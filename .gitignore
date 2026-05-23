@@ -1,0 +1,41 @@
+# Secrets and environment
+.env
+.env.*
+.envrc
+*.pem
+*.key
+
+# Probe outputs - contain real patient names, phone numbers, NRIC, etc.
+scripts/probe_output.json
+scripts/plato_swagger.json
+scripts/*_output.json
+scripts/*_response.json
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Editors / OS
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*~
+
+# Generated / build
+dist/
+build/
+*.log
+
+# GCP local credential files (in case we ever cache one locally)
+gcp-key*.json
+service-account*.json
+application_default_credentials.json
