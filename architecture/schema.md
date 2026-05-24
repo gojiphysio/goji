@@ -292,6 +292,18 @@ This means **we don't compute per_session_value ourselves** - Plato's `pro_rata_
 | Forward booking density | `fct_appointment` count by date, for dates in next 7/14/30 days |
 | New vs returning patient ratio | `dim_patient.first_visit_date` vs visit dates in `fct_service_delivered` |
 
+## BigQuery JSON column loading gotcha (verified 2026-05-24)
+
+When inserting into a BQ column of type `JSON` via `load_table_from_json`, the row value for that column must be a Python **dict/list** (i.e. a real JSON value), NOT a `json.dumps()`-ed string. Passing a string lands a JSON value of type `string` in the cell - the entire document becomes one quoted literal - and `JSON_VALUE`/`JSON_QUERY_ARRAY` against it silently return NULL/empty.
+
+Symptoms:
+- `JSON_TYPE(payload)` returns `string`.
+- `JSON_VALUE(payload, '$.any.field')` returns NULL on every row.
+- `UNNEST(JSON_QUERY_ARRAY(payload, '$.array_field'))` produces zero rows.
+- All staging/marts queries derived from the payload look "fine" but return empty.
+
+Fix: pass `inv` (dict) directly, not `json.dumps(inv)`. The BQ client library serializes the row to NDJSON itself, with the dict nested as a real JSON object.
+
 ## Plato field-naming convention (verified 2026-05-24)
 
 Top-level entities (invoice, patient, appointment, etc.) carry their own primary key as **`_id`** (Mongo-style, with leading underscore). Foreign keys to other entities drop the underscore: `patient_id`, `location_id`, etc. This is invisible in the Plato API docs and only becomes obvious when you inspect a real response.
