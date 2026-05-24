@@ -292,6 +292,12 @@ This means **we don't compute per_session_value ourselves** - Plato's `pro_rata_
 | Forward booking density | `fct_appointment` count by date, for dates in next 7/14/30 days |
 | New vs returning patient ratio | `dim_patient.first_visit_date` vs visit dates in `fct_service_delivered` |
 
+## Plato field-naming convention (verified 2026-05-24)
+
+Top-level entities (invoice, patient, appointment, etc.) carry their own primary key as **`_id`** (Mongo-style, with leading underscore). Foreign keys to other entities drop the underscore: `patient_id`, `location_id`, etc. This is invisible in the Plato API docs and only becomes obvious when you inspect a real response.
+
+Ingestion code MUST read invoice id as `_id` (not `id`). The first ingestion job silently dropped every row because of this exact confusion. When wiring up new endpoints, always verify the primary key field name against a live probe before writing the extractor.
+
 ## Assumptions verified against live API (2026-05-23)
 
 | Assumption | Verified |

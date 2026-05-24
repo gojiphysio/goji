@@ -4,17 +4,31 @@ Business intelligence backend and dashboards for **Goji Health Pte. Ltd.** (Sing
 
 The goal: a real-time web dashboard the clinic operator can use to see bookings, recognised revenue, deferred revenue, clinician performance, AR/AP, and the other vitals - editable by drag-and-drop, extensible by prompt.
 
-## Status (2026-05-23)
+## Status
 
 - [x] Architecture chosen: Plato + Xero + GSuite -> BigQuery -> Looker Studio, with Cloud Run + Cloud Scheduler for ingestion.
 - [x] Plato API explored and documented. Bookings vs. recognised revenue model verified against live data.
 - [x] Schema designed (`architecture/schema.md`).
 - [x] Bookings + recognised revenue + deferred revenue working as a local script.
-- [ ] GCP project scaffolded.
+- [x] Dashboard objectives defined (`architecture/objectives.md`).
+- [ ] GCP project scaffolded. **PAUSED** mid-setup (gcloud CLI install). To resume, restart at Task #18.
 - [ ] First ingestion job deployed.
 - [ ] BigQuery datasets created and seeded.
 - [ ] Looker Studio v1 dashboard.
 - [ ] Xero integration.
+
+## Current objective
+
+Stand up a Looker Studio dashboard that answers six pressing questions for the clinic operator:
+
+1. **Per-clinician performance** - bookings, recognised revenue, and number of appointments delivered.
+2. **Discount cost to the clinic** - how much revenue was foregone via line discounts and invoice adjustments (e.g. $150 listed, $139 charged -> $11 absorbed).
+3. **Treatment-type mix** - revenue and visit breakdown across pilates, strength & conditioning, physiotherapy, etc.
+4. **Patient demographics** - age, gender, condition tags (musculoskeletal, post-partum, etc.).
+5. **Cohort metrics** - LTV, repeat visit rate, retention, churn.
+6. **Unconfirmed upcoming appointments worth chasing** - forward-looking operational list with patient names and contact, for confirmation calls. (Originally backward-looking cancellations; deferred because Plato hard-deletes cancellations and clinic has no SOPs yet.)
+
+See `architecture/objectives.md` for the metric definitions, data sources, and open data-gaps for each.
 
 ## Layout
 
@@ -68,7 +82,9 @@ Output is three sections: daily bookings vs recognised totals, a per-clinician b
 
 ## Next session
 
-We're parking GCP work. When we come back, the path is:
-1. Scaffold the `goji-bi` GCP project (BigQuery + Cloud Run + Cloud Scheduler + Secret Manager).
-2. Lift `plato_week_metrics.py` logic into a scheduled Cloud Run job writing to `raw.plato_invoice` and friends.
-3. Build the first Looker Studio dashboard pointed at `marts.fct_invoice_line` + `fct_service_delivered` + `fct_package_balance`.
+Focus is the six dashboard questions in `architecture/objectives.md`. Likely sequence:
+
+1. Probe Plato for the data gaps the objectives doc identifies (patient demographics fields, condition tags, cancellation status codes, treatment categorisation).
+2. Decide which fields need a manual mapping table vs. coming directly from Plato.
+3. Resume GCP setup (Task #18 onward) once we know exactly what we're modelling.
+4. Stand up BigQuery + first ingestion + Looker Studio dashboard against those models.
