@@ -40,3 +40,4 @@ gcp-key*.json
 service-account*.json
 application_default_credentials.json
 *.pdf
+*.pptx
