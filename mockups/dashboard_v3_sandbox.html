@@ -319,7 +319,7 @@
       body { background: white; color: black; }
       .topbar, .page-nav, .notice, .calc-card, footer,
       .date-selector, .updated, .filters, .calc-actions { display: none !important; }
-      #page-dashboard { display: none !important; }
+      #page-dashboard, #page-pl { display: none !important; }
       .wrap { padding: 0; max-width: none; }
       .calc-grid { grid-template-columns: 1fr; gap: 0; }
       .report-card { border: none; box-shadow: none; padding: 0; }
@@ -490,6 +490,7 @@
 
     <nav class="page-nav" role="tablist" aria-label="Page">
       <button type="button" data-page="dashboard" class="active">Dashboard</button>
+      <button type="button" data-page="pl">Profit &amp; Loss</button>
       <button type="button" data-page="commission">Commission calculator</button>
     </nav>
 
@@ -502,6 +503,245 @@
       Sections labelled <span class="badge sample">Sample</span> are illustrative pending
       the ingestion job for that data source.
     </div>
+
+
+    <div class="kpi-row">
+      <div class="kpi-card">
+        <div class="kpi-label">Bookings, <span class="range-label">last 30 days</span> <span class="badge live">Live</span></div>
+        <div class="kpi-value" id="kpi_bookings">-</div>
+        <div class="kpi-sub">Cash invoiced (packages + single visits)</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Recognised revenue, <span class="range-label">last 30 days</span> <span class="badge live">Live</span></div>
+        <div class="kpi-value" id="kpi_recognised">-</div>
+        <div class="kpi-sub">Revenue actually earned (sessions delivered)</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Deferred revenue <span class="badge live">Live</span></div>
+        <div class="kpi-value" id="kpi_deferred">-</div>
+        <div class="kpi-sub">Owed in unredeemed package sessions</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Active patients, <span class="range-label">last 30 days</span> <span class="badge live">Live</span></div>
+        <div class="kpi-value" id="kpi_active_patients">-</div>
+        <div class="kpi-sub">Distinct patients with at least one session</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Visits, <span class="range-label">last 30 days</span> <span class="badge live">Live</span></div>
+        <div class="kpi-value" id="kpi_visits">-</div>
+        <div class="kpi-sub">Sessions delivered (single-use + package burns)</div>
+      </div>
+    </div>
+
+    <section class="q">
+      <h2>Activity over time <span class="badge live">Live</span></h2>
+      <div class="subtitle">
+        Visit volume and patient engagement over the <span class="range-label">last 30 days</span>.
+        <strong>Avg visits / patient</strong> is your retention signal — a rising trend means patients are returning and burning package sessions. Target 2+ for a healthy package-led model.
+      </div>
+      <div class="two-col">
+        <div>
+          <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px;">Visits</div>
+          <div class="chart-wrap small"><canvas id="visitsChart"></canvas></div>
+        </div>
+        <div>
+          <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px;">Avg visits / patient</div>
+          <div class="chart-wrap small"><canvas id="avgVisitsChart"></canvas></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="q">
+      <h2>Bookings vs recognised revenue <span class="badge live">Live</span></h2>
+      <div class="subtitle">
+        <strong>Bookings</strong> = cash invoiced when a patient pays (including packages upfront).
+        <strong>Recognised</strong> = revenue actually earned as sessions are delivered.
+        The gap between the bars is your deferred revenue — money in the bank that you still owe in sessions.
+        A wide gap is fine if it's closing week-on-week. Watch for a gap that stops shrinking.
+      </div>
+      <div class="chart-wrap" style="height: 260px; margin-top: 12px;"><canvas id="bookingsVsRecognisedChart"></canvas></div>
+    </section>
+
+    <section class="q">
+      <h2>Per-clinician performance <span class="badge live">Live</span></h2>
+      <div class="subtitle">
+        Bookings ($ invoiced) vs recognised revenue ($ earned through delivered sessions), <span class="range-label">last 30 days</span>.
+        The <strong>gap</strong> is deferred revenue: packages committed but sessions not yet used. A large gap can mean strong forward sales — or a churn risk if patients stop coming in.
+        Clinician <strong>utilisation %</strong> (slots filled ÷ slots available) requires appointment data — flagged for Charles.
+      </div>
+      <div class="two-col">
+        <div><div class="chart-wrap"><canvas id="clinicianChart"></canvas></div></div>
+        <div>
+          <table>
+            <thead>
+              <tr>
+                <th>Clinician</th>
+                <th class="num">Booked</th>
+                <th class="num">Recognised</th>
+                <th class="num">Gap</th>
+              </tr>
+            </thead>
+            <tbody id="clinicianTbody"></tbody>
+          </table>
+          <div class="subtitle" style="margin-top: 14px; font-size: 12px;">
+            Cheryl is annotated as Director because she funnels bookings to others,
+            so her individual totals are not a like-for-like comparison.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="q">
+      <h2>Discount cost to clinic <span class="badge live">Live</span></h2>
+      <div class="subtitle">
+        Implicit opening-promo discount + ad-hoc line discounts, <span class="range-label">last 30 days</span>.
+        Pack-promo cost is computed against the usual single-session price &times; pack size.
+      </div>
+      <div style="display: grid; grid-template-columns: 240px 1fr; gap: 28px; align-items: start;">
+        <div>
+          <div class="kpi-value" id="discountTotal" style="font-size: 38px; color: var(--goji);">-</div>
+          <div class="kpi-sub" style="margin-bottom: 14px;">Total discount absorbed</div>
+          <div class="kpi-sub"><span id="discountPct">-</span> of bookings</div>
+        </div>
+        <div>
+          <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px;">Opening-promo discount, by SKU</div>
+          <table>
+            <thead>
+              <tr>
+                <th>Service</th>
+                <th>Pack</th>
+                <th class="num">Units</th>
+                <th class="num">Usual ref</th>
+                <th class="num">Sold</th>
+                <th class="num">Discount</th>
+              </tr>
+            </thead>
+            <tbody id="promoBySkuTbody"></tbody>
+            <tfoot id="promoBySkuTfoot"></tfoot>
+          </table>
+
+          <div id="adhocBlock" hidden style="margin-top: 22px;">
+            <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px;">Ad-hoc on non-promo items</div>
+            <table>
+              <thead><tr><th>Item</th><th class="num">Times</th><th class="num">Discount</th></tr></thead>
+              <tbody id="discountTbody"></tbody>
+              <tfoot id="adhocTfoot"></tfoot>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="q">
+      <h2>Treatment-type mix <span class="badge live">Live</span></h2>
+      <div class="subtitle">
+        Revenue and visit breakdown across services, <span class="range-label">last 30 days</span>.
+        Categories resolved from Plato item prefix.
+      </div>
+      <div class="two-col">
+        <div>
+          <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px;">By revenue</div>
+          <div class="chart-wrap small"><canvas id="mixRevenue"></canvas></div>
+        </div>
+        <div>
+          <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px;">By visits</div>
+          <div class="chart-wrap small"><canvas id="mixVisits"></canvas></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="q">
+      <h2>Patient demographics <span class="badge sample">Sample</span></h2>
+      <div class="subtitle">
+        Age, gender, top condition tags. Pulls from Plato patient records once the
+        patient ingestion job is built.
+      </div>
+      <div class="three-col">
+        <div>
+          <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px;">Age band</div>
+          <div class="chart-wrap small"><canvas id="ageChart"></canvas></div>
+        </div>
+        <div>
+          <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px;">Gender</div>
+          <div class="chart-wrap small"><canvas id="genderChart"></canvas></div>
+        </div>
+        <div>
+          <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px;">Top conditions</div>
+          <div class="chart-wrap small"><canvas id="tagsChart"></canvas></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="q">
+      <h2>Cohort and lifetime value <span class="badge live">Live</span></h2>
+      <div class="subtitle">
+        Patients grouped by month of first visit. Whole-period figures, not affected
+        by the date selector above.
+      </div>
+      <div class="two-col">
+        <div>
+          <table>
+            <thead>
+              <tr>
+                <th>Cohort</th>
+                <th class="num">Patients</th>
+                <th class="num">Avg LTV</th>
+                <th class="num">Avg visits</th>
+              </tr>
+            </thead>
+            <tbody id="cohortTbody"></tbody>
+          </table>
+        </div>
+        <div>
+          <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px;">Retention curve <span class="badge sample">Sample</span></div>
+          <div class="chart-wrap small"><canvas id="retentionChart"></canvas></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="q">
+      <h2>Patient referral analytics <span class="badge sample">Sample</span></h2>
+      <div class="subtitle">
+        Where new patients are coming from, who they end up seeing, and what treatment
+        they end up booking. Goes live once the <code>/patient</code> ingestion job
+        lands the <code>referred_by</code> field.
+      </div>
+      <div class="two-col">
+        <div>
+          <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px;">Referral sources</div>
+          <div class="chart-wrap small"><canvas id="referralChart"></canvas></div>
+        </div>
+        <div>
+          <table>
+            <thead>
+              <tr>
+                <th>Source</th>
+                <th class="num">New patients</th>
+                <th>Top clinician</th>
+                <th>Top treatment</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Google search</td><td class="num">18</td><td>Claire</td><td>Physiotherapy</td></tr>
+              <tr><td>Doctor referral</td><td class="num">12</td><td>Claire</td><td>Physiotherapy</td></tr>
+              <tr><td>Existing patient</td><td class="num">9</td><td>Cheryl</td><td>Clinical Pilates</td></tr>
+              <tr><td>Instagram</td><td class="num">7</td><td>Kristy</td><td>Private Pilates</td></tr>
+              <tr><td>Insurance partner</td><td class="num">5</td><td>Claire</td><td>Physiotherapy</td></tr>
+              <tr><td>Walk-in</td><td class="num">3</td><td>Kristy</td><td>S&amp;C 1:1</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      Data sources: Plato Medical (live), Xero (coming), Google Workspace (coming).<br>
+      Re-run <code>scripts/dashboard/generate.py</code> to refresh.
+    </footer>
+
+    </div><!-- /#page-dashboard -->
+
+    <div id="page-pl" class="page" hidden>
 
     <!-- ===== P&L Section ===== -->
     <section class="q" id="pl-section" style="margin-bottom: 28px;">
@@ -733,226 +973,7 @@
     </section>
     <!-- ===== End P&L Section ===== -->
 
-    <div class="kpi-row">
-      <div class="kpi-card">
-        <div class="kpi-label">Bookings, <span class="range-label">last 30 days</span> <span class="badge live">Live</span></div>
-        <div class="kpi-value" id="kpi_bookings">-</div>
-        <div class="kpi-sub">Cash invoiced (packages + single visits)</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-label">Recognised revenue, <span class="range-label">last 30 days</span> <span class="badge live">Live</span></div>
-        <div class="kpi-value" id="kpi_recognised">-</div>
-        <div class="kpi-sub">Revenue actually earned (sessions delivered)</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-label">Deferred revenue <span class="badge live">Live</span></div>
-        <div class="kpi-value" id="kpi_deferred">-</div>
-        <div class="kpi-sub">Owed in unredeemed package sessions</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-label">Active patients, <span class="range-label">last 30 days</span> <span class="badge live">Live</span></div>
-        <div class="kpi-value" id="kpi_active_patients">-</div>
-        <div class="kpi-sub">Distinct patients with at least one session</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-label">Visits, <span class="range-label">last 30 days</span> <span class="badge live">Live</span></div>
-        <div class="kpi-value" id="kpi_visits">-</div>
-        <div class="kpi-sub">Sessions delivered (single-use + package burns)</div>
-      </div>
-    </div>
-
-    <section class="q">
-      <h2>Activity over time <span class="badge live">Live</span></h2>
-      <div class="subtitle">
-        Visit volume and patient engagement over the <span class="range-label">last 30 days</span>.
-        <strong>Avg visits / patient</strong> is your retention signal — a rising trend means patients are returning and burning package sessions. Target 2+ for a healthy package-led model.
-      </div>
-      <div class="two-col">
-        <div>
-          <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px;">Visits</div>
-          <div class="chart-wrap small"><canvas id="visitsChart"></canvas></div>
-        </div>
-        <div>
-          <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px;">Avg visits / patient</div>
-          <div class="chart-wrap small"><canvas id="avgVisitsChart"></canvas></div>
-        </div>
-      </div>
-    </section>
-
-    <section class="q">
-      <h2>Bookings vs recognised revenue <span class="badge live">Live</span></h2>
-      <div class="subtitle">
-        <strong>Bookings</strong> = cash invoiced when a patient pays (including packages upfront).
-        <strong>Recognised</strong> = revenue actually earned as sessions are delivered.
-        The gap between the bars is your deferred revenue — money in the bank that you still owe in sessions.
-        A wide gap is fine if it's closing week-on-week. Watch for a gap that stops shrinking.
-      </div>
-      <div class="chart-wrap" style="height: 260px; margin-top: 12px;"><canvas id="bookingsVsRecognisedChart"></canvas></div>
-    </section>
-
-    <section class="q">
-      <h2>Per-clinician performance <span class="badge live">Live</span></h2>
-      <div class="subtitle">
-        Bookings ($ invoiced) vs recognised revenue ($ earned through delivered sessions), <span class="range-label">last 30 days</span>.
-        The <strong>gap</strong> is deferred revenue: packages committed but sessions not yet used. A large gap can mean strong forward sales — or a churn risk if patients stop coming in.
-        Clinician <strong>utilisation %</strong> (slots filled ÷ slots available) requires appointment data — flagged for Charles.
-      </div>
-      <div class="two-col">
-        <div><div class="chart-wrap"><canvas id="clinicianChart"></canvas></div></div>
-        <div>
-          <table>
-            <thead>
-              <tr>
-                <th>Clinician</th>
-                <th class="num">Booked</th>
-                <th class="num">Recognised</th>
-                <th class="num">Gap</th>
-              </tr>
-            </thead>
-            <tbody id="clinicianTbody"></tbody>
-          </table>
-          <div class="subtitle" style="margin-top: 14px; font-size: 12px;">
-            Cheryl is annotated as Director because she funnels bookings to others,
-            so her individual totals are not a like-for-like comparison.
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="q">
-      <h2>Ad-hoc discounts <span class="badge live">Live</span></h2>
-      <div class="subtitle">
-        Manual line-item price overrides recorded in Plato, <span class="range-label">last 30 days</span>.
-      </div>
-      <div class="notice" style="margin-bottom: 16px;">
-        <strong>Opening promo cost not captured here.</strong> Your opening promos work by selling a separate lower-priced SKU (e.g. $139 instead of $150) — Plato records these as clean invoices with no discount line, so the price difference never appears in this data. True promo cost requires a reference table mapping each promo SKU to its usual-price equivalent. <strong>Flagged for Charles to build.</strong>
-      </div>
-      <div class="two-col">
-        <div>
-          <div class="kpi-value" id="discountTotal" style="font-size: 32px; color: var(--goji);">-</div>
-          <div class="kpi-sub" style="margin-bottom: 18px;">
-            <span id="discountPct">-</span> of bookings absorbed as discount
-          </div>
-        </div>
-        <div>
-          <table>
-            <thead>
-              <tr><th>Item</th><th class="num">Discount</th><th class="num">Times</th></tr>
-            </thead>
-            <tbody id="discountTbody"></tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-    <section class="q">
-      <h2>Treatment-type mix <span class="badge live">Live</span></h2>
-      <div class="subtitle">
-        Revenue and visit breakdown across services, <span class="range-label">last 30 days</span>.
-        Categories resolved from Plato item prefix.
-      </div>
-      <div class="two-col">
-        <div>
-          <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px;">By revenue</div>
-          <div class="chart-wrap small"><canvas id="mixRevenue"></canvas></div>
-        </div>
-        <div>
-          <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px;">By visits</div>
-          <div class="chart-wrap small"><canvas id="mixVisits"></canvas></div>
-        </div>
-      </div>
-    </section>
-
-    <section class="q">
-      <h2>Patient demographics <span class="badge sample">Sample</span></h2>
-      <div class="subtitle">
-        Age, gender, top condition tags. Pulls from Plato patient records once the
-        patient ingestion job is built.
-      </div>
-      <div class="three-col">
-        <div>
-          <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px;">Age band</div>
-          <div class="chart-wrap small"><canvas id="ageChart"></canvas></div>
-        </div>
-        <div>
-          <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px;">Gender</div>
-          <div class="chart-wrap small"><canvas id="genderChart"></canvas></div>
-        </div>
-        <div>
-          <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px;">Top conditions</div>
-          <div class="chart-wrap small"><canvas id="tagsChart"></canvas></div>
-        </div>
-      </div>
-    </section>
-
-    <section class="q">
-      <h2>Cohort and lifetime value <span class="badge live">Live</span></h2>
-      <div class="subtitle">
-        Patients grouped by month of first visit. Whole-period figures, not affected
-        by the date selector above.
-      </div>
-      <div class="two-col">
-        <div>
-          <table>
-            <thead>
-              <tr>
-                <th>Cohort</th>
-                <th class="num">Patients</th>
-                <th class="num">Avg LTV</th>
-                <th class="num">Avg visits</th>
-              </tr>
-            </thead>
-            <tbody id="cohortTbody"></tbody>
-          </table>
-        </div>
-        <div>
-          <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px;">Retention curve <span class="badge sample">Sample</span></div>
-          <div class="chart-wrap small"><canvas id="retentionChart"></canvas></div>
-        </div>
-      </div>
-    </section>
-
-    <section class="q">
-      <h2>Patient referral analytics <span class="badge sample">Sample</span></h2>
-      <div class="subtitle">
-        Where new patients are coming from, who they end up seeing, and what treatment
-        they end up booking. Goes live once the <code>/patient</code> ingestion job
-        lands the <code>referred_by</code> field.
-      </div>
-      <div class="two-col">
-        <div>
-          <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px;">Referral sources</div>
-          <div class="chart-wrap small"><canvas id="referralChart"></canvas></div>
-        </div>
-        <div>
-          <table>
-            <thead>
-              <tr>
-                <th>Source</th>
-                <th class="num">New patients</th>
-                <th>Top clinician</th>
-                <th>Top treatment</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><td>Google search</td><td class="num">18</td><td>Claire</td><td>Physiotherapy</td></tr>
-              <tr><td>Doctor referral</td><td class="num">12</td><td>Claire</td><td>Physiotherapy</td></tr>
-              <tr><td>Existing patient</td><td class="num">9</td><td>Cheryl</td><td>Clinical Pilates</td></tr>
-              <tr><td>Instagram</td><td class="num">7</td><td>Kristy</td><td>Private Pilates</td></tr>
-              <tr><td>Insurance partner</td><td class="num">5</td><td>Claire</td><td>Physiotherapy</td></tr>
-              <tr><td>Walk-in</td><td class="num">3</td><td>Kristy</td><td>S&amp;C 1:1</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-    <footer>
-      Data sources: Plato Medical (live), Xero (coming), Google Workspace (coming).<br>
-      Re-run <code>scripts/dashboard/generate.py</code> to refresh.
-    </footer>
-
-    </div><!-- /#page-dashboard -->
+    </div><!-- /#page-pl -->
 
     <div id="page-commission" class="page" hidden>
 
@@ -1105,41 +1126,237 @@
   "default_range": "30d",
   "deferred": 9812.3,
   "appointments": [
-    {"date":"2026-04-27","clinician_id":"PKN","patient":"A. Tan","service":"Initial Physiotherapy Consult","value":280},
-    {"date":"2026-04-30","clinician_id":"PKN","patient":"B. Lim","service":"Follow-up Physiotherapy","value":180},
-    {"date":"2026-05-04","clinician_id":"PKN","patient":"A. Tan","service":"Follow-up Physiotherapy","value":180},
-    {"date":"2026-05-06","clinician_id":"PKN","patient":"C. Wong","service":"S&C 1:1","value":220},
-    {"date":"2026-05-09","clinician_id":"PKN","patient":"D. Goh","service":"Private Pilates","value":200},
-    {"date":"2026-05-12","clinician_id":"PKN","patient":"B. Lim","service":"Follow-up Physiotherapy","value":180},
-    {"date":"2026-05-14","clinician_id":"PKN","patient":"E. Ho","service":"Initial Physiotherapy Consult","value":280},
-    {"date":"2026-05-18","clinician_id":"PKN","patient":"C. Wong","service":"S&C 1:1","value":220},
-    {"date":"2026-05-22","clinician_id":"PKN","patient":"D. Goh","service":"Private Pilates","value":200},
-
-    {"date":"2026-04-28","clinician_id":"PCL","patient":"F. Chua","service":"Initial Physiotherapy Consult","value":280},
-    {"date":"2026-04-29","clinician_id":"PCL","patient":"G. Sim","service":"Private Pilates","value":200},
-    {"date":"2026-05-02","clinician_id":"PCL","patient":"F. Chua","service":"Follow-up Physiotherapy","value":180},
-    {"date":"2026-05-05","clinician_id":"PCL","patient":"H. Koh","service":"Initial Physiotherapy Consult","value":280},
-    {"date":"2026-05-08","clinician_id":"PCL","patient":"G. Sim","service":"Private Pilates","value":200},
-    {"date":"2026-05-11","clinician_id":"PCL","patient":"H. Koh","service":"Follow-up Physiotherapy","value":180},
-    {"date":"2026-05-14","clinician_id":"PCL","patient":"I. Ng","service":"S&C 1:1","value":220},
-    {"date":"2026-05-17","clinician_id":"PCL","patient":"F. Chua","service":"Follow-up Physiotherapy","value":180},
-    {"date":"2026-05-20","clinician_id":"PCL","patient":"G. Sim","service":"Private Pilates","value":200},
-    {"date":"2026-05-23","clinician_id":"PCL","patient":"I. Ng","service":"S&C 1:1","value":220},
-
-    {"date":"2026-04-26","clinician_id":"PCN","patient":"J. Teo","service":"Initial Physiotherapy Consult","value":280},
-    {"date":"2026-04-28","clinician_id":"PCN","patient":"K. Soh","service":"Initial Physiotherapy Consult","value":280},
-    {"date":"2026-05-01","clinician_id":"PCN","patient":"J. Teo","service":"Follow-up Physiotherapy","value":180},
-    {"date":"2026-05-03","clinician_id":"PCN","patient":"L. Yip","service":"Private Pilates","value":200},
-    {"date":"2026-05-05","clinician_id":"PCN","patient":"K. Soh","service":"Follow-up Physiotherapy","value":180},
-    {"date":"2026-05-07","clinician_id":"PCN","patient":"M. Quek","service":"S&C 1:1","value":220},
-    {"date":"2026-05-09","clinician_id":"PCN","patient":"J. Teo","service":"Follow-up Physiotherapy","value":180},
-    {"date":"2026-05-11","clinician_id":"PCN","patient":"L. Yip","service":"Private Pilates","value":200},
-    {"date":"2026-05-13","clinician_id":"PCN","patient":"N. Phua","service":"Initial Physiotherapy Consult","value":280},
-    {"date":"2026-05-15","clinician_id":"PCN","patient":"M. Quek","service":"S&C 1:1","value":220},
-    {"date":"2026-05-18","clinician_id":"PCN","patient":"K. Soh","service":"Follow-up Physiotherapy","value":180},
-    {"date":"2026-05-20","clinician_id":"PCN","patient":"L. Yip","service":"Private Pilates","value":200},
-    {"date":"2026-05-22","clinician_id":"PCN","patient":"N. Phua","service":"Follow-up Physiotherapy","value":180},
-    {"date":"2026-05-24","clinician_id":"PCN","patient":"M. Quek","service":"S&C 1:1","value":220}
+    {
+      "date": "2026-04-27",
+      "clinician_id": "PKN",
+      "patient": "A. Tan",
+      "service": "Initial Physiotherapy Consult",
+      "value": 280
+    },
+    {
+      "date": "2026-04-30",
+      "clinician_id": "PKN",
+      "patient": "B. Lim",
+      "service": "Follow-up Physiotherapy",
+      "value": 180
+    },
+    {
+      "date": "2026-05-04",
+      "clinician_id": "PKN",
+      "patient": "A. Tan",
+      "service": "Follow-up Physiotherapy",
+      "value": 180
+    },
+    {
+      "date": "2026-05-06",
+      "clinician_id": "PKN",
+      "patient": "C. Wong",
+      "service": "S&C 1:1",
+      "value": 220
+    },
+    {
+      "date": "2026-05-09",
+      "clinician_id": "PKN",
+      "patient": "D. Goh",
+      "service": "Private Pilates",
+      "value": 200
+    },
+    {
+      "date": "2026-05-12",
+      "clinician_id": "PKN",
+      "patient": "B. Lim",
+      "service": "Follow-up Physiotherapy",
+      "value": 180
+    },
+    {
+      "date": "2026-05-14",
+      "clinician_id": "PKN",
+      "patient": "E. Ho",
+      "service": "Initial Physiotherapy Consult",
+      "value": 280
+    },
+    {
+      "date": "2026-05-18",
+      "clinician_id": "PKN",
+      "patient": "C. Wong",
+      "service": "S&C 1:1",
+      "value": 220
+    },
+    {
+      "date": "2026-05-22",
+      "clinician_id": "PKN",
+      "patient": "D. Goh",
+      "service": "Private Pilates",
+      "value": 200
+    },
+    {
+      "date": "2026-04-28",
+      "clinician_id": "PCL",
+      "patient": "F. Chua",
+      "service": "Initial Physiotherapy Consult",
+      "value": 280
+    },
+    {
+      "date": "2026-04-29",
+      "clinician_id": "PCL",
+      "patient": "G. Sim",
+      "service": "Private Pilates",
+      "value": 200
+    },
+    {
+      "date": "2026-05-02",
+      "clinician_id": "PCL",
+      "patient": "F. Chua",
+      "service": "Follow-up Physiotherapy",
+      "value": 180
+    },
+    {
+      "date": "2026-05-05",
+      "clinician_id": "PCL",
+      "patient": "H. Koh",
+      "service": "Initial Physiotherapy Consult",
+      "value": 280
+    },
+    {
+      "date": "2026-05-08",
+      "clinician_id": "PCL",
+      "patient": "G. Sim",
+      "service": "Private Pilates",
+      "value": 200
+    },
+    {
+      "date": "2026-05-11",
+      "clinician_id": "PCL",
+      "patient": "H. Koh",
+      "service": "Follow-up Physiotherapy",
+      "value": 180
+    },
+    {
+      "date": "2026-05-14",
+      "clinician_id": "PCL",
+      "patient": "I. Ng",
+      "service": "S&C 1:1",
+      "value": 220
+    },
+    {
+      "date": "2026-05-17",
+      "clinician_id": "PCL",
+      "patient": "F. Chua",
+      "service": "Follow-up Physiotherapy",
+      "value": 180
+    },
+    {
+      "date": "2026-05-20",
+      "clinician_id": "PCL",
+      "patient": "G. Sim",
+      "service": "Private Pilates",
+      "value": 200
+    },
+    {
+      "date": "2026-05-23",
+      "clinician_id": "PCL",
+      "patient": "I. Ng",
+      "service": "S&C 1:1",
+      "value": 220
+    },
+    {
+      "date": "2026-04-26",
+      "clinician_id": "PCN",
+      "patient": "J. Teo",
+      "service": "Initial Physiotherapy Consult",
+      "value": 280
+    },
+    {
+      "date": "2026-04-28",
+      "clinician_id": "PCN",
+      "patient": "K. Soh",
+      "service": "Initial Physiotherapy Consult",
+      "value": 280
+    },
+    {
+      "date": "2026-05-01",
+      "clinician_id": "PCN",
+      "patient": "J. Teo",
+      "service": "Follow-up Physiotherapy",
+      "value": 180
+    },
+    {
+      "date": "2026-05-03",
+      "clinician_id": "PCN",
+      "patient": "L. Yip",
+      "service": "Private Pilates",
+      "value": 200
+    },
+    {
+      "date": "2026-05-05",
+      "clinician_id": "PCN",
+      "patient": "K. Soh",
+      "service": "Follow-up Physiotherapy",
+      "value": 180
+    },
+    {
+      "date": "2026-05-07",
+      "clinician_id": "PCN",
+      "patient": "M. Quek",
+      "service": "S&C 1:1",
+      "value": 220
+    },
+    {
+      "date": "2026-05-09",
+      "clinician_id": "PCN",
+      "patient": "J. Teo",
+      "service": "Follow-up Physiotherapy",
+      "value": 180
+    },
+    {
+      "date": "2026-05-11",
+      "clinician_id": "PCN",
+      "patient": "L. Yip",
+      "service": "Private Pilates",
+      "value": 200
+    },
+    {
+      "date": "2026-05-13",
+      "clinician_id": "PCN",
+      "patient": "N. Phua",
+      "service": "Initial Physiotherapy Consult",
+      "value": 280
+    },
+    {
+      "date": "2026-05-15",
+      "clinician_id": "PCN",
+      "patient": "M. Quek",
+      "service": "S&C 1:1",
+      "value": 220
+    },
+    {
+      "date": "2026-05-18",
+      "clinician_id": "PCN",
+      "patient": "K. Soh",
+      "service": "Follow-up Physiotherapy",
+      "value": 180
+    },
+    {
+      "date": "2026-05-20",
+      "clinician_id": "PCN",
+      "patient": "L. Yip",
+      "service": "Private Pilates",
+      "value": 200
+    },
+    {
+      "date": "2026-05-22",
+      "clinician_id": "PCN",
+      "patient": "N. Phua",
+      "service": "Follow-up Physiotherapy",
+      "value": 180
+    },
+    {
+      "date": "2026-05-24",
+      "clinician_id": "PCN",
+      "patient": "M. Quek",
+      "service": "S&C 1:1",
+      "value": 220
+    }
   ],
   "cohorts": [
     {
@@ -1299,15 +1516,61 @@
         }
       ],
       "discounts": {
-        "total": 15.0,
-        "pct_of_bookings": 0.2,
-        "top_items": [
+        "total_true": 379.0,
+        "promo_implicit": 364.0,
+        "adhoc_nonpromo": 15.0,
+        "pct_of_bookings": 3.4,
+        "promo_units_total": 4,
+        "by_sku": [
+          {
+            "item_given_id": "SC-10OP",
+            "service": "S&C 1:1",
+            "pack": 10,
+            "label": "S&C 1:1 10-pack",
+            "units": 1,
+            "usual_total": 1600.0,
+            "sold_total": 1399.0,
+            "discount": 201.0
+          },
+          {
+            "item_given_id": "PP1:1-5OP",
+            "service": "PP 1:1",
+            "pack": 5,
+            "label": "PP 1:1 5-pack",
+            "units": 1,
+            "usual_total": 750.0,
+            "sold_total": 669.0,
+            "discount": 81.0
+          },
+          {
+            "item_given_id": "SC-5OP",
+            "service": "S&C 1:1",
+            "pack": 5,
+            "label": "S&C 1:1 5-pack",
+            "units": 1,
+            "usual_total": 800.0,
+            "sold_total": 729.0,
+            "discount": 71.0
+          },
+          {
+            "item_given_id": "SC-1OP",
+            "service": "S&C 1:1",
+            "pack": 1,
+            "label": "S&C 1:1 single",
+            "units": 1,
+            "usual_total": 160.0,
+            "sold_total": 149.0,
+            "discount": 11.0
+          }
+        ],
+        "top_adhoc_items": [
           {
             "name": "Initial Physiotherapy Consult",
             "discount": 15.0,
             "times": 1
           }
-        ]
+        ],
+        "unknown_promo_skus": []
       },
       "treatment_mix": [
         {
@@ -1709,30 +1972,81 @@
         }
       ],
       "discounts": {
-        "total": 142.0,
-        "pct_of_bookings": 0.5,
-        "top_items": [
+        "total_true": 1764.0,
+        "promo_implicit": 1734.0,
+        "adhoc_nonpromo": 30.0,
+        "pct_of_bookings": 5.9,
+        "promo_units_total": 12,
+        "by_sku": [
           {
-            "name": "Strength & Conditioning - 5 Sessions Pack (Opening Promo)",
-            "discount": 49.0,
-            "times": 1
+            "item_given_id": "SC-10OP",
+            "service": "S&C 1:1",
+            "pack": 10,
+            "label": "S&C 1:1 10-pack",
+            "units": 3,
+            "usual_total": 4800.0,
+            "sold_total": 4158.0,
+            "discount": 642.0
           },
           {
-            "name": "Strength & Conditioning - 10 Sessions Pack (Opening Promo)",
-            "discount": 39.0,
-            "times": 1
+            "item_given_id": "PP1:1-10OP",
+            "service": "PP 1:1",
+            "pack": 10,
+            "label": "PP 1:1 10-pack",
+            "units": 3,
+            "usual_total": 4500.0,
+            "sold_total": 3873.0,
+            "discount": 627.0
           },
+          {
+            "item_given_id": "SC-5OP",
+            "service": "S&C 1:1",
+            "pack": 5,
+            "label": "S&C 1:1 5-pack",
+            "units": 2,
+            "usual_total": 1600.0,
+            "sold_total": 1409.0,
+            "discount": 191.0
+          },
+          {
+            "item_given_id": "PP1:1-5OP",
+            "service": "PP 1:1",
+            "pack": 5,
+            "label": "PP 1:1 5-pack",
+            "units": 2,
+            "usual_total": 1500.0,
+            "sold_total": 1338.0,
+            "discount": 162.0
+          },
+          {
+            "item_given_id": "PP2:1-5OP",
+            "service": "PP 1:2",
+            "pack": 5,
+            "label": "PP 1:2 5-pack",
+            "units": 1,
+            "usual_total": 1000.0,
+            "sold_total": 899.0,
+            "discount": 101.0
+          },
+          {
+            "item_given_id": "SC-1OP",
+            "service": "S&C 1:1",
+            "pack": 1,
+            "label": "S&C 1:1 single",
+            "units": 1,
+            "usual_total": 160.0,
+            "sold_total": 149.0,
+            "discount": 11.0
+          }
+        ],
+        "top_adhoc_items": [
           {
             "name": "Initial Physiotherapy Consult",
             "discount": 30.0,
             "times": 2
-          },
-          {
-            "name": "Private Pilates 1:1 - 10 Sessions Pack (Opening Promo)",
-            "discount": 24.0,
-            "times": 1
           }
-        ]
+        ],
+        "unknown_promo_skus": []
       },
       "treatment_mix": [
         {
@@ -1946,30 +2260,81 @@
         }
       ],
       "discounts": {
-        "total": 142.0,
-        "pct_of_bookings": 0.4,
-        "top_items": [
+        "total_true": 1764.0,
+        "promo_implicit": 1734.0,
+        "adhoc_nonpromo": 30.0,
+        "pct_of_bookings": 4.7,
+        "promo_units_total": 12,
+        "by_sku": [
           {
-            "name": "Strength & Conditioning - 5 Sessions Pack (Opening Promo)",
-            "discount": 49.0,
-            "times": 1
+            "item_given_id": "SC-10OP",
+            "service": "S&C 1:1",
+            "pack": 10,
+            "label": "S&C 1:1 10-pack",
+            "units": 3,
+            "usual_total": 4800.0,
+            "sold_total": 4158.0,
+            "discount": 642.0
           },
           {
-            "name": "Strength & Conditioning - 10 Sessions Pack (Opening Promo)",
-            "discount": 39.0,
-            "times": 1
+            "item_given_id": "PP1:1-10OP",
+            "service": "PP 1:1",
+            "pack": 10,
+            "label": "PP 1:1 10-pack",
+            "units": 3,
+            "usual_total": 4500.0,
+            "sold_total": 3873.0,
+            "discount": 627.0
           },
+          {
+            "item_given_id": "SC-5OP",
+            "service": "S&C 1:1",
+            "pack": 5,
+            "label": "S&C 1:1 5-pack",
+            "units": 2,
+            "usual_total": 1600.0,
+            "sold_total": 1409.0,
+            "discount": 191.0
+          },
+          {
+            "item_given_id": "PP1:1-5OP",
+            "service": "PP 1:1",
+            "pack": 5,
+            "label": "PP 1:1 5-pack",
+            "units": 2,
+            "usual_total": 1500.0,
+            "sold_total": 1338.0,
+            "discount": 162.0
+          },
+          {
+            "item_given_id": "PP2:1-5OP",
+            "service": "PP 1:2",
+            "pack": 5,
+            "label": "PP 1:2 5-pack",
+            "units": 1,
+            "usual_total": 1000.0,
+            "sold_total": 899.0,
+            "discount": 101.0
+          },
+          {
+            "item_given_id": "SC-1OP",
+            "service": "S&C 1:1",
+            "pack": 1,
+            "label": "S&C 1:1 single",
+            "units": 1,
+            "usual_total": 160.0,
+            "sold_total": 149.0,
+            "discount": 11.0
+          }
+        ],
+        "top_adhoc_items": [
           {
             "name": "Initial Physiotherapy Consult",
             "discount": 30.0,
             "times": 2
-          },
-          {
-            "name": "Private Pilates 1:1 - 10 Sessions Pack (Opening Promo)",
-            "discount": 24.0,
-            "times": 1
           }
-        ]
+        ],
+        "unknown_promo_skus": []
       },
       "treatment_mix": [
         {
@@ -2103,30 +2468,91 @@
         }
       ],
       "discounts": {
-        "total": 142.0,
-        "pct_of_bookings": 0.4,
-        "top_items": [
+        "total_true": 1775.0,
+        "promo_implicit": 1745.0,
+        "adhoc_nonpromo": 30.0,
+        "pct_of_bookings": 4.7,
+        "promo_units_total": 13,
+        "by_sku": [
           {
-            "name": "Strength & Conditioning - 5 Sessions Pack (Opening Promo)",
-            "discount": 49.0,
-            "times": 1
+            "item_given_id": "SC-10OP",
+            "service": "S&C 1:1",
+            "pack": 10,
+            "label": "S&C 1:1 10-pack",
+            "units": 3,
+            "usual_total": 4800.0,
+            "sold_total": 4158.0,
+            "discount": 642.0
           },
           {
-            "name": "Strength & Conditioning - 10 Sessions Pack (Opening Promo)",
-            "discount": 39.0,
-            "times": 1
+            "item_given_id": "PP1:1-10OP",
+            "service": "PP 1:1",
+            "pack": 10,
+            "label": "PP 1:1 10-pack",
+            "units": 3,
+            "usual_total": 4500.0,
+            "sold_total": 3873.0,
+            "discount": 627.0
           },
+          {
+            "item_given_id": "SC-5OP",
+            "service": "S&C 1:1",
+            "pack": 5,
+            "label": "S&C 1:1 5-pack",
+            "units": 2,
+            "usual_total": 1600.0,
+            "sold_total": 1409.0,
+            "discount": 191.0
+          },
+          {
+            "item_given_id": "PP1:1-5OP",
+            "service": "PP 1:1",
+            "pack": 5,
+            "label": "PP 1:1 5-pack",
+            "units": 2,
+            "usual_total": 1500.0,
+            "sold_total": 1338.0,
+            "discount": 162.0
+          },
+          {
+            "item_given_id": "PP2:1-5OP",
+            "service": "PP 1:2",
+            "pack": 5,
+            "label": "PP 1:2 5-pack",
+            "units": 1,
+            "usual_total": 1000.0,
+            "sold_total": 899.0,
+            "discount": 101.0
+          },
+          {
+            "item_given_id": "PP1:1-1OP",
+            "service": "PP 1:1",
+            "pack": 1,
+            "label": "PP 1:1 single",
+            "units": 1,
+            "usual_total": 150.0,
+            "sold_total": 139.0,
+            "discount": 11.0
+          },
+          {
+            "item_given_id": "SC-1OP",
+            "service": "S&C 1:1",
+            "pack": 1,
+            "label": "S&C 1:1 single",
+            "units": 1,
+            "usual_total": 160.0,
+            "sold_total": 149.0,
+            "discount": 11.0
+          }
+        ],
+        "top_adhoc_items": [
           {
             "name": "Initial Physiotherapy Consult",
             "discount": 30.0,
             "times": 2
-          },
-          {
-            "name": "Private Pilates 1:1 - 10 Sessions Pack (Opening Promo)",
-            "discount": 24.0,
-            "times": 1
           }
-        ]
+        ],
+        "unknown_promo_skus": []
       },
       "treatment_mix": [
         {
@@ -2380,18 +2806,59 @@
     }
 
     function renderDiscounts(d) {
-      document.getElementById('discountTotal').textContent = fmt$(d.total);
+      // d shape: { total_true, promo_implicit, adhoc_nonpromo, pct_of_bookings,
+      //           promo_units_total, by_sku[], top_adhoc_items[] }
+      document.getElementById('discountTotal').textContent = fmt$(d.total_true);
       document.getElementById('discountPct').textContent   = fmtPct(d.pct_of_bookings);
-      const tbody = document.getElementById('discountTbody');
-      if (!d.top_items.length) {
-        tbody.innerHTML = '<tr><td colspan="3" class="empty">No discounts in this period.</td></tr>';
+
+      const skuBody  = document.getElementById('promoBySkuTbody');
+      const skuFoot  = document.getElementById('promoBySkuTfoot');
+      if (!d.by_sku || !d.by_sku.length) {
+        skuBody.innerHTML = '<tr><td colspan="6" class="empty">No opening-promo sales in this period.</td></tr>';
+        skuFoot.innerHTML = '';
       } else {
-        tbody.innerHTML = d.top_items.map(it => `
+        skuBody.innerHTML = d.by_sku.map(s => `
+          <tr>
+            <td>${escapeHtml(s.service)}</td>
+            <td>${s.pack === 1 ? 'single' : s.pack + '-pack'}</td>
+            <td class="num">${fmtInt(s.units)}</td>
+            <td class="num">${fmt$(s.usual_total)}</td>
+            <td class="num">${fmt$(s.sold_total)}</td>
+            <td class="num" style="color: var(--goji); font-weight: 500;">${fmt$(s.discount)}</td>
+          </tr>`).join('');
+        const totUnits = d.by_sku.reduce((a, s) => a + (s.units || 0), 0);
+        const totUsual = d.by_sku.reduce((a, s) => a + (s.usual_total || 0), 0);
+        const totSold  = d.by_sku.reduce((a, s) => a + (s.sold_total  || 0), 0);
+        skuFoot.innerHTML = `
+          <tr style="border-top: 2px solid var(--ink);">
+            <td colspan="2" style="padding-top: 10px; font-weight: 600;">Subtotal</td>
+            <td class="num" style="padding-top: 10px; font-weight: 600;">${fmtInt(totUnits)}</td>
+            <td class="num" style="padding-top: 10px; font-weight: 600;">${fmt$(totUsual)}</td>
+            <td class="num" style="padding-top: 10px; font-weight: 600;">${fmt$(totSold)}</td>
+            <td class="num" style="padding-top: 10px; font-weight: 600; color: var(--goji);">${fmt$(d.promo_implicit)}</td>
+          </tr>`;
+      }
+
+      const adhocBlock = document.getElementById('adhocBlock');
+      const adhocBody  = document.getElementById('discountTbody');
+      const adhocFoot  = document.getElementById('adhocTfoot');
+      if (d.top_adhoc_items && d.top_adhoc_items.length) {
+        adhocBlock.hidden = false;
+        adhocBody.innerHTML = d.top_adhoc_items.map(it => `
           <tr>
             <td>${escapeHtml(it.name)}</td>
-            <td class="num">${fmt$(it.discount)}</td>
             <td class="num">${fmtInt(it.times)}</td>
+            <td class="num">${fmt$(it.discount)}</td>
           </tr>`).join('');
+        const totTimes = d.top_adhoc_items.reduce((a, it) => a + (it.times || 0), 0);
+        adhocFoot.innerHTML = `
+          <tr style="border-top: 2px solid var(--ink);">
+            <td style="padding-top: 10px; font-weight: 600;">Subtotal</td>
+            <td class="num" style="padding-top: 10px; font-weight: 600;">${fmtInt(totTimes)}</td>
+            <td class="num" style="padding-top: 10px; font-weight: 600; color: var(--goji);">${fmt$(d.adhoc_nonpromo)}</td>
+          </tr>`;
+      } else {
+        adhocBlock.hidden = true;
       }
     }
 
@@ -2722,7 +3189,8 @@
       document.querySelectorAll('.page-nav button').forEach(b => {
         b.classList.toggle('active', b.dataset.page === page);
       });
-      document.getElementById('page-dashboard').hidden = (page !== 'dashboard');
+      document.getElementById('page-dashboard').hidden  = (page !== 'dashboard');
+      document.getElementById('page-pl').hidden         = (page !== 'pl');
       document.getElementById('page-commission').hidden = (page !== 'commission');
     }
 
