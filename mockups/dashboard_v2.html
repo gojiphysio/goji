@@ -1,0 +1,1730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Goji Health - Operations Dashboard</title>
+  <style>
+    :root {
+      --bg: #f6f3ee;
+      --card: #ffffff;
+      --border: #e3ddd2;
+      --ink: #1f1d1a;
+      --ink-soft: #6b6760;
+      --ink-muted: #9a958c;
+      --goji: #c44a3a;
+      --goji-soft: #f2d8d2;
+      --good: #2d8a4f;
+      --warn: #c98a14;
+      --neutral: #6b6760;
+      --shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02);
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0; padding: 0;
+      background: var(--bg); color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', Roboto, sans-serif;
+      font-size: 14px; line-height: 1.5;
+    }
+    .wrap { max-width: 1280px; margin: 0 auto; padding: 24px 32px 64px; }
+
+    header.topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 0 20px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 20px;
+      flex-wrap: wrap; gap: 12px;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-dot { width: 14px; height: 14px; background: var(--goji); border-radius: 50%; }
+    .brand-name { font-size: 20px; font-weight: 600; letter-spacing: -0.01em; }
+    .brand-sub { color: var(--ink-soft); font-size: 13px; margin-top: 2px; }
+    .filters { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+
+    .date-selector {
+      display: inline-flex; background: var(--card);
+      border: 1px solid var(--border); border-radius: 999px;
+      box-shadow: var(--shadow); overflow: hidden;
+    }
+    .date-selector button {
+      background: transparent; border: 0; padding: 6px 14px;
+      font: inherit; color: var(--ink-soft); cursor: pointer;
+      font-size: 13px; transition: background 0.15s, color 0.15s;
+    }
+    .date-selector button:hover { background: var(--bg); color: var(--ink); }
+    .date-selector button.active {
+      background: var(--goji); color: white;
+    }
+    .date-selector button + button { border-left: 1px solid var(--border); }
+    .date-selector button.active + button,
+    .date-selector button + button.active { border-left-color: transparent; }
+
+    .updated { font-size: 12px; color: var(--ink-muted); }
+    .updated .dot {
+      display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+      background: var(--good); margin-right: 6px; vertical-align: middle;
+    }
+
+    .notice {
+      background: #fdf6e3; border: 1px solid #ecd9a1;
+      color: #78611f; border-radius: 8px; padding: 12px 16px;
+      margin-bottom: 24px; font-size: 13px;
+    }
+    .notice strong { color: #5a4814; }
+
+    .badge {
+      display: inline-block; font-size: 10px; letter-spacing: 0.04em;
+      text-transform: uppercase; font-weight: 600;
+      padding: 2px 8px; border-radius: 4px; vertical-align: middle;
+      margin-left: 8px;
+    }
+    .badge.live { background: #e3f2e8; color: var(--good); }
+    .badge.sample { background: #fbeed1; color: var(--warn); }
+
+    .kpi-row {
+      display: grid; grid-template-columns: repeat(5, 1fr);
+      gap: 14px; margin-bottom: 28px;
+    }
+    .kpi-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 18px 20px; box-shadow: var(--shadow);
+    }
+    .kpi-label {
+      font-size: 12px; color: var(--ink-soft);
+      text-transform: uppercase; letter-spacing: 0.05em;
+      display: flex; align-items: center; flex-wrap: wrap;
+    }
+    .kpi-value {
+      font-size: 28px; font-weight: 600; margin-top: 8px; letter-spacing: -0.01em;
+      font-variant-numeric: tabular-nums;
+    }
+    .kpi-sub { font-size: 12px; color: var(--ink-soft); margin-top: 4px; }
+
+    section.q {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 22px 24px; margin-bottom: 20px;
+      box-shadow: var(--shadow);
+    }
+    section.q h2 {
+      font-size: 16px; font-weight: 600; margin: 0 0 4px;
+      display: flex; align-items: center;
+    }
+    section.q .subtitle {
+      font-size: 13px; color: var(--ink-soft); margin-bottom: 18px;
+    }
+
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th {
+      text-align: left; font-weight: 500; color: var(--ink-soft);
+      padding: 8px 12px; border-bottom: 1px solid var(--border);
+      font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em;
+    }
+    td { padding: 10px 12px; border-bottom: 1px solid #f0ebe2; }
+    tr:last-child td { border-bottom: none; }
+    td.num { text-align: right; font-variant-numeric: tabular-nums; }
+    th.num { text-align: right; }
+    .role-tag {
+      display: inline-block; font-size: 10px; font-weight: 600;
+      padding: 2px 6px; border-radius: 3px;
+      background: var(--goji-soft); color: var(--goji);
+      margin-left: 6px; text-transform: uppercase; letter-spacing: 0.04em;
+    }
+
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; }
+    .chart-wrap { position: relative; height: 280px; }
+    .chart-wrap.small { height: 220px; }
+
+    .pill {
+      display: inline-block; padding: 2px 8px; border-radius: 999px;
+      font-size: 11px; font-weight: 500;
+    }
+    .pill.unconfirmed { background: #fdecea; color: var(--goji); }
+    .pill.confirmed   { background: #e3f2e8; color: var(--good); }
+
+    footer {
+      margin-top: 32px; padding-top: 18px; border-top: 1px solid var(--border);
+      color: var(--ink-muted); font-size: 12px; text-align: center;
+    }
+
+    .empty { color: var(--ink-muted); font-style: italic; }
+
+    @media (max-width: 1100px) {
+      .kpi-row { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (max-width: 900px) {
+      .kpi-row { grid-template-columns: repeat(2, 1fr); }
+      .two-col, .three-col { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-dot"></div>
+        <div>
+          <div class="brand-name">Goji Health</div>
+          <div class="brand-sub">Operations Dashboard</div>
+        </div>
+      </div>
+      <div class="filters">
+        <div class="date-selector" role="tablist" aria-label="Date range">
+          <button type="button" data-range="7d">7d</button>
+          <button type="button" data-range="30d">30d</button>
+          <button type="button" data-range="90d">90d</button>
+          <button type="button" data-range="all">All</button>
+        </div>
+        <div class="updated"><span class="dot"></span>Generated <span id="generatedAt">-</span></div>
+      </div>
+    </header>
+
+    <div class="notice">
+      <strong>Live data dashboard, generated on demand.</strong> The date selector switches between
+      snapshots taken when this file was generated. Sections labelled
+      <span class="badge live">Live</span> reflect actual clinic numbers from BigQuery.
+      Sections labelled <span class="badge sample">Sample</span> are illustrative pending
+      the ingestion job for that data source.
+    </div>
+
+    <div class="kpi-row">
+      <div class="kpi-card">
+        <div class="kpi-label">Bookings, <span class="range-label">last 30 days</span> <span class="badge live">Live</span></div>
+        <div class="kpi-value" id="kpi_bookings">-</div>
+        <div class="kpi-sub">Cash invoiced (packages + single visits)</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Recognised revenue, <span class="range-label">last 30 days</span> <span class="badge live">Live</span></div>
+        <div class="kpi-value" id="kpi_recognised">-</div>
+        <div class="kpi-sub">Revenue actually earned (sessions delivered)</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Deferred revenue <span class="badge live">Live</span></div>
+        <div class="kpi-value" id="kpi_deferred">-</div>
+        <div class="kpi-sub">Owed in unredeemed package sessions</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Active patients, <span class="range-label">last 30 days</span> <span class="badge live">Live</span></div>
+        <div class="kpi-value" id="kpi_active_patients">-</div>
+        <div class="kpi-sub">Distinct patients with at least one session</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Visits, <span class="range-label">last 30 days</span> <span class="badge live">Live</span></div>
+        <div class="kpi-value" id="kpi_visits">-</div>
+        <div class="kpi-sub">Sessions delivered (single-use + package burns)</div>
+      </div>
+    </div>
+
+    <section class="q">
+      <h2>Activity over time <span class="badge live">Live</span></h2>
+      <div class="subtitle">
+        Patient activity over the <span class="range-label">last 30 days</span>.
+        Bucketed by day, week or month depending on the range width.
+      </div>
+      <div class="two-col">
+        <div>
+          <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px;">Active patients</div>
+          <div class="chart-wrap small"><canvas id="activePatientsChart"></canvas></div>
+        </div>
+        <div>
+          <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px;">Visits</div>
+          <div class="chart-wrap small"><canvas id="visitsChart"></canvas></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="q">
+      <h2>Revenue over time <span class="badge live">Live</span></h2>
+      <div class="subtitle">
+        Cash invoiced vs revenue actually earned over the <span class="range-label">last 30 days</span>.
+      </div>
+      <div class="two-col">
+        <div>
+          <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px;">Bookings</div>
+          <div class="chart-wrap small"><canvas id="bookingsChart"></canvas></div>
+        </div>
+        <div>
+          <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px;">Recognised revenue</div>
+          <div class="chart-wrap small"><canvas id="recognisedChart"></canvas></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="q">
+      <h2>Per-clinician performance <span class="badge live">Live</span></h2>
+      <div class="subtitle">
+        Bookings ($ invoiced) vs recognised revenue ($ delivered), <span class="range-label">last 30 days</span>.
+        Gap = packages sold but not yet redeemed by patients.
+      </div>
+      <div class="two-col">
+        <div><div class="chart-wrap"><canvas id="clinicianChart"></canvas></div></div>
+        <div>
+          <table>
+            <thead>
+              <tr>
+                <th>Clinician</th>
+                <th class="num">Booked</th>
+                <th class="num">Recognised</th>
+                <th class="num">Gap</th>
+              </tr>
+            </thead>
+            <tbody id="clinicianTbody"></tbody>
+          </table>
+          <div class="subtitle" style="margin-top: 14px; font-size: 12px;">
+            Cheryl is annotated as Director because she funnels bookings to others,
+            so her individual totals are not a like-for-like comparison.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="q">
+      <h2>Discount cost to the clinic <span class="badge live">Live</span></h2>
+      <div class="subtitle">
+        How much listed-price revenue was foregone via line discounts, <span class="range-label">last 30 days</span>.
+      </div>
+      <div class="two-col">
+        <div>
+          <div class="kpi-value" id="discountTotal" style="font-size: 32px; color: var(--goji);">-</div>
+          <div class="kpi-sub" style="margin-bottom: 18px;">
+            <span id="discountPct">-</span> of bookings absorbed as discount
+          </div>
+        </div>
+        <div>
+          <table>
+            <thead>
+              <tr><th>Item</th><th class="num">Discount</th><th class="num">Times</th></tr>
+            </thead>
+            <tbody id="discountTbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="q">
+      <h2>Treatment-type mix <span class="badge live">Live</span></h2>
+      <div class="subtitle">
+        Revenue and visit breakdown across services, <span class="range-label">last 30 days</span>.
+        Categories resolved from Plato item prefix.
+      </div>
+      <div class="two-col">
+        <div>
+          <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px;">By revenue</div>
+          <div class="chart-wrap small"><canvas id="mixRevenue"></canvas></div>
+        </div>
+        <div>
+          <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px;">By visits</div>
+          <div class="chart-wrap small"><canvas id="mixVisits"></canvas></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="q">
+      <h2>Patient demographics <span class="badge sample">Sample</span></h2>
+      <div class="subtitle">
+        Age, gender, top condition tags. Pulls from Plato patient records once the
+        patient ingestion job is built.
+      </div>
+      <div class="three-col">
+        <div>
+          <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px;">Age band</div>
+          <div class="chart-wrap small"><canvas id="ageChart"></canvas></div>
+        </div>
+        <div>
+          <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px;">Gender</div>
+          <div class="chart-wrap small"><canvas id="genderChart"></canvas></div>
+        </div>
+        <div>
+          <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px;">Top conditions</div>
+          <div class="chart-wrap small"><canvas id="tagsChart"></canvas></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="q">
+      <h2>Cohort and lifetime value <span class="badge live">Live</span></h2>
+      <div class="subtitle">
+        Patients grouped by month of first visit. Whole-period figures, not affected
+        by the date selector above.
+      </div>
+      <div class="two-col">
+        <div>
+          <table>
+            <thead>
+              <tr>
+                <th>Cohort</th>
+                <th class="num">Patients</th>
+                <th class="num">Avg LTV</th>
+                <th class="num">Avg visits</th>
+              </tr>
+            </thead>
+            <tbody id="cohortTbody"></tbody>
+          </table>
+        </div>
+        <div>
+          <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px;">Retention curve <span class="badge sample">Sample</span></div>
+          <div class="chart-wrap small"><canvas id="retentionChart"></canvas></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="q">
+      <h2>Patient referral analytics <span class="badge sample">Sample</span></h2>
+      <div class="subtitle">
+        Where new patients are coming from, who they end up seeing, and what treatment
+        they end up booking. Goes live once the <code>/patient</code> ingestion job
+        lands the <code>referred_by</code> field.
+      </div>
+      <div class="two-col">
+        <div>
+          <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px;">Referral sources</div>
+          <div class="chart-wrap small"><canvas id="referralChart"></canvas></div>
+        </div>
+        <div>
+          <table>
+            <thead>
+              <tr>
+                <th>Source</th>
+                <th class="num">New patients</th>
+                <th>Top clinician</th>
+                <th>Top treatment</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Google search</td><td class="num">18</td><td>Claire</td><td>Physiotherapy</td></tr>
+              <tr><td>Doctor referral</td><td class="num">12</td><td>Claire</td><td>Physiotherapy</td></tr>
+              <tr><td>Existing patient</td><td class="num">9</td><td>Cheryl</td><td>Clinical Pilates</td></tr>
+              <tr><td>Instagram</td><td class="num">7</td><td>Kristy</td><td>Private Pilates</td></tr>
+              <tr><td>Insurance partner</td><td class="num">5</td><td>Claire</td><td>Physiotherapy</td></tr>
+              <tr><td>Walk-in</td><td class="num">3</td><td>Kristy</td><td>S&amp;C 1:1</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      Data sources: Plato Medical (live), Xero (coming), Google Workspace (coming).<br>
+      Re-run <code>scripts/dashboard/generate.py</code> to refresh.
+    </footer>
+  </div>
+
+  <script id="dashboardData" type="application/json">{
+  "generated_at": "2026-05-24T22:41:07+08:00",
+  "default_range": "30d",
+  "deferred": 9812.3,
+  "cohorts": [
+    {
+      "cohort": "Mar 2026",
+      "patients": 5,
+      "avg_ltv": 1042.0,
+      "avg_visits": 3.2
+    },
+    {
+      "cohort": "Apr 2026",
+      "patients": 9,
+      "avg_ltv": 579.33,
+      "avg_visits": 1.9
+    },
+    {
+      "cohort": "May 2026",
+      "patients": 43,
+      "avg_ltv": 368.71,
+      "avg_visits": 1.6
+    }
+  ],
+  "ranges": {
+    "7d": {
+      "label": "Last 7 days",
+      "start": "2026-05-17",
+      "end": "2026-05-24",
+      "kpis": {
+        "bookings": 8917.0,
+        "recognised": 6783.4,
+        "active_patients": 28,
+        "visits": 30
+      },
+      "trends": {
+        "granularity": "DAY",
+        "bookings": [
+          {
+            "label": "18 May",
+            "value": 1930.0
+          },
+          {
+            "label": "19 May",
+            "value": 1020.0
+          },
+          {
+            "label": "20 May",
+            "value": 3308.0
+          },
+          {
+            "label": "21 May",
+            "value": 1649.0
+          },
+          {
+            "label": "22 May",
+            "value": 1010.0
+          }
+        ],
+        "recognised": [
+          {
+            "label": "18 May",
+            "value": 1394.8
+          },
+          {
+            "label": "19 May",
+            "value": 1153.8
+          },
+          {
+            "label": "20 May",
+            "value": 1909.0
+          },
+          {
+            "label": "21 May",
+            "value": 920.0
+          },
+          {
+            "label": "22 May",
+            "value": 1139.9
+          },
+          {
+            "label": "23 May",
+            "value": 265.9
+          }
+        ],
+        "visits": [
+          {
+            "label": "18 May",
+            "value": 6.0
+          },
+          {
+            "label": "19 May",
+            "value": 6.0
+          },
+          {
+            "label": "20 May",
+            "value": 8.0
+          },
+          {
+            "label": "21 May",
+            "value": 3.0
+          },
+          {
+            "label": "22 May",
+            "value": 5.0
+          },
+          {
+            "label": "23 May",
+            "value": 2.0
+          }
+        ],
+        "active_patients": [
+          {
+            "label": "18 May",
+            "value": 5.0
+          },
+          {
+            "label": "19 May",
+            "value": 5.0
+          },
+          {
+            "label": "20 May",
+            "value": 8.0
+          },
+          {
+            "label": "21 May",
+            "value": 3.0
+          },
+          {
+            "label": "22 May",
+            "value": 5.0
+          },
+          {
+            "label": "23 May",
+            "value": 2.0
+          }
+        ]
+      },
+      "clinicians": [
+        {
+          "clinician_id": "PKN",
+          "name": "Kristy Ng",
+          "bookings": 3487.0,
+          "recognised": 1688.8,
+          "is_director": false
+        },
+        {
+          "clinician_id": "PCL",
+          "name": "Cheryl Long",
+          "bookings": 2859.0,
+          "recognised": 2130.0,
+          "is_director": true
+        },
+        {
+          "clinician_id": "PCN",
+          "name": "Claire Ng",
+          "bookings": 2571.0,
+          "recognised": 2964.6,
+          "is_director": false
+        }
+      ],
+      "discounts": {
+        "total": 15.0,
+        "pct_of_bookings": 0.2,
+        "top_items": [
+          {
+            "name": "Initial Physiotherapy Consult",
+            "discount": 15.0,
+            "times": 1
+          }
+        ]
+      },
+      "treatment_mix": [
+        {
+          "category": "Physiotherapy",
+          "revenue": 5761.0,
+          "visits": 22
+        },
+        {
+          "category": "Private Pilates",
+          "revenue": 527.4,
+          "visits": 4
+        },
+        {
+          "category": "S&C",
+          "revenue": 285.0,
+          "visits": 2
+        },
+        {
+          "category": "Other",
+          "revenue": 210.0,
+          "visits": 2
+        }
+      ]
+    },
+    "30d": {
+      "label": "Last 30 days",
+      "start": "2026-04-24",
+      "end": "2026-05-24",
+      "kpis": {
+        "bookings": 28428.0,
+        "recognised": 18615.7,
+        "active_patients": 50,
+        "visits": 78
+      },
+      "trends": {
+        "granularity": "DAY",
+        "bookings": [
+          {
+            "label": "24 Apr",
+            "value": 660.0
+          },
+          {
+            "label": "27 Apr",
+            "value": 660.0
+          },
+          {
+            "label": "29 Apr",
+            "value": 590.0
+          },
+          {
+            "label": "4 May",
+            "value": 1659.0
+          },
+          {
+            "label": "5 May",
+            "value": 2604.0
+          },
+          {
+            "label": "6 May",
+            "value": 1559.0
+          },
+          {
+            "label": "7 May",
+            "value": 850.0
+          },
+          {
+            "label": "8 May",
+            "value": 2469.0
+          },
+          {
+            "label": "9 May",
+            "value": 1820.0
+          },
+          {
+            "label": "11 May",
+            "value": 2140.0
+          },
+          {
+            "label": "12 May",
+            "value": 520.0
+          },
+          {
+            "label": "13 May",
+            "value": 1261.0
+          },
+          {
+            "label": "14 May",
+            "value": 520.0
+          },
+          {
+            "label": "15 May",
+            "value": 1679.0
+          },
+          {
+            "label": "16 May",
+            "value": 520.0
+          },
+          {
+            "label": "18 May",
+            "value": 1930.0
+          },
+          {
+            "label": "19 May",
+            "value": 1020.0
+          },
+          {
+            "label": "20 May",
+            "value": 3308.0
+          },
+          {
+            "label": "21 May",
+            "value": 1649.0
+          },
+          {
+            "label": "22 May",
+            "value": 1010.0
+          }
+        ],
+        "recognised": [
+          {
+            "label": "24 Apr",
+            "value": 660.0
+          },
+          {
+            "label": "27 Apr",
+            "value": 660.0
+          },
+          {
+            "label": "29 Apr",
+            "value": 590.0
+          },
+          {
+            "label": "4 May",
+            "value": 399.9
+          },
+          {
+            "label": "5 May",
+            "value": 793.8
+          },
+          {
+            "label": "6 May",
+            "value": 389.9
+          },
+          {
+            "label": "7 May",
+            "value": 850.0
+          },
+          {
+            "label": "8 May",
+            "value": 755.9
+          },
+          {
+            "label": "9 May",
+            "value": 1820.0
+          },
+          {
+            "label": "11 May",
+            "value": 916.0
+          },
+          {
+            "label": "12 May",
+            "value": 520.0
+          },
+          {
+            "label": "13 May",
+            "value": 1261.0
+          },
+          {
+            "label": "14 May",
+            "value": 656.0
+          },
+          {
+            "label": "15 May",
+            "value": 909.9
+          },
+          {
+            "label": "16 May",
+            "value": 649.9
+          },
+          {
+            "label": "18 May",
+            "value": 1394.8
+          },
+          {
+            "label": "19 May",
+            "value": 1153.8
+          },
+          {
+            "label": "20 May",
+            "value": 1909.0
+          },
+          {
+            "label": "21 May",
+            "value": 920.0
+          },
+          {
+            "label": "22 May",
+            "value": 1139.9
+          },
+          {
+            "label": "23 May",
+            "value": 265.9
+          }
+        ],
+        "visits": [
+          {
+            "label": "24 Apr",
+            "value": 2.0
+          },
+          {
+            "label": "27 Apr",
+            "value": 2.0
+          },
+          {
+            "label": "29 Apr",
+            "value": 2.0
+          },
+          {
+            "label": "4 May",
+            "value": 2.0
+          },
+          {
+            "label": "5 May",
+            "value": 3.0
+          },
+          {
+            "label": "6 May",
+            "value": 2.0
+          },
+          {
+            "label": "7 May",
+            "value": 3.0
+          },
+          {
+            "label": "8 May",
+            "value": 4.0
+          },
+          {
+            "label": "9 May",
+            "value": 7.0
+          },
+          {
+            "label": "11 May",
+            "value": 4.0
+          },
+          {
+            "label": "12 May",
+            "value": 2.0
+          },
+          {
+            "label": "13 May",
+            "value": 5.0
+          },
+          {
+            "label": "14 May",
+            "value": 3.0
+          },
+          {
+            "label": "15 May",
+            "value": 4.0
+          },
+          {
+            "label": "16 May",
+            "value": 3.0
+          },
+          {
+            "label": "18 May",
+            "value": 6.0
+          },
+          {
+            "label": "19 May",
+            "value": 6.0
+          },
+          {
+            "label": "20 May",
+            "value": 8.0
+          },
+          {
+            "label": "21 May",
+            "value": 3.0
+          },
+          {
+            "label": "22 May",
+            "value": 5.0
+          },
+          {
+            "label": "23 May",
+            "value": 2.0
+          }
+        ],
+        "active_patients": [
+          {
+            "label": "24 Apr",
+            "value": 2.0
+          },
+          {
+            "label": "27 Apr",
+            "value": 2.0
+          },
+          {
+            "label": "29 Apr",
+            "value": 2.0
+          },
+          {
+            "label": "4 May",
+            "value": 2.0
+          },
+          {
+            "label": "5 May",
+            "value": 3.0
+          },
+          {
+            "label": "6 May",
+            "value": 2.0
+          },
+          {
+            "label": "7 May",
+            "value": 3.0
+          },
+          {
+            "label": "8 May",
+            "value": 4.0
+          },
+          {
+            "label": "9 May",
+            "value": 7.0
+          },
+          {
+            "label": "11 May",
+            "value": 4.0
+          },
+          {
+            "label": "12 May",
+            "value": 2.0
+          },
+          {
+            "label": "13 May",
+            "value": 5.0
+          },
+          {
+            "label": "14 May",
+            "value": 3.0
+          },
+          {
+            "label": "15 May",
+            "value": 4.0
+          },
+          {
+            "label": "16 May",
+            "value": 3.0
+          },
+          {
+            "label": "18 May",
+            "value": 5.0
+          },
+          {
+            "label": "19 May",
+            "value": 5.0
+          },
+          {
+            "label": "20 May",
+            "value": 8.0
+          },
+          {
+            "label": "21 May",
+            "value": 3.0
+          },
+          {
+            "label": "22 May",
+            "value": 5.0
+          },
+          {
+            "label": "23 May",
+            "value": 2.0
+          }
+        ]
+      },
+      "clinicians": [
+        {
+          "clinician_id": "PCN",
+          "name": "Claire Ng",
+          "bookings": 14671.0,
+          "recognised": 7929.9,
+          "is_director": false
+        },
+        {
+          "clinician_id": "PCL",
+          "name": "Cheryl Long",
+          "bookings": 8030.0,
+          "recognised": 7301.0,
+          "is_director": true
+        },
+        {
+          "clinician_id": "PKN",
+          "name": "Kristy Ng",
+          "bookings": 5727.0,
+          "recognised": 3384.8,
+          "is_director": false
+        }
+      ],
+      "discounts": {
+        "total": 142.0,
+        "pct_of_bookings": 0.5,
+        "top_items": [
+          {
+            "name": "Strength & Conditioning - 5 Sessions Pack (Opening Promo)",
+            "discount": 49.0,
+            "times": 1
+          },
+          {
+            "name": "Strength & Conditioning - 10 Sessions Pack (Opening Promo)",
+            "discount": 39.0,
+            "times": 1
+          },
+          {
+            "name": "Initial Physiotherapy Consult",
+            "discount": 30.0,
+            "times": 2
+          },
+          {
+            "name": "Private Pilates 1:1 - 10 Sessions Pack (Opening Promo)",
+            "discount": 24.0,
+            "times": 1
+          }
+        ]
+      },
+      "treatment_mix": [
+        {
+          "category": "Physiotherapy",
+          "revenue": 16392.0,
+          "visits": 61
+        },
+        {
+          "category": "Private Pilates",
+          "revenue": 1180.8,
+          "visits": 9
+        },
+        {
+          "category": "S&C",
+          "revenue": 832.9,
+          "visits": 6
+        },
+        {
+          "category": "Other",
+          "revenue": 210.0,
+          "visits": 2
+        }
+      ]
+    },
+    "90d": {
+      "label": "Last 90 days",
+      "start": "2026-02-23",
+      "end": "2026-05-24",
+      "kpis": {
+        "bookings": 35692.0,
+        "recognised": 25879.7,
+        "active_patients": 57,
+        "visits": 101
+      },
+      "trends": {
+        "granularity": "WEEK",
+        "bookings": [
+          {
+            "label": "15 Mar",
+            "value": 990.0
+          },
+          {
+            "label": "22 Mar",
+            "value": 660.0
+          },
+          {
+            "label": "5 Apr",
+            "value": 2314.0
+          },
+          {
+            "label": "12 Apr",
+            "value": 1650.0
+          },
+          {
+            "label": "19 Apr",
+            "value": 2310.0
+          },
+          {
+            "label": "26 Apr",
+            "value": 1250.0
+          },
+          {
+            "label": "3 May",
+            "value": 10961.0
+          },
+          {
+            "label": "10 May",
+            "value": 6640.0
+          },
+          {
+            "label": "17 May",
+            "value": 8917.0
+          }
+        ],
+        "recognised": [
+          {
+            "label": "15 Mar",
+            "value": 990.0
+          },
+          {
+            "label": "22 Mar",
+            "value": 660.0
+          },
+          {
+            "label": "5 Apr",
+            "value": 2314.0
+          },
+          {
+            "label": "12 Apr",
+            "value": 1650.0
+          },
+          {
+            "label": "19 Apr",
+            "value": 2310.0
+          },
+          {
+            "label": "26 Apr",
+            "value": 1250.0
+          },
+          {
+            "label": "3 May",
+            "value": 5009.5
+          },
+          {
+            "label": "10 May",
+            "value": 4912.8
+          },
+          {
+            "label": "17 May",
+            "value": 6783.4
+          }
+        ],
+        "visits": [
+          {
+            "label": "15 Mar",
+            "value": 3.0
+          },
+          {
+            "label": "22 Mar",
+            "value": 2.0
+          },
+          {
+            "label": "5 Apr",
+            "value": 8.0
+          },
+          {
+            "label": "12 Apr",
+            "value": 5.0
+          },
+          {
+            "label": "19 Apr",
+            "value": 7.0
+          },
+          {
+            "label": "26 Apr",
+            "value": 4.0
+          },
+          {
+            "label": "3 May",
+            "value": 21.0
+          },
+          {
+            "label": "10 May",
+            "value": 21.0
+          },
+          {
+            "label": "17 May",
+            "value": 30.0
+          }
+        ],
+        "active_patients": [
+          {
+            "label": "15 Mar",
+            "value": 3.0
+          },
+          {
+            "label": "22 Mar",
+            "value": 2.0
+          },
+          {
+            "label": "5 Apr",
+            "value": 8.0
+          },
+          {
+            "label": "12 Apr",
+            "value": 4.0
+          },
+          {
+            "label": "19 Apr",
+            "value": 5.0
+          },
+          {
+            "label": "26 Apr",
+            "value": 3.0
+          },
+          {
+            "label": "3 May",
+            "value": 21.0
+          },
+          {
+            "label": "10 May",
+            "value": 17.0
+          },
+          {
+            "label": "17 May",
+            "value": 28.0
+          }
+        ]
+      },
+      "clinicians": [
+        {
+          "clinician_id": "PCL",
+          "name": "Cheryl Long",
+          "bookings": 15290.0,
+          "recognised": 14561.0,
+          "is_director": true
+        },
+        {
+          "clinician_id": "PCN",
+          "name": "Claire Ng",
+          "bookings": 14675.0,
+          "recognised": 7933.9,
+          "is_director": false
+        },
+        {
+          "clinician_id": "PKN",
+          "name": "Kristy Ng",
+          "bookings": 5727.0,
+          "recognised": 3384.8,
+          "is_director": false
+        }
+      ],
+      "discounts": {
+        "total": 142.0,
+        "pct_of_bookings": 0.4,
+        "top_items": [
+          {
+            "name": "Strength & Conditioning - 5 Sessions Pack (Opening Promo)",
+            "discount": 49.0,
+            "times": 1
+          },
+          {
+            "name": "Strength & Conditioning - 10 Sessions Pack (Opening Promo)",
+            "discount": 39.0,
+            "times": 1
+          },
+          {
+            "name": "Initial Physiotherapy Consult",
+            "discount": 30.0,
+            "times": 2
+          },
+          {
+            "name": "Private Pilates 1:1 - 10 Sessions Pack (Opening Promo)",
+            "discount": 24.0,
+            "times": 1
+          }
+        ]
+      },
+      "treatment_mix": [
+        {
+          "category": "Physiotherapy",
+          "revenue": 23652.0,
+          "visits": 83
+        },
+        {
+          "category": "Private Pilates",
+          "revenue": 1180.8,
+          "visits": 9
+        },
+        {
+          "category": "S&C",
+          "revenue": 832.9,
+          "visits": 6
+        },
+        {
+          "category": "Other",
+          "revenue": 214.0,
+          "visits": 3
+        }
+      ]
+    },
+    "all": {
+      "label": "All time",
+      "start": "1970-01-01",
+      "end": "2027-05-24",
+      "kpis": {
+        "bookings": 36091.0,
+        "recognised": 26278.7,
+        "active_patients": 57,
+        "visits": 103
+      },
+      "trends": {
+        "granularity": "MONTH",
+        "bookings": [
+          {
+            "label": "Mar 26",
+            "value": 1650.0
+          },
+          {
+            "label": "Apr 26",
+            "value": 7524.0
+          },
+          {
+            "label": "May 26",
+            "value": 26778.0
+          },
+          {
+            "label": "Jun 26",
+            "value": 139.0
+          }
+        ],
+        "recognised": [
+          {
+            "label": "Mar 26",
+            "value": 1650.0
+          },
+          {
+            "label": "Apr 26",
+            "value": 7524.0
+          },
+          {
+            "label": "May 26",
+            "value": 16965.7
+          },
+          {
+            "label": "Jun 26",
+            "value": 139.0
+          }
+        ],
+        "visits": [
+          {
+            "label": "Mar 26",
+            "value": 5.0
+          },
+          {
+            "label": "Apr 26",
+            "value": 24.0
+          },
+          {
+            "label": "May 26",
+            "value": 73.0
+          },
+          {
+            "label": "Jun 26",
+            "value": 1.0
+          }
+        ],
+        "active_patients": [
+          {
+            "label": "Mar 26",
+            "value": 5.0
+          },
+          {
+            "label": "Apr 26",
+            "value": 12.0
+          },
+          {
+            "label": "May 26",
+            "value": 47.0
+          },
+          {
+            "label": "Jun 26",
+            "value": 1.0
+          }
+        ]
+      },
+      "clinicians": [
+        {
+          "clinician_id": "PCL",
+          "name": "Cheryl Long",
+          "bookings": 15290.0,
+          "recognised": 14561.0,
+          "is_director": true
+        },
+        {
+          "clinician_id": "PCN",
+          "name": "Claire Ng",
+          "bookings": 14814.0,
+          "recognised": 8072.9,
+          "is_director": false
+        },
+        {
+          "clinician_id": "PKN",
+          "name": "Kristy Ng",
+          "bookings": 5987.0,
+          "recognised": 3644.8,
+          "is_director": false
+        }
+      ],
+      "discounts": {
+        "total": 142.0,
+        "pct_of_bookings": 0.4,
+        "top_items": [
+          {
+            "name": "Strength & Conditioning - 5 Sessions Pack (Opening Promo)",
+            "discount": 49.0,
+            "times": 1
+          },
+          {
+            "name": "Strength & Conditioning - 10 Sessions Pack (Opening Promo)",
+            "discount": 39.0,
+            "times": 1
+          },
+          {
+            "name": "Initial Physiotherapy Consult",
+            "discount": 30.0,
+            "times": 2
+          },
+          {
+            "name": "Private Pilates 1:1 - 10 Sessions Pack (Opening Promo)",
+            "discount": 24.0,
+            "times": 1
+          }
+        ]
+      },
+      "treatment_mix": [
+        {
+          "category": "Physiotherapy",
+          "revenue": 23912.0,
+          "visits": 84
+        },
+        {
+          "category": "Private Pilates",
+          "revenue": 1319.8,
+          "visits": 10
+        },
+        {
+          "category": "S&C",
+          "revenue": 832.9,
+          "visits": 6
+        },
+        {
+          "category": "Other",
+          "revenue": 214.0,
+          "visits": 3
+        }
+      ]
+    }
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+  <script>
+  (function() {
+    const DATA = JSON.parse(document.getElementById('dashboardData').textContent);
+    const STORAGE_KEY = 'goji_dashboard_range';
+
+    const GOJI    = '#c44a3a';
+    const GOLD    = '#d99818';
+    const GREEN   = '#2d8a4f';
+    const NEUTRAL = '#6b6760';
+    const SAGE    = '#7a9e6e';
+    const COBALT  = '#3b5b8c';
+    const MIX_COLORS = [GOJI, GOLD, SAGE, COBALT, NEUTRAL, '#9c6c2e'];
+
+    Chart.defaults.font = {
+      family: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, Roboto, sans-serif",
+      size: 12
+    };
+    Chart.defaults.color = '#5c5c5c';
+
+    const fmt$  = v => (v == null || isNaN(v)) ? '-' : '$' + Math.round(Number(v)).toLocaleString();
+    const fmtPct = v => (v == null || isNaN(v)) ? '-' : Number(v).toFixed(1) + '%';
+    const fmtInt = v => (v == null || isNaN(v)) ? '-' : Math.round(Number(v)).toLocaleString();
+    const fmtNum1 = v => (v == null || isNaN(v)) ? '-' : Number(v).toFixed(1);
+    const escapeHtml = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({
+      '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;'
+    }[c]));
+
+    let clinicianChart, mixRevenueChart, mixVisitsChart;
+    let activePatientsChart, visitsChart, bookingsChart, recognisedChart;
+
+    function renderTrendChart(existing, canvasId, series, color, isCurrency) {
+      const labels = series.map(s => s.label);
+      const values = series.map(s => s.value);
+
+      if (existing) {
+        existing.data.labels = labels;
+        existing.data.datasets[0].data = values;
+        existing.options.scales.y.ticks.callback = v => isCurrency ? '$' + Math.round(v).toLocaleString() : v;
+        existing.update();
+        return existing;
+      }
+
+      return new Chart(document.getElementById(canvasId), {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [{
+            data: values,
+            borderColor: color,
+            backgroundColor: color + '22',
+            tension: 0.25,
+            fill: true,
+            pointRadius: series.length <= 14 ? 3 : 2,
+            pointHoverRadius: 5,
+            pointBackgroundColor: color,
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              mode: 'index', intersect: false,
+              callbacks: {
+                label: ctx => isCurrency
+                  ? '$' + Math.round(ctx.parsed.y).toLocaleString()
+                  : ctx.parsed.y
+              }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: { callback: v => isCurrency ? '$' + Math.round(v).toLocaleString() : v }
+            },
+            x: { ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 8 } }
+          }
+        }
+      });
+    }
+
+    function renderTrends(t) {
+      if (!t) return;
+      activePatientsChart = renderTrendChart(activePatientsChart, 'activePatientsChart', t.active_patients, SAGE,   false);
+      visitsChart         = renderTrendChart(visitsChart,         'visitsChart',         t.visits,          COBALT, false);
+      bookingsChart       = renderTrendChart(bookingsChart,       'bookingsChart',       t.bookings,        GOJI,   true);
+      recognisedChart     = renderTrendChart(recognisedChart,     'recognisedChart',     t.recognised,      GOLD,   true);
+    }
+
+    function renderKpis(r) {
+      document.getElementById('kpi_bookings').textContent        = fmt$(r.kpis.bookings);
+      document.getElementById('kpi_recognised').textContent      = fmt$(r.kpis.recognised);
+      document.getElementById('kpi_active_patients').textContent = fmtInt(r.kpis.active_patients);
+      document.getElementById('kpi_visits').textContent          = fmtInt(r.kpis.visits);
+      document.getElementById('kpi_deferred').textContent        = fmt$(DATA.deferred);
+    }
+
+    function renderClinicians(rows) {
+      const tbody = document.getElementById('clinicianTbody');
+      if (!rows.length) {
+        tbody.innerHTML = '<tr><td colspan="4" class="empty">No clinician activity in this period.</td></tr>';
+      } else {
+        tbody.innerHTML = rows.map(r => {
+          const gap = (r.bookings || 0) - (r.recognised || 0);
+          const tag = r.is_director ? ' <span class="role-tag">Director</span>' : '';
+          return `<tr>
+            <td>${escapeHtml(r.name)} (${escapeHtml(r.clinician_id)})${tag}</td>
+            <td class="num">${fmt$(r.bookings)}</td>
+            <td class="num">${fmt$(r.recognised)}</td>
+            <td class="num">${fmt$(gap)}</td>
+          </tr>`;
+        }).join('');
+      }
+
+      const labels     = rows.map(r => `${r.name.split(' ')[0]} (${r.clinician_id})`);
+      const bookings   = rows.map(r => r.bookings || 0);
+      const recognised = rows.map(r => r.recognised || 0);
+
+      if (clinicianChart) {
+        clinicianChart.data.labels = labels;
+        clinicianChart.data.datasets[0].data = bookings;
+        clinicianChart.data.datasets[1].data = recognised;
+        clinicianChart.update();
+      } else {
+        clinicianChart = new Chart(document.getElementById('clinicianChart'), {
+          type: 'bar',
+          data: {
+            labels,
+            datasets: [
+              { label: 'Booked',     data: bookings,   backgroundColor: GOJI },
+              { label: 'Recognised', data: recognised, backgroundColor: GOLD }
+            ]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom' } },
+            scales: { y: { beginAtZero: true, ticks: { callback: v => '$' + v.toLocaleString() } } }
+          }
+        });
+      }
+    }
+
+    function renderDiscounts(d) {
+      document.getElementById('discountTotal').textContent = fmt$(d.total);
+      document.getElementById('discountPct').textContent   = fmtPct(d.pct_of_bookings);
+      const tbody = document.getElementById('discountTbody');
+      if (!d.top_items.length) {
+        tbody.innerHTML = '<tr><td colspan="3" class="empty">No discounts in this period.</td></tr>';
+      } else {
+        tbody.innerHTML = d.top_items.map(it => `
+          <tr>
+            <td>${escapeHtml(it.name)}</td>
+            <td class="num">${fmt$(it.discount)}</td>
+            <td class="num">${fmtInt(it.times)}</td>
+          </tr>`).join('');
+      }
+    }
+
+    function renderMix(rows) {
+      const labels  = rows.map(r => r.category);
+      const revenue = rows.map(r => r.revenue);
+      const visits  = rows.map(r => r.visits);
+      const colors  = labels.map((_, i) => MIX_COLORS[i % MIX_COLORS.length]);
+
+      if (mixRevenueChart) {
+        mixRevenueChart.data.labels = labels;
+        mixRevenueChart.data.datasets[0].data = revenue;
+        mixRevenueChart.data.datasets[0].backgroundColor = colors;
+        mixRevenueChart.update();
+      } else {
+        mixRevenueChart = new Chart(document.getElementById('mixRevenue'), {
+          type: 'doughnut',
+          data: { labels, datasets: [{ data: revenue, backgroundColor: colors, borderWidth: 1, borderColor: '#fff' }] },
+          options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { position: 'right' } } }
+        });
+      }
+      if (mixVisitsChart) {
+        mixVisitsChart.data.labels = labels;
+        mixVisitsChart.data.datasets[0].data = visits;
+        mixVisitsChart.data.datasets[0].backgroundColor = colors;
+        mixVisitsChart.update();
+      } else {
+        mixVisitsChart = new Chart(document.getElementById('mixVisits'), {
+          type: 'doughnut',
+          data: { labels, datasets: [{ data: visits, backgroundColor: colors, borderWidth: 1, borderColor: '#fff' }] },
+          options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { position: 'right' } } }
+        });
+      }
+    }
+
+    function renderCohorts() {
+      const tbody = document.getElementById('cohortTbody');
+      if (!DATA.cohorts.length) {
+        tbody.innerHTML = '<tr><td colspan="4" class="empty">No cohorts to display.</td></tr>';
+      } else {
+        tbody.innerHTML = DATA.cohorts.map(c => `
+          <tr>
+            <td>${escapeHtml(c.cohort)}</td>
+            <td class="num">${fmtInt(c.patients)}</td>
+            <td class="num">${fmt$(c.avg_ltv)}</td>
+            <td class="num">${fmtNum1(c.avg_visits)}</td>
+          </tr>`).join('');
+      }
+    }
+
+    function renderSampleSections() {
+      new Chart(document.getElementById('ageChart'), {
+        type: 'bar',
+        data: { labels: ['0-17','18-29','30-44','45-64','65+'],
+                datasets: [{ data: [3, 12, 19, 11, 2], backgroundColor: GOJI }] },
+        options: { responsive: true, maintainAspectRatio: false,
+                   plugins: { legend: { display: false } },
+                   scales: { y: { beginAtZero: true } } }
+      });
+      new Chart(document.getElementById('genderChart'), {
+        type: 'doughnut',
+        data: { labels: ['Female','Male'],
+                datasets: [{ data: [62, 38], backgroundColor: [GOJI, COBALT], borderWidth: 1, borderColor: '#fff' }] },
+        options: { responsive: true, maintainAspectRatio: false, cutout: '65%',
+                   plugins: { legend: { position: 'bottom' } } }
+      });
+      new Chart(document.getElementById('tagsChart'), {
+        type: 'bar',
+        data: { labels: ['Musculoskeletal','Post-partum','Sports injury','Office posture','Post-surgery'],
+                datasets: [{ data: [21, 8, 7, 6, 3], backgroundColor: GOJI }] },
+        options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                   plugins: { legend: { display: false } },
+                   scales: { x: { beginAtZero: true } } }
+      });
+      new Chart(document.getElementById('retentionChart'), {
+        type: 'line',
+        data: { labels: ['Visit 1','30d','60d','90d'],
+                datasets: [
+                  { label: 'Mar cohort', data: [100, 73, 55, 41],  borderColor: GOJI,  backgroundColor: 'transparent', tension: 0.25, pointBackgroundColor: GOJI },
+                  { label: 'Apr cohort', data: [100, 68, 49, null], borderColor: GOLD, backgroundColor: 'transparent', tension: 0.25, pointBackgroundColor: GOLD },
+                  { label: 'May cohort', data: [100, 51, null, null], borderColor: SAGE, backgroundColor: 'transparent', tension: 0.25, pointBackgroundColor: SAGE }
+                ] },
+        options: { responsive: true, maintainAspectRatio: false,
+                   plugins: { legend: { position: 'bottom' } },
+                   scales: { y: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%' } } } }
+      });
+
+      const referralLabels = ['Google search', 'Doctor referral', 'Existing patient', 'Instagram', 'Insurance partner', 'Walk-in'];
+      const referralData   = [18, 12, 9, 7, 5, 3];
+      const referralColors = referralLabels.map((_, i) => MIX_COLORS[i % MIX_COLORS.length]);
+      new Chart(document.getElementById('referralChart'), {
+        type: 'doughnut',
+        data: { labels: referralLabels,
+                datasets: [{ data: referralData, backgroundColor: referralColors, borderWidth: 1, borderColor: '#fff' }] },
+        options: { responsive: true, maintainAspectRatio: false, cutout: '60%',
+                   plugins: { legend: { position: 'right' } } }
+      });
+    }
+
+    function applyRange(key) {
+      const r = DATA.ranges[key] || DATA.ranges[DATA.default_range];
+      if (!r) return;
+      const resolvedKey = DATA.ranges[key] ? key : DATA.default_range;
+
+      localStorage.setItem(STORAGE_KEY, resolvedKey);
+
+      document.querySelectorAll('[data-range]').forEach(b =>
+        b.classList.toggle('active', b.dataset.range === resolvedKey)
+      );
+      document.querySelectorAll('.range-label').forEach(el =>
+        el.textContent = r.label.toLowerCase()
+      );
+
+      renderKpis(r);
+      renderTrends(r.trends);
+      renderClinicians(r.clinicians);
+      renderDiscounts(r.discounts);
+      renderMix(r.treatment_mix);
+    }
+
+    function init() {
+      document.getElementById('generatedAt').textContent =
+        new Date(DATA.generated_at).toLocaleString();
+
+      document.querySelectorAll('[data-range]').forEach(b =>
+        b.addEventListener('click', () => applyRange(b.dataset.range))
+      );
+
+      const stored = localStorage.getItem(STORAGE_KEY);
+      const initial = (stored && DATA.ranges[stored]) ? stored : DATA.default_range;
+      applyRange(initial);
+      renderCohorts();
+      renderSampleSections();
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+  })();
+  </script>
+</body>
+</html>
