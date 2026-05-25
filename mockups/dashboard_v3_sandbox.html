@@ -555,9 +555,9 @@
       <h2>Bookings vs recognised revenue <span class="badge live">Live</span></h2>
       <div class="subtitle">
         <strong>Bookings</strong> = cash invoiced when a patient pays (including packages upfront).
-        <strong>Recognised</strong> = revenue actually earned as sessions are delivered.
-        The gap between the bars is your deferred revenue — money in the bank that you still owe in sessions.
-        A wide gap is fine if it's closing week-on-week. Watch for a gap that stops shrinking.
+        <strong>Recognised</strong> = revenue earned as sessions are delivered.
+        The shaded area between the two lines is your deferred revenue — money collected but not yet earned.
+        A wide gap is fine; watch for a gap that stops closing week-on-week.
       </div>
       <div class="chart-wrap" style="height: 260px; margin-top: 12px;"><canvas id="bookingsVsRecognisedChart"></canvas></div>
     </section>
@@ -672,32 +672,6 @@
       </div>
     </section>
 
-    <section class="q">
-      <h2>Cohort and lifetime value <span class="badge live">Live</span></h2>
-      <div class="subtitle">
-        Patients grouped by month of first visit. Whole-period figures, not affected
-        by the date selector above.
-      </div>
-      <div class="two-col">
-        <div>
-          <table>
-            <thead>
-              <tr>
-                <th>Cohort</th>
-                <th class="num">Patients</th>
-                <th class="num">Avg LTV</th>
-                <th class="num">Avg visits</th>
-              </tr>
-            </thead>
-            <tbody id="cohortTbody"></tbody>
-          </table>
-        </div>
-        <div>
-          <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px;">Retention curve <span class="badge sample">Sample</span></div>
-          <div class="chart-wrap small"><canvas id="retentionChart"></canvas></div>
-        </div>
-      </div>
-    </section>
 
     <section class="q">
       <h2>Patient referral analytics <span class="badge sample">Sample</span></h2>
@@ -2611,6 +2585,22 @@
     let clinicianChart, mixRevenueChart, mixVisitsChart;
     let visitsChart, avgVisitsChart, bookingsVsRecognisedChart;
 
+    // Parse a label like "18 May" or "4 May" into a day-of-week prefix, e.g. "Mon, 18 May"
+    const MONTHS_IDX = {Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+    const DOW = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    function labelWithDow(label) {
+      const parts = label.trim().split(/\s+/);
+      if (parts.length === 2) {
+        const day = parseInt(parts[0], 10);
+        const mon = MONTHS_IDX[parts[1]];
+        if (!isNaN(day) && mon !== undefined) {
+          const d = new Date(2026, mon, day);
+          if (!isNaN(d)) return DOW[d.getDay()] + ', ' + label;
+        }
+      }
+      return label;
+    }
+
     function renderTrendChart(existing, canvasId, series, color, isCurrency) {
       const labels = series.map(s => s.label);
       const values = series.map(s => s.value);
@@ -2646,6 +2636,7 @@
             tooltip: {
               mode: 'index', intersect: false,
               callbacks: {
+                title: items => items.length ? labelWithDow(items[0].label) : '',
                 label: ctx => isCurrency
                   ? '$' + Math.round(ctx.parsed.y).toLocaleString()
                   : ctx.parsed.y
@@ -2693,23 +2684,34 @@
       } else {
         bookingsVsRecognisedChart = new Chart(
           document.getElementById('bookingsVsRecognisedChart'), {
-          type: 'bar',
+          type: 'line',
           data: {
             labels,
             datasets: [
               {
                 label: 'Bookings (invoiced)',
                 data: bookings,
-                backgroundColor: GOJI + 'bb',
-                borderRadius: 3,
-                borderSkipped: false
+                borderColor: GOJI,
+                backgroundColor: GOJI + '28',
+                // shade the gap between bookings and recognised
+                fill: { target: '+1', above: GOJI + '28', below: 'transparent' },
+                tension: 0.25,
+                pointRadius: bookings.length <= 14 ? 3 : 2,
+                pointHoverRadius: 5,
+                pointBackgroundColor: GOJI,
+                borderWidth: 2.5
               },
               {
                 label: 'Recognised revenue',
                 data: recognised,
-                backgroundColor: GOLD + 'bb',
-                borderRadius: 3,
-                borderSkipped: false
+                borderColor: GOLD,
+                backgroundColor: 'transparent',
+                fill: false,
+                tension: 0.25,
+                pointRadius: recognised.length <= 14 ? 3 : 2,
+                pointHoverRadius: 5,
+                pointBackgroundColor: GOLD,
+                borderWidth: 2.5
               }
             ]
           },
@@ -2720,6 +2722,7 @@
               tooltip: {
                 mode: 'index', intersect: false,
                 callbacks: {
+                  title: items => items.length ? labelWithDow(items[0].label) : '',
                   label: ctx =>
                     ctx.dataset.label + ': $' + Math.round(ctx.parsed.y).toLocaleString(),
                   afterBody: items => {
@@ -2727,7 +2730,7 @@
                     const r = items[1]?.parsed.y || 0;
                     const gap = b - r;
                     return gap > 1
-                      ? ['↳ Deferred: $' + Math.round(gap).toLocaleString()]
+                      ? ['↳ Deferred gap: $' + Math.round(gap).toLocaleString()]
                       : [];
                   }
                 }
@@ -2862,6 +2865,40 @@
       }
     }
 
+    function doughnutOpts(pos) {
+      return {
+        responsive: true, maintainAspectRatio: false, cutout: '60%',
+        plugins: {
+          legend: {
+            position: pos,
+            labels: {
+              generateLabels(chart) {
+                const ds = chart.data.datasets[0];
+                const total = ds.data.reduce((a, v) => a + (v || 0), 0);
+                return chart.data.labels.map((lbl, i) => ({
+                  text: `${lbl} (${total > 0 ? Math.round(ds.data[i] / total * 100) : 0}%)`,
+                  fillStyle: Array.isArray(ds.backgroundColor) ? ds.backgroundColor[i] : ds.backgroundColor,
+                  strokeStyle: '#fff',
+                  lineWidth: 1,
+                  hidden: false,
+                  index: i
+                }));
+              }
+            }
+          },
+          tooltip: {
+            callbacks: {
+              label(ctx) {
+                const total = ctx.chart.data.datasets[0].data.reduce((a, v) => a + (v || 0), 0);
+                const pct = total > 0 ? Math.round(ctx.parsed / total * 100) : 0;
+                return ` ${ctx.label}: ${pct}%`;
+              }
+            }
+          }
+        }
+      };
+    }
+
     function renderMix(rows) {
       const labels  = rows.map(r => r.category);
       const revenue = rows.map(r => r.revenue);
@@ -2877,7 +2914,7 @@
         mixRevenueChart = new Chart(document.getElementById('mixRevenue'), {
           type: 'doughnut',
           data: { labels, datasets: [{ data: revenue, backgroundColor: colors, borderWidth: 1, borderColor: '#fff' }] },
-          options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { position: 'right' } } }
+          options: doughnutOpts('right')
         });
       }
       if (mixVisitsChart) {
@@ -2889,25 +2926,11 @@
         mixVisitsChart = new Chart(document.getElementById('mixVisits'), {
           type: 'doughnut',
           data: { labels, datasets: [{ data: visits, backgroundColor: colors, borderWidth: 1, borderColor: '#fff' }] },
-          options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { position: 'right' } } }
+          options: doughnutOpts('right')
         });
       }
     }
 
-    function renderCohorts() {
-      const tbody = document.getElementById('cohortTbody');
-      if (!DATA.cohorts.length) {
-        tbody.innerHTML = '<tr><td colspan="4" class="empty">No cohorts to display.</td></tr>';
-      } else {
-        tbody.innerHTML = DATA.cohorts.map(c => `
-          <tr>
-            <td>${escapeHtml(c.cohort)}</td>
-            <td class="num">${fmtInt(c.patients)}</td>
-            <td class="num">${fmt$(c.avg_ltv)}</td>
-            <td class="num">${fmtNum1(c.avg_visits)}</td>
-          </tr>`).join('');
-      }
-    }
 
     function renderSampleSections() {
       new Chart(document.getElementById('ageChart'), {
@@ -2922,8 +2945,7 @@
         type: 'doughnut',
         data: { labels: ['Female','Male'],
                 datasets: [{ data: [62, 38], backgroundColor: [GOJI, COBALT], borderWidth: 1, borderColor: '#fff' }] },
-        options: { responsive: true, maintainAspectRatio: false, cutout: '65%',
-                   plugins: { legend: { position: 'bottom' } } }
+        options: doughnutOpts('bottom')
       });
       new Chart(document.getElementById('tagsChart'), {
         type: 'bar',
@@ -2933,18 +2955,6 @@
                    plugins: { legend: { display: false } },
                    scales: { x: { beginAtZero: true } } }
       });
-      new Chart(document.getElementById('retentionChart'), {
-        type: 'line',
-        data: { labels: ['Visit 1','30d','60d','90d'],
-                datasets: [
-                  { label: 'Mar cohort', data: [100, 73, 55, 41],  borderColor: GOJI,  backgroundColor: 'transparent', tension: 0.25, pointBackgroundColor: GOJI },
-                  { label: 'Apr cohort', data: [100, 68, 49, null], borderColor: GOLD, backgroundColor: 'transparent', tension: 0.25, pointBackgroundColor: GOLD },
-                  { label: 'May cohort', data: [100, 51, null, null], borderColor: SAGE, backgroundColor: 'transparent', tension: 0.25, pointBackgroundColor: SAGE }
-                ] },
-        options: { responsive: true, maintainAspectRatio: false,
-                   plugins: { legend: { position: 'bottom' } },
-                   scales: { y: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%' } } } }
-      });
 
       const referralLabels = ['Google search', 'Doctor referral', 'Existing patient', 'Instagram', 'Insurance partner', 'Walk-in'];
       const referralData   = [18, 12, 9, 7, 5, 3];
@@ -2953,8 +2963,7 @@
         type: 'doughnut',
         data: { labels: referralLabels,
                 datasets: [{ data: referralData, backgroundColor: referralColors, borderWidth: 1, borderColor: '#fff' }] },
-        options: { responsive: true, maintainAspectRatio: false, cutout: '60%',
-                   plugins: { legend: { position: 'right' } } }
+        options: doughnutOpts('right')
       });
     }
 
@@ -2990,7 +2999,6 @@
       const stored = localStorage.getItem(STORAGE_KEY);
       const initial = (stored && DATA.ranges[stored]) ? stored : DATA.default_range;
       applyRange(initial);
-      renderCohorts();
       renderSampleSections();
 
       initPL();
