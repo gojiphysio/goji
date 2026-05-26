@@ -17,6 +17,7 @@ import hmac
 import json
 import logging
 import os
+import re
 import threading
 import time
 from datetime import date, datetime, timedelta
@@ -40,6 +41,28 @@ PROVIDERS = {
     "PKN": "Kristy Ng",
 }
 DIRECTOR_ID = "PCL"
+
+# Opening-promo "true discount cost" tile: for each pack SKU, we compute the
+# implicit discount as (units * pack_size * usual_per_session) - sold_total.
+# These usual single-session prices come from the published price list; they
+# are not yet in BigQuery as a reference table. Update here when prices change.
+#   prefix -> (display service name, usual price per single session SGD)
+PROMO_PRICING: dict[str, tuple[str, float]] = {
+    "SC":    ("S&C 1:1", 160.0),
+    "PP1:1": ("PP 1:1",  150.0),
+    "PP2:1": ("PP 1:2",  200.0),
+}
+PROMO_SKU_RE = re.compile(r"^([A-Z0-9:]+)-(\d+)OP$")
+
+
+def parse_promo_sku(item_given_id: str) -> tuple[str, int] | None:
+    """Return (prefix, pack_size) for an opening-promo SKU, else None."""
+    if not item_given_id:
+        return None
+    m = PROMO_SKU_RE.match(item_given_id)
+    if not m:
+        return None
+    return m.group(1), int(m.group(2))
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger("dashboard")
@@ -186,40 +209,158 @@ ORDER BY bookings DESC
 
 
 def fetch_discounts(start: date, end: date) -> dict:
-    totals_sql = f"""
+    """True discount cost: implicit opening-promo discount (usual single-session
+    price * pack size vs sold price) on pack SKUs, plus ad-hoc line discounts
+    on non-promo items. Shape matches v3 design.
+    """
+    # All sales in range, with per-line booking_amount + adhoc discount.
+    sales_sql = f"""
 SELECT
-  SUM(COALESCE(discount, 0)) AS total_discount,
-  SUM(booking_amount)        AS bookings_total
+  item_given_id,
+  item_name,
+  COUNT(*)                                                    AS units,
+  SUM(booking_amount)                                         AS sold_total,
+  SUM(COALESCE(discount, 0))                                  AS adhoc_discount,
+  SUM(CASE WHEN COALESCE(discount, 0) > 0 THEN 1 ELSE 0 END)  AS adhoc_lines
 FROM `{PROJECT}.stg.invoice_items`
 WHERE invoice_date BETWEEN '{start}' AND '{end}'
   AND classification IN ('sale', 'package_sale')
+GROUP BY item_given_id, item_name
 """
-    t = _query(totals_sql)[0]
-    total_discount = _to_float(t["total_discount"])
-    bookings_total = _to_float(t["bookings_total"])
-    pct = (total_discount / bookings_total * 100.0) if bookings_total > 0 else 0.0
+    rows = _query(sales_sql)
 
-    top_sql = f"""
-SELECT
-  item_name,
-  SUM(COALESCE(discount, 0)) AS total_discount,
-  COUNT(*)                   AS times
-FROM `{PROJECT}.stg.invoice_items`
-WHERE invoice_date BETWEEN '{start}' AND '{end}'
-  AND COALESCE(discount, 0) > 0
-GROUP BY item_name
-ORDER BY total_discount DESC
-LIMIT 5
-"""
+    by_sku: list[dict] = []
+    unknown: list[dict] = []
+    promo_implicit       = 0.0
+    promo_units_total    = 0
+    adhoc_nonpromo_total = 0.0
+    adhoc_by_item: dict[str, dict] = {}
+
+    bookings_total = 0.0
+
+    for r in rows:
+        item_given_id = r["item_given_id"] or ""
+        item_name     = r["item_name"] or "(unnamed)"
+        units         = _to_int(r["units"])
+        sold_total    = _to_float(r["sold_total"])
+        adhoc         = _to_float(r["adhoc_discount"])
+        adhoc_lines   = _to_int(r["adhoc_lines"])
+        bookings_total += sold_total
+
+        parsed = parse_promo_sku(item_given_id)
+        if parsed is None:
+            # Non-promo line: its discount is just the explicit ad-hoc column.
+            if adhoc > 0:
+                adhoc_nonpromo_total += adhoc
+                existing = adhoc_by_item.get(item_name, {"discount": 0.0, "times": 0})
+                adhoc_by_item[item_name] = {
+                    "name":     item_name,
+                    "discount": existing["discount"] + adhoc,
+                    "times":    existing["times"] + adhoc_lines,
+                }
+            continue
+
+        prefix, pack = parsed
+        if prefix not in PROMO_PRICING:
+            unknown.append({
+                "item_given_id": item_given_id,
+                "item_name":     item_name,
+                "units":         units,
+                "sold_total":    sold_total,
+            })
+            # Still count the explicit adhoc discount so it's not lost
+            adhoc_nonpromo_total += adhoc
+            continue
+
+        service, unit_price = PROMO_PRICING[prefix]
+        usual_total = units * pack * unit_price
+        # Discount = usual_total - sold_total (covers both the implicit
+        # promo gap and any extra ad-hoc discounts on top, since adhoc
+        # already reduces sold_total).
+        discount = usual_total - sold_total
+        promo_implicit    += discount
+        promo_units_total += units
+
+        label = f"{service} {pack}-pack" if pack > 1 else f"{service} single"
+        by_sku.append({
+            "item_given_id": item_given_id,
+            "service":       service,
+            "pack":          pack,
+            "label":         label,
+            "units":         units,
+            "usual_total":   round(usual_total, 2),
+            "sold_total":    round(sold_total, 2),
+            "discount":      round(discount, 2),
+        })
+
+    by_sku.sort(key=lambda x: x["discount"], reverse=True)
+    top_adhoc = sorted(
+        adhoc_by_item.values(), key=lambda x: x["discount"], reverse=True,
+    )[:5]
+
+    total_true = promo_implicit + adhoc_nonpromo_total
+    pct = (total_true / bookings_total * 100.0) if bookings_total > 0 else 0.0
+
     return {
-        "total":           total_discount,
-        "pct_of_bookings": round(pct, 1),
-        "top_items": [{
-            "name":     r["item_name"] or "(unnamed)",
-            "discount": _to_float(r["total_discount"]),
-            "times":    _to_int(r["times"]),
-        } for r in _query(top_sql)],
+        "total_true":         round(total_true, 2),
+        "promo_implicit":     round(promo_implicit, 2),
+        "adhoc_nonpromo":     round(adhoc_nonpromo_total, 2),
+        "pct_of_bookings":    round(pct, 1),
+        "promo_units_total":  promo_units_total,
+        "by_sku":             by_sku,
+        "top_adhoc_items":    [{
+            "name":     it["name"],
+            "discount": round(it["discount"], 2),
+            "times":    it["times"],
+        } for it in top_adhoc],
+        "unknown_promo_skus": unknown,
     }
+
+
+def fetch_payment_methods(start: date, end: date) -> list[dict]:
+    """Return [{method, total_amount, txn_count}] from unnested invoice payments.
+
+    Plato stores payments as a JSON array on each invoice payload at
+    `payload.payment[]`, with fields `mode`, `amount`, and a `void` flag.
+    Method names are normalised to lowercase so the dashboard JS can find
+    'platopay' regardless of how Plato cased it.
+    """
+    sql = f"""
+WITH payments AS (
+  SELECT
+    LOWER(JSON_VALUE(p, '$.mode'))                     AS method,
+    SAFE_CAST(JSON_VALUE(p, '$.amount') AS FLOAT64)    AS amount,
+    SAFE_CAST(JSON_VALUE(p, '$.void')   AS INT64)      AS is_void
+  FROM `{PROJECT}.stg.invoices` AS inv,
+       UNNEST(JSON_QUERY_ARRAY(inv.payload, '$.payment')) AS p
+  WHERE inv.invoice_date BETWEEN '{start}' AND '{end}'
+    AND inv.is_finalized = TRUE
+    AND NOT inv.is_void
+)
+SELECT
+  method,
+  ROUND(SUM(amount), 2) AS total_amount,
+  COUNT(*)              AS txn_count
+FROM payments
+WHERE COALESCE(is_void, 0) = 0
+  AND method IS NOT NULL
+GROUP BY method
+ORDER BY total_amount DESC
+"""
+    return [{
+        "method":       r["method"],
+        "total_amount": _to_float(r["total_amount"]),
+        "txn_count":    _to_int(r["txn_count"]),
+    } for r in _query(sql)]
+
+
+def fetch_appointments() -> list[dict]:
+    """Forward-looking unconfirmed appointments.
+
+    Placeholder until /appointment ingestion lands — the v3 commission tab
+    relies on this list but BQ doesn't have appointment data yet.
+    """
+    return []
 
 
 def fetch_treatment_mix(start: date, end: date) -> list[dict]:
@@ -329,12 +470,20 @@ def build_payload() -> dict:
             "treatment_mix": fetch_treatment_mix(start, end),
         }
 
+    # P&L tab uses a fixed 30-day window for payment processing fees
+    today = date.today()
+    pmt_start = today - timedelta(days=30)
+    log.info("  payment methods (%s -> %s)", pmt_start, today)
+    payment_by_method = fetch_payment_methods(pmt_start, today)
+
     return {
-        "generated_at":  datetime.now().astimezone().isoformat(timespec="seconds"),
-        "default_range": "30d",
-        "deferred":      deferred,
-        "cohorts":       cohorts,
-        "ranges":        ranges,
+        "generated_at":      datetime.now().astimezone().isoformat(timespec="seconds"),
+        "default_range":     "30d",
+        "deferred":          deferred,
+        "cohorts":           cohorts,
+        "appointments":      fetch_appointments(),
+        "payment_by_method": payment_by_method,
+        "ranges":            ranges,
     }
 
 

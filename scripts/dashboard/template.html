@@ -156,6 +156,329 @@
       .kpi-row { grid-template-columns: repeat(2, 1fr); }
       .two-col, .three-col { grid-template-columns: 1fr; }
     }
+
+    /* --- Page nav (Dashboard / Commission Calculator) --- */
+    .page-nav {
+      display: inline-flex; background: var(--card);
+      border: 1px solid var(--border); border-radius: 999px;
+      box-shadow: var(--shadow); overflow: hidden; margin-bottom: 20px;
+    }
+    .page-nav button {
+      background: transparent; border: 0; padding: 8px 18px;
+      font: inherit; color: var(--ink-soft); cursor: pointer;
+      font-size: 13px; font-weight: 500;
+    }
+    .page-nav button:hover { background: var(--bg); color: var(--ink); }
+    .page-nav button.active { background: var(--goji); color: white; }
+    .page-nav button + button { border-left: 1px solid var(--border); }
+    .page-nav button.active + button,
+    .page-nav button + button.active { border-left-color: transparent; }
+    .page[hidden] { display: none; }
+
+    /* --- Commission calculator --- */
+    .calc-grid {
+      display: grid; grid-template-columns: 360px 1fr;
+      gap: 20px; align-items: start;
+    }
+    @media (max-width: 900px) {
+      .calc-grid { grid-template-columns: 1fr; }
+    }
+    .calc-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 22px 24px; box-shadow: var(--shadow);
+    }
+    .calc-card h2 {
+      font-size: 16px; font-weight: 600; margin: 0 0 4px;
+    }
+    .calc-card .subtitle {
+      font-size: 13px; color: var(--ink-soft); margin-bottom: 18px;
+    }
+    .form-row { margin-bottom: 14px; }
+    .form-row label {
+      display: block; font-size: 12px; color: var(--ink-soft);
+      text-transform: uppercase; letter-spacing: 0.04em;
+      margin-bottom: 6px; font-weight: 500;
+    }
+    .form-row .hint {
+      font-size: 11px; color: var(--ink-muted); margin-top: 4px;
+      font-style: italic;
+    }
+    .form-row select, .form-row input[type="number"] {
+      width: 100%; padding: 9px 12px;
+      border: 1px solid var(--border); border-radius: 8px;
+      background: var(--bg); font: inherit; font-size: 14px;
+      color: var(--ink); font-variant-numeric: tabular-nums;
+    }
+    .form-row select:focus, .form-row input:focus {
+      outline: none; border-color: var(--goji);
+      box-shadow: 0 0 0 3px var(--goji-soft);
+    }
+    .input-prefix { position: relative; }
+    .input-prefix .prefix {
+      position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+      color: var(--ink-muted); font-size: 14px; pointer-events: none;
+      font-weight: 500;
+    }
+    .input-prefix input { padding-left: 32px; }
+    .input-suffix { position: relative; }
+    .input-suffix .suffix {
+      position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+      color: var(--ink-muted); font-size: 14px; pointer-events: none;
+      font-weight: 500;
+    }
+    .input-suffix input { padding-right: 32px; }
+
+    .prefill-flag {
+      display: inline-block; font-size: 10px; letter-spacing: 0.04em;
+      text-transform: uppercase; font-weight: 600;
+      padding: 2px 6px; border-radius: 3px; margin-left: 6px;
+      background: #e3f2e8; color: var(--good);
+    }
+    .prefill-flag.edited { background: #fbeed1; color: var(--warn); }
+
+    .calc-actions {
+      display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap;
+    }
+    .btn {
+      padding: 9px 16px; border-radius: 8px; border: 1px solid var(--border);
+      background: var(--card); color: var(--ink); font: inherit;
+      font-size: 13px; cursor: pointer; font-weight: 500;
+    }
+    .btn:hover { background: var(--bg); }
+    .btn.primary {
+      background: var(--goji); border-color: var(--goji); color: white;
+    }
+    .btn.primary:hover { background: #a8392a; border-color: #a8392a; }
+
+    /* --- Summary report --- */
+    .report-card { background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 24px 28px; box-shadow: var(--shadow); }
+    .report-card h2 { font-size: 18px; font-weight: 600; margin: 0; }
+    .report-meta { color: var(--ink-soft); font-size: 13px; margin: 4px 0 18px; }
+
+    .summary-rows { border-top: 1px solid var(--border); margin-top: 14px; }
+    .summary-row {
+      display: flex; justify-content: space-between; align-items: baseline;
+      padding: 10px 0; border-bottom: 1px solid #f0ebe2; font-size: 14px;
+    }
+    .summary-row .label { color: var(--ink-soft); }
+    .summary-row .value { font-variant-numeric: tabular-nums; font-weight: 500; }
+    .summary-row.total {
+      border-bottom: none; border-top: 2px solid var(--ink);
+      margin-top: 6px; padding-top: 14px;
+    }
+    .summary-row.total .label { color: var(--ink); font-weight: 600; font-size: 15px; }
+    .summary-row.total .value { color: var(--goji); font-weight: 600; font-size: 22px; }
+    .summary-row.commission .value { color: var(--goji); font-weight: 600; }
+    .summary-row.subtle .value { color: var(--ink-soft); font-weight: 400; }
+
+    .commission-breakdown {
+      background: var(--bg); border-radius: 8px; padding: 12px 16px;
+      margin-top: 16px; font-size: 12px; color: var(--ink-soft);
+      line-height: 1.6;
+    }
+    .commission-breakdown code {
+      background: var(--card); padding: 2px 6px; border-radius: 4px;
+      font-size: 11px;
+    }
+
+    .appointments-block { margin-top: 24px; }
+    .appointments-title {
+      font-size: 14px; font-weight: 600; margin: 0 0 4px;
+    }
+    .appointments-meta {
+      font-size: 12px; color: var(--ink-muted); margin-bottom: 10px;
+    }
+    .appointments-table {
+      width: 100%; border-collapse: collapse; font-size: 13px;
+    }
+    .appointments-table th {
+      text-align: left; font-weight: 500; color: var(--ink-soft);
+      padding: 8px 10px; border-bottom: 1px solid var(--border);
+      font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em;
+    }
+    .appointments-table th.num { text-align: right; }
+    .appointments-table td {
+      padding: 8px 10px; border-bottom: 1px solid #f0ebe2;
+    }
+    .appointments-table td.num {
+      text-align: right; font-variant-numeric: tabular-nums;
+    }
+    .appointments-table tfoot td {
+      border-top: 2px solid var(--ink); border-bottom: none;
+      padding-top: 10px;
+    }
+    .appointments-empty {
+      color: var(--ink-muted); font-style: italic;
+      padding: 16px 10px; text-align: center;
+    }
+
+    /* --- Print rules: only the report prints --- */
+    @media print {
+      @page { margin: 18mm; }
+      body { background: white; color: black; }
+      .topbar, .page-nav, .notice, .calc-card, footer,
+      .date-selector, .updated, .filters, .calc-actions { display: none !important; }
+      #page-dashboard, #page-pl { display: none !important; }
+      .wrap { padding: 0; max-width: none; }
+      .calc-grid { grid-template-columns: 1fr; gap: 0; }
+      .report-card { border: none; box-shadow: none; padding: 0; }
+      .summary-row.total .value { color: black; }
+      .summary-row.commission .value { color: black; }
+      .commission-breakdown { background: #f5f5f5; }
+      .brand-print {
+        display: flex !important; align-items: center; gap: 10px;
+        padding-bottom: 12px; margin-bottom: 18px;
+        border-bottom: 2px solid black;
+      }
+      .brand-print .brand-dot {
+        width: 12px; height: 12px; background: #92171D; border-radius: 50%;
+      }
+      .brand-print .brand-name { font-size: 18px; font-weight: 600; }
+      /* Keep appointment rows from splitting awkwardly */
+      .appointments-block { page-break-inside: auto; margin-top: 22px; }
+      .appointments-table tr { page-break-inside: avoid; }
+      .appointments-table thead { display: table-header-group; }
+      .appointments-table tfoot { display: table-row-group; }
+    }
+    .brand-print { display: none; }
+
+    /* ========== P&L Section ========== */
+    .pl-header {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      flex-wrap: wrap; gap: 12px; margin-bottom: 0;
+    }
+    .pl-view-toggle {
+      display: inline-flex; background: var(--bg);
+      border: 1px solid var(--border); border-radius: 999px; overflow: hidden;
+      flex-shrink: 0;
+    }
+    .pl-view-toggle button {
+      background: transparent; border: 0; padding: 5px 14px;
+      font: inherit; color: var(--ink-soft); cursor: pointer;
+      font-size: 12px; font-weight: 500; transition: background 0.15s, color 0.15s;
+    }
+    .pl-view-toggle button:hover { background: #ede9e2; color: var(--ink); }
+    .pl-view-toggle button.active { background: var(--ink); color: #fff; }
+    .pl-view-toggle button + button { border-left: 1px solid var(--border); }
+
+    .pl-grid {
+      display: grid; grid-template-columns: 1fr 300px;
+      gap: 28px; align-items: start; margin-top: 20px;
+    }
+    @media (max-width: 900px) { .pl-grid { grid-template-columns: 1fr; } }
+
+    .pl-row {
+      display: flex; justify-content: space-between; align-items: baseline;
+      padding: 9px 2px; border-bottom: 1px solid #f0ebe2; font-size: 14px;
+    }
+    .pl-row:first-child { border-top: 1px solid var(--border); padding-top: 10px; }
+    .pl-label { color: var(--ink-soft); }
+    .pl-val { font-variant-numeric: tabular-nums; font-weight: 500; color: var(--ink); }
+    .pl-row.pl-cost .pl-val { color: var(--ink-soft); }
+    .pl-row.pl-total { border-bottom: 2px solid var(--border); }
+    .pl-row.pl-total .pl-label { font-weight: 600; color: var(--ink); }
+    .pl-row.pl-total .pl-val   { font-weight: 600; color: var(--ink); }
+    .pl-row.pl-result { border-bottom: none; padding-top: 12px; }
+    .pl-row.pl-result .pl-label { font-size: 16px; font-weight: 700; color: var(--ink); }
+    .pl-row.pl-result .pl-val   { font-size: 24px; font-weight: 700; }
+    .pl-positive .pl-val { color: var(--good) !important; }
+    .pl-negative .pl-val { color: var(--goji) !important; }
+    .pl-row.pl-expandable { cursor: pointer; user-select: none; }
+    .pl-row.pl-expandable:hover .pl-label { color: var(--ink); }
+    .pl-chevron {
+      display: inline-block; font-size: 9px; margin-left: 5px;
+      color: var(--ink-muted); transition: transform 0.18s; vertical-align: middle;
+    }
+    .pl-chevron.open { transform: rotate(90deg); }
+    .pl-subrow {
+      display: flex; justify-content: space-between; align-items: baseline;
+      padding: 6px 2px 6px 18px; border-bottom: 1px solid #f5f0e8; font-size: 13px;
+      background: #faf8f5;
+    }
+    .pl-subrow .pl-label { color: var(--ink-muted); }
+    .pl-subrow .pl-val   { color: var(--ink-soft); font-variant-numeric: tabular-nums; font-weight: 500; }
+    .pl-subrow-note      { font-size: 11px; color: var(--ink-muted); margin-left: 6px; font-style: italic; }
+
+    .pl-breakeven {
+      margin-top: 16px; background: var(--bg);
+      border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px;
+    }
+    .pl-be-header {
+      display: flex; justify-content: space-between; align-items: baseline;
+      margin-bottom: 8px;
+    }
+    .pl-be-label {
+      font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em;
+      font-weight: 600; color: var(--ink-soft);
+    }
+    .pl-be-pct { font-size: 14px; font-weight: 700; color: var(--ink); }
+    .pl-progress-track {
+      height: 8px; background: #e3ddd2; border-radius: 999px; overflow: hidden;
+      margin-bottom: 8px;
+    }
+    .pl-progress-fill {
+      height: 100%; border-radius: 999px; transition: width 0.4s ease;
+      background: var(--goji);
+    }
+    .pl-progress-fill.at-target { background: var(--good); }
+    .pl-be-sub { font-size: 11px; color: var(--ink-muted); line-height: 1.5; }
+
+    /* Cost input panel */
+    .pl-inputs-toggle {
+      width: 100%; text-align: left; border-radius: 8px;
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 12px; padding: 8px 14px;
+    }
+    .pl-chevron { font-size: 10px; transition: transform 0.2s; }
+    .pl-inputs-toggle.open .pl-chevron { transform: rotate(180deg); }
+
+    .pl-inputs-panel {
+      display: none; border: 1px solid var(--border); border-radius: 8px;
+      overflow: hidden; margin-top: 8px; background: var(--card);
+    }
+    .pl-inputs-panel.open { display: block; }
+
+    .pl-input-group {
+      padding: 12px 14px; border-bottom: 1px solid #f0ebe2;
+    }
+    .pl-input-group:last-child { border-bottom: none; }
+    .pl-input-group-title {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em;
+      font-weight: 700; color: var(--ink-muted); margin-bottom: 10px;
+    }
+    .pl-input-row {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 8px; margin-bottom: 7px;
+    }
+    .pl-input-row:last-child { margin-bottom: 0; }
+    .pl-input-row label { font-size: 12px; color: var(--ink-soft); flex: 1; min-width: 0; }
+    .pl-input-wrap { position: relative; width: 100px; flex-shrink: 0; }
+    .pl-prefix {
+      position: absolute; left: 9px; top: 50%; transform: translateY(-50%);
+      color: var(--ink-muted); font-size: 12px; pointer-events: none;
+    }
+    .pl-suffix {
+      position: absolute; right: 9px; top: 50%; transform: translateY(-50%);
+      color: var(--ink-muted); font-size: 11px; pointer-events: none;
+    }
+    .pl-input-wrap input {
+      width: 100%; padding: 5px 8px 5px 20px;
+      border: 1px solid var(--border); border-radius: 6px;
+      background: var(--bg); font: inherit; font-size: 12px;
+      color: var(--ink); font-variant-numeric: tabular-nums; text-align: right;
+    }
+    .pl-input-wrap input.no-prefix { padding-left: 8px; padding-right: 28px; }
+    .pl-input-wrap input:focus {
+      outline: none; border-color: var(--goji);
+      box-shadow: 0 0 0 2px var(--goji-soft);
+    }
+    .pl-total-line {
+      display: flex; justify-content: space-between;
+      font-size: 11px; color: var(--ink-muted);
+      padding-top: 8px; margin-top: 4px;
+      border-top: 1px dashed #e3ddd2;
+    }
   </style>
 </head>
 <body>
@@ -180,6 +503,14 @@
       </div>
     </header>
 
+    <nav class="page-nav" role="tablist" aria-label="Page">
+      <button type="button" data-page="dashboard" class="active">Dashboard</button>
+      <button type="button" data-page="pl">Profit &amp; Loss</button>
+      <button type="button" data-page="commission">Commission calculator</button>
+    </nav>
+
+    <div id="page-dashboard" class="page">
+
     <div class="notice">
       <strong>Live data dashboard, generated on demand.</strong> The date selector switches between
       snapshots taken when this file was generated. Sections labelled
@@ -187,6 +518,7 @@
       Sections labelled <span class="badge sample">Sample</span> are illustrative pending
       the ingestion job for that data source.
     </div>
+
 
     <div class="kpi-row">
       <div class="kpi-card">
@@ -219,43 +551,39 @@
     <section class="q">
       <h2>Activity over time <span class="badge live">Live</span></h2>
       <div class="subtitle">
-        Patient activity over the <span class="range-label">last 30 days</span>.
-        Bucketed by day, week or month depending on the range width.
+        Visit volume and patient engagement over the <span class="range-label">last 30 days</span>.
+        <strong>Avg visits / patient</strong> is your retention signal — a rising trend means patients are returning and burning package sessions. Target 2+ for a healthy package-led model.
       </div>
       <div class="two-col">
         <div>
-          <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px;">Active patients</div>
-          <div class="chart-wrap small"><canvas id="activePatientsChart"></canvas></div>
-        </div>
-        <div>
           <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px;">Visits</div>
           <div class="chart-wrap small"><canvas id="visitsChart"></canvas></div>
+        </div>
+        <div>
+          <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px;">Avg visits / patient</div>
+          <div class="chart-wrap small"><canvas id="avgVisitsChart"></canvas></div>
         </div>
       </div>
     </section>
 
     <section class="q">
-      <h2>Revenue over time <span class="badge live">Live</span></h2>
+      <h2>Bookings vs recognised revenue <span class="badge live">Live</span></h2>
       <div class="subtitle">
-        Cash invoiced vs revenue actually earned over the <span class="range-label">last 30 days</span>.
+        Running totals since the start of the selected period.
+        <strong>Bookings</strong> = cumulative cash invoiced (packages counted upfront).
+        <strong>Recognised</strong> = cumulative revenue earned as sessions are delivered.
+        The shaded gap between the curves = outstanding deferred revenue at that point in time.
+        A widening gap means you're selling ahead of delivery. Watch for a gap that <em>stops growing</em> — it means patients aren't coming back to burn their packs.
       </div>
-      <div class="two-col">
-        <div>
-          <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px;">Bookings</div>
-          <div class="chart-wrap small"><canvas id="bookingsChart"></canvas></div>
-        </div>
-        <div>
-          <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px;">Recognised revenue</div>
-          <div class="chart-wrap small"><canvas id="recognisedChart"></canvas></div>
-        </div>
-      </div>
+      <div class="chart-wrap" style="height: 260px; margin-top: 12px;"><canvas id="bookingsVsRecognisedChart"></canvas></div>
     </section>
 
     <section class="q">
       <h2>Per-clinician performance <span class="badge live">Live</span></h2>
       <div class="subtitle">
-        Bookings ($ invoiced) vs recognised revenue ($ delivered), <span class="range-label">last 30 days</span>.
-        Gap = packages sold but not yet redeemed by patients.
+        Bookings ($ invoiced) vs recognised revenue ($ earned through delivered sessions), <span class="range-label">last 30 days</span>.
+        The <strong>gap</strong> is deferred revenue: packages committed but sessions not yet used. A large gap can mean strong forward sales — or a churn risk if patients stop coming in.
+        Clinician <strong>utilisation %</strong> (slots filled ÷ slots available) requires appointment data — flagged for Charles.
       </div>
       <div class="two-col">
         <div><div class="chart-wrap"><canvas id="clinicianChart"></canvas></div></div>
@@ -280,24 +608,42 @@
     </section>
 
     <section class="q">
-      <h2>Discount cost to the clinic <span class="badge live">Live</span></h2>
+      <h2>Discount cost to clinic <span class="badge live">Live</span></h2>
       <div class="subtitle">
-        How much listed-price revenue was foregone via line discounts, <span class="range-label">last 30 days</span>.
+        Implicit opening-promo discount + ad-hoc line discounts, <span class="range-label">last 30 days</span>.
+        Pack-promo cost is computed against the usual single-session price &times; pack size.
       </div>
-      <div class="two-col">
+      <div style="display: grid; grid-template-columns: 240px 1fr; gap: 28px; align-items: start;">
         <div>
-          <div class="kpi-value" id="discountTotal" style="font-size: 32px; color: var(--goji);">-</div>
-          <div class="kpi-sub" style="margin-bottom: 18px;">
-            <span id="discountPct">-</span> of bookings absorbed as discount
-          </div>
+          <div class="kpi-value" id="discountTotal" style="font-size: 38px; color: var(--goji);">-</div>
+          <div class="kpi-sub" style="margin-bottom: 14px;">Total discount absorbed</div>
+          <div class="kpi-sub"><span id="discountPct">-</span> of bookings</div>
         </div>
         <div>
+          <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px;">Opening-promo discount, by SKU</div>
           <table>
             <thead>
-              <tr><th>Item</th><th class="num">Discount</th><th class="num">Times</th></tr>
+              <tr>
+                <th>Service</th>
+                <th>Pack</th>
+                <th class="num">Units</th>
+                <th class="num">Usual ref</th>
+                <th class="num">Sold</th>
+                <th class="num">Discount</th>
+              </tr>
             </thead>
-            <tbody id="discountTbody"></tbody>
+            <tbody id="promoBySkuTbody"></tbody>
+            <tfoot id="promoBySkuTfoot"></tfoot>
           </table>
+
+          <div id="adhocBlock" hidden style="margin-top: 22px;">
+            <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px;">Ad-hoc on non-promo items</div>
+            <table>
+              <thead><tr><th>Item</th><th class="num">Times</th><th class="num">Discount</th></tr></thead>
+              <tbody id="discountTbody"></tbody>
+              <tfoot id="adhocTfoot"></tfoot>
+            </table>
+          </div>
         </div>
       </div>
     </section>
@@ -342,32 +688,6 @@
       </div>
     </section>
 
-    <section class="q">
-      <h2>Cohort and lifetime value <span class="badge live">Live</span></h2>
-      <div class="subtitle">
-        Patients grouped by month of first visit. Whole-period figures, not affected
-        by the date selector above.
-      </div>
-      <div class="two-col">
-        <div>
-          <table>
-            <thead>
-              <tr>
-                <th>Cohort</th>
-                <th class="num">Patients</th>
-                <th class="num">Avg LTV</th>
-                <th class="num">Avg visits</th>
-              </tr>
-            </thead>
-            <tbody id="cohortTbody"></tbody>
-          </table>
-        </div>
-        <div>
-          <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px;">Retention curve <span class="badge sample">Sample</span></div>
-          <div class="chart-wrap small"><canvas id="retentionChart"></canvas></div>
-        </div>
-      </div>
-    </section>
 
     <section class="q">
       <h2>Patient referral analytics <span class="badge sample">Sample</span></h2>
@@ -408,6 +728,393 @@
       Data sources: Plato Medical (live), Xero (coming), Google Workspace (coming).<br>
       Re-run <code>scripts/dashboard/generate.py</code> to refresh.
     </footer>
+
+    </div><!-- /#page-dashboard -->
+
+    <div id="page-pl" class="page" hidden>
+
+    <!-- ===== P&L Section ===== -->
+    <section class="q" id="pl-section" style="margin-bottom: 28px;">
+      <div class="pl-header">
+        <div>
+          <h2 style="margin: 0 0 4px;">Profit &amp; Loss <span class="badge live">Live revenue</span></h2>
+          <div class="subtitle" style="margin: 0;">Last 30 days of recognised revenue vs. your monthly cost base. Toggle to include or exclude amortized capex.</div>
+        </div>
+        <div class="pl-view-toggle" role="group" aria-label="P&L view">
+          <button type="button" data-plview="cash" class="active">Cash costs only</button>
+          <button type="button" data-plview="full">Incl. amortization</button>
+        </div>
+      </div>
+
+      <div class="pl-grid">
+
+        <!-- Left: P&L numbers -->
+        <div>
+          <div class="pl-row">
+            <span class="pl-label">Recognised revenue (last 30 days)</span>
+            <span class="pl-val" id="pl_revenue">—</span>
+          </div>
+          <div class="pl-row pl-cost">
+            <span class="pl-label">Payroll <span style="font-size:11px;color:var(--ink-muted);">(base + commission + employer CPF)</span></span>
+            <span class="pl-val" id="pl_payroll_total_val">—</span>
+          </div>
+          <div class="pl-row pl-cost pl-expandable" id="pl_opex_toggle_row" onclick="toggleOpexDetail()">
+            <span class="pl-label">Operating expenses <span class="pl-chevron open" id="pl_opex_chevron">▶</span></span>
+            <span class="pl-val" id="pl_opex_val">—</span>
+          </div>
+          <div class="pl-subrow" id="pl_pmtfee_subrow">
+            <span class="pl-label">↳ Payment processing fees
+              <span class="pl-subrow-note">(Plato Terminal: 2.1% + $0.20/txn)</span>
+            </span>
+            <span class="pl-val" id="pl_pmtfee_val">Awaiting data</span>
+          </div>
+          <div class="pl-row pl-cost" id="pl_amort_row" hidden>
+            <span class="pl-label">Amortized capex <span style="font-size:11px;color:var(--ink-muted);">(one-time costs ÷ months)</span></span>
+            <span class="pl-val" id="pl_amort_val">—</span>
+          </div>
+          <div class="pl-row pl-total">
+            <span class="pl-label">Total monthly costs</span>
+            <span class="pl-val" id="pl_costs_total">—</span>
+          </div>
+          <div class="pl-row pl-result" id="pl_result_row">
+            <span class="pl-label">Profit / (Loss)</span>
+            <span class="pl-val" id="pl_result_val">—</span>
+          </div>
+
+          <!-- Break-even bar -->
+          <div class="pl-breakeven">
+            <div class="pl-be-header">
+              <span class="pl-be-label">Revenue vs. break-even</span>
+              <span class="pl-be-pct" id="pl_be_pct">—</span>
+            </div>
+            <div class="pl-progress-track">
+              <div class="pl-progress-fill" id="pl_progress_fill" style="width: 0%;"></div>
+            </div>
+            <div class="pl-be-sub" id="pl_be_sub">—</div>
+            <div id="pl_profit_track_wrap" hidden style="margin-top: 12px;">
+              <div class="pl-be-header" style="margin-bottom: 4px;">
+                <span class="pl-be-label" style="color: var(--good);">Profit margin</span>
+                <span class="pl-be-pct" id="pl_margin_pct" style="color: var(--good);">—</span>
+              </div>
+              <div class="pl-progress-track">
+                <div class="pl-progress-fill at-target" id="pl_margin_fill" style="width: 0%;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Editable cost inputs -->
+        <div>
+          <button type="button" class="btn pl-inputs-toggle" id="pl_toggle_btn">
+            <span>Edit cost assumptions</span>
+            <span class="pl-chevron">▾</span>
+          </button>
+
+          <div class="pl-inputs-panel" id="pl_inputs_panel">
+
+            <!-- Payroll -->
+            <div class="pl-input-group">
+              <div class="pl-input-group-title">Monthly payroll (base salaries)</div>
+              <div class="pl-input-row">
+                <label>Cheryl (Clinical Director)</label>
+                <div class="pl-input-wrap">
+                  <span class="pl-prefix">$</span>
+                  <input type="number" id="pl_pay_cheryl" value="12000" min="0" step="500">
+                </div>
+              </div>
+              <div class="pl-input-row">
+                <label>Claire (Senior Physio)</label>
+                <div class="pl-input-wrap">
+                  <span class="pl-prefix">$</span>
+                  <input type="number" id="pl_pay_claire" value="5000" min="0" step="500">
+                </div>
+              </div>
+              <div class="pl-input-row">
+                <label>Kristy (Senior Physio)</label>
+                <div class="pl-input-wrap">
+                  <span class="pl-prefix">$</span>
+                  <input type="number" id="pl_pay_kristy" value="5000" min="0" step="500">
+                </div>
+              </div>
+              <div class="pl-input-row">
+                <label>Chris (Director)</label>
+                <div class="pl-input-wrap">
+                  <span class="pl-prefix">$</span>
+                  <input type="number" id="pl_pay_chris" value="6000" min="0" step="500">
+                </div>
+              </div>
+              <div class="pl-total-line">
+                <span>Payroll subtotal</span>
+                <span id="pl_payroll_subtotal">$28,000</span>
+              </div>
+            </div>
+
+            <!-- Commission structure -->
+            <div class="pl-input-group">
+              <div class="pl-input-group-title">Commission structure <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:10px;">(Claire &amp; Kristy · calculated from live 30d revenue)</span></div>
+              <div class="pl-input-row">
+                <label>Revenue threshold</label>
+                <div class="pl-input-wrap">
+                  <span class="pl-prefix">$</span>
+                  <input type="number" id="pl_comm_quota" value="13000" min="0" step="500">
+                </div>
+              </div>
+              <div class="pl-input-row">
+                <label>Commission rate (above threshold)</label>
+                <div class="pl-input-wrap">
+                  <input type="number" id="pl_comm_rate" value="40" min="0" max="100" step="1" class="no-prefix">
+                  <span class="pl-suffix">%</span>
+                </div>
+              </div>
+              <div class="pl-total-line">
+                <span>Commission this period</span>
+                <span id="pl_commission_subtotal">$0</span>
+              </div>
+            </div>
+
+            <!-- Employer CPF -->
+            <div class="pl-input-group">
+              <div class="pl-input-group-title">Employer CPF <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:10px;">(Singapore — applies to salary + commission)</span></div>
+              <div class="pl-input-row">
+                <label>Employer CPF rate</label>
+                <div class="pl-input-wrap">
+                  <input type="number" id="pl_cpf_rate" value="17" min="0" max="20" step="0.5" class="no-prefix">
+                  <span class="pl-suffix">%</span>
+                </div>
+              </div>
+              <div class="pl-input-row">
+                <label>Ordinary Wage ceiling</label>
+                <div class="pl-input-wrap">
+                  <span class="pl-prefix">$</span>
+                  <input type="number" id="pl_cpf_ceiling" value="8000" min="0" step="100">
+                </div>
+              </div>
+              <div class="pl-total-line">
+                <span>Employer CPF this period</span>
+                <span id="pl_cpf_subtotal">—</span>
+              </div>
+            </div>
+
+            <!-- Operating expenses -->
+            <div class="pl-input-group">
+              <div class="pl-input-group-title">Monthly operating expenses</div>
+              <div class="pl-input-row">
+                <label>Rent (Y1)</label>
+                <div class="pl-input-wrap">
+                  <span class="pl-prefix">$</span>
+                  <input type="number" id="pl_opex_rent" value="9723" min="0" step="100">
+                </div>
+              </div>
+              <div class="pl-input-row">
+                <label>Utilities</label>
+                <div class="pl-input-wrap">
+                  <span class="pl-prefix">$</span>
+                  <input type="number" id="pl_opex_util" value="1000" min="0" step="50">
+                </div>
+              </div>
+              <div class="pl-input-row">
+                <label>Marketing</label>
+                <div class="pl-input-wrap">
+                  <span class="pl-prefix">$</span>
+                  <input type="number" id="pl_opex_mktg" value="200" min="0" step="50">
+                </div>
+              </div>
+              <div class="pl-input-row">
+                <label>Consumables</label>
+                <div class="pl-input-wrap">
+                  <span class="pl-prefix">$</span>
+                  <input type="number" id="pl_opex_cons" value="1000" min="0" step="50">
+                </div>
+              </div>
+              <div class="pl-input-row">
+                <label>Software, admin &amp; other</label>
+                <div class="pl-input-wrap">
+                  <span class="pl-prefix">$</span>
+                  <input type="number" id="pl_opex_other" value="826" min="0" step="50">
+                </div>
+              </div>
+              <div class="pl-total-line">
+                <span>Opex subtotal</span>
+                <span id="pl_opex_subtotal">$12,749</span>
+              </div>
+            </div>
+
+            <!-- Amortization -->
+            <div class="pl-input-group" id="pl_capex_group">
+              <div class="pl-input-group-title">Amortization <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:10px;">(Full P&L view only)</span></div>
+              <div class="pl-input-row">
+                <label>Total one-time capex</label>
+                <div class="pl-input-wrap">
+                  <span class="pl-prefix">$</span>
+                  <input type="number" id="pl_capex_total" value="181500" min="0" step="1000">
+                </div>
+              </div>
+              <div class="pl-input-row">
+                <label>Amortize over</label>
+                <div class="pl-input-wrap">
+                  <input type="number" id="pl_amort_months" value="24" min="1" step="1" class="no-prefix">
+                  <span class="pl-suffix">mo</span>
+                </div>
+              </div>
+              <div class="pl-total-line">
+                <span>Monthly amortization</span>
+                <span id="pl_amort_subtotal">$7,563</span>
+              </div>
+            </div>
+
+          </div><!-- /.pl-inputs-panel -->
+        </div>
+
+      </div><!-- /.pl-grid -->
+    </section>
+    <!-- ===== End P&L Section ===== -->
+
+    </div><!-- /#page-pl -->
+
+    <div id="page-commission" class="page" hidden>
+
+      <div class="brand-print">
+        <div class="brand-dot"></div>
+        <div class="brand-name">Goji Health - Commission Summary</div>
+      </div>
+
+      <div class="calc-grid">
+        <div class="calc-card">
+          <h2>Commission calculator</h2>
+          <div class="subtitle">Select a clinician and adjust the inputs. Revenue is prefilled from BigQuery (last 30 days) but editable for month-one validation.</div>
+
+          <div class="form-row">
+            <label for="calc_clinician">Clinician</label>
+            <select id="calc_clinician"></select>
+          </div>
+
+          <div class="form-row">
+            <label for="calc_period">Pay period</label>
+            <select id="calc_period">
+              <option value="cycle" selected>26th to 25th of month</option>
+              <option value="custom">Custom start and end</option>
+            </select>
+            <div class="hint" id="period_dates">-</div>
+          </div>
+
+          <div class="form-row" id="custom_dates_row" hidden>
+            <label>Custom pay period</label>
+            <div style="display:flex; gap:8px;">
+              <input type="date" id="calc_start">
+              <input type="date" id="calc_end">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <label for="calc_base">Base pay (monthly)</label>
+            <div class="input-prefix">
+              <span class="prefix">$</span>
+              <input type="number" id="calc_base" min="0" step="100" value="5000">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <label for="calc_quota">Quota / commission threshold</label>
+            <div class="input-prefix">
+              <span class="prefix">$</span>
+              <input type="number" id="calc_quota" min="0" step="100" value="13000">
+            </div>
+            <div class="hint">Commission applies only to revenue above this figure.</div>
+          </div>
+
+          <div class="form-row">
+            <label for="calc_pct">Commission %</label>
+            <div class="input-suffix">
+              <input type="number" id="calc_pct" min="0" max="100" step="0.5" value="40">
+              <span class="suffix">%</span>
+            </div>
+            <div class="hint">Applied to revenue above the quota.</div>
+          </div>
+
+          <div class="form-row">
+            <label for="calc_revenue">
+              Actual revenue
+              <span id="prefillFlag" class="prefill-flag">Prefilled</span>
+            </label>
+            <div class="input-prefix">
+              <span class="prefix">$</span>
+              <input type="number" id="calc_revenue" min="0" step="50" value="0">
+            </div>
+            <div class="hint" id="revenue_source">Source: BigQuery, last 30 days.</div>
+          </div>
+
+          <div class="calc-actions">
+            <button type="button" class="btn" id="calc_reset">Reset to defaults</button>
+            <button type="button" class="btn primary" id="calc_download">Download PDF</button>
+          </div>
+        </div>
+
+        <div class="report-card" id="report_card">
+          <h2 id="report_title">Commission summary</h2>
+          <div class="report-meta" id="report_meta">Select a clinician to begin.</div>
+
+          <div class="summary-rows">
+            <div class="summary-row">
+              <span class="label">Base pay</span>
+              <span class="value" id="r_base">$0</span>
+            </div>
+            <div class="summary-row">
+              <span class="label">Actual revenue (pay period)</span>
+              <span class="value" id="r_revenue">$0</span>
+            </div>
+            <div class="summary-row subtle">
+              <span class="label">Commission threshold</span>
+              <span class="value" id="r_quota">$0</span>
+            </div>
+            <div class="summary-row subtle">
+              <span class="label">Revenue above threshold</span>
+              <span class="value" id="r_excess">$0</span>
+            </div>
+            <div class="summary-row subtle">
+              <span class="label">Commission rate</span>
+              <span class="value" id="r_pct">0%</span>
+            </div>
+            <div class="summary-row commission">
+              <span class="label">Commission earned</span>
+              <span class="value" id="r_commission">$0</span>
+            </div>
+            <div class="summary-row total">
+              <span class="label">Total payout</span>
+              <span class="value" id="r_total">$0</span>
+            </div>
+          </div>
+
+          <div class="commission-breakdown">
+            <strong>How this was calculated:</strong>
+            <div id="r_formula">commission = max(0, revenue - quota) * commission_pct</div>
+          </div>
+
+          <div class="appointments-block">
+            <h3 class="appointments-title">Appointment breakdown</h3>
+            <div class="appointments-meta" id="appointments_meta">-</div>
+            <table class="appointments-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Patient</th>
+                  <th>Service</th>
+                  <th class="num">Value</th>
+                </tr>
+              </thead>
+              <tbody id="appointments_tbody"></tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="3" style="text-align:right; font-weight:600;">Total</td>
+                  <td class="num" id="appointments_total" style="font-weight:600;">$0</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /#page-commission -->
+
   </div>
 
   <script id="dashboardData" type="application/json">__DATA_PLACEHOLDER__</script>
@@ -441,7 +1148,23 @@
     }[c]));
 
     let clinicianChart, mixRevenueChart, mixVisitsChart;
-    let activePatientsChart, visitsChart, bookingsChart, recognisedChart;
+    let visitsChart, avgVisitsChart, bookingsVsRecognisedChart;
+
+    // Parse a label like "18 May" or "4 May" into a day-of-week prefix, e.g. "Mon, 18 May"
+    const MONTHS_IDX = {Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+    const DOW = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    function labelWithDow(label) {
+      const parts = label.trim().split(/\s+/);
+      if (parts.length === 2) {
+        const day = parseInt(parts[0], 10);
+        const mon = MONTHS_IDX[parts[1]];
+        if (!isNaN(day) && mon !== undefined) {
+          const d = new Date(2026, mon, day);
+          if (!isNaN(d)) return DOW[d.getDay()] + ', ' + label;
+        }
+      }
+      return label;
+    }
 
     function renderTrendChart(existing, canvasId, series, color, isCurrency) {
       const labels = series.map(s => s.label);
@@ -478,6 +1201,7 @@
             tooltip: {
               mode: 'index', intersect: false,
               callbacks: {
+                title: items => items.length ? labelWithDow(items[0].label) : '',
                 label: ctx => isCurrency
                   ? '$' + Math.round(ctx.parsed.y).toLocaleString()
                   : ctx.parsed.y
@@ -495,12 +1219,124 @@
       });
     }
 
+    function renderAvgVisitsChart(t) {
+      if (!t) return;
+      const visitsMap = {};
+      (t.visits || []).forEach(s => { visitsMap[s.label] = s.value; });
+      const series = (t.active_patients || []).map(s => ({
+        label: s.label,
+        value: s.value > 0
+          ? Math.round((visitsMap[s.label] || 0) / s.value * 10) / 10
+          : null
+      }));
+      avgVisitsChart = renderTrendChart(avgVisitsChart, 'avgVisitsChart', series, SAGE, false);
+    }
+
+    function renderBookingsVsRecognised(t) {
+      if (!t) return;
+
+      // Build a map for each series, then take the union of dates sorted chronologically
+      const bookingsMap = {}, recognisedMap = {};
+      (t.bookings   || []).forEach(s => { bookingsMap[s.label]   = s.value || 0; });
+      (t.recognised || []).forEach(s => { recognisedMap[s.label] = s.value || 0; });
+
+      function parseLabelMs(l) {
+        const parts = l.trim().split(/\s+/);
+        return new Date(2026, MONTHS_IDX[parts[1]], parseInt(parts[0], 10)).getTime();
+      }
+
+      const allLabels = [...new Set([
+        ...(t.bookings   || []).map(s => s.label),
+        ...(t.recognised || []).map(s => s.label)
+      ])].sort((a, b) => parseLabelMs(a) - parseLabelMs(b));
+
+      // Compute cumulative running totals
+      let cumB = 0, cumR = 0;
+      const labels = [], cumBookings = [], cumRecognised = [];
+      allLabels.forEach(lbl => {
+        cumB += bookingsMap[lbl]   || 0;
+        cumR += recognisedMap[lbl] || 0;
+        labels.push(lbl);
+        cumBookings.push(Math.round(cumB));
+        cumRecognised.push(Math.round(cumR));
+      });
+
+      if (bookingsVsRecognisedChart) {
+        bookingsVsRecognisedChart.data.labels           = labels;
+        bookingsVsRecognisedChart.data.datasets[0].data = cumBookings;
+        bookingsVsRecognisedChart.data.datasets[1].data = cumRecognised;
+        bookingsVsRecognisedChart.update();
+      } else {
+        bookingsVsRecognisedChart = new Chart(
+          document.getElementById('bookingsVsRecognisedChart'), {
+          type: 'line',
+          data: {
+            labels,
+            datasets: [
+              {
+                label: 'Cumulative bookings',
+                data: cumBookings,
+                borderColor: GOJI,
+                backgroundColor: GOJI + '28',
+                fill: { target: '+1', above: GOJI + '28', below: 'transparent' },
+                tension: 0.3,
+                pointRadius: labels.length <= 14 ? 3 : 2,
+                pointHoverRadius: 5,
+                pointBackgroundColor: GOJI,
+                borderWidth: 2.5
+              },
+              {
+                label: 'Cumulative recognised',
+                data: cumRecognised,
+                borderColor: GOLD,
+                backgroundColor: GOLD + '22',
+                fill: { target: 'origin', above: GOLD + '22', below: 'transparent' },
+                tension: 0.3,
+                pointRadius: labels.length <= 14 ? 3 : 2,
+                pointHoverRadius: 5,
+                pointBackgroundColor: GOLD,
+                borderWidth: 2.5
+              }
+            ]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+              legend: { position: 'bottom' },
+              tooltip: {
+                mode: 'index', intersect: false,
+                callbacks: {
+                  title: items => items.length ? labelWithDow(items[0].label) : '',
+                  label: ctx =>
+                    ctx.dataset.label + ': $' + ctx.parsed.y.toLocaleString(),
+                  afterBody: items => {
+                    const b = items[0]?.parsed.y || 0;
+                    const r = items[1]?.parsed.y || 0;
+                    const gap = b - r;
+                    return gap > 1
+                      ? ['↳ Deferred outstanding: $' + Math.round(gap).toLocaleString()]
+                      : [];
+                  }
+                }
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: { callback: v => '$' + Math.round(v).toLocaleString() }
+              },
+              x: { ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 10 } }
+            }
+          }
+        });
+      }
+    }
+
     function renderTrends(t) {
       if (!t) return;
-      activePatientsChart = renderTrendChart(activePatientsChart, 'activePatientsChart', t.active_patients, SAGE,   false);
-      visitsChart         = renderTrendChart(visitsChart,         'visitsChart',         t.visits,          COBALT, false);
-      bookingsChart       = renderTrendChart(bookingsChart,       'bookingsChart',       t.bookings,        GOJI,   true);
-      recognisedChart     = renderTrendChart(recognisedChart,     'recognisedChart',     t.recognised,      GOLD,   true);
+      visitsChart = renderTrendChart(visitsChart, 'visitsChart', t.visits, COBALT, false);
+      renderAvgVisitsChart(t);
+      renderBookingsVsRecognised(t);
     }
 
     function renderKpis(r) {
@@ -557,19 +1393,94 @@
     }
 
     function renderDiscounts(d) {
-      document.getElementById('discountTotal').textContent = fmt$(d.total);
+      // d shape: { total_true, promo_implicit, adhoc_nonpromo, pct_of_bookings,
+      //           promo_units_total, by_sku[], top_adhoc_items[] }
+      document.getElementById('discountTotal').textContent = fmt$(d.total_true);
       document.getElementById('discountPct').textContent   = fmtPct(d.pct_of_bookings);
-      const tbody = document.getElementById('discountTbody');
-      if (!d.top_items.length) {
-        tbody.innerHTML = '<tr><td colspan="3" class="empty">No discounts in this period.</td></tr>';
+
+      const skuBody  = document.getElementById('promoBySkuTbody');
+      const skuFoot  = document.getElementById('promoBySkuTfoot');
+      if (!d.by_sku || !d.by_sku.length) {
+        skuBody.innerHTML = '<tr><td colspan="6" class="empty">No opening-promo sales in this period.</td></tr>';
+        skuFoot.innerHTML = '';
       } else {
-        tbody.innerHTML = d.top_items.map(it => `
+        skuBody.innerHTML = d.by_sku.map(s => `
+          <tr>
+            <td>${escapeHtml(s.service)}</td>
+            <td>${s.pack === 1 ? 'single' : s.pack + '-pack'}</td>
+            <td class="num">${fmtInt(s.units)}</td>
+            <td class="num">${fmt$(s.usual_total)}</td>
+            <td class="num">${fmt$(s.sold_total)}</td>
+            <td class="num" style="color: var(--goji); font-weight: 500;">${fmt$(s.discount)}</td>
+          </tr>`).join('');
+        const totUnits = d.by_sku.reduce((a, s) => a + (s.units || 0), 0);
+        const totUsual = d.by_sku.reduce((a, s) => a + (s.usual_total || 0), 0);
+        const totSold  = d.by_sku.reduce((a, s) => a + (s.sold_total  || 0), 0);
+        skuFoot.innerHTML = `
+          <tr style="border-top: 2px solid var(--ink);">
+            <td colspan="2" style="padding-top: 10px; font-weight: 600;">Subtotal</td>
+            <td class="num" style="padding-top: 10px; font-weight: 600;">${fmtInt(totUnits)}</td>
+            <td class="num" style="padding-top: 10px; font-weight: 600;">${fmt$(totUsual)}</td>
+            <td class="num" style="padding-top: 10px; font-weight: 600;">${fmt$(totSold)}</td>
+            <td class="num" style="padding-top: 10px; font-weight: 600; color: var(--goji);">${fmt$(d.promo_implicit)}</td>
+          </tr>`;
+      }
+
+      const adhocBlock = document.getElementById('adhocBlock');
+      const adhocBody  = document.getElementById('discountTbody');
+      const adhocFoot  = document.getElementById('adhocTfoot');
+      if (d.top_adhoc_items && d.top_adhoc_items.length) {
+        adhocBlock.hidden = false;
+        adhocBody.innerHTML = d.top_adhoc_items.map(it => `
           <tr>
             <td>${escapeHtml(it.name)}</td>
-            <td class="num">${fmt$(it.discount)}</td>
             <td class="num">${fmtInt(it.times)}</td>
+            <td class="num">${fmt$(it.discount)}</td>
           </tr>`).join('');
+        const totTimes = d.top_adhoc_items.reduce((a, it) => a + (it.times || 0), 0);
+        adhocFoot.innerHTML = `
+          <tr style="border-top: 2px solid var(--ink);">
+            <td style="padding-top: 10px; font-weight: 600;">Subtotal</td>
+            <td class="num" style="padding-top: 10px; font-weight: 600;">${fmtInt(totTimes)}</td>
+            <td class="num" style="padding-top: 10px; font-weight: 600; color: var(--goji);">${fmt$(d.adhoc_nonpromo)}</td>
+          </tr>`;
+      } else {
+        adhocBlock.hidden = true;
       }
+    }
+
+    function doughnutOpts(pos) {
+      return {
+        responsive: true, maintainAspectRatio: false, cutout: '60%',
+        plugins: {
+          legend: {
+            position: pos,
+            labels: {
+              generateLabels(chart) {
+                const ds = chart.data.datasets[0];
+                const total = ds.data.reduce((a, v) => a + (v || 0), 0);
+                return chart.data.labels.map((lbl, i) => ({
+                  text: `${lbl} (${total > 0 ? Math.round(ds.data[i] / total * 100) : 0}%)`,
+                  fillStyle: Array.isArray(ds.backgroundColor) ? ds.backgroundColor[i] : ds.backgroundColor,
+                  strokeStyle: '#fff',
+                  lineWidth: 1,
+                  hidden: false,
+                  index: i
+                }));
+              }
+            }
+          },
+          tooltip: {
+            callbacks: {
+              label(ctx) {
+                const total = ctx.chart.data.datasets[0].data.reduce((a, v) => a + (v || 0), 0);
+                const pct = total > 0 ? Math.round(ctx.parsed / total * 100) : 0;
+                return ` ${ctx.label}: ${pct}%`;
+              }
+            }
+          }
+        }
+      };
     }
 
     function renderMix(rows) {
@@ -587,7 +1498,7 @@
         mixRevenueChart = new Chart(document.getElementById('mixRevenue'), {
           type: 'doughnut',
           data: { labels, datasets: [{ data: revenue, backgroundColor: colors, borderWidth: 1, borderColor: '#fff' }] },
-          options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { position: 'right' } } }
+          options: doughnutOpts('right')
         });
       }
       if (mixVisitsChart) {
@@ -599,25 +1510,11 @@
         mixVisitsChart = new Chart(document.getElementById('mixVisits'), {
           type: 'doughnut',
           data: { labels, datasets: [{ data: visits, backgroundColor: colors, borderWidth: 1, borderColor: '#fff' }] },
-          options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { position: 'right' } } }
+          options: doughnutOpts('right')
         });
       }
     }
 
-    function renderCohorts() {
-      const tbody = document.getElementById('cohortTbody');
-      if (!DATA.cohorts.length) {
-        tbody.innerHTML = '<tr><td colspan="4" class="empty">No cohorts to display.</td></tr>';
-      } else {
-        tbody.innerHTML = DATA.cohorts.map(c => `
-          <tr>
-            <td>${escapeHtml(c.cohort)}</td>
-            <td class="num">${fmtInt(c.patients)}</td>
-            <td class="num">${fmt$(c.avg_ltv)}</td>
-            <td class="num">${fmtNum1(c.avg_visits)}</td>
-          </tr>`).join('');
-      }
-    }
 
     function renderSampleSections() {
       new Chart(document.getElementById('ageChart'), {
@@ -632,8 +1529,7 @@
         type: 'doughnut',
         data: { labels: ['Female','Male'],
                 datasets: [{ data: [62, 38], backgroundColor: [GOJI, COBALT], borderWidth: 1, borderColor: '#fff' }] },
-        options: { responsive: true, maintainAspectRatio: false, cutout: '65%',
-                   plugins: { legend: { position: 'bottom' } } }
+        options: doughnutOpts('bottom')
       });
       new Chart(document.getElementById('tagsChart'), {
         type: 'bar',
@@ -643,18 +1539,6 @@
                    plugins: { legend: { display: false } },
                    scales: { x: { beginAtZero: true } } }
       });
-      new Chart(document.getElementById('retentionChart'), {
-        type: 'line',
-        data: { labels: ['Visit 1','30d','60d','90d'],
-                datasets: [
-                  { label: 'Mar cohort', data: [100, 73, 55, 41],  borderColor: GOJI,  backgroundColor: 'transparent', tension: 0.25, pointBackgroundColor: GOJI },
-                  { label: 'Apr cohort', data: [100, 68, 49, null], borderColor: GOLD, backgroundColor: 'transparent', tension: 0.25, pointBackgroundColor: GOLD },
-                  { label: 'May cohort', data: [100, 51, null, null], borderColor: SAGE, backgroundColor: 'transparent', tension: 0.25, pointBackgroundColor: SAGE }
-                ] },
-        options: { responsive: true, maintainAspectRatio: false,
-                   plugins: { legend: { position: 'bottom' } },
-                   scales: { y: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%' } } } }
-      });
 
       const referralLabels = ['Google search', 'Doctor referral', 'Existing patient', 'Instagram', 'Insurance partner', 'Walk-in'];
       const referralData   = [18, 12, 9, 7, 5, 3];
@@ -663,8 +1547,7 @@
         type: 'doughnut',
         data: { labels: referralLabels,
                 datasets: [{ data: referralData, backgroundColor: referralColors, borderWidth: 1, borderColor: '#fff' }] },
-        options: { responsive: true, maintainAspectRatio: false, cutout: '60%',
-                   plugins: { legend: { position: 'right' } } }
+        options: doughnutOpts('right')
       });
     }
 
@@ -700,9 +1583,474 @@
       const stored = localStorage.getItem(STORAGE_KEY);
       const initial = (stored && DATA.ranges[stored]) ? stored : DATA.default_range;
       applyRange(initial);
-      renderCohorts();
       renderSampleSections();
+
+      initPL();
+      initPageNav();
+      initCommissionCalculator();
     }
+
+    /* ===== P&L Section ===== */
+    function initPL() {
+      let plView = 'cash';
+
+      // View toggle
+      document.querySelectorAll('[data-plview]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          plView = btn.dataset.plview;
+          document.querySelectorAll('[data-plview]').forEach(b =>
+            b.classList.toggle('active', b.dataset.plview === plView)
+          );
+          document.getElementById('pl_amort_row').hidden = (plView !== 'full');
+          renderPL();
+        });
+      });
+
+      // Toggle cost input panel open/closed
+      const toggleBtn = document.getElementById('pl_toggle_btn');
+      const panel     = document.getElementById('pl_inputs_panel');
+      toggleBtn.addEventListener('click', () => {
+        const isOpen = panel.classList.toggle('open');
+        toggleBtn.classList.toggle('open', isOpen);
+      });
+
+      // Live-recalculate on any input change
+      document.querySelectorAll('#pl_inputs_panel input').forEach(input =>
+        input.addEventListener('input', renderPL)
+      );
+
+      renderPL();
+
+      // ---- helpers ----
+      function numVal(id) {
+        return parseFloat(document.getElementById(id).value) || 0;
+      }
+
+      function getBaseSalaries() {
+        return numVal('pl_pay_cheryl') + numVal('pl_pay_claire') +
+               numVal('pl_pay_kristy') + numVal('pl_pay_chris');
+      }
+
+      // Commission: Claire (PCN) and Kristy (PKN) earn rate% on recognised
+      // revenue above quota, sourced live from the 30d range.
+      function getCommission() {
+        const r30       = DATA.ranges['30d'];
+        const clinicians = r30 ? (r30.clinicians || []) : [];
+        const quota     = numVal('pl_comm_quota');
+        const rate      = numVal('pl_comm_rate') / 100;
+        let total = 0;
+        clinicians.forEach(c => {
+          // Only non-directors earn commission
+          if (!c.is_director) {
+            total += Math.max(0, (c.recognised || 0) - quota) * rate;
+          }
+        });
+        return total;
+      }
+
+      // Employer CPF: 17% on min(salary, OW_ceiling) + 17% on commission (AW)
+      // Applied per person so the OW cap is respected individually.
+      function getCPF(commission) {
+        const rate    = numVal('pl_cpf_rate') / 100;
+        const ceiling = numVal('pl_cpf_ceiling');
+
+        const salaries = [
+          numVal('pl_pay_cheryl'),  // PCL — no commission
+          numVal('pl_pay_claire'),  // PCN — may earn commission
+          numVal('pl_pay_kristy'), // PKN — may earn commission
+          numVal('pl_pay_chris')   // no commission
+        ];
+
+        // Split commission between the two commission-eligible clinicians
+        const r30        = DATA.ranges['30d'];
+        const clinicians = r30 ? (r30.clinicians || []) : [];
+        const quota      = numVal('pl_comm_quota');
+        const commRate   = numVal('pl_comm_rate') / 100;
+        const commByClinician = { PCN: 0, PKN: 0 };
+        clinicians.forEach(c => {
+          if (c.clinician_id === 'PCN' || c.clinician_id === 'PKN') {
+            commByClinician[c.clinician_id] =
+              Math.max(0, (c.recognised || 0) - quota) * commRate;
+          }
+        });
+        const commPerPerson = [
+          0,                            // Cheryl
+          commByClinician['PCN'] || 0, // Claire
+          commByClinician['PKN'] || 0, // Kristy
+          0                             // Chris
+        ];
+
+        let totalCPF = 0;
+        salaries.forEach((sal, i) => {
+          const owSubject = Math.min(sal, ceiling);   // OW capped at ceiling
+          const awSubject = commPerPerson[i];           // commission = Additional Wages
+          totalCPF += rate * (owSubject + awSubject);
+        });
+        return totalCPF;
+      }
+
+      function getOpex() {
+        return numVal('pl_opex_rent')  + numVal('pl_opex_util') +
+               numVal('pl_opex_mktg') + numVal('pl_opex_cons') +
+               numVal('pl_opex_other');
+      }
+
+      // Returns exact payment processing fee from JSON data, or null if not yet available.
+      // Fee structure: Plato Terminal = 2.1% of amount + $0.20 per transaction.
+      function getPmtFee() {
+        const methods = (DATA.payment_by_method || []);
+        const plato = methods.find(m => m.method === 'platopay');
+        if (!plato) return null;
+        return plato.total_amount * 0.021 + plato.txn_count * 0.20;
+      }
+
+      let opexExpanded = true;
+      function toggleOpexDetail() {
+        opexExpanded = !opexExpanded;
+        document.getElementById('pl_pmtfee_subrow').style.display = opexExpanded ? '' : 'none';
+        const chevron = document.getElementById('pl_opex_chevron');
+        chevron.classList.toggle('open', opexExpanded);
+      }
+
+      function getAmort() {
+        const capex  = numVal('pl_capex_total');
+        const months = numVal('pl_amort_months') || 24;
+        return capex / months;
+      }
+
+      function renderPL() {
+        const baseSalaries = getBaseSalaries();
+        const commission   = getCommission();
+        const cpf          = getCPF(commission);
+        const opex         = getOpex();
+        const amort        = (plView === 'full') ? getAmort() : 0;
+        const pmtFee       = getPmtFee();
+        const costs        = baseSalaries + commission + cpf + opex + amort + (pmtFee || 0);
+
+        // Always use 30d recognised revenue — matches monthly cost base
+        const r30     = DATA.ranges['30d'];
+        const revenue = r30 ? (r30.kpis.recognised || 0) : 0;
+        const profit  = revenue - costs;
+
+        // Update P&L rows (payroll lumped)
+        const totalPayroll = baseSalaries + commission + cpf;
+        document.getElementById('pl_revenue').textContent           = fmt$(revenue);
+        document.getElementById('pl_payroll_total_val').textContent = '(' + fmt$(totalPayroll) + ')';
+        document.getElementById('pl_opex_val').textContent          = '(' + fmt$(opex)         + ')';
+        document.getElementById('pl_amort_val').textContent         = '(' + fmt$(amort)        + ')';
+        document.getElementById('pl_costs_total').textContent       = '(' + fmt$(costs)        + ')';
+
+        // Payment processing sub-row
+        const pmtFeeEl = document.getElementById('pl_pmtfee_val');
+        if (pmtFee !== null) {
+          pmtFeeEl.textContent = '(' + fmt$(pmtFee) + ')';
+          pmtFeeEl.style.color = '';
+        } else {
+          pmtFeeEl.textContent = 'Awaiting data';
+          pmtFeeEl.style.color = 'var(--ink-muted)';
+        }
+
+        const resultEl  = document.getElementById('pl_result_val');
+        const resultRow = document.getElementById('pl_result_row');
+        if (profit >= 0) {
+          resultEl.textContent = fmt$(profit);
+          resultRow.classList.add('pl-positive');
+          resultRow.classList.remove('pl-negative');
+        } else {
+          resultEl.textContent = '(' + fmt$(Math.abs(profit)) + ')';
+          resultRow.classList.add('pl-negative');
+          resultRow.classList.remove('pl-positive');
+        }
+
+        // Update subtotals in the input panel
+        document.getElementById('pl_payroll_subtotal').textContent    = fmt$(baseSalaries);
+        document.getElementById('pl_commission_subtotal').textContent = fmt$(commission);
+        document.getElementById('pl_cpf_subtotal').textContent        = fmt$(cpf);
+        document.getElementById('pl_opex_subtotal').textContent       = fmt$(opex);
+        document.getElementById('pl_amort_subtotal').textContent      = fmt$(getAmort());
+
+        // Break-even bar
+        const rawPct   = costs > 0 ? (revenue / costs) * 100 : 0;
+        const clampPct = Math.min(rawPct, 100);
+        const fillEl   = document.getElementById('pl_progress_fill');
+        fillEl.style.width = clampPct.toFixed(1) + '%';
+        fillEl.classList.toggle('at-target', profit >= 0);
+        document.getElementById('pl_be_pct').textContent = rawPct.toFixed(0) + '%';
+
+        const subEl = document.getElementById('pl_be_sub');
+        const profitTrack = document.getElementById('pl_profit_track_wrap');
+
+        if (profit >= 0) {
+          subEl.textContent = 'Break-even achieved — surplus of ' + fmt$(profit) + ' this period.';
+          // Show profit margin bar
+          const margin = revenue > 0 ? (profit / revenue) * 100 : 0;
+          profitTrack.hidden = false;
+          document.getElementById('pl_margin_pct').textContent = margin.toFixed(1) + '%';
+          document.getElementById('pl_margin_fill').style.width =
+            Math.min(margin * 3, 100).toFixed(1) + '%'; // scale: 33% margin = full bar
+        } else {
+          const gap = Math.abs(profit);
+          const revenuePerDay = revenue > 0 ? revenue / 30 : 1;
+          subEl.textContent =
+            'Need ' + fmt$(gap) + ' more per month to break even — ' +
+            'roughly ' + Math.round(gap / revenuePerDay) + ' more patient-days at current avg revenue.';
+          profitTrack.hidden = true;
+        }
+      }
+    }
+
+    /* ===== Page nav ===== */
+    function initPageNav() {
+      document.querySelectorAll('.page-nav button').forEach(btn => {
+        btn.addEventListener('click', () => switchPage(btn.dataset.page));
+      });
+    }
+    function switchPage(page) {
+      document.querySelectorAll('.page-nav button').forEach(b => {
+        b.classList.toggle('active', b.dataset.page === page);
+      });
+      document.getElementById('page-dashboard').hidden  = (page !== 'dashboard');
+      document.getElementById('page-pl').hidden         = (page !== 'pl');
+      document.getElementById('page-commission').hidden = (page !== 'commission');
+    }
+
+    /* ===== Commission calculator ===== */
+    // Per-clinician defaults (revised 2026-05-24 per Chris):
+    //   Cheryl (director): $12k base, $0 commission threshold, 40% on all revenue
+    //   Two physio clinicians: $5k base, commission above $13k at 40%
+    const CLINICIAN_DEFAULTS = {
+      'PCL': { base: 12000, quota: 0,     pct: 0,  isDirector: true  },
+      'PKN': { base: 5000,  quota: 13000, pct: 40, isDirector: false },
+      'PCN': { base: 5000,  quota: 13000, pct: 40, isDirector: false }
+    };
+    const FALLBACK_DEFAULT = { base: 5000, quota: 13000, pct: 40, isDirector: false };
+
+    function getClinicianRoster() {
+      // Union across all ranges, keep most-recent (30d preferred) revenue for prefill
+      const map = new Map();
+      Object.entries(DATA.ranges).forEach(([rangeKey, r]) => {
+        (r.clinicians || []).forEach(c => {
+          const cur = map.get(c.clinician_id) || { ...c, revenueByRange: {} };
+          cur.revenueByRange[rangeKey] = c.recognised;
+          cur.name = c.name; cur.is_director = c.is_director;
+          map.set(c.clinician_id, cur);
+        });
+      });
+      return Array.from(map.values());
+    }
+
+    /* Pay cycle runs 26th of prev month through 25th of current month.
+       If today is the 26th or later, the cycle is current-month-26 -> next-25.
+       If today is the 25th or earlier, the cycle is prev-month-26 -> this-month-25. */
+    function currentPayCycle(today) {
+      today = today || new Date(DATA.generated_at);
+      const y = today.getFullYear(), m = today.getMonth(), d = today.getDate();
+      let start, end;
+      if (d >= 26) {
+        start = new Date(y, m, 26);
+        end   = new Date(y, m + 1, 25);
+      } else {
+        start = new Date(y, m - 1, 26);
+        end   = new Date(y, m, 25);
+      }
+      return { start, end };
+    }
+    function ymd(date) {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+    function fmtDateRange(start, end) {
+      const opts = { month: 'short', day: 'numeric' };
+      const sameYear = start.getFullYear() === end.getFullYear();
+      const startStr = start.toLocaleDateString(undefined, opts);
+      const endStr   = end.toLocaleDateString(undefined, sameYear ? opts : { month:'short', day:'numeric', year:'numeric' });
+      return `${startStr} - ${endStr}, ${end.getFullYear()}`;
+    }
+
+    function getSelectedPeriod() {
+      const mode = document.getElementById('calc_period').value;
+      if (mode === 'cycle') return currentPayCycle();
+      const s = document.getElementById('calc_start').value;
+      const e = document.getElementById('calc_end').value;
+      if (!s || !e) return currentPayCycle();
+      // Parse as local dates to avoid TZ off-by-one
+      const [sy, sm, sd] = s.split('-').map(Number);
+      const [ey, em, ed] = e.split('-').map(Number);
+      return { start: new Date(sy, sm-1, sd), end: new Date(ey, em-1, ed) };
+    }
+
+    function getAppointmentsForPeriod(clinicianId, start, end) {
+      const all = (DATA.appointments || []).filter(a => a.clinician_id === clinicianId);
+      const startKey = ymd(start), endKey = ymd(end);
+      return all.filter(a => a.date >= startKey && a.date <= endKey)
+                .sort((a, b) => a.date.localeCompare(b.date));
+    }
+
+    function getRevenueForPeriod(clinicianId, start, end) {
+      return getAppointmentsForPeriod(clinicianId, start, end)
+              .reduce((sum, a) => sum + (a.value || 0), 0);
+    }
+
+    function initCommissionCalculator() {
+      const roster = getClinicianRoster();
+      const sel = document.getElementById('calc_clinician');
+      sel.innerHTML = roster.map(c =>
+        `<option value="${c.clinician_id}">${escapeHtml(c.name)} (${escapeHtml(c.clinician_id)})${c.is_director ? ' - Director' : ''}</option>`
+      ).join('');
+
+      // Wire change handlers - all input changes trigger live recalculation
+      ['calc_clinician','calc_period','calc_base','calc_quota','calc_pct','calc_revenue']
+        .forEach(id => {
+          const el = document.getElementById(id);
+          el.addEventListener('input', onCalcInputChange);
+          el.addEventListener('change', onCalcInputChange);
+        });
+
+      document.getElementById('calc_clinician').addEventListener('change', () => {
+        applyClinicianDefaults();
+        prefillRevenue();
+        recalculate();
+      });
+      document.getElementById('calc_period').addEventListener('change', () => {
+        toggleCustomDates();
+        prefillRevenue();
+        recalculate();
+      });
+      ['calc_start','calc_end'].forEach(id => {
+        document.getElementById(id).addEventListener('change', () => {
+          prefillRevenue();
+          recalculate();
+        });
+      });
+      document.getElementById('calc_revenue').addEventListener('input', flagRevenueEdited);
+
+      document.getElementById('calc_reset').addEventListener('click', () => {
+        document.getElementById('calc_period').value = 'cycle';
+        toggleCustomDates();
+        applyClinicianDefaults();
+        prefillRevenue();
+        recalculate();
+      });
+      document.getElementById('calc_download').addEventListener('click', () => window.print());
+
+      // Initialise custom date inputs to the current cycle (so they're sensible if user switches)
+      const c = currentPayCycle();
+      document.getElementById('calc_start').value = ymd(c.start);
+      document.getElementById('calc_end').value   = ymd(c.end);
+
+      toggleCustomDates();
+      applyClinicianDefaults();
+      prefillRevenue();
+      recalculate();
+    }
+
+    function toggleCustomDates() {
+      const mode = document.getElementById('calc_period').value;
+      document.getElementById('custom_dates_row').hidden = (mode !== 'custom');
+    }
+
+    function applyClinicianDefaults() {
+      const id = document.getElementById('calc_clinician').value;
+      const d = CLINICIAN_DEFAULTS[id] || FALLBACK_DEFAULT;
+      document.getElementById('calc_base').value = d.base;
+      document.getElementById('calc_quota').value = d.quota;
+      document.getElementById('calc_pct').value = d.pct;
+    }
+
+    function prefillRevenue() {
+      const id = document.getElementById('calc_clinician').value;
+      const { start, end } = getSelectedPeriod();
+      const rev = getRevenueForPeriod(id, start, end);
+      document.getElementById('calc_revenue').value = Math.round(rev * 100) / 100;
+      const flag = document.getElementById('prefillFlag');
+      flag.textContent = 'Prefilled';
+      flag.classList.remove('edited');
+      document.getElementById('period_dates').textContent = fmtDateRange(start, end);
+      document.getElementById('revenue_source').textContent =
+        `Source: appointment ledger, ${fmtDateRange(start, end)}.`;
+    }
+
+    function flagRevenueEdited() {
+      const flag = document.getElementById('prefillFlag');
+      flag.textContent = 'Edited';
+      flag.classList.add('edited');
+    }
+
+    function onCalcInputChange() {
+      recalculate();
+    }
+
+    function recalculate() {
+      const sel = document.getElementById('calc_clinician');
+      const opt = sel.options[sel.selectedIndex];
+      const clinicianLabel = opt ? opt.textContent : '';
+
+      const base    = num(document.getElementById('calc_base').value);
+      const quota   = num(document.getElementById('calc_quota').value);
+      const pct     = num(document.getElementById('calc_pct').value);
+      const revenue = num(document.getElementById('calc_revenue').value);
+
+      const excess     = Math.max(0, revenue - quota);
+      const commission = excess * (pct / 100);
+      const total      = base + commission;
+
+      const periodLabel = document.getElementById('calc_period').selectedOptions[0].textContent;
+      document.getElementById('report_title').textContent = `Commission summary - ${clinicianLabel}`;
+      document.getElementById('report_meta').textContent  =
+        `Pay period: ${periodLabel} | Generated ${new Date().toLocaleString()}`;
+
+      document.getElementById('r_base').textContent       = fmt$(base);
+      document.getElementById('r_revenue').textContent    = fmt$(revenue);
+      document.getElementById('r_quota').textContent      = fmt$(quota);
+      document.getElementById('r_excess').textContent     = fmt$(excess);
+      document.getElementById('r_pct').textContent        = pct + '%';
+      document.getElementById('r_commission').textContent = fmt$(commission);
+      document.getElementById('r_total').textContent      = fmt$(total);
+
+      document.getElementById('r_formula').innerHTML =
+        `commission = max(0, <code>${fmt$(revenue)}</code> - <code>${fmt$(quota)}</code>) &times; <code>${pct}%</code> = <code>${fmt$(commission)}</code><br>` +
+        `total payout = <code>${fmt$(base)}</code> + <code>${fmt$(commission)}</code> = <code>${fmt$(total)}</code>`;
+
+      renderAppointments(sel.value);
+    }
+
+    function renderAppointments(clinicianId) {
+      const { start, end } = getSelectedPeriod();
+      const rows = getAppointmentsForPeriod(clinicianId, start, end);
+      const tbody = document.getElementById('appointments_tbody');
+      const meta = document.getElementById('appointments_meta');
+      const totalEl = document.getElementById('appointments_total');
+
+      meta.textContent = `${rows.length} appointment${rows.length === 1 ? '' : 's'} | ${fmtDateRange(start, end)}`;
+
+      if (!rows.length) {
+        tbody.innerHTML = `<tr><td colspan="4" class="appointments-empty">No appointments recorded in this period.</td></tr>`;
+        totalEl.textContent = fmt$(0);
+        return;
+      }
+
+      tbody.innerHTML = rows.map(a => `
+        <tr>
+          <td>${escapeHtml(formatApptDate(a.date))}</td>
+          <td>${escapeHtml(a.patient)}</td>
+          <td>${escapeHtml(a.service)}</td>
+          <td class="num">${fmt$(a.value)}</td>
+        </tr>
+      `).join('');
+
+      const total = rows.reduce((s, a) => s + (a.value || 0), 0);
+      totalEl.textContent = fmt$(total);
+    }
+
+    function formatApptDate(ymdStr) {
+      const [y, m, d] = ymdStr.split('-').map(Number);
+      return new Date(y, m - 1, d).toLocaleDateString(undefined,
+        { weekday: 'short', month: 'short', day: 'numeric' });
+    }
+
+    function num(v) { const n = parseFloat(v); return isFinite(n) ? n : 0; }
 
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', init);
