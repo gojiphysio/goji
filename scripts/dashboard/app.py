@@ -69,7 +69,7 @@ log = logging.getLogger("dashboard")
 
 app = Flask(__name__)
 
-_cache: dict[str, tuple[float, str]] = {}
+_cache: dict[str, tuple[float, dict]] = {}
 _cache_lock = threading.Lock()
 _bq_client: bigquery.Client | None = None
 
@@ -515,21 +515,34 @@ def build_payload() -> dict:
     }
 
 
-def get_rendered_html() -> str:
-    """Return the dashboard HTML, using cache if fresh."""
+def get_payload() -> dict:
+    """Return the dashboard JSON payload, using cache if fresh.
+
+    The shell HTML is served immediately on `/` without touching BQ; the
+    browser then fetches this via `/api/data`. Splitting the two phases lets
+    the user see a loading state from the first byte instead of staring at a
+    blank tab during the cold-cache BQ work.
+    """
     now = time.time()
     with _cache_lock:
-        entry = _cache.get("html")
+        entry = _cache.get("payload")
         if entry and now - entry[0] < CACHE_TTL:
             return entry[1]
 
-    template = TEMPLATE.read_text()
-    payload  = build_payload()
-    html     = template.replace("__DATA_PLACEHOLDER__", json.dumps(payload))
+    payload = build_payload()
 
     with _cache_lock:
-        _cache["html"] = (now, html)
-    return html
+        _cache["payload"] = (now, payload)
+    return payload
+
+
+def get_shell_html() -> str:
+    """Return the dashboard shell HTML. No BQ work — ships in milliseconds.
+
+    Data placeholder is left as an empty object; the page fetches the real
+    payload from `/api/data` after first paint.
+    """
+    return TEMPLATE.read_text().replace("__DATA_PLACEHOLDER__", "{}")
 
 
 def check_auth(user: str, password: str) -> bool:
@@ -556,14 +569,20 @@ def requires_auth(f):
 @app.route("/")
 @requires_auth
 def index() -> Response:
-    return Response(get_rendered_html(), mimetype="text/html")
+    return Response(get_shell_html(), mimetype="text/html")
+
+
+@app.route("/api/data")
+@requires_auth
+def api_data() -> Response:
+    return Response(json.dumps(get_payload()), mimetype="application/json")
 
 
 @app.route("/refresh", methods=["POST"])
 @requires_auth
 def refresh() -> Response:
     with _cache_lock:
-        _cache.pop("html", None)
+        _cache.pop("payload", None)
     return Response('{"ok": true}', mimetype="application/json")
 
 

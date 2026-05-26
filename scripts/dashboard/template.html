@@ -72,6 +72,29 @@
     }
     .notice strong { color: #5a4814; }
 
+    /* Loading overlay: visible from first paint, hidden once /api/data lands.
+       The shell HTML ships in <50ms, so the user sees the spinner immediately
+       instead of staring at a blank tab while BQ runs. */
+    .loading-overlay {
+      position: fixed; inset: 0;
+      background: rgba(252, 249, 242, 0.96);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 1000; transition: opacity 0.2s ease-out;
+    }
+    .loading-overlay.hidden { opacity: 0; pointer-events: none; }
+    .loading-card { text-align: center; padding: 0 24px; }
+    .loading-spinner {
+      width: 36px; height: 36px; margin: 0 auto 16px;
+      border: 3px solid var(--border);
+      border-top-color: var(--goji);
+      border-radius: 50%;
+      animation: loading-spin 0.8s linear infinite;
+    }
+    @keyframes loading-spin { to { transform: rotate(360deg); } }
+    .loading-text { font-size: 14px; color: var(--ink); font-weight: 500; }
+    .loading-hint { font-size: 12px; color: var(--ink-muted); margin-top: 4px; }
+    .loading-hint.error { color: var(--goji); }
+
     .badge {
       display: inline-block; font-size: 10px; letter-spacing: 0.04em;
       text-transform: uppercase; font-weight: 600;
@@ -484,6 +507,14 @@
   </style>
 </head>
 <body>
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-card">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">Loading dashboard data</div>
+      <div class="loading-hint">First load can take ~10s while we query BigQuery</div>
+    </div>
+  </div>
+
   <div class="wrap">
 
     <header class="topbar">
@@ -1124,7 +1155,11 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
   <script>
   (function() {
-    const DATA = JSON.parse(document.getElementById('dashboardData').textContent);
+    // Real data is fetched from /api/data after first paint. The inline tag
+    // above is a placeholder (empty `{}` from the shell) so the script can
+    // still parse it without throwing, and so the page renders identically
+    // when generate.py inlines a full payload.
+    let DATA = JSON.parse(document.getElementById('dashboardData').textContent);
     const STORAGE_KEY = 'goji_dashboard_range';
 
     const GOJI    = '#c44a3a';
@@ -1574,7 +1609,22 @@
       renderMix(r.treatment_mix);
     }
 
-    function init() {
+    async function init() {
+      // If the shell shipped without inlined data (the normal Cloud Run path),
+      // pull it now. generate.py's static export inlines the full payload, so
+      // we only fetch when needed.
+      if (!DATA || !DATA.ranges) {
+        try {
+          const r = await fetch('api/data', { credentials: 'same-origin' });
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          DATA = await r.json();
+        } catch (err) {
+          showLoadError(err);
+          return;
+        }
+      }
+      hideLoadingOverlay();
+
       document.getElementById('generatedAt').textContent =
         new Date(DATA.generated_at).toLocaleString();
 
@@ -1590,6 +1640,24 @@
       initPL();
       initPageNav();
       initCommissionCalculator();
+    }
+
+    function hideLoadingOverlay() {
+      const el = document.getElementById('loadingOverlay');
+      if (el) el.classList.add('hidden');
+    }
+    function showLoadError(err) {
+      const el = document.getElementById('loadingOverlay');
+      if (!el) return;
+      const spinner = el.querySelector('.loading-spinner');
+      if (spinner) spinner.style.display = 'none';
+      const text = el.querySelector('.loading-text');
+      if (text) text.textContent = 'Failed to load dashboard data';
+      const hint = el.querySelector('.loading-hint');
+      if (hint) {
+        hint.textContent = String((err && err.message) || err) + ' — try refreshing the page';
+        hint.classList.add('error');
+      }
     }
 
     /* ===== P&L Section ===== */
@@ -1821,7 +1889,7 @@
     //   Cheryl (director): $12k base, $0 commission threshold, 40% on all revenue
     //   Two physio clinicians: $5k base, commission above $13k at 40%
     const CLINICIAN_DEFAULTS = {
-      'PCL': { base: 12000, quota: 0,     pct: 0,  isDirector: true  },
+      'PCL': { base: 12000, quota: 13000, pct: 40, isDirector: true  },
       'PKN': { base: 5000,  quota: 13000, pct: 40, isDirector: false },
       'PCN': { base: 5000,  quota: 13000, pct: 40, isDirector: false }
     };
