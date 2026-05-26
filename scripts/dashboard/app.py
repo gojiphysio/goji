@@ -354,13 +354,34 @@ ORDER BY total_amount DESC
     } for r in _query(sql)]
 
 
-def fetch_appointments() -> list[dict]:
-    """Forward-looking unconfirmed appointments.
+def fetch_appointments(start: date, end: date) -> list[dict]:
+    """Per-session deliveries used by the commission calculator.
 
-    Placeholder until /appointment ingestion lands — the v3 commission tab
-    relies on this list but BQ doesn't have appointment data yet.
+    The calculator prefills revenue from the sum of these and renders them as
+    a line-item ledger. Patient names are deliberately not in the warehouse
+    (dim_patient is PII-stripped), so we surface patient_id and let the
+    operator cross-reference Plato if a row needs a real name.
     """
-    return []
+    sql = f"""
+SELECT
+  delivery_date,
+  clinician_id,
+  patient_id,
+  item_name,
+  recognised_revenue
+FROM `{PROJECT}.marts.fct_service_delivered`
+WHERE delivery_date BETWEEN '{start}' AND '{end}'
+  AND clinician_id IS NOT NULL
+  AND COALESCE(recognised_revenue, 0) > 0
+ORDER BY delivery_date, clinician_id
+"""
+    return [{
+        "date":         r["delivery_date"].isoformat() if r["delivery_date"] else None,
+        "clinician_id": r["clinician_id"],
+        "patient":      r["patient_id"] or "—",
+        "service":      r["item_name"] or "(unnamed)",
+        "value":        _to_float(r["recognised_revenue"]),
+    } for r in _query(sql)]
 
 
 def fetch_treatment_mix(start: date, end: date) -> list[dict]:
@@ -476,12 +497,19 @@ def build_payload() -> dict:
     log.info("  payment methods (%s -> %s)", pmt_start, today)
     payment_by_method = fetch_payment_methods(pmt_start, today)
 
+    # Commission calculator needs the per-session ledger for the current pay
+    # cycle plus a generous trailing window so custom-range reports still work.
+    # 120 days covers ~4 pay cycles (26th -> 25th).
+    appt_start = today - timedelta(days=120)
+    log.info("  appointments (%s -> %s)", appt_start, today)
+    appointments = fetch_appointments(appt_start, today)
+
     return {
         "generated_at":      datetime.now().astimezone().isoformat(timespec="seconds"),
         "default_range":     "30d",
         "deferred":          deferred,
         "cohorts":           cohorts,
-        "appointments":      fetch_appointments(),
+        "appointments":      appointments,
         "payment_by_method": payment_by_method,
         "ranges":            ranges,
     }

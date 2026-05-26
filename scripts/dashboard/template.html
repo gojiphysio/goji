@@ -219,14 +219,16 @@
       color: var(--ink-muted); font-size: 14px; pointer-events: none;
       font-weight: 500;
     }
-    .input-prefix input { padding-left: 32px; }
+    /* [type="number"] in selector tied with .form-row input[type="number"]
+       above, so the later rule wins and the prefix padding actually applies. */
+    .input-prefix input[type="number"] { padding-left: 32px; }
     .input-suffix { position: relative; }
     .input-suffix .suffix {
       position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
       color: var(--ink-muted); font-size: 14px; pointer-events: none;
       font-weight: 500;
     }
-    .input-suffix input { padding-right: 32px; }
+    .input-suffix input[type="number"] { padding-right: 32px; }
 
     .prefill-flag {
       display: inline-block; font-size: 10px; letter-spacing: 0.04em;
