@@ -25,6 +25,7 @@ from datetime import date, datetime, timedelta
 from functools import wraps
 from pathlib import Path
 
+import requests
 from flask import Flask, Response, request
 from google.cloud import bigquery
 from openpyxl import Workbook
@@ -477,6 +478,158 @@ ORDER BY sort_key
     } for r in _query(sql)]
 
 
+PLATO_BASE = "https://clinic.platomedical.com/api"
+PLATO_DB   = os.environ.get("PLATO_DB", "gojihealth")
+MISMATCH_WINDOW_DAYS = int(os.environ.get("MISMATCH_WINDOW_DAYS", "30"))
+
+
+def fetch_invoice_doctor_mismatches() -> dict:
+    """Alert-only check: list non-void invoices whose `doctor` disagrees
+    with the same-day appointment-calendar doctor for the same patient.
+
+    Cleared automatically — when an invoice is corrected, the next dashboard
+    refresh (after CACHE_TTL) re-queries Plato and the resolved invoice drops
+    off the list.
+
+    Returns:
+        {
+          "available": bool,        # False if PLATO_API_KEY missing
+          "window_days": int,
+          "mismatches": [...],      # see fields below
+          "no_appt_count": int,     # invoices we couldn't cross-ref
+          "checked_at": iso ts,
+          "error": str | None,
+        }
+    """
+    api_key = os.environ.get("PLATO_API_KEY")
+    result = {
+        "available": bool(api_key),
+        "window_days": MISMATCH_WINDOW_DAYS,
+        "mismatches": [],
+        "no_appt_count": 0,
+        "checked_at": datetime.now().astimezone().isoformat(timespec="seconds"),
+        "error": None,
+    }
+    if not api_key:
+        return result
+
+    today = date.today()
+    start = today - timedelta(days=MISMATCH_WINDOW_DAYS)
+    end   = today
+    log.info("  invoice-doctor mismatch check (%s -> %s)", start, end)
+
+    try:
+        s = requests.Session()
+        s.headers.update({"accept": "application/json", "Authorization": f"Bearer {api_key}"})
+
+        # 1. calendar color -> doctor map
+        r = s.get(f"{PLATO_BASE}/{PLATO_DB}/appointment/calendars", timeout=20)
+        r.raise_for_status()
+        color_to_doctor: dict[str, str] = {}
+        for cal in r.json():
+            c, d = cal.get("color"), cal.get("doctor")
+            if c and d:
+                color_to_doctor[c] = d
+
+        # 2. all appointments in window, paginated
+        appts: list[dict] = []
+        page = 1
+        while True:
+            r = s.get(
+                f"{PLATO_BASE}/{PLATO_DB}/appointment",
+                params={"start_date": start.isoformat(), "end_date": end.isoformat(), "current_page": page},
+                timeout=30,
+            )
+            r.raise_for_status()
+            body = r.json()
+            rows = body if isinstance(body, list) else (body.get("appointments") or body.get("data") or [])
+            if not rows:
+                break
+            appts.extend(rows)
+            if len(rows) < 20:
+                break
+            page += 1
+            time.sleep(1.5)
+
+        # Index appointments by (patient_id, date)
+        appt_idx: dict[tuple[str, str], set[str]] = {}
+        for a in appts:
+            pid = a.get("patient_id")
+            d_str = (a.get("starttime") or "")[:10]
+            if not pid or not d_str:
+                continue
+            doc = color_to_doctor.get(a.get("color") or "")
+            if doc:
+                appt_idx.setdefault((pid, d_str), set()).add(doc)
+
+    except requests.RequestException as e:
+        log.exception("Plato cross-ref failed: %s", e)
+        result["error"] = f"Plato API error: {e}"
+        return result
+
+    # 3. latest invoice state for every invoice in window
+    sql = f"""
+WITH latest AS (
+  SELECT
+    invoice_id,
+    invoice_date,
+    JSON_VALUE(payload, '$.patient_id')     AS patient_id,
+    JSON_VALUE(payload, '$.doctor')         AS doctor,
+    JSON_VALUE(payload, '$.created_by')     AS created_by,
+    JSON_VALUE(payload, '$.last_edited_by') AS last_edited_by,
+    JSON_VALUE(payload, '$.invoice_prefix') AS invoice_prefix,
+    SAFE_CAST(JSON_VALUE(payload, '$.invoice') AS INT64) AS invoice_no,
+    SAFE_CAST(JSON_VALUE(payload, '$.void')      AS INT64) = 1 AS is_void,
+    SAFE_CAST(JSON_VALUE(payload, '$.finalized') AS INT64) = 1 AS is_finalized,
+    SAFE_CAST(JSON_VALUE(payload, '$.total')     AS NUMERIC) AS total
+  FROM `{PROJECT}.raw_plato.invoices_raw`
+  WHERE invoice_date BETWEEN '{start}' AND '{end}'
+  QUALIFY ROW_NUMBER() OVER (PARTITION BY invoice_id ORDER BY _loaded_at DESC) = 1
+)
+SELECT l.*, p.initial_lastname
+FROM latest l
+LEFT JOIN `{PROJECT}.marts.dim_patient` p USING (patient_id)
+WHERE NOT COALESCE(l.is_void, FALSE)
+ORDER BY l.invoice_date DESC, l.invoice_no DESC
+"""
+    invoices = _query(sql)
+
+    mismatches: list[dict] = []
+    no_appt = 0
+    for inv in invoices:
+        pid = inv.get("patient_id")
+        inv_date = inv["invoice_date"].isoformat() if inv.get("invoice_date") else None
+        if not pid or not inv_date:
+            continue
+        appt_doctors = appt_idx.get((pid, inv_date))
+        if not appt_doctors:
+            no_appt += 1
+            continue
+        doctor = inv.get("doctor")
+        if doctor in appt_doctors:
+            continue
+        # Mismatch
+        mismatches.append({
+            "invoice_id":   inv["invoice_id"],
+            "invoice_no":   f"{inv.get('invoice_prefix') or ''}{inv.get('invoice_no') or ''}".strip() or inv["invoice_id"][:8],
+            "date":         inv_date,
+            "patient":      inv.get("initial_lastname") or pid,
+            "invoice_doctor":     doctor,
+            "invoice_doctor_name": PROVIDERS.get(doctor or "", doctor or "(unset)"),
+            "appt_doctors":       sorted(appt_doctors),
+            "appt_doctor_names":  [PROVIDERS.get(d, d) for d in sorted(appt_doctors)],
+            "created_by":   inv.get("created_by"),
+            "last_edited_by": inv.get("last_edited_by"),
+            "total":        _to_float(inv.get("total")),
+        })
+
+    result["mismatches"]    = mismatches
+    result["no_appt_count"] = no_appt
+    log.info("  mismatches found: %d (window=%dd, %d invoices had no same-day appt)",
+             len(mismatches), MISMATCH_WINDOW_DAYS, no_appt)
+    return result
+
+
 def build_payload() -> dict:
     log.info("Building dashboard payload from BigQuery")
     deferred = fetch_deferred()
@@ -509,6 +662,10 @@ def build_payload() -> dict:
     log.info("  appointments (%s -> %s)", appt_start, today)
     appointments = fetch_appointments(appt_start, today)
 
+    # Invoice attribution alert: cross-ref invoice.doctor against the same-day
+    # appointment-calendar doctor. Hits Plato API live (cached for CACHE_TTL).
+    doctor_mismatches = fetch_invoice_doctor_mismatches()
+
     return {
         "generated_at":      datetime.now().astimezone().isoformat(timespec="seconds"),
         "default_range":     "30d",
@@ -517,6 +674,7 @@ def build_payload() -> dict:
         "appointments":      appointments,
         "payment_by_method": payment_by_method,
         "ranges":            ranges,
+        "doctor_mismatches": doctor_mismatches,
     }
 
 

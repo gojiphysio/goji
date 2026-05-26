@@ -180,6 +180,40 @@
 
     .empty { color: var(--ink-muted); font-style: italic; }
 
+    /* Invoice attribution alert (provider mismatch vs same-day appointment) */
+    section.alert {
+      background: #fdf4f2; border: 1px solid #f2c8c0;
+      border-radius: 12px; padding: 18px 22px; margin-bottom: 20px;
+      box-shadow: var(--shadow);
+    }
+    section.alert h2 {
+      font-size: 15px; font-weight: 600; margin: 0 0 4px;
+      color: var(--goji); display: flex; align-items: center; gap: 8px;
+    }
+    section.alert .subtitle {
+      font-size: 13px; color: var(--ink-soft); margin-bottom: 14px;
+    }
+    section.alert table th { color: var(--goji); }
+    section.alert table td { border-bottom-color: #f2dad4; }
+    .alert-count {
+      background: var(--goji); color: white;
+      border-radius: 999px; padding: 1px 9px;
+      font-size: 12px; font-weight: 600;
+    }
+    .doctor-flip {
+      font-variant-numeric: tabular-nums;
+      font-family: ui-monospace, SFMono-Regular, monospace;
+      font-size: 12px;
+    }
+    .doctor-flip .wrong { color: var(--goji); font-weight: 600; }
+    .doctor-flip .right { color: var(--good); font-weight: 600; }
+    .alert-meta { color: var(--ink-muted); font-size: 11px; }
+    .alert-config-note {
+      font-size: 12px; color: var(--ink-muted);
+      background: #fafaf7; border: 1px dashed var(--border);
+      border-radius: 6px; padding: 8px 12px; margin-top: 8px;
+    }
+
     @media (max-width: 1100px) {
       .kpi-row { grid-template-columns: repeat(3, 1fr); }
     }
@@ -420,6 +454,7 @@
       display: inline-flex; align-items: center; gap: 8px;
       z-index: 5; white-space: nowrap;
     }
+    .pl-loading-badge[hidden] { display: none; }
     .loading-spinner-small {
       width: 14px; height: 14px;
       border: 2px solid var(--border);
@@ -618,6 +653,35 @@
       Sections labelled <span class="badge sample">Sample</span> are illustrative pending
       the ingestion job for that data source.
     </div>
+
+    <section class="alert" id="doctor-mismatch-alert" hidden>
+      <h2>
+        Provider attribution alerts
+        <span class="alert-count" id="mismatch_count">0</span>
+      </h2>
+      <div class="subtitle">
+        Non-void invoices in the last <span id="mismatch_window">30</span> days
+        where <strong>invoice doctor</strong> doesn't match the same-day
+        <strong>appointment calendar doctor</strong>. Clears automatically once corrected.
+      </div>
+      <div style="overflow-x: auto;">
+        <table id="mismatch_table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Invoice</th>
+              <th>Patient</th>
+              <th>Appt → Invoice</th>
+              <th class="num">Total</th>
+              <th>Created by</th>
+              <th>Last edited</th>
+            </tr>
+          </thead>
+          <tbody id="mismatch_tbody"></tbody>
+        </table>
+      </div>
+      <div class="alert-config-note" id="mismatch_config_note" hidden></div>
+    </section>
 
 
     <div class="kpi-row">
@@ -1264,7 +1328,7 @@
     };
     Chart.defaults.color = '#5c5c5c';
 
-    const fmt$  = v => (v == null || isNaN(v)) ? '-' : '$' + Math.round(Number(v)).toLocaleString();
+    const fmt$  = v => (v == null || isNaN(v)) ? '-' : '$' + Number(v).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     const fmtPct = v => (v == null || isNaN(v)) ? '-' : Number(v).toFixed(1) + '%';
     const fmtInt = v => (v == null || isNaN(v)) ? '-' : Math.round(Number(v)).toLocaleString();
     const fmtNum1 = v => (v == null || isNaN(v)) ? '-' : Number(v).toFixed(1);
@@ -1724,10 +1788,66 @@
       const initial = (stored && DATA.ranges[stored]) ? stored : DATA.default_range;
       applyRange(initial);
       renderSampleSections();
+      renderDoctorMismatches(DATA.doctor_mismatches);
 
       initPL();
       initPageNav();
       initCommissionCalculator();
+    }
+
+    function renderDoctorMismatches(m) {
+      const section = document.getElementById('doctor-mismatch-alert');
+      const tbody   = document.getElementById('mismatch_tbody');
+      const note    = document.getElementById('mismatch_config_note');
+      const countEl = document.getElementById('mismatch_count');
+      const windowEl = document.getElementById('mismatch_window');
+      if (!section || !tbody) return;
+      tbody.innerHTML = '';
+      note.hidden = true;
+      note.textContent = '';
+
+      if (!m) { section.hidden = true; return; }
+      windowEl.textContent = m.window_days || 30;
+
+      if (!m.available) {
+        section.hidden = false;
+        countEl.textContent = '!';
+        note.hidden = false;
+        note.textContent = 'Provider attribution check is not configured: PLATO_API_KEY env var missing on the dashboard service.';
+        return;
+      }
+      if (m.error) {
+        section.hidden = false;
+        countEl.textContent = '!';
+        note.hidden = false;
+        note.textContent = 'Plato API check failed: ' + m.error + '. Will retry on next refresh.';
+        return;
+      }
+      const rows = m.mismatches || [];
+      if (!rows.length) { section.hidden = true; return; }
+
+      section.hidden = false;
+      countEl.textContent = rows.length;
+
+      const sgd = v => '$' + (v || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+      rows.forEach(r => {
+        const tr = document.createElement('tr');
+        const apptList = (r.appt_doctor_names || []).map(esc).join(' / ');
+        const invDoc = esc(r.invoice_doctor_name || r.invoice_doctor || '(unset)');
+        const flip = `<span class="doctor-flip"><span class="right">${apptList || '?'}</span> → <span class="wrong">${invDoc}</span></span>`;
+        tr.innerHTML = `
+          <td>${esc(r.date)}</td>
+          <td>${esc(r.invoice_no)}</td>
+          <td>${esc(r.patient)}</td>
+          <td>${flip}</td>
+          <td class="num">${sgd(r.total)}</td>
+          <td>${esc(r.created_by) || '<span class="alert-meta">—</span>'}</td>
+          <td>${esc(r.last_edited_by) || '<span class="alert-meta">—</span>'}</td>
+        `;
+        tbody.appendChild(tr);
+      });
     }
 
     function hideLoadingOverlay() {

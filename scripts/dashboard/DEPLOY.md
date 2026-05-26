@@ -43,9 +43,20 @@ page load with a 5-minute in-process cache.
     gcloud run deploy goji-dashboard \
       --project=goji-bi --region=asia-southeast1 --source=. \
       --service-account=dashboard-sa@goji-bi.iam.gserviceaccount.com \
-      --set-secrets=DASHBOARD_USER=dashboard-user:latest,DASHBOARD_PASS=dashboard-pass:latest \
+      --set-secrets=DASHBOARD_USER=dashboard-user:latest,DASHBOARD_PASS=dashboard-pass:latest,PLATO_API_KEY=plato-api-key:latest \
       --set-env-vars=GCP_PROJECT=goji-bi,CACHE_TTL_SECONDS=300 \
       --quiet
+
+The dashboard cross-references invoice.doctor against the same-day appointment
+calendar via Plato's API on each cache miss (every 5 min by default). Without
+`PLATO_API_KEY` the "Provider attribution alerts" section degrades to a
+"not configured" notice — the rest of the dashboard still works.
+`dashboard-sa` needs `secretmanager.secretAccessor` on the `plato-api-key`
+secret; grant once with:
+
+    gcloud secrets add-iam-policy-binding plato-api-key --project=goji-bi \
+      --member=serviceAccount:dashboard-sa@goji-bi.iam.gserviceaccount.com \
+      --role=roles/secretmanager.secretAccessor
 
 ## Force a cache refresh without redeploying
 
