@@ -408,6 +408,31 @@
     }
     .pl-revenue-loading { opacity: 0.5; }
 
+    /* P&L loading state — only shows for cache-miss (Custom). 30d and pay
+       cycle are pre-cached so toggling them is instant. */
+    #pl-section { position: relative; }
+    .pl-loading-badge {
+      position: absolute; top: 16px; left: 50%; transform: translateX(-50%);
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 999px; padding: 8px 16px;
+      font-size: 13px; font-weight: 500; color: var(--ink);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+      display: inline-flex; align-items: center; gap: 8px;
+      z-index: 5; white-space: nowrap;
+    }
+    .loading-spinner-small {
+      width: 14px; height: 14px;
+      border: 2px solid var(--border);
+      border-top-color: var(--goji);
+      border-radius: 50%;
+      animation: loading-spin 0.8s linear infinite;
+      display: inline-block;
+    }
+    .pl-grid.pl-loading {
+      opacity: 0.45; transition: opacity 0.15s ease-out;
+      pointer-events: none;
+    }
+
     .pl-header {
       display: flex; align-items: flex-start; justify-content: space-between;
       flex-wrap: wrap; gap: 12px; margin-bottom: 0;
@@ -827,6 +852,10 @@
 
     <!-- ===== P&L Section ===== -->
     <section class="q" id="pl-section" style="margin-bottom: 28px;">
+      <div class="pl-loading-badge" id="pl_loading_badge" hidden>
+        <span class="loading-spinner-small"></span>
+        <span>Fetching data for selected period…</span>
+      </div>
       <div class="pl-header">
         <div>
           <h2 style="margin: 0 0 4px;">Profit &amp; Loss <span class="badge live">Live revenue</span></h2>
@@ -1726,23 +1755,14 @@
       // plWindow holds the current period's BQ-sourced figures. Starts from
       // DATA.ranges['30d'] so the page can render before the first fetch.
       let plWindow = null;
-      let plFetchSeq = 0;            // race-guard for overlapping fetches
+      // Cache + in-flight tracking. Keyed by `${start}|${end}` so 30d and the
+      // pay cycle are both instant after the initial dashboard load, and the
+      // user only sees a loading state on cache-miss (Custom).
+      const plWindowCache = new Map();
+      const plInFlight    = new Map();
+      let   plRequestedKey = null;
 
-      function seedFromDefault30d() {
-        const r30 = DATA.ranges['30d'];
-        if (!r30) return null;
-        const today = new Date(DATA.generated_at);
-        const start = new Date(today); start.setDate(start.getDate() - 30);
-        return {
-          start: ymdLocal(start),
-          end:   ymdLocal(today),
-          days:  30,
-          recognised: r30.kpis.recognised || 0,
-          clinicians: r30.clinicians || [],
-          payment_by_method: DATA.payment_by_method || [],
-        };
-      }
-      plWindow = seedFromDefault30d();
+      function cacheKey(start, end) { return `${start}|${end}`; }
 
       function ymdLocal(d) {
         const y = d.getFullYear();
@@ -1769,30 +1789,88 @@
         return (s && e) ? { start: s, end: e } : null;
       }
 
+      function seedFromDefault30d() {
+        const r30 = DATA.ranges['30d'];
+        if (!r30) return null;
+        const range = last30Range();
+        return {
+          start: range.start,
+          end:   range.end,
+          days:  30,
+          recognised: r30.kpis.recognised || 0,
+          clinicians: r30.clinicians || [],
+          payment_by_method: DATA.payment_by_method || [],
+        };
+      }
+      // Seed the cache with the 30d window from the initial /api/data payload
+      // so the default render is instant and toggling back is free.
+      const seed30 = seedFromDefault30d();
+      if (seed30) plWindowCache.set(cacheKey(seed30.start, seed30.end), seed30);
+      plWindow = seed30;
+
       function fmtPeriodLabel(w) {
         if (!w) return '-';
         return `${w.start} → ${w.end} (${w.days}d)`;
       }
 
-      async function loadWindow(start, end) {
-        const seq = ++plFetchSeq;
-        document.getElementById('pl_revenue').classList.add('pl-revenue-loading');
-        document.getElementById('pl_period_dates').textContent =
-          `loading ${start} → ${end}…`;
-        try {
+      function setLoadingState(loading) {
+        document.getElementById('pl_loading_badge').hidden = !loading;
+        document.querySelector('#pl-section .pl-grid')
+          .classList.toggle('pl-loading', loading);
+      }
+
+      // Fetches once per key. Concurrent callers for the same key share the
+      // same in-flight Promise. Successful results are cached forever.
+      function fetchOrCache(start, end) {
+        const key = cacheKey(start, end);
+        if (plWindowCache.has(key)) return Promise.resolve(plWindowCache.get(key));
+        if (plInFlight.has(key))    return plInFlight.get(key);
+        const p = (async () => {
           const r = await fetch(`api/pl_window?start=${start}&end=${end}`,
                                  { credentials: 'same-origin' });
           if (!r.ok) throw new Error('HTTP ' + r.status);
           const w = await r.json();
-          if (seq !== plFetchSeq) return;   // a later fetch superseded this one
+          plWindowCache.set(key, w);
+          return w;
+        })();
+        plInFlight.set(key, p);
+        p.finally(() => plInFlight.delete(key));
+        return p;
+      }
+
+      async function loadWindow(start, end) {
+        const key = cacheKey(start, end);
+        plRequestedKey = key;
+        // Cache hit: render synchronously, no spinner. This is the happy path
+        // for 30d (seeded) and the pay cycle (background-prefetched on init).
+        if (plWindowCache.has(key)) {
+          plWindow = plWindowCache.get(key);
+          renderPL();
+          return;
+        }
+        // Cache miss: show the loading badge while we wait. The badge is more
+        // visible than the previous "loading…" text in the dates label, since
+        // Custom can legitimately take a few seconds.
+        setLoadingState(true);
+        try {
+          const w = await fetchOrCache(start, end);
+          if (plRequestedKey !== key) return;  // user moved on; ignore
           plWindow = w;
           renderPL();
         } catch (err) {
+          if (plRequestedKey !== key) return;
           document.getElementById('pl_period_dates').textContent =
             `load failed: ${err.message}`;
         } finally {
-          document.getElementById('pl_revenue').classList.remove('pl-revenue-loading');
+          if (plRequestedKey === key) setLoadingState(false);
         }
+      }
+
+      // Fire-and-forget: warm the cache for the pay cycle so the second tab
+      // is instant the first time the user clicks it.
+      function prefetchPayCycle() {
+        const r = payCycleRange();
+        fetchOrCache(r.start, r.end).catch(() => { /* swallow; UI will retry on click */ });
       }
 
       function applyPeriod(which) {
@@ -1800,17 +1878,13 @@
         document.querySelectorAll('[data-plperiod]').forEach(b =>
           b.classList.toggle('active', b.dataset.plperiod === which)
         );
-        const custom = document.getElementById('pl_custom_dates');
-        custom.hidden = (which !== 'custom');
+        // Custom date pickers only appear when Custom is selected.
+        document.getElementById('pl_custom_dates').hidden = (which !== 'custom');
 
-        if (which === '30d') {
-          // Default 30d window is already in DATA — skip the round-trip.
-          plWindow = seedFromDefault30d();
-          document.getElementById('pl_period_dates').textContent = fmtPeriodLabel(plWindow);
-          renderPL();
-          return;
-        }
-        const range = (which === 'cycle') ? payCycleRange() : customRange();
+        const range =
+          (which === '30d')   ? last30Range()   :
+          (which === 'cycle') ? payCycleRange() :
+                                customRange();
         if (!range) return;     // custom: user hasn't picked dates yet
         loadWindow(range.start, range.end);
       }
@@ -1860,6 +1934,9 @@
 
       document.getElementById('pl_period_dates').textContent = fmtPeriodLabel(plWindow);
       renderPL();
+      // Background-warm the pay cycle so toggling to it is instant. No UI
+      // until the user actually clicks; failures are silent.
+      prefetchPayCycle();
 
       // ---- helpers ----
       function numVal(id) {
