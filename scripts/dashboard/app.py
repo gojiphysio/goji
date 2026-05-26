@@ -360,28 +360,30 @@ ORDER BY total_amount DESC
 def fetch_appointments(start: date, end: date) -> list[dict]:
     """Per-session deliveries used by the commission calculator.
 
-    The calculator prefills revenue from the sum of these and renders them as
-    a line-item ledger. Patient names are deliberately not in the warehouse
-    (dim_patient is PII-stripped), so we surface patient_id and let the
-    operator cross-reference Plato if a row needs a real name.
+    Surfaces `initial_lastname` (e.g. "C. Wong") from marts.dim_patient when
+    available, falling back to patient_id. Full names are never stored in
+    BQ — the ingestion job derives the initial + last token in memory and
+    only the derived scalar lands.
     """
     sql = f"""
 SELECT
-  delivery_date,
-  clinician_id,
-  patient_id,
-  item_name,
-  recognised_revenue
-FROM `{PROJECT}.marts.fct_service_delivered`
-WHERE delivery_date BETWEEN '{start}' AND '{end}'
-  AND clinician_id IS NOT NULL
-  AND COALESCE(recognised_revenue, 0) > 0
-ORDER BY delivery_date, clinician_id
+  sd.delivery_date,
+  sd.clinician_id,
+  sd.patient_id,
+  p.initial_lastname,
+  sd.item_name,
+  sd.recognised_revenue
+FROM `{PROJECT}.marts.fct_service_delivered` sd
+LEFT JOIN `{PROJECT}.marts.dim_patient` p USING (patient_id)
+WHERE sd.delivery_date BETWEEN '{start}' AND '{end}'
+  AND sd.clinician_id IS NOT NULL
+  AND COALESCE(sd.recognised_revenue, 0) > 0
+ORDER BY sd.delivery_date, sd.clinician_id
 """
     return [{
         "date":         r["delivery_date"].isoformat() if r["delivery_date"] else None,
         "clinician_id": r["clinician_id"],
-        "patient":      r["patient_id"] or "—",
+        "patient":      r["initial_lastname"] or r["patient_id"] or "—",
         "service":      r["item_name"] or "(unnamed)",
         "value":        _to_float(r["recognised_revenue"]),
     } for r in _query(sql)]
