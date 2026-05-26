@@ -384,6 +384,21 @@
     .pl-row.pl-result .pl-val   { font-size: 24px; font-weight: 700; }
     .pl-positive .pl-val { color: var(--good) !important; }
     .pl-negative .pl-val { color: var(--goji) !important; }
+    .pl-row.pl-expandable { cursor: pointer; user-select: none; }
+    .pl-row.pl-expandable:hover .pl-label { color: var(--ink); }
+    .pl-chevron {
+      display: inline-block; font-size: 9px; margin-left: 5px;
+      color: var(--ink-muted); transition: transform 0.18s; vertical-align: middle;
+    }
+    .pl-chevron.open { transform: rotate(90deg); }
+    .pl-subrow {
+      display: flex; justify-content: space-between; align-items: baseline;
+      padding: 6px 2px 6px 18px; border-bottom: 1px solid #f5f0e8; font-size: 13px;
+      background: #faf8f5;
+    }
+    .pl-subrow .pl-label { color: var(--ink-muted); }
+    .pl-subrow .pl-val   { color: var(--ink-soft); font-variant-numeric: tabular-nums; font-weight: 500; }
+    .pl-subrow-note      { font-size: 11px; color: var(--ink-muted); margin-left: 6px; font-style: italic; }
 
     .pl-breakeven {
       margin-top: 16px; background: var(--bg);
@@ -554,10 +569,11 @@
     <section class="q">
       <h2>Bookings vs recognised revenue <span class="badge live">Live</span></h2>
       <div class="subtitle">
-        <strong>Bookings</strong> = cash invoiced when a patient pays (including packages upfront).
-        <strong>Recognised</strong> = revenue earned as sessions are delivered.
-        The shaded area between the two lines is your deferred revenue — money collected but not yet earned.
-        A wide gap is fine; watch for a gap that stops closing week-on-week.
+        Running totals since the start of the selected period.
+        <strong>Bookings</strong> = cumulative cash invoiced (packages counted upfront).
+        <strong>Recognised</strong> = cumulative revenue earned as sessions are delivered.
+        The shaded gap between the curves = outstanding deferred revenue at that point in time.
+        A widening gap means you're selling ahead of delivery. Watch for a gap that <em>stops growing</em> — it means patients aren't coming back to burn their packs.
       </div>
       <div class="chart-wrap" style="height: 260px; margin-top: 12px;"><canvas id="bookingsVsRecognisedChart"></canvas></div>
     </section>
@@ -742,9 +758,15 @@
             <span class="pl-label">Payroll <span style="font-size:11px;color:var(--ink-muted);">(base + commission + employer CPF)</span></span>
             <span class="pl-val" id="pl_payroll_total_val">—</span>
           </div>
-          <div class="pl-row pl-cost">
-            <span class="pl-label">Operating expenses</span>
+          <div class="pl-row pl-cost pl-expandable" id="pl_opex_toggle_row" onclick="toggleOpexDetail()">
+            <span class="pl-label">Operating expenses <span class="pl-chevron open" id="pl_opex_chevron">▶</span></span>
             <span class="pl-val" id="pl_opex_val">—</span>
+          </div>
+          <div class="pl-subrow" id="pl_pmtfee_subrow">
+            <span class="pl-label">↳ Payment processing fees
+              <span class="pl-subrow-note">(Plato Terminal: 2.1% + $0.20/txn)</span>
+            </span>
+            <span class="pl-val" id="pl_pmtfee_val">Awaiting data</span>
           </div>
           <div class="pl-row pl-cost" id="pl_amort_row" hidden>
             <span class="pl-label">Amortized capex <span style="font-size:11px;color:var(--ink-muted);">(one-time costs ÷ months)</span></span>
@@ -2669,17 +2691,37 @@
 
     function renderBookingsVsRecognised(t) {
       if (!t) return;
-      const bookingsSeries = t.bookings || [];
-      const recognisedMap  = {};
-      (t.recognised || []).forEach(s => { recognisedMap[s.label] = s.value; });
-      const labels     = bookingsSeries.map(s => s.label);
-      const bookings   = bookingsSeries.map(s => s.value || 0);
-      const recognised = labels.map(l => recognisedMap[l] || 0);
+
+      // Build a map for each series, then take the union of dates sorted chronologically
+      const bookingsMap = {}, recognisedMap = {};
+      (t.bookings   || []).forEach(s => { bookingsMap[s.label]   = s.value || 0; });
+      (t.recognised || []).forEach(s => { recognisedMap[s.label] = s.value || 0; });
+
+      function parseLabelMs(l) {
+        const parts = l.trim().split(/\s+/);
+        return new Date(2026, MONTHS_IDX[parts[1]], parseInt(parts[0], 10)).getTime();
+      }
+
+      const allLabels = [...new Set([
+        ...(t.bookings   || []).map(s => s.label),
+        ...(t.recognised || []).map(s => s.label)
+      ])].sort((a, b) => parseLabelMs(a) - parseLabelMs(b));
+
+      // Compute cumulative running totals
+      let cumB = 0, cumR = 0;
+      const labels = [], cumBookings = [], cumRecognised = [];
+      allLabels.forEach(lbl => {
+        cumB += bookingsMap[lbl]   || 0;
+        cumR += recognisedMap[lbl] || 0;
+        labels.push(lbl);
+        cumBookings.push(Math.round(cumB));
+        cumRecognised.push(Math.round(cumR));
+      });
 
       if (bookingsVsRecognisedChart) {
         bookingsVsRecognisedChart.data.labels           = labels;
-        bookingsVsRecognisedChart.data.datasets[0].data = bookings;
-        bookingsVsRecognisedChart.data.datasets[1].data = recognised;
+        bookingsVsRecognisedChart.data.datasets[0].data = cumBookings;
+        bookingsVsRecognisedChart.data.datasets[1].data = cumRecognised;
         bookingsVsRecognisedChart.update();
       } else {
         bookingsVsRecognisedChart = new Chart(
@@ -2689,26 +2731,25 @@
             labels,
             datasets: [
               {
-                label: 'Bookings (invoiced)',
-                data: bookings,
+                label: 'Cumulative bookings',
+                data: cumBookings,
                 borderColor: GOJI,
                 backgroundColor: GOJI + '28',
-                // shade the gap between bookings and recognised
                 fill: { target: '+1', above: GOJI + '28', below: 'transparent' },
-                tension: 0.25,
-                pointRadius: bookings.length <= 14 ? 3 : 2,
+                tension: 0.3,
+                pointRadius: labels.length <= 14 ? 3 : 2,
                 pointHoverRadius: 5,
                 pointBackgroundColor: GOJI,
                 borderWidth: 2.5
               },
               {
-                label: 'Recognised revenue',
-                data: recognised,
+                label: 'Cumulative recognised',
+                data: cumRecognised,
                 borderColor: GOLD,
-                backgroundColor: 'transparent',
-                fill: false,
-                tension: 0.25,
-                pointRadius: recognised.length <= 14 ? 3 : 2,
+                backgroundColor: GOLD + '22',
+                fill: { target: 'origin', above: GOLD + '22', below: 'transparent' },
+                tension: 0.3,
+                pointRadius: labels.length <= 14 ? 3 : 2,
                 pointHoverRadius: 5,
                 pointBackgroundColor: GOLD,
                 borderWidth: 2.5
@@ -2724,13 +2765,13 @@
                 callbacks: {
                   title: items => items.length ? labelWithDow(items[0].label) : '',
                   label: ctx =>
-                    ctx.dataset.label + ': $' + Math.round(ctx.parsed.y).toLocaleString(),
+                    ctx.dataset.label + ': $' + ctx.parsed.y.toLocaleString(),
                   afterBody: items => {
                     const b = items[0]?.parsed.y || 0;
                     const r = items[1]?.parsed.y || 0;
                     const gap = b - r;
                     return gap > 1
-                      ? ['↳ Deferred gap: $' + Math.round(gap).toLocaleString()]
+                      ? ['↳ Deferred outstanding: $' + Math.round(gap).toLocaleString()]
                       : [];
                   }
                 }
@@ -3111,6 +3152,23 @@
                numVal('pl_opex_other');
       }
 
+      // Returns exact payment processing fee from JSON data, or null if not yet available.
+      // Fee structure: Plato Terminal = 2.1% of amount + $0.20 per transaction.
+      function getPmtFee() {
+        const methods = (DATA.payment_by_method || []);
+        const plato = methods.find(m => m.method === 'platopay');
+        if (!plato) return null;
+        return plato.total_amount * 0.021 + plato.txn_count * 0.20;
+      }
+
+      let opexExpanded = true;
+      function toggleOpexDetail() {
+        opexExpanded = !opexExpanded;
+        document.getElementById('pl_pmtfee_subrow').style.display = opexExpanded ? '' : 'none';
+        const chevron = document.getElementById('pl_opex_chevron');
+        chevron.classList.toggle('open', opexExpanded);
+      }
+
       function getAmort() {
         const capex  = numVal('pl_capex_total');
         const months = numVal('pl_amort_months') || 24;
@@ -3123,7 +3181,8 @@
         const cpf          = getCPF(commission);
         const opex         = getOpex();
         const amort        = (plView === 'full') ? getAmort() : 0;
-        const costs        = baseSalaries + commission + cpf + opex + amort;
+        const pmtFee       = getPmtFee();
+        const costs        = baseSalaries + commission + cpf + opex + amort + (pmtFee || 0);
 
         // Always use 30d recognised revenue — matches monthly cost base
         const r30     = DATA.ranges['30d'];
@@ -3137,6 +3196,16 @@
         document.getElementById('pl_opex_val').textContent          = '(' + fmt$(opex)         + ')';
         document.getElementById('pl_amort_val').textContent         = '(' + fmt$(amort)        + ')';
         document.getElementById('pl_costs_total').textContent       = '(' + fmt$(costs)        + ')';
+
+        // Payment processing sub-row
+        const pmtFeeEl = document.getElementById('pl_pmtfee_val');
+        if (pmtFee !== null) {
+          pmtFeeEl.textContent = '(' + fmt$(pmtFee) + ')';
+          pmtFeeEl.style.color = '';
+        } else {
+          pmtFeeEl.textContent = 'Awaiting data';
+          pmtFeeEl.style.color = 'var(--ink-muted)';
+        }
 
         const resultEl  = document.getElementById('pl_result_val');
         const resultRow = document.getElementById('pl_result_row');
