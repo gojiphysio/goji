@@ -11,10 +11,11 @@ The goal: a real-time web dashboard the clinic operator can use to see bookings,
 - [x] Schema designed (`architecture/schema.md`).
 - [x] Bookings + recognised revenue + deferred revenue working as a local script.
 - [x] Dashboard objectives defined (`architecture/objectives.md`).
-- [ ] GCP project scaffolded. **PAUSED** mid-setup (gcloud CLI install). To resume, restart at Task #18.
-- [ ] First ingestion job deployed.
-- [ ] BigQuery datasets created and seeded.
-- [ ] Looker Studio v1 dashboard.
+- [x] GCP project scaffolded.
+- [x] First ingestion job deployed.
+- [x] BigQuery datasets created and seeded.
+- [x] Dashboard v1 deployed on Cloud Run with HTTP Basic Auth (see `scripts/dashboard/DEPLOY.md`). Live at `dashboard.gojiphysio.com` once DNS is wired.
+- [ ] Port v3 design + per-SKU discount tile from `mockups/dashboard_v3_sandbox.html` into the live server.
 - [ ] Xero integration.
 
 ## Current objective
