@@ -14,6 +14,7 @@ most once per CACHE_TTL seconds even if the page is reloaded constantly.
 from __future__ import annotations
 
 import hmac
+import io
 import json
 import logging
 import os
@@ -26,6 +27,8 @@ from pathlib import Path
 
 from flask import Flask, Response, request
 from google.cloud import bigquery
+from openpyxl import Workbook
+from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 
 PROJECT     = os.environ.get("GCP_PROJECT", "goji-bi")
 CACHE_TTL   = int(os.environ.get("CACHE_TTL_SECONDS", "300"))
@@ -545,6 +548,231 @@ def get_shell_html() -> str:
     return TEMPLATE.read_text().replace("__DATA_PLACEHOLDER__", "{}")
 
 
+def fetch_pl_window(start: date, end: date) -> dict:
+    """Recompute the P&L revenue + payment fee inputs for an arbitrary window.
+
+    Reuses fetch_kpis / fetch_clinicians / fetch_payment_methods so the rules
+    stay in lock-step with the main dashboard.
+    """
+    kpis              = fetch_kpis(start, end)
+    clinicians        = fetch_clinicians(start, end)
+    payment_by_method = fetch_payment_methods(start, end)
+    return {
+        "start":             start.isoformat(),
+        "end":               end.isoformat(),
+        "days":              (end - start).days + 1,
+        "recognised":        kpis["recognised"],
+        "bookings":          kpis["bookings"],
+        "clinicians":        clinicians,
+        "payment_by_method": payment_by_method,
+    }
+
+
+def _parse_iso_date(value: str | None) -> date | None:
+    if not value:
+        return None
+    try:
+        return date.fromisoformat(value)
+    except ValueError:
+        return None
+
+
+# Singapore P&L Excel export ------------------------------------------------
+
+_SGD_FMT = '_-"$"* #,##0.00_-;[Red]_-"$"* (#,##0.00);_-"$"* "-"??_-;_-@_-'
+
+def _xlsx_pl_statement(payload: dict) -> bytes:
+    """Build a Singapore-style P&L statement xlsx from the client's snapshot.
+
+    The browser already has all the figures rendered on screen, so the client
+    POSTs them and we just format them — guarantees the Excel file matches
+    what the user saw at the moment they clicked Download.
+    """
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "P&L Statement"
+    ws.sheet_view.showGridLines = False
+
+    # Column widths: A=label, B=sub-amount, C=total
+    ws.column_dimensions["A"].width = 48
+    ws.column_dimensions["B"].width = 18
+    ws.column_dimensions["C"].width = 18
+
+    # Styles
+    title_font   = Font(name="Calibri", size=14, bold=True)
+    sub_font     = Font(name="Calibri", size=10, italic=True, color="555555")
+    section_font = Font(name="Calibri", size=11, bold=True)
+    label_font   = Font(name="Calibri", size=10)
+    total_font   = Font(name="Calibri", size=11, bold=True)
+    net_font     = Font(name="Calibri", size=12, bold=True)
+    header_fill  = PatternFill("solid", fgColor="F2EEE5")
+    thin         = Side(style="thin", color="C9C2B6")
+    medium       = Side(style="medium", color="2A2622")
+    top_thin     = Border(top=thin)
+    top_medium   = Border(top=medium)
+    double_btm   = Border(top=thin, bottom=Side(style="double", color="2A2622"))
+
+    entity = payload.get("entity") or "Goji Health Pte Ltd"
+    period = payload.get("period") or {}
+    period_label = period.get("label") or ""
+    start = period.get("start") or ""
+    end   = period.get("end") or ""
+    days  = period.get("days") or ""
+    view  = payload.get("view") or "cash"  # 'cash' or 'full'
+
+    row = 1
+    ws.cell(row=row, column=1, value=entity).font = title_font
+    row += 1
+    ws.cell(row=row, column=1, value="Statement of Profit or Loss").font = section_font
+    row += 1
+    sub = f"For the period {start} to {end}" if (start and end) else period_label
+    if days:
+        sub = f"{sub}  ({days} days)"
+    ws.cell(row=row, column=1, value=sub).font = sub_font
+    row += 1
+    ws.cell(row=row, column=1, value="All amounts in SGD").font = sub_font
+    row += 2
+
+    # Header row
+    ws.cell(row=row, column=1, value="").fill = header_fill
+    c = ws.cell(row=row, column=2, value="Sub-total")
+    c.font = section_font; c.fill = header_fill; c.alignment = Alignment(horizontal="right")
+    c = ws.cell(row=row, column=3, value="Amount")
+    c.font = section_font; c.fill = header_fill; c.alignment = Alignment(horizontal="right")
+    a = ws.cell(row=row, column=1, value="Description")
+    a.font = section_font; a.fill = header_fill
+    row += 2
+
+    def write_section_header(title: str):
+        nonlocal row
+        c = ws.cell(row=row, column=1, value=title)
+        c.font = section_font
+        row += 1
+
+    def write_line(label: str, amount, *, sub: bool = False, bold: bool = False, indent: int = 1):
+        nonlocal row
+        cell_label = ws.cell(row=row, column=1, value=("  " * indent) + label)
+        cell_label.font = total_font if bold else label_font
+        col = 2 if sub else 3
+        val = ws.cell(row=row, column=col, value=amount)
+        val.number_format = _SGD_FMT
+        val.font = total_font if bold else label_font
+        row += 1
+
+    def write_subtotal(label: str, amount, *, double: bool = False, indent: int = 0):
+        nonlocal row
+        c = ws.cell(row=row, column=1, value=("  " * indent) + label)
+        c.font = total_font
+        v = ws.cell(row=row, column=3, value=amount)
+        v.number_format = _SGD_FMT
+        v.font = total_font
+        v.border = double_btm if double else top_thin
+        ws.cell(row=row, column=2).border = top_thin if not double else double_btm
+        row += 1
+
+    def write_net(label: str, amount):
+        nonlocal row
+        c = ws.cell(row=row, column=1, value=label)
+        c.font = net_font
+        v = ws.cell(row=row, column=3, value=amount)
+        v.number_format = _SGD_FMT
+        v.font = net_font
+        v.border = top_medium
+        row += 1
+
+    def blank():
+        nonlocal row
+        row += 1
+
+    # REVENUE
+    write_section_header("Revenue")
+    revenue = float(payload.get("revenue") or 0)
+    write_line("Service revenue (recognised)", revenue, sub=False)
+    write_subtotal("Total revenue", revenue)
+    blank()
+
+    # OPERATING EXPENSES
+    write_section_header("Operating expenses")
+
+    payroll = payload.get("payroll") or {}
+    base_salaries = payroll.get("base_salaries") or []
+    base_total = sum(float(p.get("amount") or 0) for p in base_salaries)
+    commission = float(payroll.get("commission") or 0)
+    cpf        = float(payroll.get("employer_cpf") or 0)
+
+    # Payroll subgroup
+    write_section_header("  Staff costs")
+    for p in base_salaries:
+        write_line(f"Salary — {p.get('name', '?')}", float(p.get('amount') or 0), sub=True, indent=2)
+    if commission:
+        write_line("Commission", commission, sub=True, indent=2)
+    if cpf:
+        write_line("Employer CPF contributions", cpf, sub=True, indent=2)
+    staff_total = base_total + commission + cpf
+    write_subtotal("Total staff costs", staff_total, indent=1)
+    blank()
+
+    # Opex subgroup
+    opex_items = payload.get("opex") or []
+    pmt_fee = float(payload.get("payment_processing_fee") or 0)
+    write_section_header("  Other operating expenses")
+    for item in opex_items:
+        write_line(item.get("name", "?"), float(item.get("amount") or 0), sub=True, indent=2)
+    if pmt_fee:
+        write_line("Payment processing fees (Plato Terminal)", pmt_fee, sub=True, indent=2)
+    other_opex_total = sum(float(i.get("amount") or 0) for i in opex_items) + pmt_fee
+    write_subtotal("Total other operating expenses", other_opex_total, indent=1)
+    blank()
+
+    total_opex = staff_total + other_opex_total
+    write_subtotal("Total operating expenses", total_opex)
+    blank()
+
+    # OPERATING PROFIT (EBITDA in cash view)
+    ebitda = revenue - total_opex
+    ebitda_label = "Operating profit / (loss) — EBITDA" if view == "cash" else "Operating profit / (loss) before amortisation"
+    write_net(ebitda_label, ebitda)
+    blank()
+
+    # AMORTISATION
+    amort = float(payload.get("amortisation") or 0) if view == "full" else 0
+    if view == "full":
+        write_section_header("Amortisation")
+        capex = payload.get("capex") or {}
+        if capex:
+            capex_total = float(capex.get("total") or 0)
+            months      = int(capex.get("months") or 0)
+            write_line(
+                f"Capex amortisation ({capex_total:,.0f} over {months} months)",
+                amort, sub=True, indent=2,
+            )
+        else:
+            write_line("Capex amortisation", amort, sub=True, indent=2)
+        write_subtotal("Total amortisation", amort)
+        blank()
+
+    # NET PROFIT BEFORE TAX
+    net_before_tax = ebitda - amort
+    write_net("Net profit / (loss) before tax", net_before_tax)
+    row += 1
+
+    # Footnote
+    ws.cell(row=row, column=1, value=(
+        "Notes:  Prepared on an accrual basis. Revenue recognised when services "
+        "are rendered (package burns) or sold (single-use). Singapore Dollar "
+        "($SGD) throughout. Employer CPF computed at the statutory rate on "
+        "Ordinary Wages (capped at the OW ceiling) plus Additional Wages "
+        "(commission)."
+    )).font = sub_font
+    ws.row_dimensions[row].height = 30
+    ws.merge_cells(start_row=row, start_column=1, end_row=row, end_column=3)
+    ws.cell(row=row, column=1).alignment = Alignment(wrap_text=True, vertical="top")
+
+    buf = io.BytesIO()
+    wb.save(buf)
+    return buf.getvalue()
+
+
 def check_auth(user: str, password: str) -> bool:
     if not AUTH_USER or not AUTH_PASS:
         return False
@@ -576,6 +804,43 @@ def index() -> Response:
 @requires_auth
 def api_data() -> Response:
     return Response(json.dumps(get_payload()), mimetype="application/json")
+
+
+@app.route("/api/pl_window")
+@requires_auth
+def api_pl_window() -> Response:
+    """Recompute the P&L revenue + payment fees for an arbitrary date window.
+
+    Used by the P&L tab's date selector ("Last 30D" / "Pay cycle" / "Custom").
+    """
+    start = _parse_iso_date(request.args.get("start"))
+    end   = _parse_iso_date(request.args.get("end"))
+    if not start or not end or start > end:
+        return Response('{"error": "invalid start/end"}', status=400,
+                        mimetype="application/json")
+    log.info("P&L window query %s -> %s", start, end)
+    return Response(json.dumps(fetch_pl_window(start, end)),
+                    mimetype="application/json")
+
+
+@app.route("/api/pl.xlsx", methods=["POST"])
+@requires_auth
+def api_pl_xlsx() -> Response:
+    """Generate a Singapore-style P&L statement xlsx from the client's snapshot.
+
+    POST body: JSON describing the period, revenue, payroll lines, opex lines,
+    and amortisation — exactly the figures the user sees on screen.
+    """
+    payload = request.get_json(silent=True) or {}
+    blob = _xlsx_pl_statement(payload)
+    period = payload.get("period") or {}
+    end = period.get("end") or date.today().isoformat()
+    filename = f"goji-pl-{end}.xlsx"
+    return Response(
+        blob,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
 
 
 @app.route("/refresh", methods=["POST"])

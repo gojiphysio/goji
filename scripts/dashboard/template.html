@@ -37,6 +37,12 @@
     }
     .brand { display: flex; align-items: center; gap: 12px; }
     .brand-dot { width: 14px; height: 14px; background: var(--goji); border-radius: 50%; }
+    .brand-img {
+      width: 44px; height: 44px; border-radius: 50%; object-fit: cover;
+      object-position: center 22%;
+      border: 1px solid var(--border); background: var(--card);
+      box-shadow: var(--shadow); flex-shrink: 0;
+    }
     .brand-name { font-size: 20px; font-weight: 600; letter-spacing: -0.01em; }
     .brand-sub { color: var(--ink-soft); font-size: 13px; margin-top: 2px; }
     .filters { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
@@ -59,6 +65,10 @@
     .date-selector button.active + button,
     .date-selector button + button.active { border-left-color: transparent; }
 
+    .page-toolbar {
+      display: flex; align-items: center; justify-content: flex-end;
+      gap: 12px; flex-wrap: wrap; margin-bottom: 16px;
+    }
     .updated { font-size: 12px; color: var(--ink-muted); }
     .updated .dot {
       display: inline-block; width: 6px; height: 6px; border-radius: 50%;
@@ -359,6 +369,10 @@
       .brand-print .brand-dot {
         width: 12px; height: 12px; background: #92171D; border-radius: 50%;
       }
+      .brand-print .brand-img {
+        width: 28px; height: 28px; border-radius: 50%; object-fit: cover;
+        object-position: center 22%;
+      }
       .brand-print .brand-name { font-size: 18px; font-weight: 600; }
       /* Keep appointment rows from splitting awkwardly */
       .appointments-block { page-break-inside: auto; margin-top: 22px; }
@@ -369,6 +383,34 @@
     .brand-print { display: none; }
 
     /* ========== P&L Section ========== */
+    .pl-period-bar {
+      display: inline-flex; align-items: center; gap: 10px;
+      flex-wrap: wrap;
+    }
+    .pl-period-bar > button {
+      background: var(--card); border: 1px solid var(--border);
+      padding: 6px 12px; border-radius: 999px;
+      font: inherit; font-size: 12px; font-weight: 500;
+      color: var(--ink-soft); cursor: pointer;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+    }
+    .pl-period-bar > button:hover { background: var(--bg); color: var(--ink); }
+    .pl-period-bar > button.active {
+      background: var(--goji); border-color: var(--goji); color: white;
+    }
+    .pl-period-dates {
+      font-size: 12px; color: var(--ink-muted); margin-left: 4px;
+    }
+    .pl-custom-dates {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 12px;
+    }
+    .pl-custom-dates input[type="date"] {
+      padding: 5px 8px; border: 1px solid var(--border); border-radius: 6px;
+      background: var(--card); font: inherit; font-size: 12px; color: var(--ink);
+    }
+    .pl-revenue-loading { opacity: 0.5; }
+
     .pl-header {
       display: flex; align-items: flex-start; justify-content: space-between;
       flex-wrap: wrap; gap: 12px; margin-bottom: 0;
@@ -519,30 +561,33 @@
 
     <header class="topbar">
       <div class="brand">
-        <div class="brand-dot"></div>
+        <img class="brand-img" src="static/soily.webp" alt="Goji Health">
         <div>
           <div class="brand-name">Goji Health</div>
           <div class="brand-sub">Operations Dashboard</div>
         </div>
       </div>
       <div class="filters">
-        <div class="date-selector" role="tablist" aria-label="Date range">
-          <button type="button" data-range="7d">7d</button>
-          <button type="button" data-range="30d">30d</button>
-          <button type="button" data-range="90d">90d</button>
-          <button type="button" data-range="all">All</button>
-        </div>
         <div class="updated"><span class="dot"></span>Generated <span id="generatedAt">-</span></div>
       </div>
     </header>
 
     <nav class="page-nav" role="tablist" aria-label="Page">
-      <button type="button" data-page="dashboard" class="active">Dashboard</button>
+      <button type="button" data-page="dashboard" class="active">Overview</button>
       <button type="button" data-page="pl">Profit &amp; Loss</button>
-      <button type="button" data-page="commission">Commission calculator</button>
+      <button type="button" data-page="commission">Commission Calculator</button>
     </nav>
 
     <div id="page-dashboard" class="page">
+
+    <div class="page-toolbar">
+      <div class="date-selector" role="tablist" aria-label="Date range">
+        <button type="button" data-range="7d">7d</button>
+        <button type="button" data-range="30d">30d</button>
+        <button type="button" data-range="90d">90d</button>
+        <button type="button" data-range="all">All</button>
+      </div>
+    </div>
 
     <div class="notice">
       <strong>Live data dashboard, generated on demand.</strong> The date selector switches between
@@ -766,12 +811,29 @@
 
     <div id="page-pl" class="page" hidden>
 
+    <div class="page-toolbar">
+      <div class="pl-period-bar" role="group" aria-label="P&L period">
+        <button type="button" data-plperiod="30d" class="active">Last 30 days</button>
+        <button type="button" data-plperiod="cycle">Pay cycle (26th → 25th)</button>
+        <button type="button" data-plperiod="custom">Custom</button>
+        <span class="pl-period-dates" id="pl_period_dates">-</span>
+      </div>
+      <div class="pl-custom-dates" id="pl_custom_dates" hidden>
+        <input type="date" id="pl_period_start">
+        <span style="color:var(--ink-muted);">to</span>
+        <input type="date" id="pl_period_end">
+      </div>
+      <button type="button" class="btn primary" id="pl_export_xlsx">
+        <span style="margin-right:6px;">↓</span> Download Excel
+      </button>
+    </div>
+
     <!-- ===== P&L Section ===== -->
     <section class="q" id="pl-section" style="margin-bottom: 28px;">
       <div class="pl-header">
         <div>
           <h2 style="margin: 0 0 4px;">Profit &amp; Loss <span class="badge live">Live revenue</span></h2>
-          <div class="subtitle" style="margin: 0;">Last 30 days of recognised revenue vs. your monthly cost base. Toggle to include or exclude amortized capex.</div>
+          <div class="subtitle" style="margin: 0;" id="pl_subtitle">Recognised revenue vs. your monthly cost base. Toggle to include or exclude amortized capex.</div>
         </div>
         <div class="pl-view-toggle" role="group" aria-label="P&L view">
           <button type="button" data-plview="cash" class="active">Cash costs only</button>
@@ -784,7 +846,7 @@
         <!-- Left: P&L numbers -->
         <div>
           <div class="pl-row">
-            <span class="pl-label">Recognised revenue (last 30 days)</span>
+            <span class="pl-label" id="pl_revenue_label">Recognised revenue (last 30 days)</span>
             <span class="pl-val" id="pl_revenue">—</span>
           </div>
           <div class="pl-row pl-cost">
@@ -1007,7 +1069,7 @@
     <div id="page-commission" class="page" hidden>
 
       <div class="brand-print">
-        <div class="brand-dot"></div>
+        <img class="brand-img" src="static/soily.webp" alt="">
         <div class="brand-name">Goji Health - Commission Summary</div>
       </div>
 
@@ -1663,6 +1725,98 @@
     /* ===== P&L Section ===== */
     function initPL() {
       let plView = 'cash';
+      let plPeriod = '30d';          // '30d' | 'cycle' | 'custom'
+      // plWindow holds the current period's BQ-sourced figures. Starts from
+      // DATA.ranges['30d'] so the page can render before the first fetch.
+      let plWindow = null;
+      let plFetchSeq = 0;            // race-guard for overlapping fetches
+
+      function seedFromDefault30d() {
+        const r30 = DATA.ranges['30d'];
+        if (!r30) return null;
+        const today = new Date(DATA.generated_at);
+        const start = new Date(today); start.setDate(start.getDate() - 30);
+        return {
+          start: ymdLocal(start),
+          end:   ymdLocal(today),
+          days:  30,
+          recognised: r30.kpis.recognised || 0,
+          clinicians: r30.clinicians || [],
+          payment_by_method: DATA.payment_by_method || [],
+        };
+      }
+      plWindow = seedFromDefault30d();
+
+      function ymdLocal(d) {
+        const y = d.getFullYear();
+        const m = String(d.getMonth()+1).padStart(2,'0');
+        const day = String(d.getDate()).padStart(2,'0');
+        return `${y}-${m}-${day}`;
+      }
+      function payCycleRange() {
+        const today = new Date(DATA.generated_at);
+        const y = today.getFullYear(), m = today.getMonth(), d = today.getDate();
+        let s, e;
+        if (d >= 26) { s = new Date(y, m, 26);     e = new Date(y, m+1, 25); }
+        else         { s = new Date(y, m-1, 26);   e = new Date(y, m, 25);   }
+        return { start: ymdLocal(s), end: ymdLocal(e) };
+      }
+      function last30Range() {
+        const today = new Date(DATA.generated_at);
+        const start = new Date(today); start.setDate(start.getDate() - 30);
+        return { start: ymdLocal(start), end: ymdLocal(today) };
+      }
+      function customRange() {
+        const s = document.getElementById('pl_period_start').value;
+        const e = document.getElementById('pl_period_end').value;
+        return (s && e) ? { start: s, end: e } : null;
+      }
+
+      function fmtPeriodLabel(w) {
+        if (!w) return '-';
+        return `${w.start} → ${w.end} (${w.days}d)`;
+      }
+
+      async function loadWindow(start, end) {
+        const seq = ++plFetchSeq;
+        document.getElementById('pl_revenue').classList.add('pl-revenue-loading');
+        document.getElementById('pl_period_dates').textContent =
+          `loading ${start} → ${end}…`;
+        try {
+          const r = await fetch(`api/pl_window?start=${start}&end=${end}`,
+                                 { credentials: 'same-origin' });
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          const w = await r.json();
+          if (seq !== plFetchSeq) return;   // a later fetch superseded this one
+          plWindow = w;
+          renderPL();
+        } catch (err) {
+          document.getElementById('pl_period_dates').textContent =
+            `load failed: ${err.message}`;
+        } finally {
+          document.getElementById('pl_revenue').classList.remove('pl-revenue-loading');
+        }
+      }
+
+      function applyPeriod(which) {
+        plPeriod = which;
+        document.querySelectorAll('[data-plperiod]').forEach(b =>
+          b.classList.toggle('active', b.dataset.plperiod === which)
+        );
+        const custom = document.getElementById('pl_custom_dates');
+        custom.hidden = (which !== 'custom');
+
+        if (which === '30d') {
+          // Default 30d window is already in DATA — skip the round-trip.
+          plWindow = seedFromDefault30d();
+          document.getElementById('pl_period_dates').textContent = fmtPeriodLabel(plWindow);
+          renderPL();
+          return;
+        }
+        const range = (which === 'cycle') ? payCycleRange() : customRange();
+        if (!range) return;     // custom: user hasn't picked dates yet
+        loadWindow(range.start, range.end);
+      }
 
       // View toggle
       document.querySelectorAll('[data-plview]').forEach(btn => {
@@ -1675,6 +1829,24 @@
           renderPL();
         });
       });
+
+      // Period selector
+      document.querySelectorAll('[data-plperiod]').forEach(btn => {
+        btn.addEventListener('click', () => applyPeriod(btn.dataset.plperiod));
+      });
+      // Initialise custom date pickers to the current pay cycle (sensible default)
+      const pc = payCycleRange();
+      document.getElementById('pl_period_start').value = pc.start;
+      document.getElementById('pl_period_end').value   = pc.end;
+      document.getElementById('pl_period_start').addEventListener('change', () => {
+        if (plPeriod === 'custom') applyPeriod('custom');
+      });
+      document.getElementById('pl_period_end').addEventListener('change', () => {
+        if (plPeriod === 'custom') applyPeriod('custom');
+      });
+
+      // Excel download
+      document.getElementById('pl_export_xlsx').addEventListener('click', downloadPLXlsx);
 
       // Toggle cost input panel open/closed
       const toggleBtn = document.getElementById('pl_toggle_btn');
@@ -1689,6 +1861,7 @@
         input.addEventListener('input', renderPL)
       );
 
+      document.getElementById('pl_period_dates').textContent = fmtPeriodLabel(plWindow);
       renderPL();
 
       // ---- helpers ----
@@ -1702,15 +1875,13 @@
       }
 
       // Commission: Claire (PCN) and Kristy (PKN) earn rate% on recognised
-      // revenue above quota, sourced live from the 30d range.
+      // revenue above quota, sourced from the selected P&L period.
       function getCommission() {
-        const r30       = DATA.ranges['30d'];
-        const clinicians = r30 ? (r30.clinicians || []) : [];
+        const clinicians = (plWindow && plWindow.clinicians) || [];
         const quota     = numVal('pl_comm_quota');
         const rate      = numVal('pl_comm_rate') / 100;
         let total = 0;
         clinicians.forEach(c => {
-          // Only non-directors earn commission
           if (!c.is_director) {
             total += Math.max(0, (c.recognised || 0) - quota) * rate;
           }
@@ -1731,9 +1902,7 @@
           numVal('pl_pay_chris')   // no commission
         ];
 
-        // Split commission between the two commission-eligible clinicians
-        const r30        = DATA.ranges['30d'];
-        const clinicians = r30 ? (r30.clinicians || []) : [];
+        const clinicians = (plWindow && plWindow.clinicians) || [];
         const quota      = numVal('pl_comm_quota');
         const commRate   = numVal('pl_comm_rate') / 100;
         const commByClinician = { PCN: 0, PKN: 0 };
@@ -1765,10 +1934,11 @@
                numVal('pl_opex_other');
       }
 
-      // Returns exact payment processing fee from JSON data, or null if not yet available.
+      // Returns exact payment processing fee for the currently selected P&L
+      // period, or null if not yet available.
       // Fee structure: Plato Terminal = 2.1% of amount + $0.20 per transaction.
       function getPmtFee() {
-        const methods = (DATA.payment_by_method || []);
+        const methods = (plWindow && plWindow.payment_by_method) || [];
         const plato = methods.find(m => m.method === 'platopay');
         if (!plato) return null;
         return plato.total_amount * 0.021 + plato.txn_count * 0.20;
@@ -1797,10 +1967,18 @@
         const pmtFee       = getPmtFee();
         const costs        = baseSalaries + commission + cpf + opex + amort + (pmtFee || 0);
 
-        // Always use 30d recognised revenue — matches monthly cost base
-        const r30     = DATA.ranges['30d'];
-        const revenue = r30 ? (r30.kpis.recognised || 0) : 0;
+        // Use the currently selected P&L window. Falls back to 0 if the
+        // initial fetch hasn't landed yet.
+        const revenue = (plWindow && plWindow.recognised) || 0;
         const profit  = revenue - costs;
+
+        // Period-aware revenue label + dates line
+        const days = (plWindow && plWindow.days) || 0;
+        const lbl  = (plPeriod === '30d')   ? `Recognised revenue (last ${days || 30} days)`
+                   : (plPeriod === 'cycle') ? `Recognised revenue (pay cycle, ${days}d)`
+                                            : `Recognised revenue (custom, ${days}d)`;
+        document.getElementById('pl_revenue_label').textContent = lbl;
+        document.getElementById('pl_period_dates').textContent  = fmtPeriodLabel(plWindow);
 
         // Update P&L rows (payroll lumped)
         const totalPayroll = baseSalaries + commission + cpf;
@@ -1860,11 +2038,94 @@
             Math.min(margin * 3, 100).toFixed(1) + '%'; // scale: 33% margin = full bar
         } else {
           const gap = Math.abs(profit);
-          const revenuePerDay = revenue > 0 ? revenue / 30 : 1;
+          const periodDays = (plWindow && plWindow.days) || 30;
+          const revenuePerDay = revenue > 0 ? revenue / periodDays : 1;
           subEl.textContent =
-            'Need ' + fmt$(gap) + ' more per month to break even — ' +
+            'Need ' + fmt$(gap) + ' more this period to break even — ' +
             'roughly ' + Math.round(gap / revenuePerDay) + ' more patient-days at current avg revenue.';
           profitTrack.hidden = true;
+        }
+      }
+
+      // Singapore-style P&L statement export. Builds a snapshot of exactly
+      // what's on screen and POSTs to /api/pl.xlsx, which formats it.
+      async function downloadPLXlsx() {
+        const baseSalaries = [
+          { id: 'pl_pay_cheryl',  name: 'Cheryl (Clinical Director)' },
+          { id: 'pl_pay_claire',  name: 'Claire (Senior Physio)' },
+          { id: 'pl_pay_kristy',  name: 'Kristy (Senior Physio)' },
+          { id: 'pl_pay_chris',   name: 'Chris (Director)' },
+        ].map(p => ({ name: p.name, amount: numVal(p.id) }));
+
+        const commission = getCommission();
+        const cpf        = getCPF(commission);
+        const opex       = [
+          { id: 'pl_opex_rent',  name: 'Rent' },
+          { id: 'pl_opex_util',  name: 'Utilities' },
+          { id: 'pl_opex_mktg',  name: 'Marketing' },
+          { id: 'pl_opex_cons',  name: 'Consumables' },
+          { id: 'pl_opex_other', name: 'Software, admin & other' },
+        ].map(o => ({ name: o.name, amount: numVal(o.id) }));
+
+        const pmtFee   = getPmtFee() || 0;
+        const amort    = (plView === 'full') ? getAmort() : 0;
+        const revenue  = (plWindow && plWindow.recognised) || 0;
+
+        const periodLabel =
+          (plPeriod === '30d')   ? 'Last 30 days' :
+          (plPeriod === 'cycle') ? 'Pay cycle (26th → 25th)' :
+                                   'Custom period';
+
+        const body = {
+          entity: 'Goji Health Pte Ltd',
+          period: {
+            label: periodLabel,
+            start: plWindow && plWindow.start,
+            end:   plWindow && plWindow.end,
+            days:  plWindow && plWindow.days,
+          },
+          view: plView,
+          revenue,
+          payroll: {
+            base_salaries: baseSalaries,
+            commission,
+            employer_cpf: cpf,
+          },
+          opex,
+          payment_processing_fee: pmtFee,
+          amortisation: amort,
+          capex: {
+            total:  numVal('pl_capex_total'),
+            months: numVal('pl_amort_months'),
+          },
+        };
+
+        const btn = document.getElementById('pl_export_xlsx');
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = 'Generating…';
+        try {
+          const r = await fetch('api/pl.xlsx', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+          });
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          const blob = await r.blob();
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `goji-pl-${(plWindow && plWindow.end) || 'latest'}.xlsx`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        } catch (err) {
+          alert('Excel export failed: ' + err.message);
+        } finally {
+          btn.disabled = false;
+          btn.innerHTML = originalText;
         }
       }
     }
