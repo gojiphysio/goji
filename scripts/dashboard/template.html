@@ -910,7 +910,10 @@
       <div class="pl-period-bar" role="group" aria-label="P&L period">
         <button type="button" data-plperiod="30d" class="active">Last 30 days</button>
         <button type="button" data-plperiod="cycle">
-          Pay cycle <span class="pl-cycle-month" id="pl_cycle_month">(26th → 25th)</span>
+          Current cycle <span class="pl-cycle-month" id="pl_cycle_month">(26th → 25th)</span>
+        </button>
+        <button type="button" data-plperiod="prev_cycle">
+          Previous cycle <span class="pl-cycle-month" id="pl_prev_cycle_month">(26th → 25th)</span>
         </button>
         <button type="button" data-plperiod="custom">Custom</button>
       </div>
@@ -1917,6 +1920,13 @@
         else         { s = new Date(y, m-1, 26);   e = new Date(y, m, 25);   }
         return { start: ymdLocal(s), end: ymdLocal(e) };
       }
+      function prevPayCycleRange() {
+        const c = payCycleRange();
+        const [sy, sm, sd] = c.start.split('-').map(Number);
+        const s = new Date(sy, sm - 1 - 1, sd);  // one month earlier
+        const e = new Date(sy, sm - 1, sd - 1);  // day before current cycle starts
+        return { start: ymdLocal(s), end: ymdLocal(e) };
+      }
       function last30Range() {
         const today = new Date(DATA.generated_at);
         const start = new Date(today); start.setDate(start.getDate() - 30);
@@ -1964,6 +1974,9 @@
         const r = payCycleRange();
         document.getElementById('pl_cycle_month').textContent =
           `(${fmtMonthDay(r.start)} → ${fmtMonthDay(r.end)})`;
+        const pr = prevPayCycleRange();
+        document.getElementById('pl_prev_cycle_month').textContent =
+          `(${fmtMonthDay(pr.start)} → ${fmtMonthDay(pr.end)})`;
       }
 
       function setLoadingState(loading) {
@@ -2024,6 +2037,8 @@
       function prefetchPayCycle() {
         const r = payCycleRange();
         fetchOrCache(r.start, r.end).catch(() => { /* swallow; UI will retry on click */ });
+        const pr = prevPayCycleRange();
+        fetchOrCache(pr.start, pr.end).catch(() => {});
       }
 
       function applyPeriod(which) {
@@ -2035,9 +2050,10 @@
         document.getElementById('pl_custom_dates').hidden = (which !== 'custom');
 
         const range =
-          (which === '30d')   ? last30Range()   :
-          (which === 'cycle') ? payCycleRange() :
-                                customRange();
+          (which === '30d')        ? last30Range()       :
+          (which === 'cycle')      ? payCycleRange()     :
+          (which === 'prev_cycle') ? prevPayCycleRange() :
+                                     customRange();
         if (!range) return;     // custom: user hasn't picked dates yet
         loadWindow(range.start, range.end);
       }
@@ -2215,9 +2231,10 @@
         // Period-aware revenue label + dates line
         const days = (plWindow && plWindow.days) || 0;
         const revName = (plRevenueMode === 'bookings') ? 'Bookings' : 'Revenue';
-        const lbl  = (plPeriod === '30d')   ? `${revName} (last ${days || 30} days)`
-                   : (plPeriod === 'cycle') ? `${revName} (pay cycle, ${days}d)`
-                                            : `${revName} (custom, ${days}d)`;
+        const lbl  = (plPeriod === '30d')        ? `${revName} (last ${days || 30} days)`
+                   : (plPeriod === 'cycle')      ? `${revName} (pay cycle, ${days}d)`
+                   : (plPeriod === 'prev_cycle') ? `${revName} (previous cycle, ${days}d)`
+                                                 : `${revName} (custom, ${days}d)`;
         document.getElementById('pl_revenue_label').textContent = lbl;
         document.getElementById('pl_period_dates').textContent  = fmtPeriodLabel(plWindow);
 
