@@ -35,9 +35,13 @@ PROJECT     = os.environ.get("GCP_PROJECT", "goji-bi")
 CACHE_TTL   = int(os.environ.get("CACHE_TTL_SECONDS", "300"))
 AUTH_USER   = os.environ.get("DASHBOARD_USER", "")
 AUTH_PASS   = os.environ.get("DASHBOARD_PASS", "")
+# Local-dev mode: enables Flask reloader and persists BQ results to disk so
+# process restarts don't trigger a fresh BQ fetch. Off in prod (Cloud Run).
+DEV_MODE    = os.environ.get("DASHBOARD_DEV") == "1"
 
-HERE     = Path(__file__).resolve().parent
-TEMPLATE = HERE / "template.html"
+HERE      = Path(__file__).resolve().parent
+TEMPLATE  = HERE / "template.html"
+CACHE_DIR = HERE / ".cache"
 
 PROVIDERS = {
     "PCN": "Claire Ng",
@@ -76,6 +80,26 @@ app = Flask(__name__)
 _cache: dict[str, tuple[float, dict]] = {}
 _cache_lock = threading.Lock()
 _bq_client: bigquery.Client | None = None
+
+
+def _disk_cache_get(key: str) -> dict | None:
+    """Read a cached BQ result from disk. Dev-mode only — returns None in prod."""
+    if not DEV_MODE:
+        return None
+    p = CACHE_DIR / f"{key}.json"
+    if not p.exists():
+        return None
+    try:
+        return json.loads(p.read_text())
+    except Exception:
+        return None
+
+
+def _disk_cache_put(key: str, value: dict) -> None:
+    if not DEV_MODE:
+        return
+    CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    (CACHE_DIR / f"{key}.json").write_text(json.dumps(value, default=str))
 
 
 def _bq() -> bigquery.Client:
@@ -692,10 +716,17 @@ def get_payload() -> dict:
         if entry and now - entry[0] < CACHE_TTL:
             return entry[1]
 
+    cached = _disk_cache_get("payload")
+    if cached is not None:
+        with _cache_lock:
+            _cache["payload"] = (now, cached)
+        return cached
+
     payload = build_payload()
 
     with _cache_lock:
         _cache["payload"] = (now, payload)
+    _disk_cache_put("payload", payload)
     return payload
 
 
@@ -714,10 +745,15 @@ def fetch_pl_window(start: date, end: date) -> dict:
     Reuses fetch_kpis / fetch_clinicians / fetch_payment_methods so the rules
     stay in lock-step with the main dashboard.
     """
+    key = f"pl_window_{start.isoformat()}_{end.isoformat()}"
+    cached = _disk_cache_get(key)
+    if cached is not None:
+        return cached
+
     kpis              = fetch_kpis(start, end)
     clinicians        = fetch_clinicians(start, end)
     payment_by_method = fetch_payment_methods(start, end)
-    return {
+    result = {
         "start":             start.isoformat(),
         "end":               end.isoformat(),
         "days":              (end - start).days + 1,
@@ -726,6 +762,8 @@ def fetch_pl_window(start: date, end: date) -> dict:
         "clinicians":        clinicians,
         "payment_by_method": payment_by_method,
     }
+    _disk_cache_put(key, result)
+    return result
 
 
 def _parse_iso_date(value: str | None) -> date | None:
@@ -847,7 +885,10 @@ def _xlsx_pl_statement(payload: dict) -> bytes:
     # REVENUE
     write_section_header("Revenue")
     revenue = float(payload.get("revenue") or 0)
-    write_line("Service revenue (recognised)", revenue, sub=False)
+    revenue_mode = payload.get("revenue_mode") or "recognised"
+    rev_label = "Service revenue (bookings)" if revenue_mode == "bookings" \
+                else "Service revenue (recognised)"
+    write_line(rev_label, revenue, sub=False)
     write_subtotal("Total revenue", revenue)
     blank()
 
@@ -917,12 +958,20 @@ def _xlsx_pl_statement(payload: dict) -> bytes:
     row += 1
 
     # Footnote
+    if revenue_mode == "bookings":
+        revenue_note = (
+            "Revenue is reported on a cash/booking basis — invoice totals at the "
+            "time of sale, regardless of when services are rendered."
+        )
+    else:
+        revenue_note = (
+            "Prepared on an accrual basis. Revenue recognised when services "
+            "are rendered (package burns) or sold (single-use)."
+        )
     ws.cell(row=row, column=1, value=(
-        "Notes:  Prepared on an accrual basis. Revenue recognised when services "
-        "are rendered (package burns) or sold (single-use). Singapore Dollar "
-        "($SGD) throughout. Employer CPF computed at the statutory rate on "
-        "Ordinary Wages (capped at the OW ceiling) plus Additional Wages "
-        "(commission)."
+        f"Notes:  {revenue_note} Singapore Dollar ($SGD) throughout. "
+        "Employer CPF computed at the statutory rate on Ordinary Wages "
+        "(capped at the OW ceiling) plus Additional Wages (commission)."
     )).font = sub_font
     ws.row_dimensions[row].height = 30
     ws.merge_cells(start_row=row, start_column=1, end_row=row, end_column=3)
@@ -1008,6 +1057,9 @@ def api_pl_xlsx() -> Response:
 def refresh() -> Response:
     with _cache_lock:
         _cache.pop("payload", None)
+    if DEV_MODE and CACHE_DIR.exists():
+        for f in CACHE_DIR.glob("*.json"):
+            f.unlink()
     return Response('{"ok": true}', mimetype="application/json")
 
 
@@ -1018,4 +1070,4 @@ def healthz() -> Response:
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", "8080"))
-    app.run(host="0.0.0.0", port=port, debug=False)
+    app.run(host="0.0.0.0", port=port, debug=DEV_MODE)

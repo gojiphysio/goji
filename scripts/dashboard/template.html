@@ -430,7 +430,11 @@
       background: var(--goji); border-color: var(--goji); color: white;
     }
     .pl-period-dates {
-      font-size: 12px; color: var(--ink-muted); margin-left: 4px;
+      font-size: 12px; color: var(--ink-muted);
+      margin-top: 4px; font-variant-numeric: tabular-nums;
+    }
+    .pl-cycle-month {
+      font-weight: 400; opacity: 0.85; margin-left: 2px;
     }
     .pl-custom-dates {
       display: inline-flex; align-items: center; gap: 6px;
@@ -472,6 +476,11 @@
       display: flex; align-items: flex-start; justify-content: space-between;
       flex-wrap: wrap; gap: 12px; margin-bottom: 0;
     }
+    .pl-toggle-stack {
+      display: flex; flex-direction: column; gap: 6px; align-items: stretch;
+    }
+    .pl-toggle-stack > .pl-view-toggle { display: flex; }
+    .pl-toggle-stack > .pl-view-toggle > button { flex: 1; }
     .pl-view-toggle {
       display: inline-flex; background: var(--bg);
       border: 1px solid var(--border); border-radius: 999px; overflow: hidden;
@@ -487,8 +496,8 @@
     .pl-view-toggle button + button { border-left: 1px solid var(--border); }
 
     .pl-grid {
-      display: grid; grid-template-columns: 1fr 300px;
-      gap: 28px; align-items: start; margin-top: 20px;
+      display: grid; grid-template-columns: 360px 1fr;
+      gap: 28px; align-items: start; margin-top: 4px;
     }
     @media (max-width: 900px) { .pl-grid { grid-template-columns: 1fr; } }
 
@@ -900,9 +909,10 @@
     <div class="page-toolbar">
       <div class="pl-period-bar" role="group" aria-label="P&L period">
         <button type="button" data-plperiod="30d" class="active">Last 30 days</button>
-        <button type="button" data-plperiod="cycle">Pay cycle (26th → 25th)</button>
+        <button type="button" data-plperiod="cycle">
+          Pay cycle <span class="pl-cycle-month" id="pl_cycle_month">(26th → 25th)</span>
+        </button>
         <button type="button" data-plperiod="custom">Custom</button>
-        <span class="pl-period-dates" id="pl_period_dates">-</span>
       </div>
       <div class="pl-custom-dates" id="pl_custom_dates" hidden>
         <input type="date" id="pl_period_start">
@@ -920,76 +930,21 @@
         <span class="loading-spinner-small"></span>
         <span>Fetching data for selected period…</span>
       </div>
-      <div class="pl-header">
-        <div>
-          <h2 style="margin: 0 0 4px;">Profit &amp; Loss <span class="badge live">Live revenue</span></h2>
-          <div class="subtitle" style="margin: 0;" id="pl_subtitle">Recognised revenue vs. your monthly cost base. Toggle to include or exclude amortized capex.</div>
-        </div>
-        <div class="pl-view-toggle" role="group" aria-label="P&L view">
-          <button type="button" data-plview="cash" class="active">Cash costs only</button>
-          <button type="button" data-plview="full">Incl. amortization</button>
-        </div>
-      </div>
-
       <div class="pl-grid">
 
-        <!-- Left: P&L numbers -->
+        <!-- Left: controls (toggles + cost assumptions) -->
         <div>
-          <div class="pl-row">
-            <span class="pl-label" id="pl_revenue_label">Recognised revenue (last 30 days)</span>
-            <span class="pl-val" id="pl_revenue">—</span>
-          </div>
-          <div class="pl-row pl-cost">
-            <span class="pl-label">Payroll <span style="font-size:11px;color:var(--ink-muted);">(base + commission + employer CPF)</span></span>
-            <span class="pl-val" id="pl_payroll_total_val">—</span>
-          </div>
-          <div class="pl-row pl-cost pl-expandable" id="pl_opex_toggle_row" onclick="toggleOpexDetail()">
-            <span class="pl-label">Operating expenses <span class="pl-chevron open" id="pl_opex_chevron">▶</span></span>
-            <span class="pl-val" id="pl_opex_val">—</span>
-          </div>
-          <div class="pl-subrow" id="pl_pmtfee_subrow">
-            <span class="pl-label">↳ Payment processing fees
-              <span class="pl-subrow-note">(Plato Terminal: 2.1% + $0.20/txn)</span>
-            </span>
-            <span class="pl-val" id="pl_pmtfee_val">Awaiting data</span>
-          </div>
-          <div class="pl-row pl-cost" id="pl_amort_row" hidden>
-            <span class="pl-label">Amortized capex <span style="font-size:11px;color:var(--ink-muted);">(one-time costs ÷ months)</span></span>
-            <span class="pl-val" id="pl_amort_val">—</span>
-          </div>
-          <div class="pl-row pl-total">
-            <span class="pl-label">Total monthly costs</span>
-            <span class="pl-val" id="pl_costs_total">—</span>
-          </div>
-          <div class="pl-row pl-result" id="pl_result_row">
-            <span class="pl-label">Profit / (Loss)</span>
-            <span class="pl-val" id="pl_result_val">—</span>
+          <div class="pl-toggle-stack" style="margin-bottom: 14px;">
+            <div class="pl-view-toggle" role="group" aria-label="Revenue source">
+              <button type="button" data-plrev="recognised" class="active">Revenue</button>
+              <button type="button" data-plrev="bookings">Bookings</button>
+            </div>
+            <div class="pl-view-toggle" role="group" aria-label="P&L view">
+              <button type="button" data-plview="cash" class="active">Cash only</button>
+              <button type="button" data-plview="full">+ Amortisation</button>
+            </div>
           </div>
 
-          <!-- Break-even bar -->
-          <div class="pl-breakeven">
-            <div class="pl-be-header">
-              <span class="pl-be-label">Revenue vs. break-even</span>
-              <span class="pl-be-pct" id="pl_be_pct">—</span>
-            </div>
-            <div class="pl-progress-track">
-              <div class="pl-progress-fill" id="pl_progress_fill" style="width: 0%;"></div>
-            </div>
-            <div class="pl-be-sub" id="pl_be_sub">—</div>
-            <div id="pl_profit_track_wrap" hidden style="margin-top: 12px;">
-              <div class="pl-be-header" style="margin-bottom: 4px;">
-                <span class="pl-be-label" style="color: var(--good);">Profit margin</span>
-                <span class="pl-be-pct" id="pl_margin_pct" style="color: var(--good);">—</span>
-              </div>
-              <div class="pl-progress-track">
-                <div class="pl-progress-fill at-target" id="pl_margin_fill" style="width: 0%;"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Right: Editable cost inputs -->
-        <div>
           <button type="button" class="btn pl-inputs-toggle" id="pl_toggle_btn">
             <span>Edit cost assumptions</span>
             <span class="pl-chevron">▾</span>
@@ -1124,9 +1079,9 @@
               </div>
             </div>
 
-            <!-- Amortization -->
+            <!-- Amortisation -->
             <div class="pl-input-group" id="pl_capex_group">
-              <div class="pl-input-group-title">Amortization <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:10px;">(Full P&L view only)</span></div>
+              <div class="pl-input-group-title">Amortisation <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:10px;">(Full P&L view only)</span></div>
               <div class="pl-input-row">
                 <label>Total one-time capex</label>
                 <div class="pl-input-wrap">
@@ -1135,19 +1090,82 @@
                 </div>
               </div>
               <div class="pl-input-row">
-                <label>Amortize over</label>
+                <label>Amortise over</label>
                 <div class="pl-input-wrap">
                   <input type="number" id="pl_amort_months" value="24" min="1" step="1" class="no-prefix">
                   <span class="pl-suffix">mo</span>
                 </div>
               </div>
               <div class="pl-total-line">
-                <span>Monthly amortization</span>
+                <span>Monthly amortisation</span>
                 <span id="pl_amort_subtotal">$7,563</span>
               </div>
             </div>
 
           </div><!-- /.pl-inputs-panel -->
+        </div>
+
+        <!-- Right: the P&L statement -->
+        <div>
+          <div class="pl-header" style="margin-bottom: 14px;">
+            <div>
+              <h2 style="margin: 0 0 4px;">Profit &amp; Loss <span class="badge live">Live revenue</span></h2>
+              <div class="subtitle" style="margin: 0;" id="pl_subtitle">Revenue/Bookings vs. your monthly cost base. Toggle to include or exclude amortised capex.</div>
+              <div class="pl-period-dates" id="pl_period_dates">-</div>
+            </div>
+          </div>
+
+          <div class="pl-row">
+            <span class="pl-label" id="pl_revenue_label">Recognised revenue (last 30 days)</span>
+            <span class="pl-val" id="pl_revenue">—</span>
+          </div>
+          <div class="pl-row pl-cost">
+            <span class="pl-label">Payroll <span style="font-size:11px;color:var(--ink-muted);">(base + commission + employer CPF)</span></span>
+            <span class="pl-val" id="pl_payroll_total_val">—</span>
+          </div>
+          <div class="pl-row pl-cost pl-expandable" id="pl_opex_toggle_row" onclick="toggleOpexDetail()">
+            <span class="pl-label">Operating expenses <span class="pl-chevron open" id="pl_opex_chevron">▶</span></span>
+            <span class="pl-val" id="pl_opex_val">—</span>
+          </div>
+          <div class="pl-subrow" id="pl_pmtfee_subrow">
+            <span class="pl-label">↳ Payment processing fees
+              <span class="pl-subrow-note">(Plato Terminal: 2.1% + $0.20/txn)</span>
+            </span>
+            <span class="pl-val" id="pl_pmtfee_val">Awaiting data</span>
+          </div>
+          <div class="pl-row pl-cost" id="pl_amort_row" hidden>
+            <span class="pl-label">Amortised capex <span style="font-size:11px;color:var(--ink-muted);">(one-time costs ÷ months)</span></span>
+            <span class="pl-val" id="pl_amort_val">—</span>
+          </div>
+          <div class="pl-row pl-total">
+            <span class="pl-label">Total monthly costs</span>
+            <span class="pl-val" id="pl_costs_total">—</span>
+          </div>
+          <div class="pl-row pl-result" id="pl_result_row">
+            <span class="pl-label">Profit / (Loss)</span>
+            <span class="pl-val" id="pl_result_val">—</span>
+          </div>
+
+          <!-- Break-even bar -->
+          <div class="pl-breakeven">
+            <div class="pl-be-header">
+              <span class="pl-be-label">Revenue vs. break-even</span>
+              <span class="pl-be-pct" id="pl_be_pct">—</span>
+            </div>
+            <div class="pl-progress-track">
+              <div class="pl-progress-fill" id="pl_progress_fill" style="width: 0%;"></div>
+            </div>
+            <div class="pl-be-sub" id="pl_be_sub">—</div>
+            <div id="pl_profit_track_wrap" hidden style="margin-top: 12px;">
+              <div class="pl-be-header" style="margin-bottom: 4px;">
+                <span class="pl-be-label" style="color: var(--good);">Profit margin</span>
+                <span class="pl-be-pct" id="pl_margin_pct" style="color: var(--good);">—</span>
+              </div>
+              <div class="pl-progress-track">
+                <div class="pl-progress-fill at-target" id="pl_margin_fill" style="width: 0%;"></div>
+              </div>
+            </div>
+          </div>
         </div>
 
       </div><!-- /.pl-grid -->
@@ -1871,6 +1889,7 @@
     /* ===== P&L Section ===== */
     function initPL() {
       let plView = 'cash';
+      let plRevenueMode = 'recognised'; // 'recognised' | 'bookings'
       let plPeriod = '30d';          // '30d' | 'cycle' | 'custom'
       // plWindow holds the current period's BQ-sourced figures. Starts from
       // DATA.ranges['30d'] so the page can render before the first fetch.
@@ -1918,6 +1937,7 @@
           end:   range.end,
           days:  30,
           recognised: r30.kpis.recognised || 0,
+          bookings:   r30.kpis.bookings   || 0,
           clinicians: r30.clinicians || [],
           payment_by_method: DATA.payment_by_method || [],
         };
@@ -1931,6 +1951,19 @@
       function fmtPeriodLabel(w) {
         if (!w) return '-';
         return `${w.start} → ${w.end} (${w.days}d)`;
+      }
+      // Short month-day, e.g. "May 26". Parses YYYY-MM-DD as a local date so
+      // we don't shift across timezones.
+      function fmtMonthDay(ymd) {
+        if (!ymd) return '';
+        const [y, m, d] = ymd.split('-').map(Number);
+        const dt = new Date(y, m - 1, d);
+        return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      }
+      function updateCycleMonthLabel() {
+        const r = payCycleRange();
+        document.getElementById('pl_cycle_month').textContent =
+          `(${fmtMonthDay(r.start)} → ${fmtMonthDay(r.end)})`;
       }
 
       function setLoadingState(loading) {
@@ -2021,6 +2054,17 @@
         });
       });
 
+      // Revenue source toggle
+      document.querySelectorAll('[data-plrev]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          plRevenueMode = btn.dataset.plrev;
+          document.querySelectorAll('[data-plrev]').forEach(b =>
+            b.classList.toggle('active', b.dataset.plrev === plRevenueMode)
+          );
+          renderPL();
+        });
+      });
+
       // Period selector
       document.querySelectorAll('[data-plperiod]').forEach(btn => {
         btn.addEventListener('click', () => applyPeriod(btn.dataset.plperiod));
@@ -2053,6 +2097,7 @@
       );
 
       document.getElementById('pl_period_dates').textContent = fmtPeriodLabel(plWindow);
+      updateCycleMonthLabel();
       renderPL();
       // Background-warm the pay cycle so toggling to it is instant. No UI
       // until the user actually clicks; failures are silent.
@@ -2163,14 +2208,16 @@
 
         // Use the currently selected P&L window. Falls back to 0 if the
         // initial fetch hasn't landed yet.
-        const revenue = (plWindow && plWindow.recognised) || 0;
+        const revenueField = (plRevenueMode === 'bookings') ? 'bookings' : 'recognised';
+        const revenue = (plWindow && plWindow[revenueField]) || 0;
         const profit  = revenue - costs;
 
         // Period-aware revenue label + dates line
         const days = (plWindow && plWindow.days) || 0;
-        const lbl  = (plPeriod === '30d')   ? `Recognised revenue (last ${days || 30} days)`
-                   : (plPeriod === 'cycle') ? `Recognised revenue (pay cycle, ${days}d)`
-                                            : `Recognised revenue (custom, ${days}d)`;
+        const revName = (plRevenueMode === 'bookings') ? 'Bookings' : 'Revenue';
+        const lbl  = (plPeriod === '30d')   ? `${revName} (last ${days || 30} days)`
+                   : (plPeriod === 'cycle') ? `${revName} (pay cycle, ${days}d)`
+                                            : `${revName} (custom, ${days}d)`;
         document.getElementById('pl_revenue_label').textContent = lbl;
         document.getElementById('pl_period_dates').textContent  = fmtPeriodLabel(plWindow);
 
@@ -2261,9 +2308,10 @@
           { id: 'pl_opex_other', name: 'Software, admin & other' },
         ].map(o => ({ name: o.name, amount: numVal(o.id) }));
 
-        const pmtFee   = getPmtFee() || 0;
-        const amort    = (plView === 'full') ? getAmort() : 0;
-        const revenue  = (plWindow && plWindow.recognised) || 0;
+        const pmtFee     = getPmtFee() || 0;
+        const amort      = (plView === 'full') ? getAmort() : 0;
+        const revField   = (plRevenueMode === 'bookings') ? 'bookings' : 'recognised';
+        const revenue    = (plWindow && plWindow[revField]) || 0;
 
         const periodLabel =
           (plPeriod === '30d')   ? 'Last 30 days' :
@@ -2279,6 +2327,7 @@
             days:  plWindow && plWindow.days,
           },
           view: plView,
+          revenue_mode: plRevenueMode,
           revenue,
           payroll: {
             base_salaries: baseSalaries,

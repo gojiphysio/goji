@@ -23,6 +23,9 @@ env/
 .mypy_cache/
 .ruff_cache/
 
+# Local-dev BQ result cache (DASHBOARD_DEV=1)
+scripts/dashboard/.cache/
+
 # Editors / OS
 .DS_Store
 .vscode/
