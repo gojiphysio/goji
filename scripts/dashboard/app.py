@@ -21,14 +21,18 @@ import os
 import re
 import threading
 import time
+from concurrent.futures import ThreadPoolExecutor
 from datetime import date, datetime, timedelta
 from functools import wraps
 from pathlib import Path
 
 from flask import Flask, Response, request
+from google.auth import default as google_auth_default
+from google.auth.transport.requests import AuthorizedSession
 from google.cloud import bigquery
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
+from requests.adapters import HTTPAdapter
 
 PROJECT     = os.environ.get("GCP_PROJECT", "goji-bi")
 CACHE_TTL   = int(os.environ.get("CACHE_TTL_SECONDS", "300"))
@@ -79,6 +83,7 @@ app = Flask(__name__)
 _cache: dict[str, tuple[float, dict]] = {}
 _cache_lock = threading.Lock()
 _bq_client: bigquery.Client | None = None
+_bq_client_lock = threading.Lock()
 
 
 def _disk_cache_get(key: str) -> dict | None:
@@ -101,10 +106,33 @@ def _disk_cache_put(key: str, value: dict) -> None:
     (CACHE_DIR / f"{key}.json").write_text(json.dumps(value, default=str))
 
 
+def _make_bq_client() -> bigquery.Client:
+    """Build a BigQuery client whose underlying HTTP session has a connection
+    pool big enough for the parallel fan-out in build_payload.
+
+    The default urllib3 pool size is 10. We fire ~27 concurrent queries, so
+    17 connections were being discarded and remade per cold build (logged as
+    'Connection pool is full, discarding connection'). Bumping pool_maxsize
+    to 40 lets every concurrent query reuse a pooled TCP connection.
+    """
+    credentials, _ = google_auth_default()
+    session = AuthorizedSession(credentials)
+    adapter = HTTPAdapter(pool_connections=4, pool_maxsize=40)
+    session.mount("https://", adapter)
+    return bigquery.Client(project=PROJECT, _http=session)
+
+
 def _bq() -> bigquery.Client:
+    # Double-checked locking: build_payload fans the BQ queries out across
+    # threads, and the first request after a cold start has all those threads
+    # racing to lazy-init the client. Without the lock several would each
+    # create a Client; the late ones would replace _bq_client and the earlier
+    # ones would silently leak.
     global _bq_client
     if _bq_client is None:
-        _bq_client = bigquery.Client(project=PROJECT)
+        with _bq_client_lock:
+            if _bq_client is None:
+                _bq_client = _make_bq_client()
     return _bq_client
 
 
@@ -193,14 +221,21 @@ ORDER BY bucket
 
 
 def fetch_trends(start: date, end: date) -> dict:
+    # Four independent BQ queries — fan out so the slowest single series is
+    # the wall-time floor instead of their sum.
     gran, _ = _granularity_for(start, end)
-    return {
-        "granularity":     gran,
-        "bookings":        _fetch_series("marts.fct_invoice_line",       "invoice_date",  "SUM(booking_amount)",        start, end),
-        "recognised":      _fetch_series("marts.fct_service_delivered",  "delivery_date", "SUM(recognised_revenue)",    start, end),
-        "visits":          _fetch_series("marts.fct_service_delivered",  "delivery_date", "COUNT(*)",                   start, end),
-        "active_patients": _fetch_series("marts.fct_service_delivered",  "delivery_date", "COUNT(DISTINCT patient_id)", start, end, "AND patient_id IS NOT NULL"),
-    }
+    with ThreadPoolExecutor(max_workers=4, thread_name_prefix="trends") as ex:
+        f_bookings        = ex.submit(_fetch_series, "marts.fct_invoice_line",      "invoice_date",  "SUM(booking_amount)",        start, end)
+        f_recognised      = ex.submit(_fetch_series, "marts.fct_service_delivered", "delivery_date", "SUM(recognised_revenue)",    start, end)
+        f_visits          = ex.submit(_fetch_series, "marts.fct_service_delivered", "delivery_date", "COUNT(*)",                   start, end)
+        f_active_patients = ex.submit(_fetch_series, "marts.fct_service_delivered", "delivery_date", "COUNT(DISTINCT patient_id)", start, end, "AND patient_id IS NOT NULL")
+        return {
+            "granularity":     gran,
+            "bookings":        f_bookings.result(),
+            "recognised":      f_recognised.result(),
+            "visits":          f_visits.result(),
+            "active_patients": f_active_patients.result(),
+        }
 
 
 def fetch_clinicians(start: date, end: date) -> list[dict]:
@@ -794,57 +829,76 @@ ORDER BY invoice_date DESC, invoice_label DESC
 
 
 def build_payload() -> dict:
-    log.info("Building dashboard payload from BigQuery")
-    deferred = fetch_deferred()
-    cohorts  = fetch_cohorts()
-    log.info("  patient demographics")
-    demographics = fetch_patient_demographics()
-    log.info("  patient referrals")
-    referrals    = fetch_patient_referrals()
+    """Fan all BQ queries out in parallel. ~27 queries; serial wall time was
+    ~38s, parallel is limited by the slowest single query (~3-5s).
 
-    ranges: dict[str, dict] = {}
-    for key, label, start, end in preset_ranges():
-        log.info("  range %s (%s -> %s)", key, start, end)
-        ranges[key] = {
-            "label":         label,
-            "start":         start.isoformat(),
-            "end":           end.isoformat(),
-            "kpis":          fetch_kpis(start, end),
-            "trends":        fetch_trends(start, end),
-            "clinicians":    fetch_clinicians(start, end),
-            "discounts":     fetch_discounts(start, end),
-            "treatment_mix": fetch_treatment_mix(start, end),
-        }
-
-    # P&L tab uses a fixed 30-day window for payment processing fees
+    BigQuery client is thread-safe; each fetch_* spawns its own job and
+    blocks on .result() so threads sleep on I/O rather than spinning on the
+    GIL. The thread pool is sized to comfortably cover all in-flight queries
+    so nothing queues behind other work in this request.
+    """
+    log.info("Building dashboard payload from BigQuery (parallel)")
     today = date.today()
-    pmt_start = today - timedelta(days=30)
-    log.info("  payment methods (%s -> %s)", pmt_start, today)
-    payment_by_method = fetch_payment_methods(pmt_start, today)
-
+    pmt_start  = today - timedelta(days=30)
     # Commission calculator needs the per-session ledger for the current pay
     # cycle plus a generous trailing window so custom-range reports still work.
     # 120 days covers ~4 pay cycles (26th -> 25th).
     appt_start = today - timedelta(days=120)
-    log.info("  appointments (%s -> %s)", appt_start, today)
-    appointments = fetch_appointments(appt_start, today)
+    presets    = preset_ranges()
 
-    # Invoice attribution alert: cross-ref invoice.doctor against the same-day
-    # appointment-calendar doctor. Hits Plato API live (cached for CACHE_TTL).
-    doctor_mismatches = fetch_invoice_doctor_mismatches()
+    # max_workers sized to cover every concurrent fetch this request fires:
+    # 7 top-level + 4 ranges × 5 metrics = 27. Round up to 32 for headroom.
+    with ThreadPoolExecutor(max_workers=32, thread_name_prefix="bq") as ex:
+        # Range-independent (or fixed-window) fetches.
+        f_deferred      = ex.submit(fetch_deferred)
+        f_cohorts       = ex.submit(fetch_cohorts)
+        f_demographics  = ex.submit(fetch_patient_demographics)
+        f_referrals     = ex.submit(fetch_patient_referrals)
+        f_payments      = ex.submit(fetch_payment_methods, pmt_start, today)
+        f_appointments  = ex.submit(fetch_appointments, appt_start, today)
+        f_mismatches    = ex.submit(fetch_invoice_doctor_mismatches)
 
-    return {
-        "generated_at":      datetime.now().astimezone().isoformat(timespec="seconds"),
-        "default_range":     "30d",
-        "deferred":          deferred,
-        "cohorts":           cohorts,
-        "demographics":      demographics,
-        "referrals":         referrals,
-        "appointments":      appointments,
-        "payment_by_method": payment_by_method,
-        "ranges":            ranges,
-        "doctor_mismatches": doctor_mismatches,
-    }
+        # Per-range fetches. Each fetch_* is independent so they all race.
+        range_jobs: dict[str, dict] = {}
+        for key, label, start, end in presets:
+            range_jobs[key] = {
+                "label":         label,
+                "start":         start.isoformat(),
+                "end":           end.isoformat(),
+                "kpis":          ex.submit(fetch_kpis, start, end),
+                "trends":        ex.submit(fetch_trends, start, end),
+                "clinicians":    ex.submit(fetch_clinicians, start, end),
+                "discounts":     ex.submit(fetch_discounts, start, end),
+                "treatment_mix": ex.submit(fetch_treatment_mix, start, end),
+            }
+
+        # Block on results. If any future raised, .result() re-raises here and
+        # the still-running ones get cancelled when the executor exits.
+        ranges: dict[str, dict] = {}
+        for key, v in range_jobs.items():
+            ranges[key] = {
+                "label":         v["label"],
+                "start":         v["start"],
+                "end":           v["end"],
+                "kpis":          v["kpis"].result(),
+                "trends":        v["trends"].result(),
+                "clinicians":    v["clinicians"].result(),
+                "discounts":     v["discounts"].result(),
+                "treatment_mix": v["treatment_mix"].result(),
+            }
+
+        return {
+            "generated_at":      datetime.now().astimezone().isoformat(timespec="seconds"),
+            "default_range":     "30d",
+            "deferred":          f_deferred.result(),
+            "cohorts":           f_cohorts.result(),
+            "demographics":      f_demographics.result(),
+            "referrals":         f_referrals.result(),
+            "appointments":      f_appointments.result(),
+            "payment_by_method": f_payments.result(),
+            "ranges":            ranges,
+            "doctor_mismatches": f_mismatches.result(),
+        }
 
 
 def get_payload() -> dict:
