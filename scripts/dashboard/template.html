@@ -73,13 +73,6 @@
       background: var(--good); margin-right: 6px; vertical-align: middle;
     }
 
-    .notice {
-      background: #fdf6e3; border: 1px solid #ecd9a1;
-      color: #78611f; border-radius: 8px; padding: 12px 16px;
-      margin-bottom: 24px; font-size: 13px;
-    }
-    .notice strong { color: #5a4814; }
-
     /* Loading overlay: visible from first paint, hidden once /api/data lands.
        The shell HTML ships in <50ms, so the user sees the spinner immediately
        instead of staring at a blank tab while BQ runs. */
@@ -214,12 +207,47 @@
       border-radius: 6px; padding: 8px 12px; margin-top: 8px;
     }
 
+    .discount-grid {
+      display: grid; grid-template-columns: 240px 1fr;
+      gap: 28px; align-items: start;
+    }
+
+    /* Tables inside sections can overflow on narrow viewports — let them
+       scroll horizontally instead of forcing the whole page to scroll. */
+    section.q .table-scroll,
+    section.alert .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
     @media (max-width: 1100px) {
       .kpi-row { grid-template-columns: repeat(3, 1fr); }
     }
     @media (max-width: 900px) {
       .kpi-row { grid-template-columns: repeat(2, 1fr); }
       .two-col, .three-col { grid-template-columns: 1fr; }
+      .discount-grid { grid-template-columns: 1fr; gap: 18px; }
+    }
+    @media (max-width: 640px) {
+      .wrap { padding: 16px 14px 48px; }
+      header.topbar { padding-bottom: 14px; margin-bottom: 14px; }
+      .brand-img { height: 36px; }
+      .brand-name { font-size: 17px; }
+      .brand-sub { font-size: 12px; }
+      .page-nav { display: flex; width: 100%; }
+      .page-nav button { flex: 1; padding: 8px 10px; font-size: 12px; }
+      .page-toolbar { justify-content: flex-start; }
+      .date-selector button { padding: 6px 10px; font-size: 12px; }
+      .kpi-row { grid-template-columns: 1fr; gap: 10px; margin-bottom: 18px; }
+      .kpi-card { padding: 14px 16px; }
+      .kpi-value { font-size: 24px; }
+      section.q { padding: 16px 16px; margin-bottom: 14px; border-radius: 10px; }
+      section.q h2 { font-size: 15px; flex-wrap: wrap; }
+      section.q .subtitle { font-size: 12px; margin-bottom: 14px; }
+      section.alert { padding: 14px 16px; }
+      .chart-wrap { height: 220px; }
+      .chart-wrap.small { height: 200px; }
+      table { font-size: 12px; }
+      th { padding: 6px 8px; font-size: 11px; }
+      td { padding: 8px 8px; }
+      .badge { margin-left: 4px; }
     }
 
     /* --- Page nav (Dashboard / Commission Calculator) --- */
@@ -384,7 +412,7 @@
     @media print {
       @page { margin: 18mm; }
       body { background: white; color: black; }
-      .topbar, .page-nav, .notice, .calc-card, footer,
+      .topbar, .page-nav, .calc-card, footer,
       .date-selector, .updated, .filters, .calc-actions { display: none !important; }
       #page-dashboard, #page-pl { display: none !important; }
       .wrap { padding: 0; max-width: none; }
@@ -655,14 +683,6 @@
       </div>
     </div>
 
-    <div class="notice">
-      <strong>Live data dashboard, generated on demand.</strong> The date selector switches between
-      snapshots taken when this file was generated. Sections labelled
-      <span class="badge live">Live</span> reflect actual clinic numbers from BigQuery.
-      Sections labelled <span class="badge sample">Sample</span> are illustrative pending
-      the ingestion job for that data source.
-    </div>
-
     <section class="alert" id="doctor-mismatch-alert" hidden>
       <h2>
         Provider attribution alerts
@@ -786,7 +806,7 @@
         Implicit opening-promo discount + ad-hoc line discounts, <span class="range-label">last 30 days</span>.
         Pack-promo cost is computed against the usual single-session price &times; pack size.
       </div>
-      <div style="display: grid; grid-template-columns: 240px 1fr; gap: 28px; align-items: start;">
+      <div class="discount-grid">
         <div>
           <div class="kpi-value" id="discountTotal" style="font-size: 38px; color: var(--goji);">-</div>
           <div class="kpi-sub" style="margin-bottom: 14px;">Total discount absorbed</div>
@@ -794,20 +814,22 @@
         </div>
         <div>
           <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px;">Opening-promo discount, by SKU</div>
-          <table>
-            <thead>
-              <tr>
-                <th>Service</th>
-                <th>Pack</th>
-                <th class="num">Units</th>
-                <th class="num">Usual ref</th>
-                <th class="num">Sold</th>
-                <th class="num">Discount</th>
-              </tr>
-            </thead>
-            <tbody id="promoBySkuTbody"></tbody>
-            <tfoot id="promoBySkuTfoot"></tfoot>
-          </table>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Service</th>
+                  <th>Pack</th>
+                  <th class="num">Units</th>
+                  <th class="num">Usual ref</th>
+                  <th class="num">Sold</th>
+                  <th class="num">Discount</th>
+                </tr>
+              </thead>
+              <tbody id="promoBySkuTbody"></tbody>
+              <tfoot id="promoBySkuTfoot"></tfoot>
+            </table>
+          </div>
 
           <div id="adhocBlock" hidden style="margin-top: 22px;">
             <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px;">Ad-hoc on non-promo items</div>
