@@ -37,6 +37,10 @@
     }
     .brand { display: flex; align-items: center; gap: 12px; }
     .brand-dot { width: 14px; height: 14px; background: var(--goji); border-radius: 50%; }
+    .brand-img {
+      height: 48px; width: auto; flex-shrink: 0;
+      background: transparent;
+    }
     .brand-name { font-size: 20px; font-weight: 600; letter-spacing: -0.01em; }
     .brand-sub { color: var(--ink-soft); font-size: 13px; margin-top: 2px; }
     .filters { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
@@ -59,6 +63,10 @@
     .date-selector button.active + button,
     .date-selector button + button.active { border-left-color: transparent; }
 
+    .page-toolbar {
+      display: flex; align-items: center; justify-content: flex-end;
+      gap: 12px; flex-wrap: wrap; margin-bottom: 16px;
+    }
     .updated { font-size: 12px; color: var(--ink-muted); }
     .updated .dot {
       display: inline-block; width: 6px; height: 6px; border-radius: 50%;
@@ -71,6 +79,29 @@
       margin-bottom: 24px; font-size: 13px;
     }
     .notice strong { color: #5a4814; }
+
+    /* Loading overlay: visible from first paint, hidden once /api/data lands.
+       The shell HTML ships in <50ms, so the user sees the spinner immediately
+       instead of staring at a blank tab while BQ runs. */
+    .loading-overlay {
+      position: fixed; inset: 0;
+      background: rgba(252, 249, 242, 0.96);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 1000; transition: opacity 0.2s ease-out;
+    }
+    .loading-overlay.hidden { opacity: 0; pointer-events: none; }
+    .loading-card { text-align: center; padding: 0 24px; }
+    .loading-spinner {
+      width: 36px; height: 36px; margin: 0 auto 16px;
+      border: 3px solid var(--border);
+      border-top-color: var(--goji);
+      border-radius: 50%;
+      animation: loading-spin 0.8s linear infinite;
+    }
+    @keyframes loading-spin { to { transform: rotate(360deg); } }
+    .loading-text { font-size: 14px; color: var(--ink); font-weight: 500; }
+    .loading-hint { font-size: 12px; color: var(--ink-muted); margin-top: 4px; }
+    .loading-hint.error { color: var(--goji); }
 
     .badge {
       display: inline-block; font-size: 10px; letter-spacing: 0.04em;
@@ -149,6 +180,40 @@
 
     .empty { color: var(--ink-muted); font-style: italic; }
 
+    /* Invoice attribution alert (provider mismatch vs same-day appointment) */
+    section.alert {
+      background: #fdf4f2; border: 1px solid #f2c8c0;
+      border-radius: 12px; padding: 18px 22px; margin-bottom: 20px;
+      box-shadow: var(--shadow);
+    }
+    section.alert h2 {
+      font-size: 15px; font-weight: 600; margin: 0 0 4px;
+      color: var(--goji); display: flex; align-items: center; gap: 8px;
+    }
+    section.alert .subtitle {
+      font-size: 13px; color: var(--ink-soft); margin-bottom: 14px;
+    }
+    section.alert table th { color: var(--goji); }
+    section.alert table td { border-bottom-color: #f2dad4; }
+    .alert-count {
+      background: var(--goji); color: white;
+      border-radius: 999px; padding: 1px 9px;
+      font-size: 12px; font-weight: 600;
+    }
+    .doctor-flip {
+      font-variant-numeric: tabular-nums;
+      font-family: ui-monospace, SFMono-Regular, monospace;
+      font-size: 12px;
+    }
+    .doctor-flip .wrong { color: var(--goji); font-weight: 600; }
+    .doctor-flip .right { color: var(--good); font-weight: 600; }
+    .alert-meta { color: var(--ink-muted); font-size: 11px; }
+    .alert-config-note {
+      font-size: 12px; color: var(--ink-muted);
+      background: #fafaf7; border: 1px dashed var(--border);
+      border-radius: 6px; padding: 8px 12px; margin-top: 8px;
+    }
+
     @media (max-width: 1100px) {
       .kpi-row { grid-template-columns: repeat(3, 1fr); }
     }
@@ -156,29 +221,439 @@
       .kpi-row { grid-template-columns: repeat(2, 1fr); }
       .two-col, .three-col { grid-template-columns: 1fr; }
     }
+
+    /* --- Page nav (Dashboard / Commission Calculator) --- */
+    .page-nav {
+      display: inline-flex; background: var(--card);
+      border: 1px solid var(--border); border-radius: 999px;
+      box-shadow: var(--shadow); overflow: hidden; margin-bottom: 20px;
+    }
+    .page-nav button {
+      background: transparent; border: 0; padding: 8px 18px;
+      font: inherit; color: var(--ink-soft); cursor: pointer;
+      font-size: 13px; font-weight: 500;
+    }
+    .page-nav button:hover { background: var(--bg); color: var(--ink); }
+    .page-nav button.active { background: var(--goji); color: white; }
+    .page-nav button + button { border-left: 1px solid var(--border); }
+    .page-nav button.active + button,
+    .page-nav button + button.active { border-left-color: transparent; }
+    .page[hidden] { display: none; }
+
+    /* --- Commission calculator --- */
+    .calc-grid {
+      display: grid; grid-template-columns: 360px 1fr;
+      gap: 20px; align-items: start;
+    }
+    @media (max-width: 900px) {
+      .calc-grid { grid-template-columns: 1fr; }
+    }
+    .calc-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 22px 24px; box-shadow: var(--shadow);
+    }
+    .calc-card h2 {
+      font-size: 16px; font-weight: 600; margin: 0 0 4px;
+    }
+    .calc-card .subtitle {
+      font-size: 13px; color: var(--ink-soft); margin-bottom: 18px;
+    }
+    .form-row { margin-bottom: 14px; }
+    .form-row label {
+      display: block; font-size: 12px; color: var(--ink-soft);
+      text-transform: uppercase; letter-spacing: 0.04em;
+      margin-bottom: 6px; font-weight: 500;
+    }
+    .form-row .hint {
+      font-size: 11px; color: var(--ink-muted); margin-top: 4px;
+      font-style: italic;
+    }
+    .form-row select, .form-row input[type="number"] {
+      width: 100%; padding: 9px 12px;
+      border: 1px solid var(--border); border-radius: 8px;
+      background: var(--bg); font: inherit; font-size: 14px;
+      color: var(--ink); font-variant-numeric: tabular-nums;
+    }
+    .form-row select:focus, .form-row input:focus {
+      outline: none; border-color: var(--goji);
+      box-shadow: 0 0 0 3px var(--goji-soft);
+    }
+    .input-prefix { position: relative; }
+    .input-prefix .prefix {
+      position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+      color: var(--ink-muted); font-size: 14px; pointer-events: none;
+      font-weight: 500;
+    }
+    /* [type="number"] in selector tied with .form-row input[type="number"]
+       above, so the later rule wins and the prefix padding actually applies. */
+    .input-prefix input[type="number"] { padding-left: 32px; }
+    .input-suffix { position: relative; }
+    .input-suffix .suffix {
+      position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+      color: var(--ink-muted); font-size: 14px; pointer-events: none;
+      font-weight: 500;
+    }
+    .input-suffix input[type="number"] { padding-right: 32px; }
+
+    .prefill-flag {
+      display: inline-block; font-size: 10px; letter-spacing: 0.04em;
+      text-transform: uppercase; font-weight: 600;
+      padding: 2px 6px; border-radius: 3px; margin-left: 6px;
+      background: #e3f2e8; color: var(--good);
+    }
+    .prefill-flag.edited { background: #fbeed1; color: var(--warn); }
+
+    .calc-actions {
+      display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap;
+    }
+    .btn {
+      padding: 9px 16px; border-radius: 8px; border: 1px solid var(--border);
+      background: var(--card); color: var(--ink); font: inherit;
+      font-size: 13px; cursor: pointer; font-weight: 500;
+    }
+    .btn:hover { background: var(--bg); }
+    .btn.primary {
+      background: var(--goji); border-color: var(--goji); color: white;
+    }
+    .btn.primary:hover { background: #a8392a; border-color: #a8392a; }
+
+    /* --- Summary report --- */
+    .report-card { background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 24px 28px; box-shadow: var(--shadow); }
+    .report-card h2 { font-size: 18px; font-weight: 600; margin: 0; }
+    .report-meta { color: var(--ink-soft); font-size: 13px; margin: 4px 0 18px; }
+
+    .summary-rows { border-top: 1px solid var(--border); margin-top: 14px; }
+    .summary-row {
+      display: flex; justify-content: space-between; align-items: baseline;
+      padding: 10px 0; border-bottom: 1px solid #f0ebe2; font-size: 14px;
+    }
+    .summary-row .label { color: var(--ink-soft); }
+    .summary-row .value { font-variant-numeric: tabular-nums; font-weight: 500; }
+    .summary-row.total {
+      border-bottom: none; border-top: 2px solid var(--ink);
+      margin-top: 6px; padding-top: 14px;
+    }
+    .summary-row.total .label { color: var(--ink); font-weight: 600; font-size: 15px; }
+    .summary-row.total .value { color: var(--goji); font-weight: 600; font-size: 22px; }
+    .summary-row.commission .value { color: var(--goji); font-weight: 600; }
+    .summary-row.subtle .value { color: var(--ink-soft); font-weight: 400; }
+
+    .commission-breakdown {
+      background: var(--bg); border-radius: 8px; padding: 12px 16px;
+      margin-top: 16px; font-size: 12px; color: var(--ink-soft);
+      line-height: 1.6;
+    }
+    .commission-breakdown code {
+      background: var(--card); padding: 2px 6px; border-radius: 4px;
+      font-size: 11px;
+    }
+
+    .appointments-block { margin-top: 24px; }
+    .appointments-title {
+      font-size: 14px; font-weight: 600; margin: 0 0 4px;
+    }
+    .appointments-meta {
+      font-size: 12px; color: var(--ink-muted); margin-bottom: 10px;
+    }
+    .appointments-table {
+      width: 100%; border-collapse: collapse; font-size: 13px;
+    }
+    .appointments-table th {
+      text-align: left; font-weight: 500; color: var(--ink-soft);
+      padding: 8px 10px; border-bottom: 1px solid var(--border);
+      font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em;
+    }
+    .appointments-table th.num { text-align: right; }
+    .appointments-table td {
+      padding: 8px 10px; border-bottom: 1px solid #f0ebe2;
+    }
+    .appointments-table td.num {
+      text-align: right; font-variant-numeric: tabular-nums;
+    }
+    .appointments-table tfoot td {
+      border-top: 2px solid var(--ink); border-bottom: none;
+      padding-top: 10px;
+    }
+    .appointments-empty {
+      color: var(--ink-muted); font-style: italic;
+      padding: 16px 10px; text-align: center;
+    }
+
+    /* --- Print rules: only the report prints --- */
+    @media print {
+      @page { margin: 18mm; }
+      body { background: white; color: black; }
+      .topbar, .page-nav, .notice, .calc-card, footer,
+      .date-selector, .updated, .filters, .calc-actions { display: none !important; }
+      #page-dashboard, #page-pl { display: none !important; }
+      .wrap { padding: 0; max-width: none; }
+      .calc-grid { grid-template-columns: 1fr; gap: 0; }
+      .report-card { border: none; box-shadow: none; padding: 0; }
+      .summary-row.total .value { color: black; }
+      .summary-row.commission .value { color: black; }
+      .commission-breakdown { background: #f5f5f5; }
+      .brand-print {
+        display: flex !important; align-items: center; gap: 10px;
+        padding-bottom: 12px; margin-bottom: 18px;
+        border-bottom: 2px solid black;
+      }
+      .brand-print .brand-dot {
+        width: 12px; height: 12px; background: #92171D; border-radius: 50%;
+      }
+      .brand-print .brand-img {
+        height: 32px; width: auto;
+      }
+      .brand-print .brand-name { font-size: 18px; font-weight: 600; }
+      /* Keep appointment rows from splitting awkwardly */
+      .appointments-block { page-break-inside: auto; margin-top: 22px; }
+      .appointments-table tr { page-break-inside: avoid; }
+      .appointments-table thead { display: table-header-group; }
+      .appointments-table tfoot { display: table-row-group; }
+    }
+    .brand-print { display: none; }
+
+    /* ========== P&L Section ========== */
+    .pl-period-bar {
+      display: inline-flex; align-items: center; gap: 10px;
+      flex-wrap: wrap;
+    }
+    .pl-period-bar > button {
+      background: var(--card); border: 1px solid var(--border);
+      padding: 6px 12px; border-radius: 999px;
+      font: inherit; font-size: 12px; font-weight: 500;
+      color: var(--ink-soft); cursor: pointer;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+    }
+    .pl-period-bar > button:hover { background: var(--bg); color: var(--ink); }
+    .pl-period-bar > button.active {
+      background: var(--goji); border-color: var(--goji); color: white;
+    }
+    .pl-period-dates {
+      font-size: 12px; color: var(--ink-muted);
+      margin-top: 4px; font-variant-numeric: tabular-nums;
+    }
+    .pl-cycle-month {
+      font-weight: 400; opacity: 0.85; margin-left: 2px;
+    }
+    .pl-custom-dates {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 12px;
+    }
+    .pl-custom-dates input[type="date"] {
+      padding: 5px 8px; border: 1px solid var(--border); border-radius: 6px;
+      background: var(--card); font: inherit; font-size: 12px; color: var(--ink);
+    }
+    .pl-revenue-loading { opacity: 0.5; }
+
+    /* P&L loading state — only shows for cache-miss (Custom). 30d and pay
+       cycle are pre-cached so toggling them is instant. */
+    #pl-section { position: relative; }
+    .pl-loading-badge {
+      position: absolute; top: 16px; left: 50%; transform: translateX(-50%);
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 999px; padding: 8px 16px;
+      font-size: 13px; font-weight: 500; color: var(--ink);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+      display: inline-flex; align-items: center; gap: 8px;
+      z-index: 5; white-space: nowrap;
+    }
+    .pl-loading-badge[hidden] { display: none; }
+    .loading-spinner-small {
+      width: 14px; height: 14px;
+      border: 2px solid var(--border);
+      border-top-color: var(--goji);
+      border-radius: 50%;
+      animation: loading-spin 0.8s linear infinite;
+      display: inline-block;
+    }
+    .pl-grid.pl-loading {
+      opacity: 0.45; transition: opacity 0.15s ease-out;
+      pointer-events: none;
+    }
+
+    .pl-header {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      flex-wrap: wrap; gap: 12px; margin-bottom: 0;
+    }
+    .pl-toggle-stack {
+      display: flex; flex-direction: column; gap: 6px; align-items: stretch;
+    }
+    .pl-toggle-stack > .pl-view-toggle { display: flex; }
+    .pl-toggle-stack > .pl-view-toggle > button { flex: 1; }
+    .pl-view-toggle {
+      display: inline-flex; background: var(--bg);
+      border: 1px solid var(--border); border-radius: 999px; overflow: hidden;
+      flex-shrink: 0;
+    }
+    .pl-view-toggle button {
+      background: transparent; border: 0; padding: 5px 14px;
+      font: inherit; color: var(--ink-soft); cursor: pointer;
+      font-size: 12px; font-weight: 500; transition: background 0.15s, color 0.15s;
+    }
+    .pl-view-toggle button:hover { background: #ede9e2; color: var(--ink); }
+    .pl-view-toggle button.active { background: var(--ink); color: #fff; }
+    .pl-view-toggle button + button { border-left: 1px solid var(--border); }
+
+    .pl-grid {
+      display: grid; grid-template-columns: 360px 1fr;
+      gap: 28px; align-items: start; margin-top: 4px;
+    }
+    @media (max-width: 900px) { .pl-grid { grid-template-columns: 1fr; } }
+
+    .pl-row {
+      display: flex; justify-content: space-between; align-items: baseline;
+      padding: 9px 2px; border-bottom: 1px solid #f0ebe2; font-size: 14px;
+    }
+    .pl-row:first-child { border-top: 1px solid var(--border); padding-top: 10px; }
+    .pl-label { color: var(--ink-soft); }
+    .pl-val { font-variant-numeric: tabular-nums; font-weight: 500; color: var(--ink); }
+    .pl-row.pl-cost .pl-val { color: var(--ink-soft); }
+    .pl-row.pl-total { border-bottom: 2px solid var(--border); }
+    .pl-row.pl-total .pl-label { font-weight: 600; color: var(--ink); }
+    .pl-row.pl-total .pl-val   { font-weight: 600; color: var(--ink); }
+    .pl-row.pl-result { border-bottom: none; padding-top: 12px; }
+    .pl-row.pl-result .pl-label { font-size: 16px; font-weight: 700; color: var(--ink); }
+    .pl-row.pl-result .pl-val   { font-size: 24px; font-weight: 700; }
+    .pl-positive .pl-val { color: var(--good) !important; }
+    .pl-negative .pl-val { color: var(--goji) !important; }
+    .pl-row.pl-expandable { cursor: pointer; user-select: none; }
+    .pl-row.pl-expandable:hover .pl-label { color: var(--ink); }
+    .pl-chevron {
+      display: inline-block; font-size: 9px; margin-left: 5px;
+      color: var(--ink-muted); transition: transform 0.18s; vertical-align: middle;
+    }
+    .pl-chevron.open { transform: rotate(90deg); }
+    .pl-subrow {
+      display: flex; justify-content: space-between; align-items: baseline;
+      padding: 6px 2px 6px 18px; border-bottom: 1px solid #f5f0e8; font-size: 13px;
+      background: #faf8f5;
+    }
+    .pl-subrow .pl-label { color: var(--ink-muted); }
+    .pl-subrow .pl-val   { color: var(--ink-soft); font-variant-numeric: tabular-nums; font-weight: 500; }
+    .pl-subrow-note      { font-size: 11px; color: var(--ink-muted); margin-left: 6px; font-style: italic; }
+
+    .pl-breakeven {
+      margin-top: 16px; background: var(--bg);
+      border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px;
+    }
+    .pl-be-header {
+      display: flex; justify-content: space-between; align-items: baseline;
+      margin-bottom: 8px;
+    }
+    .pl-be-label {
+      font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em;
+      font-weight: 600; color: var(--ink-soft);
+    }
+    .pl-be-pct { font-size: 14px; font-weight: 700; color: var(--ink); }
+    .pl-progress-track {
+      height: 8px; background: #e3ddd2; border-radius: 999px; overflow: hidden;
+      margin-bottom: 8px;
+    }
+    .pl-progress-fill {
+      height: 100%; border-radius: 999px; transition: width 0.4s ease;
+      background: var(--goji);
+    }
+    .pl-progress-fill.at-target { background: var(--good); }
+    .pl-be-sub { font-size: 11px; color: var(--ink-muted); line-height: 1.5; }
+
+    /* Cost input panel */
+    .pl-inputs-toggle {
+      width: 100%; text-align: left; border-radius: 8px;
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 12px; padding: 8px 14px;
+    }
+    .pl-chevron { font-size: 10px; transition: transform 0.2s; }
+    .pl-inputs-toggle.open .pl-chevron { transform: rotate(180deg); }
+
+    .pl-inputs-panel {
+      display: none; border: 1px solid var(--border); border-radius: 8px;
+      overflow: hidden; margin-top: 8px; background: var(--card);
+    }
+    .pl-inputs-panel.open { display: block; }
+
+    .pl-input-group {
+      padding: 12px 14px; border-bottom: 1px solid #f0ebe2;
+    }
+    .pl-input-group:last-child { border-bottom: none; }
+    .pl-input-group-title {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em;
+      font-weight: 700; color: var(--ink-muted); margin-bottom: 10px;
+    }
+    .pl-input-row {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 8px; margin-bottom: 7px;
+    }
+    .pl-input-row:last-child { margin-bottom: 0; }
+    .pl-input-row label { font-size: 12px; color: var(--ink-soft); flex: 1; min-width: 0; }
+    .pl-input-wrap { position: relative; width: 100px; flex-shrink: 0; }
+    .pl-prefix {
+      position: absolute; left: 9px; top: 50%; transform: translateY(-50%);
+      color: var(--ink-muted); font-size: 12px; pointer-events: none;
+    }
+    .pl-suffix {
+      position: absolute; right: 9px; top: 50%; transform: translateY(-50%);
+      color: var(--ink-muted); font-size: 11px; pointer-events: none;
+    }
+    .pl-input-wrap input {
+      width: 100%; padding: 5px 8px 5px 20px;
+      border: 1px solid var(--border); border-radius: 6px;
+      background: var(--bg); font: inherit; font-size: 12px;
+      color: var(--ink); font-variant-numeric: tabular-nums; text-align: right;
+    }
+    .pl-input-wrap input.no-prefix { padding-left: 8px; padding-right: 28px; }
+    .pl-input-wrap input:focus {
+      outline: none; border-color: var(--goji);
+      box-shadow: 0 0 0 2px var(--goji-soft);
+    }
+    .pl-total-line {
+      display: flex; justify-content: space-between;
+      font-size: 11px; color: var(--ink-muted);
+      padding-top: 8px; margin-top: 4px;
+      border-top: 1px dashed #e3ddd2;
+    }
   </style>
 </head>
 <body>
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-card">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">Loading dashboard data</div>
+      <div class="loading-hint">First load can take ~10s while we query BigQuery</div>
+    </div>
+  </div>
+
   <div class="wrap">
 
     <header class="topbar">
       <div class="brand">
-        <div class="brand-dot"></div>
+        <img class="brand-img" src="static/soily.webp" alt="Goji Health">
         <div>
           <div class="brand-name">Goji Health</div>
           <div class="brand-sub">Operations Dashboard</div>
         </div>
       </div>
       <div class="filters">
-        <div class="date-selector" role="tablist" aria-label="Date range">
-          <button type="button" data-range="7d">7d</button>
-          <button type="button" data-range="30d">30d</button>
-          <button type="button" data-range="90d">90d</button>
-          <button type="button" data-range="all">All</button>
-        </div>
         <div class="updated"><span class="dot"></span>Generated <span id="generatedAt">-</span></div>
       </div>
     </header>
+
+    <nav class="page-nav" role="tablist" aria-label="Page">
+      <button type="button" data-page="dashboard" class="active">Overview</button>
+      <button type="button" data-page="pl">Profit &amp; Loss</button>
+      <button type="button" data-page="commission">Commission Calculator</button>
+    </nav>
+
+    <div id="page-dashboard" class="page">
+
+    <div class="page-toolbar">
+      <div class="date-selector" role="tablist" aria-label="Date range">
+        <button type="button" data-range="7d">7d</button>
+        <button type="button" data-range="30d">30d</button>
+        <button type="button" data-range="90d">90d</button>
+        <button type="button" data-range="all">All</button>
+      </div>
+    </div>
 
     <div class="notice">
       <strong>Live data dashboard, generated on demand.</strong> The date selector switches between
@@ -187,6 +662,36 @@
       Sections labelled <span class="badge sample">Sample</span> are illustrative pending
       the ingestion job for that data source.
     </div>
+
+    <section class="alert" id="doctor-mismatch-alert" hidden>
+      <h2>
+        Provider attribution alerts
+        <span class="alert-count" id="mismatch_count">0</span>
+      </h2>
+      <div class="subtitle">
+        Non-void invoices in the last <span id="mismatch_window">30</span> days
+        where <strong>invoice doctor</strong> doesn't match the same-day
+        <strong>appointment calendar doctor</strong>. Clears automatically once corrected.
+      </div>
+      <div style="overflow-x: auto;">
+        <table id="mismatch_table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Invoice</th>
+              <th>Patient</th>
+              <th>Appt → Invoice</th>
+              <th class="num">Total</th>
+              <th>Created by</th>
+              <th>Last edited</th>
+            </tr>
+          </thead>
+          <tbody id="mismatch_tbody"></tbody>
+        </table>
+      </div>
+      <div class="alert-config-note" id="mismatch_config_note" hidden></div>
+    </section>
+
 
     <div class="kpi-row">
       <div class="kpi-card">
@@ -219,43 +724,39 @@
     <section class="q">
       <h2>Activity over time <span class="badge live">Live</span></h2>
       <div class="subtitle">
-        Patient activity over the <span class="range-label">last 30 days</span>.
-        Bucketed by day, week or month depending on the range width.
+        Visit volume and patient engagement over the <span class="range-label">last 30 days</span>.
+        <strong>Avg visits / patient</strong> is your retention signal — a rising trend means patients are returning and burning package sessions. Target 2+ for a healthy package-led model.
       </div>
       <div class="two-col">
         <div>
-          <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px;">Active patients</div>
-          <div class="chart-wrap small"><canvas id="activePatientsChart"></canvas></div>
-        </div>
-        <div>
           <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px;">Visits</div>
           <div class="chart-wrap small"><canvas id="visitsChart"></canvas></div>
+        </div>
+        <div>
+          <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px;">Avg visits / patient</div>
+          <div class="chart-wrap small"><canvas id="avgVisitsChart"></canvas></div>
         </div>
       </div>
     </section>
 
     <section class="q">
-      <h2>Revenue over time <span class="badge live">Live</span></h2>
+      <h2>Bookings vs recognised revenue <span class="badge live">Live</span></h2>
       <div class="subtitle">
-        Cash invoiced vs revenue actually earned over the <span class="range-label">last 30 days</span>.
+        Running totals since the start of the selected period.
+        <strong>Bookings</strong> = cumulative cash invoiced (packages counted upfront).
+        <strong>Recognised</strong> = cumulative revenue earned as sessions are delivered.
+        The shaded gap between the curves = outstanding deferred revenue at that point in time.
+        A widening gap means you're selling ahead of delivery. Watch for a gap that <em>stops growing</em> — it means patients aren't coming back to burn their packs.
       </div>
-      <div class="two-col">
-        <div>
-          <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px;">Bookings</div>
-          <div class="chart-wrap small"><canvas id="bookingsChart"></canvas></div>
-        </div>
-        <div>
-          <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px;">Recognised revenue</div>
-          <div class="chart-wrap small"><canvas id="recognisedChart"></canvas></div>
-        </div>
-      </div>
+      <div class="chart-wrap" style="height: 260px; margin-top: 12px;"><canvas id="bookingsVsRecognisedChart"></canvas></div>
     </section>
 
     <section class="q">
       <h2>Per-clinician performance <span class="badge live">Live</span></h2>
       <div class="subtitle">
-        Bookings ($ invoiced) vs recognised revenue ($ delivered), <span class="range-label">last 30 days</span>.
-        Gap = packages sold but not yet redeemed by patients.
+        Bookings ($ invoiced) vs recognised revenue ($ earned through delivered sessions), <span class="range-label">last 30 days</span>.
+        The <strong>gap</strong> is deferred revenue: packages committed but sessions not yet used. A large gap can mean strong forward sales — or a churn risk if patients stop coming in.
+        Clinician <strong>utilisation %</strong> (slots filled ÷ slots available) requires appointment data — flagged for Charles.
       </div>
       <div class="two-col">
         <div><div class="chart-wrap"><canvas id="clinicianChart"></canvas></div></div>
@@ -280,24 +781,42 @@
     </section>
 
     <section class="q">
-      <h2>Discount cost to the clinic <span class="badge live">Live</span></h2>
+      <h2>Discount cost to clinic <span class="badge live">Live</span></h2>
       <div class="subtitle">
-        How much listed-price revenue was foregone via line discounts, <span class="range-label">last 30 days</span>.
+        Implicit opening-promo discount + ad-hoc line discounts, <span class="range-label">last 30 days</span>.
+        Pack-promo cost is computed against the usual single-session price &times; pack size.
       </div>
-      <div class="two-col">
+      <div style="display: grid; grid-template-columns: 240px 1fr; gap: 28px; align-items: start;">
         <div>
-          <div class="kpi-value" id="discountTotal" style="font-size: 32px; color: var(--goji);">-</div>
-          <div class="kpi-sub" style="margin-bottom: 18px;">
-            <span id="discountPct">-</span> of bookings absorbed as discount
-          </div>
+          <div class="kpi-value" id="discountTotal" style="font-size: 38px; color: var(--goji);">-</div>
+          <div class="kpi-sub" style="margin-bottom: 14px;">Total discount absorbed</div>
+          <div class="kpi-sub"><span id="discountPct">-</span> of bookings</div>
         </div>
         <div>
+          <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px;">Opening-promo discount, by SKU</div>
           <table>
             <thead>
-              <tr><th>Item</th><th class="num">Discount</th><th class="num">Times</th></tr>
+              <tr>
+                <th>Service</th>
+                <th>Pack</th>
+                <th class="num">Units</th>
+                <th class="num">Usual ref</th>
+                <th class="num">Sold</th>
+                <th class="num">Discount</th>
+              </tr>
             </thead>
-            <tbody id="discountTbody"></tbody>
+            <tbody id="promoBySkuTbody"></tbody>
+            <tfoot id="promoBySkuTfoot"></tfoot>
           </table>
+
+          <div id="adhocBlock" hidden style="margin-top: 22px;">
+            <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px;">Ad-hoc on non-promo items</div>
+            <table>
+              <thead><tr><th>Item</th><th class="num">Times</th><th class="num">Discount</th></tr></thead>
+              <tbody id="discountTbody"></tbody>
+              <tfoot id="adhocTfoot"></tfoot>
+            </table>
+          </div>
         </div>
       </div>
     </section>
@@ -321,10 +840,9 @@
     </section>
 
     <section class="q">
-      <h2>Patient demographics <span class="badge sample">Sample</span></h2>
+      <h2>Patient base <span id="demographics_total" class="badge" style="background: var(--bg); color: var(--ink-soft); font-weight: 500;"></span></h2>
       <div class="subtitle">
-        Age, gender, top condition tags. Pulls from Plato patient records once the
-        patient ingestion job is built.
+        Composition of every patient on file in Plato. Charts show only the populated subset for each attribute (age band on 82% of patients, sex on 78%, clinical tags on patients we've tagged so far).
       </div>
       <div class="three-col">
         <div>
@@ -336,71 +854,49 @@
           <div class="chart-wrap small"><canvas id="genderChart"></canvas></div>
         </div>
         <div>
-          <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px;">Top conditions</div>
+          <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px;">Top clinical tags</div>
           <div class="chart-wrap small"><canvas id="tagsChart"></canvas></div>
         </div>
       </div>
     </section>
 
-    <section class="q">
-      <h2>Cohort and lifetime value <span class="badge live">Live</span></h2>
-      <div class="subtitle">
-        Patients grouped by month of first visit. Whole-period figures, not affected
-        by the date selector above.
-      </div>
-      <div class="two-col">
-        <div>
-          <table>
-            <thead>
-              <tr>
-                <th>Cohort</th>
-                <th class="num">Patients</th>
-                <th class="num">Avg LTV</th>
-                <th class="num">Avg visits</th>
-              </tr>
-            </thead>
-            <tbody id="cohortTbody"></tbody>
-          </table>
-        </div>
-        <div>
-          <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px;">Retention curve <span class="badge sample">Sample</span></div>
-          <div class="chart-wrap small"><canvas id="retentionChart"></canvas></div>
-        </div>
-      </div>
-    </section>
 
     <section class="q">
-      <h2>Patient referral analytics <span class="badge sample">Sample</span></h2>
+      <h2>Patient referrals</h2>
       <div class="subtitle">
-        Where new patients are coming from, who they end up seeing, and what treatment
-        they end up booking. Goes live once the <code>/patient</code> ingestion job
-        lands the <code>referred_by</code> field.
+        Where new patients come from, joined from Plato's <code>/contact</code> registry.
+        Five real channels: medical (GPs, OBGYN, ortho), word-of-mouth (in-house clinician network),
+        partner (gyms, allied health), online booking (Plato Online, WhatsApp, Instagram), and walk-in.
       </div>
+
+      <div style="display: flex; align-items: baseline; gap: 14px; margin: 8px 0 18px; flex-wrap: wrap;">
+        <span id="ref_pct" style="font-size: 36px; font-weight: 600; color: var(--goji); line-height: 1;">—</span>
+        <span id="ref_blurb" style="color: var(--ink-soft);">of patients on file have a referral source recorded</span>
+      </div>
+
       <div class="two-col">
         <div>
-          <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px;">Referral sources</div>
-          <div class="chart-wrap small"><canvas id="referralChart"></canvas></div>
+          <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px;">Source mix</div>
+          <div class="chart-wrap small"><canvas id="sourceMixChart"></canvas></div>
         </div>
         <div>
+          <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px;">Top sources</div>
           <table>
             <thead>
               <tr>
                 <th>Source</th>
-                <th class="num">New patients</th>
-                <th>Top clinician</th>
-                <th>Top treatment</th>
+                <th>Channel</th>
+                <th class="num">Patients</th>
               </tr>
             </thead>
-            <tbody>
-              <tr><td>Google search</td><td class="num">18</td><td>Claire</td><td>Physiotherapy</td></tr>
-              <tr><td>Doctor referral</td><td class="num">12</td><td>Claire</td><td>Physiotherapy</td></tr>
-              <tr><td>Existing patient</td><td class="num">9</td><td>Cheryl</td><td>Clinical Pilates</td></tr>
-              <tr><td>Instagram</td><td class="num">7</td><td>Kristy</td><td>Private Pilates</td></tr>
-              <tr><td>Insurance partner</td><td class="num">5</td><td>Claire</td><td>Physiotherapy</td></tr>
-              <tr><td>Walk-in</td><td class="num">3</td><td>Kristy</td><td>S&amp;C 1:1</td></tr>
-            </tbody>
+            <tbody id="top_sources_tbody"></tbody>
           </table>
         </div>
+      </div>
+
+      <div style="margin-top: 22px;">
+        <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px;">New patients per month by source</div>
+        <div class="chart-wrap" style="height: 240px;"><canvas id="acquisitionChart"></canvas></div>
       </div>
     </section>
 
@@ -408,54 +904,677 @@
       Data sources: Plato Medical (live), Xero (coming), Google Workspace (coming).<br>
       Re-run <code>scripts/dashboard/generate.py</code> to refresh.
     </footer>
+
+    </div><!-- /#page-dashboard -->
+
+    <div id="page-pl" class="page" hidden>
+
+    <div class="page-toolbar">
+      <div class="pl-period-bar" role="group" aria-label="P&L period">
+        <button type="button" data-plperiod="30d" class="active">Last 30 days</button>
+        <button type="button" data-plperiod="cycle">
+          Current cycle <span class="pl-cycle-month" id="pl_cycle_month">(26th → 25th)</span>
+        </button>
+        <button type="button" data-plperiod="prev_cycle">
+          Previous cycle <span class="pl-cycle-month" id="pl_prev_cycle_month">(26th → 25th)</span>
+        </button>
+        <button type="button" data-plperiod="custom">Custom</button>
+      </div>
+      <div class="pl-custom-dates" id="pl_custom_dates" hidden>
+        <input type="date" id="pl_period_start">
+        <span style="color:var(--ink-muted);">to</span>
+        <input type="date" id="pl_period_end">
+      </div>
+      <button type="button" class="btn primary" id="pl_export_xlsx">
+        <span style="margin-right:6px;">↓</span> Download Excel
+      </button>
+    </div>
+
+    <!-- ===== P&L Section ===== -->
+    <section class="q" id="pl-section" style="margin-bottom: 28px;">
+      <div class="pl-loading-badge" id="pl_loading_badge" hidden>
+        <span class="loading-spinner-small"></span>
+        <span>Fetching data for selected period…</span>
+      </div>
+      <div class="pl-grid">
+
+        <!-- Left: controls (toggles + cost assumptions) -->
+        <div>
+          <div class="pl-toggle-stack" style="margin-bottom: 14px;">
+            <div class="pl-view-toggle" role="group" aria-label="Revenue source">
+              <button type="button" data-plrev="recognised" class="active">Revenue</button>
+              <button type="button" data-plrev="bookings">Bookings</button>
+            </div>
+            <div class="pl-view-toggle" role="group" aria-label="P&L view">
+              <button type="button" data-plview="cash" class="active">Cash only</button>
+              <button type="button" data-plview="full">+ Amortisation</button>
+            </div>
+          </div>
+
+          <button type="button" class="btn pl-inputs-toggle" id="pl_toggle_btn">
+            <span>Edit cost assumptions</span>
+            <span class="pl-chevron">▾</span>
+          </button>
+
+          <div class="pl-inputs-panel" id="pl_inputs_panel">
+
+            <!-- Payroll -->
+            <div class="pl-input-group">
+              <div class="pl-input-group-title">Monthly payroll (base salaries)</div>
+              <div class="pl-input-row">
+                <label>Cheryl (Clinical Director)</label>
+                <div class="pl-input-wrap">
+                  <span class="pl-prefix">$</span>
+                  <input type="number" id="pl_pay_cheryl" value="12000" min="0" step="500">
+                </div>
+              </div>
+              <div class="pl-input-row">
+                <label>Claire (Senior Physio)</label>
+                <div class="pl-input-wrap">
+                  <span class="pl-prefix">$</span>
+                  <input type="number" id="pl_pay_claire" value="5000" min="0" step="500">
+                </div>
+              </div>
+              <div class="pl-input-row">
+                <label>Kristy (Senior Physio)</label>
+                <div class="pl-input-wrap">
+                  <span class="pl-prefix">$</span>
+                  <input type="number" id="pl_pay_kristy" value="5000" min="0" step="500">
+                </div>
+              </div>
+              <div class="pl-input-row">
+                <label>Chris (Director)</label>
+                <div class="pl-input-wrap">
+                  <span class="pl-prefix">$</span>
+                  <input type="number" id="pl_pay_chris" value="6000" min="0" step="500">
+                </div>
+              </div>
+              <div class="pl-total-line">
+                <span>Payroll subtotal</span>
+                <span id="pl_payroll_subtotal">$28,000</span>
+              </div>
+            </div>
+
+            <!-- Commission structure -->
+            <div class="pl-input-group">
+              <div class="pl-input-group-title">Commission structure <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:10px;">(Claire &amp; Kristy · calculated from live 30d revenue)</span></div>
+              <div class="pl-input-row">
+                <label>Revenue threshold</label>
+                <div class="pl-input-wrap">
+                  <span class="pl-prefix">$</span>
+                  <input type="number" id="pl_comm_quota" value="13000" min="0" step="500">
+                </div>
+              </div>
+              <div class="pl-input-row">
+                <label>Commission rate (above threshold)</label>
+                <div class="pl-input-wrap">
+                  <input type="number" id="pl_comm_rate" value="40" min="0" max="100" step="1" class="no-prefix">
+                  <span class="pl-suffix">%</span>
+                </div>
+              </div>
+              <div class="pl-total-line">
+                <span>Commission this period</span>
+                <span id="pl_commission_subtotal">$0</span>
+              </div>
+            </div>
+
+            <!-- Employer CPF -->
+            <div class="pl-input-group">
+              <div class="pl-input-group-title">Employer CPF <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:10px;">(Singapore — applies to salary + commission)</span></div>
+              <div class="pl-input-row">
+                <label>Employer CPF rate</label>
+                <div class="pl-input-wrap">
+                  <input type="number" id="pl_cpf_rate" value="17" min="0" max="20" step="0.5" class="no-prefix">
+                  <span class="pl-suffix">%</span>
+                </div>
+              </div>
+              <div class="pl-input-row">
+                <label>Ordinary Wage ceiling</label>
+                <div class="pl-input-wrap">
+                  <span class="pl-prefix">$</span>
+                  <input type="number" id="pl_cpf_ceiling" value="8000" min="0" step="100">
+                </div>
+              </div>
+              <div class="pl-total-line">
+                <span>Employer CPF this period</span>
+                <span id="pl_cpf_subtotal">—</span>
+              </div>
+            </div>
+
+            <!-- Operating expenses -->
+            <div class="pl-input-group">
+              <div class="pl-input-group-title">Monthly operating expenses</div>
+              <div class="pl-input-row">
+                <label>Rent (Y1)</label>
+                <div class="pl-input-wrap">
+                  <span class="pl-prefix">$</span>
+                  <input type="number" id="pl_opex_rent" value="9723" min="0" step="100">
+                </div>
+              </div>
+              <div class="pl-input-row">
+                <label>Utilities</label>
+                <div class="pl-input-wrap">
+                  <span class="pl-prefix">$</span>
+                  <input type="number" id="pl_opex_util" value="1000" min="0" step="50">
+                </div>
+              </div>
+              <div class="pl-input-row">
+                <label>Marketing</label>
+                <div class="pl-input-wrap">
+                  <span class="pl-prefix">$</span>
+                  <input type="number" id="pl_opex_mktg" value="200" min="0" step="50">
+                </div>
+              </div>
+              <div class="pl-input-row">
+                <label>Consumables</label>
+                <div class="pl-input-wrap">
+                  <span class="pl-prefix">$</span>
+                  <input type="number" id="pl_opex_cons" value="1000" min="0" step="50">
+                </div>
+              </div>
+              <div class="pl-input-row">
+                <label>Software, admin &amp; other</label>
+                <div class="pl-input-wrap">
+                  <span class="pl-prefix">$</span>
+                  <input type="number" id="pl_opex_other" value="826" min="0" step="50">
+                </div>
+              </div>
+              <div class="pl-total-line">
+                <span>Opex subtotal</span>
+                <span id="pl_opex_subtotal">$12,749</span>
+              </div>
+            </div>
+
+            <!-- Amortisation -->
+            <div class="pl-input-group" id="pl_capex_group">
+              <div class="pl-input-group-title">Amortisation <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:10px;">(Full P&L view only)</span></div>
+              <div class="pl-input-row">
+                <label>Total one-time capex</label>
+                <div class="pl-input-wrap">
+                  <span class="pl-prefix">$</span>
+                  <input type="number" id="pl_capex_total" value="181500" min="0" step="1000">
+                </div>
+              </div>
+              <div class="pl-input-row">
+                <label>Amortise over</label>
+                <div class="pl-input-wrap">
+                  <input type="number" id="pl_amort_months" value="24" min="1" step="1" class="no-prefix">
+                  <span class="pl-suffix">mo</span>
+                </div>
+              </div>
+              <div class="pl-total-line">
+                <span>Monthly amortisation</span>
+                <span id="pl_amort_subtotal">$7,563</span>
+              </div>
+            </div>
+
+          </div><!-- /.pl-inputs-panel -->
+        </div>
+
+        <!-- Right: the P&L statement -->
+        <div>
+          <div class="pl-header" style="margin-bottom: 14px;">
+            <div>
+              <h2 style="margin: 0 0 4px;">Profit &amp; Loss <span class="badge live">Live revenue</span></h2>
+              <div class="subtitle" style="margin: 0;" id="pl_subtitle">Revenue/Bookings vs. your monthly cost base. Toggle to include or exclude amortised capex.</div>
+              <div class="pl-period-dates" id="pl_period_dates">-</div>
+            </div>
+          </div>
+
+          <div class="pl-row">
+            <span class="pl-label" id="pl_revenue_label">Recognised revenue (last 30 days)</span>
+            <span class="pl-val" id="pl_revenue">—</span>
+          </div>
+          <div class="pl-row pl-cost">
+            <span class="pl-label">Payroll <span style="font-size:11px;color:var(--ink-muted);">(base + commission + employer CPF)</span></span>
+            <span class="pl-val" id="pl_payroll_total_val">—</span>
+          </div>
+          <div class="pl-row pl-cost pl-expandable" id="pl_opex_toggle_row" onclick="toggleOpexDetail()">
+            <span class="pl-label">Operating expenses <span class="pl-chevron open" id="pl_opex_chevron">▶</span></span>
+            <span class="pl-val" id="pl_opex_val">—</span>
+          </div>
+          <div class="pl-subrow" id="pl_pmtfee_subrow">
+            <span class="pl-label">↳ Payment processing fees
+              <span class="pl-subrow-note">(Plato Terminal: 2.1% + $0.20/txn)</span>
+            </span>
+            <span class="pl-val" id="pl_pmtfee_val">Awaiting data</span>
+          </div>
+          <div class="pl-row pl-cost" id="pl_amort_row" hidden>
+            <span class="pl-label">Amortised capex <span style="font-size:11px;color:var(--ink-muted);">(one-time costs ÷ months)</span></span>
+            <span class="pl-val" id="pl_amort_val">—</span>
+          </div>
+          <div class="pl-row pl-total">
+            <span class="pl-label">Total monthly costs</span>
+            <span class="pl-val" id="pl_costs_total">—</span>
+          </div>
+          <div class="pl-row pl-result" id="pl_result_row">
+            <span class="pl-label">Profit / (Loss)</span>
+            <span class="pl-val" id="pl_result_val">—</span>
+          </div>
+
+          <!-- Break-even bar -->
+          <div class="pl-breakeven">
+            <div class="pl-be-header">
+              <span class="pl-be-label">Revenue vs. break-even</span>
+              <span class="pl-be-pct" id="pl_be_pct">—</span>
+            </div>
+            <div class="pl-progress-track">
+              <div class="pl-progress-fill" id="pl_progress_fill" style="width: 0%;"></div>
+            </div>
+            <div class="pl-be-sub" id="pl_be_sub">—</div>
+            <div id="pl_profit_track_wrap" hidden style="margin-top: 12px;">
+              <div class="pl-be-header" style="margin-bottom: 4px;">
+                <span class="pl-be-label" style="color: var(--good);">Profit margin</span>
+                <span class="pl-be-pct" id="pl_margin_pct" style="color: var(--good);">—</span>
+              </div>
+              <div class="pl-progress-track">
+                <div class="pl-progress-fill at-target" id="pl_margin_fill" style="width: 0%;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /.pl-grid -->
+    </section>
+    <!-- ===== End P&L Section ===== -->
+
+    </div><!-- /#page-pl -->
+
+    <div id="page-commission" class="page" hidden>
+
+      <div class="brand-print">
+        <img class="brand-img" src="static/soily.webp" alt="">
+        <div class="brand-name">Goji Health - Commission Summary</div>
+      </div>
+
+      <div class="calc-grid">
+        <div class="calc-card">
+          <h2>Commission calculator</h2>
+          <div class="subtitle">Select a clinician and adjust the inputs. Revenue is prefilled from BigQuery (last 30 days) but editable for month-one validation.</div>
+
+          <div class="form-row">
+            <label for="calc_clinician">Clinician</label>
+            <select id="calc_clinician"></select>
+          </div>
+
+          <div class="form-row">
+            <label for="calc_period">Pay period</label>
+            <select id="calc_period">
+              <option value="cycle" selected>26th to 25th of month</option>
+              <option value="custom">Custom start and end</option>
+            </select>
+            <div class="hint" id="period_dates">-</div>
+          </div>
+
+          <div class="form-row" id="custom_dates_row" hidden>
+            <label>Custom pay period</label>
+            <div style="display:flex; gap:8px;">
+              <input type="date" id="calc_start">
+              <input type="date" id="calc_end">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <label for="calc_base">Base pay (monthly)</label>
+            <div class="input-prefix">
+              <span class="prefix">$</span>
+              <input type="number" id="calc_base" min="0" step="100" value="5000">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <label for="calc_quota">Quota / commission threshold</label>
+            <div class="input-prefix">
+              <span class="prefix">$</span>
+              <input type="number" id="calc_quota" min="0" step="100" value="13000">
+            </div>
+            <div class="hint">Commission applies only to revenue above this figure.</div>
+          </div>
+
+          <div class="form-row">
+            <label for="calc_pct">Commission %</label>
+            <div class="input-suffix">
+              <input type="number" id="calc_pct" min="0" max="100" step="0.5" value="40">
+              <span class="suffix">%</span>
+            </div>
+            <div class="hint">Applied to revenue above the quota.</div>
+          </div>
+
+          <div class="form-row">
+            <label for="calc_revenue">
+              Actual revenue
+              <span id="prefillFlag" class="prefill-flag">Prefilled</span>
+            </label>
+            <div class="input-prefix">
+              <span class="prefix">$</span>
+              <input type="number" id="calc_revenue" min="0" step="50" value="0">
+            </div>
+            <div class="hint" id="revenue_source">Source: BigQuery, last 30 days.</div>
+          </div>
+
+          <div class="calc-actions">
+            <button type="button" class="btn" id="calc_reset">Reset to defaults</button>
+            <button type="button" class="btn primary" id="calc_download">Download PDF</button>
+          </div>
+        </div>
+
+        <div class="report-card" id="report_card">
+          <h2 id="report_title">Commission summary</h2>
+          <div class="report-meta" id="report_meta">Select a clinician to begin.</div>
+
+          <div class="summary-rows">
+            <div class="summary-row">
+              <span class="label">Base pay</span>
+              <span class="value" id="r_base">$0</span>
+            </div>
+            <div class="summary-row">
+              <span class="label">Actual revenue (pay period)</span>
+              <span class="value" id="r_revenue">$0</span>
+            </div>
+            <div class="summary-row subtle">
+              <span class="label">Commission threshold</span>
+              <span class="value" id="r_quota">$0</span>
+            </div>
+            <div class="summary-row subtle">
+              <span class="label">Revenue above threshold</span>
+              <span class="value" id="r_excess">$0</span>
+            </div>
+            <div class="summary-row subtle">
+              <span class="label">Commission rate</span>
+              <span class="value" id="r_pct">0%</span>
+            </div>
+            <div class="summary-row commission">
+              <span class="label">Commission earned</span>
+              <span class="value" id="r_commission">$0</span>
+            </div>
+            <div class="summary-row total">
+              <span class="label">Total payout</span>
+              <span class="value" id="r_total">$0</span>
+            </div>
+          </div>
+
+          <div class="commission-breakdown">
+            <strong>How this was calculated:</strong>
+            <div id="r_formula">commission = max(0, revenue - quota) * commission_pct</div>
+          </div>
+
+          <div class="appointments-block">
+            <h3 class="appointments-title">Appointment breakdown</h3>
+            <div class="appointments-meta" id="appointments_meta">-</div>
+            <table class="appointments-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Patient</th>
+                  <th>Service</th>
+                  <th class="num">Value</th>
+                </tr>
+              </thead>
+              <tbody id="appointments_tbody"></tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="3" style="text-align:right; font-weight:600;">Total</td>
+                  <td class="num" id="appointments_total" style="font-weight:600;">$0</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /#page-commission -->
+
   </div>
 
   <script id="dashboardData" type="application/json">{
-  "generated_at": "2026-05-24T22:41:07+08:00",
+  "generated_at": "2026-05-27T18:13:57+08:00",
   "default_range": "30d",
-  "deferred": 9812.3,
+  "deferred": 8700.4,
   "cohorts": [
     {
       "cohort": "Mar 2026",
       "patients": 5,
-      "avg_ltv": 1042.0,
-      "avg_visits": 3.2
+      "avg_ltv": 1094.0,
+      "avg_visits": 3.4
     },
     {
       "cohort": "Apr 2026",
       "patients": 9,
-      "avg_ltv": 579.33,
-      "avg_visits": 1.9
+      "avg_ltv": 644.89,
+      "avg_visits": 2.1
     },
     {
       "cohort": "May 2026",
-      "patients": 43,
-      "avg_ltv": 368.71,
-      "avg_visits": 1.6
+      "patients": 49,
+      "avg_ltv": 394.01,
+      "avg_visits": 1.8
     }
   ],
+  "demographics": {
+    "total_patients": 72,
+    "age_bands": [
+      {
+        "label": "Under 18",
+        "count": 3
+      },
+      {
+        "label": "18-29",
+        "count": 7
+      },
+      {
+        "label": "30-39",
+        "count": 32
+      },
+      {
+        "label": "40-49",
+        "count": 10
+      },
+      {
+        "label": "50-59",
+        "count": 2
+      },
+      {
+        "label": "60+",
+        "count": 5
+      }
+    ],
+    "sex": [
+      {
+        "label": "Female",
+        "count": 46
+      },
+      {
+        "label": "Male",
+        "count": 10
+      }
+    ],
+    "top_tags": [
+      {
+        "label": "Musculoskeletal",
+        "count": 25
+      },
+      {
+        "label": "Post-partum",
+        "count": 10
+      },
+      {
+        "label": "Strength-and-Conditioning",
+        "count": 9
+      },
+      {
+        "label": "Pilates",
+        "count": 7
+      },
+      {
+        "label": "Scoliosis",
+        "count": 6
+      },
+      {
+        "label": "Pelvic-girdle-pain",
+        "count": 5
+      },
+      {
+        "label": "Pre-natal",
+        "count": 4
+      },
+      {
+        "label": "Pelvic-Incontinence",
+        "count": 3
+      }
+    ]
+  },
+  "referrals": {
+    "total_patients": 72,
+    "referred": 41,
+    "pct_referred": 56.9,
+    "by_source_type": [
+      {
+        "source_type": "word_of_mouth",
+        "label": "Word-of-mouth",
+        "count": 14
+      },
+      {
+        "source_type": "partner",
+        "label": "Partner",
+        "count": 8
+      },
+      {
+        "source_type": "medical",
+        "label": "Medical referral",
+        "count": 7
+      },
+      {
+        "source_type": "walk_in",
+        "label": "Walk-in",
+        "count": 7
+      },
+      {
+        "source_type": "online",
+        "label": "Online booking",
+        "count": 5
+      }
+    ],
+    "top_sources": [
+      {
+        "contact_id": "a39d4a856f124653ac1b710a9653fca2",
+        "label": "Word-of-mouth (Cheryl Long)",
+        "source_type": "word_of_mouth",
+        "count": 11
+      },
+      {
+        "contact_id": "ab3e1e929f8c680458f26b4e29932e23",
+        "label": "Walk-in",
+        "source_type": "walk_in",
+        "count": 7
+      },
+      {
+        "contact_id": "1e829e56bf79d2ffd833c62b90f83045",
+        "label": "Chris Hnin",
+        "source_type": "partner",
+        "count": 6
+      },
+      {
+        "contact_id": "91262dc9ea83fa947c9f5e6bda8ba2a0",
+        "label": "Online: Plato Online",
+        "source_type": "online",
+        "count": 3
+      },
+      {
+        "contact_id": "f247f579879020546570455bc868c836",
+        "label": "Word-of-mouth (Claire Ng)",
+        "source_type": "word_of_mouth",
+        "count": 3
+      },
+      {
+        "contact_id": "ccfd33e164b7bb904dd22eda1b6181c5",
+        "label": "Holistic Clinic & Surgery (Niccol Lee)",
+        "source_type": "medical",
+        "count": 2
+      },
+      {
+        "contact_id": "5c490a4b3076c1868f27c297c4d073a4",
+        "label": "KKH MSC (Dr Stacy Ng)",
+        "source_type": "medical",
+        "count": 2
+      },
+      {
+        "contact_id": "1fc5556461b116284d70b1bba75810e2",
+        "label": "Online: Whatsapp",
+        "source_type": "online",
+        "count": 2
+      },
+      {
+        "contact_id": "3baa1b2908ae5be3177a00cbbe3122c1",
+        "label": "ACME Ortho (Dr Zackary Chua)",
+        "source_type": "medical",
+        "count": 1
+      },
+      {
+        "contact_id": "0f35229b5000cdd3ddd960254bf54156",
+        "label": "Essence Osteopathy (Sara Bailes)",
+        "source_type": "partner",
+        "count": 1
+      }
+    ],
+    "monthly": [
+      {
+        "month": "2026-03",
+        "label": "Mar 26",
+        "unattributed": 7,
+        "medical": 1,
+        "word_of_mouth": 2
+      },
+      {
+        "month": "2026-04",
+        "label": "Apr 26",
+        "unattributed": 7,
+        "medical": 2,
+        "word_of_mouth": 7
+      },
+      {
+        "month": "2026-05",
+        "label": "May 26",
+        "unattributed": 17,
+        "partner": 8,
+        "online": 5,
+        "word_of_mouth": 5,
+        "walk_in": 7,
+        "medical": 4
+      }
+    ],
+    "source_types": [
+      "medical",
+      "word_of_mouth",
+      "partner",
+      "online",
+      "walk_in",
+      "other",
+      "unattributed"
+    ],
+    "source_labels": {
+      "medical": "Medical referral",
+      "word_of_mouth": "Word-of-mouth",
+      "partner": "Partner",
+      "online": "Online booking",
+      "walk_in": "Walk-in",
+      "other": "Other contact",
+      "unattributed": "Not recorded"
+    }
+  },
   "ranges": {
     "7d": {
       "label": "Last 7 days",
-      "start": "2026-05-17",
-      "end": "2026-05-24",
+      "start": "2026-05-20",
+      "end": "2026-05-27",
       "kpis": {
-        "bookings": 8917.0,
-        "recognised": 6783.4,
-        "active_patients": 28,
-        "visits": 30
+        "bookings": 9417.0,
+        "recognised": 8489.4,
+        "active_patients": 33,
+        "visits": 37
       },
       "trends": {
         "granularity": "DAY",
         "bookings": [
-          {
-            "label": "18 May",
-            "value": 1930.0
-          },
-          {
-            "label": "19 May",
-            "value": 1020.0
-          },
           {
             "label": "20 May",
             "value": 3308.0
@@ -467,20 +1586,20 @@
           {
             "label": "22 May",
             "value": 1010.0
+          },
+          {
+            "label": "25 May",
+            "value": 2150.0
+          },
+          {
+            "label": "26 May",
+            "value": 1300.0
           }
         ],
         "recognised": [
           {
-            "label": "18 May",
-            "value": 1394.8
-          },
-          {
-            "label": "19 May",
-            "value": 1153.8
-          },
-          {
             "label": "20 May",
-            "value": 1909.0
+            "value": 2036.5
           },
           {
             "label": "21 May",
@@ -493,20 +1612,20 @@
           {
             "label": "23 May",
             "value": 265.9
+          },
+          {
+            "label": "25 May",
+            "value": 2691.1
+          },
+          {
+            "label": "26 May",
+            "value": 1436.0
           }
         ],
         "visits": [
           {
-            "label": "18 May",
-            "value": 6.0
-          },
-          {
-            "label": "19 May",
-            "value": 6.0
-          },
-          {
             "label": "20 May",
-            "value": 8.0
+            "value": 9.0
           },
           {
             "label": "21 May",
@@ -519,20 +1638,20 @@
           {
             "label": "23 May",
             "value": 2.0
+          },
+          {
+            "label": "25 May",
+            "value": 12.0
+          },
+          {
+            "label": "26 May",
+            "value": 6.0
           }
         ],
         "active_patients": [
           {
-            "label": "18 May",
-            "value": 5.0
-          },
-          {
-            "label": "19 May",
-            "value": 5.0
-          },
-          {
             "label": "20 May",
-            "value": 8.0
+            "value": 9.0
           },
           {
             "label": "21 May",
@@ -545,83 +1664,81 @@
           {
             "label": "23 May",
             "value": 2.0
+          },
+          {
+            "label": "25 May",
+            "value": 11.0
+          },
+          {
+            "label": "26 May",
+            "value": 6.0
           }
         ]
       },
       "clinicians": [
         {
-          "clinician_id": "PKN",
-          "name": "Kristy Ng",
-          "bookings": 3487.0,
-          "recognised": 1688.8,
-          "is_director": false
-        },
-        {
           "clinician_id": "PCL",
           "name": "Cheryl Long",
-          "bookings": 2859.0,
-          "recognised": 2130.0,
+          "bookings": 5039.0,
+          "recognised": 4310.0,
           "is_director": true
+        },
+        {
+          "clinician_id": "PKN",
+          "name": "Kristy Ng",
+          "bookings": 2298.0,
+          "recognised": 1174.9,
+          "is_director": false
         },
         {
           "clinician_id": "PCN",
           "name": "Claire Ng",
-          "bookings": 2571.0,
-          "recognised": 2964.6,
+          "bookings": 2080.0,
+          "recognised": 3004.5,
           "is_director": false
         }
       ],
       "discounts": {
-        "total": 15.0,
-        "pct_of_bookings": 0.2,
-        "top_items": [
-          {
-            "name": "Initial Physiotherapy Consult",
-            "discount": 15.0,
-            "times": 1
-          }
-        ]
+        "total": 0.0,
+        "pct_of_bookings": 0.0,
+        "top_items": []
       },
       "treatment_mix": [
         {
           "category": "Physiotherapy",
-          "revenue": 5761.0,
-          "visits": 22
-        },
-        {
-          "category": "Private Pilates",
-          "revenue": 527.4,
-          "visits": 4
+          "revenue": 6940.0,
+          "visits": 26
         },
         {
           "category": "S&C",
-          "revenue": 285.0,
-          "visits": 2
+          "revenue": 700.8,
+          "visits": 5
+        },
+        {
+          "category": "Private Pilates",
+          "revenue": 648.6,
+          "visits": 5
         },
         {
           "category": "Other",
-          "revenue": 210.0,
-          "visits": 2
+          "revenue": 200.0,
+          "visits": 1
         }
       ]
     },
     "30d": {
       "label": "Last 30 days",
-      "start": "2026-04-24",
-      "end": "2026-05-24",
+      "start": "2026-04-27",
+      "end": "2026-05-27",
       "kpis": {
-        "bookings": 28428.0,
-        "recognised": 18615.7,
-        "active_patients": 50,
-        "visits": 78
+        "bookings": 31218.0,
+        "recognised": 22517.6,
+        "active_patients": 55,
+        "visits": 97
       },
       "trends": {
         "granularity": "DAY",
         "bookings": [
-          {
-            "label": "24 Apr",
-            "value": 660.0
-          },
           {
             "label": "27 Apr",
             "value": 660.0
@@ -697,13 +1814,17 @@
           {
             "label": "22 May",
             "value": 1010.0
+          },
+          {
+            "label": "25 May",
+            "value": 2150.0
+          },
+          {
+            "label": "26 May",
+            "value": 1300.0
           }
         ],
         "recognised": [
-          {
-            "label": "24 Apr",
-            "value": 660.0
-          },
           {
             "label": "27 Apr",
             "value": 660.0
@@ -746,7 +1867,7 @@
           },
           {
             "label": "13 May",
-            "value": 1261.0
+            "value": 1388.5
           },
           {
             "label": "14 May",
@@ -754,7 +1875,7 @@
           },
           {
             "label": "15 May",
-            "value": 909.9
+            "value": 1089.7
           },
           {
             "label": "16 May",
@@ -770,7 +1891,7 @@
           },
           {
             "label": "20 May",
-            "value": 1909.0
+            "value": 2036.5
           },
           {
             "label": "21 May",
@@ -783,14 +1904,18 @@
           {
             "label": "23 May",
             "value": 265.9
+          },
+          {
+            "label": "25 May",
+            "value": 2691.1
+          },
+          {
+            "label": "26 May",
+            "value": 1436.0
           }
         ],
         "visits": [
           {
-            "label": "24 Apr",
-            "value": 2.0
-          },
-          {
             "label": "27 Apr",
             "value": 2.0
           },
@@ -832,7 +1957,7 @@
           },
           {
             "label": "13 May",
-            "value": 5.0
+            "value": 6.0
           },
           {
             "label": "14 May",
@@ -840,7 +1965,7 @@
           },
           {
             "label": "15 May",
-            "value": 4.0
+            "value": 5.0
           },
           {
             "label": "16 May",
@@ -856,7 +1981,7 @@
           },
           {
             "label": "20 May",
-            "value": 8.0
+            "value": 9.0
           },
           {
             "label": "21 May",
@@ -869,14 +1994,18 @@
           {
             "label": "23 May",
             "value": 2.0
+          },
+          {
+            "label": "25 May",
+            "value": 12.0
+          },
+          {
+            "label": "26 May",
+            "value": 6.0
           }
         ],
         "active_patients": [
           {
-            "label": "24 Apr",
-            "value": 2.0
-          },
-          {
             "label": "27 Apr",
             "value": 2.0
           },
@@ -918,7 +2047,7 @@
           },
           {
             "label": "13 May",
-            "value": 5.0
+            "value": 6.0
           },
           {
             "label": "14 May",
@@ -926,7 +2055,7 @@
           },
           {
             "label": "15 May",
-            "value": 4.0
+            "value": 5.0
           },
           {
             "label": "16 May",
@@ -942,7 +2071,7 @@
           },
           {
             "label": "20 May",
-            "value": 8.0
+            "value": 9.0
           },
           {
             "label": "21 May",
@@ -955,6 +2084,14 @@
           {
             "label": "23 May",
             "value": 2.0
+          },
+          {
+            "label": "25 May",
+            "value": 11.0
+          },
+          {
+            "label": "26 May",
+            "value": 6.0
           }
         ]
       },
@@ -962,22 +2099,22 @@
         {
           "clinician_id": "PCN",
           "name": "Claire Ng",
-          "bookings": 14671.0,
-          "recognised": 7929.9,
+          "bookings": 14661.0,
+          "recognised": 8889.7,
           "is_director": false
         },
         {
           "clinician_id": "PCL",
           "name": "Cheryl Long",
-          "bookings": 8030.0,
-          "recognised": 7301.0,
+          "bookings": 10570.0,
+          "recognised": 9841.0,
           "is_director": true
         },
         {
           "clinician_id": "PKN",
           "name": "Kristy Ng",
-          "bookings": 5727.0,
-          "recognised": 3384.8,
+          "bookings": 5987.0,
+          "recognised": 3786.9,
           "is_director": false
         }
       ],
@@ -1010,18 +2147,18 @@
       "treatment_mix": [
         {
           "category": "Physiotherapy",
-          "revenue": 16392.0,
-          "visits": 61
+          "revenue": 19182.0,
+          "visits": 72
         },
         {
           "category": "Private Pilates",
-          "revenue": 1180.8,
-          "visits": 9
+          "revenue": 1876.9,
+          "visits": 14
         },
         {
           "category": "S&C",
-          "revenue": 832.9,
-          "visits": 6
+          "revenue": 1248.7,
+          "visits": 9
         },
         {
           "category": "Other",
@@ -1032,13 +2169,13 @@
     },
     "90d": {
       "label": "Last 90 days",
-      "start": "2026-02-23",
-      "end": "2026-05-24",
+      "start": "2026-02-26",
+      "end": "2026-05-27",
       "kpis": {
-        "bookings": 35692.0,
-        "recognised": 25879.7,
-        "active_patients": 57,
-        "visits": 101
+        "bookings": 39142.0,
+        "recognised": 30441.6,
+        "active_patients": 63,
+        "visits": 122
       },
       "trends": {
         "granularity": "WEEK",
@@ -1078,6 +2215,10 @@
           {
             "label": "17 May",
             "value": 8917.0
+          },
+          {
+            "label": "24 May",
+            "value": 3450.0
           }
         ],
         "recognised": [
@@ -1111,11 +2252,15 @@
           },
           {
             "label": "10 May",
-            "value": 4912.8
+            "value": 5220.1
           },
           {
             "label": "17 May",
-            "value": 6783.4
+            "value": 6910.9
+          },
+          {
+            "label": "24 May",
+            "value": 4127.1
           }
         ],
         "visits": [
@@ -1149,11 +2294,15 @@
           },
           {
             "label": "10 May",
-            "value": 21.0
+            "value": 23.0
           },
           {
             "label": "17 May",
-            "value": 30.0
+            "value": 31.0
+          },
+          {
+            "label": "24 May",
+            "value": 18.0
           }
         ],
         "active_patients": [
@@ -1187,11 +2336,15 @@
           },
           {
             "label": "10 May",
-            "value": 17.0
+            "value": 19.0
           },
           {
             "label": "17 May",
-            "value": 28.0
+            "value": 29.0
+          },
+          {
+            "label": "24 May",
+            "value": 16.0
           }
         ]
       },
@@ -1199,22 +2352,22 @@
         {
           "clinician_id": "PCL",
           "name": "Cheryl Long",
-          "bookings": 15290.0,
-          "recognised": 14561.0,
+          "bookings": 18490.0,
+          "recognised": 17761.0,
           "is_director": true
         },
         {
           "clinician_id": "PCN",
           "name": "Claire Ng",
-          "bookings": 14675.0,
-          "recognised": 7933.9,
+          "bookings": 14665.0,
+          "recognised": 8893.7,
           "is_director": false
         },
         {
           "clinician_id": "PKN",
           "name": "Kristy Ng",
-          "bookings": 5727.0,
-          "recognised": 3384.8,
+          "bookings": 5987.0,
+          "recognised": 3786.9,
           "is_director": false
         }
       ],
@@ -1247,18 +2400,18 @@
       "treatment_mix": [
         {
           "category": "Physiotherapy",
-          "revenue": 23652.0,
-          "visits": 83
+          "revenue": 27102.0,
+          "visits": 96
         },
         {
           "category": "Private Pilates",
-          "revenue": 1180.8,
-          "visits": 9
+          "revenue": 1876.9,
+          "visits": 14
         },
         {
           "category": "S&C",
-          "revenue": 832.9,
-          "visits": 6
+          "revenue": 1248.7,
+          "visits": 9
         },
         {
           "category": "Other",
@@ -1270,12 +2423,12 @@
     "all": {
       "label": "All time",
       "start": "1970-01-01",
-      "end": "2027-05-24",
+      "end": "2027-05-27",
       "kpis": {
-        "bookings": 36091.0,
-        "recognised": 26278.7,
-        "active_patients": 57,
-        "visits": 103
+        "bookings": 39281.0,
+        "recognised": 30580.6,
+        "active_patients": 63,
+        "visits": 123
       },
       "trends": {
         "granularity": "MONTH",
@@ -1290,7 +2443,7 @@
           },
           {
             "label": "May 26",
-            "value": 26778.0
+            "value": 29968.0
           },
           {
             "label": "Jun 26",
@@ -1308,7 +2461,7 @@
           },
           {
             "label": "May 26",
-            "value": 16965.7
+            "value": 21267.6
           },
           {
             "label": "Jun 26",
@@ -1326,7 +2479,7 @@
           },
           {
             "label": "May 26",
-            "value": 73.0
+            "value": 93.0
           },
           {
             "label": "Jun 26",
@@ -1344,7 +2497,7 @@
           },
           {
             "label": "May 26",
-            "value": 47.0
+            "value": 54.0
           },
           {
             "label": "Jun 26",
@@ -1356,22 +2509,22 @@
         {
           "clinician_id": "PCL",
           "name": "Cheryl Long",
-          "bookings": 15290.0,
-          "recognised": 14561.0,
+          "bookings": 18490.0,
+          "recognised": 17761.0,
           "is_director": true
         },
         {
           "clinician_id": "PCN",
           "name": "Claire Ng",
-          "bookings": 14814.0,
-          "recognised": 8072.9,
+          "bookings": 14804.0,
+          "recognised": 9032.7,
           "is_director": false
         },
         {
           "clinician_id": "PKN",
           "name": "Kristy Ng",
           "bookings": 5987.0,
-          "recognised": 3644.8,
+          "recognised": 3786.9,
           "is_director": false
         }
       ],
@@ -1404,18 +2557,18 @@
       "treatment_mix": [
         {
           "category": "Physiotherapy",
-          "revenue": 23912.0,
-          "visits": 84
+          "revenue": 27102.0,
+          "visits": 96
         },
         {
           "category": "Private Pilates",
-          "revenue": 1319.8,
-          "visits": 10
+          "revenue": 2015.9,
+          "visits": 15
         },
         {
           "category": "S&C",
-          "revenue": 832.9,
-          "visits": 6
+          "revenue": 1248.7,
+          "visits": 9
         },
         {
           "category": "Other",
@@ -1430,7 +2583,11 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
   <script>
   (function() {
-    const DATA = JSON.parse(document.getElementById('dashboardData').textContent);
+    // Real data is fetched from /api/data after first paint. The inline tag
+    // above is a placeholder (empty `{}` from the shell) so the script can
+    // still parse it without throwing, and so the page renders identically
+    // when generate.py inlines a full payload.
+    let DATA = JSON.parse(document.getElementById('dashboardData').textContent);
     const STORAGE_KEY = 'goji_dashboard_range';
 
     const GOJI    = '#c44a3a';
@@ -1447,7 +2604,7 @@
     };
     Chart.defaults.color = '#5c5c5c';
 
-    const fmt$  = v => (v == null || isNaN(v)) ? '-' : '$' + Math.round(Number(v)).toLocaleString();
+    const fmt$  = v => (v == null || isNaN(v)) ? '-' : '$' + Number(v).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     const fmtPct = v => (v == null || isNaN(v)) ? '-' : Number(v).toFixed(1) + '%';
     const fmtInt = v => (v == null || isNaN(v)) ? '-' : Math.round(Number(v)).toLocaleString();
     const fmtNum1 = v => (v == null || isNaN(v)) ? '-' : Number(v).toFixed(1);
@@ -1456,7 +2613,23 @@
     }[c]));
 
     let clinicianChart, mixRevenueChart, mixVisitsChart;
-    let activePatientsChart, visitsChart, bookingsChart, recognisedChart;
+    let visitsChart, avgVisitsChart, bookingsVsRecognisedChart;
+
+    // Parse a label like "18 May" or "4 May" into a day-of-week prefix, e.g. "Mon, 18 May"
+    const MONTHS_IDX = {Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+    const DOW = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    function labelWithDow(label) {
+      const parts = label.trim().split(/\s+/);
+      if (parts.length === 2) {
+        const day = parseInt(parts[0], 10);
+        const mon = MONTHS_IDX[parts[1]];
+        if (!isNaN(day) && mon !== undefined) {
+          const d = new Date(2026, mon, day);
+          if (!isNaN(d)) return DOW[d.getDay()] + ', ' + label;
+        }
+      }
+      return label;
+    }
 
     function renderTrendChart(existing, canvasId, series, color, isCurrency) {
       const labels = series.map(s => s.label);
@@ -1493,6 +2666,7 @@
             tooltip: {
               mode: 'index', intersect: false,
               callbacks: {
+                title: items => items.length ? labelWithDow(items[0].label) : '',
                 label: ctx => isCurrency
                   ? '$' + Math.round(ctx.parsed.y).toLocaleString()
                   : ctx.parsed.y
@@ -1510,12 +2684,124 @@
       });
     }
 
+    function renderAvgVisitsChart(t) {
+      if (!t) return;
+      const visitsMap = {};
+      (t.visits || []).forEach(s => { visitsMap[s.label] = s.value; });
+      const series = (t.active_patients || []).map(s => ({
+        label: s.label,
+        value: s.value > 0
+          ? Math.round((visitsMap[s.label] || 0) / s.value * 10) / 10
+          : null
+      }));
+      avgVisitsChart = renderTrendChart(avgVisitsChart, 'avgVisitsChart', series, SAGE, false);
+    }
+
+    function renderBookingsVsRecognised(t) {
+      if (!t) return;
+
+      // Build a map for each series, then take the union of dates sorted chronologically
+      const bookingsMap = {}, recognisedMap = {};
+      (t.bookings   || []).forEach(s => { bookingsMap[s.label]   = s.value || 0; });
+      (t.recognised || []).forEach(s => { recognisedMap[s.label] = s.value || 0; });
+
+      function parseLabelMs(l) {
+        const parts = l.trim().split(/\s+/);
+        return new Date(2026, MONTHS_IDX[parts[1]], parseInt(parts[0], 10)).getTime();
+      }
+
+      const allLabels = [...new Set([
+        ...(t.bookings   || []).map(s => s.label),
+        ...(t.recognised || []).map(s => s.label)
+      ])].sort((a, b) => parseLabelMs(a) - parseLabelMs(b));
+
+      // Compute cumulative running totals
+      let cumB = 0, cumR = 0;
+      const labels = [], cumBookings = [], cumRecognised = [];
+      allLabels.forEach(lbl => {
+        cumB += bookingsMap[lbl]   || 0;
+        cumR += recognisedMap[lbl] || 0;
+        labels.push(lbl);
+        cumBookings.push(Math.round(cumB));
+        cumRecognised.push(Math.round(cumR));
+      });
+
+      if (bookingsVsRecognisedChart) {
+        bookingsVsRecognisedChart.data.labels           = labels;
+        bookingsVsRecognisedChart.data.datasets[0].data = cumBookings;
+        bookingsVsRecognisedChart.data.datasets[1].data = cumRecognised;
+        bookingsVsRecognisedChart.update();
+      } else {
+        bookingsVsRecognisedChart = new Chart(
+          document.getElementById('bookingsVsRecognisedChart'), {
+          type: 'line',
+          data: {
+            labels,
+            datasets: [
+              {
+                label: 'Cumulative bookings',
+                data: cumBookings,
+                borderColor: GOJI,
+                backgroundColor: GOJI + '28',
+                fill: { target: '+1', above: GOJI + '28', below: 'transparent' },
+                tension: 0.3,
+                pointRadius: labels.length <= 14 ? 3 : 2,
+                pointHoverRadius: 5,
+                pointBackgroundColor: GOJI,
+                borderWidth: 2.5
+              },
+              {
+                label: 'Cumulative recognised',
+                data: cumRecognised,
+                borderColor: GOLD,
+                backgroundColor: GOLD + '22',
+                fill: { target: 'origin', above: GOLD + '22', below: 'transparent' },
+                tension: 0.3,
+                pointRadius: labels.length <= 14 ? 3 : 2,
+                pointHoverRadius: 5,
+                pointBackgroundColor: GOLD,
+                borderWidth: 2.5
+              }
+            ]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+              legend: { position: 'bottom' },
+              tooltip: {
+                mode: 'index', intersect: false,
+                callbacks: {
+                  title: items => items.length ? labelWithDow(items[0].label) : '',
+                  label: ctx =>
+                    ctx.dataset.label + ': $' + ctx.parsed.y.toLocaleString(),
+                  afterBody: items => {
+                    const b = items[0]?.parsed.y || 0;
+                    const r = items[1]?.parsed.y || 0;
+                    const gap = b - r;
+                    return gap > 1
+                      ? ['↳ Deferred outstanding: $' + Math.round(gap).toLocaleString()]
+                      : [];
+                  }
+                }
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: { callback: v => '$' + Math.round(v).toLocaleString() }
+              },
+              x: { ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 10 } }
+            }
+          }
+        });
+      }
+    }
+
     function renderTrends(t) {
       if (!t) return;
-      activePatientsChart = renderTrendChart(activePatientsChart, 'activePatientsChart', t.active_patients, SAGE,   false);
-      visitsChart         = renderTrendChart(visitsChart,         'visitsChart',         t.visits,          COBALT, false);
-      bookingsChart       = renderTrendChart(bookingsChart,       'bookingsChart',       t.bookings,        GOJI,   true);
-      recognisedChart     = renderTrendChart(recognisedChart,     'recognisedChart',     t.recognised,      GOLD,   true);
+      visitsChart = renderTrendChart(visitsChart, 'visitsChart', t.visits, COBALT, false);
+      renderAvgVisitsChart(t);
+      renderBookingsVsRecognised(t);
     }
 
     function renderKpis(r) {
@@ -1572,19 +2858,94 @@
     }
 
     function renderDiscounts(d) {
-      document.getElementById('discountTotal').textContent = fmt$(d.total);
+      // d shape: { total_true, promo_implicit, adhoc_nonpromo, pct_of_bookings,
+      //           promo_units_total, by_sku[], top_adhoc_items[] }
+      document.getElementById('discountTotal').textContent = fmt$(d.total_true);
       document.getElementById('discountPct').textContent   = fmtPct(d.pct_of_bookings);
-      const tbody = document.getElementById('discountTbody');
-      if (!d.top_items.length) {
-        tbody.innerHTML = '<tr><td colspan="3" class="empty">No discounts in this period.</td></tr>';
+
+      const skuBody  = document.getElementById('promoBySkuTbody');
+      const skuFoot  = document.getElementById('promoBySkuTfoot');
+      if (!d.by_sku || !d.by_sku.length) {
+        skuBody.innerHTML = '<tr><td colspan="6" class="empty">No opening-promo sales in this period.</td></tr>';
+        skuFoot.innerHTML = '';
       } else {
-        tbody.innerHTML = d.top_items.map(it => `
+        skuBody.innerHTML = d.by_sku.map(s => `
+          <tr>
+            <td>${escapeHtml(s.service)}</td>
+            <td>${s.pack === 1 ? 'single' : s.pack + '-pack'}</td>
+            <td class="num">${fmtInt(s.units)}</td>
+            <td class="num">${fmt$(s.usual_total)}</td>
+            <td class="num">${fmt$(s.sold_total)}</td>
+            <td class="num" style="color: var(--goji); font-weight: 500;">${fmt$(s.discount)}</td>
+          </tr>`).join('');
+        const totUnits = d.by_sku.reduce((a, s) => a + (s.units || 0), 0);
+        const totUsual = d.by_sku.reduce((a, s) => a + (s.usual_total || 0), 0);
+        const totSold  = d.by_sku.reduce((a, s) => a + (s.sold_total  || 0), 0);
+        skuFoot.innerHTML = `
+          <tr style="border-top: 2px solid var(--ink);">
+            <td colspan="2" style="padding-top: 10px; font-weight: 600;">Subtotal</td>
+            <td class="num" style="padding-top: 10px; font-weight: 600;">${fmtInt(totUnits)}</td>
+            <td class="num" style="padding-top: 10px; font-weight: 600;">${fmt$(totUsual)}</td>
+            <td class="num" style="padding-top: 10px; font-weight: 600;">${fmt$(totSold)}</td>
+            <td class="num" style="padding-top: 10px; font-weight: 600; color: var(--goji);">${fmt$(d.promo_implicit)}</td>
+          </tr>`;
+      }
+
+      const adhocBlock = document.getElementById('adhocBlock');
+      const adhocBody  = document.getElementById('discountTbody');
+      const adhocFoot  = document.getElementById('adhocTfoot');
+      if (d.top_adhoc_items && d.top_adhoc_items.length) {
+        adhocBlock.hidden = false;
+        adhocBody.innerHTML = d.top_adhoc_items.map(it => `
           <tr>
             <td>${escapeHtml(it.name)}</td>
-            <td class="num">${fmt$(it.discount)}</td>
             <td class="num">${fmtInt(it.times)}</td>
+            <td class="num">${fmt$(it.discount)}</td>
           </tr>`).join('');
+        const totTimes = d.top_adhoc_items.reduce((a, it) => a + (it.times || 0), 0);
+        adhocFoot.innerHTML = `
+          <tr style="border-top: 2px solid var(--ink);">
+            <td style="padding-top: 10px; font-weight: 600;">Subtotal</td>
+            <td class="num" style="padding-top: 10px; font-weight: 600;">${fmtInt(totTimes)}</td>
+            <td class="num" style="padding-top: 10px; font-weight: 600; color: var(--goji);">${fmt$(d.adhoc_nonpromo)}</td>
+          </tr>`;
+      } else {
+        adhocBlock.hidden = true;
       }
+    }
+
+    function doughnutOpts(pos) {
+      return {
+        responsive: true, maintainAspectRatio: false, cutout: '60%',
+        plugins: {
+          legend: {
+            position: pos,
+            labels: {
+              generateLabels(chart) {
+                const ds = chart.data.datasets[0];
+                const total = ds.data.reduce((a, v) => a + (v || 0), 0);
+                return chart.data.labels.map((lbl, i) => ({
+                  text: `${lbl} (${total > 0 ? Math.round(ds.data[i] / total * 100) : 0}%)`,
+                  fillStyle: Array.isArray(ds.backgroundColor) ? ds.backgroundColor[i] : ds.backgroundColor,
+                  strokeStyle: '#fff',
+                  lineWidth: 1,
+                  hidden: false,
+                  index: i
+                }));
+              }
+            }
+          },
+          tooltip: {
+            callbacks: {
+              label(ctx) {
+                const total = ctx.chart.data.datasets[0].data.reduce((a, v) => a + (v || 0), 0);
+                const pct = total > 0 ? Math.round(ctx.parsed / total * 100) : 0;
+                return ` ${ctx.label}: ${pct}%`;
+              }
+            }
+          }
+        }
+      };
     }
 
     function renderMix(rows) {
@@ -1602,7 +2963,7 @@
         mixRevenueChart = new Chart(document.getElementById('mixRevenue'), {
           type: 'doughnut',
           data: { labels, datasets: [{ data: revenue, backgroundColor: colors, borderWidth: 1, borderColor: '#fff' }] },
-          options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { position: 'right' } } }
+          options: doughnutOpts('right')
         });
       }
       if (mixVisitsChart) {
@@ -1614,73 +2975,194 @@
         mixVisitsChart = new Chart(document.getElementById('mixVisits'), {
           type: 'doughnut',
           data: { labels, datasets: [{ data: visits, backgroundColor: colors, borderWidth: 1, borderColor: '#fff' }] },
-          options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { position: 'right' } } }
+          options: doughnutOpts('right')
         });
       }
     }
 
-    function renderCohorts() {
-      const tbody = document.getElementById('cohortTbody');
-      if (!DATA.cohorts.length) {
-        tbody.innerHTML = '<tr><td colspan="4" class="empty">No cohorts to display.</td></tr>';
+
+    let ageChart, genderChart, tagsChart, acquisitionChart;
+
+    function renderDemographics(d) {
+      if (!d) return;
+      const totalEl = document.getElementById('demographics_total');
+      if (totalEl) totalEl.textContent = fmtInt(d.total_patients) + ' patients';
+
+      // Age band — fixed left→right ordering so it reads young→old
+      const ageLabels = (d.age_bands || []).map(b => b.label);
+      const ageValues = (d.age_bands || []).map(b => b.count);
+      if (ageChart) {
+        ageChart.data.labels = ageLabels;
+        ageChart.data.datasets[0].data = ageValues;
+        ageChart.update();
       } else {
-        tbody.innerHTML = DATA.cohorts.map(c => `
-          <tr>
-            <td>${escapeHtml(c.cohort)}</td>
-            <td class="num">${fmtInt(c.patients)}</td>
-            <td class="num">${fmt$(c.avg_ltv)}</td>
-            <td class="num">${fmtNum1(c.avg_visits)}</td>
-          </tr>`).join('');
+        ageChart = new Chart(document.getElementById('ageChart'), {
+          type: 'bar',
+          data: { labels: ageLabels,
+                  datasets: [{ data: ageValues, backgroundColor: GOJI, borderRadius: 4 }] },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: { callbacks: { label: ctx => ' ' + ctx.parsed.y + ' patients' } }
+            },
+            scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+          }
+        });
+      }
+
+      // Gender — doughnut, female and male in a stable colour mapping
+      const sexRows = d.sex || [];
+      const sexLabels = sexRows.map(r => r.label);
+      const sexValues = sexRows.map(r => r.count);
+      const sexColors = sexLabels.map(l => l === 'Female' ? GOJI
+                                         : l === 'Male'   ? COBALT
+                                         : NEUTRAL);
+      if (genderChart) {
+        genderChart.data.labels = sexLabels;
+        genderChart.data.datasets[0].data = sexValues;
+        genderChart.data.datasets[0].backgroundColor = sexColors;
+        genderChart.update();
+      } else {
+        genderChart = new Chart(document.getElementById('genderChart'), {
+          type: 'doughnut',
+          data: { labels: sexLabels,
+                  datasets: [{ data: sexValues, backgroundColor: sexColors,
+                               borderWidth: 1, borderColor: '#fff' }] },
+          options: doughnutOpts('bottom')
+        });
+      }
+
+      // Top clinical tags — horizontal bar, descending
+      const tagLabels = (d.top_tags || []).map(t => t.label);
+      const tagValues = (d.top_tags || []).map(t => t.count);
+      if (tagsChart) {
+        tagsChart.data.labels = tagLabels;
+        tagsChart.data.datasets[0].data = tagValues;
+        tagsChart.update();
+      } else {
+        tagsChart = new Chart(document.getElementById('tagsChart'), {
+          type: 'bar',
+          data: { labels: tagLabels,
+                  datasets: [{ data: tagValues, backgroundColor: GOJI, borderRadius: 4 }] },
+          options: {
+            indexAxis: 'y',
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: { callbacks: { label: ctx => ' ' + ctx.parsed.x + ' patients' } }
+            },
+            scales: { x: { beginAtZero: true, ticks: { precision: 0 } } }
+          }
+        });
       }
     }
 
-    function renderSampleSections() {
-      new Chart(document.getElementById('ageChart'), {
-        type: 'bar',
-        data: { labels: ['0-17','18-29','30-44','45-64','65+'],
-                datasets: [{ data: [3, 12, 19, 11, 2], backgroundColor: GOJI }] },
-        options: { responsive: true, maintainAspectRatio: false,
-                   plugins: { legend: { display: false } },
-                   scales: { y: { beginAtZero: true } } }
-      });
-      new Chart(document.getElementById('genderChart'), {
-        type: 'doughnut',
-        data: { labels: ['Female','Male'],
-                datasets: [{ data: [62, 38], backgroundColor: [GOJI, COBALT], borderWidth: 1, borderColor: '#fff' }] },
-        options: { responsive: true, maintainAspectRatio: false, cutout: '65%',
-                   plugins: { legend: { position: 'bottom' } } }
-      });
-      new Chart(document.getElementById('tagsChart'), {
-        type: 'bar',
-        data: { labels: ['Musculoskeletal','Post-partum','Sports injury','Office posture','Post-surgery'],
-                datasets: [{ data: [21, 8, 7, 6, 3], backgroundColor: GOJI }] },
-        options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false,
-                   plugins: { legend: { display: false } },
-                   scales: { x: { beginAtZero: true } } }
-      });
-      new Chart(document.getElementById('retentionChart'), {
-        type: 'line',
-        data: { labels: ['Visit 1','30d','60d','90d'],
-                datasets: [
-                  { label: 'Mar cohort', data: [100, 73, 55, 41],  borderColor: GOJI,  backgroundColor: 'transparent', tension: 0.25, pointBackgroundColor: GOJI },
-                  { label: 'Apr cohort', data: [100, 68, 49, null], borderColor: GOLD, backgroundColor: 'transparent', tension: 0.25, pointBackgroundColor: GOLD },
-                  { label: 'May cohort', data: [100, 51, null, null], borderColor: SAGE, backgroundColor: 'transparent', tension: 0.25, pointBackgroundColor: SAGE }
-                ] },
-        options: { responsive: true, maintainAspectRatio: false,
-                   plugins: { legend: { position: 'bottom' } },
-                   scales: { y: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%' } } } }
-      });
+    // Stable colour mapping for source_type buckets. Keep in sync with the
+    // SOURCE_TYPES_ORDERED list in app.py — readers will rely on the same
+    // colour meaning the same thing across both charts in this section.
+    const SOURCE_TYPE_COLORS = {
+      medical:       GOJI,
+      word_of_mouth: GOLD,
+      partner:       SAGE,
+      online:        COBALT,
+      walk_in:       NEUTRAL,
+      other:         '#9c6c2e',
+      unattributed:  '#c9c2b6',
+    };
+    let sourceMixChart;
 
-      const referralLabels = ['Google search', 'Doctor referral', 'Existing patient', 'Instagram', 'Insurance partner', 'Walk-in'];
-      const referralData   = [18, 12, 9, 7, 5, 3];
-      const referralColors = referralLabels.map((_, i) => MIX_COLORS[i % MIX_COLORS.length]);
-      new Chart(document.getElementById('referralChart'), {
-        type: 'doughnut',
-        data: { labels: referralLabels,
-                datasets: [{ data: referralData, backgroundColor: referralColors, borderWidth: 1, borderColor: '#fff' }] },
-        options: { responsive: true, maintainAspectRatio: false, cutout: '60%',
-                   plugins: { legend: { position: 'right' } } }
-      });
+    function renderReferrals(r) {
+      if (!r) return;
+
+      // Headline KPI
+      document.getElementById('ref_pct').textContent = fmtPct(r.pct_referred);
+      document.getElementById('ref_blurb').textContent =
+        `of ${fmtInt(r.total_patients)} patients on file have a referral source recorded (${fmtInt(r.referred)} of ${fmtInt(r.total_patients)})`;
+
+      const sourceTypesOrdered = r.source_types || Object.keys(SOURCE_TYPE_COLORS);
+      const sourceLabels       = r.source_labels || {};
+
+      // --- Source-mix donut: aggregated by source_type ---
+      const mixRows = (r.by_source_type || []).slice().sort((a, b) => b.count - a.count);
+      const mixLabels = mixRows.map(x => x.label);
+      const mixValues = mixRows.map(x => x.count);
+      const mixColors = mixRows.map(x => SOURCE_TYPE_COLORS[x.source_type] || NEUTRAL);
+      if (sourceMixChart) {
+        sourceMixChart.data.labels = mixLabels;
+        sourceMixChart.data.datasets[0].data = mixValues;
+        sourceMixChart.data.datasets[0].backgroundColor = mixColors;
+        sourceMixChart.update();
+      } else {
+        sourceMixChart = new Chart(document.getElementById('sourceMixChart'), {
+          type: 'doughnut',
+          data: { labels: mixLabels,
+                  datasets: [{ data: mixValues, backgroundColor: mixColors,
+                               borderWidth: 1, borderColor: '#fff' }] },
+          options: doughnutOpts('right')
+        });
+      }
+
+      // --- Top sources table: named contact + its channel ---
+      const tbody = document.getElementById('top_sources_tbody');
+      if (tbody) {
+        tbody.innerHTML = '';
+        const rows = r.top_sources || [];
+        if (rows.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="3" style="color: var(--ink-muted); font-style: italic;">No referral sources recorded yet.</td></tr>';
+        } else {
+          for (const row of rows) {
+            const channelLabel = sourceLabels[row.source_type] || row.source_type;
+            const channelColor = SOURCE_TYPE_COLORS[row.source_type] || NEUTRAL;
+            const chip = `<span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:${channelColor}; margin-right:6px; vertical-align:middle;"></span>`;
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td>${escapeHtml(row.label)}</td>
+              <td>${chip}${escapeHtml(channelLabel)}</td>
+              <td class="num">${fmtInt(row.count)}</td>`;
+            tbody.appendChild(tr);
+          }
+        }
+      }
+
+      // --- Monthly acquisition: stacked bar, one segment per source_type ---
+      const m = r.monthly || [];
+      const labels = m.map(x => x.label);
+      // Only render datasets for source_types that have at least one non-zero
+      // month — keeps the legend tidy on a 72-patient base.
+      const activeTypes = sourceTypesOrdered.filter(st =>
+        m.some(month => (month[st] || 0) > 0)
+      );
+      const datasets = activeTypes.map(st => ({
+        label: sourceLabels[st] || st,
+        data: m.map(month => month[st] || 0),
+        backgroundColor: SOURCE_TYPE_COLORS[st] || NEUTRAL,
+        borderRadius: 4,
+        stack: 'a',
+      }));
+      if (acquisitionChart) {
+        acquisitionChart.data.labels = labels;
+        acquisitionChart.data.datasets = datasets;
+        acquisitionChart.update();
+      } else {
+        acquisitionChart = new Chart(document.getElementById('acquisitionChart'), {
+          type: 'bar',
+          data: { labels, datasets },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+              legend: { position: 'bottom' },
+              tooltip: { callbacks: {
+                label: ctx => ' ' + ctx.dataset.label + ': ' + ctx.parsed.y
+              } }
+            },
+            scales: {
+              x: { stacked: true },
+              y: { stacked: true, beginAtZero: true, ticks: { precision: 0 } }
+            }
+          }
+        });
+      }
     }
 
     function applyRange(key) {
@@ -1704,7 +3186,22 @@
       renderMix(r.treatment_mix);
     }
 
-    function init() {
+    async function init() {
+      // If the shell shipped without inlined data (the normal Cloud Run path),
+      // pull it now. generate.py's static export inlines the full payload, so
+      // we only fetch when needed.
+      if (!DATA || !DATA.ranges) {
+        try {
+          const r = await fetch('api/data', { credentials: 'same-origin' });
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          DATA = await r.json();
+        } catch (err) {
+          showLoadError(err);
+          return;
+        }
+      }
+      hideLoadingOverlay();
+
       document.getElementById('generatedAt').textContent =
         new Date(DATA.generated_at).toLocaleString();
 
@@ -1715,9 +3212,841 @@
       const stored = localStorage.getItem(STORAGE_KEY);
       const initial = (stored && DATA.ranges[stored]) ? stored : DATA.default_range;
       applyRange(initial);
-      renderCohorts();
-      renderSampleSections();
+      renderDemographics(DATA.demographics);
+      renderReferrals(DATA.referrals);
+      renderDoctorMismatches(DATA.doctor_mismatches);
+
+      initPL();
+      initPageNav();
+      initCommissionCalculator();
     }
+
+    function renderDoctorMismatches(m) {
+      const section = document.getElementById('doctor-mismatch-alert');
+      const tbody   = document.getElementById('mismatch_tbody');
+      const note    = document.getElementById('mismatch_config_note');
+      const countEl = document.getElementById('mismatch_count');
+      const windowEl = document.getElementById('mismatch_window');
+      if (!section || !tbody) return;
+      tbody.innerHTML = '';
+      note.hidden = true;
+      note.textContent = '';
+
+      if (!m) { section.hidden = true; return; }
+      windowEl.textContent = m.window_days || 30;
+
+      if (!m.available) {
+        section.hidden = false;
+        countEl.textContent = '!';
+        note.hidden = false;
+        note.textContent = 'Provider attribution check is not configured: PLATO_API_KEY env var missing on the dashboard service.';
+        return;
+      }
+      if (m.error) {
+        section.hidden = false;
+        countEl.textContent = '!';
+        note.hidden = false;
+        note.textContent = 'Plato API check failed: ' + m.error + '. Will retry on next refresh.';
+        return;
+      }
+      const rows = m.mismatches || [];
+      if (!rows.length) { section.hidden = true; return; }
+
+      section.hidden = false;
+      countEl.textContent = rows.length;
+
+      const sgd = v => '$' + (v || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+      rows.forEach(r => {
+        const tr = document.createElement('tr');
+        const apptList = (r.appt_doctor_names || []).map(esc).join(' / ');
+        const invDoc = esc(r.invoice_doctor_name || r.invoice_doctor || '(unset)');
+        const flip = `<span class="doctor-flip"><span class="right">${apptList || '?'}</span> → <span class="wrong">${invDoc}</span></span>`;
+        tr.innerHTML = `
+          <td>${esc(r.date)}</td>
+          <td>${esc(r.invoice_no)}</td>
+          <td>${esc(r.patient)}</td>
+          <td>${flip}</td>
+          <td class="num">${sgd(r.total)}</td>
+          <td>${esc(r.created_by) || '<span class="alert-meta">—</span>'}</td>
+          <td>${esc(r.last_edited_by) || '<span class="alert-meta">—</span>'}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function hideLoadingOverlay() {
+      const el = document.getElementById('loadingOverlay');
+      if (el) el.classList.add('hidden');
+    }
+    function showLoadError(err) {
+      const el = document.getElementById('loadingOverlay');
+      if (!el) return;
+      const spinner = el.querySelector('.loading-spinner');
+      if (spinner) spinner.style.display = 'none';
+      const text = el.querySelector('.loading-text');
+      if (text) text.textContent = 'Failed to load dashboard data';
+      const hint = el.querySelector('.loading-hint');
+      if (hint) {
+        hint.textContent = String((err && err.message) || err) + ' — try refreshing the page';
+        hint.classList.add('error');
+      }
+    }
+
+    /* ===== P&L Section ===== */
+    function initPL() {
+      let plView = 'cash';
+      let plRevenueMode = 'recognised'; // 'recognised' | 'bookings'
+      let plPeriod = '30d';          // '30d' | 'cycle' | 'custom'
+      // plWindow holds the current period's BQ-sourced figures. Starts from
+      // DATA.ranges['30d'] so the page can render before the first fetch.
+      let plWindow = null;
+      // Cache + in-flight tracking. Keyed by `${start}|${end}` so 30d and the
+      // pay cycle are both instant after the initial dashboard load, and the
+      // user only sees a loading state on cache-miss (Custom).
+      const plWindowCache = new Map();
+      const plInFlight    = new Map();
+      let   plRequestedKey = null;
+
+      function cacheKey(start, end) { return `${start}|${end}`; }
+
+      function ymdLocal(d) {
+        const y = d.getFullYear();
+        const m = String(d.getMonth()+1).padStart(2,'0');
+        const day = String(d.getDate()).padStart(2,'0');
+        return `${y}-${m}-${day}`;
+      }
+      function payCycleRange() {
+        const today = new Date(DATA.generated_at);
+        const y = today.getFullYear(), m = today.getMonth(), d = today.getDate();
+        let s, e;
+        if (d >= 26) { s = new Date(y, m, 26);     e = new Date(y, m+1, 25); }
+        else         { s = new Date(y, m-1, 26);   e = new Date(y, m, 25);   }
+        return { start: ymdLocal(s), end: ymdLocal(e) };
+      }
+      function prevPayCycleRange() {
+        const c = payCycleRange();
+        const [sy, sm, sd] = c.start.split('-').map(Number);
+        const s = new Date(sy, sm - 1 - 1, sd);  // one month earlier
+        const e = new Date(sy, sm - 1, sd - 1);  // day before current cycle starts
+        return { start: ymdLocal(s), end: ymdLocal(e) };
+      }
+      function last30Range() {
+        const today = new Date(DATA.generated_at);
+        const start = new Date(today); start.setDate(start.getDate() - 30);
+        return { start: ymdLocal(start), end: ymdLocal(today) };
+      }
+      function customRange() {
+        const s = document.getElementById('pl_period_start').value;
+        const e = document.getElementById('pl_period_end').value;
+        return (s && e) ? { start: s, end: e } : null;
+      }
+
+      function seedFromDefault30d() {
+        const r30 = DATA.ranges['30d'];
+        if (!r30) return null;
+        const range = last30Range();
+        return {
+          start: range.start,
+          end:   range.end,
+          days:  30,
+          recognised: r30.kpis.recognised || 0,
+          bookings:   r30.kpis.bookings   || 0,
+          clinicians: r30.clinicians || [],
+          payment_by_method: DATA.payment_by_method || [],
+        };
+      }
+      // Seed the cache with the 30d window from the initial /api/data payload
+      // so the default render is instant and toggling back is free.
+      const seed30 = seedFromDefault30d();
+      if (seed30) plWindowCache.set(cacheKey(seed30.start, seed30.end), seed30);
+      plWindow = seed30;
+
+      function fmtPeriodLabel(w) {
+        if (!w) return '-';
+        return `${w.start} → ${w.end} (${w.days}d)`;
+      }
+      // Short month-day, e.g. "May 26". Parses YYYY-MM-DD as a local date so
+      // we don't shift across timezones.
+      function fmtMonthDay(ymd) {
+        if (!ymd) return '';
+        const [y, m, d] = ymd.split('-').map(Number);
+        const dt = new Date(y, m - 1, d);
+        return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      }
+      function updateCycleMonthLabel() {
+        const r = payCycleRange();
+        document.getElementById('pl_cycle_month').textContent =
+          `(${fmtMonthDay(r.start)} → ${fmtMonthDay(r.end)})`;
+        const pr = prevPayCycleRange();
+        document.getElementById('pl_prev_cycle_month').textContent =
+          `(${fmtMonthDay(pr.start)} → ${fmtMonthDay(pr.end)})`;
+      }
+
+      function setLoadingState(loading) {
+        document.getElementById('pl_loading_badge').hidden = !loading;
+        document.querySelector('#pl-section .pl-grid')
+          .classList.toggle('pl-loading', loading);
+      }
+
+      // Fetches once per key. Concurrent callers for the same key share the
+      // same in-flight Promise. Successful results are cached forever.
+      function fetchOrCache(start, end) {
+        const key = cacheKey(start, end);
+        if (plWindowCache.has(key)) return Promise.resolve(plWindowCache.get(key));
+        if (plInFlight.has(key))    return plInFlight.get(key);
+        const p = (async () => {
+          const r = await fetch(`api/pl_window?start=${start}&end=${end}`,
+                                 { credentials: 'same-origin' });
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          const w = await r.json();
+          plWindowCache.set(key, w);
+          return w;
+        })();
+        plInFlight.set(key, p);
+        p.finally(() => plInFlight.delete(key));
+        return p;
+      }
+
+      async function loadWindow(start, end) {
+        const key = cacheKey(start, end);
+        plRequestedKey = key;
+        // Cache hit: render synchronously, no spinner. This is the happy path
+        // for 30d (seeded) and the pay cycle (background-prefetched on init).
+        if (plWindowCache.has(key)) {
+          plWindow = plWindowCache.get(key);
+          renderPL();
+          return;
+        }
+        // Cache miss: show the loading badge while we wait. The badge is more
+        // visible than the previous "loading…" text in the dates label, since
+        // Custom can legitimately take a few seconds.
+        setLoadingState(true);
+        try {
+          const w = await fetchOrCache(start, end);
+          if (plRequestedKey !== key) return;  // user moved on; ignore
+          plWindow = w;
+          renderPL();
+        } catch (err) {
+          if (plRequestedKey !== key) return;
+          document.getElementById('pl_period_dates').textContent =
+            `load failed: ${err.message}`;
+        } finally {
+          if (plRequestedKey === key) setLoadingState(false);
+        }
+      }
+
+      // Fire-and-forget: warm the cache for the pay cycle so the second tab
+      // is instant the first time the user clicks it.
+      function prefetchPayCycle() {
+        const r = payCycleRange();
+        fetchOrCache(r.start, r.end).catch(() => { /* swallow; UI will retry on click */ });
+        const pr = prevPayCycleRange();
+        fetchOrCache(pr.start, pr.end).catch(() => {});
+      }
+
+      function applyPeriod(which) {
+        plPeriod = which;
+        document.querySelectorAll('[data-plperiod]').forEach(b =>
+          b.classList.toggle('active', b.dataset.plperiod === which)
+        );
+        // Custom date pickers only appear when Custom is selected.
+        document.getElementById('pl_custom_dates').hidden = (which !== 'custom');
+
+        const range =
+          (which === '30d')        ? last30Range()       :
+          (which === 'cycle')      ? payCycleRange()     :
+          (which === 'prev_cycle') ? prevPayCycleRange() :
+                                     customRange();
+        if (!range) return;     // custom: user hasn't picked dates yet
+        loadWindow(range.start, range.end);
+      }
+
+      // View toggle
+      document.querySelectorAll('[data-plview]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          plView = btn.dataset.plview;
+          document.querySelectorAll('[data-plview]').forEach(b =>
+            b.classList.toggle('active', b.dataset.plview === plView)
+          );
+          document.getElementById('pl_amort_row').hidden = (plView !== 'full');
+          renderPL();
+        });
+      });
+
+      // Revenue source toggle
+      document.querySelectorAll('[data-plrev]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          plRevenueMode = btn.dataset.plrev;
+          document.querySelectorAll('[data-plrev]').forEach(b =>
+            b.classList.toggle('active', b.dataset.plrev === plRevenueMode)
+          );
+          renderPL();
+        });
+      });
+
+      // Period selector
+      document.querySelectorAll('[data-plperiod]').forEach(btn => {
+        btn.addEventListener('click', () => applyPeriod(btn.dataset.plperiod));
+      });
+      // Initialise custom date pickers to the current pay cycle (sensible default)
+      const pc = payCycleRange();
+      document.getElementById('pl_period_start').value = pc.start;
+      document.getElementById('pl_period_end').value   = pc.end;
+      document.getElementById('pl_period_start').addEventListener('change', () => {
+        if (plPeriod === 'custom') applyPeriod('custom');
+      });
+      document.getElementById('pl_period_end').addEventListener('change', () => {
+        if (plPeriod === 'custom') applyPeriod('custom');
+      });
+
+      // Excel download
+      document.getElementById('pl_export_xlsx').addEventListener('click', downloadPLXlsx);
+
+      // Toggle cost input panel open/closed
+      const toggleBtn = document.getElementById('pl_toggle_btn');
+      const panel     = document.getElementById('pl_inputs_panel');
+      toggleBtn.addEventListener('click', () => {
+        const isOpen = panel.classList.toggle('open');
+        toggleBtn.classList.toggle('open', isOpen);
+      });
+
+      // Live-recalculate on any input change
+      document.querySelectorAll('#pl_inputs_panel input').forEach(input =>
+        input.addEventListener('input', renderPL)
+      );
+
+      document.getElementById('pl_period_dates').textContent = fmtPeriodLabel(plWindow);
+      updateCycleMonthLabel();
+      renderPL();
+      // Background-warm the pay cycle so toggling to it is instant. No UI
+      // until the user actually clicks; failures are silent.
+      prefetchPayCycle();
+
+      // ---- helpers ----
+      function numVal(id) {
+        return parseFloat(document.getElementById(id).value) || 0;
+      }
+
+      function getBaseSalaries() {
+        return numVal('pl_pay_cheryl') + numVal('pl_pay_claire') +
+               numVal('pl_pay_kristy') + numVal('pl_pay_chris');
+      }
+
+      // Commission: Claire (PCN) and Kristy (PKN) earn rate% on recognised
+      // revenue above quota, sourced from the selected P&L period.
+      function getCommission() {
+        const clinicians = (plWindow && plWindow.clinicians) || [];
+        const quota     = numVal('pl_comm_quota');
+        const rate      = numVal('pl_comm_rate') / 100;
+        let total = 0;
+        clinicians.forEach(c => {
+          if (!c.is_director) {
+            total += Math.max(0, (c.recognised || 0) - quota) * rate;
+          }
+        });
+        return total;
+      }
+
+      // Employer CPF: 17% on min(salary, OW_ceiling) + 17% on commission (AW)
+      // Applied per person so the OW cap is respected individually.
+      function getCPF(commission) {
+        const rate    = numVal('pl_cpf_rate') / 100;
+        const ceiling = numVal('pl_cpf_ceiling');
+
+        const salaries = [
+          numVal('pl_pay_cheryl'),  // PCL — no commission
+          numVal('pl_pay_claire'),  // PCN — may earn commission
+          numVal('pl_pay_kristy'), // PKN — may earn commission
+          numVal('pl_pay_chris')   // no commission
+        ];
+
+        const clinicians = (plWindow && plWindow.clinicians) || [];
+        const quota      = numVal('pl_comm_quota');
+        const commRate   = numVal('pl_comm_rate') / 100;
+        const commByClinician = { PCN: 0, PKN: 0 };
+        clinicians.forEach(c => {
+          if (c.clinician_id === 'PCN' || c.clinician_id === 'PKN') {
+            commByClinician[c.clinician_id] =
+              Math.max(0, (c.recognised || 0) - quota) * commRate;
+          }
+        });
+        const commPerPerson = [
+          0,                            // Cheryl
+          commByClinician['PCN'] || 0, // Claire
+          commByClinician['PKN'] || 0, // Kristy
+          0                             // Chris
+        ];
+
+        let totalCPF = 0;
+        salaries.forEach((sal, i) => {
+          const owSubject = Math.min(sal, ceiling);   // OW capped at ceiling
+          const awSubject = commPerPerson[i];           // commission = Additional Wages
+          totalCPF += rate * (owSubject + awSubject);
+        });
+        return totalCPF;
+      }
+
+      function getOpex() {
+        return numVal('pl_opex_rent')  + numVal('pl_opex_util') +
+               numVal('pl_opex_mktg') + numVal('pl_opex_cons') +
+               numVal('pl_opex_other');
+      }
+
+      // Returns exact payment processing fee for the currently selected P&L
+      // period, or null if not yet available.
+      // Fee structure: Plato Terminal = 2.1% of amount + $0.20 per transaction.
+      function getPmtFee() {
+        const methods = (plWindow && plWindow.payment_by_method) || [];
+        const plato = methods.find(m => m.method === 'platopay');
+        if (!plato) return null;
+        return plato.total_amount * 0.021 + plato.txn_count * 0.20;
+      }
+
+      let opexExpanded = true;
+      function toggleOpexDetail() {
+        opexExpanded = !opexExpanded;
+        document.getElementById('pl_pmtfee_subrow').style.display = opexExpanded ? '' : 'none';
+        const chevron = document.getElementById('pl_opex_chevron');
+        chevron.classList.toggle('open', opexExpanded);
+      }
+
+      function getAmort() {
+        const capex  = numVal('pl_capex_total');
+        const months = numVal('pl_amort_months') || 24;
+        return capex / months;
+      }
+
+      function renderPL() {
+        const baseSalaries = getBaseSalaries();
+        const commission   = getCommission();
+        const cpf          = getCPF(commission);
+        const opex         = getOpex();
+        const amort        = (plView === 'full') ? getAmort() : 0;
+        const pmtFee       = getPmtFee();
+        const costs        = baseSalaries + commission + cpf + opex + amort + (pmtFee || 0);
+
+        // Use the currently selected P&L window. Falls back to 0 if the
+        // initial fetch hasn't landed yet.
+        const revenueField = (plRevenueMode === 'bookings') ? 'bookings' : 'recognised';
+        const revenue = (plWindow && plWindow[revenueField]) || 0;
+        const profit  = revenue - costs;
+
+        // Period-aware revenue label + dates line
+        const days = (plWindow && plWindow.days) || 0;
+        const revName = (plRevenueMode === 'bookings') ? 'Bookings' : 'Revenue';
+        const lbl  = (plPeriod === '30d')        ? `${revName} (last ${days || 30} days)`
+                   : (plPeriod === 'cycle')      ? `${revName} (pay cycle, ${days}d)`
+                   : (plPeriod === 'prev_cycle') ? `${revName} (previous cycle, ${days}d)`
+                                                 : `${revName} (custom, ${days}d)`;
+        document.getElementById('pl_revenue_label').textContent = lbl;
+        document.getElementById('pl_period_dates').textContent  = fmtPeriodLabel(plWindow);
+
+        // Update P&L rows (payroll lumped)
+        const totalPayroll = baseSalaries + commission + cpf;
+        document.getElementById('pl_revenue').textContent           = fmt$(revenue);
+        document.getElementById('pl_payroll_total_val').textContent = '(' + fmt$(totalPayroll) + ')';
+        document.getElementById('pl_opex_val').textContent          = '(' + fmt$(opex)         + ')';
+        document.getElementById('pl_amort_val').textContent         = '(' + fmt$(amort)        + ')';
+        document.getElementById('pl_costs_total').textContent       = '(' + fmt$(costs)        + ')';
+
+        // Payment processing sub-row
+        const pmtFeeEl = document.getElementById('pl_pmtfee_val');
+        if (pmtFee !== null) {
+          pmtFeeEl.textContent = '(' + fmt$(pmtFee) + ')';
+          pmtFeeEl.style.color = '';
+        } else {
+          pmtFeeEl.textContent = 'Awaiting data';
+          pmtFeeEl.style.color = 'var(--ink-muted)';
+        }
+
+        const resultEl  = document.getElementById('pl_result_val');
+        const resultRow = document.getElementById('pl_result_row');
+        if (profit >= 0) {
+          resultEl.textContent = fmt$(profit);
+          resultRow.classList.add('pl-positive');
+          resultRow.classList.remove('pl-negative');
+        } else {
+          resultEl.textContent = '(' + fmt$(Math.abs(profit)) + ')';
+          resultRow.classList.add('pl-negative');
+          resultRow.classList.remove('pl-positive');
+        }
+
+        // Update subtotals in the input panel
+        document.getElementById('pl_payroll_subtotal').textContent    = fmt$(baseSalaries);
+        document.getElementById('pl_commission_subtotal').textContent = fmt$(commission);
+        document.getElementById('pl_cpf_subtotal').textContent        = fmt$(cpf);
+        document.getElementById('pl_opex_subtotal').textContent       = fmt$(opex);
+        document.getElementById('pl_amort_subtotal').textContent      = fmt$(getAmort());
+
+        // Break-even bar
+        const rawPct   = costs > 0 ? (revenue / costs) * 100 : 0;
+        const clampPct = Math.min(rawPct, 100);
+        const fillEl   = document.getElementById('pl_progress_fill');
+        fillEl.style.width = clampPct.toFixed(1) + '%';
+        fillEl.classList.toggle('at-target', profit >= 0);
+        document.getElementById('pl_be_pct').textContent = rawPct.toFixed(0) + '%';
+
+        const subEl = document.getElementById('pl_be_sub');
+        const profitTrack = document.getElementById('pl_profit_track_wrap');
+
+        if (profit >= 0) {
+          subEl.textContent = 'Break-even achieved — surplus of ' + fmt$(profit) + ' this period.';
+          // Show profit margin bar
+          const margin = revenue > 0 ? (profit / revenue) * 100 : 0;
+          profitTrack.hidden = false;
+          document.getElementById('pl_margin_pct').textContent = margin.toFixed(1) + '%';
+          document.getElementById('pl_margin_fill').style.width =
+            Math.min(margin * 3, 100).toFixed(1) + '%'; // scale: 33% margin = full bar
+        } else {
+          const gap = Math.abs(profit);
+          const periodDays = (plWindow && plWindow.days) || 30;
+          const revenuePerDay = revenue > 0 ? revenue / periodDays : 1;
+          subEl.textContent =
+            'Need ' + fmt$(gap) + ' more this period to break even — ' +
+            'roughly ' + Math.round(gap / revenuePerDay) + ' more patient-days at current avg revenue.';
+          profitTrack.hidden = true;
+        }
+      }
+
+      // Singapore-style P&L statement export. Builds a snapshot of exactly
+      // what's on screen and POSTs to /api/pl.xlsx, which formats it.
+      async function downloadPLXlsx() {
+        const baseSalaries = [
+          { id: 'pl_pay_cheryl',  name: 'Cheryl (Clinical Director)' },
+          { id: 'pl_pay_claire',  name: 'Claire (Senior Physio)' },
+          { id: 'pl_pay_kristy',  name: 'Kristy (Senior Physio)' },
+          { id: 'pl_pay_chris',   name: 'Chris (Director)' },
+        ].map(p => ({ name: p.name, amount: numVal(p.id) }));
+
+        const commission = getCommission();
+        const cpf        = getCPF(commission);
+        const opex       = [
+          { id: 'pl_opex_rent',  name: 'Rent' },
+          { id: 'pl_opex_util',  name: 'Utilities' },
+          { id: 'pl_opex_mktg',  name: 'Marketing' },
+          { id: 'pl_opex_cons',  name: 'Consumables' },
+          { id: 'pl_opex_other', name: 'Software, admin & other' },
+        ].map(o => ({ name: o.name, amount: numVal(o.id) }));
+
+        const pmtFee     = getPmtFee() || 0;
+        const amort      = (plView === 'full') ? getAmort() : 0;
+        const revField   = (plRevenueMode === 'bookings') ? 'bookings' : 'recognised';
+        const revenue    = (plWindow && plWindow[revField]) || 0;
+
+        const periodLabel =
+          (plPeriod === '30d')   ? 'Last 30 days' :
+          (plPeriod === 'cycle') ? 'Pay cycle (26th → 25th)' :
+                                   'Custom period';
+
+        const body = {
+          entity: 'Goji Health Pte Ltd',
+          period: {
+            label: periodLabel,
+            start: plWindow && plWindow.start,
+            end:   plWindow && plWindow.end,
+            days:  plWindow && plWindow.days,
+          },
+          view: plView,
+          revenue_mode: plRevenueMode,
+          revenue,
+          payroll: {
+            base_salaries: baseSalaries,
+            commission,
+            employer_cpf: cpf,
+          },
+          opex,
+          payment_processing_fee: pmtFee,
+          amortisation: amort,
+          capex: {
+            total:  numVal('pl_capex_total'),
+            months: numVal('pl_amort_months'),
+          },
+        };
+
+        const btn = document.getElementById('pl_export_xlsx');
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = 'Generating…';
+        try {
+          const r = await fetch('api/pl.xlsx', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+          });
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          const blob = await r.blob();
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `goji-pl-${(plWindow && plWindow.end) || 'latest'}.xlsx`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        } catch (err) {
+          alert('Excel export failed: ' + err.message);
+        } finally {
+          btn.disabled = false;
+          btn.innerHTML = originalText;
+        }
+      }
+    }
+
+    /* ===== Page nav ===== */
+    function initPageNav() {
+      document.querySelectorAll('.page-nav button').forEach(btn => {
+        btn.addEventListener('click', () => switchPage(btn.dataset.page));
+      });
+    }
+    function switchPage(page) {
+      document.querySelectorAll('.page-nav button').forEach(b => {
+        b.classList.toggle('active', b.dataset.page === page);
+      });
+      document.getElementById('page-dashboard').hidden  = (page !== 'dashboard');
+      document.getElementById('page-pl').hidden         = (page !== 'pl');
+      document.getElementById('page-commission').hidden = (page !== 'commission');
+    }
+
+    /* ===== Commission calculator ===== */
+    // Per-clinician defaults (revised 2026-05-24 per Chris):
+    //   Cheryl (director): $12k base, $0 commission threshold, 40% on all revenue
+    //   Two physio clinicians: $5k base, commission above $13k at 40%
+    const CLINICIAN_DEFAULTS = {
+      'PCL': { base: 12000, quota: 13000, pct: 40, isDirector: true  },
+      'PKN': { base: 5000,  quota: 13000, pct: 40, isDirector: false },
+      'PCN': { base: 5000,  quota: 13000, pct: 40, isDirector: false }
+    };
+    const FALLBACK_DEFAULT = { base: 5000, quota: 13000, pct: 40, isDirector: false };
+
+    function getClinicianRoster() {
+      // Union across all ranges, keep most-recent (30d preferred) revenue for prefill
+      const map = new Map();
+      Object.entries(DATA.ranges).forEach(([rangeKey, r]) => {
+        (r.clinicians || []).forEach(c => {
+          const cur = map.get(c.clinician_id) || { ...c, revenueByRange: {} };
+          cur.revenueByRange[rangeKey] = c.recognised;
+          cur.name = c.name; cur.is_director = c.is_director;
+          map.set(c.clinician_id, cur);
+        });
+      });
+      return Array.from(map.values());
+    }
+
+    /* Pay cycle runs 26th of prev month through 25th of current month.
+       If today is the 26th or later, the cycle is current-month-26 -> next-25.
+       If today is the 25th or earlier, the cycle is prev-month-26 -> this-month-25. */
+    function currentPayCycle(today) {
+      today = today || new Date(DATA.generated_at);
+      const y = today.getFullYear(), m = today.getMonth(), d = today.getDate();
+      let start, end;
+      if (d >= 26) {
+        start = new Date(y, m, 26);
+        end   = new Date(y, m + 1, 25);
+      } else {
+        start = new Date(y, m - 1, 26);
+        end   = new Date(y, m, 25);
+      }
+      return { start, end };
+    }
+    function ymd(date) {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+    function fmtDateRange(start, end) {
+      const opts = { month: 'short', day: 'numeric' };
+      const sameYear = start.getFullYear() === end.getFullYear();
+      const startStr = start.toLocaleDateString(undefined, opts);
+      const endStr   = end.toLocaleDateString(undefined, sameYear ? opts : { month:'short', day:'numeric', year:'numeric' });
+      return `${startStr} - ${endStr}, ${end.getFullYear()}`;
+    }
+
+    function getSelectedPeriod() {
+      const mode = document.getElementById('calc_period').value;
+      if (mode === 'cycle') return currentPayCycle();
+      const s = document.getElementById('calc_start').value;
+      const e = document.getElementById('calc_end').value;
+      if (!s || !e) return currentPayCycle();
+      // Parse as local dates to avoid TZ off-by-one
+      const [sy, sm, sd] = s.split('-').map(Number);
+      const [ey, em, ed] = e.split('-').map(Number);
+      return { start: new Date(sy, sm-1, sd), end: new Date(ey, em-1, ed) };
+    }
+
+    function getAppointmentsForPeriod(clinicianId, start, end) {
+      const all = (DATA.appointments || []).filter(a => a.clinician_id === clinicianId);
+      const startKey = ymd(start), endKey = ymd(end);
+      return all.filter(a => a.date >= startKey && a.date <= endKey)
+                .sort((a, b) => a.date.localeCompare(b.date));
+    }
+
+    function getRevenueForPeriod(clinicianId, start, end) {
+      return getAppointmentsForPeriod(clinicianId, start, end)
+              .reduce((sum, a) => sum + (a.value || 0), 0);
+    }
+
+    function initCommissionCalculator() {
+      const roster = getClinicianRoster();
+      const sel = document.getElementById('calc_clinician');
+      sel.innerHTML = roster.map(c =>
+        `<option value="${c.clinician_id}">${escapeHtml(c.name)} (${escapeHtml(c.clinician_id)})${c.is_director ? ' - Director' : ''}</option>`
+      ).join('');
+
+      // Wire change handlers - all input changes trigger live recalculation
+      ['calc_clinician','calc_period','calc_base','calc_quota','calc_pct','calc_revenue']
+        .forEach(id => {
+          const el = document.getElementById(id);
+          el.addEventListener('input', onCalcInputChange);
+          el.addEventListener('change', onCalcInputChange);
+        });
+
+      document.getElementById('calc_clinician').addEventListener('change', () => {
+        applyClinicianDefaults();
+        prefillRevenue();
+        recalculate();
+      });
+      document.getElementById('calc_period').addEventListener('change', () => {
+        toggleCustomDates();
+        prefillRevenue();
+        recalculate();
+      });
+      ['calc_start','calc_end'].forEach(id => {
+        document.getElementById(id).addEventListener('change', () => {
+          prefillRevenue();
+          recalculate();
+        });
+      });
+      document.getElementById('calc_revenue').addEventListener('input', flagRevenueEdited);
+
+      document.getElementById('calc_reset').addEventListener('click', () => {
+        document.getElementById('calc_period').value = 'cycle';
+        toggleCustomDates();
+        applyClinicianDefaults();
+        prefillRevenue();
+        recalculate();
+      });
+      document.getElementById('calc_download').addEventListener('click', () => window.print());
+
+      // Initialise custom date inputs to the current cycle (so they're sensible if user switches)
+      const c = currentPayCycle();
+      document.getElementById('calc_start').value = ymd(c.start);
+      document.getElementById('calc_end').value   = ymd(c.end);
+
+      toggleCustomDates();
+      applyClinicianDefaults();
+      prefillRevenue();
+      recalculate();
+    }
+
+    function toggleCustomDates() {
+      const mode = document.getElementById('calc_period').value;
+      document.getElementById('custom_dates_row').hidden = (mode !== 'custom');
+    }
+
+    function applyClinicianDefaults() {
+      const id = document.getElementById('calc_clinician').value;
+      const d = CLINICIAN_DEFAULTS[id] || FALLBACK_DEFAULT;
+      document.getElementById('calc_base').value = d.base;
+      document.getElementById('calc_quota').value = d.quota;
+      document.getElementById('calc_pct').value = d.pct;
+    }
+
+    function prefillRevenue() {
+      const id = document.getElementById('calc_clinician').value;
+      const { start, end } = getSelectedPeriod();
+      const rev = getRevenueForPeriod(id, start, end);
+      document.getElementById('calc_revenue').value = Math.round(rev * 100) / 100;
+      const flag = document.getElementById('prefillFlag');
+      flag.textContent = 'Prefilled';
+      flag.classList.remove('edited');
+      document.getElementById('period_dates').textContent = fmtDateRange(start, end);
+      document.getElementById('revenue_source').textContent =
+        `Source: appointment ledger, ${fmtDateRange(start, end)}.`;
+    }
+
+    function flagRevenueEdited() {
+      const flag = document.getElementById('prefillFlag');
+      flag.textContent = 'Edited';
+      flag.classList.add('edited');
+    }
+
+    function onCalcInputChange() {
+      recalculate();
+    }
+
+    function recalculate() {
+      const sel = document.getElementById('calc_clinician');
+      const opt = sel.options[sel.selectedIndex];
+      const clinicianLabel = opt ? opt.textContent : '';
+
+      const base    = num(document.getElementById('calc_base').value);
+      const quota   = num(document.getElementById('calc_quota').value);
+      const pct     = num(document.getElementById('calc_pct').value);
+      const revenue = num(document.getElementById('calc_revenue').value);
+
+      const excess     = Math.max(0, revenue - quota);
+      const commission = excess * (pct / 100);
+      const total      = base + commission;
+
+      const periodLabel = document.getElementById('calc_period').selectedOptions[0].textContent;
+      document.getElementById('report_title').textContent = `Commission summary - ${clinicianLabel}`;
+      document.getElementById('report_meta').textContent  =
+        `Pay period: ${periodLabel} | Generated ${new Date().toLocaleString()}`;
+
+      document.getElementById('r_base').textContent       = fmt$(base);
+      document.getElementById('r_revenue').textContent    = fmt$(revenue);
+      document.getElementById('r_quota').textContent      = fmt$(quota);
+      document.getElementById('r_excess').textContent     = fmt$(excess);
+      document.getElementById('r_pct').textContent        = pct + '%';
+      document.getElementById('r_commission').textContent = fmt$(commission);
+      document.getElementById('r_total').textContent      = fmt$(total);
+
+      document.getElementById('r_formula').innerHTML =
+        `commission = max(0, <code>${fmt$(revenue)}</code> - <code>${fmt$(quota)}</code>) &times; <code>${pct}%</code> = <code>${fmt$(commission)}</code><br>` +
+        `total payout = <code>${fmt$(base)}</code> + <code>${fmt$(commission)}</code> = <code>${fmt$(total)}</code>`;
+
+      renderAppointments(sel.value);
+    }
+
+    function renderAppointments(clinicianId) {
+      const { start, end } = getSelectedPeriod();
+      const rows = getAppointmentsForPeriod(clinicianId, start, end);
+      const tbody = document.getElementById('appointments_tbody');
+      const meta = document.getElementById('appointments_meta');
+      const totalEl = document.getElementById('appointments_total');
+
+      meta.textContent = `${rows.length} appointment${rows.length === 1 ? '' : 's'} | ${fmtDateRange(start, end)}`;
+
+      if (!rows.length) {
+        tbody.innerHTML = `<tr><td colspan="4" class="appointments-empty">No appointments recorded in this period.</td></tr>`;
+        totalEl.textContent = fmt$(0);
+        return;
+      }
+
+      tbody.innerHTML = rows.map(a => `
+        <tr>
+          <td>${escapeHtml(formatApptDate(a.date))}</td>
+          <td>${escapeHtml(a.patient)}</td>
+          <td>${escapeHtml(a.service)}</td>
+          <td class="num">${fmt$(a.value)}</td>
+        </tr>
+      `).join('');
+
+      const total = rows.reduce((s, a) => s + (a.value || 0), 0);
+      totalEl.textContent = fmt$(total);
+    }
+
+    function formatApptDate(ymdStr) {
+      const [y, m, d] = ymdStr.split('-').map(Number);
+      return new Date(y, m - 1, d).toLocaleDateString(undefined,
+        { weekday: 'short', month: 'short', day: 'numeric' });
+    }
+
+    function num(v) { const n = parseFloat(v); return isFinite(n) ? n : 0; }
 
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', init);

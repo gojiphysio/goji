@@ -840,10 +840,9 @@
     </section>
 
     <section class="q">
-      <h2>Patient demographics <span class="badge sample">Sample</span></h2>
+      <h2>Patient base <span id="demographics_total" class="badge" style="background: var(--bg); color: var(--ink-soft); font-weight: 500;"></span></h2>
       <div class="subtitle">
-        Age, gender, top condition tags. Pulls from Plato patient records once the
-        patient ingestion job is built.
+        Composition of every patient on file in Plato. Charts show only the populated subset for each attribute (age band on 82% of patients, sex on 78%, clinical tags on patients we've tagged so far).
       </div>
       <div class="three-col">
         <div>
@@ -855,7 +854,7 @@
           <div class="chart-wrap small"><canvas id="genderChart"></canvas></div>
         </div>
         <div>
-          <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px;">Top conditions</div>
+          <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px;">Top clinical tags</div>
           <div class="chart-wrap small"><canvas id="tagsChart"></canvas></div>
         </div>
       </div>
@@ -863,37 +862,41 @@
 
 
     <section class="q">
-      <h2>Patient referral analytics <span class="badge sample">Sample</span></h2>
+      <h2>Patient referrals</h2>
       <div class="subtitle">
-        Where new patients are coming from, who they end up seeing, and what treatment
-        they end up booking. Goes live once the <code>/patient</code> ingestion job
-        lands the <code>referred_by</code> field.
+        Where new patients come from, joined from Plato's <code>/contact</code> registry.
+        Five real channels: medical (GPs, OBGYN, ortho), word-of-mouth (in-house clinician network),
+        partner (gyms, allied health), online booking (Plato Online, WhatsApp, Instagram), and walk-in.
       </div>
+
+      <div style="display: flex; align-items: baseline; gap: 14px; margin: 8px 0 18px; flex-wrap: wrap;">
+        <span id="ref_pct" style="font-size: 36px; font-weight: 600; color: var(--goji); line-height: 1;">—</span>
+        <span id="ref_blurb" style="color: var(--ink-soft);">of patients on file have a referral source recorded</span>
+      </div>
+
       <div class="two-col">
         <div>
-          <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px;">Referral sources</div>
-          <div class="chart-wrap small"><canvas id="referralChart"></canvas></div>
+          <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px;">Source mix</div>
+          <div class="chart-wrap small"><canvas id="sourceMixChart"></canvas></div>
         </div>
         <div>
+          <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px;">Top sources</div>
           <table>
             <thead>
               <tr>
                 <th>Source</th>
-                <th class="num">New patients</th>
-                <th>Top clinician</th>
-                <th>Top treatment</th>
+                <th>Channel</th>
+                <th class="num">Patients</th>
               </tr>
             </thead>
-            <tbody>
-              <tr><td>Google search</td><td class="num">18</td><td>Claire</td><td>Physiotherapy</td></tr>
-              <tr><td>Doctor referral</td><td class="num">12</td><td>Claire</td><td>Physiotherapy</td></tr>
-              <tr><td>Existing patient</td><td class="num">9</td><td>Cheryl</td><td>Clinical Pilates</td></tr>
-              <tr><td>Instagram</td><td class="num">7</td><td>Kristy</td><td>Private Pilates</td></tr>
-              <tr><td>Insurance partner</td><td class="num">5</td><td>Claire</td><td>Physiotherapy</td></tr>
-              <tr><td>Walk-in</td><td class="num">3</td><td>Kristy</td><td>S&amp;C 1:1</td></tr>
-            </tbody>
+            <tbody id="top_sources_tbody"></tbody>
           </table>
         </div>
+      </div>
+
+      <div style="margin-top: 22px;">
+        <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px;">New patients per month by source</div>
+        <div class="chart-wrap" style="height: 240px;"><canvas id="acquisitionChart"></canvas></div>
       </div>
     </section>
 
@@ -1726,39 +1729,188 @@
     }
 
 
-    function renderSampleSections() {
-      new Chart(document.getElementById('ageChart'), {
-        type: 'bar',
-        data: { labels: ['0-17','18-29','30-44','45-64','65+'],
-                datasets: [{ data: [3, 12, 19, 11, 2], backgroundColor: GOJI }] },
-        options: { responsive: true, maintainAspectRatio: false,
-                   plugins: { legend: { display: false } },
-                   scales: { y: { beginAtZero: true } } }
-      });
-      new Chart(document.getElementById('genderChart'), {
-        type: 'doughnut',
-        data: { labels: ['Female','Male'],
-                datasets: [{ data: [62, 38], backgroundColor: [GOJI, COBALT], borderWidth: 1, borderColor: '#fff' }] },
-        options: doughnutOpts('bottom')
-      });
-      new Chart(document.getElementById('tagsChart'), {
-        type: 'bar',
-        data: { labels: ['Musculoskeletal','Post-partum','Sports injury','Office posture','Post-surgery'],
-                datasets: [{ data: [21, 8, 7, 6, 3], backgroundColor: GOJI }] },
-        options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false,
-                   plugins: { legend: { display: false } },
-                   scales: { x: { beginAtZero: true } } }
-      });
+    let ageChart, genderChart, tagsChart, acquisitionChart;
 
-      const referralLabels = ['Google search', 'Doctor referral', 'Existing patient', 'Instagram', 'Insurance partner', 'Walk-in'];
-      const referralData   = [18, 12, 9, 7, 5, 3];
-      const referralColors = referralLabels.map((_, i) => MIX_COLORS[i % MIX_COLORS.length]);
-      new Chart(document.getElementById('referralChart'), {
-        type: 'doughnut',
-        data: { labels: referralLabels,
-                datasets: [{ data: referralData, backgroundColor: referralColors, borderWidth: 1, borderColor: '#fff' }] },
-        options: doughnutOpts('right')
-      });
+    function renderDemographics(d) {
+      if (!d) return;
+      const totalEl = document.getElementById('demographics_total');
+      if (totalEl) totalEl.textContent = fmtInt(d.total_patients) + ' patients';
+
+      // Age band — fixed left→right ordering so it reads young→old
+      const ageLabels = (d.age_bands || []).map(b => b.label);
+      const ageValues = (d.age_bands || []).map(b => b.count);
+      if (ageChart) {
+        ageChart.data.labels = ageLabels;
+        ageChart.data.datasets[0].data = ageValues;
+        ageChart.update();
+      } else {
+        ageChart = new Chart(document.getElementById('ageChart'), {
+          type: 'bar',
+          data: { labels: ageLabels,
+                  datasets: [{ data: ageValues, backgroundColor: GOJI, borderRadius: 4 }] },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: { callbacks: { label: ctx => ' ' + ctx.parsed.y + ' patients' } }
+            },
+            scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+          }
+        });
+      }
+
+      // Gender — doughnut, female and male in a stable colour mapping
+      const sexRows = d.sex || [];
+      const sexLabels = sexRows.map(r => r.label);
+      const sexValues = sexRows.map(r => r.count);
+      const sexColors = sexLabels.map(l => l === 'Female' ? GOJI
+                                         : l === 'Male'   ? COBALT
+                                         : NEUTRAL);
+      if (genderChart) {
+        genderChart.data.labels = sexLabels;
+        genderChart.data.datasets[0].data = sexValues;
+        genderChart.data.datasets[0].backgroundColor = sexColors;
+        genderChart.update();
+      } else {
+        genderChart = new Chart(document.getElementById('genderChart'), {
+          type: 'doughnut',
+          data: { labels: sexLabels,
+                  datasets: [{ data: sexValues, backgroundColor: sexColors,
+                               borderWidth: 1, borderColor: '#fff' }] },
+          options: doughnutOpts('bottom')
+        });
+      }
+
+      // Top clinical tags — horizontal bar, descending
+      const tagLabels = (d.top_tags || []).map(t => t.label);
+      const tagValues = (d.top_tags || []).map(t => t.count);
+      if (tagsChart) {
+        tagsChart.data.labels = tagLabels;
+        tagsChart.data.datasets[0].data = tagValues;
+        tagsChart.update();
+      } else {
+        tagsChart = new Chart(document.getElementById('tagsChart'), {
+          type: 'bar',
+          data: { labels: tagLabels,
+                  datasets: [{ data: tagValues, backgroundColor: GOJI, borderRadius: 4 }] },
+          options: {
+            indexAxis: 'y',
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: { callbacks: { label: ctx => ' ' + ctx.parsed.x + ' patients' } }
+            },
+            scales: { x: { beginAtZero: true, ticks: { precision: 0 } } }
+          }
+        });
+      }
+    }
+
+    // Stable colour mapping for source_type buckets. Keep in sync with the
+    // SOURCE_TYPES_ORDERED list in app.py — readers will rely on the same
+    // colour meaning the same thing across both charts in this section.
+    const SOURCE_TYPE_COLORS = {
+      medical:       GOJI,
+      word_of_mouth: GOLD,
+      partner:       SAGE,
+      online:        COBALT,
+      walk_in:       NEUTRAL,
+      other:         '#9c6c2e',
+      unattributed:  '#c9c2b6',
+    };
+    let sourceMixChart;
+
+    function renderReferrals(r) {
+      if (!r) return;
+
+      // Headline KPI
+      document.getElementById('ref_pct').textContent = fmtPct(r.pct_referred);
+      document.getElementById('ref_blurb').textContent =
+        `of ${fmtInt(r.total_patients)} patients on file have a referral source recorded (${fmtInt(r.referred)} of ${fmtInt(r.total_patients)})`;
+
+      const sourceTypesOrdered = r.source_types || Object.keys(SOURCE_TYPE_COLORS);
+      const sourceLabels       = r.source_labels || {};
+
+      // --- Source-mix donut: aggregated by source_type ---
+      const mixRows = (r.by_source_type || []).slice().sort((a, b) => b.count - a.count);
+      const mixLabels = mixRows.map(x => x.label);
+      const mixValues = mixRows.map(x => x.count);
+      const mixColors = mixRows.map(x => SOURCE_TYPE_COLORS[x.source_type] || NEUTRAL);
+      if (sourceMixChart) {
+        sourceMixChart.data.labels = mixLabels;
+        sourceMixChart.data.datasets[0].data = mixValues;
+        sourceMixChart.data.datasets[0].backgroundColor = mixColors;
+        sourceMixChart.update();
+      } else {
+        sourceMixChart = new Chart(document.getElementById('sourceMixChart'), {
+          type: 'doughnut',
+          data: { labels: mixLabels,
+                  datasets: [{ data: mixValues, backgroundColor: mixColors,
+                               borderWidth: 1, borderColor: '#fff' }] },
+          options: doughnutOpts('right')
+        });
+      }
+
+      // --- Top sources table: named contact + its channel ---
+      const tbody = document.getElementById('top_sources_tbody');
+      if (tbody) {
+        tbody.innerHTML = '';
+        const rows = r.top_sources || [];
+        if (rows.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="3" style="color: var(--ink-muted); font-style: italic;">No referral sources recorded yet.</td></tr>';
+        } else {
+          for (const row of rows) {
+            const channelLabel = sourceLabels[row.source_type] || row.source_type;
+            const channelColor = SOURCE_TYPE_COLORS[row.source_type] || NEUTRAL;
+            const chip = `<span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:${channelColor}; margin-right:6px; vertical-align:middle;"></span>`;
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td>${escapeHtml(row.label)}</td>
+              <td>${chip}${escapeHtml(channelLabel)}</td>
+              <td class="num">${fmtInt(row.count)}</td>`;
+            tbody.appendChild(tr);
+          }
+        }
+      }
+
+      // --- Monthly acquisition: stacked bar, one segment per source_type ---
+      const m = r.monthly || [];
+      const labels = m.map(x => x.label);
+      // Only render datasets for source_types that have at least one non-zero
+      // month — keeps the legend tidy on a 72-patient base.
+      const activeTypes = sourceTypesOrdered.filter(st =>
+        m.some(month => (month[st] || 0) > 0)
+      );
+      const datasets = activeTypes.map(st => ({
+        label: sourceLabels[st] || st,
+        data: m.map(month => month[st] || 0),
+        backgroundColor: SOURCE_TYPE_COLORS[st] || NEUTRAL,
+        borderRadius: 4,
+        stack: 'a',
+      }));
+      if (acquisitionChart) {
+        acquisitionChart.data.labels = labels;
+        acquisitionChart.data.datasets = datasets;
+        acquisitionChart.update();
+      } else {
+        acquisitionChart = new Chart(document.getElementById('acquisitionChart'), {
+          type: 'bar',
+          data: { labels, datasets },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+              legend: { position: 'bottom' },
+              tooltip: { callbacks: {
+                label: ctx => ' ' + ctx.dataset.label + ': ' + ctx.parsed.y
+              } }
+            },
+            scales: {
+              x: { stacked: true },
+              y: { stacked: true, beginAtZero: true, ticks: { precision: 0 } }
+            }
+          }
+        });
+      }
     }
 
     function applyRange(key) {
@@ -1808,7 +1960,8 @@
       const stored = localStorage.getItem(STORAGE_KEY);
       const initial = (stored && DATA.ranges[stored]) ? stored : DATA.default_range;
       applyRange(initial);
-      renderSampleSections();
+      renderDemographics(DATA.demographics);
+      renderReferrals(DATA.referrals);
       renderDoctorMismatches(DATA.doctor_mismatches);
 
       initPL();

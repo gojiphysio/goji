@@ -33,6 +33,9 @@ scripts/dashboard/.cache/
 *.swp
 *~
 
+# Claude Code per-user state (machine-specific permissions, etc.)
+.claude/settings.local.json
+
 # Generated / build
 dist/
 build/

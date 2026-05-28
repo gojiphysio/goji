@@ -276,6 +276,155 @@ SELECT
     return to_float(row["deferred"]) or 0.0
 
 
+AGE_BANDS_ORDERED = ["Under 18", "18-29", "30-39", "40-49", "50-59", "60+"]
+
+
+def fetch_patient_demographics() -> dict:
+    """All-time snapshot of marts.dim_patient: age band, sex, top tags.
+
+    Mirrors app.fetch_patient_demographics — keep in sync.
+    """
+    total = to_int(bq_query(
+        f"SELECT COUNT(*) AS n FROM `{PROJECT}.marts.dim_patient`"
+    )[0]["n"])
+
+    age_rows = bq_query(f"""
+SELECT age_band, COUNT(*) AS n
+FROM `{PROJECT}.marts.dim_patient`
+WHERE age_band IS NOT NULL
+GROUP BY age_band
+""")
+    by_band = {r["age_band"]: to_int(r["n"]) for r in age_rows}
+    age_bands = [{"label": b, "count": by_band.get(b, 0)} for b in AGE_BANDS_ORDERED]
+
+    sex_rows = bq_query(f"""
+SELECT sex, COUNT(*) AS n
+FROM `{PROJECT}.marts.dim_patient`
+WHERE sex IS NOT NULL AND sex != ''
+GROUP BY sex
+ORDER BY n DESC
+""")
+    sex = [{"label": r["sex"], "count": to_int(r["n"])} for r in sex_rows]
+
+    tag_rows = bq_query(f"""
+SELECT tag AS label, COUNT(*) AS n
+FROM `{PROJECT}.marts.dim_patient`, UNNEST(tags) AS tag
+WHERE tag IS NOT NULL AND tag != ''
+GROUP BY label
+ORDER BY n DESC
+LIMIT 8
+""")
+    top_tags = [{"label": r["label"], "count": to_int(r["n"])} for r in tag_rows]
+
+    return {
+        "total_patients": total,
+        "age_bands":      age_bands,
+        "sex":            sex,
+        "top_tags":       top_tags,
+    }
+
+
+SOURCE_TYPES_ORDERED = [
+    "medical", "word_of_mouth", "partner", "online", "walk_in", "other", "unattributed",
+]
+
+SOURCE_TYPE_LABELS = {
+    "medical":        "Medical referral",
+    "word_of_mouth":  "Word-of-mouth",
+    "partner":        "Partner",
+    "online":         "Online booking",
+    "walk_in":        "Walk-in",
+    "other":          "Other contact",
+    "unattributed":   "Not recorded",
+}
+
+
+def fetch_patient_referrals() -> dict:
+    """Referral source breakdown joined against dim_referral_source.
+
+    Mirrors app.fetch_patient_referrals — keep in sync.
+    """
+    base = bq_query(f"""
+SELECT
+  COUNT(*)                                                AS total,
+  COUNTIF(referred_by IS NOT NULL AND referred_by != '')  AS referred
+FROM `{PROJECT}.marts.dim_patient`
+""")[0]
+    total    = to_int(base["total"])
+    referred = to_int(base["referred"])
+    pct      = round((referred / total * 100), 1) if total else 0.0
+
+    by_type_rows = bq_query(f"""
+SELECT
+  COALESCE(s.source_type, 'unattributed') AS source_type,
+  COUNT(*)                                AS n
+FROM `{PROJECT}.marts.dim_patient` p
+LEFT JOIN `{PROJECT}.marts.dim_referral_source` s
+  ON p.referred_by = s.contact_id
+WHERE p.referred_by IS NOT NULL AND p.referred_by != ''
+GROUP BY source_type
+ORDER BY n DESC
+""")
+    by_source_type = [{
+        "source_type": r["source_type"],
+        "label":       SOURCE_TYPE_LABELS.get(r["source_type"], r["source_type"]),
+        "count":       to_int(r["n"]),
+    } for r in by_type_rows]
+
+    top_rows = bq_query(f"""
+SELECT
+  p.referred_by                                              AS contact_id,
+  COALESCE(s.display_label, '(unknown contact)')             AS label,
+  COALESCE(s.source_type, 'unattributed')                    AS source_type,
+  COUNT(*)                                                   AS n
+FROM `{PROJECT}.marts.dim_patient` p
+LEFT JOIN `{PROJECT}.marts.dim_referral_source` s
+  ON p.referred_by = s.contact_id
+WHERE p.referred_by IS NOT NULL AND p.referred_by != ''
+GROUP BY contact_id, label, source_type
+ORDER BY n DESC, label
+LIMIT 10
+""")
+    top_sources = [{
+        "contact_id":  r["contact_id"],
+        "label":       r["label"],
+        "source_type": r["source_type"],
+        "count":       to_int(r["n"]),
+    } for r in top_rows]
+
+    monthly_rows = bq_query(f"""
+SELECT
+  FORMAT_DATE('%Y-%m', DATE_TRUNC(p.created_on, MONTH))      AS month,
+  FORMAT_DATE('%b %y', DATE_TRUNC(p.created_on, MONTH))      AS label,
+  COALESCE(s.source_type, 'unattributed')                    AS source_type,
+  COUNT(*)                                                   AS n
+FROM `{PROJECT}.marts.dim_patient` p
+LEFT JOIN `{PROJECT}.marts.dim_referral_source` s
+  ON p.referred_by = s.contact_id
+WHERE p.created_on IS NOT NULL
+GROUP BY month, label, source_type
+ORDER BY month
+""")
+    by_month: dict[str, dict] = {}
+    for r in monthly_rows:
+        m = r["month"]
+        entry = by_month.setdefault(m, {"month": m, "label": r["label"]})
+        st = r["source_type"]
+        entry[st] = entry.get(st, 0) + to_int(r["n"])
+    monthly = sorted(by_month.values(), key=lambda x: x["month"])
+
+    return {
+        "total_patients": total,
+        "referred":       referred,
+        "pct_referred":   pct,
+        "by_source_type": by_source_type,
+        "top_sources":    top_sources,
+        "monthly":        monthly,
+        "source_types":   SOURCE_TYPES_ORDERED,
+        "source_labels":  SOURCE_TYPE_LABELS,
+    }
+
+
 def fetch_cohorts() -> list[dict]:
     sql = f"""
 WITH first_visit AS (
@@ -324,6 +473,12 @@ def main() -> None:
     print("Fetching cohorts (range-independent)...")
     cohorts = fetch_cohorts()
 
+    print("Fetching patient demographics (range-independent)...")
+    demographics = fetch_patient_demographics()
+
+    print("Fetching patient referrals (range-independent)...")
+    referrals = fetch_patient_referrals()
+
     ranges: dict[str, dict] = {}
     for key, label, start, end in preset_ranges():
         print(f"Fetching {label} ({start} to {end})...")
@@ -343,6 +498,8 @@ def main() -> None:
         "default_range": "30d",
         "deferred":      deferred,
         "cohorts":       cohorts,
+        "demographics":  demographics,
+        "referrals":     referrals,
         "ranges":        ranges,
     }
 

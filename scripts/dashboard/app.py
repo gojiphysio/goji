@@ -502,6 +502,208 @@ ORDER BY sort_key
     } for r in _query(sql)]
 
 
+# Patient base / demographics / referrals -----------------------------------
+#
+# These are range-independent like `deferred` and `cohorts`: "who are our
+# patients and where did they come from" is a snapshot of the whole base, not
+# a view of activity in the last N days. The range selector at the top of
+# the page does not filter these tiles.
+
+# Ordering used to plot the age-band chart. Anything not in this list (or
+# NULL) is dropped — the chart shows only "known" bands so a stray legacy
+# value doesn't poison the axis.
+AGE_BANDS_ORDERED = ["Under 18", "18-29", "30-39", "40-49", "50-59", "60+"]
+
+
+def fetch_patient_demographics() -> dict:
+    """Patient-base composition: age band, sex, top clinical tags.
+
+    Returns:
+        {
+          "total_patients": int,
+          "age_bands":   [{"label": "30-39", "count": 32}, ...],   # fixed order
+          "sex":         [{"label": "Female", "count": 46}, ...],  # desc by count
+          "top_tags":    [{"label": "Musculoskeletal", "count": 25}, ...],  # top 8 desc
+        }
+
+    All-time snapshot of marts.dim_patient. Patients with missing age/sex are
+    silently excluded from those tiles (each tile shows the populated subset)
+    — `total_patients` is the row count of the whole table for reference.
+    """
+    total = _to_int(_query(
+        f"SELECT COUNT(*) AS n FROM `{PROJECT}.marts.dim_patient`"
+    )[0]["n"])
+
+    age_rows = _query(f"""
+SELECT age_band, COUNT(*) AS n
+FROM `{PROJECT}.marts.dim_patient`
+WHERE age_band IS NOT NULL
+GROUP BY age_band
+""")
+    by_band = {r["age_band"]: _to_int(r["n"]) for r in age_rows}
+    age_bands = [{"label": b, "count": by_band.get(b, 0)} for b in AGE_BANDS_ORDERED]
+
+    sex_rows = _query(f"""
+SELECT sex, COUNT(*) AS n
+FROM `{PROJECT}.marts.dim_patient`
+WHERE sex IS NOT NULL AND sex != ''
+GROUP BY sex
+ORDER BY n DESC
+""")
+    sex = [{"label": r["sex"], "count": _to_int(r["n"])} for r in sex_rows]
+
+    tag_rows = _query(f"""
+SELECT tag AS label, COUNT(*) AS n
+FROM `{PROJECT}.marts.dim_patient`, UNNEST(tags) AS tag
+WHERE tag IS NOT NULL AND tag != ''
+GROUP BY label
+ORDER BY n DESC
+LIMIT 8
+""")
+    top_tags = [{"label": r["label"], "count": _to_int(r["n"])} for r in tag_rows]
+
+    return {
+        "total_patients": total,
+        "age_bands":      age_bands,
+        "sex":            sex,
+        "top_tags":       top_tags,
+    }
+
+
+# Display order for the monthly-acquisition stacked bar. The chart legend
+# reads in this order; the dashboard JS also relies on this list when picking
+# colours so that "medical" is always GOJI red, "online" is always COBALT,
+# etc. Keep in sync with the SOURCE_TYPE_* constants in
+# scripts/ingestion/plato_contact/main.py.
+SOURCE_TYPES_ORDERED = [
+    "medical", "word_of_mouth", "partner", "online", "walk_in", "other", "unattributed",
+]
+
+# Human-friendly labels surfaced to the dashboard. "unattributed" is what we
+# show when a patient has no referred_by recorded — distinct from "other"
+# which is a contact in Plato that didn't match any classification rule.
+SOURCE_TYPE_LABELS = {
+    "medical":        "Medical referral",
+    "word_of_mouth":  "Word-of-mouth",
+    "partner":        "Partner",
+    "online":         "Online booking",
+    "walk_in":        "Walk-in",
+    "other":          "Other contact",
+    "unattributed":   "Not recorded",
+}
+
+
+def fetch_patient_referrals() -> dict:
+    """Referral source breakdown joined against dim_referral_source.
+
+    Returns:
+        {
+          "total_patients":   int,
+          "referred":         int,    # have a non-null referred_by
+          "pct_referred":     float,  # share in %, 1dp
+          "by_source_type":   [{"source_type", "label", "count"}, ...],  # desc
+          "top_sources":      [{"contact_id", "label", "source_type",
+                                 "count"}, ...],                         # top 10
+          "monthly":          [{"month": "2026-04", "label": "Apr 26",
+                                 "<source_type>": count, ...}, ...],     # asc
+          "source_types":     SOURCE_TYPES_ORDERED,
+          "source_labels":    SOURCE_TYPE_LABELS,
+        }
+
+    All-time, range-independent — referral attribution is a snapshot of the
+    whole patient base, not a window of recent activity. To restrict to
+    recent acquisition, slice the result client-side on `monthly`.
+    """
+    base = _query(f"""
+SELECT
+  COUNT(*)                                                AS total,
+  COUNTIF(referred_by IS NOT NULL AND referred_by != '')  AS referred
+FROM `{PROJECT}.marts.dim_patient`
+""")[0]
+    total    = _to_int(base["total"])
+    referred = _to_int(base["referred"])
+    pct      = round((referred / total * 100), 1) if total else 0.0
+
+    by_type_rows = _query(f"""
+SELECT
+  COALESCE(s.source_type, 'unattributed') AS source_type,
+  COUNT(*)                                AS n
+FROM `{PROJECT}.marts.dim_patient` p
+LEFT JOIN `{PROJECT}.marts.dim_referral_source` s
+  ON p.referred_by = s.contact_id
+WHERE p.referred_by IS NOT NULL AND p.referred_by != ''
+GROUP BY source_type
+ORDER BY n DESC
+""")
+    by_source_type = [{
+        "source_type": r["source_type"],
+        "label":       SOURCE_TYPE_LABELS.get(r["source_type"], r["source_type"]),
+        "count":       _to_int(r["n"]),
+    } for r in by_type_rows]
+
+    top_rows = _query(f"""
+SELECT
+  p.referred_by                                              AS contact_id,
+  COALESCE(s.display_label, '(unknown contact)')             AS label,
+  COALESCE(s.source_type, 'unattributed')                    AS source_type,
+  COUNT(*)                                                   AS n
+FROM `{PROJECT}.marts.dim_patient` p
+LEFT JOIN `{PROJECT}.marts.dim_referral_source` s
+  ON p.referred_by = s.contact_id
+WHERE p.referred_by IS NOT NULL AND p.referred_by != ''
+GROUP BY contact_id, label, source_type
+ORDER BY n DESC, label
+LIMIT 10
+""")
+    top_sources = [{
+        "contact_id":  r["contact_id"],
+        "label":       r["label"],
+        "source_type": r["source_type"],
+        "count":       _to_int(r["n"]),
+    } for r in top_rows]
+
+    # Monthly acquisition, pivoted to one column per source_type. The
+    # 'unattributed' bucket captures patients with no referred_by recorded —
+    # almost always the back-fill of legacy records, but we keep it visible
+    # rather than silently dropping it.
+    monthly_rows = _query(f"""
+SELECT
+  FORMAT_DATE('%Y-%m', DATE_TRUNC(p.created_on, MONTH))      AS month,
+  FORMAT_DATE('%b %y', DATE_TRUNC(p.created_on, MONTH))      AS label,
+  COALESCE(s.source_type, 'unattributed')                    AS source_type,
+  COUNT(*)                                                   AS n
+FROM `{PROJECT}.marts.dim_patient` p
+LEFT JOIN `{PROJECT}.marts.dim_referral_source` s
+  ON p.referred_by = s.contact_id
+WHERE p.created_on IS NOT NULL
+GROUP BY month, label, source_type
+ORDER BY month
+""")
+    by_month: dict[str, dict] = {}
+    for r in monthly_rows:
+        m = r["month"]
+        entry = by_month.setdefault(m, {"month": m, "label": r["label"]})
+        # Use unattributed when patient had no referred_by recorded; that's
+        # encoded by the COALESCE above. The COUNTIF in `base` already
+        # measures the same thing differently — we deliberately keep both.
+        st = r["source_type"]
+        if st not in by_month[m]:
+            entry[st] = 0
+        entry[st] = entry[st] + _to_int(r["n"])
+    monthly = sorted(by_month.values(), key=lambda x: x["month"])
+
+    return {
+        "total_patients": total,
+        "referred":       referred,
+        "pct_referred":   pct,
+        "by_source_type": by_source_type,
+        "top_sources":    top_sources,
+        "monthly":        monthly,
+        "source_types":   SOURCE_TYPES_ORDERED,
+        "source_labels":  SOURCE_TYPE_LABELS,
+    }
+
+
 PLATO_BASE = "https://clinic.platomedical.com/api"
 PLATO_DB   = os.environ.get("PLATO_DB", "gojihealth")
 MISMATCH_WINDOW_DAYS = int(os.environ.get("MISMATCH_WINDOW_DAYS", "30"))
@@ -658,6 +860,10 @@ def build_payload() -> dict:
     log.info("Building dashboard payload from BigQuery")
     deferred = fetch_deferred()
     cohorts  = fetch_cohorts()
+    log.info("  patient demographics")
+    demographics = fetch_patient_demographics()
+    log.info("  patient referrals")
+    referrals    = fetch_patient_referrals()
 
     ranges: dict[str, dict] = {}
     for key, label, start, end in preset_ranges():
@@ -695,6 +901,8 @@ def build_payload() -> dict:
         "default_range":     "30d",
         "deferred":          deferred,
         "cohorts":           cohorts,
+        "demographics":      demographics,
+        "referrals":         referrals,
         "appointments":      appointments,
         "payment_by_method": payment_by_method,
         "ranges":            ranges,
