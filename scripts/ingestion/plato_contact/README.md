@@ -84,12 +84,13 @@ gcloud run jobs execute plato-contact-ingest --region asia-southeast1 --wait
 ```bash
 gcloud scheduler jobs create http plato-contact-daily \
   --location asia-southeast1 \
-  --schedule "5 6 * * *" \
+  --schedule "5 21 * * *" \
   --time-zone "Asia/Singapore" \
   --uri "https://run.googleapis.com/v2/projects/goji-bi/locations/asia-southeast1/jobs/plato-contact-ingest:run" \
   --http-method POST \
   --oauth-service-account-email "scheduler-sa@goji-bi.iam.gserviceaccount.com"
 ```
 
-Five minutes after the patient ingest so the dimension is fresh by the time
-analytics queries run.
+21:05 SGT — five minutes after `plato-patients-daily` (21:00) so the
+referral-source dimension is fresh by the time the Patient referrals tile
+on the dashboard joins against it.

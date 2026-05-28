@@ -1271,8 +1271,11 @@ def refresh() -> Response:
     return Response('{"ok": true}', mimetype="application/json")
 
 
-@app.route("/healthz")
-def healthz() -> Response:
+@app.route("/healthcheck")
+def healthcheck() -> Response:
+    # NB: not /healthz — Cloud Run's edge load balancer reserves /healthz for
+    # its own internal probes and returns a Google-branded 404 before the
+    # request reaches the container. /healthcheck is the public uptime ping.
     return Response("ok", mimetype="text/plain")
 
 

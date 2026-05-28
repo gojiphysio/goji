@@ -843,6 +843,7 @@
       <h2>Patient base <span id="demographics_total" class="badge" style="background: var(--bg); color: var(--ink-soft); font-weight: 500;"></span></h2>
       <div class="subtitle">
         Composition of every patient on file in Plato. Charts show only the populated subset for each attribute (age band on 82% of patients, sex on 78%, clinical tags on patients we've tagged so far).
+        <span style="display:block; margin-top:4px; color: var(--ink-muted); font-size: 12px;">Refreshed nightly at 9pm SGT.</span>
       </div>
       <div class="three-col">
         <div>
@@ -867,6 +868,7 @@
         Where new patients come from, joined from Plato's <code>/contact</code> registry.
         Five real channels: medical (GPs, OBGYN, ortho), word-of-mouth (in-house clinician network),
         partner (gyms, allied health), online booking (Plato Online, WhatsApp, Instagram), and walk-in.
+        <span style="display:block; margin-top:4px; color: var(--ink-muted); font-size: 12px;">Refreshed nightly at 9pm SGT.</span>
       </div>
 
       <div style="display: flex; align-items: baseline; gap: 14px; margin: 8px 0 18px; flex-wrap: wrap;">
@@ -1327,15 +1329,15 @@
   </div>
 
   <script id="dashboardData" type="application/json">{
-  "generated_at": "2026-05-27T18:13:57+08:00",
+  "generated_at": "2026-05-28T16:26:33+08:00",
   "default_range": "30d",
   "deferred": 8700.4,
   "cohorts": [
     {
       "cohort": "Mar 2026",
       "patients": 5,
-      "avg_ltv": 1094.0,
-      "avg_visits": 3.4
+      "avg_ltv": 1160.0,
+      "avg_visits": 3.6
     },
     {
       "cohort": "Apr 2026",
@@ -1346,7 +1348,7 @@
     {
       "cohort": "May 2026",
       "patients": 49,
-      "avg_ltv": 394.01,
+      "avg_ltv": 403.83,
       "avg_visits": 1.8
     }
   ],
@@ -1564,21 +1566,17 @@
   "ranges": {
     "7d": {
       "label": "Last 7 days",
-      "start": "2026-05-20",
-      "end": "2026-05-27",
+      "start": "2026-05-21",
+      "end": "2026-05-28",
       "kpis": {
-        "bookings": 9417.0,
-        "recognised": 8489.4,
-        "active_patients": 33,
-        "visits": 37
+        "bookings": 6920.0,
+        "recognised": 7263.9,
+        "active_patients": 28,
+        "visits": 31
       },
       "trends": {
         "granularity": "DAY",
         "bookings": [
-          {
-            "label": "20 May",
-            "value": 3308.0
-          },
           {
             "label": "21 May",
             "value": 1649.0
@@ -1594,13 +1592,13 @@
           {
             "label": "26 May",
             "value": 1300.0
+          },
+          {
+            "label": "28 May",
+            "value": 811.0
           }
         ],
         "recognised": [
-          {
-            "label": "20 May",
-            "value": 2036.5
-          },
           {
             "label": "21 May",
             "value": 920.0
@@ -1620,13 +1618,13 @@
           {
             "label": "26 May",
             "value": 1436.0
+          },
+          {
+            "label": "28 May",
+            "value": 811.0
           }
         ],
         "visits": [
-          {
-            "label": "20 May",
-            "value": 9.0
-          },
           {
             "label": "21 May",
             "value": 3.0
@@ -1646,13 +1644,13 @@
           {
             "label": "26 May",
             "value": 6.0
+          },
+          {
+            "label": "28 May",
+            "value": 3.0
           }
         ],
         "active_patients": [
-          {
-            "label": "20 May",
-            "value": 9.0
-          },
           {
             "label": "21 May",
             "value": 3.0
@@ -1672,6 +1670,10 @@
           {
             "label": "26 May",
             "value": 6.0
+          },
+          {
+            "label": "28 May",
+            "value": 3.0
           }
         ]
       },
@@ -1679,70 +1681,67 @@
         {
           "clinician_id": "PCL",
           "name": "Cheryl Long",
-          "bookings": 5039.0,
-          "recognised": 4310.0,
+          "bookings": 4350.0,
+          "recognised": 3621.0,
           "is_director": true
-        },
-        {
-          "clinician_id": "PKN",
-          "name": "Kristy Ng",
-          "bookings": 2298.0,
-          "recognised": 1174.9,
-          "is_director": false
         },
         {
           "clinician_id": "PCN",
           "name": "Claire Ng",
-          "bookings": 2080.0,
-          "recognised": 3004.5,
+          "bookings": 1560.0,
+          "recognised": 2357.0,
+          "is_director": false
+        },
+        {
+          "clinician_id": "PKN",
+          "name": "Kristy Ng",
+          "bookings": 1010.0,
+          "recognised": 1285.9,
           "is_director": false
         }
       ],
       "discounts": {
-        "total": 0.0,
-        "pct_of_bookings": 0.0,
-        "top_items": []
+        "total": 15.0,
+        "pct_of_bookings": 0.2,
+        "top_items": [
+          {
+            "name": "Review Physiotherapy Session (55 mins)",
+            "discount": 15.0,
+            "times": 1
+          }
+        ]
       },
       "treatment_mix": [
         {
           "category": "Physiotherapy",
-          "revenue": 6940.0,
-          "visits": 26
+          "revenue": 6191.0,
+          "visits": 23
         },
         {
           "category": "S&C",
-          "revenue": 700.8,
-          "visits": 5
+          "revenue": 551.8,
+          "visits": 4
         },
         {
           "category": "Private Pilates",
-          "revenue": 648.6,
-          "visits": 5
-        },
-        {
-          "category": "Other",
-          "revenue": 200.0,
-          "visits": 1
+          "revenue": 521.1,
+          "visits": 4
         }
       ]
     },
     "30d": {
       "label": "Last 30 days",
-      "start": "2026-04-27",
-      "end": "2026-05-27",
+      "start": "2026-04-28",
+      "end": "2026-05-28",
       "kpis": {
-        "bookings": 31218.0,
-        "recognised": 22517.6,
+        "bookings": 31369.0,
+        "recognised": 22668.6,
         "active_patients": 55,
-        "visits": 97
+        "visits": 98
       },
       "trends": {
         "granularity": "DAY",
         "bookings": [
-          {
-            "label": "27 Apr",
-            "value": 660.0
-          },
           {
             "label": "29 Apr",
             "value": 590.0
@@ -1822,13 +1821,13 @@
           {
             "label": "26 May",
             "value": 1300.0
+          },
+          {
+            "label": "28 May",
+            "value": 811.0
           }
         ],
         "recognised": [
-          {
-            "label": "27 Apr",
-            "value": 660.0
-          },
           {
             "label": "29 Apr",
             "value": 590.0
@@ -1912,13 +1911,13 @@
           {
             "label": "26 May",
             "value": 1436.0
+          },
+          {
+            "label": "28 May",
+            "value": 811.0
           }
         ],
         "visits": [
-          {
-            "label": "27 Apr",
-            "value": 2.0
-          },
           {
             "label": "29 Apr",
             "value": 2.0
@@ -2002,13 +2001,13 @@
           {
             "label": "26 May",
             "value": 6.0
+          },
+          {
+            "label": "28 May",
+            "value": 3.0
           }
         ],
         "active_patients": [
-          {
-            "label": "27 Apr",
-            "value": 2.0
-          },
           {
             "label": "29 Apr",
             "value": 2.0
@@ -2092,6 +2091,10 @@
           {
             "label": "26 May",
             "value": 6.0
+          },
+          {
+            "label": "28 May",
+            "value": 3.0
           }
         ]
       },
@@ -2106,20 +2109,20 @@
         {
           "clinician_id": "PCL",
           "name": "Cheryl Long",
-          "bookings": 10570.0,
-          "recognised": 9841.0,
+          "bookings": 10461.0,
+          "recognised": 9732.0,
           "is_director": true
         },
         {
           "clinician_id": "PKN",
           "name": "Kristy Ng",
-          "bookings": 5987.0,
-          "recognised": 3786.9,
+          "bookings": 6247.0,
+          "recognised": 4046.9,
           "is_director": false
         }
       ],
       "discounts": {
-        "total": 142.0,
+        "total": 157.0,
         "pct_of_bookings": 0.5,
         "top_items": [
           {
@@ -2141,14 +2144,19 @@
             "name": "Private Pilates 1:1 - 10 Sessions Pack (Opening Promo)",
             "discount": 24.0,
             "times": 1
+          },
+          {
+            "name": "Review Physiotherapy Session (55 mins)",
+            "discount": 15.0,
+            "times": 1
           }
         ]
       },
       "treatment_mix": [
         {
           "category": "Physiotherapy",
-          "revenue": 19182.0,
-          "visits": 72
+          "revenue": 19333.0,
+          "visits": 73
         },
         {
           "category": "Private Pilates",
@@ -2169,13 +2177,13 @@
     },
     "90d": {
       "label": "Last 90 days",
-      "start": "2026-02-26",
-      "end": "2026-05-27",
+      "start": "2026-02-27",
+      "end": "2026-05-28",
       "kpis": {
-        "bookings": 39142.0,
-        "recognised": 30441.6,
+        "bookings": 39953.0,
+        "recognised": 31252.6,
         "active_patients": 63,
-        "visits": 122
+        "visits": 125
       },
       "trends": {
         "granularity": "WEEK",
@@ -2218,7 +2226,7 @@
           },
           {
             "label": "24 May",
-            "value": 3450.0
+            "value": 4261.0
           }
         ],
         "recognised": [
@@ -2260,7 +2268,7 @@
           },
           {
             "label": "24 May",
-            "value": 4127.1
+            "value": 4938.1
           }
         ],
         "visits": [
@@ -2302,7 +2310,7 @@
           },
           {
             "label": "24 May",
-            "value": 18.0
+            "value": 21.0
           }
         ],
         "active_patients": [
@@ -2344,7 +2352,7 @@
           },
           {
             "label": "24 May",
-            "value": 16.0
+            "value": 19.0
           }
         ]
       },
@@ -2352,8 +2360,8 @@
         {
           "clinician_id": "PCL",
           "name": "Cheryl Long",
-          "bookings": 18490.0,
-          "recognised": 17761.0,
+          "bookings": 19041.0,
+          "recognised": 18312.0,
           "is_director": true
         },
         {
@@ -2366,13 +2374,13 @@
         {
           "clinician_id": "PKN",
           "name": "Kristy Ng",
-          "bookings": 5987.0,
-          "recognised": 3786.9,
+          "bookings": 6247.0,
+          "recognised": 4046.9,
           "is_director": false
         }
       ],
       "discounts": {
-        "total": 142.0,
+        "total": 157.0,
         "pct_of_bookings": 0.4,
         "top_items": [
           {
@@ -2394,14 +2402,19 @@
             "name": "Private Pilates 1:1 - 10 Sessions Pack (Opening Promo)",
             "discount": 24.0,
             "times": 1
+          },
+          {
+            "name": "Review Physiotherapy Session (55 mins)",
+            "discount": 15.0,
+            "times": 1
           }
         ]
       },
       "treatment_mix": [
         {
           "category": "Physiotherapy",
-          "revenue": 27102.0,
-          "visits": 96
+          "revenue": 27913.0,
+          "visits": 99
         },
         {
           "category": "Private Pilates",
@@ -2423,12 +2436,12 @@
     "all": {
       "label": "All time",
       "start": "1970-01-01",
-      "end": "2027-05-27",
+      "end": "2027-05-28",
       "kpis": {
-        "bookings": 39281.0,
-        "recognised": 30580.6,
+        "bookings": 40092.0,
+        "recognised": 31391.6,
         "active_patients": 63,
-        "visits": 123
+        "visits": 126
       },
       "trends": {
         "granularity": "MONTH",
@@ -2443,7 +2456,7 @@
           },
           {
             "label": "May 26",
-            "value": 29968.0
+            "value": 30779.0
           },
           {
             "label": "Jun 26",
@@ -2461,7 +2474,7 @@
           },
           {
             "label": "May 26",
-            "value": 21267.6
+            "value": 22078.6
           },
           {
             "label": "Jun 26",
@@ -2479,7 +2492,7 @@
           },
           {
             "label": "May 26",
-            "value": 93.0
+            "value": 96.0
           },
           {
             "label": "Jun 26",
@@ -2509,8 +2522,8 @@
         {
           "clinician_id": "PCL",
           "name": "Cheryl Long",
-          "bookings": 18490.0,
-          "recognised": 17761.0,
+          "bookings": 19041.0,
+          "recognised": 18312.0,
           "is_director": true
         },
         {
@@ -2523,13 +2536,13 @@
         {
           "clinician_id": "PKN",
           "name": "Kristy Ng",
-          "bookings": 5987.0,
-          "recognised": 3786.9,
+          "bookings": 6247.0,
+          "recognised": 4046.9,
           "is_director": false
         }
       ],
       "discounts": {
-        "total": 142.0,
+        "total": 157.0,
         "pct_of_bookings": 0.4,
         "top_items": [
           {
@@ -2551,14 +2564,19 @@
             "name": "Private Pilates 1:1 - 10 Sessions Pack (Opening Promo)",
             "discount": 24.0,
             "times": 1
+          },
+          {
+            "name": "Review Physiotherapy Session (55 mins)",
+            "discount": 15.0,
+            "times": 1
           }
         ]
       },
       "treatment_mix": [
         {
           "category": "Physiotherapy",
-          "revenue": 27102.0,
-          "visits": 96
+          "revenue": 27913.0,
+          "visits": 99
         },
         {
           "category": "Private Pilates",

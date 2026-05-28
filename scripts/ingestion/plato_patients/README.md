@@ -75,17 +75,24 @@ bq query --use_legacy_sql=false \
 
 ### 4. Schedule (daily is plenty)
 
-Patient names change rarely. Daily at 06:00 Singapore time:
+Patient records change slowly and the demographics tiles on the dashboard
+present a snapshot, so a single end-of-day refresh is enough. We run at
+21:00 SGT — clinic closes around 20:00, giving a 1-hour buffer for any
+late records to settle:
 
 ```bash
 gcloud scheduler jobs create http plato-patients-daily \
   --location asia-southeast1 \
-  --schedule "0 6 * * *" \
+  --schedule "0 21 * * *" \
   --time-zone "Asia/Singapore" \
   --uri "https://run.googleapis.com/v2/projects/goji-bi/locations/asia-southeast1/jobs/plato-patients-ingest:run" \
   --http-method POST \
   --oauth-service-account-email "scheduler-sa@goji-bi.iam.gserviceaccount.com"
 ```
+
+The dashboard caption ("Refreshed nightly at 9pm SGT") on the Patient base
+and Patient referrals tiles is hard-coded to match this schedule — bump
+both if you change the cron.
 
 ## Redeploy after a code change
 
