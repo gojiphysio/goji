@@ -13,10 +13,13 @@ COPY app.py template.html ./
 COPY static/ ./static/
 
 # Cloud Run sends a SIGTERM and waits up to the grace period before SIGKILL.
-# 2 workers x 4 threads handles the trickle of traffic for this dashboard.
+# Single worker + many threads: the dashboard's in-process payload cache lives
+# inside one Python process. With 2 workers, half the warm hits landed on a
+# worker with an empty cache and rebuilt from scratch (observed: 46s warm
+# latency). One worker keeps the cache shared across all requests. All work
+# is I/O bound (BigQuery + HTTP), so threads beat extra processes here.
+#
 # Timeout aligned with Cloud Run's 300s request timeout: a cold /api/data
-# build runs ~25 BQ queries plus a paginated Plato API call (1.5s between
-# pages), which routinely takes 60-120s. A shorter worker timeout caused
-# the worker to be SIGKILLed mid-build → 504, and because the cache never
-# populated, every refresh re-triggered the slow path.
-CMD exec gunicorn --bind :$PORT --workers 2 --threads 4 --timeout 300 app:app
+# build runs ~25 BQ queries, routinely 10-30s. Plato is no longer called on
+# the hot path (appointments now come from BQ via plato-appointments-ingest).
+CMD exec gunicorn --bind :$PORT --workers 1 --threads 16 --timeout 300 app:app
