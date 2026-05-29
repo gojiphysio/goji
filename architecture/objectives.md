@@ -10,7 +10,7 @@ Cross-references:
 
 Cross-cutting decisions:
 
-- **Two audiences, two reports.** Analytics (aggregate, no PII) and operational (cancellations with patient names). Build as two Looker Studio reports against the same BigQuery tables; share only the operational one with named users.
+- **Two audiences, two surfaces.** Analytics (aggregate, no PII) and operational (patient names for call lists). Both read the same BigQuery marts; only the operational view exposes PII, and access to it is restricted.
 - **Treatment categories live in two places, both useful.** Plato tags every appointment with a treatment type via `code_Bottom` (S&C / Pilates / Physiotherapy / Home Visit). Plato also tags inventory items by `inventory` type. For revenue we use the inventory mapping; for visit counts we use `code_Bottom` directly. No manual mapping table needed for v1.
 - **Patient tags ARE a first-class field.** `patient.tag` is an array of `{"tag": "Musculoskeletal"}` records. No need to dig into `patient.custom` or `patient_note` for tagging.
 

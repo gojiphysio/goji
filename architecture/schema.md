@@ -10,7 +10,7 @@ Three BigQuery datasets, one per layer:
 
 - `raw` - exact landings from source APIs, append-only, JSON-friendly. Never queried by dashboards.
 - `stg` - typed, deduped, source-shaped views. Light transformations only.
-- `marts` - the star schema below. This is what Looker Studio points at.
+- `marts` - the star schema below. This is what the dashboard queries.
 
 Every table carries `_loaded_at` (UTC timestamp of the row's most recent load) and, where applicable, `_source_modified_at` (the API's `modified_since` value the row came back with).
 

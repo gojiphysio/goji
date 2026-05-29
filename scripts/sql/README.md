@@ -1,6 +1,6 @@
 # BigQuery SQL views
 
-All the SQL machinery that sits between the raw Plato landings and the Looker Studio dashboards. Read [`architecture/schema.md`](../../architecture/schema.md) first for the conceptual model; the files here are the executable version of that document.
+All the SQL machinery that sits between the raw Plato landings and the dashboard. Read [`architecture/schema.md`](../../architecture/schema.md) first for the conceptual model; the files here are the executable version of that document.
 
 ## Layout
 
@@ -8,11 +8,13 @@ All the SQL machinery that sits between the raw Plato landings and the Looker St
 sql/
 |-- stg/                          The staging layer. Reads raw_plato.*, dedupes, types.
 |   |-- 01_invoices.sql           One row per invoice (latest version only).
-|   `-- 02_invoice_items.sql      One row per line item, classified + booking/recognised amounts.
+|   |-- 02_invoice_items.sql      One row per line item, classified + booking/recognised amounts.
+|   `-- 03_appointments.sql       One row per appointment (latest version), calendar→doctor resolved.
 |
-|-- marts/                        The reporting layer. Reads from stg.*. Looker Studio reads from here.
-|   |-- 10_fct_invoice_line.sql       The booking fact (sales + package sales).
-|   `-- 20_fct_service_delivered.sql  The revenue fact (redemptions fanned + single-use sales).
+|-- marts/                        The reporting layer. Reads from stg.*. The dashboard reads from here.
+|   |-- 10_fct_invoice_line.sql              The booking fact (sales + package sales).
+|   |-- 20_fct_service_delivered.sql         The revenue fact (redemptions fanned + single-use sales).
+|   `-- 30_fct_invoice_doctor_mismatches.sql Invoices whose doctor disagrees with the same-day calendar.
 |
 |-- deploy_all.sh                 Apply every view to BQ in dependency order.
 `-- README.md                     This file.
@@ -23,12 +25,15 @@ Naming convention: filenames are prefixed with a numeric order (`01_`, `02_`, ..
 ## Dependencies
 
 ```
-raw_plato.invoices_raw
-        v
-stg.invoices  ----v
-                  stg.invoice_items
-                       v             v
+raw_plato.invoices_raw                      raw_plato.appointments_raw
+        v                                              v
+stg.invoices  ----v                            stg.appointments
+                  stg.invoice_items                    |
+                       v             v                 |
         marts.fct_invoice_line   marts.fct_service_delivered
+                                                       |
+        marts.fct_invoice_doctor_mismatches  <---------+
+        (joins stg.invoices × stg.appointments)
 ```
 
 Anything in `marts/` MUST read from `stg.*`, never from `raw_plato.*` directly. That's the whole point of the staging layer (decouples reporting from API shape changes).
@@ -117,6 +122,6 @@ Expectation: invoices where a single line redeemed multiple sessions (e.g. two c
 1. Edit the .sql file.
 2. Run `./deploy_all.sh`.
 3. Re-run the relevant sanity query above.
-4. Looker Studio dashboards pick up the change on next refresh.
+4. The dashboard picks up the change on its next cache refresh (≤5 min, or POST `/refresh`).
 
 Adding a new view: drop a new .sql file in `stg/` or `marts/` and bump the numeric prefix to sort it correctly relative to dependencies. No code wiring needed.

@@ -1,7 +1,7 @@
 # Dashboard deploy notes
 
-Live: <https://goji-dashboard-277737358846.asia-southeast1.run.app>
-Custom domain (pending DNS): <https://dashboard.gojiphysio.com>
+Live: <https://dashboard.gojiphysio.com>
+Cloud Run URL: <https://goji-dashboard-277737358846.asia-southeast1.run.app>
 
 Single Cloud Run service, gated by HTTP Basic Auth, queries BigQuery on each
 page load with a 5-minute in-process cache.
@@ -18,9 +18,8 @@ page load with a 5-minute in-process cache.
 ## Files
 
 - `app.py` — Flask app, BQ queries, basic-auth decorator, cache.
-- `template.html` — shared with `generate.py`. Contains `__DATA_PLACEHOLDER__`.
+- `template.html` — page markup. Contains `__DATA_PLACEHOLDER__`.
 - `Dockerfile`, `requirements.txt`, `.dockerignore` — Cloud Run build inputs.
-- `generate.py` — local one-shot generator (uses `bq` CLI), unchanged.
 
 ## Read the password
 
@@ -60,44 +59,30 @@ directly, so it no longer needs `PLATO_API_KEY`.
 
     gcloud logging tail 'resource.type=cloud_run_revision AND resource.labels.service_name=goji-dashboard' --project=goji-bi
 
-## Custom domain — finish the DNS step
+## Custom domain
 
-The domain mapping is already created in Cloud Run. To finish:
+`dashboard.gojiphysio.com` is live: a `dashboard` CNAME → `ghs.googlehosted.com.`
+on the `gojiphysio.com` zone, with Google's auto-provisioned TLS cert. The
+domain mapping lives in Cloud Run.
 
-1. Find where DNS for `gojiphysio.com` is managed. The nameservers are
-   `ns-cloud-a*.googledomains.com`, so it's either Google Domains
-   (now Squarespace) or Cloud DNS.
+Verify / inspect:
 
-2. Add this record on the `gojiphysio.com` zone:
-
-       host:  dashboard
-       type:  CNAME
-       value: ghs.googlehosted.com.
-       ttl:   300
-
-3. Once DNS propagates, Google auto-provisions a TLS cert (takes 5-30 min).
-   Verify:
-
-       dig +short dashboard.gojiphysio.com    # should return CNAME
-       curl -I https://dashboard.gojiphysio.com/   # should be 401 (auth required)
-
-   Status of cert provisioning:
-
-       gcloud beta run domain-mappings describe \
-         --domain=dashboard.gojiphysio.com \
-         --region=asia-southeast1 --project=goji-bi
+    dig +short dashboard.gojiphysio.com         # CNAME → ghs.googlehosted.com.
+    curl -I https://dashboard.gojiphysio.com/   # 401 (auth required)
+    gcloud beta run domain-mappings describe \
+      --domain=dashboard.gojiphysio.com \
+      --region=asia-southeast1 --project=goji-bi
 
 ## What this dashboard shows
 
-Same content as `generate.py`'s output (the v2 layout) but live from BQ:
-KPIs, daily/weekly/monthly trends, per-clinician table, discount summary,
-treatment-mix donuts, cohort table, deferred revenue.
+Three pages, all live from BQ:
 
-**Not yet ported** to the live server: the v3 design (P&L tab, Commission
-calculator, true-discount-cost tile with per-SKU breakdown). Those still
-live as a static mockup in `mockups/dashboard_v3_sandbox.html` with
-hand-pasted numbers — a follow-up port should add the new tile shapes to
-`app.py` and replace `template.html` with the v3 markup.
+- **Overview** — KPIs, daily/weekly/monthly trends, per-clinician table,
+  discount summary, treatment-mix donuts, cohort table, deferred revenue,
+  patient demographics, referral analytics, and the invoice-doctor mismatch alert.
+- **P&L** — Singapore-style P&L with revenue/bookings toggle, period selector,
+  and XLSX export.
+- **Commission** — per-clinician commission calculator over real appointment data.
 
 ## Cost
 

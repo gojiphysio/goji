@@ -1,91 +1,154 @@
 # Goji Business Intelligence
 
-Business intelligence backend and dashboards for **Goji Health Pte. Ltd.** (Singapore physiotherapy clinic).
+Business intelligence backend and live dashboard for **Goji Health Pte. Ltd.**
+(Singapore physiotherapy clinic).
 
-The goal: a real-time web dashboard the clinic operator can use to see bookings, recognised revenue, deferred revenue, clinician performance, AR/AP, and the other vitals - editable by drag-and-drop, extensible by prompt.
+A real-time web dashboard the clinic operator uses to see bookings, recognised
+revenue, deferred revenue, clinician performance, discounts, treatment mix,
+patient demographics, and a working P&L — all sourced from Plato and served
+from our own warehouse.
 
-## Status
+## Architecture
 
-- [x] Architecture chosen: Plato + Xero + GSuite -> BigQuery -> Looker Studio, with Cloud Run + Cloud Scheduler for ingestion.
-- [x] Plato API explored and documented. Bookings vs. recognised revenue model verified against live data.
-- [x] Schema designed (`architecture/schema.md`).
-- [x] Bookings + recognised revenue + deferred revenue working as a local script.
-- [x] Dashboard objectives defined (`architecture/objectives.md`).
-- [x] GCP project scaffolded.
-- [x] First ingestion job deployed.
-- [x] BigQuery datasets created and seeded.
-- [x] Dashboard v1 deployed on Cloud Run with HTTP Basic Auth (see `scripts/dashboard/DEPLOY.md`). Live at `dashboard.gojiphysio.com` once DNS is wired.
-- [ ] Port v3 design + per-SKU discount tile from `mockups/dashboard_v3_sandbox.html` into the live server.
-- [ ] Xero integration.
+```
+Plato API
+   │  (Cloud Run Jobs, scheduled by Cloud Scheduler)
+   ▼
+raw_plato.*        ← append-only landings, one row per API object version
+   │  (BigQuery views)
+   ▼
+stg.*              ← typed, deduped, source-shaped
+   │
+   ▼
+marts.*            ← star schema / reporting facts
+   │  (queried live per request, 5-min in-process cache)
+   ▼
+Cloud Run Flask dashboard  ← HTTP Basic Auth
+   https://dashboard.gojiphysio.com
+```
 
-## Current objective
+Everything runs in GCP project `goji-bi`, region `asia-southeast1`. The
+dashboard scales to zero and costs well under a few dollars a month.
 
-Stand up a Looker Studio dashboard that answers six pressing questions for the clinic operator:
+## What's live today
 
-1. **Per-clinician performance** - bookings, recognised revenue, and number of appointments delivered.
-2. **Discount cost to the clinic** - how much revenue was foregone via line discounts and invoice adjustments (e.g. $150 listed, $139 charged -> $11 absorbed).
-3. **Treatment-type mix** - revenue and visit breakdown across pilates, strength & conditioning, physiotherapy, etc.
-4. **Patient demographics** - age, gender, condition tags (musculoskeletal, post-partum, etc.).
-5. **Cohort metrics** - LTV, repeat visit rate, retention, churn.
-6. **Unconfirmed upcoming appointments worth chasing** - forward-looking operational list with patient names and contact, for confirmation calls. (Originally backward-looking cancellations; deferred because Plato hard-deletes cancellations and clinic has no SOPs yet.)
+**Ingestion** — four Cloud Run Jobs land Plato data into `raw_plato.*`:
 
-See `architecture/objectives.md` for the metric definitions, data sources, and open data-gaps for each.
+| Job | Source | Cadence | Notes |
+|---|---|---|---|
+| `plato-invoices-ingest` | `/invoice` | nightly | filtered by `modified_since` |
+| `plato-appointments-ingest` | `/appointment` | every 15 min | filtered by session date window `[-14d, +7d]` |
+| `plato-patients-ingest` | `/patient` | nightly | PII-safe (`initial_lastname` only) |
+| `plato-contact-ingest` | `/contact` | nightly | referral-source resolution |
+
+**Dashboard** — single Flask service (`scripts/dashboard/app.py`), three pages:
+
+- **Overview** — KPIs (bookings, recognised, active patients, deferred),
+  daily/weekly/monthly trends, per-clinician table + chart, discount cost +
+  top discounted items, treatment-mix donuts, cohort/LTV table, patient
+  demographics, and referral analytics.
+- **P&L** — Singapore-style profit & loss with a revenue/bookings toggle,
+  selectable period (Last 30D / current cycle / previous cycle / custom), and
+  XLSX export.
+- **Commission** — per-clinician commission calculator over real appointment
+  data, with patient initials.
+
+**Data-quality alert** — the Overview surfaces invoice-doctor mismatches
+(invoices whose `doctor` disagrees with the same-day appointment calendar's
+clinician), fed by the `marts.fct_invoice_doctor_mismatches` view. See the
+cross-reference + correction tooling in `scripts/cross_reference_invoice_doctor.py`
+and `scripts/fix_invoice_doctor.py`.
 
 ## Layout
 
 ```
 .
-|-- README.md                  (this file)
-|-- architecture/
-|   `-- schema.md              The canonical warehouse schema. Read this first.
-|-- plato-api-docs/            Local offline snapshot of Plato's developer docs,
-|   |-- README.md              indexed and annotated with "Notes for Goji BI"
-|   |-- 01-overview.md           sections.
-|   |-- 02-api-overview.md
-|   |-- ...
-|   `-- 13-endpoint-reference.md
-`-- scripts/
-    |-- plato_probe.py         Hits ~20 endpoints, dumps shapes to probe_output.json.
-    |                          One-shot discovery tool.
-    `-- plato_week_metrics.py  Last-7-days bookings + recognised revenue + clinician
-                               split + deferred revenue snapshot. The closest thing
-                               to a working dashboard we have today.
+├── README.md                  (this file)
+├── architecture/
+│   ├── schema.md              Canonical warehouse schema. Read this first.
+│   ├── objectives.md          The original six dashboard questions + metric defs.
+│   └── gcp_setup.md           GCP project bring-up notes.
+├── gcp-setup.sh               Idempotent GCP scaffolding script.
+├── plato-api-docs/            Offline snapshot of Plato's developer docs,
+│                              annotated with "Notes for Goji BI".
+├── claude setup/              Operator-facing guides (dashboard access, glossary).
+├── design/                    Brand template + logo assets.
+└── scripts/
+    ├── dashboard/             The live Cloud Run service (app.py, template.html,
+    │                          Dockerfile). DEPLOY.md has redeploy/rotate steps.
+    ├── ingestion/             One folder per Cloud Run ingestion Job.
+    ├── sql/                   stg + marts BigQuery views (deploy_all.sh).
+    ├── cross_reference_invoice_doctor.py  Invoice-doctor mismatch detection.
+    ├── fix_invoice_doctor.py              Correction script for mismatches.
+    ├── build_clinician_revenue_template.py  XLSX commission template generator.
+    ├── data/                  inventory.xlsx — item → category source.
+    └── archive/               One-shot probe/discovery scripts (reference only).
 ```
 
-## How to run the metrics today
+## Running things
+
+**Deploy a dashboard change** — see `scripts/dashboard/DEPLOY.md` (redeploy,
+password rotation, custom-domain DNS, log tailing).
+
+**Deploy a SQL view change:**
 
 ```bash
-cd scripts/
-pip3 install requests
-export PLATO_DB=gojihealth
-export PLATO_API_KEY=<your_bearer_token>   # generate in Plato System Setup -> API
-python3 plato_week_metrics.py
+cd scripts/sql && ./deploy_all.sh
 ```
 
-Output is three sections: daily bookings vs recognised totals, a per-clinician breakdown, and a current deferred-revenue snapshot. The same logic will move into BigQuery views once we scaffold the warehouse.
+**Deploy / schedule an ingestion job** — each `scripts/ingestion/*/README.md`
+has the `gcloud run jobs deploy` and `gcloud scheduler` commands for that job.
 
 ## Key concepts to internalise
 
-**Booking vs. recognised revenue.** The clinic sells multi-session packs. Cash comes in once, revenue is earned across multiple visits. The dashboard must always show both side by side. Schema details: `architecture/schema.md`, section "The booking vs. revenue distinction".
+**Booking vs. recognised revenue.** The clinic sells multi-session packs. Cash
+comes in once; revenue is earned across multiple visits. The dashboard always
+shows both side by side. Details: `architecture/schema.md`, section "The booking
+vs. revenue distinction".
 
 **Plato data quirks confirmed against live data:**
 
 - An "invoice" and a "queue entry" are the same object.
-- Session consumption is a new invoice line on a $0 invoice, with `item.others.redeem_from` set to the source pack's invoice id. That line's `redeem_alloc[].value` is the per-session recognised revenue.
-- Outstanding packages report includes `pro_rata_left` = Plato's own computation of deferred revenue per pack. We trust this.
-- Appointments are keyed to a "calendar", and the calendar's `color` value IS the calendar id. `color -> calendars[].color -> calendars[].doctor -> providers[].given_id`.
+- Session consumption is a new line on a $0 invoice, with
+  `item.others.redeem_from` set to the source pack's invoice id. That line's
+  `redeem_alloc[].value` is the per-session recognised revenue.
+- The outstanding-packages report includes `pro_rata_left` = Plato's own
+  deferred-revenue computation per pack. We trust this.
+- Appointments are keyed to a "calendar", and the calendar's `color` value IS
+  the calendar id: `color → calendars[].color → calendars[].doctor → providers[].given_id`.
+- Provider codes: `PCL` = Cheryl Long (director), `PKN` = Kristy Ng, `PCN` = Claire Ng.
 
 ## Operational notes
 
-- Plato API key lives in your environment, never in the repo. Use `export` (or a `.envrc`) and rely on `.gitignore` to keep `.env` files out.
-- `scripts/probe_output.json` contains real patient names and contact numbers. **Never commit.** `.gitignore` handles this.
-- `scripts/plato_swagger.json` is the full live API spec, kept locally so we can browse it without re-fetching. Not PII; gitignore'd anyway because it can be regenerated.
+- The Plato API key lives in Secret Manager (`plato-api-key`), never in the
+  repo. The dashboard service no longer needs it — it reads everything from BQ.
+- `scripts/probe_output.json` / `probe2_output.json` and `plato_swagger.json`
+  contain real patient PII and are gitignored. **Never commit.**
+- The dashboard runs read-only as `dashboard-sa@`; ingestion runs as
+  `ingestion-sa@`; Cloud Scheduler triggers as `scheduler-sa@`.
 
-## Next session
+## Future objectives
 
-Focus is the six dashboard questions in `architecture/objectives.md`. Likely sequence:
+The original six v1 questions (`architecture/objectives.md`) are answered. The
+next horizon:
 
-1. Probe Plato for the data gaps the objectives doc identifies (patient demographics fields, condition tags, cancellation status codes, treatment categorisation).
-2. Decide which fields need a manual mapping table vs. coming directly from Plato.
-3. Resume GCP setup (Task #18 onward) once we know exactly what we're modelling.
-4. Stand up BigQuery + first ingestion + Looker Studio dashboard against those models.
+1. **Xero integration → a true P&L.** Today's P&L tab is revenue- and
+   commission-driven; real costs (payroll, rent, supplies, payment fees) and
+   AR/AP live in Xero. Pull Xero into `raw_xero.*` and join to revenue for a
+   real operating-profit picture.
+2. **Operational call list (the deferred Q6).** Unconfirmed upcoming
+   appointments worth chasing — a PII-bearing operational view for confirmation
+   calls. Data and code mappings are ready (`objectives.md` §6); needs a page.
+3. **Cancellation / no-show tracking.** Plato hard-deletes cancellations, so
+   this needs a Cloud Run HTTPS receiver for the `appointment:delete` webhook.
+   Unblocks no-show rate and chair-utilisation metrics.
+4. **Package liability aging + expiry.** Surface packs nearing expiry and a
+   breakage forecast, so deferred revenue can be aged and chased.
+5. **Push a daily morning brief.** Reuse Cloud Scheduler to email/Slack a
+   one-page summary so the operator doesn't have to log in to see the vitals.
+6. **Generalise the data-quality alerting.** The invoice-doctor mismatch view
+   is one integrity check; add others (e.g. $0 non-redemption invoices, missing
+   clinician codes, orphaned redemptions) behind the same alert surface.
+7. **Deeper retention/cohort analysis.** As history accumulates, the retention
+   curve and churn definitions in `objectives.md` §5 become meaningful — revisit
+   once there's enough longitudinal data.
