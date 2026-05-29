@@ -1,52 +1,15 @@
-# Secrets and environment
-.env
-.env.*
-.envrc
-*.pem
-*.key
+# Cross-cutting ignores for the Goji monorepo.
+# Per-project ignores live in each subproject's own .gitignore
+# (e.g. business-intelligence/.gitignore).
 
-# Probe outputs - contain real patient names, phone numbers, NRIC, etc.
-scripts/probe_output.json
-scripts/plato_swagger.json
-scripts/*_output.json
-scripts/*_response.json
+# OS / editor cruft
+.DS_Store
+*.swp
+*~
 
 # Python
 __pycache__/
 *.py[cod]
-*$py.class
-*.egg-info/
-.venv/
-venv/
-env/
-.pytest_cache/
-.mypy_cache/
-.ruff_cache/
 
-# Local-dev BQ result cache (DASHBOARD_DEV=1)
-scripts/dashboard/.cache/
-
-# Editors / OS
-.DS_Store
-.vscode/
-.idea/
-*.swp
-*~
-
-# Claude Code per-user state (machine-specific permissions, etc.)
-.claude/settings.local.json
-
-# Generated / build
-dist/
-build/
-*.log
-
-# GCP local credential files (in case we ever cache one locally)
-gcp-key*.json
-service-account*.json
-application_default_credentials.json
-*.pdf
-*.pptx
-
-# Patient-level exports (contain PII-minimised names + dates) - never commit
-reports/
+# Machine-specific Claude Code state, in any subproject
+**/.claude/settings.local.json
