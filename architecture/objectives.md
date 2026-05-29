@@ -74,14 +74,18 @@ The fields `discount` (numeric) and `disc_abs` (0/1 = percentage vs absolute-dol
 
 For revenue by treatment type, join invoice lines to the inventory mapping below.
 
-For visit count by treatment type, use `fct_appointment.code_Bottom`:
+For visit count by treatment type, use `stg.appointments.treatment_type` (derived from `code_Bottom`). The id→name map is a copy of Plato's authoritative `GET /{db}/appointment/codes` "Appointment Types" group:
 
-| `code_Bottom` | Treatment type |
+| `code_Bottom` | `treatment_type` |
 |---|---|
 | `qLbH` | S&C |
 | `2kV4` | Pilates |
 | `hDWW` | Physiotherapy |
 | `sCla` | Home Visit |
+| _blank_ | **Untyped** |
+| _other_ | **Unknown** (new Plato code — refresh the map) |
+
+**Untyped is large and real.** A live pull on 2026-05-29 (191 distinct 2026 appointments) found **45% had a blank `code_Bottom`** — booked without an appointment type (consults, admin blocks, untagged). The other 55% all mapped cleanly to the four known codes; there are **no** mystery/unmapped codes — `/appointment/codes` returns exactly these four. So the treatment-mix chart describes ~55% of visits; surface `Untyped` as its own slice rather than dropping it, and treat the 45% as a Plato data-entry gap to fix upstream.
 
 Plus our inventory-side mapping derived from the 28 items we pulled. The category is inferable from `given_id` prefix:
 
@@ -206,7 +210,7 @@ ORDER BY a.starttime ASC;
 | Gap | Status | Action |
 |---|---|---|
 | Condition tags location | **RESOLVED** - `patient.tag[]` is the field | None |
-| Treatment category mapping | **RESOLVED** - inventory prefix + `appointment.code_Bottom` | None |
+| Treatment category mapping | **RESOLVED** - inventory prefix + `appointment.code_Bottom` (4 codes, authoritative via `/appointment/codes`); ~45% of appts are blank → bucketed as `Untyped` | Fix blank `code_Bottom` upstream in Plato (data-entry gap) |
 | Discount semantics | Mostly clear from field shapes; needs one SQL inspection of a real discounted booking once loaded | Inspect in BQ |
 | Cancellation signal | **CRITICAL** - hard-delete only; webhook required | Defer cancellation tile to v1.5 (post-GCP + Cloud Run webhook) |
 | Full queue status list | **RESOLVED** - 4 statuses: Checked In, Consult Start, Consult End, Checked Out | None |

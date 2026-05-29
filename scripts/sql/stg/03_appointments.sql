@@ -36,6 +36,31 @@ SELECT
     ELSE NULL
   END                                                       AS clinician_id,
 
+  -- Treatment type. Plato stores the appointment type as an opaque code in
+  -- `code_Bottom` (the "Appointment Types" code group). The id->name lookup is
+  -- authoritative at GET /{db}/appointment/codes; this CASE is a copy of that
+  -- group. If the clinic adds/renames a type in Plato, refresh it here (or
+  -- ingest /appointment/codes into a dimension and join instead).
+  --
+  -- Two distinct "no category" states, kept separate on purpose:
+  --   'Untyped' = code_Bottom blank -> appointment booked without a type
+  --               (consults, admin blocks, untagged). ~45% of 2026 appts as of
+  --               2026-05-29; this is a Plato data-entry gap, not a mapping gap.
+  --   'Unknown' = a non-blank code we don't recognise -> a new type was added
+  --               in Plato and this CASE is stale. None exist today; this branch
+  --               just stops a new code from being silently mislabelled.
+  JSON_VALUE(payload, '$.code_Bottom')                      AS code_bottom,
+  -- COALESCE folds a missing key (NULL) into the same '' arm as a present-but-
+  -- empty code; a bare `WHEN NULL` would never match (x = NULL is never true).
+  CASE COALESCE(JSON_VALUE(payload, '$.code_Bottom'), '')
+    WHEN 'qLbH' THEN 'S&C'
+    WHEN '2kV4' THEN 'Pilates'
+    WHEN 'hDWW' THEN 'Physiotherapy'
+    WHEN 'sCla' THEN 'Home Visit'
+    WHEN ''     THEN 'Untyped'
+    ELSE 'Unknown'
+  END                                                       AS treatment_type,
+
   -- Times (Plato stores naive "YYYY-MM-DD HH:MM:SS"; treat as UTC like the
   -- rest of the Plato data we ingest).
   SAFE.PARSE_TIMESTAMP('%Y-%m-%d %H:%M:%S',
