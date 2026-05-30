@@ -13,3 +13,4 @@ __pycache__/
 
 # Machine-specific Claude Code state, in any subproject
 **/.claude/settings.local.json
+.gstack/
