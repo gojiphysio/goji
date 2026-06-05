@@ -1048,8 +1048,14 @@ def _extract_phone(patient: dict) -> str | None:
 
 def _fetch_one_contact(patient_id: str) -> tuple[str, dict]:
     """Fetch one patient's name + phone from Plato, with a short in-process TTL
-    cache. Never raises and never persists — on any failure returns {} so the
-    worklist falls back to the PII-safe initials."""
+    cache. Never raises and never persists.
+
+    On a transient rate-limit (429) or 5xx it retries a couple of times with a
+    small bounded backoff (so the page never hangs). Crucially, a failed lookup
+    is NOT cached — only a real 200 response is — so a patient throttled on one
+    page load isn't stuck showing initials for the whole cache window; the next
+    load tries again.
+    """
     sess = _plato()
     if sess is None:
         return patient_id, {}
@@ -1058,25 +1064,43 @@ def _fetch_one_contact(patient_id: str) -> tuple[str, dict]:
         entry = _contact_cache.get(patient_id)
         if entry and now - entry[0] < CONTACT_TTL:
             return patient_id, entry[1]
+
     info: dict = {}
-    try:
-        r = sess.get(f"{PLATO_BASE}/{PLATO_DB}/patient/{patient_id}",
-                     timeout=PLATO_TIMEOUT_S)
-        if r.status_code == 200:
-            data = r.json()
-            if isinstance(data, list):
-                data = data[0] if data else {}
-            if isinstance(data, dict):
-                info = {
-                    "full_name": _extract_full_name(data),
-                    "phone":     _extract_phone(data),
-                }
-        else:
-            log.warning("plato patient lookup %s -> %s", patient_id, r.status_code)
-    except (requests.RequestException, ValueError) as e:
-        log.warning("plato patient lookup %s failed: %s", patient_id, e)
-    with _contact_cache_lock:
-        _contact_cache[patient_id] = (now, info)
+    fetched_ok = False
+    url = f"{PLATO_BASE}/{PLATO_DB}/patient/{patient_id}"
+    for attempt in range(3):  # 1 initial try + up to 2 retries
+        try:
+            r = sess.get(url, timeout=PLATO_TIMEOUT_S)
+            if r.status_code == 200:
+                data = r.json()
+                if isinstance(data, list):
+                    data = data[0] if data else {}
+                if isinstance(data, dict):
+                    info = {
+                        "full_name": _extract_full_name(data),
+                        "phone":     _extract_phone(data),
+                    }
+                fetched_ok = True
+                break
+            if r.status_code == 429 or r.status_code >= 500:
+                if attempt < 2:
+                    time.sleep(2 * (attempt + 1))  # 2s, then 4s — bounded
+                    continue
+                log.warning("plato patient lookup %s -> %s (giving up)", patient_id, r.status_code)
+            else:
+                log.warning("plato patient lookup %s -> %s", patient_id, r.status_code)
+            break
+        except (requests.RequestException, ValueError) as e:
+            if attempt < 2:
+                time.sleep(2 * (attempt + 1))
+                continue
+            log.warning("plato patient lookup %s failed: %s", patient_id, e)
+            break
+
+    # Cache only a genuine response; never cache a throttled/failed lookup.
+    if fetched_ok:
+        with _contact_cache_lock:
+            _contact_cache[patient_id] = (now, info)
     return patient_id, info
 
 
@@ -1091,7 +1115,9 @@ def hydrate_plato_contacts(patient_ids: list[str]) -> dict[str, dict]:
     if not ids or _plato() is None:
         return {pid: {} for pid in ids}
     out: dict[str, dict] = {}
-    with ThreadPoolExecutor(max_workers=min(8, len(ids)),
+    # Keep concurrency modest so we don't trip Plato's per-minute rate limit in
+    # the first place (the retry in _fetch_one_contact is the backstop).
+    with ThreadPoolExecutor(max_workers=min(4, len(ids)),
                             thread_name_prefix="plato") as ex:
         for pid, info in ex.map(_fetch_one_contact, ids):
             out[pid] = info
@@ -1143,8 +1169,12 @@ LEFT JOIN `{PROJECT}.marts.patient_followup_latest` f USING (patient_id)
         has_future   = bool(r["has_future_appt"])
 
         summary["total"] += 1
-        if tier in summary:
-            summary[tier] += 1
+        # Green is a healthy/context total. The red/orange/yellow card counts
+        # are deliberately the *actionable* ("to call") numbers — incremented
+        # below — so that red + orange + yellow == needs_followup and the cards
+        # visibly tally.
+        if tier == "green":
+            summary["green"] += 1
         if has_future:
             summary["already_booked"] += 1
         if status == "dismissed":
@@ -1155,6 +1185,7 @@ LEFT JOIN `{PROJECT}.marts.patient_followup_latest` f USING (patient_id)
         actionable = is_actionable(tier, has_future, status, snooze_until, today)
         if actionable:
             summary["needs_followup"] += 1
+            summary[tier] += 1  # red/orange/yellow, actionable-only
             actionable_ids.append(r["patient_id"])
 
         patients.append({
