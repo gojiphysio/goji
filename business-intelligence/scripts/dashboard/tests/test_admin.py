@@ -108,6 +108,53 @@ def test_extract_phone_variants(record, expected):
     assert app._extract_phone(record) == expected
 
 
+# --- live hydration: retry on throttle, never cache a failure -----------------
+# Why this matters: a Plato 429 used to fall back to initials AND get cached for
+# 15 min, so a throttled patient stayed on initials. These lock in the fix.
+
+class _FakeResp:
+    def __init__(self, code, payload=None):
+        self.status_code = code
+        self._payload = payload or {}
+    def json(self):
+        return self._payload
+
+
+def test_contact_retries_after_429_then_succeeds(monkeypatch):
+    app._contact_cache.clear()
+    monkeypatch.setattr(app.time, "sleep", lambda *a, **k: None)  # no real backoff in tests
+    calls = {"n": 0}
+
+    class FakeSession:
+        def get(self, url, timeout=None):
+            calls["n"] += 1
+            if calls["n"] == 1:
+                return _FakeResp(429)
+            return _FakeResp(200, {"name": {"first": "Charles", "last": "Wong"},
+                                   "mobile": "9123 4567"})
+
+    monkeypatch.setattr(app, "_plato", lambda: FakeSession())
+    pid, info = app._fetch_one_contact("p1")
+    assert info["full_name"] == "Charles Wong"
+    assert info["phone"] == "9123 4567"
+    assert calls["n"] == 2                 # retried once after the 429
+    assert "p1" in app._contact_cache      # a real 200 IS cached
+
+
+def test_contact_failure_is_not_cached(monkeypatch):
+    app._contact_cache.clear()
+    monkeypatch.setattr(app.time, "sleep", lambda *a, **k: None)
+
+    class AlwaysThrottled:
+        def get(self, url, timeout=None):
+            return _FakeResp(429)
+
+    monkeypatch.setattr(app, "_plato", lambda: AlwaysThrottled())
+    pid, info = app._fetch_one_contact("p2")
+    assert info == {}                      # degrades to initials this load
+    assert "p2" not in app._contact_cache  # but NOT cached -> next load retries
+
+
 # --- route gating: the security boundary, end-to-end ------------------------
 # These exercise the real decorators. Auth is checked before the handler runs,
 # so the founder-only routes 401 a staff login without ever touching BigQuery.

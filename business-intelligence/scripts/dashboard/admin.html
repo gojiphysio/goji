@@ -51,26 +51,49 @@
       background: var(--good); margin-right: 6px; vertical-align: middle;
     }
 
-    /* Summary tier cards (clickable filters) */
-    .kpi-row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin-bottom: 24px; }
+    /* Summary tier cards — the coloured "status bar" across the top. */
+    .kpi-row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin-bottom: 22px; }
     .kpi-card {
       background: var(--card); border: 1px solid var(--border);
       border-radius: 12px; padding: 16px 18px; box-shadow: var(--shadow);
-      cursor: pointer; transition: border-color 0.15s, transform 0.05s;
-      border-left-width: 4px;
+      cursor: pointer; transition: transform 0.05s, box-shadow 0.12s;
     }
     .kpi-card:hover { transform: translateY(-1px); }
-    .kpi-card.active { border-color: var(--ink); }
-    .kpi-card[data-tier=green]  { border-left-color: var(--tier-green); }
-    .kpi-card[data-tier=yellow] { border-left-color: var(--tier-yellow); }
-    .kpi-card[data-tier=orange] { border-left-color: var(--tier-orange); }
-    .kpi-card[data-tier=red]    { border-left-color: var(--tier-red); }
-    .kpi-card[data-tier=all]    { border-left-color: var(--ink-muted); }
-    .kpi-card[data-tier=booked] { border-left-color: var(--good); cursor: default; }
-    .kpi-card[data-tier=booked]:hover { transform: none; }
-    .kpi-label { font-size: 11px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.05em; }
-    .kpi-value { font-size: 26px; font-weight: 600; margin-top: 6px; font-variant-numeric: tabular-nums; }
+    .kpi-card.active { box-shadow: 0 0 0 2px var(--ink); }
+    .kpi-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-soft); }
+    .kpi-value { font-size: 26px; font-weight: 700; margin-top: 6px; font-variant-numeric: tabular-nums; }
     .kpi-sub { font-size: 11px; color: var(--ink-muted); margin-top: 2px; }
+
+    /* "Needs follow-up" headline card */
+    .kpi-card[data-tier=all] { border-left: 4px solid var(--goji); }
+    /* Solid-coloured tier cards */
+    .kpi-card[data-tier=red], .kpi-card[data-tier=orange], .kpi-card[data-tier=yellow] { border: none; }
+    .kpi-card[data-tier=red]    { background: var(--tier-red);    color: #fff; }
+    .kpi-card[data-tier=orange] { background: var(--tier-orange); color: #fff; }
+    .kpi-card[data-tier=yellow] { background: var(--tier-yellow); color: #3d3107; }
+    .kpi-card[data-tier=red] .kpi-label,    .kpi-card[data-tier=red] .kpi-sub,
+    .kpi-card[data-tier=orange] .kpi-label, .kpi-card[data-tier=orange] .kpi-sub { color: rgba(255,255,255,0.88); }
+    .kpi-card[data-tier=yellow] .kpi-label, .kpi-card[data-tier=yellow] .kpi-sub { color: rgba(61,49,7,0.78); }
+    /* Context cards */
+    .kpi-card[data-tier=green]  { background: var(--tier-green-bg); border-color: #cfe6d8; }
+    .kpi-card[data-tier=green] .kpi-value { color: var(--tier-green); }
+    .kpi-card[data-tier=booked] { border-left: 4px solid var(--good); cursor: default; }
+    .kpi-card[data-tier=booked]:hover { transform: none; }
+
+    /* Tabs */
+    .tabs { display: flex; gap: 4px; margin-bottom: 16px; border-bottom: 1px solid var(--border); }
+    .tab {
+      padding: 8px 16px; cursor: pointer; font: inherit; font-size: 14px; font-weight: 500;
+      color: var(--ink-soft); background: none; border: none; border-bottom: 2px solid transparent;
+    }
+    .tab:hover { color: var(--ink); }
+    .tab.active { color: var(--ink); border-bottom-color: var(--goji); }
+    .tab .count {
+      display: inline-block; min-width: 18px; padding: 0 6px; margin-left: 6px;
+      font-size: 11px; line-height: 17px; border-radius: 999px;
+      background: var(--border); color: var(--ink-soft); text-align: center;
+    }
+    .tab.active .count { background: var(--goji-soft); color: var(--goji); }
 
     section.q {
       background: var(--card); border: 1px solid var(--border);
@@ -97,6 +120,7 @@
     a.phone { color: var(--goji); text-decoration: none; font-variant-numeric: tabular-nums; }
     a.phone:hover { text-decoration: underline; }
     .muted { color: var(--ink-muted); }
+    .note { font-size: 12px; color: var(--ink-muted); font-style: italic; margin-top: 3px; }
 
     .tier-badge {
       display: inline-block; font-size: 11px; font-weight: 700;
@@ -109,14 +133,14 @@
 
     .status-pill {
       display: inline-block; font-size: 11px; font-weight: 600;
-      padding: 1px 8px; border-radius: 4px; margin-left: 6px;
+      padding: 1px 8px; border-radius: 4px;
       background: var(--goji-soft); color: var(--goji); text-transform: capitalize;
     }
     .pill-booked { background: #e3f2e8; color: var(--good); }
 
     .actions { display: flex; gap: 6px; justify-content: flex-end; }
     .actions button {
-      font: inherit; font-size: 12px; padding: 4px 10px; cursor: pointer;
+      font: inherit; font-size: 12px; padding: 4px 10px; cursor: pointer; white-space: nowrap;
       border: 1px solid var(--border); border-radius: 7px; background: var(--card); color: var(--ink-soft);
       transition: background 0.12s, color 0.12s, border-color 0.12s;
     }
@@ -172,13 +196,20 @@
 
     <div class="kpi-row" id="summary"></div>
 
+    <div class="tabs">
+      <button class="tab active" id="tab-worklist" onclick="setView('worklist')">Follow-up worklist</button>
+      <button class="tab" id="tab-dismissed" onclick="setView('dismissed')">Dismissed <span class="count" id="dismissedCount">0</span></button>
+    </div>
+
     <section class="q">
       <div class="toolbar">
         <h2 id="listTitle">Follow-up worklist</h2>
-        <label>Clinician
-          <select id="clinicianFilter"><option value="">All</option></select>
-        </label>
-        <label><input type="checkbox" id="showAll"> Show booked &amp; healthy</label>
+        <div id="worklistControls" style="display:flex; gap:14px; align-items:center; flex-wrap:wrap;">
+          <label>Clinician
+            <select id="clinicianFilter"><option value="">All</option></select>
+          </label>
+          <label><input type="checkbox" id="showAll"> Show booked &amp; healthy</label>
+        </div>
       </div>
       <table>
         <thead>
@@ -194,17 +225,17 @@
         </thead>
         <tbody id="rows"></tbody>
       </table>
-      <div class="empty" id="empty" style="display:none">Nobody to follow up right now. 🎉</div>
+      <div class="empty" id="empty" style="display:none"></div>
       <div class="pii-note">
-        Names &amp; phone numbers are fetched live from Plato for the follow-up list only and are never stored.
+        Names &amp; phone numbers are fetched live from Plato for the call list only and are never stored.
       </div>
     </section>
   </div>
 
   <script>
-    const TIERS = ["red", "orange", "yellow", "green"];
     let DATA = { summary: {}, patients: [] };
-    let tierFilter = null;        // null = no tier filter (the default "actionable" view)
+    let view = "worklist";          // "worklist" | "dismissed"
+    let tierFilter = null;          // null = the default actionable view
     let clinicianFilter = "";
     let showAll = false;
 
@@ -235,27 +266,48 @@
       if (!iso) return "—";
       return new Date(iso).toLocaleDateString("en-SG", { day: "numeric", month: "short", year: "2-digit" });
     }
+    function cap(s) { return s ? s[0].toUpperCase() + s.slice(1) : s; }
 
     function renderSummary() {
       const s = DATA.summary || {};
+      // Red/Orange/Yellow are the "to call" counts, so they sum to Needs follow-up.
       const cards = [
-        { tier: "all",    label: "Needs follow-up", value: s.needs_followup || 0, sub: "actionable now" },
+        { tier: "all",    label: "Needs follow-up", value: s.needs_followup || 0, sub: "red + orange + yellow" },
         { tier: "red",    label: "Red",    value: s.red    || 0, sub: "> 4 weeks" },
         { tier: "orange", label: "Orange", value: s.orange || 0, sub: "> 2 weeks" },
         { tier: "yellow", label: "Yellow", value: s.yellow || 0, sub: "> 1 week" },
-        { tier: "green",  label: "Green",  value: s.green  || 0, sub: "≤ 1 week" },
+        { tier: "green",  label: "Green",  value: s.green  || 0, sub: "seen ≤ 1 week" },
         { tier: "booked", label: "Re-booked", value: s.already_booked || 0, sub: "appt scheduled" },
       ];
-      document.getElementById("summary").innerHTML = cards.map(c => `
-        <div class="kpi-card${(tierFilter === c.tier || (tierFilter === null && c.tier === 'all')) ? ' active' : ''}"
-             data-tier="${c.tier}" ${c.tier !== 'booked' ? `onclick="setTier('${c.tier}')"` : ''}>
+      const activeTier = (view === "worklist");
+      document.getElementById("summary").innerHTML = cards.map(c => {
+        const isActive = activeTier && (tierFilter === c.tier || (tierFilter === null && c.tier === "all"));
+        const clickable = c.tier !== "booked";
+        return `<div class="kpi-card${isActive ? " active" : ""}" data-tier="${c.tier}"
+                     ${clickable ? `onclick="setTier('${c.tier}')"` : ""}>
           <div class="kpi-label">${c.label}</div>
           <div class="kpi-value">${c.value}</div>
           <div class="kpi-sub">${c.sub}</div>
-        </div>`).join("");
+        </div>`;
+      }).join("");
+      document.getElementById("dismissedCount").textContent = s.dismissed || 0;
+    }
+
+    function setView(v) {
+      view = v;
+      document.getElementById("tab-worklist").classList.toggle("active", v === "worklist");
+      document.getElementById("tab-dismissed").classList.toggle("active", v === "dismissed");
+      document.getElementById("worklistControls").style.display = (v === "worklist") ? "flex" : "none";
+      if (v === "dismissed") tierFilter = null;
+      renderSummary();
+      renderRows();
     }
 
     function setTier(t) {
+      view = "worklist";
+      document.getElementById("tab-worklist").classList.add("active");
+      document.getElementById("tab-dismissed").classList.remove("active");
+      document.getElementById("worklistControls").style.display = "flex";
       if (t === "all") { tierFilter = null; showAll = false; document.getElementById("showAll").checked = false; }
       else { tierFilter = t; }
       renderSummary();
@@ -269,45 +321,64 @@
       sel.value = clinicianFilter;
     }
 
-    function visiblePatients() {
+    function worklistPatients() {
       return DATA.patients.filter(p => {
+        if (p.followup_status === "dismissed") return false;   // lives in the Dismissed tab
         if (clinicianFilter && p.clinician !== clinicianFilter) return false;
-        if (tierFilter) return p.tier === tierFilter && !p.has_future_appt;
-        // Default view: only actionable (needs a call), unless "show all" is on.
+        if (tierFilter === "green") return p.tier === "green";
+        if (tierFilter) return p.tier === tierFilter && p.actionable;
         if (showAll) return true;
         return p.actionable;
       });
     }
 
+    function dismissedPatients() {
+      return DATA.patients.filter(p => p.followup_status === "dismissed");
+    }
+
     function renderRows() {
-      const list = visiblePatients();
+      const list = (view === "dismissed") ? dismissedPatients() : worklistPatients();
       const tbody = document.getElementById("rows");
       const empty = document.getElementById("empty");
       document.getElementById("listTitle").textContent =
-        tierFilter ? `${cap(tierFilter)} patients` : (showAll ? "All patients" : "Follow-up worklist");
-      if (!list.length) { tbody.innerHTML = ""; empty.style.display = "block"; return; }
+        (view === "dismissed") ? "Dismissed patients"
+          : tierFilter ? `${cap(tierFilter)} patients`
+          : showAll ? "All patients" : "Follow-up worklist";
+      if (!list.length) {
+        tbody.innerHTML = "";
+        empty.textContent = (view === "dismissed")
+          ? "No dismissed patients."
+          : "Nobody to follow up right now. 🎉";
+        empty.style.display = "block";
+        return;
+      }
       empty.style.display = "none";
       tbody.innerHTML = list.map(rowHtml).join("");
     }
 
-    function cap(s) { return s ? s[0].toUpperCase() + s.slice(1) : s; }
-
     function rowHtml(p) {
       const phone = p.phone
-        ? `<a class="phone" href="tel:${p.phone.replace(/[^+0-9]/g, '')}">${p.phone}</a>`
+        ? `<a class="phone" href="tel:${p.phone.replace(/[^+0-9]/g, '')}">${escapeHtml(p.phone)}</a>`
         : '<span class="muted">—</span>';
+
       let statusPill = "";
-      if (p.has_future_appt) statusPill = `<span class="status-pill pill-booked">Booked ${fmtDate(p.next_appt)}</span>`;
+      if (view === "dismissed") statusPill = `<span class="status-pill">Dismissed</span>`;
+      else if (p.has_future_appt) statusPill = `<span class="status-pill pill-booked">Booked ${fmtDate(p.next_appt)}</span>`;
       else if (p.followup_status === "contacted") statusPill = `<span class="status-pill">Contacted</span>`;
       else if (p.followup_status === "snoozed") statusPill = `<span class="status-pill">Snoozed → ${fmtDate(p.snooze_until)}</span>`;
-      else if (p.followup_status === "dismissed") statusPill = `<span class="status-pill">Dismissed</span>`;
+      const note = p.followup_note ? `<div class="note">“${escapeHtml(p.followup_note)}”</div>` : "";
+      const statusCell = (statusPill || '<span class="muted">—</span>') + note;
 
-      const actions = p.has_future_appt ? "" : `
-        <div class="actions">
+      let actions = "";
+      if (view === "dismissed") {
+        actions = `<div class="actions"><button class="primary" onclick="act('${p.patient_id}','active')">Restore to list</button></div>`;
+      } else if (!p.has_future_appt) {
+        actions = `<div class="actions">
           <button class="primary" onclick="act('${p.patient_id}','contacted')">Contacted</button>
           <button onclick="act('${p.patient_id}','snoozed')">Snooze</button>
           <button class="danger" onclick="act('${p.patient_id}','dismissed')">Dismiss</button>
         </div>`;
+      }
 
       return `<tr data-id="${p.patient_id}">
         <td><span class="name">${escapeHtml(p.name)}</span> ${p.age_band ? `<span class="muted">· ${p.age_band}</span>` : ""}</td>
@@ -315,7 +386,7 @@
         <td>${escapeHtml(p.clinician || "—")}</td>
         <td class="num">${fmtDate(p.last_visit)}</td>
         <td class="num"><span class="tier-badge ${p.tier}">${p.days_since_last}d</span></td>
-        <td>${statusPill || '<span class="muted">—</span>'}</td>
+        <td>${statusCell}</td>
         <td class="num">${actions}</td>
       </tr>`;
     }
@@ -324,6 +395,28 @@
       return String(s == null ? "" : s).replace(/[&<>"']/g, c =>
         ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
     }
+
+    // Recompute the summary from local state so the cards stay in sync after an
+    // action, without a server round-trip. Mirrors fetch_patient_retention.
+    function recomputeSummary() {
+      const today = new Date().toISOString().slice(0, 10);
+      const s = { total: 0, green: 0, yellow: 0, orange: 0, red: 0,
+                  needs_followup: 0, already_booked: 0, snoozed: 0, dismissed: 0 };
+      for (const p of DATA.patients) {
+        s.total++;
+        if (p.tier === "green") s.green++;
+        if (p.has_future_appt) s.already_booked++;
+        if (p.followup_status === "dismissed") s.dismissed++;
+        if (p.followup_status === "snoozed" && p.snooze_until && p.snooze_until > today) s.snoozed++;
+        if (p.actionable) {
+          s.needs_followup++;
+          if (p.tier === "red" || p.tier === "orange" || p.tier === "yellow") s[p.tier]++;
+        }
+      }
+      DATA.summary = s;
+    }
+
+    function isLapsed(p) { return p.tier === "red" || p.tier === "orange" || p.tier === "yellow"; }
 
     async function act(patientId, status) {
       const p = DATA.patients.find(x => x.patient_id === patientId);
@@ -337,12 +430,21 @@
         if (wks === null) return;
         snoozeDays = Math.max(1, parseInt(wks, 10) || 1) * 7;
       }
+
       // Optimistic local update.
       p.followup_status = status;
-      if (status === "snoozed") { p.snooze_until = new Date(Date.now() + snoozeDays * 864e5).toISOString().slice(0, 10); p.actionable = false; }
-      if (status === "dismissed") p.actionable = false;
-      if (status === "contacted") { /* stays actionable, just flagged */ }
-      adjustSummary(p, status);
+      if (status === "snoozed") {
+        p.snooze_until = new Date(Date.now() + snoozeDays * 864e5).toISOString().slice(0, 10);
+        p.actionable = false;
+      } else if (status === "dismissed") {
+        p.actionable = false;
+      } else if (status === "active") {
+        p.snooze_until = null; p.followup_note = null;
+        p.actionable = isLapsed(p) && !p.has_future_appt;   // back on the list if still lapsed
+      } else if (status === "contacted") {
+        p.actionable = !p.has_future_appt;                  // stays on the list, just flagged
+      }
+      recomputeSummary();
       renderSummary();
       renderRows();
 
@@ -356,15 +458,6 @@
       } catch (e) {
         alert("Could not save (" + e.message + "). Reloading.");
         load();
-      }
-    }
-
-    function adjustSummary(p, status) {
-      const s = DATA.summary;
-      if ((status === "snoozed" || status === "dismissed")) {
-        s.needs_followup = Math.max(0, (s.needs_followup || 0) - 1);
-        if (status === "snoozed") s.snoozed = (s.snoozed || 0) + 1;
-        if (status === "dismissed") s.dismissed = (s.dismissed || 0) + 1;
       }
     }
 
