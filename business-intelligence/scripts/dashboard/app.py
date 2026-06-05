@@ -21,12 +21,14 @@ import os
 import re
 import threading
 import time
+import uuid
 from concurrent.futures import ThreadPoolExecutor
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 from functools import wraps
 from pathlib import Path
 
-from flask import Flask, Response, request
+import requests
+from flask import Flask, Response, g, request
 from google.auth import default as google_auth_default
 from google.auth.transport.requests import AuthorizedSession
 from google.cloud import bigquery
@@ -36,15 +38,31 @@ from requests.adapters import HTTPAdapter
 
 PROJECT     = os.environ.get("GCP_PROJECT", "goji-bi")
 CACHE_TTL   = int(os.environ.get("CACHE_TTL_SECONDS", "300"))
+# Founder credential — sees everything, including the financial dashboard.
 AUTH_USER   = os.environ.get("DASHBOARD_USER", "")
 AUTH_PASS   = os.environ.get("DASHBOARD_PASS", "")
+# Staff credential — can reach ONLY the /admin section (patient ops). It must
+# never satisfy the founder-only financial routes; see require_roles below.
+STAFF_USER  = os.environ.get("STAFF_USER", "")
+STAFF_PASS  = os.environ.get("STAFF_PASS", "")
 # Local-dev mode: enables Flask reloader and persists BQ results to disk so
 # process restarts don't trigger a fresh BQ fetch. Off in prod (Cloud Run).
 DEV_MODE    = os.environ.get("DASHBOARD_DEV") == "1"
 
-HERE      = Path(__file__).resolve().parent
-TEMPLATE  = HERE / "template.html"
-CACHE_DIR = HERE / ".cache"
+# Plato API — used ONLY to hydrate patient name + phone live for the staff
+# retention worklist. These are never written to BigQuery (the warehouse stays
+# PII-free by design). Absent key -> hydration silently no-ops and the worklist
+# falls back to the PII-safe initials from dim_patient.
+PLATO_BASE      = os.environ.get("PLATO_BASE", "https://clinic.platomedical.com/api")
+PLATO_DB        = os.environ.get("PLATO_DB", "gojihealth")
+PLATO_API_KEY   = os.environ.get("PLATO_API_KEY", "")
+PLATO_TIMEOUT_S = int(os.environ.get("PLATO_TIMEOUT_S", "15"))
+CONTACT_TTL     = int(os.environ.get("CONTACT_TTL_SECONDS", "900"))
+
+HERE           = Path(__file__).resolve().parent
+TEMPLATE       = HERE / "template.html"
+ADMIN_TEMPLATE = HERE / "admin.html"
+CACHE_DIR      = HERE / ".cache"
 
 PROVIDERS = {
     "PCN": "Claire Ng",
@@ -938,6 +956,308 @@ def get_shell_html() -> str:
     return TEMPLATE.read_text().replace("__DATA_PLACEHOLDER__", "{}")
 
 
+# Staff admin dashboard: patient retention worklist --------------------------
+#
+# A front-desk tool, separate from the founder financials. It tiers patients by
+# how long since their last visit and surfaces an actionable call list. The
+# retention facts come from BigQuery (PII-free); patient name + phone are
+# hydrated LIVE from Plato at render time and never persisted.
+
+TIER_RANK = {"red": 0, "orange": 1, "yellow": 2, "green": 3}
+ACTIONABLE_TIERS = ("yellow", "orange", "red")
+VALID_FOLLOWUP_STATUSES = {"contacted", "snoozed", "dismissed", "active"}
+DEFAULT_SNOOZE_DAYS = 7
+
+
+def is_snoozed(status: str | None, snooze_until: date | None, today: date) -> bool:
+    """A snooze is only active while snooze_until is still in the future."""
+    return status == "snoozed" and snooze_until is not None and snooze_until > today
+
+
+def is_actionable(tier: str, has_future_appt: bool, status: str | None,
+                  snooze_until: date | None, today: date) -> bool:
+    """Whether a patient should appear on the front desk's call list.
+
+    Actionable = lapsed (yellow/orange/red) AND has no future appointment booked
+    AND hasn't been dismissed or is currently snoozed. 'contacted' stays
+    actionable — reaching out once doesn't take them off the list until they
+    re-book (which shows as a future appointment) or are dismissed.
+    """
+    if tier not in ACTIONABLE_TIERS:
+        return False
+    if has_future_appt or status == "dismissed":
+        return False
+    return not is_snoozed(status, snooze_until, today)
+
+# Plato patient records aren't documented field-for-field, so probe the phone
+# under the keys we've seen across Plato deployments, in priority order.
+_PHONE_KEYS = (
+    "mobile", "handphone", "hp", "phone", "tel", "telephone",
+    "contact_number", "contactnumber", "contact",
+)
+
+_plato_session: requests.Session | None = None
+_plato_session_lock = threading.Lock()
+_contact_cache: dict[str, tuple[float, dict]] = {}
+_contact_cache_lock = threading.Lock()
+
+
+def _plato() -> requests.Session | None:
+    """Lazily build the Plato API session, or None if no key is configured."""
+    global _plato_session
+    if not PLATO_API_KEY:
+        return None
+    if _plato_session is None:
+        with _plato_session_lock:
+            if _plato_session is None:
+                s = requests.Session()
+                s.headers.update({
+                    "accept": "application/json",
+                    "Authorization": f"Bearer {PLATO_API_KEY}",
+                })
+                _plato_session = s
+    return _plato_session
+
+
+def _extract_full_name(patient: dict) -> str | None:
+    """Plato exposes `name` as a string or a {first,last} dict. Return the full
+    name (front desk needs it to make the call), or None."""
+    name = patient.get("name")
+    if isinstance(name, dict):
+        full = f"{name.get('first', '') or ''} {name.get('last', '') or ''}".strip()
+        return full or None
+    if isinstance(name, str):
+        return name.strip() or None
+    return None
+
+
+def _extract_phone(patient: dict) -> str | None:
+    """Pull a phone number out of a Plato patient record, defensively probing
+    the keys we've observed (top-level string or nested {number/value})."""
+    for k in _PHONE_KEYS:
+        v = patient.get(k)
+        if isinstance(v, str) and v.strip():
+            return v.strip()
+        if isinstance(v, dict):
+            for kk in ("number", "value", "mobile", "phone"):
+                vv = v.get(kk)
+                if isinstance(vv, str) and vv.strip():
+                    return vv.strip()
+    return None
+
+
+def _fetch_one_contact(patient_id: str) -> tuple[str, dict]:
+    """Fetch one patient's name + phone from Plato, with a short in-process TTL
+    cache. Never raises and never persists — on any failure returns {} so the
+    worklist falls back to the PII-safe initials."""
+    sess = _plato()
+    if sess is None:
+        return patient_id, {}
+    now = time.time()
+    with _contact_cache_lock:
+        entry = _contact_cache.get(patient_id)
+        if entry and now - entry[0] < CONTACT_TTL:
+            return patient_id, entry[1]
+    info: dict = {}
+    try:
+        r = sess.get(f"{PLATO_BASE}/{PLATO_DB}/patient/{patient_id}",
+                     timeout=PLATO_TIMEOUT_S)
+        if r.status_code == 200:
+            data = r.json()
+            if isinstance(data, list):
+                data = data[0] if data else {}
+            if isinstance(data, dict):
+                info = {
+                    "full_name": _extract_full_name(data),
+                    "phone":     _extract_phone(data),
+                }
+        else:
+            log.warning("plato patient lookup %s -> %s", patient_id, r.status_code)
+    except (requests.RequestException, ValueError) as e:
+        log.warning("plato patient lookup %s failed: %s", patient_id, e)
+    with _contact_cache_lock:
+        _contact_cache[patient_id] = (now, info)
+    return patient_id, info
+
+
+def hydrate_plato_contacts(patient_ids: list[str]) -> dict[str, dict]:
+    """Fetch name + phone for a set of patient_ids live from Plato, in parallel.
+
+    Called only for the actionable worklist (a small set), so call volume to
+    Plato stays low. Returns {patient_id: {"full_name", "phone"}}; missing or
+    failed lookups map to {} and the caller degrades to initials.
+    """
+    ids = [p for p in dict.fromkeys(patient_ids) if p]
+    if not ids or _plato() is None:
+        return {pid: {} for pid in ids}
+    out: dict[str, dict] = {}
+    with ThreadPoolExecutor(max_workers=min(8, len(ids)),
+                            thread_name_prefix="plato") as ex:
+        for pid, info in ex.map(_fetch_one_contact, ids):
+            out[pid] = info
+    return out
+
+
+def fetch_patient_retention() -> dict:
+    """Build the retention worklist: per-tier summary + a per-patient list.
+
+    Tiers and future-appointment status come from marts.fct_patient_retention
+    (PII-free). Follow-up state (contacted/snoozed/dismissed) comes from
+    marts.patient_followup_latest. A patient is "actionable" — i.e. needs a
+    call — when they're yellow/orange/red, have no future appointment booked,
+    and haven't been dismissed or snoozed. Names + phones are hydrated live for
+    the actionable set only.
+    """
+    sql = f"""
+SELECT
+  r.patient_id,
+  r.tier,
+  r.days_since_last,
+  r.last_visit_date,
+  r.next_appt_date,
+  r.has_future_appt,
+  r.clinician_id,
+  r.age_band,
+  r.initial_lastname,
+  f.status       AS followup_status,
+  f.snooze_until AS followup_snooze_until,
+  f.note         AS followup_note,
+  f.updated_at   AS followup_at,
+  f.updated_by   AS followup_by
+FROM `{PROJECT}.marts.fct_patient_retention` r
+LEFT JOIN `{PROJECT}.marts.patient_followup_latest` f USING (patient_id)
+"""
+    rows = _query(sql)
+    today = date.today()
+    summary = {
+        "total": 0, "green": 0, "yellow": 0, "orange": 0, "red": 0,
+        "needs_followup": 0, "already_booked": 0, "snoozed": 0, "dismissed": 0,
+    }
+    patients: list[dict] = []
+    actionable_ids: list[str] = []
+
+    for r in rows:
+        tier   = r["tier"]
+        status = r.get("followup_status")
+        snooze_until = r.get("followup_snooze_until")
+        has_future   = bool(r["has_future_appt"])
+
+        summary["total"] += 1
+        if tier in summary:
+            summary[tier] += 1
+        if has_future:
+            summary["already_booked"] += 1
+        if status == "dismissed":
+            summary["dismissed"] += 1
+        if is_snoozed(status, snooze_until, today):
+            summary["snoozed"] += 1
+
+        actionable = is_actionable(tier, has_future, status, snooze_until, today)
+        if actionable:
+            summary["needs_followup"] += 1
+            actionable_ids.append(r["patient_id"])
+
+        patients.append({
+            "patient_id":       r["patient_id"],
+            "tier":             tier,
+            "days_since_last":  _to_int(r["days_since_last"]),
+            "last_visit":       r["last_visit_date"].isoformat() if r["last_visit_date"] else None,
+            "next_appt":        r["next_appt_date"].isoformat() if r["next_appt_date"] else None,
+            "has_future_appt":  has_future,
+            "clinician_id":     r["clinician_id"],
+            "clinician":        PROVIDERS.get(r["clinician_id"], r["clinician_id"] or "—"),
+            "age_band":         r["age_band"],
+            "initial_lastname": r["initial_lastname"],
+            "followup_status":  status,
+            "followup_note":    r.get("followup_note"),
+            "snooze_until":     snooze_until.isoformat() if snooze_until else None,
+            "actionable":       actionable,
+        })
+
+    contacts = hydrate_plato_contacts(actionable_ids)
+    for p in patients:
+        c = contacts.get(p["patient_id"]) or {}
+        p["name"]  = c.get("full_name") or p["initial_lastname"] or "—"
+        p["phone"] = c.get("phone")
+
+    # Most urgent first: actionable before the rest, then by tier severity, then
+    # by how long they've been away.
+    patients.sort(key=lambda x: (
+        0 if x["actionable"] else 1,
+        TIER_RANK.get(x["tier"], 9),
+        -x["days_since_last"],
+    ))
+
+    return {
+        "generated_at": datetime.now().astimezone().isoformat(timespec="seconds"),
+        "summary":      summary,
+        "patients":     patients,
+    }
+
+
+def get_retention() -> dict:
+    """Cached accessor for the retention worklist (same TTL as the financials).
+
+    Caching also keeps live Plato hydration cheap. The cache key is invalidated
+    when a follow-up action is recorded so the worklist reflects it on reload.
+    """
+    now = time.time()
+    with _cache_lock:
+        entry = _cache.get("retention")
+        if entry and now - entry[0] < CACHE_TTL:
+            return entry[1]
+    data = fetch_patient_retention()
+    with _cache_lock:
+        _cache["retention"] = (now, data)
+    return data
+
+
+def get_admin_shell_html() -> str:
+    """Return the admin dashboard HTML. No BQ work; it fetches /api/admin/retention."""
+    return ADMIN_TEMPLATE.read_text()
+
+
+def record_followup(patient_id: str, status: str, *, note: str | None = None,
+                    snooze_days: int | None = None,
+                    updated_by: str | None = None) -> None:
+    """Append one follow-up event (append-only; latest wins). Snoozing without
+    an explicit duration defaults to one week."""
+    snooze_until: str | None = None
+    if status == "snoozed":
+        days = snooze_days if isinstance(snooze_days, int) and snooze_days > 0 else DEFAULT_SNOOZE_DAYS
+        snooze_until = (date.today() + timedelta(days=days)).isoformat()
+
+    row = {
+        "event_id":     str(uuid.uuid4()),
+        "patient_id":   patient_id,
+        "status":       status,
+        "note":         (note or None),
+        "snooze_until": snooze_until,
+        "updated_by":   updated_by,
+        "updated_at":   datetime.now(timezone.utc).isoformat(),
+    }
+    # Explicit schema so the append never depends on autodetect (e.g. a row with
+    # a null snooze_until). Matches sql/marts/40_patient_followup_events.sql.
+    job_config = bigquery.LoadJobConfig(
+        source_format=bigquery.SourceFormat.NEWLINE_DELIMITED_JSON,
+        write_disposition=bigquery.WriteDisposition.WRITE_APPEND,
+        schema=[
+            bigquery.SchemaField("event_id",     "STRING",    mode="REQUIRED"),
+            bigquery.SchemaField("patient_id",   "STRING",    mode="REQUIRED"),
+            bigquery.SchemaField("status",       "STRING",    mode="REQUIRED"),
+            bigquery.SchemaField("note",         "STRING"),
+            bigquery.SchemaField("snooze_until", "DATE"),
+            bigquery.SchemaField("updated_by",   "STRING"),
+            bigquery.SchemaField("updated_at",   "TIMESTAMP", mode="REQUIRED"),
+        ],
+    )
+    _bq().load_table_from_json(
+        [row], f"{PROJECT}.marts.patient_followup_events", job_config=job_config,
+    ).result()
+    with _cache_lock:
+        _cache.pop("retention", None)
+
+
 def fetch_pl_window(start: date, end: date) -> dict:
     """Recompute the P&L revenue + payment fee inputs for an arbitrary window.
 
@@ -1181,41 +1501,71 @@ def _xlsx_pl_statement(payload: dict) -> bytes:
     return buf.getvalue()
 
 
-def check_auth(user: str, password: str) -> bool:
-    if not AUTH_USER or not AUTH_PASS:
+def _creds_match(user: str, password: str, want_user: str, want_pass: str) -> bool:
+    """Constant-time match against one configured credential pair.
+
+    Returns False if the target pair isn't configured, so an unset secret can
+    never be satisfied by empty input.
+    """
+    if not want_user or not want_pass:
         return False
-    return (hmac.compare_digest(user, AUTH_USER)
-            and hmac.compare_digest(password, AUTH_PASS))
+    return (hmac.compare_digest(user, want_user)
+            and hmac.compare_digest(password, want_pass))
 
 
-def requires_auth(f):
-    @wraps(f)
-    def wrapper(*args, **kwargs):
-        auth = request.authorization
-        if not auth or not check_auth(auth.username or "", auth.password or ""):
-            return Response(
-                "Authentication required.",
-                401,
-                {"WWW-Authenticate": 'Basic realm="Goji Dashboard"'},
-            )
-        return f(*args, **kwargs)
-    return wrapper
+def resolve_role(user: str, password: str) -> str | None:
+    """Map a basic-auth credential pair to a role, or None if it matches neither.
+
+    'founder' -> full access (financial dashboard + admin). 'staff' -> admin
+    section only. Both pairs are checked so the timing of a staff login doesn't
+    reveal whether the founder credential exists.
+    """
+    is_founder = _creds_match(user, password, AUTH_USER, AUTH_PASS)
+    is_staff   = _creds_match(user, password, STAFF_USER, STAFF_PASS)
+    if is_founder:
+        return "founder"
+    if is_staff:
+        return "staff"
+    return None
+
+
+def require_roles(*roles: str):
+    """Gate a route to the given roles. A credential for a role NOT in `roles`
+    gets a 401 — this is what keeps a staff login out of the founder-only
+    financial routes entirely (it never even reaches the handler).
+    """
+    def decorator(f):
+        @wraps(f)
+        def wrapper(*args, **kwargs):
+            auth = request.authorization
+            role = resolve_role(auth.username or "", auth.password or "") if auth else None
+            if role is None or role not in roles:
+                return Response(
+                    "Authentication required.",
+                    401,
+                    {"WWW-Authenticate": 'Basic realm="Goji Dashboard"'},
+                )
+            g.role = role
+            g.user = (auth.username or "") if auth else ""
+            return f(*args, **kwargs)
+        return wrapper
+    return decorator
 
 
 @app.route("/")
-@requires_auth
+@require_roles("founder")
 def index() -> Response:
     return Response(get_shell_html(), mimetype="text/html")
 
 
 @app.route("/api/data")
-@requires_auth
+@require_roles("founder")
 def api_data() -> Response:
     return Response(json.dumps(get_payload()), mimetype="application/json")
 
 
 @app.route("/api/pl_window")
-@requires_auth
+@require_roles("founder")
 def api_pl_window() -> Response:
     """Recompute the P&L revenue + payment fees for an arbitrary date window.
 
@@ -1232,7 +1582,7 @@ def api_pl_window() -> Response:
 
 
 @app.route("/api/pl.xlsx", methods=["POST"])
-@requires_auth
+@require_roles("founder")
 def api_pl_xlsx() -> Response:
     """Generate a Singapore-style P&L statement xlsx from the client's snapshot.
 
@@ -1252,13 +1602,56 @@ def api_pl_xlsx() -> Response:
 
 
 @app.route("/refresh", methods=["POST"])
-@requires_auth
+@require_roles("founder")
 def refresh() -> Response:
     with _cache_lock:
         _cache.pop("payload", None)
+        _cache.pop("retention", None)
     if DEV_MODE and CACHE_DIR.exists():
         for f in CACHE_DIR.glob("*.json"):
             f.unlink()
+    return Response('{"ok": true}', mimetype="application/json")
+
+
+@app.route("/admin")
+@require_roles("founder", "staff")
+def admin_index() -> Response:
+    """Staff admin dashboard shell. Open to staff and founders; no financials."""
+    return Response(get_admin_shell_html(), mimetype="text/html")
+
+
+@app.route("/api/admin/retention")
+@require_roles("founder", "staff")
+def api_admin_retention() -> Response:
+    """Patient retention worklist: tier summary + per-patient call list."""
+    return Response(json.dumps(get_retention(), default=str),
+                    mimetype="application/json")
+
+
+@app.route("/api/admin/followup", methods=["POST"])
+@require_roles("founder", "staff")
+def api_admin_followup() -> Response:
+    """Record a follow-up action (contacted / snoozed / dismissed / active).
+
+    Body: {patient_id, status, note?, snooze_days?}. Appends one event row;
+    the worklist reflects it on the next reload.
+    """
+    body   = request.get_json(silent=True) or {}
+    pid    = (body.get("patient_id") or "").strip()
+    status = (body.get("status") or "").strip()
+    if not pid or status not in VALID_FOLLOWUP_STATUSES:
+        return Response('{"error": "patient_id and a valid status are required"}',
+                        status=400, mimetype="application/json")
+    snooze_days = body.get("snooze_days")
+    if snooze_days is not None and not isinstance(snooze_days, int):
+        snooze_days = None
+    try:
+        record_followup(pid, status, note=body.get("note"),
+                        snooze_days=snooze_days, updated_by=getattr(g, "user", None))
+    except Exception as e:
+        log.exception("follow-up write failed: %s", e)
+        return Response('{"error": "write failed"}', status=500,
+                        mimetype="application/json")
     return Response('{"ok": true}', mimetype="application/json")
 
 

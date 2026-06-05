@@ -14,7 +14,9 @@ sql/
 |-- marts/                        The reporting layer. Reads from stg.*. The dashboard reads from here.
 |   |-- 10_fct_invoice_line.sql              The booking fact (sales + package sales).
 |   |-- 20_fct_service_delivered.sql         The revenue fact (redemptions fanned + single-use sales).
-|   `-- 30_fct_invoice_doctor_mismatches.sql Invoices whose doctor disagrees with the same-day calendar.
+|   |-- 30_fct_invoice_doctor_mismatches.sql Invoices whose doctor disagrees with the same-day calendar.
+|   |-- 40_patient_followup_events.sql       Front-desk follow-up log (append-only) + latest-per-patient view.
+|   `-- 41_fct_patient_retention.sql         Patients tiered by time since last visit (staff worklist). PII-free.
 |
 |-- deploy_all.sh                 Apply every view to BQ in dependency order.
 `-- README.md                     This file.
@@ -34,7 +36,17 @@ stg.invoices  ----v                            stg.appointments
                                                        |
         marts.fct_invoice_doctor_mismatches  <---------+
         (joins stg.invoices × stg.appointments)
+
+marts.fct_service_delivered  ─┐
+stg.appointments  ────────────┤
+marts.dim_patient ────────────┴─>  marts.fct_patient_retention   (staff worklist)
+marts.patient_followup_events ──>  marts.patient_followup_latest (applied to the
+                                                                   worklist by the app)
 ```
+
+`dim_patient` is a dimension loaded directly by the `plato-patients-ingest`
+job (not a stg view) — see `ingestion/plato_patients/`. The retention view reads
+it for the PII-safe clinician/age/initials scalars.
 
 Anything in `marts/` MUST read from `stg.*`, never from `raw_plato.*` directly. That's the whole point of the staging layer (decouples reporting from API shape changes).
 
