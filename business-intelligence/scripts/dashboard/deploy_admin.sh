@@ -32,7 +32,7 @@ gcloud config set project "${PROJECT}" >/dev/null
 
 # --- Step 1: the staff login -------------------------------------------------
 echo
-echo "==> Step 1/4: setting up the separate staff login"
+echo "==> Step 1/5: setting up the separate staff login"
 
 STAFF_USER_NAME="frontdesk"
 STAFF_PW=""
@@ -64,29 +64,61 @@ fi
 
 # --- Step 2: the data --------------------------------------------------------
 echo
-echo "==> Step 2/4: building the behind-the-scenes data"
+echo "==> Step 2/5: building the behind-the-scenes data"
 ( cd "${HERE}/../sql" && ./deploy_all.sh )
 
 # --- Step 3: permission to save follow-up actions ----------------------------
 echo
-echo "==> Step 3/4: allowing the dashboard to save follow-up actions"
-if bq add-iam-policy-binding \
-     --member="serviceAccount:${SA}" \
-     --role="roles/bigquery.dataEditor" \
-     "${PROJECT}:marts.patient_followup_events" >/dev/null 2>&1; then
-  echo "    permission granted"
+echo "==> Step 3/5: allowing the dashboard to save follow-up actions"
+bq add-iam-policy-binding \
+  --member="serviceAccount:${SA}" \
+  --role="roles/bigquery.dataEditor" \
+  "${PROJECT}:marts.patient_followup_events" >/dev/null 2>&1 || true
+# Verify the binding actually took. Its absence is exactly what causes
+# "Could not save (HTTP 500)" when the front desk dismisses a patient, so we
+# stop loudly rather than let that ship silently.
+if bq get-iam-policy "${PROJECT}:marts.patient_followup_events" 2>/dev/null | grep -q "${SA}"; then
+  echo "    write permission confirmed"
 else
-  echo "    (permission may already be set — continuing)"
+  echo
+  echo "    !! Could NOT give the dashboard permission to save — and saving WILL fail."
+  echo "       Fix it once in the Cloud Console (about a minute):"
+  echo "         BigQuery  >  ${PROJECT}  >  marts  >  patient_followup_events"
+  echo "         > Share  >  Add principal"
+  echo "         principal:  ${SA}"
+  echo "         role:       BigQuery Data Editor    > Save"
+  echo "       Then re-run this script. Stopping here so this isn't missed."
+  exit 1
 fi
 
-# --- Step 4: publish ---------------------------------------------------------
+# --- Step 4: refresh patient names ------------------------------------------
+# Names + phones now come from BigQuery (marts.dim_patient_contact), filled by
+# the patients-ingest job. Redeploy it with the new code and run it once so the
+# worklist shows full names right away. Non-fatal: if it can't run now, the
+# nightly job fills names later — so we warn and carry on to publishing.
 echo
-echo "==> Step 4/4: publishing the dashboard (this puts the new screen online)"
+echo "==> Step 4/5: refreshing patient names (one-off; can take a few minutes)"
+INGEST_DIR="${HERE}/../ingestion/plato_patients"
+if ( cd "${INGEST_DIR}" && gcloud run jobs deploy plato-patients-ingest \
+       --source . --region="${REGION}" --project="${PROJECT}" --quiet ); then
+  echo "    names job updated — running it once now…"
+  gcloud run jobs execute plato-patients-ingest \
+    --region="${REGION}" --project="${PROJECT}" --wait \
+    || echo "    (couldn't run it now — tonight's 9pm run will fill the names)"
+else
+  echo "    (couldn't update the names job now — tonight's 9pm run will fill the names)"
+fi
+
+# --- Step 5: publish ---------------------------------------------------------
+echo
+echo "==> Step 5/5: publishing the dashboard (this puts the new screen online)"
+# The dashboard no longer calls Plato directly — names come from BigQuery — so
+# PLATO_API_KEY is intentionally not mounted here anymore.
 gcloud run deploy "${SERVICE}" \
   --project="${PROJECT}" --region="${REGION}" --source="${HERE}" \
   --service-account="${SA}" \
-  --set-secrets=DASHBOARD_USER=dashboard-user:latest,DASHBOARD_PASS=dashboard-pass:latest,STAFF_USER=dashboard-staff-user:latest,STAFF_PASS=dashboard-staff-pass:latest,PLATO_API_KEY=plato-api-key:latest \
-  --set-env-vars=GCP_PROJECT=${PROJECT},CACHE_TTL_SECONDS=300,PLATO_DB=gojihealth \
+  --set-secrets=DASHBOARD_USER=dashboard-user:latest,DASHBOARD_PASS=dashboard-pass:latest,STAFF_USER=dashboard-staff-user:latest,STAFF_PASS=dashboard-staff-pass:latest \
+  --set-env-vars=GCP_PROJECT=${PROJECT},CACHE_TTL_SECONDS=300 \
   --quiet
 
 echo

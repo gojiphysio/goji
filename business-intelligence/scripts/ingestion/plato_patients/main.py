@@ -3,25 +3,29 @@
 Cloud Run Job: ingest Plato /patient into marts.dim_patient.
 
 PII boundary: this job is the ONLY code in the BI stack that ever sees a full
-patient name, DOB, or postal code. We pull each patient record, derive
-PII-safe scalars in memory (initial_lastname, age_band, postal_sector, ...)
-and write ONLY those derived values to BigQuery. Raw name/DOB/contacts are
-discarded before the BQ load job runs.
+patient name, DOB, or postal code. For the analytics dimension (dim_patient) we
+pull each patient record, derive PII-safe scalars in memory (initial_lastname,
+age_band, postal_sector, ...) and write ONLY those derived values — raw
+DOB/postal are discarded before the BQ load.
 
-If a patient's name in Plato is "Charles Wong" -> we store "C. Wong".
-If their DOB is 1985-04-12                     -> we store age_band "40-49".
-If their postal is 788887                      -> we store postal_sector "78".
+  "Charles Wong" -> initial_lastname "C. Wong"
+  DOB 1985-04-12 -> age_band "40-49"
+  postal 788887  -> postal_sector "78"
 
-Each derivation is a single Python function with a unit-testable rule. There
-is no SQL view shape that could later expose more PII — the data simply never
-arrives in BQ in the first place.
+SCOPED EXCEPTION (added deliberately, signed off by the founders): the staff
+Front Desk dashboard needs to phone patients, so this job ALSO writes a second,
+separate table — dim_patient_contact — holding the full_name + phone. That is
+the only place PII lands in the warehouse; it is read solely by the staff
+worklist path and never appears on the financial dashboard. dim_patient itself
+stays PII-free. Keep these two concerns in separate tables.
 
 Env vars:
-  PLATO_DB         Plato database name              default: gojihealth
-  PLATO_API_KEY    Plato bearer token               (required, from Secret Manager)
-  BQ_PROJECT       Target BQ project                default: goji-bi
-  BQ_DATASET       Target dataset                   default: marts
-  BQ_TABLE         Target table                     default: dim_patient
+  PLATO_DB          Plato database name             default: gojihealth
+  PLATO_API_KEY     Plato bearer token              (required, from Secret Manager)
+  BQ_PROJECT        Target BQ project               default: goji-bi
+  BQ_DATASET        Target dataset                  default: marts
+  BQ_TABLE          Target table (dimension)        default: dim_patient
+  BQ_CONTACT_TABLE  Target table (PII contacts)     default: dim_patient_contact
 
 Exit codes: 0 on success, 1 on config error, 2 on BQ failure, 3 on Plato failure.
 """
@@ -81,6 +85,43 @@ def initial_lastname(raw_name: str | None) -> str | None:
     first = tokens[0][0].upper()
     last  = tokens[-1]
     return f"{first}. {last}"
+
+
+def full_name(raw_name: str | None) -> str | None:
+    """Return the patient's full name, cleaned, or None.
+
+    Unlike initial_lastname (PII-safe), this keeps the whole name. It feeds the
+    dim_patient_contact table that the staff Front Desk dashboard reads so the
+    front desk can address patients by name when they call. A deliberate, scoped
+    exception to the PII boundary — see the module docstring.
+    """
+    if not raw_name:
+        return None
+    cleaned = " ".join(raw_name.split())
+    return cleaned or None
+
+
+# Phone lives under different keys across Plato deployments; probe in priority
+# order (top-level string, or a nested {number/value}). Mirrors the dashboard's
+# old live-lookup extractor so behaviour is identical now that it moved here.
+_PHONE_KEYS = (
+    "mobile", "handphone", "hp", "phone", "tel", "telephone",
+    "contact_number", "contactnumber", "contact",
+)
+
+
+def extract_phone(patient: dict) -> str | None:
+    """Best-effort mobile/phone from a Plato patient record, or None."""
+    for k in _PHONE_KEYS:
+        v = patient.get(k)
+        if isinstance(v, str) and v.strip():
+            return v.strip()
+        if isinstance(v, dict):
+            for kk in ("number", "value", "mobile", "phone"):
+                vv = v.get(kk)
+                if isinstance(vv, str) and vv.strip():
+                    return vv.strip()
+    return None
 
 
 def age_band(dob_str: str | None, today: date | None = None) -> str | None:
@@ -224,8 +265,10 @@ def main() -> None:
     bq_project = env("BQ_PROJECT", "goji-bi", required=False)
     bq_dataset = env("BQ_DATASET", "marts", required=False)
     bq_table = env("BQ_TABLE", "dim_patient", required=False)
+    bq_contact_table = env("BQ_CONTACT_TABLE", "dim_patient_contact", required=False)
 
     table_ref = f"{bq_project}.{bq_dataset}.{bq_table}"
+    contact_ref = f"{bq_project}.{bq_dataset}.{bq_contact_table}"
     updated_at_iso = datetime.now(timezone.utc).isoformat()
     age_ref_date = date.today()
 
@@ -242,6 +285,7 @@ def main() -> None:
     # latest snapshot fully supersedes the previous one. Goji's patient
     # count (~thousands) fits comfortably in memory.
     rows: list[dict] = []
+    contact_rows: list[dict] = []
     seen_ids: set[str] = set()
     skipped_no_id = 0
 
@@ -298,6 +342,17 @@ def main() -> None:
                 "referred_by":      row_referred_by,
                 "_updated_at":      updated_at_iso,
             })
+
+            # PII contact row (full name + phone) for the staff worklist. Kept in
+            # a SEPARATE table/buffer from the PII-free dimension above. Captured
+            # here, before `del p`, since it reads the raw record.
+            contact_rows.append({
+                "patient_id":  patient_id,
+                "full_name":   full_name(raw_name),
+                "phone":       extract_phone(p),
+                "_updated_at": updated_at_iso,
+            })
+
             # Belt-and-braces: blow away the raw source references as soon as
             # we've derived from them. Python GC would get them anyway once
             # the loop iterates, but this makes the lifetime explicit and
@@ -339,6 +394,29 @@ def main() -> None:
         sys.exit(2)
 
     log.info(f"done: wrote {load_job.output_rows} rows to {table_ref}")
+
+    # Second load: the PII contact table (full name + phone) for the staff
+    # Front Desk dashboard. Same WRITE_TRUNCATE snapshot pattern, separate table.
+    log.info(f"loading {len(contact_rows)} contact rows into {contact_ref}")
+    contact_job_config = bigquery.LoadJobConfig(
+        source_format=bigquery.SourceFormat.NEWLINE_DELIMITED_JSON,
+        write_disposition=bigquery.WriteDisposition.WRITE_TRUNCATE,
+        schema=[
+            bigquery.SchemaField("patient_id",  "STRING", mode="REQUIRED"),
+            bigquery.SchemaField("full_name",   "STRING"),
+            bigquery.SchemaField("phone",       "STRING"),
+            bigquery.SchemaField("_updated_at", "TIMESTAMP", mode="REQUIRED"),
+        ],
+    )
+    try:
+        contact_load = bq.load_table_from_json(
+            contact_rows, contact_ref, job_config=contact_job_config)
+        contact_load.result()
+    except Exception as e:
+        log.exception(f"bq contact load failed: {e}")
+        sys.exit(2)
+
+    log.info(f"done: wrote {contact_load.output_rows} rows to {contact_ref}")
 
 
 if __name__ == "__main__":

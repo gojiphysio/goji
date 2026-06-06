@@ -16,7 +16,8 @@ sql/
 |   |-- 20_fct_service_delivered.sql         The revenue fact (redemptions fanned + single-use sales).
 |   |-- 30_fct_invoice_doctor_mismatches.sql Invoices whose doctor disagrees with the same-day calendar.
 |   |-- 40_patient_followup_events.sql       Front-desk follow-up log (append-only) + latest-per-patient view.
-|   `-- 41_fct_patient_retention.sql         Patients tiered by time since last visit (staff worklist). PII-free.
+|   |-- 41_fct_patient_retention.sql         Patients tiered by time since last visit (staff worklist). PII-free.
+|   `-- 42_dim_patient_contact.sql           PII contact (full name + phone) for the staff worklist. Filled by the patients-ingest job.
 |
 |-- deploy_all.sh                 Apply every view to BQ in dependency order.
 `-- README.md                     This file.

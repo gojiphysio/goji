@@ -13,8 +13,7 @@ staff** (patient ops only).
 - `template.html` — the founder dashboard markup with a `__DATA_PLACEHOLDER__`
   that `app.py` fills with live data. Three pages: Overview, P&L, Commission.
 - `admin.html` — the staff admin page: the patient retention worklist.
-- `tests/` — pytest unit tests for the role boundary, the actionability rule,
-  and Plato name/phone extraction.
+- `tests/` — pytest unit tests for the role boundary and the actionability rule.
 - `Dockerfile`, `requirements.txt`, `.dockerignore` — Cloud Run build inputs.
 - `static/` — brand image served by the page.
 - `DEPLOY.md` — redeploy, password rotation, custom-domain DNS, and log tailing.
@@ -34,8 +33,10 @@ Staff admin (`/admin`, no financials):
 
 - **Retention worklist** — patients tiered by time since last visit
   (green ≤1wk / yellow >1wk / orange >2wk / red >4wk), with the front desk's
-  contacted/snooze/dismiss actions. Patients with a future appointment booked
-  are excluded. Name + phone are hydrated live from Plato and never stored.
+  contacted/snooze/dismiss actions and a Dismissed tab. Patients with a future
+  appointment booked are excluded. Name + phone come from BigQuery
+  (`marts.dim_patient_contact`, written by `plato-patients-ingest`); a header
+  line shows patients active in the last 12 months.
 
 ## Run locally
 
@@ -45,15 +46,15 @@ pip3 install -r requirements.txt
 DASHBOARD_DEV=1 GCP_PROJECT=goji-bi \
   DASHBOARD_USER=founder DASHBOARD_PASS=pw \
   STAFF_USER=frontdesk STAFF_PASS=pw \
-  PLATO_API_KEY=... PLATO_DB=gojihealth \
   python3 app.py
 ```
 
 `DASHBOARD_DEV=1` enables the Flask reloader and persists BQ results to
 `.cache/` so restarts don't re-hit BigQuery. You need Application Default
 Credentials with BQ read on `goji-bi` (your `gcloud auth application-default
-login` account works). `PLATO_API_KEY` is optional locally — without it the
-worklist shows PII-safe initials instead of full name + phone.
+login` account works). Names/phones come from `marts.dim_patient_contact`; if
+that table is empty (ingest job hasn't run), the worklist shows PII-safe
+initials instead.
 
 ## Test
 

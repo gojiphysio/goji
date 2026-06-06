@@ -27,7 +27,6 @@ from datetime import date, datetime, timedelta, timezone
 from functools import wraps
 from pathlib import Path
 
-import requests
 from flask import Flask, Response, g, request
 from google.auth import default as google_auth_default
 from google.auth.transport.requests import AuthorizedSession
@@ -49,15 +48,8 @@ STAFF_PASS  = os.environ.get("STAFF_PASS", "")
 # process restarts don't trigger a fresh BQ fetch. Off in prod (Cloud Run).
 DEV_MODE    = os.environ.get("DASHBOARD_DEV") == "1"
 
-# Plato API — used ONLY to hydrate patient name + phone live for the staff
-# retention worklist. These are never written to BigQuery (the warehouse stays
-# PII-free by design). Absent key -> hydration silently no-ops and the worklist
-# falls back to the PII-safe initials from dim_patient.
-PLATO_BASE      = os.environ.get("PLATO_BASE", "https://clinic.platomedical.com/api")
-PLATO_DB        = os.environ.get("PLATO_DB", "gojihealth")
-PLATO_API_KEY   = os.environ.get("PLATO_API_KEY", "")
-PLATO_TIMEOUT_S = int(os.environ.get("PLATO_TIMEOUT_S", "15"))
-CONTACT_TTL     = int(os.environ.get("CONTACT_TTL_SECONDS", "900"))
+# Patient name + phone for the staff worklist come from marts.dim_patient_contact
+# (written by the plato-patients-ingest job). The dashboard no longer calls Plato.
 
 HERE           = Path(__file__).resolve().parent
 TEMPLATE       = HERE / "template.html"
@@ -989,139 +981,16 @@ def is_actionable(tier: str, has_future_appt: bool, status: str | None,
         return False
     return not is_snoozed(status, snooze_until, today)
 
-# Plato patient records aren't documented field-for-field, so probe the phone
-# under the keys we've seen across Plato deployments, in priority order.
-_PHONE_KEYS = (
-    "mobile", "handphone", "hp", "phone", "tel", "telephone",
-    "contact_number", "contactnumber", "contact",
-)
 
-_plato_session: requests.Session | None = None
-_plato_session_lock = threading.Lock()
-_contact_cache: dict[str, tuple[float, dict]] = {}
-_contact_cache_lock = threading.Lock()
-
-
-def _plato() -> requests.Session | None:
-    """Lazily build the Plato API session, or None if no key is configured."""
-    global _plato_session
-    if not PLATO_API_KEY:
-        return None
-    if _plato_session is None:
-        with _plato_session_lock:
-            if _plato_session is None:
-                s = requests.Session()
-                s.headers.update({
-                    "accept": "application/json",
-                    "Authorization": f"Bearer {PLATO_API_KEY}",
-                })
-                _plato_session = s
-    return _plato_session
-
-
-def _extract_full_name(patient: dict) -> str | None:
-    """Plato exposes `name` as a string or a {first,last} dict. Return the full
-    name (front desk needs it to make the call), or None."""
-    name = patient.get("name")
-    if isinstance(name, dict):
-        full = f"{name.get('first', '') or ''} {name.get('last', '') or ''}".strip()
-        return full or None
-    if isinstance(name, str):
-        return name.strip() or None
-    return None
-
-
-def _extract_phone(patient: dict) -> str | None:
-    """Pull a phone number out of a Plato patient record, defensively probing
-    the keys we've observed (top-level string or nested {number/value})."""
-    for k in _PHONE_KEYS:
-        v = patient.get(k)
-        if isinstance(v, str) and v.strip():
-            return v.strip()
-        if isinstance(v, dict):
-            for kk in ("number", "value", "mobile", "phone"):
-                vv = v.get(kk)
-                if isinstance(vv, str) and vv.strip():
-                    return vv.strip()
-    return None
-
-
-def _fetch_one_contact(patient_id: str) -> tuple[str, dict]:
-    """Fetch one patient's name + phone from Plato, with a short in-process TTL
-    cache. Never raises and never persists.
-
-    On a transient rate-limit (429) or 5xx it retries a couple of times with a
-    small bounded backoff (so the page never hangs). Crucially, a failed lookup
-    is NOT cached — only a real 200 response is — so a patient throttled on one
-    page load isn't stuck showing initials for the whole cache window; the next
-    load tries again.
-    """
-    sess = _plato()
-    if sess is None:
-        return patient_id, {}
-    now = time.time()
-    with _contact_cache_lock:
-        entry = _contact_cache.get(patient_id)
-        if entry and now - entry[0] < CONTACT_TTL:
-            return patient_id, entry[1]
-
-    info: dict = {}
-    fetched_ok = False
-    url = f"{PLATO_BASE}/{PLATO_DB}/patient/{patient_id}"
-    for attempt in range(3):  # 1 initial try + up to 2 retries
-        try:
-            r = sess.get(url, timeout=PLATO_TIMEOUT_S)
-            if r.status_code == 200:
-                data = r.json()
-                if isinstance(data, list):
-                    data = data[0] if data else {}
-                if isinstance(data, dict):
-                    info = {
-                        "full_name": _extract_full_name(data),
-                        "phone":     _extract_phone(data),
-                    }
-                fetched_ok = True
-                break
-            if r.status_code == 429 or r.status_code >= 500:
-                if attempt < 2:
-                    time.sleep(2 * (attempt + 1))  # 2s, then 4s — bounded
-                    continue
-                log.warning("plato patient lookup %s -> %s (giving up)", patient_id, r.status_code)
-            else:
-                log.warning("plato patient lookup %s -> %s", patient_id, r.status_code)
-            break
-        except (requests.RequestException, ValueError) as e:
-            if attempt < 2:
-                time.sleep(2 * (attempt + 1))
-                continue
-            log.warning("plato patient lookup %s failed: %s", patient_id, e)
-            break
-
-    # Cache only a genuine response; never cache a throttled/failed lookup.
-    if fetched_ok:
-        with _contact_cache_lock:
-            _contact_cache[patient_id] = (now, info)
-    return patient_id, info
-
-
-def hydrate_plato_contacts(patient_ids: list[str]) -> dict[str, dict]:
-    """Fetch name + phone for a set of patient_ids live from Plato, in parallel.
-
-    Called only for the actionable worklist (a small set), so call volume to
-    Plato stays low. Returns {patient_id: {"full_name", "phone"}}; missing or
-    failed lookups map to {} and the caller degrades to initials.
-    """
-    ids = [p for p in dict.fromkeys(patient_ids) if p]
-    if not ids or _plato() is None:
-        return {pid: {} for pid in ids}
-    out: dict[str, dict] = {}
-    # Keep concurrency modest so we don't trip Plato's per-minute rate limit in
-    # the first place (the retry in _fetch_one_contact is the backstop).
-    with ThreadPoolExecutor(max_workers=min(4, len(ids)),
-                            thread_name_prefix="plato") as ex:
-        for pid, info in ex.map(_fetch_one_contact, ids):
-            out[pid] = info
-    return out
+def fetch_active_patient_count() -> int:
+    """Distinct patients with a delivered visit in the last 12 months."""
+    sql = f"""
+SELECT COUNT(DISTINCT patient_id) AS n
+FROM `{PROJECT}.marts.fct_service_delivered`
+WHERE patient_id IS NOT NULL
+  AND delivery_date >= DATE_SUB(CURRENT_DATE(), INTERVAL 365 DAY)
+"""
+    return _to_int(_query(sql)[0]["n"])
 
 
 def fetch_patient_retention() -> dict:
@@ -1129,10 +998,11 @@ def fetch_patient_retention() -> dict:
 
     Tiers and future-appointment status come from marts.fct_patient_retention
     (PII-free). Follow-up state (contacted/snoozed/dismissed) comes from
-    marts.patient_followup_latest. A patient is "actionable" — i.e. needs a
-    call — when they're yellow/orange/red, have no future appointment booked,
-    and haven't been dismissed or snoozed. Names + phones are hydrated live for
-    the actionable set only.
+    marts.patient_followup_latest. Full name + phone come from
+    marts.dim_patient_contact (populated by the patients-ingest job) — no live
+    Plato calls. A patient is "actionable" — i.e. needs a call — when they're
+    yellow/orange/red, have no future appointment booked, and haven't been
+    dismissed or snoozed.
     """
     sql = f"""
 SELECT
@@ -1145,12 +1015,15 @@ SELECT
   r.clinician_id,
   r.age_band,
   r.initial_lastname,
+  c.full_name    AS full_name,
+  c.phone        AS phone,
   f.status       AS followup_status,
   f.snooze_until AS followup_snooze_until,
   f.note         AS followup_note,
   f.updated_at   AS followup_at,
   f.updated_by   AS followup_by
 FROM `{PROJECT}.marts.fct_patient_retention` r
+LEFT JOIN `{PROJECT}.marts.dim_patient_contact`     c USING (patient_id)
 LEFT JOIN `{PROJECT}.marts.patient_followup_latest` f USING (patient_id)
 """
     rows = _query(sql)
@@ -1158,9 +1031,9 @@ LEFT JOIN `{PROJECT}.marts.patient_followup_latest` f USING (patient_id)
     summary = {
         "total": 0, "green": 0, "yellow": 0, "orange": 0, "red": 0,
         "needs_followup": 0, "already_booked": 0, "snoozed": 0, "dismissed": 0,
+        "active_12m": fetch_active_patient_count(),
     }
     patients: list[dict] = []
-    actionable_ids: list[str] = []
 
     for r in rows:
         tier   = r["tier"]
@@ -1186,7 +1059,6 @@ LEFT JOIN `{PROJECT}.marts.patient_followup_latest` f USING (patient_id)
         if actionable:
             summary["needs_followup"] += 1
             summary[tier] += 1  # red/orange/yellow, actionable-only
-            actionable_ids.append(r["patient_id"])
 
         patients.append({
             "patient_id":       r["patient_id"],
@@ -1198,18 +1070,14 @@ LEFT JOIN `{PROJECT}.marts.patient_followup_latest` f USING (patient_id)
             "clinician_id":     r["clinician_id"],
             "clinician":        PROVIDERS.get(r["clinician_id"], r["clinician_id"] or "—"),
             "age_band":         r["age_band"],
-            "initial_lastname": r["initial_lastname"],
+            # Full name from the contact table; fall back to PII-safe initials.
+            "name":             r.get("full_name") or r.get("initial_lastname") or "—",
+            "phone":            r.get("phone"),
             "followup_status":  status,
             "followup_note":    r.get("followup_note"),
             "snooze_until":     snooze_until.isoformat() if snooze_until else None,
             "actionable":       actionable,
         })
-
-    contacts = hydrate_plato_contacts(actionable_ids)
-    for p in patients:
-        c = contacts.get(p["patient_id"]) or {}
-        p["name"]  = c.get("full_name") or p["initial_lastname"] or "—"
-        p["phone"] = c.get("phone")
 
     # Most urgent first: actionable before the rest, then by tier severity, then
     # by how long they've been away.
@@ -1229,8 +1097,8 @@ LEFT JOIN `{PROJECT}.marts.patient_followup_latest` f USING (patient_id)
 def get_retention() -> dict:
     """Cached accessor for the retention worklist (same TTL as the financials).
 
-    Caching also keeps live Plato hydration cheap. The cache key is invalidated
-    when a follow-up action is recorded so the worklist reflects it on reload.
+    The cache key is invalidated when a follow-up action is recorded so the
+    worklist reflects it on reload.
     """
     now = time.time()
     with _cache_lock:
@@ -1681,8 +1549,15 @@ def api_admin_followup() -> Response:
                         snooze_days=snooze_days, updated_by=getattr(g, "user", None))
     except Exception as e:
         log.exception("follow-up write failed: %s", e)
-        return Response('{"error": "write failed"}', status=500,
-                        mimetype="application/json")
+        msg = str(e).lower()
+        if "permission" in msg or "denied" in msg or "403" in msg or "access" in msg:
+            return Response(
+                json.dumps({"error": "The dashboard isn't allowed to save yet — its "
+                            "service account needs write access to "
+                            "marts.patient_followup_events. See DEPLOY.md."}),
+                status=403, mimetype="application/json")
+        return Response('{"error": "Could not save — please try again."}',
+                        status=500, mimetype="application/json")
     return Response('{"ok": true}', mimetype="application/json")
 
 

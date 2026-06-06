@@ -51,6 +51,9 @@
       background: var(--good); margin-right: 6px; vertical-align: middle;
     }
 
+    .active-line { font-size: 14px; color: var(--ink-soft); margin: 2px 0 16px; }
+    .active-line b { color: var(--ink); font-size: 18px; font-variant-numeric: tabular-nums; }
+
     /* Summary tier cards — the coloured "status bar" across the top. */
     .kpi-row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin-bottom: 22px; }
     .kpi-card {
@@ -121,6 +124,7 @@
     a.phone:hover { text-decoration: underline; }
     .muted { color: var(--ink-muted); }
     .note { font-size: 12px; color: var(--ink-muted); font-style: italic; margin-top: 3px; }
+    .reason { color: var(--ink); }
 
     .tier-badge {
       display: inline-block; font-size: 11px; font-weight: 700;
@@ -194,6 +198,7 @@
       <div class="updated" id="updated"></div>
     </header>
 
+    <div class="active-line" id="activeLine"></div>
     <div class="kpi-row" id="summary"></div>
 
     <div class="tabs">
@@ -219,7 +224,7 @@
             <th>Clinician</th>
             <th class="num">Last seen</th>
             <th class="num">Days ago</th>
-            <th>Status</th>
+            <th id="statusHead">Status</th>
             <th class="num">Action</th>
           </tr>
         </thead>
@@ -291,6 +296,9 @@
         </div>`;
       }).join("");
       document.getElementById("dismissedCount").textContent = s.dismissed || 0;
+      const active = s.active_12m || 0;
+      document.getElementById("activeLine").innerHTML =
+        `<b>${active.toLocaleString()}</b> active patients · seen in the last 12 months`;
     }
 
     function setView(v) {
@@ -344,6 +352,8 @@
         (view === "dismissed") ? "Dismissed patients"
           : tierFilter ? `${cap(tierFilter)} patients`
           : showAll ? "All patients" : "Follow-up worklist";
+      document.getElementById("statusHead").textContent =
+        (view === "dismissed") ? "Reason" : "Status";
       if (!list.length) {
         tbody.innerHTML = "";
         empty.textContent = (view === "dismissed")
@@ -361,13 +371,20 @@
         ? `<a class="phone" href="tel:${p.phone.replace(/[^+0-9]/g, '')}">${escapeHtml(p.phone)}</a>`
         : '<span class="muted">—</span>';
 
-      let statusPill = "";
-      if (view === "dismissed") statusPill = `<span class="status-pill">Dismissed</span>`;
-      else if (p.has_future_appt) statusPill = `<span class="status-pill pill-booked">Booked ${fmtDate(p.next_appt)}</span>`;
-      else if (p.followup_status === "contacted") statusPill = `<span class="status-pill">Contacted</span>`;
-      else if (p.followup_status === "snoozed") statusPill = `<span class="status-pill">Snoozed → ${fmtDate(p.snooze_until)}</span>`;
-      const note = p.followup_note ? `<div class="note">“${escapeHtml(p.followup_note)}”</div>` : "";
-      const statusCell = (statusPill || '<span class="muted">—</span>') + note;
+      let statusCell;
+      if (view === "dismissed") {
+        // In the Dismissed tab this column is the "Reason" (the dismiss note).
+        statusCell = p.followup_note
+          ? `<span class="reason">${escapeHtml(p.followup_note)}</span>`
+          : '<span class="muted">No reason given</span>';
+      } else {
+        let statusPill = "";
+        if (p.has_future_appt) statusPill = `<span class="status-pill pill-booked">Booked ${fmtDate(p.next_appt)}</span>`;
+        else if (p.followup_status === "contacted") statusPill = `<span class="status-pill">Contacted</span>`;
+        else if (p.followup_status === "snoozed") statusPill = `<span class="status-pill">Snoozed → ${fmtDate(p.snooze_until)}</span>`;
+        const note = p.followup_note ? `<div class="note">“${escapeHtml(p.followup_note)}”</div>` : "";
+        statusCell = (statusPill || '<span class="muted">—</span>') + note;
+      }
 
       let actions = "";
       if (view === "dismissed") {
@@ -454,9 +471,13 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ patient_id: patientId, status, note, snooze_days: snoozeDays }),
         });
-        if (!res.ok) throw new Error("HTTP " + res.status);
+        if (!res.ok) {
+          let msg = "HTTP " + res.status;
+          try { const j = await res.json(); if (j && j.error) msg = j.error; } catch (_) {}
+          throw new Error(msg);
+        }
       } catch (e) {
-        alert("Could not save (" + e.message + "). Reloading.");
+        alert("Could not save: " + e.message);
         load();
       }
     }

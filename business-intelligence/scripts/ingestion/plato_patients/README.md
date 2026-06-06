@@ -1,25 +1,28 @@
 # Plato patients ingestion job
 
-Cloud Run **Job** that pulls Plato `/patient`, derives a PII-safe
-`initial_lastname` (e.g. `"C. Wong"`) **in memory**, and writes only the
-derived value into `goji-bi.marts.dim_patient`. The raw name never lands in
-BigQuery.
+Cloud Run **Job** that pulls Plato `/patient` and writes two tables:
+
+1. `goji-bi.marts.dim_patient` — PII-safe analytics dimension. Derives
+   `initial_lastname` (e.g. `"C. Wong"`), `age_band`, `postal_sector`, etc.
+   **in memory**; the raw name/DOB/postal never land here.
+2. `goji-bi.marts.dim_patient_contact` — a **deliberate, scoped PII exception**:
+   `full_name` + `phone` for the staff Front Desk worklist (the front desk needs
+   to phone patients). Kept in a separate table, read only by the staff worklist
+   path, never surfaced on the financial dashboard. Set `BQ_CONTACT_TABLE` to
+   override the table name.
 
 ## PII boundary
 
 This is the **only** code path in the BI stack that handles a full patient
-name. The boundary is enforced in `main.py::main`:
+name. For the analytics dimension (`dim_patient`) the boundary still holds: read
+`name`, compute `initial_lastname`/`age_band`/etc., discard the originals — only
+derived scalars land.
 
-1. Pull `/patient` paginated.
-2. For each row, read `name`, compute `initial_lastname(name)`, discard the
-   original.
-3. Build a `rows[]` containing only `{patient_id, initial_lastname,
-   _updated_at}` — never the full name.
-4. Single BQ `WRITE_TRUNCATE` load.
-
-If you ever need a richer derivation (age band, postcode sector, etc.) add
-it as a separate column with the same pattern: derive in `main.py`, only
-the derived scalar lands.
+The **one deliberate exception** (founder sign-off) is `dim_patient_contact`:
+the staff Front Desk worklist needs to call patients, so this job also writes
+`{patient_id, full_name, phone}` to that separate table. Keep PII to that table
+only — `dim_patient` stays PII-free. If you add richer *analytics* attributes,
+follow the derive-only pattern and put them in `dim_patient`, not here.
 
 ## One-time setup
 

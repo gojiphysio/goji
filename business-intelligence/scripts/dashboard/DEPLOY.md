@@ -23,10 +23,10 @@ page load with a 5-minute in-process cache.
 - Reads `DASHBOARD_USER`/`DASHBOARD_PASS` and `STAFF_USER`/`STAFF_PASS` from
   Secret Manager at boot (`dashboard-user`, `dashboard-pass`, `dashboard-staff-user`,
   `dashboard-staff-pass`).
-- `PLATO_API_KEY` (secret `plato-api-key`) is mounted so the admin worklist can
-  hydrate patient name + phone **live** from Plato. These are never written to
-  BQ — the warehouse stays PII-free. Without the key, the worklist degrades to
-  the PII-safe initials from `dim_patient`.
+- The dashboard does **not** call Plato. The admin worklist reads patient name +
+  phone from `marts.dim_patient_contact`, written nightly by the
+  `plato-patients-ingest` job (the one place that holds patient PII; the
+  financial dashboard never reads it).
 - Container: `python:3.12-slim` + Flask + gunicorn + google-cloud-bigquery.
 - One revision keeps 0..3 instances; concurrency 20; memory 512Mi.
 
@@ -80,16 +80,29 @@ Grant the dashboard SA write on **only** the follow-up table (so it can append
     gcloud run deploy goji-dashboard \
       --project=goji-bi --region=asia-southeast1 --source=. \
       --service-account=dashboard-sa@goji-bi.iam.gserviceaccount.com \
-      --set-secrets=DASHBOARD_USER=dashboard-user:latest,DASHBOARD_PASS=dashboard-pass:latest,STAFF_USER=dashboard-staff-user:latest,STAFF_PASS=dashboard-staff-pass:latest,PLATO_API_KEY=plato-api-key:latest \
-      --set-env-vars=GCP_PROJECT=goji-bi,CACHE_TTL_SECONDS=300,PLATO_DB=gojihealth \
+      --set-secrets=DASHBOARD_USER=dashboard-user:latest,DASHBOARD_PASS=dashboard-pass:latest,STAFF_USER=dashboard-staff-user:latest,STAFF_PASS=dashboard-staff-pass:latest \
+      --set-env-vars=GCP_PROJECT=goji-bi,CACHE_TTL_SECONDS=300 \
       --quiet
 
-The invoice-doctor mismatch alert is fed by `marts.fct_invoice_doctor_mismatches`,
-a SQL view over `stg.appointments` (populated by the `plato-appointments-ingest`
-Cloud Run Job every 15 minutes) — the financial dashboard reads it from BQ, not
-Plato. `PLATO_API_KEY` is back on the service for one reason only: the staff
-admin worklist hydrates patient name + phone live from Plato at render time
-(never persisted).
+The dashboard does not call Plato. The invoice-doctor mismatch alert reads
+`marts.fct_invoice_doctor_mismatches` (a view over `stg.appointments`,
+populated by `plato-appointments-ingest`), and the staff worklist reads patient
+name + phone from `marts.dim_patient_contact` (populated by
+`plato-patients-ingest`). Both come from BigQuery, so no `PLATO_API_KEY` is
+mounted here.
+
+## If the worklist can't save (HTTP 500 on dismiss/contacted/snooze)
+
+The dashboard SA must have **write** access to the follow-up table. `deploy_admin.sh`
+grants and verifies this, but if you ever see a save error, grant it directly:
+
+    bq add-iam-policy-binding \
+      --member="serviceAccount:dashboard-sa@goji-bi.iam.gserviceaccount.com" \
+      --role="roles/bigquery.dataEditor" \
+      goji-bi:marts.patient_followup_events
+
+(or in the Console: BigQuery → goji-bi → marts → patient_followup_events →
+Share → add the SA as **BigQuery Data Editor**).
 
 ## Force a cache refresh without redeploying
 
@@ -129,7 +142,8 @@ Staff admin (`/admin`) — patient ops, no financials:
 - **Retention worklist** — patients tiered by time since last visit
   (green ≤1wk / yellow >1wk / orange >2wk / red >4wk), excluding anyone with a
   future appointment booked or marked dismissed/snoozed. Front desk can mark
-  **contacted / snooze / dismiss**; name + phone are hydrated live from Plato.
+  **contacted / snooze / dismiss**; name + phone come from BigQuery
+  (`dim_patient_contact`), plus a count of patients active in the last 12 months.
 
 ## Cost
 
