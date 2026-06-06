@@ -1,0 +1,121 @@
+name: Deploy dashboard
+
+# Auto-deploy the Goji dashboards on every push to main. Tests run first and
+# gate the deploy. Auth to Google Cloud uses Workload Identity Federation — no
+# service-account key is stored anywhere. One-time setup: see README.md here.
+#
+# What gets deployed is scoped to what changed in the push:
+#   - SQL files               -> redeploy BigQuery views/tables (+ ensure the
+#                                 dashboard's write grant on the follow-up table)
+#   - patients ingest job     -> redeploy the Cloud Run Job + run it once
+#   - dashboard app           -> redeploy the goji-dashboard Cloud Run service
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "business-intelligence/scripts/dashboard/**"
+      - "business-intelligence/scripts/sql/**"
+      - "business-intelligence/scripts/ingestion/plato_patients/**"
+      - ".github/workflows/deploy-dashboard.yml"
+  workflow_dispatch: {}   # allow manual "Run workflow" from the Actions tab
+
+concurrency:
+  group: deploy-dashboard
+  cancel-in-progress: false   # never interrupt an in-flight deploy
+
+permissions:
+  contents: read
+  id-token: write             # required for Workload Identity Federation
+
+env:
+  PROJECT: ${{ vars.GCP_PROJECT }}
+  REGION:  ${{ vars.GCP_REGION }}
+  SERVICE: goji-dashboard
+  DASHBOARD_SA: dashboard-sa@${{ vars.GCP_PROJECT }}.iam.gserviceaccount.com
+
+jobs:
+  # ---- 1. Tests gate the deploy -------------------------------------------
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install deps
+        run: pip install -r business-intelligence/scripts/dashboard/requirements.txt pytest
+      - name: Dashboard tests
+        working-directory: business-intelligence/scripts/dashboard
+        run: python -m pytest tests/ -q
+      - name: Ingestion tests
+        working-directory: business-intelligence/scripts/ingestion/plato_patients
+        run: python -m pytest test_extract.py -q
+
+  # ---- 2. Deploy (only after tests pass) ----------------------------------
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # need history to diff what changed
+
+      - name: Detect changed areas
+        id: changes
+        run: |
+          base="${{ github.event.before }}"
+          if [ -z "$base" ] \
+             || [ "$base" = "0000000000000000000000000000000000000000" ] \
+             || ! git cat-file -e "${base}^{commit}" 2>/dev/null; then
+            echo "No usable base commit — deploying everything."
+            { echo "sql=true"; echo "patients=true"; echo "dashboard=true"; } >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          changed="$(git diff --name-only "$base" "${{ github.sha }}")"
+          echo "Changed files:"; echo "$changed"
+          base_path="business-intelligence/scripts"
+          grep -q "^${base_path}/sql/"                      <<<"$changed" && echo "sql=true"       >>"$GITHUB_OUTPUT" || echo "sql=false"       >>"$GITHUB_OUTPUT"
+          grep -q "^${base_path}/ingestion/plato_patients/" <<<"$changed" && echo "patients=true"  >>"$GITHUB_OUTPUT" || echo "patients=false"  >>"$GITHUB_OUTPUT"
+          grep -q "^${base_path}/dashboard/"                <<<"$changed" && echo "dashboard=true" >>"$GITHUB_OUTPUT" || echo "dashboard=false" >>"$GITHUB_OUTPUT"
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.WIF_PROVIDER }}
+          service_account: ${{ vars.DEPLOY_SERVICE_ACCOUNT }}
+
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Deploy SQL views/tables + ensure follow-up write grant
+        if: steps.changes.outputs.sql == 'true'
+        working-directory: business-intelligence/scripts/sql
+        run: |
+          ./deploy_all.sh
+          # Idempotent: the dashboard SA needs write access to save follow-ups.
+          bq add-iam-policy-binding \
+            --member="serviceAccount:${DASHBOARD_SA}" \
+            --role="roles/bigquery.dataEditor" \
+            "${PROJECT}:marts.patient_followup_events"
+
+      - name: Deploy + run patients ingest job
+        if: steps.changes.outputs.patients == 'true'
+        working-directory: business-intelligence/scripts/ingestion/plato_patients
+        run: |
+          gcloud run jobs deploy plato-patients-ingest \
+            --source . --region "${REGION}" --project "${PROJECT}" --quiet
+          # Run once so name/phone changes show up immediately (else nightly).
+          gcloud run jobs execute plato-patients-ingest \
+            --region "${REGION}" --project "${PROJECT}" --wait
+
+      - name: Deploy dashboard
+        if: steps.changes.outputs.dashboard == 'true'
+        working-directory: business-intelligence/scripts/dashboard
+        run: |
+          gcloud run deploy "${SERVICE}" \
+            --source . --region "${REGION}" --project "${PROJECT}" \
+            --service-account "${DASHBOARD_SA}" \
+            --set-secrets=DASHBOARD_USER=dashboard-user:latest,DASHBOARD_PASS=dashboard-pass:latest,STAFF_USER=dashboard-staff-user:latest,STAFF_PASS=dashboard-staff-pass:latest \
+            --set-env-vars=GCP_PROJECT=${PROJECT},CACHE_TTL_SECONDS=300 \
+            --quiet
