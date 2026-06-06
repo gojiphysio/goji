@@ -24,6 +24,11 @@ gcloud config set project "$PROJECT"
 # 1. Deploy bot service account + the permissions a deploy needs.
 gcloud iam service-accounts create github-deployer \
   --display-name="GitHub Actions deployer" || true
+# Wait for the new account to propagate before granting roles, otherwise the
+# first few bindings can fail with "Service account does not exist".
+until gcloud iam service-accounts describe "$DEPLOYER" >/dev/null 2>&1; do
+  echo "  waiting for ${DEPLOYER} to propagate…"; sleep 3
+done
 for ROLE in \
   roles/run.admin \
   roles/iam.serviceAccountUser \
