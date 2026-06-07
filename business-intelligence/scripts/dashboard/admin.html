@@ -432,7 +432,7 @@
     async function loadToday() {
       const tbl = document.getElementById("todayLoading");
       try {
-        const res = await fetch("/api/admin/schedule", { headers: { "Accept": "application/json" } });
+        const res = await fetch("/api/frontdesk/schedule", { headers: { "Accept": "application/json" } });
         if (!res.ok) throw new Error("HTTP " + res.status);
         SCHED = await res.json();
         loaded.today = true;
@@ -497,7 +497,7 @@
       try {
         // The schedule fetch already seeds CALLS; only hit the endpoint if not.
         if (!loaded.calls) {
-          const res = await fetch("/api/admin/calls", { headers: { "Accept": "application/json" } });
+          const res = await fetch("/api/frontdesk/calls", { headers: { "Accept": "application/json" } });
           if (!res.ok) throw new Error("HTTP " + res.status);
           CALLS = await res.json();
           loaded.calls = true;
@@ -547,7 +547,7 @@
       if (loaded.today) renderToday();
       updateCounts();
       try {
-        const res = await fetch("/api/admin/confirm_appt", {
+        const res = await fetch("/api/frontdesk/confirm_appt", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ appointment_id: appointmentId }),
@@ -570,7 +570,7 @@
     async function loadPackages() {
       const tbl = document.getElementById("packagesLoading");
       try {
-        const res = await fetch("/api/admin/package_alerts", { headers: { "Accept": "application/json" } });
+        const res = await fetch("/api/frontdesk/package_alerts", { headers: { "Accept": "application/json" } });
         if (!res.ok) throw new Error("HTTP " + res.status);
         PKG = await res.json();
         loaded.packages = true;
@@ -618,7 +618,7 @@
     async function loadRetention() {
       const tbl = document.getElementById("retentionLoading");
       try {
-        const res = await fetch("/api/admin/retention", { headers: { "Accept": "application/json" } });
+        const res = await fetch("/api/frontdesk/retention", { headers: { "Accept": "application/json" } });
         if (!res.ok) throw new Error("HTTP " + res.status);
         DATA = await res.json();
         loaded.retention = true;
@@ -816,7 +816,7 @@
       renderRows();
 
       try {
-        const res = await fetch("/api/admin/followup", {
+        const res = await fetch("/api/frontdesk/followup", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ patient_id: patientId, status, note, snooze_days: snoozeDays }),

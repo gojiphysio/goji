@@ -45,7 +45,7 @@ AUTH_PASS   = os.environ.get("DASHBOARD_PASS", "")
 # desk, clinicians) can have their own login. The legacy single-pair env vars
 # STAFF_USER / STAFF_PASS continue to work; additional staff accounts are
 # added via STAFF_<N>_USER / STAFF_<N>_PASS for N = 1, 2, 3, ...
-# All of these map to the 'staff' role and can only reach /admin routes.
+# All of these map to the 'staff' role and can only reach the Front Desk routes.
 def _load_staff_creds() -> list[tuple[str, str]]:
     pairs: list[tuple[str, str]] = []
     # Legacy single pair
@@ -1137,8 +1137,9 @@ def get_retention() -> dict:
     return data
 
 
-def get_admin_shell_html() -> str:
-    """Return the admin dashboard HTML. No BQ work; it fetches /api/admin/retention."""
+def get_frontdesk_shell_html() -> str:
+    """Return the Front Desk portal HTML. No BQ work; the page fetches its data
+    from /api/frontdesk/*."""
     return ADMIN_TEMPLATE.read_text()
 
 
@@ -1637,24 +1638,31 @@ def resolve_role(user: str, password: str) -> str | None:
     return None
 
 
-def require_roles(*roles: str):
+def require_roles(*roles: str, only_mode: str | None = None):
     """Gate a route to the given roles.
 
     A credential for a role NOT in `roles` gets a 401 — this is what keeps a
     staff login out of the founder-only financial routes entirely.
 
-    Additionally, routes that require the 'founder' role are completely
-    unavailable on the frontdesk subdomain (APP_MODE='frontdesk'), returning
-    404 so the financial dashboard is not reachable even with valid credentials.
-    This ensures frontdesk.* never exposes financial data regardless of what
-    credentials are tried.
+    Subdomain pinning keeps the two surfaces cleanly separated — there are
+    exactly two ways in, and neither leaks the other's routes:
+      - founder-only routes don't exist on the frontdesk subdomain
+        (APP_MODE='frontdesk'), so frontdesk.* never exposes financial data
+        regardless of credentials;
+      - `only_mode="frontdesk"` pins the patient-ops routes to the frontdesk
+        subdomain, so the ops portal is NOT reachable on dashboard.* at all.
+    Both return 404 (not 401) on the wrong subdomain: the route simply does not
+    exist there.
     """
     def decorator(f):
         @wraps(f)
         def wrapper(*args, **kwargs):
+            from flask import abort
+            # Routes pinned to one subdomain don't exist on the other.
+            if only_mode is not None and APP_MODE != only_mode:
+                abort(404)
             # On the frontdesk subdomain, founder-only routes don't exist.
             if APP_MODE == "frontdesk" and roles == ("founder",):
-                from flask import abort
                 abort(404)
             auth = request.authorization
             role = resolve_role(auth.username or "", auth.password or "") if auth else None
@@ -1677,12 +1685,12 @@ def index() -> Response:
     """Root route. Behaviour depends on APP_MODE:
 
     - 'dashboard' (default): serves the financial dashboard; founder-only.
-    - 'frontdesk': redirects to /admin so staff land on the patient ops view.
+    - 'frontdesk': redirects to /frontdesk so staff land on the patient ops view.
       Both staff and founder credentials are accepted there.
     """
     if APP_MODE == "frontdesk":
         from flask import redirect
-        return redirect("/admin", code=302)
+        return redirect("/frontdesk", code=302)
     # dashboard mode: enforce founder-only
     auth = request.authorization
     role = resolve_role(auth.username or "", auth.password or "") if auth else None
@@ -1754,24 +1762,31 @@ def refresh() -> Response:
     return Response('{"ok": true}', mimetype="application/json")
 
 
-@app.route("/admin")
-@require_roles("founder", "staff")
-def admin_index() -> Response:
-    """Staff admin dashboard shell. Open to staff and founders; no financials."""
-    return Response(get_admin_shell_html(), mimetype="text/html")
+# Patient-ops portal (the "Front Desk"). Lives only on frontdesk.* — pinned
+# with only_mode="frontdesk" so it 404s on the founder dashboard subdomain. The
+# legacy /admin and /api/admin/* paths are kept as aliases (same handlers) so
+# old bookmarks and any cached page keep working through the rename.
+@app.route("/frontdesk")
+@app.route("/admin")  # legacy alias
+@require_roles("founder", "staff", only_mode="frontdesk")
+def frontdesk_index() -> Response:
+    """Front Desk portal shell. Open to staff and founders; no financials."""
+    return Response(get_frontdesk_shell_html(), mimetype="text/html")
 
 
-@app.route("/api/admin/retention")
-@require_roles("founder", "staff")
-def api_admin_retention() -> Response:
+@app.route("/api/frontdesk/retention")
+@app.route("/api/admin/retention")  # legacy alias
+@require_roles("founder", "staff", only_mode="frontdesk")
+def api_frontdesk_retention() -> Response:
     """Patient retention worklist: tier summary + per-patient call list."""
     return Response(json.dumps(get_retention(), default=str),
                     mimetype="application/json")
 
 
-@app.route("/api/admin/followup", methods=["POST"])
-@require_roles("founder", "staff")
-def api_admin_followup() -> Response:
+@app.route("/api/frontdesk/followup", methods=["POST"])
+@app.route("/api/admin/followup", methods=["POST"])  # legacy alias
+@require_roles("founder", "staff", only_mode="frontdesk")
+def api_frontdesk_followup() -> Response:
     """Record a follow-up action (contacted / snoozed / dismissed / active).
 
     Body: {patient_id, status, note?, snooze_days?}. Appends one event row;
@@ -1803,21 +1818,23 @@ def api_admin_followup() -> Response:
     return Response('{"ok": true}', mimetype="application/json")
 
 
-@app.route("/api/admin/schedule")
-@require_roles("founder", "staff")
-def api_admin_schedule() -> Response:
+@app.route("/api/frontdesk/schedule")
+@app.route("/api/admin/schedule")  # legacy alias
+@require_roles("founder", "staff", only_mode="frontdesk")
+def api_frontdesk_schedule() -> Response:
     """Today's appointments, time-ordered, with NEW / confirmation flags."""
     return Response(json.dumps(get_upcoming(), default=str),
                     mimetype="application/json")
 
 
-@app.route("/api/admin/calls")
-@require_roles("founder", "staff")
-def api_admin_calls() -> Response:
+@app.route("/api/frontdesk/calls")
+@app.route("/api/admin/calls")  # legacy alias
+@require_roles("founder", "staff", only_mode="frontdesk")
+def api_frontdesk_calls() -> Response:
     """Unconfirmed appointments in the next 72h (the reminder-call list).
 
-    Shares the cached upcoming blob with /api/admin/schedule; returns just the
-    call list so the Call List tab can fetch independently.
+    Shares the cached upcoming blob with /api/frontdesk/schedule; returns just
+    the call list so the Call List tab can fetch independently.
     """
     data = get_upcoming()
     return Response(json.dumps({"generated_at": data["generated_at"],
@@ -1825,17 +1842,19 @@ def api_admin_calls() -> Response:
                     mimetype="application/json")
 
 
-@app.route("/api/admin/package_alerts")
-@require_roles("founder", "staff")
-def api_admin_package_alerts() -> Response:
+@app.route("/api/frontdesk/package_alerts")
+@app.route("/api/admin/package_alerts")  # legacy alias
+@require_roles("founder", "staff", only_mode="frontdesk")
+def api_frontdesk_package_alerts() -> Response:
     """Patients with <=2 prepaid sessions left, most urgent (0) first."""
     return Response(json.dumps(get_package_alerts(), default=str),
                     mimetype="application/json")
 
 
-@app.route("/api/admin/confirm_appt", methods=["POST"])
-@require_roles("founder", "staff")
-def api_admin_confirm_appt() -> Response:
+@app.route("/api/frontdesk/confirm_appt", methods=["POST"])
+@app.route("/api/admin/confirm_appt", methods=["POST"])  # legacy alias
+@require_roles("founder", "staff", only_mode="frontdesk")
+def api_frontdesk_confirm_appt() -> Response:
     """Confirm an appointment (after the reminder call).
 
     Body: {appointment_id}. Appends one confirmation event; the call list drops

@@ -132,8 +132,13 @@ gcloud run deploy "${SERVICE}" \
 
 echo
 echo "============================================================"
-echo " Done — the Front Desk screen is live:"
-echo "   https://dashboard.gojiphysio.com/admin"
+echo " Done — shared setup complete (staff login, data, write grants)."
+echo
+echo " The Front Desk screen lives on its OWN subdomain now, not on the"
+echo " dashboard. Publish/refresh it with:"
+echo "   bash business-intelligence/scripts/dashboard/deploy_frontdesk.sh"
+echo " Then it's live at:"
+echo "   https://frontdesk.gojiphysio.com/frontdesk"
 echo
 echo " Staff sign in with:"
 echo "   username: ${STAFF_USER_NAME}"

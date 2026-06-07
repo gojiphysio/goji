@@ -21,7 +21,7 @@ staff** (patient ops only).
 
 ## Pages
 
-Founder dashboard (`/`):
+Founder dashboard (`dashboard.gojiphysio.com`, `/`):
 
 - **Overview** — KPIs, daily/weekly/monthly trends, per-clinician table + chart,
   discount cost + top discounted items, treatment-mix donuts, cohort/LTV table,
@@ -30,7 +30,8 @@ Founder dashboard (`/`):
   (Last 30D / current cycle / previous cycle / custom), and XLSX export.
 - **Commission** — per-clinician commission calculator over real appointment data.
 
-Staff admin (`/admin`, no financials) — four tabs:
+Front Desk portal (`frontdesk.gojiphysio.com/frontdesk`, no financials; the
+legacy `/admin` path still works as an alias) — four tabs:
 
 - **Today** — today's appointments, time-ordered, with `NEW` (first visit) and
   confirmed/unconfirmed badges, a session-balance column, and a clinician

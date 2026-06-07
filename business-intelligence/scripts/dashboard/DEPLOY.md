@@ -13,14 +13,17 @@ only difference is the `APP_MODE` env var, which selects the routes and audience
 
 ## Two subdomains, one codebase
 
+There are exactly two ways in, and each subdomain 404s the other's routes:
+
 - **`dashboard.*`** (`APP_MODE=dashboard`, default) — the financial dashboard
-  (`/`, `/api/data`, P&L, commission) **and** the admin section. Founder-only in
-  practice (don't mount staff secrets here if you want it strictly founders).
-- **`frontdesk.*`** (`APP_MODE=frontdesk`) — the patient ops portal only. `/`
-  redirects to `/admin`; every founder-only financial route returns **404**, so
-  no financial data is reachable here even with a founder credential. Used by
-  reception **and** clinicians (Plato covers clinician schedule/performance, so
-  there is no separate clinician portal).
+  only (`/`, `/api/data`, P&L, commission), founder-only. The patient ops portal
+  is **not** served here: `/frontdesk` (and the legacy `/admin`) return **404**.
+- **`frontdesk.*`** (`APP_MODE=frontdesk`) — the patient ops portal only, at
+  `/frontdesk` (`/` redirects there; the legacy `/admin` path still works as an
+  alias). Every founder-only financial route returns **404**, so no financial
+  data is reachable here even with a founder credential. Used by reception **and**
+  clinicians (Plato covers clinician schedule/performance, so there is no
+  separate clinician portal).
 
 ## Roles
 
@@ -179,7 +182,9 @@ Founder dashboard — three pages, all live from BQ:
   and XLSX export.
 - **Commission** — per-clinician commission calculator over real appointment data.
 
-Staff admin (`/admin`) — patient ops, no financials:
+Front Desk portal (`frontdesk.gojiphysio.com/frontdesk`) — patient ops, no
+financials. Four tabs: **Today** (schedule), **Call list** (unconfirmed appts),
+**Package alerts** (≤2 sessions left), and:
 
 - **Retention worklist** — patients tiered by time since last visit
   (green ≤1wk / yellow >1wk / orange >2wk / red >4wk), excluding anyone with a

@@ -100,6 +100,15 @@ def _auth(user: str, pw: str) -> dict:
 
 @pytest.fixture
 def client():
+    """A test client on the founder dashboard subdomain (APP_MODE=dashboard)."""
+    app.app.config.update(TESTING=True)
+    return app.app.test_client()
+
+
+@pytest.fixture
+def frontdesk_client(monkeypatch):
+    """A test client on the front-desk subdomain (APP_MODE=frontdesk)."""
+    monkeypatch.setattr(app, "APP_MODE", "frontdesk")
     app.app.config.update(TESTING=True)
     return app.app.test_client()
 
@@ -111,22 +120,55 @@ def test_staff_blocked_from_financial_data(client):
 def test_staff_blocked_from_financial_index(client):
     assert client.get("/", headers=_auth("frontdesk", "staff-pw")).status_code == 401
 
-def test_admin_requires_auth(client):
-    assert client.get("/admin").status_code == 401
+def test_healthcheck_open(client):
+    assert client.get("/healthcheck").status_code == 200
 
-def test_bad_creds_blocked_from_admin(client):
-    assert client.get("/admin", headers=_auth("frontdesk", "wrong")).status_code == 401
 
-def test_staff_can_reach_admin(client):
-    resp = client.get("/admin", headers=_auth("frontdesk", "staff-pw"))
+# --- subdomain split: exactly two surfaces ----------------------------------
+# Founders use dashboard.* (APP_MODE=dashboard); the front desk uses frontdesk.*
+# (APP_MODE=frontdesk). Each subdomain 404s the other's routes — the route does
+# not exist there at all, regardless of credentials.
+
+def test_frontdesk_portal_404s_on_dashboard_subdomain(client):
+    # The ops portal must NOT be reachable on the founder dashboard subdomain.
+    assert client.get("/frontdesk", headers=_auth("founder", "founder-pw")).status_code == 404
+    assert client.get("/api/frontdesk/schedule", headers=_auth("founder", "founder-pw")).status_code == 404
+
+def test_legacy_admin_404s_on_dashboard_subdomain(client):
+    # Legacy /admin alias is also frontdesk-only now.
+    assert client.get("/admin", headers=_auth("founder", "founder-pw")).status_code == 404
+
+def test_financial_routes_404_on_frontdesk_subdomain(frontdesk_client):
+    # Financial data must never be reachable on the front-desk subdomain.
+    assert frontdesk_client.get("/api/data", headers=_auth("founder", "founder-pw")).status_code == 404
+
+def test_index_redirects_to_frontdesk_on_frontdesk_subdomain(frontdesk_client):
+    resp = frontdesk_client.get("/")
+    assert resp.status_code == 302
+    assert resp.headers["Location"].endswith("/frontdesk")
+
+
+# --- front-desk portal access (on the frontdesk subdomain) ------------------
+
+def test_frontdesk_requires_auth(frontdesk_client):
+    assert frontdesk_client.get("/frontdesk").status_code == 401
+
+def test_bad_creds_blocked_from_frontdesk(frontdesk_client):
+    assert frontdesk_client.get("/frontdesk", headers=_auth("frontdesk", "wrong")).status_code == 401
+
+def test_staff_can_reach_frontdesk(frontdesk_client):
+    resp = frontdesk_client.get("/frontdesk", headers=_auth("frontdesk", "staff-pw"))
     assert resp.status_code == 200
     assert b"Front Desk" in resp.data
 
-def test_founder_can_reach_admin(client):
-    assert client.get("/admin", headers=_auth("founder", "founder-pw")).status_code == 200
+def test_founder_can_reach_frontdesk(frontdesk_client):
+    assert frontdesk_client.get("/frontdesk", headers=_auth("founder", "founder-pw")).status_code == 200
 
-def test_healthcheck_open(client):
-    assert client.get("/healthcheck").status_code == 200
+def test_legacy_admin_alias_still_serves_on_frontdesk(frontdesk_client):
+    # /admin keeps working as an alias so old bookmarks don't break.
+    resp = frontdesk_client.get("/admin", headers=_auth("frontdesk", "staff-pw"))
+    assert resp.status_code == 200
+    assert b"Front Desk" in resp.data
 
 
 # --- Phase 2: today's schedule / call list / package alerts -----------------
@@ -171,25 +213,32 @@ def test_confirmed_today_appt_stays_on_schedule_but_off_calls():
     assert calls == []
 
 
-# --- Phase 2 route gating ---------------------------------------------------
+# --- Phase 2 route gating (on the frontdesk subdomain) ----------------------
+
+@pytest.mark.parametrize("path", [
+    "/api/frontdesk/schedule", "/api/frontdesk/calls", "/api/frontdesk/package_alerts",
+])
+def test_phase2_endpoints_require_auth(frontdesk_client, path):
+    assert frontdesk_client.get(path).status_code == 401
 
 @pytest.mark.parametrize("path", [
     "/api/admin/schedule", "/api/admin/calls", "/api/admin/package_alerts",
 ])
-def test_phase2_endpoints_require_auth(client, path):
-    assert client.get(path).status_code == 401
+def test_phase2_legacy_aliases_require_auth(frontdesk_client, path):
+    # Legacy /api/admin/* aliases still resolve (and still demand auth).
+    assert frontdesk_client.get(path).status_code == 401
 
-def test_confirm_appt_requires_auth(client):
-    assert client.post("/api/admin/confirm_appt", json={"appointment_id": "x"}).status_code == 401
+def test_confirm_appt_requires_auth(frontdesk_client):
+    assert frontdesk_client.post("/api/frontdesk/confirm_appt", json={"appointment_id": "x"}).status_code == 401
 
-def test_confirm_appt_bad_creds_blocked(client):
-    resp = client.post("/api/admin/confirm_appt",
+def test_confirm_appt_bad_creds_blocked(frontdesk_client):
+    resp = frontdesk_client.post("/api/frontdesk/confirm_appt",
                        headers=_auth("frontdesk", "wrong"), json={"appointment_id": "x"})
     assert resp.status_code == 401
 
-def test_confirm_appt_missing_id_is_400(client):
+def test_confirm_appt_missing_id_is_400(frontdesk_client):
     # Valid staff auth, but no appointment_id — validation rejects before any BQ
     # work, so this exercises the guard without touching BigQuery.
-    resp = client.post("/api/admin/confirm_appt",
+    resp = frontdesk_client.post("/api/frontdesk/confirm_appt",
                        headers=_auth("frontdesk", "staff-pw"), json={})
     assert resp.status_code == 400
