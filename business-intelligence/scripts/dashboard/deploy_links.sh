@@ -29,10 +29,11 @@ DOMAIN="${DOMAIN:-go.gojiphysio.com}"
 SA="dashboard-sa@${PROJECT}.iam.gserviceaccount.com"
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Public-link config. WHATSAPP_NUMBER is E.164 digits, no '+'. If unset, the
-# redirect falls back to the site (links never dead-end) — but you'll want it
-# set for the links to actually open WhatsApp.
+# Public-link config. WHATSAPP_NUMBER is E.164 digits, no '+'. PLATO_BOOKING_URL
+# is the Plato online-booking page (the 'book' slug). If unset, the relevant
+# links fall back to the site (never dead-end) — but you'll want them set.
 WHATSAPP_NUMBER="${WHATSAPP_NUMBER:-}"
+PLATO_BOOKING_URL="${PLATO_BOOKING_URL:-}"
 WHATSAPP_FALLBACK_URL="${WHATSAPP_FALLBACK_URL:-https://www.gojiphysio.com}"
 
 echo "============================================================"
@@ -51,7 +52,7 @@ echo "==> Deploying ${SERVICE} (APP_MODE=links)"
 gcloud run deploy "${SERVICE}" \
   --project="${PROJECT}" --region="${REGION}" --source="${HERE}" \
   --service-account="${SA}" \
-  --set-env-vars=GCP_PROJECT=${PROJECT},CACHE_TTL_SECONDS=300,APP_MODE=links,WHATSAPP_NUMBER=${WHATSAPP_NUMBER},WHATSAPP_FALLBACK_URL=${WHATSAPP_FALLBACK_URL} \
+  --set-env-vars=GCP_PROJECT=${PROJECT},CACHE_TTL_SECONDS=300,APP_MODE=links,WHATSAPP_NUMBER=${WHATSAPP_NUMBER},WHATSAPP_FALLBACK_URL=${WHATSAPP_FALLBACK_URL},PLATO_BOOKING_URL=${PLATO_BOOKING_URL} \
   --allow-unauthenticated \
   --quiet
 
@@ -73,10 +74,9 @@ fi
 echo
 echo "============================================================"
 echo " Done — public links live at:"
-echo "   https://${DOMAIN}/ig    (Instagram bio)"
-echo "   https://${DOMAIN}/web   (website button)"
-echo "   https://${DOMAIN}/gbp   (Google Business Profile)"
-echo "   https://${DOMAIN}/ads   https://${DOMAIN}/email   https://${DOMAIN}/qr"
-echo " Each logs a click then opens WhatsApp. Slugs/messages live in"
-echo " LINK_SLUGS in app.py."
+echo "   https://${DOMAIN}/wa     (WhatsApp — social/bio.site button)"
+echo "   https://${DOMAIN}/book   (Plato booking — social/bio.site button)"
+echo "   https://${DOMAIN}/ig  /web  /gbp  /ads  /email  /qr   (WhatsApp)"
+echo " Each logs a click then opens WhatsApp or Plato booking. Slugs/messages"
+echo " live in LINK_SLUGS in app.py."
 echo "============================================================"

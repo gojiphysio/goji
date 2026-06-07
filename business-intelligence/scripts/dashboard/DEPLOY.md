@@ -204,27 +204,31 @@ Founder dashboard — four pages, all live from BQ:
   pattern as the follow-up log). The **Click-to-WhatsApp** card is live from
   `marts.link_click_events` (see below).
 
-### Click-to-WhatsApp tracking (`go.gojiphysio.com/<slug>`)
+### Trackable CTA links (`go.gojiphysio.com/<slug>`)
 
-WhatsApp is the primary CTA, so every channel's outbound link routes through a
-public redirector. It runs as its **own** Cloud Run service `goji-links`
-(`APP_MODE=links`) on `go.gojiphysio.com` — a short, on-brand domain that serves
-*only* the redirects, keeping the internal `dashboard.gojiphysio.com` tool out of
-public view. Each hit logs a row to `marts.link_click_events` (streaming insert,
-off-thread) then 302s to a `wa.me` deep link with a channel-specific prefilled
-message — which also seeds the enquiry-log source. Slugs/messages are defined in
-`LINK_SLUGS` in `app.py`. (The dashboard service also keeps a `GET /r/<slug>`
-route working internally, but the published links are `go.gojiphysio.com/<slug>`.)
+Every customer CTA routes through a public redirector that logs the click then
+302s to its destination — **WhatsApp** (the primary CTA) or **Plato booking**
+(socials like `bio.site/gojiphysio` offer both). It runs as its **own** Cloud Run
+service `goji-links` (`APP_MODE=links`) on `go.gojiphysio.com` — a short, on-brand
+domain that serves *only* the redirects, keeping the internal
+`dashboard.gojiphysio.com` tool out of public view. Each hit logs a row to
+`marts.link_click_events` (streaming insert, off-thread); WhatsApp slugs add a
+channel-specific prefilled message that also seeds the enquiry-log source.
+Slugs/kinds/messages are defined in `LINK_SLUGS` in `app.py`. (The dashboard
+service also keeps `GET /r/<slug>` working internally, but the published links are
+`go.gojiphysio.com/<slug>`.)
 
 **Setup — all via GitHub Actions, no Cloud Shell:**
 
-1. Set a **GitHub Actions repository variable** (Settings → Secrets and variables
+1. Set **GitHub Actions repository variables** (Settings → Secrets and variables
    → Actions → **Variables**):
    - `WHATSAPP_NUMBER` — WhatsApp business number, E.164 digits, no `+`
-     (e.g. `6580000000`). **Required to go live.** Until set, the redirect falls
-     back to the site URL, so links never dead-end.
-   - `WHATSAPP_FALLBACK_URL` — optional; where the bare root and unknown slugs go
-     (defaults to `https://www.gojiphysio.com`).
+     (e.g. `6580000000`). Enables the WhatsApp slugs.
+   - `PLATO_BOOKING_URL` — your Plato online-booking page URL. Enables the `book`
+     slug.
+   - `WHATSAPP_FALLBACK_URL` — optional; where the bare root and any unconfigured
+     slug go (defaults to `https://www.gojiphysio.com`). Until a target is set,
+     links fall back here so they never dead-end.
 2. Push to `main` (e.g. merge this PR). The deploy workflow **creates** the
    `goji-links` service and the `go.gojiphysio.com` domain mapping on first run
    (and keeps them in sync after), then prints the one DNS record to add.
@@ -235,18 +239,21 @@ route working internally, but the published links are `go.gojiphysio.com/<slug>`
 `deploy_links.sh` does the same standup from Cloud Shell if you ever need a manual
 fallback, but the workflow is the primary path.
 
-Publish each channel's link as `https://go.gojiphysio.com/<slug>`:
+Publish each link as `https://go.gojiphysio.com/<slug>`:
 
-| Channel | Link |
-|---|---|
-| Instagram bio | `https://go.gojiphysio.com/ig` |
-| Website button | `https://go.gojiphysio.com/web` |
-| Google Business Profile | `https://go.gojiphysio.com/gbp` |
-| Paid ads | `https://go.gojiphysio.com/ads` |
-| Email signature | `https://go.gojiphysio.com/email` |
-| QR codes (print / events) | `https://go.gojiphysio.com/qr` |
+| Where | Link | Goes to |
+|---|---|---|
+| `bio.site/gojiphysio` "WhatsApp" button | `…/wa` | WhatsApp |
+| `bio.site/gojiphysio` "Book" button | `…/book` | Plato booking |
+| Website button | `…/web` | WhatsApp |
+| Google Business Profile | `…/gbp` | WhatsApp |
+| Paid ads | `…/ads` | WhatsApp |
+| Email signature | `…/email` | WhatsApp |
+| QR codes (print / events) | `…/qr` | WhatsApp |
 
-Edit wording or add a channel in `LINK_SLUGS` in `app.py`.
+(`…/ig` is also available for any direct Instagram link.) Edit wording, change a
+slug's destination, or add a channel in `LINK_SLUGS` in `app.py`. The Marketing
+tab shows **Click-to-WhatsApp** and **Booking-link clicks** as live cards.
 
 Front Desk portal (`frontdesk.gojiphysio.com`) — patient ops, no financials.
 Four tabs: **Today** (schedule), **Call list** (unconfirmed appts),
