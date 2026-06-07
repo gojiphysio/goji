@@ -74,12 +74,13 @@ gcloud run deploy "${SERVICE}" \
 # --- Map the subdomain ------------------------------------------------------
 echo
 echo "==> Mapping ${DOMAIN} -> ${SERVICE}"
+gcloud components install beta --quiet || true
 if gcloud beta run domain-mappings describe --domain="${DOMAIN}" \
-     --region="${REGION}" --project="${PROJECT}" >/dev/null 2>&1; then
+     --platform=managed --region="${REGION}" --project="${PROJECT}" --quiet >/dev/null 2>&1; then
   echo "    domain mapping already exists"
 else
   gcloud beta run domain-mappings create --service="${SERVICE}" \
-    --domain="${DOMAIN}" --region="${REGION}" --project="${PROJECT}"
+    --domain="${DOMAIN}" --platform=managed --region="${REGION}" --project="${PROJECT}" --quiet
   echo
   echo "    >> Add this DNS record on the gojiphysio.com zone:"
   echo "         frontdesk  CNAME  ghs.googlehosted.com."
