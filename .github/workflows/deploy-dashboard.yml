@@ -88,16 +88,20 @@ jobs:
       - name: Set up gcloud
         uses: google-github-actions/setup-gcloud@v2
 
-      - name: Deploy SQL views/tables + ensure follow-up write grant
+      - name: Deploy SQL views/tables + ensure front-desk write grants
         if: steps.changes.outputs.sql == 'true'
         working-directory: business-intelligence/scripts/sql
         run: |
           ./deploy_all.sh
-          # Idempotent: the dashboard SA needs write access to save follow-ups.
-          bq add-iam-policy-binding \
-            --member="serviceAccount:${DASHBOARD_SA}" \
-            --role="roles/bigquery.dataEditor" \
-            "${PROJECT}:marts.patient_followup_events"
+          # Idempotent: the dashboard SA needs table-level write on the two
+          # append-only event logs to save follow-ups and appointment
+          # confirmations. Everything else stays read-only.
+          for t in patient_followup_events appt_confirmation_events; do
+            bq add-iam-policy-binding \
+              --member="serviceAccount:${DASHBOARD_SA}" \
+              --role="roles/bigquery.dataEditor" \
+              "${PROJECT}:marts.${t}"
+          done
 
       - name: Deploy + run patients ingest job
         if: steps.changes.outputs.patients == 'true'
