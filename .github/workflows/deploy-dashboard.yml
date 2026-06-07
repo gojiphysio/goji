@@ -177,13 +177,16 @@ jobs:
             --quiet
           # Ensure the go.gojiphysio.com domain mapping exists (create once —
           # gojiphysio.com is already domain-verified via the other subdomains).
-          # --quiet keeps it non-interactive in CI. Non-fatal: a mapping hiccup
-          # must not fail the rest of the deploy.
-          if gcloud run domain-mappings describe --domain="${LINKS_DOMAIN}" \
-               --region "${REGION}" --project "${PROJECT}" --quiet >/dev/null 2>&1; then
+          # Managed Cloud Run domain-mappings live in the `beta` surface (the GA
+          # `gcloud run domain-mappings` is Anthos-only and rejects --region), so
+          # install beta non-interactively and pass --quiet. Non-fatal: a mapping
+          # hiccup must not fail the rest of the deploy.
+          gcloud components install beta --quiet || true
+          if gcloud beta run domain-mappings describe --domain="${LINKS_DOMAIN}" \
+               --platform=managed --region "${REGION}" --project "${PROJECT}" --quiet >/dev/null 2>&1; then
             echo "domain mapping ${LINKS_DOMAIN} already exists"
-          elif gcloud run domain-mappings create --service="${LINKS_SERVICE}" \
-                 --domain="${LINKS_DOMAIN}" --region "${REGION}" --project "${PROJECT}" --quiet; then
+          elif gcloud beta run domain-mappings create --service="${LINKS_SERVICE}" \
+                 --domain="${LINKS_DOMAIN}" --platform=managed --region "${REGION}" --project "${PROJECT}" --quiet; then
             echo ">> One-time DNS: add  go  CNAME  ghs.googlehosted.com.  on the"
             echo "   gojiphysio.com zone. TLS auto-provisions once it resolves."
           else

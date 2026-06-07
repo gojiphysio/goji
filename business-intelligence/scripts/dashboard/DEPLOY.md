@@ -179,8 +179,8 @@ Verify / inspect:
 
     dig +short dashboard.gojiphysio.com         # CNAME → ghs.googlehosted.com.
     curl -I https://dashboard.gojiphysio.com/   # 401 (auth required)
-    gcloud run domain-mappings describe \
-      --domain=dashboard.gojiphysio.com \
+    gcloud beta run domain-mappings describe \
+      --domain=dashboard.gojiphysio.com --platform=managed \
       --region=asia-southeast1 --project=goji-bi
 
 ## What this dashboard shows
