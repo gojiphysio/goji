@@ -927,8 +927,9 @@ def build_payload() -> dict:
     presets    = preset_ranges()
 
     # max_workers sized to cover every concurrent fetch this request fires:
-    # 8 top-level + 4 ranges × 5 metrics = 28. Round up to 32 for headroom.
-    with ThreadPoolExecutor(max_workers=32, thread_name_prefix="bq") as ex:
+    # 8 top-level + 4 ranges × 5 metrics + 3 previous-window KPI jobs = 31.
+    # Round up to 36 for headroom.
+    with ThreadPoolExecutor(max_workers=36, thread_name_prefix="bq") as ex:
         # Range-independent (or fixed-window) fetches.
         f_deferred      = ex.submit(fetch_deferred)
         f_cohorts       = ex.submit(fetch_cohorts)
@@ -952,6 +953,16 @@ def build_payload() -> dict:
                 "discounts":     ex.submit(fetch_discounts, start, end),
                 "treatment_mix": ex.submit(fetch_treatment_mix, start, end),
             }
+            # Trend indicators compare each range against the immediately
+            # preceding window of equal length (e.g. the 30 days before the
+            # last 30). "All time" has no comparable prior window, so it gets
+            # no previous-period KPIs.
+            if key == "all":
+                range_jobs[key]["prev_kpis"] = None
+            else:
+                prev_end   = start - timedelta(days=1)
+                prev_start = prev_end - (end - start)
+                range_jobs[key]["prev_kpis"] = ex.submit(fetch_kpis, prev_start, prev_end)
 
         # Block on results. If any future raised, .result() re-raises here and
         # the still-running ones get cancelled when the executor exits.
@@ -962,6 +973,7 @@ def build_payload() -> dict:
                 "start":         v["start"],
                 "end":           v["end"],
                 "kpis":          v["kpis"].result(),
+                "prev_kpis":     v["prev_kpis"].result() if v["prev_kpis"] else None,
                 "trends":        v["trends"].result(),
                 "clinicians":    v["clinicians"].result(),
                 "discounts":     v["discounts"].result(),

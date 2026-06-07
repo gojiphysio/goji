@@ -123,6 +123,17 @@
       font-variant-numeric: tabular-nums;
     }
     .kpi-sub { font-size: 12px; color: var(--ink-soft); margin-top: 4px; }
+    /* Stock-ticker style trend chip: change vs the previous equal-length
+       time range. Up is green, down is red, flat/maintain is muted. */
+    .kpi-trend {
+      display: inline-flex; align-items: center; gap: 4px;
+      margin-top: 8px; font-size: 12px; font-weight: 600;
+      font-variant-numeric: tabular-nums; line-height: 1;
+    }
+    .kpi-trend .kpi-trend-arrow { font-size: 10px; }
+    .kpi-trend.up   { color: var(--good); }
+    .kpi-trend.down { color: var(--goji); }
+    .kpi-trend.flat { color: var(--ink-soft); }
 
     section.q {
       background: var(--card); border: 1px solid var(--border);
@@ -812,11 +823,13 @@
       <div class="kpi-card">
         <div class="kpi-label">Bookings <span class="range-label">last 30 days</span> <span class="badge live">Live</span></div>
         <div class="kpi-value" id="kpi_bookings">-</div>
+        <div class="kpi-trend" id="kpi_bookings_trend" hidden></div>
         <div class="kpi-sub">Cash invoiced (packages + single visits)</div>
       </div>
       <div class="kpi-card">
         <div class="kpi-label">Recognised revenue <span class="range-label">last 30 days</span> <span class="badge live">Live</span></div>
         <div class="kpi-value" id="kpi_recognised">-</div>
+        <div class="kpi-trend" id="kpi_recognised_trend" hidden></div>
         <div class="kpi-sub">Revenue actually earned (sessions delivered)</div>
       </div>
       <div class="kpi-card">
@@ -827,11 +840,13 @@
       <div class="kpi-card">
         <div class="kpi-label">Active patients <span class="range-label">last 30 days</span> <span class="badge live">Live</span></div>
         <div class="kpi-value" id="kpi_active_patients">-</div>
+        <div class="kpi-trend" id="kpi_active_patients_trend" hidden></div>
         <div class="kpi-sub">Distinct patients with at least one session</div>
       </div>
       <div class="kpi-card">
         <div class="kpi-label">Visits <span class="range-label">last 30 days</span> <span class="badge live">Live</span></div>
         <div class="kpi-value" id="kpi_visits">-</div>
+        <div class="kpi-trend" id="kpi_visits_trend" hidden></div>
         <div class="kpi-sub">Sessions delivered (single-use + package burns)</div>
       </div>
     </div>
@@ -1469,16 +1484,19 @@
       <div class="kpi-card">
         <div class="kpi-label">Visits <span class="range-label">last 30 days</span> <span class="badge live">Live</span></div>
         <div class="kpi-value" id="mkt_visits">-</div>
+        <div class="kpi-trend" id="mkt_visits_trend" hidden></div>
         <div class="mkt-target">North-star · track up with active patients</div>
       </div>
       <div class="kpi-card">
         <div class="kpi-label">Active patients <span class="range-label">last 30 days</span> <span class="badge live">Live</span></div>
         <div class="kpi-value" id="mkt_active">-</div>
+        <div class="kpi-trend" id="mkt_active_trend" hidden></div>
         <div class="mkt-target">North-star · baseline ~72 · grow materially MoM</div>
       </div>
       <div class="kpi-card">
         <div class="kpi-label">Bookings <span class="range-label">last 30 days</span> <span class="badge live">Live</span></div>
         <div class="kpi-value" id="mkt_bookings">-</div>
+        <div class="kpi-trend" id="mkt_bookings_trend" hidden></div>
         <div class="mkt-target">North-star · dollar value of packs/sales</div>
       </div>
       <div class="kpi-card">
@@ -1941,12 +1959,50 @@
       renderBookingsVsRecognised(t);
     }
 
+    // Stock-ticker trend chip. Compares a metric to the same metric in the
+    // previous equal-length window (r.prev_kpis from the backend). previous
+    // being null/undefined — e.g. the "all time" range — hides the chip.
+    const TREND_FLAT_PCT = 0.5;  // |change| under this reads as "maintain"
+    function renderTrend(id, current, previous, label) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const ok = current != null && isFinite(current) &&
+                 previous != null && isFinite(previous);
+      if (!ok) { el.hidden = true; el.className = 'kpi-trend'; el.textContent = ''; return; }
+      el.hidden = false;
+      el.title = 'vs previous ' + ((label || 'period').toLowerCase());
+
+      let dir, arrow, text;
+      if (previous === 0) {
+        // No baseline to take a percentage against — report direction only.
+        if (current > 0)      { dir = 'up';   arrow = '▲'; text = 'new'; }
+        else if (current < 0) { dir = 'down'; arrow = '▼'; text = 'new'; }
+        else                  { dir = 'flat'; arrow = '—'; text = 'no change'; }
+      } else {
+        const pct = (current - previous) / Math.abs(previous) * 100;
+        if (pct > TREND_FLAT_PCT)       { dir = 'up';   arrow = '▲'; }
+        else if (pct < -TREND_FLAT_PCT) { dir = 'down'; arrow = '▼'; }
+        else                            { dir = 'flat'; arrow = '—'; }
+        const mag = Math.abs(pct);
+        const sign = pct > 0 ? '+' : pct < 0 ? '−' : '';
+        text = sign + (mag >= 100 ? mag.toFixed(0) : mag.toFixed(1)) + '%';
+      }
+      el.className = 'kpi-trend ' + dir;
+      el.innerHTML = '<span class="kpi-trend-arrow">' + arrow + '</span><span>' + text + '</span>';
+    }
+
     function renderKpis(r) {
       document.getElementById('kpi_bookings').textContent        = fmt$(r.kpis.bookings);
       document.getElementById('kpi_recognised').textContent      = fmt$(r.kpis.recognised);
       document.getElementById('kpi_active_patients').textContent = fmtInt(r.kpis.active_patients);
       document.getElementById('kpi_visits').textContent          = fmtInt(r.kpis.visits);
       document.getElementById('kpi_deferred').textContent        = fmt$(DATA.deferred);
+
+      const p = r.prev_kpis;
+      renderTrend('kpi_bookings_trend',        r.kpis.bookings,        p && p.bookings,        r.label);
+      renderTrend('kpi_recognised_trend',      r.kpis.recognised,      p && p.recognised,      r.label);
+      renderTrend('kpi_active_patients_trend', r.kpis.active_patients, p && p.active_patients, r.label);
+      renderTrend('kpi_visits_trend',          r.kpis.visits,          p && p.visits,          r.label);
     }
 
     function renderClinicians(rows) {
@@ -2333,6 +2389,11 @@
       document.getElementById('mkt_bookings').textContent = fmt$(r.kpis.bookings);
       if (DATA.demographics)
         document.getElementById('mkt_total_patients').textContent = fmtInt(DATA.demographics.total_patients);
+
+      const p = r.prev_kpis;
+      renderTrend('mkt_visits_trend',   r.kpis.visits,          p && p.visits,          r.label);
+      renderTrend('mkt_active_trend',   r.kpis.active_patients, p && p.active_patients, r.label);
+      renderTrend('mkt_bookings_trend', r.kpis.bookings,        p && p.bookings,        r.label);
 
       mktActiveChart = renderTrendChart(mktActiveChart, 'mktActiveChart',
         (r.trends && r.trends.active_patients) || [], GOJI, false);
