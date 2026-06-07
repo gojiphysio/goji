@@ -1120,39 +1120,35 @@ def record_followup(patient_id: str, status: str, *, note: str | None = None,
                     snooze_days: int | None = None,
                     updated_by: str | None = None) -> None:
     """Append one follow-up event (append-only; latest wins). Snoozing without
-    an explicit duration defaults to one week."""
-    snooze_until: str | None = None
+    an explicit duration defaults to one week.
+
+    Uses a parameterised DML INSERT (a query job), NOT a load job: query/DML
+    writes honour the dashboard SA's *table-level* dataEditor grant on
+    patient_followup_events, whereas load jobs effectively need dataset-level
+    write. This keeps least-privilege (no broad write on the marts dataset) and
+    is immediately visible to patient_followup_latest. Parameters avoid any
+    injection from the free-text note.
+    """
+    snooze_until: date | None = None
     if status == "snoozed":
         days = snooze_days if isinstance(snooze_days, int) and snooze_days > 0 else DEFAULT_SNOOZE_DAYS
-        snooze_until = (date.today() + timedelta(days=days)).isoformat()
+        snooze_until = date.today() + timedelta(days=days)
 
-    row = {
-        "event_id":     str(uuid.uuid4()),
-        "patient_id":   patient_id,
-        "status":       status,
-        "note":         (note or None),
-        "snooze_until": snooze_until,
-        "updated_by":   updated_by,
-        "updated_at":   datetime.now(timezone.utc).isoformat(),
-    }
-    # Explicit schema so the append never depends on autodetect (e.g. a row with
-    # a null snooze_until). Matches sql/marts/40_patient_followup_events.sql.
-    job_config = bigquery.LoadJobConfig(
-        source_format=bigquery.SourceFormat.NEWLINE_DELIMITED_JSON,
-        write_disposition=bigquery.WriteDisposition.WRITE_APPEND,
-        schema=[
-            bigquery.SchemaField("event_id",     "STRING",    mode="REQUIRED"),
-            bigquery.SchemaField("patient_id",   "STRING",    mode="REQUIRED"),
-            bigquery.SchemaField("status",       "STRING",    mode="REQUIRED"),
-            bigquery.SchemaField("note",         "STRING"),
-            bigquery.SchemaField("snooze_until", "DATE"),
-            bigquery.SchemaField("updated_by",   "STRING"),
-            bigquery.SchemaField("updated_at",   "TIMESTAMP", mode="REQUIRED"),
-        ],
-    )
-    _bq().load_table_from_json(
-        [row], f"{PROJECT}.marts.patient_followup_events", job_config=job_config,
-    ).result()
+    sql = f"""
+INSERT INTO `{PROJECT}.marts.patient_followup_events`
+  (event_id, patient_id, status, note, snooze_until, updated_by, updated_at)
+VALUES
+  (@event_id, @patient_id, @status, @note, @snooze_until, @updated_by, CURRENT_TIMESTAMP())
+"""
+    job_config = bigquery.QueryJobConfig(query_parameters=[
+        bigquery.ScalarQueryParameter("event_id",   "STRING", str(uuid.uuid4())),
+        bigquery.ScalarQueryParameter("patient_id", "STRING", patient_id),
+        bigquery.ScalarQueryParameter("status",     "STRING", status),
+        bigquery.ScalarQueryParameter("note",       "STRING", (note or None)),
+        bigquery.ScalarQueryParameter("snooze_until", "DATE", snooze_until),
+        bigquery.ScalarQueryParameter("updated_by", "STRING", updated_by),
+    ])
+    _bq().query(sql, job_config=job_config).result()
     with _cache_lock:
         _cache.pop("retention", None)
 
