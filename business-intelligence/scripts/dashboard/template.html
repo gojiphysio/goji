@@ -642,6 +642,20 @@
     }
 
     /* ===== Marketing tab ===== */
+    /* Marketing KPI grids. Defined as classes (not inline styles) so the
+       mobile breakpoints below actually win — inline grid-template-columns
+       would override the media queries and overflow on small screens.
+       Desktop: 4-up north-star, 3-up channels. Tablet: 2-up. Mobile: stacked. */
+    #page-marketing .kpi-row.mkt-kpis-4 { grid-template-columns: repeat(4, 1fr); }
+    #page-marketing .kpi-row.mkt-kpis-3 { grid-template-columns: repeat(3, 1fr); }
+    @media (max-width: 900px) {
+      #page-marketing .kpi-row.mkt-kpis-4,
+      #page-marketing .kpi-row.mkt-kpis-3 { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 640px) {
+      #page-marketing .kpi-row.mkt-kpis-4,
+      #page-marketing .kpi-row.mkt-kpis-3 { grid-template-columns: 1fr; }
+    }
     /* WIP channel cards: real layout, but visibly "no data yet" so no one
        mistakes a placeholder for a live number. */
     .mkt-target { font-size: 12px; color: var(--ink-soft); margin-top: 6px; }
@@ -1416,7 +1430,7 @@
     </div>
 
     <!-- North-star KPIs (live) -->
-    <div class="kpi-row" style="grid-template-columns: repeat(4, 1fr);">
+    <div class="kpi-row mkt-kpis-4">
       <div class="kpi-card">
         <div class="kpi-label">Visits, <span class="range-label">last 30 days</span> <span class="badge live">Live</span></div>
         <div class="kpi-value" id="mkt_visits">-</div>
@@ -1459,7 +1473,7 @@
     <section class="q">
       <h2>Channel leading indicators <span class="wip-tag">WIP</span></h2>
       <div class="subtitle">The campaign's leading indicators. No data source is wired up yet — these are the cards each integration will fill. Targets shown are from the strategy.</div>
-      <div class="kpi-row" style="grid-template-columns: repeat(3, 1fr);">
+      <div class="kpi-row mkt-kpis-3">
         <div class="kpi-card wip">
           <div class="kpi-label">Instagram reach / month</div>
           <div class="kpi-value">— pending integration</div>
