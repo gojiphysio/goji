@@ -96,10 +96,11 @@ jobs:
         working-directory: business-intelligence/scripts/sql
         run: |
           ./deploy_all.sh
-          # Idempotent: the dashboard SA needs table-level write on the two
-          # append-only event logs to save follow-ups and appointment
-          # confirmations. Everything else stays read-only.
-          for t in patient_followup_events appt_confirmation_events; do
+          # Idempotent: the dashboard SA needs table-level write on the
+          # append-only event logs — follow-ups, appointment confirmations,
+          # marketing operating tools, and click-to-WhatsApp link clicks.
+          # Everything else stays read-only.
+          for t in patient_followup_events appt_confirmation_events marketing_ops_events link_click_events; do
             bq add-iam-policy-binding \
               --member="serviceAccount:${DASHBOARD_SA}" \
               --role="roles/bigquery.dataEditor" \

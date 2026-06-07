@@ -27,7 +27,9 @@ from datetime import date, datetime, timedelta, timezone
 from functools import wraps
 from pathlib import Path
 
-from flask import Flask, Response, g, request
+from urllib.parse import quote
+
+from flask import Flask, Response, g, redirect, request
 from google.auth import default as google_auth_default
 from google.auth.transport.requests import AuthorizedSession
 from google.cloud import bigquery
@@ -110,6 +112,28 @@ def parse_promo_sku(item_given_id: str) -> tuple[str, int] | None:
     if not m:
         return None
     return m.group(1), int(m.group(2))
+
+# --- Click-to-WhatsApp tracking -------------------------------------------
+# WhatsApp is the primary CTA: customers message before booking (high price
+# point; they want to explain symptoms and discuss scheduling first). Every
+# outbound CTA across channels routes through the public GET /r/<slug> route,
+# which logs the click and 302-redirects to a wa.me deep link. The channel-
+# specific prefilled message also seeds the enquiry-log source, so each chat is
+# attributable. Adding an entry point = add a slug here (config-only).
+WHATSAPP_NUMBER = os.environ.get("WHATSAPP_NUMBER", "")  # E.164 digits, no '+'
+# Where /r/<slug> sends a click when WhatsApp isn't configured yet or the slug
+# is unknown, so a published link never dead-ends.
+WHATSAPP_FALLBACK_URL = os.environ.get("WHATSAPP_FALLBACK_URL",
+                                       "https://www.gojiphysio.com")
+# slug -> (label, prefilled WhatsApp message). Founder signs off on wording.
+LINK_SLUGS: dict[str, tuple[str, str]] = {
+    "web":   ("Website",   "Hi Goji! I have a question about physio (via your website)."),
+    "ig":    ("Instagram", "Hi Goji! I found you on Instagram and have a question about physio."),
+    "gbp":   ("Google",    "Hi Goji! I found you on Google and have a question about physio."),
+    "ads":   ("Paid ad",   "Hi Goji! I saw your ad and have a question about physio."),
+    "email": ("Email",     "Hi Goji! Following up from your email — I have a physio question."),
+    "qr":    ("QR / print", "Hi Goji! I scanned your QR code and have a question about physio."),
+}
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger("dashboard")
@@ -908,6 +932,56 @@ ORDER BY item_type, updated_at DESC
     } for r in rows]
 
 
+LINK_CLICK_TABLE = f"{PROJECT}.marts.link_click_events"
+
+
+def _record_link_click(slug: str, user_agent: str | None, referer: str | None) -> None:
+    """Append one click via the streaming insert API (insert_rows_json), NOT
+    DML: clicks are public/high-frequency, so this dodges BigQuery's 1,500
+    DML-statements-per-table-per-day cap and the latency of a query job.
+    Best-effort — never raise into the request; a logging hiccup must not break
+    the redirect."""
+    try:
+        row = {
+            "click_id":   str(uuid.uuid4()),
+            "slug":       (slug or "")[:64],
+            "clicked_at": datetime.now(timezone.utc).isoformat(),
+            "user_agent": ((user_agent or "")[:512] or None),
+            "referer":    ((referer or "")[:512] or None),
+        }
+        errors = _bq().insert_rows_json(LINK_CLICK_TABLE, [row])
+        if errors:
+            log.warning("link click insert returned errors: %s", errors)
+    except Exception as e:
+        log.warning("link click not recorded (slug=%s): %s", slug, e)
+
+
+def _record_link_click_async(slug: str, user_agent: str | None, referer: str | None) -> None:
+    """Fire-and-forget so the public redirect returns immediately."""
+    threading.Thread(target=_record_link_click,
+                     args=(slug, user_agent, referer), daemon=True).start()
+
+
+def fetch_link_clicks(start: date, end: date) -> dict:
+    """Click-to-WhatsApp counts for [start, end] — total + per-channel slug.
+
+    Degrades to zeros if the table isn't deployed yet (see DEPLOY.md), like
+    fetch_marketing_ops: the Marketing tab must still render.
+    """
+    try:
+        rows = _query(f"""
+SELECT slug, COUNT(*) AS clicks
+FROM `{PROJECT}.marts.link_click_events`
+WHERE DATE(clicked_at) BETWEEN '{start}' AND '{end}'
+GROUP BY slug
+""")
+    except Exception as e:
+        log.warning("link_click_events unavailable (run deploy_all.sh?): %s", e)
+        return {"total": 0, "by_slug": {}}
+    by_slug = {r["slug"]: _to_int(r["clicks"]) for r in rows}
+    return {"total": sum(by_slug.values()), "by_slug": by_slug}
+
+
 def build_payload() -> dict:
     """Fan all BQ queries out in parallel. ~27 queries; serial wall time was
     ~38s, parallel is limited by the slowest single query (~3-5s).
@@ -927,9 +1001,9 @@ def build_payload() -> dict:
     presets    = preset_ranges()
 
     # max_workers sized to cover every concurrent fetch this request fires:
-    # 8 top-level + 4 ranges × 5 metrics + 3 previous-window KPI jobs = 31.
-    # Round up to 36 for headroom.
-    with ThreadPoolExecutor(max_workers=36, thread_name_prefix="bq") as ex:
+    # 8 top-level + 4 ranges × 6 metrics + 3 ranges × 2 previous-window jobs = 38.
+    # Round up to 48 for headroom.
+    with ThreadPoolExecutor(max_workers=48, thread_name_prefix="bq") as ex:
         # Range-independent (or fixed-window) fetches.
         f_deferred      = ex.submit(fetch_deferred)
         f_cohorts       = ex.submit(fetch_cohorts)
@@ -952,17 +1026,20 @@ def build_payload() -> dict:
                 "clinicians":    ex.submit(fetch_clinicians, start, end),
                 "discounts":     ex.submit(fetch_discounts, start, end),
                 "treatment_mix": ex.submit(fetch_treatment_mix, start, end),
+                "link_clicks":   ex.submit(fetch_link_clicks, start, end),
             }
             # Trend indicators compare each range against the immediately
             # preceding window of equal length (e.g. the 30 days before the
             # last 30). "All time" has no comparable prior window, so it gets
             # no previous-period KPIs.
             if key == "all":
-                range_jobs[key]["prev_kpis"] = None
+                range_jobs[key]["prev_kpis"]        = None
+                range_jobs[key]["link_clicks_prev"] = None
             else:
                 prev_end   = start - timedelta(days=1)
                 prev_start = prev_end - (end - start)
-                range_jobs[key]["prev_kpis"] = ex.submit(fetch_kpis, prev_start, prev_end)
+                range_jobs[key]["prev_kpis"]        = ex.submit(fetch_kpis, prev_start, prev_end)
+                range_jobs[key]["link_clicks_prev"] = ex.submit(fetch_link_clicks, prev_start, prev_end)
 
         # Block on results. If any future raised, .result() re-raises here and
         # the still-running ones get cancelled when the executor exits.
@@ -972,12 +1049,14 @@ def build_payload() -> dict:
                 "label":         v["label"],
                 "start":         v["start"],
                 "end":           v["end"],
-                "kpis":          v["kpis"].result(),
-                "prev_kpis":     v["prev_kpis"].result() if v["prev_kpis"] else None,
-                "trends":        v["trends"].result(),
-                "clinicians":    v["clinicians"].result(),
-                "discounts":     v["discounts"].result(),
-                "treatment_mix": v["treatment_mix"].result(),
+                "kpis":             v["kpis"].result(),
+                "prev_kpis":        v["prev_kpis"].result() if v["prev_kpis"] else None,
+                "trends":           v["trends"].result(),
+                "clinicians":       v["clinicians"].result(),
+                "discounts":        v["discounts"].result(),
+                "treatment_mix":    v["treatment_mix"].result(),
+                "link_clicks":      v["link_clicks"].result(),
+                "link_clicks_prev": v["link_clicks_prev"].result() if v["link_clicks_prev"] else None,
             }
 
         return {
@@ -2028,6 +2107,29 @@ def api_frontdesk_confirm_appt() -> Response:
         return Response('{"error": "Could not save — please try again."}',
                         status=500, mimetype="application/json")
     return Response('{"ok": true}', mimetype="application/json")
+
+
+@app.route("/r/<slug>")
+def whatsapp_redirect(slug: str):
+    """PUBLIC (no @require_roles): trackable click-to-WhatsApp redirect.
+
+    Every channel's outbound CTA — website button, IG bio link, GBP link, ad
+    destinations, email signature, printed QR codes — points here. We log the
+    click (best-effort, off the request thread) and 302 to a wa.me deep link
+    whose prefilled message is channel-specific, which also seeds the enquiry-
+    log source. Unknown/unconfigured slugs fall back to the site so a published
+    link never dead-ends. This route is intentionally unauthenticated; the rest
+    of the dashboard stays founder-only via @require_roles.
+    """
+    slug = (slug or "").lower().strip()
+    entry = LINK_SLUGS.get(slug)
+    _record_link_click_async(slug, request.headers.get("User-Agent"),
+                             request.headers.get("Referer"))
+    if entry and WHATSAPP_NUMBER:
+        target = f"https://wa.me/{WHATSAPP_NUMBER}?text={quote(entry[1])}"
+    else:
+        target = WHATSAPP_FALLBACK_URL
+    return redirect(target, code=302)
 
 
 @app.route("/healthcheck")

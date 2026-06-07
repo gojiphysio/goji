@@ -1536,10 +1536,18 @@
       </div>
     </section>
 
-    <!-- Channel leading indicators (WIP) -->
+    <!-- Channel leading indicators -->
     <section class="q">
-      <h2>Channel leading indicators <span class="wip-tag">WIP</span></h2>
-      <div class="subtitle">The campaign's leading indicators. No data source is wired up yet — these are the cards each integration will fill. Targets shown are from the strategy.</div>
+      <h2>Channel leading indicators</h2>
+      <div class="subtitle">Leading indicators for the funnel. <strong>Click-to-WhatsApp</strong> is live — it's the intent signal (WhatsApp is the primary CTA). The rest fill as each integration lands; targets shown are from the strategy.</div>
+      <div class="kpi-row mkt-kpis-3">
+        <div class="kpi-card">
+          <div class="kpi-label">Click-to-WhatsApp <span class="range-label">last 30 days</span> <span class="badge live">Live</span></div>
+          <div class="kpi-value" id="mkt_wa_clicks">-</div>
+          <div class="kpi-trend" id="mkt_wa_clicks_trend" hidden></div>
+          <div class="mkt-target" id="mkt_wa_clicks_split">Intent signal · taps to start a WhatsApp chat</div>
+        </div>
+      </div>
       <div class="kpi-row mkt-kpis-3">
         <div class="kpi-card wip">
           <div class="kpi-label">Instagram reach / month</div>
@@ -1697,6 +1705,8 @@
     const SAGE    = '#7a9e6e';
     const COBALT  = '#3b5b8c';
     const MIX_COLORS = [GOJI, GOLD, SAGE, COBALT, NEUTRAL, '#9c6c2e'];
+    // Pretty labels for click-to-WhatsApp channel slugs (must match LINK_SLUGS in app.py).
+    const WA_SLUG_LABELS = { web:'Web', ig:'IG', gbp:'Google', ads:'Ads', email:'Email', qr:'QR' };
 
     /* ===== Marketing tab: static config =====
        Fixed campaign content from /marketing/. Only the *state* of these items
@@ -2408,6 +2418,22 @@
       renderTrend('mkt_visits_trend',   r.kpis.visits,          p && p.visits,          r.label);
       renderTrend('mkt_active_trend',   r.kpis.active_patients, p && p.active_patients, r.label);
       renderTrend('mkt_bookings_trend', r.kpis.bookings,        p && p.bookings,        r.label);
+
+      // Click-to-WhatsApp (intent) — total + per-channel split.
+      const lc = r.link_clicks, lcp = r.link_clicks_prev;
+      const waEl = document.getElementById('mkt_wa_clicks');
+      const splitEl = document.getElementById('mkt_wa_clicks_split');
+      if (lc) {
+        waEl.textContent = fmtInt(lc.total);
+        const parts = Object.entries(lc.by_slug || {})
+          .sort((a, b) => b[1] - a[1])
+          .map(([s, n]) => `${WA_SLUG_LABELS[s] || s} ${fmtInt(n)}`);
+        splitEl.textContent = parts.length ? parts.join(' · ')
+          : 'Intent signal · taps to start a WhatsApp chat';
+      } else {
+        waEl.textContent = '—';
+      }
+      renderTrend('mkt_wa_clicks_trend', lc && lc.total, lcp && lcp.total, r.label);
 
       mktActiveChart = renderTrendChart(mktActiveChart, 'mktActiveChart',
         (r.trends && r.trends.active_patients) || [], GOJI, false);
