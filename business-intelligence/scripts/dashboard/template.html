@@ -121,19 +121,24 @@
     .kpi-value {
       font-size: 28px; font-weight: 600; margin-top: 8px; letter-spacing: -0.01em;
       font-variant-numeric: tabular-nums;
+      display: inline-block; vertical-align: baseline;
     }
     .kpi-sub { font-size: 12px; color: var(--ink-soft); margin-top: 4px; }
-    /* Stock-ticker style trend chip: change vs the previous equal-length
-       time range. Up is green, down is red, flat/maintain is muted. */
+    /* Stock-ticker style trend chip: change vs the previous equal-length time
+       range, sitting to the right of the value (baseline-aligned). Up is
+       green, down is red, flat/maintain is muted. */
     .kpi-trend {
       display: inline-flex; align-items: center; gap: 4px;
-      margin-top: 8px; font-size: 12px; font-weight: 600;
+      margin-left: 8px; vertical-align: baseline;
+      font-size: 12px; font-weight: 600;
       font-variant-numeric: tabular-nums; line-height: 1;
     }
     .kpi-trend .kpi-trend-arrow { font-size: 10px; }
     .kpi-trend.up   { color: var(--good); }
     .kpi-trend.down { color: var(--goji); }
     .kpi-trend.flat { color: var(--ink-soft); }
+    /* The display:inline-flex above would otherwise defeat the hidden attr. */
+    .kpi-trend[hidden] { display: none; }
 
     section.q {
       background: var(--card); border: 1px solid var(--border);
@@ -280,7 +285,7 @@
       .nav-full { display: none; }
       .nav-short { display: inline; }
       .page-nav {
-        display: flex; max-width: 100%;
+        display: inline-flex; max-width: 100%;
         overflow-x: auto; -webkit-overflow-scrolling: touch;
         scrollbar-width: none;
       }
@@ -299,12 +304,14 @@
       .chart-wrap.small { height: 200px; }
       /* Every data table becomes its own horizontal scroller on mobile so a
          wide table swipes instead of overflowing the page. display:block wraps
-         the row groups in an anonymous table box (columns stay aligned) while
-         the table box itself scrolls. Works for any table without needing a
-         .table-scroll wrapper, so new tables get this for free. */
+         the row groups in an anonymous table box (columns stay aligned). The
+         base "width:100%" is overridden to max-content so the table keeps its
+         natural width and scrolls, rather than cramming columns to fit. Works
+         for any table without a .table-scroll wrapper, so new tables get this
+         for free. */
       table {
         font-size: 12px;
-        display: block; max-width: 100%;
+        display: block; width: max-content; max-width: 100%;
         overflow-x: auto; -webkit-overflow-scrolling: touch;
       }
       th { padding: 6px 8px; font-size: 11px; }
