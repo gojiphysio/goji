@@ -12,7 +12,8 @@ staff** (patient ops only).
   endpoints, and `/refresh`.
 - `template.html` — the founder dashboard markup with a `__DATA_PLACEHOLDER__`
   that `app.py` fills with live data. Three pages: Overview, P&L, Commission.
-- `admin.html` — the staff admin page: the patient retention worklist.
+- `admin.html` — the staff admin page: today's schedule, the reminder-call
+  list, package alerts, and the patient retention worklist.
 - `tests/` — pytest unit tests for the role boundary and the actionability rule.
 - `Dockerfile`, `requirements.txt`, `.dockerignore` — Cloud Run build inputs.
 - `static/` — brand image served by the page.
@@ -29,14 +30,24 @@ Founder dashboard (`/`):
   (Last 30D / current cycle / previous cycle / custom), and XLSX export.
 - **Commission** — per-clinician commission calculator over real appointment data.
 
-Staff admin (`/admin`, no financials):
+Staff admin (`/admin`, no financials) — four tabs:
 
+- **Today** — today's appointments, time-ordered, with `NEW` (first visit) and
+  confirmed/unconfirmed badges, a session-balance column, and a clinician
+  filter. Reads `marts.fct_upcoming_appointments` (Plato data, ≤15-min lag).
+- **Call list** — unconfirmed appointments in the next 72h, with a one-click
+  **Confirm** that appends to `marts.appt_confirmation_events`.
+- **Package alerts** — patients with ≤2 prepaid sessions left
+  (`marts.fct_package_balance`), most urgent (0) first, for renewal calls.
 - **Retention worklist** — patients tiered by time since last visit
   (green ≤1wk / yellow >1wk / orange >2wk / red >4wk), with the front desk's
   contacted/snooze/dismiss actions and a Dismissed tab. Patients with a future
-  appointment booked are excluded. Name + phone come from BigQuery
-  (`marts.dim_patient_contact`, written by `plato-patients-ingest`); a header
-  line shows patients active in the last 12 months.
+  appointment booked are excluded; a header line shows patients active in the
+  last 12 months.
+
+Name + phone everywhere come from BigQuery (`marts.dim_patient_contact`,
+written by `plato-patients-ingest`) and are shown to the front desk only —
+never stored on the financial dashboard.
 
 ## Run locally
 

@@ -82,13 +82,16 @@ Deploy the follow-up state objects (idempotent; the events table is
 
     cd ../sql && ./deploy_all.sh
 
-Grant the dashboard SA write on **only** the follow-up table (so it can append
-"contacted/snoozed/dismissed" events; everything else stays read-only):
+Grant the dashboard SA write on **only** the two append-only event tables (so
+it can append "contacted/snoozed/dismissed" follow-up events and appointment
+confirmations; everything else stays read-only):
 
-    bq add-iam-policy-binding \
-      --member="serviceAccount:dashboard-sa@goji-bi.iam.gserviceaccount.com" \
-      --role="roles/bigquery.dataEditor" \
-      goji-bi:marts.patient_followup_events
+    for t in patient_followup_events appt_confirmation_events; do
+      bq add-iam-policy-binding \
+        --member="serviceAccount:dashboard-sa@goji-bi.iam.gserviceaccount.com" \
+        --role="roles/bigquery.dataEditor" \
+        "goji-bi:marts.$t"
+    done
 
 ## Read the password
 
@@ -126,18 +129,22 @@ name + phone from `marts.dim_patient_contact` (populated by
 `plato-patients-ingest`). Both come from BigQuery, so no `PLATO_API_KEY` is
 mounted here.
 
-## If the worklist can't save (HTTP 500 on dismiss/contacted/snooze)
+## If a front-desk action can't save (HTTP 500 on dismiss/contacted/snooze/confirm)
 
-The dashboard SA must have **write** access to the follow-up table. `deploy_admin.sh`
-grants and verifies this, but if you ever see a save error, grant it directly:
+The dashboard SA must have **write** access to the relevant append-only table:
+`marts.patient_followup_events` (retention worklist) and
+`marts.appt_confirmation_events` (call-list confirmations). `deploy_admin.sh`
+grants and verifies both, but if you ever see a save error, grant them directly:
 
-    bq add-iam-policy-binding \
-      --member="serviceAccount:dashboard-sa@goji-bi.iam.gserviceaccount.com" \
-      --role="roles/bigquery.dataEditor" \
-      goji-bi:marts.patient_followup_events
+    for t in patient_followup_events appt_confirmation_events; do
+      bq add-iam-policy-binding \
+        --member="serviceAccount:dashboard-sa@goji-bi.iam.gserviceaccount.com" \
+        --role="roles/bigquery.dataEditor" \
+        "goji-bi:marts.$t"
+    done
 
-(or in the Console: BigQuery → goji-bi → marts → patient_followup_events →
-Share → add the SA as **BigQuery Data Editor**).
+(or in the Console: BigQuery → goji-bi → marts → <table> → Share → add the SA
+as **BigQuery Data Editor**).
 
 ## Force a cache refresh without redeploying
 

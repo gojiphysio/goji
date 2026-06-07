@@ -67,29 +67,38 @@ echo
 echo "==> Step 2/5: building the behind-the-scenes data"
 ( cd "${HERE}/../sql" && ./deploy_all.sh )
 
-# --- Step 3: permission to save follow-up actions ----------------------------
+# --- Step 3: permission to save front-desk actions ---------------------------
+# The dashboard writes two append-only event logs: follow-up actions (retention
+# worklist) and appointment confirmations (call list). Each needs a table-level
+# dataEditor grant on the SA — we keep it table-level, not dataset-wide, for
+# least privilege.
 echo
-echo "==> Step 3/5: allowing the dashboard to save follow-up actions"
-bq add-iam-policy-binding \
-  --member="serviceAccount:${SA}" \
-  --role="roles/bigquery.dataEditor" \
-  "${PROJECT}:marts.patient_followup_events" >/dev/null 2>&1 || true
-# Verify the binding actually took. Its absence is exactly what causes
-# "Could not save (HTTP 500)" when the front desk dismisses a patient, so we
-# stop loudly rather than let that ship silently.
-if bq get-iam-policy "${PROJECT}:marts.patient_followup_events" 2>/dev/null | grep -q "${SA}"; then
-  echo "    write permission confirmed"
-else
-  echo
-  echo "    !! Could NOT give the dashboard permission to save — and saving WILL fail."
-  echo "       Fix it once in the Cloud Console (about a minute):"
-  echo "         BigQuery  >  ${PROJECT}  >  marts  >  patient_followup_events"
-  echo "         > Share  >  Add principal"
-  echo "         principal:  ${SA}"
-  echo "         role:       BigQuery Data Editor    > Save"
-  echo "       Then re-run this script. Stopping here so this isn't missed."
-  exit 1
-fi
+echo "==> Step 3/5: allowing the dashboard to save front-desk actions"
+grant_editor() {
+  local table="$1" label="$2"
+  bq add-iam-policy-binding \
+    --member="serviceAccount:${SA}" \
+    --role="roles/bigquery.dataEditor" \
+    "${PROJECT}:marts.${table}" >/dev/null 2>&1 || true
+  # Verify the binding actually took. Its absence is exactly what causes
+  # "Could not save (HTTP 500)" when the front desk takes an action, so we
+  # stop loudly rather than let that ship silently.
+  if bq get-iam-policy "${PROJECT}:marts.${table}" 2>/dev/null | grep -q "${SA}"; then
+    echo "    write permission confirmed (${label})"
+  else
+    echo
+    echo "    !! Could NOT give the dashboard permission to save ${label} — saving WILL fail."
+    echo "       Fix it once in the Cloud Console (about a minute):"
+    echo "         BigQuery  >  ${PROJECT}  >  marts  >  ${table}"
+    echo "         > Share  >  Add principal"
+    echo "         principal:  ${SA}"
+    echo "         role:       BigQuery Data Editor    > Save"
+    echo "       Then re-run this script. Stopping here so this isn't missed."
+    exit 1
+  fi
+}
+grant_editor patient_followup_events    "follow-up actions"
+grant_editor appt_confirmation_events   "appointment confirmations"
 
 # --- Step 4: refresh patient names ------------------------------------------
 # Names + phones now come from BigQuery (marts.dim_patient_contact), filled by

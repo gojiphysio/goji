@@ -1179,6 +1179,192 @@ VALUES
         _cache.pop("retention", None)
 
 
+# Staff admin dashboard: today's schedule + call list + package alerts --------
+#
+# The "Front Desk replaces Plato" view (Roadmap Phase 2). All three read from
+# marts.fct_upcoming_appointments / marts.fct_package_balance (PII-free) and
+# hydrate name + phone live from marts.dim_patient_contact at render time — the
+# same boundary as the retention worklist. Confirmation state is OUR event log
+# (marts.appt_confirmation_events); Plato has no confirmation field.
+
+# Patients with this many prepaid sessions left (or fewer) show on Package
+# Alerts. 0 first — they've run out and most urgently need a renewal call.
+PACKAGE_ALERT_THRESHOLD = 2
+
+
+def _clinician_name(clinician_id: str | None) -> str:
+    return PROVIDERS.get(clinician_id, clinician_id or "—")
+
+
+def partition_upcoming(appts: list[dict]) -> tuple[list[dict], list[dict]]:
+    """Split upcoming appointments into the two tab views.
+
+    schedule = today's real (non-cancelled) appointments — what the front desk
+               sees on the "Today" tab.
+    calls    = real (non-cancelled) appointments still awaiting confirmation
+               anywhere in the window — the reminder-call list. A confirmed or
+               cancelled appointment is never a call.
+    Pure so the rule is unit-tested without touching BigQuery.
+    """
+    schedule = [a for a in appts if a["is_today"] and not a["is_cancelled"]]
+    calls    = [a for a in appts if not a["is_cancelled"] and not a["confirmed"]]
+    return schedule, calls
+
+
+def fetch_upcoming() -> dict:
+    """Today's schedule + the unconfirmed call list, in one query.
+
+    Both tabs read the same source — appointments from now through the next 72h
+    (marts.fct_upcoming_appointments) — so we fetch once and shape twice:
+      schedule: today's non-cancelled appointments, time-ordered.
+      calls:    non-cancelled, still-unconfirmed appointments in the window.
+    Confirmation comes from marts.appt_confirmation_latest; name + phone from
+    marts.dim_patient_contact (no live Plato calls).
+    """
+    sql = f"""
+SELECT
+  u.appointment_id,
+  u.appt_date,
+  u.appt_time,
+  u.start_at,
+  u.patient_id,
+  u.clinician_id,
+  u.service_name,
+  u.is_cancelled,
+  u.is_first_visit,
+  u.sessions_remaining,
+  u.initial_lastname,
+  u.age_band,
+  (u.appt_date = CURRENT_DATE())       AS is_today,
+  c.full_name                          AS full_name,
+  c.phone                              AS phone,
+  (cf.appointment_id IS NOT NULL)      AS confirmed,
+  cf.confirmed_at                      AS confirmed_at,
+  cf.confirmed_by                      AS confirmed_by
+FROM `{PROJECT}.marts.fct_upcoming_appointments` u
+LEFT JOIN `{PROJECT}.marts.dim_patient_contact`      c  USING (patient_id)
+LEFT JOIN `{PROJECT}.marts.appt_confirmation_latest` cf USING (appointment_id)
+ORDER BY u.start_at
+"""
+    appts: list[dict] = []
+    for r in _query(sql):
+        appts.append({
+            "appointment_id":     r["appointment_id"],
+            "appt_date":          r["appt_date"].isoformat() if r["appt_date"] else None,
+            "time":               r["appt_time"] or "—",
+            "is_today":           bool(r["is_today"]),
+            "patient_id":         r["patient_id"],
+            "clinician":          _clinician_name(r["clinician_id"]),
+            "service":            r["service_name"] or "—",
+            "is_cancelled":       bool(r["is_cancelled"]),
+            "is_first_visit":     bool(r["is_first_visit"]),
+            "sessions_remaining": _to_int(r["sessions_remaining"]) if r["sessions_remaining"] is not None else None,
+            "name":               r.get("full_name") or r.get("initial_lastname") or "—",
+            "phone":              r.get("phone"),
+            "age_band":           r["age_band"],
+            "confirmed":          bool(r["confirmed"]),
+        })
+
+    schedule, calls = partition_upcoming(appts)
+    return {
+        "generated_at": datetime.now().astimezone().isoformat(timespec="seconds"),
+        "schedule":     schedule,
+        "calls":        calls,
+    }
+
+
+def fetch_package_alerts() -> dict:
+    """Patients with PACKAGE_ALERT_THRESHOLD or fewer prepaid sessions left.
+
+    Sorted by urgency: fewest sessions first (0 = ran out), then most-recently
+    seen first so the front desk reaches people still in the habit of coming in.
+    sessions_remaining is NULL for patients whose pack size we can't read from
+    the SKU; those are excluded by fct_package_balance's filter here, so we
+    never raise a false 'about to run out' alarm.
+    """
+    sql = f"""
+SELECT
+  pb.patient_id,
+  pb.sessions_remaining,
+  pb.last_visit_date,
+  p.initial_lastname,
+  p.age_band,
+  p.primary_doctor,
+  c.full_name AS full_name,
+  c.phone     AS phone
+FROM `{PROJECT}.marts.fct_package_balance` pb
+LEFT JOIN `{PROJECT}.marts.dim_patient`         p USING (patient_id)
+LEFT JOIN `{PROJECT}.marts.dim_patient_contact` c USING (patient_id)
+WHERE pb.sessions_remaining IS NOT NULL
+  AND pb.sessions_remaining <= {PACKAGE_ALERT_THRESHOLD}
+ORDER BY pb.sessions_remaining ASC, pb.last_visit_date DESC
+"""
+    patients = [{
+        "patient_id":         r["patient_id"],
+        "sessions_remaining": _to_int(r["sessions_remaining"]),
+        "last_visit":         r["last_visit_date"].isoformat() if r["last_visit_date"] else None,
+        "clinician":          _clinician_name(r["primary_doctor"]),
+        "name":               r.get("full_name") or r.get("initial_lastname") or "—",
+        "phone":              r.get("phone"),
+        "age_band":           r["age_band"],
+    } for r in _query(sql)]
+    return {
+        "generated_at": datetime.now().astimezone().isoformat(timespec="seconds"),
+        "patients":     patients,
+    }
+
+
+def get_upcoming() -> dict:
+    """Cached accessor for today's schedule + call list (same TTL as the rest)."""
+    now = time.time()
+    with _cache_lock:
+        entry = _cache.get("upcoming")
+        if entry and now - entry[0] < CACHE_TTL:
+            return entry[1]
+    data = fetch_upcoming()
+    with _cache_lock:
+        _cache["upcoming"] = (now, data)
+    return data
+
+
+def get_package_alerts() -> dict:
+    """Cached accessor for the package-alerts list (same TTL as the rest)."""
+    now = time.time()
+    with _cache_lock:
+        entry = _cache.get("package_alerts")
+        if entry and now - entry[0] < CACHE_TTL:
+            return entry[1]
+    data = fetch_package_alerts()
+    with _cache_lock:
+        _cache["package_alerts"] = (now, data)
+    return data
+
+
+def record_confirmation(appointment_id: str, *, confirmed_by: str | None = None) -> None:
+    """Append one appointment-confirmation event (append-only; latest wins).
+
+    Same parameterised DML-INSERT pattern as record_followup: a query/DML write
+    honours the dashboard SA's table-level dataEditor grant on
+    appt_confirmation_events, so we keep least-privilege (no dataset-wide write).
+    Visible to appt_confirmation_latest immediately; invalidates the upcoming
+    cache so the call list reflects it on reload.
+    """
+    sql = f"""
+INSERT INTO `{PROJECT}.marts.appt_confirmation_events`
+  (event_id, appointment_id, confirmed_by, confirmed_at)
+VALUES
+  (@event_id, @appointment_id, @confirmed_by, CURRENT_TIMESTAMP())
+"""
+    job_config = bigquery.QueryJobConfig(query_parameters=[
+        bigquery.ScalarQueryParameter("event_id",       "STRING", str(uuid.uuid4())),
+        bigquery.ScalarQueryParameter("appointment_id", "STRING", appointment_id),
+        bigquery.ScalarQueryParameter("confirmed_by",   "STRING", confirmed_by),
+    ])
+    _bq().query(sql, job_config=job_config).result()
+    with _cache_lock:
+        _cache.pop("upcoming", None)
+
+
 def fetch_pl_window(start: date, end: date) -> dict:
     """Recompute the P&L revenue + payment fee inputs for an arbitrary window.
 
@@ -1560,6 +1746,8 @@ def refresh() -> Response:
     with _cache_lock:
         _cache.pop("payload", None)
         _cache.pop("retention", None)
+        _cache.pop("upcoming", None)
+        _cache.pop("package_alerts", None)
     if DEV_MODE and CACHE_DIR.exists():
         for f in CACHE_DIR.glob("*.json"):
             f.unlink()
@@ -1609,6 +1797,65 @@ def api_admin_followup() -> Response:
                 json.dumps({"error": "The dashboard isn't allowed to save yet — its "
                             "service account needs write access to "
                             "marts.patient_followup_events. See DEPLOY.md."}),
+                status=403, mimetype="application/json")
+        return Response('{"error": "Could not save — please try again."}',
+                        status=500, mimetype="application/json")
+    return Response('{"ok": true}', mimetype="application/json")
+
+
+@app.route("/api/admin/schedule")
+@require_roles("founder", "staff")
+def api_admin_schedule() -> Response:
+    """Today's appointments, time-ordered, with NEW / confirmation flags."""
+    return Response(json.dumps(get_upcoming(), default=str),
+                    mimetype="application/json")
+
+
+@app.route("/api/admin/calls")
+@require_roles("founder", "staff")
+def api_admin_calls() -> Response:
+    """Unconfirmed appointments in the next 72h (the reminder-call list).
+
+    Shares the cached upcoming blob with /api/admin/schedule; returns just the
+    call list so the Call List tab can fetch independently.
+    """
+    data = get_upcoming()
+    return Response(json.dumps({"generated_at": data["generated_at"],
+                                "calls": data["calls"]}, default=str),
+                    mimetype="application/json")
+
+
+@app.route("/api/admin/package_alerts")
+@require_roles("founder", "staff")
+def api_admin_package_alerts() -> Response:
+    """Patients with <=2 prepaid sessions left, most urgent (0) first."""
+    return Response(json.dumps(get_package_alerts(), default=str),
+                    mimetype="application/json")
+
+
+@app.route("/api/admin/confirm_appt", methods=["POST"])
+@require_roles("founder", "staff")
+def api_admin_confirm_appt() -> Response:
+    """Confirm an appointment (after the reminder call).
+
+    Body: {appointment_id}. Appends one confirmation event; the call list drops
+    it on the next reload.
+    """
+    body = request.get_json(silent=True) or {}
+    appt_id = (body.get("appointment_id") or "").strip()
+    if not appt_id:
+        return Response('{"error": "appointment_id is required"}',
+                        status=400, mimetype="application/json")
+    try:
+        record_confirmation(appt_id, confirmed_by=getattr(g, "user", None))
+    except Exception as e:
+        log.exception("confirmation write failed: %s", e)
+        msg = str(e).lower()
+        if "permission" in msg or "denied" in msg or "403" in msg or "access" in msg:
+            return Response(
+                json.dumps({"error": "The dashboard isn't allowed to save yet — its "
+                            "service account needs write access to "
+                            "marts.appt_confirmation_events. See DEPLOY.md."}),
                 status=403, mimetype="application/json")
         return Response('{"error": "Could not save — please try again."}',
                         status=500, mimetype="application/json")

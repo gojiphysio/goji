@@ -52,8 +52,8 @@ def test_staff_cannot_match_founder():
     assert app.resolve_role("frontdesk", "staff-pw") != "founder"
 
 def test_unset_pair_never_matches_empty(monkeypatch):
-    monkeypatch.setattr(app, "STAFF_USER", "")
-    monkeypatch.setattr(app, "STAFF_PASS", "")
+    # With no staff credentials configured, empty creds must never resolve.
+    monkeypatch.setattr(app, "STAFF_CREDS", [])
     assert app.resolve_role("", "") is None
 
 
@@ -127,3 +127,69 @@ def test_founder_can_reach_admin(client):
 
 def test_healthcheck_open(client):
     assert client.get("/healthcheck").status_code == 200
+
+
+# --- Phase 2: today's schedule / call list / package alerts -----------------
+
+def test_clinician_name_maps_known_ids():
+    assert app._clinician_name("PCN") == "Claire Ng"
+    assert app._clinician_name("PCL") == "Cheryl Long"
+
+def test_clinician_name_falls_back():
+    # Unknown id passes through; None becomes an em-dash placeholder.
+    assert app._clinician_name("PZZ") == "PZZ"
+    assert app._clinician_name(None) == "—"
+
+
+def _appt(appointment_id, *, is_today, is_cancelled=False, confirmed=False):
+    return {"appointment_id": appointment_id, "is_today": is_today,
+            "is_cancelled": is_cancelled, "confirmed": confirmed}
+
+def test_partition_schedule_is_todays_non_cancelled():
+    appts = [
+        _appt("a", is_today=True),
+        _appt("b", is_today=True, is_cancelled=True),   # cancelled -> not on schedule
+        _appt("c", is_today=False),                     # tomorrow -> not on schedule
+    ]
+    schedule, _ = app.partition_upcoming(appts)
+    assert [a["appointment_id"] for a in schedule] == ["a"]
+
+def test_partition_calls_are_unconfirmed_non_cancelled_in_window():
+    appts = [
+        _appt("a", is_today=True),                      # today, unconfirmed -> call
+        _appt("b", is_today=False),                     # tomorrow, unconfirmed -> call
+        _appt("c", is_today=True, confirmed=True),      # confirmed -> not a call
+        _appt("d", is_today=False, is_cancelled=True),  # cancelled -> not a call
+    ]
+    _, calls = app.partition_upcoming(appts)
+    assert sorted(a["appointment_id"] for a in calls) == ["a", "b"]
+
+def test_confirmed_today_appt_stays_on_schedule_but_off_calls():
+    appts = [_appt("a", is_today=True, confirmed=True)]
+    schedule, calls = app.partition_upcoming(appts)
+    assert [a["appointment_id"] for a in schedule] == ["a"]
+    assert calls == []
+
+
+# --- Phase 2 route gating ---------------------------------------------------
+
+@pytest.mark.parametrize("path", [
+    "/api/admin/schedule", "/api/admin/calls", "/api/admin/package_alerts",
+])
+def test_phase2_endpoints_require_auth(client, path):
+    assert client.get(path).status_code == 401
+
+def test_confirm_appt_requires_auth(client):
+    assert client.post("/api/admin/confirm_appt", json={"appointment_id": "x"}).status_code == 401
+
+def test_confirm_appt_bad_creds_blocked(client):
+    resp = client.post("/api/admin/confirm_appt",
+                       headers=_auth("frontdesk", "wrong"), json={"appointment_id": "x"})
+    assert resp.status_code == 401
+
+def test_confirm_appt_missing_id_is_400(client):
+    # Valid staff auth, but no appointment_id — validation rejects before any BQ
+    # work, so this exercises the guard without touching BigQuery.
+    resp = client.post("/api/admin/confirm_appt",
+                       headers=_auth("frontdesk", "staff-pw"), json={})
+    assert resp.status_code == 400

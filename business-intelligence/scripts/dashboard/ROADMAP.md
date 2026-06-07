@@ -11,12 +11,36 @@
 
 ---
 
-## 🔜 Phase 2 — Today's Schedule on `frontdesk.*`
+## ✅ Phase 2 — Today's Schedule on `frontdesk.*` (done)
 
 ### Goal
 
 Replace the need to keep Plato open separately. Front desk (and clinicians) see
 today's appointments in one place, with new-patient flags and confirmation status.
+
+### What shipped
+
+- New marts: `fct_upcoming_appointments` (today + next 72h, PII-free),
+  `fct_package_balance` (prepaid sessions left per patient), and the append-only
+  `appt_confirmation_events` table (+ `appt_confirmation_latest` view). All
+  picked up automatically by `deploy_all.sh`.
+- Routes in `app.py`: `GET /api/admin/schedule`, `GET /api/admin/calls`,
+  `GET /api/admin/package_alerts`, `POST /api/admin/confirm_appt` — all gated
+  `@require_roles("founder", "staff")`. Name/phone hydrated from
+  `marts.dim_patient_contact` at render time, never stored.
+- `admin.html` now has four top-level tabs: **Today**, **Call list**,
+  **Package alerts**, **Retention**.
+- `deploy_admin.sh` grants the dashboard SA table-level `dataEditor` on
+  `appt_confirmation_events` (alongside the existing follow-up table).
+
+**Open question — resolved.** Data freshness: a ≤15-min lag from Plato is fine
+for a same-day schedule, so the schedule reads BigQuery as-is (no live Plato
+fetch). **Sessions-remaining caveat:** pack size is read from the SKU
+(`-NN` suffix); patients holding a package whose pack size isn't encoded are
+left off Package Alerts rather than shown a guessed count — fold in a pack-size
+reference table to make every package exact.
+
+### Original plan (for reference)
 
 ### 1. New BigQuery mart: `fct_upcoming_appointments`
 
