@@ -242,8 +242,17 @@
       .brand-img { height: 36px; }
       .brand-name { font-size: 17px; }
       .brand-sub { font-size: 12px; }
-      .page-nav { display: flex; width: 100%; }
-      .page-nav button { flex: 1; padding: 8px 10px; font-size: 12px; }
+      /* Tab bar: short labels, single row that swipes horizontally if it
+         overflows, instead of squeezing all four tabs to fit. */
+      .nav-full { display: none; }
+      .nav-short { display: inline; }
+      .page-nav {
+        display: flex; max-width: 100%;
+        overflow-x: auto; -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+      }
+      .page-nav::-webkit-scrollbar { display: none; }
+      .page-nav button { flex: 0 0 auto; padding: 8px 14px; font-size: 12px; white-space: nowrap; }
       .page-toolbar { justify-content: flex-start; }
       .date-selector button { padding: 6px 10px; font-size: 12px; }
       .kpi-row { grid-template-columns: 1fr; gap: 10px; margin-bottom: 18px; }
@@ -277,6 +286,8 @@
     .page-nav button + button { border-left: 1px solid var(--border); }
     .page-nav button.active + button,
     .page-nav button + button.active { border-left-color: transparent; }
+    /* Desktop shows full tab labels; the short variants kick in on mobile. */
+    .nav-short { display: none; }
     .page[hidden] { display: none; }
 
     /* --- Commission calculator --- */
@@ -738,8 +749,8 @@
 
     <nav class="page-nav" role="tablist" aria-label="Page">
       <button type="button" data-page="dashboard" class="active">Overview</button>
-      <button type="button" data-page="pl">Profit &amp; Loss</button>
-      <button type="button" data-page="commission">Commission Calculator</button>
+      <button type="button" data-page="pl"><span class="nav-full">Profit &amp; Loss</span><span class="nav-short">P&amp;L</span></button>
+      <button type="button" data-page="commission"><span class="nav-full">Commission Calculator</span><span class="nav-short">Commission</span></button>
       <button type="button" data-page="marketing">Marketing</button>
     </nav>
 
