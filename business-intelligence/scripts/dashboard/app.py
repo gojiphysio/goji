@@ -864,6 +864,50 @@ ORDER BY invoice_date DESC, invoice_label DESC
     return result
 
 
+# Marketing tab — operating-tool state ---------------------------------------
+#
+# The founder Marketing tab presents clinic metrics (read from the existing
+# marts) PLUS a few light operating tools whose state has no source in Plato:
+# the weekly-rhythm checklist, the content-calendar status, the partnership
+# pipeline, and the enquiry log. That mutable state lives in the append-only
+# marts.marketing_ops_events table (latest event wins), surfaced via
+# marts.marketing_ops_latest. Same least-privilege write pattern as the
+# front-desk follow-up log. See scripts/sql/marts/50_marketing_ops_events.sql.
+
+VALID_MARKETING_ITEM_TYPES = {"checklist", "content", "partnership", "enquiry"}
+
+
+def fetch_marketing_ops() -> list[dict]:
+    """Current state of every marketing operating-tool item (latest event each).
+
+    A tiny table (one row per checklist slot / content week / partner / enquiry),
+    so this stays cheap to read on every load. The Marketing tab decides how to
+    render each row from item_type; the back end just returns the latest state.
+
+    Degrades gracefully to [] if the table hasn't been deployed yet (see
+    DEPLOY.md): the rest of the founder dashboard must still load. The Marketing
+    tab renders its clinic metrics regardless and shows an empty operating-tools
+    state until the first write lands.
+    """
+    try:
+        rows = _query(f"""
+SELECT item_type, item_key, state, payload, updated_by, updated_at
+FROM `{PROJECT}.marts.marketing_ops_latest`
+ORDER BY item_type, updated_at DESC
+""")
+    except Exception as e:
+        log.warning("marketing_ops_latest unavailable (run deploy_all.sh?): %s", e)
+        return []
+    return [{
+        "item_type":  r["item_type"],
+        "item_key":   r["item_key"],
+        "state":      r["state"],
+        "payload":    r["payload"],
+        "updated_by": r["updated_by"],
+        "updated_at": r["updated_at"].isoformat() if r.get("updated_at") else None,
+    } for r in rows]
+
+
 def build_payload() -> dict:
     """Fan all BQ queries out in parallel. ~27 queries; serial wall time was
     ~38s, parallel is limited by the slowest single query (~3-5s).
@@ -883,7 +927,7 @@ def build_payload() -> dict:
     presets    = preset_ranges()
 
     # max_workers sized to cover every concurrent fetch this request fires:
-    # 7 top-level + 4 ranges × 5 metrics = 27. Round up to 32 for headroom.
+    # 8 top-level + 4 ranges × 5 metrics = 28. Round up to 32 for headroom.
     with ThreadPoolExecutor(max_workers=32, thread_name_prefix="bq") as ex:
         # Range-independent (or fixed-window) fetches.
         f_deferred      = ex.submit(fetch_deferred)
@@ -893,6 +937,7 @@ def build_payload() -> dict:
         f_payments      = ex.submit(fetch_payment_methods, pmt_start, today)
         f_appointments  = ex.submit(fetch_appointments, appt_start, today)
         f_mismatches    = ex.submit(fetch_invoice_doctor_mismatches)
+        f_marketing_ops = ex.submit(fetch_marketing_ops)
 
         # Per-range fetches. Each fetch_* is independent so they all race.
         range_jobs: dict[str, dict] = {}
@@ -934,6 +979,7 @@ def build_payload() -> dict:
             "payment_by_method": f_payments.result(),
             "ranges":            ranges,
             "doctor_mismatches": f_mismatches.result(),
+            "marketing_ops":     f_marketing_ops.result(),
         }
 
 
@@ -1366,6 +1412,36 @@ VALUES
         _cache.pop("upcoming", None)
 
 
+def record_marketing_ops(item_type: str, item_key: str, *, state: str | None = None,
+                         payload: str | None = None,
+                         updated_by: str | None = None) -> None:
+    """Append one marketing operating-tool event (append-only; latest wins).
+
+    Same parameterised DML-INSERT pattern as record_followup / record_confirmation:
+    a query/DML write honours the dashboard SA's table-level dataEditor grant on
+    marketing_ops_events, keeping least-privilege (no dataset-wide write). Visible
+    to marketing_ops_latest immediately; pops the founder payload cache so the
+    Marketing tab's first-paint snapshot reflects it on the next reload too.
+    """
+    sql = f"""
+INSERT INTO `{PROJECT}.marts.marketing_ops_events`
+  (event_id, item_type, item_key, state, payload, updated_by, updated_at)
+VALUES
+  (@event_id, @item_type, @item_key, @state, @payload, @updated_by, CURRENT_TIMESTAMP())
+"""
+    job_config = bigquery.QueryJobConfig(query_parameters=[
+        bigquery.ScalarQueryParameter("event_id",   "STRING", str(uuid.uuid4())),
+        bigquery.ScalarQueryParameter("item_type",  "STRING", item_type),
+        bigquery.ScalarQueryParameter("item_key",   "STRING", item_key),
+        bigquery.ScalarQueryParameter("state",      "STRING", (state or None)),
+        bigquery.ScalarQueryParameter("payload",    "STRING", (payload or None)),
+        bigquery.ScalarQueryParameter("updated_by", "STRING", updated_by),
+    ])
+    _bq().query(sql, job_config=job_config).result()
+    with _cache_lock:
+        _cache.pop("payload", None)
+
+
 def fetch_pl_window(start: date, end: date) -> dict:
     """Recompute the P&L revenue + payment fee inputs for an arbitrary window.
 
@@ -1718,6 +1794,54 @@ def index() -> Response:
 @require_roles("founder")
 def api_data() -> Response:
     return Response(json.dumps(get_payload()), mimetype="application/json")
+
+
+@app.route("/api/marketing/ops")
+@require_roles("founder")
+def api_marketing_ops() -> Response:
+    """Current marketing operating-tool state (checklist / content / pipeline /
+    enquiries). Founder-only and dashboard-mode only — the decorator 404s this
+    on the frontdesk subdomain. Read straight from marts.marketing_ops_latest
+    (a tiny table) so it reflects writes immediately, no cache."""
+    return Response(json.dumps({"items": fetch_marketing_ops()}, default=str),
+                    mimetype="application/json")
+
+
+@app.route("/api/marketing/ops", methods=["POST"])
+@require_roles("founder")
+def api_marketing_ops_save() -> Response:
+    """Record one marketing operating-tool event.
+
+    Body: {item_type, item_key, state?, payload?}. Appends one event row; the
+    Marketing tab reflects it on the next fetch. item_type must be one of
+    checklist / content / partnership / enquiry; item_key is the stable id the
+    front end owns (rhythm-slot+week, content week, partner slug, enquiry UUID).
+    """
+    body      = request.get_json(silent=True) or {}
+    item_type = (body.get("item_type") or "").strip()
+    item_key  = (body.get("item_key") or "").strip()
+    if item_type not in VALID_MARKETING_ITEM_TYPES or not item_key:
+        return Response('{"error": "a valid item_type and item_key are required"}',
+                        status=400, mimetype="application/json")
+    state   = body.get("state")
+    payload = body.get("payload")
+    try:
+        record_marketing_ops(item_type, item_key,
+                             state=(str(state).strip() if state is not None else None),
+                             payload=(str(payload).strip() if payload is not None else None),
+                             updated_by=getattr(g, "user", None))
+    except Exception as e:
+        log.exception("marketing-ops write failed: %s", e)
+        msg = str(e).lower()
+        if "permission" in msg or "denied" in msg or "403" in msg or "access" in msg:
+            return Response(
+                json.dumps({"error": "The dashboard isn't allowed to save yet — its "
+                            "service account needs write access to "
+                            "marts.marketing_ops_events. See DEPLOY.md."}),
+                status=403, mimetype="application/json")
+        return Response('{"error": "Could not save — please try again."}',
+                        status=500, mimetype="application/json")
+    return Response('{"ok": true}', mimetype="application/json")
 
 
 @app.route("/api/pl_window")

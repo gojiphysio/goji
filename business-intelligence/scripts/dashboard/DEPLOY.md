@@ -88,11 +88,12 @@ Deploy the follow-up state objects (idempotent; the events table is
 
     cd ../sql && ./deploy_all.sh
 
-Grant the dashboard SA write on **only** the two append-only event tables (so
-it can append "contacted/snoozed/dismissed" follow-up events and appointment
-confirmations; everything else stays read-only):
+Grant the dashboard SA write on **only** the append-only event tables (so it
+can append "contacted/snoozed/dismissed" follow-up events, appointment
+confirmations, and marketing operating-tool state; everything else stays
+read-only):
 
-    for t in patient_followup_events appt_confirmation_events; do
+    for t in patient_followup_events appt_confirmation_events marketing_ops_events; do
       bq add-iam-policy-binding \
         --member="serviceAccount:dashboard-sa@goji-bi.iam.gserviceaccount.com" \
         --role="roles/bigquery.dataEditor" \
@@ -143,11 +144,13 @@ mounted here.
 ## If a front-desk action can't save (HTTP 500 on dismiss/contacted/snooze/confirm)
 
 The dashboard SA must have **write** access to the relevant append-only table:
-`marts.patient_followup_events` (retention worklist) and
-`marts.appt_confirmation_events` (call-list confirmations). `deploy_admin.sh`
-grants and verifies both, but if you ever see a save error, grant them directly:
+`marts.patient_followup_events` (retention worklist),
+`marts.appt_confirmation_events` (call-list confirmations), and
+`marts.marketing_ops_events` (founder Marketing tab operating tools).
+`deploy_admin.sh` grants and verifies all three, but if you ever see a save
+error, grant them directly:
 
-    for t in patient_followup_events appt_confirmation_events; do
+    for t in patient_followup_events appt_confirmation_events marketing_ops_events; do
       bq add-iam-policy-binding \
         --member="serviceAccount:dashboard-sa@goji-bi.iam.gserviceaccount.com" \
         --role="roles/bigquery.dataEditor" \
@@ -181,7 +184,7 @@ Verify / inspect:
 
 ## What this dashboard shows
 
-Founder dashboard — three pages, all live from BQ:
+Founder dashboard — four pages, all live from BQ:
 
 - **Overview** — KPIs, daily/weekly/monthly trends, per-clinician table,
   discount summary, treatment-mix donuts, cohort table, deferred revenue,
@@ -189,6 +192,15 @@ Founder dashboard — three pages, all live from BQ:
 - **P&L** — Singapore-style P&L with revenue/bookings toggle, period selector,
   and XLSX export.
 - **Commission** — per-clinician commission calculator over real appointment data.
+- **Marketing** — campaign view for the 90-day plan: north-star KPIs (visits,
+  active patients, bookings) and patient acquisition live from BQ; channel
+  leading indicators (Instagram, GBP, website, paid) as **WIP placeholders**
+  until those integrations land; a delivery-lane mix + ICP/clinical-focus
+  readout; referral-source breakdown (with a note that Plato attribution is
+  coarse); plus light operating tools — a weekly-rhythm checklist, the 12-week
+  content calendar, a partnership pipeline, and an enquiry log. The operating
+  tools persist to `marts.marketing_ops_events` (append-only, latest wins; same
+  pattern as the follow-up log).
 
 Front Desk portal (`frontdesk.gojiphysio.com`) — patient ops, no financials.
 Four tabs: **Today** (schedule), **Call list** (unconfirmed appts),

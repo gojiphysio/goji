@@ -11,7 +11,8 @@ staff** (patient ops only).
   in-process cache, the P&L window/XLSX endpoints, the admin retention
   endpoints, and `/refresh`.
 - `template.html` — the founder dashboard markup with a `__DATA_PLACEHOLDER__`
-  that `app.py` fills with live data. Three pages: Overview, P&L, Commission.
+  that `app.py` fills with live data. Four pages: Overview, P&L, Commission,
+  Marketing.
 - `admin.html` — the staff admin page: today's schedule, the reminder-call
   list, package alerts, and the patient retention worklist.
 - `tests/` — pytest unit tests for the role boundary and the actionability rule.
@@ -29,6 +30,12 @@ Founder dashboard (`dashboard.gojiphysio.com`, `/`):
 - **P&L** — Singapore-style P&L with a revenue/bookings toggle, period selector
   (Last 30D / current cycle / previous cycle / custom), and XLSX export.
 - **Commission** — per-clinician commission calculator over real appointment data.
+- **Marketing** — 90-day-campaign view: north-star KPIs and acquisition live from
+  BQ; channel leading indicators (Instagram, GBP, website, paid) as WIP
+  placeholders pending integrations; delivery-lane mix + ICP/clinical-focus;
+  referral-source breakdown (Plato attribution is coarse); and light operating
+  tools (weekly rhythm, content calendar, partnership pipeline, enquiry log)
+  persisted to `marts.marketing_ops_events` via `/api/marketing/ops`.
 
 Front Desk portal (`frontdesk.gojiphysio.com`, served at `/`, no financials;
 the legacy `/admin` path redirects to `/`) — four tabs:

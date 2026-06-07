@@ -240,3 +240,39 @@ def test_confirm_appt_missing_id_is_400(frontdesk_client):
     resp = frontdesk_client.post("/api/frontdesk/confirm_appt",
                        headers=_auth("frontdesk", "staff-pw"), json={})
     assert resp.status_code == 400
+
+
+# --- Marketing tab: founder-only operating-tool routes ----------------------
+# The Marketing tab lives on the founder dashboard subdomain. Its /api/marketing
+# routes follow the same boundary as /api/data: founder-only, and 404 (not even
+# reachable) on the frontdesk subdomain.
+
+def test_marketing_ops_requires_auth(client):
+    assert client.get("/api/marketing/ops").status_code == 401
+
+def test_marketing_ops_blocks_staff(client):
+    # A staff credential must never reach the founder Marketing data.
+    assert client.get("/api/marketing/ops", headers=_auth("frontdesk", "staff-pw")).status_code == 401
+
+def test_marketing_ops_404_on_frontdesk_subdomain(frontdesk_client):
+    # Founder-only route: doesn't exist on the front-desk subdomain.
+    assert frontdesk_client.get("/api/marketing/ops",
+                                headers=_auth("founder", "founder-pw")).status_code == 404
+    assert frontdesk_client.post("/api/marketing/ops", headers=_auth("founder", "founder-pw"),
+                                 json={"item_type": "checklist", "item_key": "x"}).status_code == 404
+
+def test_marketing_ops_save_requires_auth(client):
+    assert client.post("/api/marketing/ops",
+                       json={"item_type": "checklist", "item_key": "x"}).status_code == 401
+
+@pytest.mark.parametrize("body", [
+    {},                                     # nothing
+    {"item_type": "bogus", "item_key": "x"},  # not a known item_type
+    {"item_type": "checklist"},             # missing item_key
+    {"item_key": "x"},                      # missing item_type
+])
+def test_marketing_ops_save_validates_before_bq(client, body):
+    # Valid founder auth, but a malformed body — the guard rejects with 400
+    # before record_marketing_ops touches BigQuery.
+    resp = client.post("/api/marketing/ops", headers=_auth("founder", "founder-pw"), json=body)
+    assert resp.status_code == 400

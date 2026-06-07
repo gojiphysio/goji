@@ -68,10 +68,10 @@ echo "==> Step 2/5: building the behind-the-scenes data"
 ( cd "${HERE}/../sql" && ./deploy_all.sh )
 
 # --- Step 3: permission to save front-desk actions ---------------------------
-# The dashboard writes two append-only event logs: follow-up actions (retention
-# worklist) and appointment confirmations (call list). Each needs a table-level
-# dataEditor grant on the SA — we keep it table-level, not dataset-wide, for
-# least privilege.
+# The dashboard writes three append-only event logs: follow-up actions (retention
+# worklist), appointment confirmations (call list), and marketing operating-tool
+# state (founder Marketing tab). Each needs a table-level dataEditor grant on the
+# SA — we keep it table-level, not dataset-wide, for least privilege.
 echo
 echo "==> Step 3/5: allowing the dashboard to save front-desk actions"
 grant_editor() {
@@ -99,6 +99,7 @@ grant_editor() {
 }
 grant_editor patient_followup_events    "follow-up actions"
 grant_editor appt_confirmation_events   "appointment confirmations"
+grant_editor marketing_ops_events       "marketing operating tools"
 
 # --- Step 4: refresh patient names ------------------------------------------
 # Names + phones now come from BigQuery (marts.dim_patient_contact), filled by

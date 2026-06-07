@@ -142,3 +142,20 @@ Is a 15-min lag acceptable for the schedule view?
 - `marketing` role — tab-gated read-only access to Demographics, Referrals,
   Treatment Mix, Cohort on `dashboard.*`; no P&L or commission
 - Xero integration — true net margin, payroll, rent, supplies (blocked on Xero)
+
+### Marketing tab — DONE (founder-only) / follow-ups
+
+The **Marketing** tab now ships on `dashboard.*` (founder-only — the `marketing`
+read-only role above is still the future split). It presents the 90-day-plan
+metrics through a marketing lens (north-star KPIs, acquisition, delivery-lane
+mix, ICP/clinical-focus, referral sources) and light operating tools (weekly
+rhythm, 12-week content calendar, partnership pipeline, enquiry log) persisted to
+`marts.marketing_ops_events`. Open follow-ups:
+
+- **Channel integrations** (the WIP placeholder cards): Instagram reach, Google
+  Business Profile clicks/calls, website sessions (GA4/PostHog), paid spend +
+  cost-per-first-visit, review velocity. Each card is the seam to plug into.
+- **Enquiry → first-visit attribution**: Plato only records a coarse
+  `referred_by` per patient, so first visits can't be split by marketing channel
+  today. The enquiry log is the manual bridge; later, tag enquiry source at
+  intake and flow it into the warehouse to close the loop per channel.
