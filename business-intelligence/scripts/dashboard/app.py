@@ -40,10 +40,36 @@ CACHE_TTL   = int(os.environ.get("CACHE_TTL_SECONDS", "300"))
 # Founder credential — sees everything, including the financial dashboard.
 AUTH_USER   = os.environ.get("DASHBOARD_USER", "")
 AUTH_PASS   = os.environ.get("DASHBOARD_PASS", "")
-# Staff credential — can reach ONLY the /admin section (patient ops). It must
-# never satisfy the founder-only financial routes; see require_roles below.
-STAFF_USER  = os.environ.get("STAFF_USER", "")
-STAFF_PASS  = os.environ.get("STAFF_PASS", "")
+
+# Staff credentials — multiple pairs supported so every team member (front
+# desk, clinicians) can have their own login. The legacy single-pair env vars
+# STAFF_USER / STAFF_PASS continue to work; additional staff accounts are
+# added via STAFF_<N>_USER / STAFF_<N>_PASS for N = 1, 2, 3, ...
+# All of these map to the 'staff' role and can only reach /admin routes.
+def _load_staff_creds() -> list[tuple[str, str]]:
+    pairs: list[tuple[str, str]] = []
+    # Legacy single pair
+    u, p = os.environ.get("STAFF_USER", ""), os.environ.get("STAFF_PASS", "")
+    if u and p:
+        pairs.append((u, p))
+    # Numbered extras: STAFF_1_USER/PASS, STAFF_2_USER/PASS, ...
+    n = 1
+    while True:
+        u = os.environ.get(f"STAFF_{n}_USER", "")
+        p = os.environ.get(f"STAFF_{n}_PASS", "")
+        if not u and not p:
+            break
+        if u and p:
+            pairs.append((u, p))
+        n += 1
+    return pairs
+
+STAFF_CREDS: list[tuple[str, str]] = _load_staff_creds()
+
+# APP_MODE controls which subdomain this instance serves.
+#   "dashboard"  — financial dashboard (default); founder-only.
+#   "frontdesk"  — patient ops portal; staff + founders.
+APP_MODE = os.environ.get("APP_MODE", "dashboard").lower()
 # Local-dev mode: enables Flask reloader and persists BQ results to disk so
 # process restarts don't trigger a fresh BQ fetch. Off in prod (Cloud Run).
 DEV_MODE    = os.environ.get("DASHBOARD_DEV") == "1"
@@ -1411,34 +1437,47 @@ def _creds_match(user: str, password: str, want_user: str, want_pass: str) -> bo
 def resolve_role(user: str, password: str) -> str | None:
     """Map a basic-auth credential pair to a role, or None if it matches neither.
 
-    'founder' -> full access (financial dashboard + admin). 'staff' -> admin
-    section only. Both pairs are checked so the timing of a staff login doesn't
-    reveal whether the founder credential exists.
+    'founder' -> full access (financial dashboard + admin).
+    'staff'   -> admin/frontdesk section only; never satisfies founder routes.
+    All configured staff credential pairs are checked so timing doesn't leak
+    whether the founder credential exists.
     """
     is_founder = _creds_match(user, password, AUTH_USER, AUTH_PASS)
-    is_staff   = _creds_match(user, password, STAFF_USER, STAFF_PASS)
     if is_founder:
         return "founder"
+    is_staff = any(_creds_match(user, password, u, p) for u, p in STAFF_CREDS)
     if is_staff:
         return "staff"
     return None
 
 
 def require_roles(*roles: str):
-    """Gate a route to the given roles. A credential for a role NOT in `roles`
-    gets a 401 — this is what keeps a staff login out of the founder-only
-    financial routes entirely (it never even reaches the handler).
+    """Gate a route to the given roles.
+
+    A credential for a role NOT in `roles` gets a 401 — this is what keeps a
+    staff login out of the founder-only financial routes entirely.
+
+    Additionally, routes that require the 'founder' role are completely
+    unavailable on the frontdesk subdomain (APP_MODE='frontdesk'), returning
+    404 so the financial dashboard is not reachable even with valid credentials.
+    This ensures frontdesk.* never exposes financial data regardless of what
+    credentials are tried.
     """
     def decorator(f):
         @wraps(f)
         def wrapper(*args, **kwargs):
+            # On the frontdesk subdomain, founder-only routes don't exist.
+            if APP_MODE == "frontdesk" and roles == ("founder",):
+                from flask import abort
+                abort(404)
             auth = request.authorization
             role = resolve_role(auth.username or "", auth.password or "") if auth else None
             if role is None or role not in roles:
+                realm = "Goji Front Desk" if APP_MODE == "frontdesk" else "Goji Dashboard"
                 return Response(
                     "Authentication required.",
                     401,
-                    {"WWW-Authenticate": 'Basic realm="Goji Dashboard"'},
+                    {"WWW-Authenticate": f'Basic realm="{realm}"'},
                 )
             g.role = role
             g.user = (auth.username or "") if auth else ""
@@ -1448,8 +1487,27 @@ def require_roles(*roles: str):
 
 
 @app.route("/")
-@require_roles("founder")
 def index() -> Response:
+    """Root route. Behaviour depends on APP_MODE:
+
+    - 'dashboard' (default): serves the financial dashboard; founder-only.
+    - 'frontdesk': redirects to /admin so staff land on the patient ops view.
+      Both staff and founder credentials are accepted there.
+    """
+    if APP_MODE == "frontdesk":
+        from flask import redirect
+        return redirect("/admin", code=302)
+    # dashboard mode: enforce founder-only
+    auth = request.authorization
+    role = resolve_role(auth.username or "", auth.password or "") if auth else None
+    if role != "founder":
+        return Response(
+            "Authentication required.",
+            401,
+            {"WWW-Authenticate": 'Basic realm="Goji Dashboard"'},
+        )
+    g.role = role
+    g.user = (auth.username or "") if auth else ""
     return Response(get_shell_html(), mimetype="text/html")
 
 
