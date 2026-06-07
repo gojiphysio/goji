@@ -286,7 +286,16 @@
       section.alert { padding: 14px 16px; }
       .chart-wrap { height: 220px; }
       .chart-wrap.small { height: 200px; }
-      table { font-size: 12px; }
+      /* Every data table becomes its own horizontal scroller on mobile so a
+         wide table swipes instead of overflowing the page. display:block wraps
+         the row groups in an anonymous table box (columns stay aligned) while
+         the table box itself scrolls. Works for any table without needing a
+         .table-scroll wrapper, so new tables get this for free. */
+      table {
+        font-size: 12px;
+        display: block; max-width: 100%;
+        overflow-x: auto; -webkit-overflow-scrolling: touch;
+      }
       th { padding: 6px 8px; font-size: 11px; }
       td { padding: 8px 8px; }
       .badge { margin-left: 4px; }
