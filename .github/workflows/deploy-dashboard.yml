@@ -36,6 +36,7 @@ env:
   SERVICE: goji-dashboard
   FRONTDESK_SERVICE: goji-frontdesk
   LINKS_SERVICE: goji-links
+  LINKS_DOMAIN: go.gojiphysio.com
   DASHBOARD_SA: dashboard-sa@${{ vars.GCP_PROJECT }}.iam.gserviceaccount.com
   # Click-to-WhatsApp redirect. Public links live at go.gojiphysio.com/<slug>
   # (goji-links service, APP_MODE=links). Set the repo variable WHATSAPP_NUMBER
@@ -163,19 +164,27 @@ jobs:
         if: steps.changes.outputs.dashboard == 'true'
         working-directory: business-intelligence/scripts/dashboard
         run: |
-          # Public go.gojiphysio.com redirector (APP_MODE=links). The service +
-          # its domain mapping are created once by deploy_links.sh; this only
-          # rolls code and keeps WHATSAPP_NUMBER in sync from the repo variable
-          # (--update-env-vars preserves everything else). Skip gracefully if the
-          # service hasn't been created yet, so the deploy never breaks on it.
-          if gcloud run services describe "${LINKS_SERVICE}" \
+          # Public go.gojiphysio.com redirector (APP_MODE=links). `gcloud run
+          # deploy` creates the service the first time and updates it after, so
+          # there's no manual Cloud Shell step. Full env set so WHATSAPP_NUMBER
+          # (from the repo variable) stays in sync on every deploy.
+          gcloud run deploy "${LINKS_SERVICE}" \
+            --source . --region "${REGION}" --project "${PROJECT}" \
+            --service-account "${DASHBOARD_SA}" \
+            --set-env-vars=GCP_PROJECT=${PROJECT},CACHE_TTL_SECONDS=300,APP_MODE=links,WHATSAPP_NUMBER=${WHATSAPP_NUMBER},WHATSAPP_FALLBACK_URL=${WHATSAPP_FALLBACK_URL} \
+            --allow-unauthenticated \
+            --quiet
+          # Ensure the go.gojiphysio.com domain mapping exists (create once —
+          # gojiphysio.com is already domain-verified via the other subdomains).
+          # Non-fatal: a mapping hiccup must not fail the rest of the deploy.
+          if gcloud beta run domain-mappings describe --domain="${LINKS_DOMAIN}" \
                --region "${REGION}" --project "${PROJECT}" >/dev/null 2>&1; then
-            gcloud run deploy "${LINKS_SERVICE}" \
-              --source . --region "${REGION}" --project "${PROJECT}" \
-              --service-account "${DASHBOARD_SA}" \
-              --update-env-vars=APP_MODE=links,WHATSAPP_NUMBER=${WHATSAPP_NUMBER},WHATSAPP_FALLBACK_URL=${WHATSAPP_FALLBACK_URL} \
-              --allow-unauthenticated \
-              --quiet
+            echo "domain mapping ${LINKS_DOMAIN} already exists"
+          elif gcloud beta run domain-mappings create --service="${LINKS_SERVICE}" \
+                 --domain="${LINKS_DOMAIN}" --region "${REGION}" --project "${PROJECT}"; then
+            echo ">> One-time DNS: add  go  CNAME  ghs.googlehosted.com.  on the"
+            echo "   gojiphysio.com zone. TLS auto-provisions once it resolves."
           else
-            echo "goji-links not created yet — run deploy_links.sh once. Skipping."
+            echo "!! Could not create the ${LINKS_DOMAIN} mapping automatically."
+            echo "   Create it once with deploy_links.sh, then re-run. Continuing."
           fi

@@ -216,23 +216,26 @@ message — which also seeds the enquiry-log source. Slugs/messages are defined 
 `LINK_SLUGS` in `app.py`. (The dashboard service also keeps a `GET /r/<slug>`
 route working internally, but the published links are `go.gojiphysio.com/<slug>`.)
 
-**One-time setup** (Google Cloud Shell):
+**Setup — all via GitHub Actions, no Cloud Shell:**
 
-    WHATSAPP_NUMBER=6580000000 bash business-intelligence/scripts/dashboard/deploy_links.sh
+1. Set a **GitHub Actions repository variable** (Settings → Secrets and variables
+   → Actions → **Variables**):
+   - `WHATSAPP_NUMBER` — WhatsApp business number, E.164 digits, no `+`
+     (e.g. `6580000000`). **Required to go live.** Until set, the redirect falls
+     back to the site URL, so links never dead-end.
+   - `WHATSAPP_FALLBACK_URL` — optional; where the bare root and unknown slugs go
+     (defaults to `https://www.gojiphysio.com`).
+2. Push to `main` (e.g. merge this PR). The deploy workflow **creates** the
+   `goji-links` service and the `go.gojiphysio.com` domain mapping on first run
+   (and keeps them in sync after), then prints the one DNS record to add.
+3. **One-time DNS** (the only manual step — it's on your DNS host, not GCP): add
+   `go  CNAME  ghs.googlehosted.com.` on the `gojiphysio.com` zone. TLS
+   auto-provisions once it resolves.
 
-That creates the `goji-links` service + the `go.gojiphysio.com` domain mapping and
-prints the DNS record to add (`go CNAME ghs.googlehosted.com.`). Then set a
-**GitHub Actions repository variable** (Settings → Secrets and variables →
-Actions → **Variables**) so the number persists across future deploys:
+`deploy_links.sh` does the same standup from Cloud Shell if you ever need a manual
+fallback, but the workflow is the primary path.
 
-- `WHATSAPP_NUMBER` — WhatsApp business number, E.164 digits, no `+`
-  (e.g. `6580000000`). **Required to go live.** Until set, the redirect falls back
-  to the site URL, so links never dead-end.
-- `WHATSAPP_FALLBACK_URL` — optional; where the bare root and unknown slugs go
-  (defaults to `https://www.gojiphysio.com`).
-
-The deploy workflow then keeps `goji-links` (and `goji-dashboard`) in sync on
-every push. Publish each channel's link as `https://go.gojiphysio.com/<slug>`:
+Publish each channel's link as `https://go.gojiphysio.com/<slug>`:
 
 | Channel | Link |
 |---|---|
