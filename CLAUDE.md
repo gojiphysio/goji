@@ -30,3 +30,21 @@ you're working in (`scripts/dashboard/`, `scripts/ingestion/`, `marketing/`).
   except table-level `dataEditor` grants on the append-only event tables.
 - **Capture rules as you learn them.** When a build surfaces a new rule of
   thumb, add it to the nearest `CLAUDE.md` in the same PR.
+
+## Harness engineering
+
+We engineer the *harness* (context + constraints + feedback loops + tooling)
+around the agent, not just the code. (See OpenAI's "Harness engineering.")
+
+- **If it's not in-context, it doesn't exist.** Durable decisions, plans,
+  rationale, and learnings live in **versioned repo artifacts** — the scoped
+  `CLAUDE.md` files, `scripts/dashboard/DEPLOY.md` (deploy/ops truth), and
+  `ROADMAP.md` — not in chat. Commit the rule/decision in the same PR that
+  relied on it.
+- **Agent-legible structure.** The `CLAUDE.md` hierarchy is the system map;
+  keep it current. Mirror established patterns (the `plato_*` ingestion shape,
+  `stg/`→`marts/` layering, per-route auth) so new work is predictable.
+- **Feedback loops gate changes.** Tests run green before merge (CI gates
+  deploy); the PR checklist (`.github/pull_request_template.md`) is the
+  golden-principles check. When something was error-prone, improve the harness
+  (a doc, a constraint, a test) so it's easy next time.
