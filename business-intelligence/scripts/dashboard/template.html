@@ -166,6 +166,17 @@
     .pill.unconfirmed { background: #fdecea; color: var(--goji); }
     .pill.confirmed   { background: #e3f2e8; color: var(--good); }
 
+    /* Time-range indicator (e.g. "last 30 days") rendered as a tag rather than
+       inline text, so cards and captions read cleaner. Text is set lowercase
+       by JS; the tag upper-cases it. */
+    .range-label {
+      display: inline-block; vertical-align: middle; white-space: nowrap;
+      margin-left: 6px; padding: 2px 8px; border-radius: 999px;
+      font-size: 10px; font-weight: 600; letter-spacing: 0.04em;
+      text-transform: uppercase;
+      background: var(--bg); color: var(--ink-soft); border: 1px solid var(--border);
+    }
+
     footer {
       margin-top: 32px; padding-top: 18px; border-top: 1px solid var(--border);
       color: var(--ink-muted); font-size: 12px; text-align: center;
@@ -775,12 +786,12 @@
 
     <div class="kpi-row">
       <div class="kpi-card">
-        <div class="kpi-label">Bookings, <span class="range-label">last 30 days</span> <span class="badge live">Live</span></div>
+        <div class="kpi-label">Bookings <span class="range-label">last 30 days</span> <span class="badge live">Live</span></div>
         <div class="kpi-value" id="kpi_bookings">-</div>
         <div class="kpi-sub">Cash invoiced (packages + single visits)</div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-label">Recognised revenue, <span class="range-label">last 30 days</span> <span class="badge live">Live</span></div>
+        <div class="kpi-label">Recognised revenue <span class="range-label">last 30 days</span> <span class="badge live">Live</span></div>
         <div class="kpi-value" id="kpi_recognised">-</div>
         <div class="kpi-sub">Revenue actually earned (sessions delivered)</div>
       </div>
@@ -790,12 +801,12 @@
         <div class="kpi-sub">Owed in unredeemed package sessions</div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-label">Active patients, <span class="range-label">last 30 days</span> <span class="badge live">Live</span></div>
+        <div class="kpi-label">Active patients <span class="range-label">last 30 days</span> <span class="badge live">Live</span></div>
         <div class="kpi-value" id="kpi_active_patients">-</div>
         <div class="kpi-sub">Distinct patients with at least one session</div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-label">Visits, <span class="range-label">last 30 days</span> <span class="badge live">Live</span></div>
+        <div class="kpi-label">Visits <span class="range-label">last 30 days</span> <span class="badge live">Live</span></div>
         <div class="kpi-value" id="kpi_visits">-</div>
         <div class="kpi-sub">Sessions delivered (single-use + package burns)</div>
       </div>
@@ -1432,17 +1443,17 @@
     <!-- North-star KPIs (live) -->
     <div class="kpi-row mkt-kpis-4">
       <div class="kpi-card">
-        <div class="kpi-label">Visits, <span class="range-label">last 30 days</span> <span class="badge live">Live</span></div>
+        <div class="kpi-label">Visits <span class="range-label">last 30 days</span> <span class="badge live">Live</span></div>
         <div class="kpi-value" id="mkt_visits">-</div>
         <div class="mkt-target">North-star · track up with active patients</div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-label">Active patients, <span class="range-label">last 30 days</span> <span class="badge live">Live</span></div>
+        <div class="kpi-label">Active patients <span class="range-label">last 30 days</span> <span class="badge live">Live</span></div>
         <div class="kpi-value" id="mkt_active">-</div>
         <div class="mkt-target">North-star · baseline ~72 · grow materially MoM</div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-label">Bookings, <span class="range-label">last 30 days</span> <span class="badge live">Live</span></div>
+        <div class="kpi-label">Bookings <span class="range-label">last 30 days</span> <span class="badge live">Live</span></div>
         <div class="kpi-value" id="mkt_bookings">-</div>
         <div class="mkt-target">North-star · dollar value of packs/sales</div>
       </div>
@@ -1463,7 +1474,7 @@
           <div class="chart-wrap"><canvas id="mktAcqChart"></canvas></div>
         </div>
         <div>
-          <div style="font-size:13px; font-weight:500; margin-bottom:8px;">Active patients (<span class="range-label">last 30 days</span>)</div>
+          <div style="font-size:13px; font-weight:500; margin-bottom:8px;">Active patients<span class="range-label">last 30 days</span></div>
           <div class="chart-wrap"><canvas id="mktActiveChart"></canvas></div>
         </div>
       </div>
@@ -1510,7 +1521,7 @@
     <!-- Marketing mix lens + ICP -->
     <section class="q">
       <h2>Marketing-mix lens</h2>
-      <div class="subtitle">Delivered mix (<span class="range-label">last 30 days</span>) by delivery lane, and how the base fits the post-partum ICP. Service type can’t split women’s-health vs MSK physio — that wedge signal is in the clinical-focus rows on the right.</div>
+      <div class="subtitle">Delivered mix <span class="range-label">last 30 days</span> by delivery lane, and how the base fits the post-partum ICP. Service type can’t split women’s-health vs MSK physio — that wedge signal is in the clinical-focus rows on the right.</div>
       <div class="two-col">
         <div>
           <div style="font-size:13px; font-weight:500; margin-bottom:8px;">Share by lane (recognised revenue)</div>
