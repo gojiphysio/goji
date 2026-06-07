@@ -1,19 +1,50 @@
 # Dashboard deploy notes
 
-Live: <https://dashboard.gojiphysio.com>
+Live:
+
+- Founders / finance: <https://dashboard.gojiphysio.com>  (`APP_MODE=dashboard`)
+- Whole team / front desk: <https://frontdesk.gojiphysio.com>  (`APP_MODE=frontdesk`)
+
 Cloud Run URL: <https://goji-dashboard-277737358846.asia-southeast1.run.app>
 
-Single Cloud Run service, gated by HTTP Basic Auth, queries BigQuery on each
-page load with a 5-minute in-process cache.
+Both subdomains run the **same container image** (`app.py`), gated by HTTP Basic
+Auth, querying BigQuery on each page load with a 5-minute in-process cache. The
+only difference is the `APP_MODE` env var, which selects the routes and audience.
 
-## Two audiences, one service
+## Two subdomains, one codebase
 
-- **Founders** (`DASHBOARD_USER`/`DASHBOARD_PASS`) — full access: the financial
-  dashboard (`/`, `/api/data`, P&L, commission) **and** the admin section.
-- **Front-desk staff** (`STAFF_USER`/`STAFF_PASS`) — the **admin section only**
-  (`/admin`, `/api/admin/*`): the patient retention worklist. A staff
-  credential returns 401 on every financial route, so it can never reach
-  financial data. Role gating lives in `require_roles(...)` in `app.py`.
+- **`dashboard.*`** (`APP_MODE=dashboard`, default) — the financial dashboard
+  (`/`, `/api/data`, P&L, commission) **and** the admin section. Founder-only in
+  practice (don't mount staff secrets here if you want it strictly founders).
+- **`frontdesk.*`** (`APP_MODE=frontdesk`) — the patient ops portal only. `/`
+  redirects to `/admin`; every founder-only financial route returns **404**, so
+  no financial data is reachable here even with a founder credential. Used by
+  reception **and** clinicians (Plato covers clinician schedule/performance, so
+  there is no separate clinician portal).
+
+## Roles
+
+- **Founders** (`DASHBOARD_USER`/`DASHBOARD_PASS`) — skeleton key: full access on
+  `dashboard.*`, and on `frontdesk.*` they land on the ops view.
+- **Staff** — one or more credential pairs, all mapping to the `staff` role:
+  - legacy single pair `STAFF_USER`/`STAFF_PASS` (the shared `frontdesk` login)
+  - per-person extras `STAFF_1_USER`/`STAFF_1_PASS`, `STAFF_2_USER`/`STAFF_2_PASS`,
+    … (username format `firstnamelastname`, e.g. `claireng`). Add as many as
+    there are team members.
+  A staff credential returns 401/404 on every financial route. Role gating lives
+  in `resolve_role(...)` / `require_roles(...)` in `app.py`.
+
+## Stand up the front desk subdomain
+
+One command from Cloud Shell creates the `goji-frontdesk` service + domain mapping:
+
+    bash business-intelligence/scripts/dashboard/deploy_frontdesk.sh
+
+It reuses the existing secrets. To give people their own logins, mint per-person
+secrets and pass them in (see the comments at the top of the script):
+
+    STAFF_SECRETS="STAFF_1_USER=staff-claireng-user:latest,STAFF_1_PASS=staff-claireng-pass:latest" \
+      bash business-intelligence/scripts/dashboard/deploy_frontdesk.sh
 
 ## Architecture
 
@@ -81,8 +112,12 @@ Grant the dashboard SA write on **only** the follow-up table (so it can append
       --project=goji-bi --region=asia-southeast1 --source=. \
       --service-account=dashboard-sa@goji-bi.iam.gserviceaccount.com \
       --set-secrets=DASHBOARD_USER=dashboard-user:latest,DASHBOARD_PASS=dashboard-pass:latest,STAFF_USER=dashboard-staff-user:latest,STAFF_PASS=dashboard-staff-pass:latest,PLATO_API_KEY=plato-api-key:latest \
-      --set-env-vars=GCP_PROJECT=goji-bi,CACHE_TTL_SECONDS=300,PLATO_DB=gojihealth \
+      --set-env-vars=GCP_PROJECT=goji-bi,CACHE_TTL_SECONDS=300,PLATO_DB=gojihealth,APP_MODE=dashboard \
       --quiet
+
+Then redeploy the front desk service from the same code:
+
+    bash business-intelligence/scripts/dashboard/deploy_frontdesk.sh
 
 The invoice-doctor mismatch alert is fed by `marts.fct_invoice_doctor_mismatches`,
 a SQL view over `stg.appointments` (populated by the `plato-appointments-ingest`
