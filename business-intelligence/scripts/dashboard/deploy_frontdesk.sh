@@ -5,7 +5,7 @@
 #
 # Same container image as the financial dashboard, but launched with
 # APP_MODE=frontdesk so it:
-#   - serves the patient ops view at  /  (redirects to /frontdesk)
+#   - serves the patient ops view at  /  (the subdomain is the front desk)
 #   - returns 404 on every founder-only financial route (no financial data
 #     is reachable here even with a founder credential)
 #

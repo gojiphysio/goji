@@ -1682,15 +1682,24 @@ def require_roles(*roles: str, only_mode: str | None = None):
 
 @app.route("/")
 def index() -> Response:
-    """Root route. Behaviour depends on APP_MODE:
+    """Root route — each subdomain serves its own portal at /, no extra path:
 
-    - 'dashboard' (default): serves the financial dashboard; founder-only.
-    - 'frontdesk': redirects to /frontdesk so staff land on the patient ops view.
-      Both staff and founder credentials are accepted there.
+    - 'frontdesk': the Front Desk patient-ops portal (founder + staff). The
+      subdomain already says "front desk", so there's no redundant /frontdesk.
+    - 'dashboard' (default): the founder financial dashboard (founder-only).
     """
     if APP_MODE == "frontdesk":
-        from flask import redirect
-        return redirect("/frontdesk", code=302)
+        auth = request.authorization
+        role = resolve_role(auth.username or "", auth.password or "") if auth else None
+        if role not in ("founder", "staff"):
+            return Response(
+                "Authentication required.",
+                401,
+                {"WWW-Authenticate": 'Basic realm="Goji Front Desk"'},
+            )
+        g.role = role
+        g.user = (auth.username or "") if auth else ""
+        return Response(get_frontdesk_shell_html(), mimetype="text/html")
     # dashboard mode: enforce founder-only
     auth = request.authorization
     role = resolve_role(auth.username or "", auth.password or "") if auth else None
@@ -1762,16 +1771,20 @@ def refresh() -> Response:
     return Response('{"ok": true}', mimetype="application/json")
 
 
-# Patient-ops portal (the "Front Desk"). Lives only on frontdesk.* — pinned
-# with only_mode="frontdesk" so it 404s on the founder dashboard subdomain. The
-# legacy /admin and /api/admin/* paths are kept as aliases (same handlers) so
-# old bookmarks and any cached page keep working through the rename.
-@app.route("/frontdesk")
-@app.route("/admin")  # legacy alias
-@require_roles("founder", "staff", only_mode="frontdesk")
-def frontdesk_index() -> Response:
-    """Front Desk portal shell. Open to staff and founders; no financials."""
-    return Response(get_frontdesk_shell_html(), mimetype="text/html")
+# Patient-ops portal (the "Front Desk") is served at / on the frontdesk
+# subdomain — see index(). The /api/frontdesk/* data routes below are pinned to
+# that subdomain with only_mode="frontdesk" so they 404 on the founder
+# dashboard. The legacy /api/admin/* paths are kept as aliases (same handlers)
+# so any cached page keeps working through the rename.
+@app.route("/admin")
+def legacy_admin_redirect() -> Response:
+    """Deprecated path. The ops portal used to live at /admin; it now lives at /
+    on the frontdesk subdomain. Redirect old bookmarks there (and 404 on the
+    dashboard subdomain, where the portal isn't served at all)."""
+    from flask import abort, redirect
+    if APP_MODE != "frontdesk":
+        abort(404)
+    return redirect("/", code=301)
 
 
 @app.route("/api/frontdesk/retention")

@@ -15,15 +15,18 @@ only difference is the `APP_MODE` env var, which selects the routes and audience
 
 There are exactly two ways in, and each subdomain 404s the other's routes:
 
+Each subdomain serves its own portal at `/` — the subdomain *is* the audience.
+
 - **`dashboard.*`** (`APP_MODE=dashboard`, default) — the financial dashboard
   only (`/`, `/api/data`, P&L, commission), founder-only. The patient ops portal
-  is **not** served here: `/frontdesk` (and the legacy `/admin`) return **404**.
-- **`frontdesk.*`** (`APP_MODE=frontdesk`) — the patient ops portal only, at
-  `/frontdesk` (`/` redirects there; the legacy `/admin` path still works as an
-  alias). Every founder-only financial route returns **404**, so no financial
-  data is reachable here even with a founder credential. Used by reception **and**
-  clinicians (Plato covers clinician schedule/performance, so there is no
-  separate clinician portal).
+  is **not** served here: the legacy `/admin` and the `/api/frontdesk/*` routes
+  return **404**.
+- **`frontdesk.*`** (`APP_MODE=frontdesk`) — the patient ops portal at `/` (no
+  redundant `/frontdesk` path; the legacy `/admin` 301-redirects to `/`). Every
+  founder-only financial route returns **404**, so no financial data is reachable
+  here even with a founder credential. Used by reception **and** clinicians
+  (Plato covers clinician schedule/performance, so there is no separate clinician
+  portal).
 
 ## Roles
 
@@ -182,8 +185,8 @@ Founder dashboard — three pages, all live from BQ:
   and XLSX export.
 - **Commission** — per-clinician commission calculator over real appointment data.
 
-Front Desk portal (`frontdesk.gojiphysio.com/frontdesk`) — patient ops, no
-financials. Four tabs: **Today** (schedule), **Call list** (unconfirmed appts),
+Front Desk portal (`frontdesk.gojiphysio.com`) — patient ops, no financials.
+Four tabs: **Today** (schedule), **Call list** (unconfirmed appts),
 **Package alerts** (≤2 sessions left), and:
 
 - **Retention worklist** — patients tiered by time since last visit

@@ -30,8 +30,8 @@ Founder dashboard (`dashboard.gojiphysio.com`, `/`):
   (Last 30D / current cycle / previous cycle / custom), and XLSX export.
 - **Commission** — per-clinician commission calculator over real appointment data.
 
-Front Desk portal (`frontdesk.gojiphysio.com/frontdesk`, no financials; the
-legacy `/admin` path still works as an alias) — four tabs:
+Front Desk portal (`frontdesk.gojiphysio.com`, served at `/`, no financials;
+the legacy `/admin` path redirects to `/`) — four tabs:
 
 - **Today** — today's appointments, time-ordered, with `NEW` (first visit) and
   confirmed/unconfirmed badges, a session-balance column, and a clinician

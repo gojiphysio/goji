@@ -129,46 +129,44 @@ def test_healthcheck_open(client):
 # (APP_MODE=frontdesk). Each subdomain 404s the other's routes — the route does
 # not exist there at all, regardless of credentials.
 
-def test_frontdesk_portal_404s_on_dashboard_subdomain(client):
+def test_ops_routes_404_on_dashboard_subdomain(client):
     # The ops portal must NOT be reachable on the founder dashboard subdomain.
-    assert client.get("/frontdesk", headers=_auth("founder", "founder-pw")).status_code == 404
     assert client.get("/api/frontdesk/schedule", headers=_auth("founder", "founder-pw")).status_code == 404
 
 def test_legacy_admin_404s_on_dashboard_subdomain(client):
-    # Legacy /admin alias is also frontdesk-only now.
+    # The legacy /admin path is frontdesk-only; 404 on the dashboard subdomain.
     assert client.get("/admin", headers=_auth("founder", "founder-pw")).status_code == 404
 
 def test_financial_routes_404_on_frontdesk_subdomain(frontdesk_client):
     # Financial data must never be reachable on the front-desk subdomain.
     assert frontdesk_client.get("/api/data", headers=_auth("founder", "founder-pw")).status_code == 404
 
-def test_index_redirects_to_frontdesk_on_frontdesk_subdomain(frontdesk_client):
-    resp = frontdesk_client.get("/")
-    assert resp.status_code == 302
-    assert resp.headers["Location"].endswith("/frontdesk")
+def test_no_redundant_frontdesk_path(frontdesk_client):
+    # The portal is at / on frontdesk.*; there is no /frontdesk page route.
+    assert frontdesk_client.get("/frontdesk", headers=_auth("frontdesk", "staff-pw")).status_code == 404
 
 
-# --- front-desk portal access (on the frontdesk subdomain) ------------------
+# --- front-desk portal access: served at / on the frontdesk subdomain -------
 
-def test_frontdesk_requires_auth(frontdesk_client):
-    assert frontdesk_client.get("/frontdesk").status_code == 401
+def test_frontdesk_root_requires_auth(frontdesk_client):
+    assert frontdesk_client.get("/").status_code == 401
 
-def test_bad_creds_blocked_from_frontdesk(frontdesk_client):
-    assert frontdesk_client.get("/frontdesk", headers=_auth("frontdesk", "wrong")).status_code == 401
+def test_bad_creds_blocked_from_frontdesk_root(frontdesk_client):
+    assert frontdesk_client.get("/", headers=_auth("frontdesk", "wrong")).status_code == 401
 
-def test_staff_can_reach_frontdesk(frontdesk_client):
-    resp = frontdesk_client.get("/frontdesk", headers=_auth("frontdesk", "staff-pw"))
+def test_staff_can_reach_frontdesk_root(frontdesk_client):
+    resp = frontdesk_client.get("/", headers=_auth("frontdesk", "staff-pw"))
     assert resp.status_code == 200
     assert b"Front Desk" in resp.data
 
-def test_founder_can_reach_frontdesk(frontdesk_client):
-    assert frontdesk_client.get("/frontdesk", headers=_auth("founder", "founder-pw")).status_code == 200
+def test_founder_can_reach_frontdesk_root(frontdesk_client):
+    assert frontdesk_client.get("/", headers=_auth("founder", "founder-pw")).status_code == 200
 
-def test_legacy_admin_alias_still_serves_on_frontdesk(frontdesk_client):
-    # /admin keeps working as an alias so old bookmarks don't break.
-    resp = frontdesk_client.get("/admin", headers=_auth("frontdesk", "staff-pw"))
-    assert resp.status_code == 200
-    assert b"Front Desk" in resp.data
+def test_legacy_admin_redirects_to_root_on_frontdesk(frontdesk_client):
+    # /admin is deprecated: it 301-redirects to / so old bookmarks don't break.
+    resp = frontdesk_client.get("/admin")
+    assert resp.status_code == 301
+    assert resp.headers["Location"].endswith("/")
 
 
 # --- Phase 2: today's schedule / call list / package alerts -----------------
