@@ -122,7 +122,9 @@ def parse_promo_sku(item_given_id: str) -> tuple[str, int] | None:
 # go.gojiphysio.com/<slug>), which logs the click and 302-redirects to the slug's
 # destination. WhatsApp slugs carry a channel-specific prefilled message that
 # also seeds the enquiry-log source. Adding an entry point = add a slug here.
-WHATSAPP_NUMBER = os.environ.get("WHATSAPP_NUMBER", "")  # E.164 digits, no '+'
+# Digits only — wa.me wants no '+', spaces, or dashes, so we strip them defensively
+# (the repo variable might be entered as "+65 8377 0401").
+WHATSAPP_NUMBER = re.sub(r"\D", "", os.environ.get("WHATSAPP_NUMBER", ""))
 # Plato online-booking URL — the other primary CTA. Set it to enable 'booking'
 # slugs; until then they fall back to the site so the link never dead-ends.
 PLATO_BOOKING_URL = os.environ.get("PLATO_BOOKING_URL", "")
