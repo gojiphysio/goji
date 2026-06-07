@@ -276,3 +276,38 @@ def test_marketing_ops_save_validates_before_bq(client, body):
     # before record_marketing_ops touches BigQuery.
     resp = client.post("/api/marketing/ops", headers=_auth("founder", "founder-pw"), json=body)
     assert resp.status_code == 400
+
+
+# --- click-to-WhatsApp redirect (public) ------------------------------------
+
+@pytest.fixture
+def _no_click_logging(monkeypatch):
+    # Keep the redirect tests hermetic: don't spawn the BQ-writing thread.
+    monkeypatch.setattr(app, "_record_link_click_async", lambda *a, **k: None)
+
+
+def test_whatsapp_redirect_known_slug(client, monkeypatch, _no_click_logging):
+    # A configured number + known slug 302s to a wa.me deep link with the
+    # channel's prefilled message. No auth required — it's a public route.
+    monkeypatch.setattr(app, "WHATSAPP_NUMBER", "6580000000")
+    resp = client.get("/r/ig")
+    assert resp.status_code == 302
+    loc = resp.headers["Location"]
+    assert loc.startswith("https://wa.me/6580000000?text=")
+    assert "Instagram" in loc  # the prefilled message is URL-encoded but readable
+
+
+def test_whatsapp_redirect_unknown_slug_falls_back(client, monkeypatch, _no_click_logging):
+    # Unknown slug (or unconfigured number) must never dead-end — it falls back
+    # to the site URL rather than erroring.
+    monkeypatch.setattr(app, "WHATSAPP_NUMBER", "6580000000")
+    monkeypatch.setattr(app, "WHATSAPP_FALLBACK_URL", "https://example.test/site")
+    resp = client.get("/r/bogus")
+    assert resp.status_code == 302
+    assert resp.headers["Location"] == "https://example.test/site"
+
+
+def test_whatsapp_redirect_is_public(client, _no_click_logging):
+    # The redirect must work with no credentials at all (it's the link people
+    # click from Instagram/Google/etc.).
+    assert client.get("/r/web").status_code == 302

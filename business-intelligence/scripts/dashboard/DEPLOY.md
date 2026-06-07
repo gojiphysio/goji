@@ -90,10 +90,10 @@ Deploy the follow-up state objects (idempotent; the events table is
 
 Grant the dashboard SA write on **only** the append-only event tables (so it
 can append "contacted/snoozed/dismissed" follow-up events, appointment
-confirmations, and marketing operating-tool state; everything else stays
-read-only):
+confirmations, marketing operating-tool state, and click-to-WhatsApp link
+clicks; everything else stays read-only):
 
-    for t in patient_followup_events appt_confirmation_events marketing_ops_events; do
+    for t in patient_followup_events appt_confirmation_events marketing_ops_events link_click_events; do
       bq add-iam-policy-binding \
         --member="serviceAccount:dashboard-sa@goji-bi.iam.gserviceaccount.com" \
         --role="roles/bigquery.dataEditor" \
@@ -145,12 +145,13 @@ mounted here.
 
 The dashboard SA must have **write** access to the relevant append-only table:
 `marts.patient_followup_events` (retention worklist),
-`marts.appt_confirmation_events` (call-list confirmations), and
-`marts.marketing_ops_events` (founder Marketing tab operating tools).
-`deploy_admin.sh` grants and verifies all three, but if you ever see a save
+`marts.appt_confirmation_events` (call-list confirmations),
+`marts.marketing_ops_events` (founder Marketing tab operating tools), and
+`marts.link_click_events` (click-to-WhatsApp tracking).
+`deploy_admin.sh` grants and verifies all four, but if you ever see a save
 error, grant them directly:
 
-    for t in patient_followup_events appt_confirmation_events marketing_ops_events; do
+    for t in patient_followup_events appt_confirmation_events marketing_ops_events link_click_events; do
       bq add-iam-policy-binding \
         --member="serviceAccount:dashboard-sa@goji-bi.iam.gserviceaccount.com" \
         --role="roles/bigquery.dataEditor" \
@@ -200,7 +201,28 @@ Founder dashboard — four pages, all live from BQ:
   coarse); plus light operating tools — a weekly-rhythm checklist, the 12-week
   content calendar, a partnership pipeline, and an enquiry log. The operating
   tools persist to `marts.marketing_ops_events` (append-only, latest wins; same
-  pattern as the follow-up log).
+  pattern as the follow-up log). The **Click-to-WhatsApp** card is live from
+  `marts.link_click_events` (see below).
+
+### Click-to-WhatsApp tracking (`GET /r/<slug>`)
+
+WhatsApp is the primary CTA, so every channel's outbound link points at the
+dashboard's **public** redirect `GET /r/<slug>` (e.g. `…/r/ig`, `…/r/web`,
+`…/r/gbp`, `…/r/ads`, `…/r/email`, `…/r/qr`). Each hit logs a row to
+`marts.link_click_events` (streaming insert, off-thread) then 302s to a `wa.me`
+deep link with a channel-specific prefilled message — which also seeds the
+enquiry-log source. Slugs are defined in `LINK_SLUGS` in `app.py`.
+
+To go live, set these on the **dashboard** Cloud Run service (the route falls
+back to the site URL until the number is set, so links never dead-end):
+
+- `WHATSAPP_NUMBER` — the WhatsApp business number in E.164 digits, no `+`
+  (e.g. `6580000000`).
+- `WHATSAPP_FALLBACK_URL` — optional; where unknown/unconfigured slugs go
+  (default `https://www.gojiphysio.com`).
+
+Then repoint each channel's outbound link to its `…/r/<slug>` URL (site button,
+IG bio, GBP link, ad destinations, email signature, printed QR codes).
 
 Front Desk portal (`frontdesk.gojiphysio.com`) — patient ops, no financials.
 Four tabs: **Today** (schedule), **Call list** (unconfirmed appts),
