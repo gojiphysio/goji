@@ -213,16 +213,22 @@ dashboard's **public** redirect `GET /r/<slug>` (e.g. `…/r/ig`, `…/r/web`,
 deep link with a channel-specific prefilled message — which also seeds the
 enquiry-log source. Slugs are defined in `LINK_SLUGS` in `app.py`.
 
-To go live, set these on the **dashboard** Cloud Run service (the route falls
-back to the site URL until the number is set, so links never dead-end):
+To go live, set a **GitHub Actions repository variable** (Settings → Secrets and
+variables → Actions → **Variables**) — the deploy workflow injects it as a Cloud
+Run env var on every dashboard deploy, so it persists (don't set it by hand on
+the service; `--set-env-vars` would wipe a manual value next deploy):
 
 - `WHATSAPP_NUMBER` — the WhatsApp business number in E.164 digits, no `+`
-  (e.g. `6580000000`).
+  (e.g. `6580000000`). **Required to go live.** Until set, `/r/<slug>` falls back
+  to the site URL, so links never dead-end.
 - `WHATSAPP_FALLBACK_URL` — optional; where unknown/unconfigured slugs go
-  (default `https://www.gojiphysio.com`).
+  (defaults to `https://www.gojiphysio.com`).
 
-Then repoint each channel's outbound link to its `…/r/<slug>` URL (site button,
-IG bio, GBP link, ad destinations, email signature, printed QR codes).
+After setting the variable, push any dashboard change (or re-run the workflow) to
+roll it out. Then repoint each channel's outbound link to its `…/r/<slug>` URL
+(site button, IG bio, GBP link, ad destinations, email signature, printed QR
+codes). The prefilled WhatsApp messages per channel live in `LINK_SLUGS` in
+`app.py` — edit there to adjust wording.
 
 Front Desk portal (`frontdesk.gojiphysio.com`) — patient ops, no financials.
 Four tabs: **Today** (schedule), **Call list** (unconfirmed appts),

@@ -36,6 +36,10 @@ env:
   SERVICE: goji-dashboard
   FRONTDESK_SERVICE: goji-frontdesk
   DASHBOARD_SA: dashboard-sa@${{ vars.GCP_PROJECT }}.iam.gserviceaccount.com
+  # Click-to-WhatsApp redirect (/r/<slug>). Set the repo variable WHATSAPP_NUMBER
+  # (E.164 digits, no '+') to go live; until then /r/<slug> falls back to the site.
+  WHATSAPP_NUMBER: ${{ vars.WHATSAPP_NUMBER }}
+  WHATSAPP_FALLBACK_URL: ${{ vars.WHATSAPP_FALLBACK_URL || 'https://www.gojiphysio.com' }}
 
 jobs:
   # ---- 1. Tests gate the deploy -------------------------------------------
@@ -125,7 +129,7 @@ jobs:
             --source . --region "${REGION}" --project "${PROJECT}" \
             --service-account "${DASHBOARD_SA}" \
             --set-secrets=DASHBOARD_USER=dashboard-user:latest,DASHBOARD_PASS=dashboard-pass:latest,STAFF_USER=dashboard-staff-user:latest,STAFF_PASS=dashboard-staff-pass:latest \
-            --set-env-vars=GCP_PROJECT=${PROJECT},CACHE_TTL_SECONDS=300,APP_MODE=dashboard \
+            --set-env-vars=GCP_PROJECT=${PROJECT},CACHE_TTL_SECONDS=300,APP_MODE=dashboard,WHATSAPP_NUMBER=${WHATSAPP_NUMBER},WHATSAPP_FALLBACK_URL=${WHATSAPP_FALLBACK_URL} \
             --allow-unauthenticated \
             --quiet
 
