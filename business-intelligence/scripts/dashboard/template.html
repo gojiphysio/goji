@@ -228,6 +228,28 @@
     section.q .table-scroll,
     section.alert .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
+    /* --- Page nav (Dashboard / Commission Calculator) ---
+       Defined before the media queries so the mobile overrides below
+       (short labels, scrollable row) win on source order rather than
+       being clobbered by these base rules. */
+    .page-nav {
+      display: inline-flex; background: var(--card);
+      border: 1px solid var(--border); border-radius: 999px;
+      box-shadow: var(--shadow); overflow: hidden; margin-bottom: 20px;
+    }
+    .page-nav button {
+      background: transparent; border: 0; padding: 8px 18px;
+      font: inherit; color: var(--ink-soft); cursor: pointer;
+      font-size: 13px; font-weight: 500;
+    }
+    .page-nav button:hover { background: var(--bg); color: var(--ink); }
+    .page-nav button.active { background: var(--goji); color: white; }
+    .page-nav button + button { border-left: 1px solid var(--border); }
+    .page-nav button.active + button,
+    .page-nav button + button.active { border-left-color: transparent; }
+    /* Desktop shows full tab labels; the short variants kick in on mobile. */
+    .nav-short { display: none; }
+
     @media (max-width: 1100px) {
       .kpi-row { grid-template-columns: repeat(3, 1fr); }
     }
@@ -270,24 +292,6 @@
       .badge { margin-left: 4px; }
     }
 
-    /* --- Page nav (Dashboard / Commission Calculator) --- */
-    .page-nav {
-      display: inline-flex; background: var(--card);
-      border: 1px solid var(--border); border-radius: 999px;
-      box-shadow: var(--shadow); overflow: hidden; margin-bottom: 20px;
-    }
-    .page-nav button {
-      background: transparent; border: 0; padding: 8px 18px;
-      font: inherit; color: var(--ink-soft); cursor: pointer;
-      font-size: 13px; font-weight: 500;
-    }
-    .page-nav button:hover { background: var(--bg); color: var(--ink); }
-    .page-nav button.active { background: var(--goji); color: white; }
-    .page-nav button + button { border-left: 1px solid var(--border); }
-    .page-nav button.active + button,
-    .page-nav button + button.active { border-left-color: transparent; }
-    /* Desktop shows full tab labels; the short variants kick in on mobile. */
-    .nav-short { display: none; }
     .page[hidden] { display: none; }
 
     /* --- Commission calculator --- */
