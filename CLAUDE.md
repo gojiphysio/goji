@@ -41,10 +41,14 @@ around the agent, not just the code. (See OpenAI's "Harness engineering.")
   `CLAUDE.md` files, `scripts/dashboard/DEPLOY.md` (deploy/ops truth), and
   `ROADMAP.md` — not in chat. Commit the rule/decision in the same PR that
   relied on it.
-- **Agent-legible structure.** The `CLAUDE.md` hierarchy is the system map;
-  keep it current. Mirror established patterns (the `plato_*` ingestion shape,
-  `stg/`→`marts/` layering, per-route auth) so new work is predictable.
-- **Feedback loops gate changes.** Tests run green before merge (CI gates
-  deploy); the PR checklist (`.github/pull_request_template.md`) is the
-  golden-principles check. When something was error-prone, improve the harness
-  (a doc, a constraint, a test) so it's easy next time.
+- **These files are a map, not an encyclopedia.** Keep each `CLAUDE.md` short
+  and pointed (progressive disclosure): the entry point sends you to the deeper
+  source of truth (`DEPLOY.md`, `ROADMAP.md`, `marketing/strategy/*`). Don't let
+  them bloat into a stale manual.
+- **Enforce invariants, not implementations.** Mirror the established patterns
+  (the `plato_*` ingestion shape, `stg/`→`marts/` layering, per-route auth,
+  graceful-degradation `fetch_*`) so new work is predictable; leave the *how*
+  free. Tests run green before merge (CI gates deploy) and the PR checklist
+  (`.github/pull_request_template.md`) is the golden-principles check.
+- **When something is error-prone, fix the harness** — a doc, a constraint, a
+  test — so it's easy next time, rather than just patching the one-off.
