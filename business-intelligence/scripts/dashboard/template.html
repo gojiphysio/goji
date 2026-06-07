@@ -172,6 +172,13 @@
 
     .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
     .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; }
+    /* Grid items default to min-width:auto and won't shrink below their
+       content's intrinsic width, so a wide table forces the whole grid (and
+       page) past the viewport — clipping the last column on mobile. min-width:0
+       lets the track shrink so the table, a horizontal scroller on mobile,
+       stays within its card and swipes instead of overflowing. */
+    .two-col > *, .three-col > *, .discount-grid > *,
+    .calc-grid > *, .pl-grid > * { min-width: 0; }
     .chart-wrap { position: relative; height: 280px; }
     .chart-wrap.small { height: 220px; }
 
