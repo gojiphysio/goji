@@ -287,14 +287,31 @@ def _no_click_logging(monkeypatch):
 
 
 def test_whatsapp_redirect_known_slug(client, monkeypatch, _no_click_logging):
-    # A configured number + known slug 302s to a wa.me deep link with the
-    # channel's prefilled message. No auth required — it's a public route.
+    # A configured number + known WhatsApp slug 302s to a wa.me deep link with
+    # the channel's prefilled message. No auth required — it's a public route.
     monkeypatch.setattr(app, "WHATSAPP_NUMBER", "6580000000")
     resp = client.get("/r/ig")
     assert resp.status_code == 302
     loc = resp.headers["Location"]
     assert loc.startswith("https://wa.me/6580000000?text=")
     assert "Instagram" in loc  # the prefilled message is URL-encoded but readable
+
+
+def test_booking_redirect_known_slug(client, monkeypatch, _no_click_logging):
+    # A booking slug 302s to the Plato booking URL when configured.
+    monkeypatch.setattr(app, "PLATO_BOOKING_URL", "https://book.plato.test/goji")
+    resp = client.get("/r/book")
+    assert resp.status_code == 302
+    assert resp.headers["Location"] == "https://book.plato.test/goji"
+
+
+def test_booking_falls_back_when_unset(client, monkeypatch, _no_click_logging):
+    # Until PLATO_BOOKING_URL is set, the booking slug falls back to the site.
+    monkeypatch.setattr(app, "PLATO_BOOKING_URL", "")
+    monkeypatch.setattr(app, "WHATSAPP_FALLBACK_URL", "https://example.test/site")
+    resp = client.get("/r/book")
+    assert resp.status_code == 302
+    assert resp.headers["Location"] == "https://example.test/site"
 
 
 def test_whatsapp_redirect_unknown_slug_falls_back(client, monkeypatch, _no_click_logging):
@@ -311,3 +328,10 @@ def test_whatsapp_redirect_is_public(client, _no_click_logging):
     # The redirect must work with no credentials at all (it's the link people
     # click from Instagram/Google/etc.).
     assert client.get("/r/web").status_code == 302
+
+
+def test_root_slug_not_exposed_in_dashboard_mode(client):
+    # The bare /<slug> redirect (go.gojiphysio.com/ig) is registered ONLY in
+    # links mode. On the dashboard surface it must not exist, so the internal
+    # tool never serves public-style short links. /r/<slug> stays available.
+    assert client.get("/ig").status_code == 404

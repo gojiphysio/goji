@@ -23,10 +23,13 @@ you're working in (`scripts/dashboard/`, `scripts/ingestion/`, `marketing/`).
   Console, Google Business Profile) and small DIY pieces over paid vendors. Only
   reach for a paid service when the free path genuinely can't do the job, and
   flag it explicitly.
-- **Every customer CTA is a trackable WhatsApp link.** WhatsApp is the primary
-  CTA — customers message before booking. Route every outbound CTA (site, IG,
-  GBP, ads, email, QR) through the dashboard's `GET /r/<slug>` redirect so the
-  click is logged and attributable. Don't publish a raw `wa.me` link.
+- **Every customer CTA is a trackable link.** WhatsApp is the primary CTA
+  (customers message before booking), but socials also offer Plato booking, so we
+  track both. Route every outbound CTA (site, IG/socials, GBP, ads, email, QR)
+  through the public redirector `go.gojiphysio.com/<slug>` (the `goji-links`
+  service; `LINK_SLUGS` maps each slug to WhatsApp or Plato booking) so the click
+  is logged and attributable. Don't publish a raw `wa.me`/Plato link, and don't
+  use the internal `dashboard.*` domain.
 - **Branch & PR.** Develop on a feature branch and open a PR to `main`. **Never
   push directly to `main`** — deploys run from `main` via GitHub Actions.
 - **SQL is idempotent.** Every `.sql` is `CREATE OR REPLACE` (views) or

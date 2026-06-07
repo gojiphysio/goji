@@ -204,25 +204,56 @@ Founder dashboard — four pages, all live from BQ:
   pattern as the follow-up log). The **Click-to-WhatsApp** card is live from
   `marts.link_click_events` (see below).
 
-### Click-to-WhatsApp tracking (`GET /r/<slug>`)
+### Trackable CTA links (`go.gojiphysio.com/<slug>`)
 
-WhatsApp is the primary CTA, so every channel's outbound link points at the
-dashboard's **public** redirect `GET /r/<slug>` (e.g. `…/r/ig`, `…/r/web`,
-`…/r/gbp`, `…/r/ads`, `…/r/email`, `…/r/qr`). Each hit logs a row to
-`marts.link_click_events` (streaming insert, off-thread) then 302s to a `wa.me`
-deep link with a channel-specific prefilled message — which also seeds the
-enquiry-log source. Slugs are defined in `LINK_SLUGS` in `app.py`.
+Every customer CTA routes through a public redirector that logs the click then
+302s to its destination — **WhatsApp** (the primary CTA) or **Plato booking**
+(socials like `bio.site/gojiphysio` offer both). It runs as its **own** Cloud Run
+service `goji-links` (`APP_MODE=links`) on `go.gojiphysio.com` — a short, on-brand
+domain that serves *only* the redirects, keeping the internal
+`dashboard.gojiphysio.com` tool out of public view. Each hit logs a row to
+`marts.link_click_events` (streaming insert, off-thread); WhatsApp slugs add a
+channel-specific prefilled message that also seeds the enquiry-log source.
+Slugs/kinds/messages are defined in `LINK_SLUGS` in `app.py`. (The dashboard
+service also keeps `GET /r/<slug>` working internally, but the published links are
+`go.gojiphysio.com/<slug>`.)
 
-To go live, set these on the **dashboard** Cloud Run service (the route falls
-back to the site URL until the number is set, so links never dead-end):
+**Setup — all via GitHub Actions, no Cloud Shell:**
 
-- `WHATSAPP_NUMBER` — the WhatsApp business number in E.164 digits, no `+`
-  (e.g. `6580000000`).
-- `WHATSAPP_FALLBACK_URL` — optional; where unknown/unconfigured slugs go
-  (default `https://www.gojiphysio.com`).
+1. Set **GitHub Actions repository variables** (Settings → Secrets and variables
+   → Actions → **Variables**):
+   - `WHATSAPP_NUMBER` — WhatsApp business number, E.164 digits, no `+`
+     (e.g. `6580000000`). Enables the WhatsApp slugs.
+   - `PLATO_BOOKING_URL` — your Plato online-booking page URL. Enables the `book`
+     slug.
+   - `WHATSAPP_FALLBACK_URL` — optional; where the bare root and any unconfigured
+     slug go (defaults to `https://www.gojiphysio.com`). Until a target is set,
+     links fall back here so they never dead-end.
+2. Push to `main` (e.g. merge this PR). The deploy workflow **creates** the
+   `goji-links` service and the `go.gojiphysio.com` domain mapping on first run
+   (and keeps them in sync after), then prints the one DNS record to add.
+3. **One-time DNS** (the only manual step — it's on your DNS host, not GCP): add
+   `go  CNAME  ghs.googlehosted.com.` on the `gojiphysio.com` zone. TLS
+   auto-provisions once it resolves.
 
-Then repoint each channel's outbound link to its `…/r/<slug>` URL (site button,
-IG bio, GBP link, ad destinations, email signature, printed QR codes).
+`deploy_links.sh` does the same standup from Cloud Shell if you ever need a manual
+fallback, but the workflow is the primary path.
+
+Publish each link as `https://go.gojiphysio.com/<slug>`:
+
+| Where | Link | Goes to |
+|---|---|---|
+| `bio.site/gojiphysio` "WhatsApp" button | `…/wa` | WhatsApp |
+| `bio.site/gojiphysio` "Book" button | `…/book` | Plato booking |
+| Website button | `…/web` | WhatsApp |
+| Google Business Profile | `…/gbp` | WhatsApp |
+| Paid ads | `…/ads` | WhatsApp |
+| Email signature | `…/email` | WhatsApp |
+| QR codes (print / events) | `…/qr` | WhatsApp |
+
+(`…/ig` is also available for any direct Instagram link.) Edit wording, change a
+slug's destination, or add a channel in `LINK_SLUGS` in `app.py`. The Marketing
+tab shows **Click-to-WhatsApp** and **Booking-link clicks** as live cards.
 
 Front Desk portal (`frontdesk.gojiphysio.com`) — patient ops, no financials.
 Four tabs: **Today** (schedule), **Call list** (unconfirmed appts),
