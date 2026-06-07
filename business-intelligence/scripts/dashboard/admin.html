@@ -33,6 +33,9 @@
       background: var(--bg); color: var(--ink);
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', Roboto, sans-serif;
       font-size: 14px; line-height: 1.5;
+      /* Belt-and-braces: tables scroll within their own wrappers, so nothing
+         should ever push the page itself sideways. */
+      overflow-x: hidden;
     }
     .wrap { max-width: 1180px; margin: 0 auto; padding: 24px 32px 64px; }
 
@@ -131,7 +134,17 @@
       border: 1px solid var(--border); border-radius: 8px; background: var(--card); color: var(--ink);
     }
 
+    /* Tables can have more columns than a phone is wide. Each table sits in a
+       horizontally-scrollable wrapper so it scrolls inside its card instead of
+       pushing the whole page sideways. min-width keeps columns legible (they
+       scroll) rather than crushed; on desktop the wrapper is wider than that so
+       nothing scrolls. */
+    .table-scroll {
+      width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;
+      overscroll-behavior-x: contain;
+    }
     table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .table-scroll table { min-width: 600px; }
     th {
       text-align: left; font-weight: 500; color: var(--ink-soft);
       padding: 8px 12px; border-bottom: 1px solid var(--border);
@@ -211,6 +224,10 @@
     @media (max-width: 820px) {
       .kpi-row { grid-template-columns: repeat(3, 1fr); }
       .wrap { padding: 16px; }
+      /* Trim card + cell padding so the scrollable tables show as much as
+         possible before the user has to swipe sideways. */
+      section.q { padding: 16px 14px; }
+      th, td { padding: 8px 10px; }
     }
   </style>
 </head>
@@ -252,6 +269,7 @@
             <select id="todayClinician"><option value="">All</option></select>
           </label>
         </div>
+        <div class="table-scroll">
         <table>
           <thead>
             <tr>
@@ -265,6 +283,7 @@
           </thead>
           <tbody id="todayRows"></tbody>
         </table>
+        </div>
         <div class="empty" id="todayEmpty" style="display:none"></div>
         <div class="panel-loading" id="todayLoading">Loading today's schedule…</div>
         <div class="pii-note">
@@ -280,6 +299,7 @@
         <div class="toolbar">
           <h2>Call list — unconfirmed appointments (next 72h)</h2>
         </div>
+        <div class="table-scroll">
         <table>
           <thead>
             <tr>
@@ -292,6 +312,7 @@
           </thead>
           <tbody id="callsRows"></tbody>
         </table>
+        </div>
         <div class="empty" id="callsEmpty" style="display:none"></div>
         <div class="panel-loading" id="callsLoading">Loading call list…</div>
         <div class="pii-note">Confirming records who confirmed and when, and removes the appointment from this list.</div>
@@ -304,6 +325,7 @@
         <div class="toolbar">
           <h2>Package alerts — 2 or fewer sessions left</h2>
         </div>
+        <div class="table-scroll">
         <table>
           <thead>
             <tr>
@@ -316,6 +338,7 @@
           </thead>
           <tbody id="packagesRows"></tbody>
         </table>
+        </div>
         <div class="empty" id="packagesEmpty" style="display:none"></div>
         <div class="panel-loading" id="packagesLoading">Loading package alerts…</div>
         <div class="pii-note">Counts prepaid sessions still owed (bought − redeemed). Patients whose pack size isn't recorded are left off rather than guessed.</div>
@@ -342,6 +365,7 @@
             <label><input type="checkbox" id="showAll"> Show booked &amp; healthy</label>
           </div>
         </div>
+        <div class="table-scroll">
         <table>
           <thead>
             <tr>
@@ -356,6 +380,7 @@
           </thead>
           <tbody id="rows"></tbody>
         </table>
+        </div>
         <div class="empty" id="empty" style="display:none"></div>
         <div class="panel-loading" id="retentionLoading">Loading patient worklist…</div>
         <div class="pii-note">
