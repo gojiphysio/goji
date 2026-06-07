@@ -177,12 +177,13 @@ jobs:
             --quiet
           # Ensure the go.gojiphysio.com domain mapping exists (create once —
           # gojiphysio.com is already domain-verified via the other subdomains).
-          # Non-fatal: a mapping hiccup must not fail the rest of the deploy.
-          if gcloud beta run domain-mappings describe --domain="${LINKS_DOMAIN}" \
-               --region "${REGION}" --project "${PROJECT}" >/dev/null 2>&1; then
+          # --quiet keeps it non-interactive in CI. Non-fatal: a mapping hiccup
+          # must not fail the rest of the deploy.
+          if gcloud run domain-mappings describe --domain="${LINKS_DOMAIN}" \
+               --region "${REGION}" --project "${PROJECT}" --quiet >/dev/null 2>&1; then
             echo "domain mapping ${LINKS_DOMAIN} already exists"
-          elif gcloud beta run domain-mappings create --service="${LINKS_SERVICE}" \
-                 --domain="${LINKS_DOMAIN}" --region "${REGION}" --project "${PROJECT}"; then
+          elif gcloud run domain-mappings create --service="${LINKS_SERVICE}" \
+                 --domain="${LINKS_DOMAIN}" --region "${REGION}" --project "${PROJECT}" --quiet; then
             echo ">> One-time DNS: add  go  CNAME  ghs.googlehosted.com.  on the"
             echo "   gojiphysio.com zone. TLS auto-provisions once it resolves."
           else
