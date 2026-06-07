@@ -8,7 +8,22 @@ How to run each channel week-to-week. The operator owns delivery; these are the 
 
 **Role:** discovery via Reels, authority via carousels, warmth via stories.
 
-- **Profile:** clear bio (who we help + location + booking link), highlights (Conditions, What to expect, Meet the team, FAQ, Workshops), brand-consistent grid.
+- **Profile:** clear bio (who we help + location + booking link), highlights (Conditions, What to expect, Meet the team, FAQ, Workshops), brand-consistent grid. See **Profile / bio for reach** below.
+
+### Profile / bio for reach
+
+The bio is the most-indexed text on the profile and where we plant the women's-health wedge. Lead with the wedge terms (our priority SEO set and our differentiator vs the bolt-on clinics), then signal the wider scope so MSK and family searchers still see themselves.
+
+- **Name field is the lever.** IG search weights the bold display-name field (~30 chars) and handle far above the body text. Spend the Name field on the highest-intent wedge terms, e.g. `Goji · Women's & Postnatal Physio SG`. MSK / "physio near me" reach is carried by the handle, captions, GBP, and condition landing pages — no need to cram them into the bio.
+- **Body keywords:** include the real services as factual descriptors — *pre-natal, post-natal, pelvic floor* (women's wedge), plus *back & neck* (MSK) and *staying strong* (family / active-aging), the Lentor neighbourhood term, and the brand promise. Write the terms a mum would search.
+- **CTA:** route the link through the dashboard `GET /r/<slug>` redirect → WhatsApp (tracked), never a raw `wa.me` link.
+- **Compliance (bio is advertising → Lane A):** these terms are a *factual description of services we genuinely deliver* — truthful and accurate (AHPC), an explicit "Clear YES" in `../strategy/03-compliance-guardrails.md`. Keep clear of the Lane A Hard-NOs: no *fix/cure/treat your [condition]*, no *best / leading / #1 / the only*.
+- **Reference bio:**
+  > **Name:** Goji · Women's & Postnatal Physio 🇸🇬
+  > Women's, postnatal & family physiotherapy + Pilates · Lentor, SG
+  > Pre-natal · pelvic floor · back & neck · staying strong
+  > Helping you feel confident in your body again 💛
+  > 👇 Message us on WhatsApp
 - **Reels** for reach: 3-line script (hook/middle/takeaway), 15-90s, retention over length, on-screen text always, hook in first 3 seconds.
 - **Carousels** for saves/authority: one idea in 5-8 slides, berry-dot bullets, soft CTA on the last slide.
 - **Captions** are searchable: lead with the keyword/question; write the way a mum would search ("leaking after birth", "back pain physio singapore").
