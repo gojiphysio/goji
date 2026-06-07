@@ -68,6 +68,7 @@ gcloud run deploy "${SERVICE}" \
   --service-account="${SA}" \
   --set-secrets="${SECRETS}" \
   --set-env-vars=GCP_PROJECT=${PROJECT},CACHE_TTL_SECONDS=300,APP_MODE=frontdesk \
+  --allow-unauthenticated \
   --quiet
 
 # --- Map the subdomain ------------------------------------------------------

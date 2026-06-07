@@ -125,6 +125,7 @@ jobs:
             --service-account "${DASHBOARD_SA}" \
             --set-secrets=DASHBOARD_USER=dashboard-user:latest,DASHBOARD_PASS=dashboard-pass:latest,STAFF_USER=dashboard-staff-user:latest,STAFF_PASS=dashboard-staff-pass:latest \
             --set-env-vars=GCP_PROJECT=${PROJECT},CACHE_TTL_SECONDS=300,APP_MODE=dashboard \
+            --allow-unauthenticated \
             --quiet
 
       - name: Deploy frontdesk
@@ -141,8 +142,12 @@ jobs:
           # never accidentally come up in financial-dashboard mode.
           # NB: the goji-frontdesk service + its frontdesk.gojiphysio.com domain
           # mapping are created once by deploy_frontdesk.sh; this only rolls code.
+          # --allow-unauthenticated: the Cloud Run service must accept public
+          # requests so they reach Flask, which does the HTTP Basic Auth. Without
+          # it the Google front end returns a 403 before the app is ever hit.
           gcloud run deploy "${FRONTDESK_SERVICE}" \
             --source . --region "${REGION}" --project "${PROJECT}" \
             --service-account "${DASHBOARD_SA}" \
             --update-env-vars=APP_MODE=frontdesk \
+            --allow-unauthenticated \
             --quiet

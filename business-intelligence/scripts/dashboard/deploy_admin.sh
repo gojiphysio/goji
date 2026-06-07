@@ -128,6 +128,7 @@ gcloud run deploy "${SERVICE}" \
   --service-account="${SA}" \
   --set-secrets=DASHBOARD_USER=dashboard-user:latest,DASHBOARD_PASS=dashboard-pass:latest,STAFF_USER=dashboard-staff-user:latest,STAFF_PASS=dashboard-staff-pass:latest \
   --set-env-vars=GCP_PROJECT=${PROJECT},CACHE_TTL_SECONDS=300 \
+  --allow-unauthenticated \
   --quiet
 
 echo
