@@ -71,6 +71,8 @@ STAFF_CREDS: list[tuple[str, str]] = _load_staff_creds()
 # APP_MODE controls which subdomain this instance serves.
 #   "dashboard"  — financial dashboard (default); founder-only.
 #   "frontdesk"  — patient ops portal; staff + founders.
+#   "links"      — public click-to-WhatsApp redirect surface only
+#                  (go.gojiphysio.com/<slug>); no dashboard/auth routes exist.
 APP_MODE = os.environ.get("APP_MODE", "dashboard").lower()
 # Local-dev mode: enables Flask reloader and persists BQ results to disk so
 # process restarts don't trigger a fresh BQ fetch. Off in prod (Cloud Run).
@@ -1825,6 +1827,10 @@ def require_roles(*roles: str, only_mode: str | None = None):
         @wraps(f)
         def wrapper(*args, **kwargs):
             from flask import abort
+            # The links subdomain is a public redirect surface only — no
+            # authenticated route exists there at all.
+            if APP_MODE == "links":
+                abort(404)
             # Routes pinned to one subdomain don't exist on the other.
             if only_mode is not None and APP_MODE != only_mode:
                 abort(404)
@@ -1854,7 +1860,10 @@ def index() -> Response:
     - 'frontdesk': the Front Desk patient-ops portal (founder + staff). The
       subdomain already says "front desk", so there's no redundant /frontdesk.
     - 'dashboard' (default): the founder financial dashboard (founder-only).
+    - 'links': no UI — bounce the bare root to the marketing site.
     """
+    if APP_MODE == "links":
+        return redirect(WHATSAPP_FALLBACK_URL, code=302)
     if APP_MODE == "frontdesk":
         auth = request.authorization
         role = resolve_role(auth.username or "", auth.password or "") if auth else None
@@ -2130,6 +2139,16 @@ def whatsapp_redirect(slug: str):
     else:
         target = WHATSAPP_FALLBACK_URL
     return redirect(target, code=302)
+
+
+# On the public links subdomain the slug sits at the root (go.gojiphysio.com/ig),
+# so the published URLs stay short and on-brand. Registered ONLY in links mode so
+# this catch-all can never shadow the dashboard/frontdesk routes; `/r/<slug>`
+# above keeps working in every mode.
+if APP_MODE == "links":
+    @app.route("/<slug>")
+    def links_slug(slug: str):
+        return whatsapp_redirect(slug)
 
 
 @app.route("/healthcheck")

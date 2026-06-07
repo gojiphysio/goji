@@ -1,8 +1,10 @@
 # Dashboard — conventions
 
 Flask app (`app.py`) serving one page (`template.html`) from BigQuery, on Cloud
-Run. Founder dashboard (`APP_MODE=dashboard`) and front-desk portal
-(`APP_MODE=frontdesk`) are the same code on two subdomains. See `DEPLOY.md`.
+Run. One image, three subdomains via `APP_MODE`: founder dashboard
+(`dashboard`), front-desk portal (`frontdesk`), and the public click-to-WhatsApp
+redirector (`links` → `go.gojiphysio.com/<slug>`, redirects only, no UI/auth).
+See `DEPLOY.md`.
 
 ## Design philosophy
 - **Glanceable headline metrics.** Each card answers a question at a glance or in
@@ -25,7 +27,9 @@ Run. Founder dashboard (`APP_MODE=dashboard`) and front-desk portal
 ## Backend
 - **Auth is per-route** via `@require_roles(...)`; there's no global guard. A
   route with **no decorator is public** (e.g. `/healthcheck`, `/r/<slug>`).
-  Founder routes are founder-only and 404 on the frontdesk subdomain.
+  Founder routes are founder-only and 404 on the frontdesk subdomain; **every**
+  gated route 404s in `links` mode (that surface is public redirects only, with
+  the slug served at the root `/<slug>`).
 - **Graceful degradation.** Every `fetch_*` wraps its query in try/except and
   returns a safe empty value, so a not-yet-deployed table never breaks the page
   (see `fetch_marketing_ops`, `fetch_link_clicks`).

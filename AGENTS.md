@@ -25,8 +25,9 @@ you're working in (`scripts/dashboard/`, `scripts/ingestion/`, `marketing/`).
   flag it explicitly.
 - **Every customer CTA is a trackable WhatsApp link.** WhatsApp is the primary
   CTA — customers message before booking. Route every outbound CTA (site, IG,
-  GBP, ads, email, QR) through the dashboard's `GET /r/<slug>` redirect so the
-  click is logged and attributable. Don't publish a raw `wa.me` link.
+  GBP, ads, email, QR) through the public redirector `go.gojiphysio.com/<slug>`
+  (the `goji-links` service) so the click is logged and attributable. Don't
+  publish a raw `wa.me` link, and don't use the internal `dashboard.*` domain.
 - **Branch & PR.** Develop on a feature branch and open a PR to `main`. **Never
   push directly to `main`** — deploys run from `main` via GitHub Actions.
 - **SQL is idempotent.** Every `.sql` is `CREATE OR REPLACE` (views) or

@@ -204,31 +204,46 @@ Founder dashboard — four pages, all live from BQ:
   pattern as the follow-up log). The **Click-to-WhatsApp** card is live from
   `marts.link_click_events` (see below).
 
-### Click-to-WhatsApp tracking (`GET /r/<slug>`)
+### Click-to-WhatsApp tracking (`go.gojiphysio.com/<slug>`)
 
-WhatsApp is the primary CTA, so every channel's outbound link points at the
-dashboard's **public** redirect `GET /r/<slug>` (e.g. `…/r/ig`, `…/r/web`,
-`…/r/gbp`, `…/r/ads`, `…/r/email`, `…/r/qr`). Each hit logs a row to
-`marts.link_click_events` (streaming insert, off-thread) then 302s to a `wa.me`
-deep link with a channel-specific prefilled message — which also seeds the
-enquiry-log source. Slugs are defined in `LINK_SLUGS` in `app.py`.
+WhatsApp is the primary CTA, so every channel's outbound link routes through a
+public redirector. It runs as its **own** Cloud Run service `goji-links`
+(`APP_MODE=links`) on `go.gojiphysio.com` — a short, on-brand domain that serves
+*only* the redirects, keeping the internal `dashboard.gojiphysio.com` tool out of
+public view. Each hit logs a row to `marts.link_click_events` (streaming insert,
+off-thread) then 302s to a `wa.me` deep link with a channel-specific prefilled
+message — which also seeds the enquiry-log source. Slugs/messages are defined in
+`LINK_SLUGS` in `app.py`. (The dashboard service also keeps a `GET /r/<slug>`
+route working internally, but the published links are `go.gojiphysio.com/<slug>`.)
 
-To go live, set a **GitHub Actions repository variable** (Settings → Secrets and
-variables → Actions → **Variables**) — the deploy workflow injects it as a Cloud
-Run env var on every dashboard deploy, so it persists (don't set it by hand on
-the service; `--set-env-vars` would wipe a manual value next deploy):
+**One-time setup** (Google Cloud Shell):
 
-- `WHATSAPP_NUMBER` — the WhatsApp business number in E.164 digits, no `+`
-  (e.g. `6580000000`). **Required to go live.** Until set, `/r/<slug>` falls back
+    WHATSAPP_NUMBER=6580000000 bash business-intelligence/scripts/dashboard/deploy_links.sh
+
+That creates the `goji-links` service + the `go.gojiphysio.com` domain mapping and
+prints the DNS record to add (`go CNAME ghs.googlehosted.com.`). Then set a
+**GitHub Actions repository variable** (Settings → Secrets and variables →
+Actions → **Variables**) so the number persists across future deploys:
+
+- `WHATSAPP_NUMBER` — WhatsApp business number, E.164 digits, no `+`
+  (e.g. `6580000000`). **Required to go live.** Until set, the redirect falls back
   to the site URL, so links never dead-end.
-- `WHATSAPP_FALLBACK_URL` — optional; where unknown/unconfigured slugs go
+- `WHATSAPP_FALLBACK_URL` — optional; where the bare root and unknown slugs go
   (defaults to `https://www.gojiphysio.com`).
 
-After setting the variable, push any dashboard change (or re-run the workflow) to
-roll it out. Then repoint each channel's outbound link to its `…/r/<slug>` URL
-(site button, IG bio, GBP link, ad destinations, email signature, printed QR
-codes). The prefilled WhatsApp messages per channel live in `LINK_SLUGS` in
-`app.py` — edit there to adjust wording.
+The deploy workflow then keeps `goji-links` (and `goji-dashboard`) in sync on
+every push. Publish each channel's link as `https://go.gojiphysio.com/<slug>`:
+
+| Channel | Link |
+|---|---|
+| Instagram bio | `https://go.gojiphysio.com/ig` |
+| Website button | `https://go.gojiphysio.com/web` |
+| Google Business Profile | `https://go.gojiphysio.com/gbp` |
+| Paid ads | `https://go.gojiphysio.com/ads` |
+| Email signature | `https://go.gojiphysio.com/email` |
+| QR codes (print / events) | `https://go.gojiphysio.com/qr` |
+
+Edit wording or add a channel in `LINK_SLUGS` in `app.py`.
 
 Front Desk portal (`frontdesk.gojiphysio.com`) — patient ops, no financials.
 Four tabs: **Today** (schedule), **Call list** (unconfirmed appts),

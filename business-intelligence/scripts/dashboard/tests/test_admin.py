@@ -311,3 +311,10 @@ def test_whatsapp_redirect_is_public(client, _no_click_logging):
     # The redirect must work with no credentials at all (it's the link people
     # click from Instagram/Google/etc.).
     assert client.get("/r/web").status_code == 302
+
+
+def test_root_slug_not_exposed_in_dashboard_mode(client):
+    # The bare /<slug> redirect (go.gojiphysio.com/ig) is registered ONLY in
+    # links mode. On the dashboard surface it must not exist, so the internal
+    # tool never serves public-style short links. /r/<slug> stays available.
+    assert client.get("/ig").status_code == 404

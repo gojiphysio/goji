@@ -35,9 +35,11 @@ env:
   REGION:  ${{ vars.GCP_REGION }}
   SERVICE: goji-dashboard
   FRONTDESK_SERVICE: goji-frontdesk
+  LINKS_SERVICE: goji-links
   DASHBOARD_SA: dashboard-sa@${{ vars.GCP_PROJECT }}.iam.gserviceaccount.com
-  # Click-to-WhatsApp redirect (/r/<slug>). Set the repo variable WHATSAPP_NUMBER
-  # (E.164 digits, no '+') to go live; until then /r/<slug> falls back to the site.
+  # Click-to-WhatsApp redirect. Public links live at go.gojiphysio.com/<slug>
+  # (goji-links service, APP_MODE=links). Set the repo variable WHATSAPP_NUMBER
+  # (E.164 digits, no '+') to go live; until then the redirect falls back to the site.
   WHATSAPP_NUMBER: ${{ vars.WHATSAPP_NUMBER }}
   WHATSAPP_FALLBACK_URL: ${{ vars.WHATSAPP_FALLBACK_URL || 'https://www.gojiphysio.com' }}
 
@@ -156,3 +158,24 @@ jobs:
             --update-env-vars=APP_MODE=frontdesk \
             --allow-unauthenticated \
             --quiet
+
+      - name: Deploy links (click-to-WhatsApp redirector)
+        if: steps.changes.outputs.dashboard == 'true'
+        working-directory: business-intelligence/scripts/dashboard
+        run: |
+          # Public go.gojiphysio.com redirector (APP_MODE=links). The service +
+          # its domain mapping are created once by deploy_links.sh; this only
+          # rolls code and keeps WHATSAPP_NUMBER in sync from the repo variable
+          # (--update-env-vars preserves everything else). Skip gracefully if the
+          # service hasn't been created yet, so the deploy never breaks on it.
+          if gcloud run services describe "${LINKS_SERVICE}" \
+               --region "${REGION}" --project "${PROJECT}" >/dev/null 2>&1; then
+            gcloud run deploy "${LINKS_SERVICE}" \
+              --source . --region "${REGION}" --project "${PROJECT}" \
+              --service-account "${DASHBOARD_SA}" \
+              --update-env-vars=APP_MODE=links,WHATSAPP_NUMBER=${WHATSAPP_NUMBER},WHATSAPP_FALLBACK_URL=${WHATSAPP_FALLBACK_URL} \
+              --allow-unauthenticated \
+              --quiet
+          else
+            echo "goji-links not created yet — run deploy_links.sh once. Skipping."
+          fi
