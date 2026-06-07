@@ -1,10 +1,18 @@
 # CI / auto-deploy
 
-`deploy-dashboard.yml` runs the test suites and then deploys the dashboard
-(and, when they change, the SQL views and the patients ingest job) to Cloud Run
-on every push to `main`. Google Cloud auth uses **Workload Identity Federation**
-— GitHub proves its identity to GCP with a short-lived token, so **no
-service-account key is ever stored** in the repo or anywhere else.
+`deploy-dashboard.yml` runs the test suites and then deploys the app to Cloud
+Run on every push to `main`. When the dashboard app changes it redeploys **both**
+services that run the image — `goji-dashboard` (`APP_MODE=dashboard`) and
+`goji-frontdesk` (`APP_MODE=frontdesk`) — and, when they change, the SQL views
+and the patients ingest job. Google Cloud auth uses **Workload Identity
+Federation** — GitHub proves its identity to GCP with a short-lived token, so
+**no service-account key is ever stored** in the repo or anywhere else.
+
+The `goji-frontdesk` redeploy only rolls the new image: it forces
+`APP_MODE=frontdesk` but leaves the service's secrets untouched, so per-person
+staff logins added via `deploy_frontdesk.sh` are preserved. The service and its
+`frontdesk.gojiphysio.com` domain mapping are created once by
+`deploy_frontdesk.sh`; CI never recreates them.
 
 ## One-time setup (needs a project Owner; ~5 minutes)
 

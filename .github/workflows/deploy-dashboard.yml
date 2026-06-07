@@ -8,7 +8,9 @@ name: Deploy dashboard
 #   - SQL files               -> redeploy BigQuery views/tables (+ ensure the
 #                                 dashboard's write grant on the follow-up table)
 #   - patients ingest job     -> redeploy the Cloud Run Job + run it once
-#   - dashboard app           -> redeploy the goji-dashboard Cloud Run service
+#   - dashboard app           -> redeploy BOTH Cloud Run services that run this
+#                                 image: goji-dashboard (APP_MODE=dashboard) and
+#                                 goji-frontdesk (APP_MODE=frontdesk)
 
 on:
   push:
@@ -32,6 +34,7 @@ env:
   PROJECT: ${{ vars.GCP_PROJECT }}
   REGION:  ${{ vars.GCP_REGION }}
   SERVICE: goji-dashboard
+  FRONTDESK_SERVICE: goji-frontdesk
   DASHBOARD_SA: dashboard-sa@${{ vars.GCP_PROJECT }}.iam.gserviceaccount.com
 
 jobs:
@@ -121,5 +124,25 @@ jobs:
             --source . --region "${REGION}" --project "${PROJECT}" \
             --service-account "${DASHBOARD_SA}" \
             --set-secrets=DASHBOARD_USER=dashboard-user:latest,DASHBOARD_PASS=dashboard-pass:latest,STAFF_USER=dashboard-staff-user:latest,STAFF_PASS=dashboard-staff-pass:latest \
-            --set-env-vars=GCP_PROJECT=${PROJECT},CACHE_TTL_SECONDS=300 \
+            --set-env-vars=GCP_PROJECT=${PROJECT},CACHE_TTL_SECONDS=300,APP_MODE=dashboard \
+            --quiet
+
+      - name: Deploy frontdesk
+        if: steps.changes.outputs.dashboard == 'true'
+        working-directory: business-intelligence/scripts/dashboard
+        run: |
+          # Same image as goji-dashboard, but APP_MODE=frontdesk. We deploy from
+          # source and deliberately do NOT pass --set-secrets here: the frontdesk
+          # service may carry per-person staff logins (STAFF_<N>_USER/PASS) added
+          # via deploy_frontdesk.sh, and --set-secrets would drop any not listed.
+          # Omitting it lets gcloud carry the existing secret mounts forward.
+          # We force APP_MODE=frontdesk on every deploy (via --update-env-vars,
+          # which preserves the other env vars) so the front-desk subdomain can
+          # never accidentally come up in financial-dashboard mode.
+          # NB: the goji-frontdesk service + its frontdesk.gojiphysio.com domain
+          # mapping are created once by deploy_frontdesk.sh; this only rolls code.
+          gcloud run deploy "${FRONTDESK_SERVICE}" \
+            --source . --region "${REGION}" --project "${PROJECT}" \
+            --service-account "${DASHBOARD_SA}" \
+            --update-env-vars=APP_MODE=frontdesk \
             --quiet

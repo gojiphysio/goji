@@ -116,6 +116,10 @@ confirmations; everything else stays read-only):
 
 ## Redeploy after a code change
 
+Normally you don't — pushing to `main` auto-deploys **both** services
+(`goji-dashboard` and `goji-frontdesk`) via `.github/workflows/deploy-dashboard.yml`.
+To deploy by hand (e.g. from a branch), do both services from the same code:
+
     cd scripts/dashboard
     gcloud run deploy goji-dashboard \
       --project=goji-bi --region=asia-southeast1 --source=. \
@@ -124,7 +128,8 @@ confirmations; everything else stays read-only):
       --set-env-vars=GCP_PROJECT=goji-bi,CACHE_TTL_SECONDS=300,APP_MODE=dashboard \
       --quiet
 
-Then redeploy the front desk service from the same code:
+Then the front desk service from the same code (preserves its secrets,
+incl. per-person staff logins):
 
     bash business-intelligence/scripts/dashboard/deploy_frontdesk.sh
 
