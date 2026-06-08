@@ -290,7 +290,7 @@ def test_whatsapp_redirect_known_slug(client, monkeypatch, _no_click_logging):
     # A configured number + known WhatsApp slug 302s to a wa.me deep link with
     # the channel's prefilled message. No auth required — it's a public route.
     monkeypatch.setattr(app, "WHATSAPP_NUMBER", "6580000000")
-    resp = client.get("/r/ig")
+    resp = client.get("/r/ig-wa")
     assert resp.status_code == 302
     loc = resp.headers["Location"]
     assert loc.startswith("https://wa.me/6580000000?text=")
@@ -300,29 +300,29 @@ def test_whatsapp_redirect_known_slug(client, monkeypatch, _no_click_logging):
 def test_booking_redirect_known_slug(client, monkeypatch, _no_click_logging):
     # A booking slug 302s to the Plato booking URL when configured.
     monkeypatch.setattr(app, "PLATO_BOOKING_URL", "https://book.plato.test/goji")
-    resp = client.get("/r/book")
+    resp = client.get("/r/web-plato")
     assert resp.status_code == 302
     assert resp.headers["Location"] == "https://book.plato.test/goji"
 
 
 def test_per_channel_slugs_resolve_by_kind(client, monkeypatch, _no_click_logging):
-    # Per-channel slugs resolve to the right destination by kind: the WhatsApp
-    # channel slug -> wa.me, and the matching '<channel>book' slug -> Plato.
+    # Slugs are "<channel>-<destination>": the -wa slug -> wa.me, the matching
+    # -plato slug -> Plato.
     monkeypatch.setattr(app, "WHATSAPP_NUMBER", "6580000000")
     monkeypatch.setattr(app, "PLATO_BOOKING_URL", "https://book.plato.test/goji")
-    assert client.get("/r/bio").headers["Location"].startswith("https://wa.me/6580000000?text=")
-    assert client.get("/r/webbook").headers["Location"] == "https://book.plato.test/goji"
-    assert client.get("/r/biobook").headers["Location"] == "https://book.plato.test/goji"
+    assert client.get("/r/bio-wa").headers["Location"].startswith("https://wa.me/6580000000?text=")
+    assert client.get("/r/web-plato").headers["Location"] == "https://book.plato.test/goji"
+    assert client.get("/r/bio-plato").headers["Location"] == "https://book.plato.test/goji"
     # Sanity: kind buckets are consistent with the slug naming.
-    assert app.LINK_SLUG_KIND["bio"] == "whatsapp"
-    assert app.LINK_SLUG_KIND["biobook"] == "booking"
+    assert app.LINK_SLUG_KIND["bio-wa"] == "whatsapp"
+    assert app.LINK_SLUG_KIND["bio-plato"] == "booking"
 
 
 def test_booking_falls_back_when_unset(client, monkeypatch, _no_click_logging):
     # Until PLATO_BOOKING_URL is set, the booking slug falls back to the site.
     monkeypatch.setattr(app, "PLATO_BOOKING_URL", "")
     monkeypatch.setattr(app, "WHATSAPP_FALLBACK_URL", "https://example.test/site")
-    resp = client.get("/r/book")
+    resp = client.get("/r/web-plato")
     assert resp.status_code == 302
     assert resp.headers["Location"] == "https://example.test/site"
 
@@ -340,7 +340,7 @@ def test_whatsapp_redirect_unknown_slug_falls_back(client, monkeypatch, _no_clic
 def test_whatsapp_redirect_is_public(client, _no_click_logging):
     # The redirect must work with no credentials at all (it's the link people
     # click from Instagram/Google/etc.).
-    assert client.get("/r/web").status_code == 302
+    assert client.get("/r/web-wa").status_code == 302
 
 
 def test_root_slug_not_exposed_in_dashboard_mode(client):

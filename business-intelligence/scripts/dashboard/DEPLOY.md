@@ -239,19 +239,19 @@ service also keeps `GET /r/<slug>` working internally, but the published links a
 `deploy_links.sh` does the same standup from Cloud Shell if you ever need a manual
 fallback, but the workflow is the primary path.
 
-Slugs are **per channel and per destination** (`<channel>` → WhatsApp,
-`<channel>book` → Plato booking) so clicks attribute by channel, not just by
-destination. Publish each as `https://go.gojiphysio.com/<slug>`:
+Slugs are `<channel>-<destination>` — both explicit (`-wa` = WhatsApp, `-plato` =
+Plato booking), so nothing assumes a default CTA and clicks attribute by channel.
+Publish each as `https://go.gojiphysio.com/<slug>`:
 
 | Where | WhatsApp button | Book button |
 |---|---|---|
-| Website (www.gojiphysio.com) | `…/web` | `…/webbook` |
-| `bio.site/gojiphysio` (IG/socials hub) | `…/bio` | `…/biobook` |
-| Google Business Profile (later) | `…/gbp` | `…/gbpbook` |
-| Paid ads (later) | `…/ads` | `…/adsbook` |
-| QR codes (print / events / in-person) | `…/qr` | `…/qrbook` |
+| Website (www.gojiphysio.com) | `…/web-wa` | `…/web-plato` |
+| `bio.site/gojiphysio` (IG/socials hub) | `…/bio-wa` | `…/bio-plato` |
+| Google Business Profile (later) | `…/gbp-wa` | `…/gbp-plato` |
+| Paid ads (later) | `…/ads-wa` | `…/ads-plato` |
+| QR codes (print / events / in-person) | `…/qr-wa` | `…/qr-plato` |
 
-`…/ig` is available for any direct Instagram link; `…/wa` and `…/book` are
+`…/ig-wa` is available for any direct Instagram link; `…/wa` and `…/plato` are
 generic fallbacks. **bio.site mailing-list button:** point it straight at the
 signup page (untracked — nurture, not a primary CTA). **Instagram native
 WhatsApp/email action buttons can't be wrapped** (not custom URLs); keep the IG
