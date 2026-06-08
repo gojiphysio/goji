@@ -1551,7 +1551,7 @@
           <div class="kpi-label">Booking-link clicks <span class="range-label">last 30 days</span> <span class="badge live">Live</span></div>
           <div class="kpi-value" id="mkt_book_clicks">-</div>
           <div class="kpi-trend" id="mkt_book_clicks_trend" hidden></div>
-          <div class="mkt-target">Taps to book via Plato</div>
+          <div class="mkt-target" id="mkt_book_clicks_split">Taps to book via Plato</div>
         </div>
       </div>
       <div class="kpi-row mkt-kpis-3">
@@ -1711,8 +1711,12 @@
     const SAGE    = '#7a9e6e';
     const COBALT  = '#3b5b8c';
     const MIX_COLORS = [GOJI, GOLD, SAGE, COBALT, NEUTRAL, '#9c6c2e'];
-    // Pretty labels for tracked-link channel slugs (must match LINK_SLUGS in app.py).
-    const WA_SLUG_LABELS = { wa:'WhatsApp', web:'Web', ig:'IG', gbp:'Google', ads:'Ads', email:'Email', qr:'QR', book:'Book' };
+    // Pretty channel labels for tracked-link slugs (must match LINK_SLUGS in app.py).
+    // Covers both WhatsApp and booking slugs; used by both per-channel splits.
+    const SLUG_LABELS = {
+      'web-wa':'Web', 'bio-wa':'bio.site', 'gbp-wa':'Google', 'ads-wa':'Ads', 'qr-wa':'QR', 'ig-wa':'IG', 'wa':'Social',
+      'web-plato':'Web', 'bio-plato':'bio.site', 'gbp-plato':'Google', 'ads-plato':'Ads', 'qr-plato':'QR', 'plato':'Social',
+    };
 
     /* ===== Marketing tab: static config =====
        Fixed campaign content from /marketing/. Only the *state* of these items
@@ -2425,19 +2429,23 @@
       renderTrend('mkt_active_trend',   r.kpis.active_patients, p && p.active_patients, r.label);
       renderTrend('mkt_bookings_trend', r.kpis.bookings,        p && p.bookings,        r.label);
 
-      // Tracked-link intent — WhatsApp + Plato booking, each with trend.
+      // Tracked-link intent — WhatsApp + Plato booking, each with a per-channel split.
       const lc = r.link_clicks, lcp = r.link_clicks_prev;
       const waEl = document.getElementById('mkt_wa_clicks');
-      const splitEl = document.getElementById('mkt_wa_clicks_split');
+      const waSplitEl = document.getElementById('mkt_wa_clicks_split');
       const bkEl = document.getElementById('mkt_book_clicks');
+      const bkSplitEl = document.getElementById('mkt_book_clicks_split');
+      const splitOf = (bySlug, fallback) => {
+        const parts = Object.entries(bySlug || {})
+          .sort((a, b) => b[1] - a[1])
+          .map(([s, n]) => `${SLUG_LABELS[s] || s} ${fmtInt(n)}`);
+        return parts.length ? parts.join(' · ') : fallback;
+      };
       if (lc) {
         waEl.textContent = fmtInt(lc.whatsapp);
-        const parts = Object.entries(lc.wa_by_slug || {})
-          .sort((a, b) => b[1] - a[1])
-          .map(([s, n]) => `${WA_SLUG_LABELS[s] || s} ${fmtInt(n)}`);
-        splitEl.textContent = parts.length ? parts.join(' · ')
-          : 'Intent signal · taps to start a WhatsApp chat';
+        waSplitEl.textContent = splitOf(lc.wa_by_slug, 'Intent signal · taps to start a WhatsApp chat');
         bkEl.textContent = fmtInt(lc.booking);
+        bkSplitEl.textContent = splitOf(lc.book_by_slug, 'Taps to book via Plato');
       } else {
         waEl.textContent = '—';
         bkEl.textContent = '—';

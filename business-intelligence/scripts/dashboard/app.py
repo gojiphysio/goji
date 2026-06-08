@@ -134,16 +134,25 @@ WHATSAPP_FALLBACK_URL = os.environ.get("WHATSAPP_FALLBACK_URL",
 # slug -> {kind, label, text?}. kind="whatsapp" → wa.me deep link with `text`;
 # kind="booking" → Plato. The founder signs off on the WhatsApp wording.
 LINK_SLUGS: dict[str, dict] = {
-    # WhatsApp (message-first)
-    "wa":    {"kind": "whatsapp", "label": "WhatsApp (social)", "text": "Hi Goji! I have a question about physio."},
-    "ig":    {"kind": "whatsapp", "label": "Instagram",  "text": "Hi Goji! I found you on Instagram and have a question about physio."},
-    "web":   {"kind": "whatsapp", "label": "Website",    "text": "Hi Goji! I have a question about physio (via your website)."},
-    "gbp":   {"kind": "whatsapp", "label": "Google",     "text": "Hi Goji! I found you on Google and have a question about physio."},
-    "ads":   {"kind": "whatsapp", "label": "Paid ad",    "text": "Hi Goji! I saw your ad and have a question about physio."},
-    "email": {"kind": "whatsapp", "label": "Email",      "text": "Hi Goji! Following up from your email — I have a physio question."},
-    "qr":    {"kind": "whatsapp", "label": "QR / print", "text": "Hi Goji! I scanned your QR code and have a question about physio."},
-    # Booking (Plato) — e.g. the "Book" button on bio.site/gojiphysio
-    "book":  {"kind": "booking",  "label": "Book (social)"},
+    # Slug = "<channel>-<destination>" — both explicit, no assumed default, so a
+    # channel whose primary CTA isn't WhatsApp reads just as clearly.
+    #   destination: "wa" = WhatsApp deep link, "plato" = Plato online booking.
+    # The WhatsApp prefilled text also seeds the enquiry-log source.
+    # --- WhatsApp ---
+    "web-wa": {"kind": "whatsapp", "label": "Web",      "text": "Hi Goji! I have a question about physio (via your website)."},
+    "bio-wa": {"kind": "whatsapp", "label": "bio.site", "text": "Hi Goji! I found you via your Instagram/socials and have a question about physio."},
+    "gbp-wa": {"kind": "whatsapp", "label": "Google",   "text": "Hi Goji! I found you on Google and have a question about physio."},
+    "ads-wa": {"kind": "whatsapp", "label": "Ads",      "text": "Hi Goji! I saw your ad and have a question about physio."},
+    "qr-wa":  {"kind": "whatsapp", "label": "QR",       "text": "Hi Goji! I scanned your QR code and have a question about physio."},
+    "ig-wa":  {"kind": "whatsapp", "label": "IG",       "text": "Hi Goji! I found you on Instagram and have a question about physio."},
+    "wa":     {"kind": "whatsapp", "label": "Social",   "text": "Hi Goji! I have a question about physio."},  # generic fallback
+    # --- Plato booking ---
+    "web-plato": {"kind": "booking", "label": "Web"},
+    "bio-plato": {"kind": "booking", "label": "bio.site"},
+    "gbp-plato": {"kind": "booking", "label": "Google"},
+    "ads-plato": {"kind": "booking", "label": "Ads"},
+    "qr-plato":  {"kind": "booking", "label": "QR"},
+    "plato":     {"kind": "booking", "label": "Social"},  # generic fallback
 }
 # slug -> kind, for splitting the click metric (WhatsApp vs booking).
 LINK_SLUG_KIND = {s: c["kind"] for s, c in LINK_SLUGS.items()}
