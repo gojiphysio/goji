@@ -305,6 +305,19 @@ def test_booking_redirect_known_slug(client, monkeypatch, _no_click_logging):
     assert resp.headers["Location"] == "https://book.plato.test/goji"
 
 
+def test_per_channel_slugs_resolve_by_kind(client, monkeypatch, _no_click_logging):
+    # Per-channel slugs resolve to the right destination by kind: the WhatsApp
+    # channel slug -> wa.me, and the matching '<channel>book' slug -> Plato.
+    monkeypatch.setattr(app, "WHATSAPP_NUMBER", "6580000000")
+    monkeypatch.setattr(app, "PLATO_BOOKING_URL", "https://book.plato.test/goji")
+    assert client.get("/r/bio").headers["Location"].startswith("https://wa.me/6580000000?text=")
+    assert client.get("/r/webbook").headers["Location"] == "https://book.plato.test/goji"
+    assert client.get("/r/biobook").headers["Location"] == "https://book.plato.test/goji"
+    # Sanity: kind buckets are consistent with the slug naming.
+    assert app.LINK_SLUG_KIND["bio"] == "whatsapp"
+    assert app.LINK_SLUG_KIND["biobook"] == "booking"
+
+
 def test_booking_falls_back_when_unset(client, monkeypatch, _no_click_logging):
     # Until PLATO_BOOKING_URL is set, the booking slug falls back to the site.
     monkeypatch.setattr(app, "PLATO_BOOKING_URL", "")

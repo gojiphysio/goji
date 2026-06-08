@@ -239,21 +239,26 @@ service also keeps `GET /r/<slug>` working internally, but the published links a
 `deploy_links.sh` does the same standup from Cloud Shell if you ever need a manual
 fallback, but the workflow is the primary path.
 
-Publish each link as `https://go.gojiphysio.com/<slug>`:
+Slugs are **per channel and per destination** (`<channel>` → WhatsApp,
+`<channel>book` → Plato booking) so clicks attribute by channel, not just by
+destination. Publish each as `https://go.gojiphysio.com/<slug>`:
 
-| Where | Link | Goes to |
+| Where | WhatsApp button | Book button |
 |---|---|---|
-| `bio.site/gojiphysio` "WhatsApp" button | `…/wa` | WhatsApp |
-| `bio.site/gojiphysio` "Book" button | `…/book` | Plato booking |
-| Website button | `…/web` | WhatsApp |
-| Google Business Profile | `…/gbp` | WhatsApp |
-| Paid ads | `…/ads` | WhatsApp |
-| Email signature | `…/email` | WhatsApp |
-| QR codes (print / events) | `…/qr` | WhatsApp |
+| Website (www.gojiphysio.com) | `…/web` | `…/webbook` |
+| `bio.site/gojiphysio` (IG/socials hub) | `…/bio` | `…/biobook` |
+| Google Business Profile (later) | `…/gbp` | `…/gbpbook` |
+| Paid ads (later) | `…/ads` | `…/adsbook` |
+| QR codes (print / events / in-person) | `…/qr` | `…/qrbook` |
 
-(`…/ig` is also available for any direct Instagram link.) Edit wording, change a
+`…/ig` is available for any direct Instagram link; `…/wa` and `…/book` are
+generic fallbacks. **bio.site mailing-list button:** point it straight at the
+signup page (untracked — nurture, not a primary CTA). **Instagram native
+WhatsApp/email action buttons can't be wrapped** (not custom URLs); keep the IG
+bio link pointing at bio.site so those clicks are tracked. Edit wording, change a
 slug's destination, or add a channel in `LINK_SLUGS` in `app.py`. The Marketing
-tab shows **Click-to-WhatsApp** and **Booking-link clicks** as live cards.
+tab shows **Click-to-WhatsApp** and **Booking-link clicks** live, each split by
+channel.
 
 Front Desk portal (`frontdesk.gojiphysio.com`) — patient ops, no financials.
 Four tabs: **Today** (schedule), **Call list** (unconfirmed appts),
