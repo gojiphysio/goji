@@ -93,7 +93,7 @@ can append "contacted/snoozed/dismissed" follow-up events, appointment
 confirmations, marketing operating-tool state, and click-to-WhatsApp link
 clicks; everything else stays read-only):
 
-    for t in patient_followup_events appt_confirmation_events marketing_ops_events link_click_events; do
+    for t in patient_followup_events lead_events marketing_ops_events link_click_events; do
       bq add-iam-policy-binding \
         --member="serviceAccount:dashboard-sa@goji-bi.iam.gserviceaccount.com" \
         --role="roles/bigquery.dataEditor" \
@@ -141,17 +141,17 @@ name + phone from `marts.dim_patient_contact` (populated by
 `plato-patients-ingest`). Both come from BigQuery, so no `PLATO_API_KEY` is
 mounted here.
 
-## If a front-desk action can't save (HTTP 500 on dismiss/contacted/snooze/confirm)
+## If a front-desk action can't save (HTTP 500 on dismiss/contacted/snooze/lead)
 
 The dashboard SA must have **write** access to the relevant append-only table:
 `marts.patient_followup_events` (retention worklist),
-`marts.appt_confirmation_events` (call-list confirmations),
+`marts.lead_events` (Leads pipeline),
 `marts.marketing_ops_events` (founder Marketing tab operating tools), and
 `marts.link_click_events` (click-to-WhatsApp tracking).
 `deploy_admin.sh` grants and verifies all four, but if you ever see a save
 error, grant them directly:
 
-    for t in patient_followup_events appt_confirmation_events marketing_ops_events link_click_events; do
+    for t in patient_followup_events lead_events marketing_ops_events link_click_events; do
       bq add-iam-policy-binding \
         --member="serviceAccount:dashboard-sa@goji-bi.iam.gserviceaccount.com" \
         --role="roles/bigquery.dataEditor" \
@@ -261,10 +261,14 @@ tab shows **Click-to-WhatsApp** and **Booking-link clicks** live, each split by
 channel.
 
 Front Desk portal (`frontdesk.gojiphysio.com`) — patient ops, no financials.
-Four tabs: **Today** (schedule), **Call list** (unconfirmed appts),
-**Package alerts** (≤2 sessions left), and:
+Three tabs — the worklists Plato doesn't track:
 
-- **Retention worklist** — patients tiered by time since last visit
+- **Leads** — inbound WhatsApp/Instagram/etc. inquiries tracked through the
+  funnel (inquiry → booked → won, or lost), with a capture form and a funnel
+  summary. "Won" = became a patient/customer, not "bought a package". Writes
+  `marts.lead_events`. Replaces the founder Marketing tab's manual enquiry log.
+- **Package alerts** (≤2 prepaid sessions left) — for renewal calls.
+- **Follow-ups** — patients tiered by time since last visit
   (green ≤1wk / yellow >1wk / orange >2wk / red >4wk), excluding anyone with a
   future appointment booked or marked dismissed/snoozed. Front desk can mark
   **contacted / snooze / dismiss**; name + phone come from BigQuery

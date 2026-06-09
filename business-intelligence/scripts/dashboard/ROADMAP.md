@@ -159,3 +159,54 @@ rhythm, 12-week content calendar, partnership pipeline, enquiry log) persisted t
   `referred_by` per patient, so first visits can't be split by marketing channel
   today. The enquiry log is the manual bridge; later, tag enquiry source at
   intake and flow it into the warehouse to close the loop per channel.
+
+---
+
+## Phase 4 — WhatsApp leads funnel tracking (idea / to-do)
+
+### Goal
+
+WhatsApp is the primary CTA — customers message us before they book — but once a
+message lands there's no structured record of it. We want to **organise and track
+each inbound WhatsApp lead through the sales funnel** so we can answer:
+
+- How many inquiries come in (per week / channel)?
+- How many convert to a booked first visit (close rate)?
+- How many go cold / are lost, and at what stage?
+- Where in the funnel do we leak, and how fast do we respond?
+
+This closes the loop the Phase 3 follow-up flags: the public redirector already
+logs the **click** (`go.gojiphysio.com/<slug>` → `record_link_click`), but not
+what happens after the WhatsApp conversation starts. A lead pipeline is the
+missing middle between "click logged" and "first visit in Plato".
+
+### Funnel stages (straw model — refine before building)
+
+`inquiry → qualified → booked → showed (first visit) → won` , with `lost`
+(+ reason) reachable from any stage. Mirrors the existing append-only
+event-log pattern (`patient_followup_events`, `appt_confirmation_events`).
+
+### Sketch (follows established patterns — not a commitment)
+
+- **New append-only table** `marts.whatsapp_lead_events` (lead_id, stage,
+  source_slug, notes, staff, event_ts) + a `_latest` view for current stage per
+  lead. Add it to the `dataEditor` grant loops in `deploy_admin.sh`, `DEPLOY.md`,
+  and `.github/workflows/deploy-dashboard.yml`.
+- **New mart** `fct_lead_funnel` — counts by stage + conversion/loss rates per
+  period, to back glanceable funnel cards (reuse `renderTrend`).
+- **Frontdesk surface** to capture/advance a lead (a tab in `admin.html`, gated
+  `@require_roles("founder", "staff")`), since reception works the WhatsApp inbox.
+- **Founder/Marketing surface** for the funnel headline metrics (close rate,
+  lost-reason mix) — likely a card group on the Marketing tab.
+
+### Open questions before starting
+
+- **Capture method.** Manual entry by reception (fastest to ship, fits the
+  enquiry-log precedent) vs. some WhatsApp Business API ingestion (richer, but
+  Meta API + opt-in overhead — weigh against the "free / DIY first" rule). Start
+  manual, leave the API as a later seam?
+- **Lead ↔ patient join.** How do we link a WhatsApp lead to the eventual Plato
+  patient to confirm "won" automatically? Phone number is the natural key — is it
+  reliably captured on both sides?
+- **Dedup / identity.** One person messaging twice shouldn't double-count
+  inquiries — key on phone, not message.

@@ -177,16 +177,7 @@
     }
     .pill-booked { background: #e3f2e8; color: var(--good); }
 
-    /* Appointment badges on the Today schedule. */
-    .appt-badge {
-      display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 0.04em;
-      padding: 2px 7px; border-radius: 4px; text-transform: uppercase; margin-right: 5px;
-    }
-    .appt-badge.new      { background: var(--goji-soft);  color: var(--goji); }
-    .appt-badge.unconf   { background: var(--tier-yellow-bg); color: #8a6d10; }
-    .appt-badge.confirmed{ background: #e3f2e8; color: var(--good); }
-
-    /* Sessions-left chip on Package Alerts / Today. */
+    /* Sessions-left chip on Package Alerts. */
     .sessions { font-variant-numeric: tabular-nums; font-weight: 700; }
     .sessions.zero { color: var(--tier-red); }
     .sessions.low  { color: var(--tier-orange); }
@@ -221,6 +212,28 @@
     .loading-hint.error { color: var(--goji); }
     .panel-loading { text-align: center; color: var(--ink-muted); padding: 32px 0; }
 
+    /* Leads: capture form + funnel stage badges. */
+    .lead-form { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    .lead-form label { font-size: 13px; color: var(--ink-soft); display: inline-flex; align-items: center; gap: 6px; }
+    .lead-form input { font: inherit; font-size: 13px; padding: 5px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--card); color: var(--ink); }
+    .lead-form input.note { flex: 1; min-width: 180px; }
+    .lead-form button {
+      font: inherit; font-size: 13px; font-weight: 600; padding: 6px 14px; cursor: pointer;
+      border: 1px solid var(--good); border-radius: 8px; background: var(--card); color: var(--good);
+    }
+    .lead-form button:hover { background: var(--good); color: #fff; }
+    .save-hint { font-size: 12px; color: var(--ink-muted); margin-top: 8px; min-height: 16px; }
+    .save-hint.error { color: var(--goji); }
+    .stage-badge {
+      display: inline-block; font-size: 11px; font-weight: 700;
+      padding: 2px 9px; border-radius: 999px; text-transform: capitalize;
+    }
+    .stage-badge.inquiry   { background: var(--goji-soft);     color: var(--goji); }
+    .stage-badge.qualified { background: var(--tier-yellow-bg); color: #8a6d10; }
+    .stage-badge.booked    { background: #e2ecfb;              color: #2a5aa8; }
+    .stage-badge.won       { background: var(--tier-green-bg);  color: var(--tier-green); }
+    .stage-badge.lost      { background: var(--border);        color: var(--ink-soft); }
+
     @media (max-width: 820px) {
       .kpi-row { grid-template-columns: repeat(3, 1fr); }
       .wrap { padding: 16px; }
@@ -246,76 +259,82 @@
         <img class="brand-img" src="/static/soily.webp" alt="Goji Health">
         <div>
           <div class="brand-name">Front Desk</div>
-          <div class="brand-sub">Today's schedule, calls &amp; patient follow-up</div>
+          <div class="brand-sub">Leads, package alerts &amp; patient follow-up</div>
         </div>
       </div>
       <div class="updated" id="updated"></div>
     </header>
 
-    <!-- Top-level sections -->
+    <!-- Top-level sections — the worklists Plato doesn't give you, read
+         left-to-right as one lifecycle: new lead → active package → win-back. -->
     <nav class="maintabs">
-      <button class="maintab active" id="mtab-today"     onclick="showTab('today')">Today</button>
-      <button class="maintab"        id="mtab-calls"     onclick="showTab('calls')">Call list <span class="count" id="callsCount">0</span></button>
+      <button class="maintab active" id="mtab-leads"     onclick="showTab('leads')">Leads <span class="count" id="leadsCount">0</span></button>
       <button class="maintab"        id="mtab-packages"  onclick="showTab('packages')">Package alerts <span class="count" id="packagesCount">0</span></button>
-      <button class="maintab"        id="mtab-retention" onclick="showTab('retention')">Retention</button>
+      <button class="maintab"        id="mtab-retention" onclick="showTab('retention')">Follow-ups</button>
     </nav>
 
-    <!-- ============================ TODAY ============================ -->
-    <div class="panel active" id="panel-today">
+    <!-- ============================ LEADS ============================ -->
+    <div class="panel active" id="panel-leads">
+      <div class="kpi-row" id="leadSummary"></div>
+
+      <section class="q" style="margin-bottom:18px;">
+        <div class="toolbar">
+          <h2>New lead</h2>
+        </div>
+        <div class="lead-form">
+          <label>Channel
+            <select id="leadChannel">
+              <option value="whatsapp">WhatsApp</option>
+              <option value="instagram">Instagram</option>
+              <option value="google">Google</option>
+              <option value="referral">Referral</option>
+              <option value="walk_in">Walk-in</option>
+              <option value="form">Web form</option>
+              <option value="call">Phone call</option>
+              <option value="other">Other</option>
+            </select>
+          </label>
+          <input type="text" id="leadContact" placeholder="Phone or @handle">
+          <input type="text" id="leadNote" class="note" placeholder="What did they ask about? (no clinical detail)">
+          <button class="primary" id="leadAdd">Add lead</button>
+        </div>
+        <div class="save-hint" id="leadHint"></div>
+      </section>
+
+      <div class="tabs">
+        <button class="tab active" id="ltab-open" onclick="setLeadView('open')">Open <span class="count" id="leadOpenCount">0</span></button>
+        <button class="tab" id="ltab-won" onclick="setLeadView('won')">Won <span class="count" id="leadWonCount">0</span></button>
+        <button class="tab" id="ltab-lost" onclick="setLeadView('lost')">Lost <span class="count" id="leadLostCount">0</span></button>
+      </div>
+
       <section class="q">
         <div class="toolbar">
-          <h2>Today's schedule</h2>
-          <label>Clinician
-            <select id="todayClinician"><option value="">All</option></select>
+          <h2 id="leadListTitle">Open leads</h2>
+          <label>Channel
+            <select id="leadChannelFilter"><option value="">All</option></select>
           </label>
         </div>
         <div class="table-scroll">
         <table>
           <thead>
             <tr>
-              <th>Time</th>
-              <th>Patient</th>
-              <th>Clinician</th>
-              <th>Service</th>
-              <th class="num">Sessions left</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody id="todayRows"></tbody>
-        </table>
-        </div>
-        <div class="empty" id="todayEmpty" style="display:none"></div>
-        <div class="panel-loading" id="todayLoading">Loading today's schedule…</div>
-        <div class="pii-note">
-          Appointments refresh from Plato every ~15 min. Names &amp; phone numbers come from
-          BigQuery and are shown to the front desk only — never stored on the financial dashboard.
-        </div>
-      </section>
-    </div>
-
-    <!-- ============================ CALL LIST ============================ -->
-    <div class="panel" id="panel-calls">
-      <section class="q">
-        <div class="toolbar">
-          <h2>Call list — unconfirmed appointments (next 72h)</h2>
-        </div>
-        <div class="table-scroll">
-        <table>
-          <thead>
-            <tr>
-              <th>When</th>
-              <th>Patient</th>
-              <th>Phone</th>
-              <th>Clinician</th>
+              <th>Contact</th>
+              <th>Channel</th>
+              <th>Stage</th>
+              <th class="num">Came in</th>
+              <th id="leadDetailHead">Note</th>
               <th class="num">Action</th>
             </tr>
           </thead>
-          <tbody id="callsRows"></tbody>
+          <tbody id="leadRows"></tbody>
         </table>
         </div>
-        <div class="empty" id="callsEmpty" style="display:none"></div>
-        <div class="panel-loading" id="callsLoading">Loading call list…</div>
-        <div class="pii-note">Confirming records who confirmed and when, and removes the appointment from this list.</div>
+        <div class="empty" id="leadEmpty" style="display:none"></div>
+        <div class="panel-loading" id="leadLoading">Loading leads…</div>
+        <div class="pii-note">
+          A lead is <b>won</b> when they become a patient/customer (their first visit) — not when
+          they buy a package. Contact details are kept here only for the front desk to follow up.
+        </div>
       </section>
     </div>
 
@@ -422,9 +441,9 @@
     }
 
     // ---- top-level tab routing ---------------------------------------------
-    const TABS = ["today", "calls", "packages", "retention"];
+    const TABS = ["leads", "packages", "retention"];
     const loaded = {};           // tab -> true once its data has been fetched
-    let activeTab = "today";
+    let activeTab = "leads";
 
     function showTab(name) {
       activeTab = name;
@@ -436,13 +455,12 @@
     }
 
     function loadTab(name) {
-      if (name === "today")     return loadToday();
-      if (name === "calls")     return loadCalls();
+      if (name === "leads")     return loadLeads();
       if (name === "packages")  return loadPackages();
       if (name === "retention") return loadRetention();
     }
 
-    // First paint: dismiss the overlay once the default (Today) tab has loaded.
+    // First paint: dismiss the overlay once the default (Leads) tab has loaded.
     function clearOverlay() { document.getElementById("loading").classList.add("hidden"); }
     function overlayError(e) {
       const hint = document.getElementById("loadingHint");
@@ -450,144 +468,215 @@
       hint.textContent = "Could not load: " + e.message;
     }
 
-    // ======================= TODAY ==========================================
-    let SCHED = { schedule: [] };
-    let todayClinician = "";
+    // ======================= LEADS ==========================================
+    // Inbound-lead pipeline. A lead is "won" when they become a patient/customer
+    // (their first visit) — packages are a separate worklist, not a stage here.
+    const LEAD_CHANNEL_LABELS = {
+      whatsapp: "WhatsApp", instagram: "Instagram", google: "Google",
+      referral: "Referral", walk_in: "Walk-in", form: "Web form",
+      call: "Phone call", other: "Other",
+    };
+    const OPEN_STAGES = ["inquiry", "qualified", "booked"];
+    let LEADS = { summary: {}, leads: [] };
+    let leadView = "open";              // "open" | "won" | "lost"
+    let leadChannelFilter = "";
 
-    async function loadToday() {
-      const tbl = document.getElementById("todayLoading");
+    async function loadLeads() {
+      const tbl = document.getElementById("leadLoading");
       try {
-        const res = await fetch("/api/frontdesk/schedule", { headers: { "Accept": "application/json" } });
+        const res = await fetch("/api/frontdesk/leads", { headers: { "Accept": "application/json" } });
         if (!res.ok) throw new Error("HTTP " + res.status);
-        SCHED = await res.json();
-        loaded.today = true;
+        LEADS = await res.json();
+        loaded.leads = true;
         tbl.style.display = "none";
-        // The schedule blob also carries the call list — seed its count + cache.
-        if (SCHED.calls) { CALLS = { generated_at: SCHED.generated_at, calls: SCHED.calls }; loaded.calls = true; }
-        renderTodayClinicianOptions();
-        renderToday();
+        renderLeadSummary();
+        renderLeadChannelOptions();
+        renderLeads();
         updateCounts();
-        setUpdated(SCHED.generated_at);
-        if (activeTab === "today") clearOverlay();
+        setUpdated(LEADS.generated_at);
+        if (activeTab === "leads") clearOverlay();
       } catch (e) {
-        tbl.textContent = "Could not load today's schedule: " + e.message;
-        if (activeTab === "today") overlayError(e);
+        tbl.textContent = "Could not load leads: " + e.message;
+        if (activeTab === "leads") overlayError(e);
       }
     }
 
-    function renderTodayClinicianOptions() {
-      const ids = [...new Set((SCHED.schedule || []).map(a => a.clinician).filter(Boolean))].sort();
-      const sel = document.getElementById("todayClinician");
-      sel.innerHTML = '<option value="">All</option>' + ids.map(c => `<option value="${c}">${escapeHtml(c)}</option>`).join("");
-      sel.value = todayClinician;
+    function renderLeadSummary() {
+      const s = LEADS.summary || {};
+      const pct = s.close_rate != null ? Math.round(s.close_rate * 100) + "%" : "—";
+      const cards = [
+        { tier: "all",    label: "Inquiries", value: s.total  || 0, sub: "all leads in" },
+        { tier: "yellow", label: "Open",      value: s.open   || 0, sub: "still in play" },
+        { tier: "booked", label: "Booked",    value: s.booked || 0, sub: "appt scheduled" },
+        { tier: "green",  label: "Won",       value: s.won    || 0, sub: "became a patient" },
+        { tier: "lost",   label: "Lost",      value: s.lost   || 0, sub: "didn't convert" },
+        { tier: "booked", label: "Close rate", value: pct,          sub: "won ÷ won+lost" },
+      ];
+      document.getElementById("leadSummary").innerHTML = cards.map(c =>
+        `<div class="kpi-card" data-tier="${c.tier}" style="cursor:default;">
+          <div class="kpi-label">${c.label}</div>
+          <div class="kpi-value">${c.value}</div>
+          <div class="kpi-sub">${c.sub}</div>
+        </div>`).join("");
     }
 
-    function renderToday() {
-      const list = (SCHED.schedule || []).filter(a => !todayClinician || a.clinician === todayClinician);
-      const tbody = document.getElementById("todayRows");
-      const empty = document.getElementById("todayEmpty");
+    function renderLeadChannelOptions() {
+      const chans = [...new Set((LEADS.leads || []).map(l => l.channel).filter(Boolean))].sort();
+      const sel = document.getElementById("leadChannelFilter");
+      sel.innerHTML = '<option value="">All</option>' +
+        chans.map(c => `<option value="${c}">${escapeHtml(LEAD_CHANNEL_LABELS[c] || c)}</option>`).join("");
+      sel.value = leadChannelFilter;
+    }
+
+    function leadsForView() {
+      return (LEADS.leads || []).filter(l => {
+        if (leadChannelFilter && l.channel !== leadChannelFilter) return false;
+        if (leadView === "won")  return l.stage === "won";
+        if (leadView === "lost") return l.stage === "lost";
+        return OPEN_STAGES.includes(l.stage);   // "open"
+      });
+    }
+
+    function setLeadView(v) {
+      leadView = v;
+      for (const t of ["open", "won", "lost"]) {
+        document.getElementById("ltab-" + t).classList.toggle("active", t === v);
+      }
+      renderLeads();
+    }
+
+    function renderLeads() {
+      const list = leadsForView();
+      const tbody = document.getElementById("leadRows");
+      const empty = document.getElementById("leadEmpty");
+      document.getElementById("leadListTitle").textContent =
+        leadView === "won" ? "Won leads" : leadView === "lost" ? "Lost leads" : "Open leads";
+      document.getElementById("leadDetailHead").textContent =
+        leadView === "lost" ? "Reason" : "Note";
       if (!list.length) {
         tbody.innerHTML = "";
-        empty.textContent = todayClinician ? "No appointments for that clinician today." : "No appointments scheduled today.";
+        empty.textContent = leadView === "open"
+          ? "No open leads. Log a new inquiry above. 🎉"
+          : `No ${leadView} leads yet.`;
         empty.style.display = "block";
         return;
       }
       empty.style.display = "none";
-      tbody.innerHTML = list.map(a => {
-        let badges = "";
-        if (a.is_first_visit) badges += '<span class="appt-badge new">New</span>';
-        badges += a.confirmed
-          ? '<span class="appt-badge confirmed">Confirmed</span>'
-          : '<span class="appt-badge unconf">Unconfirmed</span>';
-        return `<tr>
-          <td class="time">${escapeHtml(a.time)}</td>
-          <td><span class="name">${escapeHtml(a.name)}</span> ${a.age_band ? `<span class="muted">· ${a.age_band}</span>` : ""}</td>
-          <td>${escapeHtml(a.clinician || "—")}</td>
-          <td>${escapeHtml(a.service || "—")}</td>
-          <td class="num">${sessionsCell(a.sessions_remaining)}</td>
-          <td>${badges}</td>
-        </tr>`;
-      }).join("");
+      tbody.innerHTML = list.map(leadRowHtml).join("");
     }
 
-    document.getElementById("todayClinician").addEventListener("change", e => {
-      todayClinician = e.target.value; renderToday();
+    function leadRowHtml(l) {
+      const detail = (leadView === "lost")
+        ? (l.lost_reason ? `<span class="reason">${escapeHtml(l.lost_reason)}</span>` : '<span class="muted">—</span>')
+        : (l.note ? `<span class="note" style="font-style:normal;">${escapeHtml(l.note)}</span>` : '<span class="muted">—</span>');
+
+      let actions = "";
+      if (OPEN_STAGES.includes(l.stage)) {
+        const booked = l.stage === "booked"
+          ? ""
+          : `<button onclick="advanceLead('${l.lead_id}','booked')">Booked</button>`;
+        actions = `<div class="actions">
+          ${booked}
+          <button class="primary" onclick="advanceLead('${l.lead_id}','won')">Won</button>
+          <button class="danger" onclick="advanceLead('${l.lead_id}','lost')">Lost</button>
+        </div>`;
+      } else {
+        actions = `<div class="actions"><button onclick="advanceLead('${l.lead_id}','inquiry')">Reopen</button></div>`;
+      }
+
+      return `<tr data-id="${l.lead_id}">
+        <td>${l.contact ? `<span class="name">${escapeHtml(l.contact)}</span>` : '<span class="muted">—</span>'}</td>
+        <td>${escapeHtml(LEAD_CHANNEL_LABELS[l.channel] || l.channel || "—")}</td>
+        <td><span class="stage-badge ${l.stage}">${escapeHtml(l.stage)}</span></td>
+        <td class="num">${fmtDate(l.first_seen)}</td>
+        <td>${detail}</td>
+        <td class="num">${actions}</td>
+      </tr>`;
+    }
+
+    async function addLead() {
+      const channel = document.getElementById("leadChannel").value;
+      const contactEl = document.getElementById("leadContact");
+      const noteEl = document.getElementById("leadNote");
+      const contact = contactEl.value.trim();
+      const note = noteEl.value.trim();
+      const hint = document.getElementById("leadHint");
+      if (!contact) { hint.className = "save-hint error"; hint.textContent = "Add a phone or handle so we can follow up."; return; }
+      const lead = {
+        lead_id: (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random()),
+        contact, channel, note, stage: "inquiry",
+        first_seen: new Date().toISOString(), updated_at: new Date().toISOString(),
+      };
+      // Optimistic: show it immediately.
+      LEADS.leads = [lead, ...(LEADS.leads || [])];
+      recomputeLeadSummary();
+      renderLeadSummary(); renderLeadChannelOptions(); renderLeads(); updateCounts();
+      contactEl.value = ""; noteEl.value = "";
+      hint.className = "save-hint"; hint.textContent = "Saving…";
+      try {
+        await postLead({ lead_id: lead.lead_id, stage: "inquiry", contact, channel, note });
+        hint.textContent = "Lead logged.";
+        setTimeout(() => { hint.textContent = ""; }, 2000);
+      } catch (e) {
+        hint.className = "save-hint error"; hint.textContent = "Could not save: " + e.message;
+        loaded.leads = false; loadLeads();
+      }
+    }
+
+    async function advanceLead(leadId, stage) {
+      const l = (LEADS.leads || []).find(x => x.lead_id === leadId);
+      if (!l) return;
+      let lostReason = null;
+      if (stage === "lost") {
+        lostReason = prompt("Mark this lead lost. Optional reason (e.g. price, went elsewhere, no reply):", "");
+        if (lostReason === null) return;   // cancelled
+      }
+      // Optimistic local update.
+      l.stage = stage;
+      if (stage === "lost") l.lost_reason = lostReason || null;
+      recomputeLeadSummary();
+      renderLeadSummary(); renderLeads(); updateCounts();
+      try {
+        await postLead({ lead_id: leadId, stage, contact: l.contact, channel: l.channel,
+                         note: l.note, lost_reason: lostReason });
+      } catch (e) {
+        alert("Could not save: " + e.message);
+        loaded.leads = false; loadLeads();
+      }
+    }
+
+    async function postLead(body) {
+      const res = await fetch("/api/frontdesk/leads", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) {
+        let msg = "HTTP " + res.status;
+        try { const j = await res.json(); if (j && j.error) msg = j.error; } catch (_) {}
+        throw new Error(msg);
+      }
+    }
+
+    // Recompute the funnel summary from local state so the cards stay in sync
+    // after an action, without a server round-trip. Mirrors fetch_leads.
+    function recomputeLeadSummary() {
+      const s = { total: 0, open: 0, booked: 0, won: 0, lost: 0, close_rate: 0, by_channel: {} };
+      for (const l of (LEADS.leads || [])) {
+        s.total++;
+        const bucket = l.stage === "won" ? "won" : l.stage === "lost" ? "lost" : "open";
+        s[bucket]++;
+        if (l.stage === "booked") s.booked++;
+      }
+      const closed = s.won + s.lost;
+      s.close_rate = closed ? s.won / closed : 0;
+      LEADS.summary = s;
+    }
+
+    document.getElementById("leadAdd").addEventListener("click", addLead);
+    document.getElementById("leadChannelFilter").addEventListener("change", e => {
+      leadChannelFilter = e.target.value; renderLeads();
     });
-
-    // ======================= CALL LIST ======================================
-    let CALLS = { calls: [] };
-
-    async function loadCalls() {
-      const tbl = document.getElementById("callsLoading");
-      try {
-        // The schedule fetch already seeds CALLS; only hit the endpoint if not.
-        if (!loaded.calls) {
-          const res = await fetch("/api/frontdesk/calls", { headers: { "Accept": "application/json" } });
-          if (!res.ok) throw new Error("HTTP " + res.status);
-          CALLS = await res.json();
-          loaded.calls = true;
-        }
-        tbl.style.display = "none";
-        renderCalls();
-        updateCounts();
-      } catch (e) {
-        tbl.textContent = "Could not load call list: " + e.message;
-      }
-    }
-
-    function renderCalls() {
-      const list = CALLS.calls || [];
-      const tbody = document.getElementById("callsRows");
-      const empty = document.getElementById("callsEmpty");
-      document.getElementById("callsLoading").style.display = "none";
-      if (!list.length) {
-        tbody.innerHTML = "";
-        empty.textContent = "Everything's confirmed. 🎉";
-        empty.style.display = "block";
-        return;
-      }
-      empty.style.display = "none";
-      tbody.innerHTML = list.map(a => {
-        const when = (a.is_today ? "Today" : fmtDate(a.appt_date)) + " · " + escapeHtml(a.time);
-        return `<tr data-id="${a.appointment_id}">
-          <td class="time">${when}</td>
-          <td><span class="name">${escapeHtml(a.name)}</span></td>
-          <td>${phoneCell(a.phone)}</td>
-          <td>${escapeHtml(a.clinician || "—")}</td>
-          <td class="num"><div class="actions">
-            <button class="primary" onclick="confirmAppt('${a.appointment_id}')">Confirm</button>
-          </div></td>
-        </tr>`;
-      }).join("");
-    }
-
-    async function confirmAppt(appointmentId) {
-      // Optimistic: drop it from the call list, mark confirmed in the schedule.
-      if (CALLS.calls) CALLS.calls = CALLS.calls.filter(a => a.appointment_id !== appointmentId);
-      if (SCHED.schedule) {
-        const s = SCHED.schedule.find(a => a.appointment_id === appointmentId);
-        if (s) s.confirmed = true;
-      }
-      renderCalls();
-      if (loaded.today) renderToday();
-      updateCounts();
-      try {
-        const res = await fetch("/api/frontdesk/confirm_appt", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ appointment_id: appointmentId }),
-        });
-        if (!res.ok) {
-          let msg = "HTTP " + res.status;
-          try { const j = await res.json(); if (j && j.error) msg = j.error; } catch (_) {}
-          throw new Error(msg);
-        }
-      } catch (e) {
-        alert("Could not confirm: " + e.message);
-        // Re-fetch to get back to a truthful state.
-        loaded.calls = false; loaded.today = false; loadToday();
-      }
-    }
 
     // ======================= PACKAGE ALERTS =================================
     let PKG = { patients: [] };
@@ -629,7 +718,13 @@
 
     // ======================= COUNTS ON THE TABS =============================
     function updateCounts() {
-      if (loaded.calls)    document.getElementById("callsCount").textContent    = (CALLS.calls || []).length;
+      if (loaded.leads) {
+        const s = LEADS.summary || {};
+        document.getElementById("leadsCount").textContent     = s.open || 0;   // nav badge: open leads
+        document.getElementById("leadOpenCount").textContent  = s.open || 0;
+        document.getElementById("leadWonCount").textContent   = s.won  || 0;
+        document.getElementById("leadLostCount").textContent  = s.lost || 0;
+      }
       if (loaded.packages) document.getElementById("packagesCount").textContent = (PKG.patients || []).length;
     }
 
@@ -864,8 +959,8 @@
       showAll = e.target.checked; if (showAll) tierFilter = null; renderSummary(); renderRows();
     });
 
-    // Land on Today by default.
-    showTab("today");
+    // Land on Leads by default.
+    showTab("leads");
   </script>
 </body>
 </html>
