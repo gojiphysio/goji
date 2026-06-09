@@ -43,6 +43,7 @@
 CREATE TABLE IF NOT EXISTS `goji-bi.marts.lead_events` (
   event_id    STRING    NOT NULL OPTIONS(description="UUID for this event row"),
   lead_id     STRING    NOT NULL OPTIONS(description="Stable id for the lead (UUID minted on first capture)"),
+  name        STRING    OPTIONS(description="Lead's name (optional — an inbound message often arrives before we know it). Pre-patient PII, stored deliberately."),
   contact     STRING    OPTIONS(description="Phone or @handle — who the lead is, and the dedup key. Pre-patient PII, stored deliberately."),
   channel     STRING    OPTIONS(description="whatsapp | instagram | google | referral | walk_in | form | call | other"),
   stage       STRING    NOT NULL OPTIONS(description="inquiry | qualified | booked | won | lost"),
@@ -52,12 +53,19 @@ CREATE TABLE IF NOT EXISTS `goji-bi.marts.lead_events` (
   updated_at  TIMESTAMP NOT NULL OPTIONS(description="When the event was recorded")
 );
 
+-- `name` was added after the table first shipped. CREATE TABLE IF NOT EXISTS
+-- won't alter an existing table, so add the column explicitly — idempotent, and
+-- a no-op once the column exists (and for fresh installs the CREATE already has it).
+ALTER TABLE `goji-bi.marts.lead_events`
+  ADD COLUMN IF NOT EXISTS name STRING
+  OPTIONS(description="Lead's name (optional). Pre-patient PII, stored deliberately.");
+
 -- Latest event per lead, plus first_seen (when the lead first came in) so the
 -- funnel can bucket inquiries by period. The Leads tab reads this for the
 -- worklist and the founder Marketing funnel cards aggregate it.
 CREATE OR REPLACE VIEW `goji-bi.marts.lead_latest` AS
 SELECT
-  lead_id, contact, channel, stage, lost_reason, note, updated_by, updated_at, first_seen
+  lead_id, name, contact, channel, stage, lost_reason, note, updated_by, updated_at, first_seen
 FROM (
   SELECT
     *,

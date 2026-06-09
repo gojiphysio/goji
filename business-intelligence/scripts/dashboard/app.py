@@ -1451,7 +1451,7 @@ def fetch_leads() -> dict:
     marts/46_lead_events.sql.
     """
     sql = f"""
-SELECT lead_id, contact, channel, stage, lost_reason, note,
+SELECT lead_id, name, contact, channel, stage, lost_reason, note,
        updated_by, updated_at, first_seen
 FROM `{PROJECT}.marts.lead_latest`
 """
@@ -1480,6 +1480,7 @@ FROM `{PROJECT}.marts.lead_latest`
 
         leads.append({
             "lead_id":     r["lead_id"],
+            "name":        r.get("name"),
             "contact":     r.get("contact"),
             "channel":     channel,
             "stage":       stage,
@@ -1522,9 +1523,9 @@ def get_leads() -> dict:
     return data
 
 
-def record_lead(lead_id: str, stage: str, *, contact: str | None = None,
-                channel: str | None = None, note: str | None = None,
-                lost_reason: str | None = None,
+def record_lead(lead_id: str, stage: str, *, name: str | None = None,
+                contact: str | None = None, channel: str | None = None,
+                note: str | None = None, lost_reason: str | None = None,
                 updated_by: str | None = None) -> None:
     """Append one lead event (append-only; latest wins).
 
@@ -1536,13 +1537,14 @@ def record_lead(lead_id: str, stage: str, *, contact: str | None = None,
     """
     sql = f"""
 INSERT INTO `{PROJECT}.marts.lead_events`
-  (event_id, lead_id, contact, channel, stage, lost_reason, note, updated_by, updated_at)
+  (event_id, lead_id, name, contact, channel, stage, lost_reason, note, updated_by, updated_at)
 VALUES
-  (@event_id, @lead_id, @contact, @channel, @stage, @lost_reason, @note, @updated_by, CURRENT_TIMESTAMP())
+  (@event_id, @lead_id, @name, @contact, @channel, @stage, @lost_reason, @note, @updated_by, CURRENT_TIMESTAMP())
 """
     job_config = bigquery.QueryJobConfig(query_parameters=[
         bigquery.ScalarQueryParameter("event_id",    "STRING", str(uuid.uuid4())),
         bigquery.ScalarQueryParameter("lead_id",     "STRING", lead_id),
+        bigquery.ScalarQueryParameter("name",        "STRING", (name or None)),
         bigquery.ScalarQueryParameter("contact",     "STRING", (contact or None)),
         bigquery.ScalarQueryParameter("channel",     "STRING", (channel or None)),
         bigquery.ScalarQueryParameter("stage",       "STRING", stage),
@@ -2118,9 +2120,10 @@ def api_frontdesk_leads() -> Response:
 def api_frontdesk_leads_save() -> Response:
     """Capture a lead or advance its stage.
 
-    Body: {lead_id, stage, contact?, channel?, note?, lost_reason?}. Appends one
-    event row carrying the lead's current snapshot; the pipeline reflects it on
-    the next reload. lead_id is the stable id the front end mints on capture.
+    Body: {lead_id, stage, name?, contact?, channel?, note?, lost_reason?}.
+    Appends one event row carrying the lead's current snapshot; the pipeline
+    reflects it on the next reload. lead_id is the id the front end mints on
+    capture. name is optional; contact stays the identity/dedup key.
     """
     body    = request.get_json(silent=True) or {}
     lead_id = (body.get("lead_id") or "").strip()
@@ -2134,6 +2137,7 @@ def api_frontdesk_leads_save() -> Response:
                         status=400, mimetype="application/json")
     try:
         record_lead(lead_id, stage,
+                    name=(body.get("name") or None),
                     contact=(body.get("contact") or None),
                     channel=channel,
                     note=(body.get("note") or None),

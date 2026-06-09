@@ -294,6 +294,7 @@
               <option value="other">Other</option>
             </select>
           </label>
+          <input type="text" id="leadName" placeholder="Name (optional)">
           <input type="text" id="leadContact" placeholder="Phone or @handle">
           <input type="text" id="leadNote" class="note" placeholder="What did they ask about? (no clinical detail)">
           <button class="primary" id="leadAdd">Add lead</button>
@@ -318,6 +319,7 @@
         <table>
           <thead>
             <tr>
+              <th>Name</th>
               <th>Contact</th>
               <th>Channel</th>
               <th>Stage</th>
@@ -585,7 +587,8 @@
       }
 
       return `<tr data-id="${l.lead_id}">
-        <td>${l.contact ? `<span class="name">${escapeHtml(l.contact)}</span>` : '<span class="muted">—</span>'}</td>
+        <td>${l.name ? `<span class="name">${escapeHtml(l.name)}</span>` : '<span class="muted">—</span>'}</td>
+        <td>${l.contact ? escapeHtml(l.contact) : '<span class="muted">—</span>'}</td>
         <td>${escapeHtml(LEAD_CHANNEL_LABELS[l.channel] || l.channel || "—")}</td>
         <td><span class="stage-badge ${l.stage}">${escapeHtml(l.stage)}</span></td>
         <td class="num">${fmtDate(l.first_seen)}</td>
@@ -596,25 +599,27 @@
 
     async function addLead() {
       const channel = document.getElementById("leadChannel").value;
+      const nameEl = document.getElementById("leadName");
       const contactEl = document.getElementById("leadContact");
       const noteEl = document.getElementById("leadNote");
+      const name = nameEl.value.trim();
       const contact = contactEl.value.trim();
       const note = noteEl.value.trim();
       const hint = document.getElementById("leadHint");
       if (!contact) { hint.className = "save-hint error"; hint.textContent = "Add a phone or handle so we can follow up."; return; }
       const lead = {
         lead_id: (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random()),
-        contact, channel, note, stage: "inquiry",
+        name, contact, channel, note, stage: "inquiry",
         first_seen: new Date().toISOString(), updated_at: new Date().toISOString(),
       };
       // Optimistic: show it immediately.
       LEADS.leads = [lead, ...(LEADS.leads || [])];
       recomputeLeadSummary();
       renderLeadSummary(); renderLeadChannelOptions(); renderLeads(); updateCounts();
-      contactEl.value = ""; noteEl.value = "";
+      nameEl.value = ""; contactEl.value = ""; noteEl.value = "";
       hint.className = "save-hint"; hint.textContent = "Saving…";
       try {
-        await postLead({ lead_id: lead.lead_id, stage: "inquiry", contact, channel, note });
+        await postLead({ lead_id: lead.lead_id, stage: "inquiry", name, contact, channel, note });
         hint.textContent = "Lead logged.";
         setTimeout(() => { hint.textContent = ""; }, 2000);
       } catch (e) {
@@ -637,8 +642,8 @@
       recomputeLeadSummary();
       renderLeadSummary(); renderLeads(); updateCounts();
       try {
-        await postLead({ lead_id: leadId, stage, contact: l.contact, channel: l.channel,
-                         note: l.note, lost_reason: lostReason });
+        await postLead({ lead_id: leadId, stage, name: l.name, contact: l.contact,
+                         channel: l.channel, note: l.note, lost_reason: lostReason });
       } catch (e) {
         alert("Could not save: " + e.message);
         loaded.leads = false; loadLeads();
