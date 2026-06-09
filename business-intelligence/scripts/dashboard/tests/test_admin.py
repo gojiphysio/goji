@@ -226,6 +226,25 @@ def test_leads_save_validates_before_bq(frontdesk_client, body):
                                  headers=_auth("frontdesk", "staff-pw"), json=body)
     assert resp.status_code == 400
 
+def test_leads_save_accepts_optional_name(frontdesk_client, monkeypatch):
+    # Name is optional: a lead saves with or without one, and the value (or None)
+    # is passed through to record_lead. Patch record_lead so no BigQuery is hit.
+    calls = []
+    monkeypatch.setattr(app, "record_lead", lambda *a, **k: calls.append(k))
+    auth = _auth("frontdesk", "staff-pw")
+
+    r1 = frontdesk_client.post("/api/frontdesk/leads", headers=auth,
+                               json={"lead_id": "1", "stage": "inquiry",
+                                     "name": "Jane", "contact": "+65"})
+    assert r1.status_code == 200
+    assert calls[-1]["name"] == "Jane"
+
+    r2 = frontdesk_client.post("/api/frontdesk/leads", headers=auth,
+                               json={"lead_id": "2", "stage": "inquiry", "contact": "+65"})
+    assert r2.status_code == 200
+    assert calls[-1]["name"] is None
+
+
 def test_lead_stage_and_channel_vocab():
     # The funnel vocabulary the UI and SQL agree on.
     assert app.OPEN_LEAD_STAGES <= app.VALID_LEAD_STAGES
