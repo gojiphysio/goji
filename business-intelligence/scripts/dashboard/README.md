@@ -38,16 +38,19 @@ Founder dashboard (`dashboard.gojiphysio.com`, `/`):
   persisted to `marts.marketing_ops_events` via `/api/marketing/ops`.
 
 Front Desk portal (`frontdesk.gojiphysio.com`, served at `/`, no financials;
-the legacy `/admin` path redirects to `/`) — four tabs:
+the legacy `/admin` path redirects to `/`) — three tabs, the worklists Plato
+doesn't track (Today's schedule / call list were removed: they mirrored Plato's
+own calendar, which the team uses directly):
 
-- **Today** — today's appointments, time-ordered, with `NEW` (first visit) and
-  confirmed/unconfirmed badges, a session-balance column, and a clinician
-  filter. Reads `marts.fct_upcoming_appointments` (Plato data, ≤15-min lag).
-- **Call list** — unconfirmed appointments in the next 72h, with a one-click
-  **Confirm** that appends to `marts.appt_confirmation_events`.
+- **Leads** — inbound WhatsApp/Instagram/etc. inquiries tracked through the
+  acquisition funnel (`inquiry → qualified → booked → won`, or `lost` + reason),
+  with a capture form and a funnel summary (inquiries, open, won, lost, close
+  rate). "Won" = the lead became a patient/customer (first visit), **not**
+  "bought a package". Writes `marts.lead_events`; the structured replacement for
+  the founder Marketing tab's manual enquiry log.
 - **Package alerts** — patients with ≤2 prepaid sessions left
   (`marts.fct_package_balance`), most urgent (0) first, for renewal calls.
-- **Retention worklist** — patients tiered by time since last visit
+- **Follow-ups** — patients tiered by time since last visit
   (green ≤1wk / yellow >1wk / orange >2wk / red >4wk), with the front desk's
   contacted/snooze/dismiss actions and a Dismissed tab. Patients with a future
   appointment booked are excluded; a header line shows patients active in the

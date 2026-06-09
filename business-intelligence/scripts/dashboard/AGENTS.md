@@ -42,7 +42,22 @@ See `DEPLOY.md`.
   at 1,500 statements/table/day. New writable table → add it to the grant loops in
   `deploy_admin.sh`, `DEPLOY.md`, and `.github/workflows/deploy-dashboard.yml`.
 
+## Front desk portal (`frontdesk.*`)
+- It's the **worklists Plato doesn't track**, not a second calendar: **Leads**
+  (inbound funnel) → **Package alerts** (renewals) → **Follow-ups** (win-backs).
+  Don't re-add a Today/schedule/call-list mirror of Plato — that was removed
+  precisely to avoid two sources of truth.
+- **"Won" = the lead became a patient/customer** (their first visit), **not**
+  "bought a package". Packages are a separate worklist, never a funnel stage.
+- **Lead `contact` PII is stored on purpose** — a pre-patient isn't in Plato to
+  hydrate from, so `marts.lead_events` is the *only* exception to the
+  patient-worklist rule of "key on id, never persist name/phone". Keep it gated
+  (founder+staff, frontdesk) and keep `note` operational, not clinical.
+
 ## Marketing tab
 - WIP "pending integration" cards are the **seams** where live integrations plug
   in. Convert a WIP card to a live card (value id + `kpi-trend` div + `badge live`)
   and wire it in `renderMarketingMetrics(r)`.
+- The manual enquiry log is being **replaced by the front-desk Leads pipeline**
+  (`marts.lead_events`) — the single source of truth for inbound inquiries. Don't
+  build new enquiry capture here; funnel metrics should read lead aggregates.

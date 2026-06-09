@@ -69,8 +69,8 @@ echo "==> Step 2/5: building the behind-the-scenes data"
 
 # --- Step 3: permission to save front-desk actions ---------------------------
 # The dashboard writes four append-only event logs: follow-up actions (retention
-# worklist), appointment confirmations (call list), marketing operating-tool
-# state (founder Marketing tab), and click-to-WhatsApp link clicks. Each needs a
+# worklist), inbound leads (the Leads pipeline), marketing operating-tool state
+# (founder Marketing tab), and click-to-WhatsApp link clicks. Each needs a
 # table-level dataEditor grant on the SA — we keep it table-level, not
 # dataset-wide, for least privilege.
 echo
@@ -99,7 +99,7 @@ grant_editor() {
   fi
 }
 grant_editor patient_followup_events    "follow-up actions"
-grant_editor appt_confirmation_events   "appointment confirmations"
+grant_editor lead_events                "inbound leads"
 grant_editor marketing_ops_events       "marketing operating tools"
 grant_editor link_click_events          "click-to-WhatsApp tracking"
 
