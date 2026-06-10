@@ -235,6 +235,17 @@
     .doctor-flip .wrong { color: var(--goji); font-weight: 600; }
     .doctor-flip .right { color: var(--good); font-weight: 600; }
     .alert-meta { color: var(--ink-muted); font-size: 11px; }
+    .dismiss-btn {
+      font-size: 11px; padding: 2px 8px; border-radius: 4px; cursor: pointer;
+      background: transparent; border: 1px solid var(--border); color: var(--ink-soft);
+    }
+    .dismiss-btn:hover { background: var(--bg); color: var(--ink); }
+    .dismiss-all-btn {
+      font-size: 12px; padding: 3px 10px; border-radius: 4px; cursor: pointer;
+      background: transparent; border: 1px solid var(--border); color: var(--ink-soft);
+      margin-left: 8px; font-weight: 500; vertical-align: middle;
+    }
+    .dismiss-all-btn:hover { background: var(--bg); color: var(--ink); }
     .alert-config-note {
       font-size: 12px; color: var(--ink-muted);
       background: #fafaf7; border: 1px dashed var(--border);
@@ -807,11 +818,12 @@
       <h2>
         Provider attribution alerts
         <span class="alert-count" id="mismatch_count">0</span>
+        <button type="button" id="mismatch_dismiss_all" class="dismiss-all-btn" style="display:none;">Dismiss all</button>
       </h2>
       <div class="subtitle">
         Non-void invoices in the last <span id="mismatch_window">30</span> days
         where <strong>invoice doctor</strong> doesn't match the same-day
-        <strong>appointment calendar doctor</strong>. Clears automatically once corrected.
+        <strong>appointment calendar doctor</strong>. Dismiss rows you've already fixed in Plato — they'll disappear automatically on the next data refresh.
       </div>
       <div style="overflow-x: auto;">
         <table id="mismatch_table">
@@ -824,6 +836,7 @@
               <th class="num">Total</th>
               <th>Created by</th>
               <th>Last edited</th>
+              <th></th>
             </tr>
           </thead>
           <tbody id="mismatch_tbody"></tbody>
@@ -858,6 +871,12 @@
         <div class="kpi-sub">Distinct patients with at least one session</div>
       </div>
       <div class="kpi-card">
+        <div class="kpi-label">New patients <span class="range-label">last 30 days</span> <span class="badge live">Live</span></div>
+        <div class="kpi-value" id="kpi_new_patients">-</div>
+        <div class="kpi-trend" id="kpi_new_patients_trend" hidden></div>
+        <div class="kpi-sub">First-ever visit in this period</div>
+      </div>
+      <div class="kpi-card">
         <div class="kpi-label">Visits <span class="range-label">last 30 days</span> <span class="badge live">Live</span></div>
         <div class="kpi-value" id="kpi_visits">-</div>
         <div class="kpi-trend" id="kpi_visits_trend" hidden></div>
@@ -865,22 +884,40 @@
       </div>
     </div>
 
+    <div class="kpi-row" id="projection_row" style="display:none;">
+      <div class="kpi-card">
+        <div class="kpi-label">Month-to-date <span class="badge live">Live</span></div>
+        <div class="kpi-value" id="proj_actual_mtd">-</div>
+        <div class="kpi-sub" id="proj_actual_sub">Recognised so far</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Projected month-end <span class="badge live">Live</span></div>
+        <div class="kpi-value" id="proj_projected_eom">-</div>
+        <div class="kpi-trend" id="proj_trend" hidden></div>
+        <div class="kpi-sub">Run-rate extrapolation (Mon–Sat)</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Prior month actual <span class="badge live">Live</span></div>
+        <div class="kpi-value" id="proj_prev_month">-</div>
+        <div class="kpi-sub" id="proj_prev_month_sub">Last month for comparison</div>
+      </div>
+    </div>
+
     <section class="q">
       <h2>Activity over time <span class="badge live">Live</span></h2>
       <div class="subtitle">
-        Visit volume and patient engagement over the <span class="range-label">last 30 days</span>.
-        <strong>Avg visits / patient</strong> is your retention signal — a rising trend means patients are returning and burning package sessions. Target 2+ for a healthy package-led model.
+        Visit volume over the <span class="range-label">last 30 days</span>.
+        Avg visits / patient: <strong id="avg_visits_per_patient">–</strong> — target 2+ for a healthy package-led model.
       </div>
-      <div class="two-col">
-        <div>
-          <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px;">Visits</div>
-          <div class="chart-wrap small"><canvas id="visitsChart"></canvas></div>
-        </div>
-        <div>
-          <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px;">Avg visits / patient</div>
-          <div class="chart-wrap small"><canvas id="avgVisitsChart"></canvas></div>
-        </div>
+      <div class="chart-wrap small"><canvas id="visitsChart"></canvas></div>
+    </section>
+
+    <section class="q" id="weekly_visits_section" style="display:none;">
+      <h2>Week-by-week visits <span class="badge live">Live</span></h2>
+      <div class="subtitle">
+        Total sessions per week (Mon–Sat) within the <span class="range-label">last 30 days</span>.
       </div>
+      <div class="chart-wrap small"><canvas id="weeklyVisitsChart"></canvas></div>
     </section>
 
     <section class="q">
@@ -1802,7 +1839,7 @@
     }[c]));
 
     let clinicianChart, mixRevenueChart, mixVisitsChart;
-    let visitsChart, avgVisitsChart, bookingsVsRecognisedChart;
+    let visitsChart, weeklyVisitsChart, bookingsVsRecognisedChart;
 
     // Parse a label like "18 May" or "4 May" into a day-of-week prefix, e.g. "Mon, 18 May"
     const MONTHS_IDX = {Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
@@ -1873,17 +1910,97 @@
       });
     }
 
-    function renderAvgVisitsChart(t) {
+    function renderAvgVisitsStat(t) {
       if (!t) return;
-      const visitsMap = {};
-      (t.visits || []).forEach(s => { visitsMap[s.label] = s.value; });
-      const series = (t.active_patients || []).map(s => ({
-        label: s.label,
-        value: s.value > 0
-          ? Math.round((visitsMap[s.label] || 0) / s.value * 10) / 10
-          : null
-      }));
-      avgVisitsChart = renderTrendChart(avgVisitsChart, 'avgVisitsChart', series, SAGE, false);
+      const el = document.getElementById('avg_visits_per_patient');
+      if (!el) return;
+      const totalVisits   = (t.visits          || []).reduce((s, x) => s + (x.value || 0), 0);
+      const totalPatients = (t.active_patients || []).reduce((s, x) => s + (x.value || 0), 0);
+      el.textContent = totalPatients > 0
+        ? (totalVisits / totalPatients).toFixed(1)
+        : '–';
+    }
+
+    function renderWeeklyVisits(series, rangeKey) {
+      const section = document.getElementById('weekly_visits_section');
+      if (!section) return;
+      // Only show for 30d and 90d views; hide for 7d and all
+      if (rangeKey === '7d' || rangeKey === 'all' || !series || !series.length) {
+        section.style.display = 'none';
+        return;
+      }
+      section.style.display = '';
+      const labels = series.map(s => s.label);
+      const values = series.map(s => s.value);
+      if (weeklyVisitsChart) {
+        weeklyVisitsChart.data.labels = labels;
+        weeklyVisitsChart.data.datasets[0].data = values;
+        weeklyVisitsChart.update();
+      } else {
+        weeklyVisitsChart = new Chart(document.getElementById('weeklyVisitsChart'), {
+          type: 'bar',
+          data: {
+            labels,
+            datasets: [{
+              data: values,
+              backgroundColor: COBALT + '99',
+              borderColor: COBALT,
+              borderWidth: 1,
+              borderRadius: 3,
+            }]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  title: items => items.length ? 'Week of ' + items[0].label : '',
+                  label: ctx => ctx.parsed.y + ' sessions'
+                }
+              }
+            },
+            scales: {
+              y: { beginAtZero: true, ticks: { precision: 0 } },
+              x: { ticks: { maxRotation: 0 } }
+            }
+          }
+        });
+      }
+    }
+
+    function renderProjection(p) {
+      const row = document.getElementById('projection_row');
+      if (!row) return;
+      if (!p || p.actual_mtd == null) { row.style.display = 'none'; return; }
+      row.style.display = '';
+      document.getElementById('proj_actual_mtd').textContent    = fmt$(p.actual_mtd);
+      document.getElementById('proj_projected_eom').textContent = fmt$(p.projected_eom);
+      document.getElementById('proj_prev_month').textContent    = fmt$(p.prev_month_actual);
+
+      const dayInfo = p.days_elapsed != null && p.days_total != null
+        ? 'day ' + p.days_elapsed + ' of ' + p.days_total + (p.month_label ? ' · ' + p.month_label : '')
+        : '';
+      const sub = document.getElementById('proj_actual_sub');
+      if (sub && dayInfo) sub.textContent = 'Recognised so far · ' + dayInfo;
+
+      const prevSub = document.getElementById('proj_prev_month_sub');
+      if (prevSub && p.prev_month_label) prevSub.textContent = p.prev_month_label + ' final';
+
+      // Trend: projected vs prior month
+      const trendEl = document.getElementById('proj_trend');
+      if (trendEl && p.prev_month_actual && p.prev_month_actual > 0) {
+        const pct = (p.projected_eom - p.prev_month_actual) / p.prev_month_actual * 100;
+        const mag = Math.abs(pct);
+        const sign = pct > 0 ? '+' : pct < 0 ? '−' : '';
+        const text = sign + (mag >= 100 ? mag.toFixed(0) : mag.toFixed(1)) + '%';
+        const dir  = pct > 0.5 ? 'up' : pct < -0.5 ? 'down' : 'flat';
+        const arrow = pct > 0.5 ? '▲' : pct < -0.5 ? '▼' : '—';
+        trendEl.hidden = false;
+        trendEl.className = 'kpi-trend ' + dir;
+        trendEl.title  = 'Projected vs ' + (p.prev_month_label || 'prior month');
+        trendEl.innerHTML = '<span class="kpi-trend-arrow">' + arrow + '</span><span>' + text + '</span>';
+      }
     }
 
     function renderBookingsVsRecognised(t) {
@@ -1989,22 +2106,34 @@
     function renderTrends(t) {
       if (!t) return;
       visitsChart = renderTrendChart(visitsChart, 'visitsChart', t.visits, COBALT, false);
-      renderAvgVisitsChart(t);
+      renderAvgVisitsStat(t);
       renderBookingsVsRecognised(t);
+    }
+
+    // Format an ISO date range string, e.g. "3–9 Jun" or "27 May – 2 Jun"
+    const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    function fmtIsoRange(start, end) {
+      if (!start || !end) return '';
+      const s = new Date(start + 'T00:00:00'), e = new Date(end + 'T00:00:00');
+      const sd = s.getDate(), sm = MONTHS_SHORT[s.getMonth()];
+      const ed = e.getDate(), em = MONTHS_SHORT[e.getMonth()];
+      return sm === em ? sd + '–' + ed + ' ' + em : sd + ' ' + sm + ' – ' + ed + ' ' + em;
     }
 
     // Stock-ticker trend chip. Compares a metric to the same metric in the
     // previous equal-length window (r.prev_kpis from the backend). previous
     // being null/undefined — e.g. the "all time" range — hides the chip.
     const TREND_FLAT_PCT = 0.5;  // |change| under this reads as "maintain"
-    function renderTrend(id, current, previous, label) {
+    function renderTrend(id, current, previous, prevStart, prevEnd) {
       const el = document.getElementById(id);
       if (!el) return;
       const ok = current != null && isFinite(current) &&
                  previous != null && isFinite(previous);
       if (!ok) { el.hidden = true; el.className = 'kpi-trend'; el.textContent = ''; return; }
       el.hidden = false;
-      el.title = 'vs previous ' + ((label || 'period').toLowerCase());
+      el.title = prevStart && prevEnd
+        ? 'vs ' + fmtIsoRange(prevStart, prevEnd)
+        : 'vs previous period';
 
       let dir, arrow, text;
       if (previous === 0) {
@@ -2029,14 +2158,17 @@
       document.getElementById('kpi_bookings').textContent        = fmt$(r.kpis.bookings);
       document.getElementById('kpi_recognised').textContent      = fmt$(r.kpis.recognised);
       document.getElementById('kpi_active_patients').textContent = fmtInt(r.kpis.active_patients);
+      document.getElementById('kpi_new_patients').textContent    = fmtInt(r.kpis.new_patients);
       document.getElementById('kpi_visits').textContent          = fmtInt(r.kpis.visits);
       document.getElementById('kpi_deferred').textContent        = fmt$(DATA.deferred);
 
-      const p = r.prev_kpis;
-      renderTrend('kpi_bookings_trend',        r.kpis.bookings,        p && p.bookings,        r.label);
-      renderTrend('kpi_recognised_trend',      r.kpis.recognised,      p && p.recognised,      r.label);
-      renderTrend('kpi_active_patients_trend', r.kpis.active_patients, p && p.active_patients, r.label);
-      renderTrend('kpi_visits_trend',          r.kpis.visits,          p && p.visits,          r.label);
+      const p  = r.prev_kpis;
+      const ps = r.prev_start, pe = r.prev_end;
+      renderTrend('kpi_bookings_trend',        r.kpis.bookings,        p && p.bookings,        ps, pe);
+      renderTrend('kpi_recognised_trend',      r.kpis.recognised,      p && p.recognised,      ps, pe);
+      renderTrend('kpi_active_patients_trend', r.kpis.active_patients, p && p.active_patients, ps, pe);
+      renderTrend('kpi_new_patients_trend',    r.kpis.new_patients,    p && p.new_patients,    ps, pe);
+      renderTrend('kpi_visits_trend',          r.kpis.visits,          p && p.visits,          ps, pe);
     }
 
     function renderClinicians(rows) {
@@ -2424,10 +2556,11 @@
       if (DATA.demographics)
         document.getElementById('mkt_total_patients').textContent = fmtInt(DATA.demographics.total_patients);
 
-      const p = r.prev_kpis;
-      renderTrend('mkt_visits_trend',   r.kpis.visits,          p && p.visits,          r.label);
-      renderTrend('mkt_active_trend',   r.kpis.active_patients, p && p.active_patients, r.label);
-      renderTrend('mkt_bookings_trend', r.kpis.bookings,        p && p.bookings,        r.label);
+      const p  = r.prev_kpis;
+      const ps = r.prev_start, pe = r.prev_end;
+      renderTrend('mkt_visits_trend',   r.kpis.visits,          p && p.visits,          ps, pe);
+      renderTrend('mkt_active_trend',   r.kpis.active_patients, p && p.active_patients, ps, pe);
+      renderTrend('mkt_bookings_trend', r.kpis.bookings,        p && p.bookings,        ps, pe);
 
       // Tracked-link intent — WhatsApp + Plato booking, each with a per-channel split.
       const lc = r.link_clicks, lcp = r.link_clicks_prev;
@@ -2450,8 +2583,8 @@
         waEl.textContent = '—';
         bkEl.textContent = '—';
       }
-      renderTrend('mkt_wa_clicks_trend',   lc && lc.whatsapp, lcp && lcp.whatsapp, r.label);
-      renderTrend('mkt_book_clicks_trend', lc && lc.booking,  lcp && lcp.booking,  r.label);
+      renderTrend('mkt_wa_clicks_trend',   lc && lc.whatsapp, lcp && lcp.whatsapp, ps, pe);
+      renderTrend('mkt_book_clicks_trend', lc && lc.booking,  lcp && lcp.booking,  ps, pe);
 
       mktActiveChart = renderTrendChart(mktActiveChart, 'mktActiveChart',
         (r.trends && r.trends.active_patients) || [], GOJI, false);
@@ -2690,12 +2823,16 @@
       document.querySelectorAll('[data-range]').forEach(b =>
         b.classList.toggle('active', b.dataset.range === resolvedKey)
       );
+      const rangeLabel = (r.start && r.end && resolvedKey !== 'all')
+        ? fmtIsoRange(r.start, r.end)
+        : r.label.toLowerCase();
       document.querySelectorAll('.range-label').forEach(el =>
-        el.textContent = r.label.toLowerCase()
+        el.textContent = rangeLabel
       );
 
       renderKpis(r);
       renderTrends(r.trends);
+      renderWeeklyVisits(r.weekly_visits, resolvedKey);
       renderClinicians(r.clinicians);
       renderDiscounts(r.discounts);
       renderMix(r.treatment_mix);
@@ -2731,6 +2868,7 @@
       renderDemographics(DATA.demographics);
       renderReferrals(DATA.referrals);
       renderDoctorMismatches(DATA.doctor_mismatches);
+      renderProjection(DATA.projection);
       initMarketing();
 
       initPL();
@@ -2738,16 +2876,54 @@
       initCommissionCalculator();
     }
 
+    // Dismissed mismatch invoice IDs stored in localStorage.
+    // Format: { invoice_id: iso_timestamp_dismissed }
+    const DM_KEY = 'dm_dismissed';
+    const DM_TTL_DAYS = 7;
+
+    function dmGetDismissed() {
+      try {
+        const raw = localStorage.getItem(DM_KEY);
+        if (!raw) return {};
+        const obj = JSON.parse(raw);
+        const cutoff = Date.now() - DM_TTL_DAYS * 86400 * 1000;
+        // Evict entries older than TTL
+        const pruned = {};
+        for (const [id, ts] of Object.entries(obj)) {
+          if (new Date(ts).getTime() > cutoff) pruned[id] = ts;
+        }
+        if (Object.keys(pruned).length !== Object.keys(obj).length) {
+          localStorage.setItem(DM_KEY, JSON.stringify(pruned));
+        }
+        return pruned;
+      } catch (_) { return {}; }
+    }
+
+    function dmDismiss(invoiceId) {
+      const obj = dmGetDismissed();
+      obj[invoiceId] = new Date().toISOString();
+      try { localStorage.setItem(DM_KEY, JSON.stringify(obj)); } catch (_) {}
+    }
+
+    function dmDismissAll(invoiceIds) {
+      const obj = dmGetDismissed();
+      const ts = new Date().toISOString();
+      invoiceIds.forEach(id => { obj[id] = ts; });
+      try { localStorage.setItem(DM_KEY, JSON.stringify(obj)); } catch (_) {}
+    }
+
     function renderDoctorMismatches(m) {
-      const section = document.getElementById('doctor-mismatch-alert');
-      const tbody   = document.getElementById('mismatch_tbody');
-      const note    = document.getElementById('mismatch_config_note');
-      const countEl = document.getElementById('mismatch_count');
-      const windowEl = document.getElementById('mismatch_window');
+      const section    = document.getElementById('doctor-mismatch-alert');
+      const tbody      = document.getElementById('mismatch_tbody');
+      const note       = document.getElementById('mismatch_config_note');
+      const countEl    = document.getElementById('mismatch_count');
+      const windowEl   = document.getElementById('mismatch_window');
+      const dismissAll = document.getElementById('mismatch_dismiss_all');
       if (!section || !tbody) return;
       tbody.innerHTML = '';
       note.hidden = true;
       note.textContent = '';
+      if (dismissAll) dismissAll.style.display = 'none';
 
       if (!m) { section.hidden = true; return; }
       windowEl.textContent = m.window_days || 30;
@@ -2766,16 +2942,23 @@
         note.textContent = 'Plato API check failed: ' + m.error + '. Will retry on next refresh.';
         return;
       }
-      const rows = m.mismatches || [];
-      if (!rows.length) { section.hidden = true; return; }
+      const allRows  = m.mismatches || [];
+      if (!allRows.length) { section.hidden = true; return; }
+
+      const dismissed = dmGetDismissed();
+      // Also clear dismissals for invoices no longer in the mismatch list (resolved in Plato)
+      const activeIds = new Set(allRows.map(r => r.invoice_id));
+      const visibleRows = allRows.filter(r => !dismissed[r.invoice_id]);
+
+      if (!visibleRows.length) { section.hidden = true; return; }
 
       section.hidden = false;
-      countEl.textContent = rows.length;
+      countEl.textContent = visibleRows.length;
 
       const sgd = v => '$' + (v || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
       const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
-      rows.forEach(r => {
+      visibleRows.forEach(r => {
         const tr = document.createElement('tr');
         const apptList = (r.appt_doctor_names || []).map(esc).join(' / ');
         const invDoc = esc(r.invoice_doctor_name || r.invoice_doctor || '(unset)');
@@ -2788,9 +2971,27 @@
           <td class="num">${sgd(r.total)}</td>
           <td>${esc(r.created_by) || '<span class="alert-meta">—</span>'}</td>
           <td>${esc(r.last_edited_by) || '<span class="alert-meta">—</span>'}</td>
+          <td><button type="button" class="dismiss-btn" data-invoice="${esc(r.invoice_id)}">Dismiss</button></td>
         `;
         tbody.appendChild(tr);
       });
+
+      // Wire per-row dismiss buttons
+      tbody.querySelectorAll('.dismiss-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          dmDismiss(btn.dataset.invoice);
+          renderDoctorMismatches(m);
+        });
+      });
+
+      // Wire "Dismiss all" button
+      if (dismissAll) {
+        dismissAll.style.display = '';
+        dismissAll.onclick = () => {
+          dmDismissAll(visibleRows.map(r => r.invoice_id));
+          renderDoctorMismatches(m);
+        };
+      }
     }
 
     function hideLoadingOverlay() {

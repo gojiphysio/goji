@@ -13,9 +13,9 @@ See `DEPLOY.md`.
 
 ## UI
 - **Reuse the trend ticker.** New metric cards show change vs the previous period
-  via `renderTrend(id, current, previous, label)` (green ▲ / red ▼ / grey —).
-  Back it with a `ranges[key].<metric>` + `ranges[key].<metric>_prev` pair from
-  `build_payload()`.
+  via `renderTrend(id, current, previous, prevStart, prevEnd)` (green ▲ / red ▼ / grey —).
+  Back it with `ranges[key].prev_kpis.<metric>`, `ranges[key].prev_start`, and
+  `ranges[key].prev_end` from `build_payload()`. The tooltip shows "vs D–D Mon".
 - **Mobile rules** (learned the hard way):
   - Tables must scroll, not overflow: `display:block; width:max-content;
     overflow-x:auto` on the table, **and `min-width:0` on any grid/flex item that
@@ -36,6 +36,13 @@ See `DEPLOY.md`.
 - **Cache:** `get_payload()` caches `build_payload()` for `CACHE_TTL` (5 min);
   writes pop the cache. `build_payload()` fans queries out in a thread pool —
   add per-range work to `range_jobs[key]` and mirror it in the results assembly.
+- **`date.today()` must use SGT.** All `date.today()` / `datetime.now()` calls in
+  the backend use `datetime.now(ZoneInfo("Asia/Singapore")).date()` so the date
+  boundaries match the clinic's operating timezone, not the UTC Cloud Run host.
+- **Session grain.** `fct_service_delivered` Part A fans out by `qty` (physical
+  session count), not `len(redeem_alloc)`. When a redemption spans two packages
+  (cross-package transition), `redeem_alloc` has 2 entries for 1 visit — using
+  `qty` keeps the count correct.
 - **Writes are append-only event logs** with table-level `dataEditor` grants
   (`record_*` → parameterised DML). **High-frequency / public** writes (e.g. link
   clicks) use the **streaming API** (`insert_rows_json`), not DML — DML is capped
