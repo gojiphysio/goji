@@ -106,7 +106,7 @@
     .badge.sample { background: #fbeed1; color: var(--warn); }
 
     .kpi-row {
-      display: grid; grid-template-columns: repeat(5, 1fr);
+      display: grid; grid-template-columns: repeat(3, 1fr);
       gap: 14px; margin-bottom: 28px;
     }
     .kpi-card {
@@ -884,24 +884,13 @@
       </div>
     </div>
 
-    <div class="kpi-row" id="projection_row" style="display:none;">
-      <div class="kpi-card">
-        <div class="kpi-label">Month-to-date <span class="badge live">Live</span></div>
-        <div class="kpi-value" id="proj_actual_mtd">-</div>
-        <div class="kpi-sub" id="proj_actual_sub">Recognised so far</div>
+    <section class="q" id="projection_section" style="display:none;">
+      <h2>Monthly revenue trajectory <span class="badge live">Live</span></h2>
+      <div class="subtitle" id="projection_caption"></div>
+      <div class="chart-wrap" style="height:220px; margin-top:12px;">
+        <canvas id="projectionChart"></canvas>
       </div>
-      <div class="kpi-card">
-        <div class="kpi-label">Projected month-end <span class="badge live">Live</span></div>
-        <div class="kpi-value" id="proj_projected_eom">-</div>
-        <div class="kpi-trend" id="proj_trend" hidden></div>
-        <div class="kpi-sub">Run-rate extrapolation (Mon–Sat)</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-label">Prior month actual <span class="badge live">Live</span></div>
-        <div class="kpi-value" id="proj_prev_month">-</div>
-        <div class="kpi-sub" id="proj_prev_month_sub">Last month for comparison</div>
-      </div>
-    </div>
+    </section>
 
     <section class="q">
       <h2>Activity over time <span class="badge live">Live</span></h2>
@@ -1839,7 +1828,7 @@
     }[c]));
 
     let clinicianChart, mixRevenueChart, mixVisitsChart;
-    let visitsChart, weeklyVisitsChart, bookingsVsRecognisedChart;
+    let visitsChart, weeklyVisitsChart, bookingsVsRecognisedChart, projectionChart;
 
     // Parse a label like "18 May" or "4 May" into a day-of-week prefix, e.g. "Mon, 18 May"
     const MONTHS_IDX = {Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
@@ -1970,36 +1959,91 @@
     }
 
     function renderProjection(p) {
-      const row = document.getElementById('projection_row');
-      if (!row) return;
-      if (!p || p.actual_mtd == null) { row.style.display = 'none'; return; }
-      row.style.display = '';
-      document.getElementById('proj_actual_mtd').textContent    = fmt$(p.actual_mtd);
-      document.getElementById('proj_projected_eom').textContent = fmt$(p.projected_eom);
-      document.getElementById('proj_prev_month').textContent    = fmt$(p.prev_month_actual);
+      const section = document.getElementById('projection_section');
+      if (!section) return;
+      if (!p || p.actual_mtd == null) { section.style.display = 'none'; return; }
+      section.style.display = '';
 
-      const dayInfo = p.days_elapsed != null && p.days_total != null
-        ? 'day ' + p.days_elapsed + ' of ' + p.days_total + (p.month_label ? ' · ' + p.month_label : '')
-        : '';
-      const sub = document.getElementById('proj_actual_sub');
-      if (sub && dayInfo) sub.textContent = 'Recognised so far · ' + dayInfo;
+      // Build chart data: 3 prior months + current month (split actual / projected remainder)
+      const history     = p.monthly_history || [];
+      const histLabels  = history.map(x => x.label);
+      const histActuals = history.map(x => x.actual || 0);
 
-      const prevSub = document.getElementById('proj_prev_month_sub');
-      if (prevSub && p.prev_month_label) prevSub.textContent = p.prev_month_label + ' final';
+      const curLabel    = (p.month_label || '').replace(' 20', ' ').replace(' 2', ' \'2') + ' ✦';
+      const labels      = [...histLabels, curLabel];
+      const actualData  = [...histActuals, p.actual_mtd || 0];
+      const remainder   = Math.max(0, (p.projected_eom || 0) - (p.actual_mtd || 0));
+      const remData     = [...histActuals.map(() => 0), remainder];
 
-      // Trend: projected vs prior month
-      const trendEl = document.getElementById('proj_trend');
-      if (trendEl && p.prev_month_actual && p.prev_month_actual > 0) {
-        const pct = (p.projected_eom - p.prev_month_actual) / p.prev_month_actual * 100;
-        const mag = Math.abs(pct);
-        const sign = pct > 0 ? '+' : pct < 0 ? '−' : '';
-        const text = sign + (mag >= 100 ? mag.toFixed(0) : mag.toFixed(1)) + '%';
-        const dir  = pct > 0.5 ? 'up' : pct < -0.5 ? 'down' : 'flat';
-        const arrow = pct > 0.5 ? '▲' : pct < -0.5 ? '▼' : '—';
-        trendEl.hidden = false;
-        trendEl.className = 'kpi-trend ' + dir;
-        trendEl.title  = 'Projected vs ' + (p.prev_month_label || 'prior month');
-        trendEl.innerHTML = '<span class="kpi-trend-arrow">' + arrow + '</span><span>' + text + '</span>';
+      if (projectionChart) {
+        projectionChart.data.labels = labels;
+        projectionChart.data.datasets[0].data = actualData;
+        projectionChart.data.datasets[1].data = remData;
+        projectionChart.update();
+      } else {
+        projectionChart = new Chart(document.getElementById('projectionChart'), {
+          type: 'bar',
+          data: {
+            labels,
+            datasets: [
+              {
+                label: 'Actual',
+                data: actualData,
+                backgroundColor: COBALT,
+                borderRadius: 4,
+                stack: 'rev',
+              },
+              {
+                label: 'Projected remainder',
+                data: remData,
+                backgroundColor: COBALT + '44',
+                borderRadius: 4,
+                stack: 'rev',
+              },
+            ]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                mode: 'index', intersect: false,
+                callbacks: {
+                  title: items => items.length ? items[0].label.replace(' ✦', ' (current)') : '',
+                  label: ctx => {
+                    if (ctx.parsed.y === 0) return null;
+                    const label = ctx.datasetIndex === 0 ? 'Actual' : 'Projected remainder';
+                    return label + ': ' + fmt$(ctx.parsed.y);
+                  }
+                }
+              }
+            },
+            scales: {
+              x: { stacked: true, ticks: { maxRotation: 0 } },
+              y: { stacked: true, beginAtZero: true,
+                   ticks: { callback: v => '$' + Math.round(v / 1000) + 'k' } }
+            }
+          }
+        });
+      }
+
+      // Caption
+      const capEl = document.getElementById('projection_caption');
+      if (capEl) {
+        const pct = p.prev_month_actual > 0
+          ? ((p.projected_eom - p.prev_month_actual) / p.prev_month_actual * 100)
+          : null;
+        const trend = pct != null
+          ? ' · ' + (pct > 0 ? '▲ +' : '▼ ') + Math.abs(pct).toFixed(1) + '% vs ' + (p.prev_month_label || 'prior month')
+          : '';
+        const days = p.days_elapsed != null
+          ? ' · day ' + p.days_elapsed + ' of ' + p.days_total
+          : '';
+        capEl.textContent =
+          (p.month_label || '') + days +
+          ' · ' + fmt$(p.actual_mtd) + ' actual' +
+          ' · ' + fmt$(p.projected_eom) + ' projected' +
+          trend;
       }
     }
 
