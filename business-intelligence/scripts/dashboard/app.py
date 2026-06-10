@@ -675,20 +675,96 @@ ORDER BY revenue DESC
     } for r in _query(sql)]
 
 
-def fetch_deferred() -> float:
+def fetch_deferred() -> dict:
     sql = f"""
 SELECT
   COALESCE(
     (SELECT SUM(booking_amount) FROM `{PROJECT}.marts.fct_invoice_line` WHERE is_package_sale),
     0
-  )
-  - COALESCE(
+  ) AS sold_alltime,
+  COALESCE(
     (SELECT SUM(recognised_revenue) FROM `{PROJECT}.marts.fct_service_delivered`
      WHERE delivery_method = 'package_burn'),
     0
-  ) AS deferred
+  ) AS recognised_alltime
 """
-    return _to_float(_query(sql)[0]["deferred"])
+    row   = _query(sql)[0]
+    sold  = _to_float(row["sold_alltime"])
+    recog = _to_float(row["recognised_alltime"])
+    return {
+        "deferred":           sold - recog,
+        "sold_alltime":       sold,
+        "recognised_alltime": recog,
+        "consumed_pct":       round(recog / sold * 100, 1) if sold else None,
+    }
+
+
+def fetch_packages(start: date, end: date) -> dict:
+    sql_summary = f"""
+SELECT
+  COALESCE(SUM(qty), 0)            AS total_units,
+  COALESCE(SUM(booking_amount), 0) AS total_revenue,
+  (SELECT COUNT(DISTINCT a.patient_id)
+   FROM (
+     SELECT DISTINCT patient_id
+     FROM `{PROJECT}.marts.fct_invoice_line`
+     WHERE is_package_sale
+       AND invoice_date BETWEEN '{start}' AND '{end}'
+       AND patient_id IS NOT NULL
+   ) a
+   WHERE NOT EXISTS (
+     SELECT 1 FROM `{PROJECT}.marts.fct_invoice_line` b
+     WHERE b.is_package_sale
+       AND b.patient_id = a.patient_id
+       AND b.invoice_date < '{start}'
+   )) AS new_buyers
+FROM `{PROJECT}.marts.fct_invoice_line`
+WHERE is_package_sale
+  AND invoice_date BETWEEN '{start}' AND '{end}'
+"""
+    sql_breakdown = f"""
+SELECT
+  COALESCE(NULLIF(TRIM(item_name), ''), item_given_id, 'Unknown') AS name,
+  CAST(SUM(qty) AS INT64)          AS units,
+  SUM(booking_amount)              AS revenue
+FROM `{PROJECT}.marts.fct_invoice_line`
+WHERE is_package_sale
+  AND invoice_date BETWEEN '{start}' AND '{end}'
+GROUP BY 1
+ORDER BY revenue DESC
+"""
+    try:
+        with ThreadPoolExecutor(max_workers=2) as ex:
+            f_s = ex.submit(_query, sql_summary)
+            f_b = ex.submit(_query, sql_breakdown)
+        summary      = f_s.result()[0]
+        breakdown_rows = f_b.result()
+    except Exception:
+        log.exception("fetch_packages failed")
+        return {"total_units": 0, "total_revenue": 0.0, "new_buyers": 0, "breakdown": []}
+
+    total_units   = int(summary.get("total_units") or 0)
+    total_revenue = _to_float(summary.get("total_revenue"))
+    new_buyers    = int(summary.get("new_buyers") or 0)
+
+    breakdown = []
+    for row in breakdown_rows:
+        units   = int(row.get("units") or 0)
+        revenue = _to_float(row.get("revenue"))
+        breakdown.append({
+            "name":      row.get("name") or "Unknown",
+            "units":     units,
+            "revenue":   revenue,
+            "pct_count": round(units   / total_units   * 100, 1) if total_units   else 0,
+            "pct_value": round(revenue / total_revenue * 100, 1) if total_revenue else 0,
+        })
+
+    return {
+        "total_units":   total_units,
+        "total_revenue": total_revenue,
+        "new_buyers":    new_buyers,
+        "breakdown":     breakdown,
+    }
 
 
 def fetch_cohorts() -> list[dict]:
@@ -1144,9 +1220,9 @@ def build_payload() -> dict:
     presets    = preset_ranges()
 
     # max_workers sized to cover every concurrent fetch this request fires:
-    # 9 top-level + 4 ranges × 7 metrics + 3 ranges × 2 previous-window jobs = 43.
-    # Round up to 56 for headroom.
-    with ThreadPoolExecutor(max_workers=56, thread_name_prefix="bq") as ex:
+    # 9 top-level + 4 ranges × 8 metrics + 3 ranges × 2 previous-window jobs = 47.
+    # Round up to 60 for headroom.
+    with ThreadPoolExecutor(max_workers=60, thread_name_prefix="bq") as ex:
         # Range-independent (or fixed-window) fetches.
         f_deferred      = ex.submit(fetch_deferred)
         f_cohorts       = ex.submit(fetch_cohorts)
@@ -1171,6 +1247,7 @@ def build_payload() -> dict:
                 "clinicians":     ex.submit(fetch_clinicians, start, end),
                 "discounts":      ex.submit(fetch_discounts, start, end),
                 "treatment_mix":  ex.submit(fetch_treatment_mix, start, end),
+                "packages":       ex.submit(fetch_packages, start, end),
                 "link_clicks":    ex.submit(fetch_link_clicks, start, end),
             }
             # Trend indicators compare each range against the immediately
@@ -1207,6 +1284,7 @@ def build_payload() -> dict:
                 "clinicians":       v["clinicians"].result(),
                 "discounts":        v["discounts"].result(),
                 "treatment_mix":    v["treatment_mix"].result(),
+                "packages":         v["packages"].result(),
                 "link_clicks":      v["link_clicks"].result(),
                 "link_clicks_prev": v["link_clicks_prev"].result() if v["link_clicks_prev"] else None,
             }
@@ -1214,7 +1292,7 @@ def build_payload() -> dict:
         return {
             "generated_at":      datetime.now().astimezone().isoformat(timespec="seconds"),
             "default_range":     "30d",
-            "deferred":          f_deferred.result(),
+            "deferred_stats":    f_deferred.result(),
             "cohorts":           f_cohorts.result(),
             "demographics":      f_demographics.result(),
             "referrals":         f_referrals.result(),
