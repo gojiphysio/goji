@@ -24,6 +24,7 @@ import time
 import uuid
 from concurrent.futures import ThreadPoolExecutor
 from datetime import date, datetime, timedelta, timezone
+from zoneinfo import ZoneInfo
 from functools import wraps
 from pathlib import Path
 
@@ -241,7 +242,7 @@ def _to_int(v) -> int:
 
 
 def preset_ranges() -> list[tuple[str, str, date, date]]:
-    today = date.today()
+    today = datetime.now(ZoneInfo("Asia/Singapore")).date()
     return [
         ("7d",  "Last 7 days",   today - timedelta(days=7),   today),
         ("30d", "Last 30 days",  today - timedelta(days=30),  today),
@@ -265,7 +266,15 @@ SELECT
      AND patient_id IS NOT NULL)                                          AS active_patients,
   (SELECT COUNT(*)
    FROM `{PROJECT}.marts.fct_service_delivered`
-   WHERE delivery_date BETWEEN '{start}' AND '{end}')                     AS visits
+   WHERE delivery_date BETWEEN '{start}' AND '{end}')                     AS visits,
+  (SELECT COUNT(*)
+   FROM (
+     SELECT patient_id, MIN(delivery_date) AS first_visit
+     FROM `{PROJECT}.marts.fct_service_delivered`
+     WHERE patient_id IS NOT NULL
+     GROUP BY patient_id
+   )
+   WHERE first_visit BETWEEN '{start}' AND '{end}')                       AS new_patients
 """
     row = _query(sql)[0]
     return {
@@ -273,6 +282,7 @@ SELECT
         "recognised":      _to_float(row["recognised"]),
         "active_patients": _to_int(row["active_patients"]),
         "visits":          _to_int(row["visits"]),
+        "new_patients":    _to_int(row["new_patients"]),
     }
 
 
@@ -317,6 +327,80 @@ def fetch_trends(start: date, end: date) -> dict:
             "recognised":      f_recognised.result(),
             "visits":          f_visits.result(),
             "active_patients": f_active_patients.result(),
+        }
+
+
+def fetch_weekly_visits(start: date, end: date) -> list[dict]:
+    sql = f"""
+SELECT
+  FORMAT_DATE('%-d %b', DATE_TRUNC(delivery_date, WEEK(MONDAY))) AS label,
+  DATE_TRUNC(delivery_date, WEEK(MONDAY))                        AS bucket,
+  COUNT(*)                                                        AS value
+FROM `{PROJECT}.marts.fct_service_delivered`
+WHERE delivery_date BETWEEN '{start}' AND '{end}'
+GROUP BY bucket, label
+ORDER BY bucket
+"""
+    try:
+        return [{"label": r["label"], "value": _to_float(r["value"])} for r in _query(sql)]
+    except Exception as exc:
+        log.warning("fetch_weekly_visits failed: %s", exc)
+        return []
+
+
+def _business_days(start: date, end: date) -> int:
+    """Count Mon–Sat days (inclusive) between start and end."""
+    count = 0
+    d = start
+    while d <= end:
+        if d.weekday() != 6:  # skip Sunday
+            count += 1
+        d += timedelta(days=1)
+    return count
+
+
+def fetch_monthly_projection(today: date) -> dict:
+    try:
+        month_start = today.replace(day=1)
+        if today.month == 12:
+            month_end = date(today.year + 1, 1, 1) - timedelta(days=1)
+        else:
+            month_end = date(today.year, today.month + 1, 1) - timedelta(days=1)
+        last_month_end   = month_start - timedelta(days=1)
+        last_month_start = last_month_end.replace(day=1)
+
+        sql = f"""
+SELECT
+  (SELECT COALESCE(SUM(recognised_revenue), 0)
+   FROM `{PROJECT}.marts.fct_service_delivered`
+   WHERE delivery_date BETWEEN '{month_start}' AND '{today}')                    AS actual_mtd,
+  (SELECT COALESCE(SUM(recognised_revenue), 0)
+   FROM `{PROJECT}.marts.fct_service_delivered`
+   WHERE delivery_date BETWEEN '{last_month_start}' AND '{last_month_end}')      AS prev_month_actual
+"""
+        row = _query(sql)[0]
+        actual_mtd        = _to_float(row["actual_mtd"])
+        prev_month_actual = _to_float(row["prev_month_actual"])
+
+        days_elapsed  = _business_days(month_start, today)
+        days_total    = _business_days(month_start, month_end)
+        projected_eom = (actual_mtd / days_elapsed * days_total) if days_elapsed > 0 else 0.0
+
+        return {
+            "actual_mtd":        actual_mtd,
+            "projected_eom":     projected_eom,
+            "prev_month_actual": prev_month_actual,
+            "days_elapsed":      days_elapsed,
+            "days_total":        days_total,
+            "month_label":       month_start.strftime("%b %Y"),
+            "prev_month_label":  last_month_start.strftime("%b %Y"),
+        }
+    except Exception as exc:
+        log.warning("fetch_monthly_projection failed: %s", exc)
+        return {
+            "actual_mtd": None, "projected_eom": None,
+            "prev_month_actual": None, "days_elapsed": None,
+            "days_total": None, "month_label": None, "prev_month_label": None,
         }
 
 
@@ -1026,7 +1110,7 @@ def build_payload() -> dict:
     so nothing queues behind other work in this request.
     """
     log.info("Building dashboard payload from BigQuery (parallel)")
-    today = date.today()
+    today      = datetime.now(ZoneInfo("Asia/Singapore")).date()
     pmt_start  = today - timedelta(days=30)
     # Commission calculator needs the per-session ledger for the current pay
     # cycle plus a generous trailing window so custom-range reports still work.
@@ -1035,9 +1119,9 @@ def build_payload() -> dict:
     presets    = preset_ranges()
 
     # max_workers sized to cover every concurrent fetch this request fires:
-    # 8 top-level + 4 ranges × 6 metrics + 3 ranges × 2 previous-window jobs = 38.
-    # Round up to 48 for headroom.
-    with ThreadPoolExecutor(max_workers=48, thread_name_prefix="bq") as ex:
+    # 9 top-level + 4 ranges × 7 metrics + 3 ranges × 2 previous-window jobs = 43.
+    # Round up to 56 for headroom.
+    with ThreadPoolExecutor(max_workers=56, thread_name_prefix="bq") as ex:
         # Range-independent (or fixed-window) fetches.
         f_deferred      = ex.submit(fetch_deferred)
         f_cohorts       = ex.submit(fetch_cohorts)
@@ -1047,20 +1131,22 @@ def build_payload() -> dict:
         f_appointments  = ex.submit(fetch_appointments, appt_start, today)
         f_mismatches    = ex.submit(fetch_invoice_doctor_mismatches)
         f_marketing_ops = ex.submit(fetch_marketing_ops)
+        f_projection    = ex.submit(fetch_monthly_projection, today)
 
         # Per-range fetches. Each fetch_* is independent so they all race.
         range_jobs: dict[str, dict] = {}
         for key, label, start, end in presets:
             range_jobs[key] = {
-                "label":         label,
-                "start":         start.isoformat(),
-                "end":           end.isoformat(),
-                "kpis":          ex.submit(fetch_kpis, start, end),
-                "trends":        ex.submit(fetch_trends, start, end),
-                "clinicians":    ex.submit(fetch_clinicians, start, end),
-                "discounts":     ex.submit(fetch_discounts, start, end),
-                "treatment_mix": ex.submit(fetch_treatment_mix, start, end),
-                "link_clicks":   ex.submit(fetch_link_clicks, start, end),
+                "label":          label,
+                "start":          start.isoformat(),
+                "end":            end.isoformat(),
+                "kpis":           ex.submit(fetch_kpis, start, end),
+                "trends":         ex.submit(fetch_trends, start, end),
+                "weekly_visits":  ex.submit(fetch_weekly_visits, start, end),
+                "clinicians":     ex.submit(fetch_clinicians, start, end),
+                "discounts":      ex.submit(fetch_discounts, start, end),
+                "treatment_mix":  ex.submit(fetch_treatment_mix, start, end),
+                "link_clicks":    ex.submit(fetch_link_clicks, start, end),
             }
             # Trend indicators compare each range against the immediately
             # preceding window of equal length (e.g. the 30 days before the
@@ -1069,23 +1155,30 @@ def build_payload() -> dict:
             if key == "all":
                 range_jobs[key]["prev_kpis"]        = None
                 range_jobs[key]["link_clicks_prev"] = None
+                range_jobs[key]["prev_start"]       = None
+                range_jobs[key]["prev_end"]         = None
             else:
                 prev_end   = start - timedelta(days=1)
                 prev_start = prev_end - (end - start)
                 range_jobs[key]["prev_kpis"]        = ex.submit(fetch_kpis, prev_start, prev_end)
                 range_jobs[key]["link_clicks_prev"] = ex.submit(fetch_link_clicks, prev_start, prev_end)
+                range_jobs[key]["prev_start"]       = prev_start.isoformat()
+                range_jobs[key]["prev_end"]         = prev_end.isoformat()
 
         # Block on results. If any future raised, .result() re-raises here and
         # the still-running ones get cancelled when the executor exits.
         ranges: dict[str, dict] = {}
         for key, v in range_jobs.items():
             ranges[key] = {
-                "label":         v["label"],
-                "start":         v["start"],
-                "end":           v["end"],
+                "label":            v["label"],
+                "start":            v["start"],
+                "end":              v["end"],
+                "prev_start":       v["prev_start"],
+                "prev_end":         v["prev_end"],
                 "kpis":             v["kpis"].result(),
                 "prev_kpis":        v["prev_kpis"].result() if v["prev_kpis"] else None,
                 "trends":           v["trends"].result(),
+                "weekly_visits":    v["weekly_visits"].result(),
                 "clinicians":       v["clinicians"].result(),
                 "discounts":        v["discounts"].result(),
                 "treatment_mix":    v["treatment_mix"].result(),
@@ -1105,6 +1198,7 @@ def build_payload() -> dict:
             "ranges":            ranges,
             "doctor_mismatches": f_mismatches.result(),
             "marketing_ops":     f_marketing_ops.result(),
+            "projection":        f_projection.result(),
         }
 
 
