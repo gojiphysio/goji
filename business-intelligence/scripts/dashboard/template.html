@@ -968,6 +968,42 @@
       </div>
     </section>
 
+    <section class="q" id="packages_section" style="display:none;">
+      <h2>Packages <span class="badge live">Live</span></h2>
+      <div class="subtitle">
+        Package sales, <span class="range-label">last 30 days</span>.
+      </div>
+      <div style="display:flex; gap:32px; flex-wrap:wrap; margin:12px 0 16px;">
+        <div>
+          <div class="kpi-value" id="pkg_total_units" style="font-size:32px;">-</div>
+          <div class="kpi-sub">packages sold</div>
+        </div>
+        <div>
+          <div class="kpi-value" id="pkg_new_buyers" style="font-size:32px;">-</div>
+          <div class="kpi-sub">new buyers</div>
+        </div>
+        <div>
+          <div class="kpi-value" id="pkg_total_value" style="font-size:32px;">-</div>
+          <div class="kpi-sub">total value</div>
+        </div>
+      </div>
+      <div class="table-scroll" style="min-width:0;">
+        <table>
+          <thead>
+            <tr>
+              <th>Package</th>
+              <th class="num">Sold</th>
+              <th class="num">% of count</th>
+              <th class="num">Revenue</th>
+              <th class="num">% of value</th>
+            </tr>
+          </thead>
+          <tbody id="pkg_breakdown_tbody"></tbody>
+        </table>
+      </div>
+      <div class="kpi-sub" id="pkg_consumption_stat" style="margin-top:12px;"></div>
+    </section>
+
     <section class="q">
       <h2>Patient base <span id="demographics_total" class="badge" style="background: var(--bg); color: var(--ink-soft); font-weight: 500;"></span></h2>
       <div class="subtitle">
@@ -2203,7 +2239,7 @@
       document.getElementById('kpi_active_patients').textContent = fmtInt(r.kpis.active_patients);
       document.getElementById('kpi_new_patients').textContent    = fmtInt(r.kpis.new_patients);
       document.getElementById('kpi_visits').textContent          = fmtInt(r.kpis.visits);
-      document.getElementById('kpi_deferred').textContent        = fmt$(DATA.deferred);
+      document.getElementById('kpi_deferred').textContent        = fmt$(DATA.deferred_stats?.deferred);
 
       const p  = r.prev_kpis;
       const ps = r.prev_start, pe = r.prev_end;
@@ -2382,6 +2418,32 @@
       }
     }
 
+
+    function renderPackages(pkgs) {
+      const section = document.getElementById('packages_section');
+      if (!pkgs || pkgs.total_units == null) { section.style.display = 'none'; return; }
+      section.style.display = '';
+      document.getElementById('pkg_total_units').textContent = fmtInt(pkgs.total_units);
+      document.getElementById('pkg_new_buyers').textContent  = fmtInt(pkgs.new_buyers);
+      document.getElementById('pkg_total_value').textContent = fmt$(pkgs.total_revenue);
+      const tbody = document.getElementById('pkg_breakdown_tbody');
+      tbody.innerHTML = (pkgs.breakdown || []).map(row =>
+        `<tr>
+          <td>${row.name}</td>
+          <td class="num">${row.units}</td>
+          <td class="num">${row.pct_count}%</td>
+          <td class="num">${fmt$(row.revenue)}</td>
+          <td class="num">${row.pct_value}%</td>
+        </tr>`
+      ).join('');
+      const stats = DATA.deferred_stats;
+      const el = document.getElementById('pkg_consumption_stat');
+      if (el && stats && stats.consumed_pct != null) {
+        el.textContent = stats.consumed_pct + '% of all-time package credit consumed'
+          + ' · ' + fmt$(stats.recognised_alltime) + ' recognised of '
+          + fmt$(stats.sold_alltime) + ' sold';
+      }
+    }
 
     let ageChart, genderChart, tagsChart, acquisitionChart;
 
@@ -2879,6 +2941,7 @@
       renderClinicians(r.clinicians);
       renderDiscounts(r.discounts);
       renderMix(r.treatment_mix);
+      renderPackages(r.packages);
       renderMarketingMetrics(r);
     }
 
