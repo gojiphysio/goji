@@ -801,6 +801,7 @@
       <button type="button" data-page="pl"><span class="nav-full">Profit &amp; Loss</span><span class="nav-short">P&amp;L</span></button>
       <button type="button" data-page="commission"><span class="nav-full">Commission Calculator</span><span class="nav-short">Commission</span></button>
       <button type="button" data-page="marketing">Marketing</button>
+      <button type="button" data-page="other">Other details</button>
     </nav>
 
     <div id="page-dashboard" class="page">
@@ -862,7 +863,7 @@
       <div class="kpi-card">
         <div class="kpi-label">Deferred revenue <span class="badge live">Live</span></div>
         <div class="kpi-value" id="kpi_deferred">-</div>
-        <div class="kpi-sub">Owed in unredeemed package sessions</div>
+        <div class="kpi-sub">Current balance: all-time packages sold minus redeemed (not range-scoped)</div>
       </div>
       <div class="kpi-card">
         <div class="kpi-label">Active patients <span class="range-label">last 30 days</span> <span class="badge live">Live</span></div>
@@ -886,7 +887,6 @@
 
     <section class="q" id="projection_section" style="display:none;">
       <h2>Monthly revenue trajectory <span class="badge live">Live</span></h2>
-      <div class="subtitle" id="projection_caption"></div>
       <div class="chart-wrap" style="height:220px; margin-top:12px;">
         <canvas id="projectionChart"></canvas>
       </div>
@@ -945,49 +945,6 @@
           <div class="subtitle" style="margin-top: 14px; font-size: 12px;">
             Cheryl is annotated as Director because she funnels bookings to others,
             so her individual totals are not a like-for-like comparison.
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="q">
-      <h2>Discount cost to clinic <span class="badge live">Live</span></h2>
-      <div class="subtitle">
-        Implicit opening-promo discount + ad-hoc line discounts, <span class="range-label">last 30 days</span>.
-        Pack-promo cost is computed against the usual single-session price &times; pack size.
-      </div>
-      <div class="discount-grid">
-        <div>
-          <div class="kpi-value" id="discountTotal" style="font-size: 38px; color: var(--goji);">-</div>
-          <div class="kpi-sub" style="margin-bottom: 14px;">Total discount absorbed</div>
-          <div class="kpi-sub"><span id="discountPct">-</span> of bookings</div>
-        </div>
-        <div>
-          <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px;">Opening-promo discount, by SKU</div>
-          <div class="table-scroll">
-            <table>
-              <thead>
-                <tr>
-                  <th>Service</th>
-                  <th>Pack</th>
-                  <th class="num">Units</th>
-                  <th class="num">Usual ref</th>
-                  <th class="num">Sold</th>
-                  <th class="num">Discount</th>
-                </tr>
-              </thead>
-              <tbody id="promoBySkuTbody"></tbody>
-              <tfoot id="promoBySkuTfoot"></tfoot>
-            </table>
-          </div>
-
-          <div id="adhocBlock" hidden style="margin-top: 22px;">
-            <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px;">Ad-hoc on non-promo items</div>
-            <table>
-              <thead><tr><th>Item</th><th class="num">Times</th><th class="num">Discount</th></tr></thead>
-              <tbody id="discountTbody"></tbody>
-              <tfoot id="adhocTfoot"></tfoot>
-            </table>
           </div>
         </div>
       </div>
@@ -1716,6 +1673,53 @@
 
     </div><!-- /#page-marketing -->
 
+    <div id="page-other" class="page" hidden>
+
+      <section class="q">
+        <h2>Discount cost to clinic <span class="badge live">Live</span></h2>
+        <div class="subtitle">
+          Implicit opening-promo discount + ad-hoc line discounts, <span class="range-label">last 30 days</span>.
+          Pack-promo cost is computed against the usual single-session price &times; pack size.
+        </div>
+        <div class="discount-grid">
+          <div>
+            <div class="kpi-value" id="discountTotal" style="font-size: 38px; color: var(--goji);">-</div>
+            <div class="kpi-sub" style="margin-bottom: 14px;">Total discount absorbed</div>
+            <div class="kpi-sub"><span id="discountPct">-</span> of bookings</div>
+          </div>
+          <div>
+            <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px;">Opening-promo discount, by SKU</div>
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Service</th>
+                    <th>Pack</th>
+                    <th class="num">Units</th>
+                    <th class="num">Usual ref</th>
+                    <th class="num">Sold</th>
+                    <th class="num">Discount</th>
+                  </tr>
+                </thead>
+                <tbody id="promoBySkuTbody"></tbody>
+                <tfoot id="promoBySkuTfoot"></tfoot>
+              </table>
+            </div>
+
+            <div id="adhocBlock" hidden style="margin-top: 22px;">
+              <div style="font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px;">Ad-hoc on non-promo items</div>
+              <table>
+                <thead><tr><th>Item</th><th class="num">Times</th><th class="num">Discount</th></tr></thead>
+                <tbody id="discountTbody"></tbody>
+                <tfoot id="adhocTfoot"></tfoot>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div><!-- /#page-other -->
+
   </div>
 
   <script id="dashboardData" type="application/json">__DATA_PLACEHOLDER__</script>
@@ -1899,14 +1903,13 @@
       });
     }
 
-    function renderAvgVisitsStat(t) {
+    function renderAvgVisitsStat(t, activePatients) {
       if (!t) return;
       const el = document.getElementById('avg_visits_per_patient');
       if (!el) return;
-      const totalVisits   = (t.visits          || []).reduce((s, x) => s + (x.value || 0), 0);
-      const totalPatients = (t.active_patients || []).reduce((s, x) => s + (x.value || 0), 0);
-      el.textContent = totalPatients > 0
-        ? (totalVisits / totalPatients).toFixed(1)
+      const totalVisits = (t.visits || []).reduce((s, x) => s + (x.value || 0), 0);
+      el.textContent = activePatients > 0
+        ? (totalVisits / activePatients).toFixed(1)
         : '–';
     }
 
@@ -2009,11 +2012,25 @@
               tooltip: {
                 mode: 'index', intersect: false,
                 callbacks: {
-                  title: items => items.length ? items[0].label.replace(' ✦', ' (current)') : '',
+                  title: items => {
+                    if (!items.length) return '';
+                    const isCurrentMonth = items[0].dataIndex === labels.length - 1;
+                    if (isCurrentMonth && p.days_elapsed != null)
+                      return items[0].label.replace(' ✦', '') + '  (day ' + p.days_elapsed + ' of ' + p.days_total + ')';
+                    return items[0].label.replace(' ✦', '');
+                  },
                   label: ctx => {
                     if (ctx.parsed.y === 0) return null;
-                    const label = ctx.datasetIndex === 0 ? 'Actual' : 'Projected remainder';
-                    return label + ': ' + fmt$(ctx.parsed.y);
+                    const isCurrentMonth = ctx.dataIndex === labels.length - 1;
+                    if (!isCurrentMonth) return 'Actual: ' + fmt$(ctx.parsed.y);
+                    if (ctx.datasetIndex === 0) return 'Actual so far: ' + fmt$(p.actual_mtd);
+                    const pct = p.prev_month_actual > 0
+                      ? ((p.projected_eom - p.prev_month_actual) / p.prev_month_actual * 100)
+                      : null;
+                    const trend = pct != null
+                      ? '  ' + (pct >= 0 ? '▲ +' : '▼ ') + Math.abs(pct).toFixed(1) + '% vs ' + (p.prev_month_label || 'prior month')
+                      : '';
+                    return 'Projected EOM: ' + fmt$(p.projected_eom) + trend;
                   }
                 }
               }
@@ -2027,24 +2044,6 @@
         });
       }
 
-      // Caption
-      const capEl = document.getElementById('projection_caption');
-      if (capEl) {
-        const pct = p.prev_month_actual > 0
-          ? ((p.projected_eom - p.prev_month_actual) / p.prev_month_actual * 100)
-          : null;
-        const trend = pct != null
-          ? ' · ' + (pct > 0 ? '▲ +' : '▼ ') + Math.abs(pct).toFixed(1) + '% vs ' + (p.prev_month_label || 'prior month')
-          : '';
-        const days = p.days_elapsed != null
-          ? ' · day ' + p.days_elapsed + ' of ' + p.days_total
-          : '';
-        capEl.textContent =
-          (p.month_label || '') + days +
-          ' · ' + fmt$(p.actual_mtd) + ' actual' +
-          ' · ' + fmt$(p.projected_eom) + ' projected' +
-          trend;
-      }
     }
 
     function renderBookingsVsRecognised(t) {
@@ -2147,10 +2146,10 @@
       }
     }
 
-    function renderTrends(t) {
+    function renderTrends(t, kpis) {
       if (!t) return;
       visitsChart = renderTrendChart(visitsChart, 'visitsChart', t.visits, COBALT, false);
-      renderAvgVisitsStat(t);
+      renderAvgVisitsStat(t, kpis?.active_patients);
       renderBookingsVsRecognised(t);
     }
 
@@ -2875,7 +2874,7 @@
       );
 
       renderKpis(r);
-      renderTrends(r.trends);
+      renderTrends(r.trends, r.kpis);
       renderWeeklyVisits(r.weekly_visits, resolvedKey);
       renderClinicians(r.clinicians);
       renderDiscounts(r.discounts);
@@ -3571,6 +3570,7 @@
       document.getElementById('page-pl').hidden         = (page !== 'pl');
       document.getElementById('page-commission').hidden = (page !== 'commission');
       document.getElementById('page-marketing').hidden  = (page !== 'marketing');
+      document.getElementById('page-other').hidden      = (page !== 'other');
       // Charts created while their page was hidden render at 0×0; resize once
       // the marketing page is first shown so the canvases pick up real dims.
       if (page === 'marketing') resizeMarketingCharts();
