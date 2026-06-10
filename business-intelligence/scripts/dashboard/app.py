@@ -369,16 +369,38 @@ def fetch_monthly_projection(today: date) -> dict:
         last_month_end   = month_start - timedelta(days=1)
         last_month_start = last_month_end.replace(day=1)
 
-        sql = f"""
+        # 3 prior complete months for the history sparkline
+        if month_start.month > 3:
+            history_start = month_start.replace(month=month_start.month - 3)
+        else:
+            history_start = month_start.replace(
+                year=month_start.year - 1, month=month_start.month + 9
+            )
+
+        kpi_sql = f"""
 SELECT
   (SELECT COALESCE(SUM(recognised_revenue), 0)
    FROM `{PROJECT}.marts.fct_service_delivered`
-   WHERE delivery_date BETWEEN '{month_start}' AND '{today}')                    AS actual_mtd,
+   WHERE delivery_date BETWEEN '{month_start}' AND '{today}')               AS actual_mtd,
   (SELECT COALESCE(SUM(recognised_revenue), 0)
    FROM `{PROJECT}.marts.fct_service_delivered`
-   WHERE delivery_date BETWEEN '{last_month_start}' AND '{last_month_end}')      AS prev_month_actual
+   WHERE delivery_date BETWEEN '{last_month_start}' AND '{last_month_end}') AS prev_month_actual
 """
-        row = _query(sql)[0]
+        history_sql = f"""
+SELECT
+  FORMAT_DATE('%b %y', DATE_TRUNC(delivery_date, MONTH)) AS label,
+  COALESCE(SUM(recognised_revenue), 0)                   AS actual
+FROM `{PROJECT}.marts.fct_service_delivered`
+WHERE delivery_date BETWEEN '{history_start}' AND '{last_month_end}'
+GROUP BY 1
+ORDER BY MIN(delivery_date)
+"""
+        with ThreadPoolExecutor(max_workers=2) as ex:
+            f_kpi     = ex.submit(_query, kpi_sql)
+            f_history = ex.submit(_query, history_sql)
+            row     = f_kpi.result()[0]
+            history = f_history.result()
+
         actual_mtd        = _to_float(row["actual_mtd"])
         prev_month_actual = _to_float(row["prev_month_actual"])
 
@@ -394,6 +416,8 @@ SELECT
             "days_total":        days_total,
             "month_label":       month_start.strftime("%b %Y"),
             "prev_month_label":  last_month_start.strftime("%b %Y"),
+            "monthly_history":   [{"label": r["label"], "actual": _to_float(r["actual"])}
+                                  for r in history],
         }
     except Exception as exc:
         log.warning("fetch_monthly_projection failed: %s", exc)
@@ -401,6 +425,7 @@ SELECT
             "actual_mtd": None, "projected_eom": None,
             "prev_month_actual": None, "days_elapsed": None,
             "days_total": None, "month_label": None, "prev_month_label": None,
+            "monthly_history": [],
         }
 
 
