@@ -970,21 +970,21 @@
 
     <section class="q" id="packages_section" style="display:none;">
       <h2>Packages <span class="badge live">Live</span></h2>
-      <div class="subtitle">
-        Package sales, <span class="range-label">last 30 days</span>.
-      </div>
-      <div style="display:flex; gap:32px; flex-wrap:wrap; margin:12px 0 16px;">
-        <div>
-          <div class="kpi-value" id="pkg_total_units" style="font-size:32px;">-</div>
-          <div class="kpi-sub">packages sold</div>
+      <div class="kpi-row" style="margin-bottom:20px;">
+        <div class="kpi-card">
+          <div class="kpi-label">Packages sold <span class="range-label">last 30 days</span></div>
+          <div class="kpi-value" id="pkg_total_units">-</div>
+          <div class="kpi-sub">total packages purchased</div>
         </div>
-        <div>
-          <div class="kpi-value" id="pkg_new_buyers" style="font-size:32px;">-</div>
-          <div class="kpi-sub">new buyers</div>
+        <div class="kpi-card">
+          <div class="kpi-label">New buyers <span class="range-label">last 30 days</span></div>
+          <div class="kpi-value" id="pkg_new_buyers">-</div>
+          <div class="kpi-sub">first-time package purchase</div>
         </div>
-        <div>
-          <div class="kpi-value" id="pkg_total_value" style="font-size:32px;">-</div>
-          <div class="kpi-sub">total value</div>
+        <div class="kpi-card">
+          <div class="kpi-label">Package value <span class="range-label">last 30 days</span></div>
+          <div class="kpi-value" id="pkg_total_value">-</div>
+          <div class="kpi-sub">total booking amount</div>
         </div>
       </div>
       <div class="table-scroll" style="min-width:0;">
