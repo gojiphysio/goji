@@ -83,9 +83,16 @@ How SG clinics build these: cross-referral agreements, co-hosted workshops, list
 
 - **Embrace Physiotherapy (Katong)** - "by women, for women," dedicated women's clinic, pre/post-natal classes + Pilates. Closest direct competitor to Goji's wedge. [link](https://www.embracephysio.sg/)
 - **PhysioActive, Health2Mama, Physio Down Under, Hello Physio, UrbanRehab** - women's-health physio bolted onto general physio. [Homage round-up](https://www.homage.sg/resources/physiotherapy-clinics-women-singapore/)
+- **Calyx** - on-the-ground competitor known to the team.
+- **Physio & Sole** - on-the-ground competitor known to the team.
 - **Core Concepts** - largest private physio group (generalist scale player).
 
-**Read:** dedicated women's-only positioning is largely held by Embrace; most others treat women's health as an add-on. **Goji's post-partum + family + movement (Pilates/S&C) combination is a differentiable wedge** - and Goji can out-educate and out-show-up the bolt-on players.
+**Read:** dedicated women's-only positioning is largely held by Embrace; most others treat women's health as an add-on. **Goji's post-partum + family + movement (Pilates/S&C) combination is a differentiable wedge** — and Goji can out-educate and out-show-up the bolt-on players. Katong is an intentional SEO/GEO neighbourhood target: ranking there puts Goji in front of Embrace's prospective patients.
+
+## Paid advertising platform restrictions
+
+- **Meta (Instagram/Facebook):** "pelvic floor" and "pelvic health" are flagged as non-advertisable by Meta Business Suite. Any paid campaign targeting pelvic conditions will be blocked. Pelvic/women's-health content must stay organic on Meta. Paid Meta budget should target MSK terms, neighbourhood + parenting interests, and Lane B fitness offers only.
+- **Google Search:** No equivalent block on pelvic health or physio terms. High-intent search terms (e.g. "postnatal physio Singapore", "pelvic floor physiotherapist", "back pain physio Lentor") are all runnable with compliant ad copy.
 
 ## Channel-by-channel email / WhatsApp / GBP best practice
 

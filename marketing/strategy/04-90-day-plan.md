@@ -1,12 +1,18 @@
 # 90-Day Campaign Plan
 
-Month-by-month arc with weekly sprints. Built on the strategy in `01-campaign-strategy.md`. Every published asset passes the lane-aware checklist in `03-compliance-guardrails.md`.
+Month-by-month arc with weekly sprints. Built on the strategy in `01-campaign-strategy.md`. Every published asset passes the lane-aware checklist in `03-compliance-guardrails.md`. The 30-day campaign breakdown for Month 1 is in `05-30-day-campaigns.md`.
 
 Theme of the quarter: **Get discoverable, get credible, get booked.**
 
 - **Month 1 - FOUNDATION & AUTHORITY:** fix the discoverable surfaces, stand up the content engine, plant the wedge.
 - **Month 2 - REACH & COMMUNITY:** show up where mums are, ramp content, light the partnership and workshop fires, begin modest paid.
 - **Month 3 - CONVERSION & SCALE:** turn attention into bookings, formalize referral loops, scale winners, measure and plan Q2.
+
+**Four north-star metrics (from BI dashboard + discovery sweep):**
+1. Visits — appointments delivered.
+2. Active patients — distinct patients with a delivered service in the period.
+3. Bookings — dollar value of packs/sales.
+4. Discovery Rank Score — % of priority patient questions where Goji appears in the top 5 across Google, ChatGPT, Gemini, Claude, TikTok, and Instagram. The leading indicator; the commercial three are the lagging outcomes.
 
 A note on sequencing: discoverability (GBP, SEO, website) compounds slowly (2-4 months to first movement), so we start it on day 1. Content and partnerships produce faster. Paid is layered only once organic shows what resonates.
 
@@ -35,12 +41,13 @@ A note on sequencing: discoverability (GBP, SEO, website) compounds slowly (2-4 
 - Start asking satisfied patients for honest Google reviews (never incentivised).
 - Identify and list Goji for editorial round-ups (Sassy Mama, HoneyKids, Little Steps).
 
-### Week 4 - Partnership outreach begins
+### Week 4 - Partnership outreach begins + Discovery Rank baseline
 - Shortlist 8-10 referral partners (gynae, confinement, doulas, lactation, prenatal studios) - see `partnerships/partnerships-and-events.md`. Send first 4-5 intros.
 - Email/WhatsApp the existing list: a warm "what we do / who we help" educational note (not a promo on the clinical side).
 - Review week-1 leading indicators; note early content winners.
+- Stand up the **Discovery Rank Sweep** on the dashboard: finalise the 15-20 priority prompts (include Lentor AND Katong neighbourhood variants), wire up queries to Google, ChatGPT, Gemini, Claude, TikTok, and Instagram, run the first sweep, and write the baseline row to the discovery table. This sets the north-star Discovery Rank Score from which all future movement is measured.
 
-**Month 1 exit criteria:** GBP fully optimized; 3-5 condition pages live; content engine producing weekly; first reviews coming in; 4-5 partnership conversations open; baselines instrumented.
+**Month 1 exit criteria:** GBP fully optimized; 3-5 condition pages live (GEO-ready with bylines, FAQs, and schema); content engine producing weekly; first reviews coming in; 4-5 partnership conversations open; baselines instrumented including Discovery Rank Score on the dashboard.
 
 ---
 
@@ -50,7 +57,7 @@ A note on sequencing: discoverability (GBP, SEO, website) compounds slowly (2-4 
 
 ### Week 5 - Ramp content + first workshop planned
 - Increase to 3 Reels + 2 carousels/week if sustainable. Double down on month-1 winners.
-- Plan a **workshop**: in-clinic or partner-hosted, e.g. "Returning to exercise after birth - what's safe and when" (education-led, free or low-cost, Lane-A-careful framing). Set a date in week 7-8.
+- Plan an **in-clinic workshop**: small group, education-led, free or low-cost, e.g. "Returning to exercise after birth — what's safe and when." In-clinic workshops preferred over baby fairs (direct ROI, lower cost). Set a date in week 7-8.
 - Convert 2-3 partnership conversations into concrete cross-referral or co-hosting agreements.
 
 ### Week 6 - Launch modest paid
@@ -66,7 +73,8 @@ A note on sequencing: discoverability (GBP, SEO, website) compounds slowly (2-4 
 ### Week 8 - Optimize the funnel
 - Review: which content drives saves, profile visits, DMs? Which paid terms drive enquiries cheapest?
 - Tighten the enquiry-to-first-visit handoff (WhatsApp response time, booking friction).
-- Second batch film day, informed by what's working.
+- Second batch film day, informed by what's working. Capture written transcripts of every Reel — they're what AI engines can read and cite.
+- Review the **Discovery Rank Sweep** trend on the dashboard: which engines are moving, which prompts are still empty, which third-party sources are being cited instead of us. Empty cells drive the next round of content briefs.
 
 **Month 2 exit criteria:** reach up 2-3x; first workshop done with content captured; 2-3 live partnerships; paid running with an emerging cost-per-enquiry; enquiries trending up.
 
@@ -82,7 +90,7 @@ A note on sequencing: discoverability (GBP, SEO, website) compounds slowly (2-4 
 
 ### Week 10 - Referral engine + seasonal tie-in
 - Formalize the referral loop: simple referral cards/links for partners, a shared workshop calendar, reciprocal social.
-- If a baby fair or seasonal window lands in-quarter, plan presence (booth or co-hosted talk). Otherwise run a seasonal content campaign (e.g. a themed education series).
+- Prefer a second in-clinic workshop or partner co-hosted session over baby fair booths. If a major fair coincides, consider a speaking slot or co-hosting a talk rather than a booth.
 
 ### Week 11 - Stories & reactivation
 - Publish 1-2 (fully consented, compliance-checked) patient stories framed as education, not cure.
@@ -90,11 +98,13 @@ A note on sequencing: discoverability (GBP, SEO, website) compounds slowly (2-4 
 - Second workshop or a partner co-hosted session.
 
 ### Week 12 - Measure & plan Q2
-- Full readout against north-star KPIs from the BI dashboard: new patients, active patients, visits, bookings, treatment-mix shift.
+- Full readout against all four north-star KPIs from the BI dashboard: new patients, active patients, visits, bookings, treatment-mix shift.
 - Cost-per-first-visit by channel. What to keep, cut, scale.
-- Write the Q2 plan: which pillar to push, whether to grow the fitness mix deliberately, partnership expansion, paid scale-up.
+- **Discovery Rank Sweep Q1 readout:** 12 weeks of data. Report the Discovery Rank Score per engine and overall, week-over-week trend, and the prompt/engine gaps to close in Q2. Use empty cells to brief the next batch of content.
+- Publish one **quarterly pillar piece** — 1,000-1,300 words on a core topic (e.g. "A Singapore physio's guide to post-partum recovery"). This is the anchor piece that drives both SEO and AI citations into Q2. Internal links from shorter posts point to it.
+- Write the Q2 plan: which pillar to push, whether to grow the fitness mix deliberately, partnership expansion, paid scale-up, GEO gaps to close.
 
-**Month 3 exit criteria:** measurable lift in enquiries and first visits; known cost-per-first-visit by channel; 3-5 live partnerships and a repeatable referral loop; a data-backed Q2 plan.
+**Month 3 exit criteria:** measurable lift in enquiries and first visits; known cost-per-first-visit by channel; 3-5 live partnerships and a repeatable referral loop; a data-backed Q2 plan; Discovery Rank Score trending up with at least one engine above 30%.
 
 ---
 
