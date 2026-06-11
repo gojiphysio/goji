@@ -1589,15 +1589,17 @@
           <div class="kpi-value">— pending integration</div>
           <div class="mkt-target">Condition-page views, booking starts</div>
         </div>
-        <div class="kpi-card wip">
-          <div class="kpi-label">Paid spend (SGD / month)</div>
-          <div class="kpi-value">— pending integration</div>
-          <div class="mkt-target">M1 $800–1.2k → M3 $2–2.5k</div>
+        <div class="kpi-card">
+          <div class="kpi-label">Ads spend (SGD) <span class="range-label">this period</span> <span class="badge live">Google Ads</span></div>
+          <div class="kpi-value" id="mkt_ads_spend">-</div>
+          <div class="kpi-trend" id="mkt_ads_spend_trend" hidden></div>
+          <div class="mkt-target">M1 budget $800–1.2k/mo</div>
         </div>
-        <div class="kpi-card wip">
-          <div class="kpi-label">Cost per first visit (paid)</div>
-          <div class="kpi-value">— pending integration</div>
-          <div class="mkt-target">Establish &amp; drive down M1 → M3</div>
+        <div class="kpi-card">
+          <div class="kpi-label">Ad clicks <span class="range-label">this period</span> <span class="badge live">Google Ads</span></div>
+          <div class="kpi-value" id="mkt_ads_clicks">-</div>
+          <div class="kpi-trend" id="mkt_ads_clicks_trend" hidden></div>
+          <div class="mkt-target">Avg CPC: <span id="mkt_ads_cpc">-</span></div>
         </div>
         <div class="kpi-card wip">
           <div class="kpi-label">Google reviews / month</div>
@@ -2690,6 +2692,15 @@
       }
       renderTrend('mkt_wa_clicks_trend',   lc && lc.whatsapp, lcp && lcp.whatsapp, ps, pe);
       renderTrend('mkt_book_clicks_trend', lc && lc.booking,  lcp && lcp.booking,  ps, pe);
+
+      const ga  = r.google_ads, gap = r.google_ads_prev;
+      if (ga) {
+        document.getElementById('mkt_ads_spend').textContent  = ga.spend  ? fmt$(ga.spend)           : '—';
+        document.getElementById('mkt_ads_clicks').textContent = ga.clicks ? fmtInt(ga.clicks)         : '—';
+        document.getElementById('mkt_ads_cpc').textContent    = ga.cpc    ? '$' + ga.cpc.toFixed(2)   : '—';
+        renderTrend('mkt_ads_spend_trend',  ga.spend,  gap && gap.spend,  ps, pe);
+        renderTrend('mkt_ads_clicks_trend', ga.clicks, gap && gap.clicks, ps, pe);
+      }
 
       mktActiveChart = renderTrendChart(mktActiveChart, 'mktActiveChart',
         (r.trends && r.trends.active_patients) || [], GOJI, false);

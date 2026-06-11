@@ -161,6 +161,22 @@ error, grant them directly:
 (or in the Console: BigQuery → goji-bi → marts → <table> → Share → add the SA
 as **BigQuery Data Editor**).
 
+## Google Ads Data Transfer
+
+The `goji-bi.google_ads` dataset is created and populated by the BigQuery Data Transfer
+(source: Google Ads, daily at 08:00 SGT). The dataset lives in the **US multi-region** —
+the dashboard queries it directly from Python (no cross-region view possible).
+
+The dashboard SA needs read access on the dataset:
+
+    bq add-iam-policy-binding \
+      --member="serviceAccount:dashboard-sa@goji-bi.iam.gserviceaccount.com" \
+      --role="roles/bigquery.dataViewer" \
+      goji-bi:google_ads
+
+(or in the Console: BigQuery → goji-bi → google_ads → Share → add the SA as
+**BigQuery Data Viewer**).
+
 ## Force a cache refresh without redeploying
 
     curl -X POST -u "$USER:$PASS" https://dashboard.gojiphysio.com/refresh

@@ -1201,6 +1201,55 @@ GROUP BY slug
             "wa_by_slug": wa_by_slug, "book_by_slug": book_by_slug}
 
 
+def fetch_google_ads(start: date, end: date) -> dict:
+    """Google Ads spend/clicks/impressions for [start, end] from the BQ Data Transfer dataset.
+
+    Queries goji-bi.google_ads directly (US region; a mart view can't cross regions).
+    Degrades to zeros if the transfer hasn't run yet or tables have an unexpected schema.
+    """
+    empty = {"spend": 0.0, "clicks": 0, "impressions": 0, "cpc": None}
+    try:
+        tables = _query(f"""
+SELECT table_name
+FROM `{PROJECT}.google_ads.INFORMATION_SCHEMA.TABLES`
+WHERE REGEXP_CONTAINS(LOWER(table_name), r'campaign.*(basic)?stats|account.*(basic)?stats')
+LIMIT 5
+""")
+        if not tables:
+            return empty
+        table_name = tables[0]["table_name"]
+        if table_name.startswith("p_"):
+            # Standard transfer: date-partitioned table, filter on _PARTITIONDATE
+            sql = f"""
+SELECT SUM(cost_micros) / 1e6 AS spend, SUM(clicks) AS clicks, SUM(impressions) AS impressions
+FROM `{PROJECT}.google_ads.{table_name}`
+WHERE _PARTITIONDATE BETWEEN '{start}' AND '{end}'
+"""
+        else:
+            # Legacy transfer: date-sharded tables, filter via _TABLE_SUFFIX
+            base = table_name.rstrip("_0123456789")
+            sql = f"""
+SELECT SUM(Cost) / 1e6 AS spend, SUM(Clicks) AS clicks, SUM(Impressions) AS impressions
+FROM `{PROJECT}.google_ads.{base}_*`
+WHERE _TABLE_SUFFIX BETWEEN '{start.strftime("%Y%m%d")}' AND '{end.strftime("%Y%m%d")}'
+"""
+        rows = _query(sql)
+        if not rows or rows[0]["clicks"] is None:
+            return empty
+        r      = rows[0]
+        spend  = float(r["spend"] or 0)
+        clicks = _to_int(r["clicks"])
+        return {
+            "spend":       spend,
+            "clicks":      clicks,
+            "impressions": _to_int(r["impressions"]),
+            "cpc":         round(spend / clicks, 2) if clicks else None,
+        }
+    except Exception as e:
+        log.warning("google_ads unavailable: %s", e)
+        return empty
+
+
 def build_payload() -> dict:
     """Fan all BQ queries out in parallel. ~27 queries; serial wall time was
     ~38s, parallel is limited by the slowest single query (~3-5s).
@@ -1220,9 +1269,9 @@ def build_payload() -> dict:
     presets    = preset_ranges()
 
     # max_workers sized to cover every concurrent fetch this request fires:
-    # 9 top-level + 4 ranges × 8 metrics + 3 ranges × 2 previous-window jobs = 47.
-    # Round up to 60 for headroom.
-    with ThreadPoolExecutor(max_workers=60, thread_name_prefix="bq") as ex:
+    # 9 top-level + 4 ranges × 9 metrics + 3 ranges × 3 previous-window jobs = 54.
+    # Round up to 70 for headroom.
+    with ThreadPoolExecutor(max_workers=70, thread_name_prefix="bq") as ex:
         # Range-independent (or fixed-window) fetches.
         f_deferred      = ex.submit(fetch_deferred)
         f_cohorts       = ex.submit(fetch_cohorts)
@@ -1249,6 +1298,7 @@ def build_payload() -> dict:
                 "treatment_mix":  ex.submit(fetch_treatment_mix, start, end),
                 "packages":       ex.submit(fetch_packages, start, end),
                 "link_clicks":    ex.submit(fetch_link_clicks, start, end),
+                "google_ads":     ex.submit(fetch_google_ads, start, end),
             }
             # Trend indicators compare each range against the immediately
             # preceding window of equal length (e.g. the 30 days before the
@@ -1257,6 +1307,7 @@ def build_payload() -> dict:
             if key == "all":
                 range_jobs[key]["prev_kpis"]        = None
                 range_jobs[key]["link_clicks_prev"] = None
+                range_jobs[key]["google_ads_prev"]  = None
                 range_jobs[key]["prev_start"]       = None
                 range_jobs[key]["prev_end"]         = None
             else:
@@ -1264,6 +1315,7 @@ def build_payload() -> dict:
                 prev_start = prev_end - (end - start)
                 range_jobs[key]["prev_kpis"]        = ex.submit(fetch_kpis, prev_start, prev_end)
                 range_jobs[key]["link_clicks_prev"] = ex.submit(fetch_link_clicks, prev_start, prev_end)
+                range_jobs[key]["google_ads_prev"]  = ex.submit(fetch_google_ads, prev_start, prev_end)
                 range_jobs[key]["prev_start"]       = prev_start.isoformat()
                 range_jobs[key]["prev_end"]         = prev_end.isoformat()
 
@@ -1287,6 +1339,8 @@ def build_payload() -> dict:
                 "packages":         v["packages"].result(),
                 "link_clicks":      v["link_clicks"].result(),
                 "link_clicks_prev": v["link_clicks_prev"].result() if v["link_clicks_prev"] else None,
+                "google_ads":       v["google_ads"].result(),
+                "google_ads_prev":  v["google_ads_prev"].result() if v["google_ads_prev"] else None,
             }
 
         return {
