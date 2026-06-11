@@ -1201,6 +1201,55 @@ GROUP BY slug
             "wa_by_slug": wa_by_slug, "book_by_slug": book_by_slug}
 
 
+def fetch_google_ads(start: date, end: date) -> dict:
+    """Google Ads spend/clicks/impressions for [start, end] from the BQ Data Transfer dataset.
+
+    Queries goji-bi.google_ads directly (US region; a mart view can't cross regions).
+    Degrades to zeros if the transfer hasn't run yet or tables have an unexpected schema.
+    """
+    empty = {"spend": 0.0, "clicks": 0, "impressions": 0, "cpc": None}
+    try:
+        tables = _query(f"""
+SELECT table_name
+FROM `{PROJECT}.google_ads.INFORMATION_SCHEMA.TABLES`
+WHERE REGEXP_CONTAINS(LOWER(table_name), r'campaign.*(basic)?stats|account.*(basic)?stats')
+LIMIT 5
+""")
+        if not tables:
+            return empty
+        table_name = tables[0]["table_name"]
+        if table_name.startswith("p_"):
+            # Standard transfer: date-partitioned table, filter on _PARTITIONDATE
+            sql = f"""
+SELECT SUM(cost_micros) / 1e6 AS spend, SUM(clicks) AS clicks, SUM(impressions) AS impressions
+FROM `{PROJECT}.google_ads.{table_name}`
+WHERE _PARTITIONDATE BETWEEN '{start}' AND '{end}'
+"""
+        else:
+            # Legacy transfer: date-sharded tables, filter via _TABLE_SUFFIX
+            base = table_name.rstrip("_0123456789")
+            sql = f"""
+SELECT SUM(Cost) / 1e6 AS spend, SUM(Clicks) AS clicks, SUM(Impressions) AS impressions
+FROM `{PROJECT}.google_ads.{base}_*`
+WHERE _TABLE_SUFFIX BETWEEN '{start.strftime("%Y%m%d")}' AND '{end.strftime("%Y%m%d")}'
+"""
+        rows = _query(sql)
+        if not rows or rows[0]["clicks"] is None:
+            return empty
+        r      = rows[0]
+        spend  = float(r["spend"] or 0)
+        clicks = _to_int(r["clicks"])
+        return {
+            "spend":       spend,
+            "clicks":      clicks,
+            "impressions": _to_int(r["impressions"]),
+            "cpc":         round(spend / clicks, 2) if clicks else None,
+        }
+    except Exception as e:
+        log.warning("google_ads unavailable: %s", e)
+        return empty
+
+
 def build_payload() -> dict:
     """Fan all BQ queries out in parallel. ~27 queries; serial wall time was
     ~38s, parallel is limited by the slowest single query (~3-5s).
@@ -1220,9 +1269,9 @@ def build_payload() -> dict:
     presets    = preset_ranges()
 
     # max_workers sized to cover every concurrent fetch this request fires:
-    # 9 top-level + 4 ranges × 8 metrics + 3 ranges × 2 previous-window jobs = 47.
-    # Round up to 60 for headroom.
-    with ThreadPoolExecutor(max_workers=60, thread_name_prefix="bq") as ex:
+    # 9 top-level + 4 ranges × 9 metrics + 3 ranges × 3 previous-window jobs = 54.
+    # Round up to 70 for headroom.
+    with ThreadPoolExecutor(max_workers=70, thread_name_prefix="bq") as ex:
         # Range-independent (or fixed-window) fetches.
         f_deferred      = ex.submit(fetch_deferred)
         f_cohorts       = ex.submit(fetch_cohorts)
@@ -1249,6 +1298,7 @@ def build_payload() -> dict:
                 "treatment_mix":  ex.submit(fetch_treatment_mix, start, end),
                 "packages":       ex.submit(fetch_packages, start, end),
                 "link_clicks":    ex.submit(fetch_link_clicks, start, end),
+                "google_ads":     ex.submit(fetch_google_ads, start, end),
             }
             # Trend indicators compare each range against the immediately
             # preceding window of equal length (e.g. the 30 days before the
@@ -1257,6 +1307,7 @@ def build_payload() -> dict:
             if key == "all":
                 range_jobs[key]["prev_kpis"]        = None
                 range_jobs[key]["link_clicks_prev"] = None
+                range_jobs[key]["google_ads_prev"]  = None
                 range_jobs[key]["prev_start"]       = None
                 range_jobs[key]["prev_end"]         = None
             else:
@@ -1264,6 +1315,7 @@ def build_payload() -> dict:
                 prev_start = prev_end - (end - start)
                 range_jobs[key]["prev_kpis"]        = ex.submit(fetch_kpis, prev_start, prev_end)
                 range_jobs[key]["link_clicks_prev"] = ex.submit(fetch_link_clicks, prev_start, prev_end)
+                range_jobs[key]["google_ads_prev"]  = ex.submit(fetch_google_ads, prev_start, prev_end)
                 range_jobs[key]["prev_start"]       = prev_start.isoformat()
                 range_jobs[key]["prev_end"]         = prev_end.isoformat()
 
@@ -1287,6 +1339,8 @@ def build_payload() -> dict:
                 "packages":         v["packages"].result(),
                 "link_clicks":      v["link_clicks"].result(),
                 "link_clicks_prev": v["link_clicks_prev"].result() if v["link_clicks_prev"] else None,
+                "google_ads":       v["google_ads"].result(),
+                "google_ads_prev":  v["google_ads_prev"].result() if v["google_ads_prev"] else None,
             }
 
         return {
@@ -2145,6 +2199,62 @@ def api_data() -> Response:
     return Response(json.dumps(get_payload()), mimetype="application/json")
 
 
+@app.route("/api/range")
+@require_roles("founder")
+def api_range() -> Response:
+    """Return a single range dict for an arbitrary [start, end] window.
+
+    Used by the Custom date-range picker in the dashboard. Returns data in the
+    same shape as one entry from DATA.ranges so the existing render functions
+    work without modification, including a previous-period comparison of equal
+    length so trend tickers render.
+    """
+    start = _parse_iso_date(request.args.get("start"))
+    end   = _parse_iso_date(request.args.get("end"))
+    if not start or not end or start > end or (end - start).days > 366:
+        return Response(json.dumps({"error": "invalid range"}), status=400,
+                        mimetype="application/json")
+
+    prev_end   = start - timedelta(days=1)
+    prev_start = prev_end - (end - start)
+
+    log.info("Custom range query %s -> %s", start, end)
+    with ThreadPoolExecutor(max_workers=20, thread_name_prefix="bq_custom") as ex:
+        f_kpis      = ex.submit(fetch_kpis,          start,      end)
+        f_prev_kpis = ex.submit(fetch_kpis,          prev_start, prev_end)
+        f_tr        = ex.submit(fetch_trends,        start,      end)
+        f_wv        = ex.submit(fetch_weekly_visits, start,      end)
+        f_clin      = ex.submit(fetch_clinicians,    start,      end)
+        f_disc      = ex.submit(fetch_discounts,     start,      end)
+        f_mix       = ex.submit(fetch_treatment_mix, start,      end)
+        f_pkgs      = ex.submit(fetch_packages,      start,      end)
+        f_lc        = ex.submit(fetch_link_clicks,   start,      end)
+        f_lc_prev   = ex.submit(fetch_link_clicks,   prev_start, prev_end)
+        f_ga        = ex.submit(fetch_google_ads,    start,      end)
+        f_ga_prev   = ex.submit(fetch_google_ads,    prev_start, prev_end)
+
+    result = {
+        "label":            "Custom",
+        "start":            start.isoformat(),
+        "end":              end.isoformat(),
+        "prev_start":       prev_start.isoformat(),
+        "prev_end":         prev_end.isoformat(),
+        "kpis":             f_kpis.result(),
+        "prev_kpis":        f_prev_kpis.result(),
+        "trends":           f_tr.result(),
+        "weekly_visits":    f_wv.result(),
+        "clinicians":       f_clin.result(),
+        "discounts":        f_disc.result(),
+        "treatment_mix":    f_mix.result(),
+        "packages":         f_pkgs.result(),
+        "link_clicks":      f_lc.result(),
+        "link_clicks_prev": f_lc_prev.result(),
+        "google_ads":       f_ga.result(),
+        "google_ads_prev":  f_ga_prev.result(),
+    }
+    return Response(json.dumps(result), mimetype="application/json")
+
+
 @app.route("/api/marketing/ops")
 @require_roles("founder")
 def api_marketing_ops() -> Response:
@@ -2208,55 +2318,6 @@ def api_pl_window() -> Response:
     log.info("P&L window query %s -> %s", start, end)
     return Response(json.dumps(fetch_pl_window(start, end)),
                     mimetype="application/json")
-
-
-@app.route("/api/custom_range")
-@require_roles("founder")
-def api_custom_range() -> Response:
-    """Run all per-range metrics for an arbitrary date window.
-
-    Returns the same structure as DATA.ranges['30d'] so the frontend
-    can drop it into DATA.ranges.custom and call applyRange('custom').
-    """
-    start = _parse_iso_date(request.args.get("start"))
-    end   = _parse_iso_date(request.args.get("end"))
-    if not start or not end or start > end or (end - start).days > 366:
-        return Response('{"error":"invalid range"}', status=400,
-                        mimetype="application/json")
-
-    prev_end   = start - timedelta(days=1)
-    prev_start = prev_end - (end - start)
-
-    log.info("Custom range query %s -> %s", start, end)
-    with ThreadPoolExecutor(max_workers=14, thread_name_prefix="bq_custom") as ex:
-        f_kpis        = ex.submit(fetch_kpis,          start,      end)
-        f_prev_kpis   = ex.submit(fetch_kpis,          prev_start, prev_end)
-        f_trends      = ex.submit(fetch_trends,        start,      end)
-        f_weekly      = ex.submit(fetch_weekly_visits, start,      end)
-        f_clinicians  = ex.submit(fetch_clinicians,    start,      end)
-        f_discounts   = ex.submit(fetch_discounts,     start,      end)
-        f_treatment   = ex.submit(fetch_treatment_mix, start,      end)
-        f_packages    = ex.submit(fetch_packages,      start,      end)
-        f_clicks      = ex.submit(fetch_link_clicks,   start,      end)
-        f_clicks_prev = ex.submit(fetch_link_clicks,   prev_start, prev_end)
-
-    return Response(json.dumps({
-        "label":            "Custom",
-        "start":            start.isoformat(),
-        "end":              end.isoformat(),
-        "prev_start":       prev_start.isoformat(),
-        "prev_end":         prev_end.isoformat(),
-        "kpis":             f_kpis.result(),
-        "prev_kpis":        f_prev_kpis.result(),
-        "trends":           f_trends.result(),
-        "weekly_visits":    f_weekly.result(),
-        "clinicians":       f_clinicians.result(),
-        "discounts":        f_discounts.result(),
-        "treatment_mix":    f_treatment.result(),
-        "packages":         f_packages.result(),
-        "link_clicks":      f_clicks.result(),
-        "link_clicks_prev": f_clicks_prev.result(),
-    }), mimetype="application/json")
 
 
 @app.route("/api/pl.xlsx", methods=["POST"])

@@ -67,6 +67,22 @@
       display: flex; align-items: center; justify-content: flex-end;
       gap: 12px; flex-wrap: wrap; margin-bottom: 16px;
     }
+    .global-toolbar {
+      display: flex; align-items: center; justify-content: flex-end;
+      gap: 12px; flex-wrap: wrap; padding: 10px 0 14px;
+    }
+    #range_custom_dates {
+      display: flex; align-items: center; gap: 8px; font-size: 13px;
+    }
+    #range_custom_dates input[type="date"] {
+      padding: 5px 8px; border: 1px solid var(--border); border-radius: 6px;
+      background: var(--card); font: inherit; font-size: 12px; color: var(--ink);
+    }
+    #range_apply {
+      padding: 5px 14px; border-radius: 6px; border: none;
+      background: var(--goji); color: white; font-size: 12px; cursor: pointer;
+    }
+    #range_apply:disabled { opacity: 0.6; cursor: default; }
     .updated { font-size: 12px; color: var(--ink-muted); }
     .updated .dot {
       display: inline-block; width: 6px; height: 6px; border-radius: 50%;
@@ -283,21 +299,6 @@
     .page-nav button + button.active { border-left-color: transparent; }
     /* Desktop shows full tab labels; the short variants kick in on mobile. */
     .nav-short { display: none; }
-    .custom-date-picker {
-      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
-      margin-top: 10px; width: 100%;
-    }
-    .custom-date-picker input[type="date"] {
-      border: 1px solid var(--border); border-radius: 8px;
-      padding: 5px 10px; font: inherit; font-size: 13px;
-      background: var(--card); color: var(--ink); cursor: pointer;
-    }
-    .custom-date-picker .apply-btn {
-      background: var(--goji); color: #fff; border: 0;
-      border-radius: 8px; padding: 5px 14px;
-      font: inherit; font-size: 13px; font-weight: 500; cursor: pointer;
-    }
-    .custom-date-picker .apply-btn:disabled { opacity: 0.6; cursor: default; }
 
     @media (max-width: 1100px) {
       .kpi-row { grid-template-columns: repeat(3, 1fr); }
@@ -325,6 +326,7 @@
       .page-nav::-webkit-scrollbar { display: none; }
       .page-nav button { flex: 0 0 auto; padding: 8px 14px; font-size: 12px; white-space: nowrap; }
       .page-toolbar { justify-content: flex-start; }
+      .global-toolbar { justify-content: flex-start; }
       .date-selector button { padding: 6px 10px; font-size: 12px; }
       .kpi-row { grid-template-columns: 1fr; gap: 10px; margin-bottom: 18px; }
       .kpi-card { padding: 14px 16px; }
@@ -819,9 +821,9 @@
       <button type="button" data-page="other">Other details</button>
     </nav>
 
-    <div id="page-dashboard" class="page">
-
-    <div class="page-toolbar">
+    <!-- Global date-range selector — applies to Overview, Marketing, Other Details.
+         Hidden automatically when P&L or Commission tabs are active. -->
+    <div class="global-toolbar" id="global_toolbar">
       <div class="date-selector" role="tablist" aria-label="Date range">
         <button type="button" data-range="7d">7d</button>
         <button type="button" data-range="30d">30d</button>
@@ -829,21 +831,15 @@
         <button type="button" data-range="all">All</button>
         <button type="button" data-range="custom">Custom</button>
       </div>
-      <div class="custom-date-picker" id="custom_date_picker" hidden>
-        <input type="date" id="custom_start">
-        <span style="color:var(--ink-muted); font-size:13px;">to</span>
-        <input type="date" id="custom_end">
-        <button type="button" class="apply-btn" id="custom_apply_btn">Apply</button>
-        <span id="custom_loading" hidden style="font-size:13px; color:var(--ink-muted);">Loading…</span>
-      </div>
-      <div class="custom-date-picker" id="custom_date_picker">
-        <input type="date" id="custom_start">
-        <span style="color:var(--ink-muted); font-size:13px;">to</span>
-        <input type="date" id="custom_end">
-        <button type="button" class="apply-btn" id="custom_apply_btn">Apply</button>
-        <span id="custom_loading" hidden style="font-size:13px; color:var(--ink-muted);">Loading…</span>
+      <div id="range_custom_dates" hidden>
+        <input type="date" id="range_start">
+        <span style="color:var(--ink-muted);">to</span>
+        <input type="date" id="range_end">
+        <button type="button" id="range_apply">Apply</button>
       </div>
     </div>
+
+    <div id="page-dashboard" class="page">
 
     <section class="alert" id="doctor-mismatch-alert" hidden>
       <h2>
@@ -1533,16 +1529,6 @@
       </div>
     </section>
 
-    <div class="page-toolbar">
-      <div class="date-selector" role="tablist" aria-label="Date range">
-        <button type="button" data-range="7d">7d</button>
-        <button type="button" data-range="30d">30d</button>
-        <button type="button" data-range="90d">90d</button>
-        <button type="button" data-range="all">All</button>
-        <button type="button" data-range="custom">Custom</button>
-      </div>
-    </div>
-
     <!-- North-star KPIs (live) -->
     <div class="kpi-row mkt-kpis-4">
       <div class="kpi-card">
@@ -1620,15 +1606,17 @@
           <div class="kpi-value">— pending integration</div>
           <div class="mkt-target">Condition-page views, booking starts</div>
         </div>
-        <div class="kpi-card wip">
-          <div class="kpi-label">Paid spend (SGD / month)</div>
-          <div class="kpi-value">— pending integration</div>
-          <div class="mkt-target">M1 $800–1.2k → M3 $2–2.5k</div>
+        <div class="kpi-card">
+          <div class="kpi-label">Ads spend (SGD) <span class="range-label">this period</span> <span class="badge live">Google Ads</span></div>
+          <div class="kpi-value" id="mkt_ads_spend">-</div>
+          <div class="kpi-trend" id="mkt_ads_spend_trend" hidden></div>
+          <div class="mkt-target">M1 budget $800–1.2k/mo</div>
         </div>
-        <div class="kpi-card wip">
-          <div class="kpi-label">Cost per first visit (paid)</div>
-          <div class="kpi-value">— pending integration</div>
-          <div class="mkt-target">Establish &amp; drive down M1 → M3</div>
+        <div class="kpi-card">
+          <div class="kpi-label">Ad clicks <span class="range-label">this period</span> <span class="badge live">Google Ads</span></div>
+          <div class="kpi-value" id="mkt_ads_clicks">-</div>
+          <div class="kpi-trend" id="mkt_ads_clicks_trend" hidden></div>
+          <div class="mkt-target">Avg CPC: <span id="mkt_ads_cpc">-</span></div>
         </div>
         <div class="kpi-card wip">
           <div class="kpi-label">Google reviews / month</div>
@@ -2722,6 +2710,15 @@
       renderTrend('mkt_wa_clicks_trend',   lc && lc.whatsapp, lcp && lcp.whatsapp, ps, pe);
       renderTrend('mkt_book_clicks_trend', lc && lc.booking,  lcp && lcp.booking,  ps, pe);
 
+      const ga  = r.google_ads, gap = r.google_ads_prev;
+      if (ga) {
+        document.getElementById('mkt_ads_spend').textContent  = ga.spend  ? fmt$(ga.spend)           : '—';
+        document.getElementById('mkt_ads_clicks').textContent = ga.clicks ? fmtInt(ga.clicks)         : '—';
+        document.getElementById('mkt_ads_cpc').textContent    = ga.cpc    ? '$' + ga.cpc.toFixed(2)   : '—';
+        renderTrend('mkt_ads_spend_trend',  ga.spend,  gap && gap.spend,  ps, pe);
+        renderTrend('mkt_ads_clicks_trend', ga.clicks, gap && gap.clicks, ps, pe);
+      }
+
       mktActiveChart = renderTrendChart(mktActiveChart, 'mktActiveChart',
         (r.trends && r.trends.active_patients) || [], GOJI, false);
 
@@ -2949,26 +2946,6 @@
       }
     }
 
-    async function applyCustomRange(start, end) {
-      const applyBtn = document.getElementById('custom_apply_btn');
-      const loading  = document.getElementById('custom_loading');
-      applyBtn.disabled = true;
-      loading.hidden = false;
-      try {
-        const res = await fetch(`api/custom_range?start=${start}&end=${end}`,
-                                { credentials: 'same-origin' });
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        DATA.ranges.custom = await res.json();
-        localStorage.setItem('goji_custom_dates', JSON.stringify({ start, end }));
-        applyRange('custom');
-      } catch (err) {
-        alert('Could not load custom range: ' + err.message);
-      } finally {
-        applyBtn.disabled = false;
-        loading.hidden = true;
-      }
-    }
-
     function applyRange(key) {
       const r = DATA.ranges[key] || DATA.ranges[DATA.default_range];
       if (!r) return;
@@ -2979,8 +2956,7 @@
       document.querySelectorAll('[data-range]').forEach(b =>
         b.classList.toggle('active', b.dataset.range === resolvedKey)
       );
-      const picker = document.getElementById('custom_date_picker');
-      if (picker) picker.hidden = (resolvedKey !== 'custom');
+      document.getElementById('range_custom_dates').hidden = (resolvedKey !== 'custom');
       const rangeLabel = (r.start && r.end && resolvedKey !== 'all')
         ? fmtIsoRange(r.start, r.end)
         : r.label.toLowerCase();
@@ -3020,40 +2996,41 @@
       document.querySelectorAll('[data-range]').forEach(b =>
         b.addEventListener('click', () => {
           if (b.dataset.range === 'custom') {
-            // Show the picker; don't apply until the user clicks Apply
-            const picker = document.getElementById('custom_date_picker');
-            if (picker) picker.hidden = false;
+            // Reveal the picker; don't apply until the user clicks Apply.
+            document.getElementById('range_custom_dates').hidden = false;
             document.querySelectorAll('[data-range]').forEach(x =>
               x.classList.toggle('active', x.dataset.range === 'custom')
             );
           } else {
+            document.getElementById('range_custom_dates').hidden = true;
             applyRange(b.dataset.range);
           }
         })
       );
 
-      document.getElementById('custom_apply_btn').addEventListener('click', () => {
-        const s = document.getElementById('custom_start').value;
-        const e = document.getElementById('custom_end').value;
-        if (s && e && s <= e) applyCustomRange(s, e);
+      // Apply button: fetch the custom range from the server, inject into DATA, re-render.
+      document.getElementById('range_apply').addEventListener('click', async () => {
+        const start = document.getElementById('range_start').value;
+        const end   = document.getElementById('range_end').value;
+        if (!start || !end) return;
+        const btn = document.getElementById('range_apply');
+        btn.disabled = true; btn.textContent = 'Loading…';
+        try {
+          const resp = await fetch(`/api/range?start=${start}&end=${end}`,
+            { credentials: 'same-origin' });
+          if (!resp.ok) { alert('Error fetching range: ' + resp.statusText); return; }
+          DATA.ranges['custom'] = await resp.json();
+          applyRange('custom');
+        } catch(e) {
+          alert('Error fetching range: ' + e.message);
+        } finally {
+          btn.disabled = false; btn.textContent = 'Apply';
+        }
       });
 
-      // Restore custom dates from previous session
-      const savedCustom = (() => {
-        try { return JSON.parse(localStorage.getItem('goji_custom_dates')); } catch { return null; }
-      })();
-      if (savedCustom) {
-        document.getElementById('custom_start').value = savedCustom.start;
-        document.getElementById('custom_end').value   = savedCustom.end;
-      }
-
       const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored === 'custom' && savedCustom) {
-        await applyCustomRange(savedCustom.start, savedCustom.end);
-      } else {
-        const initial = (stored && DATA.ranges[stored]) ? stored : DATA.default_range;
-        applyRange(initial);
-      }
+      const initial = (stored && DATA.ranges[stored]) ? stored : DATA.default_range;
+      applyRange(initial);
       renderDemographics(DATA.demographics);
       renderReferrals(DATA.referrals);
       renderDoctorMismatches(DATA.doctor_mismatches);
@@ -3712,6 +3689,7 @@
       document.querySelectorAll('.page-nav button').forEach(b => {
         b.classList.toggle('active', b.dataset.page === page);
       });
+      document.getElementById('global_toolbar').hidden  = (page === 'pl' || page === 'commission');
       document.getElementById('page-dashboard').hidden  = (page !== 'dashboard');
       document.getElementById('page-pl').hidden         = (page !== 'pl');
       document.getElementById('page-commission').hidden = (page !== 'commission');

@@ -19,11 +19,9 @@ Three regimes exist. How hard they bite depends on the lane and on Goji's licenc
 
 1. **AHPC Code of Professional Conduct** - binds every registered physiotherapist personally, always, in both lanes. Core requirement: advertising must be **truthful, accurate, and must not induce unnecessary demand** for services. It also says a practitioner must not give the impression their skills/equipment/facilities are better than others (this is what restricts superlatives and comparisons), and restricts package deals/discounts that induce unnecessary demand.
 2. **Medicines (Advertisement and Sale) Act (MASA)** - restricts advertising the *treatment of an ailment, disease, injury or condition*. Bites in Lane A. Largely irrelevant to Lane B.
-3. **HCSA Advertisement Regulations** - the strict list (no superlatives, no before/after, no discounts/packages in ads, etc.). These apply to *licensable* healthcare services.
+3. **HCSA Advertisement Regulations** - the strict list (no superlatives, no before/after, no discounts/packages in ads, etc.). These apply to *licensable* healthcare services. **Confirmed June 2026: Goji's physiotherapy is not currently a licensable service under HCSA. The physiotherapists hold individual AHPC licences; the business is not MOH-licensed. The HCSA strict list is therefore best practice (not law) for Lane A. The AHPC Code of Professional Conduct and MASA are the binding floor.** Use Embrace Physiotherapy and Physio Down Under as benchmarks — both operate under the same licensing model.
 
-> **VERIFY BEFORE LAUNCH - the pivotal open item:** Is Goji's physiotherapy currently a *licensable* service under HCSA? The sources conflict: one MOH FAQ lists physiotherapy as an example of a *non-licensable* service, while the HCSA (in force Jan 2022) expanded coverage to allied health services including physiotherapy, rolled out in phases. Whether it is licensable *now* depends on the phase. Confirm Goji's actual status with MOH. If licensable, the full HCSA strict list is mandatory for Lane A. If not, the HCSA list is best-practice for Lane A and the binding floor is AHPC + MASA.
-
-**Why this does not block us:** our Lane A strategy is education-first and conservative either way. We never plan to lean on discounts, before/after imagery, or testimonials on the clinical side. So whichever way the licence question resolves, the clinical content we are producing already complies. We only need the answer before we would ever use a clinical-side promotion, price offer, or testimonial.
+**Why this does not limit us:** our Lane A strategy is education-first and conservative either way. We do not plan to use discounts, before/after imagery, or testimonials on the clinical side. The content we produce already complies with both the best-practice HCSA list and the binding AHPC floor. Confirm borderline Lane A claim wording with AHPC or a healthcare lawyer before any clinical promotion goes live.
 
 ---
 
@@ -37,7 +35,7 @@ Covers: pelvic floor dysfunction, diastasis recti, incontinence, pre/post-natal 
 - No comparative claims against other named or implied providers.
 - No before/after photos in advertising (allowed only inside a private consultation).
 - No unsubstantiated or embellished clinical claims - every claim defensible with evidence.
-- Treat discounts/packages and testimonials as **off-limits until the HCSA licence question is resolved** (and even then, high bar - see grey zone).
+- Treat discounts/packages and testimonials as **off-limits by default** (best practice; the AHPC Code restricts inducing unnecessary demand, and HCSA compliance is the standard we hold ourselves to regardless of legal obligation).
 
 **Clear YES:**
 - Factual descriptions of what we assess and how a session works.
@@ -93,7 +91,7 @@ For every asset, first decide the lane, then check:
 - [ ] No cure/outcome/time guarantee
 - [ ] No superlative or comparative claim
 - [ ] No before/after imagery
-- [ ] No discount/package/testimonial (pending HCSA licence answer)
+- [ ] No discount/package/testimonial (AHPC Code + best practice; apply regardless of HCSA obligation)
 - [ ] Every clinical claim defensible with evidence
 - [ ] Framed as education / "can help", not "will fix"
 
@@ -109,5 +107,5 @@ For every asset, first decide the lane, then check:
 
 ## Open verification items
 
-1. **(Pivotal)** Confirm with MOH whether Goji's physiotherapy is currently a licensable service under the phased HCSA rollout. Decides whether the HCSA strict list is law or best-practice for Lane A.
-2. Confirm with AHPC/MOH the permissible wording for specific post-natal/women's-health clinical claims before any borderline Lane A campaign.
+1. ~~Confirm with MOH whether Goji's physiotherapy is currently a licensable service under the phased HCSA rollout.~~ **Resolved June 2026:** Goji is not HCSA-licensable. HCSA strict list is best practice; AHPC Code is law.
+2. **(Active)** Confirm with AHPC or a healthcare lawyer the permissible wording for specific post-natal and women's-health clinical claims before any borderline Lane A campaign goes live.

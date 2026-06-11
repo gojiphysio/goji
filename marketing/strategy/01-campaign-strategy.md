@@ -13,8 +13,9 @@ That is a multi-year brand goal. This 90-day campaign is the opening move: estab
 1. **Number of visits** - appointments delivered (`fct_appointment`).
 2. **Number of active patients** - distinct patients with a delivered service in the period (cohort metrics).
 3. **Bookings** - dollar value of packs/sales (`fct_invoice_line`).
+4. **Discovery Rank Score** - the % of priority patient questions where Goji appears in the top 5 across Google, ChatGPT, Gemini, Claude, TikTok, and Instagram. Tracked weekly via the Discovery Rank Sweep routine on the ops dashboard. This is the leading indicator for discovery — the commercial three are the lagging outcomes. **Not yet instrumented; build task for Week 4.**
 
-Everything below is in service of these three.
+Everything below is in service of all four.
 
 ## What the data says (and why the strategy is shaped this way)
 
@@ -50,7 +51,7 @@ The distinctiveness engine. Education-first content on pelvic floor, post-partum
 The biggest single segment and broadest search demand (back, neck, shoulder, knee, sports/desk injuries). Fills the schedule. Education content here earns the most reach and the most bookings by volume. Not glamorous, but it pays the bills.
 
 ### Pillar 3 - Movement & fitness: Clinical Pilates + S&C (THE ADJUNCT) - Lane B
-The freer lane. Used for: (a) the "return to movement" bridge out of rehab, (b) compliant offers (founding-member, intro classes), (c) retention and LTV. A supporting conversion layer, not the main reach driver - it is only ~12% of delivery today.
+The freer lane. Used for: (a) the "return to movement" bridge out of rehab, (b) compliant offers (founding-member, intro classes), (c) retention and LTV. A supporting conversion layer, not the main reach driver — it is only ~12% of delivery today. **Pilates and S&C are a relationship-extension tool for existing patients, not a top-of-funnel campaign.** Do not lead any top-of-funnel copy with fitness. Pilates is genuinely attractive to millennial women and is worth acknowledging as part of the offering, but treat it as an adjunct that keeps patients in the ecosystem after physio — not a way to acquire new ones.
 
 ### Pillar 4 - Active-aging & family (THE QUIET PILLAR) - mixed lanes
 24% of patients are 65+. Light-touch content on staying strong and mobile with age, plus the family breadth (kids, partners, parents). Low effort, real returns, reinforces "family."
@@ -63,7 +64,7 @@ Foundation already exists (website, Instagram, Google Business Profile, email/Wh
 |---|---|---|
 | **Instagram (Reels + carousels)** | Primary reach + authority. Practitioner-led education. | Lane A education (wedge + MSK), Lane B for fitness offers |
 | **Google Business Profile** | Highest-leverage local discovery. Posts 2-3x/week, reviews, photos, booking link. | Both |
-| **Local SEO + website** | Capture "physio near me" + condition/neighbourhood intent. Condition landing pages. | Both |
+| **Local SEO + website** | Capture "physio near me" + condition/neighbourhood intent. Condition landing pages. Target both **Lentor** (home base) and **Katong** (intentional — Embrace's catchment area). | Both |
 | **Email + WhatsApp** | Nurture and retention. WhatsApp is the SG booking/reminder default (~98% open). | Both |
 | **Partnerships & referrals** | Gynae, confinement, doulas, lactation, prenatal studios. The post-partum referral ecosystem. | Lane A wedge |
 | **Workshops & events** | In-clinic and partner-hosted sessions; baby fairs. Trust at scale. | Wedge + fitness |
@@ -77,9 +78,11 @@ You were unsure on budget. For a new clinic with an existing foundation and Sing
 
 Indicative monthly paid media (excludes content production and event/booth costs):
 
+**Meta advertising restriction:** "pelvic floor" and "pelvic health" are flagged as non-advertisable by Meta Business Suite. All pelvic/women's-health content stays organic. Paid budget on Meta goes to MSK terms and branded only, or Lane B fitness offers. Plan accordingly.
+
 | Month | Paid media (SGD) | Allocation |
 |---|---|---|
-| 1 | 800 - 1,200 | ~70% Google Search (high-intent: "women's physio singapore", "postnatal physio", "pelvic floor physiotherapy", "physiotherapy [neighbourhood]", branded). ~30% Meta retargeting of site/IG visitors. Learn. |
+| 1 | 800 - 1,200 | ~70% Google Search (high-intent: "women's physio singapore", "postnatal physio", "physiotherapy [neighbourhood]", "back pain physio Singapore", branded). ~30% Meta retargeting of site/IG visitors (MSK and general — not pelvic terms). Learn. |
 | 2 | 1,500 - 2,000 | Continue search. Add Meta retargeting + small Lane B fitness-offer prospecting (neighbourhood/parenting interests). Boost top organic education Reels. |
 | 3 | 2,000 - 2,500 | Scale winners. Seasonal/event tie-in. Shift spend toward whatever booking source is cheapest per first-visit. |
 
@@ -136,6 +139,25 @@ In-house operator runs week-to-week delivery; Claude is the strategy + content e
 - **Monthly:** one batch film day (practitioner Reels), review BI north-stars, plan next month's themes.
 - **Weekly:** publish to calendar, post GBP updates, review leading indicators, reply to all DMs/reviews, advance one partnership.
 - **Always:** every asset passes the lane-aware pre-publish checklist in `03-compliance-guardrails.md`.
+
+## Brand name (canonical — lock this across all surfaces)
+
+- **Short form (Instagram, website, day-to-day):** Goji Physio
+- **Full form (Google Business Profile, formal use):** Goji Women's and Family Physiotherapy
+- **Suggested bio / handle format:** Goji Physio | Women's and Family Physiotherapy @ Lentor
+- **Legal name (internal, hidden from marketing):** Goji Health Pte Ltd
+
+NAP must be consistent: same name, address, phone on website, GBP, Instagram, LinkedIn, and any health directories. AI engines and Google hedge when entity names conflict; consistency is what earns confident citation.
+
+## MOH licensing status (confirmed June 2026)
+
+Goji is **not MOH-business-licensed**. The physiotherapists are individually **AHPC-licensed**. This means:
+- The HCSA strict advertising list is **best practice**, not a legal requirement for Lane A.
+- The **AHPC Code of Professional Conduct** is the binding floor — always applies.
+- The Medicines (Advertisement and Sale) Act still restricts treatment-of-condition claims.
+- Use Embrace Physiotherapy and Physio Down Under as benchmarks (both operate under the same licensing model in 2026).
+
+Confirm borderline Lane A claim wording with AHPC or a healthcare lawyer before any pelvic/post-partum campaign goes live.
 
 ## What success looks like at day 90
 
