@@ -2206,39 +2206,41 @@ def api_range() -> Response:
 
     Used by the Custom date-range picker in the dashboard. Returns data in the
     same shape as one entry from DATA.ranges so the existing render functions
-    work without modification. No previous-period comparison (trend shows —).
+    work without modification, including a previous-period comparison of equal
+    length so trend tickers render.
     """
-    start_s = request.args.get("start", "")
-    end_s   = request.args.get("end", "")
-    try:
-        start = date.fromisoformat(start_s)
-        end   = date.fromisoformat(end_s)
-    except ValueError:
-        return Response(json.dumps({"error": "invalid dates"}), status=400,
-                        mimetype="application/json")
-    if start > end or (end - start).days > 366:
+    start = _parse_iso_date(request.args.get("start"))
+    end   = _parse_iso_date(request.args.get("end"))
+    if not start or not end or start > end or (end - start).days > 366:
         return Response(json.dumps({"error": "invalid range"}), status=400,
                         mimetype="application/json")
 
+    prev_end   = start - timedelta(days=1)
+    prev_start = prev_end - (end - start)
+
+    log.info("Custom range query %s -> %s", start, end)
     with ThreadPoolExecutor(max_workers=20, thread_name_prefix="bq_custom") as ex:
-        f_kpis  = ex.submit(fetch_kpis, start, end)
-        f_tr    = ex.submit(fetch_trends, start, end)
-        f_wv    = ex.submit(fetch_weekly_visits, start, end)
-        f_clin  = ex.submit(fetch_clinicians, start, end)
-        f_disc  = ex.submit(fetch_discounts, start, end)
-        f_mix   = ex.submit(fetch_treatment_mix, start, end)
-        f_pkgs  = ex.submit(fetch_packages, start, end)
-        f_lc    = ex.submit(fetch_link_clicks, start, end)
-        f_ga    = ex.submit(fetch_google_ads, start, end)
+        f_kpis      = ex.submit(fetch_kpis,          start,      end)
+        f_prev_kpis = ex.submit(fetch_kpis,          prev_start, prev_end)
+        f_tr        = ex.submit(fetch_trends,        start,      end)
+        f_wv        = ex.submit(fetch_weekly_visits, start,      end)
+        f_clin      = ex.submit(fetch_clinicians,    start,      end)
+        f_disc      = ex.submit(fetch_discounts,     start,      end)
+        f_mix       = ex.submit(fetch_treatment_mix, start,      end)
+        f_pkgs      = ex.submit(fetch_packages,      start,      end)
+        f_lc        = ex.submit(fetch_link_clicks,   start,      end)
+        f_lc_prev   = ex.submit(fetch_link_clicks,   prev_start, prev_end)
+        f_ga        = ex.submit(fetch_google_ads,    start,      end)
+        f_ga_prev   = ex.submit(fetch_google_ads,    prev_start, prev_end)
 
     result = {
         "label":            "Custom",
         "start":            start.isoformat(),
         "end":              end.isoformat(),
-        "prev_start":       None,
-        "prev_end":         None,
+        "prev_start":       prev_start.isoformat(),
+        "prev_end":         prev_end.isoformat(),
         "kpis":             f_kpis.result(),
-        "prev_kpis":        None,
+        "prev_kpis":        f_prev_kpis.result(),
         "trends":           f_tr.result(),
         "weekly_visits":    f_wv.result(),
         "clinicians":       f_clin.result(),
@@ -2246,9 +2248,9 @@ def api_range() -> Response:
         "treatment_mix":    f_mix.result(),
         "packages":         f_pkgs.result(),
         "link_clicks":      f_lc.result(),
-        "link_clicks_prev": None,
+        "link_clicks_prev": f_lc_prev.result(),
         "google_ads":       f_ga.result(),
-        "google_ads_prev":  None,
+        "google_ads_prev":  f_ga_prev.result(),
     }
     return Response(json.dumps(result), mimetype="application/json")
 

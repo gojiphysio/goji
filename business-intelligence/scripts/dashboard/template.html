@@ -2956,6 +2956,7 @@
       document.querySelectorAll('[data-range]').forEach(b =>
         b.classList.toggle('active', b.dataset.range === resolvedKey)
       );
+      document.getElementById('range_custom_dates').hidden = (resolvedKey !== 'custom');
       const rangeLabel = (r.start && r.end && resolvedKey !== 'all')
         ? fmtIsoRange(r.start, r.end)
         : r.label.toLowerCase();
@@ -2993,20 +2994,21 @@
         new Date(DATA.generated_at).toLocaleString();
 
       document.querySelectorAll('[data-range]').forEach(b =>
-        b.addEventListener('click', () => applyRange(b.dataset.range))
-      );
-
-      // Show custom date inputs when Custom is selected; hide on preset selection.
-      document.querySelector('[data-range="custom"]').addEventListener('click', () => {
-        document.getElementById('range_custom_dates').hidden = false;
-      });
-      document.querySelectorAll('[data-range]:not([data-range="custom"])').forEach(b =>
         b.addEventListener('click', () => {
-          document.getElementById('range_custom_dates').hidden = true;
+          if (b.dataset.range === 'custom') {
+            // Reveal the picker; don't apply until the user clicks Apply.
+            document.getElementById('range_custom_dates').hidden = false;
+            document.querySelectorAll('[data-range]').forEach(x =>
+              x.classList.toggle('active', x.dataset.range === 'custom')
+            );
+          } else {
+            document.getElementById('range_custom_dates').hidden = true;
+            applyRange(b.dataset.range);
+          }
         })
       );
 
-      // Apply button: fetch a custom range from the server, inject into DATA, re-render.
+      // Apply button: fetch the custom range from the server, inject into DATA, re-render.
       document.getElementById('range_apply').addEventListener('click', async () => {
         const start = document.getElementById('range_start').value;
         const end   = document.getElementById('range_end').value;
