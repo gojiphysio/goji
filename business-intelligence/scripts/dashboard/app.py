@@ -2199,6 +2199,60 @@ def api_data() -> Response:
     return Response(json.dumps(get_payload()), mimetype="application/json")
 
 
+@app.route("/api/range")
+@require_roles("founder")
+def api_range() -> Response:
+    """Return a single range dict for an arbitrary [start, end] window.
+
+    Used by the Custom date-range picker in the dashboard. Returns data in the
+    same shape as one entry from DATA.ranges so the existing render functions
+    work without modification. No previous-period comparison (trend shows —).
+    """
+    start_s = request.args.get("start", "")
+    end_s   = request.args.get("end", "")
+    try:
+        start = date.fromisoformat(start_s)
+        end   = date.fromisoformat(end_s)
+    except ValueError:
+        return Response(json.dumps({"error": "invalid dates"}), status=400,
+                        mimetype="application/json")
+    if start > end or (end - start).days > 366:
+        return Response(json.dumps({"error": "invalid range"}), status=400,
+                        mimetype="application/json")
+
+    with ThreadPoolExecutor(max_workers=20, thread_name_prefix="bq_custom") as ex:
+        f_kpis  = ex.submit(fetch_kpis, start, end)
+        f_tr    = ex.submit(fetch_trends, start, end)
+        f_wv    = ex.submit(fetch_weekly_visits, start, end)
+        f_clin  = ex.submit(fetch_clinicians, start, end)
+        f_disc  = ex.submit(fetch_discounts, start, end)
+        f_mix   = ex.submit(fetch_treatment_mix, start, end)
+        f_pkgs  = ex.submit(fetch_packages, start, end)
+        f_lc    = ex.submit(fetch_link_clicks, start, end)
+        f_ga    = ex.submit(fetch_google_ads, start, end)
+
+    result = {
+        "label":            "Custom",
+        "start":            start.isoformat(),
+        "end":              end.isoformat(),
+        "prev_start":       None,
+        "prev_end":         None,
+        "kpis":             f_kpis.result(),
+        "prev_kpis":        None,
+        "trends":           f_tr.result(),
+        "weekly_visits":    f_wv.result(),
+        "clinicians":       f_clin.result(),
+        "discounts":        f_disc.result(),
+        "treatment_mix":    f_mix.result(),
+        "packages":         f_pkgs.result(),
+        "link_clicks":      f_lc.result(),
+        "link_clicks_prev": None,
+        "google_ads":       f_ga.result(),
+        "google_ads_prev":  None,
+    }
+    return Response(json.dumps(result), mimetype="application/json")
+
+
 @app.route("/api/marketing/ops")
 @require_roles("founder")
 def api_marketing_ops() -> Response:
