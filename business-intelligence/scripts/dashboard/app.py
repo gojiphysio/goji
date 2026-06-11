@@ -1190,9 +1190,11 @@ GROUP BY slug
     wa_by_slug: dict[str, int] = {}
     book_by_slug: dict[str, int] = {}
     for r in rows:
+        kind = LINK_SLUG_KIND.get(r["slug"])
+        if kind is None:
+            continue  # unknown slug = bot/scanner traffic, not a marketing channel
         n = _to_int(r["clicks"])
-        # Unknown/retired slugs default to the WhatsApp bucket (the common case).
-        if LINK_SLUG_KIND.get(r["slug"], "whatsapp") == "booking":
+        if kind == "booking":
             book_by_slug[r["slug"]] = n
         else:
             wa_by_slug[r["slug"]] = n
