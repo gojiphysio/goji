@@ -2210,6 +2210,55 @@ def api_pl_window() -> Response:
                     mimetype="application/json")
 
 
+@app.route("/api/custom_range")
+@require_roles("founder")
+def api_custom_range() -> Response:
+    """Run all per-range metrics for an arbitrary date window.
+
+    Returns the same structure as DATA.ranges['30d'] so the frontend
+    can drop it into DATA.ranges.custom and call applyRange('custom').
+    """
+    start = _parse_iso_date(request.args.get("start"))
+    end   = _parse_iso_date(request.args.get("end"))
+    if not start or not end or start > end or (end - start).days > 366:
+        return Response('{"error":"invalid range"}', status=400,
+                        mimetype="application/json")
+
+    prev_end   = start - timedelta(days=1)
+    prev_start = prev_end - (end - start)
+
+    log.info("Custom range query %s -> %s", start, end)
+    with ThreadPoolExecutor(max_workers=14, thread_name_prefix="bq_custom") as ex:
+        f_kpis        = ex.submit(fetch_kpis,          start,      end)
+        f_prev_kpis   = ex.submit(fetch_kpis,          prev_start, prev_end)
+        f_trends      = ex.submit(fetch_trends,        start,      end)
+        f_weekly      = ex.submit(fetch_weekly_visits, start,      end)
+        f_clinicians  = ex.submit(fetch_clinicians,    start,      end)
+        f_discounts   = ex.submit(fetch_discounts,     start,      end)
+        f_treatment   = ex.submit(fetch_treatment_mix, start,      end)
+        f_packages    = ex.submit(fetch_packages,      start,      end)
+        f_clicks      = ex.submit(fetch_link_clicks,   start,      end)
+        f_clicks_prev = ex.submit(fetch_link_clicks,   prev_start, prev_end)
+
+    return Response(json.dumps({
+        "label":            "Custom",
+        "start":            start.isoformat(),
+        "end":              end.isoformat(),
+        "prev_start":       prev_start.isoformat(),
+        "prev_end":         prev_end.isoformat(),
+        "kpis":             f_kpis.result(),
+        "prev_kpis":        f_prev_kpis.result(),
+        "trends":           f_trends.result(),
+        "weekly_visits":    f_weekly.result(),
+        "clinicians":       f_clinicians.result(),
+        "discounts":        f_discounts.result(),
+        "treatment_mix":    f_treatment.result(),
+        "packages":         f_packages.result(),
+        "link_clicks":      f_clicks.result(),
+        "link_clicks_prev": f_clicks_prev.result(),
+    }), mimetype="application/json")
+
+
 @app.route("/api/pl.xlsx", methods=["POST"])
 @require_roles("founder")
 def api_pl_xlsx() -> Response:

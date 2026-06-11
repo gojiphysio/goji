@@ -283,6 +283,21 @@
     .page-nav button + button.active { border-left-color: transparent; }
     /* Desktop shows full tab labels; the short variants kick in on mobile. */
     .nav-short { display: none; }
+    .custom-date-picker {
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+      margin-top: 10px; width: 100%;
+    }
+    .custom-date-picker input[type="date"] {
+      border: 1px solid var(--border); border-radius: 8px;
+      padding: 5px 10px; font: inherit; font-size: 13px;
+      background: var(--card); color: var(--ink); cursor: pointer;
+    }
+    .custom-date-picker .apply-btn {
+      background: var(--goji); color: #fff; border: 0;
+      border-radius: 8px; padding: 5px 14px;
+      font: inherit; font-size: 13px; font-weight: 500; cursor: pointer;
+    }
+    .custom-date-picker .apply-btn:disabled { opacity: 0.6; cursor: default; }
 
     @media (max-width: 1100px) {
       .kpi-row { grid-template-columns: repeat(3, 1fr); }
@@ -812,6 +827,14 @@
         <button type="button" data-range="30d">30d</button>
         <button type="button" data-range="90d">90d</button>
         <button type="button" data-range="all">All</button>
+        <button type="button" data-range="custom">Custom</button>
+      </div>
+      <div class="custom-date-picker" id="custom_date_picker" hidden>
+        <input type="date" id="custom_start">
+        <span style="color:var(--ink-muted); font-size:13px;">to</span>
+        <input type="date" id="custom_end">
+        <button type="button" class="apply-btn" id="custom_apply_btn">Apply</button>
+        <span id="custom_loading" hidden style="font-size:13px; color:var(--ink-muted);">Loading…</span>
       </div>
     </div>
 
@@ -1509,6 +1532,7 @@
         <button type="button" data-range="30d">30d</button>
         <button type="button" data-range="90d">90d</button>
         <button type="button" data-range="all">All</button>
+        <button type="button" data-range="custom">Custom</button>
       </div>
     </div>
 
@@ -2918,6 +2942,26 @@
       }
     }
 
+    async function applyCustomRange(start, end) {
+      const applyBtn = document.getElementById('custom_apply_btn');
+      const loading  = document.getElementById('custom_loading');
+      applyBtn.disabled = true;
+      loading.hidden = false;
+      try {
+        const res = await fetch(`api/custom_range?start=${start}&end=${end}`,
+                                { credentials: 'same-origin' });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        DATA.ranges.custom = await res.json();
+        localStorage.setItem('goji_custom_dates', JSON.stringify({ start, end }));
+        applyRange('custom');
+      } catch (err) {
+        alert('Could not load custom range: ' + err.message);
+      } finally {
+        applyBtn.disabled = false;
+        loading.hidden = true;
+      }
+    }
+
     function applyRange(key) {
       const r = DATA.ranges[key] || DATA.ranges[DATA.default_range];
       if (!r) return;
@@ -2928,6 +2972,8 @@
       document.querySelectorAll('[data-range]').forEach(b =>
         b.classList.toggle('active', b.dataset.range === resolvedKey)
       );
+      const picker = document.getElementById('custom_date_picker');
+      if (picker) picker.hidden = (resolvedKey !== 'custom');
       const rangeLabel = (r.start && r.end && resolvedKey !== 'all')
         ? fmtIsoRange(r.start, r.end)
         : r.label.toLowerCase();
@@ -2965,12 +3011,42 @@
         new Date(DATA.generated_at).toLocaleString();
 
       document.querySelectorAll('[data-range]').forEach(b =>
-        b.addEventListener('click', () => applyRange(b.dataset.range))
+        b.addEventListener('click', () => {
+          if (b.dataset.range === 'custom') {
+            // Show the picker; don't apply until the user clicks Apply
+            const picker = document.getElementById('custom_date_picker');
+            if (picker) picker.hidden = false;
+            document.querySelectorAll('[data-range]').forEach(x =>
+              x.classList.toggle('active', x.dataset.range === 'custom')
+            );
+          } else {
+            applyRange(b.dataset.range);
+          }
+        })
       );
 
+      document.getElementById('custom_apply_btn').addEventListener('click', () => {
+        const s = document.getElementById('custom_start').value;
+        const e = document.getElementById('custom_end').value;
+        if (s && e && s <= e) applyCustomRange(s, e);
+      });
+
+      // Restore custom dates from previous session
+      const savedCustom = (() => {
+        try { return JSON.parse(localStorage.getItem('goji_custom_dates')); } catch { return null; }
+      })();
+      if (savedCustom) {
+        document.getElementById('custom_start').value = savedCustom.start;
+        document.getElementById('custom_end').value   = savedCustom.end;
+      }
+
       const stored = localStorage.getItem(STORAGE_KEY);
-      const initial = (stored && DATA.ranges[stored]) ? stored : DATA.default_range;
-      applyRange(initial);
+      if (stored === 'custom' && savedCustom) {
+        await applyCustomRange(savedCustom.start, savedCustom.end);
+      } else {
+        const initial = (stored && DATA.ranges[stored]) ? stored : DATA.default_range;
+        applyRange(initial);
+      }
       renderDemographics(DATA.demographics);
       renderReferrals(DATA.referrals);
       renderDoctorMismatches(DATA.doctor_mismatches);
