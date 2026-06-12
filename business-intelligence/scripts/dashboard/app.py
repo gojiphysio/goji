@@ -147,6 +147,20 @@ LINK_SLUGS: dict[str, dict] = {
     "qr-wa":  {"kind": "whatsapp", "label": "QR",       "text": "Hi Goji! I scanned your QR code and have a question about physio."},
     "ig-wa":  {"kind": "whatsapp", "label": "IG",       "text": "Hi Goji! I found you on Instagram and have a question about physio."},
     "wa":     {"kind": "whatsapp", "label": "Social",   "text": "Hi Goji! I have a question about physio."},  # generic fallback
+    # --- Condition pages (women's health) ---
+    "wa-postpartum":   {"kind": "whatsapp", "label": "Postpartum",   "text": "Hi Goji, I'd like to find out more about postnatal physiotherapy."},
+    "wa-pelvic":       {"kind": "whatsapp", "label": "Pelvic floor", "text": "Hi Goji, I'd like to find out more about pelvic floor physiotherapy."},
+    "wa-prenatal":     {"kind": "whatsapp", "label": "Prenatal",     "text": "Hi Goji, I'd like to find out more about physiotherapy during pregnancy."},
+    "wa-pgp":          {"kind": "whatsapp", "label": "PGP/MSK",      "text": "Hi Goji, I'd like to find out more about pelvic girdle pain or wrist pain during/after pregnancy."},
+    "wa-diastasis":    {"kind": "whatsapp", "label": "Diastasis",    "text": "Hi Goji, I'd like to find out more about diastasis recti."},
+    "wa-csection":     {"kind": "whatsapp", "label": "C-section",    "text": "Hi Goji, I'd like to find out more about C-section recovery."},
+    "wa-perineal":     {"kind": "whatsapp", "label": "Perineal",     "text": "Hi Goji, I'd like to find out more about perineal tear recovery."},
+    "wa-mastitis":     {"kind": "whatsapp", "label": "Mastitis",     "text": "Hi Goji, I'd like to find out more about blocked ducts or mastitis support."},
+    "wa-prolapse":     {"kind": "whatsapp", "label": "Prolapse",     "text": "Hi Goji, I'd like to find out more about pelvic organ prolapse."},
+    "wa-pelvicpain":   {"kind": "whatsapp", "label": "Pelvic pain",  "text": "Hi Goji, I'd like to find out more about pelvic pain."},
+    "wa-incontinence": {"kind": "whatsapp", "label": "Incontinence", "text": "Hi Goji, I'd like to find out more about urinary incontinence."},
+    "wa-bowel":        {"kind": "whatsapp", "label": "Bowel",        "text": "Hi Goji, I'd like to find out more about bowel health and physiotherapy."},
+    "wa-menopause":    {"kind": "whatsapp", "label": "Menopause",    "text": "Hi Goji, I'd like to find out more about physiotherapy for perimenopause or menopause."},
     # --- Plato booking ---
     "web-plato": {"kind": "booking", "label": "Web"},
     "bio-plato": {"kind": "booking", "label": "bio.site"},
