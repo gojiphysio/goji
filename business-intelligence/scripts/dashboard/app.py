@@ -161,6 +161,16 @@ LINK_SLUGS: dict[str, dict] = {
     "wa-incontinence": {"kind": "whatsapp", "label": "Incontinence", "text": "Hi Goji, I'd like to find out more about urinary incontinence."},
     "wa-bowel":        {"kind": "whatsapp", "label": "Bowel",        "text": "Hi Goji, I'd like to find out more about bowel health and physiotherapy."},
     "wa-menopause":    {"kind": "whatsapp", "label": "Menopause",    "text": "Hi Goji, I'd like to find out more about physiotherapy for perimenopause or menopause."},
+    # --- Condition pages (paediatrics) ---
+    "wa-torticollis":  {"kind": "whatsapp", "label": "Torticollis",  "text": "Hi Goji, I'd like to find out more about physiotherapy for my child's torticollis."},
+    "wa-clubfoot":     {"kind": "whatsapp", "label": "Clubfoot",     "text": "Hi Goji, I'd like to find out more about physiotherapy for my child's clubfoot."},
+    "wa-ddh":          {"kind": "whatsapp", "label": "DDH",          "text": "Hi Goji, I'd like to find out more about physiotherapy for developmental dysplasia of the hip."},
+    "wa-devdelay":     {"kind": "whatsapp", "label": "Dev delay",    "text": "Hi Goji, I'd like to find out more about physiotherapy for developmental concerns and motor delays."},
+    "wa-neurodev":     {"kind": "whatsapp", "label": "Neurodev",     "text": "Hi Goji, I'd like to find out more about physiotherapy for my child's neurodevelopmental condition."},
+    "wa-scoliosis":    {"kind": "whatsapp", "label": "Scoliosis",    "text": "Hi Goji, I'd like to find out more about scoliosis and Schroth therapy."},
+    "wa-peds-pelvis":  {"kind": "whatsapp", "label": "Peds pelvis",  "text": "Hi Goji, I'd like to find out more about paediatric pelvic health physiotherapy."},
+    "wa-peds-sports":  {"kind": "whatsapp", "label": "Peds sports",  "text": "Hi Goji, I'd like to find out more about physiotherapy for my child's sports injury."},
+    "wa-fracture":     {"kind": "whatsapp", "label": "Fracture",     "text": "Hi Goji, I'd like to find out more about post-fracture rehabilitation for my child."},
     # --- Plato booking ---
     "web-plato": {"kind": "booking", "label": "Web"},
     "bio-plato": {"kind": "booking", "label": "bio.site"},
