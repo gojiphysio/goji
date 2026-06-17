@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- WordPress eXtended RSS (WXR) export — Goji Physio condition pages
+     IMPORT INSTRUCTIONS:
+     1. In Squarespace: Settings → Import / Export → Import → WordPress
+     2. Upload this file
+     3. Squarespace creates the pages as drafts (not yet visible to visitors)
+     4. Go to Pages → find the imported page → set the URL slug, SEO title, and meta description
+     5. When ready to publish: enable the page and link from the homepage conditions list
+-->
+<rss version="2.0"
+  xmlns:excerpt="http://wordpress.org/export/1.2/excerpt/"
+  xmlns:content="http://purl.org/rss/1.0/modules/content/"
+  xmlns:wfw="http://wellformedweb.org/CommentAPI/"
+  xmlns:dc="http://purl.org/dc/elements/1.1/"
+  xmlns:wp="http://wordpress.org/export/1.2/">
+
+  <channel>
+    <title>Goji Physio</title>
+    <link>https://www.gojiphysio.com</link>
+    <description>Women's and Family Physiotherapy, Lentor, Singapore</description>
+    <language>en-SG</language>
+    <wp:wxr_version>1.2</wp:wxr_version>
+    <wp:base_site_url>https://www.gojiphysio.com</wp:base_site_url>
+    <wp:base_blog_url>https://www.gojiphysio.com</wp:base_blog_url>
+
+    <wp:author>
+      <wp:author_login>cheryl</wp:author_login>
+      <wp:author_email>hello@gojiphysio.com</wp:author_email>
+      <wp:author_display_name>Cheryl Long</wp:author_display_name>
+      <wp:author_first_name>Cheryl</wp:author_first_name>
+      <wp:author_last_name>Long</wp:author_last_name>
+    </wp:author>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         PAGE 1 OF 1 (TEST): Prenatal Physiotherapy
+         URL slug: prenatal-physiotherapy-singapore
+         SEO title: Prenatal Physiotherapy Singapore | Pregnancy Physio at Goji Physio Lentor
+         Meta desc: Pelvic girdle pain, wrist pain, or preparing for birth? Goji's physiotherapists support women through pregnancy at Lentor, Singapore. AHPC-registered.
+         After import: Page Settings → Advanced → paste the JSON-LD from prenatal-physiotherapy-singapore.jsonld
+         ═══════════════════════════════════════════════════════════ -->
+    <item>
+      <title>Physiotherapy During Pregnancy — Prenatal Care and Birth Preparation</title>
+      <link>https://www.gojiphysio.com/prenatal-physiotherapy-singapore</link>
+      <pubDate>Wed, 17 Jun 2026 08:00:00 +0800</pubDate>
+      <dc:creator>cheryl</dc:creator>
+      <wp:post_name>prenatal-physiotherapy-singapore</wp:post_name>
+      <wp:post_type>page</wp:post_type>
+      <wp:status>draft</wp:status>
+      <wp:post_date>2026-06-17 08:00:00</wp:post_date>
+      <wp:post_date_gmt>2026-06-17 00:00:00</wp:post_date_gmt>
+      <excerpt:encoded><![CDATA[Prenatal physiotherapy addresses the musculoskeletal and pelvic floor changes that happen as your body adapts to pregnancy. A physiotherapist can help you stay active safely, manage pain, prepare your body for labour, and reduce the risk of complications that are often assumed to be a normal part of being pregnant.]]></excerpt:encoded>
+      <content:encoded><![CDATA[
+<p class="page-byline"><strong>Reviewed by Cheryl Long</strong>, AHPC-registered physiotherapist, Goji Physio</p>
+
+<p>Prenatal physiotherapy addresses the musculoskeletal and pelvic floor changes that happen as your body adapts to pregnancy. A physiotherapist can help you stay active safely, manage pain, prepare your body for labour, and reduce the risk of complications that are often left untreated because they are assumed to be a normal part of being pregnant.</p>
+
+<hr />
+
+<h2>Why do so many women experience pain during pregnancy?</h2>
+
+<p>Pregnancy changes your body rapidly. Hormones such as relaxin loosen the ligaments that stabilise your pelvis and spine. Your centre of gravity shifts as your uterus grows. Blood volume increases by up to 50 per cent. These changes are normal — but they place new demands on your muscles, joints, and pelvic floor, and when those structures are not well-supported, pain and dysfunction follow.</p>
+
+<p>Common presentations include:</p>
+
+<ul>
+<li><strong>Pelvic girdle pain (PGP):</strong> aching or sharp pain at the front of the pelvis, tailbone, or sacroiliac (SI) joints — often worse with walking, stairs, or rolling over in bed</li>
+<li><strong>Lower back pain:</strong> typically worse with prolonged sitting, standing, or lifting</li>
+<li><strong>Pubic symphysis dysfunction (PSD):</strong> sharp pain at the pubic bone, particularly with stepping, hip abduction, or weight-bearing on one leg</li>
+<li><strong>Pelvic floor pressure or heaviness,</strong> particularly in the second and third trimester</li>
+<li><strong>Wrist and thumb pain</strong> (de Quervain's tenosynovitis, colloquially "mummy's wrist"): can begin before birth, especially in women who are physically active</li>
+</ul>
+
+<p>These are common — but they are not inevitable, and they are not things to simply wait out. A physiotherapist can identify what is driving your symptoms and work with you on specific, evidence-based strategies.</p>
+
+<hr />
+
+<h2>What does a session at Goji involve during pregnancy?</h2>
+
+<p>Your first session starts with a conversation. Cheryl will ask about your pregnancy, your current activities, your work setup and home demands, and what is specifically bothering you. The assessment then follows the clinical picture:</p>
+
+<ul>
+<li><strong>Musculoskeletal screen:</strong> posture, spinal and pelvic joint movement, and load tolerance</li>
+<li><strong>Pelvic floor assessment</strong> (when clinically relevant): function, coordination, and preparation for labour. An internal assessment is offered but never required — Cheryl will explain what is being assessed and why, and you can decline at any point</li>
+<li><strong>Movement and load advice:</strong> how to modify activities, exercise, and daily tasks without simply stopping what you enjoy</li>
+<li><strong>Education on normal vs. worth acting on:</strong> what to expect at each stage, what to act on, and when to involve your obstetrician or GP</li>
+</ul>
+
+<p>You will leave with a clear picture of where you are and a practical plan — not a printed sheet of generic exercises to do on your own.</p>
+
+<hr />
+
+<h2>Can I continue exercising during pregnancy?</h2>
+
+<p>In most uncomplicated pregnancies, yes — and the evidence supports staying active throughout. The question is not whether to move, but how to move well at each stage.</p>
+
+<p>Physiotherapy can help you:</p>
+<ul>
+<li>Adapt your current routine safely (running, gym, yoga, swimming, Pilates)</li>
+<li>Understand which movements to modify as your pregnancy progresses</li>
+<li>Maintain pelvic floor and deep abdominal function that supports both birth and postnatal recovery</li>
+<li>Recognise when a symptom is a reason to stop, and when it is simply a reason to modify</li>
+</ul>
+
+<hr />
+
+<h2>Birth preparation: what physiotherapy can offer</h2>
+
+<p>The third trimester is an evidence-supported window to prepare the pelvic floor and body for labour. This is distinct from standard antenatal classes — it focuses on the physiology of the pelvic floor during active labour:</p>
+
+<ul>
+<li><strong>Perineal preparation:</strong> evidence from randomised controlled trials supports perineal massage from 34–36 weeks in reducing the risk of third- and fourth-degree perineal tears</li>
+<li><strong>Breathing and bearing-down strategies:</strong> how to use intra-abdominal pressure effectively in the second stage of labour, rather than defaulting to Valsalva breath-holding</li>
+<li><strong>Positions for labour:</strong> movement and positioning that may reduce pain and support fetal descent — particularly relevant if you are planning a physiological birth</li>
+<li><strong>Planning the fourth trimester:</strong> what to expect from your body in the weeks after birth, so your postnatal recovery is intentional rather than reactive</li>
+</ul>
+
+<p>This session is typically done at 32–36 weeks. You are welcome to come with your birth partner.</p>
+
+<hr />
+
+<h2>Frequently asked questions</h2>
+
+<h3>Is physiotherapy safe during pregnancy?</h3>
+<p>Yes. Physiotherapy is safe across all trimesters of an uncomplicated pregnancy. Cheryl will adapt the assessment and any hands-on treatment to your stage and clinical picture. If you have a high-risk pregnancy, we will coordinate with your obstetric team before proceeding.</p>
+
+<h3>When is the best time to start prenatal physiotherapy?</h3>
+<p>Any time a concern arises is the right time. Many women first come with a specific symptom — pelvic girdle pain at 20 weeks, or wrist pain in the third trimester. Others come earlier to build a plan for staying active. A dedicated birth preparation session is most useful at 32–36 weeks.</p>
+
+<h3>My pain only started last week. Is it too late in pregnancy to help?</h3>
+<p>No. Even late in the third trimester, addressing posture, load strategies, and pelvic floor function can meaningfully reduce discomfort and improve your readiness for birth and the postnatal period.</p>
+
+<h3>Will there be an internal (vaginal) examination?</h3>
+<p>Internal pelvic floor assessment is offered when it is clinically relevant — for example, if you are experiencing pelvic floor symptoms or requesting birth preparation. It is never required. Cheryl will explain what is being assessed and why before proceeding; you can decline at any point.</p>
+
+<h3>I have no pain. Is there still a reason to see a physio during pregnancy?</h3>
+<p>Yes. A prenatal check can identify pelvic floor or movement patterns that are not causing pain now but may increase your risk of postnatal complications. Many women find a single birth-preparation session useful regardless of whether they had symptoms during pregnancy.</p>
+
+<h3>Do you see women with high-risk pregnancies?</h3>
+<p>Goji works with most presentations in pregnancy. For high-risk cases — including placenta praevia, cerclage, or preterm labour risk — we coordinate with your obstetric team before we begin.</p>
+
+<hr />
+
+<p><strong>Ready to talk?</strong> Message us on WhatsApp and tell us about your pregnancy, where you are, and what is bothering you — we'll help you figure out the right next step.</p>
+<p><a href="https://go.gojiphysio.com/wa-prenatal">Message Goji on WhatsApp →</a></p>
+
+<hr />
+
+<p><strong>Reviewed by Cheryl Long, BSc (Hons) Physiotherapy, AHPC-registered</strong><br />
+Clinical Director, Goji Physio — Women's and Family Physiotherapy, Lentor, Singapore</p>
+
+<p><strong>Related conditions:</strong>
+<a href="/pelvic-girdle-pain-physiotherapy-singapore">Pelvic Girdle Pain &amp; Mummy's Wrist</a> ·
+<a href="/postnatal-physiotherapy-singapore">Postpartum Recovery &amp; Return to Sport</a> ·
+<a href="/pelvic-floor-physiotherapy-singapore">Pelvic Floor Dysfunction</a> ·
+<a href="/diastasis-recti-physiotherapy-singapore">Diastasis Recti</a> ·
+<a href="/csection-recovery-physiotherapy-singapore">C-Section Recovery</a>
+</p>
+      ]]></content:encoded>
+    </item>
+
+  </channel>
+</rss>
