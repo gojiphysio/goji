@@ -44,6 +44,14 @@
     .brand-name { font-size: 20px; font-weight: 600; letter-spacing: -0.01em; }
     .brand-sub { color: var(--ink-soft); font-size: 13px; margin-top: 2px; }
     .filters { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    .portal-switch {
+      font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+      color: var(--goji); text-decoration: none;
+      padding: 5px 12px; border: 1.5px solid var(--goji);
+      border-radius: 999px;
+      transition: background 0.15s, color 0.15s;
+    }
+    .portal-switch:hover { background: var(--goji); color: #fff; }
 
     .date-selector {
       display: inline-flex; background: var(--card);
@@ -809,6 +817,7 @@
         </div>
       </div>
       <div class="filters">
+        <a href="https://frontdesk.gojiphysio.com" class="portal-switch" title="Switch to Front Desk portal">Front Desk →</a>
         <div class="updated"><span class="dot"></span>Generated <span id="generatedAt">-</span></div>
       </div>
     </header>
