@@ -1,0 +1,79 @@
+---
+/**
+ * PractitionerCard — the credibility component. Photo, name, role, special
+ * interests. Names/roles/expertise are factual (AHPC-registered clinicians);
+ * no superlatives.
+ */
+import LogoLockup from "./LogoLockup.astro";
+
+interface Props {
+  name: string;
+  role: string;
+  interests: string;
+  image?: string;
+}
+const { name, role, interests, image } = Astro.props;
+---
+
+<article class="prac">
+  <div class="prac__media">
+    {
+      image ? (
+        <img src={image} alt={`Portrait of ${name}`} loading="lazy" decoding="async" />
+      ) : (
+        <div class="placeholder" role="img" aria-label={`Portrait of ${name} (placeholder)`}>
+          <LogoLockup variant="mark" height={40} />
+        </div>
+      )
+    }
+  </div>
+  <div class="prac__body">
+    <h3 class="prac__name">{name}</h3>
+    <p class="prac__role">{role}</p>
+    <p class="prac__interests">{interests}</p>
+  </div>
+</article>
+
+<style>
+  .prac {
+    background-color: var(--bg-content);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  .prac__media img,
+  .placeholder {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+  }
+  .placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background:
+      radial-gradient(120% 120% at 50% 25%, var(--color-linen-deep), var(--color-linen));
+  }
+  .prac__body {
+    padding: var(--space-5);
+  }
+  .prac__name {
+    margin-bottom: var(--space-1);
+  }
+  .prac__role {
+    font-size: var(--fs-caption);
+    font-weight: var(--weight-semibold);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--color-primary);
+    margin-bottom: var(--space-3);
+  }
+  .prac__interests {
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+  }
+</style>

@@ -1,0 +1,38 @@
+---
+/**
+ * Section — consistent vertical rhythm + background surface wrapper.
+ * tone: "linen" (warm page bg), "surface" (white), "closing" (full-bleed
+ * Deep Red — use sparingly, for closing/quote surfaces only).
+ */
+interface Props {
+  tone?: "linen" | "surface" | "closing";
+  id?: string;
+  narrow?: boolean;
+  class?: string;
+}
+const { tone = "linen", id, narrow = false, class: className = "" } = Astro.props;
+---
+
+<section class:list={["section", `tone-${tone}`, className]} id={id}>
+  <div class:list={["container", narrow && "container--narrow"]}>
+    <slot />
+  </div>
+</section>
+
+<style>
+  .section {
+    padding-block: var(--section-y);
+  }
+  .tone-linen {
+    background-color: var(--bg-page);
+    color: var(--text-default);
+  }
+  .tone-surface {
+    background-color: var(--bg-content);
+    color: var(--text-default);
+  }
+  .tone-closing {
+    background-color: var(--bg-closing);
+    color: var(--text-on-dark);
+  }
+</style>

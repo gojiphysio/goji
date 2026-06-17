@@ -1,0 +1,51 @@
+---
+/**
+ * StatBlock — big-number block. Deep Red number, Earth Brown label.
+ * For KPIs and "did you know" facts. Keep claims factual and compliant
+ * (no outcome guarantees).
+ */
+interface Props {
+  value: string;
+  label: string;
+  caption?: string;
+  align?: "start" | "center";
+}
+const { value, label, caption, align = "start" } = Astro.props;
+---
+
+<div class:list={["stat", `align-${align}`]}>
+  <span class="stat__value">{value}</span>
+  <span class="stat__label">{label}</span>
+  {caption && <span class="stat__caption">{caption}</span>}
+</div>
+
+<style>
+  .stat {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+  .align-center {
+    align-items: center;
+    text-align: center;
+  }
+  .stat__value {
+    font-family: var(--font-display);
+    font-weight: var(--weight-bold);
+    font-size: var(--fs-display);
+    line-height: 1;
+    color: var(--color-primary);
+    letter-spacing: var(--tracking-tight);
+    font-variant-numeric: tabular-nums;
+  }
+  .stat__label {
+    font-family: var(--font-display);
+    font-weight: var(--weight-semibold);
+    font-size: var(--fs-h3);
+    color: var(--text-default);
+  }
+  .stat__caption {
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+  }
+</style>

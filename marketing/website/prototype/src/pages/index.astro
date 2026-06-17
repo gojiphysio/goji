@@ -1,0 +1,310 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Section from "../components/Section.astro";
+import Button from "../components/Button.astro";
+import LogoLockup from "../components/LogoLockup.astro";
+import ImageTextSplit from "../components/ImageTextSplit.astro";
+import EducationCard from "../components/EducationCard.astro";
+import PractitionerCard from "../components/PractitionerCard.astro";
+import StatBlock from "../components/StatBlock.astro";
+import QuoteSurface from "../components/QuoteSurface.astro";
+import ContactBlock from "../components/ContactBlock.astro";
+import { SITE } from "../lib/site.ts";
+
+const services = [
+  {
+    title: "Physiotherapy",
+    lead: "Assessment and treatment for pain, injury, recovery, pelvic health, women's health, paediatric, vestibular, and lymphatic concerns.",
+    meta: ["55 min initial consult", "In-clinic & home visits"],
+  },
+  {
+    title: "Mummy & Baby Assessment",
+    lead: "A joint assessment for postpartum mothers and babies aged 0–6 months, supporting recovery, development, and early physical needs.",
+    meta: ["90 min", "In-clinic & home visits"],
+  },
+  {
+    title: "Clinical Pilates",
+    lead: "Physiotherapist-led reformer Pilates for rehabilitation, movement retraining, strength, and a safe return to activity or sport.",
+    meta: ["55 min", "1:1 or 2:1 reformer"],
+  },
+  {
+    title: "Private Pilates",
+    lead: "Instructor-led reformer Pilates for building strength, mobility, body awareness, and confidence in movement.",
+    meta: ["55 min", "1:1 or 2:1 reformer"],
+  },
+  {
+    title: "Strength & Conditioning",
+    lead: "Build strength and resilience through tailored exercise, with guidance from professionals to sustain your momentum.",
+    meta: ["55 min", "1:1 or 2:1 sessions"],
+  },
+];
+
+const careAreas = [
+  {
+    title: "Women's Health",
+    points: [
+      "Prenatal care and birth preparation",
+      "Postpartum recovery and return to sport",
+      "Diastasis recti and Caesarean scar care",
+      "Pelvic floor dysfunction and pelvic pain",
+      "Perimenopause, menopause, and bone health",
+    ],
+  },
+  {
+    title: "Paediatrics",
+    points: [
+      "Congenital torticollis and early intervention",
+      "Developmental concerns and milestones",
+      "Scoliosis and Schroth therapy",
+      "Paediatric pelvic health",
+      "Musculoskeletal and sports injury",
+    ],
+  },
+  {
+    title: "Musculoskeletal & Sports",
+    points: [
+      "Injuries and persistent or recurrent pain",
+      "Sports rehabilitation and performance",
+      "Post-operation recovery",
+      "Functional movement assessment",
+      "Dry needling",
+    ],
+  },
+  {
+    title: "Vestibular & Lymphatic",
+    points: [
+      "Vertigo, dizziness, and balance",
+      "BPPV and fall prevention",
+      "Lymphoedema and swelling management",
+      "Lipedema",
+      "Breast cancer post-op rehabilitation",
+    ],
+  },
+];
+
+const team = [
+  {
+    name: "Cheryl Long",
+    role: "Founder · Clinical Director",
+    interests:
+      "Women's and pelvic health, paediatric orthopaedics, pre & postnatal care, scoliosis management, clinical Pilates, dry needling.",
+  },
+  {
+    name: "Claire Ng",
+    role: "Senior Physiotherapist",
+    interests:
+      "Pelvic health, pre & postnatal care, women's rehabilitation, musculoskeletal and sports, lymphoedema, vestibular, clinical Pilates.",
+  },
+  {
+    name: "Kristy Ng",
+    role: "Senior Physiotherapist",
+    interests:
+      "Pelvic health, pre & postnatal care, women's rehabilitation, sports, paediatric physiotherapy including neuro cases.",
+  },
+];
+---
+
+<BaseLayout>
+  {/* ---- Hero ---- */}
+  <section class="hero">
+    <div class="container hero__inner">
+      <div class="hero__text">
+        <LogoLockup variant="tagline" height={48} class="hero__brand" />
+        <h1 class="hero__title">{SITE.tagline}</h1>
+        <p class="hero__lead">
+          Women's and family physiotherapy at Lentor. Expert, unhurried care for
+          pelvic health, pregnancy and postpartum recovery, paediatrics, and
+          everyday strength.
+        </p>
+        <div class="hero__actions">
+          <Button slug="web-plato" variant="primary" size="lg">Book an appointment</Button>
+          <Button slug="web-wa" variant="secondary" size="lg" berry>Ask us on WhatsApp</Button>
+        </div>
+      </div>
+      <div class="hero__media" role="img" aria-label="Clinic photograph placeholder">
+        <LogoLockup variant="mark" height={72} />
+        <span class="hero__media-note">Real clinic photo</span>
+      </div>
+    </div>
+  </section>
+
+  {/* ---- About ---- */}
+  <Section tone="surface" id="about">
+    <ImageTextSplit eyebrow="Who we are">
+      <h2>A clinic women can trust through it all.</h2>
+      <p>
+        Women make careful decisions about their bodies, especially during
+        pregnancy, recovery, and caring for their children. Finding the right
+        physio should not mean starting over at every life stage.
+      </p>
+      <p>
+        You are heard before you are treated, with care that combines clinical
+        expertise and real understanding. The same trusted support can extend to
+        your children and family too.
+      </p>
+    </ImageTextSplit>
+  </Section>
+
+  {/* ---- Services ---- */}
+  <Section tone="linen" id="services">
+    <header class="section-head">
+      <p class="eyebrow">Our services</p>
+      <h2>Care for every stage, under one roof.</h2>
+    </header>
+    <div class="grid grid--3">
+      {
+        services.map((s) => (
+          <EducationCard title={s.title} lead={s.lead} meta={s.meta} />
+        ))
+      }
+    </div>
+  </Section>
+
+  {/* ---- Areas of care ---- */}
+  <Section tone="surface" id="care">
+    <header class="section-head">
+      <p class="eyebrow">Areas of care</p>
+      <h2>Conditions and concerns we commonly assess and treat.</h2>
+      <p class="section-head__sub">
+        Care tailored to the individual, their stage of life, and what matters to
+        them.
+      </p>
+    </header>
+    <div class="grid grid--2">
+      {
+        careAreas.map((c) => (
+          <EducationCard title={c.title} points={c.points} />
+        ))
+      }
+    </div>
+  </Section>
+
+  {/* ---- Stats ---- */}
+  <Section tone="linen">
+    <div class="grid grid--3 stats">
+      <StatBlock value="3" label="Specialist physios" caption="AHPC-registered clinicians" align="center" />
+      <StatBlock value="5" label="Areas of care" caption="From pelvic health to paediatrics" align="center" />
+      <StatBlock value="1 min" label="From Lentor MRT" caption="Ground floor, stroller-friendly" align="center" />
+    </div>
+  </Section>
+
+  {/* ---- Team ---- */}
+  <Section tone="surface" id="team">
+    <header class="section-head">
+      <p class="eyebrow">Meet the team</p>
+      <h2>Clinicians who get it.</h2>
+    </header>
+    <div class="grid grid--3">
+      {
+        team.map((t) => (
+          <PractitionerCard name={t.name} role={t.role} interests={t.interests} />
+        ))
+      }
+    </div>
+  </Section>
+
+  {/* ---- Closing promise (the one full-bleed Deep Red surface) ---- */}
+  <Section tone="closing">
+    <QuoteSurface />
+  </Section>
+
+  {/* ---- Contact ---- */}
+  <Section tone="linen" id="contact">
+    <ContactBlock />
+  </Section>
+</BaseLayout>
+
+<style>
+  .hero {
+    background:
+      radial-gradient(110% 90% at 85% 10%, var(--color-linen-deep), transparent 60%),
+      var(--bg-page);
+    padding-block: clamp(2.5rem, 1.5rem + 5vw, 5.5rem);
+  }
+  .hero__inner {
+    display: grid;
+    gap: var(--space-7);
+    align-items: center;
+  }
+  @media (min-width: 880px) {
+    .hero__inner {
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: var(--space-9);
+    }
+  }
+  .hero__brand {
+    margin-bottom: var(--space-5);
+  }
+  .hero__title {
+    font-size: var(--fs-display);
+    line-height: var(--lh-tight);
+    margin-bottom: var(--space-4);
+  }
+  .hero__lead {
+    font-size: var(--fs-h3);
+    color: var(--text-muted);
+    max-width: 46ch;
+    margin-bottom: var(--space-6);
+  }
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+  .hero__media {
+    aspect-ratio: 4 / 5;
+    border-radius: var(--radius-lg);
+    background:
+      radial-gradient(120% 120% at 30% 20%, var(--color-surface), var(--color-linen-deep));
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-3);
+  }
+  .hero__media-note {
+    font-size: var(--fs-caption);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .section-head {
+    max-width: 56ch;
+    margin-bottom: var(--space-7);
+  }
+  .section-head h2 {
+    margin-top: var(--space-2);
+  }
+  .section-head__sub {
+    margin-top: var(--space-3);
+    color: var(--text-muted);
+  }
+
+  .grid {
+    display: grid;
+    gap: var(--space-5);
+  }
+  .grid--2 {
+    grid-template-columns: 1fr;
+  }
+  .grid--3 {
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 640px) {
+    .grid--2,
+    .grid--3 {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  @media (min-width: 980px) {
+    .grid--3 {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  .stats {
+    gap: var(--space-7);
+  }
+</style>

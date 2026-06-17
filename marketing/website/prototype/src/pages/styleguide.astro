@@ -1,0 +1,376 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Button from "../components/Button.astro";
+import BerryList from "../components/BerryList.astro";
+import EducationCard from "../components/EducationCard.astro";
+import StatBlock from "../components/StatBlock.astro";
+import PractitionerCard from "../components/PractitionerCard.astro";
+import ImageTextSplit from "../components/ImageTextSplit.astro";
+import QuoteSurface from "../components/QuoteSurface.astro";
+import ContactBlock from "../components/ContactBlock.astro";
+import LogoLockup from "../components/LogoLockup.astro";
+
+const colors = [
+  { token: "--color-primary", name: "Deep Red", hex: "#91171D", role: "Accent, CTAs, the berry dot", dark: true },
+  { token: "--color-ink", name: "Earth Brown", hex: "#3C1E1F", role: "Primary text", dark: true },
+  { token: "--color-linen", name: "Linen White", hex: "#F7F2E0", role: "Primary warm background", dark: false },
+  { token: "--color-accent", name: "Midnight Blue", hex: "#176591", role: "Sparing accent / signals", dark: true },
+  { token: "--color-surface", name: "White", hex: "#FFFFFF", role: "Content background", dark: false },
+];
+
+const typeScale = [
+  { token: "--fs-display", label: "Display", note: "Plus Jakarta Sans SemiBold · 40–64", cls: "t-display" },
+  { token: "--fs-h1", label: "Heading 1", note: "32–40", cls: "t-h1" },
+  { token: "--fs-h2", label: "Heading 2", note: "24–28", cls: "t-h2" },
+  { token: "--fs-h3", label: "Heading 3", note: "20–22", cls: "t-h3" },
+  { token: "--fs-body", label: "Body", note: "Inter · 16–18 · line-height 1.55", cls: "t-body" },
+  { token: "--fs-caption", label: "Caption", note: "13", cls: "t-caption" },
+];
+
+const spacing = ["1", "2", "3", "4", "5", "6", "7", "8"];
+const radii = [
+  { token: "--radius-sm", label: "sm" },
+  { token: "--radius-md", label: "md" },
+  { token: "--radius-lg", label: "lg" },
+  { token: "--radius-pill", label: "pill" },
+];
+---
+
+<BaseLayout title="Goji Design System — Styleguide" bare>
+  <header class="sg-hero">
+    <div class="container">
+      <LogoLockup variant="main" height={40} />
+      <h1>Design system</h1>
+      <p class="sg-lede">
+        The Goji look, in code. Everything here reads from a single tokens file
+        (<code>src/styles/tokens.css</code>). Change a token and the whole system
+        reflows. This page is the reference and the QA surface.
+      </p>
+    </div>
+  </header>
+
+  <div class="container sg">
+    {/* ---- Colour ---- */}
+    <section class="sg-block">
+      <h2 class="sg-h">Colour</h2>
+      <div class="swatches">
+        {
+          colors.map((c) => (
+            <div class="swatch">
+              <div class="swatch__chip" style={`background:${c.hex};color:${c.dark ? "#F7F2E0" : "#3C1E1F"}`}>
+                {c.hex}
+              </div>
+              <div class="swatch__meta">
+                <strong>{c.name}</strong>
+                <code>{c.token}</code>
+                <span>{c.role}</span>
+              </div>
+            </div>
+          ))
+        }
+      </div>
+      <p class="sg-note">
+        Deep Red is an accent, never a fill area, except the one full-bleed
+        closing/quote surface. Earth Brown on Linen/White and Linen on Deep Red
+        both pass WCAG AA.
+      </p>
+    </section>
+
+    {/* ---- Typography ---- */}
+    <section class="sg-block">
+      <h2 class="sg-h">Typography</h2>
+      <div class="type-list">
+        {
+          typeScale.map((t) => (
+            <div class="type-row">
+              <div class={`type-sample ${t.cls}`}>Care that grows with you</div>
+              <div class="type-meta">
+                <strong>{t.label}</strong>
+                <span>{t.note}</span>
+              </div>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    {/* ---- Spacing & radius ---- */}
+    <section class="sg-block sg-block--split">
+      <div>
+        <h2 class="sg-h">Spacing</h2>
+        <div class="space-stack">
+          {
+            spacing.map((s) => (
+              <div class="space-row">
+                <span class="space-bar" style={`width:var(--space-${s})`} />
+                <code>--space-{s}</code>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+      <div>
+        <h2 class="sg-h">Radius</h2>
+        <div class="radius-row">
+          {
+            radii.map((r) => (
+              <div class="radius-item">
+                <span class="radius-box" style={`border-radius:var(${r.token})`} />
+                <code>{r.label}</code>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+
+    {/* ---- Buttons ---- */}
+    <section class="sg-block">
+      <h2 class="sg-h">Buttons &amp; CTAs</h2>
+      <p class="sg-note">
+        CTAs route through the tracked redirector (<code>go.gojiphysio.com/&lt;slug&gt;</code>) —
+        never raw wa.me / Plato links.
+      </p>
+      <div class="row">
+        <Button slug="web-plato" variant="primary">Book an appointment</Button>
+        <Button slug="web-plato" variant="primary" size="lg">Primary large</Button>
+        <Button slug="web-wa" variant="secondary" berry>WhatsApp us</Button>
+        <Button href="#" variant="secondary">Secondary</Button>
+        <Button href="#" variant="ghost">Learn more</Button>
+      </div>
+    </section>
+
+    {/* ---- Berry list ---- */}
+    <section class="sg-block">
+      <h2 class="sg-h">Berry-dot list</h2>
+      <p class="sg-note">The signature motif — the Deep Red berry as the bullet.</p>
+      <BerryList
+        columns={2}
+        items={[
+          "Prenatal care and birth preparation",
+          "Postpartum recovery and return to sport",
+          "Pelvic floor dysfunction",
+          "Diastasis recti",
+          "Paediatric pelvic health",
+          "Sports rehabilitation",
+        ]}
+      />
+    </section>
+
+    {/* ---- Logo lockups ---- */}
+    <section class="sg-block">
+      <h2 class="sg-h">Logo lockups</h2>
+      <div class="logo-grid">
+        <div class="logo-tile light">
+          <LogoLockup variant="main" height={40} />
+          <code>main · light bg</code>
+        </div>
+        <div class="logo-tile light">
+          <LogoLockup variant="tagline" height={48} />
+          <code>tagline · light bg</code>
+        </div>
+        <div class="logo-tile dark">
+          <LogoLockup variant="light" height={40} />
+          <code>light · dark bg</code>
+        </div>
+        <div class="logo-tile light">
+          <LogoLockup variant="mark" height={48} />
+          <code>mark</code>
+        </div>
+      </div>
+    </section>
+
+    {/* ---- Cards ---- */}
+    <section class="sg-block">
+      <h2 class="sg-h">Education / service cards</h2>
+      <div class="card-grid">
+        <EducationCard
+          eyebrow="Service"
+          title="Clinical Pilates"
+          lead="Physiotherapist-led reformer Pilates for rehabilitation, movement retraining, and a safe return to activity."
+          meta={["55 min", "1:1 or 2:1 reformer"]}
+        />
+        <EducationCard
+          title="Women's Health"
+          points={[
+            "Prenatal care and birth preparation",
+            "Postpartum recovery",
+            "Pelvic floor dysfunction",
+            "Perimenopause and bone health",
+          ]}
+        />
+      </div>
+    </section>
+
+    {/* ---- Stats ---- */}
+    <section class="sg-block">
+      <h2 class="sg-h">Stat blocks</h2>
+      <div class="row row--wide">
+        <StatBlock value="3" label="Specialist physios" caption="AHPC-registered" />
+        <StatBlock value="5" label="Areas of care" />
+        <StatBlock value="1 min" label="From Lentor MRT" caption="Ground floor" />
+      </div>
+    </section>
+
+    {/* ---- Practitioner ---- */}
+    <section class="sg-block">
+      <h2 class="sg-h">Practitioner cards</h2>
+      <div class="card-grid">
+        <PractitionerCard
+          name="Cheryl Long"
+          role="Founder · Clinical Director"
+          interests="Women's and pelvic health, paediatric orthopaedics, clinical Pilates, dry needling."
+        />
+        <PractitionerCard
+          name="Claire Ng"
+          role="Senior Physiotherapist"
+          interests="Pelvic health, pre & postnatal care, musculoskeletal and sports, vestibular."
+        />
+      </div>
+    </section>
+
+    {/* ---- Image + text ---- */}
+    <section class="sg-block">
+      <h2 class="sg-h">Image + text split</h2>
+      <ImageTextSplit eyebrow="Who we are">
+        <h2>A clinic women can trust through it all.</h2>
+        <p>
+          You are heard before you are treated, with care that combines clinical
+          expertise and real understanding.
+        </p>
+      </ImageTextSplit>
+    </section>
+
+    {/* ---- Contact ---- */}
+    <section class="sg-block">
+      <h2 class="sg-h">Contact block</h2>
+      <ContactBlock />
+    </section>
+  </div>
+
+  {/* ---- Quote surface (full bleed) ---- */}
+  <section class="sg-closing">
+    <div class="container">
+      <p class="sg-closing__label">Quote / closing surface</p>
+      <QuoteSurface />
+    </div>
+  </section>
+
+  <style>
+    .sg-hero {
+      padding-block: var(--space-8) var(--space-6);
+      border-bottom: 1px solid var(--color-border);
+    }
+    .sg-hero h1 {
+      font-size: var(--fs-display);
+      margin: var(--space-4) 0 var(--space-3);
+    }
+    .sg-lede {
+      max-width: 60ch;
+      color: var(--text-muted);
+      font-size: var(--fs-h3);
+    }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.85em;
+      background: var(--color-linen-deep);
+      padding: 0.1em 0.4em;
+      border-radius: 4px;
+      color: var(--color-ink);
+    }
+
+    .sg-block {
+      padding-block: var(--space-7);
+      border-bottom: 1px solid var(--color-border);
+    }
+    .sg-block--split {
+      display: grid;
+      gap: var(--space-7);
+    }
+    @media (min-width: 720px) {
+      .sg-block--split {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    .sg-h {
+      font-size: var(--fs-h2);
+      margin-bottom: var(--space-5);
+    }
+    .sg-note {
+      color: var(--text-muted);
+      font-size: var(--fs-small);
+      margin-bottom: var(--space-5);
+      max-width: 60ch;
+    }
+
+    .swatches {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: var(--space-4);
+    }
+    .swatch__chip {
+      height: 96px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: flex-end;
+      padding: var(--space-3);
+      font-size: var(--fs-caption);
+      font-weight: var(--weight-semibold);
+      border: 1px solid var(--color-border);
+    }
+    .swatch__meta {
+      display: grid;
+      gap: 2px;
+      margin-top: var(--space-3);
+    }
+    .swatch__meta span {
+      font-size: var(--fs-caption);
+      color: var(--text-muted);
+    }
+
+    .type-list {
+      display: grid;
+      gap: var(--space-5);
+    }
+    .type-row {
+      display: grid;
+      gap: var(--space-2);
+      padding-bottom: var(--space-4);
+      border-bottom: 1px dashed var(--color-border);
+    }
+    .type-meta {
+      display: flex;
+      gap: var(--space-4);
+      font-size: var(--fs-caption);
+      color: var(--text-muted);
+    }
+    .t-display { font-family: var(--font-display); font-weight: 600; font-size: var(--fs-display); line-height: 1.1; }
+    .t-h1 { font-family: var(--font-display); font-weight: 600; font-size: var(--fs-h1); }
+    .t-h2 { font-family: var(--font-display); font-weight: 600; font-size: var(--fs-h2); }
+    .t-h3 { font-family: var(--font-display); font-weight: 600; font-size: var(--fs-h3); }
+    .t-body { font-family: var(--font-body); font-size: var(--fs-body); }
+    .t-caption { font-family: var(--font-body); font-size: var(--fs-caption); }
+
+    .space-stack { display: grid; gap: var(--space-3); }
+    .space-row { display: flex; align-items: center; gap: var(--space-4); }
+    .space-bar { height: 16px; background: var(--color-primary); border-radius: 3px; }
+    .radius-row { display: flex; gap: var(--space-5); flex-wrap: wrap; }
+    .radius-item { display: grid; gap: var(--space-2); justify-items: center; }
+    .radius-box { width: 72px; height: 72px; background: var(--color-linen-deep); border: 1px solid var(--color-border-strong); display: block; }
+
+    .row { display: flex; flex-wrap: wrap; gap: var(--space-4); align-items: center; }
+    .row--wide { gap: var(--space-8); }
+
+    .logo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: var(--space-4); }
+    .logo-tile { display: grid; gap: var(--space-3); justify-items: center; padding: var(--space-6); border-radius: var(--radius-md); border: 1px solid var(--color-border); }
+    .logo-tile.light { background: var(--color-surface); }
+    .logo-tile.dark { background: var(--color-ink); }
+    .logo-tile.dark code { background: rgba(247,242,224,0.15); color: var(--color-linen); }
+
+    .card-grid { display: grid; gap: var(--space-5); grid-template-columns: 1fr; }
+    @media (min-width: 700px) { .card-grid { grid-template-columns: 1fr 1fr; } }
+
+    .sg-closing { background: var(--bg-closing); color: var(--text-on-dark); padding-block: var(--space-9); }
+    .sg-closing__label { text-align: center; font-size: var(--fs-caption); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--color-linen); opacity: 0.7; margin-bottom: var(--space-6); }
+  </style>
+</BaseLayout>
