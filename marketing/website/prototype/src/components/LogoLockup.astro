@@ -1,0 +1,41 @@
+---
+/**
+ * Logo lockup. Picks the correct PNG variant for the background and keeps the
+ * brand's clear-space. Variants live in public/brand/ (copies of the BI
+ * design/brand_assets/). Rule: never stretch or recolor; match background.
+ *  - "main"    : wordmark, Earth Brown + Deep Red O  (light backgrounds)
+ *  - "light"   : wordmark, Linen White + Deep Red O  (dark / Deep Red backgrounds)
+ *  - "tagline" : horizontal lockup with the descriptor (hero / covers)
+ *  - "mark"    : the standalone berry "O" (favicons, small spaces)
+ */
+interface Props {
+  variant?: "main" | "light" | "tagline" | "mark";
+  height?: number;
+  class?: string;
+}
+const { variant = "main", height = 40, class: className = "" } = Astro.props;
+
+const files: Record<NonNullable<Props["variant"]>, string> = {
+  main: "/brand/logo_main_transparent.png",
+  light: "/brand/logo_light_transparent.png",
+  tagline: "/brand/logo_with_tagline_transparent.png",
+  mark: "/brand/logo_mark_transparent.png",
+};
+---
+
+<img
+  class:list={["logo", className]}
+  src={files[variant]}
+  alt="Goji — Women's and Family Physiotherapy"
+  style={`height:${height}px`}
+  loading="eager"
+  decoding="async"
+/>
+
+<style>
+  .logo {
+    width: auto;
+    /* clear-space guard */
+    margin: 0;
+  }
+</style>

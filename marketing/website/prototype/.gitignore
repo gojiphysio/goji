@@ -1,0 +1,9 @@
+# Node / Astro build artifacts — never commit these.
+node_modules/
+dist/
+.astro/
+
+# Env / local
+.env
+.env.production
+.DS_Store

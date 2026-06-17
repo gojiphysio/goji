@@ -1,0 +1,57 @@
+---
+/**
+ * QuoteSurface — the one sanctioned full-bleed Deep Red surface (Linen text +
+ * light logo). Built for the brand promise / closing line.
+ *
+ * COMPLIANCE: Lane A (clinical) has NO patient testimonials by default. Do not
+ * drop a patient quote here. Use the brand promise or another compliant,
+ * non-testimonial line. Any real testimonial needs consent + compliance sign-off.
+ */
+import LogoLockup from "./LogoLockup.astro";
+
+interface Props {
+  quote?: string;
+  attribution?: string;
+}
+const {
+  quote = "We're not here to fix you. We're here to help you feel confident in your body again.",
+  attribution,
+} = Astro.props;
+---
+
+<figure class="quote">
+  <LogoLockup variant="light" height={34} class="quote__logo" />
+  <blockquote class="quote__text">{quote}</blockquote>
+  {attribution && <figcaption class="quote__by">{attribution}</figcaption>}
+</figure>
+
+<style>
+  .quote {
+    margin: 0;
+    max-width: 26ch;
+    margin-inline: auto;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-5);
+  }
+  .quote__logo {
+    opacity: 0.95;
+  }
+  .quote__text {
+    font-family: var(--font-display);
+    font-weight: var(--weight-semibold);
+    font-size: var(--fs-h1);
+    line-height: var(--lh-snug);
+    letter-spacing: var(--tracking-tight);
+    color: var(--text-on-dark);
+    margin: 0;
+    text-wrap: balance;
+  }
+  .quote__by {
+    font-size: var(--fs-small);
+    color: var(--color-linen);
+    opacity: 0.8;
+  }
+</style>

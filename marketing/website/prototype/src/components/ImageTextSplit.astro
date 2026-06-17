@@ -1,0 +1,81 @@
+---
+/**
+ * ImageTextSplit — half-bleed photo + story column (the About / feature workhorse).
+ * Pass `image` (a src in public/) for a real photo; otherwise a branded
+ * placeholder panel renders (we use real, consented clinic photos in production —
+ * no stock, no before/after framing).
+ * `reverse` puts the image on the right.
+ */
+import LogoLockup from "./LogoLockup.astro";
+
+interface Props {
+  image?: string;
+  imageAlt?: string;
+  reverse?: boolean;
+  eyebrow?: string;
+}
+const { image, imageAlt = "", reverse = false, eyebrow } = Astro.props;
+---
+
+<div class:list={["split", reverse && "split--reverse"]}>
+  <div class="split__media">
+    {
+      image ? (
+        <img src={image} alt={imageAlt} loading="lazy" decoding="async" />
+      ) : (
+        <div class="placeholder" role="img" aria-label="Photograph placeholder">
+          <LogoLockup variant="mark" height={56} />
+          <span class="placeholder__note">Real clinic photo</span>
+        </div>
+      )
+    }
+  </div>
+  <div class="split__body">
+    {eyebrow && <p class="eyebrow">{eyebrow}</p>}
+    <slot />
+  </div>
+</div>
+
+<style>
+  .split {
+    display: grid;
+    gap: var(--space-6);
+    align-items: center;
+  }
+  @media (min-width: 820px) {
+    .split {
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-8);
+    }
+    .split--reverse .split__media {
+      order: 2;
+    }
+  }
+
+  .split__media img,
+  .placeholder {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    border-radius: var(--radius-lg);
+    object-fit: cover;
+  }
+  .placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    background:
+      radial-gradient(120% 120% at 30% 20%, var(--color-linen-deep), var(--color-linen));
+    border: 1px solid var(--color-border);
+  }
+  .placeholder__note {
+    font-size: var(--fs-caption);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .split__body :global(h2) {
+    margin-bottom: var(--space-4);
+  }
+</style>

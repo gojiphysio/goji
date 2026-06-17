@@ -1,0 +1,22 @@
+{
+  "name": "goji-website-prototype",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Design-system prototype for the Goji Health website (Astro, Cloudflare Pages-bound).",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@fontsource-variable/inter": "^5.2.5",
+    "@fontsource/plus-jakarta-sans": "^5.2.5",
+    "astro": "^5.6.1"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

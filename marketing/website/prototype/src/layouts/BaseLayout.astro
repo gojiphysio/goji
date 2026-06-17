@@ -1,0 +1,178 @@
+---
+/**
+ * BaseLayout — document shell: <head>, fonts, tokens, skip link, site header
+ * and footer. Pass `bare` to drop the header/footer (used by the styleguide).
+ */
+import "@fontsource-variable/inter";
+import "@fontsource/plus-jakarta-sans/400.css";
+import "@fontsource/plus-jakarta-sans/600.css";
+import "@fontsource/plus-jakarta-sans/700.css";
+import "../styles/tokens.css";
+import "../styles/base.css";
+
+import LogoLockup from "../components/LogoLockup.astro";
+import Button from "../components/Button.astro";
+import { SITE } from "../lib/site.ts";
+
+interface Props {
+  title?: string;
+  description?: string;
+  bare?: boolean;
+}
+const {
+  title = SITE.seoTitle,
+  description = SITE.seoDescription,
+  bare = false,
+} = Astro.props;
+
+const nav = [
+  { href: "#about", label: "About" },
+  { href: "#services", label: "Services" },
+  { href: "#care", label: "Care" },
+  { href: "#team", label: "Team" },
+  { href: "#contact", label: "Find us" },
+];
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/png" href="/brand/logo_mark_transparent.png" />
+    <meta name="theme-color" content="#91171d" />
+  </head>
+  <body>
+    <a href="#main" class="skip-link">Skip to content</a>
+
+    {
+      !bare && (
+        <header class="site-header">
+          <div class="container site-header__inner">
+            <a href="/" class="site-header__logo" aria-label="Goji home">
+              <LogoLockup variant="main" height={34} />
+            </a>
+            <nav class="site-nav" aria-label="Primary">
+              {nav.map((item) => (
+                <a href={item.href}>{item.label}</a>
+              ))}
+            </nav>
+            <div class="site-header__cta">
+              <Button slug="web-plato" variant="primary">Book</Button>
+            </div>
+          </div>
+        </header>
+      )
+    }
+
+    <main id="main">
+      <slot />
+    </main>
+
+    {
+      !bare && (
+        <footer class="site-footer">
+          <div class="container site-footer__inner">
+            <div>
+              <LogoLockup variant="light" height={30} />
+              <p class="site-footer__line">{SITE.fullName}</p>
+            </div>
+            <div class="site-footer__meta">
+              <p>{SITE.address.line1}, {SITE.address.line2}</p>
+              <p>
+                <a href={`mailto:${SITE.email}`}>{SITE.email}</a>
+              </p>
+              <p class="site-footer__fine">
+                Prototype — design system preview. Not the live site.
+              </p>
+            </div>
+          </div>
+        </footer>
+      )
+    }
+
+    <style>
+      .skip-link {
+        position: absolute;
+        left: var(--space-4);
+        top: -3rem;
+        background: var(--color-ink);
+        color: var(--color-linen);
+        padding: 0.5rem 1rem;
+        border-radius: var(--radius-sm);
+        z-index: 100;
+        transition: top var(--dur) var(--ease);
+      }
+      .skip-link:focus {
+        top: var(--space-4);
+        color: var(--color-linen);
+      }
+
+      .site-header {
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        background-color: color-mix(in srgb, var(--color-linen) 88%, transparent);
+        backdrop-filter: saturate(140%) blur(8px);
+        border-bottom: 1px solid var(--color-border);
+      }
+      .site-header__inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--space-5);
+        min-height: 68px;
+      }
+      .site-nav {
+        display: none;
+        gap: var(--space-5);
+      }
+      .site-nav a {
+        color: var(--text-default);
+        text-decoration: none;
+        font-size: var(--fs-small);
+        font-weight: var(--weight-medium);
+      }
+      .site-nav a:hover {
+        color: var(--color-primary);
+      }
+      @media (min-width: 880px) {
+        .site-nav {
+          display: flex;
+        }
+      }
+
+      .site-footer {
+        background-color: var(--color-ink);
+        color: var(--color-linen);
+        padding-block: var(--space-7);
+      }
+      .site-footer__inner {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-6);
+        justify-content: space-between;
+      }
+      .site-footer__line {
+        margin-top: var(--space-3);
+        font-size: var(--fs-small);
+        opacity: 0.85;
+      }
+      .site-footer__meta {
+        font-size: var(--fs-small);
+        display: grid;
+        gap: var(--space-2);
+      }
+      .site-footer__meta a {
+        color: var(--color-linen);
+        text-decoration: underline;
+      }
+      .site-footer__fine {
+        opacity: 0.6;
+        font-size: var(--fs-caption);
+      }
+    </style>
+  </body>
+</html>
