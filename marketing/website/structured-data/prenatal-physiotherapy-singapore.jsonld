@@ -1,0 +1,159 @@
+<!--
+  SQUARESPACE HEADER CODE INJECTION — Prenatal Physiotherapy
+  Paste this entire block into:
+  Page Settings → Advanced → Page Header Code Injection
+
+  Replace [DATE_PUBLISHED] and [DATE_REVIEWED] with ISO dates when the page goes live (e.g. 2026-07-01).
+  Replace [FULL_ADDRESS] with the clinic's street address as it appears on Google Business Profile.
+  Replace [PHONE] with the clinic's phone number as it appears on GBP.
+-->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+
+    {
+      "@type": "MedicalWebPage",
+      "@id": "https://www.gojiphysio.com/prenatal-physiotherapy-singapore#webpage",
+      "url": "https://www.gojiphysio.com/prenatal-physiotherapy-singapore",
+      "name": "Prenatal Physiotherapy Singapore | Pregnancy Physio at Goji Physio Lentor",
+      "description": "Pelvic girdle pain, wrist pain, or preparing for birth? Goji's physiotherapists support women through pregnancy at Lentor, Singapore. AHPC-registered.",
+      "inLanguage": "en-SG",
+      "isPartOf": {
+        "@id": "https://www.gojiphysio.com/#website"
+      },
+      "about": {
+        "@type": "MedicalCondition",
+        "name": "Prenatal musculoskeletal and pelvic floor conditions"
+      },
+      "reviewedBy": {
+        "@id": "https://www.gojiphysio.com/cheryl-long#person"
+      },
+      "datePublished": "[DATE_PUBLISHED]",
+      "dateModified": "[DATE_REVIEWED]"
+    },
+
+    {
+      "@type": "Article",
+      "@id": "https://www.gojiphysio.com/prenatal-physiotherapy-singapore#article",
+      "headline": "Physiotherapy During Pregnancy — Prenatal Care and Birth Preparation",
+      "url": "https://www.gojiphysio.com/prenatal-physiotherapy-singapore",
+      "author": {
+        "@id": "https://www.gojiphysio.com/cheryl-long#person"
+      },
+      "publisher": {
+        "@id": "https://www.gojiphysio.com/#organization"
+      },
+      "datePublished": "[DATE_PUBLISHED]",
+      "dateModified": "[DATE_REVIEWED]",
+      "description": "Prenatal physiotherapy addresses musculoskeletal and pelvic floor changes during pregnancy, helping women stay active, manage pain, and prepare for labour.",
+      "mainEntityOfPage": {
+        "@id": "https://www.gojiphysio.com/prenatal-physiotherapy-singapore#webpage"
+      }
+    },
+
+    {
+      "@type": "Person",
+      "@id": "https://www.gojiphysio.com/cheryl-long#person",
+      "name": "Cheryl Long",
+      "jobTitle": "Clinical Director, Physiotherapist",
+      "description": "BSc (Hons) Physiotherapy, AHPC-registered physiotherapist specialising in women's health and pelvic floor physiotherapy.",
+      "url": "https://www.gojiphysio.com/cheryl-long",
+      "worksFor": {
+        "@id": "https://www.gojiphysio.com/#organization"
+      }
+    },
+
+    {
+      "@type": "FAQPage",
+      "@id": "https://www.gojiphysio.com/prenatal-physiotherapy-singapore#faq",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Is physiotherapy safe during pregnancy?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Physiotherapy is safe across all trimesters of an uncomplicated pregnancy. Cheryl will adapt the assessment and any hands-on treatment to your stage and clinical picture. If you have a high-risk pregnancy, we will coordinate with your obstetric team before proceeding."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "When is the best time to start prenatal physiotherapy?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Any time a concern arises is the right time. Many women first come with a specific symptom — pelvic girdle pain at 20 weeks, or wrist pain in the third trimester. Others come earlier to build a plan for staying active. A dedicated birth preparation session is most useful at 32–36 weeks."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "My pain only started last week. Is it too late in pregnancy to help?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. Even late in the third trimester, addressing posture, load strategies, and pelvic floor function can meaningfully reduce discomfort and improve your readiness for birth and the postnatal period."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Will there be an internal (vaginal) examination?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Internal pelvic floor assessment is offered when it is clinically relevant — for example, if you are experiencing pelvic floor symptoms or requesting birth preparation. It is never required. Cheryl will explain what is being assessed and why before proceeding; you can decline at any point."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "I have no pain. Is there still a reason to see a physio during pregnancy?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. A prenatal check can identify pelvic floor or movement patterns that are not causing pain now but may increase your risk of postnatal complications. Many women find a single birth-preparation session useful regardless of whether they had symptoms during pregnancy."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Do you see women with high-risk pregnancies?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Goji works with most presentations in pregnancy. For high-risk cases — including placenta praevia, cerclage, or preterm labour risk — we coordinate with your obstetric team before we begin."
+          }
+        }
+      ]
+    },
+
+    {
+      "@type": "Service",
+      "@id": "https://www.gojiphysio.com/prenatal-physiotherapy-singapore#service",
+      "name": "Prenatal Physiotherapy",
+      "alternateName": "Pregnancy Physiotherapy Singapore",
+      "description": "Physiotherapy during pregnancy addressing pelvic girdle pain, lower back pain, pelvic floor changes, and birth preparation at Goji Physio, Lentor, Singapore.",
+      "provider": {
+        "@id": "https://www.gojiphysio.com/#organization"
+      },
+      "areaServed": {
+        "@type": "City",
+        "name": "Singapore"
+      },
+      "url": "https://www.gojiphysio.com/prenatal-physiotherapy-singapore"
+    },
+
+    {
+      "@type": "MedicalOrganization",
+      "@id": "https://www.gojiphysio.com/#organization",
+      "name": "Goji Women's and Family Physiotherapy",
+      "alternateName": "Goji Physio",
+      "url": "https://www.gojiphysio.com",
+      "telephone": "[PHONE]",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "[FULL_ADDRESS]",
+        "addressLocality": "Lentor",
+        "addressCountry": "SG"
+      },
+      "medicalSpecialty": "Physiotherapy",
+      "sameAs": [
+        "https://www.instagram.com/gojiphysio"
+      ]
+    }
+
+  ]
+}
+</script>
