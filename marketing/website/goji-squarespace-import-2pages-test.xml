@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Goji Physio — Squarespace blog import (2-page test)
+     =====================================================================
+     BEFORE IMPORTING:
+     1. Rename your Blog collection to "Conditions" and set its URL slug to: conditions
+        Pages → [Blog] → Settings (gear) → URL Slug → type "conditions" → Save
+     2. Delete any previously imported test drafts
+     3. Settings → Import / Export → Import → WordPress → upload this file
+
+     AFTER IMPORTING — for each new post:
+     • Post Settings → SEO → Title + Description (see comments above each item)
+     • Post Settings → Advanced → Header Code Injection → paste matching .jsonld file
+     • When Cheryl has reviewed: enable the post, then link from the homepage conditions list
+     =====================================================================
+-->
+<rss version="2.0"
+  xmlns:excerpt="http://wordpress.org/export/1.2/excerpt/"
+  xmlns:content="http://purl.org/rss/1.0/modules/content/"
+  xmlns:wfw="http://wellformedweb.org/CommentAPI/"
+  xmlns:dc="http://purl.org/dc/elements/1.1/"
+  xmlns:wp="http://wordpress.org/export/1.2/">
+
+  <channel>
+    <title>Goji Physio</title>
+    <link>https://www.gojiphysio.com</link>
+    <description>Women&#x27;s and Family Physiotherapy, Lentor, Singapore</description>
+    <pubDate>Wed, 17 Jun 2026 00:00:00 +0000</pubDate>
+    <language>en-SG</language>
+    <wp:wxr_version>1.2</wp:wxr_version>
+    <wp:base_site_url>https://www.gojiphysio.com</wp:base_site_url>
+    <wp:base_blog_url>https://www.gojiphysio.com</wp:base_blog_url>
+
+    <wp:author>
+      <wp:author_id>1</wp:author_id>
+      <wp:author_login><![CDATA[cheryl]]></wp:author_login>
+      <wp:author_email><![CDATA[hello@gojiphysio.com]]></wp:author_email>
+      <wp:author_display_name><![CDATA[Cheryl Long]]></wp:author_display_name>
+      <wp:author_first_name><![CDATA[Cheryl]]></wp:author_first_name>
+      <wp:author_last_name><![CDATA[Long]]></wp:author_last_name>
+    </wp:author>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         POST 1 OF 2: Prenatal Care and Birth Preparation
+         Full URL: gojiphysio.com/conditions/prenatal-physiotherapy
+         SEO Title (paste into Post Settings → SEO → Title):
+           Prenatal Physiotherapy Singapore | Pregnancy Physio at Goji Physio Lentor
+         Meta Description (paste into Post Settings → SEO → Description):
+           Pelvic girdle pain, wrist pain, or preparing for birth? Goji's physiotherapists support women through pregnancy at Lentor, Singapore. AHPC-registered.
+         ═══════════════════════════════════════════════════════════ -->
+    <item>
+      <title>Prenatal Care and Birth Preparation</title>
+      <link>https://www.gojiphysio.com/conditions/prenatal-physiotherapy</link>
+      <pubDate>Wed, 17 Jun 2026 00:00:00 +0000</pubDate>
+      <dc:creator><![CDATA[cheryl]]></dc:creator>
+      <guid isPermaLink="false">https://www.gojiphysio.com/?p=1</guid>
+      <description></description>
+      <content:encoded><![CDATA[<h1>Physiotherapy During Pregnancy &#8212; Prenatal Care and Birth Preparation</h1>
+
+<p><em>Reviewed by <a href="https://www.gojiphysio.com/cheryl-long"><strong>Cheryl Long</strong></a>, AHPC-registered physiotherapist, Goji Physio</em></p>
+
+<hr />
+
+<blockquote>Prenatal physiotherapy addresses the musculoskeletal and pelvic floor changes that happen as your body adapts to pregnancy. A physiotherapist can help you stay active safely, manage pain, and prepare your body for labour &#8212; addressing complaints that are often left untreated because they are assumed to be a normal part of being pregnant.</blockquote>
+
+<hr />
+
+<h2>Why do so many women experience pain during pregnancy?</h2>
+
+<p>Pregnancy changes your body rapidly. Hormones such as relaxin loosen the ligaments that stabilise your pelvis and spine. Your centre of gravity shifts as your uterus grows. Blood volume increases by up to 50 per cent. These changes are normal &#8212; but they place new demands on your muscles, joints, and pelvic floor, and when those structures are not well-supported, pain and dysfunction follow.</p>
+
+<p>Common presentations include:</p>
+<ul>
+<li><strong>Pelvic girdle pain (PGP):</strong> aching or sharp pain at the front of the pelvis, tailbone, or sacroiliac (SI) joints &#8212; often worse with walking, stairs, or rolling over in bed</li>
+<li><strong>Lower back pain:</strong> typically worse with prolonged sitting, standing, or lifting</li>
+<li><strong>Pubic symphysis dysfunction (PSD):</strong> sharp pain at the pubic bone, particularly with stepping, hip abduction, or weight-bearing on one leg</li>
+<li><strong>Pelvic floor pressure or heaviness,</strong> particularly in the second and third trimester</li>
+<li><strong>Wrist and thumb pain</strong> (de Quervain&#8217;s tenosynovitis, colloquially &#8220;mummy&#8217;s wrist&#8221;): can begin before birth, especially in women who are physically active</li>
+</ul>
+
+<p>These are common &#8212; but they are not inevitable, and they are not things to simply wait out.</p>
+
+<hr />
+
+<h2>What does a session at Goji involve during pregnancy?</h2>
+
+<p>Your first session starts with a conversation. Cheryl will ask about your pregnancy, your current activities, your work setup and home demands, and what is specifically bothering you. The assessment then follows the clinical picture:</p>
+<ul>
+<li><strong>Musculoskeletal screen:</strong> posture, spinal and pelvic joint movement, and load tolerance</li>
+<li><strong>Pelvic floor assessment</strong> (when clinically relevant): function, coordination, and preparation for labour. An internal assessment is offered but never required &#8212; you can decline at any point</li>
+<li><strong>Movement and load advice:</strong> how to modify activities, exercise, and daily tasks without simply stopping what you enjoy</li>
+<li><strong>Education on normal vs. worth acting on:</strong> what to expect at each stage, and when to involve your obstetrician or GP</li>
+</ul>
+<p>You will leave with a clear picture of where you are and a practical plan &#8212; not a printed sheet of generic exercises to do on your own.</p>
+
+<hr />
+
+<h2>Can I continue exercising during pregnancy?</h2>
+
+<p>In most uncomplicated pregnancies, yes &#8212; and the evidence supports staying active throughout. The question is not whether to move, but how to move well at each stage. Physiotherapy can help you adapt your routine safely, understand which movements to modify as your pregnancy progresses, and recognise when a symptom is a reason to stop versus a reason to modify.</p>
+
+<hr />
+
+<h2>Birth preparation: what physiotherapy can offer</h2>
+
+<p>The third trimester is an evidence-supported window to prepare the pelvic floor and body for labour:</p>
+<ul>
+<li><strong>Perineal preparation:</strong> evidence from randomised controlled trials supports perineal massage from 34&#8211;36 weeks in reducing the risk of third- and fourth-degree tears</li>
+<li><strong>Breathing and bearing-down strategies:</strong> how to use intra-abdominal pressure effectively in the second stage of labour</li>
+<li><strong>Positions for labour:</strong> movement and positioning that may reduce pain and support fetal descent</li>
+<li><strong>Planning the fourth trimester:</strong> what to expect from your body in the weeks after birth</li>
+</ul>
+<p>This session is typically done at 32&#8211;36 weeks. You are welcome to come with your birth partner.</p>
+
+<hr />
+
+<h2>Frequently asked questions</h2>
+
+<h3>Is physiotherapy safe during pregnancy?</h3>
+<p>Yes. Physiotherapy is safe across all trimesters of an uncomplicated pregnancy. Cheryl will adapt the assessment and any hands-on treatment to your stage and clinical picture. If you have a high-risk pregnancy, we will coordinate with your obstetric team before proceeding.</p>
+
+<h3>When is the best time to start prenatal physiotherapy?</h3>
+<p>Any time a concern arises is the right time. Many women first come with a specific symptom &#8212; pelvic girdle pain at 20 weeks, or wrist pain in the third trimester. A dedicated birth preparation session is most useful at 32&#8211;36 weeks.</p>
+
+<h3>My pain only started last week. Is it too late in pregnancy to help?</h3>
+<p>No. Even late in the third trimester, addressing posture, load strategies, and pelvic floor function can meaningfully reduce discomfort and improve your readiness for birth and the postnatal period.</p>
+
+<h3>Will there be an internal (vaginal) examination?</h3>
+<p>Internal pelvic floor assessment is offered when clinically relevant. It is never required &#8212; Cheryl will explain what is being assessed and why, and you can decline at any point.</p>
+
+<h3>I have no pain. Is there still a reason to see a physio during pregnancy?</h3>
+<p>Yes. A prenatal check can identify pelvic floor or movement patterns that are not causing pain now but may increase your risk of postnatal complications. Many women find a single birth-preparation session useful even without symptoms.</p>
+
+<h3>Do you see women with high-risk pregnancies?</h3>
+<p>Goji works with most presentations in pregnancy. For high-risk cases &#8212; including placenta praevia, cerclage, or preterm labour risk &#8212; we coordinate with your obstetric team before we begin.</p>
+
+<hr />
+
+<p><strong>Ready to talk?</strong> Message us on WhatsApp and tell us about your pregnancy, where you are, and what is bothering you.</p>
+
+<p><a href="https://go.gojiphysio.com/wa-prenatal" style="display:inline-block;background-color:#6B1C1C;color:#ffffff;padding:14px 32px;border-radius:6px;text-decoration:none;font-weight:600;font-size:16px;">Message Goji on WhatsApp &#8594;</a></p>
+
+<hr />
+
+<p><em>Reviewed by <a href="https://www.gojiphysio.com/cheryl-long"><strong>Cheryl Long</strong></a>, BSc (Hons) Physiotherapy, AHPC-registered<br />Clinical Director, Goji Physio &#8212; Women&#8217;s and Family Physiotherapy, Lentor, Singapore</em></p>
+
+<p><strong>Related conditions:</strong><br />
+<a href="https://www.gojiphysio.com/conditions/pelvic-girdle-pain-physiotherapy">Pelvic Girdle Pain &amp; Mummy&#8217;s Wrist</a> &#183;
+<a href="https://www.gojiphysio.com/conditions/postnatal-physiotherapy">Postpartum Recovery &amp; Return to Sport</a> &#183;
+<a href="https://www.gojiphysio.com/conditions/pelvic-floor-physiotherapy">Pelvic Floor Dysfunction</a> &#183;
+<a href="https://www.gojiphysio.com/conditions/diastasis-recti-physiotherapy">Diastasis Recti</a> &#183;
+<a href="https://www.gojiphysio.com/conditions/caesarean-recovery-physiotherapy">Caesarean Recovery</a>
+</p>]]></content:encoded>
+      <excerpt:encoded><![CDATA[Prenatal physiotherapy addresses the musculoskeletal and pelvic floor changes that happen as your body adapts to pregnancy.]]></excerpt:encoded>
+      <wp:post_id>1</wp:post_id>
+      <wp:post_date><![CDATA[2026-06-17 00:00:00]]></wp:post_date>
+      <wp:post_date_gmt><![CDATA[2026-06-17 00:00:00]]></wp:post_date_gmt>
+      <wp:comment_status><![CDATA[closed]]></wp:comment_status>
+      <wp:ping_status><![CDATA[closed]]></wp:ping_status>
+      <wp:post_name><![CDATA[prenatal-physiotherapy]]></wp:post_name>
+      <wp:status><![CDATA[draft]]></wp:status>
+      <wp:post_parent>0</wp:post_parent>
+      <wp:menu_order>0</wp:menu_order>
+      <wp:post_type><![CDATA[post]]></wp:post_type>
+      <wp:post_password><![CDATA[]]></wp:post_password>
+      <wp:is_sticky>0</wp:is_sticky>
+    </item>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         POST 2 OF 2: Pelvic Floor Dysfunction
+         Full URL: gojiphysio.com/conditions/pelvic-floor-physiotherapy
+         SEO Title (paste into Post Settings → SEO → Title):
+           Pelvic Floor Physiotherapy Singapore | Goji Physio Lentor | Women's Health
+         Meta Description (paste into Post Settings → SEO → Description):
+           See a pelvic floor physiotherapist in Singapore for leaking, urgency, prolapse, pelvic pain, or post-partum recovery. Goji's women's health physios are at Lentor MRT.
+         ═══════════════════════════════════════════════════════════ -->
+    <item>
+      <title>Pelvic Floor Dysfunction</title>
+      <link>https://www.gojiphysio.com/conditions/pelvic-floor-physiotherapy</link>
+      <pubDate>Wed, 17 Jun 2026 00:00:00 +0000</pubDate>
+      <dc:creator><![CDATA[cheryl]]></dc:creator>
+      <guid isPermaLink="false">https://www.gojiphysio.com/?p=2</guid>
+      <description></description>
+      <content:encoded><![CDATA[<h1>Pelvic Floor Physiotherapy in Singapore</h1>
+
+<p><em>Reviewed by <a href="https://www.gojiphysio.com/cheryl-long"><strong>Cheryl Long</strong></a>, AHPC-registered physiotherapist, Goji Physio</em></p>
+
+<hr />
+
+<blockquote>Pelvic floor physiotherapy is specialised care for the muscles, nerves, and connective tissue of the pelvic region. It can help with urinary leaking, urgency, pelvic pain, heaviness or prolapse, painful intercourse, and recovery after birth or surgery. A physiotherapist assesses how your pelvic floor is actually working &#8212; not just whether it can squeeze &#8212; and guides a plan to address what&#8217;s happening.</blockquote>
+
+<hr />
+
+<h2>What is the pelvic floor, and what does it do?</h2>
+
+<p>The pelvic floor is a group of muscles and connective tissue that form the base of the pelvis, sitting like a hammock between the pubic bone at the front and the tailbone at the back. It supports the bladder, bowel, and uterus, and has four main jobs:</p>
+<ul>
+<li><strong>Support:</strong> holding the pelvic organs in place, especially under load (lifting, sneezing, running)</li>
+<li><strong>Continence:</strong> keeping the urethra and bowel closed at the right times</li>
+<li><strong>Relaxation:</strong> opening fully to allow voiding, defecation, and comfortable intercourse</li>
+<li><strong>Sexual function:</strong> contributing to arousal and sensation</li>
+</ul>
+<p>When any of these functions are disrupted &#8212; whether the muscles are too weak, too tight, poorly coordinated, or affected by injury or surgery &#8212; it can show up as a wide range of symptoms.</p>
+
+<hr />
+
+<h2>What are the signs that your pelvic floor may need attention?</h2>
+
+<ul>
+<li><strong>Stress urinary incontinence:</strong> leaking when you cough, sneeze, laugh, jump, or exercise</li>
+<li><strong>Urgency incontinence:</strong> a sudden, strong urge to get to the toilet, sometimes with leaking before you arrive</li>
+<li><strong>Pelvic organ prolapse:</strong> a sensation of heaviness, pressure, or a bulge in the vaginal area, especially towards the end of the day or after activity</li>
+<li><strong>Pelvic pain:</strong> in the pelvis, lower abdomen, coccyx, or hips &#8212; at rest or with specific movements, exercise, or intercourse</li>
+<li><strong>Painful intercourse or vaginismus:</strong> pain, tension, or inability to tolerate vaginal penetration</li>
+<li><strong>Bowel dysfunction:</strong> difficulty emptying, urgency, or leaking</li>
+<li><strong>Post-partum recovery:</strong> healing after a vaginal birth with perineal trauma, or after Caesarean section</li>
+</ul>
+<p>These symptoms are common &#8212; but they are not something you have to accept or manage indefinitely without support.</p>
+
+<hr />
+
+<h2>What does a session at Goji involve?</h2>
+
+<p>Your first session starts with a conversation: your symptoms, your history, your goals, and any concerns about the assessment process. Nothing will happen without your informed consent.</p>
+<ul>
+<li><strong>External assessment:</strong> posture, breathing, hip and lumbar movement, and how load and breath affect the pelvic floor from the outside</li>
+<li><strong>Internal assessment</strong> (if clinically appropriate and consented): a gentle vaginal examination to assess muscle resting tone, strength, coordination, endurance, and ability to relax. This is not a speculum examination. You can decline at any stage</li>
+<li><strong>Functional tests:</strong> simple movements or activities that reproduce your symptoms</li>
+</ul>
+<p>At the end of the session you will have a clear picture of what is happening with your pelvic floor &#8212; and a plan for what to do about it.</p>
+
+<hr />
+
+<h2>Is pelvic floor physiotherapy only for women who have had children?</h2>
+
+<p>No. Pelvic floor issues affect people across all life stages and regardless of whether they have given birth &#8212; during pregnancy, post-partum, in athletes, at perimenopause and menopause, and in children. At Goji, we see women, men, and children for pelvic health concerns.</p>
+
+<hr />
+
+<h2>Do Kegel exercises cover everything I need?</h2>
+
+<p>Kegel exercises are one tool, but they are not always the right starting point. If your pelvic floor is already overactive or too tight, doing more Kegels can worsen symptoms like pelvic pain or urgency. A physiotherapy assessment identifies what your pelvic floor actually needs &#8212; whether that is strengthening, relaxation, coordination training, load management, or some combination.</p>
+
+<hr />
+
+<h2>Frequently asked questions</h2>
+
+<h3>Is it normal to leak urine &#8212; even just a little?</h3>
+<p>Leaking urine when you cough, sneeze, laugh, or exercise is very common, but it is not inevitable or something you simply have to accept. It often responds well to physiotherapy. If leaking is affecting your daily life or confidence, it is worth getting assessed rather than assuming it will resolve on its own.</p>
+
+<h3>Will the internal assessment be uncomfortable?</h3>
+<p>A pelvic floor physiotherapy assessment is conducted gently and with your comfort and consent as the priority. You can ask to pause or stop at any point, and you can decline the internal component if you prefer. Most people find the assessment more straightforward than they expected.</p>
+
+<h3>What is the difference between a pelvic floor physio and a regular physio?</h3>
+<p>Pelvic floor physiotherapists have undergone additional postgraduate training in the anatomy, assessment, and treatment of pelvic floor dysfunction &#8212; including internal examination skills. Our women&#8217;s health physios bring specific expertise to pelvic health concerns that goes beyond what a general physiotherapy appointment covers.</p>
+
+<h3>How many sessions will I need?</h3>
+<p>The number of sessions depends on your specific concern, how long it has been present, and how you respond to treatment. Some people notice meaningful improvement after two or three sessions; others benefit from a longer course. Your physiotherapist will give you a realistic sense of what to expect at your first appointment.</p>
+
+<h3>Can pelvic floor physio help with pain during intercourse?</h3>
+<p>Yes &#8212; pelvic pain during intercourse and vaginismus are common concerns treated by pelvic floor physiotherapists. These conditions often involve pelvic floor overactivity, sensitivity, or scar tissue, and typically respond well to a combination of assessment, manual therapy, relaxation techniques, and guided progression.</p>
+
+<h3>Do I need a doctor&#8217;s referral?</h3>
+<p>No referral is required to book an appointment at Goji. If your health insurance requires a referral for reimbursement, check your policy in advance of your visit.</p>
+
+<hr />
+
+<p><strong>Have questions about pelvic floor physiotherapy?</strong> Message us on WhatsApp &#8212; we are happy to answer before you book.</p>
+
+<p><a href="https://go.gojiphysio.com/wa-pelvic" style="display:inline-block;background-color:#6B1C1C;color:#ffffff;padding:14px 32px;border-radius:6px;text-decoration:none;font-weight:600;font-size:16px;">Message Goji on WhatsApp &#8594;</a></p>
+
+<hr />
+
+<p><em>Reviewed by <a href="https://www.gojiphysio.com/cheryl-long"><strong>Cheryl Long</strong></a>, BSc (Hons) Physiotherapy, AHPC-registered<br />Clinical Director, Goji Physio &#8212; Women&#8217;s and Family Physiotherapy, Lentor, Singapore</em></p>
+
+<p><strong>Related conditions:</strong><br />
+<a href="https://www.gojiphysio.com/conditions/postnatal-physiotherapy">Postpartum Recovery &amp; Return to Sport</a> &#183;
+<a href="https://www.gojiphysio.com/conditions/pelvic-organ-prolapse-physiotherapy">Pelvic Organ Prolapse</a> &#183;
+<a href="https://www.gojiphysio.com/conditions/urinary-incontinence-physiotherapy">Urinary Incontinence</a> &#183;
+<a href="https://www.gojiphysio.com/conditions/pelvic-pain-physiotherapy">Pelvic Pain &amp; Dyspareunia</a> &#183;
+<a href="https://www.gojiphysio.com/conditions/prenatal-physiotherapy">Prenatal Care &amp; Birth Preparation</a>
+</p>]]></content:encoded>
+      <excerpt:encoded><![CDATA[Pelvic floor physiotherapy is specialised care for the muscles, nerves, and connective tissue of the pelvic region, helping with leaking, urgency, prolapse, pelvic pain, and recovery after birth.]]></excerpt:encoded>
+      <wp:post_id>2</wp:post_id>
+      <wp:post_date><![CDATA[2026-06-17 00:00:00]]></wp:post_date>
+      <wp:post_date_gmt><![CDATA[2026-06-17 00:00:00]]></wp:post_date_gmt>
+      <wp:comment_status><![CDATA[closed]]></wp:comment_status>
+      <wp:ping_status><![CDATA[closed]]></wp:ping_status>
+      <wp:post_name><![CDATA[pelvic-floor-physiotherapy]]></wp:post_name>
+      <wp:status><![CDATA[draft]]></wp:status>
+      <wp:post_parent>0</wp:post_parent>
+      <wp:menu_order>0</wp:menu_order>
+      <wp:post_type><![CDATA[post]]></wp:post_type>
+      <wp:post_password><![CDATA[]]></wp:post_password>
+      <wp:is_sticky>0</wp:is_sticky>
+    </item>
+
+  </channel>
+</rss>
