@@ -359,39 +359,60 @@ def _business_days(start: date, end: date) -> int:
     return count
 
 
+def _fiscal_period(today: date) -> tuple[date, date]:
+    """Return (start, end) of the fiscal month containing today (26th → 25th)."""
+    if today.day >= 26:
+        fs = today.replace(day=26)
+        fe = date(today.year + 1, 1, 25) if today.month == 12 \
+             else date(today.year, today.month + 1, 25)
+    else:
+        fs = date(today.year - 1, 12, 26) if today.month == 1 \
+             else date(today.year, today.month - 1, 26)
+        fe = today.replace(day=25)
+    return fs, fe
+
+
+def _prior_fiscal_start(fs: date) -> date:
+    """Return the 26th of the calendar month before fs."""
+    return date(fs.year - 1, 12, 26) if fs.month == 1 \
+           else date(fs.year, fs.month - 1, 26)
+
+
 def fetch_monthly_projection(today: date) -> dict:
     try:
-        month_start = today.replace(day=1)
-        if today.month == 12:
-            month_end = date(today.year + 1, 1, 1) - timedelta(days=1)
-        else:
-            month_end = date(today.year, today.month + 1, 1) - timedelta(days=1)
-        last_month_end   = month_start - timedelta(days=1)
-        last_month_start = last_month_end.replace(day=1)
+        period_start, period_end = _fiscal_period(today)
 
-        # 3 prior complete months for the history sparkline
-        if month_start.month > 3:
-            history_start = month_start.replace(month=month_start.month - 3)
-        else:
-            history_start = month_start.replace(
-                year=month_start.year - 1, month=month_start.month + 9
-            )
+        # 3 prior complete fiscal periods (each 26th → 25th)
+        p1_start = _prior_fiscal_start(period_start)
+        p1_end   = period_start - timedelta(days=1)
+        p2_start = _prior_fiscal_start(p1_start)
+        p2_end   = p1_start - timedelta(days=1)
+        p3_start = _prior_fiscal_start(p2_start)
+        p3_end   = p2_start - timedelta(days=1)
+
+        # Labels named by ending month (e.g. "May 26" = Apr 26–May 25 fiscal period)
+        lbl = lambda d: d.strftime('%b %y')
+        p1_lbl, p2_lbl, p3_lbl = lbl(p1_end), lbl(p2_end), lbl(p3_end)
 
         kpi_sql = f"""
 SELECT
   (SELECT COALESCE(SUM(recognised_revenue), 0)
    FROM `{PROJECT}.marts.fct_service_delivered`
-   WHERE delivery_date BETWEEN '{month_start}' AND '{today}')               AS actual_mtd,
+   WHERE delivery_date BETWEEN '{period_start}' AND '{today}') AS actual_mtd,
   (SELECT COALESCE(SUM(recognised_revenue), 0)
    FROM `{PROJECT}.marts.fct_service_delivered`
-   WHERE delivery_date BETWEEN '{last_month_start}' AND '{last_month_end}') AS prev_month_actual
+   WHERE delivery_date BETWEEN '{p1_start}' AND '{p1_end}')   AS prev_month_actual
 """
         history_sql = f"""
 SELECT
-  FORMAT_DATE('%b %y', DATE_TRUNC(delivery_date, MONTH)) AS label,
-  COALESCE(SUM(recognised_revenue), 0)                   AS actual
+  CASE
+    WHEN delivery_date BETWEEN '{p3_start}' AND '{p3_end}' THEN '{p3_lbl}'
+    WHEN delivery_date BETWEEN '{p2_start}' AND '{p2_end}' THEN '{p2_lbl}'
+    WHEN delivery_date BETWEEN '{p1_start}' AND '{p1_end}' THEN '{p1_lbl}'
+  END AS label,
+  COALESCE(SUM(recognised_revenue), 0) AS actual
 FROM `{PROJECT}.marts.fct_service_delivered`
-WHERE delivery_date BETWEEN '{history_start}' AND '{last_month_end}'
+WHERE delivery_date BETWEEN '{p3_start}' AND '{p1_end}'
 GROUP BY 1
 ORDER BY MIN(delivery_date)
 """
@@ -403,10 +424,9 @@ ORDER BY MIN(delivery_date)
 
         actual_mtd        = _to_float(row["actual_mtd"])
         prev_month_actual = _to_float(row["prev_month_actual"])
-
-        days_elapsed  = _business_days(month_start, today)
-        days_total    = _business_days(month_start, month_end)
-        projected_eom = (actual_mtd / days_elapsed * days_total) if days_elapsed > 0 else 0.0
+        days_elapsed      = _business_days(period_start, today)
+        days_total        = _business_days(period_start, period_end)
+        projected_eom     = (actual_mtd / days_elapsed * days_total) if days_elapsed else 0.0
 
         return {
             "actual_mtd":        actual_mtd,
@@ -414,8 +434,8 @@ ORDER BY MIN(delivery_date)
             "prev_month_actual": prev_month_actual,
             "days_elapsed":      days_elapsed,
             "days_total":        days_total,
-            "month_label":       month_start.strftime("%b %Y"),
-            "prev_month_label":  last_month_start.strftime("%b %Y"),
+            "month_label":       period_end.strftime("%b %Y"),
+            "prev_month_label":  p1_end.strftime("%b %Y"),
             "monthly_history":   [{"label": r["label"], "actual": _to_float(r["actual"])}
                                   for r in history],
         }
