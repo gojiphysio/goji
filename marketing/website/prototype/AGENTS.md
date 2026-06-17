@@ -49,7 +49,11 @@ See `README.md`. `npm install` then `npm run dev` (hot reload). `npm run build`
 + `npm run preview` is the Cloudflare-Pages-parity dry run (serves `dist/`).
 
 ## Roadmap (not built yet)
-Hosting on Cloudflare Pages (+ per-PR preview URLs), DNS cutover from
-Squarespace, porting `../site-capture/content-inventory.md` + `../condition-pages/`
-+ 3 bios, an enquiry-form handler (free/DIY — a Pages Function feeding the
-front-desk Leads pipeline), and SEO/schema. Capture new rules here as they surface.
+Active focus (see `HANDOFF.md` for the ordered plan): design polish (via
+`tokens.css`), a blog (Astro content collection at `src/content/blog/` with an
+index + post template) seeded with backdated posts, and a free Cloudflare Pages
+deploy. Then: hosting hardening (+ per-PR preview URLs), porting
+`../site-capture/content-inventory.md` + `../condition-pages/` + 3 bios, an
+enquiry-form handler (free/DIY, a Pages Function feeding the front-desk Leads
+pipeline), SEO/schema, and DNS cutover from Squarespace. Capture new rules here
+as they surface.

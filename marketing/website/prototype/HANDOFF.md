@@ -7,6 +7,22 @@ Pick-up notes for continuing this work in a local session.
 - **Status:** Phase 1 complete — scaffolding + design system + a living styleguide
   and a composed sample homepage. No hosting, no content porting, no PR yet.
 
+## Where we're heading next (owner's priorities)
+
+In rough order, the immediate goals for the next session(s):
+
+1. **Improve the design / look + feel.** The bones are here; the brief is to make
+   it feel more polished and distinctive. The look lives in one file
+   (`src/styles/tokens.css`) — start there, use `/styleguide` as the QA surface.
+2. **Implement a blog.** New surface, not built yet. Astro content collection
+   (`src/content/blog/`, Markdown/MDX) + an index page + a post template. Keep the
+   same components/tokens so it inherits the design system.
+3. **Fill the blog with pre-written, backdated content.** Seed real posts with
+   past `pubDate` frontmatter so the blog looks established at launch (not empty).
+   Compliance rules below apply to every post.
+4. **Deploy live, low/no cost.** Cloudflare Pages is the planned path (free, Astro
+   preset, per-PR preview URLs) — see the hosting steps below.
+
 ## What's built
 
 - **Astro** static site (Node 22; see `.nvmrc`), bound for **Cloudflare Pages**.
@@ -34,6 +50,12 @@ npm run dev            # http://localhost:4321  (hot reload)
 
 Open **http://localhost:4321/** and **http://localhost:4321/styleguide**.
 To tweak the look, edit `src/styles/tokens.css` and watch it reflow live.
+
+**In Claude Code:** a launch config is committed at `.claude/launch.json`
+(`website-prototype`, port 4232), so the built-in preview tool can start the dev
+server and show a live pane without touching the terminal — just start the
+`website-prototype` server. Port 4232 is only a convention for that pane; plain
+`npm run dev` still serves on 4321.
 
 Production-parity check (what Cloudflare Pages will serve):
 
@@ -76,15 +98,35 @@ on push — needs a `CLOUDFLARE_API_TOKEN` + `CLOUDFLARE_ACCOUNT_ID` as repo sec
 
 ## Next phases (not started)
 
-1. **Hosting** — wire Cloudflare Pages (above) for live preview URLs.
-2. **Content porting** — home + `../condition-pages/*.md` (4 drafts) + 3 bios into
+Ordered to match the owner's priorities above. 1-4 are the active focus; 5-7 are
+the still-standing items from the original plan.
+
+1. **Design polish** — raise the look + feel. Work in `src/styles/tokens.css`
+   (the single knob) and the component CSS; `/styleguide` is the QA surface so a
+   token change is visible everywhere at once. Don't hardcode hex/px in components.
+2. **Blog** — add an Astro content collection at `src/content/blog/` (define the
+   schema in `src/content/config.ts`: `title`, `description`, `pubDate`, optional
+   `updatedDate`, `tags`, `heroImage`). Build `/blog` (index, newest-first) and a
+   `/blog/[...slug]` post template that reuses `BaseLayout` + existing components.
+   Add per-post SEO/schema (Article JSON-LD) when you reach phase 6.
+3. **Seed backdated content** — write real posts as Markdown/MDX under
+   `src/content/blog/` with past `pubDate` values so the blog reads as established.
+   Every post still obeys the compliance guardrails (no cure/outcome claims, no
+   superlatives, no testimonials by default — see `../strategy/03-compliance-guardrails.md`).
+   Source ideas from `../content-engine/` and `../strategy/` if useful.
+4. **Deploy (Cloudflare Pages, free)** — follow the hosting steps above to get a
+   `*.pages.dev` URL that rebuilds on push, with per-PR previews. This is the
+   low/no-cost target. (Alternatives if ever needed: Netlify, GitHub Pages — but
+   Cloudflare is the plan and is free.)
+5. **Content porting** — home + `../condition-pages/*.md` (4 drafts) + 3 bios into
    Astro pages / MDX content collections; add per-condition CTA slugs to `LINK_SLUGS`.
-3. **Enquiry form handler** — Squarespace's form goes away; free/DIY option is a
-   Cloudflare Pages Function feeding the front-desk Leads pipeline (`marts.lead_events`).
-4. **SEO/schema** — JSON-LD (LocalBusiness, MedicalWebPage, FAQPage, Article),
+6. **SEO/schema** — JSON-LD (LocalBusiness, MedicalWebPage, FAQPage, Article),
    per-page meta, sitemap, Lentor Modern map embed.
-5. **DNS cutover** from Squarespace once the look + content are approved (stage on
-   `*.pages.dev` first; leave the `go.gojiphysio.com` Cloud Run service untouched).
+7. **Enquiry form handler + DNS cutover** — replace Squarespace's form with a
+   free/DIY Cloudflare Pages Function feeding the front-desk Leads pipeline
+   (`marts.lead_events`); then cut DNS over from Squarespace once look + content
+   are approved (stage on `*.pages.dev` first; leave the `go.gojiphysio.com`
+   Cloud Run service untouched).
 
 Full plan with rationale was captured during the planning session; this file plus
 `AGENTS.md` and `README.md` are the durable record.
