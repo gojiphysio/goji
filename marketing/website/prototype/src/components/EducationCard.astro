@@ -1,0 +1,70 @@
+---
+/**
+ * EducationCard — title + short lead + berry-dot points, with room for an image.
+ * Drives the Services and Areas-of-Care surfaces. Educational, not promotional.
+ */
+import BerryList from "./BerryList.astro";
+
+interface Props {
+  eyebrow?: string;
+  title: string;
+  lead?: string;
+  points?: string[];
+  meta?: string[];
+  class?: string;
+}
+const { eyebrow, title, lead, points, meta, class: className = "" } = Astro.props;
+---
+
+<article class:list={["card", className]}>
+  {eyebrow && <p class="eyebrow">{eyebrow}</p>}
+  <h3 class="card__title">{title}</h3>
+  {lead && <p class="card__lead">{lead}</p>}
+  {points && points.length > 0 && <BerryList items={points} class="card__points" />}
+  {
+    meta && meta.length > 0 && (
+      <ul class="card__meta">
+        {meta.map((m) => (
+          <li>{m}</li>
+        ))}
+      </ul>
+    )
+  }
+  <slot />
+</article>
+
+<style>
+  .card {
+    background-color: var(--bg-content);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
+    box-shadow: var(--shadow-sm);
+    height: 100%;
+    transition: box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease);
+  }
+  .card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+  .card__title {
+    margin-bottom: var(--space-3);
+  }
+  .card__lead {
+    color: var(--text-muted);
+    margin-bottom: var(--space-4);
+  }
+  .card__meta {
+    list-style: none;
+    padding: 0;
+    margin: var(--space-4) 0 0;
+    border-top: 1px solid var(--color-border);
+    padding-top: var(--space-4);
+    display: grid;
+    gap: var(--space-2);
+    font-size: var(--fs-caption);
+    letter-spacing: 0.02em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+</style>

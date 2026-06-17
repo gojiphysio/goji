@@ -1,0 +1,86 @@
+---
+/**
+ * ContactBlock — booking prompt + address + hours + WhatsApp (the conversion
+ * surface). CTAs route through the tracked redirector via the Button `slug`.
+ */
+import Button from "./Button.astro";
+import BerryList from "./BerryList.astro";
+import { SITE } from "../lib/site.ts";
+---
+
+<div class="contact">
+  <div class="contact__cta">
+    <p class="eyebrow">Get in touch</p>
+    <h2>Ready when you are.</h2>
+    <p class="contact__lead">
+      Message us with a question, or book a first session. We'll talk through
+      what's going on before we treat.
+    </p>
+    <div class="contact__actions">
+      <Button slug="web-plato" variant="primary" size="lg">Book an appointment</Button>
+      <Button slug="web-wa" variant="secondary" size="lg" berry>WhatsApp us</Button>
+    </div>
+  </div>
+
+  <div class="contact__details">
+    <div class="contact__group">
+      <h3>Find us</h3>
+      <p>
+        {SITE.address.line1}<br />
+        {SITE.address.line2}
+      </p>
+      <p class="contact__note">{SITE.address.note}</p>
+    </div>
+    <div class="contact__group">
+      <h3>Hours</h3>
+      <BerryList items={SITE.hours.map((h) => `${h.days}: ${h.time}`)} />
+    </div>
+    <div class="contact__group">
+      <h3>Email</h3>
+      <p><a href={`mailto:${SITE.email}`}>{SITE.email}</a></p>
+    </div>
+  </div>
+</div>
+
+<style>
+  .contact {
+    display: grid;
+    gap: var(--space-7);
+  }
+  @media (min-width: 820px) {
+    .contact {
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: var(--space-9);
+      align-items: start;
+    }
+  }
+  .contact h2 {
+    margin: var(--space-2) 0 var(--space-3);
+  }
+  .contact__lead {
+    color: var(--text-muted);
+    max-width: 42ch;
+    margin-bottom: var(--space-5);
+  }
+  .contact__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+  .contact__details {
+    display: grid;
+    gap: var(--space-5);
+  }
+  .contact__group h3 {
+    font-size: var(--fs-caption);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--color-primary);
+    margin-bottom: var(--space-2);
+  }
+  .contact__note {
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+    margin-top: var(--space-2);
+  }
+</style>
