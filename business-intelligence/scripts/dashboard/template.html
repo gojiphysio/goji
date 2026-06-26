@@ -148,6 +148,28 @@
       display: inline-block; vertical-align: baseline;
     }
     .kpi-sub { font-size: 12px; color: var(--ink-soft); margin-top: 4px; }
+
+    /* Package credit consumption progress bar */
+    .pkg-progress-wrap { margin-top: 16px; }
+    .pkg-progress-labels {
+      display: flex; justify-content: space-between; align-items: baseline;
+      margin-bottom: 6px;
+    }
+    .pkg-progress-labels .ppl-title { font-size: 12px; font-weight: 600; color: var(--ink); }
+    .pkg-progress-labels .ppl-pct   { font-size: 13px; font-weight: 700; color: var(--ink); }
+    .pkg-progress-track {
+      height: 8px; border-radius: 999px;
+      background: var(--bg); overflow: hidden;
+    }
+    .pkg-progress-fill {
+      height: 100%; border-radius: 999px;
+      background: var(--goji);
+      transition: width 0.4s ease;
+    }
+    .pkg-progress-meta {
+      display: flex; justify-content: space-between;
+      margin-top: 6px; font-size: 11px; color: var(--ink-muted);
+    }
     /* Stock-ticker style trend chip: change vs the previous equal-length time
        range, sitting to the right of the value (baseline-aligned). Up is
        green, down is red, flat/maintain is muted. */
@@ -1106,7 +1128,20 @@
           <tbody id="pkg_breakdown_tbody"></tbody>
         </table>
       </div>
-      <div class="kpi-sub" id="pkg_consumption_stat" style="margin-top:12px;"></div>
+      <div class="pkg-progress-wrap" id="pkg_consumption_stat" hidden>
+        <div class="pkg-progress-labels">
+          <span class="ppl-title">Package credit consumed <span id="pkg_asof" style="font-weight:400;color:var(--ink-muted);"></span></span>
+          <span class="ppl-pct"><span id="pkg_pct">0</span>%</span>
+        </div>
+        <div class="pkg-progress-track">
+          <div class="pkg-progress-fill" id="pkg_progress_fill" style="width:0%"></div>
+        </div>
+        <div class="pkg-progress-meta">
+          <span><span id="pkg_recognised">-</span> recognised</span>
+          <span><span id="pkg_deferred_balance">-</span> deferred</span>
+          <span><span id="pkg_sold_total">-</span> sold</span>
+        </div>
+      </div>
     </section>
 
     <section class="q">
@@ -2337,7 +2372,9 @@
       document.getElementById('kpi_active_patients').textContent = fmtInt(r.kpis.active_patients);
       document.getElementById('kpi_new_patients').textContent    = fmtInt(r.kpis.new_patients);
       document.getElementById('kpi_visits').textContent          = fmtInt(r.kpis.visits);
-      document.getElementById('kpi_deferred').textContent        = fmt$(r.deferred_stats?.deferred);
+      const ds = r.deferred_stats;
+      const deferredVal = ds?.deferred ?? ((ds?.sold ?? 0) - (ds?.recognised ?? 0));
+      document.getElementById('kpi_deferred').textContent = fmt$(deferredVal || null);
       // Update the label to show "as of [end date]" so it's clear this is a point-in-time balance
       const deferredEnd = r.end ? new Date(r.end + 'T00:00:00').toLocaleDateString('en-SG', {day:'numeric',month:'short',year:'numeric'}) : '';
       const deferredLbl = document.getElementById('kpi_deferred_asof');
@@ -2540,12 +2577,23 @@
       ).join('');
     }
     function renderPackagesDeferred(deferred, endDate) {
-      const el = document.getElementById('pkg_consumption_stat');
-      if (!el || !deferred || deferred.consumed_pct == null) return;
-      const asof = endDate ? new Date(endDate + 'T00:00:00').toLocaleDateString('en-SG', {day:'numeric',month:'short',year:'numeric'}) : '';
-      el.textContent = deferred.consumed_pct + '% of package credit consumed as of ' + asof
-        + ' · ' + fmt$(deferred.recognised) + ' recognised of '
-        + fmt$(deferred.sold) + ' sold';
+      const wrap = document.getElementById('pkg_consumption_stat');
+      if (!wrap || !deferred) return;
+      const sold  = deferred.sold ?? 0;
+      const recog = deferred.recognised ?? 0;
+      const pct   = deferred.consumed_pct ?? (sold ? Math.round(recog / sold * 1000) / 10 : 0);
+      const bal   = deferred.deferred ?? (sold - recog);
+      const asof  = endDate
+        ? new Date(endDate + 'T00:00:00').toLocaleDateString('en-SG', {day:'numeric',month:'short',year:'numeric'})
+        : '';
+      wrap.hidden = false;
+      document.getElementById('pkg_pct').textContent           = pct ?? 0;
+      document.getElementById('pkg_progress_fill').style.width = Math.min(pct ?? 0, 100) + '%';
+      document.getElementById('pkg_recognised').textContent    = fmt$(recog);
+      document.getElementById('pkg_deferred_balance').textContent = fmt$(bal);
+      document.getElementById('pkg_sold_total').textContent    = fmt$(sold);
+      const asofEl = document.getElementById('pkg_asof');
+      if (asofEl) asofEl.textContent = asof ? '· as of ' + asof : '';
     }
 
     let ageChart, genderChart, tagsChart, acquisitionChart;
