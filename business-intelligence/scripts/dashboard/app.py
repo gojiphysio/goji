@@ -695,27 +695,37 @@ ORDER BY revenue DESC
     } for r in _query(sql)]
 
 
-def fetch_deferred() -> dict:
+def fetch_deferred(end: date) -> dict:
+    """Outstanding deferred revenue liability as of `end`.
+
+    = packages sold on or before `end`
+    - sessions delivered (package burns) on or before `end`
+
+    This is the balance-sheet liability at the close of the selected period,
+    so switching the date range shows how the deferred balance evolved over
+    time rather than always showing the current all-time snapshot.
+    """
     sql = f"""
 SELECT
   COALESCE(
-    (SELECT SUM(booking_amount) FROM `{PROJECT}.marts.fct_invoice_line` WHERE is_package_sale),
+    (SELECT SUM(booking_amount) FROM `{PROJECT}.marts.fct_invoice_line`
+     WHERE is_package_sale AND invoice_date <= '{end}'),
     0
-  ) AS sold_alltime,
+  ) AS sold_through_end,
   COALESCE(
     (SELECT SUM(recognised_revenue) FROM `{PROJECT}.marts.fct_service_delivered`
-     WHERE delivery_method = 'package_burn'),
+     WHERE delivery_method = 'package_burn' AND delivery_date <= '{end}'),
     0
-  ) AS recognised_alltime
+  ) AS recognised_through_end
 """
     row   = _query(sql)[0]
-    sold  = _to_float(row["sold_alltime"])
-    recog = _to_float(row["recognised_alltime"])
+    sold  = _to_float(row["sold_through_end"])
+    recog = _to_float(row["recognised_through_end"])
     return {
-        "deferred":           sold - recog,
-        "sold_alltime":       sold,
-        "recognised_alltime": recog,
-        "consumed_pct":       round(recog / sold * 100, 1) if sold else None,
+        "deferred":      sold - recog,
+        "sold":          sold,
+        "recognised":    recog,
+        "consumed_pct":  round(recog / sold * 100, 1) if sold else None,
     }
 
 
@@ -1295,7 +1305,7 @@ def build_payload() -> dict:
     # Round up to 70 for headroom.
     with ThreadPoolExecutor(max_workers=70, thread_name_prefix="bq") as ex:
         # Range-independent (or fixed-window) fetches.
-        f_deferred      = ex.submit(fetch_deferred)
+        # fetch_deferred is now per-range (moved into range_jobs below).
         f_cohorts       = ex.submit(fetch_cohorts)
         f_demographics  = ex.submit(fetch_patient_demographics)
         f_referrals     = ex.submit(fetch_patient_referrals)
@@ -1319,6 +1329,7 @@ def build_payload() -> dict:
                 "discounts":      ex.submit(fetch_discounts, start, end),
                 "treatment_mix":  ex.submit(fetch_treatment_mix, start, end),
                 "packages":       ex.submit(fetch_packages, start, end),
+                "deferred":       ex.submit(fetch_deferred, end),
                 "link_clicks":    ex.submit(fetch_link_clicks, start, end),
                 "google_ads":     ex.submit(fetch_google_ads, start, end),
             }
@@ -1359,6 +1370,7 @@ def build_payload() -> dict:
                 "discounts":        v["discounts"].result(),
                 "treatment_mix":    v["treatment_mix"].result(),
                 "packages":         v["packages"].result(),
+                "deferred_stats":   v["deferred"].result(),
                 "link_clicks":      v["link_clicks"].result(),
                 "link_clicks_prev": v["link_clicks_prev"].result() if v["link_clicks_prev"] else None,
                 "google_ads":       v["google_ads"].result(),
@@ -1368,7 +1380,6 @@ def build_payload() -> dict:
         return {
             "generated_at":      datetime.now().astimezone().isoformat(timespec="seconds"),
             "default_range":     "30d",
-            "deferred_stats":    f_deferred.result(),
             "cohorts":           f_cohorts.result(),
             "demographics":      f_demographics.result(),
             "referrals":         f_referrals.result(),

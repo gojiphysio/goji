@@ -968,7 +968,7 @@
       <div class="kpi-card">
         <div class="kpi-label">Deferred revenue <span class="badge live">Live</span></div>
         <div class="kpi-value" id="kpi_deferred">-</div>
-        <div class="kpi-sub">Current balance: all-time packages sold minus redeemed (not range-scoped)</div>
+        <div class="kpi-sub">Outstanding package liability <span id="kpi_deferred_asof" style="color:var(--ink-muted);"></span></div>
       </div>
       <div class="kpi-card">
         <div class="kpi-label">Active patients <span class="range-label">last 30 days</span> <span class="badge live">Live</span></div>
@@ -2337,7 +2337,11 @@
       document.getElementById('kpi_active_patients').textContent = fmtInt(r.kpis.active_patients);
       document.getElementById('kpi_new_patients').textContent    = fmtInt(r.kpis.new_patients);
       document.getElementById('kpi_visits').textContent          = fmtInt(r.kpis.visits);
-      document.getElementById('kpi_deferred').textContent        = fmt$(DATA.deferred_stats?.deferred);
+      document.getElementById('kpi_deferred').textContent        = fmt$(r.deferred_stats?.deferred);
+      // Update the label to show "as of [end date]" so it's clear this is a point-in-time balance
+      const deferredEnd = r.end ? new Date(r.end + 'T00:00:00').toLocaleDateString('en-SG', {day:'numeric',month:'short',year:'numeric'}) : '';
+      const deferredLbl = document.getElementById('kpi_deferred_asof');
+      if (deferredLbl) deferredLbl.textContent = deferredEnd ? 'as of ' + deferredEnd : '';
 
       const p  = r.prev_kpis;
       const ps = r.prev_start, pe = r.prev_end;
@@ -2534,13 +2538,14 @@
           <td class="num">${row.pct_value}%</td>
         </tr>`
       ).join('');
-      const stats = DATA.deferred_stats;
+    }
+    function renderPackagesDeferred(deferred, endDate) {
       const el = document.getElementById('pkg_consumption_stat');
-      if (el && stats && stats.consumed_pct != null) {
-        el.textContent = stats.consumed_pct + '% of all-time package credit consumed'
-          + ' · ' + fmt$(stats.recognised_alltime) + ' recognised of '
-          + fmt$(stats.sold_alltime) + ' sold';
-      }
+      if (!el || !deferred || deferred.consumed_pct == null) return;
+      const asof = endDate ? new Date(endDate + 'T00:00:00').toLocaleDateString('en-SG', {day:'numeric',month:'short',year:'numeric'}) : '';
+      el.textContent = deferred.consumed_pct + '% of package credit consumed as of ' + asof
+        + ' · ' + fmt$(deferred.recognised) + ' recognised of '
+        + fmt$(deferred.sold) + ' sold';
     }
 
     let ageChart, genderChart, tagsChart, acquisitionChart;
@@ -3050,6 +3055,7 @@
       renderDiscounts(r.discounts);
       renderMix(r.treatment_mix);
       renderPackages(r.packages);
+      renderPackagesDeferred(r.deferred_stats, r.end);
       renderMarketingMetrics(r);
     }
 
