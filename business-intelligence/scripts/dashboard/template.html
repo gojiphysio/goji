@@ -504,14 +504,36 @@
       padding: 16px 10px; text-align: center;
     }
 
-    /* --- Print rules: only the report prints --- */
+    /* --- Print rules --- */
     @media print {
       @page { margin: 18mm; }
       body { background: white; color: black; }
       .topbar, .page-nav, .calc-card, footer,
-      .date-selector, .updated, .filters, .calc-actions { display: none !important; }
-      #page-dashboard, #page-pl { display: none !important; }
+      .date-selector, .updated, .filters, .calc-actions,
+      .btn-print { display: none !important; }
       .wrap { padding: 0; max-width: none; }
+
+      /* Commission-only print (default — when not printing Overview) */
+      #page-dashboard, #page-pl { display: none !important; }
+
+      /* Overview print — triggered by body[data-printing="overview"] */
+      body[data-printing="overview"] #page-dashboard { display: block !important; }
+      body[data-printing="overview"] #page-commission { display: none !important; }
+      body[data-printing="overview"] .page-toolbar,
+      body[data-printing="overview"] .global-toolbar { display: none !important; }
+      body[data-printing="overview"] .overview-print-header {
+        display: flex !important;
+      }
+
+      /* Cards and sections look clean on paper */
+      body[data-printing="overview"] section.q {
+        break-inside: avoid;
+        border: 1px solid #ddd;
+        box-shadow: none;
+        margin-bottom: 14px;
+      }
+
+      /* Commission card print (unchanged) */
       .calc-grid { grid-template-columns: 1fr; gap: 0; }
       .report-card { border: none; box-shadow: none; padding: 0; }
       .summary-row.total .value { color: black; }
@@ -525,17 +547,45 @@
       .brand-print .brand-dot {
         width: 12px; height: 12px; background: #92171D; border-radius: 50%;
       }
-      .brand-print .brand-img {
-        height: 32px; width: auto;
-      }
+      .brand-print .brand-img { height: 32px; width: auto; }
       .brand-print .brand-name { font-size: 18px; font-weight: 600; }
-      /* Keep appointment rows from splitting awkwardly */
       .appointments-block { page-break-inside: auto; margin-top: 22px; }
       .appointments-table tr { page-break-inside: avoid; }
       .appointments-table thead { display: table-header-group; }
       .appointments-table tfoot { display: table-row-group; }
     }
     .brand-print { display: none; }
+
+    /* Overview print header — hidden on screen, visible when printing overview */
+    .overview-print-header {
+      display: none;
+      align-items: center; justify-content: space-between;
+      padding-bottom: 12px; margin-bottom: 18px;
+      border-bottom: 2px solid #1f1d1a;
+    }
+    .overview-print-header .ph-brand {
+      display: flex; align-items: center; gap: 10px;
+    }
+    .overview-print-header .ph-dot {
+      width: 12px; height: 12px; background: #c44a3a; border-radius: 50%;
+    }
+    .overview-print-header .ph-name { font-size: 18px; font-weight: 700; }
+    .overview-print-header .ph-meta {
+      font-size: 13px; color: #6b6760; text-align: right;
+    }
+    .overview-print-header .ph-meta strong { color: #1f1d1a; }
+
+    /* Print button in the Overview toolbar */
+    .btn-print {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 14px; border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--card); color: var(--ink-soft);
+      font: inherit; font-size: 12px; font-weight: 500;
+      cursor: pointer; transition: background 0.15s, color 0.15s;
+    }
+    .btn-print:hover { background: var(--bg); color: var(--ink); }
+    .btn-print svg { flex-shrink: 0; }
 
     /* ========== P&L Section ========== */
     .pl-period-bar {
@@ -846,9 +896,29 @@
         <input type="date" id="range_end">
         <button type="button" id="range_apply">Apply</button>
       </div>
+      <button type="button" class="btn-print" id="btn-print-overview" title="Print / Save as PDF">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+          <rect x="6" y="14" width="12" height="8"/>
+        </svg>
+        Print / PDF
+      </button>
     </div>
 
     <div id="page-dashboard" class="page">
+
+    <!-- Print header: hidden on screen, appears at top of Overview when printing -->
+    <div class="overview-print-header" id="overview-print-header">
+      <div class="ph-brand">
+        <div class="ph-dot"></div>
+        <span class="ph-name">Goji Health</span>
+      </div>
+      <div class="ph-meta">
+        <div>Overview Report</div>
+        <div><strong id="print-range-label"></strong></div>
+        <div id="print-date-generated"></div>
+      </div>
+    </div>
 
     <section class="alert" id="doctor-mismatch-alert" hidden>
       <h2>
@@ -3049,6 +3119,7 @@
       initPL();
       initPageNav();
       initCommissionCalculator();
+      initPrintOverview();
     }
 
     // Dismissed mismatch invoice IDs stored in localStorage.
@@ -3707,6 +3778,26 @@
       // Charts created while their page was hidden render at 0×0; resize once
       // the marketing page is first shown so the canvases pick up real dims.
       if (page === 'marketing') resizeMarketingCharts();
+    }
+
+    /* ===== Overview print ===== */
+    function initPrintOverview() {
+      document.getElementById('btn-print-overview').addEventListener('click', () => {
+        // Stamp the print header with the currently active range label and date
+        const activeBtn = document.querySelector('[data-range].active');
+        const rangeLabel = activeBtn ? activeBtn.textContent.trim() : '';
+        document.getElementById('print-range-label').textContent = rangeLabel;
+        document.getElementById('print-date-generated').textContent =
+          'Generated ' + new Date().toLocaleDateString('en-SG', {
+            day: 'numeric', month: 'long', year: 'numeric'
+          });
+
+        // Tell CSS to show the overview page and hide everything else
+        document.body.dataset.printing = 'overview';
+        window.print();
+        // Clean up after the print dialog closes
+        delete document.body.dataset.printing;
+      });
     }
 
     /* ===== Commission calculator ===== */
