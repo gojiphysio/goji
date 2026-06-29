@@ -214,6 +214,44 @@ that point *into* the website (IG bio, GBP, ads, email) with
 the same channels the funnel uses. (The `go.gojiphysio.com/<slug>` redirector
 sends taps to WhatsApp/Plato, not the site, so it's unaffected.)
 
+## Plato online-booking attribution — spike verdict (2026-06)
+
+**Question:** can a `?ref=<code>` we append to the Plato booking URL be traced
+back through Plato so a tap → first-visit is linkable (the "click-id passthrough"
+for the funnel's Plato-booking CTA)?
+
+**Verdict: no, not via a URL param — leave Plato bookings "not linked yet".**
+Desk review of the full Plato API docs (`business-intelligence/plato-api-docs/`)
+found no field that a booking-URL param could land in or that we ingest:
+- **Appointment** (`07-appointments.md`): `patient_id`, `title`, `description`,
+  `starttime`, `endtime`, `color` (= calendar ID). `title`/`description` are
+  patient-entered during booking, not URL-derived. No source/ref/UTM/custom field.
+- **Online booking** endpoints (`onlineapptbooking/list`, `/slots`) expose only
+  calendars and availability — nothing about a booking's origin.
+- **Invoice**: the only `ref` (`09-invoice-queue.md`) is a *payment* reference on
+  `/invoice/payment`, not a booking source.
+- **Webhooks** (`06`) carry just `object_id`; `referred_by` is a pre-seeded
+  *contact relationship* ("Online Booking - Instagram"), not a per-booking code.
+- The booking page is Plato-hosted, so an appended query param is dropped.
+
+**Only Plato-native source signal that IS ingestable:** the appointment `color`
+(calendar ID, already pulled). Per-channel online-booking calendars would encode
+source in `color` — but that fragments availability; not recommended for a small
+clinic.
+
+**To confirm empirically** (needs Plato + BQ access; expected to show nothing):
+1. Open `<PLATO_BOOKING_URL>?ref=GOJITEST1` and complete one test booking.
+2. `GET /{db}/appointment/{id}` and the draft `GET /{db}/invoice/{id}`; search
+   every field for `GOJITEST1`. Or once ingested:
+   `SELECT * FROM raw_plato.appointments_raw WHERE TO_JSON_STRING(payload) LIKE '%GOJITEST1%'`
+   (and `invoices_raw`).
+3. Appears → Plato preserves it, we can extract+join. Absent (expected) → dropped.
+
+**Fallback today:** the manual "Online Booking - <source>" `referred_by` contacts
+give a coarse Plato-booking source. The WhatsApp click-id passthrough (parked —
+needs WhatsApp Cloud API + an inbox) is the path that would actually close the
+loop for the primary CTA.
+
 ## Force a cache refresh without redeploying
 
     curl -X POST -u "$USER:$PASS" https://dashboard.gojiphysio.com/refresh
