@@ -34,6 +34,12 @@ const nav = [
   { href: "/blog", label: "Blog" },
   { href: isHome ? "#contact" : "/#contact", label: "Find us" },
 ];
+
+// GA4 (website tracking). Inert until PUBLIC_GA4_ID is set in the Cloudflare
+// Pages build env — dev/preview and the un-launched prototype emit no tag.
+// NOTE: a PDPA consent mechanism must be in place before enabling in
+// production (see business-intelligence/scripts/dashboard/DEPLOY.md).
+const GA4_ID = import.meta.env.PUBLIC_GA4_ID;
 ---
 
 <!doctype html>
@@ -45,6 +51,21 @@ const nav = [
     <meta name="description" content={description} />
     <link rel="icon" type="image/png" href="/brand/logo_mark_transparent.png" />
     <meta name="theme-color" content="#91171d" />
+    {
+      GA4_ID && (
+        <Fragment>
+          <script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${GA4_ID}`} />
+          <script is:inline define:vars={{ GA4_ID }}>
+            window.dataLayer = window.dataLayer || [];
+            function gtag() {
+              dataLayer.push(arguments);
+            }
+            gtag("js", new Date());
+            gtag("config", GA4_ID);
+          </script>
+        </Fragment>
+      )
+    }
   </head>
   <body>
     <a href="#main" class="skip-link">Skip to content</a>
