@@ -18,12 +18,37 @@ interface Props {
   title?: string;
   description?: string;
   bare?: boolean;
+  noindex?: boolean;
 }
 const {
   title = SITE.seoTitle,
   description = SITE.seoDescription,
   bare = false,
+  noindex = false,
 } = Astro.props;
+
+const origin = Astro.site ?? new URL(Astro.url.origin);
+const canonicalURL = new URL(Astro.url.pathname, origin);
+const ogImage = new URL("/og-image.jpg", origin);
+
+// LocalBusiness structured data for local SEO (NAP from SITE).
+const businessSchema = {
+  "@context": "https://schema.org",
+  "@type": "MedicalBusiness",
+  name: SITE.fullName,
+  url: origin.href,
+  image: ogImage.href,
+  email: SITE.email,
+  address: {
+    "@type": "PostalAddress",
+    streetAddress: SITE.address.line1,
+    addressLocality: "Singapore",
+    postalCode: "788887",
+    addressCountry: "SG",
+  },
+  openingHours: "Mo-Sa 08:00-20:00",
+  sameAs: ["https://www.instagram.com/gojiphysio/"],
+};
 
 const isHome = Astro.url.pathname === "/";
 const nav = [
@@ -48,8 +73,26 @@ const GA4_ID = import.meta.env.PUBLIC_GA4_ID;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalURL.href} />
+    {noindex && <meta name="robots" content="noindex" />}
     <link rel="icon" type="image/png" href="/brand/logo_mark_transparent.png" />
     <meta name="theme-color" content="#91171d" />
+
+    {/* Open Graph / Twitter */}
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Goji Physiotherapy" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalURL.href} />
+    <meta property="og:image" content={ogImage.href} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage.href} />
+
+    {!bare && <script type="application/ld+json" set:html={JSON.stringify(businessSchema)} />}
+
+    {/* GA4 (website tracking). Inert until PUBLIC_GA4_ID is set in the build env. */}
     {
       GA4_ID && (
         <Fragment>
