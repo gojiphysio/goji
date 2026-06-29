@@ -129,6 +129,9 @@ To deploy by hand (e.g. from a branch), do both services from the same code:
       --set-env-vars=GCP_PROJECT=goji-bi,CACHE_TTL_SECONDS=300,APP_MODE=dashboard \
       --quiet
 
+(Once the GA4 export is linked, append `,GA4_DATASET=analytics_<propertyId>` to
+`--set-env-vars` to light the Website-sessions card — see "GA4 website analytics".)
+
 Then the front desk service from the same code (preserves its secrets,
 incl. per-person staff logins):
 
@@ -176,6 +179,78 @@ The dashboard SA needs read access on the dataset:
 
 (or in the Console: BigQuery → goji-bi → google_ads → Share → add the SA as
 **BigQuery Data Viewer**).
+
+## GA4 website analytics (Website-sessions card)
+
+The "Website sessions" card reads the **free native GA4 → BigQuery export**. The
+card and `fetch_web_sessions` ship inert: with `GA4_DATASET` unset they return
+zeros, so nothing breaks before the export exists. To light it up — one-time:
+
+1. **Create a GA4 property** for the website and note its **Measurement ID**
+   (`G-XXXXXXX`) and numeric **property ID**.
+2. **Add the tag to the site.** Set `PUBLIC_GA4_ID=G-XXXXXXX` in the Cloudflare
+   Pages build env (Astro reads it in `BaseLayout.astro`; unset = no tag, so dev
+   and the un-launched prototype stay untracked). **PDPA:** put a consent
+   mechanism (banner or Google Consent Mode) in place before enabling in
+   production — this is a Singapore healthcare site.
+3. **Link GA4 → BigQuery** (GA4 Admin → Product links → BigQuery links → Link;
+   pick the `goji-bi` project, daily export). GA4 creates a dataset
+   `analytics_<propertyId>`. First data lands ~24–48h later.
+4. **Grant the dashboard SA** read on that dataset (same as google_ads):
+
+       bq add-iam-policy-binding \
+         --member="serviceAccount:dashboard-sa@goji-bi.iam.gserviceaccount.com" \
+         --role="roles/bigquery.dataViewer" \
+         goji-bi:analytics_<propertyId>
+
+5. **Tell the dashboard the dataset** via env vars on redeploy (see below):
+   `GA4_DATASET=analytics_<propertyId>` (and `GA4_PROJECT` only if the export
+   isn't in `goji-bi`). The GA4 export sits in the **US multi-region**; like
+   `google_ads`, the dashboard queries it directly from Python.
+
+**Channel attribution:** GA4 auto-captures `utm_*` on inbound links. Tag links
+that point *into* the website (IG bio, GBP, ads, email) with
+`utm_source=<slug>` matching the `LINK_SLUGS` taxonomy so sessions attribute to
+the same channels the funnel uses. (The `go.gojiphysio.com/<slug>` redirector
+sends taps to WhatsApp/Plato, not the site, so it's unaffected.)
+
+## Plato online-booking attribution — spike verdict (2026-06)
+
+**Question:** can a `?ref=<code>` we append to the Plato booking URL be traced
+back through Plato so a tap → first-visit is linkable (the "click-id passthrough"
+for the funnel's Plato-booking CTA)?
+
+**Verdict: no, not via a URL param — leave Plato bookings "not linked yet".**
+Desk review of the full Plato API docs (`business-intelligence/plato-api-docs/`)
+found no field that a booking-URL param could land in or that we ingest:
+- **Appointment** (`07-appointments.md`): `patient_id`, `title`, `description`,
+  `starttime`, `endtime`, `color` (= calendar ID). `title`/`description` are
+  patient-entered during booking, not URL-derived. No source/ref/UTM/custom field.
+- **Online booking** endpoints (`onlineapptbooking/list`, `/slots`) expose only
+  calendars and availability — nothing about a booking's origin.
+- **Invoice**: the only `ref` (`09-invoice-queue.md`) is a *payment* reference on
+  `/invoice/payment`, not a booking source.
+- **Webhooks** (`06`) carry just `object_id`; `referred_by` is a pre-seeded
+  *contact relationship* ("Online Booking - Instagram"), not a per-booking code.
+- The booking page is Plato-hosted, so an appended query param is dropped.
+
+**Only Plato-native source signal that IS ingestable:** the appointment `color`
+(calendar ID, already pulled). Per-channel online-booking calendars would encode
+source in `color` — but that fragments availability; not recommended for a small
+clinic.
+
+**To confirm empirically** (needs Plato + BQ access; expected to show nothing):
+1. Open `<PLATO_BOOKING_URL>?ref=GOJITEST1` and complete one test booking.
+2. `GET /{db}/appointment/{id}` and the draft `GET /{db}/invoice/{id}`; search
+   every field for `GOJITEST1`. Or once ingested:
+   `SELECT * FROM raw_plato.appointments_raw WHERE TO_JSON_STRING(payload) LIKE '%GOJITEST1%'`
+   (and `invoices_raw`).
+3. Appears → Plato preserves it, we can extract+join. Absent (expected) → dropped.
+
+**Fallback today:** the manual "Online Booking - <source>" `referred_by` contacts
+give a coarse Plato-booking source. The WhatsApp click-id passthrough (parked —
+needs WhatsApp Cloud API + an inbox) is the path that would actually close the
+loop for the primary CTA.
 
 ## Force a cache refresh without redeploying
 
