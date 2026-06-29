@@ -33,7 +33,6 @@ const grouped = categories.reduce(
 >
   <section class="conditions-hero">
     <div class="container">
-      <p class="eyebrow">Conditions</p>
       <h1>What we treat</h1>
       <p class="conditions-hero__lead">
         Goji's physiotherapists assess and treat a wide range of musculoskeletal,
@@ -50,9 +49,6 @@ const grouped = categories.reduce(
       if (!items.length) return null;
       return (
         <Section tone={cat === "Women's Health" ? "linen" : "surface"}>
-          <header class="section-head">
-            <p class="eyebrow">{cat}</p>
-          </header>
           <div class="cond-grid">
             {items.map((c) => (
               <a href={`/conditions/${c.slug}`} class="cond-card">

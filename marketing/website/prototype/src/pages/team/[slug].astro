@@ -66,7 +66,6 @@ const firstName = d.name.split(" ")[0];
   {/* ---- Bio (from markdown body) ---- */}
   <section class="bio-body">
     <div class="container bio-body__inner">
-      <p class="eyebrow">About {firstName}</p>
       <div class="bio-prose">
         <Content />
       </div>
@@ -76,7 +75,6 @@ const firstName = d.name.split(" ")[0];
   {/* ---- Approach ---- */}
   <section class="bio-approach">
     <div class="container bio-approach__inner">
-      <p class="eyebrow">{firstName}'s approach</p>
       <blockquote class="bio-approach__quote">{d.approach}</blockquote>
     </div>
   </section>
@@ -115,7 +113,6 @@ const firstName = d.name.split(" ")[0];
   {d.personalNote && (
     <section class="bio-personal">
       <div class="container bio-personal__inner">
-        <p class="eyebrow">Outside the clinic</p>
         <p class="bio-personal__text">{d.personalNote}</p>
       </div>
     </section>
