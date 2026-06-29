@@ -44,6 +44,9 @@ env:
   WHATSAPP_NUMBER: ${{ vars.WHATSAPP_NUMBER }}
   WHATSAPP_FALLBACK_URL: ${{ vars.WHATSAPP_FALLBACK_URL || 'https://www.gojiphysio.com' }}
   PLATO_BOOKING_URL: ${{ vars.PLATO_BOOKING_URL }}   # Plato online-booking URL (the 'book' slugs)
+  # GA4 BigQuery export dataset (analytics_<propertyId>) for the Website-sessions
+  # card. Empty until the repo variable GA4_DATASET is set → the card stays inert.
+  GA4_DATASET: ${{ vars.GA4_DATASET }}
 
 jobs:
   # ---- 1. Tests gate the deploy -------------------------------------------
@@ -133,7 +136,7 @@ jobs:
             --source . --region "${REGION}" --project "${PROJECT}" \
             --service-account "${DASHBOARD_SA}" \
             --set-secrets=DASHBOARD_USER=dashboard-user:latest,DASHBOARD_PASS=dashboard-pass:latest,STAFF_USER=dashboard-staff-user:latest,STAFF_PASS=dashboard-staff-pass:latest \
-            --set-env-vars=GCP_PROJECT=${PROJECT},CACHE_TTL_SECONDS=300,APP_MODE=dashboard,WHATSAPP_NUMBER=${WHATSAPP_NUMBER},WHATSAPP_FALLBACK_URL=${WHATSAPP_FALLBACK_URL},PLATO_BOOKING_URL=${PLATO_BOOKING_URL} \
+            --set-env-vars=GCP_PROJECT=${PROJECT},CACHE_TTL_SECONDS=300,APP_MODE=dashboard,WHATSAPP_NUMBER=${WHATSAPP_NUMBER},WHATSAPP_FALLBACK_URL=${WHATSAPP_FALLBACK_URL},PLATO_BOOKING_URL=${PLATO_BOOKING_URL},GA4_DATASET=${GA4_DATASET} \
             --allow-unauthenticated \
             --quiet
 

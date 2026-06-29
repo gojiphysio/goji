@@ -1726,10 +1726,11 @@
           <div class="kpi-value">— pending integration</div>
           <div class="mkt-target">Target 2–3×</div>
         </div>
-        <div class="kpi-card wip">
-          <div class="kpi-label">Website sessions / month</div>
-          <div class="kpi-value">— pending integration</div>
-          <div class="mkt-target">Condition-page views, booking starts</div>
+        <div class="kpi-card">
+          <div class="kpi-label">Website sessions <span class="range-label">this period</span> <span class="badge live">GA4</span></div>
+          <div class="kpi-value" id="mkt_web_sessions">-</div>
+          <div class="kpi-trend" id="mkt_web_sessions_trend" hidden></div>
+          <div class="mkt-target" id="mkt_web_pageviews">Condition-page views, booking starts</div>
         </div>
         <div class="kpi-card">
           <div class="kpi-label">Ads spend (SGD) <span class="range-label">this period</span> <span class="badge live">Google Ads</span></div>
@@ -2879,6 +2880,16 @@
         document.getElementById('mkt_ads_cpc').textContent    = ga.cpc    ? '$' + ga.cpc.toFixed(2)   : '—';
         renderTrend('mkt_ads_spend_trend',  ga.spend,  gap && gap.spend,  ps, pe);
         renderTrend('mkt_ads_clicks_trend', ga.clicks, gap && gap.clicks, ps, pe);
+      }
+
+      // Website sessions (GA4 BigQuery export). Stays '—' until the export is
+      // linked; pageviews ride along as the card subtext.
+      const ws = r.web_sessions, wsp = r.web_sessions_prev;
+      if (ws) {
+        document.getElementById('mkt_web_sessions').textContent = ws.sessions ? fmtInt(ws.sessions) : '—';
+        document.getElementById('mkt_web_pageviews').textContent = ws.pageviews
+          ? `${fmtInt(ws.pageviews)} page views` : 'Condition-page views, booking starts';
+        renderTrend('mkt_web_sessions_trend', ws.sessions, wsp && wsp.sessions, ps, pe);
       }
 
       mktActiveChart = renderTrendChart(mktActiveChart, 'mktActiveChart',

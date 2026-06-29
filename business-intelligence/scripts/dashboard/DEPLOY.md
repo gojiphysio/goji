@@ -129,6 +129,9 @@ To deploy by hand (e.g. from a branch), do both services from the same code:
       --set-env-vars=GCP_PROJECT=goji-bi,CACHE_TTL_SECONDS=300,APP_MODE=dashboard \
       --quiet
 
+(Once the GA4 export is linked, append `,GA4_DATASET=analytics_<propertyId>` to
+`--set-env-vars` to light the Website-sessions card — see "GA4 website analytics".)
+
 Then the front desk service from the same code (preserves its secrets,
 incl. per-person staff logins):
 
@@ -176,6 +179,40 @@ The dashboard SA needs read access on the dataset:
 
 (or in the Console: BigQuery → goji-bi → google_ads → Share → add the SA as
 **BigQuery Data Viewer**).
+
+## GA4 website analytics (Website-sessions card)
+
+The "Website sessions" card reads the **free native GA4 → BigQuery export**. The
+card and `fetch_web_sessions` ship inert: with `GA4_DATASET` unset they return
+zeros, so nothing breaks before the export exists. To light it up — one-time:
+
+1. **Create a GA4 property** for the website and note its **Measurement ID**
+   (`G-XXXXXXX`) and numeric **property ID**.
+2. **Add the tag to the site.** Set `PUBLIC_GA4_ID=G-XXXXXXX` in the Cloudflare
+   Pages build env (Astro reads it in `BaseLayout.astro`; unset = no tag, so dev
+   and the un-launched prototype stay untracked). **PDPA:** put a consent
+   mechanism (banner or Google Consent Mode) in place before enabling in
+   production — this is a Singapore healthcare site.
+3. **Link GA4 → BigQuery** (GA4 Admin → Product links → BigQuery links → Link;
+   pick the `goji-bi` project, daily export). GA4 creates a dataset
+   `analytics_<propertyId>`. First data lands ~24–48h later.
+4. **Grant the dashboard SA** read on that dataset (same as google_ads):
+
+       bq add-iam-policy-binding \
+         --member="serviceAccount:dashboard-sa@goji-bi.iam.gserviceaccount.com" \
+         --role="roles/bigquery.dataViewer" \
+         goji-bi:analytics_<propertyId>
+
+5. **Tell the dashboard the dataset** via env vars on redeploy (see below):
+   `GA4_DATASET=analytics_<propertyId>` (and `GA4_PROJECT` only if the export
+   isn't in `goji-bi`). The GA4 export sits in the **US multi-region**; like
+   `google_ads`, the dashboard queries it directly from Python.
+
+**Channel attribution:** GA4 auto-captures `utm_*` on inbound links. Tag links
+that point *into* the website (IG bio, GBP, ads, email) with
+`utm_source=<slug>` matching the `LINK_SLUGS` taxonomy so sessions attribute to
+the same channels the funnel uses. (The `go.gojiphysio.com/<slug>` redirector
+sends taps to WhatsApp/Plato, not the site, so it's unaffected.)
 
 ## Force a cache refresh without redeploying
 

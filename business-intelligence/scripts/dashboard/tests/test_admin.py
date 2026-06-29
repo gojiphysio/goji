@@ -293,6 +293,13 @@ def test_build_funnel_paths_degrades_without_clicks():
     assert f["first_visits"] is None
 
 
+def test_fetch_web_sessions_noop_until_ga4_linked():
+    # GA4_DATASET is unset in the test env, so the fetch must short-circuit to
+    # zeros WITHOUT touching BigQuery (the Website card stays empty, never errors).
+    assert app.GA4_DATASET == ""
+    assert app.fetch_web_sessions(TODAY - timedelta(days=30), TODAY) == {"sessions": 0, "pageviews": 0}
+
+
 # --- Marketing tab: founder-only operating-tool routes ----------------------
 # The Marketing tab lives on the founder dashboard subdomain. Its /api/marketing
 # routes follow the same boundary as /api/data: founder-only, and 404 (not even

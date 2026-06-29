@@ -40,6 +40,11 @@ from requests.adapters import HTTPAdapter
 
 PROJECT     = os.environ.get("GCP_PROJECT", "goji-bi")
 CACHE_TTL   = int(os.environ.get("CACHE_TTL_SECONDS", "300"))
+# GA4 BigQuery export (free native daily export). GA4_DATASET is the
+# `analytics_<propertyId>` dataset; unset until the export is linked, in which
+# case the Website-sessions card just stays empty. See DEPLOY.md.
+GA4_PROJECT = os.environ.get("GA4_PROJECT", PROJECT)
+GA4_DATASET = os.environ.get("GA4_DATASET", "")
 # Founder credential — sees everything, including the financial dashboard.
 AUTH_USER   = os.environ.get("DASHBOARD_USER", "")
 AUTH_PASS   = os.environ.get("DASHBOARD_PASS", "")
@@ -1282,6 +1287,41 @@ WHERE _TABLE_SUFFIX BETWEEN '{start.strftime("%Y%m%d")}' AND '{end.strftime("%Y%
         return empty
 
 
+def fetch_web_sessions(start: date, end: date) -> dict:
+    """Website sessions & pageviews for [start, end] from the GA4 BigQuery export
+    (the free native daily export; dataset `analytics_<propertyId>`, tables
+    `events_YYYYMMDD`).
+
+    Like fetch_google_ads, this queries a separate — and possibly cross-region —
+    dataset directly, and degrades to zeros if the export isn't linked yet
+    (GA4_DATASET unset) or the tables aren't there, so the Website card simply
+    stays empty until GA4 data flows. A GA4 session is the distinct pair
+    (user_pseudo_id, ga_session_id); pageviews are `page_view` events. Daily
+    `events_intraday_*` tables are excluded naturally — their _TABLE_SUFFIX
+    ("intraday_…") sorts outside a YYYYMMDD range.
+    """
+    empty = {"sessions": 0, "pageviews": 0}
+    if not GA4_DATASET:
+        return empty
+    try:
+        rows = _query(f"""
+SELECT
+  COUNT(DISTINCT CONCAT(
+    user_pseudo_id, '-',
+    CAST((SELECT value.int_value FROM UNNEST(event_params) WHERE key = 'ga_session_id') AS STRING)
+  ))                                AS sessions,
+  COUNTIF(event_name = 'page_view') AS pageviews
+FROM `{GA4_PROJECT}.{GA4_DATASET}.events_*`
+WHERE _TABLE_SUFFIX BETWEEN '{start.strftime("%Y%m%d")}' AND '{end.strftime("%Y%m%d")}'
+""")
+        if not rows or rows[0]["sessions"] is None:
+            return empty
+        return {"sessions": _to_int(rows[0]["sessions"]), "pageviews": _to_int(rows[0]["pageviews"])}
+    except Exception as e:
+        log.warning("web_sessions unavailable (GA4 export linked? GA4_DATASET set?): %s", e)
+        return empty
+
+
 # Funnel-path source label per link slug prefix (slug = "<source>-<cta>", see
 # LINK_SLUGS). `bio` is handled specially: bio.site is the Instagram link-in-bio
 # page, so bio-* taps flow Instagram -> bio.site -> CTA rather than being their
@@ -1354,7 +1394,7 @@ def build_payload() -> dict:
     presets    = preset_ranges()
 
     # max_workers sized to cover every concurrent fetch this request fires:
-    # 8 top-level + 4 ranges × 10 metrics + 3 ranges × 3 previous-window jobs = 57.
+    # 8 top-level + 4 ranges × 11 metrics + 3 ranges × 4 previous-window jobs = 64.
     # Round up to 70 for headroom.
     with ThreadPoolExecutor(max_workers=70, thread_name_prefix="bq") as ex:
         # Range-independent (or fixed-window) fetches.
@@ -1385,25 +1425,28 @@ def build_payload() -> dict:
                 "deferred":       ex.submit(fetch_deferred, end),
                 "link_clicks":    ex.submit(fetch_link_clicks, start, end),
                 "google_ads":     ex.submit(fetch_google_ads, start, end),
+                "web_sessions":   ex.submit(fetch_web_sessions, start, end),
             }
             # Trend indicators compare each range against the immediately
             # preceding window of equal length (e.g. the 30 days before the
             # last 30). "All time" has no comparable prior window, so it gets
             # no previous-period KPIs.
             if key == "all":
-                range_jobs[key]["prev_kpis"]        = None
-                range_jobs[key]["link_clicks_prev"] = None
-                range_jobs[key]["google_ads_prev"]  = None
-                range_jobs[key]["prev_start"]       = None
-                range_jobs[key]["prev_end"]         = None
+                range_jobs[key]["prev_kpis"]         = None
+                range_jobs[key]["link_clicks_prev"]  = None
+                range_jobs[key]["google_ads_prev"]   = None
+                range_jobs[key]["web_sessions_prev"] = None
+                range_jobs[key]["prev_start"]        = None
+                range_jobs[key]["prev_end"]          = None
             else:
                 prev_end   = start - timedelta(days=1)
                 prev_start = prev_end - (end - start)
-                range_jobs[key]["prev_kpis"]        = ex.submit(fetch_kpis, prev_start, prev_end)
-                range_jobs[key]["link_clicks_prev"] = ex.submit(fetch_link_clicks, prev_start, prev_end)
-                range_jobs[key]["google_ads_prev"]  = ex.submit(fetch_google_ads, prev_start, prev_end)
-                range_jobs[key]["prev_start"]       = prev_start.isoformat()
-                range_jobs[key]["prev_end"]         = prev_end.isoformat()
+                range_jobs[key]["prev_kpis"]         = ex.submit(fetch_kpis, prev_start, prev_end)
+                range_jobs[key]["link_clicks_prev"]  = ex.submit(fetch_link_clicks, prev_start, prev_end)
+                range_jobs[key]["google_ads_prev"]   = ex.submit(fetch_google_ads, prev_start, prev_end)
+                range_jobs[key]["web_sessions_prev"] = ex.submit(fetch_web_sessions, prev_start, prev_end)
+                range_jobs[key]["prev_start"]        = prev_start.isoformat()
+                range_jobs[key]["prev_end"]          = prev_end.isoformat()
 
         # Block on results. If any future raised, .result() re-raises here and
         # the still-running ones get cancelled when the executor exits.
@@ -1428,6 +1471,8 @@ def build_payload() -> dict:
                 "link_clicks_prev": v["link_clicks_prev"].result() if v["link_clicks_prev"] else None,
                 "google_ads":       v["google_ads"].result(),
                 "google_ads_prev":  v["google_ads_prev"].result() if v["google_ads_prev"] else None,
+                "web_sessions":      v["web_sessions"].result(),
+                "web_sessions_prev": v["web_sessions_prev"].result() if v["web_sessions_prev"] else None,
                 "funnel_paths":     _build_funnel_paths(v["link_clicks"].result(), v["kpis"].result()),
             }
 
