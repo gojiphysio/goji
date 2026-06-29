@@ -1322,6 +1322,27 @@ WHERE _TABLE_SUFFIX BETWEEN '{start.strftime("%Y%m%d")}' AND '{end.strftime("%Y%
         return empty
 
 
+def fetch_lead_wins(start: date, end: date) -> dict:
+    """Won leads (became a patient) by channel for leads that *entered* in
+    [start, end] (bucketed by first_seen — the cohort funnel view). Reads
+    marts.lead_latest; 'won' is terminal, so the latest stage captures it.
+
+    Feeds the funnel's patient outcome. Degrades to {} so the patient node
+    simply doesn't draw until the front desk logs and wins leads.
+    """
+    try:
+        rows = _query(f"""
+SELECT COALESCE(channel, 'other') AS channel, COUNTIF(stage = 'won') AS won
+FROM `{PROJECT}.marts.lead_latest`
+WHERE DATE(first_seen) BETWEEN '{start}' AND '{end}'
+GROUP BY channel
+""")
+    except Exception as e:
+        log.warning("lead_wins unavailable (run deploy_all.sh?): %s", e)
+        return {}
+    return {r["channel"]: _to_int(r["won"]) for r in rows}
+
+
 # Funnel-path source label per link slug prefix (slug = "<source>-<cta>", see
 # LINK_SLUGS). `bio` is handled specially: bio.site is the Instagram link-in-bio
 # page, so bio-* taps flow Instagram -> bio.site -> CTA rather than being their
@@ -1329,17 +1350,26 @@ WHERE _TABLE_SUFFIX BETWEEN '{start.strftime("%Y%m%d")}' AND '{end.strftime("%Y%
 FUNNEL_SOURCE = {"web": "Web", "gbp": "Google", "ads": "Ads", "qr": "QR", "ig": "Instagram"}
 
 
-def _build_funnel_paths(link_clicks: dict, kpis: dict) -> dict:
+def _build_funnel_paths(link_clicks: dict, kpis: dict, lead_wins: dict) -> dict:
     """Build the acquisition-funnel Sankey flows for the front-end from the
     per-slug click counts already in `link_clicks` (exact, from
     marts.link_click_events) — no extra query.
 
     Flows are Source -> CTA, with one intermediate hop: Instagram -> bio.site ->
     CTA for bio-* taps (the link-in-bio page), while ig-* taps are a direct
-    Instagram -> CTA. `first_visits` is the all-source first-visit count for the
-    period (shown as a single stat, not split per CTA — a tap can't yet be traced
-    to the booking it leads to). Returns empty flows if no clicks, so the section
-    degrades gracefully like the other fetch_* helpers.
+    Instagram -> CTA.
+
+    A terminal patient outcome is added off the WhatsApp CTA only, fed by the
+    front-desk lead pipeline (`lead_wins`, won leads by channel): WhatsApp ->
+    "Became a patient" = won whatsapp-channel leads. This is the only
+    marketing-channel -> patient bridge we have, and it's WhatsApp-only — direct
+    Plato bookings aren't logged as leads (no 'online' lead channel), so they
+    route to "Not linked yet" (which means "not converted OR not yet tracked",
+    NOT "failed"). The remaining WhatsApp taps go there too. `first_visits` (the
+    all-source first-visit count) rides along as a stat so the gap between
+    tracked-tap conversions and total new patients stays visible. Units shift
+    from taps to people at the patient step. Degrades gracefully: no clicks ->
+    empty flows; no logged wins -> no patient node.
     """
     lc = link_clicks or {}
     wa = lc.get("wa_by_slug", {}) or {}
@@ -1366,11 +1396,20 @@ def _build_funnel_paths(link_clicks: dict, kpis: dict) -> dict:
 
     wa_taps    = sum(wa.values())
     plato_taps = sum(bk.values())
+
+    # Patient outcome via the lead pipeline (WhatsApp-only bridge). Clamp so a
+    # period with more logged wins than taps can't draw a negative remainder.
+    became_patient = min(wa_taps, _to_int((lead_wins or {}).get("whatsapp", 0)))
+    add("WhatsApp", "Became a patient", became_patient)
+    add("WhatsApp", "Not linked yet", max(0, wa_taps - became_patient))
+    add("Plato booking", "Not linked yet", plato_taps)
+
     return {
-        "flows":        [{"from": a, "to": b, "flow": n} for (a, b), n in flows.items()],
-        "total_taps":   wa_taps + plato_taps,
-        "wa_taps":      wa_taps,
-        "plato_taps":   plato_taps,
+        "flows":          [{"from": a, "to": b, "flow": n} for (a, b), n in flows.items()],
+        "total_taps":     wa_taps + plato_taps,
+        "wa_taps":        wa_taps,
+        "plato_taps":     plato_taps,
+        "became_patient": became_patient,
         "first_visits": (kpis or {}).get("new_patients"),
     }
 
@@ -1394,7 +1433,7 @@ def build_payload() -> dict:
     presets    = preset_ranges()
 
     # max_workers sized to cover every concurrent fetch this request fires:
-    # 8 top-level + 4 ranges × 11 metrics + 3 ranges × 4 previous-window jobs = 64.
+    # 8 top-level + 4 ranges × 12 metrics + 3 ranges × 4 previous-window jobs = 68.
     # Round up to 70 for headroom.
     with ThreadPoolExecutor(max_workers=70, thread_name_prefix="bq") as ex:
         # Range-independent (or fixed-window) fetches.
@@ -1426,6 +1465,7 @@ def build_payload() -> dict:
                 "link_clicks":    ex.submit(fetch_link_clicks, start, end),
                 "google_ads":     ex.submit(fetch_google_ads, start, end),
                 "web_sessions":   ex.submit(fetch_web_sessions, start, end),
+                "lead_wins":      ex.submit(fetch_lead_wins, start, end),
             }
             # Trend indicators compare each range against the immediately
             # preceding window of equal length (e.g. the 30 days before the
@@ -1473,7 +1513,8 @@ def build_payload() -> dict:
                 "google_ads_prev":  v["google_ads_prev"].result() if v["google_ads_prev"] else None,
                 "web_sessions":      v["web_sessions"].result(),
                 "web_sessions_prev": v["web_sessions_prev"].result() if v["web_sessions_prev"] else None,
-                "funnel_paths":     _build_funnel_paths(v["link_clicks"].result(), v["kpis"].result()),
+                "funnel_paths":     _build_funnel_paths(v["link_clicks"].result(), v["kpis"].result(),
+                                                        v["lead_wins"].result()),
             }
 
         return {

@@ -263,7 +263,8 @@ def test_build_funnel_paths_sources_ctas_and_biosite_hop():
         "wa_by_slug":   {"ig-wa": 50, "bio-wa": 60, "web-wa": 40, "gbp-wa": 30, "wa": 5},
         "book_by_slug": {"bio-plato": 20, "web-plato": 24, "ads-plato": 28, "plato": 3},
     }
-    f = app._build_funnel_paths(link_clicks, {"new_patients": 47})
+    f = app._build_funnel_paths(link_clicks, {"new_patients": 47},
+                                {"whatsapp": 12, "instagram": 3})
     flows = {(d["from"], d["to"]): d["flow"] for d in f["flows"]}
 
     # ig-* is a direct Instagram tap; bio-* routes Instagram -> bio.site -> CTA.
@@ -280,16 +281,35 @@ def test_build_funnel_paths_sources_ctas_and_biosite_hop():
     assert flows[("Other", "WhatsApp")] == 5
     assert flows[("Other", "Plato booking")] == 3
 
+    # Patient outcome: WhatsApp-only bridge from the lead pipeline (won whatsapp
+    # leads). Non-whatsapp wins (instagram) are NOT pulled into the tap funnel.
+    assert flows[("WhatsApp", "Became a patient")] == 12
+    assert flows[("WhatsApp", "Not linked yet")] == 185 - 12   # remaining WhatsApp taps
+    assert flows[("Plato booking", "Not linked yet")] == 75    # Plato isn't lead-linked yet
+    assert f["became_patient"] == 12
+
     assert f["wa_taps"] == 185 and f["plato_taps"] == 75
     assert f["total_taps"] == 260
     assert f["first_visits"] == 47
 
 
+def test_build_funnel_paths_patient_node_absent_without_wins():
+    # No logged wins → no "Became a patient" flow (the node simply doesn't draw),
+    # and the WhatsApp clamp can't go negative.
+    f = app._build_funnel_paths(
+        {"wa_by_slug": {"ig-wa": 10}, "book_by_slug": {}}, {"new_patients": 4}, {})
+    flows = {(d["from"], d["to"]): d["flow"] for d in f["flows"]}
+    assert ("WhatsApp", "Became a patient") not in flows
+    assert flows[("WhatsApp", "Not linked yet")] == 10
+    assert f["became_patient"] == 0
+
+
 def test_build_funnel_paths_degrades_without_clicks():
-    # No clicks / no kpis → empty flows and safe nulls, never an exception.
-    f = app._build_funnel_paths({}, {})
+    # No clicks / no kpis / no wins → empty flows and safe nulls, never an exception.
+    f = app._build_funnel_paths({}, {}, {})
     assert f["flows"] == []
     assert f["total_taps"] == 0
+    assert f["became_patient"] == 0
     assert f["first_visits"] is None
 
 

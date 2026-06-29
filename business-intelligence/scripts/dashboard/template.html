@@ -1752,13 +1752,14 @@
       </div>
     </section>
 
-    <!-- Acquisition funnel · by path (Source → bio.site → CTA) -->
+    <!-- Acquisition funnel · by path (Source → bio.site → CTA → patient) -->
     <section class="q">
       <h2>Acquisition funnel · by path <span class="badge live">Live</span></h2>
-      <div class="subtitle">Where someone taps one of our links &rarr; the button they tap. Instagram splits into <strong>direct</strong> taps and ones <strong>via bio.site</strong> (the link in bio). Thicker bands mean more people.</div>
+      <div class="subtitle">Where someone taps one of our links &rarr; the button they tap &rarr; whether they became a patient. Instagram splits into <strong>direct</strong> taps and ones <strong>via bio.site</strong> (the link in bio). Thicker bands mean more people.</div>
       <div class="chart-wrap tall"><canvas id="mktFunnelChart"></canvas></div>
       <div class="funnel-legend" id="mkt_funnel_legend"></div>
       <div class="funnel-stats" id="mkt_funnel_stats"></div>
+      <div class="mkt-target" style="margin-top:12px;">&ldquo;Became a patient&rdquo; counts WhatsApp enquiries the front desk logged and won. Plato bookings and unlogged enquiries sit under &ldquo;not linked yet&rdquo; &mdash; not failures, just not yet tied to a first visit (that needs per-tap tracking). Compare against new patients this period for the full picture.</div>
     </section>
 
     <!-- Marketing mix lens + ICP -->
@@ -2924,25 +2925,30 @@
       renderFunnelSankey(r);
     }
 
-    // Acquisition funnel (by path): a Sankey of Source -> bio.site -> CTA, built
-    // from the exact per-slug click counts (r.funnel_paths from the backend).
-    // bio.site is the Instagram link-in-bio page, so it sits as an intermediate
-    // hop after Instagram; direct Instagram taps skip it. First visits are shown
-    // as a single stat (a tap can't yet be traced to the booking it leads to).
+    // Acquisition funnel (by path): a Sankey of Source -> bio.site -> CTA ->
+    // patient, built from r.funnel_paths. Source -> CTA is exact (per-slug
+    // click counts); bio.site is the Instagram link-in-bio hop. The patient
+    // outcome comes off WhatsApp only, via the front-desk lead pipeline (the one
+    // marketing-channel -> patient bridge); Plato bookings + unconverted taps go
+    // to "Not linked yet". Units shift from taps to people at the patient step.
     const FUNNEL_COLUMN = {
       'Instagram': 0, 'Web': 0, 'Google': 0, 'Ads': 0, 'QR': 0, 'Other': 0,
       'bio.site': 1, 'WhatsApp': 2, 'Plato booking': 2,
+      'Became a patient': 3, 'Not linked yet': 3,
     };
     const FUNNEL_COLOR = {
       'Instagram': '#9c6c2e', 'bio.site': '#c6a36b', 'Web': NEUTRAL,
       'Google': COBALT, 'Ads': GOLD, 'QR': SAGE, 'Other': '#b0a89c',
       'WhatsApp': '#2f8f8f', 'Plato booking': '#b9791b',
+      'Became a patient': GREEN, 'Not linked yet': '#cdc7bb',
     };
     const FUNNEL_PRIORITY = {
       'Instagram': 0, 'Web': 1, 'Google': 2, 'Ads': 3, 'QR': 4, 'Other': 5,
       'bio.site': 0, 'WhatsApp': 0, 'Plato booking': 1,
+      'Became a patient': 0, 'Not linked yet': 1,
     };
     const FUNNEL_SOURCE_NODES = ['Instagram', 'Web', 'Google', 'Ads', 'QR', 'Other'];
+    const FUNNEL_OUTCOME_NODES = ['Became a patient', 'Not linked yet'];
     const funnelSw = id => `<span class="item"><span class="sw" style="background:${FUNNEL_COLOR[id] || NEUTRAL}"></span>${id}</span>`;
 
     function renderFunnelSankey(r) {
@@ -2979,12 +2985,15 @@
           }] },
           options: {
             responsive: true, maintainAspectRatio: false,
-            layout: { padding: { left: 4, right: 80, top: 6, bottom: 6 } },
+            layout: { padding: { left: 4, right: 104, top: 6, bottom: 6 } },
             plugins: {
               legend: { display: false },
               tooltip: { callbacks: { label: c => {
                 const d = c.dataset.data[c.dataIndex];
-                return ` ${d.from} \u2192 ${d.to}: ${fmtInt(d.flow)} taps`;
+                const unit = d.to === 'Became a patient' ? ' patients'
+                           : d.to === 'Not linked yet'   ? ''
+                           : ' taps';
+                return ` ${d.from} \u2192 ${d.to}: ${fmtInt(d.flow)}${unit}`;
               } } }
             }
           }
@@ -2997,8 +3006,9 @@
       const stats = [
         [fmtInt(fp.total_taps), 'tracked CTA taps'],
         [`${fmtInt(fp.wa_taps)} / ${fmtInt(fp.plato_taps)}`, 'WhatsApp / Plato taps'],
+        [fmtInt(fp.became_patient), 'became patients (WhatsApp, logged)'],
       ];
-      if (fp.first_visits != null) stats.push([fmtInt(fp.first_visits), 'first visits this period (all sources)']);
+      if (fp.first_visits != null) stats.push([fmtInt(fp.first_visits), 'new patients this period (all sources)']);
       if (toBtn) stats.push([`${toBtn.from} \u2192 ${toBtn.to}`, `busiest path (${fmtInt(toBtn.flow)})`]);
       statsEl.innerHTML = stats.map(([b, l]) => `<div class="stat"><b>${b}</b>${l}</div>`).join('');
 
@@ -3007,9 +3017,11 @@
       const srcItems = FUNNEL_SOURCE_NODES.filter(s => present.has(s)).map(funnelSw).join('')
                      + (present.has('bio.site') ? funnelSw('bio.site') : '');
       const btnItems = ['WhatsApp', 'Plato booking'].filter(s => present.has(s)).map(funnelSw).join('');
+      const outItems = FUNNEL_OUTCOME_NODES.filter(s => present.has(s)).map(funnelSw).join('');
       legend.innerHTML =
         `<div class="grp"><span class="grp-lbl">Tapped from</span>${srcItems}</div>` +
-        `<div class="grp"><span class="grp-lbl">Button</span>${btnItems}</div>`;
+        `<div class="grp"><span class="grp-lbl">Button</span>${btnItems}</div>` +
+        (outItems ? `<div class="grp"><span class="grp-lbl">Outcome</span>${outItems}</div>` : '');
     }
 
     // Range-independent marketing tiles (acquisition, sources, ICP).
