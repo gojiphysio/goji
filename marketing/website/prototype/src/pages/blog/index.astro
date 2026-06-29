@@ -1,0 +1,50 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+---
+
+<BaseLayout
+  title="Blog | Goji Health"
+  description="Resources, guides, and reading from the Goji Health team on women's health, pelvic floor, postnatal recovery, paediatrics, and more."
+>
+  <section class="blog-landing">
+    <div class="container blog-landing__inner">
+      <p class="eyebrow">From the blog</p>
+      <h1>Resources and reading</h1>
+      <p class="blog-landing__lead">
+        Practical guides and educational reading from our physiotherapists —
+        on pelvic health, postnatal recovery, paediatrics, and moving well at
+        every stage of life.
+      </p>
+      <p class="blog-landing__coming">Posts coming soon.</p>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .blog-landing {
+    background: var(--bg-page);
+    padding-block: clamp(3rem, 2rem + 5vw, 6rem);
+    min-height: 50vh;
+    display: flex;
+    align-items: center;
+  }
+  .blog-landing__inner {
+    max-width: var(--container-narrow);
+  }
+  .blog-landing__inner h1 {
+    margin-top: var(--space-3);
+    margin-bottom: var(--space-5);
+  }
+  .blog-landing__lead {
+    font-size: var(--fs-body);
+    color: var(--text-muted);
+    line-height: var(--lh-body);
+    max-width: 48ch;
+    margin-bottom: var(--space-4);
+  }
+  .blog-landing__coming {
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+    opacity: 0.6;
+  }
+</style>

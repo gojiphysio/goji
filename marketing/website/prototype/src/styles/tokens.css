@@ -44,19 +44,19 @@
   --weight-bold: 700;
 
   /* Fluid type scale (clamp honours the brief's ranges) */
-  --fs-display: clamp(2.5rem, 1.6rem + 4vw, 4rem);   /* 40 -> 64 */
+  --fs-display: clamp(2.75rem, 1.6rem + 4.5vw, 4.5rem); /* 44 -> 72 */
   --fs-h1: clamp(2rem, 1.6rem + 1.8vw, 2.5rem);       /* 32 -> 40 */
   --fs-h2: clamp(1.5rem, 1.3rem + 0.9vw, 1.75rem);    /* 24 -> 28 */
   --fs-h3: clamp(1.25rem, 1.15rem + 0.45vw, 1.375rem);/* 20 -> 22 */
-  --fs-body: clamp(1rem, 0.96rem + 0.18vw, 1.125rem); /* 16 -> 18 */
-  --fs-small: 0.9375rem;                               /* 15 */
-  --fs-caption: 0.8125rem;                             /* 13 */
+  --fs-body: clamp(0.875rem, 0.85rem + 0.13vw, 0.9375rem); /* 14 -> 15 */
+  --fs-small: 0.8125rem;                                    /* 13 */
+  --fs-caption: 0.75rem;                                    /* 12 */
 
-  --lh-tight: 1.15;
+  --lh-tight: 1.13;
   --lh-snug: 1.3;
   --lh-body: 1.55; /* generous, within the brief's 1.4–1.6 */
 
-  --tracking-tight: -0.02em;
+  --tracking-tight: -0.025em;
   --tracking-label: 0.08em; /* uppercase eyebrow labels */
 
   /* ---- Spacing (8px base scale) ---- */
@@ -86,7 +86,7 @@
   --container-max: 1180px;
   --container-narrow: 760px;
   --gutter: clamp(1.25rem, 0.8rem + 2vw, 2.5rem);
-  --section-y: clamp(3.5rem, 2.5rem + 4vw, 6.5rem);
+  --section-y: clamp(2.75rem, 1.8rem + 3.2vw, 5rem);
 
   /* ---- Motion ---- */
   --ease: cubic-bezier(0.22, 0.61, 0.36, 1);

@@ -44,10 +44,10 @@ const { items, columns = 1, class: className = "" } = Astro.props;
     position: absolute;
     left: 0;
     top: 0.55em;
-    width: 0.55rem;
-    height: 0.55rem;
-    border-radius: 50%;
+    width: 0.375rem;
+    height: 0.625rem;
+    border-radius: 9999px;
     background-color: var(--berry);
-    transform: translateY(-50%);
+    transform: translateY(-50%) rotate(45deg); /* slanted like the O in the logo */
   }
 </style>

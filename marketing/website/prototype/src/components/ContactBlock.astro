@@ -11,7 +11,7 @@ import { SITE } from "../lib/site.ts";
 <div class="contact">
   <div class="contact__cta">
     <p class="eyebrow">Get in touch</p>
-    <h2>Ready when you are.</h2>
+    <h2>Ready when you are</h2>
     <p class="contact__lead">
       Message us with a question, or book a first session. We'll talk through
       what's going on before we treat.
@@ -30,6 +30,14 @@ import { SITE } from "../lib/site.ts";
         {SITE.address.line2}
       </p>
       <p class="contact__note">{SITE.address.note}</p>
+      <a
+        href="https://maps.app.goo.gl/wBaCkBiDNfF7JCGv8"
+        class="contact__directions"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Get directions &rarr;
+      </a>
     </div>
     <div class="contact__group">
       <h3>Hours</h3>
@@ -83,4 +91,15 @@ import { SITE } from "../lib/site.ts";
     color: var(--text-muted);
     margin-top: var(--space-2);
   }
+  .contact__directions {
+    display: inline-block;
+    margin-top: var(--space-3);
+    font-family: var(--font-display);
+    font-size: var(--fs-small);
+    font-weight: var(--weight-medium);
+    color: var(--color-primary);
+    text-decoration: none;
+    transition: color var(--dur) var(--ease);
+  }
+  .contact__directions:hover { color: var(--color-primary-deep); }
 </style>
