@@ -156,31 +156,37 @@ const reviews = [
   title="Women's Physiotherapy at Lentor Modern | Goji Health"
   description="Expert women's and family physiotherapy at Lentor Modern, Singapore. Pelvic health, pregnancy and postpartum care, paediatrics, and everyday strength — one minute from Lentor MRT."
 >
-  {/* ---- Hero (centred editorial) ---- */}
+  {/* ---- Hero (copy left, clinic photos right) ---- */}
   <section class="hero">
     <div class="container hero__inner">
-      <div class="hero__bloom-wrap" role="img" aria-label="From green bud to ripe goji berry">
-        {[1, 2, 3, 4, 5, 6, 7].map((n) => (
-          <img
-            src={`/illustrations/bloom-${n}.png`}
-            class="bloom-frame"
-            alt=""
-            aria-hidden="true"
-            width="300"
-            height="300"
-            decoding="async"
-          />
-        ))}
+      <div class="hero__text">
+        <p class="hero__tagline">{SITE.tagline}</p>
+        <p class="hero__lead">
+          Expert, unhurried care for pelvic health, pregnancy and postpartum
+          recovery, paediatrics, and everyday strength.
+        </p>
+        <div class="hero__actions">
+          <Button slug="web-plato" variant="primary" size="lg">Book an appointment</Button>
+          <Button slug="web-wa" variant="secondary" size="lg" berry>Talk to us on WhatsApp</Button>
+        </div>
       </div>
-
-      <p class="hero__tagline">{SITE.tagline}</p>
-      <p class="hero__lead">
-        Expert, unhurried care for pelvic health, pregnancy and postpartum
-        recovery, paediatrics, and everyday strength.
-      </p>
-      <div class="hero__actions">
-        <Button slug="web-plato" variant="primary" size="lg">Book an appointment</Button>
-        <Button slug="web-wa" variant="secondary" size="lg" berry>Talk to us on WhatsApp</Button>
+      <div class="hero__media">
+        <div class="hero-shots" role="img" aria-label="Inside the Goji clinic at Lentor Modern - reception, the reformer studio, and a session in progress">
+          {[
+            { src: "/photos/space/reception.webp" },
+            { src: "/photos/space/studio.webp" },
+            { src: "/photos/space/session.webp" },
+          ].map((img) => (
+            <img
+              src={img.src}
+              class="hero-shot"
+              alt=""
+              aria-hidden="true"
+              loading="eager"
+              decoding="async"
+            />
+          ))}
+        </div>
       </div>
     </div>
   </section>
@@ -333,35 +339,36 @@ const reviews = [
     </div>
   </Section>
 
-  {/* ---- Clinic space ---- */}
+  {/* ---- For every stage of growth (brand bloom) ---- */}
   <section class="space-sec">
     <div class="container space-sec__inner">
       <div class="space-sec__image">
-        <div class="space-slideshow" role="img" aria-label="Inside the Goji clinic at Lentor Modern - reception, the reformer studio, and a session in progress">
-          {[
-            { src: "/photos/space/reception.webp" },
-            { src: "/photos/space/studio.webp" },
-            { src: "/photos/space/session.webp" },
-          ].map((img) => (
+        <div class="bloom-wrap" role="img" aria-label="A goji flower growing from green bud to ripe berry">
+          {[1, 2, 3, 4, 5, 6, 7].map((n) => (
             <img
-              src={img.src}
-              class="space-frame"
+              src={`/illustrations/bloom-${n}.png`}
+              class="bloom-frame"
               alt=""
               aria-hidden="true"
-              loading="lazy"
+              width="300"
+              height="300"
               decoding="async"
             />
           ))}
         </div>
       </div>
       <div class="space-sec__text">
-        <h2>Designed around you</h2>
+        <h2>For every stage of growth</h2>
         <p>
-          Ground floor at Lentor Modern Mall. Private treatment rooms and a
-          reformer studio, one minute from Lentor MRT (Thomson-East Coast Line,
-          Exit 1).
+          Goji takes its name from a berry that ripens in its own time. Bodies are
+          the same. They grow, change, and recover in stages, and care should meet
+          you at each one.
         </p>
-        <p>Stroller-friendly entry, step-free access, and private changing facilities.</p>
+        <p>
+          From pregnancy and birth to postpartum recovery, from your children's
+          early milestones to the changes of menopause, the same trusted team is
+          here for every stage.
+        </p>
       </div>
     </div>
   </section>
@@ -532,44 +539,23 @@ const reviews = [
      ====================================================== */
   .hero {
     background: var(--bg-page);
-    padding-block: clamp(2.5rem, 1.5rem + 5vw, 5rem);
-    text-align: center;
+    display: flex;
+    align-items: center;
+    /* Fill the fold so only the cream hero shows above it. */
+    min-height: calc(100svh - 68px);
+    padding-block: var(--space-7);
   }
   .hero__inner {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    gap: var(--space-7);
+    width: 100%;
     align-items: center;
   }
-
-  /* Flipbook: 1.75s cycle (0.25s per frame), bud → ripe berry.
-     delay = (N-1)*0.25 - 1.75 so frame 1 (bud) shows first, 7 (berry) last. */
-  .hero__bloom-wrap {
-    position: relative;
-    width: clamp(140px, 22vw, 200px);
-    height: clamp(140px, 22vw, 200px);
-    margin-inline: auto;
-    margin-bottom: var(--space-5);
-    flex-shrink: 0;
-  }
-  .bloom-frame {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    opacity: 0;
-    animation: bloom-appear 1.75s linear infinite;
-  }
-  .bloom-frame:nth-child(1) { animation-delay: -1.75s; }
-  .bloom-frame:nth-child(2) { animation-delay: -1.5s; }
-  .bloom-frame:nth-child(3) { animation-delay: -1.25s; }
-  .bloom-frame:nth-child(4) { animation-delay: -1s; }
-  .bloom-frame:nth-child(5) { animation-delay: -0.75s; }
-  .bloom-frame:nth-child(6) { animation-delay: -0.5s; }
-  .bloom-frame:nth-child(7) { animation-delay: -0.25s; }
-  @keyframes bloom-appear {
-    0%, 14.2%   { opacity: 1; }
-    14.3%, 100% { opacity: 0; }
+  @media (min-width: 820px) {
+    .hero__inner {
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: var(--space-9);
+    }
   }
 
   .hero__tagline {
@@ -579,8 +565,7 @@ const reviews = [
     color: var(--text-default);
     line-height: var(--lh-tight);
     letter-spacing: var(--tracking-tight);
-    max-width: 16ch;
-    margin-inline: auto;
+    max-width: 15ch;
     margin-bottom: var(--space-5);
     text-wrap: balance;
   }
@@ -588,7 +573,7 @@ const reviews = [
     font-family: var(--font-body);
     font-size: var(--fs-body);
     color: var(--text-muted);
-    max-width: 44ch;
+    max-width: 46ch;
     margin-bottom: var(--space-6);
     line-height: var(--lh-body);
   }
@@ -596,7 +581,40 @@ const reviews = [
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-3);
-    justify-content: center;
+  }
+
+  /* Hero clinic-photo crossfade (3 frames, 21s loop) */
+  .hero-shots {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background: color-mix(in srgb, var(--color-linen-deep) 70%, var(--bg-page));
+    box-shadow: var(--shadow-md);
+  }
+  .hero-shot {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    animation: hero-fade 21s infinite;
+  }
+  .hero-shot:nth-child(1) { animation-delay: 0s; }
+  .hero-shot:nth-child(2) { animation-delay: 7s; }
+  .hero-shot:nth-child(3) { animation-delay: 14s; }
+  @keyframes hero-fade {
+    0%   { opacity: 0; }
+    8%   { opacity: 1; }
+    33%  { opacity: 1; }
+    41%  { opacity: 0; }
+    100% { opacity: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hero-shot { animation: none; }
+    .hero-shot:nth-child(1) { opacity: 1; }
   }
 
   /* ======================================================
@@ -918,49 +936,49 @@ const reviews = [
   }
   .space-sec__inner {
     display: grid;
-    gap: var(--space-7);
+    gap: var(--space-6);
     align-items: center;
   }
   @media (min-width: 720px) {
     .space-sec__inner {
-      grid-template-columns: 6fr 5fr;
+      grid-template-columns: 5fr 6fr;
       gap: var(--space-8);
     }
   }
-  .space-sec__text h2 { margin: var(--space-2) 0 var(--space-4); }
+  .space-sec__text h2 { margin: 0 0 var(--space-4); }
   .space-sec__text p { color: var(--text-muted); }
+  .space-sec__text p + p { margin-top: var(--space-4); }
 
-  /* Soft crossfade slideshow of real clinic photos (3 frames, 21s loop) */
-  .space-slideshow {
+  /* Goji bloom flipbook: green bud -> ripe berry, 1.75s loop */
+  .bloom-wrap {
     position: relative;
-    width: 100%;
+    width: clamp(200px, 36vw, 320px);
     aspect-ratio: 1 / 1;
-    border-radius: var(--radius-md);
-    overflow: hidden;
-    background: color-mix(in srgb, var(--color-linen-deep) 70%, var(--bg-page));
+    margin-inline: auto;
   }
-  .space-frame {
+  .bloom-frame {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
     opacity: 0;
-    animation: space-crossfade 21s infinite;
+    animation: bloom-appear 1.75s linear infinite;
   }
-  .space-frame:nth-child(1) { animation-delay: 0s; }
-  .space-frame:nth-child(2) { animation-delay: 7s; }
-  .space-frame:nth-child(3) { animation-delay: 14s; }
-  @keyframes space-crossfade {
-    0%   { opacity: 0; }
-    8%   { opacity: 1; }
-    33%  { opacity: 1; }
-    41%  { opacity: 0; }
-    100% { opacity: 0; }
+  .bloom-frame:nth-child(1) { animation-delay: -1.75s; }
+  .bloom-frame:nth-child(2) { animation-delay: -1.5s; }
+  .bloom-frame:nth-child(3) { animation-delay: -1.25s; }
+  .bloom-frame:nth-child(4) { animation-delay: -1s; }
+  .bloom-frame:nth-child(5) { animation-delay: -0.75s; }
+  .bloom-frame:nth-child(6) { animation-delay: -0.5s; }
+  .bloom-frame:nth-child(7) { animation-delay: -0.25s; }
+  @keyframes bloom-appear {
+    0%, 14.2%   { opacity: 1; }
+    14.3%, 100% { opacity: 0; }
   }
   @media (prefers-reduced-motion: reduce) {
-    .space-frame { animation: none; }
-    .space-frame:nth-child(1) { opacity: 1; }
+    .bloom-frame { animation: none; }
+    .bloom-frame:nth-child(7) { opacity: 1; }
   }
 
   /* ======================================================
