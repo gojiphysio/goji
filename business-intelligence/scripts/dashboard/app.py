@@ -1322,6 +1322,51 @@ WHERE _TABLE_SUFFIX BETWEEN '{start.strftime("%Y%m%d")}' AND '{end.strftime("%Y%
         return empty
 
 
+def fetch_instagram(start: date, end: date) -> dict:
+    """Instagram account metrics for [start, end] from marts.fct_instagram
+    (Graph API export). Degrades to a safe empty dict if the table/job isn't
+    there yet, so the Instagram cards just stay empty until data flows.
+
+    Grain-aware: reach is the de-duplicated trailing-28-day total (latest, never
+    summed); profile_views is additive (summed over the range); followers is the
+    latest count, with growth = latest − first-in-range.
+    """
+    empty = {"reach_28": None, "profile_views": None, "followers": None,
+             "follower_growth": None}
+    try:
+        rows = _query(f"""
+SELECT
+  (SELECT value FROM `{PROJECT}.marts.fct_instagram`
+   WHERE metric = 'reach' AND period = 'days_28' AND metric_date <= '{end}'
+   ORDER BY metric_date DESC LIMIT 1)                                   AS reach_28,
+  (SELECT SUM(value) FROM `{PROJECT}.marts.fct_instagram`
+   WHERE metric = 'profile_views' AND period = 'day'
+     AND metric_date BETWEEN '{start}' AND '{end}')                     AS profile_views,
+  (SELECT value FROM `{PROJECT}.marts.fct_instagram`
+   WHERE metric = 'follower_count' AND period = 'day' AND metric_date <= '{end}'
+   ORDER BY metric_date DESC LIMIT 1)                                   AS followers_latest,
+  (SELECT value FROM `{PROJECT}.marts.fct_instagram`
+   WHERE metric = 'follower_count' AND period = 'day'
+     AND metric_date BETWEEN '{start}' AND '{end}'
+   ORDER BY metric_date ASC LIMIT 1)                                    AS followers_first
+""")
+    except Exception as e:
+        log.warning("instagram unavailable (run the ingest job / deploy_all.sh?): %s", e)
+        return empty
+    if not rows:
+        return empty
+    r = rows[0]
+    latest = _to_int(r["followers_latest"]) if r["followers_latest"] is not None else None
+    first  = _to_int(r["followers_first"])  if r["followers_first"]  is not None else None
+    growth = (latest - first) if (latest is not None and first is not None) else None
+    return {
+        "reach_28":        _to_int(r["reach_28"]) if r["reach_28"] is not None else None,
+        "profile_views":   _to_int(r["profile_views"]) if r["profile_views"] is not None else None,
+        "followers":       latest,
+        "follower_growth": growth,
+    }
+
+
 def fetch_lead_wins(start: date, end: date) -> dict:
     """Won leads (became a patient) by channel for leads that *entered* in
     [start, end] (bucketed by first_seen — the cohort funnel view). Reads
@@ -1433,9 +1478,9 @@ def build_payload() -> dict:
     presets    = preset_ranges()
 
     # max_workers sized to cover every concurrent fetch this request fires:
-    # 8 top-level + 4 ranges × 12 metrics + 3 ranges × 4 previous-window jobs = 68.
-    # Round up to 70 for headroom.
-    with ThreadPoolExecutor(max_workers=70, thread_name_prefix="bq") as ex:
+    # 8 top-level + 4 ranges × 13 metrics + 3 ranges × 5 previous-window jobs = 75.
+    # Round up to 90 for headroom.
+    with ThreadPoolExecutor(max_workers=90, thread_name_prefix="bq") as ex:
         # Range-independent (or fixed-window) fetches.
         # fetch_deferred is now per-range (moved into range_jobs below).
         f_cohorts       = ex.submit(fetch_cohorts)
@@ -1465,6 +1510,7 @@ def build_payload() -> dict:
                 "link_clicks":    ex.submit(fetch_link_clicks, start, end),
                 "google_ads":     ex.submit(fetch_google_ads, start, end),
                 "web_sessions":   ex.submit(fetch_web_sessions, start, end),
+                "instagram":      ex.submit(fetch_instagram, start, end),
                 "lead_wins":      ex.submit(fetch_lead_wins, start, end),
             }
             # Trend indicators compare each range against the immediately
@@ -1476,6 +1522,7 @@ def build_payload() -> dict:
                 range_jobs[key]["link_clicks_prev"]  = None
                 range_jobs[key]["google_ads_prev"]   = None
                 range_jobs[key]["web_sessions_prev"] = None
+                range_jobs[key]["instagram_prev"]    = None
                 range_jobs[key]["prev_start"]        = None
                 range_jobs[key]["prev_end"]          = None
             else:
@@ -1485,6 +1532,7 @@ def build_payload() -> dict:
                 range_jobs[key]["link_clicks_prev"]  = ex.submit(fetch_link_clicks, prev_start, prev_end)
                 range_jobs[key]["google_ads_prev"]   = ex.submit(fetch_google_ads, prev_start, prev_end)
                 range_jobs[key]["web_sessions_prev"] = ex.submit(fetch_web_sessions, prev_start, prev_end)
+                range_jobs[key]["instagram_prev"]    = ex.submit(fetch_instagram, prev_start, prev_end)
                 range_jobs[key]["prev_start"]        = prev_start.isoformat()
                 range_jobs[key]["prev_end"]          = prev_end.isoformat()
 
@@ -1513,6 +1561,8 @@ def build_payload() -> dict:
                 "google_ads_prev":  v["google_ads_prev"].result() if v["google_ads_prev"] else None,
                 "web_sessions":      v["web_sessions"].result(),
                 "web_sessions_prev": v["web_sessions_prev"].result() if v["web_sessions_prev"] else None,
+                "instagram":         v["instagram"].result(),
+                "instagram_prev":    v["instagram_prev"].result() if v["instagram_prev"] else None,
                 "funnel_paths":     _build_funnel_paths(v["link_clicks"].result(), v["kpis"].result(),
                                                         v["lead_wins"].result()),
             }

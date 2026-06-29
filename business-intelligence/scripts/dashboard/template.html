@@ -1716,10 +1716,21 @@
         </div>
       </div>
       <div class="kpi-row mkt-kpis-3">
-        <div class="kpi-card wip">
-          <div class="kpi-label">Instagram reach / month</div>
-          <div class="kpi-value">— pending integration</div>
-          <div class="mkt-target">Target 3–5× (Reels-led)</div>
+        <div class="kpi-card">
+          <div class="kpi-label">Instagram reach <span class="range-label">last 28 days</span> <span class="badge live">Instagram</span></div>
+          <div class="kpi-value" id="mkt_ig_reach">-</div>
+          <div class="mkt-target">Target 3–5× (Reels-led) · de-duplicated 28-day reach</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Instagram profile visits <span class="range-label">this period</span> <span class="badge live">Instagram</span></div>
+          <div class="kpi-value" id="mkt_ig_profile_views">-</div>
+          <div class="kpi-trend" id="mkt_ig_profile_views_trend" hidden></div>
+          <div class="mkt-target">Intent signal · taps to your profile</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Instagram followers <span class="badge live">Instagram</span></div>
+          <div class="kpi-value" id="mkt_ig_followers">-</div>
+          <div class="mkt-target" id="mkt_ig_follower_growth">Total followers</div>
         </div>
         <div class="kpi-card wip">
           <div class="kpi-label">GBP booking clicks + calls</div>
@@ -2891,6 +2902,25 @@
         document.getElementById('mkt_web_pageviews').textContent = ws.pageviews
           ? `${fmtInt(ws.pageviews)} page views` : 'Condition-page views, booking starts';
         renderTrend('mkt_web_sessions_trend', ws.sessions, wsp && wsp.sessions, ps, pe);
+      }
+
+      // Instagram (Graph API). reach = de-duplicated 28-day total (no trend, it's
+      // a fixed window); profile visits are range-additive (trend vs prev);
+      // followers shows the latest count + growth over the period.
+      const ig = r.instagram, igp = r.instagram_prev;
+      if (ig) {
+        document.getElementById('mkt_ig_reach').textContent =
+          ig.reach_28 != null ? fmtInt(ig.reach_28) : '—';
+        document.getElementById('mkt_ig_profile_views').textContent =
+          ig.profile_views != null ? fmtInt(ig.profile_views) : '—';
+        renderTrend('mkt_ig_profile_views_trend', ig.profile_views, igp && igp.profile_views, ps, pe);
+        document.getElementById('mkt_ig_followers').textContent =
+          ig.followers != null ? fmtInt(ig.followers) : '—';
+        if (ig.follower_growth != null) {
+          const g = ig.follower_growth;
+          document.getElementById('mkt_ig_follower_growth').textContent =
+            `${g >= 0 ? '+' : ''}${fmtInt(g)} this period`;
+        }
       }
 
       mktActiveChart = renderTrendChart(mktActiveChart, 'mktActiveChart',

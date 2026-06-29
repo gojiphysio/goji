@@ -78,3 +78,10 @@ See `DEPLOY.md`.
   to (no FK from `link_click_events` to `lead_events`/invoices — closing that gap
   needs a click-id passthrough). `renderFunnelSankey` degrades gracefully if the
   plugin or the slug data is missing.
+- The **Instagram cards** (reach, profile visits, followers) read
+  `marts.fct_instagram` via `fetch_instagram`, fed by the `instagram_insights`
+  ingest job (Graph API). **Reach is de-duplicated** → the card shows the
+  trailing-28-day total (`period='days_28'`), never a sum of daily reach; profile
+  views are range-additive; followers is the latest count + growth delta. Cards
+  stay "—" until the job runs (gated on the `IG_USER_ID` repo var — see DEPLOY.md).
+  IG metrics are top-of-funnel KPIs, **not** a Sankey column (different scale/grain).

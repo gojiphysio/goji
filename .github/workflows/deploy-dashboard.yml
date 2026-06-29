@@ -19,6 +19,7 @@ on:
       - "business-intelligence/scripts/dashboard/**"
       - "business-intelligence/scripts/sql/**"
       - "business-intelligence/scripts/ingestion/plato_patients/**"
+      - "business-intelligence/scripts/ingestion/instagram_insights/**"
       - ".github/workflows/deploy-dashboard.yml"
   workflow_dispatch: {}   # allow manual "Run workflow" from the Actions tab
 
@@ -65,6 +66,9 @@ jobs:
       - name: Ingestion tests
         working-directory: business-intelligence/scripts/ingestion/plato_patients
         run: python -m pytest test_extract.py -q
+      - name: Instagram ingestion tests
+        working-directory: business-intelligence/scripts/ingestion/instagram_insights
+        run: python -m pytest test_extract.py -q
 
   # ---- 2. Deploy (only after tests pass) ----------------------------------
   deploy:
@@ -83,7 +87,7 @@ jobs:
              || [ "$base" = "0000000000000000000000000000000000000000" ] \
              || ! git cat-file -e "${base}^{commit}" 2>/dev/null; then
             echo "No usable base commit — deploying everything."
-            { echo "sql=true"; echo "patients=true"; echo "dashboard=true"; } >> "$GITHUB_OUTPUT"
+            { echo "sql=true"; echo "patients=true"; echo "instagram=true"; echo "dashboard=true"; } >> "$GITHUB_OUTPUT"
             exit 0
           fi
           changed="$(git diff --name-only "$base" "${{ github.sha }}")"
@@ -91,6 +95,7 @@ jobs:
           base_path="business-intelligence/scripts"
           grep -q "^${base_path}/sql/"                      <<<"$changed" && echo "sql=true"       >>"$GITHUB_OUTPUT" || echo "sql=false"       >>"$GITHUB_OUTPUT"
           grep -q "^${base_path}/ingestion/plato_patients/" <<<"$changed" && echo "patients=true"  >>"$GITHUB_OUTPUT" || echo "patients=false"  >>"$GITHUB_OUTPUT"
+          grep -q "^${base_path}/ingestion/instagram_insights/" <<<"$changed" && echo "instagram=true" >>"$GITHUB_OUTPUT" || echo "instagram=false" >>"$GITHUB_OUTPUT"
           grep -q "^${base_path}/dashboard/"                <<<"$changed" && echo "dashboard=true" >>"$GITHUB_OUTPUT" || echo "dashboard=false" >>"$GITHUB_OUTPUT"
 
       - name: Authenticate to Google Cloud
@@ -126,6 +131,22 @@ jobs:
             --source . --region "${REGION}" --project "${PROJECT}" --quiet
           # Run once so name/phone changes show up immediately (else nightly).
           gcloud run jobs execute plato-patients-ingest \
+            --region "${REGION}" --project "${PROJECT}" --wait
+
+      # Gated on the IG_USER_ID repo variable: until Instagram is set up (Meta
+      # app, token secret `ig-access-token`, raw_instagram dataset + grants — see
+      # the job README + DEPLOY.md), this step is skipped, so CI never fails on a
+      # half-configured integration and the dashboard card just stays "—".
+      - name: Deploy + run Instagram insights job
+        if: steps.changes.outputs.instagram == 'true' && vars.IG_USER_ID != ''
+        working-directory: business-intelligence/scripts/ingestion/instagram_insights
+        run: |
+          gcloud run jobs deploy instagram-insights-ingest \
+            --source . --region "${REGION}" --project "${PROJECT}" \
+            --set-secrets=IG_ACCESS_TOKEN=ig-access-token:latest \
+            --set-env-vars=IG_USER_ID=${{ vars.IG_USER_ID }},BQ_PROJECT=${PROJECT} \
+            --quiet
+          gcloud run jobs execute instagram-insights-ingest \
             --region "${REGION}" --project "${PROJECT}" --wait
 
       - name: Deploy dashboard

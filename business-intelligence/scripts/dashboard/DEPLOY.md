@@ -214,6 +214,46 @@ that point *into* the website (IG bio, GBP, ads, email) with
 the same channels the funnel uses. (The `go.gojiphysio.com/<slug>` redirector
 sends taps to WhatsApp/Plato, not the site, so it's unaffected.)
 
+## Instagram insights (Instagram cards)
+
+The Marketing tab's three Instagram cards (reach, profile visits, followers) read
+`marts.fct_instagram`, fed by the `instagram-insights-ingest` Cloud Run Job
+(`scripts/ingestion/instagram_insights/`) off the free Instagram Graph API. Cards
+and `fetch_instagram` ship inert — empty `marts.fct_instagram` ⇒ "—". To light up:
+
+1. **Account + app:** Instagram must be a **Business/Creator** account linked to a
+   **Facebook Page**; create a Meta Business app with `instagram_basic`,
+   `instagram_manage_insights`, `pages_read_engagement`.
+2. **Token + id:** mint a **long-lived access token** (~60 days) and note the
+   **IG Business account id**. Store the token in Secret Manager:
+
+       printf '%s' "<LONG_LIVED_TOKEN>" | gcloud secrets create ig-access-token --data-file=-
+
+   Rotate monthly before expiry (the job README has the cadence).
+3. **Dataset + table:** `bq mk --location=<loc> raw_instagram`, then run the job's
+   `schema.sql` once to create `insights_raw`.
+4. **Grants:** the **ingest job SA** needs `dataEditor` on `raw_instagram` (+
+   `secretAccessor` on `ig-access-token`); the **dashboard SA** needs `dataViewer`
+   on `raw_instagram` (so its stg/marts reads work):
+
+       bq add-iam-policy-binding \
+         --member="serviceAccount:dashboard-sa@goji-bi.iam.gserviceaccount.com" \
+         --role="roles/bigquery.dataViewer" \
+         goji-bi:raw_instagram
+
+5. **Set the repo variable `IG_USER_ID`** → this *un-gates* the deploy step in
+   `deploy-dashboard.yml`, which then deploys the job (mounting `ig-access-token`)
+   and runs it once. Until `IG_USER_ID` is set, CI skips the job entirely.
+6. **Schedule** a daily run (one-time):
+
+       gcloud scheduler jobs create http instagram-insights-daily \
+         --schedule="30 1 * * *" --uri=".../run.googleapis.com/.../jobs/instagram-insights-ingest:run" \
+         --http-method=POST --oauth-service-account-email=<scheduler-sa>
+
+`marts.fct_instagram` / `stg.instagram` deploy automatically via `deploy_all.sh`
+(globs `stg/*.sql` + `marts/*.sql`). **Reach is de-duplicated** — the card shows
+the trailing-28-day total (`period='days_28'`), never a sum of daily reach.
+
 ## Plato online-booking attribution — spike verdict (2026-06)
 
 **Question:** can a `?ref=<code>` we append to the Plato booking URL be traced
