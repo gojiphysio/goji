@@ -1282,116 +1282,56 @@ WHERE _TABLE_SUFFIX BETWEEN '{start.strftime("%Y%m%d")}' AND '{end.strftime("%Y%
         return empty
 
 
-def fetch_marketing_funnel(start: date, end: date) -> dict:
-    """Lead-based funnel aggregates for [start, end] — the ENQUIRE→BOOK→ACTIVE
-    backbone reads marts.lead_events (per dashboard AGENTS.md: "funnel metrics
-    read lead aggregates"), plus RETAIN from marts.fct_service_delivered.
+# Funnel-path source label per link slug prefix (slug = "<source>-<cta>", see
+# LINK_SLUGS). `bio` is handled specially: bio.site is the Instagram link-in-bio
+# page, so bio-* taps flow Instagram -> bio.site -> CTA rather than being their
+# own discovery source. A generic slug with no prefix ('wa' / 'plato') is "Other".
+FUNNEL_SOURCE = {"web": "Web", "gbp": "Google", "ads": "Ads", "qr": "QR", "ig": "Instagram"}
 
-    Cumulative funnel semantics: a lead counts at every stage it *ever reached*,
-    not just its current one (a `won` lead must still count in `booked`). We take
-    the furthest stage each lead reached (inquiry<qualified<booked<won; `lost` is
-    not a progress stage) and bucket the lead by `first_seen` — the period it
-    entered the pipeline (standard cohort funnel). `qualified` folds into ENQUIRE.
 
-    RETAIN = patients with >=2 delivered visits in the window.
+def _build_funnel_paths(link_clicks: dict, kpis: dict) -> dict:
+    """Build the acquisition-funnel Sankey flows for the front-end from the
+    per-slug click counts already in `link_clicks` (exact, from
+    marts.link_click_events) — no extra query.
 
-    Degrades to zeros if a table isn't deployed yet (like fetch_link_clicks), so
-    the Marketing tab still renders. The cross-source stages (REACH impressions,
-    ENQUIRE click volume, ACTIVE all-source first visits) are merged in by
-    _build_funnel from the already-fetched google_ads / link_clicks / kpis.
+    Flows are Source -> CTA, with one intermediate hop: Instagram -> bio.site ->
+    CTA for bio-* taps (the link-in-bio page), while ig-* taps are a direct
+    Instagram -> CTA. `first_visits` is the all-source first-visit count for the
+    period (shown as a single stat, not split per CTA — a tap can't yet be traced
+    to the booking it leads to). Returns empty flows if no clicks, so the section
+    degrades gracefully like the other fetch_* helpers.
     """
-    empty = {"enquired": 0, "booked": 0, "won": 0, "retain": 0}
-    try:
-        leads = _query(f"""
-WITH lead_progress AS (
-  SELECT
-    lead_id,
-    MIN(updated_at) AS first_seen,
-    MAX(CASE stage
-          WHEN 'inquiry'   THEN 1
-          WHEN 'qualified' THEN 2
-          WHEN 'booked'    THEN 3
-          WHEN 'won'       THEN 4
-          ELSE 0 END) AS max_stage
-  FROM `{PROJECT}.marts.lead_events`
-  GROUP BY lead_id
-)
-SELECT
-  COUNTIF(max_stage >= 1) AS enquired,
-  COUNTIF(max_stage >= 3) AS booked,
-  COUNTIF(max_stage >= 4) AS won
-FROM lead_progress
-WHERE DATE(first_seen) BETWEEN '{start}' AND '{end}'
-""")[0]
-        retain = _query(f"""
-SELECT COUNT(*) AS repeat_visitors FROM (
-  SELECT patient_id
-  FROM `{PROJECT}.marts.fct_service_delivered`
-  WHERE delivery_date BETWEEN '{start}' AND '{end}'
-    AND patient_id IS NOT NULL
-  GROUP BY patient_id
-  HAVING COUNT(*) >= 2
-)
-""")[0]
-    except Exception as e:
-        log.warning("marketing_funnel unavailable (run deploy_all.sh?): %s", e)
-        return empty
+    lc = link_clicks or {}
+    wa = lc.get("wa_by_slug", {}) or {}
+    bk = lc.get("book_by_slug", {}) or {}
+
+    flows: dict[tuple[str, str], int] = {}
+    def add(src: str, dst: str, n: int) -> None:
+        if n:
+            flows[(src, dst)] = flows.get((src, dst), 0) + n
+
+    bio_total = 0
+    for by_slug, cta in ((wa, "WhatsApp"), (bk, "Plato booking")):
+        for slug, n in by_slug.items():
+            prefix = slug.split("-")[0] if "-" in slug else None
+            if prefix == "bio":
+                add("bio.site", cta, n)   # Instagram -> bio.site edge added once below
+                bio_total += n
+            elif prefix == "ig":
+                add("Instagram", cta, n)  # direct Instagram tap (story/post sticker)
+            else:
+                add(FUNNEL_SOURCE.get(prefix, "Other"), cta, n)
+    if bio_total:
+        add("Instagram", "bio.site", bio_total)
+
+    wa_taps    = sum(wa.values())
+    plato_taps = sum(bk.values())
     return {
-        "enquired": _to_int(leads["enquired"]),
-        "booked":   _to_int(leads["booked"]),
-        "won":      _to_int(leads["won"]),
-        "retain":   _to_int(retain["repeat_visitors"]),
-    }
-
-
-def _build_funnel(raw: dict, link_clicks: dict, kpis: dict, google_ads: dict) -> dict:
-    """Assemble the funnel for the front-end from the lead aggregates (raw) plus
-    the cross-source context already fetched for the same range.
-
-    The CHARTED stages are the tracked lead pipeline — Enquire → Book → Active.
-    These share one grain (counts of leads) and are monotonic by construction
-    (won ⊆ booked ⊆ enquired, from the cumulative max_stage query), so the
-    stage-to-stage conversions are always ≤100% and the bars always narrow.
-
-    Reach / Engage / Retention are NOT charted on the same axis: they're a
-    different scale and grain (ad impressions are 100×+ a lead count; retention
-    is an all-source clinic metric with no lead linkage). Mixing them onto a
-    linear bar axis would flatten the lead bars to slivers and could show a
-    >100% "conversion". They're returned as labelled `context` instead. Retention
-    is repeat_visitors / active_patients — both from fct_service_delivered, and
-    repeat ⊆ active, so the rate is always ≤100%.
-    """
-    clicks       = (link_clicks or {}).get("total")
-    new_patients = (kpis or {}).get("new_patients")
-    active_pts   = (kpis or {}).get("active_patients")
-    impressions  = (google_ads or {}).get("impressions") or None
-    enquired = raw.get("enquired", 0)
-    booked   = raw.get("booked", 0)
-    won      = raw.get("won", 0)
-    retain   = raw.get("retain", 0)
-
-    def ratio(n: int, d: int):
-        return round(n / d, 3) if d else None
-
-    return {
-        "stages": [
-            {"key": "enquire", "label": "Enquire", "value": enquired,
-             "context": clicks, "context_label": "tracked link taps"},
-            {"key": "book",    "label": "Book",    "value": booked},
-            {"key": "active",  "label": "Active",  "value": won,
-             "context": new_patients, "context_label": "all-source first visits"},
-        ],
-        "conv": {
-            "enquire_book": ratio(booked, enquired),
-            "book_active":  ratio(won, booked),
-        },
-        "context": {
-            "reach":           impressions,               # ad impressions (IG/website pending)
-            "engage":          None,                      # pending integration
-            "repeat_visitors": retain,
-            "active_patients": active_pts,
-            "repeat_rate":     ratio(retain, active_pts), # repeat ⊆ active ⇒ ≤100%
-        },
+        "flows":        [{"from": a, "to": b, "flow": n} for (a, b), n in flows.items()],
+        "total_taps":   wa_taps + plato_taps,
+        "wa_taps":      wa_taps,
+        "plato_taps":   plato_taps,
+        "first_visits": (kpis or {}).get("new_patients"),
     }
 
 
@@ -1414,7 +1354,7 @@ def build_payload() -> dict:
     presets    = preset_ranges()
 
     # max_workers sized to cover every concurrent fetch this request fires:
-    # 8 top-level + 4 ranges × 11 metrics + 3 ranges × 4 previous-window jobs = 64.
+    # 8 top-level + 4 ranges × 10 metrics + 3 ranges × 3 previous-window jobs = 57.
     # Round up to 70 for headroom.
     with ThreadPoolExecutor(max_workers=70, thread_name_prefix="bq") as ex:
         # Range-independent (or fixed-window) fetches.
@@ -1445,7 +1385,6 @@ def build_payload() -> dict:
                 "deferred":       ex.submit(fetch_deferred, end),
                 "link_clicks":    ex.submit(fetch_link_clicks, start, end),
                 "google_ads":     ex.submit(fetch_google_ads, start, end),
-                "funnel":         ex.submit(fetch_marketing_funnel, start, end),
             }
             # Trend indicators compare each range against the immediately
             # preceding window of equal length (e.g. the 30 days before the
@@ -1455,7 +1394,6 @@ def build_payload() -> dict:
                 range_jobs[key]["prev_kpis"]        = None
                 range_jobs[key]["link_clicks_prev"] = None
                 range_jobs[key]["google_ads_prev"]  = None
-                range_jobs[key]["funnel_prev"]      = None
                 range_jobs[key]["prev_start"]       = None
                 range_jobs[key]["prev_end"]         = None
             else:
@@ -1464,7 +1402,6 @@ def build_payload() -> dict:
                 range_jobs[key]["prev_kpis"]        = ex.submit(fetch_kpis, prev_start, prev_end)
                 range_jobs[key]["link_clicks_prev"] = ex.submit(fetch_link_clicks, prev_start, prev_end)
                 range_jobs[key]["google_ads_prev"]  = ex.submit(fetch_google_ads, prev_start, prev_end)
-                range_jobs[key]["funnel_prev"]      = ex.submit(fetch_marketing_funnel, prev_start, prev_end)
                 range_jobs[key]["prev_start"]       = prev_start.isoformat()
                 range_jobs[key]["prev_end"]         = prev_end.isoformat()
 
@@ -1491,9 +1428,7 @@ def build_payload() -> dict:
                 "link_clicks_prev": v["link_clicks_prev"].result() if v["link_clicks_prev"] else None,
                 "google_ads":       v["google_ads"].result(),
                 "google_ads_prev":  v["google_ads_prev"].result() if v["google_ads_prev"] else None,
-                "funnel":           _build_funnel(v["funnel"].result(), v["link_clicks"].result(),
-                                                   v["kpis"].result(), v["google_ads"].result()),
-                "funnel_prev":      v["funnel_prev"].result() if v["funnel_prev"] else None,
+                "funnel_paths":     _build_funnel_paths(v["link_clicks"].result(), v["kpis"].result()),
             }
 
         return {

@@ -67,4 +67,14 @@ See `DEPLOY.md`.
   and wire it in `renderMarketingMetrics(r)`.
 - The manual enquiry log is being **replaced by the front-desk Leads pipeline**
   (`marts.lead_events`) — the single source of truth for inbound inquiries. Don't
-  build new enquiry capture here; funnel metrics should read lead aggregates.
+  build new enquiry capture here.
+- The **acquisition funnel** ("by path") is a Sankey (`chartjs-chart-sankey`,
+  **vendored in `static/`**, not a CDN — registered once near the top of the main
+  script, guarded). `_build_funnel_paths` builds Source → bio.site → CTA flows
+  from `link_click_events` slug splits (the `wa_by_slug` / `book_by_slug` already
+  in the payload — no extra query). bio.site is the Instagram link-in-bio hop
+  (`bio-*` slugs route Instagram → bio.site → CTA; `ig-*` are direct). First
+  visits show as a single stat: a tap can't yet be traced to the booking it leads
+  to (no FK from `link_click_events` to `lead_events`/invoices — closing that gap
+  needs a click-id passthrough). `renderFunnelSankey` degrades gracefully if the
+  plugin or the slug data is missing.

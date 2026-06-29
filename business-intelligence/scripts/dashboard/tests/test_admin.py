@@ -253,48 +253,44 @@ def test_lead_stage_and_channel_vocab():
     assert "instagram" in app.VALID_LEAD_CHANNELS
 
 
-# --- Marketing funnel assembler (_build_funnel, pure) -----------------------
-# The lead aggregation lives in SQL (exercised end-to-end per DEPLOY.md). The
-# pure assembler that shapes stages + conversion rates is unit-tested here.
+# --- Acquisition-funnel Sankey paths (_build_funnel_paths, pure) -------------
+# The per-slug click counts come from marts.link_click_events (exercised
+# end-to-end per DEPLOY.md). The pure builder that turns those slug counts into
+# Source -> bio.site -> CTA flows is unit-tested here.
 
-def test_build_funnel_shape_and_conversions():
-    raw = {"enquired": 100, "booked": 40, "won": 30, "retain": 60}
-    f = app._build_funnel(
-        raw,
-        link_clicks={"total": 250},
-        kpis={"new_patients": 45, "active_patients": 120},
-        google_ads={"impressions": 9000},
-    )
-    # Charted stages = the grain-consistent lead pipeline only.
-    keys = [s["key"] for s in f["stages"]]
-    assert keys == ["enquire", "book", "active"]
+def test_build_funnel_paths_sources_ctas_and_biosite_hop():
+    link_clicks = {
+        "wa_by_slug":   {"ig-wa": 50, "bio-wa": 60, "web-wa": 40, "gbp-wa": 30, "wa": 5},
+        "book_by_slug": {"bio-plato": 20, "web-plato": 24, "ads-plato": 28, "plato": 3},
+    }
+    f = app._build_funnel_paths(link_clicks, {"new_patients": 47})
+    flows = {(d["from"], d["to"]): d["flow"] for d in f["flows"]}
 
-    stage = {s["key"]: s for s in f["stages"]}
-    assert stage["enquire"]["value"] == 100
-    assert stage["enquire"]["context"] == 250        # tracked link taps
-    assert stage["active"]["value"] == 30            # lead-attributed first visits
-    assert stage["active"]["context"] == 45          # all-source first visits
+    # ig-* is a direct Instagram tap; bio-* routes Instagram -> bio.site -> CTA.
+    assert flows[("Instagram", "WhatsApp")] == 50        # ig-wa direct
+    assert flows[("Instagram", "bio.site")] == 80        # bio-wa 60 + bio-plato 20
+    assert flows[("bio.site", "WhatsApp")] == 60
+    assert flows[("bio.site", "Plato booking")] == 20
+    # Other sources map by slug prefix; gbp -> Google.
+    assert flows[("Web", "WhatsApp")] == 40
+    assert flows[("Google", "WhatsApp")] == 30
+    assert flows[("Web", "Plato booking")] == 24
+    assert flows[("Ads", "Plato booking")] == 28
+    # Generic fallback slugs ('wa' / 'plato') have no source prefix -> "Other".
+    assert flows[("Other", "WhatsApp")] == 5
+    assert flows[("Other", "Plato booking")] == 3
 
-    # Charted conversions are stage[i+1]/stage[i] and always <=100% (won<=booked<=enquired).
-    assert f["conv"]["enquire_book"] == 0.4
-    assert f["conv"]["book_active"] == 0.75
-
-    # Reach/Engage/Retention are context, not charted stages.
-    assert f["context"]["reach"] == 9000             # ad impressions
-    assert f["context"]["engage"] is None            # pending integration
-    # Retention is repeat/active (both all-source); repeat <= active so <=100%.
-    assert f["context"]["repeat_rate"] == 0.5        # 60 / 120
+    assert f["wa_taps"] == 185 and f["plato_taps"] == 75
+    assert f["total_taps"] == 260
+    assert f["first_visits"] == 47
 
 
-def test_build_funnel_degrades_without_sources():
-    # No clicks/ads/kpis and zero leads → no division by zero, nulls not crashes.
-    f = app._build_funnel({"enquired": 0, "booked": 0, "won": 0, "retain": 0},
-                          link_clicks={}, kpis={}, google_ads={})
-    stage = {s["key"]: s for s in f["stages"]}
-    assert stage["enquire"]["context"] is None       # no click total
-    assert f["conv"]["enquire_book"] is None          # 0 denominator → None, not error
-    assert f["context"]["reach"] is None             # no impressions → pending
-    assert f["context"]["repeat_rate"] is None       # 0 active patients → None, not error
+def test_build_funnel_paths_degrades_without_clicks():
+    # No clicks / no kpis → empty flows and safe nulls, never an exception.
+    f = app._build_funnel_paths({}, {})
+    assert f["flows"] == []
+    assert f["total_taps"] == 0
+    assert f["first_visits"] is None
 
 
 # --- Marketing tab: founder-only operating-tool routes ----------------------
