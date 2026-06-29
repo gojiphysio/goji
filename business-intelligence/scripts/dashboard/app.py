@@ -1282,6 +1282,59 @@ WHERE _TABLE_SUFFIX BETWEEN '{start.strftime("%Y%m%d")}' AND '{end.strftime("%Y%
         return empty
 
 
+# Funnel-path source label per link slug prefix (slug = "<source>-<cta>", see
+# LINK_SLUGS). `bio` is handled specially: bio.site is the Instagram link-in-bio
+# page, so bio-* taps flow Instagram -> bio.site -> CTA rather than being their
+# own discovery source. A generic slug with no prefix ('wa' / 'plato') is "Other".
+FUNNEL_SOURCE = {"web": "Web", "gbp": "Google", "ads": "Ads", "qr": "QR", "ig": "Instagram"}
+
+
+def _build_funnel_paths(link_clicks: dict, kpis: dict) -> dict:
+    """Build the acquisition-funnel Sankey flows for the front-end from the
+    per-slug click counts already in `link_clicks` (exact, from
+    marts.link_click_events) — no extra query.
+
+    Flows are Source -> CTA, with one intermediate hop: Instagram -> bio.site ->
+    CTA for bio-* taps (the link-in-bio page), while ig-* taps are a direct
+    Instagram -> CTA. `first_visits` is the all-source first-visit count for the
+    period (shown as a single stat, not split per CTA — a tap can't yet be traced
+    to the booking it leads to). Returns empty flows if no clicks, so the section
+    degrades gracefully like the other fetch_* helpers.
+    """
+    lc = link_clicks or {}
+    wa = lc.get("wa_by_slug", {}) or {}
+    bk = lc.get("book_by_slug", {}) or {}
+
+    flows: dict[tuple[str, str], int] = {}
+    def add(src: str, dst: str, n: int) -> None:
+        if n:
+            flows[(src, dst)] = flows.get((src, dst), 0) + n
+
+    bio_total = 0
+    for by_slug, cta in ((wa, "WhatsApp"), (bk, "Plato booking")):
+        for slug, n in by_slug.items():
+            prefix = slug.split("-")[0] if "-" in slug else None
+            if prefix == "bio":
+                add("bio.site", cta, n)   # Instagram -> bio.site edge added once below
+                bio_total += n
+            elif prefix == "ig":
+                add("Instagram", cta, n)  # direct Instagram tap (story/post sticker)
+            else:
+                add(FUNNEL_SOURCE.get(prefix, "Other"), cta, n)
+    if bio_total:
+        add("Instagram", "bio.site", bio_total)
+
+    wa_taps    = sum(wa.values())
+    plato_taps = sum(bk.values())
+    return {
+        "flows":        [{"from": a, "to": b, "flow": n} for (a, b), n in flows.items()],
+        "total_taps":   wa_taps + plato_taps,
+        "wa_taps":      wa_taps,
+        "plato_taps":   plato_taps,
+        "first_visits": (kpis or {}).get("new_patients"),
+    }
+
+
 def build_payload() -> dict:
     """Fan all BQ queries out in parallel. ~27 queries; serial wall time was
     ~38s, parallel is limited by the slowest single query (~3-5s).
@@ -1301,7 +1354,7 @@ def build_payload() -> dict:
     presets    = preset_ranges()
 
     # max_workers sized to cover every concurrent fetch this request fires:
-    # 9 top-level + 4 ranges × 9 metrics + 3 ranges × 3 previous-window jobs = 54.
+    # 8 top-level + 4 ranges × 10 metrics + 3 ranges × 3 previous-window jobs = 57.
     # Round up to 70 for headroom.
     with ThreadPoolExecutor(max_workers=70, thread_name_prefix="bq") as ex:
         # Range-independent (or fixed-window) fetches.
@@ -1375,6 +1428,7 @@ def build_payload() -> dict:
                 "link_clicks_prev": v["link_clicks_prev"].result() if v["link_clicks_prev"] else None,
                 "google_ads":       v["google_ads"].result(),
                 "google_ads_prev":  v["google_ads_prev"].result() if v["google_ads_prev"] else None,
+                "funnel_paths":     _build_funnel_paths(v["link_clicks"].result(), v["kpis"].result()),
             }
 
         return {

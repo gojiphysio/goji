@@ -227,6 +227,17 @@
     .calc-grid > *, .pl-grid > * { min-width: 0; }
     .chart-wrap { position: relative; height: 280px; }
     .chart-wrap.small { height: 220px; }
+    .chart-wrap.tall { height: 400px; }
+    /* Acquisition-funnel (Sankey) legend + summary stats */
+    .funnel-legend { display: flex; flex-wrap: wrap; gap: 8px 0; margin-top: 14px; font-size: 12px; color: var(--ink-soft); }
+    .funnel-legend .grp { display: flex; align-items: center; gap: 12px; }
+    .funnel-legend .grp + .grp { margin-left: 16px; padding-left: 16px; border-left: 1px solid var(--border); }
+    .funnel-legend .item { display: inline-flex; align-items: center; gap: 5px; }
+    .funnel-legend .sw { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+    .funnel-legend .grp-lbl { color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.04em; font-size: 10px; }
+    .funnel-stats { display: flex; flex-wrap: wrap; gap: 22px; margin-top: 16px; }
+    .funnel-stats .stat { font-size: 12px; color: var(--ink-soft); }
+    .funnel-stats .stat b { display: block; font-size: 19px; color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
 
     .pill {
       display: inline-block; padding: 2px 8px; border-radius: 999px;
@@ -1740,6 +1751,15 @@
       </div>
     </section>
 
+    <!-- Acquisition funnel · by path (Source → bio.site → CTA) -->
+    <section class="q">
+      <h2>Acquisition funnel · by path <span class="badge live">Live</span></h2>
+      <div class="subtitle">Where someone taps one of our links &rarr; the button they tap. Instagram splits into <strong>direct</strong> taps and ones <strong>via bio.site</strong> (the link in bio). Thicker bands mean more people.</div>
+      <div class="chart-wrap tall"><canvas id="mktFunnelChart"></canvas></div>
+      <div class="funnel-legend" id="mkt_funnel_legend"></div>
+      <div class="funnel-stats" id="mkt_funnel_stats"></div>
+    </section>
+
     <!-- Marketing mix lens + ICP -->
     <section class="q">
       <h2>Marketing-mix lens</h2>
@@ -1894,6 +1914,9 @@
   <script id="dashboardData" type="application/json">__DATA_PLACEHOLDER__</script>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+  <!-- Sankey controller for the acquisition funnel. Vendored in static/ (not a
+       CDN) so the funnel doesn't depend on a second external host. -->
+  <script src="static/chartjs-chart-sankey.min.js"></script>
   <script>
   (function() {
     // Real data is fetched from /api/data after first paint. The inline tag
@@ -1902,6 +1925,13 @@
     // when generate.py inlines a full payload.
     let DATA = JSON.parse(document.getElementById('dashboardData').textContent);
     const STORAGE_KEY = 'goji_dashboard_range';
+
+    // Register the Sankey controller (vendored plugin) once, if it loaded. The
+    // acquisition funnel no-ops gracefully if this isn't present.
+    try {
+      const SK = window['chartjs-chart-sankey'];
+      if (SK && window.Chart) Chart.register(SK.SankeyController, SK.Flow);
+    } catch (e) { /* funnel degrades; rest of the dashboard is unaffected */ }
 
     const GOJI    = '#c44a3a';
     const GOLD    = '#d99818';
@@ -2781,7 +2811,7 @@
     }
 
     /* ===== Marketing tab ===== */
-    let mktAcqChart, mktActiveChart, mktPillarChart, mktSourceChart;
+    let mktAcqChart, mktActiveChart, mktPillarChart, mktSourceChart, mktFunnelChart;
     // Latest operating-tool state, keyed "item_type|item_key". Seeded from the
     // payload, updated optimistically on each save.
     const marketingOps = new Map();
@@ -2879,6 +2909,96 @@
       document.getElementById('mkt_pillar_legend').innerHTML = pLabels.map((p, i) =>
         `<div><span class="dot-sq" style="background:${pColors[i]}"></span>${escapeHtml(p)} — ${total ? Math.round(pValues[i] / total * 100) : 0}%</div>`
       ).join('');
+
+      renderFunnelSankey(r);
+    }
+
+    // Acquisition funnel (by path): a Sankey of Source -> bio.site -> CTA, built
+    // from the exact per-slug click counts (r.funnel_paths from the backend).
+    // bio.site is the Instagram link-in-bio page, so it sits as an intermediate
+    // hop after Instagram; direct Instagram taps skip it. First visits are shown
+    // as a single stat (a tap can't yet be traced to the booking it leads to).
+    const FUNNEL_COLUMN = {
+      'Instagram': 0, 'Web': 0, 'Google': 0, 'Ads': 0, 'QR': 0, 'Other': 0,
+      'bio.site': 1, 'WhatsApp': 2, 'Plato booking': 2,
+    };
+    const FUNNEL_COLOR = {
+      'Instagram': '#9c6c2e', 'bio.site': '#c6a36b', 'Web': NEUTRAL,
+      'Google': COBALT, 'Ads': GOLD, 'QR': SAGE, 'Other': '#b0a89c',
+      'WhatsApp': '#2f8f8f', 'Plato booking': '#b9791b',
+    };
+    const FUNNEL_PRIORITY = {
+      'Instagram': 0, 'Web': 1, 'Google': 2, 'Ads': 3, 'QR': 4, 'Other': 5,
+      'bio.site': 0, 'WhatsApp': 0, 'Plato booking': 1,
+    };
+    const FUNNEL_SOURCE_NODES = ['Instagram', 'Web', 'Google', 'Ads', 'QR', 'Other'];
+    const funnelSw = id => `<span class="item"><span class="sw" style="background:${FUNNEL_COLOR[id] || NEUTRAL}"></span>${id}</span>`;
+
+    function renderFunnelSankey(r) {
+      const fp = (r && r.funnel_paths) || {};
+      const flows = fp.flows || [];
+      const legend = document.getElementById('mkt_funnel_legend');
+      const statsEl = document.getElementById('mkt_funnel_stats');
+      const haveSankey = !!(window.Chart && window['chartjs-chart-sankey']);
+
+      if (!haveSankey || !flows.length) {
+        if (mktFunnelChart) { mktFunnelChart.data.datasets[0].data = []; mktFunnelChart.update(); }
+        legend.innerHTML = '';
+        statsEl.innerHTML = !haveSankey ? ''
+          : '<div class="stat" style="color:var(--ink-muted);font-style:italic;">No tracked link taps in this period yet.</div>';
+        return;
+      }
+
+      if (mktFunnelChart) {
+        mktFunnelChart.data.datasets[0].data = flows;
+        mktFunnelChart.update();
+      } else {
+        mktFunnelChart = new Chart(document.getElementById('mktFunnelChart'), {
+          type: 'sankey',
+          data: { datasets: [{
+            data: flows,
+            colorFrom: c => FUNNEL_COLOR[c.dataset.data[c.dataIndex].from] || NEUTRAL,
+            colorTo:   c => FUNNEL_COLOR[c.dataset.data[c.dataIndex].to]   || NEUTRAL,
+            colorMode: 'gradient',
+            column: FUNNEL_COLUMN,
+            priority: FUNNEL_PRIORITY,
+            alpha: 0.6,
+            borderWidth: 0,
+            nodeWidth: 13,
+          }] },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            layout: { padding: { left: 4, right: 80, top: 6, bottom: 6 } },
+            plugins: {
+              legend: { display: false },
+              tooltip: { callbacks: { label: c => {
+                const d = c.dataset.data[c.dataIndex];
+                return ` ${d.from} \u2192 ${d.to}: ${fmtInt(d.flow)} taps`;
+              } } }
+            }
+          }
+        });
+      }
+
+      // Summary stats beside the chart.
+      const toBtn = flows.filter(d => d.to === 'WhatsApp' || d.to === 'Plato booking')
+                         .sort((a, b) => b.flow - a.flow)[0];
+      const stats = [
+        [fmtInt(fp.total_taps), 'tracked CTA taps'],
+        [`${fmtInt(fp.wa_taps)} / ${fmtInt(fp.plato_taps)}`, 'WhatsApp / Plato taps'],
+      ];
+      if (fp.first_visits != null) stats.push([fmtInt(fp.first_visits), 'first visits this period (all sources)']);
+      if (toBtn) stats.push([`${toBtn.from} \u2192 ${toBtn.to}`, `busiest path (${fmtInt(toBtn.flow)})`]);
+      statsEl.innerHTML = stats.map(([b, l]) => `<div class="stat"><b>${b}</b>${l}</div>`).join('');
+
+      // Legend — only the nodes that actually appear this period.
+      const present = new Set(flows.flatMap(d => [d.from, d.to]));
+      const srcItems = FUNNEL_SOURCE_NODES.filter(s => present.has(s)).map(funnelSw).join('')
+                     + (present.has('bio.site') ? funnelSw('bio.site') : '');
+      const btnItems = ['WhatsApp', 'Plato booking'].filter(s => present.has(s)).map(funnelSw).join('');
+      legend.innerHTML =
+        `<div class="grp"><span class="grp-lbl">Tapped from</span>${srcItems}</div>` +
+        `<div class="grp"><span class="grp-lbl">Button</span>${btnItems}</div>`;
     }
 
     // Range-independent marketing tiles (acquisition, sources, ICP).
@@ -3052,7 +3172,7 @@
     }
 
     function resizeMarketingCharts() {
-      [mktAcqChart, mktActiveChart, mktPillarChart, mktSourceChart].forEach(c => { if (c) c.resize(); });
+      [mktAcqChart, mktActiveChart, mktPillarChart, mktSourceChart, mktFunnelChart].forEach(c => { if (c) c.resize(); });
     }
 
     function initMarketing() {

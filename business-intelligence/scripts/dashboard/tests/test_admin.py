@@ -253,6 +253,46 @@ def test_lead_stage_and_channel_vocab():
     assert "instagram" in app.VALID_LEAD_CHANNELS
 
 
+# --- Acquisition-funnel Sankey paths (_build_funnel_paths, pure) -------------
+# The per-slug click counts come from marts.link_click_events (exercised
+# end-to-end per DEPLOY.md). The pure builder that turns those slug counts into
+# Source -> bio.site -> CTA flows is unit-tested here.
+
+def test_build_funnel_paths_sources_ctas_and_biosite_hop():
+    link_clicks = {
+        "wa_by_slug":   {"ig-wa": 50, "bio-wa": 60, "web-wa": 40, "gbp-wa": 30, "wa": 5},
+        "book_by_slug": {"bio-plato": 20, "web-plato": 24, "ads-plato": 28, "plato": 3},
+    }
+    f = app._build_funnel_paths(link_clicks, {"new_patients": 47})
+    flows = {(d["from"], d["to"]): d["flow"] for d in f["flows"]}
+
+    # ig-* is a direct Instagram tap; bio-* routes Instagram -> bio.site -> CTA.
+    assert flows[("Instagram", "WhatsApp")] == 50        # ig-wa direct
+    assert flows[("Instagram", "bio.site")] == 80        # bio-wa 60 + bio-plato 20
+    assert flows[("bio.site", "WhatsApp")] == 60
+    assert flows[("bio.site", "Plato booking")] == 20
+    # Other sources map by slug prefix; gbp -> Google.
+    assert flows[("Web", "WhatsApp")] == 40
+    assert flows[("Google", "WhatsApp")] == 30
+    assert flows[("Web", "Plato booking")] == 24
+    assert flows[("Ads", "Plato booking")] == 28
+    # Generic fallback slugs ('wa' / 'plato') have no source prefix -> "Other".
+    assert flows[("Other", "WhatsApp")] == 5
+    assert flows[("Other", "Plato booking")] == 3
+
+    assert f["wa_taps"] == 185 and f["plato_taps"] == 75
+    assert f["total_taps"] == 260
+    assert f["first_visits"] == 47
+
+
+def test_build_funnel_paths_degrades_without_clicks():
+    # No clicks / no kpis → empty flows and safe nulls, never an exception.
+    f = app._build_funnel_paths({}, {})
+    assert f["flows"] == []
+    assert f["total_taps"] == 0
+    assert f["first_visits"] is None
+
+
 # --- Marketing tab: founder-only operating-tool routes ----------------------
 # The Marketing tab lives on the founder dashboard subdomain. Its /api/marketing
 # routes follow the same boundary as /api/data: founder-only, and 404 (not even
