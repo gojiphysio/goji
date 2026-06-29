@@ -253,6 +253,50 @@ def test_lead_stage_and_channel_vocab():
     assert "instagram" in app.VALID_LEAD_CHANNELS
 
 
+# --- Marketing funnel assembler (_build_funnel, pure) -----------------------
+# The lead aggregation lives in SQL (exercised end-to-end per DEPLOY.md). The
+# pure assembler that shapes stages + conversion rates is unit-tested here.
+
+def test_build_funnel_shape_and_conversions():
+    raw = {"enquired": 100, "booked": 40, "won": 30, "retain": 60}
+    f = app._build_funnel(
+        raw,
+        link_clicks={"total": 250},
+        kpis={"new_patients": 45, "active_patients": 120},
+        google_ads={"impressions": 9000},
+    )
+    # Charted stages = the grain-consistent lead pipeline only.
+    keys = [s["key"] for s in f["stages"]]
+    assert keys == ["enquire", "book", "active"]
+
+    stage = {s["key"]: s for s in f["stages"]}
+    assert stage["enquire"]["value"] == 100
+    assert stage["enquire"]["context"] == 250        # tracked link taps
+    assert stage["active"]["value"] == 30            # lead-attributed first visits
+    assert stage["active"]["context"] == 45          # all-source first visits
+
+    # Charted conversions are stage[i+1]/stage[i] and always <=100% (won<=booked<=enquired).
+    assert f["conv"]["enquire_book"] == 0.4
+    assert f["conv"]["book_active"] == 0.75
+
+    # Reach/Engage/Retention are context, not charted stages.
+    assert f["context"]["reach"] == 9000             # ad impressions
+    assert f["context"]["engage"] is None            # pending integration
+    # Retention is repeat/active (both all-source); repeat <= active so <=100%.
+    assert f["context"]["repeat_rate"] == 0.5        # 60 / 120
+
+
+def test_build_funnel_degrades_without_sources():
+    # No clicks/ads/kpis and zero leads → no division by zero, nulls not crashes.
+    f = app._build_funnel({"enquired": 0, "booked": 0, "won": 0, "retain": 0},
+                          link_clicks={}, kpis={}, google_ads={})
+    stage = {s["key"]: s for s in f["stages"]}
+    assert stage["enquire"]["context"] is None       # no click total
+    assert f["conv"]["enquire_book"] is None          # 0 denominator → None, not error
+    assert f["context"]["reach"] is None             # no impressions → pending
+    assert f["context"]["repeat_rate"] is None       # 0 active patients → None, not error
+
+
 # --- Marketing tab: founder-only operating-tool routes ----------------------
 # The Marketing tab lives on the founder dashboard subdomain. Its /api/marketing
 # routes follow the same boundary as /api/data: founder-only, and 404 (not even

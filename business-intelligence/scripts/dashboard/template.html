@@ -1740,6 +1740,24 @@
       </div>
     </section>
 
+    <!-- Acquisition funnel -->
+    <section class="q">
+      <h2>Acquisition funnel <span class="badge live">Live</span></h2>
+      <div class="subtitle">The tracked lead journey for the selected period — <strong>Enquire → Book → Active</strong> (first visit) — from the lead pipeline (<code>lead_events</code>). The wider strategy funnel is <strong>Reach → Engage → Enquire → Book → Active → Retain</strong>; <strong>Reach</strong>/<strong>Engage</strong> (top) and <strong>retention</strong> (bottom) are shown as context beside the chart — they're a different scale and grain, and fill in further as Google&nbsp;Ads, website (GA4) and Instagram tracking land.</div>
+      <div class="two-col">
+        <div>
+          <div class="chart-wrap"><canvas id="mktFunnelChart"></canvas></div>
+        </div>
+        <div>
+          <div style="font-size:13px; font-weight:500; margin-bottom:8px;">Stage-to-stage conversion <span class="kpi-trend" id="mkt_funnel_trend" hidden></span></div>
+          <table>
+            <tbody id="mkt_funnel_conv_tbody"></tbody>
+          </table>
+          <div class="mkt-target" id="mkt_funnel_note" style="margin-top:10px;"></div>
+        </div>
+      </div>
+    </section>
+
     <!-- Marketing mix lens + ICP -->
     <section class="q">
       <h2>Marketing-mix lens</h2>
@@ -2781,7 +2799,7 @@
     }
 
     /* ===== Marketing tab ===== */
-    let mktAcqChart, mktActiveChart, mktPillarChart, mktSourceChart;
+    let mktAcqChart, mktActiveChart, mktPillarChart, mktSourceChart, mktFunnelChart;
     // Latest operating-tool state, keyed "item_type|item_key". Seeded from the
     // payload, updated optimistically on each save.
     const marketingOps = new Map();
@@ -2879,6 +2897,88 @@
       document.getElementById('mkt_pillar_legend').innerHTML = pLabels.map((p, i) =>
         `<div><span class="dot-sq" style="background:${pColors[i]}"></span>${escapeHtml(p)} — ${total ? Math.round(pValues[i] / total * 100) : 0}%</div>`
       ).join('');
+
+      renderFunnel(r);
+    }
+
+    // Acquisition funnel: horizontal bars for the tracked lead pipeline
+    // (Enquire → Book → Active), which share a grain and always narrow. Reach /
+    // Engage / Retention are a different scale & grain, so they're shown as
+    // labelled context around the chart, not plotted on the same axis.
+    // Decreasing GOJI opacity down the funnel signals the narrowing.
+    const FUNNEL_ALPHA = ['ff', 'cc', '99'];  // by stage depth
+    const pctLabel = x => x == null ? '—' : Math.round(x * 100) + '%';
+    function renderFunnel(r) {
+      const f = r && r.funnel;
+      if (!f || !f.stages) return;
+      const stages = f.stages;
+      const labels = stages.map(s => s.label);
+      const data   = stages.map(s => s.value == null ? 0 : s.value);
+      const colors = stages.map((s, i) => GOJI + (FUNNEL_ALPHA[i] || '99'));
+
+      if (mktFunnelChart) {
+        mktFunnelChart.data.labels = labels;
+        mktFunnelChart.data.datasets[0].data = data;
+        mktFunnelChart.data.datasets[0].backgroundColor = colors;
+        mktFunnelChart._stages = stages;
+        mktFunnelChart.update();
+      } else {
+        mktFunnelChart = new Chart(document.getElementById('mktFunnelChart'), {
+          type: 'bar',
+          data: { labels, datasets: [{ data, backgroundColor: colors, borderRadius: 4 }] },
+          options: {
+            indexAxis: 'y',
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: { callbacks: { label: ctx => {
+                const s = (ctx.chart._stages || stages)[ctx.dataIndex];
+                if (!s) return '';
+                let t = ' ' + fmtInt(s.value);
+                if (s.context != null) t += `  (${fmtInt(s.context)} ${s.context_label})`;
+                return t;
+              } } }
+            },
+            scales: {
+              x: { beginAtZero: true, ticks: { precision: 0 } },
+              y: { ticks: { callback: (val, i) => {
+                const s = (mktFunnelChart && mktFunnelChart._stages || stages)[i];
+                return s ? `${s.label} · ${fmtInt(s.value)}` : '';
+              } } }
+            }
+          }
+        });
+        mktFunnelChart._stages = stages;
+      }
+
+      // Stage-to-stage conversion + the all-source retention rate (a different
+      // lens — labelled so it isn't read as a lead-funnel step).
+      const conv = f.conv || {};
+      const ctx  = f.context || {};
+      const rows = [
+        ['Enquire → Book', pctLabel(conv.enquire_book)],
+        ['Book → Active (first visit)', pctLabel(conv.book_active)],
+      ];
+      if (ctx.repeat_rate != null) {
+        rows.push([`Repeat-visit rate <span style="color:var(--ink-soft)">(all patients)</span>`,
+                   `${pctLabel(ctx.repeat_rate)} <span style="color:var(--ink-soft)">(${fmtInt(ctx.repeat_visitors)}/${fmtInt(ctx.active_patients)})</span>`]);
+      }
+      document.getElementById('mkt_funnel_conv_tbody').innerHTML =
+        rows.map(([k, v]) => `<tr><td>${k}</td><td class="num">${v}</td></tr>`).join('');
+
+      // Context note: top-of-funnel reach + the all-source first-visit count.
+      const active = stages.find(s => s.key === 'active') || {};
+      const bits = [];
+      bits.push(ctx.reach != null
+        ? `<strong>Reach</strong> ${fmtInt(ctx.reach)} ad impressions · Instagram & website pending`
+        : `<strong>Reach &amp; Engage</strong> pending (Google Ads, website, Instagram)`);
+      if (active.context != null)
+        bits.push(`Active also reflects <strong>${fmtInt(active.context)}</strong> first visits across all sources (incl. untracked).`);
+      document.getElementById('mkt_funnel_note').innerHTML = bits.join(' · ');
+
+      // Headline trend: first visits (Active) vs the previous equal-length window.
+      const fp = r.funnel_prev;
+      renderTrend('mkt_funnel_trend', active.value, fp && fp.won, r.prev_start, r.prev_end);
     }
 
     // Range-independent marketing tiles (acquisition, sources, ICP).
@@ -3052,7 +3152,7 @@
     }
 
     function resizeMarketingCharts() {
-      [mktAcqChart, mktActiveChart, mktPillarChart, mktSourceChart].forEach(c => { if (c) c.resize(); });
+      [mktAcqChart, mktActiveChart, mktPillarChart, mktSourceChart, mktFunnelChart].forEach(c => { if (c) c.resize(); });
     }
 
     function initMarketing() {
