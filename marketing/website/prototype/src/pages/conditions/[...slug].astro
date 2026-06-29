@@ -1,0 +1,134 @@
+---
+import { getCollection, getEntry } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Section from "../../components/Section.astro";
+import Button from "../../components/Button.astro";
+
+export async function getStaticPaths() {
+  const conditions = await getCollection("conditions", ({ data }) => !data.draft);
+  return conditions.map((c) => ({ params: { slug: c.slug }, props: { entry: c } }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await entry.render();
+const { title, description, cardTitle, category, ctaSlug } = entry.data;
+---
+
+<BaseLayout title={`${title} | Goji Physiotherapy`} description={description}>
+  {/* Page header */}
+  <section class="cond-header">
+    <div class="container cond-header__inner">
+      <a href="/conditions" class="cond-header__back">
+        <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M10 3L5 8l5 5"/>
+        </svg>
+        All conditions
+      </a>
+      <p class="eyebrow">{category}</p>
+      <h1>{cardTitle ?? title}</h1>
+    </div>
+  </section>
+
+  {/* Main content */}
+  <Section tone="surface">
+    <div class="cond-body container--narrow">
+      <Content />
+    </div>
+  </Section>
+
+  {/* Sticky CTA */}
+  <Section tone="linen">
+    <div class="cond-cta">
+      <div>
+        <h2>Ready to get some answers?</h2>
+        <p>Message us to describe your symptoms — we will recommend the right appointment type and answer any questions before you book.</p>
+      </div>
+      <div class="cond-cta__btns">
+        <Button slug={ctaSlug as "web-wa" | "web-plato"} variant="primary" size="lg" berry>Ask us on WhatsApp</Button>
+        <Button slug="web-plato" variant="secondary" size="lg">Book an appointment</Button>
+      </div>
+    </div>
+  </Section>
+</BaseLayout>
+
+<style>
+  .cond-header {
+    background: var(--bg-page);
+    padding-block: clamp(2rem, 1.5rem + 3vw, 4rem);
+    border-bottom: 1px solid var(--color-border);
+  }
+  .cond-header__inner {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+  .cond-header__back {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--fs-small);
+    font-weight: var(--weight-medium);
+    color: var(--text-muted);
+    text-decoration: none;
+  }
+  .cond-header__back:hover { color: var(--color-primary); }
+
+  /* Prose content */
+  .cond-body {
+    /* The container--narrow class sets max-width: 760px */
+  }
+  .cond-body :global(h2) {
+    margin-top: var(--space-7);
+    margin-bottom: var(--space-3);
+  }
+  .cond-body :global(h2:first-child) {
+    margin-top: 0;
+  }
+  .cond-body :global(p) {
+    color: var(--text-muted);
+    margin-bottom: var(--space-4);
+    line-height: var(--lh-body);
+  }
+  .cond-body :global(ul), .cond-body :global(ol) {
+    color: var(--text-muted);
+    margin-bottom: var(--space-4);
+    padding-left: 1.4rem;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  .cond-body :global(strong) {
+    font-weight: var(--weight-semibold);
+    color: var(--text-default);
+  }
+  .cond-body :global(hr) {
+    border: none;
+    border-top: 1px solid var(--color-border);
+    margin-block: var(--space-7);
+  }
+  .cond-body :global(blockquote) {
+    border-left: 3px solid var(--color-primary);
+    padding-left: var(--space-5);
+    color: var(--text-muted);
+  }
+
+  /* CTA section */
+  .cond-cta {
+    display: grid;
+    gap: var(--space-5);
+    align-items: start;
+  }
+  @media (min-width: 760px) {
+    .cond-cta {
+      grid-template-columns: 1fr auto;
+      align-items: center;
+    }
+  }
+  .cond-cta h2 { margin-bottom: var(--space-2); }
+  .cond-cta p { color: var(--text-muted); max-width: 44ch; }
+  .cond-cta__btns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+</style>

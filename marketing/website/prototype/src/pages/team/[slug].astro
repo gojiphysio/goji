@@ -1,0 +1,367 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Button from "../../components/Button.astro";
+import LogoLockup from "../../components/LogoLockup.astro";
+
+export async function getStaticPaths() {
+  const entries = await getCollection("team", ({ data }) => !data.draft);
+  return entries.map((entry) => ({
+    params: { slug: entry.slug },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await entry.render();
+const d = entry.data;
+const firstName = d.name.split(" ")[0];
+---
+
+<BaseLayout
+  title={`${d.name} — ${d.role} | Goji Health`}
+  description={d.tagline}
+>
+  {/* ---- Hero ---- */}
+  <section class="bio-hero">
+    <div class="container bio-hero__inner">
+      <div class="bio-hero__photo">
+        {d.photo ? (
+          <img src={d.photo} alt={`Portrait of ${d.name}`} class="bio-hero__img" loading="eager" decoding="async" />
+        ) : (
+          <div class="bio-hero__placeholder" role="img" aria-label={`Portrait of ${d.name} (photo coming soon)`}>
+            <LogoLockup variant="mark" height={52} />
+          </div>
+        )}
+      </div>
+      <div class="bio-hero__text">
+        <p class="eyebrow eyebrow--flower">Meet the team</p>
+        <h1 class="bio-hero__name">{d.name}</h1>
+        <p class="bio-hero__role">{d.role}</p>
+        <p class="bio-hero__creds">{d.credentials}</p>
+        <p class="bio-hero__tagline">{d.tagline}</p>
+        <div class="bio-hero__actions">
+          <Button slug="web-plato" variant="primary">Book with {firstName}</Button>
+          <Button slug="web-wa" variant="secondary" berry>WhatsApp us</Button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* ---- Patients see [name] for ---- */}
+  <section class="bio-specialties">
+    <div class="container">
+      <h2 class="bio-specialties__heading">Patients see {firstName} for</h2>
+      <div class="specialty-grid">
+        {d.specialties.map((s) => (
+          <div class="specialty-card">
+            <h3 class="specialty-card__title">{s.title}</h3>
+            <p class="specialty-card__desc">{s.description}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  {/* ---- Bio (from markdown body) ---- */}
+  <section class="bio-body">
+    <div class="container bio-body__inner">
+      <p class="eyebrow">About {firstName}</p>
+      <div class="bio-prose">
+        <Content />
+      </div>
+    </div>
+  </section>
+
+  {/* ---- Approach ---- */}
+  <section class="bio-approach">
+    <div class="container bio-approach__inner">
+      <p class="eyebrow">{firstName}'s approach</p>
+      <blockquote class="bio-approach__quote">{d.approach}</blockquote>
+    </div>
+  </section>
+
+  {/* ---- Credentials ---- */}
+  <section class="bio-creds">
+    <div class="container bio-creds__inner">
+      <div class="cred-block">
+        <h3 class="cred-block__heading">Education</h3>
+        <ul class="cred-list">
+          {d.education.map((item) => <li>{item}</li>)}
+        </ul>
+      </div>
+      <div class="cred-block">
+        <h3 class="cred-block__heading">Clinical experience</h3>
+        <ul class="cred-list">
+          {d.experience.map((item) => <li>{item}</li>)}
+        </ul>
+      </div>
+      <div class="cred-block">
+        <h3 class="cred-block__heading">Specialist training</h3>
+        <ul class="cred-list">
+          {d.training.map((item) => <li>{item}</li>)}
+        </ul>
+      </div>
+      <div class="cred-block">
+        <h3 class="cred-block__heading">Languages</h3>
+        <ul class="cred-list">
+          {d.languages.map((item) => <li>{item}</li>)}
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  {/* ---- Personal note (optional) ---- */}
+  {d.personalNote && (
+    <section class="bio-personal">
+      <div class="container bio-personal__inner">
+        <p class="eyebrow">Outside the clinic</p>
+        <p class="bio-personal__text">{d.personalNote}</p>
+      </div>
+    </section>
+  )}
+
+  {/* ---- CTA strip ---- */}
+  <section class="bio-cta">
+    <div class="container bio-cta__inner">
+      <h2>Book an appointment with {firstName}</h2>
+      <p>Ready to get started? Book online or reach out on WhatsApp — we'll talk through what's going on before your first session.</p>
+      <div class="bio-cta__actions">
+        <Button slug="web-plato" variant="primary" size="lg">Book an appointment</Button>
+        <Button slug="web-wa" variant="secondary" size="lg" berry>Ask us on WhatsApp</Button>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  /* Swap the editorial red dash for a small bloom icon on this page's eyebrows */
+  .eyebrow--flower::before {
+    content: '';
+    width: 20px;
+    height: 20px;
+    background: url('/illustrations/bloom-7.png') center / contain no-repeat;
+    border-radius: 0;
+  }
+
+  /* ---- Hero ---- */
+  .bio-hero {
+    background: var(--bg-page);
+    padding-block: var(--section-y);
+  }
+  .bio-hero__inner {
+    display: grid;
+    gap: var(--space-8);
+    align-items: center;
+  }
+  @media (min-width: 720px) {
+    .bio-hero__inner {
+      grid-template-columns: 5fr 7fr;
+      gap: var(--space-9);
+    }
+  }
+  .bio-hero__img,
+  .bio-hero__placeholder {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    border-radius: var(--radius-lg);
+  }
+  .bio-hero__img { object-fit: cover; }
+  .bio-hero__placeholder {
+    background: radial-gradient(120% 120% at 50% 25%, var(--color-linen-deep), var(--color-linen));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .bio-hero__name {
+    font-size: var(--fs-h1);
+    margin-top: var(--space-3);
+    margin-bottom: var(--space-2);
+  }
+  .bio-hero__role {
+    font-family: var(--font-body);
+    font-size: var(--fs-caption);
+    font-weight: var(--weight-semibold);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--color-primary);
+    margin-bottom: var(--space-3);
+  }
+  .bio-hero__creds {
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+    margin-bottom: var(--space-4);
+  }
+  .bio-hero__tagline {
+    font-size: var(--fs-body);
+    color: var(--text-muted);
+    line-height: var(--lh-body);
+    max-width: 44ch;
+    margin-bottom: var(--space-6);
+  }
+  .bio-hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+
+  /* ---- Specialties ---- */
+  .bio-specialties {
+    background: var(--bg-content);
+    padding-block: var(--section-y);
+    border-top: 1px solid var(--rule);
+  }
+  .bio-specialties__heading {
+    font-size: var(--fs-h2);
+    margin-bottom: var(--space-6);
+  }
+  .specialty-grid {
+    display: grid;
+    gap: var(--space-4);
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 540px) {
+    .specialty-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (min-width: 900px) {
+    .specialty-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+  .specialty-card {
+    border-top: 2px solid var(--color-primary);
+    padding-top: var(--space-4);
+    padding-bottom: var(--space-3);
+  }
+  .specialty-card__title {
+    font-size: var(--fs-body);
+    font-weight: var(--weight-semibold);
+    margin-bottom: var(--space-2);
+  }
+  .specialty-card__desc {
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+    line-height: var(--lh-body);
+  }
+
+  /* ---- Bio body ---- */
+  .bio-body {
+    background: var(--bg-page);
+    padding-block: var(--section-y);
+  }
+  .bio-body__inner {
+    max-width: var(--container-narrow);
+  }
+  .bio-prose {
+    margin-top: var(--space-5);
+    font-size: var(--fs-body);
+    color: var(--text-muted);
+    line-height: var(--lh-body);
+  }
+
+  /* ---- Approach ---- */
+  .bio-approach {
+    background: var(--color-linen-deep);
+    padding-block: var(--section-y);
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+  }
+  .bio-approach__inner {
+    max-width: var(--container-narrow);
+  }
+  .bio-approach__quote {
+    margin-top: var(--space-5);
+    font-family: var(--font-display);
+    font-size: var(--fs-h2);
+    font-weight: var(--weight-semibold);
+    line-height: var(--lh-snug);
+    letter-spacing: var(--tracking-tight);
+    color: var(--text-default);
+    text-wrap: balance;
+  }
+
+  /* ---- Credentials ---- */
+  .bio-creds {
+    background: var(--bg-content);
+    padding-block: var(--section-y);
+  }
+  .bio-creds__inner {
+    display: grid;
+    gap: var(--space-7);
+  }
+  @media (min-width: 720px) {
+    .bio-creds__inner { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (min-width: 1000px) {
+    .bio-creds__inner { grid-template-columns: repeat(4, 1fr); }
+  }
+  .cred-block__heading {
+    font-size: var(--fs-body);
+    font-weight: var(--weight-semibold);
+    margin-bottom: var(--space-4);
+    padding-bottom: var(--space-2);
+    border-bottom: 1.5px solid var(--rule);
+  }
+  .cred-list {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  .cred-list li {
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+    line-height: var(--lh-body);
+    padding-left: 1em;
+    position: relative;
+  }
+  .cred-list li::before {
+    content: "-";
+    position: absolute;
+    left: 0;
+    color: var(--color-primary);
+  }
+
+  /* ---- Personal note ---- */
+  .bio-personal {
+    background: var(--bg-page);
+    padding-block: var(--section-y);
+    border-top: 1px solid var(--rule);
+  }
+  .bio-personal__inner {
+    max-width: var(--container-narrow);
+  }
+  .bio-personal__text {
+    margin-top: var(--space-4);
+    font-size: var(--fs-body);
+    color: var(--text-muted);
+    line-height: var(--lh-body);
+  }
+
+  /* ---- CTA strip ---- */
+  .bio-cta {
+    background: var(--color-ink);
+    padding-block: var(--section-y);
+  }
+  .bio-cta__inner {
+    max-width: var(--container-narrow);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+  .bio-cta__inner h2 {
+    color: var(--color-linen);
+    font-size: var(--fs-h2);
+  }
+  .bio-cta__inner p {
+    color: color-mix(in srgb, var(--color-linen) 75%, transparent);
+    font-size: var(--fs-body);
+    line-height: var(--lh-body);
+    max-width: 48ch;
+  }
+  .bio-cta__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-top: var(--space-2);
+  }
+</style>

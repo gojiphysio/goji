@@ -37,6 +37,7 @@ const { eyebrow, title, lead, points, meta, class: className = "" } = Astro.prop
   .card {
     background-color: var(--bg-content);
     border: 1px solid var(--color-border);
+    border-top: 3px solid var(--color-primary); /* berry red top accent */
     border-radius: var(--radius-lg);
     padding: var(--space-6);
     box-shadow: var(--shadow-sm);
@@ -45,7 +46,7 @@ const { eyebrow, title, lead, points, meta, class: className = "" } = Astro.prop
   }
   .card:hover {
     box-shadow: var(--shadow-md);
-    transform: translateY(-2px);
+    transform: translateY(-3px);
   }
   .card__title {
     margin-bottom: var(--space-3);
