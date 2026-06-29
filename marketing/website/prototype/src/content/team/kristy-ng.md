@@ -1,5 +1,6 @@
 ---
 name: Kristy Ng
+photo: "/photos/team/kristy-ng.webp"
 role: Senior Physiotherapist
 credentials: "AHPC-registered Physiotherapist | BSc (Hons) Physiotherapy"
 tagline: >

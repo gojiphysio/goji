@@ -1,5 +1,6 @@
 ---
 name: Claire Ng
+photo: "/photos/team/claire-ng.webp"
 role: Senior Physiotherapist
 credentials: "AHPC-registered Physiotherapist | BSc (Hons) Physiotherapy"
 tagline: >

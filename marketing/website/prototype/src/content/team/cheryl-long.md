@@ -1,5 +1,6 @@
 ---
 name: Cheryl Long
+photo: "/photos/team/cheryl-long.webp"
 role: Clinical Director
 credentials: "AHPC-registered Physiotherapist | BSc (Hons) Physiotherapy"
 tagline: >

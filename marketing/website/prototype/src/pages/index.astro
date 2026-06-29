@@ -41,58 +41,56 @@ const services = [
   },
 ];
 
+// Women's Health links through to the real condition pages under /conditions.
+// Other areas describe the clinic's wider scope (plain text, no page yet).
 const careAreas = [
   {
     title: "Women's Health",
-    slug: "womens-health",
+    guideHref: "/conditions",
     points: [
-      { text: "Prenatal care and birth preparation", href: "/blog/prenatal-physiotherapy" },
-      { text: "Postpartum recovery and return to sport", href: "/blog/postpartum-recovery" },
-      { text: "Diastasis recti and Caesarean scar care", href: "/blog/diastasis-recti" },
-      { text: "Pelvic floor dysfunction and pelvic pain", href: "/blog/pelvic-floor-physiotherapy" },
-      { text: "Perimenopause, menopause, and bone health", href: "/blog/perimenopause-bone-health" },
+      "Prenatal care and birth preparation",
+      "Postpartum, diastasis recti, and Caesarean scar care",
+      "Pelvic floor dysfunction, prolapse, and pelvic pain",
+      "Bladder and bowel concerns",
+      "Perimenopause, menopause, and bone health",
     ],
   },
   {
     title: "Paediatrics",
-    slug: "paediatrics",
     points: [
-      { text: "Congenital torticollis and early intervention", href: "/blog/torticollis-newborns" },
-      { text: "Developmental concerns and milestones", href: "/blog/paediatric-development" },
-      { text: "Scoliosis and Schroth therapy", href: "/blog/scoliosis-schroth" },
-      { text: "Paediatric pelvic health", href: "/blog/paediatric-pelvic-health" },
-      { text: "Musculoskeletal and sports injury", href: "/blog/paediatric-sports-injury" },
+      "Congenital torticollis and early intervention",
+      "Developmental concerns and milestones",
+      "Scoliosis and Schroth therapy",
+      "Paediatric pelvic health",
+      "Musculoskeletal and sports injury",
     ],
   },
   {
     title: "Musculoskeletal & Sports",
-    slug: "musculoskeletal",
     points: [
-      { text: "Injuries and persistent or recurrent pain", href: "/blog/pain-and-injury" },
-      { text: "Sports rehabilitation and performance", href: "/blog/sports-rehabilitation" },
-      { text: "Post-operation recovery", href: "/blog/post-operation-recovery" },
-      { text: "Functional movement assessment", href: "/blog/movement-assessment" },
-      { text: "Dry needling", href: "/blog/dry-needling" },
+      "Injuries and persistent or recurrent pain",
+      "Sports rehabilitation and performance",
+      "Post-operation recovery",
+      "Functional movement assessment",
+      "Dry needling",
     ],
   },
   {
     title: "Vestibular Rehabilitation",
-    slug: "vestibular",
     points: [
-      { text: "Vertigo, dizziness, and balance disorders", href: "/blog/vertigo-dizziness" },
-      { text: "BPPV and fall prevention", href: "/blog/bppv" },
-      { text: "Post-concussion vestibular rehabilitation", href: "/blog/post-concussion" },
-      { text: "Benign positional vertigo", href: "/blog/benign-positional-vertigo" },
-      { text: "Vestibular migraine management", href: "/blog/vestibular-migraine" },
+      "Vertigo, dizziness, and balance disorders",
+      "BPPV and fall prevention",
+      "Post-concussion vestibular rehabilitation",
+      "Benign positional vertigo",
+      "Vestibular migraine management",
     ],
   },
   {
     title: "Lymphatic Health",
-    slug: "lymphatic",
     points: [
-      { text: "Lymphoedema assessment and management", href: "/blog/lymphoedema" },
-      { text: "Oncology rehabilitation", href: "/blog/oncology-rehabilitation" },
-      { text: "Post-surgical lymphatic drainage", href: "/blog/lymphatic-drainage" },
+      "Lymphoedema assessment and management",
+      "Oncology rehabilitation",
+      "Post-surgical lymphatic drainage",
     ],
   },
 ];
@@ -152,26 +150,6 @@ const reviews = [
   },
 ];
 
-const blogPosts = [
-  {
-    tag: "Women's Health",
-    title: "What is pelvic floor physiotherapy and do I need it?",
-    date: "June 2025",
-    href: "/blog/pelvic-floor-physiotherapy",
-  },
-  {
-    tag: "Postpartum",
-    title: "Returning to exercise after a C-section: what to expect",
-    date: "May 2025",
-    href: "/blog/exercise-after-csection",
-  },
-  {
-    tag: "Paediatrics",
-    title: "Torticollis in newborns: early signs and when to see a physio",
-    date: "April 2025",
-    href: "/blog/torticollis-newborns",
-  },
-];
 ---
 
 <BaseLayout
@@ -202,7 +180,7 @@ const blogPosts = [
       </p>
       <div class="hero__actions">
         <Button slug="web-plato" variant="primary" size="lg">Book an appointment</Button>
-        <Button slug="web-wa" variant="secondary" size="lg" berry>Ask us on WhatsApp</Button>
+        <Button slug="web-wa" variant="secondary" size="lg" berry>Talk to us on WhatsApp</Button>
       </div>
     </div>
   </section>
@@ -210,7 +188,6 @@ const blogPosts = [
   {/* ---- About (text-only, no photo placeholder) ---- */}
   <section class="about-sec" id="about">
     <div class="container about-sec__inner">
-      <p class="eyebrow">Who we are</p>
       <h2>A clinic women can trust through it all</h2>
       <div class="about-sec__body">
         <p>
@@ -232,7 +209,6 @@ const blogPosts = [
     <div class="container">
       <div class="sec-two-col">
       <header class="section-head">
-        <p class="eyebrow">Services</p>
         <h2>Care for every stage, under one roof</h2>
       </header>
       <div class="accordion">
@@ -267,7 +243,6 @@ const blogPosts = [
     <div class="container">
       <div class="sec-two-col">
       <header class="section-head">
-        <p class="eyebrow">Areas of care</p>
         <h2>Conditions and concerns we commonly assess and treat</h2>
         <p class="section-head__sub">
           Care tailored to the individual, their stage of life, and what matters
@@ -287,14 +262,14 @@ const blogPosts = [
                 <div class="accordion__body-inner">
                   <ul class="care-list">
                     {c.points.map((p) => (
-                      <li>
-                        <a href={p.href}>{p.text}</a>
-                      </li>
+                      <li>{p}</li>
                     ))}
                   </ul>
-                  <a href={`/conditions/${c.slug}`} class="care-link">
-                    Read the full guide
-                  </a>
+                  {c.guideHref && (
+                    <a href={c.guideHref} class="care-link">
+                      View all conditions
+                    </a>
+                  )}
                 </div>
               </div>
             </details>
@@ -334,7 +309,6 @@ const blogPosts = [
   {/* ---- Team carousel ---- */}
   <Section tone="surface" id="team">
     <header class="section-head">
-      <p class="eyebrow">Meet the team</p>
       <h2>Clinicians who get it</h2>
     </header>
     <div class="team-wrap">
@@ -342,7 +316,7 @@ const blogPosts = [
         {
           team.map((t) => (
             <div class="team-slide">
-              <PractitionerCard name={t.name} role={t.role} interests={t.interests} href={`/team/${t.slug}`} />
+              <PractitionerCard name={t.name} role={t.role} interests={t.interests} image={`/photos/team/${t.slug}.webp`} href={`/team/${t.slug}`} />
             </div>
           ))
         }
@@ -363,12 +337,24 @@ const blogPosts = [
   <section class="space-sec">
     <div class="container space-sec__inner">
       <div class="space-sec__image">
-        <div class="img-ph" role="img" aria-label="Goji reformer studio (photo coming soon)">
-          <span>Reformer room / clinic space</span>
+        <div class="space-slideshow" role="img" aria-label="Inside the Goji clinic at Lentor Modern - reception, the reformer studio, and a session in progress">
+          {[
+            { src: "/photos/space/reception.webp" },
+            { src: "/photos/space/studio.webp" },
+            { src: "/photos/space/session.webp" },
+          ].map((img) => (
+            <img
+              src={img.src}
+              class="space-frame"
+              alt=""
+              aria-hidden="true"
+              loading="lazy"
+              decoding="async"
+            />
+          ))}
         </div>
       </div>
       <div class="space-sec__text">
-        <p class="eyebrow">Our space</p>
         <h2>Designed around you</h2>
         <p>
           Ground floor at Lentor Modern Mall. Private treatment rooms and a
@@ -384,7 +370,6 @@ const blogPosts = [
   <section class="reviews-sec">
     <div class="container">
       <div class="reviews-header">
-        <p class="eyebrow">What patients say</p>
         <h2 class="reviews-title">The Goji community</h2>
         <div class="reviews-rating">
           <span class="reviews-stars" aria-hidden="true">★★★★★</span>
@@ -422,52 +407,10 @@ const blogPosts = [
     </div>
   </section>
 
-  {/* ---- Blog preview ---- */}
-  <Section tone="linen" id="blog">
-    <header class="section-head">
-      <p class="eyebrow">From the blog</p>
-      <h2>Resources and reading</h2>
-    </header>
-    <div class="blog-wrap">
-      <div class="blog-track" id="blogTrack">
-        {blogPosts.map((post) => (
-          <article class="blog-card">
-            <div class="blog-card__img">
-              <div
-                class="img-ph"
-                role="img"
-                aria-label={`Blog post: ${post.title}`}
-              >
-                <span>{post.tag}</span>
-              </div>
-            </div>
-            <div class="blog-card__body">
-              <span class="blog-card__tag">{post.tag}</span>
-              <h3 class="blog-card__title">
-                <a href={post.href}>{post.title}</a>
-              </h3>
-              <time class="blog-card__date">{post.date}</time>
-            </div>
-          </article>
-        ))}
-      </div>
-      <button class="blog-btn blog-btn--prev" id="blogPrev" aria-label="Previous post" disabled>
-        <Icon name="tabler:chevron-left" size={22} />
-      </button>
-      <button class="blog-btn blog-btn--next" id="blogNext" aria-label="Next post">
-        <Icon name="tabler:chevron-right" size={22} />
-      </button>
-    </div>
-    <div class="blog-more">
-      <a href="/blog" class="blog-more__link">View all posts</a>
-    </div>
-  </Section>
-
   {/* ---- FAQ ---- */}
   <Section tone="surface" id="faq">
     <div class="sec-two-col">
     <header class="section-head">
-      <p class="eyebrow">Common questions</p>
       <h2>Frequently asked questions</h2>
     </header>
     <div class="faq-list">
@@ -555,26 +498,6 @@ const blogPosts = [
     });
     track.addEventListener("scroll", updateUI, { passive: true });
     updateUI();
-  }
-
-  // Blog carousel
-  const bTrack = document.getElementById("blogTrack") as HTMLElement | null;
-  const bPrev = document.getElementById("blogPrev") as HTMLButtonElement | null;
-  const bNext = document.getElementById("blogNext") as HTMLButtonElement | null;
-  if (bTrack && bPrev && bNext) {
-    function bSlideWidth(): number {
-      const slide = bTrack!.firstElementChild as HTMLElement | null;
-      return slide ? slide.offsetWidth + parseInt(getComputedStyle(bTrack!).gap || "0") : 0;
-    }
-    function bUpdateUI() {
-      const maxScroll = bTrack!.scrollWidth - bTrack!.clientWidth;
-      bPrev!.disabled = bTrack!.scrollLeft <= 1;
-      bNext!.disabled = bTrack!.scrollLeft >= maxScroll - 1;
-    }
-    bPrev.addEventListener("click", () => { bTrack.scrollBy({ left: -bSlideWidth(), behavior: "smooth" }); });
-    bNext.addEventListener("click", () => { bTrack.scrollBy({ left: bSlideWidth(), behavior: "smooth" }); });
-    bTrack.addEventListener("scroll", bUpdateUI, { passive: true });
-    bUpdateUI();
   }
 
   // Reviews carousel
@@ -1004,116 +927,41 @@ const blogPosts = [
       gap: var(--space-8);
     }
   }
-  .space-sec__image .img-ph { aspect-ratio: 6 / 4; }
   .space-sec__text h2 { margin: var(--space-2) 0 var(--space-4); }
   .space-sec__text p { color: var(--text-muted); }
 
-  /* ======================================================
-     Blog cards
-     ====================================================== */
-  /* --- Blog carousel track --- */
-  .blog-wrap {
+  /* Soft crossfade slideshow of real clinic photos (3 frames, 21s loop) */
+  .space-slideshow {
     position: relative;
-  }
-  .blog-track {
-    display: flex;
-    gap: var(--space-5);
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    scroll-behavior: smooth;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    padding-bottom: var(--space-2);
-  }
-  .blog-track::-webkit-scrollbar { display: none; }
-
-  .blog-btn {
-    display: none;
-    position: absolute;
-    top: 40%;
-    transform: translateY(-50%);
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    border: none;
-    background: color-mix(in srgb, var(--color-ink) 80%, transparent);
-    color: var(--color-linen);
-    cursor: pointer;
-    align-items: center;
-    justify-content: center;
-    z-index: 2;
-    transition: background 0.2s;
-  }
-  .blog-btn:hover { background: var(--color-ink); }
-  .blog-btn:disabled { opacity: 0.3; cursor: default; }
-  @media (min-width: 640px) { .blog-btn { display: flex; } }
-  .blog-btn--prev { left: calc(-1 * var(--space-7)); }
-  .blog-btn--next { right: calc(-1 * var(--space-7)); }
-
-  .blog-card {
-    flex: 0 0 calc(100% - var(--space-5));
-    scroll-snap-align: start;
-    background: var(--bg-content);
-    border: 1px solid var(--color-border);
+    width: 100%;
+    aspect-ratio: 1 / 1;
     border-radius: var(--radius-md);
     overflow: hidden;
-    transition: box-shadow var(--dur) var(--ease);
-    display: flex;
-    flex-direction: column;
+    background: color-mix(in srgb, var(--color-linen-deep) 70%, var(--bg-page));
   }
-  @media (min-width: 640px) {
-    .blog-card { flex: 0 0 calc(50% - var(--space-4)); }
+  .space-frame {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    animation: space-crossfade 21s infinite;
   }
-  @media (min-width: 960px) {
-    .blog-card { flex: 0 0 calc(33.333% - var(--space-4)); }
+  .space-frame:nth-child(1) { animation-delay: 0s; }
+  .space-frame:nth-child(2) { animation-delay: 7s; }
+  .space-frame:nth-child(3) { animation-delay: 14s; }
+  @keyframes space-crossfade {
+    0%   { opacity: 0; }
+    8%   { opacity: 1; }
+    33%  { opacity: 1; }
+    41%  { opacity: 0; }
+    100% { opacity: 0; }
   }
-  .blog-card:hover { box-shadow: var(--shadow-md); }
-  .blog-card__img .img-ph {
-    aspect-ratio: 3 / 2;
-    border-radius: 0;
-    border: none;
-    border-bottom: 1px solid var(--color-border);
+  @media (prefers-reduced-motion: reduce) {
+    .space-frame { animation: none; }
+    .space-frame:nth-child(1) { opacity: 1; }
   }
-  .blog-card__body {
-    padding: var(--space-4) var(--space-4) var(--space-5);
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
-    flex: 1;
-  }
-  .blog-card__tag {
-    font-family: var(--font-body);
-    font-size: var(--fs-caption);
-    font-weight: var(--weight-semibold);
-    letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
-    color: var(--color-primary);
-  }
-  .blog-card__title {
-    font-family: var(--font-display);
-    font-size: var(--fs-body);
-    font-weight: var(--weight-semibold);
-    color: var(--text-default);
-    line-height: var(--lh-snug);
-  }
-  .blog-card__title a { color: inherit; text-decoration: none; }
-  .blog-card__title a:hover { color: var(--color-primary); }
-  .blog-card__date {
-    font-family: var(--font-body);
-    font-size: var(--fs-caption);
-    color: var(--text-muted);
-    margin-top: auto;
-  }
-  .blog-more { margin-top: var(--space-6); text-align: center; }
-  .blog-more__link {
-    font-family: var(--font-body);
-    font-size: var(--fs-small);
-    font-weight: var(--weight-medium);
-    color: var(--color-primary);
-    text-decoration-thickness: 1px;
-    text-underline-offset: 0.2em;
-  }
-  .blog-more__link::after { content: " \2192"; }
 
   /* ======================================================
      FAQ
