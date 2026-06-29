@@ -1,0 +1,153 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Section from "../../components/Section.astro";
+import Button from "../../components/Button.astro";
+
+const allConditions = await getCollection("conditions", ({ data }) => !data.draft);
+allConditions.sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99));
+
+// Group by category
+const categories = [
+  "Women's Health",
+  "Musculoskeletal & Sports",
+  "Paediatrics",
+  "Vestibular",
+  "Lymphatic & Oncology",
+] as const;
+
+type Category = (typeof categories)[number];
+
+const grouped = categories.reduce(
+  (acc, cat) => {
+    acc[cat] = allConditions.filter((c) => c.data.category === cat);
+    return acc;
+  },
+  {} as Record<Category, typeof allConditions>,
+);
+---
+
+<BaseLayout
+  title="Conditions We Treat | Goji Physiotherapy Singapore"
+  description="Physiotherapy for pelvic floor, back pain, neck pain, postnatal recovery, paediatric concerns, and more at Goji Physio, Lentor MRT Singapore."
+>
+  <section class="conditions-hero">
+    <div class="container">
+      <p class="eyebrow">Conditions</p>
+      <h1>What we treat</h1>
+      <p class="conditions-hero__lead">
+        Goji's physiotherapists assess and treat a wide range of musculoskeletal,
+        pelvic health, paediatric, and neurological conditions. Every person's
+        presentation is different — these pages are a starting point, not a
+        diagnosis.
+      </p>
+    </div>
+  </section>
+
+  {
+    categories.map((cat) => {
+      const items = grouped[cat];
+      if (!items.length) return null;
+      return (
+        <Section tone={cat === "Women's Health" ? "linen" : "surface"}>
+          <header class="section-head">
+            <p class="eyebrow">{cat}</p>
+          </header>
+          <div class="cond-grid">
+            {items.map((c) => (
+              <a href={`/conditions/${c.slug}`} class="cond-card">
+                <h2 class="cond-card__title">{c.data.cardTitle ?? c.data.title}</h2>
+                <p class="cond-card__lead">{c.data.cardLead}</p>
+                <span class="cond-card__cta">Read more</span>
+              </a>
+            ))}
+          </div>
+        </Section>
+      );
+    })
+  }
+
+  <Section tone="linen" id="contact-cta">
+    <div class="contact-strip">
+      <h2>Not sure where to start?</h2>
+      <p>Message us on WhatsApp — describe what you are experiencing and we will help you find the right appointment type.</p>
+      <Button slug="web-wa" variant="primary" size="lg" berry>Ask us on WhatsApp</Button>
+    </div>
+  </Section>
+</BaseLayout>
+
+<style>
+  .conditions-hero {
+    background: var(--bg-page);
+    padding-block: clamp(2.5rem, 1.5rem + 4vw, 5rem);
+    border-bottom: 1px solid var(--color-border);
+  }
+  .conditions-hero__lead {
+    max-width: 52ch;
+    color: var(--text-muted);
+    margin-top: var(--space-4);
+  }
+
+  .section-head {
+    margin-bottom: var(--space-5);
+  }
+
+  .cond-grid {
+    display: grid;
+    gap: var(--space-4);
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 640px) {
+    .cond-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (min-width: 980px) {
+    .cond-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+
+  .cond-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding: var(--space-5);
+    background: var(--bg-content);
+    border: 1px solid var(--color-border);
+    border-top: 3px solid var(--color-primary);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    text-decoration: none;
+    color: inherit;
+    transition: box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease);
+  }
+  .cond-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+  .cond-card__title {
+    font-size: var(--fs-h3);
+    color: var(--text-default);
+  }
+  .cond-card__lead {
+    font-size: var(--fs-body);
+    color: var(--text-muted);
+    flex: 1;
+    line-height: var(--lh-snug);
+  }
+  .cond-card__cta {
+    font-size: var(--fs-caption);
+    font-weight: var(--weight-semibold);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--color-primary);
+    margin-top: var(--space-2);
+  }
+
+  .contact-strip {
+    max-width: 44ch;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+  .contact-strip p {
+    color: var(--text-muted);
+  }
+</style>

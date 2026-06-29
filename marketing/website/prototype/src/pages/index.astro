@@ -2,37 +2,39 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Section from "../components/Section.astro";
 import Button from "../components/Button.astro";
-import LogoLockup from "../components/LogoLockup.astro";
-import ImageTextSplit from "../components/ImageTextSplit.astro";
-import EducationCard from "../components/EducationCard.astro";
 import PractitionerCard from "../components/PractitionerCard.astro";
-import StatBlock from "../components/StatBlock.astro";
 import QuoteSurface from "../components/QuoteSurface.astro";
 import ContactBlock from "../components/ContactBlock.astro";
+import { Icon } from "astro-icon/components";
 import { SITE } from "../lib/site.ts";
 
 const services = [
   {
+    icon: "tabler:stretching",
     title: "Physiotherapy",
     lead: "Assessment and treatment for pain, injury, recovery, pelvic health, women's health, paediatric, vestibular, and lymphatic concerns.",
     meta: ["55 min initial consult", "In-clinic & home visits"],
   },
   {
+    icon: "tabler:baby-carriage",
     title: "Mummy & Baby Assessment",
     lead: "A joint assessment for postpartum mothers and babies aged 0–6 months, supporting recovery, development, and early physical needs.",
     meta: ["90 min", "In-clinic & home visits"],
   },
   {
+    icon: "tabler:yoga",
     title: "Clinical Pilates",
     lead: "Physiotherapist-led reformer Pilates for rehabilitation, movement retraining, strength, and a safe return to activity or sport.",
     meta: ["55 min", "1:1 or 2:1 reformer"],
   },
   {
+    icon: "tabler:heart",
     title: "Private Pilates",
     lead: "Instructor-led reformer Pilates for building strength, mobility, body awareness, and confidence in movement.",
     meta: ["55 min", "1:1 or 2:1 reformer"],
   },
   {
+    icon: "tabler:barbell",
     title: "Strength & Conditioning",
     lead: "Build strength and resilience through tailored exercise, with guidance from professionals to sustain your momentum.",
     meta: ["55 min", "1:1 or 2:1 sessions"],
@@ -42,42 +44,55 @@ const services = [
 const careAreas = [
   {
     title: "Women's Health",
+    slug: "womens-health",
     points: [
-      "Prenatal care and birth preparation",
-      "Postpartum recovery and return to sport",
-      "Diastasis recti and Caesarean scar care",
-      "Pelvic floor dysfunction and pelvic pain",
-      "Perimenopause, menopause, and bone health",
+      { text: "Prenatal care and birth preparation", href: "/blog/prenatal-physiotherapy" },
+      { text: "Postpartum recovery and return to sport", href: "/blog/postpartum-recovery" },
+      { text: "Diastasis recti and Caesarean scar care", href: "/blog/diastasis-recti" },
+      { text: "Pelvic floor dysfunction and pelvic pain", href: "/blog/pelvic-floor-physiotherapy" },
+      { text: "Perimenopause, menopause, and bone health", href: "/blog/perimenopause-bone-health" },
     ],
   },
   {
     title: "Paediatrics",
+    slug: "paediatrics",
     points: [
-      "Congenital torticollis and early intervention",
-      "Developmental concerns and milestones",
-      "Scoliosis and Schroth therapy",
-      "Paediatric pelvic health",
-      "Musculoskeletal and sports injury",
+      { text: "Congenital torticollis and early intervention", href: "/blog/torticollis-newborns" },
+      { text: "Developmental concerns and milestones", href: "/blog/paediatric-development" },
+      { text: "Scoliosis and Schroth therapy", href: "/blog/scoliosis-schroth" },
+      { text: "Paediatric pelvic health", href: "/blog/paediatric-pelvic-health" },
+      { text: "Musculoskeletal and sports injury", href: "/blog/paediatric-sports-injury" },
     ],
   },
   {
     title: "Musculoskeletal & Sports",
+    slug: "musculoskeletal",
     points: [
-      "Injuries and persistent or recurrent pain",
-      "Sports rehabilitation and performance",
-      "Post-operation recovery",
-      "Functional movement assessment",
-      "Dry needling",
+      { text: "Injuries and persistent or recurrent pain", href: "/blog/pain-and-injury" },
+      { text: "Sports rehabilitation and performance", href: "/blog/sports-rehabilitation" },
+      { text: "Post-operation recovery", href: "/blog/post-operation-recovery" },
+      { text: "Functional movement assessment", href: "/blog/movement-assessment" },
+      { text: "Dry needling", href: "/blog/dry-needling" },
     ],
   },
   {
-    title: "Vestibular & Lymphatic",
+    title: "Vestibular Rehabilitation",
+    slug: "vestibular",
     points: [
-      "Vertigo, dizziness, and balance",
-      "BPPV and fall prevention",
-      "Lymphoedema and swelling management",
-      "Lipedema",
-      "Breast cancer post-op rehabilitation",
+      { text: "Vertigo, dizziness, and balance disorders", href: "/blog/vertigo-dizziness" },
+      { text: "BPPV and fall prevention", href: "/blog/bppv" },
+      { text: "Post-concussion vestibular rehabilitation", href: "/blog/post-concussion" },
+      { text: "Benign positional vertigo", href: "/blog/benign-positional-vertigo" },
+      { text: "Vestibular migraine management", href: "/blog/vestibular-migraine" },
+    ],
+  },
+  {
+    title: "Lymphatic Health",
+    slug: "lymphatic",
+    points: [
+      { text: "Lymphoedema assessment and management", href: "/blog/lymphoedema" },
+      { text: "Oncology rehabilitation", href: "/blog/oncology-rehabilitation" },
+      { text: "Post-surgical lymphatic drainage", href: "/blog/lymphatic-drainage" },
     ],
   },
 ];
@@ -85,125 +100,418 @@ const careAreas = [
 const team = [
   {
     name: "Cheryl Long",
-    role: "Founder · Clinical Director",
+    role: "Clinical Director",
     interests:
-      "Women's and pelvic health, paediatric orthopaedics, pre & postnatal care, scoliosis management, clinical Pilates, dry needling.",
+      "Pelvic health, women's rehabilitation, musculoskeletal, sports, dry needling, clinical Pilates.",
+    slug: "cheryl-long",
   },
   {
     name: "Claire Ng",
     role: "Senior Physiotherapist",
     interests:
-      "Pelvic health, pre & postnatal care, women's rehabilitation, musculoskeletal and sports, lymphoedema, vestibular, clinical Pilates.",
+      "Pelvic health, pre & postnatal care, women's rehabilitation, musculoskeletal, lymphoedema, vestibular.",
+    slug: "claire-ng",
   },
   {
     name: "Kristy Ng",
     role: "Senior Physiotherapist",
     interests:
       "Pelvic health, pre & postnatal care, women's rehabilitation, sports, paediatric physiotherapy including neuro cases.",
+    slug: "kristy-ng",
+  },
+];
+
+// COMPLIANCE NOTE: Outcome/superlative phrases trimmed per SG healthcare ad rules.
+// Trimmed: "Cheryl is the best", "She is truly a gem" (superlatives); Zachary W. outcome sentence
+// and referral solicitation removed. All reviews are authentic public Google Reviews.
+// Order: Cheryl → Cheryl → Kristy → Claire → general → Cheryl, so all three physios appear early
+const reviews = [
+  {
+    name: "Jennifer O.",
+    text: "Cheryl has been instrumental in helping me in my pre and postnatal recovery. She has given me so much more confidence in my body post partum and helped me tremendously in preparing for birth. She is also just in general really sweet and lovely which makes our sessions very enjoyable.",
+  },
+  {
+    name: "Sulwyn N.",
+    text: "I've had a wonderful experience with Cheryl at Goji. She is incredibly supportive, knowledgeable and always takes a gentle yet thoughtful approach to treatment. What stands out most is that Goji isn't just a physio clinic — the entire team has built a welcoming and encouraging community that genuinely cares about your progress.",
+  },
+  {
+    name: "Grace S.",
+    text: "Did a postpartum physio check with Kristy! She was very knowledgeable and shared what she's checking for and how. Also gave me tips on breath work to incorporate in my usual workouts to activate my deep core. Very useful and practical for me!",
+  },
+  {
+    name: "Alison K.",
+    text: "Had a physio session with Claire after hurting my back as a postpartum mum getting back into strength training. She is really able to balance the sports side and women's health sides of physio. Would highly recommend!",
+  },
+  {
+    name: "Nadjib S.",
+    text: "Love the ambience of the newly opened clinic. Was attended by Chris and handled by Cheryl. Cheryl guided me to a personalised exercise suitable for my current injury and was very professional. I enjoyed my sessions there. Overall satisfied!",
+  },
+  {
+    name: "Zachary W.",
+    text: "Cheryl is an extremely patient and amicable physiotherapist who has helped me with my injuries through the process of dry needling. Cheryl explains the procedures cohesively so that I was able to understand the dry needling process.",
+  },
+];
+
+const blogPosts = [
+  {
+    tag: "Women's Health",
+    title: "What is pelvic floor physiotherapy and do I need it?",
+    date: "June 2025",
+    href: "/blog/pelvic-floor-physiotherapy",
+  },
+  {
+    tag: "Postpartum",
+    title: "Returning to exercise after a C-section: what to expect",
+    date: "May 2025",
+    href: "/blog/exercise-after-csection",
+  },
+  {
+    tag: "Paediatrics",
+    title: "Torticollis in newborns: early signs and when to see a physio",
+    date: "April 2025",
+    href: "/blog/torticollis-newborns",
   },
 ];
 ---
 
-<BaseLayout>
-  {/* ---- Hero ---- */}
+<BaseLayout
+  title="Women's Physiotherapy at Lentor Modern | Goji Health"
+  description="Expert women's and family physiotherapy at Lentor Modern, Singapore. Pelvic health, pregnancy and postpartum care, paediatrics, and everyday strength — one minute from Lentor MRT."
+>
+  {/* ---- Hero (centred editorial) ---- */}
   <section class="hero">
     <div class="container hero__inner">
-      <div class="hero__text">
-        <LogoLockup variant="tagline" height={48} class="hero__brand" />
-        <h1 class="hero__title">{SITE.tagline}</h1>
-        <p class="hero__lead">
-          Women's and family physiotherapy at Lentor. Expert, unhurried care for
-          pelvic health, pregnancy and postpartum recovery, paediatrics, and
-          everyday strength.
-        </p>
-        <div class="hero__actions">
-          <Button slug="web-plato" variant="primary" size="lg">Book an appointment</Button>
-          <Button slug="web-wa" variant="secondary" size="lg" berry>Ask us on WhatsApp</Button>
-        </div>
+      <div class="hero__bloom-wrap" role="img" aria-label="From green bud to ripe goji berry">
+        {[1, 2, 3, 4, 5, 6, 7].map((n) => (
+          <img
+            src={`/illustrations/bloom-${n}.png`}
+            class="bloom-frame"
+            alt=""
+            aria-hidden="true"
+            width="300"
+            height="300"
+            decoding="async"
+          />
+        ))}
       </div>
-      <div class="hero__media" role="img" aria-label="Clinic photograph placeholder">
-        <LogoLockup variant="mark" height={72} />
-        <span class="hero__media-note">Real clinic photo</span>
+
+      <p class="hero__tagline">{SITE.tagline}</p>
+      <p class="hero__lead">
+        Expert, unhurried care for pelvic health, pregnancy and postpartum
+        recovery, paediatrics, and everyday strength.
+      </p>
+      <div class="hero__actions">
+        <Button slug="web-plato" variant="primary" size="lg">Book an appointment</Button>
+        <Button slug="web-wa" variant="secondary" size="lg" berry>Ask us on WhatsApp</Button>
       </div>
     </div>
   </section>
 
-  {/* ---- About ---- */}
-  <Section tone="surface" id="about">
-    <ImageTextSplit eyebrow="Who we are">
-      <h2>A clinic women can trust through it all.</h2>
-      <p>
-        Women make careful decisions about their bodies, especially during
-        pregnancy, recovery, and caring for their children. Finding the right
-        physio should not mean starting over at every life stage.
-      </p>
-      <p>
-        You are heard before you are treated, with care that combines clinical
-        expertise and real understanding. The same trusted support can extend to
-        your children and family too.
-      </p>
-    </ImageTextSplit>
-  </Section>
-
-  {/* ---- Services ---- */}
-  <Section tone="linen" id="services">
-    <header class="section-head">
-      <p class="eyebrow">Our services</p>
-      <h2>Care for every stage, under one roof.</h2>
-    </header>
-    <div class="grid grid--3">
-      {
-        services.map((s) => (
-          <EducationCard title={s.title} lead={s.lead} meta={s.meta} />
-        ))
-      }
+  {/* ---- About (text-only, no photo placeholder) ---- */}
+  <section class="about-sec" id="about">
+    <div class="container about-sec__inner">
+      <p class="eyebrow">Who we are</p>
+      <h2>A clinic women can trust through it all</h2>
+      <div class="about-sec__body">
+        <p>
+          Women make careful decisions about their bodies, especially during
+          pregnancy, recovery, and caring for their children. Finding the right
+          physio should not mean starting over at every life stage.
+        </p>
+        <p>
+          You are heard before you are treated, with care that combines clinical
+          expertise and real understanding. The same trusted support can extend to
+          your children and family too.
+        </p>
+      </div>
     </div>
-  </Section>
+  </section>
 
-  {/* ---- Areas of care ---- */}
-  <Section tone="surface" id="care">
-    <header class="section-head">
-      <p class="eyebrow">Areas of care</p>
-      <h2>Conditions and concerns we commonly assess and treat.</h2>
-      <p class="section-head__sub">
-        Care tailored to the individual, their stage of life, and what matters to
-        them.
-      </p>
-    </header>
-    <div class="grid grid--2">
-      {
-        careAreas.map((c) => (
-          <EducationCard title={c.title} points={c.points} />
-        ))
-      }
+  {/* ---- Services (accordion with Tabler icons) ---- */}
+  <section class="services-sec" id="services">
+    <div class="container">
+      <div class="sec-two-col">
+      <header class="section-head">
+        <p class="eyebrow">Services</p>
+        <h2>Care for every stage, under one roof</h2>
+      </header>
+      <div class="accordion">
+        {
+          services.map((s) => (
+            <details class="accordion__item">
+              <summary class="accordion__trigger">
+                <span class="accordion__icon-wrap" aria-hidden="true">
+                  <Icon name={s.icon} size={20} />
+                </span>
+                <span class="accordion__info">
+                  <span class="accordion__name">{s.title}</span>
+                  <span class="accordion__meta">{s.meta.join(" · ")}</span>
+                </span>
+                <span class="accordion__toggle" aria-hidden="true" />
+              </summary>
+              <div class="accordion__body">
+                <div class="accordion__body-inner">
+                  <p>{s.lead}</p>
+                </div>
+              </div>
+            </details>
+          ))
+        }
+      </div>
+      </div>
     </div>
-  </Section>
+  </section>
 
-  {/* ---- Stats ---- */}
-  <Section tone="linen">
-    <div class="grid grid--3 stats">
-      <StatBlock value="3" label="Specialist physios" caption="AHPC-registered clinicians" align="center" />
-      <StatBlock value="5" label="Areas of care" caption="From pelvic health to paediatrics" align="center" />
-      <StatBlock value="1 min" label="From Lentor MRT" caption="Ground floor, stroller-friendly" align="center" />
+  {/* ---- Areas of care (accordion, berry icon per row, linked conditions) ---- */}
+  <section class="care-sec" id="care">
+    <div class="container">
+      <div class="sec-two-col">
+      <header class="section-head">
+        <p class="eyebrow">Areas of care</p>
+        <h2>Conditions and concerns we commonly assess and treat</h2>
+        <p class="section-head__sub">
+          Care tailored to the individual, their stage of life, and what matters
+          to them.
+        </p>
+      </header>
+      <div class="accordion">
+        {
+          careAreas.map((c) => (
+            <details class="accordion__item">
+              <summary class="accordion__trigger accordion__trigger--care">
+                <span class="care-berry" aria-hidden="true"></span>
+                <span class="accordion__name">{c.title}</span>
+                <span class="accordion__toggle" aria-hidden="true" />
+              </summary>
+              <div class="accordion__body">
+                <div class="accordion__body-inner">
+                  <ul class="care-list">
+                    {c.points.map((p) => (
+                      <li>
+                        <a href={p.href}>{p.text}</a>
+                      </li>
+                    ))}
+                  </ul>
+                  <a href={`/conditions/${c.slug}`} class="care-link">
+                    Read the full guide
+                  </a>
+                </div>
+              </div>
+            </details>
+          ))
+        }
+      </div>
+      </div>
     </div>
-  </Section>
+  </section>
 
-  {/* ---- Team ---- */}
+  {/* ---- Stats: 4 items (2×2 on mobile, 4-col on desktop) ---- */}
+  <section class="stats-strip">
+    <div class="container stats-strip__inner">
+      <div class="stat-item">
+        <span class="stat-item__value">1 min</span>
+        <span class="stat-item__label">walk from Lentor MRT</span>
+        <span class="stat-item__caption">Ground floor, stroller-friendly</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-item__value">3</span>
+        <span class="stat-item__label">specialist physios</span>
+        <span class="stat-item__caption">AHPC-registered clinicians</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-item__value">20+</span>
+        <span class="stat-item__label">years combined experience</span>
+        <span class="stat-item__caption">Across pelvic health, sports, and paediatrics</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-item__value">1000+</span>
+        <span class="stat-item__label">patients served</span>
+        <span class="stat-item__caption">And growing</span>
+      </div>
+    </div>
+  </section>
+
+  {/* ---- Team carousel ---- */}
   <Section tone="surface" id="team">
     <header class="section-head">
       <p class="eyebrow">Meet the team</p>
-      <h2>Clinicians who get it.</h2>
+      <h2>Clinicians who get it</h2>
     </header>
-    <div class="grid grid--3">
-      {
-        team.map((t) => (
-          <PractitionerCard name={t.name} role={t.role} interests={t.interests} />
-        ))
-      }
+    <div class="team-wrap">
+      <div class="team-track" id="teamTrack">
+        {
+          team.map((t) => (
+            <div class="team-slide">
+              <PractitionerCard name={t.name} role={t.role} interests={t.interests} href={`/team/${t.slug}`} />
+            </div>
+          ))
+        }
+      </div>
+      <button class="carousel-btn carousel-btn--prev" id="teamPrev" aria-label="Previous clinician" disabled>
+        <Icon name="tabler:chevron-left" size={22} />
+      </button>
+      <button class="carousel-btn carousel-btn--next" id="teamNext" aria-label="Next clinician">
+        <Icon name="tabler:chevron-right" size={22} />
+      </button>
+    </div>
+    <div class="team-dots" id="teamDots" aria-hidden="true">
+      {team.map((_, i) => <span class:list={["team-dot", { "team-dot--active": i === 0 }]} />)}
     </div>
   </Section>
 
-  {/* ---- Closing promise (the one full-bleed Deep Red surface) ---- */}
+  {/* ---- Clinic space ---- */}
+  <section class="space-sec">
+    <div class="container space-sec__inner">
+      <div class="space-sec__image">
+        <div class="img-ph" role="img" aria-label="Goji reformer studio (photo coming soon)">
+          <span>Reformer room / clinic space</span>
+        </div>
+      </div>
+      <div class="space-sec__text">
+        <p class="eyebrow">Our space</p>
+        <h2>Designed around you</h2>
+        <p>
+          Ground floor at Lentor Modern Mall. Private treatment rooms and a
+          reformer studio, one minute from Lentor MRT (Thomson-East Coast Line,
+          Exit 1).
+        </p>
+        <p>Stroller-friendly entry, step-free access, and private changing facilities.</p>
+      </div>
+    </div>
+  </section>
+
+  {/* ---- Google Reviews carousel ---- */}
+  <section class="reviews-sec">
+    <div class="container">
+      <div class="reviews-header">
+        <p class="eyebrow">What patients say</p>
+        <h2 class="reviews-title">The Goji community</h2>
+        <div class="reviews-rating">
+          <span class="reviews-stars" aria-hidden="true">★★★★★</span>
+          <span class="reviews-score">5.0</span>
+          <a
+            href="https://maps.app.goo.gl/wBaCkBiDNfF7JCGv8"
+            class="reviews-source"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            See all on Google
+          </a>
+        </div>
+      </div>
+      <div class="reviews-wrap">
+        <div class="reviews-track" id="reviewsTrack">
+          {reviews.map((r) => (
+            <blockquote class="review-card">
+              <div class="review-card__stars" aria-label="5 stars">★★★★★</div>
+              <p class="review-card__text">{r.text}</p>
+              <footer class="review-card__footer">
+                <span class="review-card__name">{r.name}</span>
+              </footer>
+            </blockquote>
+          ))}
+        </div>
+        <button class="reviews-btn reviews-btn--prev" id="reviewsPrev" aria-label="Previous review" disabled>
+          <Icon name="tabler:chevron-left" size={22} />
+        </button>
+        <button class="reviews-btn reviews-btn--next" id="reviewsNext" aria-label="Next review">
+          <Icon name="tabler:chevron-right" size={22} />
+        </button>
+      </div>
+      <p class="reviews-disclaimer">All reviews sourced from <a href="https://maps.app.goo.gl/wBaCkBiDNfF7JCGv8" target="_blank" rel="noopener noreferrer">Google Maps</a>. Individual experiences may vary.</p>
+    </div>
+  </section>
+
+  {/* ---- Blog preview ---- */}
+  <Section tone="linen" id="blog">
+    <header class="section-head">
+      <p class="eyebrow">From the blog</p>
+      <h2>Resources and reading</h2>
+    </header>
+    <div class="blog-wrap">
+      <div class="blog-track" id="blogTrack">
+        {blogPosts.map((post) => (
+          <article class="blog-card">
+            <div class="blog-card__img">
+              <div
+                class="img-ph"
+                role="img"
+                aria-label={`Blog post: ${post.title}`}
+              >
+                <span>{post.tag}</span>
+              </div>
+            </div>
+            <div class="blog-card__body">
+              <span class="blog-card__tag">{post.tag}</span>
+              <h3 class="blog-card__title">
+                <a href={post.href}>{post.title}</a>
+              </h3>
+              <time class="blog-card__date">{post.date}</time>
+            </div>
+          </article>
+        ))}
+      </div>
+      <button class="blog-btn blog-btn--prev" id="blogPrev" aria-label="Previous post" disabled>
+        <Icon name="tabler:chevron-left" size={22} />
+      </button>
+      <button class="blog-btn blog-btn--next" id="blogNext" aria-label="Next post">
+        <Icon name="tabler:chevron-right" size={22} />
+      </button>
+    </div>
+    <div class="blog-more">
+      <a href="/blog" class="blog-more__link">View all posts</a>
+    </div>
+  </Section>
+
+  {/* ---- FAQ ---- */}
+  <Section tone="surface" id="faq">
+    <div class="sec-two-col">
+    <header class="section-head">
+      <p class="eyebrow">Common questions</p>
+      <h2>Frequently asked questions</h2>
+    </header>
+    <div class="faq-list">
+      {[
+        {
+          q: "Do I need a referral to see a physiotherapist at Goji?",
+          a: "No referral is needed. You can book directly online or message us on WhatsApp and we'll help you find the right session.",
+        },
+        {
+          q: "What should I expect at my first session?",
+          a: "Your first session is a full assessment — we spend time understanding your history, what's going on in your body, and what you want to achieve. Treatment may begin in the same session depending on what we find.",
+        },
+        {
+          q: "Is physiotherapy covered by insurance?",
+          a: "Many health insurance plans cover physiotherapy. We recommend checking with your insurer beforehand. We issue itemised receipts you can submit for reimbursement.",
+        },
+        {
+          q: "Do you offer home visits?",
+          a: "Yes — home visits are available for physiotherapy and Mummy & Baby Assessment sessions. Let us know when you enquire and we'll arrange the details.",
+        },
+        {
+          q: "What is pelvic floor physiotherapy and who is it for?",
+          a: "Pelvic floor physiotherapy addresses the muscles, ligaments, and connective tissue that support the bladder, bowel, and uterus. It is relevant across all life stages — not just postpartum. Common reasons to see us include leakage, pelvic pain, prolapse, or simply wanting a postnatal check.",
+        },
+        {
+          q: "How many sessions will I need?",
+          a: "This varies by condition and how your body responds. We will give you a realistic picture after your first assessment and review progress with you as we go.",
+        },
+      ].map((item) => (
+        <details class="faq-item">
+          <summary class="faq-q">
+            {item.q}
+            <span class="faq-toggle" aria-hidden="true" />
+          </summary>
+          <div class="faq-a">
+            <p>{item.a}</p>
+          </div>
+        </details>
+      ))}
+    </div>
+    </div>
+  </Section>
+
+  {/* ---- Closing promise ---- */}
   <Section tone="closing">
     <QuoteSurface />
   </Section>
@@ -214,97 +522,842 @@ const team = [
   </Section>
 </BaseLayout>
 
+<script>
+  const track = document.getElementById("teamTrack") as HTMLElement | null;
+  const prev = document.getElementById("teamPrev") as HTMLButtonElement | null;
+  const next = document.getElementById("teamNext") as HTMLButtonElement | null;
+  const dots = document.querySelectorAll(".team-dot");
+
+  if (track && prev && next) {
+    function slideWidth(): number {
+      const slide = track!.firstElementChild as HTMLElement | null;
+      return slide ? slide.offsetWidth + parseInt(getComputedStyle(track!).gap || "0") : 0;
+    }
+
+    function currentIndex(): number {
+      const sw = slideWidth();
+      return sw > 0 ? Math.round(track!.scrollLeft / sw) : 0;
+    }
+
+    function updateUI() {
+      const maxScroll = track!.scrollWidth - track!.clientWidth;
+      prev!.disabled = track!.scrollLeft <= 1;
+      next!.disabled = track!.scrollLeft >= maxScroll - 1;
+      const idx = currentIndex();
+      dots.forEach((d, i) => d.classList.toggle("team-dot--active", i === idx));
+    }
+
+    prev.addEventListener("click", () => {
+      track.scrollBy({ left: -slideWidth(), behavior: "smooth" });
+    });
+    next.addEventListener("click", () => {
+      track.scrollBy({ left: slideWidth(), behavior: "smooth" });
+    });
+    track.addEventListener("scroll", updateUI, { passive: true });
+    updateUI();
+  }
+
+  // Blog carousel
+  const bTrack = document.getElementById("blogTrack") as HTMLElement | null;
+  const bPrev = document.getElementById("blogPrev") as HTMLButtonElement | null;
+  const bNext = document.getElementById("blogNext") as HTMLButtonElement | null;
+  if (bTrack && bPrev && bNext) {
+    function bSlideWidth(): number {
+      const slide = bTrack!.firstElementChild as HTMLElement | null;
+      return slide ? slide.offsetWidth + parseInt(getComputedStyle(bTrack!).gap || "0") : 0;
+    }
+    function bUpdateUI() {
+      const maxScroll = bTrack!.scrollWidth - bTrack!.clientWidth;
+      bPrev!.disabled = bTrack!.scrollLeft <= 1;
+      bNext!.disabled = bTrack!.scrollLeft >= maxScroll - 1;
+    }
+    bPrev.addEventListener("click", () => { bTrack.scrollBy({ left: -bSlideWidth(), behavior: "smooth" }); });
+    bNext.addEventListener("click", () => { bTrack.scrollBy({ left: bSlideWidth(), behavior: "smooth" }); });
+    bTrack.addEventListener("scroll", bUpdateUI, { passive: true });
+    bUpdateUI();
+  }
+
+  // Reviews carousel
+  const rTrack = document.getElementById("reviewsTrack") as HTMLElement | null;
+  const rPrev = document.getElementById("reviewsPrev") as HTMLButtonElement | null;
+  const rNext = document.getElementById("reviewsNext") as HTMLButtonElement | null;
+
+  if (rTrack && rPrev && rNext) {
+    function rSlideWidth(): number {
+      const slide = rTrack!.firstElementChild as HTMLElement | null;
+      return slide ? slide.offsetWidth + parseInt(getComputedStyle(rTrack!).gap || "0") : 0;
+    }
+    function rUpdateUI() {
+      const maxScroll = rTrack!.scrollWidth - rTrack!.clientWidth;
+      rPrev!.disabled = rTrack!.scrollLeft <= 1;
+      rNext!.disabled = rTrack!.scrollLeft >= maxScroll - 1;
+    }
+    rPrev.addEventListener("click", () => {
+      rTrack.scrollBy({ left: -rSlideWidth(), behavior: "smooth" });
+    });
+    rNext.addEventListener("click", () => {
+      rTrack.scrollBy({ left: rSlideWidth(), behavior: "smooth" });
+    });
+    rTrack.addEventListener("scroll", rUpdateUI, { passive: true });
+    rUpdateUI();
+  }
+</script>
+
 <style>
+  /* ======================================================
+     Hero
+     ====================================================== */
   .hero {
-    background:
-      radial-gradient(110% 90% at 85% 10%, var(--color-linen-deep), transparent 60%),
-      var(--bg-page);
-    padding-block: clamp(2.5rem, 1.5rem + 5vw, 5.5rem);
+    background: var(--bg-page);
+    padding-block: clamp(2.5rem, 1.5rem + 5vw, 5rem);
+    text-align: center;
   }
   .hero__inner {
-    display: grid;
-    gap: var(--space-7);
+    display: flex;
+    flex-direction: column;
     align-items: center;
   }
-  @media (min-width: 880px) {
-    .hero__inner {
-      grid-template-columns: 1.05fr 0.95fr;
-      gap: var(--space-9);
-    }
-  }
-  .hero__brand {
+
+  /* Flipbook: 1.75s cycle (0.25s per frame), bud → ripe berry.
+     delay = (N-1)*0.25 - 1.75 so frame 1 (bud) shows first, 7 (berry) last. */
+  .hero__bloom-wrap {
+    position: relative;
+    width: clamp(140px, 22vw, 200px);
+    height: clamp(140px, 22vw, 200px);
+    margin-inline: auto;
     margin-bottom: var(--space-5);
+    flex-shrink: 0;
   }
-  .hero__title {
+  .bloom-frame {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    opacity: 0;
+    animation: bloom-appear 1.75s linear infinite;
+  }
+  .bloom-frame:nth-child(1) { animation-delay: -1.75s; }
+  .bloom-frame:nth-child(2) { animation-delay: -1.5s; }
+  .bloom-frame:nth-child(3) { animation-delay: -1.25s; }
+  .bloom-frame:nth-child(4) { animation-delay: -1s; }
+  .bloom-frame:nth-child(5) { animation-delay: -0.75s; }
+  .bloom-frame:nth-child(6) { animation-delay: -0.5s; }
+  .bloom-frame:nth-child(7) { animation-delay: -0.25s; }
+  @keyframes bloom-appear {
+    0%, 14.2%   { opacity: 1; }
+    14.3%, 100% { opacity: 0; }
+  }
+
+  .hero__tagline {
+    font-family: var(--font-display);
     font-size: var(--fs-display);
+    font-weight: var(--weight-semibold);
+    color: var(--text-default);
     line-height: var(--lh-tight);
-    margin-bottom: var(--space-4);
+    letter-spacing: var(--tracking-tight);
+    max-width: 16ch;
+    margin-inline: auto;
+    margin-bottom: var(--space-5);
+    text-wrap: balance;
   }
   .hero__lead {
-    font-size: var(--fs-h3);
+    font-family: var(--font-body);
+    font-size: var(--fs-body);
     color: var(--text-muted);
-    max-width: 46ch;
+    max-width: 44ch;
     margin-bottom: var(--space-6);
+    line-height: var(--lh-body);
   }
   .hero__actions {
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-3);
+    justify-content: center;
   }
-  .hero__media {
-    aspect-ratio: 4 / 5;
-    border-radius: var(--radius-lg);
-    background:
-      radial-gradient(120% 120% at 30% 20%, var(--color-surface), var(--color-linen-deep));
-    border: 1px solid var(--color-border);
-    box-shadow: var(--shadow-lg);
+
+  /* ======================================================
+     About — text only
+     ====================================================== */
+  .about-sec {
+    background: var(--bg-content);
+    padding-block: var(--section-y);
+  }
+  .about-sec__inner {
+    max-width: var(--container-narrow);
+  }
+  .about-sec__inner h2 { margin: var(--space-2) 0 var(--space-5); }
+  .about-sec__body {
+    display: grid;
+    gap: var(--space-4);
+  }
+  @media (min-width: 640px) {
+    .about-sec__body {
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-6);
+    }
+  }
+  .about-sec__inner p { color: var(--text-muted); }
+
+  /* ======================================================
+     Services section
+     ====================================================== */
+  .services-sec {
+    background: var(--bg-page);
+    padding-block: var(--section-y);
+  }
+
+  /* ======================================================
+     Care section
+     ====================================================== */
+  .care-sec {
+    background: var(--bg-content);
+    padding-block: var(--section-y);
+  }
+
+  /* ======================================================
+     Shared accordion
+     ====================================================== */
+  .accordion { border-top: 1px solid var(--rule); }
+  .accordion__item { border-bottom: 1px solid var(--rule); }
+
+  .accordion__trigger {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    padding-block: var(--space-4);
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+  }
+  .accordion__trigger::-webkit-details-marker { display: none; }
+
+  .accordion__icon-wrap {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-sm);
+    background: color-mix(in srgb, var(--color-primary) 9%, transparent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-primary);
+  }
+  .accordion__icon-wrap [data-icon] { display: block; }
+
+  .accordion__info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+  }
+  .accordion__name {
+    font-family: var(--font-display);
+    font-weight: var(--weight-semibold);
+    font-size: var(--fs-body);
+    color: var(--text-default);
+  }
+  .accordion__trigger--care .accordion__name { flex: 1; }
+
+  .accordion__meta {
+    font-family: var(--font-body);
+    font-size: var(--fs-caption);
+    color: var(--text-muted);
+  }
+
+  /* + / × toggle */
+  .accordion__toggle {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    position: relative;
+    margin-left: auto;
+  }
+  .accordion__toggle::before,
+  .accordion__toggle::after {
+    content: "";
+    position: absolute;
+    background: var(--color-primary);
+    border-radius: 2px;
+    transition: transform var(--dur) var(--ease);
+  }
+  .accordion__toggle::before {
+    width: 14px; height: 1.5px;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  .accordion__toggle::after {
+    width: 1.5px; height: 14px;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  details[open] .accordion__toggle::after {
+    transform: translate(-50%, -50%) rotate(90deg);
+  }
+
+  .accordion__body {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.28s var(--ease);
+    overflow: hidden;
+  }
+  details[open] .accordion__body { grid-template-rows: 1fr; }
+  .accordion__body-inner {
+    overflow: hidden;
+    padding-bottom: var(--space-5);
+  }
+  .accordion__body-inner p {
+    font-family: var(--font-body);
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+    line-height: var(--lh-body);
+    max-width: 64ch;
+  }
+
+  /* ---- Care area rows ---- */
+  /* Single goji berry illustration before category name */
+  .care-berry {
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    background: url('/illustrations/bloom-7.png') center / 140% no-repeat;
+    flex-shrink: 0;
+  }
+
+  /* Conditions list — indented, no extra bullet icon */
+  .care-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 var(--space-3) var(--space-5);
+  }
+  .care-list li {
+    font-family: var(--font-body);
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+    padding-block: var(--space-1);
+    line-height: var(--lh-body);
+  }
+  .care-list li::before {
+    content: "–";
+    margin-right: 0.5em;
+    color: var(--color-primary);
+    font-weight: var(--weight-semibold);
+  }
+  .care-list a {
+    color: inherit;
+    text-decoration: none;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+    transition: color var(--dur);
+  }
+  .care-list a:hover { color: var(--color-primary); text-decoration: underline; }
+
+  .care-link {
+    font-family: var(--font-body);
+    font-size: var(--fs-small);
+    font-weight: var(--weight-medium);
+    color: var(--color-primary);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+    margin-left: var(--space-5);
+  }
+  .care-link::after { content: " \2192"; }
+
+  /* ======================================================
+     Stats strip — 4 items, 2×2 on mobile, 4-col on desktop
+     ====================================================== */
+  .stats-strip {
+    background: var(--bg-page);
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    padding-block: var(--space-7);
+  }
+  .stats-strip__inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-6) var(--space-4);
+    text-align: center;
+  }
+  @media (min-width: 640px) {
+    .stats-strip__inner {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+  .stat-item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    gap: var(--space-3);
+    gap: var(--space-1);
   }
-  .hero__media-note {
+  .stat-item__value {
+    font-family: var(--font-display);
+    font-weight: var(--weight-bold);
+    font-size: clamp(1.75rem, 1.3rem + 1.8vw, 2.5rem);
+    color: var(--color-primary);
+    line-height: 1;
+    letter-spacing: var(--tracking-tight);
+    font-variant-numeric: tabular-nums;
+  }
+  .stat-item__label {
+    font-family: var(--font-display);
+    font-weight: var(--weight-semibold);
+    font-size: var(--fs-small);
+    color: var(--text-default);
+  }
+  .stat-item__caption {
+    font-family: var(--font-body);
     font-size: var(--fs-caption);
-    letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
     color: var(--text-muted);
   }
 
-  .section-head {
-    max-width: 56ch;
-    margin-bottom: var(--space-7);
+  /* ======================================================
+     Team carousel
+     ====================================================== */
+  .team-wrap {
+    position: relative;
   }
-  .section-head h2 {
-    margin-top: var(--space-2);
-  }
-  .section-head__sub {
-    margin-top: var(--space-3);
-    color: var(--text-muted);
-  }
-
-  .grid {
-    display: grid;
+  .team-track {
+    display: flex;
     gap: var(--space-5);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding-bottom: var(--space-1);
   }
-  .grid--2 {
-    grid-template-columns: 1fr;
+  .team-track::-webkit-scrollbar { display: none; }
+  .team-slide {
+    flex: 0 0 100%;
+    scroll-snap-align: center;
   }
-  .grid--3 {
-    grid-template-columns: 1fr;
+
+  /* Translucent circular arrows, overlaid on the slides (mobile only) */
+  .carousel-btn {
+    position: absolute;
+    top: 38%;
+    transform: translateY(-50%);
+    z-index: 2;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: color-mix(in srgb, var(--color-ink) 55%, transparent);
+    backdrop-filter: blur(3px);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    transition: background var(--dur) var(--ease), opacity var(--dur) var(--ease);
+  }
+  .carousel-btn--prev { left: var(--space-3); }
+  .carousel-btn--next { right: var(--space-3); }
+  .carousel-btn:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--color-primary) 80%, transparent);
+  }
+  .carousel-btn:disabled { opacity: 0; pointer-events: none; }
+
+  .team-dots {
+    display: flex;
+    gap: var(--space-2);
+    justify-content: center;
+    margin-top: var(--space-5);
+  }
+  .team-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--color-border-strong);
+    transition: background var(--dur);
+  }
+  .team-dot--active { background: var(--color-primary); }
+
+  /* Desktop: static 3-column grid, no carousel chrome */
+  @media (min-width: 720px) {
+    .team-track {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      overflow: visible;
+      scroll-snap-type: none;
+    }
+    .team-slide { flex: none; }
+    .carousel-btn,
+    .team-dots { display: none; }
+  }
+
+  /* ======================================================
+     Clinic space
+     ====================================================== */
+  .space-sec {
+    background: var(--bg-page);
+    padding-block: var(--section-y);
+  }
+  .space-sec__inner {
+    display: grid;
+    gap: var(--space-7);
+    align-items: center;
+  }
+  @media (min-width: 720px) {
+    .space-sec__inner {
+      grid-template-columns: 6fr 5fr;
+      gap: var(--space-8);
+    }
+  }
+  .space-sec__image .img-ph { aspect-ratio: 6 / 4; }
+  .space-sec__text h2 { margin: var(--space-2) 0 var(--space-4); }
+  .space-sec__text p { color: var(--text-muted); }
+
+  /* ======================================================
+     Blog cards
+     ====================================================== */
+  /* --- Blog carousel track --- */
+  .blog-wrap {
+    position: relative;
+  }
+  .blog-track {
+    display: flex;
+    gap: var(--space-5);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: var(--space-2);
+  }
+  .blog-track::-webkit-scrollbar { display: none; }
+
+  .blog-btn {
+    display: none;
+    position: absolute;
+    top: 40%;
+    transform: translateY(-50%);
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: color-mix(in srgb, var(--color-ink) 80%, transparent);
+    color: var(--color-linen);
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    transition: background 0.2s;
+  }
+  .blog-btn:hover { background: var(--color-ink); }
+  .blog-btn:disabled { opacity: 0.3; cursor: default; }
+  @media (min-width: 640px) { .blog-btn { display: flex; } }
+  .blog-btn--prev { left: calc(-1 * var(--space-7)); }
+  .blog-btn--next { right: calc(-1 * var(--space-7)); }
+
+  .blog-card {
+    flex: 0 0 calc(100% - var(--space-5));
+    scroll-snap-align: start;
+    background: var(--bg-content);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    transition: box-shadow var(--dur) var(--ease);
+    display: flex;
+    flex-direction: column;
   }
   @media (min-width: 640px) {
-    .grid--2,
-    .grid--3 {
-      grid-template-columns: 1fr 1fr;
+    .blog-card { flex: 0 0 calc(50% - var(--space-4)); }
+  }
+  @media (min-width: 960px) {
+    .blog-card { flex: 0 0 calc(33.333% - var(--space-4)); }
+  }
+  .blog-card:hover { box-shadow: var(--shadow-md); }
+  .blog-card__img .img-ph {
+    aspect-ratio: 3 / 2;
+    border-radius: 0;
+    border: none;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .blog-card__body {
+    padding: var(--space-4) var(--space-4) var(--space-5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    flex: 1;
+  }
+  .blog-card__tag {
+    font-family: var(--font-body);
+    font-size: var(--fs-caption);
+    font-weight: var(--weight-semibold);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--color-primary);
+  }
+  .blog-card__title {
+    font-family: var(--font-display);
+    font-size: var(--fs-body);
+    font-weight: var(--weight-semibold);
+    color: var(--text-default);
+    line-height: var(--lh-snug);
+  }
+  .blog-card__title a { color: inherit; text-decoration: none; }
+  .blog-card__title a:hover { color: var(--color-primary); }
+  .blog-card__date {
+    font-family: var(--font-body);
+    font-size: var(--fs-caption);
+    color: var(--text-muted);
+    margin-top: auto;
+  }
+  .blog-more { margin-top: var(--space-6); text-align: center; }
+  .blog-more__link {
+    font-family: var(--font-body);
+    font-size: var(--fs-small);
+    font-weight: var(--weight-medium);
+    color: var(--color-primary);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+  }
+  .blog-more__link::after { content: " \2192"; }
+
+  /* ======================================================
+     FAQ
+     ====================================================== */
+  .faq-list {
+    margin-top: var(--space-7);
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid var(--rule);
+  }
+  .faq-item {
+    border-bottom: 1px solid var(--rule);
+  }
+  .faq-q {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-5);
+    padding-block: var(--space-5);
+    font-family: var(--font-display);
+    font-size: var(--fs-body);
+    font-weight: var(--weight-semibold);
+    color: var(--text-default);
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+  }
+  .faq-q::-webkit-details-marker { display: none; }
+  .faq-toggle {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    position: relative;
+  }
+  .faq-toggle::before,
+  .faq-toggle::after {
+    content: "";
+    position: absolute;
+    background: var(--color-primary);
+    border-radius: 2px;
+    transition: transform 0.25s var(--ease);
+  }
+  .faq-toggle::before { width: 14px; height: 1.5px; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+  .faq-toggle::after  { width: 1.5px; height: 14px; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+  details[open] .faq-toggle::after { transform: translate(-50%, -50%) rotate(90deg); }
+  .faq-a {
+    overflow: hidden;
+    padding-bottom: var(--space-5);
+  }
+  .faq-a p {
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+    line-height: var(--lh-body);
+    max-width: 68ch;
+  }
+
+  /* ======================================================
+     Shared helpers
+     ====================================================== */
+  .img-ph {
+    width: 100%;
+    background: color-mix(in srgb, var(--color-linen-deep) 70%, var(--bg-page));
+    border: 1.5px dashed var(--color-border-strong);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .img-ph span {
+    font-family: var(--font-body);
+    font-size: var(--fs-caption);
+    color: var(--text-muted);
+    text-align: center;
+    padding: var(--space-5);
+  }
+
+  .section-head { max-width: 56ch; margin-bottom: var(--space-7); }
+  .section-head h2 { margin-top: var(--space-2); }
+  .section-head__sub { margin-top: var(--space-3); color: var(--text-muted); }
+
+  /* Two-column section layout (header left, accordion right) */
+  .sec-two-col {
+    display: grid;
+    gap: var(--space-6) var(--space-8);
+    grid-template-columns: 1fr;
+  }
+  /* Grid gap handles all spacing — remove header bottom margin */
+  .sec-two-col .section-head { margin-bottom: 0; }
+  .sec-two-col .faq-list { margin-top: 0; }
+  @media (min-width: 720px) {
+    .sec-two-col {
+      grid-template-columns: 1fr 1.6fr;
+      align-items: start;
+      gap: 0 var(--space-10);
+    }
+    .sec-two-col .section-head {
+      position: sticky;
+      top: calc(68px + var(--space-6));
     }
   }
-  @media (min-width: 980px) {
-    .grid--3 {
-      grid-template-columns: repeat(3, 1fr);
-    }
+
+  .grid { display: grid; gap: var(--space-5); }
+  .grid--3 { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+  @media (min-width: 900px) {
+    .grid--3 { grid-template-columns: repeat(3, 1fr); }
   }
-  .stats {
-    gap: var(--space-7);
+
+  /* ======================================================
+     Google Reviews carousel
+     ====================================================== */
+  .reviews-sec {
+    background: var(--bg-content);
+    padding-block: var(--section-y);
+    border-top: 1px solid var(--rule);
+  }
+  .reviews-header {
+    margin-bottom: var(--space-6);
+  }
+  .reviews-title {
+    margin: var(--space-2) 0 var(--space-5);
+  }
+  .reviews-header .reviews-rating {
+    /* sits below the title on all sizes */
+  }
+  .reviews-rating {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+  .reviews-stars {
+    color: #f5a623;
+    font-size: 1.2rem;
+    letter-spacing: 0.05em;
+  }
+  .reviews-score {
+    font-family: var(--font-display);
+    font-size: var(--fs-h2);
+    font-weight: var(--weight-bold);
+    color: var(--text-default);
+    line-height: 1;
+  }
+  .reviews-source {
+    font-family: var(--font-body);
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+
+  /* --- Carousel track --- */
+  .reviews-wrap {
+    position: relative;
+  }
+  .reviews-track {
+    display: flex;
+    gap: var(--space-5);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: var(--space-2);
+  }
+  .reviews-track::-webkit-scrollbar { display: none; }
+
+  .review-card {
+    flex: 0 0 calc(100% - var(--space-5));
+    scroll-snap-align: start;
+    background: var(--bg-page);
+    border-radius: var(--radius-md);
+    padding: var(--space-5);
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    border: 1px solid var(--color-border);
+  }
+  @media (min-width: 640px) {
+    .review-card { flex: 0 0 calc(50% - var(--space-4)); }
+  }
+  @media (min-width: 960px) {
+    .review-card { flex: 0 0 calc(33.333% - var(--space-4)); }
+  }
+
+  .review-card__stars {
+    color: #f5a623;
+    font-size: 0.9rem;
+    letter-spacing: 0.05em;
+  }
+  .review-card__text {
+    font-family: var(--font-body);
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+    line-height: var(--lh-body);
+    flex: 1;
+  }
+  .review-card__footer {
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--rule);
+    margin-top: auto;
+  }
+  .review-card__name {
+    font-family: var(--font-display);
+    font-size: var(--fs-small);
+    font-weight: var(--weight-semibold);
+    color: var(--text-default);
+  }
+
+  /* --- Arrow buttons (desktop only) --- */
+  .reviews-btn {
+    display: none;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: color-mix(in srgb, var(--color-ink) 80%, transparent);
+    color: var(--color-linen);
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    transition: background 0.2s;
+  }
+  .reviews-btn:hover { background: var(--color-ink); }
+  .reviews-btn:disabled { opacity: 0.3; cursor: default; }
+  @media (min-width: 640px) {
+    .reviews-btn { display: flex; }
+  }
+  .reviews-btn--prev { left: calc(-1 * var(--space-7)); }
+  .reviews-btn--next { right: calc(-1 * var(--space-7)); }
+
+  /* --- Disclaimer --- */
+  .reviews-disclaimer {
+    margin-top: var(--space-5);
+    font-size: var(--fs-caption);
+    color: var(--text-muted);
+    text-align: center;
+  }
+  .reviews-disclaimer a {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
   }
 </style>

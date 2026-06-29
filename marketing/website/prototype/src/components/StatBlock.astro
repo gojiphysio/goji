@@ -1,8 +1,8 @@
 ---
 /**
- * StatBlock — big-number block. Deep Red number, Earth Brown label.
- * For KPIs and "did you know" facts. Keep claims factual and compliant
- * (no outcome guarantees).
+ * StatBlock — icon + number + label. For KPIs and trust signals.
+ * Pass an SVG icon via the named "icon" slot.
+ * Keep claims factual and compliant (no outcome guarantees).
  */
 interface Props {
   value: string;
@@ -14,6 +14,9 @@ const { value, label, caption, align = "start" } = Astro.props;
 ---
 
 <div class:list={["stat", `align-${align}`]}>
+  <div class="stat__icon">
+    <slot name="icon" />
+  </div>
   <span class="stat__value">{value}</span>
   <span class="stat__label">{label}</span>
   {caption && <span class="stat__caption">{caption}</span>}
@@ -23,20 +26,35 @@ const { value, label, caption, align = "start" } = Astro.props;
   .stat {
     display: flex;
     flex-direction: column;
-    gap: var(--space-1);
+    gap: var(--space-2);
   }
   .align-center {
     align-items: center;
     text-align: center;
   }
+  .stat__icon {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-md);
+    background-color: color-mix(in srgb, var(--color-primary) 10%, transparent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-primary);
+    flex-shrink: 0;
+  }
+  .align-center .stat__icon {
+    margin-inline: auto;
+  }
   .stat__value {
     font-family: var(--font-display);
     font-weight: var(--weight-bold);
-    font-size: var(--fs-display);
+    font-size: var(--fs-h1);
     line-height: 1;
     color: var(--color-primary);
     letter-spacing: var(--tracking-tight);
     font-variant-numeric: tabular-nums;
+    margin-top: var(--space-1);
   }
   .stat__label {
     font-family: var(--font-display);

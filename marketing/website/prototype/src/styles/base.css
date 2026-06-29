@@ -23,7 +23,7 @@ body {
   color: var(--text-default);
   font-family: var(--font-body);
   font-size: var(--fs-body);
-  font-weight: var(--weight-regular);
+  font-weight: var(--weight-medium);
   line-height: var(--lh-body);
   font-synthesis: none;
   -webkit-font-smoothing: antialiased;
@@ -112,12 +112,22 @@ ol {
 
 /* Uppercase eyebrow label used above section headings. */
 .eyebrow {
-  font-family: var(--font-body);
-  font-size: var(--fs-caption);
-  font-weight: var(--weight-semibold);
-  letter-spacing: var(--tracking-label);
-  text-transform: uppercase;
-  color: var(--color-primary);
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  font-weight: var(--weight-medium);
+  color: var(--text-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6em;
+}
+/* Short red editorial dash before the label */
+.eyebrow::before {
+  content: '';
+  width: 20px;
+  height: 2px;
+  flex-shrink: 0;
+  background: var(--color-primary);
+  border-radius: 2px;
 }
 
 @media (prefers-reduced-motion: reduce) {

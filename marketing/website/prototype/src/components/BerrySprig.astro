@@ -1,0 +1,354 @@
+---
+/**
+ * BerrySprig — Lycium barbarum (Goji berry) botanical motif.
+ *
+ * Filled botanical illustration style based on the A. Moreau plate:
+ * - Leaves: filled oval shapes with midrib (22% opacity to distinguish from berries)
+ * - Flowers: filled 6-petal star with dark centre (55% opacity, botanical)
+ * - Berries: fully filled pendant ovals (100% opacity)
+ * - Branches: fine line strokes
+ *
+ * animate={true} lifecycle animation:
+ *   0.00–0.60 s  Branches draw in (stroke-dashoffset)
+ *   0.30–0.65 s  Leaves fade in
+ *   0.60–1.40 s  6-petal flowers bloom (scale 0 → bud → open star → fade)
+ *   1.10–2.00 s  Berries ripen (fill-opacity 0 → 1 with spring)
+ */
+interface Props {
+  animate?: boolean;
+  class?: string;
+  "aria-hidden"?: boolean;
+  width?: number | string;
+  height?: number | string;
+}
+const {
+  animate = false,
+  class: className,
+  "aria-hidden": ariaHidden = true,
+  width = 120,
+  height = "auto",
+} = Astro.props;
+---
+
+<svg
+  class:list={["berry-sprig", animate && "berry-sprig--animated", className]}
+  viewBox="0 0 115 185"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+  width={width}
+  height={height}
+  aria-hidden={ariaHidden}
+  role="img"
+>
+  <!-- ══════════════════════════════════════════════════════════
+       BRANCHES  (pathLength="1" for draw-in animation)
+       ══════════════════════════════════════════════════════════ -->
+  <path class="branch" style="--d:0s"
+    d="M 20 180 C 24 150 32 115 39 85 C 44 60 48 38 50 16"
+    pathLength="1" stroke="currentColor" stroke-width="0.9" stroke-linecap="round"/>
+  <path class="branch" style="--d:0.1s"
+    d="M 46 40 C 62 30 78 22 96 18"
+    pathLength="1" stroke="currentColor" stroke-width="0.6" stroke-linecap="round"/>
+  <path class="branch" style="--d:0.15s"
+    d="M 38 86 C 54 76 70 69 88 65"
+    pathLength="1" stroke="currentColor" stroke-width="0.6" stroke-linecap="round"/>
+  <path class="branch" style="--d:0.2s"
+    d="M 32 112 C 22 106 12 102 5 99"
+    pathLength="1" stroke="currentColor" stroke-width="0.5" stroke-linecap="round"/>
+  <path class="branch" style="--d:0.25s"
+    d="M 26 144 C 36 138 42 134 48 132"
+    pathLength="1" stroke="currentColor" stroke-width="0.45" stroke-linecap="round"/>
+  <!-- Pedicels -->
+  <path class="branch" style="--d:0.4s" d="M 5 99 L 5 88"     pathLength="1" stroke="currentColor" stroke-width="0.35" stroke-linecap="round"/>
+  <path class="branch" style="--d:0.4s" d="M 88 65 L 90 54"   pathLength="1" stroke="currentColor" stroke-width="0.35" stroke-linecap="round"/>
+  <path class="branch" style="--d:0.4s" d="M 64 71 L 64 60"   pathLength="1" stroke="currentColor" stroke-width="0.35" stroke-linecap="round"/>
+  <path class="branch" style="--d:0.4s" d="M 96 18 L 99 6"    pathLength="1" stroke="currentColor" stroke-width="0.35" stroke-linecap="round"/>
+  <path class="branch" style="--d:0.4s" d="M 72 24 L 72 13"   pathLength="1" stroke="currentColor" stroke-width="0.35" stroke-linecap="round"/>
+  <path class="branch" style="--d:0.4s" d="M 50 16 L 46 5"    pathLength="1" stroke="currentColor" stroke-width="0.35" stroke-linecap="round"/>
+  <path class="branch" style="--d:0.4s" d="M 48 132 L 52 122" pathLength="1" stroke="currentColor" stroke-width="0.35" stroke-linecap="round"/>
+  <path class="branch" style="--d:0.4s" d="M 30 152 L 26 142" pathLength="1" stroke="currentColor" stroke-width="0.35" stroke-linecap="round"/>
+
+  <!-- ══════════════════════════════════════════════════════════
+       LEAVES — filled broad-oval shapes with midrib.
+       Each leaf is drawn in local coords (0,0 = attachment point,
+       pointing in the -y direction), then translate+rotated into place.
+       fill-opacity 0.22 makes leaves visually distinct from berries.
+       ══════════════════════════════════════════════════════════ -->
+
+  <!-- Main stem — alternating left / right (like Lycium phyllotaxis) -->
+  <g class="leaf" style="--ld:0.30s" transform="translate(24,127) rotate(-35)">
+    <ellipse rx="3.5" ry="8" fill="currentColor" fill-opacity="0.22" stroke="currentColor" stroke-width="0.4" stroke-opacity="0.5"/>
+    <line x1="0" y1="-7" x2="0" y2="7" stroke="currentColor" stroke-width="0.3" stroke-opacity="0.4"/>
+  </g>
+  <g class="leaf" style="--ld:0.32s" transform="translate(42,91) rotate(30)">
+    <ellipse rx="3.5" ry="8" fill="currentColor" fill-opacity="0.22" stroke="currentColor" stroke-width="0.4" stroke-opacity="0.5"/>
+    <line x1="0" y1="-7" x2="0" y2="7" stroke="currentColor" stroke-width="0.3" stroke-opacity="0.4"/>
+  </g>
+  <g class="leaf" style="--ld:0.33s" transform="translate(35,106) rotate(-28)">
+    <ellipse rx="3.5" ry="8" fill="currentColor" fill-opacity="0.22" stroke="currentColor" stroke-width="0.4" stroke-opacity="0.5"/>
+    <line x1="0" y1="-7" x2="0" y2="7" stroke="currentColor" stroke-width="0.3" stroke-opacity="0.4"/>
+  </g>
+
+  <!-- Right lower branch -->
+  <g class="leaf" style="--ld:0.35s" transform="translate(54,74) rotate(-66)">
+    <ellipse rx="3.5" ry="8" fill="currentColor" fill-opacity="0.22" stroke="currentColor" stroke-width="0.4" stroke-opacity="0.5"/>
+    <line x1="0" y1="-7" x2="0" y2="7" stroke="currentColor" stroke-width="0.3" stroke-opacity="0.4"/>
+  </g>
+  <g class="leaf" style="--ld:0.35s" transform="translate(70,72) rotate(-63)">
+    <ellipse rx="3.5" ry="8" fill="currentColor" fill-opacity="0.22" stroke="currentColor" stroke-width="0.4" stroke-opacity="0.5"/>
+    <line x1="0" y1="-7" x2="0" y2="7" stroke="currentColor" stroke-width="0.3" stroke-opacity="0.4"/>
+  </g>
+
+  <!-- Right upper branch -->
+  <g class="leaf" style="--ld:0.36s" transform="translate(60,30) rotate(-62)">
+    <ellipse rx="3.5" ry="8" fill="currentColor" fill-opacity="0.22" stroke="currentColor" stroke-width="0.4" stroke-opacity="0.5"/>
+    <line x1="0" y1="-7" x2="0" y2="7" stroke="currentColor" stroke-width="0.3" stroke-opacity="0.4"/>
+  </g>
+  <g class="leaf" style="--ld:0.36s" transform="translate(77,28) rotate(-58)">
+    <ellipse rx="3.5" ry="8" fill="currentColor" fill-opacity="0.22" stroke="currentColor" stroke-width="0.4" stroke-opacity="0.5"/>
+    <line x1="0" y1="-7" x2="0" y2="7" stroke="currentColor" stroke-width="0.3" stroke-opacity="0.4"/>
+  </g>
+
+  <!-- Left spur -->
+  <g class="leaf" style="--ld:0.37s" transform="translate(15,103) rotate(68)">
+    <ellipse rx="3.5" ry="8" fill="currentColor" fill-opacity="0.22" stroke="currentColor" stroke-width="0.4" stroke-opacity="0.5"/>
+    <line x1="0" y1="-7" x2="0" y2="7" stroke="currentColor" stroke-width="0.3" stroke-opacity="0.4"/>
+  </g>
+
+  <!-- Lower twig -->
+  <g class="leaf" style="--ld:0.38s" transform="translate(38,138) rotate(-40)">
+    <ellipse rx="3.5" ry="8" fill="currentColor" fill-opacity="0.22" stroke="currentColor" stroke-width="0.4" stroke-opacity="0.5"/>
+    <line x1="0" y1="-7" x2="0" y2="7" stroke="currentColor" stroke-width="0.3" stroke-opacity="0.4"/>
+  </g>
+
+  <!-- ══════════════════════════════════════════════════════════
+       BERRY NODES
+       flower-node: 6 FILLED petals + filled dark centre + anther ring.
+       berry: fully filled oval.
+       ══════════════════════════════════════════════════════════ -->
+
+  <!-- Berry 8: lower twig, bottom -->
+  <g class="berry-node">
+    <g class="flower-node" style="--fd:0.70s">
+      <g transform="translate(26,136)">
+        <path transform="rotate(0)"   d="M 0,2 C 3,0 3,-9 0,-13 C -3,-9 -3,0 0,2" fill="currentColor" fill-opacity="0.55"/>
+        <path transform="rotate(60)"  d="M 0,2 C 3,0 3,-9 0,-13 C -3,-9 -3,0 0,2" fill="currentColor" fill-opacity="0.55"/>
+        <path transform="rotate(120)" d="M 0,2 C 3,0 3,-9 0,-13 C -3,-9 -3,0 0,2" fill="currentColor" fill-opacity="0.55"/>
+        <path transform="rotate(180)" d="M 0,2 C 3,0 3,-9 0,-13 C -3,-9 -3,0 0,2" fill="currentColor" fill-opacity="0.55"/>
+        <path transform="rotate(240)" d="M 0,2 C 3,0 3,-9 0,-13 C -3,-9 -3,0 0,2" fill="currentColor" fill-opacity="0.55"/>
+        <path transform="rotate(300)" d="M 0,2 C 3,0 3,-9 0,-13 C -3,-9 -3,0 0,2" fill="currentColor" fill-opacity="0.55"/>
+        <circle r="3" fill="currentColor" fill-opacity="0.85"/>
+        <circle cx="0" cy="-2.3" r="0.75" fill="currentColor" fill-opacity="0.2"/>
+        <circle cx="2" cy="-1.15" r="0.75" fill="currentColor" fill-opacity="0.2"/>
+        <circle cx="2" cy="1.15" r="0.75" fill="currentColor" fill-opacity="0.2"/>
+        <circle cx="0" cy="2.3" r="0.75" fill="currentColor" fill-opacity="0.2"/>
+        <circle cx="-2" cy="1.15" r="0.75" fill="currentColor" fill-opacity="0.2"/>
+        <circle cx="-2" cy="-1.15" r="0.75" fill="currentColor" fill-opacity="0.2"/>
+      </g>
+    </g>
+    <ellipse class="berry" cx="26" cy="136" rx="6" ry="9.5" fill="currentColor" style="--bd:1.10s"/>
+  </g>
+
+  <!-- Berry 7: lower twig, upper -->
+  <g class="berry-node">
+    <g class="flower-node" style="--fd:0.75s">
+      <g transform="translate(52,116)">
+        <path transform="rotate(0)"   d="M 0,2 C 3,0 3,-9 0,-13 C -3,-9 -3,0 0,2" fill="currentColor" fill-opacity="0.55"/>
+        <path transform="rotate(60)"  d="M 0,2 C 3,0 3,-9 0,-13 C -3,-9 -3,0 0,2" fill="currentColor" fill-opacity="0.55"/>
+        <path transform="rotate(120)" d="M 0,2 C 3,0 3,-9 0,-13 C -3,-9 -3,0 0,2" fill="currentColor" fill-opacity="0.55"/>
+        <path transform="rotate(180)" d="M 0,2 C 3,0 3,-9 0,-13 C -3,-9 -3,0 0,2" fill="currentColor" fill-opacity="0.55"/>
+        <path transform="rotate(240)" d="M 0,2 C 3,0 3,-9 0,-13 C -3,-9 -3,0 0,2" fill="currentColor" fill-opacity="0.55"/>
+        <path transform="rotate(300)" d="M 0,2 C 3,0 3,-9 0,-13 C -3,-9 -3,0 0,2" fill="currentColor" fill-opacity="0.55"/>
+        <circle r="3" fill="currentColor" fill-opacity="0.85"/>
+        <circle cx="0" cy="-2.3" r="0.75" fill="currentColor" fill-opacity="0.2"/><circle cx="2" cy="-1.15" r="0.75" fill="currentColor" fill-opacity="0.2"/>
+        <circle cx="2" cy="1.15" r="0.75" fill="currentColor" fill-opacity="0.2"/><circle cx="0" cy="2.3" r="0.75" fill="currentColor" fill-opacity="0.2"/>
+        <circle cx="-2" cy="1.15" r="0.75" fill="currentColor" fill-opacity="0.2"/><circle cx="-2" cy="-1.15" r="0.75" fill="currentColor" fill-opacity="0.2"/>
+      </g>
+    </g>
+    <ellipse class="berry" cx="52" cy="116" rx="6.5" ry="10" fill="currentColor" style="--bd:1.20s"/>
+  </g>
+
+  <!-- Berry 1: left spur -->
+  <g class="berry-node">
+    <g class="flower-node" style="--fd:0.80s">
+      <g transform="translate(5,81)">
+        <path transform="rotate(0)"   d="M 0,2 C 3,0 3,-9 0,-13 C -3,-9 -3,0 0,2" fill="currentColor" fill-opacity="0.55"/>
+        <path transform="rotate(60)"  d="M 0,2 C 3,0 3,-9 0,-13 C -3,-9 -3,0 0,2" fill="currentColor" fill-opacity="0.55"/>
+        <path transform="rotate(120)" d="M 0,2 C 3,0 3,-9 0,-13 C -3,-9 -3,0 0,2" fill="currentColor" fill-opacity="0.55"/>
+        <path transform="rotate(180)" d="M 0,2 C 3,0 3,-9 0,-13 C -3,-9 -3,0 0,2" fill="currentColor" fill-opacity="0.55"/>
+        <path transform="rotate(240)" d="M 0,2 C 3,0 3,-9 0,-13 C -3,-9 -3,0 0,2" fill="currentColor" fill-opacity="0.55"/>
+        <path transform="rotate(300)" d="M 0,2 C 3,0 3,-9 0,-13 C -3,-9 -3,0 0,2" fill="currentColor" fill-opacity="0.55"/>
+        <circle r="3" fill="currentColor" fill-opacity="0.85"/>
+        <circle cx="0" cy="-2.3" r="0.75" fill="currentColor" fill-opacity="0.2"/><circle cx="2" cy="-1.15" r="0.75" fill="currentColor" fill-opacity="0.2"/>
+        <circle cx="2" cy="1.15" r="0.75" fill="currentColor" fill-opacity="0.2"/><circle cx="0" cy="2.3" r="0.75" fill="currentColor" fill-opacity="0.2"/>
+        <circle cx="-2" cy="1.15" r="0.75" fill="currentColor" fill-opacity="0.2"/><circle cx="-2" cy="-1.15" r="0.75" fill="currentColor" fill-opacity="0.2"/>
+      </g>
+    </g>
+    <ellipse class="berry" cx="5" cy="81" rx="7.5" ry="11.5" fill="currentColor" style="--bd:1.30s"/>
+  </g>
+
+  <!-- Berry 3: right lower, inner -->
+  <g class="berry-node">
+    <g class="flower-node" style="--fd:0.85s">
+      <g transform="translate(64,53)">
+        <path transform="rotate(0)"   d="M 0,2 C 3,0 3,-9 0,-13 C -3,-9 -3,0 0,2" fill="currentColor" fill-opacity="0.55"/>
+        <path transform="rotate(60)"  d="M 0,2 C 3,0 3,-9 0,-13 C -3,-9 -3,0 0,2" fill="currentColor" fill-opacity="0.55"/>
+        <path transform="rotate(120)" d="M 0,2 C 3,0 3,-9 0,-13 C -3,-9 -3,0 0,2" fill="currentColor" fill-opacity="0.55"/>
+        <path transform="rotate(180)" d="M 0,2 C 3,0 3,-9 0,-13 C -3,-9 -3,0 0,2" fill="currentColor" fill-opacity="0.55"/>
+        <path transform="rotate(240)" d="M 0,2 C 3,0 3,-9 0,-13 C -3,-9 -3,0 0,2" fill="currentColor" fill-opacity="0.55"/>
+        <path transform="rotate(300)" d="M 0,2 C 3,0 3,-9 0,-13 C -3,-9 -3,0 0,2" fill="currentColor" fill-opacity="0.55"/>
+        <circle r="3" fill="currentColor" fill-opacity="0.85"/>
+        <circle cx="0" cy="-2.3" r="0.75" fill="currentColor" fill-opacity="0.2"/><circle cx="2" cy="-1.15" r="0.75" fill="currentColor" fill-opacity="0.2"/>
+        <circle cx="2" cy="1.15" r="0.75" fill="currentColor" fill-opacity="0.2"/><circle cx="0" cy="2.3" r="0.75" fill="currentColor" fill-opacity="0.2"/>
+        <circle cx="-2" cy="1.15" r="0.75" fill="currentColor" fill-opacity="0.2"/><circle cx="-2" cy="-1.15" r="0.75" fill="currentColor" fill-opacity="0.2"/>
+      </g>
+    </g>
+    <ellipse class="berry" cx="64" cy="53" rx="7" ry="11" fill="currentColor" style="--bd:1.40s"/>
+  </g>
+
+  <!-- Berry 2: right lower, outer -->
+  <g class="berry-node">
+    <g class="flower-node" style="--fd:0.90s">
+      <g transform="translate(90,47)">
+        <path transform="rotate(0)"   d="M 0,2 C 3,0 3,-9 0,-13 C -3,-9 -3,0 0,2" fill="currentColor" fill-opacity="0.55"/>
+        <path transform="rotate(60)"  d="M 0,2 C 3,0 3,-9 0,-13 C -3,-9 -3,0 0,2" fill="currentColor" fill-opacity="0.55"/>
+        <path transform="rotate(120)" d="M 0,2 C 3,0 3,-9 0,-13 C -3,-9 -3,0 0,2" fill="currentColor" fill-opacity="0.55"/>
+        <path transform="rotate(180)" d="M 0,2 C 3,0 3,-9 0,-13 C -3,-9 -3,0 0,2" fill="currentColor" fill-opacity="0.55"/>
+        <path transform="rotate(240)" d="M 0,2 C 3,0 3,-9 0,-13 C -3,-9 -3,0 0,2" fill="currentColor" fill-opacity="0.55"/>
+        <path transform="rotate(300)" d="M 0,2 C 3,0 3,-9 0,-13 C -3,-9 -3,0 0,2" fill="currentColor" fill-opacity="0.55"/>
+        <circle r="3" fill="currentColor" fill-opacity="0.85"/>
+        <circle cx="0" cy="-2.3" r="0.75" fill="currentColor" fill-opacity="0.2"/><circle cx="2" cy="-1.15" r="0.75" fill="currentColor" fill-opacity="0.2"/>
+        <circle cx="2" cy="1.15" r="0.75" fill="currentColor" fill-opacity="0.2"/><circle cx="0" cy="2.3" r="0.75" fill="currentColor" fill-opacity="0.2"/>
+        <circle cx="-2" cy="1.15" r="0.75" fill="currentColor" fill-opacity="0.2"/><circle cx="-2" cy="-1.15" r="0.75" fill="currentColor" fill-opacity="0.2"/>
+      </g>
+    </g>
+    <ellipse class="berry" cx="90" cy="47" rx="7.5" ry="11.5" fill="currentColor" style="--bd:1.50s"/>
+  </g>
+
+  <!-- Berry 5: right upper, inner -->
+  <g class="berry-node">
+    <g class="flower-node" style="--fd:0.95s">
+      <g transform="translate(72,6)">
+        <path transform="rotate(0)"   d="M 0,2 C 3,0 3,-9 0,-13 C -3,-9 -3,0 0,2" fill="currentColor" fill-opacity="0.55"/>
+        <path transform="rotate(60)"  d="M 0,2 C 3,0 3,-9 0,-13 C -3,-9 -3,0 0,2" fill="currentColor" fill-opacity="0.55"/>
+        <path transform="rotate(120)" d="M 0,2 C 3,0 3,-9 0,-13 C -3,-9 -3,0 0,2" fill="currentColor" fill-opacity="0.55"/>
+        <path transform="rotate(180)" d="M 0,2 C 3,0 3,-9 0,-13 C -3,-9 -3,0 0,2" fill="currentColor" fill-opacity="0.55"/>
+        <path transform="rotate(240)" d="M 0,2 C 3,0 3,-9 0,-13 C -3,-9 -3,0 0,2" fill="currentColor" fill-opacity="0.55"/>
+        <path transform="rotate(300)" d="M 0,2 C 3,0 3,-9 0,-13 C -3,-9 -3,0 0,2" fill="currentColor" fill-opacity="0.55"/>
+        <circle r="3" fill="currentColor" fill-opacity="0.85"/>
+        <circle cx="0" cy="-2.3" r="0.75" fill="currentColor" fill-opacity="0.2"/><circle cx="2" cy="-1.15" r="0.75" fill="currentColor" fill-opacity="0.2"/>
+        <circle cx="2" cy="1.15" r="0.75" fill="currentColor" fill-opacity="0.2"/><circle cx="0" cy="2.3" r="0.75" fill="currentColor" fill-opacity="0.2"/>
+        <circle cx="-2" cy="1.15" r="0.75" fill="currentColor" fill-opacity="0.2"/><circle cx="-2" cy="-1.15" r="0.75" fill="currentColor" fill-opacity="0.2"/>
+      </g>
+    </g>
+    <ellipse class="berry" cx="72" cy="6" rx="6.5" ry="10" fill="currentColor" style="--bd:1.55s"/>
+  </g>
+
+  <!-- Berry 4: right upper, outer -->
+  <g class="berry-node">
+    <g class="flower-node" style="--fd:1.00s">
+      <g transform="translate(99,5)">
+        <path transform="rotate(0)"   d="M 0,2 C 3,0 3,-9 0,-13 C -3,-9 -3,0 0,2" fill="currentColor" fill-opacity="0.55"/>
+        <path transform="rotate(60)"  d="M 0,2 C 3,0 3,-9 0,-13 C -3,-9 -3,0 0,2" fill="currentColor" fill-opacity="0.55"/>
+        <path transform="rotate(120)" d="M 0,2 C 3,0 3,-9 0,-13 C -3,-9 -3,0 0,2" fill="currentColor" fill-opacity="0.55"/>
+        <path transform="rotate(180)" d="M 0,2 C 3,0 3,-9 0,-13 C -3,-9 -3,0 0,2" fill="currentColor" fill-opacity="0.55"/>
+        <path transform="rotate(240)" d="M 0,2 C 3,0 3,-9 0,-13 C -3,-9 -3,0 0,2" fill="currentColor" fill-opacity="0.55"/>
+        <path transform="rotate(300)" d="M 0,2 C 3,0 3,-9 0,-13 C -3,-9 -3,0 0,2" fill="currentColor" fill-opacity="0.55"/>
+        <circle r="3" fill="currentColor" fill-opacity="0.85"/>
+        <circle cx="0" cy="-2.3" r="0.75" fill="currentColor" fill-opacity="0.2"/><circle cx="2" cy="-1.15" r="0.75" fill="currentColor" fill-opacity="0.2"/>
+        <circle cx="2" cy="1.15" r="0.75" fill="currentColor" fill-opacity="0.2"/><circle cx="0" cy="2.3" r="0.75" fill="currentColor" fill-opacity="0.2"/>
+        <circle cx="-2" cy="1.15" r="0.75" fill="currentColor" fill-opacity="0.2"/><circle cx="-2" cy="-1.15" r="0.75" fill="currentColor" fill-opacity="0.2"/>
+      </g>
+    </g>
+    <ellipse class="berry" cx="99" cy="5" rx="7" ry="10" fill="currentColor" style="--bd:1.60s"/>
+  </g>
+
+  <!-- Berry 6: top of main branch -->
+  <g class="berry-node">
+    <g class="flower-node" style="--fd:1.05s">
+      <g transform="translate(45,3)">
+        <path transform="rotate(0)"   d="M 0,2 C 3,0 3,-9 0,-13 C -3,-9 -3,0 0,2" fill="currentColor" fill-opacity="0.55"/>
+        <path transform="rotate(60)"  d="M 0,2 C 3,0 3,-9 0,-13 C -3,-9 -3,0 0,2" fill="currentColor" fill-opacity="0.55"/>
+        <path transform="rotate(120)" d="M 0,2 C 3,0 3,-9 0,-13 C -3,-9 -3,0 0,2" fill="currentColor" fill-opacity="0.55"/>
+        <path transform="rotate(180)" d="M 0,2 C 3,0 3,-9 0,-13 C -3,-9 -3,0 0,2" fill="currentColor" fill-opacity="0.55"/>
+        <path transform="rotate(240)" d="M 0,2 C 3,0 3,-9 0,-13 C -3,-9 -3,0 0,2" fill="currentColor" fill-opacity="0.55"/>
+        <path transform="rotate(300)" d="M 0,2 C 3,0 3,-9 0,-13 C -3,-9 -3,0 0,2" fill="currentColor" fill-opacity="0.55"/>
+        <circle r="3" fill="currentColor" fill-opacity="0.85"/>
+        <circle cx="0" cy="-2.3" r="0.75" fill="currentColor" fill-opacity="0.2"/><circle cx="2" cy="-1.15" r="0.75" fill="currentColor" fill-opacity="0.2"/>
+        <circle cx="2" cy="1.15" r="0.75" fill="currentColor" fill-opacity="0.2"/><circle cx="0" cy="2.3" r="0.75" fill="currentColor" fill-opacity="0.2"/>
+        <circle cx="-2" cy="1.15" r="0.75" fill="currentColor" fill-opacity="0.2"/><circle cx="-2" cy="-1.15" r="0.75" fill="currentColor" fill-opacity="0.2"/>
+      </g>
+    </g>
+    <ellipse class="berry" cx="45" cy="3" rx="6" ry="9.5" fill="currentColor" style="--bd:1.65s"/>
+  </g>
+</svg>
+
+<style>
+  /* ── STATIC STATE ── */
+  .flower-node { display: none; }
+
+  /* ── ANIMATED STATE ── */
+  @media (prefers-reduced-motion: no-preference) {
+
+    /* 1. Branches draw in */
+    .berry-sprig--animated .branch {
+      stroke-dasharray: 1;
+      stroke-dashoffset: 1;
+      animation: sprig-draw 0.65s cubic-bezier(0.4, 0, 0.2, 1) var(--d, 0s) both;
+    }
+
+    /* 2. Leaves fade in after branches */
+    .berry-sprig--animated .leaf {
+      opacity: 0;
+      animation: sprig-leaf-in 0.45s ease-out var(--ld, 0.3s) forwards;
+    }
+
+    /* 3. Flowers bloom: tight bud → full open 6-petal star → fades */
+    .berry-sprig--animated .flower-node {
+      display: block;
+      transform: scale(0) rotate(-45deg);
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: sprig-flower 1.05s cubic-bezier(0.34, 1.15, 0.64, 1) var(--fd, 0.6s) both;
+    }
+
+    /* 4. Berries ripen */
+    .berry-sprig--animated .berry {
+      fill-opacity: 0;
+      transform: scale(0.25);
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: sprig-ripen 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) var(--bd, 1.1s) both;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .berry-sprig--animated .branch {
+      stroke-dasharray: unset;
+      stroke-dashoffset: unset;
+    }
+    .berry-sprig--animated .leaf { opacity: 1; }
+  }
+
+  :global(@keyframes sprig-draw) {
+    to { stroke-dashoffset: 0; }
+  }
+
+  :global(@keyframes sprig-leaf-in) {
+    to { opacity: 1; }
+  }
+
+  /* Lifecycle: closed bud → petals unfurl → full star → senescence */
+  :global(@keyframes sprig-flower) {
+    0%   { transform: scale(0)    rotate(-45deg); opacity: 0;   }
+    18%  { transform: scale(0.32) rotate(-18deg); opacity: 0.75;}
+    55%  { transform: scale(1.12) rotate(6deg);   opacity: 1;   }
+    78%  { transform: scale(1)    rotate(0deg);   opacity: 0.95;}
+    100% { transform: scale(0)    rotate(22deg);  opacity: 0;   }
+  }
+
+  :global(@keyframes sprig-ripen) {
+    from { fill-opacity: 0; transform: scale(0.25); }
+    to   { fill-opacity: 1; transform: scale(1);    }
+  }
+</style>
