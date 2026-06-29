@@ -1,0 +1,24 @@
+# Cloudflare Pages redirects. Preserve SEO from the old Squarespace URLs.
+# Old conditions lived at /blog/conditions/<slug>-physiotherapy; new at /conditions/<slug>.
+# Format: /source  /destination  <status>. Specific rules first, wildcards last.
+
+/blog/conditions/prenatal-physiotherapy            /conditions/prenatal-care            301
+/blog/conditions/diastasis-recti-physiotherapy     /conditions/diastasis-recti          301
+/blog/conditions/caesarean-recovery-physiotherapy  /conditions/caesarean-recovery       301
+/blog/conditions/perineal-tear-physiotherapy       /conditions/perineal-tear            301
+/blog/conditions/urinary-incontinence-physiotherapy /conditions/urinary-incontinence    301
+/blog/conditions/pelvic-organ-prolapse-physiotherapy /conditions/pelvic-organ-prolapse  301
+/blog/conditions/pelvic-pain-physiotherapy         /conditions/pelvic-pain              301
+/blog/conditions/pelvic-girdle-pain-physiotherapy  /conditions/pelvic-girdle-pain       301
+/blog/conditions/bowel-dysfunction-physiotherapy   /conditions/bowel-dysfunction        301
+/blog/conditions/blocked-ducts-mastitis            /conditions/blocked-ducts-mastitis   301
+/blog/conditions/menopause-physiotherapy           /conditions/menopause                301
+
+# Any other old condition/blog URLs fall back to the conditions index.
+/blog/conditions/*  /conditions  301
+/blog/*             /conditions  301
+/blog               /conditions  301
+
+# Old standalone pages now live as homepage sections.
+/about-us           /#about      301
+/team               /#team       301

@@ -1,0 +1,73 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Button from "../components/Button.astro";
+---
+
+<BaseLayout
+  title="Page not found | Goji Physiotherapy"
+  description="The page you were looking for could not be found."
+  noindex
+>
+  <section class="nf">
+    <div class="container nf__inner">
+      <p class="nf__code">404</p>
+      <h1>We could not find that page</h1>
+      <p class="nf__lead">
+        The page may have moved or no longer exists. Let's get you back on track.
+      </p>
+      <div class="nf__actions">
+        <Button href="/" variant="primary" size="lg">Back to home</Button>
+        <Button href="/conditions" variant="secondary" size="lg">What we treat</Button>
+      </div>
+      <p class="nf__help">
+        Looking for something specific? <a href="https://go.gojiphysio.com/web-wa" target="_blank" rel="noopener noreferrer">Message us on WhatsApp</a> and we'll point you the right way.
+      </p>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .nf {
+    background: var(--bg-page);
+    padding-block: clamp(3rem, 2rem + 6vw, 7rem);
+    min-height: 60vh;
+    display: flex;
+    align-items: center;
+  }
+  .nf__inner {
+    max-width: var(--container-narrow);
+    text-align: center;
+    margin-inline: auto;
+  }
+  .nf__code {
+    font-family: var(--font-display);
+    font-weight: var(--weight-bold);
+    font-size: clamp(3rem, 2rem + 6vw, 5rem);
+    color: var(--color-primary);
+    line-height: 1;
+    letter-spacing: var(--tracking-tight);
+  }
+  .nf h1 { margin: var(--space-3) 0 var(--space-4); }
+  .nf__lead {
+    color: var(--text-muted);
+    max-width: 44ch;
+    margin-inline: auto;
+    margin-bottom: var(--space-6);
+  }
+  .nf__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    justify-content: center;
+    margin-bottom: var(--space-6);
+  }
+  .nf__help {
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+  }
+  .nf__help a {
+    color: var(--color-primary);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+</style>

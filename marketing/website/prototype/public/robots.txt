@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /styleguide
+
+Sitemap: https://www.gojiphysio.com/sitemap-index.xml
