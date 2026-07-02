@@ -100,17 +100,6 @@ const concerns: Concern[] = [
   },
 ];
 
-// Clinician matching: concern -> clinicians who see it.
-const clinicianMatch = [
-  { concern: "Pregnancy and birth preparation", clinicians: "Cheryl, Claire, Kristy" },
-  { concern: "Postpartum recovery", clinicians: "Cheryl, Claire, Kristy" },
-  { concern: "Return to sport after birth", clinicians: "Claire, Kristy" },
-  { concern: "Paediatric physiotherapy", clinicians: "Kristy" },
-  { concern: "Lymphoedema", clinicians: "Claire" },
-  { concern: "Scoliosis / Schroth therapy", clinicians: "Cheryl" },
-  { concern: "Vestibular / dizziness", clinicians: "Claire" },
-];
-
 // Women's Health links through to the real condition pages under /conditions.
 // Other areas describe the clinic's wider scope (plain text, no page yet).
 const careAreas = [
@@ -240,19 +229,6 @@ const reviews = [
           <Button slug="web-plato" variant="primary" size="lg">Book an appointment</Button>
           <Button slug="web-wa" variant="secondary" size="lg">WhatsApp us</Button>
         </div>
-        <ul class="hero__chips" aria-label="Why families choose Goji">
-          {[
-            "1 min from Lentor MRT",
-            "AHPC-registered physiotherapists",
-            "5.0 on Google",
-            "Home visits available",
-          ].map((chip) => (
-            <li class="hero__chip">
-              <span class="hero__chip-dot" aria-hidden="true"></span>
-              {chip}
-            </li>
-          ))}
-        </ul>
       </div>
       <div class="hero__media">
         <div class="hero-shots" role="img" aria-label="Inside the Goji clinic at Lentor Modern - reception, the reformer studio, and a session in progress">
@@ -275,42 +251,24 @@ const reviews = [
     </div>
   </section>
 
-  {/* ---- Concern router: "Not sure what to book?" ---- */}
-  <section class="router-sec" id="not-sure">
-    <div class="container">
-      <header class="section-head router-sec__head">
-        <h2>Not sure what to book?</h2>
-        <p class="section-head__sub">
-          Start with what sounds most like you. We'll help you choose the right
-          session.
-        </p>
-      </header>
-      <ul class="router-grid">
-        {
-          concerns.map((c) => (
-            <li class="router-card">
-              <h3 class="router-card__title">{c.title}</h3>
-              <p class="router-card__body">{c.body}</p>
-              <p class="router-card__rec">
-                <span class="router-card__rec-label">Recommended</span>
-                {c.recommended}
-              </p>
-              <div class="router-card__cta">
-                {c.cta.href ? (
-                  <Button href={c.cta.href} variant="secondary">{c.cta.label}</Button>
-                ) : (
-                  <Button slug={c.cta.slug} variant="secondary">{c.cta.label}</Button>
-                )}
-              </div>
+  {/* ---- Trust marquee (full-width, scrolls right to left) ---- */}
+  <section class="ticker" aria-label="Why families choose Goji">
+    <div class="ticker__track">
+      {[0, 1].map((dup) => (
+        <ul class="ticker__group" aria-hidden={dup === 1 ? "true" : undefined}>
+          {[
+            "1 min from Lentor MRT",
+            "AHPC-registered physiotherapists",
+            "5.0 on Google",
+            "Home visits available",
+          ].map((item) => (
+            <li class="ticker__item">
+              <span class="ticker__dot" aria-hidden="true"></span>
+              {item}
             </li>
-          ))
-        }
-      </ul>
-      <p class="router-sec__foot">
-        Still unsure?{" "}
-        <a href="https://go.gojiphysio.com/web-wa" target="_blank" rel="noopener noreferrer">WhatsApp us</a>
-        {" "}and we'll point you to the right session.
-      </p>
+          ))}
+        </ul>
+      ))}
     </div>
   </section>
 
@@ -339,29 +297,37 @@ const reviews = [
       <header class="section-head">
         <h2>Care for the whole family, under one roof</h2>
       </header>
-      <ul class="service-grid">
-        {
-          services.map((s) => (
-            <li class="service-card">
-              <span class="service-card__icon" aria-hidden="true">
-                <Icon name={s.icon} size={22} />
-              </span>
-              <h3 class="service-card__name">{s.title}</h3>
-              <p class="service-card__meta">{s.meta.join(" · ")}</p>
-              <p class="service-card__lead">{s.lead}</p>
-              {s.price && (
-                <p class="service-card__price">
-                  From <strong>${s.price}</strong>
-                  {s.priceNote && <span class="service-card__price-note">{s.priceNote}</span>}
-                </p>
-              )}
-              <div class="service-card__cta">
-                <Button slug="web-plato" variant="secondary">Book {s.title}</Button>
-              </div>
-            </li>
-          ))
-        }
-      </ul>
+      <div class="service-wrap">
+        <div class="service-track" id="serviceTrack">
+          {
+            services.map((s) => (
+              <article class="service-card">
+                <span class="service-card__icon" aria-hidden="true">
+                  <Icon name={s.icon} size={22} />
+                </span>
+                <h3 class="service-card__name">{s.title}</h3>
+                <p class="service-card__meta">{s.meta.join(" · ")}</p>
+                <p class="service-card__lead">{s.lead}</p>
+                {s.price && (
+                  <p class="service-card__price">
+                    From <strong>${s.price}</strong>
+                    {s.priceNote && <span class="service-card__price-note">{s.priceNote}</span>}
+                  </p>
+                )}
+                <div class="service-card__cta">
+                  <Button slug="web-plato" variant="secondary">Book {s.title}</Button>
+                </div>
+              </article>
+            ))
+          }
+        </div>
+        <button class="reviews-btn reviews-btn--prev" id="servicePrev" aria-label="Previous services" disabled>
+          <Icon name="tabler:chevron-left" size={22} />
+        </button>
+        <button class="reviews-btn reviews-btn--next" id="serviceNext" aria-label="More services">
+          <Icon name="tabler:chevron-right" size={22} />
+        </button>
+      </div>
     </div>
   </section>
 
@@ -427,7 +393,7 @@ const reviews = [
       </div>
       <div class="stat-item">
         <span class="stat-item__value">1000+</span>
-        <span class="stat-item__label">patients served</span>
+        <span class="stat-item__label">patients collectively served</span>
         <span class="stat-item__caption">And growing</span>
       </div>
     </div>
@@ -459,30 +425,6 @@ const reviews = [
       {team.map((_, i) => <span class:list={["team-dot", { "team-dot--active": i === 0 }]} />)}
     </div>
   </Section>
-
-  {/* ---- Clinician matching ---- */}
-  <section class="match-sec" id="match">
-    <div class="container">
-      <header class="section-head">
-        <h2>Find the right clinician for your concern</h2>
-      </header>
-      <dl class="match-list">
-        {
-          clinicianMatch.map((m) => (
-            <div class="match-row">
-              <dt class="match-row__concern">{m.concern}</dt>
-              <dd class="match-row__clinicians">{m.clinicians}</dd>
-            </div>
-          ))
-        }
-      </dl>
-      <p class="match-sec__foot">
-        Still unsure?{" "}
-        <a href="https://go.gojiphysio.com/web-wa" target="_blank" rel="noopener noreferrer">WhatsApp us</a>
-        {" "}and we'll help match you to the right appointment.
-      </p>
-    </div>
-  </section>
 
   {/* ---- For every stage of growth (brand bloom) ---- */}
   <section class="space-sec">
@@ -606,6 +548,45 @@ const reviews = [
     </div>
   </Section>
 
+  {/* ---- Concern router: "Not sure what to book?" ---- */}
+  <section class="router-sec" id="not-sure">
+    <div class="container">
+      <header class="section-head router-sec__head">
+        <h2>Not sure what to book?</h2>
+        <p class="section-head__sub">
+          Start with what sounds most like you. We'll help you choose the right
+          session.
+        </p>
+      </header>
+      <ul class="router-grid">
+        {
+          concerns.map((c) => (
+            <li class="router-card">
+              <h3 class="router-card__title">{c.title}</h3>
+              <p class="router-card__body">{c.body}</p>
+              <p class="router-card__rec">
+                <span class="router-card__rec-label">Recommended</span>
+                {c.recommended}
+              </p>
+              <div class="router-card__cta">
+                {c.cta.href ? (
+                  <Button href={c.cta.href} variant="secondary">{c.cta.label}</Button>
+                ) : (
+                  <Button slug={c.cta.slug} variant="secondary">{c.cta.label}</Button>
+                )}
+              </div>
+            </li>
+          ))
+        }
+      </ul>
+      <p class="router-sec__foot">
+        Still unsure?{" "}
+        <a href="https://go.gojiphysio.com/web-wa" target="_blank" rel="noopener noreferrer">WhatsApp us</a>
+        {" "}and we'll point you to the right session.
+      </p>
+    </div>
+  </section>
+
   {/* ---- Closing promise ---- */}
   <Section tone="closing">
     <QuoteSurface />
@@ -676,6 +657,31 @@ const reviews = [
     rTrack.addEventListener("scroll", rUpdateUI, { passive: true });
     rUpdateUI();
   }
+
+  // Services carousel
+  const sTrack = document.getElementById("serviceTrack") as HTMLElement | null;
+  const sPrev = document.getElementById("servicePrev") as HTMLButtonElement | null;
+  const sNext = document.getElementById("serviceNext") as HTMLButtonElement | null;
+
+  if (sTrack && sPrev && sNext) {
+    function sSlideWidth(): number {
+      const slide = sTrack!.firstElementChild as HTMLElement | null;
+      return slide ? slide.offsetWidth + parseInt(getComputedStyle(sTrack!).gap || "0") : 0;
+    }
+    function sUpdateUI() {
+      const maxScroll = sTrack!.scrollWidth - sTrack!.clientWidth;
+      sPrev!.disabled = sTrack!.scrollLeft <= 1;
+      sNext!.disabled = sTrack!.scrollLeft >= maxScroll - 1;
+    }
+    sPrev.addEventListener("click", () => {
+      sTrack.scrollBy({ left: -sSlideWidth(), behavior: "smooth" });
+    });
+    sNext.addEventListener("click", () => {
+      sTrack.scrollBy({ left: sSlideWidth(), behavior: "smooth" });
+    });
+    sTrack.addEventListener("scroll", sUpdateUI, { passive: true });
+    sUpdateUI();
+  }
 </script>
 
 <style>
@@ -705,7 +711,7 @@ const reviews = [
 
   .hero__tagline {
     font-family: var(--font-display);
-    font-size: var(--fs-display);
+    font-size: clamp(2.25rem, 1.7rem + 2.2vw, 3.25rem);
     font-weight: var(--weight-semibold);
     color: var(--text-default);
     line-height: var(--lh-tight);
@@ -736,35 +742,60 @@ const reviews = [
     margin-bottom: var(--space-4);
     max-width: 30ch;
   }
-  .hero__chips {
-    list-style: none;
-    padding: 0;
-    margin: var(--space-5) 0 0;
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-2) var(--space-4);
+  /* ======================================================
+     Trust marquee — full-width, scrolls right to left
+     ====================================================== */
+  .ticker {
+    background: var(--color-linen-deep);
+    border-block: 1px solid var(--rule);
+    overflow: hidden;
   }
-  .hero__chip {
+  .ticker__track {
+    display: flex;
+    width: max-content;
+    animation: ticker-scroll 34s linear infinite;
+  }
+  .ticker:hover .ticker__track { animation-play-state: paused; }
+  .ticker__group {
+    display: flex;
+    align-items: center;
+    gap: var(--space-6);
+    list-style: none;
+    margin: 0;
+    padding: var(--space-3) 0 var(--space-3) var(--space-6);
+  }
+  .ticker__item {
     display: inline-flex;
     align-items: center;
-    gap: var(--space-2);
-    font-family: var(--font-body);
+    gap: var(--space-3);
+    white-space: nowrap;
+    font-family: var(--font-display);
     font-size: var(--fs-small);
+    font-weight: var(--weight-medium);
     color: var(--text-default);
   }
-  .hero__chip-dot {
-    width: 7px;
-    height: 7px;
+  .ticker__dot {
+    width: 6px;
+    height: 11px;
     border-radius: 50%;
     background: var(--color-primary);
+    transform: rotate(45deg);
     flex: none;
+  }
+  @keyframes ticker-scroll {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ticker__track { animation: none; flex-wrap: wrap; }
+    .ticker__group:nth-child(2) { display: none; }
   }
 
   /* Hero clinic-photo crossfade (3 frames, 21s loop) */
   .hero-shots {
     position: relative;
     width: 100%;
-    aspect-ratio: 1 / 1;
+    aspect-ratio: 4 / 3;
     border-radius: var(--radius-md);
     overflow: hidden;
     background: color-mix(in srgb, var(--color-linen-deep) 70%, var(--bg-page));
@@ -825,19 +856,22 @@ const reviews = [
     padding-block: var(--section-y);
   }
 
-  /* Service cards */
-  .service-grid {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: grid;
-    gap: var(--space-4);
-    grid-template-columns: 1fr;
+  /* Service cards carousel (3-up on desktop, swipe on mobile) */
+  .service-wrap { position: relative; }
+  .service-track {
+    display: flex;
+    gap: var(--space-5);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: var(--space-2);
   }
-  @media (min-width: 720px) {
-    .service-grid { grid-template-columns: 1fr 1fr; }
-  }
+  .service-track::-webkit-scrollbar { display: none; }
   .service-card {
+    flex: 0 0 100%;
+    scroll-snap-align: start;
     display: flex;
     flex-direction: column;
     gap: var(--space-2);
@@ -845,6 +879,12 @@ const reviews = [
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
     padding: var(--space-5);
+  }
+  @media (min-width: 640px) {
+    .service-card { flex: 0 0 calc(50% - var(--space-4)); }
+  }
+  @media (min-width: 960px) {
+    .service-card { flex: 0 0 calc(33.333% - var(--space-4)); }
   }
   .service-card__icon {
     width: 40px;
@@ -961,55 +1001,6 @@ const reviews = [
   }
 
   /* ======================================================
-     Clinician matching
-     ====================================================== */
-  .match-sec {
-    background: var(--bg-page);
-    padding-block: var(--section-y);
-  }
-  .match-list {
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    border-top: 1px solid var(--rule);
-  }
-  .match-row {
-    display: grid;
-    gap: 2px var(--space-5);
-    grid-template-columns: 1fr;
-    padding-block: var(--space-4);
-    border-bottom: 1px solid var(--rule);
-  }
-  @media (min-width: 640px) {
-    .match-row {
-      grid-template-columns: 1fr 1fr;
-      align-items: baseline;
-    }
-  }
-  .match-row__concern {
-    font-family: var(--font-display);
-    font-weight: var(--weight-semibold);
-    color: var(--text-default);
-    font-size: var(--fs-small);
-    margin: 0;
-  }
-  .match-row__clinicians {
-    margin: 0;
-    font-size: var(--fs-small);
-    color: var(--text-muted);
-  }
-  .match-sec__foot {
-    margin-top: var(--space-6);
-    font-size: var(--fs-small);
-    color: var(--text-muted);
-  }
-  .match-sec__foot a {
-    color: var(--color-primary);
-    text-decoration: underline;
-    text-underline-offset: 0.2em;
-  }
-
-  /* ======================================================
      Care section
      ====================================================== */
   .care-sec {
@@ -1118,12 +1109,14 @@ const reviews = [
   }
 
   /* ---- Care area rows ---- */
-  /* Single goji berry illustration before category name */
+  /* Stylized berry oval, tilted 45deg right (matches the marquee marker) */
   .care-berry {
     display: inline-block;
-    width: 30px;
-    height: 30px;
-    background: url('/illustrations/bloom-7.png') center / 140% no-repeat;
+    width: 14px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    transform: rotate(45deg);
     flex-shrink: 0;
   }
 
