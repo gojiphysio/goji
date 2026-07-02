@@ -20,6 +20,8 @@
   --color-linen-deep: #efe7cf;    /* hairlines / subtle fills on linen */
   --color-border: #e4dcc4;        /* default border on warm surfaces */
   --color-border-strong: #d6cbac;
+  --color-whatsapp: #25d366;      /* WhatsApp brand green — WhatsApp CTAs only */
+  --color-whatsapp-hover: #1fb457;
 
   /* ---- Semantic color roles (components use THESE) ---- */
   --bg-page: var(--color-linen);
