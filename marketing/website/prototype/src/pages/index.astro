@@ -8,37 +8,107 @@ import ContactBlock from "../components/ContactBlock.astro";
 import { Icon } from "astro-icon/components";
 import { SITE } from "../lib/site.ts";
 
+// `price` is the "From $" figure; leave "" to hide the price line (no
+// placeholders shipped). `priceNote` is an optional secondary line.
 const services = [
   {
     icon: "tabler:stretching",
     title: "Physiotherapy",
     lead: "Assessment and treatment for pain, injury, recovery, pelvic health, women's health, paediatric, vestibular, and lymphatic concerns.",
     meta: ["55 min initial consult", "In-clinic & home visits"],
+    price: "230",
+    priceNote: "Home visits from $330",
   },
   {
     icon: "tabler:baby-carriage",
     title: "Mummy & Baby Assessment",
-    lead: "A joint assessment for postpartum mothers and babies aged 0–6 months, supporting recovery, development, and early physical needs.",
+    lead: "A joint assessment for postpartum mothers and babies aged 0 to 6 months, supporting recovery, development, and early physical needs.",
     meta: ["90 min", "In-clinic & home visits"],
+    price: "330",
+    priceNote: "",
   },
   {
     icon: "tabler:yoga",
     title: "Clinical Pilates",
     lead: "Physiotherapist-led reformer Pilates for rehabilitation, movement retraining, strength, and a safe return to activity or sport.",
     meta: ["55 min", "1:1 or 2:1 reformer"],
+    price: "180",
+    priceNote: "",
   },
   {
     icon: "tabler:heart",
     title: "Private Pilates",
     lead: "Instructor-led reformer Pilates for building strength, mobility, body awareness, and confidence in movement.",
     meta: ["55 min", "1:1 or 2:1 reformer"],
+    price: "150",
+    priceNote: "",
   },
   {
     icon: "tabler:barbell",
     title: "Strength & Conditioning",
     lead: "Build strength and resilience through tailored exercise, with guidance from professionals to sustain your momentum.",
     meta: ["55 min", "1:1 or 2:1 sessions"],
+    price: "180",
+    priceNote: "",
   },
+];
+
+// "Not sure what to book?" concern router. Each CTA is a tracked link
+// (web-plato = booking, web-wa = WhatsApp) or an in-page anchor (href).
+type Concern = {
+  title: string;
+  body: string;
+  recommended: string;
+  cta: { label: string; slug?: "web-wa" | "web-plato"; href?: string };
+};
+const concerns: Concern[] = [
+  {
+    title: "Pregnant and in pain",
+    body: "Pelvic pain, back pain, rib pain, birth preparation, or staying active safely.",
+    recommended: "Physiotherapy",
+    cta: { label: "Book physiotherapy", slug: "web-plato" as const },
+  },
+  {
+    title: "Recently gave birth",
+    body: "Postnatal check, diastasis recti, C-section scar care, pelvic floor recovery, or return to exercise.",
+    recommended: "Physiotherapy or Mummy & Baby Assessment",
+    cta: { label: "Ask us what to book", slug: "web-wa" as const },
+  },
+  {
+    title: "Leaking, heaviness, or pelvic pain",
+    body: "Bladder leaks, prolapse symptoms, painful sex, pelvic pressure, or pelvic floor concerns.",
+    recommended: "Women's Health Physiotherapy",
+    cta: { label: "Book physiotherapy", slug: "web-plato" as const },
+  },
+  {
+    title: "Worried about baby's movement or development",
+    body: "Torticollis, flat head, delayed milestones, feeding posture, or early movement concerns.",
+    recommended: "Mummy & Baby Assessment or Paediatric Physiotherapy",
+    cta: { label: "Book Mummy & Baby Assessment", slug: "web-plato" as const },
+  },
+  {
+    title: "Pain or injury",
+    body: "Back pain, neck pain, sports injuries, post-surgery recovery, or recurring pain.",
+    recommended: "Physiotherapy",
+    cta: { label: "Book physiotherapy", slug: "web-plato" as const },
+  },
+  {
+    title: "Want to get stronger safely",
+    body: "Strength training, return to sport, movement confidence, or physio-led Pilates.",
+    recommended: "Clinical Pilates or Strength & Conditioning",
+    cta: { label: "View strengthening options", href: "#services" },
+  },
+];
+
+// Clinician matching: concern -> clinicians who see it.
+const clinicianMatch = [
+  { concern: "Pregnancy and birth preparation", clinicians: "Cheryl, Claire, Kristy" },
+  { concern: "Postpartum recovery", clinicians: "Cheryl, Claire, Kristy" },
+  { concern: "Return to sport after birth", clinicians: "Claire, Kristy" },
+  { concern: "Paediatric physiotherapy", clinicians: "Kristy" },
+  { concern: "Lymphoedema", clinicians: "Claire" },
+  { concern: "Scoliosis / Schroth therapy", clinicians: "Cheryl" },
+  { concern: "Vestibular / dizziness", clinicians: "Claire" },
 ];
 
 // Women's Health links through to the real condition pages under /conditions.
@@ -161,6 +231,7 @@ const reviews = [
     <div class="container hero__inner">
       <div class="hero__text">
         <p class="hero__tagline">{SITE.tagline}</p>
+        <p class="hero__sub">Women's and Family Physiotherapy in Lentor, Singapore</p>
         <p class="hero__lead">
           Expert, unhurried care for pelvic health, pregnancy and postpartum
           recovery, paediatrics, and everyday strength.
@@ -169,6 +240,19 @@ const reviews = [
           <Button slug="web-plato" variant="primary" size="lg">Book an appointment</Button>
           <Button slug="web-wa" variant="secondary" size="lg">WhatsApp us</Button>
         </div>
+        <ul class="hero__chips" aria-label="Why families choose Goji">
+          {[
+            "1 min from Lentor MRT",
+            "AHPC-registered physiotherapists",
+            "5.0 on Google",
+            "Home visits available",
+          ].map((chip) => (
+            <li class="hero__chip">
+              <span class="hero__chip-dot" aria-hidden="true"></span>
+              {chip}
+            </li>
+          ))}
+        </ul>
       </div>
       <div class="hero__media">
         <div class="hero-shots" role="img" aria-label="Inside the Goji clinic at Lentor Modern - reception, the reformer studio, and a session in progress">
@@ -191,6 +275,45 @@ const reviews = [
     </div>
   </section>
 
+  {/* ---- Concern router: "Not sure what to book?" ---- */}
+  <section class="router-sec" id="not-sure">
+    <div class="container">
+      <header class="section-head router-sec__head">
+        <h2>Not sure what to book?</h2>
+        <p class="section-head__sub">
+          Start with what sounds most like you. We'll help you choose the right
+          session.
+        </p>
+      </header>
+      <ul class="router-grid">
+        {
+          concerns.map((c) => (
+            <li class="router-card">
+              <h3 class="router-card__title">{c.title}</h3>
+              <p class="router-card__body">{c.body}</p>
+              <p class="router-card__rec">
+                <span class="router-card__rec-label">Recommended</span>
+                {c.recommended}
+              </p>
+              <div class="router-card__cta">
+                {c.cta.href ? (
+                  <Button href={c.cta.href} variant="secondary">{c.cta.label}</Button>
+                ) : (
+                  <Button slug={c.cta.slug} variant="secondary">{c.cta.label}</Button>
+                )}
+              </div>
+            </li>
+          ))
+        }
+      </ul>
+      <p class="router-sec__foot">
+        Still unsure?{" "}
+        <a href="https://go.gojiphysio.com/web-wa" target="_blank" rel="noopener noreferrer">WhatsApp us</a>
+        {" "}and we'll point you to the right session.
+      </p>
+    </div>
+  </section>
+
   {/* ---- About (text-only, no photo placeholder) ---- */}
   <section class="about-sec" id="about">
     <div class="container about-sec__inner">
@@ -210,37 +333,35 @@ const reviews = [
     </div>
   </section>
 
-  {/* ---- Services (accordion with Tabler icons) ---- */}
+  {/* ---- Services (cards with pricing + Tabler icons) ---- */}
   <section class="services-sec" id="services">
     <div class="container">
-      <div class="sec-two-col">
       <header class="section-head">
         <h2>Care for the whole family, under one roof</h2>
       </header>
-      <div class="accordion">
+      <ul class="service-grid">
         {
           services.map((s) => (
-            <details class="accordion__item">
-              <summary class="accordion__trigger">
-                <span class="accordion__icon-wrap" aria-hidden="true">
-                  <Icon name={s.icon} size={20} />
-                </span>
-                <span class="accordion__info">
-                  <span class="accordion__name">{s.title}</span>
-                  <span class="accordion__meta">{s.meta.join(" · ")}</span>
-                </span>
-                <span class="accordion__toggle" aria-hidden="true" />
-              </summary>
-              <div class="accordion__body">
-                <div class="accordion__body-inner">
-                  <p>{s.lead}</p>
-                </div>
+            <li class="service-card">
+              <span class="service-card__icon" aria-hidden="true">
+                <Icon name={s.icon} size={22} />
+              </span>
+              <h3 class="service-card__name">{s.title}</h3>
+              <p class="service-card__meta">{s.meta.join(" · ")}</p>
+              <p class="service-card__lead">{s.lead}</p>
+              {s.price && (
+                <p class="service-card__price">
+                  From <strong>${s.price}</strong>
+                  {s.priceNote && <span class="service-card__price-note">{s.priceNote}</span>}
+                </p>
+              )}
+              <div class="service-card__cta">
+                <Button slug="web-plato" variant="secondary">Book {s.title}</Button>
               </div>
-            </details>
+            </li>
           ))
         }
-      </div>
-      </div>
+      </ul>
     </div>
   </section>
 
@@ -338,6 +459,30 @@ const reviews = [
       {team.map((_, i) => <span class:list={["team-dot", { "team-dot--active": i === 0 }]} />)}
     </div>
   </Section>
+
+  {/* ---- Clinician matching ---- */}
+  <section class="match-sec" id="match">
+    <div class="container">
+      <header class="section-head">
+        <h2>Find the right clinician for your concern</h2>
+      </header>
+      <dl class="match-list">
+        {
+          clinicianMatch.map((m) => (
+            <div class="match-row">
+              <dt class="match-row__concern">{m.concern}</dt>
+              <dd class="match-row__clinicians">{m.clinicians}</dd>
+            </div>
+          ))
+        }
+      </dl>
+      <p class="match-sec__foot">
+        Still unsure?{" "}
+        <a href="https://go.gojiphysio.com/web-wa" target="_blank" rel="noopener noreferrer">WhatsApp us</a>
+        {" "}and we'll help match you to the right appointment.
+      </p>
+    </div>
+  </section>
 
   {/* ---- For every stage of growth (brand bloom) ---- */}
   <section class="space-sec">
@@ -582,6 +727,38 @@ const reviews = [
     flex-wrap: wrap;
     gap: var(--space-3);
   }
+  .hero__sub {
+    font-family: var(--font-display);
+    font-size: var(--fs-h3, 1.0625rem);
+    font-weight: var(--weight-medium);
+    color: var(--color-primary);
+    margin-top: calc(-1 * var(--space-3));
+    margin-bottom: var(--space-4);
+    max-width: 30ch;
+  }
+  .hero__chips {
+    list-style: none;
+    padding: 0;
+    margin: var(--space-5) 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-4);
+  }
+  .hero__chip {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-family: var(--font-body);
+    font-size: var(--fs-small);
+    color: var(--text-default);
+  }
+  .hero__chip-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    flex: none;
+  }
 
   /* Hero clinic-photo crossfade (3 frames, 21s loop) */
   .hero-shots {
@@ -646,6 +823,190 @@ const reviews = [
   .services-sec {
     background: var(--bg-page);
     padding-block: var(--section-y);
+  }
+
+  /* Service cards */
+  .service-grid {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: var(--space-4);
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 720px) {
+    .service-grid { grid-template-columns: 1fr 1fr; }
+  }
+  .service-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    background: var(--bg-content);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-5);
+  }
+  .service-card__icon {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-sm);
+    background: color-mix(in srgb, var(--color-primary) 9%, transparent);
+    color: var(--color-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--space-1);
+  }
+  .service-card__icon [data-icon] { display: block; }
+  .service-card__name {
+    font-family: var(--font-display);
+    font-size: var(--fs-body);
+    font-weight: var(--weight-semibold);
+    color: var(--text-default);
+  }
+  .service-card__meta {
+    font-size: var(--fs-caption);
+    color: var(--text-muted);
+  }
+  .service-card__lead {
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+    line-height: var(--lh-body);
+  }
+  .service-card__price {
+    font-size: var(--fs-small);
+    color: var(--text-default);
+    margin-top: var(--space-1);
+  }
+  .service-card__price strong {
+    font-family: var(--font-display);
+    font-size: var(--fs-h3, 1.0625rem);
+    font-weight: var(--weight-bold);
+    color: var(--text-default);
+  }
+  .service-card__price-note {
+    display: block;
+    font-size: var(--fs-caption);
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+  .service-card__cta {
+    margin-top: auto;
+    padding-top: var(--space-4);
+  }
+
+  /* ======================================================
+     Concern router — "Not sure what to book?"
+     ====================================================== */
+  .router-sec {
+    background: var(--bg-content);
+    border-block: 1px solid var(--rule);
+    padding-block: var(--section-y);
+  }
+  .router-sec__head { margin-bottom: var(--space-6); }
+  .router-grid {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: var(--space-4);
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 720px) {
+    .router-grid { grid-template-columns: 1fr 1fr; }
+  }
+  .router-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    background: var(--color-linen);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-5);
+  }
+  .router-card__title {
+    font-family: var(--font-display);
+    font-size: var(--fs-body);
+    font-weight: var(--weight-semibold);
+    color: var(--text-default);
+  }
+  .router-card__body {
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+    line-height: var(--lh-body);
+  }
+  .router-card__rec {
+    font-size: var(--fs-small);
+    color: var(--text-default);
+    margin-top: var(--space-1);
+  }
+  .router-card__rec-label {
+    display: block;
+    font-size: var(--fs-caption);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-label);
+    color: var(--color-primary);
+    margin-bottom: 2px;
+  }
+  .router-card__cta { margin-top: auto; padding-top: var(--space-3); }
+  .router-sec__foot {
+    margin-top: var(--space-6);
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+  }
+  .router-sec__foot a {
+    color: var(--color-primary);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+
+  /* ======================================================
+     Clinician matching
+     ====================================================== */
+  .match-sec {
+    background: var(--bg-page);
+    padding-block: var(--section-y);
+  }
+  .match-list {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid var(--rule);
+  }
+  .match-row {
+    display: grid;
+    gap: 2px var(--space-5);
+    grid-template-columns: 1fr;
+    padding-block: var(--space-4);
+    border-bottom: 1px solid var(--rule);
+  }
+  @media (min-width: 640px) {
+    .match-row {
+      grid-template-columns: 1fr 1fr;
+      align-items: baseline;
+    }
+  }
+  .match-row__concern {
+    font-family: var(--font-display);
+    font-weight: var(--weight-semibold);
+    color: var(--text-default);
+    font-size: var(--fs-small);
+    margin: 0;
+  }
+  .match-row__clinicians {
+    margin: 0;
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+  }
+  .match-sec__foot {
+    margin-top: var(--space-6);
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+  }
+  .match-sec__foot a {
+    color: var(--color-primary);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
   }
 
   /* ======================================================

@@ -134,7 +134,7 @@ Fields: Name (First, Last) · Email (required) · Phone · Submit
 **Find Us at Lentor Modern**
 Goji is on the ground floor of Lentor Modern, a one-minute walk from Exit 1 of Lentor MRT (Thomson-East Coast Line). Turn right after exiting the station and walk past Burger King. We're stroller-accessible, with parking available in the mall.
 
-- 📍 **Address:** Lentor Modern, #01-131 Lentor Central, Singapore 788887
+- 📍 **Address:** Lentor Modern, #01-13 Lentor Central, Singapore 788887
 - 🕐 **Hours:** Monday–Saturday 8am–8pm · Sunday & Public Holidays: Closed (By Appointment Only)
 - 📞 **Contact:** WhatsApp +65 8377 0401 · hello@gojiphysio.com
 
