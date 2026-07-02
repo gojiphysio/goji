@@ -53,53 +53,6 @@ const services = [
   },
 ];
 
-// "Not sure what to book?" concern router. Each CTA is a tracked link
-// (web-plato = booking, web-wa = WhatsApp) or an in-page anchor (href).
-type Concern = {
-  title: string;
-  body: string;
-  recommended: string;
-  cta: { label: string; slug?: "web-wa" | "web-plato"; href?: string };
-};
-const concerns: Concern[] = [
-  {
-    title: "Pregnant and in pain",
-    body: "Pelvic pain, back pain, rib pain, birth preparation, or staying active safely.",
-    recommended: "Physiotherapy",
-    cta: { label: "Book physiotherapy", slug: "web-plato" as const },
-  },
-  {
-    title: "Recently gave birth",
-    body: "Postnatal check, diastasis recti, C-section scar care, pelvic floor recovery, or return to exercise.",
-    recommended: "Physiotherapy or Mummy & Baby Assessment",
-    cta: { label: "Ask us what to book", slug: "web-wa" as const },
-  },
-  {
-    title: "Leaking, heaviness, or pelvic pain",
-    body: "Bladder leaks, prolapse symptoms, painful sex, pelvic pressure, or pelvic floor concerns.",
-    recommended: "Women's Health Physiotherapy",
-    cta: { label: "Book physiotherapy", slug: "web-plato" as const },
-  },
-  {
-    title: "Worried about baby's movement or development",
-    body: "Torticollis, flat head, delayed milestones, feeding posture, or early movement concerns.",
-    recommended: "Mummy & Baby Assessment or Paediatric Physiotherapy",
-    cta: { label: "Book Mummy & Baby Assessment", slug: "web-plato" as const },
-  },
-  {
-    title: "Pain or injury",
-    body: "Back pain, neck pain, sports injuries, post-surgery recovery, or recurring pain.",
-    recommended: "Physiotherapy",
-    cta: { label: "Book physiotherapy", slug: "web-plato" as const },
-  },
-  {
-    title: "Want to get stronger safely",
-    body: "Strength training, return to sport, movement confidence, or physio-led Pilates.",
-    recommended: "Clinical Pilates or Strength & Conditioning",
-    cta: { label: "View strengthening options", href: "#services" },
-  },
-];
-
 // Women's Health links through to the real condition pages under /conditions.
 // Other areas describe the clinic's wider scope (plain text, no page yet).
 const careAreas = [
@@ -548,45 +501,6 @@ const reviews = [
     </div>
   </Section>
 
-  {/* ---- Concern router: "Not sure what to book?" ---- */}
-  <section class="router-sec" id="not-sure">
-    <div class="container">
-      <header class="section-head router-sec__head">
-        <h2>Not sure what to book?</h2>
-        <p class="section-head__sub">
-          Start with what sounds most like you. We'll help you choose the right
-          session.
-        </p>
-      </header>
-      <ul class="router-grid">
-        {
-          concerns.map((c) => (
-            <li class="router-card">
-              <h3 class="router-card__title">{c.title}</h3>
-              <p class="router-card__body">{c.body}</p>
-              <p class="router-card__rec">
-                <span class="router-card__rec-label">Recommended</span>
-                {c.recommended}
-              </p>
-              <div class="router-card__cta">
-                {c.cta.href ? (
-                  <Button href={c.cta.href} variant="secondary">{c.cta.label}</Button>
-                ) : (
-                  <Button slug={c.cta.slug} variant="secondary">{c.cta.label}</Button>
-                )}
-              </div>
-            </li>
-          ))
-        }
-      </ul>
-      <p class="router-sec__foot">
-        Still unsure?{" "}
-        <a href="https://go.gojiphysio.com/web-wa" target="_blank" rel="noopener noreferrer">WhatsApp us</a>
-        {" "}and we'll point you to the right session.
-      </p>
-    </div>
-  </section>
-
   {/* ---- Closing promise ---- */}
   <Section tone="closing">
     <QuoteSurface />
@@ -934,70 +848,6 @@ const reviews = [
     padding-top: var(--space-4);
   }
 
-  /* ======================================================
-     Concern router — "Not sure what to book?"
-     ====================================================== */
-  .router-sec {
-    background: var(--bg-content);
-    border-block: 1px solid var(--rule);
-    padding-block: var(--section-y);
-  }
-  .router-sec__head { margin-bottom: var(--space-6); }
-  .router-grid {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: grid;
-    gap: var(--space-4);
-    grid-template-columns: 1fr;
-  }
-  @media (min-width: 720px) {
-    .router-grid { grid-template-columns: 1fr 1fr; }
-  }
-  .router-card {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
-    background: var(--color-linen);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    padding: var(--space-5);
-  }
-  .router-card__title {
-    font-family: var(--font-display);
-    font-size: var(--fs-body);
-    font-weight: var(--weight-semibold);
-    color: var(--text-default);
-  }
-  .router-card__body {
-    font-size: var(--fs-small);
-    color: var(--text-muted);
-    line-height: var(--lh-body);
-  }
-  .router-card__rec {
-    font-size: var(--fs-small);
-    color: var(--text-default);
-    margin-top: var(--space-1);
-  }
-  .router-card__rec-label {
-    display: block;
-    font-size: var(--fs-caption);
-    text-transform: uppercase;
-    letter-spacing: var(--tracking-label);
-    color: var(--color-primary);
-    margin-bottom: 2px;
-  }
-  .router-card__cta { margin-top: auto; padding-top: var(--space-3); }
-  .router-sec__foot {
-    margin-top: var(--space-6);
-    font-size: var(--fs-small);
-    color: var(--text-muted);
-  }
-  .router-sec__foot a {
-    color: var(--color-primary);
-    text-decoration: underline;
-    text-underline-offset: 0.2em;
-  }
 
   /* ======================================================
      Care section
