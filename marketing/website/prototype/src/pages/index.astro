@@ -502,7 +502,7 @@ const reviews = [
   </section>
 
   {/* ---- FAQ ---- */}
-  <Section tone="surface" id="faq">
+  <Section tone="linen" id="faq">
     <div class="sec-two-col">
     <header class="section-head">
       <h2>Frequently asked questions</h2>
@@ -704,7 +704,7 @@ const reviews = [
   }
   @media (min-width: 820px) {
     .hero__inner {
-      grid-template-columns: 1.05fr 0.95fr;
+      grid-template-columns: 0.85fr 1.15fr;
       gap: var(--space-9);
     }
   }
@@ -735,7 +735,7 @@ const reviews = [
   }
   .hero__sub {
     font-family: var(--font-display);
-    font-size: var(--fs-h3, 1.0625rem);
+    font-size: var(--fs-body);
     font-weight: var(--weight-medium);
     color: var(--color-primary);
     margin-top: calc(-1 * var(--space-3));
@@ -755,7 +755,6 @@ const reviews = [
     width: max-content;
     animation: ticker-scroll 34s linear infinite;
   }
-  .ticker:hover .ticker__track { animation-play-state: paused; }
   .ticker__group {
     display: flex;
     align-items: center;
