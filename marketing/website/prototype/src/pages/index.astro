@@ -53,51 +53,13 @@ const services = [
   },
 ];
 
-// "Not sure what to book?" concern router. Each CTA is a tracked link
-// (web-plato = booking, web-wa = WhatsApp) or an in-page anchor (href).
-type Concern = {
-  title: string;
-  body: string;
-  recommended: string;
-  cta: { label: string; slug?: "web-wa" | "web-plato"; href?: string };
-};
-const concerns: Concern[] = [
-  {
-    title: "Pregnant and in pain",
-    body: "Pelvic pain, back pain, rib pain, birth preparation, or staying active safely.",
-    recommended: "Physiotherapy",
-    cta: { label: "Book physiotherapy", slug: "web-plato" as const },
-  },
-  {
-    title: "Recently gave birth",
-    body: "Postnatal check, diastasis recti, C-section scar care, pelvic floor recovery, or return to exercise.",
-    recommended: "Physiotherapy or Mummy & Baby Assessment",
-    cta: { label: "Ask us what to book", slug: "web-wa" as const },
-  },
-  {
-    title: "Leaking, heaviness, or pelvic pain",
-    body: "Bladder leaks, prolapse symptoms, painful sex, pelvic pressure, or pelvic floor concerns.",
-    recommended: "Women's Health Physiotherapy",
-    cta: { label: "Book physiotherapy", slug: "web-plato" as const },
-  },
-  {
-    title: "Worried about baby's movement or development",
-    body: "Torticollis, flat head, delayed milestones, feeding posture, or early movement concerns.",
-    recommended: "Mummy & Baby Assessment or Paediatric Physiotherapy",
-    cta: { label: "Book Mummy & Baby Assessment", slug: "web-plato" as const },
-  },
-  {
-    title: "Pain or injury",
-    body: "Back pain, neck pain, sports injuries, post-surgery recovery, or recurring pain.",
-    recommended: "Physiotherapy",
-    cta: { label: "Book physiotherapy", slug: "web-plato" as const },
-  },
-  {
-    title: "Want to get stronger safely",
-    body: "Strength training, return to sport, movement confidence, or physio-led Pilates.",
-    recommended: "Clinical Pilates or Strength & Conditioning",
-    cta: { label: "View strengthening options", href: "#services" },
-  },
+// Trust marquee items, repeated in the loop so the track always exceeds the
+// viewport width (prevents a blank gap in the scroll).
+const tickerItems = [
+  "1 min from Lentor MRT",
+  "AHPC-registered physiotherapists",
+  "5.0 on Google",
+  "Home visits available",
 ];
 
 // Women's Health links through to the real condition pages under /conditions.
@@ -222,20 +184,22 @@ const reviews = [
         <p class="hero__tagline">{SITE.tagline}</p>
         <p class="hero__sub">Women's and Family Physiotherapy in Lentor, Singapore</p>
         <p class="hero__lead">
-          Expert, unhurried care for pelvic health, pregnancy and postpartum
-          recovery, paediatrics, and everyday strength.
+          Expert care for pelvic health, pregnancy and postpartum recovery,
+          paediatrics and everyday strength.
         </p>
         <div class="hero__actions">
-          <Button slug="web-plato" variant="primary" size="lg">Book an appointment</Button>
+          <Button slug="web-plato" variant="primary" size="lg">Book now</Button>
           <Button slug="web-wa" variant="whatsapp" size="lg">WhatsApp us</Button>
         </div>
       </div>
       <div class="hero__media">
-        <div class="hero-shots" role="img" aria-label="Inside the Goji clinic at Lentor Modern - reception, the reformer studio, and a session in progress">
+        <div class="hero-shots" role="img" aria-label="Inside the Goji clinic at Lentor Modern">
           {[
+            { src: "/photos/space/reception-warm.webp" },
             { src: "/photos/space/reception.webp" },
             { src: "/photos/space/studio.webp" },
             { src: "/photos/space/session.webp" },
+            { src: "/photos/space/strength.webp" },
           ].map((img) => (
             <img
               src={img.src}
@@ -256,12 +220,7 @@ const reviews = [
     <div class="ticker__track">
       {[0, 1].map((dup) => (
         <ul class="ticker__group" aria-hidden={dup === 1 ? "true" : undefined}>
-          {[
-            "1 min from Lentor MRT",
-            "AHPC-registered physiotherapists",
-            "5.0 on Google",
-            "Home visits available",
-          ].map((item) => (
+          {[0, 1, 2].flatMap(() => tickerItems).map((item) => (
             <li class="ticker__item">
               <span class="ticker__dot" aria-hidden="true"></span>
               {item}
@@ -548,45 +507,6 @@ const reviews = [
     </div>
   </Section>
 
-  {/* ---- Concern router: "Not sure what to book?" ---- */}
-  <section class="router-sec" id="not-sure">
-    <div class="container">
-      <header class="section-head router-sec__head">
-        <h2>Not sure what to book?</h2>
-        <p class="section-head__sub">
-          Start with what sounds most like you. We'll help you choose the right
-          session.
-        </p>
-      </header>
-      <ul class="router-grid">
-        {
-          concerns.map((c) => (
-            <li class="router-card">
-              <h3 class="router-card__title">{c.title}</h3>
-              <p class="router-card__body">{c.body}</p>
-              <p class="router-card__rec">
-                <span class="router-card__rec-label">Recommended</span>
-                {c.recommended}
-              </p>
-              <div class="router-card__cta">
-                {c.cta.href ? (
-                  <Button href={c.cta.href} variant="secondary">{c.cta.label}</Button>
-                ) : (
-                  <Button slug={c.cta.slug} variant="secondary">{c.cta.label}</Button>
-                )}
-              </div>
-            </li>
-          ))
-        }
-      </ul>
-      <p class="router-sec__foot">
-        Still unsure?{" "}
-        <a href="https://go.gojiphysio.com/web-wa" target="_blank" rel="noopener noreferrer">WhatsApp us</a>
-        {" "}and we'll point you to the right session.
-      </p>
-    </div>
-  </section>
-
   {/* ---- Closing promise ---- */}
   <Section tone="closing">
     <QuoteSurface />
@@ -692,9 +612,8 @@ const reviews = [
     background: var(--bg-page);
     display: flex;
     align-items: center;
-    /* Fill the fold so only the cream hero shows above it. */
-    min-height: calc(100svh - 68px);
-    padding-block: var(--space-7);
+    /* Sized to its content so the trust ticker sits within the first screen. */
+    padding-block: var(--space-6);
   }
   .hero__inner {
     display: grid;
@@ -717,7 +636,7 @@ const reviews = [
     line-height: var(--lh-tight);
     letter-spacing: var(--tracking-tight);
     max-width: 15ch;
-    margin-bottom: var(--space-5);
+    margin-bottom: var(--space-4);
     text-wrap: balance;
   }
   .hero__lead {
@@ -738,7 +657,7 @@ const reviews = [
     font-size: var(--fs-body);
     font-weight: var(--weight-medium);
     color: var(--color-primary);
-    margin-top: calc(-1 * var(--space-3));
+    margin-top: 0;
     margin-bottom: var(--space-4);
     max-width: 30ch;
   }
@@ -790,7 +709,7 @@ const reviews = [
     .ticker__group:nth-child(2) { display: none; }
   }
 
-  /* Hero clinic-photo crossfade (3 frames, 21s loop) */
+  /* Hero clinic-photo crossfade (5 frames, 35s loop) */
   .hero-shots {
     position: relative;
     width: 100%;
@@ -807,16 +726,18 @@ const reviews = [
     height: 100%;
     object-fit: cover;
     opacity: 0;
-    animation: hero-fade 21s infinite;
+    animation: hero-fade 35s infinite;
   }
   .hero-shot:nth-child(1) { animation-delay: 0s; }
   .hero-shot:nth-child(2) { animation-delay: 7s; }
   .hero-shot:nth-child(3) { animation-delay: 14s; }
+  .hero-shot:nth-child(4) { animation-delay: 21s; }
+  .hero-shot:nth-child(5) { animation-delay: 28s; }
   @keyframes hero-fade {
     0%   { opacity: 0; }
-    8%   { opacity: 1; }
-    33%  { opacity: 1; }
-    41%  { opacity: 0; }
+    2%   { opacity: 1; }
+    18%  { opacity: 1; }
+    22%  { opacity: 0; }
     100% { opacity: 0; }
   }
   @media (prefers-reduced-motion: reduce) {
@@ -934,70 +855,6 @@ const reviews = [
     padding-top: var(--space-4);
   }
 
-  /* ======================================================
-     Concern router — "Not sure what to book?"
-     ====================================================== */
-  .router-sec {
-    background: var(--bg-content);
-    border-block: 1px solid var(--rule);
-    padding-block: var(--section-y);
-  }
-  .router-sec__head { margin-bottom: var(--space-6); }
-  .router-grid {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: grid;
-    gap: var(--space-4);
-    grid-template-columns: 1fr;
-  }
-  @media (min-width: 720px) {
-    .router-grid { grid-template-columns: 1fr 1fr; }
-  }
-  .router-card {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
-    background: var(--color-linen);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    padding: var(--space-5);
-  }
-  .router-card__title {
-    font-family: var(--font-display);
-    font-size: var(--fs-body);
-    font-weight: var(--weight-semibold);
-    color: var(--text-default);
-  }
-  .router-card__body {
-    font-size: var(--fs-small);
-    color: var(--text-muted);
-    line-height: var(--lh-body);
-  }
-  .router-card__rec {
-    font-size: var(--fs-small);
-    color: var(--text-default);
-    margin-top: var(--space-1);
-  }
-  .router-card__rec-label {
-    display: block;
-    font-size: var(--fs-caption);
-    text-transform: uppercase;
-    letter-spacing: var(--tracking-label);
-    color: var(--color-primary);
-    margin-bottom: 2px;
-  }
-  .router-card__cta { margin-top: auto; padding-top: var(--space-3); }
-  .router-sec__foot {
-    margin-top: var(--space-6);
-    font-size: var(--fs-small);
-    color: var(--text-muted);
-  }
-  .router-sec__foot a {
-    color: var(--color-primary);
-    text-decoration: underline;
-    text-underline-offset: 0.2em;
-  }
 
   /* ======================================================
      Care section
