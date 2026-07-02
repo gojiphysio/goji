@@ -14,6 +14,10 @@ export const SITE = {
   seoDescription:
     "Physiotherapy for women and children at Lentor MRT. Prenatal, post-partum, paediatric, and pelvic health care in one trusted clinic.",
   email: "hello@gojiphysio.com",
+  phone: "+65 8377 0401",
+  phoneE164: "+6583770401",
+  instagram: "https://www.instagram.com/gojiphysio/",
+  googleMaps: "https://maps.app.goo.gl/wBaCkBiDNfF7JCGv8",
   address: {
     line1: "Lentor Modern, #01-13",
     line2: "Lentor Central, Singapore 788887",

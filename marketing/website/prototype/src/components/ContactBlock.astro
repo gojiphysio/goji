@@ -40,7 +40,7 @@ import { SITE } from "../lib/site.ts";
     </div>
     <div class="contact__group">
       <h3>Hours</h3>
-      <BerryList items={SITE.hours.map((h) => `${h.days}: ${h.time}`)} />
+      <BerryList items={SITE.hours.map((h) => `${h.days}: ${h.time}`)} class="contact__hours" />
     </div>
     <div class="contact__group">
       <h3>Email</h3>
@@ -101,4 +101,17 @@ import { SITE } from "../lib/site.ts";
     transition: color var(--dur) var(--ease);
   }
   .contact__directions:hover { color: var(--color-primary-deep); }
+
+  /* Hours list: larger, clearer berry-oval markers (keeps the 45deg tilt) */
+  .contact :global(.contact__hours li) {
+    padding-left: 1.9rem;
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+  }
+  .contact :global(.contact__hours li)::before {
+    width: 0.5rem;
+    height: 0.85rem;
+    top: 0.55em;
+    background-color: var(--color-primary);
+  }
 </style>

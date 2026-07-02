@@ -21,7 +21,7 @@ const { name, role, interests, image, href } = Astro.props;
       image ? (
         <img
           src={image}
-          alt={`Portrait of ${name}`}
+          alt={`${name}, ${role} at Goji Physiotherapy`}
           loading="lazy"
           decoding="async"
           class="prac__img"

@@ -133,7 +133,7 @@ Add the following JSON-LD schemas to the `<head>` of this page:
 3. **Person** (Cheryl Long) — `name`, `jobTitle` ("Physiotherapist"), `worksFor` (MedicalOrganization: Goji Physio), `alumniOf` (Glasgow Caledonian University), `hasCredential` (AHPC registration), `sameAs` (link to `/cheryl-long` bio page and LinkedIn if available).
 4. **FAQPage** — one `Question`/`Answer` pair per FAQ entry above (6 total).
 5. **Service** — `name` ("Postnatal Physiotherapy"), `serviceType`, `provider` (MedicalOrganization: Goji Physio), `areaServed` (Singapore), `url`.
-6. **MedicalOrganization** on the homepage (if not already added): `name` "Goji Physio", `alternateName` "Goji Women's and Family Physiotherapy", `address` (Lentor Modern, #01-131 Lentor Central, Singapore 788887), `telephone` "+6583770401", `url` "https://www.gojiphysio.com".
+6. **MedicalOrganization** on the homepage (if not already added): `name` "Goji Physio", `alternateName` "Goji Women's and Family Physiotherapy", `address` (Lentor Modern, #01-13 Lentor Central, Singapore 788887), `telephone` "+6583770401", `url` "https://www.gojiphysio.com".
 
 _Note: Google deprecated FAQPage rich results in mid-2026 but the schema still helps AI engines parse and cite FAQ content._
 

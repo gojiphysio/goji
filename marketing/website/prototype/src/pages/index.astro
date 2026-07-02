@@ -8,36 +8,95 @@ import ContactBlock from "../components/ContactBlock.astro";
 import { Icon } from "astro-icon/components";
 import { SITE } from "../lib/site.ts";
 
+// `price` is the "From $" figure; leave "" to hide the price line (no
+// placeholders shipped). `priceNote` is an optional secondary line.
 const services = [
   {
     icon: "tabler:stretching",
     title: "Physiotherapy",
     lead: "Assessment and treatment for pain, injury, recovery, pelvic health, women's health, paediatric, vestibular, and lymphatic concerns.",
     meta: ["55 min initial consult", "In-clinic & home visits"],
+    price: "230",
+    priceNote: "Home visits from $330",
   },
   {
     icon: "tabler:baby-carriage",
     title: "Mummy & Baby Assessment",
-    lead: "A joint assessment for postpartum mothers and babies aged 0–6 months, supporting recovery, development, and early physical needs.",
+    lead: "A joint assessment for postpartum mothers and babies aged 0 to 6 months, supporting recovery, development, and early physical needs.",
     meta: ["90 min", "In-clinic & home visits"],
+    price: "330",
+    priceNote: "",
   },
   {
     icon: "tabler:yoga",
     title: "Clinical Pilates",
     lead: "Physiotherapist-led reformer Pilates for rehabilitation, movement retraining, strength, and a safe return to activity or sport.",
     meta: ["55 min", "1:1 or 2:1 reformer"],
+    price: "180",
+    priceNote: "",
   },
   {
     icon: "tabler:heart",
     title: "Private Pilates",
     lead: "Instructor-led reformer Pilates for building strength, mobility, body awareness, and confidence in movement.",
     meta: ["55 min", "1:1 or 2:1 reformer"],
+    price: "150",
+    priceNote: "",
   },
   {
     icon: "tabler:barbell",
     title: "Strength & Conditioning",
     lead: "Build strength and resilience through tailored exercise, with guidance from professionals to sustain your momentum.",
     meta: ["55 min", "1:1 or 2:1 sessions"],
+    price: "180",
+    priceNote: "",
+  },
+];
+
+// "Not sure what to book?" concern router. Each CTA is a tracked link
+// (web-plato = booking, web-wa = WhatsApp) or an in-page anchor (href).
+type Concern = {
+  title: string;
+  body: string;
+  recommended: string;
+  cta: { label: string; slug?: "web-wa" | "web-plato"; href?: string };
+};
+const concerns: Concern[] = [
+  {
+    title: "Pregnant and in pain",
+    body: "Pelvic pain, back pain, rib pain, birth preparation, or staying active safely.",
+    recommended: "Physiotherapy",
+    cta: { label: "Book physiotherapy", slug: "web-plato" as const },
+  },
+  {
+    title: "Recently gave birth",
+    body: "Postnatal check, diastasis recti, C-section scar care, pelvic floor recovery, or return to exercise.",
+    recommended: "Physiotherapy or Mummy & Baby Assessment",
+    cta: { label: "Ask us what to book", slug: "web-wa" as const },
+  },
+  {
+    title: "Leaking, heaviness, or pelvic pain",
+    body: "Bladder leaks, prolapse symptoms, painful sex, pelvic pressure, or pelvic floor concerns.",
+    recommended: "Women's Health Physiotherapy",
+    cta: { label: "Book physiotherapy", slug: "web-plato" as const },
+  },
+  {
+    title: "Worried about baby's movement or development",
+    body: "Torticollis, flat head, delayed milestones, feeding posture, or early movement concerns.",
+    recommended: "Mummy & Baby Assessment or Paediatric Physiotherapy",
+    cta: { label: "Book Mummy & Baby Assessment", slug: "web-plato" as const },
+  },
+  {
+    title: "Pain or injury",
+    body: "Back pain, neck pain, sports injuries, post-surgery recovery, or recurring pain.",
+    recommended: "Physiotherapy",
+    cta: { label: "Book physiotherapy", slug: "web-plato" as const },
+  },
+  {
+    title: "Want to get stronger safely",
+    body: "Strength training, return to sport, movement confidence, or physio-led Pilates.",
+    recommended: "Clinical Pilates or Strength & Conditioning",
+    cta: { label: "View strengthening options", href: "#services" },
   },
 ];
 
@@ -161,6 +220,7 @@ const reviews = [
     <div class="container hero__inner">
       <div class="hero__text">
         <p class="hero__tagline">{SITE.tagline}</p>
+        <p class="hero__sub">Women's and Family Physiotherapy in Lentor, Singapore</p>
         <p class="hero__lead">
           Expert, unhurried care for pelvic health, pregnancy and postpartum
           recovery, paediatrics, and everyday strength.
@@ -191,6 +251,27 @@ const reviews = [
     </div>
   </section>
 
+  {/* ---- Trust marquee (full-width, scrolls right to left) ---- */}
+  <section class="ticker" aria-label="Why families choose Goji">
+    <div class="ticker__track">
+      {[0, 1].map((dup) => (
+        <ul class="ticker__group" aria-hidden={dup === 1 ? "true" : undefined}>
+          {[
+            "1 min from Lentor MRT",
+            "AHPC-registered physiotherapists",
+            "5.0 on Google",
+            "Home visits available",
+          ].map((item) => (
+            <li class="ticker__item">
+              <span class="ticker__dot" aria-hidden="true"></span>
+              {item}
+            </li>
+          ))}
+        </ul>
+      ))}
+    </div>
+  </section>
+
   {/* ---- About (text-only, no photo placeholder) ---- */}
   <section class="about-sec" id="about">
     <div class="container about-sec__inner">
@@ -210,36 +291,42 @@ const reviews = [
     </div>
   </section>
 
-  {/* ---- Services (accordion with Tabler icons) ---- */}
+  {/* ---- Services (cards with pricing + Tabler icons) ---- */}
   <section class="services-sec" id="services">
     <div class="container">
-      <div class="sec-two-col">
       <header class="section-head">
         <h2>Care for the whole family, under one roof</h2>
       </header>
-      <div class="accordion">
-        {
-          services.map((s) => (
-            <details class="accordion__item">
-              <summary class="accordion__trigger">
-                <span class="accordion__icon-wrap" aria-hidden="true">
-                  <Icon name={s.icon} size={20} />
+      <div class="service-wrap">
+        <div class="service-track" id="serviceTrack">
+          {
+            services.map((s) => (
+              <article class="service-card">
+                <span class="service-card__icon" aria-hidden="true">
+                  <Icon name={s.icon} size={22} />
                 </span>
-                <span class="accordion__info">
-                  <span class="accordion__name">{s.title}</span>
-                  <span class="accordion__meta">{s.meta.join(" · ")}</span>
-                </span>
-                <span class="accordion__toggle" aria-hidden="true" />
-              </summary>
-              <div class="accordion__body">
-                <div class="accordion__body-inner">
-                  <p>{s.lead}</p>
+                <h3 class="service-card__name">{s.title}</h3>
+                <p class="service-card__meta">{s.meta.join(" · ")}</p>
+                <p class="service-card__lead">{s.lead}</p>
+                {s.price && (
+                  <p class="service-card__price">
+                    From <strong>${s.price}</strong>
+                    {s.priceNote && <span class="service-card__price-note">{s.priceNote}</span>}
+                  </p>
+                )}
+                <div class="service-card__cta">
+                  <Button slug="web-plato" variant="secondary">Book {s.title}</Button>
                 </div>
-              </div>
-            </details>
-          ))
-        }
-      </div>
+              </article>
+            ))
+          }
+        </div>
+        <button class="reviews-btn reviews-btn--prev" id="servicePrev" aria-label="Previous services" disabled>
+          <Icon name="tabler:chevron-left" size={22} />
+        </button>
+        <button class="reviews-btn reviews-btn--next" id="serviceNext" aria-label="More services">
+          <Icon name="tabler:chevron-right" size={22} />
+        </button>
       </div>
     </div>
   </section>
@@ -306,7 +393,7 @@ const reviews = [
       </div>
       <div class="stat-item">
         <span class="stat-item__value">1000+</span>
-        <span class="stat-item__label">patients served</span>
+        <span class="stat-item__label">patients collectively served</span>
         <span class="stat-item__caption">And growing</span>
       </div>
     </div>
@@ -415,7 +502,7 @@ const reviews = [
   </section>
 
   {/* ---- FAQ ---- */}
-  <Section tone="surface" id="faq">
+  <Section tone="linen" id="faq">
     <div class="sec-two-col">
     <header class="section-head">
       <h2>Frequently asked questions</h2>
@@ -460,6 +547,45 @@ const reviews = [
     </div>
     </div>
   </Section>
+
+  {/* ---- Concern router: "Not sure what to book?" ---- */}
+  <section class="router-sec" id="not-sure">
+    <div class="container">
+      <header class="section-head router-sec__head">
+        <h2>Not sure what to book?</h2>
+        <p class="section-head__sub">
+          Start with what sounds most like you. We'll help you choose the right
+          session.
+        </p>
+      </header>
+      <ul class="router-grid">
+        {
+          concerns.map((c) => (
+            <li class="router-card">
+              <h3 class="router-card__title">{c.title}</h3>
+              <p class="router-card__body">{c.body}</p>
+              <p class="router-card__rec">
+                <span class="router-card__rec-label">Recommended</span>
+                {c.recommended}
+              </p>
+              <div class="router-card__cta">
+                {c.cta.href ? (
+                  <Button href={c.cta.href} variant="secondary">{c.cta.label}</Button>
+                ) : (
+                  <Button slug={c.cta.slug} variant="secondary">{c.cta.label}</Button>
+                )}
+              </div>
+            </li>
+          ))
+        }
+      </ul>
+      <p class="router-sec__foot">
+        Still unsure?{" "}
+        <a href="https://go.gojiphysio.com/web-wa" target="_blank" rel="noopener noreferrer">WhatsApp us</a>
+        {" "}and we'll point you to the right session.
+      </p>
+    </div>
+  </section>
 
   {/* ---- Closing promise ---- */}
   <Section tone="closing">
@@ -531,6 +657,31 @@ const reviews = [
     rTrack.addEventListener("scroll", rUpdateUI, { passive: true });
     rUpdateUI();
   }
+
+  // Services carousel
+  const sTrack = document.getElementById("serviceTrack") as HTMLElement | null;
+  const sPrev = document.getElementById("servicePrev") as HTMLButtonElement | null;
+  const sNext = document.getElementById("serviceNext") as HTMLButtonElement | null;
+
+  if (sTrack && sPrev && sNext) {
+    function sSlideWidth(): number {
+      const slide = sTrack!.firstElementChild as HTMLElement | null;
+      return slide ? slide.offsetWidth + parseInt(getComputedStyle(sTrack!).gap || "0") : 0;
+    }
+    function sUpdateUI() {
+      const maxScroll = sTrack!.scrollWidth - sTrack!.clientWidth;
+      sPrev!.disabled = sTrack!.scrollLeft <= 1;
+      sNext!.disabled = sTrack!.scrollLeft >= maxScroll - 1;
+    }
+    sPrev.addEventListener("click", () => {
+      sTrack.scrollBy({ left: -sSlideWidth(), behavior: "smooth" });
+    });
+    sNext.addEventListener("click", () => {
+      sTrack.scrollBy({ left: sSlideWidth(), behavior: "smooth" });
+    });
+    sTrack.addEventListener("scroll", sUpdateUI, { passive: true });
+    sUpdateUI();
+  }
 </script>
 
 <style>
@@ -560,7 +711,7 @@ const reviews = [
 
   .hero__tagline {
     font-family: var(--font-display);
-    font-size: var(--fs-display);
+    font-size: clamp(2.25rem, 1.7rem + 2.2vw, 3.25rem);
     font-weight: var(--weight-semibold);
     color: var(--text-default);
     line-height: var(--lh-tight);
@@ -581,6 +732,62 @@ const reviews = [
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-3);
+  }
+  .hero__sub {
+    font-family: var(--font-display);
+    font-size: var(--fs-body);
+    font-weight: var(--weight-medium);
+    color: var(--color-primary);
+    margin-top: calc(-1 * var(--space-3));
+    margin-bottom: var(--space-4);
+    max-width: 30ch;
+  }
+  /* ======================================================
+     Trust marquee — full-width, scrolls right to left
+     ====================================================== */
+  .ticker {
+    background: var(--color-linen-deep);
+    border-block: 1px solid var(--rule);
+    overflow: hidden;
+  }
+  .ticker__track {
+    display: flex;
+    width: max-content;
+    animation: ticker-scroll 34s linear infinite;
+  }
+  .ticker__group {
+    display: flex;
+    align-items: center;
+    gap: var(--space-6);
+    list-style: none;
+    margin: 0;
+    padding: var(--space-3) 0 var(--space-3) var(--space-6);
+  }
+  .ticker__item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+    white-space: nowrap;
+    font-family: var(--font-display);
+    font-size: var(--fs-small);
+    font-weight: var(--weight-medium);
+    color: var(--text-default);
+  }
+  .ticker__dot {
+    width: 6px;
+    height: 11px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    transform: rotate(45deg);
+    flex: none;
+  }
+  @keyframes ticker-scroll {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ticker__track { animation: none; flex-wrap: wrap; }
+    .ticker__group:nth-child(2) { display: none; }
   }
 
   /* Hero clinic-photo crossfade (3 frames, 21s loop) */
@@ -646,6 +853,150 @@ const reviews = [
   .services-sec {
     background: var(--bg-page);
     padding-block: var(--section-y);
+  }
+
+  /* Service cards carousel (3-up on desktop, swipe on mobile) */
+  .service-wrap { position: relative; }
+  .service-track {
+    display: flex;
+    gap: var(--space-5);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: var(--space-2);
+  }
+  .service-track::-webkit-scrollbar { display: none; }
+  .service-card {
+    flex: 0 0 100%;
+    scroll-snap-align: start;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    background: var(--bg-content);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-5);
+  }
+  @media (min-width: 640px) {
+    .service-card { flex: 0 0 calc(50% - var(--space-4)); }
+  }
+  @media (min-width: 960px) {
+    .service-card { flex: 0 0 calc(33.333% - var(--space-4)); }
+  }
+  .service-card__icon {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-sm);
+    background: color-mix(in srgb, var(--color-primary) 9%, transparent);
+    color: var(--color-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--space-1);
+  }
+  .service-card__icon [data-icon] { display: block; }
+  .service-card__name {
+    font-family: var(--font-display);
+    font-size: var(--fs-body);
+    font-weight: var(--weight-semibold);
+    color: var(--text-default);
+  }
+  .service-card__meta {
+    font-size: var(--fs-caption);
+    color: var(--text-muted);
+  }
+  .service-card__lead {
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+    line-height: var(--lh-body);
+  }
+  .service-card__price {
+    font-size: var(--fs-small);
+    color: var(--text-default);
+    margin-top: var(--space-1);
+  }
+  .service-card__price strong {
+    font-family: var(--font-display);
+    font-size: var(--fs-h3, 1.0625rem);
+    font-weight: var(--weight-bold);
+    color: var(--text-default);
+  }
+  .service-card__price-note {
+    display: block;
+    font-size: var(--fs-caption);
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+  .service-card__cta {
+    margin-top: auto;
+    padding-top: var(--space-4);
+  }
+
+  /* ======================================================
+     Concern router — "Not sure what to book?"
+     ====================================================== */
+  .router-sec {
+    background: var(--bg-content);
+    border-block: 1px solid var(--rule);
+    padding-block: var(--section-y);
+  }
+  .router-sec__head { margin-bottom: var(--space-6); }
+  .router-grid {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: var(--space-4);
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 720px) {
+    .router-grid { grid-template-columns: 1fr 1fr; }
+  }
+  .router-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    background: var(--color-linen);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-5);
+  }
+  .router-card__title {
+    font-family: var(--font-display);
+    font-size: var(--fs-body);
+    font-weight: var(--weight-semibold);
+    color: var(--text-default);
+  }
+  .router-card__body {
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+    line-height: var(--lh-body);
+  }
+  .router-card__rec {
+    font-size: var(--fs-small);
+    color: var(--text-default);
+    margin-top: var(--space-1);
+  }
+  .router-card__rec-label {
+    display: block;
+    font-size: var(--fs-caption);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-label);
+    color: var(--color-primary);
+    margin-bottom: 2px;
+  }
+  .router-card__cta { margin-top: auto; padding-top: var(--space-3); }
+  .router-sec__foot {
+    margin-top: var(--space-6);
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+  }
+  .router-sec__foot a {
+    color: var(--color-primary);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
   }
 
   /* ======================================================
@@ -757,12 +1108,14 @@ const reviews = [
   }
 
   /* ---- Care area rows ---- */
-  /* Single goji berry illustration before category name */
+  /* Stylized berry oval, tilted 45deg right (matches the marquee marker) */
   .care-berry {
     display: inline-block;
-    width: 30px;
-    height: 30px;
-    background: url('/illustrations/bloom-7.png') center / 140% no-repeat;
+    width: 14px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    transform: rotate(45deg);
     flex-shrink: 0;
   }
 
