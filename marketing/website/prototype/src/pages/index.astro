@@ -16,7 +16,7 @@ const services = [
     title: "Physiotherapy",
     lead: "Assessment and treatment for pain, injury, recovery, pelvic health, women's health, paediatric, vestibular, and lymphatic concerns.",
     meta: ["55 min initial consult", "In-clinic & home visits"],
-    price: "230",
+    price: "260",
     priceNote: "Home visits from $330",
   },
   {
@@ -33,14 +33,6 @@ const services = [
     lead: "Physiotherapist-led reformer Pilates for rehabilitation, movement retraining, strength, and a safe return to activity or sport.",
     meta: ["55 min", "1:1 or 2:1 reformer"],
     price: "180",
-    priceNote: "",
-  },
-  {
-    icon: "tabler:heart",
-    title: "Private Pilates",
-    lead: "Instructor-led reformer Pilates for building strength, mobility, body awareness, and confidence in movement.",
-    meta: ["55 min", "1:1 or 2:1 reformer"],
-    price: "150",
     priceNote: "",
   },
   {
@@ -69,11 +61,12 @@ const careAreas = [
     title: "Women's Health",
     guideHref: "/conditions",
     points: [
-      "Prenatal care and birth preparation",
-      "Postpartum, diastasis recti, and Caesarean scar care",
-      "Pelvic floor dysfunction, prolapse, and pelvic pain",
-      "Bladder and bowel concerns",
-      "Perimenopause, menopause, and bone health",
+      { text: "Prenatal care and birth preparation", href: "/conditions/prenatal-care" },
+      { text: "Postpartum, diastasis recti, and Caesarean scar care", href: "/conditions/diastasis-recti" },
+      { text: "Pelvic floor dysfunction, prolapse, and pelvic pain", href: "/conditions/pelvic-organ-prolapse" },
+      { text: "Bladder and bowel concerns", href: "/conditions/urinary-incontinence" },
+      { text: "Perimenopause, menopause, and bone health", href: "/conditions/menopause" },
+      { text: "Osteoporosis and Osteopenia management", href: "/conditions/menopause" },
     ],
   },
   {
@@ -287,6 +280,9 @@ const reviews = [
           <Icon name="tabler:chevron-right" size={22} />
         </button>
       </div>
+      <div class="track-dots" id="serviceDots" aria-hidden="true">
+        {services.map((_, i) => <span class:list={["track-dot", { "track-dot--active": i === 0 }]} />)}
+      </div>
     </div>
   </section>
 
@@ -295,7 +291,7 @@ const reviews = [
     <div class="container">
       <div class="sec-two-col">
       <header class="section-head">
-        <h2>Conditions and concerns we commonly assess and treat</h2>
+        <h2>Conditions we treat</h2>
         <p class="section-head__sub">
           Care tailored to the individual, their stage of life, and what matters
           to them.
@@ -313,9 +309,19 @@ const reviews = [
               <div class="accordion__body">
                 <div class="accordion__body-inner">
                   <ul class="care-list">
-                    {c.points.map((p) => (
-                      <li>{p}</li>
-                    ))}
+                    {c.points.map((p) =>
+                      typeof p === "string" ? (
+                        <li>{p}</li>
+                      ) : (
+                        <li>
+                          <a href={p.href} class="care-list__link">
+                            {p.text}
+                            <span class="care-list__arrow" aria-hidden="true">→</span>
+                            <span class="visually-hidden"> — read more</span>
+                          </a>
+                        </li>
+                      ),
+                    )}
                   </ul>
                   {c.guideHref && (
                     <a href={c.guideHref} class="care-link">
@@ -456,6 +462,9 @@ const reviews = [
           <Icon name="tabler:chevron-right" size={22} />
         </button>
       </div>
+      <div class="track-dots" id="reviewsDots" aria-hidden="true">
+        {reviews.map((_, i) => <span class:list={["track-dot", { "track-dot--active": i === 0 }]} />)}
+      </div>
       <p class="reviews-disclaimer">All reviews sourced from <a href="https://maps.app.goo.gl/wBaCkBiDNfF7JCGv8" target="_blank" rel="noopener noreferrer">Google Maps</a>. Individual experiences may vary.</p>
     </div>
   </section>
@@ -519,89 +528,56 @@ const reviews = [
 </BaseLayout>
 
 <script>
-  const track = document.getElementById("teamTrack") as HTMLElement | null;
-  const prev = document.getElementById("teamPrev") as HTMLButtonElement | null;
-  const next = document.getElementById("teamNext") as HTMLButtonElement | null;
-  const dots = document.querySelectorAll(".team-dot");
+  // One carousel behaviour for all three horizontal scrollers: arrow buttons
+  // scroll by a slide, dots (mobile) track the active slide, and both reflect
+  // scroll position (arrows disable at the ends).
+  function initCarousel(
+    trackId: string,
+    prevId: string,
+    nextId: string,
+    dotSelector: string | null,
+    activeClass = "track-dot--active",
+  ) {
+    const track = document.getElementById(trackId) as HTMLElement | null;
+    const prev = document.getElementById(prevId) as HTMLButtonElement | null;
+    const next = document.getElementById(nextId) as HTMLButtonElement | null;
+    if (!track || !prev || !next) return;
+    const dots = dotSelector
+      ? Array.from(document.querySelectorAll(dotSelector))
+      : [];
 
-  if (track && prev && next) {
-    function slideWidth(): number {
-      const slide = track!.firstElementChild as HTMLElement | null;
-      return slide ? slide.offsetWidth + parseInt(getComputedStyle(track!).gap || "0") : 0;
-    }
+    const slideWidth = () => {
+      const slide = track.firstElementChild as HTMLElement | null;
+      return slide
+        ? slide.offsetWidth + parseInt(getComputedStyle(track).gap || "0")
+        : 0;
+    };
 
-    function currentIndex(): number {
-      const sw = slideWidth();
-      return sw > 0 ? Math.round(track!.scrollLeft / sw) : 0;
-    }
+    const update = () => {
+      const maxScroll = track.scrollWidth - track.clientWidth;
+      prev.disabled = track.scrollLeft <= 1;
+      next.disabled = track.scrollLeft >= maxScroll - 1;
+      if (dots.length) {
+        const sw = slideWidth();
+        const idx = sw > 0 ? Math.round(track.scrollLeft / sw) : 0;
+        dots.forEach((d, i) => d.classList.toggle(activeClass, i === idx));
+      }
+    };
 
-    function updateUI() {
-      const maxScroll = track!.scrollWidth - track!.clientWidth;
-      prev!.disabled = track!.scrollLeft <= 1;
-      next!.disabled = track!.scrollLeft >= maxScroll - 1;
-      const idx = currentIndex();
-      dots.forEach((d, i) => d.classList.toggle("team-dot--active", i === idx));
-    }
-
-    prev.addEventListener("click", () => {
-      track.scrollBy({ left: -slideWidth(), behavior: "smooth" });
-    });
-    next.addEventListener("click", () => {
-      track.scrollBy({ left: slideWidth(), behavior: "smooth" });
-    });
-    track.addEventListener("scroll", updateUI, { passive: true });
-    updateUI();
+    prev.addEventListener("click", () =>
+      track.scrollBy({ left: -slideWidth(), behavior: "smooth" }),
+    );
+    next.addEventListener("click", () =>
+      track.scrollBy({ left: slideWidth(), behavior: "smooth" }),
+    );
+    track.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    update();
   }
 
-  // Reviews carousel
-  const rTrack = document.getElementById("reviewsTrack") as HTMLElement | null;
-  const rPrev = document.getElementById("reviewsPrev") as HTMLButtonElement | null;
-  const rNext = document.getElementById("reviewsNext") as HTMLButtonElement | null;
-
-  if (rTrack && rPrev && rNext) {
-    function rSlideWidth(): number {
-      const slide = rTrack!.firstElementChild as HTMLElement | null;
-      return slide ? slide.offsetWidth + parseInt(getComputedStyle(rTrack!).gap || "0") : 0;
-    }
-    function rUpdateUI() {
-      const maxScroll = rTrack!.scrollWidth - rTrack!.clientWidth;
-      rPrev!.disabled = rTrack!.scrollLeft <= 1;
-      rNext!.disabled = rTrack!.scrollLeft >= maxScroll - 1;
-    }
-    rPrev.addEventListener("click", () => {
-      rTrack.scrollBy({ left: -rSlideWidth(), behavior: "smooth" });
-    });
-    rNext.addEventListener("click", () => {
-      rTrack.scrollBy({ left: rSlideWidth(), behavior: "smooth" });
-    });
-    rTrack.addEventListener("scroll", rUpdateUI, { passive: true });
-    rUpdateUI();
-  }
-
-  // Services carousel
-  const sTrack = document.getElementById("serviceTrack") as HTMLElement | null;
-  const sPrev = document.getElementById("servicePrev") as HTMLButtonElement | null;
-  const sNext = document.getElementById("serviceNext") as HTMLButtonElement | null;
-
-  if (sTrack && sPrev && sNext) {
-    function sSlideWidth(): number {
-      const slide = sTrack!.firstElementChild as HTMLElement | null;
-      return slide ? slide.offsetWidth + parseInt(getComputedStyle(sTrack!).gap || "0") : 0;
-    }
-    function sUpdateUI() {
-      const maxScroll = sTrack!.scrollWidth - sTrack!.clientWidth;
-      sPrev!.disabled = sTrack!.scrollLeft <= 1;
-      sNext!.disabled = sTrack!.scrollLeft >= maxScroll - 1;
-    }
-    sPrev.addEventListener("click", () => {
-      sTrack.scrollBy({ left: -sSlideWidth(), behavior: "smooth" });
-    });
-    sNext.addEventListener("click", () => {
-      sTrack.scrollBy({ left: sSlideWidth(), behavior: "smooth" });
-    });
-    sTrack.addEventListener("scroll", sUpdateUI, { passive: true });
-    sUpdateUI();
-  }
+  initCarousel("teamTrack", "teamPrev", "teamNext", ".team-dot", "team-dot--active");
+  initCarousel("serviceTrack", "servicePrev", "serviceNext", "#serviceDots .track-dot");
+  initCarousel("reviewsTrack", "reviewsPrev", "reviewsNext", "#reviewsDots .track-dot");
 </script>
 
 <style>
@@ -1002,7 +978,17 @@ const reviews = [
     text-underline-offset: 0.2em;
     transition: color var(--dur);
   }
-  .care-list a:hover { color: var(--color-primary); text-decoration: underline; }
+  /* Linked condition items: text + a small "read more" arrow that trails
+     the last word inline (so it stays put when the text wraps). */
+  .care-list__link:hover { color: var(--color-primary); }
+  .care-list__arrow {
+    color: var(--color-primary);
+    font-size: 0.85em;
+    margin-left: 0.3em;
+    display: inline-block;
+    transition: transform var(--dur) var(--ease);
+  }
+  .care-list__link:hover .care-list__arrow { transform: translateX(3px); }
 
   .care-link {
     font-family: var(--font-body);
@@ -1398,9 +1384,11 @@ const reviews = [
     color: var(--text-default);
   }
 
-  /* --- Arrow buttons (desktop only) --- */
+  /* --- Arrow buttons (shared by services + reviews) ---
+     Mobile: translucent, overlaid on the track edges (matches the team
+     carousel). Desktop (>=640px): solid, parked just outside the track. */
   .reviews-btn {
-    display: none;
+    display: flex;
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
@@ -1408,21 +1396,51 @@ const reviews = [
     height: 44px;
     border-radius: 50%;
     border: none;
-    background: color-mix(in srgb, var(--color-ink) 80%, transparent);
-    color: var(--color-linen);
+    background: color-mix(in srgb, var(--color-ink) 55%, transparent);
+    backdrop-filter: blur(3px);
+    color: #fff;
     cursor: pointer;
     align-items: center;
     justify-content: center;
     z-index: 2;
-    transition: background 0.2s;
+    transition: background var(--dur) var(--ease), opacity var(--dur) var(--ease);
   }
-  .reviews-btn:hover { background: var(--color-ink); }
-  .reviews-btn:disabled { opacity: 0.3; cursor: default; }
+  .reviews-btn--prev { left: var(--space-3); }
+  .reviews-btn--next { right: var(--space-3); }
+  .reviews-btn:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--color-primary) 80%, transparent);
+  }
+  .reviews-btn:disabled { opacity: 0; pointer-events: none; }
   @media (min-width: 640px) {
-    .reviews-btn { display: flex; }
+    .reviews-btn {
+      background: color-mix(in srgb, var(--color-ink) 80%, transparent);
+      backdrop-filter: none;
+      color: var(--color-linen);
+    }
+    .reviews-btn:hover:not(:disabled) { background: var(--color-ink); }
+    .reviews-btn:disabled { opacity: 0.3; pointer-events: auto; }
+    .reviews-btn--prev { left: calc(-1 * var(--space-7)); }
+    .reviews-btn--next { right: calc(-1 * var(--space-7)); }
   }
-  .reviews-btn--prev { left: calc(-1 * var(--space-7)); }
-  .reviews-btn--next { right: calc(-1 * var(--space-7)); }
+
+  /* Carousel dots (mobile only) — shared by services + reviews */
+  .track-dots {
+    display: flex;
+    gap: var(--space-2);
+    justify-content: center;
+    margin-top: var(--space-5);
+  }
+  .track-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--color-border-strong);
+    transition: background var(--dur);
+  }
+  .track-dot--active { background: var(--color-primary); }
+  @media (min-width: 640px) {
+    .track-dots { display: none; }
+  }
 
   /* --- Disclaimer --- */
   .reviews-disclaimer {

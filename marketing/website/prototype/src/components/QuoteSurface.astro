@@ -10,20 +10,25 @@
 import LogoLockup from "./LogoLockup.astro";
 
 interface Props {
-  quote?: string;
+  /** Each entry renders on its own line (controls the wrap points). */
+  lines?: string[];
   attribution?: string;
 }
 const {
-  quote = "We're not here to fix you. We're here to help you feel confident in your body again.",
+  lines = [
+    "We're not here to fix you.",
+    "We're here to help you feel confident",
+    "in your body again.",
+  ],
   attribution,
 } = Astro.props;
 ---
 
 <div class="quote-wrap">
   <figure class="quote">
-    <LogoLockup variant="main" height={34} class="quote__logo" />
+    <LogoLockup variant="light" height={34} class="quote__logo" />
     <blockquote class="quote__text">
-      {quote.split(/(?<=\.)\s+/).map((line) => <span class="quote__line">{line}</span>)}
+      {lines.map((line) => <span class="quote__line">{line}</span>)}
     </blockquote>
     {attribution && <figcaption class="quote__by">{attribution}</figcaption>}
   </figure>
