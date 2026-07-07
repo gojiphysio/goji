@@ -1,0 +1,866 @@
+---
+/**
+ * BookingForm — a 3-step, mobile-first booking flow (Service & format ->
+ * When & who -> Your details) that ends in an on-page confirmation.
+ *
+ * Phase 1: driven by the `bookingApi` MOCK (src/lib/booking.ts) — availability
+ * and submission are simulated. Phase 2 swaps that module for real Plato calls;
+ * this component does not change.
+ */
+import FormField from "./FormField.astro";
+import ServiceOption from "./ServiceOption.astro";
+import Button from "../Button.astro";
+import BerrySprig from "../BerrySprig.astro";
+import { services } from "../../lib/services";
+import { clinicians } from "../../lib/clinicians";
+
+const steps = [
+  { n: 1, label: "Service" },
+  { n: 2, label: "Time" },
+  { n: 3, label: "Details" },
+];
+---
+
+<form class="booking" id="booking-form" novalidate>
+  <ol class="booking__progress">
+    {
+      steps.map((s) => (
+        <li class="booking__progress-item" data-progress={String(s.n)}>
+          <span class="booking__progress-dot" aria-hidden="true" />
+          {s.label}
+        </li>
+      ))
+    }
+  </ol>
+
+  {/* ---------- Step 1: Service & format ---------- */}
+  <fieldset class="booking__step" data-step="1">
+    <legend class="booking__legend">
+      <h2>What would you like to book?</h2>
+    </legend>
+
+    <div class="booking__services" role="radiogroup" aria-label="Service">
+      {services.map((s) => <ServiceOption service={s} />)}
+    </div>
+    <p class="booking__error" data-error="service" role="alert" hidden></p>
+
+    <div class="booking__where" data-where hidden>
+      <p class="booking__sublabel">Where would you like to be seen?</p>
+      <div class="booking__toggle" role="radiogroup" aria-label="Location">
+        <label class="pill">
+          <input class="pill__input visually-hidden" type="radio" name="format" value="clinic" checked />
+          <span class="pill__face">In-clinic</span>
+        </label>
+        <label class="pill" data-home-label>
+          <input class="pill__input visually-hidden" type="radio" name="format" value="home" />
+          <span class="pill__face">Home visit</span>
+        </label>
+      </div>
+      <p class="booking__hint" data-home-hint hidden>
+        This service is offered in-clinic only.
+      </p>
+
+      <div class="booking__address" data-address hidden>
+        <FormField
+          id="address"
+          name="address"
+          label="Home address"
+          textarea={true}
+          autocomplete="street-address"
+          placeholder="Block / unit, street, postal code"
+        />
+      </div>
+    </div>
+
+    <div class="booking__nav">
+      <button type="button" class="bbtn bbtn--primary" data-nav="next">Continue</button>
+    </div>
+  </fieldset>
+
+  {/* ---------- Step 2: When & who ---------- */}
+  <fieldset class="booking__step" data-step="2" hidden>
+    <legend class="booking__legend">
+      <h2>When works for you?</h2>
+    </legend>
+
+    <FormField id="date" name="date" label="Preferred date" type="date" required={true} />
+
+    <div class="booking__slots">
+      <p class="booking__sublabel">Available times</p>
+      <div class="booking__chips" data-slots></div>
+      <p class="booking__hint" data-slots-msg>Pick a date to see available times.</p>
+      <p class="booking__error" data-error="time" role="alert" hidden></p>
+    </div>
+
+    <div class="booking__clinician">
+      <p class="booking__sublabel">Preferred clinician (optional)</p>
+      <p class="booking__hint">Not sure? We'll match you with the right specialist.</p>
+      <div class="booking__clinicians" role="radiogroup" aria-label="Preferred clinician">
+        <label class="copt" data-clinician-opt>
+          <input class="copt__input visually-hidden" type="radio" name="clinician" value="" checked />
+          <span class="copt__name">First available</span>
+          <span class="copt__role">We'll match you</span>
+          <span class="copt__tick" aria-hidden="true"></span>
+        </label>
+        {
+          clinicians.map((c) => (
+            <label class="copt" data-clinician-opt data-services={c.services.join(" ")} hidden>
+              <input class="copt__input visually-hidden" type="radio" name="clinician" value={c.id} />
+              <span class="copt__name">{c.name}</span>
+              <span class="copt__role">{c.role}</span>
+              <span class="copt__tick" aria-hidden="true" />
+            </label>
+          ))
+        }
+      </div>
+    </div>
+
+    <div class="booking__nav">
+      <button type="button" class="bbtn bbtn--ghost" data-nav="back">Back</button>
+      <button type="button" class="bbtn bbtn--primary" data-nav="next">Continue</button>
+    </div>
+  </fieldset>
+
+  {/* ---------- Step 3: Your details ---------- */}
+  <fieldset class="booking__step" data-step="3" hidden>
+    <legend class="booking__legend">
+      <h2>Your details</h2>
+    </legend>
+
+    <div class="booking__grid">
+      <FormField id="name" name="name" label="Full name" required={true} autocomplete="name" />
+      <FormField id="phone" name="phone" label="Phone" type="tel" required={true} autocomplete="tel" inputmode="tel" />
+      <FormField id="email" name="email" label="Email" type="email" required={true} autocomplete="email" inputmode="email" />
+    </div>
+
+    <div class="booking__summary" data-summary></div>
+    <p class="booking__error" data-error="submit" role="alert" hidden></p>
+
+    <div class="booking__nav">
+      <button type="button" class="bbtn bbtn--ghost" data-nav="back">Back</button>
+      <button type="submit" class="bbtn bbtn--primary" data-submit>Confirm booking</button>
+    </div>
+  </fieldset>
+
+  {/* ---------- Confirmation ---------- */}
+  <div class="booking__done" data-step="done" hidden>
+    <div class="booking__done-sprig">
+      <BerrySprig animate={true} width={92} />
+    </div>
+    <h2>Booking request received</h2>
+    <p class="booking__done-lead" data-done-lead></p>
+    <p class="booking__hint">
+      We'll confirm your appointment shortly. If you'd like to add anything before
+      then, message us and we'll pick it up.
+    </p>
+    <div class="booking__done-cta">
+      <Button slug="web-wa" variant="whatsapp" size="lg">Message us on WhatsApp</Button>
+    </div>
+  </div>
+</form>
+
+<style>
+  .booking {
+    border: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+  }
+
+  /* Progress */
+  .booking__progress {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    gap: var(--space-4);
+    flex-wrap: wrap;
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+  }
+  .booking__progress-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+  }
+  .booking__progress-dot {
+    width: 0.55rem;
+    height: 0.9rem;
+    border-radius: var(--radius-pill);
+    background: var(--color-border-strong);
+    transform: rotate(45deg);
+    transition: background-color var(--dur) var(--ease);
+  }
+  .booking__progress-item[data-active] {
+    color: var(--text-default);
+    font-weight: var(--weight-semibold);
+  }
+  .booking__progress-item[data-active] .booking__progress-dot,
+  .booking__progress-item[data-done] .booking__progress-dot {
+    background: var(--color-primary);
+  }
+
+  /* Steps */
+  .booking__step {
+    border: 0;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+  }
+  /* [hidden] must win over the display above (class beats the UA [hidden] rule). */
+  .booking__step[hidden],
+  .booking__done[hidden] {
+    display: none;
+  }
+  .booking__legend {
+    padding: 0;
+    width: 100%;
+  }
+  .booking__legend h2 {
+    font-size: var(--fs-h2);
+  }
+
+  .booking__services {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .booking__sublabel {
+    font-family: var(--font-display);
+    font-size: var(--fs-small);
+    font-weight: var(--weight-semibold);
+    color: var(--text-default);
+    margin-bottom: var(--space-2);
+  }
+  .booking__hint {
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+  }
+  .booking__error {
+    font-size: var(--fs-small);
+    color: var(--color-primary);
+  }
+
+  /* In-clinic / Home toggle */
+  .booking__toggle {
+    display: inline-flex;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+  }
+  .pill__face {
+    display: inline-block;
+    padding: 0.55rem 1.1rem;
+    border: 1.5px solid var(--color-border);
+    border-radius: var(--radius-pill);
+    background: var(--bg-content);
+    font-size: var(--fs-small);
+    font-weight: var(--weight-semibold);
+    color: var(--text-default);
+    cursor: pointer;
+    transition: border-color var(--dur) var(--ease),
+      background-color var(--dur) var(--ease), color var(--dur) var(--ease);
+  }
+  .pill:has(.pill__input:checked) .pill__face {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: var(--color-linen);
+  }
+  .pill:has(.pill__input:focus-visible) .pill__face {
+    outline: 3px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+  .pill[hidden] {
+    display: none;
+  }
+  .booking__address {
+    margin-top: var(--space-4);
+    max-width: 30rem;
+  }
+
+  /* Time chips */
+  .booking__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+  .chip {
+    padding: 0.5rem 0.9rem;
+    border: 1.5px solid var(--color-border);
+    border-radius: var(--radius-pill);
+    background: var(--bg-content);
+    font-family: var(--font-body);
+    font-size: var(--fs-small);
+    font-weight: var(--weight-semibold);
+    color: var(--text-default);
+    cursor: pointer;
+    transition: border-color var(--dur) var(--ease),
+      background-color var(--dur) var(--ease), color var(--dur) var(--ease);
+  }
+  .chip:hover {
+    border-color: var(--color-border-strong);
+  }
+  .chip[aria-pressed="true"] {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: var(--color-linen);
+  }
+  .chip:focus-visible {
+    outline: 3px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  /* Clinician options */
+  .booking__clinicians {
+    display: grid;
+    gap: var(--space-2);
+  }
+  @media (min-width: 560px) {
+    .booking__clinicians {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .copt {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 0.15rem var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    border: 1.5px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--bg-content);
+    cursor: pointer;
+    transition: border-color var(--dur) var(--ease),
+      box-shadow var(--dur) var(--ease);
+  }
+  .copt[hidden] {
+    display: none;
+  }
+  .copt:hover {
+    border-color: var(--color-border-strong);
+  }
+  .copt:has(.copt__input:checked) {
+    border-color: var(--color-primary);
+    box-shadow: var(--shadow-sm);
+  }
+  .copt:has(.copt__input:focus-visible) {
+    outline: 3px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+  .copt__name {
+    font-family: var(--font-display);
+    font-weight: var(--weight-semibold);
+    color: var(--text-default);
+  }
+  .copt__role {
+    grid-column: 1;
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+  }
+  .copt__tick {
+    grid-row: 1 / span 2;
+    grid-column: 2;
+    width: 1.1rem;
+    height: 1.1rem;
+    border-radius: 50%;
+    border: 1.5px solid var(--color-border-strong);
+    position: relative;
+  }
+  .copt:has(.copt__input:checked) .copt__tick {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+  }
+  .copt:has(.copt__input:checked) .copt__tick::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 0.34rem;
+    height: 0.55rem;
+    border: solid var(--color-linen);
+    border-width: 0 2px 2px 0;
+    transform: translateY(-1px) rotate(45deg);
+  }
+
+  /* Details grid */
+  .booking__grid {
+    display: grid;
+    gap: var(--space-4);
+  }
+  @media (min-width: 560px) {
+    .booking__grid {
+      grid-template-columns: 1fr 1fr;
+    }
+    .booking__grid > :global(.field:first-child) {
+      grid-column: 1 / -1;
+    }
+  }
+
+  /* Summary card */
+  .booking__summary {
+    display: grid;
+    gap: var(--space-2);
+    padding: var(--space-4) var(--space-5);
+    background: var(--color-linen);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    font-size: var(--fs-small);
+  }
+  .booking__summary :global(.booking__srow) {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-4);
+  }
+  .booking__summary :global(.booking__skey) {
+    color: var(--text-muted);
+  }
+  .booking__summary :global(.booking__sval) {
+    color: var(--text-default);
+    font-weight: var(--weight-semibold);
+    text-align: right;
+  }
+
+  /* Nav + local buttons (native <button>, mirrors .btn tokens) */
+  .booking__nav {
+    display: flex;
+    gap: var(--space-3);
+    align-items: center;
+    margin-top: var(--space-2);
+  }
+  .bbtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-body);
+    font-weight: var(--weight-semibold);
+    font-size: var(--fs-body);
+    line-height: 1;
+    padding: 0.9rem 1.65rem;
+    border-radius: var(--radius-pill);
+    border: 1.5px solid transparent;
+    cursor: pointer;
+    transition: background-color var(--dur) var(--ease),
+      color var(--dur) var(--ease), border-color var(--dur) var(--ease),
+      transform var(--dur) var(--ease);
+  }
+  .bbtn:hover {
+    transform: translateY(-1px);
+  }
+  .bbtn--primary {
+    background: var(--cta-bg);
+    color: var(--cta-text);
+    margin-left: auto;
+  }
+  .bbtn--primary:hover {
+    background: var(--cta-bg-hover);
+  }
+  .bbtn--primary[disabled] {
+    opacity: 0.6;
+    cursor: progress;
+    transform: none;
+  }
+  .bbtn--ghost {
+    background: transparent;
+    color: var(--color-primary);
+    padding-inline: 0.5rem;
+  }
+  .bbtn--ghost:hover {
+    color: var(--color-primary-deep);
+  }
+
+  /* Confirmation */
+  .booking__done {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: var(--space-4);
+    padding-block: var(--space-6);
+  }
+  .booking__done-sprig {
+    opacity: 0.9;
+  }
+  .booking__done-lead {
+    max-width: 40ch;
+    color: var(--text-muted);
+  }
+  .booking__done-cta {
+    margin-top: var(--space-2);
+  }
+</style>
+
+<script>
+  import { services, serviceById } from "../../lib/services";
+  import { cliniciansForService } from "../../lib/clinicians";
+  import { bookingApi, type BookingDraft } from "../../lib/booking";
+
+  const form = document.getElementById("booking-form") as HTMLFormElement | null;
+  if (form) init(form);
+
+  function init(form: HTMLFormElement) {
+    const stepEls = Array.from(
+      form.querySelectorAll<HTMLElement>("[data-step]"),
+    );
+    const progressItems = Array.from(
+      form.querySelectorAll<HTMLElement>("[data-progress]"),
+    );
+    const getStep = (n: number | string) =>
+      stepEls.find((el) => el.dataset.step === String(n)) ?? null;
+
+    let current = 1;
+    let selectedTime = "";
+    let lastAvailKey = "";
+
+    const draft = (): BookingDraft => ({
+      service: (getChecked("service") as BookingDraft["service"]) ?? null,
+      format: (getChecked("format") as BookingDraft["format"]) || "clinic",
+      address: getValue("address"),
+      date: getValue("date"),
+      time: selectedTime,
+      clinicianId: getChecked("clinician") ?? "",
+      name: getValue("name"),
+      phone: getValue("phone"),
+      email: getValue("email"),
+    });
+
+    function getChecked(name: string): string | null {
+      const el = form!.querySelector<HTMLInputElement>(
+        `input[name="${name}"]:checked`,
+      );
+      return el ? el.value : null;
+    }
+    function getValue(id: string): string {
+      const el = document.getElementById(id) as
+        | HTMLInputElement
+        | HTMLTextAreaElement
+        | null;
+      return el ? el.value.trim() : "";
+    }
+    function setError(key: string, msg: string) {
+      const p = form!.querySelector<HTMLElement>(`[data-error="${key}"]`);
+      if (!p) return;
+      p.textContent = msg;
+      p.hidden = !msg;
+    }
+    function setFieldError(id: string, msg: string) {
+      const control = document.getElementById(id);
+      const field = control?.closest<HTMLElement>(".field");
+      const err = document.getElementById(`${id}-error`);
+      if (field) field.toggleAttribute("data-invalid", !!msg);
+      if (err) {
+        err.textContent = msg;
+        err.hidden = !msg;
+      }
+    }
+
+    // ----- Step 1: service + format wiring -----
+    const whereBlock = form.querySelector<HTMLElement>("[data-where]");
+    const homeLabel = form.querySelector<HTMLElement>("[data-home-label]");
+    const homeHint = form.querySelector<HTMLElement>("[data-home-hint]");
+    const addressBlock = form.querySelector<HTMLElement>("[data-address]");
+
+    form.querySelectorAll<HTMLInputElement>('input[name="service"]').forEach(
+      (input) => {
+        input.addEventListener("change", onServiceChange);
+      },
+    );
+    form.querySelectorAll<HTMLInputElement>('input[name="format"]').forEach(
+      (input) => {
+        input.addEventListener("change", () => {
+          if (addressBlock) addressBlock.hidden = getChecked("format") !== "home";
+        });
+      },
+    );
+
+    function onServiceChange() {
+      setError("service", "");
+      const svc = serviceById(getChecked("service") ?? "");
+      if (!svc) return;
+      if (whereBlock) whereBlock.hidden = false;
+
+      // Home-visit availability depends on the service.
+      if (homeLabel && homeHint) {
+        const homeInput = homeLabel.querySelector<HTMLInputElement>(
+          'input[name="format"]',
+        );
+        if (svc.supportsHome) {
+          homeLabel.hidden = false;
+          homeHint.hidden = true;
+        } else {
+          homeLabel.hidden = true;
+          homeHint.hidden = false;
+          if (homeInput?.checked) {
+            const clinic = form!.querySelector<HTMLInputElement>(
+              'input[name="format"][value="clinic"]',
+            );
+            if (clinic) clinic.checked = true;
+          }
+        }
+      }
+      if (addressBlock) addressBlock.hidden = getChecked("format") !== "home";
+
+      // Filter the clinician options to those who offer this service.
+      const eligible = new Set(
+        cliniciansForService(svc.id).map((c) => c.id),
+      );
+      form!
+        .querySelectorAll<HTMLElement>("[data-clinician-opt]")
+        .forEach((opt) => {
+          const val = opt.querySelector<HTMLInputElement>("input")?.value ?? "";
+          if (val === "") {
+            opt.hidden = false;
+            return;
+          }
+          const ok = eligible.has(val);
+          opt.hidden = !ok;
+          if (!ok) {
+            const input = opt.querySelector<HTMLInputElement>("input");
+            if (input?.checked) {
+              input.checked = false;
+              const firstAvail = form!.querySelector<HTMLInputElement>(
+                'input[name="clinician"][value=""]',
+              );
+              if (firstAvail) firstAvail.checked = true;
+            }
+          }
+        });
+
+      // Service changed -> availability is stale.
+      selectedTime = "";
+      lastAvailKey = "";
+    }
+
+    // ----- Step 2: date + slots -----
+    const dateInput = document.getElementById("date") as HTMLInputElement | null;
+    const chips = form.querySelector<HTMLElement>("[data-slots]");
+    const slotsMsg = form.querySelector<HTMLElement>("[data-slots-msg]");
+
+    if (dateInput) {
+      dateInput.min = new Date().toISOString().slice(0, 10);
+      dateInput.addEventListener("change", () => {
+        setFieldError("date", "");
+        refreshSlots();
+      });
+    }
+    form.querySelectorAll<HTMLInputElement>('input[name="clinician"]').forEach(
+      (input) => input.addEventListener("change", refreshSlots),
+    );
+
+    function fmtTime(t: string): string {
+      const [h, m] = t.split(":").map(Number);
+      const ap = h < 12 ? "am" : "pm";
+      const h12 = h % 12 === 0 ? 12 : h % 12;
+      return `${h12}:${String(m).padStart(2, "0")} ${ap}`;
+    }
+
+    async function refreshSlots() {
+      if (!chips || !slotsMsg) return;
+      const d = draft();
+      if (!d.service || !d.date) {
+        chips.innerHTML = "";
+        slotsMsg.hidden = false;
+        slotsMsg.textContent = "Pick a date to see available times.";
+        return;
+      }
+      const key = `${d.service}|${d.clinicianId}|${d.date}`;
+      lastAvailKey = key;
+      chips.innerHTML = "";
+      slotsMsg.hidden = false;
+      slotsMsg.textContent = "Finding available times…";
+      const times = await bookingApi.getAvailability({
+        service: d.service,
+        clinicianId: d.clinicianId,
+        date: d.date,
+      });
+      if (key !== lastAvailKey) return; // a newer request superseded this one
+      if (!times.length) {
+        slotsMsg.hidden = false;
+        slotsMsg.textContent =
+          "No times available on this date. Please try another day.";
+        selectedTime = "";
+        return;
+      }
+      slotsMsg.hidden = true;
+      times.forEach((t) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "chip";
+        btn.dataset.time = t;
+        btn.textContent = fmtTime(t);
+        btn.setAttribute("aria-pressed", String(t === selectedTime));
+        btn.addEventListener("click", () => {
+          selectedTime = t;
+          setError("time", "");
+          chips
+            .querySelectorAll<HTMLElement>(".chip")
+            .forEach((c) =>
+              c.setAttribute(
+                "aria-pressed",
+                String(c.dataset.time === selectedTime),
+              ),
+            );
+        });
+        chips.appendChild(btn);
+      });
+    }
+
+    // ----- Validation per step -----
+    function validate(step: number): boolean {
+      const d = draft();
+      if (step === 1) {
+        if (!d.service) {
+          setError("service", "Please choose a service to continue.");
+          return false;
+        }
+        if (d.format === "home" && !d.address) {
+          setFieldError("address", "Please add the home-visit address.");
+          return false;
+        }
+        return true;
+      }
+      if (step === 2) {
+        let ok = true;
+        if (!d.date) {
+          setFieldError("date", "Please choose a preferred date.");
+          ok = false;
+        }
+        if (!d.time) {
+          setError("time", "Please pick an available time.");
+          ok = false;
+        }
+        return ok;
+      }
+      if (step === 3) {
+        let ok = true;
+        if (!d.name) {
+          setFieldError("name", "Please enter your name.");
+          ok = false;
+        }
+        if (!/^[+\d][\d\s()-]{6,}$/.test(d.phone)) {
+          setFieldError("phone", "Please enter a valid phone number.");
+          ok = false;
+        }
+        if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(d.email)) {
+          setFieldError("email", "Please enter a valid email.");
+          ok = false;
+        }
+        return ok;
+      }
+      return true;
+    }
+
+    // ----- Summary (step 3) -----
+    function buildSummary() {
+      const box = form!.querySelector<HTMLElement>("[data-summary]");
+      if (!box) return;
+      const d = draft();
+      const svc = serviceById(d.service ?? "");
+      const clinician =
+        d.clinicianId === ""
+          ? "First available"
+          : form!
+              .querySelector(
+                `input[name="clinician"][value="${d.clinicianId}"]`,
+              )
+              ?.closest(".copt")
+              ?.querySelector(".copt__name")?.textContent || "First available";
+      const dateLabel = d.date
+        ? new Date(`${d.date}T00:00:00`).toLocaleDateString("en-SG", {
+            weekday: "short",
+            day: "numeric",
+            month: "short",
+          })
+        : "";
+      const rows: [string, string][] = [
+        ["Service", svc?.title ?? ""],
+        ["Where", d.format === "home" ? "Home visit" : "In-clinic"],
+        ["When", `${dateLabel} · ${fmtTime(d.time)}`],
+        ["Clinician", clinician],
+      ];
+      box.innerHTML = rows
+        .map(
+          ([k, v]) =>
+            `<div class="booking__srow"><span class="booking__skey">${k}</span><span class="booking__sval">${v}</span></div>`,
+        )
+        .join("");
+    }
+
+    // ----- Navigation -----
+    function goto(step: number) {
+      current = step;
+      stepEls.forEach((el) => {
+        if (el.dataset.step === "done") return;
+        el.hidden = el.dataset.step !== String(step);
+      });
+      progressItems.forEach((p) => {
+        const n = Number(p.dataset.progress);
+        p.toggleAttribute("data-active", n === step);
+        p.toggleAttribute("data-done", n < step);
+      });
+      form!.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    form.querySelectorAll<HTMLElement>('[data-nav="next"]').forEach((btn) =>
+      btn.addEventListener("click", () => {
+        if (!validate(current)) return;
+        if (current === 1) refreshSlots();
+        if (current + 1 === 3) buildSummary();
+        goto(current + 1);
+      }),
+    );
+    form.querySelectorAll<HTMLElement>('[data-nav="back"]').forEach((btn) =>
+      btn.addEventListener("click", () => goto(current - 1)),
+    );
+
+    // ----- Submit -----
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (!validate(3)) return;
+      const submitBtn = form.querySelector<HTMLButtonElement>("[data-submit]");
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Sending…";
+      }
+      setError("submit", "");
+      const result = await bookingApi.createBooking(draft());
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Confirm booking";
+      }
+      if (!result.ok) {
+        setError(
+          "submit",
+          result.error || "Something went wrong. Please try again or message us.",
+        );
+        return;
+      }
+      // Reveal confirmation, hide the steps.
+      stepEls.forEach((el) => {
+        if (el.dataset.step !== "done") el.hidden = true;
+      });
+      const done = getStep("done");
+      const lead = form.querySelector<HTMLElement>("[data-done-lead]");
+      const d = draft();
+      const svc = serviceById(d.service ?? "");
+      if (lead) {
+        const dateLabel = d.date
+          ? new Date(`${d.date}T00:00:00`).toLocaleDateString("en-SG", {
+              weekday: "long",
+              day: "numeric",
+              month: "long",
+            })
+          : "";
+        lead.textContent = `We've received your request for ${svc?.title ?? "an appointment"} on ${dateLabel} at ${fmtTime(d.time)}. Your reference is ${result.reference}.`;
+      }
+      progressItems.forEach((p) => p.setAttribute("data-done", ""));
+      if (done) {
+        done.hidden = false;
+        done.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    });
+
+    // Initial state.
+    goto(1);
+  }
+</script>

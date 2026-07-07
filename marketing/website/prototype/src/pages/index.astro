@@ -7,43 +7,7 @@ import QuoteSurface from "../components/QuoteSurface.astro";
 import ContactBlock from "../components/ContactBlock.astro";
 import { Icon } from "astro-icon/components";
 import { SITE } from "../lib/site.ts";
-
-// `price` is the "From $" figure; leave "" to hide the price line (no
-// placeholders shipped). `priceNote` is an optional secondary line.
-const services = [
-  {
-    icon: "tabler:stretching",
-    title: "Physiotherapy",
-    lead: "Assessment and treatment for pain, injury, recovery, pelvic health, women's health, paediatric, vestibular, and lymphatic concerns.",
-    meta: ["55 min initial consult", "In-clinic & home visits"],
-    price: "260",
-    priceNote: "Home visits from $330",
-  },
-  {
-    icon: "tabler:baby-carriage",
-    title: "Mummy & Baby Assessment",
-    lead: "A joint assessment for postpartum mothers and babies aged 0 to 6 months, supporting recovery, development, and early physical needs.",
-    meta: ["90 min", "In-clinic & home visits"],
-    price: "330",
-    priceNote: "",
-  },
-  {
-    icon: "tabler:yoga",
-    title: "Clinical Pilates",
-    lead: "Physiotherapist-led reformer Pilates for rehabilitation, movement retraining, strength, and a safe return to activity or sport.",
-    meta: ["55 min", "1:1 or 2:1 reformer"],
-    price: "180",
-    priceNote: "",
-  },
-  {
-    icon: "tabler:barbell",
-    title: "Strength & Conditioning",
-    lead: "Build strength and resilience through tailored exercise, with guidance from professionals to sustain your momentum.",
-    meta: ["55 min", "1:1 or 2:1 sessions"],
-    price: "180",
-    priceNote: "",
-  },
-];
+import { services } from "../lib/services.ts";
 
 // Trust marquee items, repeated in the loop so the track always exceeds the
 // viewport width (prevents a blank gap in the scroll).
@@ -181,15 +145,14 @@ const reviews = [
           paediatrics and everyday strength.
         </p>
         <div class="hero__actions">
-          <Button slug="web-plato" variant="primary" size="lg">Book now</Button>
           <Button slug="web-wa" variant="whatsapp" size="lg">WhatsApp us</Button>
+          <Button href="/book" variant="primary" size="lg">Book now</Button>
         </div>
       </div>
       <div class="hero__media">
         <div class="hero-shots" role="img" aria-label="Inside the Goji clinic at Lentor Modern">
           {[
             { src: "/photos/space/reception-warm.webp" },
-            { src: "/photos/space/reception.webp" },
             { src: "/photos/space/studio.webp" },
             { src: "/photos/space/session.webp" },
             { src: "/photos/space/strength.webp" },
@@ -267,7 +230,7 @@ const reviews = [
                   </p>
                 )}
                 <div class="service-card__cta">
-                  <Button slug="web-plato" variant="secondary">Book {s.title}</Button>
+                  <Button href="/book" variant="secondary">Book {s.title}</Button>
                 </div>
               </article>
             ))
@@ -685,7 +648,7 @@ const reviews = [
     .ticker__group:nth-child(2) { display: none; }
   }
 
-  /* Hero clinic-photo crossfade (5 frames, 35s loop) */
+  /* Hero clinic-photo crossfade (4 frames, 28s loop) */
   .hero-shots {
     position: relative;
     width: 100%;
@@ -702,19 +665,18 @@ const reviews = [
     height: 100%;
     object-fit: cover;
     opacity: 0;
-    animation: hero-fade 35s infinite;
+    animation: hero-fade 28s infinite;
   }
   .hero-shot:nth-child(1) { animation-delay: 0s; }
   .hero-shot:nth-child(2) { animation-delay: 7s; }
   .hero-shot:nth-child(3) { animation-delay: 14s; }
   .hero-shot:nth-child(4) { animation-delay: 21s; }
-  .hero-shot:nth-child(5) { animation-delay: 28s; }
   @keyframes hero-fade {
-    0%   { opacity: 0; }
-    2%   { opacity: 1; }
-    18%  { opacity: 1; }
-    22%  { opacity: 0; }
-    100% { opacity: 0; }
+    0%    { opacity: 0; }
+    2.5%  { opacity: 1; }
+    22.5% { opacity: 1; }
+    27.5% { opacity: 0; }
+    100%  { opacity: 0; }
   }
   @media (prefers-reduced-motion: reduce) {
     .hero-shot { animation: none; }
@@ -741,6 +703,9 @@ const reviews = [
       grid-template-columns: 1fr 1fr;
       gap: var(--space-6);
     }
+    /* Side by side: cancel the stacked p + p top margin so both
+       columns start at the same height. */
+    .about-sec__body p + p { margin-top: 0; }
   }
   .about-sec__inner p { color: var(--text-muted); }
 

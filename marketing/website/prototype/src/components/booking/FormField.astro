@@ -1,0 +1,89 @@
+---
+/**
+ * FormField — label + input/textarea + inline error slot, wired to tokens.
+ * The error <p> is toggled by the BookingForm script via [hidden].
+ */
+interface Props {
+  id: string;
+  name: string;
+  label: string;
+  type?: string;
+  required?: boolean;
+  textarea?: boolean;
+  autocomplete?: string;
+  placeholder?: string;
+  inputmode?: string;
+}
+const {
+  id,
+  name,
+  label,
+  type = "text",
+  required = false,
+  textarea = false,
+  autocomplete,
+  placeholder,
+  inputmode,
+} = Astro.props;
+const errId = `${id}-error`;
+---
+
+<div class="field">
+  <label class="field__label" for={id}>
+    {label}
+    {required && <span class="field__req" aria-hidden="true">*</span>}
+  </label>
+  {
+    textarea ? (
+      <textarea
+        id={id}
+        name={name}
+        class="field__control"
+        rows="2"
+        required={required}
+        autocomplete={autocomplete}
+        placeholder={placeholder}
+        aria-describedby={errId}
+      />
+    ) : (
+      <input
+        id={id}
+        name={name}
+        class="field__control"
+        type={type}
+        required={required}
+        autocomplete={autocomplete}
+        placeholder={placeholder}
+        inputmode={inputmode}
+        aria-describedby={errId}
+      />
+    )
+  }
+  <p class="field__error" id={errId} role="alert" hidden></p>
+</div>
+
+<style>
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  .field__label {
+    font-family: var(--font-display);
+    font-size: var(--fs-small);
+    font-weight: var(--weight-medium);
+    color: var(--text-default);
+  }
+  .field__req {
+    color: var(--color-primary);
+    margin-left: 0.15em;
+  }
+  .field__error {
+    font-size: var(--fs-small);
+    color: var(--color-primary);
+  }
+  /* Red control border when the field is flagged invalid by the script. */
+  .field[data-invalid] .field__control {
+    border-color: var(--color-primary);
+  }
+</style>

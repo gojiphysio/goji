@@ -78,6 +78,38 @@ ol {
   padding-left: 1.25rem;
 }
 
+/* Form controls — base look wired to tokens (the design system's form layer). */
+input,
+textarea,
+select {
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  color: var(--text-default);
+  background-color: var(--bg-content);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 0.65rem 0.8rem;
+  width: 100%;
+  transition: border-color var(--dur) var(--ease),
+    box-shadow var(--dur) var(--ease);
+}
+textarea {
+  resize: vertical;
+  min-height: 3.5rem;
+}
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-muted);
+  opacity: 0.8;
+}
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 22%, transparent);
+}
+
 /* Accessible focus ring for keyboard users. */
 :focus-visible {
   outline: 3px solid var(--color-accent);
