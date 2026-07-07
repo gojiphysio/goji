@@ -72,6 +72,8 @@ def derive_availability(
         return datetime(day.year, day.month, day.day, h, m)
 
     # Booked ranges per calendar `color`, from the day's real appointments.
+    # `-all-` entries (e.g. a clinic-wide "Clinical Meeting") block EVERY
+    # clinician and are applied on top of each clinician's own bookings.
     booked: dict[str, list[tuple[datetime, datetime]]] = {}
     for a in plato.appointments(day.isoformat(), day.isoformat()):
         try:
@@ -80,6 +82,7 @@ def derive_availability(
         except (KeyError, ValueError, TypeError):
             continue
         booked.setdefault(a.get("color", ""), []).append((s, e))
+    clinic_wide = booked.get("-all-", [])
 
     cfg = plato.online_booking_config()
     out: dict[str, list[str]] = {}
@@ -109,7 +112,7 @@ def derive_availability(
             for b in (rule.get("restricted_blocks") or [])
             if b.get("day") == dow
         ]
-        taken = booked.get(color, [])
+        taken = booked.get(color, []) + clinic_wide
 
         slots: list[str] = []
         t = win_start
