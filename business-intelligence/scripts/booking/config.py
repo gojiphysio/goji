@@ -14,9 +14,13 @@ from __future__ import annotations
 SLOT_MINUTES = 30
 HOME_TRAVEL_MINUTES = 30  # travel block before AND after a home visit
 
-# clinician_id -> Plato calendar `color` (the appointment calendar) + doctor code
+# clinician_id -> Plato calendar `color` (the appointment calendar) + doctor code.
+# online_start / online_end (optional) clamp the online-bookable window when the
+# clinic's intended online hours differ from the raw Plato rule hours. Cheryl's
+# online bookings don't start until 09:00 (her rule says 08:00).
 CLINICIANS: dict[str, dict] = {
-    "cheryl-long": {"name": "Cheryl Long", "calendar": "blue", "doctor": "PCL"},
+    "cheryl-long": {"name": "Cheryl Long", "calendar": "blue", "doctor": "PCL",
+                    "online_start": "09:00"},
     "claire-ng": {"name": "Claire Ng", "calendar": "6hpO", "doctor": "PCN"},
     "kristy-ng": {"name": "Kristy Ng", "calendar": "green", "doctor": "PKN"},
 }

@@ -105,8 +105,13 @@ def derive_availability(
         if delta > (rule.get("max_days") or 365):
             continue
 
-        win_start = at(rule.get("starttime", "08:00"))
-        win_end = at(rule.get("endtime", "18:00"))
+        # Window = the clinician's rule hours, clamped by any online-hours
+        # override (e.g. Cheryl's online bookings don't start until 09:00).
+        meta = CLINICIANS[cid]
+        win_start = max(at(rule.get("starttime", "08:00")),
+                        at(meta["online_start"]) if meta.get("online_start") else at("00:00"))
+        win_end = min(at(rule.get("endtime", "18:00")),
+                      at(meta["online_end"]) if meta.get("online_end") else at("23:59"))
         blocks = [
             (at(b["starttime"]), at(b["endtime"]))
             for b in (rule.get("restricted_blocks") or [])
