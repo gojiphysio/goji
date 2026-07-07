@@ -7,14 +7,16 @@
  * not pick a clinician, the clinic assigns one from those who offer the chosen
  * service (Phase 2 backend does the real routing + availability match).
  *
- * NOTE (confirm with clinic): mapping derived from listed specialties —
- * - Cheryl Long: women's/pelvic/paediatric/scoliosis/MSK + Clinical Pilates.
- * - Claire Ng: pelvic/pre & postnatal/women's/lymphoedema/vestibular/MSK. No
- *   paediatric or Pilates listed, so mapped to Physiotherapy only.
- * - Kristy Ng: pelvic/pre & postnatal/paediatric/women's/sports + Clinical Pilates.
- * Mummy & Baby needs paediatric competency (Cheryl, Kristy). Strength &
- * Conditioning mapped to the clinicians with exercise/sports/Pilates focus
- * (Cheryl, Kristy). Adjust here if the clinic's actual coverage differs.
+ * Coverage is the SOURCE OF TRUTH FROM PLATO's live online-booking config
+ * (GET /onlineapptbooking/list, 2026-07-07), per each website card's mapped
+ * Plato calendar:
+ * - Physiotherapy -> Women's/Pelvic calendar: Cheryl, Kristy, Claire.
+ * - Mummy & Baby  -> Paediatric calendar:     Cheryl, Kristy.
+ * - Clinical Pilates -> Pilates 1:1 calendar: Cheryl, Claire.
+ * - Strength & Conditioning -> S&C calendar:  Kristy, Claire.
+ * calendarId is the Plato booking calendar `color` used when creating the
+ * appointment; doctorCode is the Plato doctor code. Keep this in sync with
+ * Plato — do not hand-edit coverage without checking onlineapptbooking/list.
  */
 import type { ServiceId } from "./services";
 
@@ -23,6 +25,10 @@ export interface Clinician {
   name: string;
   role: string;
   services: ServiceId[];
+  /** Plato booking calendar `color` (used as the appointment calendar id). */
+  calendarId: string;
+  /** Plato doctor code. */
+  doctorCode: string;
 }
 
 export const clinicians: Clinician[] = [
@@ -30,29 +36,25 @@ export const clinicians: Clinician[] = [
     id: "cheryl-long",
     name: "Cheryl Long",
     role: "Clinical Director",
-    services: [
-      "physiotherapy",
-      "mummy-baby",
-      "clinical-pilates",
-      "strength-conditioning",
-    ],
+    services: ["physiotherapy", "mummy-baby", "clinical-pilates"],
+    calendarId: "blue",
+    doctorCode: "PCL",
   },
   {
     id: "claire-ng",
     name: "Claire Ng",
     role: "Senior Physiotherapist",
-    services: ["physiotherapy"],
+    services: ["physiotherapy", "clinical-pilates", "strength-conditioning"],
+    calendarId: "6hpO",
+    doctorCode: "PCN",
   },
   {
     id: "kristy-ng",
     name: "Kristy Ng",
     role: "Senior Physiotherapist",
-    services: [
-      "physiotherapy",
-      "mummy-baby",
-      "clinical-pilates",
-      "strength-conditioning",
-    ],
+    services: ["physiotherapy", "mummy-baby", "strength-conditioning"],
+    calendarId: "green",
+    doctorCode: "PKN",
   },
 ];
 

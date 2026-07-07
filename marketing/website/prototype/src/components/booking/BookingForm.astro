@@ -22,12 +22,12 @@ const steps = [
 ---
 
 <form class="booking" id="booking-form" novalidate>
-  <ol class="booking__progress">
+  <ol class="booking__progress" aria-label="Booking steps">
     {
       steps.map((s) => (
-        <li class="booking__progress-item" data-progress={String(s.n)}>
-          <span class="booking__progress-dot" aria-hidden="true" />
-          {s.label}
+        <li class="booking__pstep" data-progress={String(s.n)}>
+          <span class="booking__pnum" aria-hidden="true">{s.n}</span>
+          <span class="booking__plabel">{s.label}</span>
         </li>
       ))
     }
@@ -61,19 +61,27 @@ const steps = [
       </p>
 
       <div class="booking__address" data-address hidden>
+        <div class="booking__addr-grid">
+          <FormField id="addr-block" name="addr-block" label="Block / house number" required={true} autocomplete="address-line1" placeholder="e.g. 123B" />
+          <FormField id="addr-postal" name="addr-postal" label="Postal code" required={true} inputmode="numeric" autocomplete="postal-code" placeholder="6 digits" />
+          <FormField id="addr-street" name="addr-street" label="Street name" required={true} autocomplete="address-line2" placeholder="e.g. Lentor Central" />
+          <FormField id="addr-building" name="addr-building" label="Building name (optional)" placeholder="e.g. Lentor Modern" />
+          <FormField id="addr-unit" name="addr-unit" label="Unit number (optional)" placeholder="e.g. #12-34" />
+        </div>
         <FormField
-          id="address"
-          name="address"
-          label="Home address"
+          id="addr-notes"
+          name="addr-notes"
+          label="Directions, access & parking (optional)"
           textarea={true}
-          autocomplete="street-address"
-          placeholder="Block / unit, street, postal code"
+          placeholder="Landmarks, gate or lift access, and where to park when you arrive"
         />
       </div>
     </div>
 
     <div class="booking__nav">
-      <button type="button" class="bbtn bbtn--primary" data-nav="next">Continue</button>
+      <button type="button" class="bbtn bbtn--primary" data-nav="next">
+        Continue <span class="bbtn__arrow" aria-hidden="true">&rarr;</span>
+      </button>
     </div>
   </fieldset>
 
@@ -99,7 +107,7 @@ const steps = [
         <label class="copt" data-clinician-opt>
           <input class="copt__input visually-hidden" type="radio" name="clinician" value="" checked />
           <span class="copt__name">First available</span>
-          <span class="copt__role">We'll match you</span>
+          <span class="copt__role">Recommended · we'll match you</span>
           <span class="copt__tick" aria-hidden="true"></span>
         </label>
         {
@@ -117,7 +125,9 @@ const steps = [
 
     <div class="booking__nav">
       <button type="button" class="bbtn bbtn--ghost" data-nav="back">Back</button>
-      <button type="button" class="bbtn bbtn--primary" data-nav="next">Continue</button>
+      <button type="button" class="bbtn bbtn--primary" data-nav="next">
+        Continue <span class="bbtn__arrow" aria-hidden="true">&rarr;</span>
+      </button>
     </div>
   </fieldset>
 
@@ -167,36 +177,79 @@ const steps = [
     gap: var(--space-6);
   }
 
-  /* Progress */
+  /* Progress — a connected 1 -> 2 -> 3 guided stepper. */
   .booking__progress {
     list-style: none;
     padding: 0;
+    margin: 0;
     display: flex;
-    gap: var(--space-4);
-    flex-wrap: wrap;
-    font-size: var(--fs-small);
-    color: var(--text-muted);
   }
-  .booking__progress-item {
-    display: inline-flex;
+  .booking__pstep {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 0.5em;
+    gap: var(--space-2);
+    position: relative;
+    text-align: center;
   }
-  .booking__progress-dot {
-    width: 0.55rem;
-    height: 0.9rem;
-    border-radius: var(--radius-pill);
+  /* Connector line running from the previous step's number into this one. */
+  .booking__pstep:not(:first-child)::before {
+    content: "";
+    position: absolute;
+    top: 0.9rem;
+    right: 50%;
+    left: -50%;
+    height: 2px;
     background: var(--color-border-strong);
-    transform: rotate(45deg);
+    z-index: 0;
     transition: background-color var(--dur) var(--ease);
   }
-  .booking__progress-item[data-active] {
+  .booking__pnum {
+    position: relative;
+    z-index: 1;
+    width: 1.8rem;
+    height: 1.8rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 1.5px solid var(--color-border-strong);
+    background: var(--bg-content);
+    font-family: var(--font-display);
+    font-size: var(--fs-small);
+    font-weight: var(--weight-semibold);
+    color: var(--text-muted);
+    transition: background-color var(--dur) var(--ease),
+      border-color var(--dur) var(--ease), color var(--dur) var(--ease);
+  }
+  .booking__plabel {
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+    transition: color var(--dur) var(--ease);
+  }
+  /* Completed steps: filled number + filled connector coming into them. */
+  .booking__pstep[data-done] .booking__pnum {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: var(--color-linen);
+  }
+  .booking__pstep[data-done]::before,
+  .booking__pstep[data-active]::before {
+    background: var(--color-primary);
+  }
+  /* Current step: outlined-but-emphasised number + dark label. */
+  .booking__pstep[data-active] .booking__pnum {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 14%, transparent);
+  }
+  .booking__pstep[data-active] .booking__plabel {
     color: var(--text-default);
     font-weight: var(--weight-semibold);
   }
-  .booking__progress-item[data-active] .booking__progress-dot,
-  .booking__progress-item[data-done] .booking__progress-dot {
-    background: var(--color-primary);
+  .booking__pstep[data-done] .booking__plabel {
+    color: var(--text-default);
   }
 
   /* Steps */
@@ -216,6 +269,7 @@ const steps = [
   .booking__legend {
     padding: 0;
     width: 100%;
+    margin-bottom: var(--space-3);
   }
   .booking__legend h2 {
     font-size: var(--fs-h2);
@@ -276,7 +330,23 @@ const steps = [
   }
   .booking__address {
     margin-top: var(--space-4);
-    max-width: 30rem;
+    max-width: 34rem;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+  .booking__addr-grid {
+    display: grid;
+    gap: var(--space-4);
+  }
+  @media (min-width: 520px) {
+    .booking__addr-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+    /* Street name spans full width; block+postal share the first row. */
+    .booking__addr-grid > :global(.field:nth-child(3)) {
+      grid-column: 1 / -1;
+    }
   }
 
   /* Time chips */
@@ -447,6 +517,14 @@ const steps = [
   .bbtn:hover {
     transform: translateY(-1px);
   }
+  .bbtn__arrow {
+    margin-left: 0.15em;
+    display: inline-block;
+    transition: transform var(--dur) var(--ease);
+  }
+  .bbtn:hover .bbtn__arrow {
+    transform: translateX(2px);
+  }
   .bbtn--primary {
     background: var(--cta-bg);
     color: var(--cta-text);
@@ -515,7 +593,7 @@ const steps = [
     const draft = (): BookingDraft => ({
       service: (getChecked("service") as BookingDraft["service"]) ?? null,
       format: (getChecked("format") as BookingDraft["format"]) || "clinic",
-      address: getValue("address"),
+      address: composeAddress(),
       date: getValue("date"),
       time: selectedTime,
       clinicianId: getChecked("clinician") ?? "",
@@ -536,6 +614,24 @@ const steps = [
         | HTMLTextAreaElement
         | null;
       return el ? el.value.trim() : "";
+    }
+    /** Build one formatted Singapore address string from the structured fields. */
+    function composeAddress(): string {
+      const block = getValue("addr-block");
+      const street = getValue("addr-street");
+      const building = getValue("addr-building");
+      const unit = getValue("addr-unit");
+      const postal = getValue("addr-postal");
+      const notes = getValue("addr-notes");
+      const parts: string[] = [];
+      const line1 = [block, street].filter(Boolean).join(" ");
+      if (line1) parts.push(line1);
+      if (building) parts.push(building);
+      if (unit) parts.push(unit);
+      if (postal) parts.push(`Singapore ${postal}`);
+      let addr = parts.join(", ");
+      if (notes) addr += `${addr ? "; " : ""}Access: ${notes}`;
+      return addr;
     }
     function setError(key: string, msg: string) {
       const p = form!.querySelector<HTMLElement>(`[data-error="${key}"]`);
@@ -713,9 +809,19 @@ const steps = [
           setError("service", "Please choose a service to continue.");
           return false;
         }
-        if (d.format === "home" && !d.address) {
-          setFieldError("address", "Please add the home-visit address.");
-          return false;
+        if (d.format === "home") {
+          let ok = true;
+          setFieldError("addr-block", getValue("addr-block") ? "" : "Required");
+          setFieldError("addr-street", getValue("addr-street") ? "" : "Required");
+          if (!getValue("addr-block")) ok = false;
+          if (!getValue("addr-street")) ok = false;
+          if (!/^\d{6}$/.test(getValue("addr-postal"))) {
+            setFieldError("addr-postal", "Enter a 6-digit postal code.");
+            ok = false;
+          } else {
+            setFieldError("addr-postal", "");
+          }
+          return ok;
         }
         return true;
       }
@@ -775,9 +881,10 @@ const steps = [
       const rows: [string, string][] = [
         ["Service", svc?.title ?? ""],
         ["Where", d.format === "home" ? "Home visit" : "In-clinic"],
-        ["When", `${dateLabel} · ${fmtTime(d.time)}`],
-        ["Clinician", clinician],
       ];
+      if (d.format === "home" && d.address) rows.push(["Address", d.address]);
+      rows.push(["When", `${dateLabel} · ${fmtTime(d.time)}`]);
+      rows.push(["Clinician", clinician]);
       box.innerHTML = rows
         .map(
           ([k, v]) =>
@@ -787,7 +894,7 @@ const steps = [
     }
 
     // ----- Navigation -----
-    function goto(step: number) {
+    function goto(step: number, scroll = true) {
       current = step;
       stepEls.forEach((el) => {
         if (el.dataset.step === "done") return;
@@ -798,7 +905,7 @@ const steps = [
         p.toggleAttribute("data-active", n === step);
         p.toggleAttribute("data-done", n < step);
       });
-      form!.scrollIntoView({ behavior: "smooth", block: "start" });
+      if (scroll) form!.scrollIntoView({ behavior: "smooth", block: "start" });
     }
 
     form.querySelectorAll<HTMLElement>('[data-nav="next"]').forEach((btn) =>
@@ -860,7 +967,7 @@ const steps = [
       }
     });
 
-    // Initial state.
-    goto(1);
+    // Initial state (no scroll — keep the page heading in view on load).
+    goto(1, false);
   }
 </script>

@@ -7,6 +7,13 @@
  * - `supportsHome`: whether a home visit is offered (equipment-based sessions are
  *   in-clinic only, so the booking form hides the home-visit option for them).
  * - `durationMin`: session length, used to build the booking slot window.
+ * - `platoCalendarId`: the Plato online-booking calendar this card maps to
+ *   (from GET /onlineapptbooking/list). Phase 2 queries /onlineapptbooking/slots
+ *   with this id for real availability. Note: "Physiotherapy" spans several
+ *   Plato condition-calendars; it maps to Women's/Pelvic (all three clinicians)
+ *   and the front desk triages the specific condition. "Mummy & Baby" has no
+ *   dedicated Plato calendar yet — mapped to Paediatric (Cheryl + Kristy); a
+ *   dedicated 90-min calendar should be created in Plato (its interval is 60m).
  */
 export type ServiceId =
   | "physiotherapy"
@@ -24,6 +31,17 @@ export interface Service {
   priceNote: string;
   supportsHome: boolean;
   durationMin: number;
+  platoCalendarId: string;
+  /**
+   * Plato "Appointment Type" code (the `code_Bottom` field on POST /appointment).
+   * Validated codes: Physiotherapy=hDWW, Pilates=2kV4, S&C=qLbH, Home Visit=sCla.
+   * (Confirmed/Unconfirmed live in `code_Left`: YS06 / C22K.)
+   * OPEN: Mummy & Baby has no Plato type — using Physiotherapy (hDWW) for now.
+   * RULE (decided 2026-07-07): a HOME-VISIT booking is typed Home Visit (`sCla`)
+   * regardless of service; the service name goes in the title/description. So the
+   * backend uses `format === "home" ? "sCla" : service.platoTypeCode`.
+   */
+  platoTypeCode: string;
 }
 
 export const services: Service[] = [
@@ -37,6 +55,8 @@ export const services: Service[] = [
     priceNote: "Home visits from $330",
     supportsHome: true,
     durationMin: 55,
+    platoCalendarId: "dDIjWJp",
+    platoTypeCode: "hDWW",
   },
   {
     id: "mummy-baby",
@@ -48,6 +68,8 @@ export const services: Service[] = [
     priceNote: "",
     supportsHome: true,
     durationMin: 90,
+    platoCalendarId: "z1xE8rP",
+    platoTypeCode: "hDWW",
   },
   {
     id: "clinical-pilates",
@@ -59,6 +81,8 @@ export const services: Service[] = [
     priceNote: "",
     supportsHome: false,
     durationMin: 55,
+    platoCalendarId: "ne8sgkb",
+    platoTypeCode: "2kV4",
   },
   {
     id: "strength-conditioning",
@@ -70,6 +94,8 @@ export const services: Service[] = [
     priceNote: "",
     supportsHome: false,
     durationMin: 55,
+    platoCalendarId: "XV1FDpu",
+    platoTypeCode: "qLbH",
   },
 ];
 
