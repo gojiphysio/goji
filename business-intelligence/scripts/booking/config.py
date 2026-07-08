@@ -14,6 +14,11 @@ from __future__ import annotations
 SLOT_MINUTES = 30
 HOME_TRAVEL_MINUTES = 30  # travel block before AND after a home visit
 
+# Minimum lead time: the earliest bookable slot must start at least this many
+# minutes from now (so at 09:00 the first slot is 10:30). Same-day booking IS
+# allowed within this rule — it overrides Plato's own min_days=1 no-same-day.
+MIN_LEAD_MINUTES = 90
+
 # clinician_id -> Plato calendar `color` (the appointment calendar) + doctor code.
 # online_start / online_end (optional) clamp the online-bookable window when the
 # clinic's intended online hours differ from the raw Plato rule hours. Cheryl's

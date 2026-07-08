@@ -1,7 +1,7 @@
 """Unit tests for the 30-min availability derivation (no network — stub Plato)."""
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, datetime
 
 from booking.availability import derive_availability
 
@@ -52,6 +52,14 @@ def test_clinic_wide_all_block_applies_to_everyone():
               "endtime": "2026-07-15 11:00:00"}]
     out = derive_availability(StubPlato(appts, CFG), "physiotherapy", WED)
     assert out["cheryl-long"] == ["09:00", "11:00"]
+
+
+def test_min_lead_time_same_day():
+    # At 09:00 today, the earliest bookable slot is 10:30 (90-min lead); same-day
+    # is allowed despite Plato's min_days.
+    now = datetime(2026, 7, 15, 9, 0)  # 09:00 on the WED test day
+    out = derive_availability(StubPlato([], CFG), "physiotherapy", WED, now=now)
+    assert out["cheryl-long"] == ["10:30", "11:00"]  # 09:00-10:00 within lead, excluded
 
 
 def test_day_off_returns_no_slots():

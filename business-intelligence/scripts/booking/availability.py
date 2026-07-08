@@ -20,6 +20,7 @@ from .config import (
     CLINICIANS,
     HOME_TRAVEL_MINUTES,
     HOME_VISIT_CLINICIAN,
+    MIN_LEAD_MINUTES,
     SERVICES,
     SLOT_MINUTES,
     clinician_by_calendar,
@@ -48,11 +49,13 @@ def derive_availability(
     *,
     clinician_id: str | None = None,
     home: bool = False,
+    now: datetime | None = None,
 ) -> dict[str, list[str]]:
     """Return {clinician_id: ["HH:MM", ...]} of free 30-min starts for `day`.
 
     `clinician_id` restricts to one clinician; `home` restricts to the home-visit
-    clinician and pads each slot with travel time on both sides.
+    clinician and pads each slot with travel time on both sides. `now` (naive SGT)
+    is injectable for testing; defaults to the current SGT time.
     """
     svc = SERVICES.get(service_id)
     if not svc:
@@ -64,8 +67,11 @@ def derive_availability(
     pad = timedelta(minutes=HOME_TRAVEL_MINUTES if home else 0)
     step = timedelta(minutes=SLOT_MINUTES)
     dow = _DOW[day.weekday()]
-    today = datetime.now(SGT).date()
-    now_naive = datetime.now(SGT).replace(tzinfo=None)
+    _now = now if now is not None else datetime.now(SGT).replace(tzinfo=None)
+    today = _now.date()
+    # Earliest a slot may start: now + the minimum lead time (naive SGT, matching
+    # the `at()` datetimes). Naturally a no-op for future days.
+    lead_cutoff = _now + timedelta(minutes=MIN_LEAD_MINUTES)
 
     def at(hhmm: str) -> datetime:
         h, m = (int(x) for x in hhmm.split(":"))
@@ -99,10 +105,9 @@ def derive_availability(
         if dow in (rule.get("restricted_days") or []):
             continue
 
-        delta = (day - today).days
-        if delta < (rule.get("min_days") or 0):
-            continue
-        if delta > (rule.get("max_days") or 365):
+        # Same-day booking is allowed (governed by the lead-time cutoff below), so
+        # Plato's min_days is intentionally NOT enforced. Keep only the far bound.
+        if (day - today).days > (rule.get("max_days") or 365):
             continue
 
         # Window = the clinician's rule hours, clamped by any online-hours
@@ -124,8 +129,8 @@ def derive_availability(
         while t + dur <= win_end:
             occ_start, occ_end = t - pad, t + dur + pad
             free = occ_start >= win_start  # travel-before must fit the working day
-            if free and day == today and t <= now_naive:
-                free = False  # no past slots
+            if free and t < lead_cutoff:
+                free = False  # must be at least the min lead time from now
             if free and any(_overlaps(occ_start, occ_end, bs, be) for bs, be in blocks):
                 free = False
             if free and any(_overlaps(occ_start, occ_end, bs, be) for bs, be in taken):
