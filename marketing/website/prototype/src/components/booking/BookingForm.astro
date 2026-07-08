@@ -1340,7 +1340,12 @@ const steps = [
           : "";
         lead.textContent = `We've received your request for ${svc?.title ?? "an appointment"} on ${dateLabel} at ${fmtTime(d.time)}. Your reference is ${result.reference}.`;
       }
-      progressItems.forEach((p) => p.setAttribute("data-done", ""));
+      progressItems.forEach((p) => {
+        // Clear data-active too: a step left both active AND done renders its
+        // number in the primary colour on a primary fill (invisible).
+        p.removeAttribute("data-active");
+        p.setAttribute("data-done", "");
+      });
       if (done) {
         done.hidden = false;
         done.scrollIntoView({ behavior: "smooth", block: "start" });
