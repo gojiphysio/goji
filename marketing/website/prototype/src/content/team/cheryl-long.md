@@ -8,52 +8,80 @@ tagline: >
   across all stages of life.
 specialties:
   - title: "Women's health physiotherapy"
-    description: "Pregnancy, postpartum recovery, pelvic floor concerns, and menopausal changes."
-  - title: "Pelvic health physiotherapy"
-    description: "Assessment and management of bladder, bowel, and pelvic pain conditions."
+    description: "Pregnancy-related pain, birth preparation, diastasis recti management, postpartum recovery and return to sport, and menopausal bone health support."
   - title: "Paediatric physiotherapy"
-    description: "Movement concerns, developmental milestones, and musculoskeletal issues in children."
+    description: "Orthopaedic conditions, growing pains, sports injuries, and congenital musculoskeletal conditions."
+  - title: "Pelvic health physiotherapy"
+    description: "Bladder and bowel dysfunction for women and children, including bedwetting, constipation, urinary and faecal incontinence, pelvic organ prolapse, urgency, pelvic pain, and vaginismus."
   - title: "Scoliosis management"
-    description: "Schroth-based therapy and exercise programmes for scoliosis in children and adults."
+    description: "Schroth-based therapy (PSSE) for scoliosis in children and adults."
   - title: "Musculoskeletal rehabilitation"
-    description: "Assessment and treatment of injuries, persistent pain, and post-operative recovery."
+    description: "Sports and orthopaedic injuries, and post-surgical recovery."
   - title: "Clinical Pilates"
-    description: "Physiotherapist-led reformer Pilates for rehabilitation and movement retraining."
+    description: "Mat or reformer-based rehabilitation for low-impact, individualised progression in strength, control, mobility, and long-term movement health."
 approach: >
-  Cheryl takes time to understand the full picture before recommending a course of care.
-  She draws on a range of assessment and treatment approaches — manual therapy, therapeutic
-  exercise, dry needling, and clinical Pilates — tailoring each session to what the person
-  in front of her actually needs.
+  Cheryl takes time to understand the full picture, from immediate symptoms to your
+  long-term family and lifestyle context. Her care combines clinical reasoning with
+  practical rehabilitation, so each session provides both effective treatment and the
+  clarity needed to navigate recovery. Depending on clinical needs, she draws on manual
+  therapy, dry needling, movement retraining, clinical Pilates, and home strategies so
+  that progress continues beyond the clinic.
 education:
-  - "BSc (Hons) Physiotherapy"
-  - "AHPC-registered Physiotherapist"
+  - "First Class Honours degree in Physiotherapy, Glasgow Caledonian University"
+  - "Diploma in Physiotherapy, Nanyang Polytechnic"
+  - "Singapore-registered physiotherapist with AHPC registration"
 experience:
-  - "10+ years across hospital and private practice settings"
+  - "10 years across KK Women's and Children's Hospital and private practice"
   - "Clinical Director, Goji Health"
-  - "Previously: restructured public hospital physiotherapy and community care"
+  - "Clinical Educator for physiotherapy students, Singapore Institute of Technology (AHPC supervision training)"
+  - "Pilot study on virtual reality rehabilitation and dynamic balance in children with spastic diplegic cerebral palsy"
 training:
-  - "APPI Clinical Pilates (Mat and Reformer)"
-  - "Schroth Scoliosis Therapy"
-  - "Pelvic Health Physiotherapy"
-  - "Dry Needling"
+  - "BodyTree Academy Pilates Matwork and Reformer Teacher Certification"
+  - "APPI Clinical Rehabilitation Pilates certified instructor"
+  - "APPI Pre and Post-natal Pilates certified instructor"
+  - "BSPTS C2 Schroth certified instructor"
+  - "CES Pregnancy and Postpartum Corrective Exercise Specialist"
+  - "Advanced Paediatric Bowel and Bladder Disorders (Peds Level 2)"
+  - "Advanced Assessment and Management for Female Pelvic Health (Mandy Roscher)"
+  - "APA Women's Pelvic Health Physiotherapy Level 2"
+  - "GEMt Dry Needling Advanced Certification"
+  - "Diploma in Sports Massage, ITEC Level 3"
 languages:
   - "English"
   - "Mandarin"
 personalNote: >
-  Outside the clinic, Cheryl enjoys hiking, reformer Pilates, and exploring Singapore's
-  food scene. She is a co-founder of Mitera, a children's footwear brand designed to
-  support healthy foot development.
+  Outside the clinic, I love being outdoors with my husband and three young ones. I find
+  balance through a good dose of quiet movement on the yoga mat, HIIT classes, and tennis
+  in equal measure. My guilty pleasures include the occasional late-night Netflix binge and
+  an unapologetic dedication to supporting local, with a soft spot for home-grown bakeries.
+  My passion for thoughtful movement also extends into my role as co-founder of Mitera, a
+  home-grown children's shoe brand thoughtfully designed to support healthy foot development
+  and everyday comfort. Building Goji has been a dream come true, a space where women,
+  children, and families can feel well cared for through different seasons of life. I hope
+  every patient who walks through our doors feels heard, understood, and empowered to live
+  well at every life stage.
 draft: false
 ---
 
-Cheryl founded Goji Health with a clear goal: to give women access to physiotherapy that
-genuinely understands the female body across every stage of life.
+Cheryl is a senior physiotherapist with over 10 years of clinical experience in women's
+health, paediatric pelvic health, orthopaedic rehabilitation, scoliosis management, and
+clinical Pilates.
 
-She has worked across hospital and private practice settings in Singapore for over a decade,
-with a particular focus on women's health, pelvic floor rehabilitation, paediatrics, and
-clinical Pilates. Cheryl believes that good care starts with being heard. Sessions are
-unhurried, and treatment is always explained so that patients understand what is happening
-and why.
+Working at the heart of women's and children's health, she offers a continuum of care that
+supports the whole family, from managing pelvic floor dysfunction and postpartum recovery to
+treating a sprained ankle.
 
-Cheryl also has a deep interest in paediatric physiotherapy and has worked extensively with
-children across a range of musculoskeletal, developmental, and scoliosis-related concerns.
+Cheryl's experience spans both tertiary hospital and private practice settings, including her
+foundational years at KK Women's and Children's Hospital and subsequent senior roles in
+private practice. Her sessions are comprehensive and highly individualised, so patients leave
+with a clear understanding of their condition and treatment plan.
+
+With over a decade of experience in clinical Pilates, Cheryl often integrates movement and
+functional rehabilitation into her care. She also uses dry needling to treat pain and
+muscular dysfunction. Her approach is evidence-informed, practical, and focused on helping
+patients recover with confidence while building long-term physical resilience.
+
+As a mother of three, Cheryl brings both professional expertise and personal insight to her
+work with women, children, and families. She understands how physical health, family life,
+recovery, and everyday demands often overlap, and offers continuity of care across different
+life stages.

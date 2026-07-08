@@ -62,7 +62,7 @@ export const services: Service[] = [
     id: "mummy-baby",
     icon: "tabler:baby-carriage",
     title: "Mummy & Baby Assessment",
-    lead: "A joint assessment for postpartum mothers and babies aged 0 to 6 months, supporting recovery, development, and early physical needs.",
+    lead: "A joint assessment for postpartum mothers (suitable after both vaginal and Caesarean birth) and babies aged 0 to 6 months, supporting recovery, development concerns, and early physical needs.",
     meta: ["90 min", "In-clinic & home visits"],
     price: "330",
     priceNote: "",

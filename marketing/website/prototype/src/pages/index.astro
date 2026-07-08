@@ -5,6 +5,7 @@ import Button from "../components/Button.astro";
 import PractitionerCard from "../components/PractitionerCard.astro";
 import QuoteSurface from "../components/QuoteSurface.astro";
 import ContactBlock from "../components/ContactBlock.astro";
+import BloomFlipbook from "../components/BloomFlipbook.astro";
 import { Icon } from "astro-icon/components";
 import { SITE } from "../lib/site.ts";
 import { services } from "../lib/services.ts";
@@ -18,37 +19,52 @@ const tickerItems = [
   "Home visits available",
 ];
 
-// Women's Health links through to the real condition pages under /conditions.
-// Other areas describe the clinic's wider scope (plain text, no page yet).
+// Condition lists mirror the clinic-vetted old-site copy. Women's Health items
+// link through to the real condition pages under /conditions where one exists;
+// everything else is plain text (no dedicated page yet).
 const careAreas = [
   {
     title: "Women's Health",
     guideHref: "/conditions",
     points: [
       { text: "Prenatal care and birth preparation", href: "/conditions/prenatal-care" },
-      { text: "Postpartum, diastasis recti, and Caesarean scar care", href: "/conditions/diastasis-recti" },
-      { text: "Pelvic floor dysfunction, prolapse, and pelvic pain", href: "/conditions/pelvic-organ-prolapse" },
-      { text: "Bladder and bowel concerns", href: "/conditions/urinary-incontinence" },
-      { text: "Perimenopause, menopause, and bone health", href: "/conditions/menopause" },
-      { text: "Osteoporosis and Osteopenia management", href: "/conditions/menopause" },
+      { text: "Antenatal and postnatal musculoskeletal concerns (pelvic girdle pain and mummy's wrist)", href: "/conditions/pelvic-girdle-pain" },
+      "Postpartum recovery and return to sport",
+      { text: "Diastasis recti", href: "/conditions/diastasis-recti" },
+      { text: "Caesarean recovery and scar management", href: "/conditions/caesarean-recovery" },
+      { text: "Perineal tear, scar, and birth trauma", href: "/conditions/perineal-tear" },
+      { text: "Blocked ducts and mastitis", href: "/conditions/blocked-ducts-mastitis" },
+      "Pelvic floor dysfunction",
+      { text: "Pelvic organ prolapse (POP)", href: "/conditions/pelvic-organ-prolapse" },
+      { text: "Pelvic pain and dyspareunia", href: "/conditions/pelvic-pain" },
+      { text: "Perimenopause and menopause management", href: "/conditions/menopause" },
+      "Osteopenia / osteoporosis and fragility fractures management",
+      { text: "Urinary incontinence", href: "/conditions/urinary-incontinence" },
+      { text: "Bowel dysfunction and constipation", href: "/conditions/bowel-dysfunction" },
     ],
   },
   {
     title: "Paediatrics",
     points: [
-      "Congenital torticollis and early intervention",
-      "Developmental concerns and milestones",
-      "Scoliosis and Schroth therapy",
-      "Paediatric pelvic health",
+      "Congenital torticollis",
+      "Postural / structural congenital talipes equinovarus (CTEV)",
+      "Developmental dysplasia of the hip (DDH)",
+      "Developmental concerns and early intervention",
+      "Neurodevelopmental conditions",
+      "Adolescent idiopathic scoliosis and Schroth therapy",
+      "Paediatric pelvic health (bedwetting, soiling, and constipation)",
       "Musculoskeletal and sports injury",
+      "Post-fracture rehabilitation",
     ],
   },
   {
     title: "Musculoskeletal & Sports",
     points: [
-      "Injuries and persistent or recurrent pain",
+      "Injuries",
+      "Persistent or recurrent pain",
+      "Adult scoliosis",
       "Sports rehabilitation and performance",
-      "Post-operation recovery",
+      "Post-operation recovery and rehabilitation",
       "Functional movement assessment",
       "Dry needling",
     ],
@@ -56,19 +72,21 @@ const careAreas = [
   {
     title: "Vestibular Rehabilitation",
     points: [
-      "Vertigo, dizziness, and balance disorders",
-      "BPPV and fall prevention",
-      "Post-concussion vestibular rehabilitation",
-      "Benign positional vertigo",
-      "Vestibular migraine management",
+      "Vertigo",
+      "Dizziness",
+      "Balance difficulties",
+      "Benign paroxysmal positional vertigo (BPPV)",
+      "Fall prevention and age-related instability",
     ],
   },
   {
     title: "Lymphatic Health",
     points: [
-      "Lymphoedema assessment and management",
-      "Oncology rehabilitation",
-      "Post-surgical lymphatic drainage",
+      "Lymphoedema",
+      "Swelling management",
+      "Lipedema",
+      "Breast cancer post-op rehabilitation",
+      "Chronic venous insufficiency (CVI)",
     ],
   },
 ];
@@ -78,14 +96,14 @@ const team = [
     name: "Cheryl Long",
     role: "Clinical Director",
     interests:
-      "Pelvic health, women's rehabilitation, musculoskeletal, sports, dry needling, clinical Pilates.",
+      "Women's health, paediatric orthopaedic conditions, pelvic health (women's & paediatric), pre & postnatal care, musculoskeletal rehabilitation, scoliosis management, clinical Pilates, dry needling.",
     slug: "cheryl-long",
   },
   {
     name: "Claire Ng",
     role: "Senior Physiotherapist",
     interests:
-      "Pelvic health, pre & postnatal care, women's rehabilitation, musculoskeletal, lymphoedema, vestibular.",
+      "Pelvic health, pre & postnatal care, women's rehabilitation, musculoskeletal, sports, lymphoedema, vestibular physiotherapy, clinical Pilates.",
     slug: "claire-ng",
   },
   {
@@ -358,19 +376,7 @@ const reviews = [
   <section class="space-sec">
     <div class="container space-sec__inner">
       <div class="space-sec__image">
-        <div class="bloom-wrap" role="img" aria-label="A goji flower growing from green bud to ripe berry">
-          {[1, 2, 3, 4, 5, 6, 7].map((n) => (
-            <img
-              src={`/illustrations/bloom-${n}.png`}
-              class="bloom-frame"
-              alt=""
-              aria-hidden="true"
-              width="300"
-              height="300"
-              decoding="async"
-            />
-          ))}
-        </div>
+        <BloomFlipbook />
       </div>
       <div class="space-sec__text">
         <h2>For every stage of growth</h2>
@@ -441,28 +447,28 @@ const reviews = [
     <div class="faq-list">
       {[
         {
-          q: "Do I need a referral to see a physiotherapist at Goji?",
-          a: "No referral is needed. You can book directly online or message us on WhatsApp and we'll help you find the right session.",
+          q: "What should I expect at my first visit?",
+          a: "Your first session starts with a conversation. We'll ask about your history, your current concerns, and your goals. Then we'll do a physical assessment and walk you through what we find. You'll leave with a clear understanding of what's going on and a plan for what comes next. First sessions typically run 60 minutes.",
         },
         {
-          q: "What should I expect at my first session?",
-          a: "Your first session is a full assessment — we spend time understanding your history, what's going on in your body, and what you want to achieve. Treatment may begin in the same session depending on what we find.",
+          q: "What should I wear to my appointment?",
+          a: "Comfortable clothing that allows movement. Think activewear, loose shorts, or leggings. We'll provide anything else you need during your session.",
         },
         {
-          q: "Is physiotherapy covered by insurance?",
-          a: "Many health insurance plans cover physiotherapy. We recommend checking with your insurer beforehand. We issue itemised receipts you can submit for reimbursement.",
+          q: "Can I see a physio during pregnancy?",
+          a: "Absolutely. Prenatal physiotherapy is safe and recommended. We treat common pregnancy concerns like pelvic girdle pain, lower back pain, and pelvic floor changes. We also help you prepare physically for birth and postpartum recovery.",
         },
         {
-          q: "Do you offer home visits?",
-          a: "Yes — home visits are available for physiotherapy and Mummy & Baby Assessment sessions. Let us know when you enquire and we'll arrange the details.",
+          q: "Do you treat children? What ages?",
+          a: "Yes. We see children from infancy through to 18. Our paediatric physiotherapy covers developmental concerns, movement milestones, sports injuries, scoliosis, and paediatric pelvic health. Sessions are designed to be comfortable for kids and informative for parents.",
         },
         {
-          q: "What is pelvic floor physiotherapy and who is it for?",
-          a: "Pelvic floor physiotherapy addresses the muscles, ligaments, and connective tissue that support the bladder, bowel, and uterus. It is relevant across all life stages — not just postpartum. Common reasons to see us include leakage, pelvic pain, prolapse, or simply wanting a postnatal check.",
+          q: "How is Goji different from other physio clinics?",
+          a: "We specialise in providing a continuum of care for women. We built Goji so you can trust one clinic for your pelvic health, your postpartum recovery, and your child's physio needs. You don't have to start over with a new provider when your family's needs change.",
         },
         {
-          q: "How many sessions will I need?",
-          a: "This varies by condition and how your body responds. We will give you a realistic picture after your first assessment and review progress with you as we go.",
+          q: "Do you accept insurance?",
+          a: "We do not do direct billing. We recommend checking with your insurer before your first visit. Most of our patients pay first and claim later with their relevant corporate and personal insurance providers. Some insurance providers require a referral letter from a doctor.",
         },
       ].map((item) => (
         <details class="faq-item">
@@ -1109,38 +1115,6 @@ const reviews = [
   .space-sec__text h2 { margin: 0 0 var(--space-4); }
   .space-sec__text p { color: var(--text-muted); }
   .space-sec__text p + p { margin-top: var(--space-4); }
-
-  /* Goji bloom flipbook: green bud -> ripe berry, 1.75s loop */
-  .bloom-wrap {
-    position: relative;
-    width: clamp(200px, 36vw, 320px);
-    aspect-ratio: 1 / 1;
-    margin-inline: auto;
-  }
-  .bloom-frame {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    opacity: 0;
-    animation: bloom-appear 1.75s linear infinite;
-  }
-  .bloom-frame:nth-child(1) { animation-delay: -1.75s; }
-  .bloom-frame:nth-child(2) { animation-delay: -1.5s; }
-  .bloom-frame:nth-child(3) { animation-delay: -1.25s; }
-  .bloom-frame:nth-child(4) { animation-delay: -1s; }
-  .bloom-frame:nth-child(5) { animation-delay: -0.75s; }
-  .bloom-frame:nth-child(6) { animation-delay: -0.5s; }
-  .bloom-frame:nth-child(7) { animation-delay: -0.25s; }
-  @keyframes bloom-appear {
-    0%, 14.2%   { opacity: 1; }
-    14.3%, 100% { opacity: 0; }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .bloom-frame { animation: none; }
-    .bloom-frame:nth-child(7) { opacity: 1; }
-  }
 
   /* ======================================================
      FAQ
