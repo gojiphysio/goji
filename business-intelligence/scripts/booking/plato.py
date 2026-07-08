@@ -16,6 +16,10 @@ import requests
 BASE = "https://clinic.platomedical.com/api"
 TIMEOUT_S = 30
 PER_PAGE_SLEEP_S = 1.0  # pace multi-page reads under Plato's 20 req/min limit
+# The online-booking config (clinician hours/rules) is effectively static, but
+# derive_availability reads it on every slot lookup. Cache it briefly so a burst
+# of availability calls (a user clicking around dates/clinicians) hits Plato once.
+CONFIG_TTL_S = float(os.environ.get("PLATO_CONFIG_TTL", "300"))
 
 
 class PlatoError(RuntimeError):
@@ -35,6 +39,8 @@ class PlatoClient:
             "accept": "application/json",
             "Authorization": f"Bearer {token}",
         })
+        self._cfg_cache: dict | None = None
+        self._cfg_ts = 0.0
 
     def _url(self, path: str) -> str:
         return f"{BASE}/{self.db}/{path.lstrip('/')}"
@@ -89,8 +95,17 @@ class PlatoClient:
                             {"start_date": start_date, "end_date": end_date})
 
     def online_booking_config(self) -> dict:
-        """The clinic's online-booking calendars + per-clinician rules."""
-        return self.get("onlineapptbooking/list")
+        """The clinic's online-booking calendars + per-clinician rules.
+
+        Cached for CONFIG_TTL_S — it barely changes, and re-fetching it on every
+        availability lookup is a needless Plato round-trip on the hot path.
+        """
+        now = time.monotonic()
+        if self._cfg_cache is not None and now - self._cfg_ts < CONFIG_TTL_S:
+            return self._cfg_cache
+        self._cfg_cache = self.get("onlineapptbooking/list")
+        self._cfg_ts = now
+        return self._cfg_cache
 
     def create_appointment(self, payload: dict) -> dict:
         """Create one appointment. Returns {success, _id}. Does NOT check conflicts

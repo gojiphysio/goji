@@ -15,6 +15,7 @@ from __future__ import annotations
 import logging
 import os
 import threading
+import time
 import uuid
 from datetime import date, datetime, timezone
 
@@ -40,6 +41,15 @@ VALID_STAGES = {"page_view", "service_selected", "time_selected", "details",
 _plato: PlatoClient | None = None
 _bq = None
 _init_lock = threading.Lock()
+
+# Short-lived availability cache: repeated lookups for the same
+# (service, date, clinician, home) — a user clicking around dates/times, or
+# several visitors on the same day — reuse one derivation instead of hitting
+# Plato each time. Safe because create_booking re-derives under a lock before
+# writing, so a slot that fills within the TTL is still caught at submit.
+AVAIL_TTL_S = float(os.environ.get("AVAIL_CACHE_TTL", "45"))
+_avail_cache: dict[tuple, tuple[float, dict]] = {}
+_avail_cache_lock = threading.Lock()
 
 
 def plato() -> PlatoClient:
@@ -86,6 +96,14 @@ def availability():
         return jsonify({"error": "bad date"}), 400
     home = request.args.get("home", "") in ("1", "true", "yes")
     clinician = request.args.get("clinician") or None
+
+    cache_key = (service, day.isoformat(), clinician or "", home)
+    nowm = time.monotonic()
+    with _avail_cache_lock:
+        hit = _avail_cache.get(cache_key)
+        if hit and nowm - hit[0] < AVAIL_TTL_S:
+            return jsonify(hit[1])
+
     try:
         avail = derive_availability(plato(), service, day,
                                     clinician_id=clinician, home=home)
@@ -93,12 +111,15 @@ def availability():
         log.warning("availability failed (%s %s): %s", service, day, e)
         return jsonify({"error": "unavailable", "times": []}), 502
     times = sorted({t for slots in avail.values() for t in slots})
-    return jsonify({
+    payload = {
         "date": day.isoformat(),
         "times": times,
         "by_clinician": avail,
         "clinicians": [{"id": cid, "name": CLINICIANS[cid]["name"]} for cid in avail],
-    })
+    }
+    with _avail_cache_lock:
+        _avail_cache[cache_key] = (nowm, payload)
+    return jsonify(payload)
 
 
 @app.route("/api/book", methods=["POST", "OPTIONS"])

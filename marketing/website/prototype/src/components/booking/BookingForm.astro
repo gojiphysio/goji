@@ -61,11 +61,6 @@ const steps = [
         This service is offered in-clinic only.
       </p>
 
-      <p class="booking__surcharge" data-home-surcharge hidden>
-        Home visits include a <strong>$70 travel surcharge</strong>, added to the
-        session fee.
-      </p>
-
       <div class="booking__address" data-address hidden>
         <p class="booking__disclaimer">
           Home visits include a $70 travel surcharge on top of the session fee.
@@ -100,6 +95,29 @@ const steps = [
       <h2>When works for you?</h2>
     </legend>
 
+    <div class="booking__clinician">
+      <p class="booking__sublabel">Preferred clinician (optional)</p>
+      <p class="booking__hint">Choose who you'd like to see first — availability updates to match. Not sure? Leave it on "First available" and we'll match you.</p>
+      <div class="booking__clinicians" role="radiogroup" aria-label="Preferred clinician">
+        <label class="copt" data-clinician-opt>
+          <input class="copt__input visually-hidden" type="radio" name="clinician" value="" checked />
+          <span class="copt__name">First available</span>
+          <span class="copt__role">Recommended · we'll match you</span>
+          <span class="copt__tick" aria-hidden="true"></span>
+        </label>
+        {
+          clinicians.map((c) => (
+            <label class="copt" data-clinician-opt data-services={c.services.join(" ")} hidden>
+              <input class="copt__input visually-hidden" type="radio" name="clinician" value={c.id} />
+              <span class="copt__name">{c.name}</span>
+              <span class="copt__role">{c.role}</span>
+              <span class="copt__tick" aria-hidden="true" />
+            </label>
+          ))
+        }
+      </div>
+    </div>
+
     <div class="booking__datewrap">
       <p class="booking__sublabel" id="date-label">
         Preferred date <span class="field__req" aria-hidden="true">*</span>
@@ -131,29 +149,6 @@ const steps = [
       <p class="booking__error" data-error="time" role="alert" hidden></p>
     </div>
 
-    <div class="booking__clinician">
-      <p class="booking__sublabel">Preferred clinician (optional)</p>
-      <p class="booking__hint">Not sure? We'll match you with the right specialist.</p>
-      <div class="booking__clinicians" role="radiogroup" aria-label="Preferred clinician">
-        <label class="copt" data-clinician-opt>
-          <input class="copt__input visually-hidden" type="radio" name="clinician" value="" checked />
-          <span class="copt__name">First available</span>
-          <span class="copt__role">Recommended · we'll match you</span>
-          <span class="copt__tick" aria-hidden="true"></span>
-        </label>
-        {
-          clinicians.map((c) => (
-            <label class="copt" data-clinician-opt data-services={c.services.join(" ")} hidden>
-              <input class="copt__input visually-hidden" type="radio" name="clinician" value={c.id} />
-              <span class="copt__name">{c.name}</span>
-              <span class="copt__role">{c.role}</span>
-              <span class="copt__tick" aria-hidden="true" />
-            </label>
-          ))
-        }
-      </div>
-    </div>
-
     <div class="booking__nav">
       <button type="button" class="bbtn bbtn--ghost" data-nav="back">Back</button>
       <button type="button" class="bbtn bbtn--primary" data-nav="next">
@@ -174,13 +169,26 @@ const steps = [
       <FormField id="email" name="email" label="Email" type="email" required={true} autocomplete="email" inputmode="email" />
     </div>
 
-    <FormField
-      id="notes"
-      name="notes"
-      label="Tell us about your condition (optional)"
-      textarea={true}
-      placeholder="A few words on your symptoms, injury or goals helps us prepare for your visit."
-    />
+    <div class="field booking__condition-field">
+      <p class="field__label" id="notes-label">Tell us about your condition (optional)</p>
+      <div class="booking__conditions" role="group" aria-labelledby="notes-label" data-conditions>
+        {
+          ["Prenatal", "Postpartum", "Injury", "Pain", "Scoliosis", "Paediatrics", "Others"].map((c) => (
+            <button type="button" class="ccond" data-condition={c} aria-pressed="false">
+              {c}
+            </button>
+          ))
+        }
+      </div>
+      <textarea
+        id="notes"
+        name="notes"
+        class="field__control booking__notes"
+        rows="2"
+        aria-describedby="notes-label"
+        placeholder="Add anything else that helps us prepare — symptoms, injury, or goals (optional)."
+      ></textarea>
+    </div>
 
     <div class="booking__summary" data-summary></div>
     <p class="booking__changes-note">
@@ -342,28 +350,6 @@ const steps = [
     color: var(--color-primary);
   }
 
-  /* Home-visit surcharge callout — shown when "Home visit" is selected. */
-  .booking__surcharge {
-    display: flex;
-    align-items: baseline;
-    gap: var(--space-2);
-    margin-top: var(--space-3);
-    padding: var(--space-3) var(--space-4);
-    background: var(--color-linen);
-    border: 1px solid var(--color-border);
-    border-left: 3px solid var(--color-accent);
-    border-radius: var(--radius-sm);
-    font-size: var(--fs-small);
-    color: var(--text-muted);
-  }
-  .booking__surcharge strong {
-    color: var(--text-default);
-    font-weight: var(--weight-semibold);
-  }
-  .booking__surcharge[hidden] {
-    display: none;
-  }
-
   /* In-clinic / Home toggle */
   .booking__toggle {
     display: inline-flex;
@@ -419,6 +405,45 @@ const steps = [
     color: var(--text-default);
     line-height: var(--lh-body);
   }
+
+  /* Quick-select condition chips above the free-text notes box. */
+  .booking__condition-field {
+    gap: var(--space-3);
+  }
+  .booking__conditions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+  .ccond {
+    padding: 0.4rem 0.85rem;
+    border: 1.5px solid var(--color-border);
+    border-radius: var(--radius-pill);
+    background: var(--bg-content);
+    font-family: var(--font-body);
+    font-size: var(--fs-small);
+    font-weight: var(--weight-semibold);
+    color: var(--text-default);
+    cursor: pointer;
+    transition: border-color var(--dur) var(--ease),
+      background-color var(--dur) var(--ease), color var(--dur) var(--ease);
+  }
+  .ccond:hover {
+    border-color: var(--color-border-strong);
+  }
+  .ccond[aria-pressed="true"] {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: var(--color-linen);
+  }
+  .ccond:focus-visible {
+    outline: 3px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+  .booking__notes {
+    margin-top: var(--space-1);
+  }
+
   .booking__addr-grid {
     display: grid;
     gap: var(--space-4);
@@ -813,8 +838,17 @@ const steps = [
       name: getValue("name"),
       phone: getValue("phone"),
       email: getValue("email"),
-      notes: getValue("notes"),
+      notes: composeNotes(),
     });
+
+    /** Combine the quick-select condition chips with any free-text detail. */
+    function composeNotes(): string {
+      const tags = Array.from(
+        form!.querySelectorAll<HTMLElement>('[data-condition][aria-pressed="true"]'),
+      ).map((b) => b.dataset.condition || "");
+      const extra = getValue("notes");
+      return [tags.join(", "), extra].filter(Boolean).join(" — ");
+    }
 
     function getChecked(name: string): string | null {
       const el = form!.querySelector<HTMLInputElement>(
@@ -868,16 +902,14 @@ const steps = [
     const whereBlock = form.querySelector<HTMLElement>("[data-where]");
     const homeLabel = form.querySelector<HTMLElement>("[data-home-label]");
     const homeHint = form.querySelector<HTMLElement>("[data-home-hint]");
-    const homeSurcharge = form.querySelector<HTMLElement>("[data-home-surcharge]");
     const addressBlock = form.querySelector<HTMLElement>("[data-address]");
 
     // Show + require the address fields ONLY for a home visit; an in-clinic
-    // booking never asks for an address. The travel surcharge is surfaced the
-    // moment "Home visit" is chosen.
+    // booking never asks for an address. The travel-surcharge note lives inside
+    // the address block, so it appears the moment "Home visit" is chosen.
     function syncAddress() {
       const home = getChecked("format") === "home";
       if (addressBlock) addressBlock.hidden = !home;
-      if (homeSurcharge) homeSurcharge.hidden = !home;
       ["addr-block", "addr-street", "addr-postal"].forEach((id) => {
         const el = document.getElementById(id) as HTMLInputElement | null;
         if (el) el.required = home;
@@ -1124,12 +1156,23 @@ const steps = [
     // (implied by "time_selected"), so the dashboard can see who lands on the
     // details step but never starts filling it in. -----
     let detailsTracked = false;
+    function markDetailsEngaged() {
+      if (detailsTracked) return;
+      detailsTracked = true;
+      bookingApi.track("details");
+    }
     ["name", "phone", "email", "notes"].forEach((id) => {
-      const el = document.getElementById(id);
-      el?.addEventListener("input", () => {
-        if (detailsTracked) return;
-        detailsTracked = true;
-        bookingApi.track("details");
+      document.getElementById(id)?.addEventListener("input", markDetailsEngaged);
+    });
+
+    // Quick-select condition chips: toggle aria-pressed; the chosen ones are
+    // folded into the notes by composeNotes(). A tap also counts as engaging the
+    // details step for the funnel.
+    form.querySelectorAll<HTMLButtonElement>("[data-condition]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const on = btn.getAttribute("aria-pressed") === "true";
+        btn.setAttribute("aria-pressed", String(!on));
+        markDetailsEngaged();
       });
     });
 
