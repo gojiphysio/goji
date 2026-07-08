@@ -670,6 +670,17 @@ const steps = [
     const homeHint = form.querySelector<HTMLElement>("[data-home-hint]");
     const addressBlock = form.querySelector<HTMLElement>("[data-address]");
 
+    // Show + require the address fields ONLY for a home visit; an in-clinic
+    // booking never asks for an address.
+    function syncAddress() {
+      const home = getChecked("format") === "home";
+      if (addressBlock) addressBlock.hidden = !home;
+      ["addr-block", "addr-street", "addr-postal"].forEach((id) => {
+        const el = document.getElementById(id) as HTMLInputElement | null;
+        if (el) el.required = home;
+      });
+    }
+
     form.querySelectorAll<HTMLInputElement>('input[name="service"]').forEach(
       (input) => {
         input.addEventListener("change", onServiceChange);
@@ -677,9 +688,7 @@ const steps = [
     );
     form.querySelectorAll<HTMLInputElement>('input[name="format"]').forEach(
       (input) => {
-        input.addEventListener("change", () => {
-          if (addressBlock) addressBlock.hidden = getChecked("format") !== "home";
-        });
+        input.addEventListener("change", syncAddress);
       },
     );
 
@@ -708,7 +717,7 @@ const steps = [
           }
         }
       }
-      if (addressBlock) addressBlock.hidden = getChecked("format") !== "home";
+      syncAddress();
 
       // Filter the clinician options to those who offer this service.
       const eligible = new Set(
@@ -989,6 +998,7 @@ const steps = [
 
     // Initial state (no scroll — keep the page heading in view on load).
     bookingApi.track("page_view");
+    syncAddress();
     goto(1, false);
   }
 </script>

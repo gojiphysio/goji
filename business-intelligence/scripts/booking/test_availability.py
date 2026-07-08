@@ -25,7 +25,7 @@ CFG = {
         "rules": [{
             "name": "Cheryl Long", "book_calendar": "blue",
             "starttime": "09:00", "endtime": "12:00",
-            "min_days": 0, "max_days": 365,
+            "min_days": 1, "max_days": 365,
             "restricted_days": [], "restricted_blocks": [],
         }],
     }],
@@ -54,12 +54,11 @@ def test_clinic_wide_all_block_applies_to_everyone():
     assert out["cheryl-long"] == ["09:00", "11:00"]
 
 
-def test_min_lead_time_same_day():
-    # At 09:00 today, the earliest bookable slot is 10:30 (90-min lead); same-day
-    # is allowed despite Plato's min_days.
-    now = datetime(2026, 7, 15, 9, 0)  # 09:00 on the WED test day
+def test_same_day_excluded_by_min_days():
+    # min_days=1 -> booking on `today` itself returns nothing (1 day in advance).
+    now = datetime(2026, 7, 15, 9, 0)  # 09:00 ON the WED test day
     out = derive_availability(StubPlato([], CFG), "physiotherapy", WED, now=now)
-    assert out["cheryl-long"] == ["10:30", "11:00"]  # 09:00-10:00 within lead, excluded
+    assert out.get("cheryl-long", []) == []
 
 
 def test_day_off_returns_no_slots():

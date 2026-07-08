@@ -20,7 +20,6 @@ from .config import (
     CLINICIANS,
     HOME_TRAVEL_MINUTES,
     HOME_VISIT_CLINICIAN,
-    MIN_LEAD_MINUTES,
     SERVICES,
     SLOT_MINUTES,
     clinician_by_calendar,
@@ -69,9 +68,6 @@ def derive_availability(
     dow = _DOW[day.weekday()]
     _now = now if now is not None else datetime.now(SGT).replace(tzinfo=None)
     today = _now.date()
-    # Earliest a slot may start: now + the minimum lead time (naive SGT, matching
-    # the `at()` datetimes). Naturally a no-op for future days.
-    lead_cutoff = _now + timedelta(minutes=MIN_LEAD_MINUTES)
 
     def at(hhmm: str) -> datetime:
         h, m = (int(x) for x in hhmm.split(":"))
@@ -105,9 +101,12 @@ def derive_availability(
         if dow in (rule.get("restricted_days") or []):
             continue
 
-        # Same-day booking is allowed (governed by the lead-time cutoff below), so
-        # Plato's min_days is intentionally NOT enforced. Keep only the far bound.
-        if (day - today).days > (rule.get("max_days") or 365):
+        # Booking must be at least `min_days` ahead (Plato's rule; 1 = no same-day)
+        # and within `max_days`.
+        delta = (day - today).days
+        if delta < (rule.get("min_days") or 0):
+            continue
+        if delta > (rule.get("max_days") or 365):
             continue
 
         # Window = the clinician's rule hours, clamped by any online-hours
@@ -129,8 +128,8 @@ def derive_availability(
         while t + dur <= win_end:
             occ_start, occ_end = t - pad, t + dur + pad
             free = occ_start >= win_start  # travel-before must fit the working day
-            if free and t < lead_cutoff:
-                free = False  # must be at least the min lead time from now
+            if free and day == today and t <= _now:
+                free = False  # no past slots (same-day is also gated by min_days)
             if free and any(_overlaps(occ_start, occ_end, bs, be) for bs, be in blocks):
                 free = False
             if free and any(_overlaps(occ_start, occ_end, bs, be) for bs, be in taken):
