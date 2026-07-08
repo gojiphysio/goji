@@ -104,6 +104,18 @@ def test_first_available_assigns_a_free_clinician():
     assert len(p.created) == 1
 
 
+def test_booking_beyond_60_days_is_refused():
+    # 61 days after NOW's date -> past the 60-day window.
+    p = StubPlato()
+    try:
+        create_booking(p, {**BASE, "date": "2026-09-14",
+                           "clinician_id": "cheryl-long"}, now=NOW)
+        assert False, "expected BookingError"
+    except BookingError as e:
+        assert e.code == "too_far"
+    assert p.created == []  # nothing written
+
+
 if __name__ == "__main__":
     for name, fn in sorted(globals().items()):
         if name.startswith("test_") and callable(fn):

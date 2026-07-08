@@ -115,7 +115,8 @@ def book():
         log.exception("booking failed")
         return jsonify({"ok": False,
                         "error": "Something went wrong. Please try again or message us."}), 502
-    mailer.send_admin_booking_email(result, draft)  # best-effort
+    mailer.send_admin_booking_email(result, draft)     # best-effort
+    mailer.send_customer_booking_email(result, draft)  # best-effort
     _track_async("confirmed", draft.get("session_id"), draft.get("service"),
                  request.headers.get("User-Agent"), request.headers.get("Referer"))
     return jsonify({"ok": True, "reference": result["reference"]})

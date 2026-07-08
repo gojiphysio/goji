@@ -20,6 +20,7 @@ from .config import (
     CLINICIANS,
     HOME_TRAVEL_MINUTES,
     HOME_VISIT_CLINICIAN,
+    MAX_ADVANCE_DAYS,
     SERVICES,
     SLOT_MINUTES,
     clinician_by_calendar,
@@ -106,7 +107,7 @@ def derive_availability(
         delta = (day - today).days
         if delta < (rule.get("min_days") or 0):
             continue
-        if delta > (rule.get("max_days") or 365):
+        if delta > min(rule.get("max_days") or 365, MAX_ADVANCE_DAYS):
             continue
 
         # Window = the clinician's rule hours, clamped by any online-hours

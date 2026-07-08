@@ -10,7 +10,7 @@
 import FormField from "./FormField.astro";
 import ServiceOption from "./ServiceOption.astro";
 import Button from "../Button.astro";
-import BerrySprig from "../BerrySprig.astro";
+import BloomFlipbook from "../BloomFlipbook.astro";
 import { services } from "../../lib/services";
 import { clinicians } from "../../lib/clinicians";
 import { cta } from "../../lib/links";
@@ -61,6 +61,11 @@ const steps = [
         This service is offered in-clinic only.
       </p>
 
+      <p class="booking__surcharge" data-home-surcharge hidden>
+        Home visits include a <strong>$70 travel surcharge</strong>, added to the
+        session fee.
+      </p>
+
       <div class="booking__address" data-address hidden>
         <div class="booking__addr-grid">
           <FormField id="addr-block" name="addr-block" label="Block / house number" required={true} autocomplete="address-line1" placeholder="e.g. 123B" />
@@ -92,11 +97,33 @@ const steps = [
       <h2>When works for you?</h2>
     </legend>
 
-    <FormField id="date" name="date" label="Preferred date" type="date" required={true} />
+    <div class="booking__datewrap">
+      <p class="booking__sublabel" id="date-label">
+        Preferred date <span class="field__req" aria-hidden="true">*</span>
+      </p>
+      <input type="hidden" id="date" name="date" />
+      <div class="cal" data-cal aria-labelledby="date-label">
+        <div class="cal__head">
+          <button type="button" class="cal__nav" data-cal-prev aria-label="Previous month">
+            <span aria-hidden="true">&lsaquo;</span>
+          </button>
+          <span class="cal__title" data-cal-title aria-live="polite"></span>
+          <button type="button" class="cal__nav" data-cal-next aria-label="Next month">
+            <span aria-hidden="true">&rsaquo;</span>
+          </button>
+        </div>
+        <div class="cal__dow" aria-hidden="true">
+          <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span>
+          <span>Fri</span><span>Sat</span><span>Sun</span>
+        </div>
+        <div class="cal__grid" data-cal-grid role="grid"></div>
+      </div>
+      <p class="field__error" id="date-error" role="alert" hidden></p>
+    </div>
 
     <div class="booking__slots">
       <p class="booking__sublabel">Available times</p>
-      <div class="booking__chips" data-slots></div>
+      <div class="booking__slotlist" data-slots></div>
       <p class="booking__hint" data-slots-msg>Pick a date to see available times.</p>
       <p class="booking__error" data-error="time" role="alert" hidden></p>
     </div>
@@ -161,7 +188,7 @@ const steps = [
   {/* ---------- Confirmation ---------- */}
   <div class="booking__done" data-step="done" hidden>
     <div class="booking__done-sprig">
-      <BerrySprig animate={true} width={92} />
+      <BloomFlipbook size="132px" aria-label="A goji berry, ripe" />
     </div>
     <h2>Booking request received</h2>
     <p class="booking__done-lead" data-done-lead></p>
@@ -304,6 +331,28 @@ const steps = [
     color: var(--color-primary);
   }
 
+  /* Home-visit surcharge callout — shown when "Home visit" is selected. */
+  .booking__surcharge {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-2);
+    margin-top: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    background: var(--color-linen);
+    border: 1px solid var(--color-border);
+    border-left: 3px solid var(--color-accent);
+    border-radius: var(--radius-sm);
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+  }
+  .booking__surcharge strong {
+    color: var(--text-default);
+    font-weight: var(--weight-semibold);
+  }
+  .booking__surcharge[hidden] {
+    display: none;
+  }
+
   /* In-clinic / Home toggle */
   .booking__toggle {
     display: inline-flex;
@@ -356,34 +405,156 @@ const steps = [
     }
   }
 
-  /* Time chips */
-  .booking__chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-2);
+  /* Inline month calendar (replaces the native date input) */
+  .cal {
+    max-width: 22rem;
+    padding: var(--space-4);
+    background: var(--bg-content);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
   }
-  .chip {
-    padding: 0.5rem 0.9rem;
+  .cal__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-3);
+  }
+  .cal__title {
+    font-family: var(--font-display);
+    font-size: var(--fs-body);
+    font-weight: var(--weight-semibold);
+    color: var(--text-default);
+  }
+  .cal__nav {
+    width: 2rem;
+    height: 2rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     border: 1.5px solid var(--color-border);
     border-radius: var(--radius-pill);
     background: var(--bg-content);
-    font-family: var(--font-body);
-    font-size: var(--fs-small);
-    font-weight: var(--weight-semibold);
+    font-size: 1.1rem;
+    line-height: 1;
     color: var(--text-default);
     cursor: pointer;
     transition: border-color var(--dur) var(--ease),
       background-color var(--dur) var(--ease), color var(--dur) var(--ease);
   }
-  .chip:hover {
+  .cal__nav:hover:not([disabled]) {
     border-color: var(--color-border-strong);
   }
-  .chip[aria-pressed="true"] {
+  .cal__nav[disabled] {
+    opacity: 0.35;
+    cursor: default;
+  }
+  .cal__nav:focus-visible {
+    outline: 3px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+  .cal__dow {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: var(--space-1);
+    margin-bottom: var(--space-1);
+  }
+  .cal__dow span {
+    text-align: center;
+    font-size: var(--fs-caption);
+    font-weight: var(--weight-semibold);
+    color: var(--text-muted);
+    padding-block: var(--space-1);
+  }
+  .cal__grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: var(--space-1);
+  }
+  /* Day cells and time slots are created at runtime (in <script>), so Astro's
+     scoped attribute never lands on them. Constrain to the .booking ancestor
+     (scoped) but mark the runtime descendants :global so the rules apply. */
+  .booking :global(.cal__day) {
+    aspect-ratio: 1 / 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1.5px solid transparent;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    font-family: var(--font-body);
+    font-size: var(--fs-small);
+    font-weight: var(--weight-medium);
+    color: var(--text-default);
+    cursor: pointer;
+    transition: border-color var(--dur) var(--ease),
+      background-color var(--dur) var(--ease), color var(--dur) var(--ease);
+  }
+  .booking :global(.cal__day:hover:not([disabled]):not([aria-pressed="true"])) {
+    border-color: var(--color-border-strong);
+  }
+  .booking :global(.cal__day[disabled]) {
+    color: color-mix(in srgb, var(--text-muted) 45%, transparent);
+    cursor: default;
+  }
+  .booking :global(.cal__day[aria-pressed="true"]) {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: var(--color-linen);
+    font-weight: var(--weight-semibold);
+  }
+  .booking :global(.cal__day:focus-visible) {
+    outline: 3px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+  .booking :global(.cal__pad) {
+    aspect-ratio: 1 / 1;
+  }
+
+  /* Available times — grouped Morning / Afternoon slot grid */
+  .booking__slotlist {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+  .booking :global(.slots__gtitle) {
+    font-size: var(--fs-caption);
+    font-weight: var(--weight-semibold);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-label);
+    color: var(--text-muted);
+    margin-bottom: var(--space-2);
+  }
+  .booking :global(.slots__grid) {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(5.25rem, 1fr));
+    gap: var(--space-2);
+  }
+  .booking :global(.slot) {
+    padding: 0.7rem 0.5rem;
+    border: 1.5px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--bg-content);
+    font-family: var(--font-body);
+    font-size: var(--fs-small);
+    font-weight: var(--weight-semibold);
+    color: var(--text-default);
+    text-align: center;
+    cursor: pointer;
+    transition: border-color var(--dur) var(--ease),
+      background-color var(--dur) var(--ease), color var(--dur) var(--ease),
+      box-shadow var(--dur) var(--ease);
+  }
+  .booking :global(.slot:hover:not([aria-pressed="true"])) {
+    border-color: var(--color-border-strong);
+    box-shadow: var(--shadow-sm);
+  }
+  .booking :global(.slot[aria-pressed="true"]) {
     background: var(--color-primary);
     border-color: var(--color-primary);
     color: var(--color-linen);
   }
-  .chip:focus-visible {
+  .booking :global(.slot:focus-visible) {
     outline: 3px solid var(--color-accent);
     outline-offset: 2px;
   }
@@ -571,7 +742,7 @@ const steps = [
     padding-block: var(--space-6);
   }
   .booking__done-sprig {
-    opacity: 0.9;
+    margin-bottom: calc(-1 * var(--space-2));
   }
   .booking__done-lead {
     max-width: 40ch;
@@ -668,13 +839,16 @@ const steps = [
     const whereBlock = form.querySelector<HTMLElement>("[data-where]");
     const homeLabel = form.querySelector<HTMLElement>("[data-home-label]");
     const homeHint = form.querySelector<HTMLElement>("[data-home-hint]");
+    const homeSurcharge = form.querySelector<HTMLElement>("[data-home-surcharge]");
     const addressBlock = form.querySelector<HTMLElement>("[data-address]");
 
     // Show + require the address fields ONLY for a home visit; an in-clinic
-    // booking never asks for an address.
+    // booking never asks for an address. The travel surcharge is surfaced the
+    // moment "Home visit" is chosen.
     function syncAddress() {
       const home = getChecked("format") === "home";
       if (addressBlock) addressBlock.hidden = !home;
+      if (homeSurcharge) homeSurcharge.hidden = !home;
       ["addr-block", "addr-street", "addr-postal"].forEach((id) => {
         const el = document.getElementById(id) as HTMLInputElement | null;
         if (el) el.required = home;
@@ -750,21 +924,97 @@ const steps = [
       lastAvailKey = "";
     }
 
-    // ----- Step 2: date + slots -----
+    // ----- Step 2: date (inline calendar) + slots -----
     const dateInput = document.getElementById("date") as HTMLInputElement | null;
     const chips = form.querySelector<HTMLElement>("[data-slots]");
     const slotsMsg = form.querySelector<HTMLElement>("[data-slots-msg]");
 
-    if (dateInput) {
-      dateInput.min = new Date().toISOString().slice(0, 10);
-      dateInput.addEventListener("change", () => {
-        setFieldError("date", "");
-        refreshSlots();
-      });
-    }
+    initCalendar();
+
     form.querySelectorAll<HTMLInputElement>('input[name="clinician"]').forEach(
       (input) => input.addEventListener("change", refreshSlots),
     );
+
+    /**
+     * Inline month calendar — the primary date picker (no click-to-open icon).
+     * Writes YYYY-MM-DD into the hidden #date input, then refreshes slots.
+     * Bounded to [tomorrow, +60 days]; Sundays (clinic closed) are disabled.
+     */
+    function initCalendar() {
+      const grid = form!.querySelector<HTMLElement>("[data-cal-grid]");
+      const title = form!.querySelector<HTMLElement>("[data-cal-title]");
+      const prev = form!.querySelector<HTMLButtonElement>("[data-cal-prev]");
+      const next = form!.querySelector<HTMLButtonElement>("[data-cal-next]");
+      if (!grid || !title || !prev || !next || !dateInput) return;
+
+      const startOfDay = (d: Date) => {
+        const x = new Date(d);
+        x.setHours(0, 0, 0, 0);
+        return x;
+      };
+      const today = startOfDay(new Date());
+      const minDate = new Date(today);
+      minDate.setDate(minDate.getDate() + 1); // 1 day in advance (no same-day)
+      const maxDate = new Date(today);
+      maxDate.setDate(maxDate.getDate() + 60); // bookings capped 60 days out
+      const ymd = (d: Date) =>
+        `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+      const sameMonth = (a: Date, b: Date) =>
+        a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth();
+
+      let view = new Date(minDate.getFullYear(), minDate.getMonth(), 1);
+
+      function render() {
+        title!.textContent = view.toLocaleDateString("en-SG", {
+          month: "long",
+          year: "numeric",
+        });
+        prev!.disabled = sameMonth(view, minDate);
+        next!.disabled = sameMonth(view, maxDate);
+        grid!.innerHTML = "";
+        const y = view.getFullYear();
+        const m = view.getMonth();
+        const offset = (new Date(y, m, 1).getDay() + 6) % 7; // Mon=0 .. Sun=6
+        for (let i = 0; i < offset; i++) {
+          const pad = document.createElement("span");
+          pad.className = "cal__pad";
+          grid!.appendChild(pad);
+        }
+        const days = new Date(y, m + 1, 0).getDate();
+        for (let d = 1; d <= days; d++) {
+          const date = new Date(y, m, d);
+          const value = ymd(date);
+          const disabled =
+            date < minDate || date > maxDate || date.getDay() === 0; // Sun closed
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "cal__day";
+          btn.textContent = String(d);
+          btn.disabled = disabled;
+          btn.setAttribute("aria-pressed", String(value === dateInput!.value));
+          if (!disabled) {
+            btn.addEventListener("click", () => {
+              dateInput!.value = value;
+              selectedTime = "";
+              setFieldError("date", "");
+              render();
+              refreshSlots();
+            });
+          }
+          grid!.appendChild(btn);
+        }
+      }
+
+      prev.addEventListener("click", () => {
+        view = new Date(view.getFullYear(), view.getMonth() - 1, 1);
+        render();
+      });
+      next.addEventListener("click", () => {
+        view = new Date(view.getFullYear(), view.getMonth() + 1, 1);
+        render();
+      });
+      render();
+    }
 
     function fmtTime(t: string): string {
       const [h, m] = t.split(":").map(Number);
@@ -802,26 +1052,41 @@ const steps = [
         return;
       }
       slotsMsg.hidden = true;
-      times.forEach((t) => {
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "chip";
-        btn.dataset.time = t;
-        btn.textContent = fmtTime(t);
-        btn.setAttribute("aria-pressed", String(t === selectedTime));
-        btn.addEventListener("click", () => {
-          selectedTime = t;
-          setError("time", "");
-          chips
-            .querySelectorAll<HTMLElement>(".chip")
-            .forEach((c) =>
-              c.setAttribute(
-                "aria-pressed",
-                String(c.dataset.time === selectedTime),
-              ),
-            );
+      const onPick = (t: string) => {
+        selectedTime = t;
+        setError("time", "");
+        chips!
+          .querySelectorAll<HTMLElement>(".slot")
+          .forEach((c) =>
+            c.setAttribute("aria-pressed", String(c.dataset.time === selectedTime)),
+          );
+      };
+      const groups: { title: string; times: string[] }[] = [
+        { title: "Morning", times: times.filter((t) => Number(t.slice(0, 2)) < 12) },
+        { title: "Afternoon", times: times.filter((t) => Number(t.slice(0, 2)) >= 12) },
+      ];
+      groups.forEach((g) => {
+        if (!g.times.length) return;
+        const wrap = document.createElement("div");
+        wrap.className = "slots__group";
+        const h = document.createElement("p");
+        h.className = "slots__gtitle";
+        h.textContent = g.title;
+        const gr = document.createElement("div");
+        gr.className = "slots__grid";
+        g.times.forEach((t) => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "slot";
+          btn.dataset.time = t;
+          btn.textContent = fmtTime(t);
+          btn.setAttribute("aria-pressed", String(t === selectedTime));
+          btn.addEventListener("click", () => onPick(t));
+          gr.appendChild(btn);
         });
-        chips.appendChild(btn);
+        wrap.appendChild(h);
+        wrap.appendChild(gr);
+        chips!.appendChild(wrap);
       });
     }
 
@@ -904,7 +1169,7 @@ const steps = [
         : "";
       const rows: [string, string][] = [
         ["Service", svc?.title ?? ""],
-        ["Where", d.format === "home" ? "Home visit" : "In-clinic"],
+        ["Where", d.format === "home" ? "Home visit (+$70 travel)" : "In-clinic"],
       ];
       if (d.format === "home" && d.address) rows.push(["Address", d.address]);
       rows.push(["When", `${dateLabel} · ${fmtTime(d.time)}`]);

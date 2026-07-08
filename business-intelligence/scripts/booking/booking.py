@@ -15,6 +15,7 @@ from __future__ import annotations
 import re
 import threading
 from datetime import date, datetime, timedelta
+from zoneinfo import ZoneInfo
 
 from .availability import derive_availability
 from .config import (
@@ -22,8 +23,11 @@ from .config import (
     HOME_TRAVEL_MINUTES,
     HOME_VISIT_CLINICIAN,
     HOME_VISIT_TYPE_CODE,
+    MAX_ADVANCE_DAYS,
     SERVICES,
 )
+
+_SGT = ZoneInfo("Asia/Singapore")
 
 _EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 _PHONE_RE = re.compile(r"^[+\d][\d\s()-]{6,}$")
@@ -79,6 +83,14 @@ def create_booking(plato, draft: dict, *, now: datetime | None = None) -> dict:
         raise BookingError("Please choose a valid date.")
     time_ = (draft.get("time") or "").strip()
     _require(_TIME_RE.match(time_), "Please choose a valid time.")
+
+    today = (now or datetime.now(_SGT).replace(tzinfo=None)).date()
+    _require(
+        (day - today).days <= MAX_ADVANCE_DAYS,
+        f"That date is too far ahead. Please choose a date within the next "
+        f"{MAX_ADVANCE_DAYS} days.",
+        "too_far",
+    )
 
     name = (draft.get("name") or "").strip()
     phone = (draft.get("phone") or "").strip()
