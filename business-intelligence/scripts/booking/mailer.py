@@ -28,9 +28,11 @@ SMTP_PORT = int(os.environ.get("SMTP_PORT", "587"))
 SMTP_USER = os.environ.get("SMTP_USER", "hello@gojiphysio.com")
 SMTP_PASS = os.environ.get("GMAIL_APP_PASSWORD")  # Secret Manager
 ADMIN_TO = os.environ.get("BOOKING_ADMIN_EMAIL", "hello@gojiphysio.com")
-FROM_NAME = os.environ.get("BOOKING_FROM_NAME", "Goji Health")
+FROM_NAME = os.environ.get("BOOKING_FROM_NAME", "Goji Physiotherapy")
 # Tracked WhatsApp CTA (goes through the go.gojiphysio.com redirector).
 WHATSAPP_LINK = os.environ.get("BOOKING_WA_LINK", "https://go.gojiphysio.com/web-wa")
+# Clinic Google Maps listing, included in the confirmation for easy directions.
+MAPS_LINK = os.environ.get("BOOKING_MAPS_LINK", "https://maps.app.goo.gl/fUnkD6QwYD8o5qnx9")
 
 
 def _send(msg: EmailMessage, what: str, ref: str | None) -> None:
@@ -101,18 +103,18 @@ def send_customer_booking_email(result: dict, draft: dict) -> None:
         return
     try:
         name = (draft.get("name") or "there").split()[0]
-        where = "Home visit" if result.get("home") else "In-clinic at Goji Health, Lentor Modern"
+        where = "Home visit" if result.get("home") else "In-clinic at Goji Physiotherapy, Lentor Modern"
         when = _fmt_when(result.get("date", ""), result.get("time", ""))
         msg = EmailMessage()
-        msg["Subject"] = f"Your Goji Health booking - {when}"
+        msg["Subject"] = f"Your Goji Physiotherapy booking - {when}"
         msg["From"] = formataddr((FROM_NAME, SMTP_USER))
         msg["To"] = to
         msg["Reply-To"] = SMTP_USER
         lines = [
             f"Hi {name},",
             "",
-            "Thanks for booking with Goji Health. We've received your request and "
-            "here are the details:",
+            "Thanks for booking with Goji Physiotherapy. We've received your "
+            "request and here are the details:",
             "",
             f"Service:   {result['service']}",
             f"When:      {when} (Singapore time)",
@@ -121,6 +123,8 @@ def send_customer_booking_email(result: dict, draft: dict) -> None:
         ]
         if result.get("home") and draft.get("address"):
             lines.append(f"Address:   {draft.get('address')}")
+        if (draft.get("notes") or "").strip():
+            lines.append(f"You told us: {draft.get('notes').strip()}")
         lines += [
             f"Reference: {result['reference']}",
             "",
@@ -129,8 +133,9 @@ def send_customer_booking_email(result: dict, draft: dict) -> None:
             f"  {WHATSAPP_LINK}",
             "",
             "See you soon,",
-            "The Goji Health team",
+            "The Goji Physiotherapy team",
             "Lentor Modern, #01-13, Lentor Central, Singapore 788887",
+            f"Find us on Google Maps: {MAPS_LINK}",
         ]
         msg.set_content("\n".join(lines))
         _send(msg, "customer booking", result.get("reference"))
