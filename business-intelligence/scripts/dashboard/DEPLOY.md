@@ -315,8 +315,11 @@ service also keeps `GET /r/<slug>` working internally, but the published links a
    → Actions → **Variables**):
    - `WHATSAPP_NUMBER` — WhatsApp business number, E.164 digits, no `+`
      (e.g. `6580000000`). Enables the WhatsApp slugs.
-   - `PLATO_BOOKING_URL` — your Plato online-booking page URL. Enables the `book`
-     slug.
+   - `SITE_BOOKING_URL` — the website booking form (defaults to
+     `https://www.gojiphysio.com/book`). Enables the `*-book` slugs (the current
+     booking CTA).
+   - `PLATO_BOOKING_URL` — legacy Plato online-booking page URL. Enables the
+     `*-plato` slugs (kept so old published links never dead-end).
    - `WHATSAPP_FALLBACK_URL` — optional; where the bare root and any unconfigured
      slug go (defaults to `https://www.gojiphysio.com`). Until a target is set,
      links fall back here so they never dead-end.
@@ -330,20 +333,24 @@ service also keeps `GET /r/<slug>` working internally, but the published links a
 `deploy_links.sh` does the same standup from Cloud Shell if you ever need a manual
 fallback, but the workflow is the primary path.
 
-Slugs are `<channel>-<destination>` — both explicit (`-wa` = WhatsApp, `-plato` =
-Plato booking), so nothing assumes a default CTA and clicks attribute by channel.
-Publish each as `https://go.gojiphysio.com/<slug>`:
+Slugs are `<channel>-<destination>` — both explicit (`-wa` = WhatsApp, `-book` =
+website `/book` form, `-plato` = legacy Plato booking), so nothing assumes a
+default CTA and clicks attribute by channel. The **Book button now points to our
+own `/book` form** (`-book`), not Plato. Publish each as
+`https://go.gojiphysio.com/<slug>`:
 
 | Where | WhatsApp button | Book button |
 |---|---|---|
-| Website (www.gojiphysio.com) | `…/web-wa` | `…/web-plato` |
-| `bio.site/gojiphysio` (IG/socials hub) | `…/bio-wa` | `…/bio-plato` |
-| Google Business Profile (later) | `…/gbp-wa` | `…/gbp-plato` |
-| Paid ads (later) | `…/ads-wa` | `…/ads-plato` |
-| QR codes (print / events / in-person) | `…/qr-wa` | `…/qr-plato` |
+| Website (www.gojiphysio.com) | `…/web-wa` | `…/web-book` |
+| `bio.site/gojiphysio` (IG/socials hub) | `…/bio-wa` | `…/bio-book` |
+| Google Business Profile (later) | `…/gbp-wa` | `…/gbp-book` |
+| Paid ads (later) | `…/ads-wa` | `…/ads-book` |
+| QR codes (print / events / in-person) | `…/qr-wa` | `…/qr-book` |
 
-`…/ig-wa` is available for any direct Instagram link; `…/wa` and `…/plato` are
-generic fallbacks. **bio.site mailing-list button:** point it straight at the
+`…/ig-wa` is available for any direct Instagram link; `…/wa` and `…/book` are
+generic fallbacks. The legacy `…/*-plato` slugs still resolve (to
+`PLATO_BOOKING_URL`) so previously-published booking links never dead-end, but new
+surfaces should use `…/*-book`. **bio.site mailing-list button:** point it straight at the
 signup page (untracked — nurture, not a primary CTA). **Instagram native
 WhatsApp/email action buttons can't be wrapped** (not custom URLs); keep the IG
 bio link pointing at bio.site so those clicks are tracked. Edit wording, change a

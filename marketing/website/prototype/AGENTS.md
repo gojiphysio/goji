@@ -25,8 +25,8 @@ so a token change reflows everything (styleguide is the QA surface).
   the `cta()` helper / Button `slug` prop (`src/lib/links.ts`). Never publish a
   raw `wa.me` / Plato URL, never the internal `dashboard.*` domain. Only slugs
   that exist in `LINK_SLUGS` (`business-intelligence/scripts/dashboard/app.py`)
-  are exposed today: `web-wa`, `web-plato`. A new CTA needs its slug added there
-  first.
+  are exposed today: `web-wa`, `web-book` (the Book CTA points at our own `/book`
+  form via `web-book`, not Plato). A new CTA needs its slug added there first.
 - **Compliance is a hard constraint** (`marketing/strategy/03-compliance-guardrails.md`).
   Applies to placeholder copy too: no cure/outcome/time guarantees, no
   superlatives ("best/leading/No.1"), no comparative claims, no before/after

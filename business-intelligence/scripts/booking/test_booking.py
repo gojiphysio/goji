@@ -97,6 +97,20 @@ def test_home_visit_rolls_back_on_failure():
     assert p.deleted == ["id001", "id002"]  # the two created were rolled back
 
 
+def test_condition_notes_land_in_description():
+    p = StubPlato()
+    res = create_booking(p, {**BASE, "clinician_id": "cheryl-long",
+                             "notes": "Right knee pain after running."}, now=NOW)
+    assert res["ok"]
+    assert "Condition: Right knee pain after running." in p.created[0][0]["description"]
+
+
+def test_empty_notes_are_a_no_op():
+    p = StubPlato()
+    create_booking(p, {**BASE, "clinician_id": "cheryl-long", "notes": "   "}, now=NOW)
+    assert "Condition:" not in p.created[0][0]["description"]
+
+
 def test_first_available_assigns_a_free_clinician():
     p = StubPlato()
     res = create_booking(p, {**BASE, "clinician_id": ""}, now=NOW)

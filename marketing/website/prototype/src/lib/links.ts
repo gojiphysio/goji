@@ -14,7 +14,7 @@
 const REDIRECT_BASE = "https://go.gojiphysio.com";
 
 /** Slugs the redirector serves today. Keep in sync with app.py `LINK_SLUGS`. */
-export type CtaSlug = "web-wa" | "web-plato";
+export type CtaSlug = "web-wa" | "web-book";
 
 /** Resolve a slug to its tracked redirect URL. */
 export function cta(slug: CtaSlug): string {
@@ -24,5 +24,5 @@ export function cta(slug: CtaSlug): string {
 /** Human-friendly defaults for the two web CTAs. */
 export const CTA = {
   whatsapp: { slug: "web-wa" as CtaSlug, label: "Message us on WhatsApp" },
-  book: { slug: "web-plato" as CtaSlug, label: "Book an appointment" },
+  book: { slug: "web-book" as CtaSlug, label: "Book an appointment" },
 } as const;
