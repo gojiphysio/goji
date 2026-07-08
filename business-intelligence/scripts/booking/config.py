@@ -19,8 +19,9 @@ HOME_TRAVEL_MINUTES = 30  # travel block before AND after a home visit
 # clinic's intended online hours differ from the raw Plato rule hours. Cheryl's
 # online bookings don't start until 09:00 (her rule says 08:00).
 CLINICIANS: dict[str, dict] = {
+    # Cheryl is fixed 09:00-17:00, Mon-Fri (Sat/Sun already off in Plato rules).
     "cheryl-long": {"name": "Cheryl Long", "calendar": "blue", "doctor": "PCL",
-                    "online_start": "09:00"},
+                    "online_start": "09:00", "online_end": "17:00"},
     "claire-ng": {"name": "Claire Ng", "calendar": "6hpO", "doctor": "PCN"},
     "kristy-ng": {"name": "Kristy Ng", "calendar": "green", "doctor": "PKN"},
 }
