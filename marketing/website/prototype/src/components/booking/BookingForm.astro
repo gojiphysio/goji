@@ -13,6 +13,7 @@ import Button from "../Button.astro";
 import BerrySprig from "../BerrySprig.astro";
 import { services } from "../../lib/services";
 import { clinicians } from "../../lib/clinicians";
+import { cta } from "../../lib/links";
 
 const steps = [
   { n: 1, label: "Service" },
@@ -144,6 +145,11 @@ const steps = [
     </div>
 
     <div class="booking__summary" data-summary></div>
+    <p class="booking__changes-note">
+      Need to change or cancel later? Message us on
+      <a href={cta("web-wa")} target="_blank" rel="noopener">WhatsApp</a>. That's
+      where we handle all appointment changes and cancellations.
+    </p>
     <p class="booking__error" data-error="submit" role="alert" hidden></p>
 
     <div class="booking__nav">
@@ -160,8 +166,9 @@ const steps = [
     <h2>Booking request received</h2>
     <p class="booking__done-lead" data-done-lead></p>
     <p class="booking__hint">
-      We'll confirm your appointment shortly. If you'd like to add anything before
-      then, message us and we'll pick it up.
+      A confirmation is on its way to your email. To change or cancel this
+      appointment, message us on WhatsApp. That's where we handle all changes
+      and cancellations.
     </p>
     <div class="booking__done-cta">
       <Button slug="web-wa" variant="whatsapp" size="lg">Message us on WhatsApp</Button>
@@ -490,6 +497,13 @@ const steps = [
     font-weight: var(--weight-semibold);
     text-align: right;
   }
+  .booking__changes-note {
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+  }
+  .booking__changes-note a {
+    font-weight: var(--weight-semibold);
+  }
 
   /* Nav + local buttons (native <button>, mirrors .btn tokens) */
   .booking__nav {
@@ -759,7 +773,7 @@ const steps = [
         slotsMsg.textContent = "Pick a date to see available times.";
         return;
       }
-      const key = `${d.service}|${d.clinicianId}|${d.date}`;
+      const key = `${d.service}|${d.clinicianId}|${d.date}|${d.format}`;
       lastAvailKey = key;
       chips.innerHTML = "";
       slotsMsg.hidden = false;
@@ -768,6 +782,7 @@ const steps = [
         service: d.service,
         clinicianId: d.clinicianId,
         date: d.date,
+        home: d.format === "home",
       });
       if (key !== lastAvailKey) return; // a newer request superseded this one
       if (!times.length) {
@@ -911,7 +926,11 @@ const steps = [
     form.querySelectorAll<HTMLElement>('[data-nav="next"]').forEach((btn) =>
       btn.addEventListener("click", () => {
         if (!validate(current)) return;
-        if (current === 1) refreshSlots();
+        if (current === 1) {
+          bookingApi.track("service_selected");
+          refreshSlots();
+        }
+        if (current === 2) bookingApi.track("time_selected");
         if (current + 1 === 3) buildSummary();
         goto(current + 1);
       }),
@@ -924,6 +943,7 @@ const steps = [
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       if (!validate(3)) return;
+      bookingApi.track("submitted");
       const submitBtn = form.querySelector<HTMLButtonElement>("[data-submit]");
       if (submitBtn) {
         submitBtn.disabled = true;
@@ -968,6 +988,7 @@ const steps = [
     });
 
     // Initial state (no scroll — keep the page heading in view on load).
+    bookingApi.track("page_view");
     goto(1, false);
   }
 </script>

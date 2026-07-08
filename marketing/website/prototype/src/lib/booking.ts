@@ -1,14 +1,13 @@
 /**
  * Booking data contract + the API seam the booking form talks to.
  *
- * PHASE 1 (now): `bookingApi` is a client-side MOCK so the whole flow is
- * reviewable on the static site with no backend and no Plato key.
- *
- * PHASE 2 (next): replace the two method bodies with `fetch` calls to the
- * `goji-booking` backend — `GET /api/availability` and `POST /api/book` — which
- * hold the write-capable Plato key server-side and create the appointment via
- * Plato `POST /{db}/appointment`. The form UI depends only on this interface, so
- * nothing above this file changes.
+ * The UI depends only on `BookingApi`. Which implementation runs is decided by
+ * the `PUBLIC_BOOKING_API` build env var:
+ *   - unset  -> MOCK (local dev / preview / the static mock-up; no real writes)
+ *   - set    -> REAL fetch to the goji-booking backend
+ *              (GET /api/availability, POST /api/book, POST /api/track)
+ * So the same static build is safe to preview, and production just sets the var
+ * to `https://booking.gojiphysio.com`.
  */
 import type { ServiceId } from "./services";
 
@@ -31,20 +30,109 @@ export interface AvailabilityQuery {
   service: ServiceId;
   clinicianId: string;
   date: string;
+  home: boolean;
 }
 
 export interface BookingResult {
   ok: boolean;
   reference?: string;
   error?: string;
+  code?: string;
 }
+
+export type FunnelStage =
+  | "page_view"
+  | "service_selected"
+  | "time_selected"
+  | "details"
+  | "submitted";
 
 export interface BookingApi {
   getAvailability(query: AvailabilityQuery): Promise<string[]>;
   createBooking(draft: BookingDraft): Promise<BookingResult>;
+  /** Fire-and-forget funnel event; no-op in the mock. */
+  track(stage: FunnelStage): void;
 }
 
-/** Deterministic 0..1 pseudo-random from a string, so mock slots are stable per date. */
+const API = import.meta.env.PUBLIC_BOOKING_API as string | undefined;
+
+/** Stable per-session id so the backend can count drop-off by distinct session. */
+export function bookingSessionId(): string {
+  try {
+    const key = "goji_booking_sid";
+    let v = sessionStorage.getItem(key);
+    if (!v) {
+      v = crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2);
+      sessionStorage.setItem(key, v);
+    }
+    return v;
+  } catch {
+    return "nosession";
+  }
+}
+
+// ---- Real backend ----------------------------------------------------------
+const realApi: BookingApi = {
+  async getAvailability({ service, clinicianId, date, home }) {
+    if (!date) return [];
+    const p = new URLSearchParams({ service, date });
+    if (clinicianId) p.set("clinician", clinicianId);
+    if (home) p.set("home", "1");
+    try {
+      const r = await fetch(`${API}/api/availability?${p.toString()}`);
+      if (!r.ok) return [];
+      const d = await r.json();
+      return Array.isArray(d.times) ? d.times : [];
+    } catch {
+      return [];
+    }
+  },
+
+  async createBooking(draft) {
+    try {
+      const r = await fetch(`${API}/api/book`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          service: draft.service,
+          date: draft.date,
+          time: draft.time,
+          format: draft.format,
+          name: draft.name,
+          phone: draft.phone,
+          email: draft.email,
+          clinician_id: draft.clinicianId,
+          address: draft.address,
+          session_id: bookingSessionId(),
+        }),
+      });
+      const d = await r.json().catch(() => ({}));
+      if (r.ok && d.ok) return { ok: true, reference: d.reference };
+      return {
+        ok: false,
+        error: d.error || "Something went wrong. Please try again or message us.",
+        code: d.code,
+      };
+    } catch {
+      return { ok: false, error: "We couldn't reach the booking system. Please message us on WhatsApp." };
+    }
+  },
+
+  track(stage) {
+    try {
+      fetch(`${API}/api/track`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ stage, session_id: bookingSessionId() }),
+        keepalive: true,
+      }).catch(() => {});
+    } catch {
+      /* never break the flow for a tracking hiccup */
+    }
+  },
+};
+
+// ---- Mock (default) --------------------------------------------------------
 function seededUnit(seed: string, salt: number): number {
   let h = 2166136261 ^ salt;
   for (let i = 0; i < seed.length; i++) {
@@ -53,31 +141,23 @@ function seededUnit(seed: string, salt: number): number {
   }
   return ((h >>> 0) % 1000) / 1000;
 }
-
 const MOCK_LATENCY_MS = 450;
 
-/**
- * Phase 1 mock. Availability: 30-min slots across clinic hours, with a stable,
- * date-dependent subset marked open. Sundays return no slots (clinic closed).
- */
-export const bookingApi: BookingApi = {
+const mockApi: BookingApi = {
   async getAvailability({ service, clinicianId, date }) {
     await new Promise((r) => setTimeout(r, MOCK_LATENCY_MS));
     if (!date) return [];
-    const day = new Date(`${date}T00:00:00`).getDay(); // 0 = Sunday
-    if (day === 0) return [];
+    if (new Date(`${date}T00:00:00`).getDay() === 0) return []; // Sunday closed
     const open: string[] = [];
     const key = `${service}|${clinicianId}|${date}`;
-    // 09:00 to 16:30 in 30-min steps.
     for (let i = 0; i < 16; i++) {
-      const mins = 9 * 60 + i * 30;
+      const mins = 9 * 60 + i * 30; // 09:00–16:30, 30-min steps
       const hh = String(Math.floor(mins / 60)).padStart(2, "0");
       const mm = String(mins % 60).padStart(2, "0");
       if (seededUnit(key, i) > 0.45) open.push(`${hh}:${mm}`);
     }
     return open;
   },
-
   async createBooking(draft) {
     await new Promise((r) => setTimeout(r, MOCK_LATENCY_MS));
     if (!draft.service || !draft.date || !draft.time || !draft.name) {
@@ -85,12 +165,15 @@ export const bookingApi: BookingApi = {
     }
     const ref =
       "GOJI-" +
-      Math.abs(
-        Math.floor(seededUnit(JSON.stringify(draft), 7) * 1e6),
-      )
+      Math.abs(Math.floor(seededUnit(JSON.stringify(draft), 7) * 1e6))
         .toString(36)
         .toUpperCase()
         .padStart(4, "0");
     return { ok: true, reference: ref };
   },
+  track() {
+    /* no-op in the mock */
+  },
 };
+
+export const bookingApi: BookingApi = API ? realApi : mockApi;
