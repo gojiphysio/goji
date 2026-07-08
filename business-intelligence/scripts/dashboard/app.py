@@ -1238,6 +1238,48 @@ GROUP BY slug
             "wa_by_slug": wa_by_slug, "book_by_slug": book_by_slug}
 
 
+# Ordered website booking-funnel stages (event stage -> display label).
+BOOKING_FUNNEL_STAGES = [
+    ("page_view", "Viewed"),
+    ("service_selected", "Chose service"),
+    ("time_selected", "Chose time"),
+    ("submitted", "Submitted"),
+    ("confirmed", "Booked"),
+]
+
+
+def fetch_booking_funnel(start: date, end: date) -> dict:
+    """Website /book funnel for [start, end]: distinct sessions reaching each
+    stage, in order, from marts.booking_funnel_events (written by goji-booking).
+
+    Degrades to zeros if the table isn't deployed yet, like fetch_link_clicks —
+    the Marketing tab must still render.
+    """
+    labels = dict(BOOKING_FUNNEL_STAGES)
+    order = [s for s, _ in BOOKING_FUNNEL_STAGES]
+    empty = {"stages": [{"stage": s, "label": labels[s], "sessions": 0} for s in order],
+             "viewed": 0, "booked": 0, "conversion_pct": 0.0}
+    try:
+        rows = _query(f"""
+SELECT stage, COUNT(DISTINCT session_id) AS sessions
+FROM `{PROJECT}.marts.booking_funnel_events`
+WHERE DATE(occurred_at) BETWEEN '{start}' AND '{end}'
+GROUP BY stage
+""")
+    except Exception as e:
+        log.warning("booking_funnel_events unavailable (run deploy_all.sh?): %s", e)
+        return empty
+    counts = {r["stage"]: _to_int(r["sessions"]) for r in rows}
+    viewed = counts.get("page_view", 0)
+    booked = counts.get("confirmed", 0)
+    return {
+        "stages": [{"stage": s, "label": labels[s], "sessions": counts.get(s, 0)} for s in order],
+        "viewed": viewed,
+        "booked": booked,
+        "conversion_pct": round(booked / viewed * 100.0, 1) if viewed else 0.0,
+    }
+
+
 def fetch_google_ads(start: date, end: date) -> dict:
     """Google Ads spend/clicks/impressions for [start, end] from the BQ Data Transfer dataset.
 
@@ -1463,6 +1505,7 @@ def build_payload() -> dict:
                 "packages":       ex.submit(fetch_packages, start, end),
                 "deferred":       ex.submit(fetch_deferred, end),
                 "link_clicks":    ex.submit(fetch_link_clicks, start, end),
+                "booking_funnel": ex.submit(fetch_booking_funnel, start, end),
                 "google_ads":     ex.submit(fetch_google_ads, start, end),
                 "web_sessions":   ex.submit(fetch_web_sessions, start, end),
                 "lead_wins":      ex.submit(fetch_lead_wins, start, end),
@@ -1509,6 +1552,7 @@ def build_payload() -> dict:
                 "deferred_stats":   v["deferred"].result(),
                 "link_clicks":      v["link_clicks"].result(),
                 "link_clicks_prev": v["link_clicks_prev"].result() if v["link_clicks_prev"] else None,
+                "booking_funnel":   v["booking_funnel"].result(),
                 "google_ads":       v["google_ads"].result(),
                 "google_ads_prev":  v["google_ads_prev"].result() if v["google_ads_prev"] else None,
                 "web_sessions":      v["web_sessions"].result(),
