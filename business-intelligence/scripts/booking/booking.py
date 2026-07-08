@@ -90,6 +90,10 @@ def create_booking(plato, draft: dict, *, now: datetime | None = None) -> dict:
     address = (draft.get("address") or "").strip()
     _require(not home or address, "Please add the home-visit address.")
 
+    # Optional free-text the patient shares about their condition; capped so a
+    # runaway paste can't bloat the Plato appointment note.
+    notes = (draft.get("notes") or "").strip()[:1000]
+
     # Candidate clinicians: home = Cheryl only; explicit choice = that one; else
     # anyone offering the service who is free at the slot (availability decides).
     if home:
@@ -111,7 +115,7 @@ def create_booking(plato, draft: dict, *, now: datetime | None = None) -> dict:
                 last_err = BookingError("That time is no longer available.", "slot_taken")
                 continue
             ids, visit_id = _create_appointments(
-                plato, svc, cid, day, time_, home, name, phone, email, address)
+                plato, svc, cid, day, time_, home, name, phone, email, address, notes)
             return {
                 "ok": True,
                 "reference": "GOJI-" + visit_id[-6:].upper(),
@@ -135,11 +139,13 @@ def _post(plato, payload: dict) -> str:
 
 
 def _create_appointments(plato, svc, cid, day, time_, home, name, phone, email,
-                         address) -> tuple[list[str], str]:
+                         address, notes="") -> tuple[list[str], str]:
     """Create the appointment(s). Returns (all_ids, visit_id). Rolls back on any
     failure so a partial home visit never lingers."""
     clin = CLINICIANS[cid]
     color, doctor, dur = clin["calendar"], clin["doctor"], svc["duration_min"]
+    # Patient's condition note, appended to the visit description when present.
+    note_line = f"\nCondition: {notes}" if notes else ""
     created: list[str] = []
     try:
         if home:
@@ -153,7 +159,8 @@ def _create_appointments(plato, svc, cid, day, time_, home, name, phone, email,
             visit_id = _post(plato, {
                 "title": f"{name} (home visit)",
                 "description": (f"HOME VISIT — {svc['title']}. Booked via website.\n"
-                                f"Patient: {name} ({phone}).\nAddress: {address}"),
+                                f"Patient: {name} ({phone}).\nAddress: {address}"
+                                f"{note_line}"),
                 "starttime": _dt(day, time_),
                 "endtime": _dt(day, time_, dur),
                 "color": color, "doctor": doctor,
@@ -172,7 +179,8 @@ def _create_appointments(plato, svc, cid, day, time_, home, name, phone, email,
             visit_id = _post(plato, {
                 "title": name,
                 "description": (f"{svc['title']}. Booked via website.\n"
-                                f"Patient: {name} ({phone})."),
+                                f"Patient: {name} ({phone})."
+                                f"{note_line}"),
                 "starttime": _dt(day, time_),
                 "endtime": _dt(day, time_, dur),
                 "color": color, "doctor": doctor,

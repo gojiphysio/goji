@@ -48,6 +48,8 @@ def send_admin_booking_email(result: dict, draft: dict) -> None:
         ]
         if result.get("home"):
             lines.append(f"Address:   {draft.get('address')}")
+        if (draft.get("notes") or "").strip():
+            lines.append(f"Condition: {draft.get('notes').strip()}")
         lines += [f"Reference: {result['reference']}", "",
                   "The customer has been sent Plato's confirmation. Changes and "
                   "cancellations are handled over WhatsApp."]

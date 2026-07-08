@@ -62,6 +62,9 @@ const steps = [
       </p>
 
       <div class="booking__address" data-address hidden>
+        <p class="booking__disclaimer">
+          Home visits include a $70 travel surcharge on top of the session fee.
+        </p>
         <div class="booking__addr-grid">
           <FormField id="addr-block" name="addr-block" label="Block / house number" required={true} autocomplete="address-line1" placeholder="e.g. 123B" />
           <FormField id="addr-postal" name="addr-postal" label="Postal code" required={true} inputmode="numeric" autocomplete="postal-code" placeholder="6 digits" />
@@ -143,6 +146,14 @@ const steps = [
       <FormField id="phone" name="phone" label="Phone" type="tel" required={true} autocomplete="tel" inputmode="tel" />
       <FormField id="email" name="email" label="Email" type="email" required={true} autocomplete="email" inputmode="email" />
     </div>
+
+    <FormField
+      id="notes"
+      name="notes"
+      label="Tell us about your condition (optional)"
+      textarea={true}
+      placeholder="A few words on your symptoms, injury or goals helps us prepare for your visit."
+    />
 
     <div class="booking__summary" data-summary></div>
     <p class="booking__changes-note">
@@ -341,6 +352,23 @@ const steps = [
     display: flex;
     flex-direction: column;
     gap: var(--space-4);
+  }
+  /* The base display:flex above outranks the UA [hidden] rule, so an in-clinic
+     booking would still show the address block (and its surcharge note). Re-hide
+     it explicitly, mirroring .booking__step[hidden]. */
+  .booking__address[hidden] {
+    display: none;
+  }
+  /* Home-visit travel-surcharge note: full-width box with symmetric padding so
+     the text never sits with stray gaps on either side. */
+  .booking__disclaimer {
+    margin: 0;
+    padding: var(--space-3) var(--space-4);
+    background: var(--color-linen);
+    border-radius: var(--radius-sm);
+    font-size: var(--fs-small);
+    color: var(--text-default);
+    line-height: var(--lh-body);
   }
   .booking__addr-grid {
     display: grid;
@@ -614,6 +642,7 @@ const steps = [
       name: getValue("name"),
       phone: getValue("phone"),
       email: getValue("email"),
+      notes: getValue("notes"),
     });
 
     function getChecked(name: string): string | null {
@@ -824,6 +853,20 @@ const steps = [
         chips.appendChild(btn);
       });
     }
+
+    // ----- Step 3: fire the "details" funnel event once, when the user first
+    // engages the details form. This is distinct from merely reaching the step
+    // (implied by "time_selected"), so the dashboard can see who lands on the
+    // details step but never starts filling it in. -----
+    let detailsTracked = false;
+    ["name", "phone", "email", "notes"].forEach((id) => {
+      const el = document.getElementById(id);
+      el?.addEventListener("input", () => {
+        if (detailsTracked) return;
+        detailsTracked = true;
+        bookingApi.track("details");
+      });
+    });
 
     // ----- Validation per step -----
     function validate(step: number): boolean {

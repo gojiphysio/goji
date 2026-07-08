@@ -24,6 +24,8 @@ export interface BookingDraft {
   name: string;
   phone: string;
   email: string;
+  /** Optional free-text: what the patient wants us to know about their condition. */
+  notes: string;
 }
 
 export interface AvailabilityQuery {
@@ -103,6 +105,7 @@ const realApi: BookingApi = {
           email: draft.email,
           clinician_id: draft.clinicianId,
           address: draft.address,
+          notes: draft.notes,
           session_id: bookingSessionId(),
         }),
       });

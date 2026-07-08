@@ -261,7 +261,9 @@ def test_lead_stage_and_channel_vocab():
 def test_build_funnel_paths_sources_ctas_and_biosite_hop():
     link_clicks = {
         "wa_by_slug":   {"ig-wa": 50, "bio-wa": 60, "web-wa": 40, "gbp-wa": 30, "wa": 5},
-        "book_by_slug": {"bio-plato": 20, "web-plato": 24, "ads-plato": 28, "plato": 3},
+        # book_by_slug carries both the website /book slugs (*-book) and any legacy
+        # Plato slugs (*-plato); both are the "Booking" CTA in the funnel.
+        "book_by_slug": {"bio-book": 20, "web-book": 24, "ads-book": 28, "book": 3},
     }
     f = app._build_funnel_paths(link_clicks, {"new_patients": 47},
                                 {"whatsapp": 12, "instagram": 3})
@@ -269,23 +271,23 @@ def test_build_funnel_paths_sources_ctas_and_biosite_hop():
 
     # ig-* is a direct Instagram tap; bio-* routes Instagram -> bio.site -> CTA.
     assert flows[("Instagram", "WhatsApp")] == 50        # ig-wa direct
-    assert flows[("Instagram", "bio.site")] == 80        # bio-wa 60 + bio-plato 20
+    assert flows[("Instagram", "bio.site")] == 80        # bio-wa 60 + bio-book 20
     assert flows[("bio.site", "WhatsApp")] == 60
-    assert flows[("bio.site", "Plato booking")] == 20
+    assert flows[("bio.site", "Booking")] == 20
     # Other sources map by slug prefix; gbp -> Google.
     assert flows[("Web", "WhatsApp")] == 40
     assert flows[("Google", "WhatsApp")] == 30
-    assert flows[("Web", "Plato booking")] == 24
-    assert flows[("Ads", "Plato booking")] == 28
-    # Generic fallback slugs ('wa' / 'plato') have no source prefix -> "Other".
+    assert flows[("Web", "Booking")] == 24
+    assert flows[("Ads", "Booking")] == 28
+    # Generic fallback slugs ('wa' / 'book') have no source prefix -> "Other".
     assert flows[("Other", "WhatsApp")] == 5
-    assert flows[("Other", "Plato booking")] == 3
+    assert flows[("Other", "Booking")] == 3
 
     # Patient outcome: WhatsApp-only bridge from the lead pipeline (won whatsapp
     # leads). Non-whatsapp wins (instagram) are NOT pulled into the tap funnel.
     assert flows[("WhatsApp", "Became a patient")] == 12
     assert flows[("WhatsApp", "Not linked yet")] == 185 - 12   # remaining WhatsApp taps
-    assert flows[("Plato booking", "Not linked yet")] == 75    # Plato isn't lead-linked yet
+    assert flows[("Booking", "Not linked yet")] == 75    # bookings aren't lead-linked yet
     assert f["became_patient"] == 12
 
     assert f["wa_taps"] == 185 and f["plato_taps"] == 75
@@ -403,6 +405,30 @@ def test_booking_falls_back_when_unset(client, monkeypatch, _no_click_logging):
     resp = client.get("/r/web-plato")
     assert resp.status_code == 302
     assert resp.headers["Location"] == "https://example.test/site"
+
+
+def test_book_redirect_goes_to_site_booking_form(client, monkeypatch, _no_click_logging):
+    # The current booking CTA: a *-book slug 302s to our own /book form.
+    monkeypatch.setattr(app, "SITE_BOOKING_URL", "https://www.gojiphysio.com/book")
+    resp = client.get("/r/web-book")
+    assert resp.status_code == 302
+    assert resp.headers["Location"] == "https://www.gojiphysio.com/book"
+    assert app.LINK_SLUG_KIND["web-book"] == "book"
+
+
+def test_book_slug_counts_as_a_booking_click():
+    # *-book clicks bucket into book_by_slug so they show as booking-link clicks.
+    rows = {"web-book": 5, "bio-book": 3, "web-wa": 9}
+    # emulate fetch_link_clicks' split without touching BigQuery
+    book = {s: n for s, n in rows.items() if app.LINK_SLUG_KIND.get(s) in ("book", "booking")}
+    assert book == {"web-book": 5, "bio-book": 3}
+
+
+def test_booking_funnel_labels_include_details():
+    # The "Entered details" stage must sit between time_selected and submitted.
+    stages = [s for s, _ in app.BOOKING_FUNNEL_STAGES]
+    assert stages.index("time_selected") < stages.index("details") < stages.index("submitted")
+    assert dict(app.BOOKING_FUNNEL_STAGES)["details"] == "Entered details"
 
 
 def test_whatsapp_redirect_unknown_slug_falls_back(client, monkeypatch, _no_click_logging):

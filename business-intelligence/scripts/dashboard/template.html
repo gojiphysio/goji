@@ -1710,7 +1710,7 @@
     <!-- Channel leading indicators -->
     <section class="q">
       <h2>Channel leading indicators</h2>
-      <div class="subtitle">Leading indicators for the funnel. <strong>Click-to-WhatsApp</strong> and <strong>booking-link clicks</strong> are live — the two intent signals from our tracked links (WhatsApp is the primary CTA; socials also offer Plato booking). The rest fill as each integration lands; targets shown are from the strategy.</div>
+      <div class="subtitle">Leading indicators for the funnel. <strong>Click-to-WhatsApp</strong> and <strong>booking-link clicks</strong> are live — the two intent signals from our tracked links (WhatsApp is the primary CTA; socials also offer online booking). The rest fill as each integration lands; targets shown are from the strategy.</div>
       <div class="kpi-row mkt-kpis-3">
         <div class="kpi-card">
           <div class="kpi-label">Click-to-WhatsApp <span class="range-label">last 30 days</span> <span class="badge live">Live</span></div>
@@ -1722,7 +1722,7 @@
           <div class="kpi-label">Booking-link clicks <span class="range-label">last 30 days</span> <span class="badge live">Live</span></div>
           <div class="kpi-value" id="mkt_book_clicks">-</div>
           <div class="kpi-trend" id="mkt_book_clicks_trend" hidden></div>
-          <div class="mkt-target" id="mkt_book_clicks_split">Taps to book via Plato</div>
+          <div class="mkt-target" id="mkt_book_clicks_split">Taps to book</div>
         </div>
       </div>
       <div class="kpi-row mkt-kpis-3">
@@ -1774,7 +1774,7 @@
       <div class="chart-wrap tall"><canvas id="mktFunnelChart"></canvas></div>
       <div class="funnel-legend" id="mkt_funnel_legend"></div>
       <div class="funnel-stats" id="mkt_funnel_stats"></div>
-      <div class="mkt-target" style="margin-top:12px;">&ldquo;Became a patient&rdquo; counts WhatsApp enquiries the front desk logged and won. Plato bookings and unlogged enquiries sit under &ldquo;not linked yet&rdquo; &mdash; not failures, just not yet tied to a first visit (that needs per-tap tracking). Compare against new patients this period for the full picture.</div>
+      <div class="mkt-target" style="margin-top:12px;">&ldquo;Became a patient&rdquo; counts WhatsApp enquiries the front desk logged and won. Bookings and unlogged enquiries sit under &ldquo;not linked yet&rdquo; &mdash; not failures, just not yet tied to a first visit (that needs per-tap tracking). Compare against new patients this period for the full picture.</div>
     </section>
 
     <!-- Marketing mix lens + ICP -->
@@ -2888,7 +2888,7 @@
       renderTrend('mkt_active_trend',   r.kpis.active_patients, p && p.active_patients, ps, pe);
       renderTrend('mkt_bookings_trend', r.kpis.bookings,        p && p.bookings,        ps, pe);
 
-      // Tracked-link intent — WhatsApp + Plato booking, each with a per-channel split.
+      // Tracked-link intent — WhatsApp + booking clicks, each with a per-channel split.
       const lc = r.link_clicks, lcp = r.link_clicks_prev;
       const waEl = document.getElementById('mkt_wa_clicks');
       const waSplitEl = document.getElementById('mkt_wa_clicks_split');
@@ -2904,7 +2904,7 @@
         waEl.textContent = fmtInt(lc.whatsapp);
         waSplitEl.textContent = splitOf(lc.wa_by_slug, 'Intent signal · taps to start a WhatsApp chat');
         bkEl.textContent = fmtInt(lc.booking);
-        bkSplitEl.textContent = splitOf(lc.book_by_slug, 'Taps to book via Plato');
+        bkSplitEl.textContent = splitOf(lc.book_by_slug, 'Taps to book');
       } else {
         waEl.textContent = '—';
         bkEl.textContent = '—';
@@ -2969,22 +2969,22 @@
     // patient, built from r.funnel_paths. Source -> CTA is exact (per-slug
     // click counts); bio.site is the Instagram link-in-bio hop. The patient
     // outcome comes off WhatsApp only, via the front-desk lead pipeline (the one
-    // marketing-channel -> patient bridge); Plato bookings + unconverted taps go
+    // marketing-channel -> patient bridge); Bookings + unconverted taps go
     // to "Not linked yet". Units shift from taps to people at the patient step.
     const FUNNEL_COLUMN = {
       'Instagram': 0, 'Web': 0, 'Google': 0, 'Ads': 0, 'QR': 0, 'Other': 0,
-      'bio.site': 1, 'WhatsApp': 2, 'Plato booking': 2,
+      'bio.site': 1, 'WhatsApp': 2, 'Booking': 2,
       'Became a patient': 3, 'Not linked yet': 3,
     };
     const FUNNEL_COLOR = {
       'Instagram': '#9c6c2e', 'bio.site': '#c6a36b', 'Web': NEUTRAL,
       'Google': COBALT, 'Ads': GOLD, 'QR': SAGE, 'Other': '#b0a89c',
-      'WhatsApp': '#2f8f8f', 'Plato booking': '#b9791b',
+      'WhatsApp': '#2f8f8f', 'Booking': '#b9791b',
       'Became a patient': GREEN, 'Not linked yet': '#cdc7bb',
     };
     const FUNNEL_PRIORITY = {
       'Instagram': 0, 'Web': 1, 'Google': 2, 'Ads': 3, 'QR': 4, 'Other': 5,
-      'bio.site': 0, 'WhatsApp': 0, 'Plato booking': 1,
+      'bio.site': 0, 'WhatsApp': 0, 'Booking': 1,
       'Became a patient': 0, 'Not linked yet': 1,
     };
     const FUNNEL_SOURCE_NODES = ['Instagram', 'Web', 'Google', 'Ads', 'QR', 'Other'];
@@ -3041,11 +3041,11 @@
       }
 
       // Summary stats beside the chart.
-      const toBtn = flows.filter(d => d.to === 'WhatsApp' || d.to === 'Plato booking')
+      const toBtn = flows.filter(d => d.to === 'WhatsApp' || d.to === 'Booking')
                          .sort((a, b) => b.flow - a.flow)[0];
       const stats = [
         [fmtInt(fp.total_taps), 'tracked CTA taps'],
-        [`${fmtInt(fp.wa_taps)} / ${fmtInt(fp.plato_taps)}`, 'WhatsApp / Plato taps'],
+        [`${fmtInt(fp.wa_taps)} / ${fmtInt(fp.plato_taps)}`, 'WhatsApp / booking taps'],
         [fmtInt(fp.became_patient), 'became patients (WhatsApp, logged)'],
       ];
       if (fp.first_visits != null) stats.push([fmtInt(fp.first_visits), 'new patients this period (all sources)']);
@@ -3056,7 +3056,7 @@
       const present = new Set(flows.flatMap(d => [d.from, d.to]));
       const srcItems = FUNNEL_SOURCE_NODES.filter(s => present.has(s)).map(funnelSw).join('')
                      + (present.has('bio.site') ? funnelSw('bio.site') : '');
-      const btnItems = ['WhatsApp', 'Plato booking'].filter(s => present.has(s)).map(funnelSw).join('');
+      const btnItems = ['WhatsApp', 'Booking'].filter(s => present.has(s)).map(funnelSw).join('');
       const outItems = FUNNEL_OUTCOME_NODES.filter(s => present.has(s)).map(funnelSw).join('');
       legend.innerHTML =
         `<div class="grp"><span class="grp-lbl">Tapped from</span>${srcItems}</div>` +

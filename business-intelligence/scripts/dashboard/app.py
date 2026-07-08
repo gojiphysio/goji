@@ -131,18 +131,24 @@ def parse_promo_sku(item_given_id: str) -> tuple[str, int] | None:
 # Digits only — wa.me wants no '+', spaces, or dashes, so we strip them defensively
 # (the repo variable might be entered as "+65 8377 0401").
 WHATSAPP_NUMBER = re.sub(r"\D", "", os.environ.get("WHATSAPP_NUMBER", ""))
-# Plato online-booking URL — the other primary CTA. Set it to enable 'booking'
-# slugs; until then they fall back to the site so the link never dead-ends.
+# Plato online-booking URL — the legacy booking CTA. Set it to enable 'booking'
+# ('*-plato') slugs; until then they fall back to the site so the link never
+# dead-ends.
 PLATO_BOOKING_URL = os.environ.get("PLATO_BOOKING_URL", "")
+# Our own website booking form — the current booking CTA. 'book' ('*-book') slugs
+# redirect here so a click lands on /book and is still logged + attributable.
+SITE_BOOKING_URL = os.environ.get("SITE_BOOKING_URL", "https://www.gojiphysio.com/book")
 # Where a click goes when its target isn't configured yet or the slug is unknown.
 WHATSAPP_FALLBACK_URL = os.environ.get("WHATSAPP_FALLBACK_URL",
                                        "https://www.gojiphysio.com")
 # slug -> {kind, label, text?}. kind="whatsapp" → wa.me deep link with `text`;
-# kind="booking" → Plato. The founder signs off on the WhatsApp wording.
+# kind="book" → our website /book form; kind="booking" → legacy Plato booking.
+# The founder signs off on the WhatsApp wording.
 LINK_SLUGS: dict[str, dict] = {
     # Slug = "<channel>-<destination>" — both explicit, no assumed default, so a
     # channel whose primary CTA isn't WhatsApp reads just as clearly.
-    #   destination: "wa" = WhatsApp deep link, "plato" = Plato online booking.
+    #   destination: "wa" = WhatsApp deep link, "book" = website /book form,
+    #                "plato" = legacy Plato online booking.
     # The WhatsApp prefilled text also seeds the enquiry-log source.
     # --- WhatsApp ---
     "web-wa": {"kind": "whatsapp", "label": "Web",      "text": "Hi Goji! I have a question about physio (via your website)."},
@@ -152,7 +158,14 @@ LINK_SLUGS: dict[str, dict] = {
     "qr-wa":  {"kind": "whatsapp", "label": "QR",       "text": "Hi Goji! I scanned your QR code and have a question about physio."},
     "ig-wa":  {"kind": "whatsapp", "label": "IG",       "text": "Hi Goji! I found you on Instagram and have a question about physio."},
     "wa":     {"kind": "whatsapp", "label": "Social",   "text": "Hi Goji! I have a question about physio."},  # generic fallback
-    # --- Plato booking ---
+    # --- Website /book form (current booking CTA) ---
+    "web-book": {"kind": "book", "label": "Web"},
+    "bio-book": {"kind": "book", "label": "bio.site"},
+    "gbp-book": {"kind": "book", "label": "Google"},
+    "ads-book": {"kind": "book", "label": "Ads"},
+    "qr-book":  {"kind": "book", "label": "QR"},
+    "book":     {"kind": "book", "label": "Social"},  # generic fallback
+    # --- Plato booking (legacy; kept so old published links never dead-end) ---
     "web-plato": {"kind": "booking", "label": "Web"},
     "bio-plato": {"kind": "booking", "label": "bio.site"},
     "gbp-plato": {"kind": "booking", "label": "Google"},
@@ -1229,7 +1242,7 @@ GROUP BY slug
         if kind is None:
             continue  # unknown slug = bot/scanner traffic, not a marketing channel
         n = _to_int(r["clicks"])
-        if kind == "booking":
+        if kind in ("book", "booking"):  # website /book form or legacy Plato
             book_by_slug[r["slug"]] = n
         else:
             wa_by_slug[r["slug"]] = n
@@ -1243,6 +1256,7 @@ BOOKING_FUNNEL_STAGES = [
     ("page_view", "Viewed"),
     ("service_selected", "Chose service"),
     ("time_selected", "Chose time"),
+    ("details", "Entered details"),
     ("submitted", "Submitted"),
     ("confirmed", "Booked"),
 ]
@@ -1423,7 +1437,7 @@ def _build_funnel_paths(link_clicks: dict, kpis: dict, lead_wins: dict) -> dict:
             flows[(src, dst)] = flows.get((src, dst), 0) + n
 
     bio_total = 0
-    for by_slug, cta in ((wa, "WhatsApp"), (bk, "Plato booking")):
+    for by_slug, cta in ((wa, "WhatsApp"), (bk, "Booking")):
         for slug, n in by_slug.items():
             prefix = slug.split("-")[0] if "-" in slug else None
             if prefix == "bio":
@@ -1444,7 +1458,7 @@ def _build_funnel_paths(link_clicks: dict, kpis: dict, lead_wins: dict) -> dict:
     became_patient = min(wa_taps, _to_int((lead_wins or {}).get("whatsapp", 0)))
     add("WhatsApp", "Became a patient", became_patient)
     add("WhatsApp", "Not linked yet", max(0, wa_taps - became_patient))
-    add("Plato booking", "Not linked yet", plato_taps)
+    add("Booking", "Not linked yet", plato_taps)
 
     return {
         "flows":          [{"from": a, "to": b, "flow": n} for (a, b), n in flows.items()],
@@ -2696,6 +2710,8 @@ def _slug_target(slug: str) -> str:
     cfg = LINK_SLUGS.get(slug)
     if not cfg:
         return WHATSAPP_FALLBACK_URL
+    if cfg["kind"] == "book":
+        return SITE_BOOKING_URL or WHATSAPP_FALLBACK_URL
     if cfg["kind"] == "booking":
         return PLATO_BOOKING_URL or WHATSAPP_FALLBACK_URL
     if WHATSAPP_NUMBER:  # whatsapp
