@@ -239,6 +239,16 @@
     .funnel-stats .stat { font-size: 12px; color: var(--ink-soft); }
     .funnel-stats .stat b { display: block; font-size: 19px; color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
 
+    /* Website booking funnel (drop-off bars) */
+    .bfunnel { display: flex; flex-direction: column; gap: 7px; margin-top: 12px; }
+    .bfunnel-empty { font-size: 12px; color: var(--ink-soft); }
+    .bfrow { display: grid; grid-template-columns: 96px 1fr auto; align-items: center; gap: 10px; font-size: 12px; }
+    .bfrow .bfl { color: var(--ink-soft); }
+    .bfrow .bfbar { height: 14px; background: var(--border); border-radius: 4px; overflow: hidden; }
+    .bfrow .bffill { display: block; height: 100%; background: var(--goji); border-radius: 4px; }
+    .bfrow .bfn { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+    .bfrow .bfdrop { color: var(--ink-soft); font-weight: 500; }
+
     .pill {
       display: inline-block; padding: 2px 8px; border-radius: 999px;
       font-size: 11px; font-weight: 500;
@@ -1732,6 +1742,11 @@
           <div class="kpi-trend" id="mkt_web_sessions_trend" hidden></div>
           <div class="mkt-target" id="mkt_web_pageviews">Condition-page views, booking starts</div>
         </div>
+        <div class="kpi-card" style="grid-column: 1 / -1;">
+          <div class="kpi-label">Website booking funnel <span class="range-label">this period</span> <span class="badge live">Live</span></div>
+          <div id="mkt_booking_funnel" class="bfunnel"></div>
+          <div class="mkt-target" id="mkt_booking_conv">Viewed to booked</div>
+        </div>
         <div class="kpi-card">
           <div class="kpi-label">Ads spend (SGD) <span class="range-label">this period</span> <span class="badge live">Google Ads</span></div>
           <div class="kpi-value" id="mkt_ads_spend">-</div>
@@ -2836,6 +2851,29 @@
     }
 
     // Range-dependent marketing tiles (KPIs, active trend, pillar mix).
+    // Website booking funnel: drop-off bars (distinct sessions per stage).
+    function renderBookingFunnel(bf) {
+      const el = document.getElementById('mkt_booking_funnel');
+      const cap = document.getElementById('mkt_booking_conv');
+      if (!el) return;
+      if (!bf || !bf.stages || !bf.viewed) {
+        el.innerHTML = '<div class="bfunnel-empty">No booking activity in this period yet.</div>';
+        if (cap) cap.textContent = 'Viewed to booked';
+        return;
+      }
+      const top = bf.stages[0].sessions || 1;
+      el.innerHTML = bf.stages.map((s, i) => {
+        const pct = Math.round((s.sessions / top) * 100);
+        const prev = i ? bf.stages[i - 1].sessions : s.sessions;
+        const drop = (i && prev) ? Math.round((1 - s.sessions / prev) * 100) : 0;
+        const dropTag = (i && drop > 0) ? ` <span class="bfdrop">-${drop}%</span>` : '';
+        return `<div class="bfrow"><span class="bfl">${s.label}</span>`
+          + `<span class="bfbar"><span class="bffill" style="width:${pct}%"></span></span>`
+          + `<span class="bfn">${fmtInt(s.sessions)}${dropTag}</span></div>`;
+      }).join('');
+      if (cap) cap.textContent = `${fmtInt(bf.viewed)} viewed to ${fmtInt(bf.booked)} booked (${bf.conversion_pct}%)`;
+    }
+
     function renderMarketingMetrics(r) {
       if (!r || !r.kpis) return;
       document.getElementById('mkt_visits').textContent   = fmtInt(r.kpis.visits);
@@ -2892,6 +2930,8 @@
           ? `${fmtInt(ws.pageviews)} page views` : 'Condition-page views, booking starts';
         renderTrend('mkt_web_sessions_trend', ws.sessions, wsp && wsp.sessions, ps, pe);
       }
+
+      renderBookingFunnel(r.booking_funnel);
 
       mktActiveChart = renderTrendChart(mktActiveChart, 'mktActiveChart',
         (r.trends && r.trends.active_patients) || [], GOJI, false);

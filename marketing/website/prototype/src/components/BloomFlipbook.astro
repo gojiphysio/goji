@@ -1,0 +1,75 @@
+---
+/**
+ * BloomFlipbook — the brand "growing goji berry" motif: a 7-frame flipbook that
+ * loops green bud -> ripe berry (1.75s). Shared by the homepage "every stage of
+ * growth" section and the booking confirmation.
+ *
+ * `size` sets the square footprint (any CSS length/clamp). Frames are decorative;
+ * the wrapper carries the accessible label.
+ */
+interface Props {
+  size?: string;
+  class?: string;
+  "aria-label"?: string;
+}
+const {
+  size = "clamp(200px, 36vw, 320px)",
+  class: className,
+  "aria-label": ariaLabel = "A goji flower growing from green bud to ripe berry",
+} = Astro.props;
+---
+
+<div
+  class:list={["bloom-wrap", className]}
+  style={`--bloom-size:${size}`}
+  role="img"
+  aria-label={ariaLabel}
+>
+  {
+    [1, 2, 3, 4, 5, 6, 7].map((n) => (
+      <img
+        src={`/illustrations/bloom-${n}.png`}
+        class="bloom-frame"
+        alt=""
+        aria-hidden="true"
+        width="300"
+        height="300"
+        decoding="async"
+      />
+    ))
+  }
+</div>
+
+<style>
+  /* Goji bloom flipbook: green bud -> ripe berry, 1.75s loop */
+  .bloom-wrap {
+    position: relative;
+    width: var(--bloom-size);
+    aspect-ratio: 1 / 1;
+    margin-inline: auto;
+  }
+  .bloom-frame {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    opacity: 0;
+    animation: bloom-appear 1.75s linear infinite;
+  }
+  .bloom-frame:nth-child(1) { animation-delay: -1.75s; }
+  .bloom-frame:nth-child(2) { animation-delay: -1.5s; }
+  .bloom-frame:nth-child(3) { animation-delay: -1.25s; }
+  .bloom-frame:nth-child(4) { animation-delay: -1s; }
+  .bloom-frame:nth-child(5) { animation-delay: -0.75s; }
+  .bloom-frame:nth-child(6) { animation-delay: -0.5s; }
+  .bloom-frame:nth-child(7) { animation-delay: -0.25s; }
+  @keyframes bloom-appear {
+    0%, 14.2% { opacity: 1; }
+    14.3%, 100% { opacity: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .bloom-frame { animation: none; }
+    .bloom-frame:nth-child(7) { opacity: 1; }
+  }
+</style>

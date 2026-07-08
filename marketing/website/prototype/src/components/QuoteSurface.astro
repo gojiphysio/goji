@@ -7,8 +7,6 @@
  * drop a patient quote here. Use the brand promise or another compliant,
  * non-testimonial line. Any real testimonial needs consent + compliance sign-off.
  */
-import LogoLockup from "./LogoLockup.astro";
-
 interface Props {
   /** Each entry renders on its own line (controls the wrap points). */
   lines?: string[];
@@ -26,7 +24,11 @@ const {
 
 <div class="quote-wrap">
   <figure class="quote">
-    <LogoLockup variant="light" height={34} class="quote__logo" />
+    <span
+      class="quote__logo"
+      role="img"
+      aria-label="Goji — Women's and Family Physiotherapy"
+    ></span>
     <blockquote class="quote__text">
       {lines.map((line) => <span class="quote__line">{line}</span>)}
     </blockquote>
@@ -52,7 +54,18 @@ const {
     gap: var(--space-5);
     position: relative;
   }
-  .quote__logo { opacity: 0.95; }
+  /* Fill the whole lockup (wordmark + berry "O") with one flat linen colour
+     so the Deep Red "O" no longer disappears into the Deep Red surface.
+     A mask paints the token colour through the logo's alpha shape. */
+  .quote__logo {
+    display: block;
+    height: 34px;
+    aspect-ratio: 4096 / 2008;
+    background-color: var(--text-on-dark);
+    -webkit-mask: url("/brand/logo_light_transparent.png") center / contain no-repeat;
+    mask: url("/brand/logo_light_transparent.png") center / contain no-repeat;
+    opacity: 0.95;
+  }
   .quote__text {
     font-family: var(--font-display);
     font-weight: var(--weight-semibold);

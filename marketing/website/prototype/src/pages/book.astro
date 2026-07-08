@@ -1,0 +1,37 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Section from "../components/Section.astro";
+import BookingForm from "../components/booking/BookingForm.astro";
+import { cta } from "../lib/links.ts";
+---
+
+<BaseLayout
+  title="Book an appointment | Goji Health"
+  description="Book physiotherapy, a Mummy & Baby assessment, Clinical Pilates, or Strength & Conditioning at Goji Health, Lentor. In-clinic or home visits, one minute from Lentor MRT."
+>
+  <Section tone="surface" narrow={true}>
+    <div class="book-head">
+      <p class="eyebrow">Book with Goji</p>
+      <h1>Book an appointment</h1>
+      <p class="book-head__lead">
+        A few quick steps and we'll take it from there. Prefer to talk it through
+        first? <a href={cta("web-wa")} target="_blank" rel="noopener">Message us on WhatsApp</a>.
+      </p>
+    </div>
+    <BookingForm />
+  </Section>
+</BaseLayout>
+
+<style>
+  .book-head {
+    margin-bottom: var(--space-7);
+  }
+  .book-head h1 {
+    margin-top: var(--space-3);
+  }
+  .book-head__lead {
+    margin-top: var(--space-3);
+    color: var(--text-muted);
+    max-width: 46ch;
+  }
+</style>
