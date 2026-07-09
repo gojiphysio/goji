@@ -80,14 +80,13 @@ const realApi: BookingApi = {
     const p = new URLSearchParams({ service, date });
     if (clinicianId) p.set("clinician", clinicianId);
     if (home) p.set("home", "1");
-    try {
-      const r = await fetch(`${API}/api/availability?${p.toString()}`);
-      if (!r.ok) return [];
-      const d = await r.json();
-      return Array.isArray(d.times) ? d.times : [];
-    } catch {
-      return [];
-    }
+    // Throw on a failed fetch (network / 5xx) so the caller can tell "couldn't
+    // load" apart from a genuine "no slots" (200 with an empty list) — a
+    // rate-limited request must not read as "no availability".
+    const r = await fetch(`${API}/api/availability?${p.toString()}`);
+    if (!r.ok) throw new Error(`availability ${r.status}`);
+    const d = await r.json();
+    return Array.isArray(d.times) ? d.times : [];
   },
 
   async createBooking(draft) {

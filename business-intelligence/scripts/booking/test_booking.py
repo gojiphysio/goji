@@ -81,6 +81,7 @@ def test_home_visit_creates_three_blocks():
     assert len(p.created) == 3
     titles = [c[0]["title"] for c in p.created]
     assert titles[0].startswith("Travel") and titles[2].startswith("Travel")
+    assert titles[1] == "Jane Tan"  # visit title is just the name, no "(home visit)"
     visit = p.created[1][0]
     assert visit["code_Bottom"] == "sCla" and "123B Lentor" in visit["description"]
     assert p.created[0][0]["starttime"] == "2026-07-15 09:30:00"  # travel-before

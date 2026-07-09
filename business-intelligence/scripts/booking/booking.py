@@ -169,7 +169,7 @@ def _create_appointments(plato, svc, cid, day, time_, home, name, phone, email,
                 "color": color, "doctor": doctor,
             }))
             visit_id = _post(plato, {
-                "title": f"{name} (home visit)",
+                "title": name,
                 "description": (f"HOME VISIT — {svc['title']}. Booked via website.\n"
                                 f"Patient: {name} ({phone}).\nAddress: {address}"
                                 f"{note_line}"),

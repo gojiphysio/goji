@@ -62,3 +62,10 @@ export const clinicians: Clinician[] = [
 export function cliniciansForService(serviceId: ServiceId): Clinician[] {
   return clinicians.filter((c) => c.services.includes(serviceId));
 }
+
+/**
+ * Home visits are offered by one clinician only (mirrors the booking backend's
+ * HOME_VISIT_CLINICIAN). When "Home visit" is selected the picker is restricted
+ * to this clinician.
+ */
+export const HOME_VISIT_CLINICIAN_ID = "cheryl-long";

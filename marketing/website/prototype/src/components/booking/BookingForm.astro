@@ -134,8 +134,8 @@ const steps = [
           </button>
         </div>
         <div class="cal__dow" aria-hidden="true">
-          <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span>
-          <span>Fri</span><span>Sat</span><span>Sun</span>
+          <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span>
+          <span>Thu</span><span>Fri</span><span>Sat</span>
         </div>
         <div class="cal__grid" data-cal-grid role="grid"></div>
       </div>
@@ -808,7 +808,7 @@ const steps = [
 
 <script>
   import { services, serviceById } from "../../lib/services";
-  import { cliniciansForService } from "../../lib/clinicians";
+  import { cliniciansForService, HOME_VISIT_CLINICIAN_ID } from "../../lib/clinicians";
   import { bookingApi, type BookingDraft } from "../../lib/booking";
 
   const form = document.getElementById("booking-form") as HTMLFormElement | null;
@@ -826,7 +826,8 @@ const steps = [
 
     let current = 1;
     let selectedTime = "";
-    let lastAvailKey = "";
+    let availSeq = 0; // monotonic token so only the latest availability request renders
+    let availTimer: ReturnType<typeof setTimeout> | undefined; // debounce handle
 
     const draft = (): BookingDraft => ({
       service: (getChecked("service") as BookingDraft["service"]) ?? null,
@@ -923,7 +924,12 @@ const steps = [
     );
     form.querySelectorAll<HTMLInputElement>('input[name="format"]').forEach(
       (input) => {
-        input.addEventListener("change", syncAddress);
+        input.addEventListener("change", () => {
+          syncAddress();
+          filterClinicians();  // home visit -> Cheryl only
+          selectedTime = "";
+          scheduleRefresh();   // format affects availability (travel padding)
+        });
       },
     );
 
@@ -953,36 +959,43 @@ const steps = [
         }
       }
       syncAddress();
-
-      // Filter the clinician options to those who offer this service.
-      const eligible = new Set(
-        cliniciansForService(svc.id).map((c) => c.id),
-      );
-      form!
-        .querySelectorAll<HTMLElement>("[data-clinician-opt]")
-        .forEach((opt) => {
-          const val = opt.querySelector<HTMLInputElement>("input")?.value ?? "";
-          if (val === "") {
-            opt.hidden = false;
-            return;
-          }
-          const ok = eligible.has(val);
-          opt.hidden = !ok;
-          if (!ok) {
-            const input = opt.querySelector<HTMLInputElement>("input");
-            if (input?.checked) {
-              input.checked = false;
-              const firstAvail = form!.querySelector<HTMLInputElement>(
-                'input[name="clinician"][value=""]',
-              );
-              if (firstAvail) firstAvail.checked = true;
-            }
-          }
-        });
+      filterClinicians();
 
       // Service changed -> availability is stale.
       selectedTime = "";
-      lastAvailKey = "";
+    }
+
+    /**
+     * Show only the clinicians who can take this booking: those who offer the
+     * chosen service, and — for a home visit — only the home-visit clinician
+     * (Cheryl). "First available" is hidden for home visits since there is a
+     * single option. Resets the selection if the current pick is no longer valid.
+     */
+    function filterClinicians() {
+      const svc = serviceById(getChecked("service") ?? "");
+      if (!svc) return;
+      const home = getChecked("format") === "home";
+      const serviceEligible = cliniciansForService(svc.id).map((c) => c.id);
+      const allowed = new Set(
+        home
+          ? serviceEligible.filter((id) => id === HOME_VISIT_CLINICIAN_ID)
+          : serviceEligible,
+      );
+      form!.querySelectorAll<HTMLElement>("[data-clinician-opt]").forEach((opt) => {
+        const input = opt.querySelector<HTMLInputElement>("input");
+        const val = input?.value ?? "";
+        const visible = val === "" ? !home : allowed.has(val);
+        opt.hidden = !visible;
+        if (!visible && input?.checked) input.checked = false;
+      });
+      // Ensure something stays selected: home -> Cheryl, otherwise First available.
+      if (!form!.querySelector('input[name="clinician"]:checked')) {
+        const fallback = home ? HOME_VISIT_CLINICIAN_ID : "";
+        const fb = form!.querySelector<HTMLInputElement>(
+          `input[name="clinician"][value="${fallback}"]`,
+        );
+        if (fb) fb.checked = true;
+      }
     }
 
     // ----- Step 2: date (inline calendar) + slots -----
@@ -993,7 +1006,7 @@ const steps = [
     initCalendar();
 
     form.querySelectorAll<HTMLInputElement>('input[name="clinician"]').forEach(
-      (input) => input.addEventListener("change", refreshSlots),
+      (input) => input.addEventListener("change", scheduleRefresh),
     );
 
     /**
@@ -1035,7 +1048,7 @@ const steps = [
         grid!.innerHTML = "";
         const y = view.getFullYear();
         const m = view.getMonth();
-        const offset = (new Date(y, m, 1).getDay() + 6) % 7; // Mon=0 .. Sun=6
+        const offset = new Date(y, m, 1).getDay(); // Sun=0 .. Sat=6 (Sunday-first)
         for (let i = 0; i < offset; i++) {
           const pad = document.createElement("span");
           pad.className = "cal__pad";
@@ -1059,7 +1072,7 @@ const steps = [
               selectedTime = "";
               setFieldError("date", "");
               render();
-              refreshSlots();
+              scheduleRefresh();
             });
           }
           grid!.appendChild(btn);
@@ -1084,6 +1097,21 @@ const steps = [
       return `${h12}:${String(m).padStart(2, "0")} ${ap}`;
     }
 
+    /**
+     * Debounced entry point for availability. Rapid date/clinician/format
+     * changes collapse to a single fetch after a short idle, so a burst of clicks
+     * can't hammer Plato (which rate-limits and then backs off for a long time).
+     */
+    function scheduleRefresh() {
+      if (availTimer) clearTimeout(availTimer);
+      if (chips && slotsMsg && getValue("date")) {
+        chips.innerHTML = "";
+        slotsMsg.hidden = false;
+        slotsMsg.textContent = "Finding available times…";
+      }
+      availTimer = setTimeout(refreshSlots, 250);
+    }
+
     async function refreshSlots() {
       if (!chips || !slotsMsg) return;
       const d = draft();
@@ -1093,18 +1121,31 @@ const steps = [
         slotsMsg.textContent = "Pick a date to see available times.";
         return;
       }
-      const key = `${d.service}|${d.clinicianId}|${d.date}|${d.format}`;
-      lastAvailKey = key;
+      // A monotonic token — only the most recent request may render. This makes
+      // a double-click on the same date (identical key) safe, where the old
+      // key-equality check let both responses render and duplicated the slots.
+      const mySeq = ++availSeq;
       chips.innerHTML = "";
       slotsMsg.hidden = false;
       slotsMsg.textContent = "Finding available times…";
-      const times = await bookingApi.getAvailability({
-        service: d.service,
-        clinicianId: d.clinicianId,
-        date: d.date,
-        home: d.format === "home",
-      });
-      if (key !== lastAvailKey) return; // a newer request superseded this one
+      let times: string[];
+      try {
+        times = await bookingApi.getAvailability({
+          service: d.service,
+          clinicianId: d.clinicianId,
+          date: d.date,
+          home: d.format === "home",
+        });
+      } catch {
+        if (mySeq !== availSeq) return;
+        slotsMsg.hidden = false;
+        slotsMsg.textContent =
+          "We couldn't load times just now. Please pick the date again.";
+        selectedTime = "";
+        return;
+      }
+      if (mySeq !== availSeq) return; // a newer request superseded this one
+      chips.innerHTML = ""; // guard against any stale content
       if (!times.length) {
         slotsMsg.hidden = false;
         slotsMsg.textContent =
@@ -1288,7 +1329,7 @@ const steps = [
         if (!validate(current)) return;
         if (current === 1) {
           bookingApi.track("service_selected");
-          refreshSlots();
+          scheduleRefresh();
         }
         if (current === 2) bookingApi.track("time_selected");
         if (current + 1 === 3) buildSummary();
