@@ -52,14 +52,19 @@ class PlatoClient:
     def _url(self, path: str) -> str:
         return f"{BASE}/{self.db}/{path.lstrip('/')}"
 
-    def get(self, path: str, params: dict | None = None, _retries: int = 4):
-        """GET with exponential backoff on 429/5xx (Plato caps at 20 req/min)."""
-        delay = 2.0
+    def get(self, path: str, params: dict | None = None, _retries: int = 3):
+        """GET with exponential backoff on 429/5xx (Plato caps at 20 req/min).
+
+        Backoff is capped low (<=8s/step) because this sits on the interactive
+        availability path — a long 60s backoff made the booking form hang for
+        minutes when a burst of date changes tripped the rate limit. The frontend
+        debounces + the per-day appointment cache keep the request rate down."""
+        delay = 1.0
         for attempt in range(_retries + 1):
             r = self.s.get(self._url(path), params=params, timeout=self.timeout)
             if r.status_code in (429, 500, 502, 503) and attempt < _retries:
                 time.sleep(delay)
-                delay = min(delay * 2, 60)
+                delay = min(delay * 2, 8)
                 continue
             r.raise_for_status()
             return r.json()
