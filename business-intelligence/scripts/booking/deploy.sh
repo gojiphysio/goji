@@ -31,14 +31,13 @@ HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 gcloud config set project "${PROJECT}" >/dev/null
 
-# plato-api-key is required; gmail-app-password is optional (mailer degrades).
-SECRETS="PLATO_API_KEY=plato-api-key:latest"
-if gcloud secrets describe gmail-app-password >/dev/null 2>&1; then
-  SECRETS="${SECRETS},GMAIL_APP_PASSWORD=gmail-app-password:latest"
-  echo "==> mounting gmail-app-password (admin email enabled)"
-else
-  echo "==> gmail-app-password secret not found — admin email disabled (booking still works)"
-fi
+# Both secrets are mounted unconditionally — plato-api-key (Plato) and
+# gmail-app-password (confirmation/admin emails). Both exist in Secret Manager;
+# the runtime SA (dashboard-sa) has secretAccessor. Do NOT gate the gmail mount on
+# `gcloud secrets describe`: under CI the deploy SA can't read Secret Manager, so
+# that check dropped the mount and disabled emails. Keep this matching the CI
+# workflow (.github/workflows/deploy-booking.yml).
+SECRETS="PLATO_API_KEY=plato-api-key:latest,GMAIL_APP_PASSWORD=gmail-app-password:latest"
 
 echo "==> Deploying ${SERVICE}"
 gcloud run deploy "${SERVICE}" \
