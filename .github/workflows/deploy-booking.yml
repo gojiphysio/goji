@@ -1,0 +1,105 @@
+name: Deploy booking
+
+# Auto-deploy the goji-booking service (the website's direct-to-Plato booking
+# backend at https://booking.gojiphysio.com) on every push to main that touches
+# it. Tests run first and gate the deploy. Auth to Google Cloud uses Workload
+# Identity Federation — no service-account key is stored (same setup as
+# deploy-dashboard.yml; see README.md here).
+#
+# Mirrors business-intelligence/scripts/booking/deploy.sh so the manual Cloud
+# Shell path and CI stay identical. --max-instances=1 keeps the per-clinician
+# in-process lock authoritative — do NOT raise it without a shared lock store.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "business-intelligence/scripts/booking/**"
+      - ".github/workflows/deploy-booking.yml"
+  workflow_dispatch: {}   # allow manual "Run workflow" from the Actions tab
+
+concurrency:
+  group: deploy-booking
+  cancel-in-progress: false   # never interrupt an in-flight deploy
+
+permissions:
+  contents: read
+  id-token: write             # required for Workload Identity Federation
+
+env:
+  PROJECT: ${{ vars.GCP_PROJECT }}
+  REGION:  ${{ vars.GCP_REGION }}
+  SERVICE: goji-booking
+  DOMAIN:  booking.gojiphysio.com
+  CORS_ORIGIN: https://www.gojiphysio.com
+  BOOKING_SA: dashboard-sa@${{ vars.GCP_PROJECT }}.iam.gserviceaccount.com
+
+jobs:
+  # ---- 1. Tests gate the deploy -------------------------------------------
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install deps
+        run: pip install -r business-intelligence/scripts/booking/requirements.txt pytest
+      - name: Booking tests
+        working-directory: business-intelligence/scripts
+        run: python -m pytest booking/ -q
+
+  # ---- 2. Deploy (only after tests pass) ----------------------------------
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.WIF_PROVIDER }}
+          service_account: ${{ vars.DEPLOY_SERVICE_ACCOUNT }}
+
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Deploy booking service
+        working-directory: business-intelligence/scripts/booking
+        run: |
+          # plato-api-key is required; gmail-app-password is optional (the mailer
+          # degrades gracefully if it isn't mounted).
+          SECRETS="PLATO_API_KEY=plato-api-key:latest"
+          if gcloud secrets describe gmail-app-password --project "${PROJECT}" >/dev/null 2>&1; then
+            SECRETS="${SECRETS},GMAIL_APP_PASSWORD=gmail-app-password:latest"
+            echo "mounting gmail-app-password (confirmation emails enabled)"
+          else
+            echo "gmail-app-password not found — emails disabled (booking still works)"
+          fi
+
+          gcloud run deploy "${SERVICE}" \
+            --source . --region "${REGION}" --project "${PROJECT}" \
+            --service-account "${BOOKING_SA}" \
+            --set-env-vars=GCP_PROJECT=${PROJECT},PLATO_DB=gojihealth,CORS_ORIGIN=${CORS_ORIGIN} \
+            --set-secrets="${SECRETS}" \
+            --max-instances=1 --min-instances=0 \
+            --allow-unauthenticated \
+            --quiet
+
+      - name: Ensure booking.gojiphysio.com domain mapping
+        working-directory: business-intelligence/scripts/booking
+        run: |
+          # Created once by deploy.sh; this keeps it idempotent. Managed domain
+          # mappings live in the `beta` surface. Non-fatal — a mapping hiccup must
+          # not fail the code roll.
+          gcloud components install beta --quiet || true
+          if gcloud beta run domain-mappings describe --domain="${DOMAIN}" \
+               --platform=managed --region "${REGION}" --project "${PROJECT}" --quiet >/dev/null 2>&1; then
+            echo "domain mapping ${DOMAIN} already exists"
+          elif gcloud beta run domain-mappings create --service="${SERVICE}" \
+                 --domain="${DOMAIN}" --platform=managed --region "${REGION}" --project "${PROJECT}" --quiet; then
+            echo ">> One-time DNS: add  booking  CNAME  ghs.googlehosted.com.  on the gojiphysio.com zone."
+          else
+            echo "!! Could not create the ${DOMAIN} mapping automatically; run deploy.sh once. Continuing."
+          fi
