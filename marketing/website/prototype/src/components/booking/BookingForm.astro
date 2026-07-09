@@ -165,7 +165,7 @@ const steps = [
 
     <div class="booking__grid">
       <FormField id="name" name="name" label="Full name" required={true} autocomplete="name" />
-      <FormField id="phone" name="phone" label="Phone" type="tel" required={true} autocomplete="tel" inputmode="tel" />
+      <FormField id="phone" name="phone" label="Phone" type="tel" required={true} autocomplete="tel" inputmode="tel" placeholder="e.g. 9123 4567" />
       <FormField id="email" name="email" label="Email" type="email" required={true} autocomplete="email" inputmode="email" />
     </div>
 
@@ -1203,7 +1203,10 @@ const steps = [
       bookingApi.track("details");
     }
     ["name", "phone", "email", "notes"].forEach((id) => {
-      document.getElementById(id)?.addEventListener("input", markDetailsEngaged);
+      document.getElementById(id)?.addEventListener("input", () => {
+        markDetailsEngaged();
+        if (id !== "notes") setFieldError(id, ""); // clear the error as they correct it
+      });
     });
 
     // Quick-select condition chips: toggle aria-pressed; the chosen ones are
@@ -1218,6 +1221,21 @@ const steps = [
     });
 
     // ----- Validation per step -----
+    /**
+     * A valid Singapore number: 8 digits starting 6 (landline/VoIP), 8 or 9
+     * (mobile). Accepts spacing/dashes and an optional +65 / 65 country code.
+     */
+    function isValidSgPhone(raw: string): boolean {
+      let n = raw.replace(/[^\d]/g, ""); // digits only (drops +, spaces, dashes)
+      if (n.length === 10 && n.startsWith("65")) n = n.slice(2); // strip country code
+      return /^[689]\d{7}$/.test(n);
+    }
+
+    /** A pragmatic email check: local@domain.tld, tld >= 2 letters, no spaces. */
+    function isValidEmail(raw: string): boolean {
+      return /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/.test(raw.trim());
+    }
+
     function validate(step: number): boolean {
       const d = draft();
       if (step === 1) {
@@ -1258,15 +1276,15 @@ const steps = [
         if (!d.name) {
           setFieldError("name", "Please enter your name.");
           ok = false;
-        }
-        if (!/^[+\d][\d\s()-]{6,}$/.test(d.phone)) {
-          setFieldError("phone", "Please enter a valid phone number.");
+        } else setFieldError("name", "");
+        if (!isValidSgPhone(d.phone)) {
+          setFieldError("phone", "Please enter a valid 8-digit Singapore number.");
           ok = false;
-        }
-        if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(d.email)) {
-          setFieldError("email", "Please enter a valid email.");
+        } else setFieldError("phone", "");
+        if (!isValidEmail(d.email)) {
+          setFieldError("email", "Please enter a valid email address.");
           ok = false;
-        }
+        } else setFieldError("email", "");
         return ok;
       }
       return true;
