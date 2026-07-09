@@ -68,21 +68,18 @@ jobs:
       - name: Deploy booking service
         working-directory: business-intelligence/scripts/booking
         run: |
-          # plato-api-key is required; gmail-app-password is optional (the mailer
-          # degrades gracefully if it isn't mounted).
-          SECRETS="PLATO_API_KEY=plato-api-key:latest"
-          if gcloud secrets describe gmail-app-password --project "${PROJECT}" >/dev/null 2>&1; then
-            SECRETS="${SECRETS},GMAIL_APP_PASSWORD=gmail-app-password:latest"
-            echo "mounting gmail-app-password (confirmation emails enabled)"
-          else
-            echo "gmail-app-password not found — emails disabled (booking still works)"
-          fi
-
+          # Both secrets are mounted unconditionally. plato-api-key powers Plato;
+          # gmail-app-password powers the confirmation/admin emails. We do NOT gate
+          # the gmail mount on `gcloud secrets describe` — the deploy service
+          # account (WIF) doesn't have Secret Manager read access, so that check
+          # returned "not found" and silently dropped the mount, disabling emails.
+          # The runtime SA (dashboard-sa) has secretAccessor, which is what
+          # actually matters at request time. Both secrets exist in Secret Manager.
           gcloud run deploy "${SERVICE}" \
             --source . --region "${REGION}" --project "${PROJECT}" \
             --service-account "${BOOKING_SA}" \
             --set-env-vars=GCP_PROJECT=${PROJECT},PLATO_DB=gojihealth,CORS_ORIGIN=${CORS_ORIGIN} \
-            --set-secrets="${SECRETS}" \
+            --set-secrets=PLATO_API_KEY=plato-api-key:latest,GMAIL_APP_PASSWORD=gmail-app-password:latest \
             --max-instances=1 --min-instances=0 \
             --allow-unauthenticated \
             --quiet
