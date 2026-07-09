@@ -10,8 +10,11 @@
 #   gmail-app-password   (optional)  hello@ Google Workspace app password for the
 #                                    admin notification email; skipped if absent
 #
-# Run from Google Cloud Shell:
+# PRIMARY PATH: pushes to `main` that touch scripts/booking/** auto-deploy via
+# .github/workflows/deploy-booking.yml (tests gate it; WIF auth, no key). This
+# script is the manual fallback (or first-time standup) — run from Cloud Shell:
 #   bash business-intelligence/scripts/booking/deploy.sh
+# Keep the two in sync: the workflow mirrors the gcloud args below.
 #
 # Re-runnable. --max-instances=1 keeps the per-clinician in-process lock
 # authoritative (do NOT raise it without moving the lock to a shared store).
