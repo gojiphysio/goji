@@ -106,6 +106,13 @@ def create_booking(plato, draft: dict, *, now: datetime | None = None) -> dict:
     # runaway paste can't bloat the Plato appointment note.
     notes = (draft.get("notes") or "").strip()[:1000]
 
+    # What the customer asked for on the form, for the confirmation email: an
+    # explicit clinician by name, or "First available" when they let us match.
+    # (Home visits are always Cheryl, but we still report what they selected.)
+    requested_id = (draft.get("clinician_id") or "").strip()
+    requested_name = (CLINICIANS[requested_id]["name"]
+                      if requested_id in CLINICIANS else "First available")
+
     # Candidate clinicians: home = Cheryl only; explicit choice = that one; else
     # anyone offering the service who is free at the slot (availability decides).
     if home:
@@ -134,6 +141,7 @@ def create_booking(plato, draft: dict, *, now: datetime | None = None) -> dict:
                 "appointment_ids": ids,
                 "clinician_id": cid,
                 "clinician_name": CLINICIANS[cid]["name"],
+                "clinician_requested": requested_name,
                 "service": svc["title"],
                 "date": day.isoformat(),
                 "time": time_,
