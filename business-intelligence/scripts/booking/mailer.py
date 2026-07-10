@@ -44,6 +44,21 @@ def _send(msg: EmailMessage, what: str, ref: str | None) -> None:
     log.info("%s email sent (ref %s)", what, ref)
 
 
+def _row(label: str, value) -> str:
+    """One aligned 'Label:   value' line for the plain-text booking emails."""
+    return f"{label + ':':<19}{value}"
+
+
+def _clinician_lines(result: dict) -> list[str]:
+    """Two clear lines: what the customer selected vs. who they were matched to.
+    Both are shown even when identical (an explicit clinician was requested)."""
+    return [
+        _row("Your selection", result.get("clinician_requested")
+             or result.get("clinician_name")),
+        _row("Clinician matched", result["clinician_name"]),
+    ]
+
+
 def _fmt_when(date_str: str, time_str: str) -> str:
     """'2026-07-15' + '09:00' -> 'Wednesday, 15 July 2026 at 9:00 am'."""
     try:
@@ -71,19 +86,19 @@ def send_admin_booking_email(result: dict, draft: dict) -> None:
         lines = [
             "A new booking came in via the website:",
             "",
-            f"Service:   {result['service']}",
-            f"When:      {result['date']} {result['time']} (SGT)",
-            f"Where:     {where}",
-            f"Clinician: {result['clinician_name']}",
-            f"Name:      {draft.get('name')}",
-            f"Phone:     {draft.get('phone')}",
-            f"Email:     {draft.get('email')}",
+            _row("Service", result['service']),
+            _row("When", f"{result['date']} {result['time']} (SGT)"),
+            _row("Where", where),
+            *_clinician_lines(result),
+            _row("Name", draft.get('name')),
+            _row("Phone", draft.get('phone')),
+            _row("Email", draft.get('email')),
         ]
         if result.get("home"):
-            lines.append(f"Address:   {draft.get('address')}")
+            lines.append(_row("Address", draft.get('address')))
         if (draft.get("notes") or "").strip():
-            lines.append(f"Condition: {draft.get('notes').strip()}")
-        lines += [f"Reference: {result['reference']}", "",
+            lines.append(_row("Condition", draft.get('notes').strip()))
+        lines += [_row("Reference", result['reference']), "",
                   "The customer has been sent Plato's confirmation. Changes and "
                   "cancellations are handled over WhatsApp."]
         msg.set_content("\n".join(lines))
@@ -116,17 +131,17 @@ def send_customer_booking_email(result: dict, draft: dict) -> None:
             "Thanks for booking with Goji Physiotherapy. We've received your "
             "request and here are the details:",
             "",
-            f"Service:   {result['service']}",
-            f"When:      {when} (Singapore time)",
-            f"Where:     {where}",
-            f"Clinician: {result['clinician_name']}",
+            _row("Service", result['service']),
+            _row("When", f"{when} (Singapore time)"),
+            _row("Where", where),
+            *_clinician_lines(result),
         ]
         if result.get("home") and draft.get("address"):
-            lines.append(f"Address:   {draft.get('address')}")
+            lines.append(_row("Address", draft.get('address')))
         if (draft.get("notes") or "").strip():
-            lines.append(f"You told us: {draft.get('notes').strip()}")
+            lines.append(_row("You told us", draft.get('notes').strip()))
         lines += [
-            f"Reference: {result['reference']}",
+            _row("Reference", result['reference']),
             "",
             "Need to change or cancel? Just message us on WhatsApp and we'll take "
             f"care of it - that's where we handle all changes and cancellations:",

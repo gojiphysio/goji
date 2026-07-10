@@ -99,12 +99,16 @@ const steps = [
       <p class="booking__sublabel">Preferred clinician (optional)</p>
       <p class="booking__hint">Choose who you'd like to see first — availability updates to match. Not sure? Leave it on "First available" and we'll match you.</p>
       <div class="booking__clinicians" role="radiogroup" aria-label="Preferred clinician">
-        <label class="copt" data-clinician-opt>
+        <label class="copt copt--first" data-clinician-opt data-first-available>
           <input class="copt__input visually-hidden" type="radio" name="clinician" value="" checked />
-          <span class="copt__name">First available</span>
-          <span class="copt__role">Recommended · we'll match you</span>
+          <span class="copt__name">
+            First available
+            <span class="copt__badge">Recommended</span>
+          </span>
+          <span class="copt__role">We'll match you with the soonest clinician for your service</span>
           <span class="copt__tick" aria-hidden="true"></span>
         </label>
+        <p class="booking__clinician-or" aria-hidden="true">Or pick someone specific</p>
         {
           clinicians.map((c) => (
             <label class="copt" data-clinician-opt data-services={c.services.join(" ")} hidden>
@@ -621,6 +625,12 @@ const steps = [
     .booking__clinicians {
       grid-template-columns: 1fr 1fr;
     }
+    /* The recommended default and its separator stay full-width above the
+       two-column grid of named clinicians, so it reads as the primary choice. */
+    .copt--first,
+    .booking__clinician-or {
+      grid-column: 1 / -1;
+    }
   }
   .copt {
     display: grid;
@@ -682,6 +692,42 @@ const steps = [
     border: solid var(--color-linen);
     border-width: 0 2px 2px 0;
     transform: translateY(-1px) rotate(45deg);
+  }
+
+  /* "First available" is the recommended default — give it a tinted, primary-
+     edged card and a badge so it clearly stands apart from the named options,
+     and reads as pre-selected the moment the step opens. */
+  .copt--first {
+    background: color-mix(in srgb, var(--color-primary) 5%, var(--bg-content));
+    border-color: color-mix(in srgb, var(--color-primary) 35%, var(--color-border));
+  }
+  .copt--first:has(.copt__input:checked) {
+    border-color: var(--color-primary);
+    background: color-mix(in srgb, var(--color-primary) 8%, var(--bg-content));
+    box-shadow: var(--shadow-sm);
+  }
+  .copt__badge {
+    display: inline-block;
+    margin-left: var(--space-2);
+    padding: 0.12rem 0.55rem;
+    border-radius: var(--radius-pill);
+    background: var(--color-primary);
+    color: var(--color-linen);
+    font-family: var(--font-body);
+    font-size: var(--fs-caption);
+    font-weight: var(--weight-semibold);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-label);
+    vertical-align: middle;
+  }
+  /* Quiet separator between the default and the named clinicians. */
+  .booking__clinician-or {
+    margin: var(--space-1) 0;
+    font-size: var(--fs-caption);
+    font-weight: var(--weight-semibold);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-label);
+    color: var(--text-muted);
   }
 
   /* Details grid */
@@ -988,6 +1034,10 @@ const steps = [
         opt.hidden = !visible;
         if (!visible && input?.checked) input.checked = false;
       });
+      // The "Or pick someone specific" separator only makes sense while the
+      // "First available" default is shown (it's hidden for home visits).
+      const orSep = form!.querySelector<HTMLElement>(".booking__clinician-or");
+      if (orSep) orSep.hidden = home;
       // Ensure something stays selected: home -> Cheryl, otherwise First available.
       if (!form!.querySelector('input[name="clinician"]:checked')) {
         const fallback = home ? HOME_VISIT_CLINICIAN_ID : "";
