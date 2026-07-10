@@ -863,34 +863,8 @@
       background: var(--goji-soft); border: 1px solid #e9c9c1; border-radius: 8px;
       padding: 10px 14px; font-size: 12px; color: #7a3328; margin-top: 14px;
     }
-    /* Operating tools */
-    .checklist { list-style: none; padding: 0; margin: 0; }
-    .checklist li {
-      display: flex; align-items: flex-start; gap: 10px;
-      padding: 10px 0; border-bottom: 1px solid #f0ebe2;
-    }
-    .checklist li:last-child { border-bottom: none; }
-    .checklist input[type=checkbox] { margin-top: 3px; width: 16px; height: 16px; accent-color: var(--goji); cursor: pointer; }
-    .checklist .ck-when { font-weight: 600; }
-    .checklist .ck-text { color: var(--ink-soft); }
-    .checklist li.done .ck-text { text-decoration: line-through; color: var(--ink-muted); }
-    .mkt-select {
-      padding: 5px 8px; border: 1px solid var(--border); border-radius: 6px;
-      background: var(--bg); font: inherit; font-size: 12px; color: var(--ink); cursor: pointer;
-    }
-    .mkt-input {
-      padding: 6px 10px; border: 1px solid var(--border); border-radius: 6px;
-      background: var(--card); font: inherit; font-size: 13px; color: var(--ink);
-    }
-    .mkt-input:focus, .mkt-select:focus {
-      outline: none; border-color: var(--goji); box-shadow: 0 0 0 2px var(--goji-soft);
-    }
-    .enquiry-form { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 14px; }
-    .enquiry-form .mkt-input.note { flex: 1; min-width: 160px; }
     .pillar-legend { font-size: 12px; color: var(--ink-soft); margin-top: 10px; line-height: 1.7; }
     .pillar-legend .dot-sq { display:inline-block; width:9px; height:9px; border-radius:2px; margin-right:5px; vertical-align:middle; }
-    .save-hint { font-size: 11px; color: var(--ink-muted); min-height: 14px; margin-top: 4px; }
-    .save-hint.err { color: var(--goji); }
   </style>
 </head>
 <body>
@@ -1658,16 +1632,6 @@
 
     <div id="page-marketing" class="page" hidden>
 
-    <section class="q" style="background: var(--ink); color: #fff; border-color: var(--ink);">
-      <h2 style="color:#fff;">90-day campaign — women's &amp; family physio</h2>
-      <div class="subtitle" style="color:#d8d3c8;">
-        Lead with the post-partum / women's-health wedge; organic-led with a modest,
-        compliance-safe paid layer. The clinic-side numbers below are live from the
-        warehouse; channel metrics (Instagram, GBP, website, paid) are placeholders
-        until those integrations land. Operating tools at the bottom run the week-to-week.
-      </div>
-    </section>
-
     <!-- North-star KPIs (live) -->
     <div class="kpi-row mkt-kpis-4">
       <div class="kpi-card">
@@ -1819,66 +1783,8 @@
         <strong>Attribution is limited by Plato.</strong> Plato only records a coarse
         referral source per patient (and only when filled in), so we can't yet split
         first visits by marketing channel — Instagram vs Google vs partner vs walk-in.
-        The enquiry log below is the manual bridge; richer per-channel attribution can
-        be added later (enquiry-source tagging at intake → warehouse).
-      </div>
-    </section>
-
-    <!-- ===== Operating tools ===== -->
-    <section class="q">
-      <h2>This week's operating rhythm</h2>
-      <div class="subtitle">The every-week cadence from the 90-day plan. Resets each ISO week. <span id="mkt_week_label" style="color:var(--ink-muted);"></span></div>
-      <ul class="checklist" id="mkt_rhythm_list"></ul>
-      <div class="save-hint" id="mkt_rhythm_hint"></div>
-    </section>
-
-    <section class="q">
-      <h2>Content calendar</h2>
-      <div class="subtitle">The 12-week theme plan. Set each week's status as you batch-film and publish. <span id="mkt_campaign_week" style="color:var(--ink-muted);"></span></div>
-      <div style="overflow-x:auto;">
-        <table>
-          <thead><tr><th>Wk</th><th>Theme</th><th>Pillar</th><th>Status</th></tr></thead>
-          <tbody id="mkt_content_tbody"></tbody>
-        </table>
-      </div>
-      <div class="save-hint" id="mkt_content_hint"></div>
-    </section>
-
-    <section class="q">
-      <h2>Partnership pipeline</h2>
-      <div class="subtitle">The post-partum referral engine. Target: 4–5 intros out by end of month 1; 2–3 live by month 2. Add a contact / next step inline.</div>
-      <div style="overflow-x:auto;">
-        <table>
-          <thead><tr><th>Partner type</th><th>Stage</th><th>Contact / next step</th></tr></thead>
-          <tbody id="mkt_pipeline_tbody"></tbody>
-        </table>
-      </div>
-      <div class="save-hint" id="mkt_pipeline_hint"></div>
-    </section>
-
-    <section class="q">
-      <h2>Enquiry log <span id="mkt_enquiry_count" class="badge" style="background: var(--bg); color: var(--ink-soft); font-weight:500;"></span></h2>
-      <div class="subtitle">Tag enquiries by source as they come in (the Month-1 "enquiry-source tagging" task). This is the manual bridge while Plato attribution is limited.</div>
-      <div class="enquiry-form">
-        <select class="mkt-select" id="mkt_enquiry_source">
-          <option value="whatsapp">WhatsApp</option>
-          <option value="call">Phone call</option>
-          <option value="form">Website form</option>
-          <option value="instagram">Instagram</option>
-          <option value="google">Google / GBP</option>
-          <option value="referral">Referral / partner</option>
-          <option value="walk_in">Walk-in</option>
-          <option value="other">Other</option>
-        </select>
-        <input type="text" class="mkt-input note" id="mkt_enquiry_note" placeholder="Short note (no patient names / PII) — e.g. 'postnatal, asked re pelvic floor'">
-        <button type="button" class="btn primary" id="mkt_enquiry_add">Log enquiry</button>
-      </div>
-      <div class="save-hint" id="mkt_enquiry_hint"></div>
-      <div style="overflow-x:auto;">
-        <table>
-          <thead><tr><th>When</th><th>Source</th><th>Note</th></tr></thead>
-          <tbody id="mkt_enquiry_tbody"></tbody>
-        </table>
+        The front-desk Leads pipeline is the manual bridge; richer per-channel attribution
+        can be added later (enquiry-source tagging at intake → warehouse).
       </div>
     </section>
 
@@ -2001,52 +1907,6 @@
       'web-plato':'Web', 'bio-plato':'bio.site', 'gbp-plato':'Google', 'ads-plato':'Ads', 'qr-plato':'QR', 'plato':'Social',
     };
 
-    /* ===== Marketing tab: static config =====
-       Fixed campaign content from /marketing/. Only the *state* of these items
-       (checked / status / stage / enquiries) is persisted server-side via
-       /api/marketing/ops; the content itself lives here. */
-    // Approx Month-1 start of the 90-day plan; used to highlight the current
-    // content-calendar week. Adjust if the campaign start shifts.
-    const CAMPAIGN_START = '2026-06-02';
-    const RHYTHM_ITEMS = [
-      { key: 'mon',     when: 'Mon',     text: 'Review last week’s leading indicators; set the week’s posts from the calendar.' },
-      { key: 'tuethu',  when: 'Tue–Thu', text: 'Publish Reels/carousels (best Wed/Thu AM & PM SGT); 2–3 GBP posts across the week.' },
-      { key: 'daily',   when: 'Daily',   text: 'Reply to every DM, comment, review and enquiry fast (WhatsApp is the booking workhorse).' },
-      { key: 'fri',     when: 'Fri',     text: 'Advance one partnership; check paid spend/pacing; capture clinic moments for content.' },
-      { key: 'monthly', when: 'Monthly', text: 'One batch film day; BI north-star review; plan next month’s themes.' },
-    ];
-    // 12-week content calendar (theme per week). pillar maps to PILLAR colours.
-    const CONTENT_CALENDAR = [
-      { wk: 1,  theme: '“Meet Goji” – who we help, the team', pillar: 'Brand + wedge' },
-      { wk: 2,  theme: 'Pelvic floor 101 – “is leaking normal?”', pillar: 'Wedge' },
-      { wk: 3,  theme: 'Back pain at the desk', pillar: 'MSK' },
-      { wk: 4,  theme: 'What to expect at your first visit', pillar: 'Brand' },
-      { wk: 5,  theme: 'Diastasis recti explained', pillar: 'Wedge' },
-      { wk: 6,  theme: 'Neck & shoulder / tech-neck', pillar: 'MSK' },
-      { wk: 7,  theme: 'Returning to exercise after birth (workshop)', pillar: 'Wedge + fitness' },
-      { wk: 8,  theme: 'Clinical Pilates – what it is, who it’s for', pillar: 'Fitness' },
-      { wk: 9,  theme: 'Pre-natal care & staying strong in pregnancy', pillar: 'Wedge' },
-      { wk: 10, theme: 'Staying strong as you age', pillar: 'Active-aging' },
-      { wk: 11, theme: 'Patient story (consented, education-framed)', pillar: 'Wedge/MSK' },
-      { wk: 12, theme: '“Feel strong again” – movement & momentum', pillar: 'Fitness + brand' },
-    ];
-    const CONTENT_STATUSES = ['planned', 'filmed', 'published'];
-    // Starter partnership pipeline (ranked by proximity to the decision).
-    const PARTNER_TYPES = [
-      { key: 'gynae',       label: 'OBGYN / gynae clinics, KKH' },
-      { key: 'confinement', label: 'Confinement agencies & centres' },
-      { key: 'postnatal',   label: 'Postnatal hubs (multi-service)' },
-      { key: 'doula',       label: 'Doulas & lactation consultants' },
-      { key: 'prenatal',    label: 'Prenatal yoga/pilates studios' },
-      { key: 'paeds',       label: 'Paediatric clinics, mum & baby cafes' },
-    ];
-    const PARTNER_STAGES = [
-      { v: 'not_started', l: 'Not started' },
-      { v: 'intro_sent',  l: 'Intro sent' },
-      { v: 'talking',     l: 'In conversation' },
-      { v: 'live',        l: 'Live agreement' },
-      { v: 'paused',      l: 'Paused' },
-    ];
     // Group delivered-service categories (from treatment_mix) by lane. Note:
     // service type alone can't split women's-health physio from MSK physio
     // (both are "Physiotherapy" in Plato) — that wedge signal comes from the
@@ -2064,12 +1924,6 @@
         default:                   return 'Other';
       }
     }
-    const ENQUIRY_SOURCE_LABELS = {
-      whatsapp: 'WhatsApp', call: 'Phone call', form: 'Website form',
-      instagram: 'Instagram', google: 'Google / GBP', referral: 'Referral / partner',
-      walk_in: 'Walk-in', other: 'Other',
-    };
-
     Chart.defaults.font = {
       family: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, Roboto, sans-serif",
       size: 12
@@ -2866,26 +2720,6 @@
 
     /* ===== Marketing tab ===== */
     let mktAcqChart, mktActiveChart, mktPillarChart, mktSourceChart, mktFunnelChart;
-    // Latest operating-tool state, keyed "item_type|item_key". Seeded from the
-    // payload, updated optimistically on each save.
-    const marketingOps = new Map();
-    const opKey = (type, key) => type + '|' + key;
-    const getOp = (type, key) => marketingOps.get(opKey(type, key));
-
-    // ISO-week stamp, e.g. "2026-W24" — the weekly checklist resets on this.
-    function isoWeekStamp(d = new Date()) {
-      const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-      const day = t.getUTCDay() || 7;            // Mon=1..Sun=7
-      t.setUTCDate(t.getUTCDate() + 4 - day);    // nearest Thursday
-      const yearStart = new Date(Date.UTC(t.getUTCFullYear(), 0, 1));
-      const week = Math.ceil(((t - yearStart) / 86400000 + 1) / 7);
-      return t.getUTCFullYear() + '-W' + String(week).padStart(2, '0');
-    }
-    function campaignWeekNow() {
-      const start = new Date(CAMPAIGN_START + 'T00:00:00');
-      const days = Math.floor((new Date() - start) / 86400000);
-      return Math.min(12, Math.max(1, Math.floor(days / 7) + 1));
-    }
 
     // Range-dependent marketing tiles (KPIs, active trend, pillar mix).
     // Website booking funnel: drop-off bars (distinct sessions per stage).
@@ -3193,143 +3027,8 @@
       ).join('');
     }
 
-    // --- Operating tools ---
-    function renderRhythm() {
-      const week = isoWeekStamp();
-      document.getElementById('mkt_week_label').textContent = '(' + week + ')';
-      const ul = document.getElementById('mkt_rhythm_list');
-      ul.innerHTML = '';
-      RHYTHM_ITEMS.forEach(item => {
-        const key = item.key + '|' + week;
-        const done = (getOp('checklist', key) || {}).state === 'done';
-        const li = document.createElement('li');
-        if (done) li.classList.add('done');
-        const cb = document.createElement('input');
-        cb.type = 'checkbox'; cb.checked = done;
-        cb.addEventListener('change', () => {
-          li.classList.toggle('done', cb.checked);
-          postMarketingOp('checklist', key, { state: cb.checked ? 'done' : 'todo' },
-                          document.getElementById('mkt_rhythm_hint'));
-        });
-        const span = document.createElement('span');
-        span.innerHTML = `<span class="ck-when">${item.when}</span> · <span class="ck-text">${escapeHtml(item.text)}</span>`;
-        li.appendChild(cb); li.appendChild(span);
-        ul.appendChild(li);
-      });
-    }
-
-    function renderContent() {
-      const cw = campaignWeekNow();
-      document.getElementById('mkt_campaign_week').textContent =
-        `(campaign week ~${cw}, from ${CAMPAIGN_START})`;
-      const tbody = document.getElementById('mkt_content_tbody');
-      tbody.innerHTML = '';
-      CONTENT_CALENDAR.forEach(c => {
-        const cur = (getOp('content', String(c.wk)) || {}).state || 'planned';
-        const tr = document.createElement('tr');
-        if (c.wk === cw) tr.style.background = 'var(--goji-soft)';
-        const sel = `<select class="mkt-select" data-wk="${c.wk}">` +
-          CONTENT_STATUSES.map(s => `<option value="${s}"${s === cur ? ' selected' : ''}>${s[0].toUpperCase() + s.slice(1)}</option>`).join('') +
-          '</select>';
-        tr.innerHTML = `<td>${c.wk}${c.wk === cw ? ' <strong>(now)</strong>' : ''}</td>` +
-                       `<td>${escapeHtml(c.theme)}</td><td>${escapeHtml(c.pillar)}</td><td>${sel}</td>`;
-        tbody.appendChild(tr);
-      });
-      tbody.querySelectorAll('select[data-wk]').forEach(sel => {
-        sel.addEventListener('change', () =>
-          postMarketingOp('content', sel.dataset.wk, { state: sel.value },
-                          document.getElementById('mkt_content_hint')));
-      });
-    }
-
-    function renderPipeline() {
-      const tbody = document.getElementById('mkt_pipeline_tbody');
-      tbody.innerHTML = '';
-      PARTNER_TYPES.forEach(p => {
-        const op = getOp('partnership', p.key) || {};
-        const stage = op.state || 'not_started';
-        const note = op.payload || '';
-        const tr = document.createElement('tr');
-        const sel = `<select class="mkt-select" data-partner="${p.key}">` +
-          PARTNER_STAGES.map(s => `<option value="${s.v}"${s.v === stage ? ' selected' : ''}>${s.l}</option>`).join('') +
-          '</select>';
-        tr.innerHTML = `<td>${escapeHtml(p.label)}</td><td>${sel}</td>` +
-          `<td><input type="text" class="mkt-input" style="width:100%;" data-partner-note="${p.key}" value="${escapeHtml(note)}" placeholder="contact / next step"></td>`;
-        tbody.appendChild(tr);
-      });
-      const save = (key) => {
-        const sel  = tbody.querySelector(`select[data-partner="${key}"]`);
-        const note = tbody.querySelector(`input[data-partner-note="${key}"]`);
-        postMarketingOp('partnership', key, { state: sel.value, payload: note.value },
-                        document.getElementById('mkt_pipeline_hint'));
-      };
-      tbody.querySelectorAll('select[data-partner]').forEach(s =>
-        s.addEventListener('change', () => save(s.dataset.partner)));
-      tbody.querySelectorAll('input[data-partner-note]').forEach(i =>
-        i.addEventListener('change', () => save(i.dataset.partnerNote)));
-    }
-
-    function renderEnquiries() {
-      const rows = [];
-      marketingOps.forEach((v, k) => { if (k.startsWith('enquiry|')) rows.push(v); });
-      rows.sort((a, b) => (b.updated_at || '').localeCompare(a.updated_at || ''));
-      document.getElementById('mkt_enquiry_count').textContent = rows.length ? rows.length + ' logged' : '';
-      const tbody = document.getElementById('mkt_enquiry_tbody');
-      tbody.innerHTML = rows.length
-        ? rows.map(v => {
-            const when = v.updated_at ? new Date(v.updated_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '—';
-            return `<tr><td>${when}</td><td>${escapeHtml(ENQUIRY_SOURCE_LABELS[v.state] || v.state || '—')}</td><td>${escapeHtml(v.payload || '')}</td></tr>`;
-          }).join('')
-        : '<tr><td colspan="3" style="color:var(--ink-muted);font-style:italic;">No enquiries logged yet.</td></tr>';
-    }
-
-    // POST one event; optimistically update the local map then re-render the log.
-    async function postMarketingOp(itemType, itemKey, { state, payload } = {}, hintEl) {
-      if (hintEl) { hintEl.classList.remove('err'); hintEl.textContent = 'Saving…'; }
-      try {
-        const res = await fetch('api/marketing/ops', {
-          method: 'POST', credentials: 'same-origin',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ item_type: itemType, item_key: itemKey, state, payload }),
-        });
-        if (!res.ok) {
-          let msg = 'Could not save — please try again.';
-          try { msg = (await res.json()).error || msg; } catch (e) {}
-          throw new Error(msg);
-        }
-        marketingOps.set(opKey(itemType, itemKey),
-          { item_type: itemType, item_key: itemKey, state, payload, updated_at: new Date().toISOString() });
-        if (hintEl) hintEl.textContent = 'Saved.';
-      } catch (err) {
-        if (hintEl) { hintEl.classList.add('err'); hintEl.textContent = err.message; }
-      }
-    }
-
     function resizeMarketingCharts() {
       [mktAcqChart, mktActiveChart, mktPillarChart, mktSourceChart, mktFunnelChart].forEach(c => { if (c) c.resize(); });
-    }
-
-    function initMarketing() {
-      marketingOps.clear();
-      (DATA.marketing_ops || []).forEach(o => marketingOps.set(opKey(o.item_type, o.item_key), o));
-      renderMarketingStatic();
-      renderRhythm();
-      renderContent();
-      renderPipeline();
-      renderEnquiries();
-      const addBtn = document.getElementById('mkt_enquiry_add');
-      if (addBtn && !addBtn.dataset.wired) {
-        addBtn.dataset.wired = '1';
-        addBtn.addEventListener('click', async () => {
-          const source = document.getElementById('mkt_enquiry_source').value;
-          const noteEl = document.getElementById('mkt_enquiry_note');
-          const id = (crypto.randomUUID && crypto.randomUUID()) || ('e' + Date.now());
-          await postMarketingOp('enquiry', id, { state: source, payload: noteEl.value.trim() },
-                                document.getElementById('mkt_enquiry_hint'));
-          noteEl.value = '';
-          renderEnquiries();
-        });
-      }
     }
 
     function applyRange(key) {
@@ -3424,7 +3123,7 @@
       renderDoctorMismatches(DATA.doctor_mismatches);
       renderMismatchHistory();
       renderProjection(DATA.projection);
-      initMarketing();
+      renderMarketingStatic();
 
       initPL();
       initPageNav();
