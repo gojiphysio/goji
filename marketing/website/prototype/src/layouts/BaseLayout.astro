@@ -106,6 +106,15 @@ const GA4_ID = import.meta.env.PUBLIC_GA4_ID;
 // Inert until PUBLIC_BOOKING_API is set (same seam the booking form uses), so
 // dev/preview/mock builds emit nothing. Same PDPA-consent caveat as GA4.
 const BOOKING_API = import.meta.env.PUBLIC_BOOKING_API;
+
+// Google Ads conversion tracking. Inert until PUBLIC_GADS_ID (e.g. "AW-123456789")
+// is set; the booking-confirmation event then reports a "booked" conversion so
+// Smart Bidding optimises toward booking-producing queries (not cheap brand
+// clicks). PUBLIC_GADS_BOOKING_LABEL is the conversion action's label — both come
+// from the Website conversion action you create in Google Ads (see
+// marketing/ads/google-ads-playbook.md). Same PDPA-consent caveat as GA4.
+const GADS_ID = import.meta.env.PUBLIC_GADS_ID;
+const GADS_BOOKING_LABEL = import.meta.env.PUBLIC_GADS_BOOKING_LABEL;
 ---
 
 <!doctype html>
@@ -209,6 +218,27 @@ const BOOKING_API = import.meta.env.PUBLIC_BOOKING_API;
         </Fragment>
       )
     }
+
+    {/* Google Ads conversion tag. Inert until PUBLIC_GADS_ID is set. Shares the
+        gtag/dataLayer shim with GA4; exposes the booking conversion target that
+        BookingForm fires on a confirmed booking. */}
+    {
+      GADS_ID && (
+        <Fragment>
+          <script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${GADS_ID}`} />
+          <script is:inline define:vars={{ GADS_ID, GADS_BOOKING_LABEL }}>
+            window.dataLayer = window.dataLayer || [];
+            function gtag() {
+              dataLayer.push(arguments);
+            }
+            window.gtag = window.gtag || gtag;
+            gtag("js", new Date());
+            gtag("config", GADS_ID);
+            if (GADS_BOOKING_LABEL) window.__gojiBookingConversion = GADS_ID + "/" + GADS_BOOKING_LABEL;
+          </script>
+        </Fragment>
+      )
+    }
   </head>
   <body>
     <a href="#main" class="skip-link">Skip to content</a>
@@ -268,7 +298,7 @@ const BOOKING_API = import.meta.env.PUBLIC_BOOKING_API;
             </div>
           </div>
           <div class="container site-footer__copyright">
-            <p>&copy; {new Date().getFullYear()} Goji Health. All rights reserved.</p>
+            <p>&copy; {new Date().getFullYear()} Goji Health. All rights reserved. &middot; <a href="/privacy">Privacy</a></p>
           </div>
         </footer>
       )
@@ -365,6 +395,12 @@ const BOOKING_API = import.meta.env.PUBLIC_BOOKING_API;
         font-size: var(--fs-caption);
         color: color-mix(in srgb, var(--color-linen) 45%, transparent);
       }
+      .site-footer__copyright a {
+        color: inherit;
+        text-decoration: underline;
+        text-underline-offset: 0.2em;
+      }
+      .site-footer__copyright a:hover { color: var(--color-linen); }
 
       /* Header CTAs: WhatsApp sits next to Book, right of the nav. */
       .site-header__cta {

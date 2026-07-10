@@ -1392,6 +1392,27 @@ const steps = [
       const lead = form.querySelector<HTMLElement>("[data-done-lead]");
       const d = draft();
       const svc = serviceById(d.service ?? "");
+
+      // Conversion signal: tell GA4 (and Google Ads, if configured) a booking was
+      // confirmed, valued at the service price, so Smart Bidding can optimise
+      // toward booking-producing queries instead of cheap brand clicks. gtag only
+      // exists when PUBLIC_GA4_ID / PUBLIC_GADS_ID are set, so this is inert on
+      // dev/preview. transaction_id dedupes. Never break the confirmation.
+      try {
+        const w = window as any;
+        const value = svc && svc.price ? Number(svc.price) || undefined : undefined;
+        if (typeof w.gtag === "function") {
+          w.gtag("event", "booking_confirmed", {
+            value, currency: "SGD", transaction_id: result.reference, service: d.service,
+          });
+          if (w.__gojiBookingConversion) {
+            w.gtag("event", "conversion", {
+              send_to: w.__gojiBookingConversion,
+              value, currency: "SGD", transaction_id: result.reference,
+            });
+          }
+        }
+      } catch { /* analytics must never block the booking confirmation */ }
       if (lead) {
         const dateLabel = d.date
           ? new Date(`${d.date}T00:00:00`).toLocaleDateString("en-SG", {

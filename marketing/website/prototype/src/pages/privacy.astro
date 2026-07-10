@@ -1,0 +1,139 @@
+---
+/**
+ * Privacy policy — the notice that makes our no-banner, first-party analytics
+ * legitimate under Singapore's PDPA. Kept factually in sync with what the site
+ * actually collects: booking details (to Plato + email), and first-party
+ * analytics (visitor/session id + utm/gclid + pages; no name/phone/email).
+ * Update the "Last updated" date whenever the data practices change.
+ */
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Section from "../components/Section.astro";
+import { SITE } from "../lib/site.ts";
+
+const lastUpdated = "10 July 2026";
+---
+
+<BaseLayout
+  title="Privacy Policy | Goji Health"
+  description="How Goji Physiotherapy collects and uses personal data and website analytics, in line with Singapore's Personal Data Protection Act (PDPA)."
+>
+  <section class="legal-header">
+    <div class="container legal-header__inner">
+      <h1>Privacy Policy</h1>
+      <p class="legal-updated">Last updated: {lastUpdated}</p>
+    </div>
+  </section>
+
+  <Section tone="surface">
+    <div class="legal container--narrow">
+      <p>
+        This notice explains what personal data {SITE.fullName} ("Goji", "we",
+        "us") collects when you use our website or book an appointment, how we use
+        it, and the choices you have. We handle personal data in line with
+        Singapore's Personal Data Protection Act (PDPA).
+      </p>
+
+      <h2>What we collect</h2>
+      <h3>1. Booking and enquiry details</h3>
+      <p>
+        When you book an appointment or message us, you give us details such as
+        your name, phone number, email address, appointment preferences, a
+        home-visit address (if applicable), and any notes you choose to share
+        about your condition. We use these only to arrange and provide your care,
+        to send booking confirmations, and to contact you about your appointment.
+      </p>
+
+      <h3>2. Website analytics</h3>
+      <p>
+        As you browse, we record anonymous usage data to understand which
+        channels bring people to us and where our booking flow can be improved:
+      </p>
+      <ul>
+        <li>A random visitor and session identifier stored in your browser (not linked to your name, phone, or email).</li>
+        <li>The pages you view and the steps you reach in the booking flow.</li>
+        <li>How you arrived: the referring website and any campaign tags in the link (for example utm and Google click identifiers).</li>
+        <li>General device and browser information, used to filter out automated traffic.</li>
+      </ul>
+      <p>
+        This analytics data does not include your name, phone number, or email.
+        The details you enter into the booking form are never sent to our
+        analytics.
+      </p>
+
+      <h2>Cookies and similar technologies</h2>
+      <p>
+        Our own analytics uses your browser's local storage to hold the random
+        identifiers described above. When enabled, Google Analytics and Google
+        Ads also set cookies to measure visits and the performance of our ads. You
+        can clear this data at any time in your browser settings, and you can
+        manage ad personalisation through Google's Ads Settings.
+      </p>
+
+      <h2>Who we share it with</h2>
+      <p>We use a small number of trusted service providers to run the clinic and the site:</p>
+      <ul>
+        <li><strong>Plato</strong> - our practice-management system, which stores your booking and clinical records.</li>
+        <li><strong>Google</strong> (Analytics and Ads) - website and advertising measurement.</li>
+        <li><strong>Cloudflare</strong> - website hosting and delivery.</li>
+        <li><strong>WhatsApp / Meta</strong> - only if you choose to message us on WhatsApp.</li>
+      </ul>
+      <p>We do not sell your personal data.</p>
+
+      <h2>How long we keep it</h2>
+      <p>
+        We keep booking and clinical records for as long as needed to provide your
+        care and to meet our legal, accounting, and insurance obligations.
+        Analytics data is retained in aggregate to track trends over time.
+      </p>
+
+      <h2>Your choices and rights</h2>
+      <p>Under the PDPA, you may:</p>
+      <ul>
+        <li>Ask what personal data we hold about you and request a copy.</li>
+        <li>Ask us to correct information that is inaccurate or out of date.</li>
+        <li>Withdraw your consent to our use of your personal data, subject to legal and care-related limits.</li>
+        <li>Opt out of website analytics by clearing your browser's site data for this site, or using your browser's privacy controls and Google's Ads Settings.</li>
+      </ul>
+      <p>
+        To make a request, email us at <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.
+      </p>
+
+      <h2>Contact</h2>
+      <p>
+        {SITE.fullName}<br />
+        {SITE.address.line1}, {SITE.address.line2}<br />
+        <a href={`mailto:${SITE.email}`}>{SITE.email}</a>
+      </p>
+
+      <h2>Changes to this notice</h2>
+      <p>
+        We may update this notice as our services or data practices change. When
+        we do, we will revise the "Last updated" date above.
+      </p>
+    </div>
+  </Section>
+</BaseLayout>
+
+<style>
+  .legal-header {
+    background: var(--bg-page);
+    padding-block: clamp(2rem, 1.5rem + 3vw, 4rem);
+    border-bottom: 1px solid var(--color-border);
+  }
+  .legal-header__inner { display: flex; flex-direction: column; gap: var(--space-2); }
+  .legal-updated { color: var(--text-muted); font-size: var(--fs-small); }
+
+  .legal :global(h2) { margin-top: var(--space-7); margin-bottom: var(--space-3); }
+  .legal :global(h3) { margin-top: var(--space-5); margin-bottom: var(--space-2); }
+  .legal :global(p) { color: var(--text-muted); margin-bottom: var(--space-4); line-height: var(--lh-body); }
+  .legal :global(ul) {
+    color: var(--text-muted);
+    margin-bottom: var(--space-4);
+    padding-left: 1.4rem;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  .legal :global(strong) { font-weight: var(--weight-semibold); color: var(--text-default); }
+  .legal :global(a) { color: var(--color-primary); text-decoration: underline; text-underline-offset: 0.2em; }
+</style>
