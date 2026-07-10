@@ -923,6 +923,7 @@
       <button type="button" data-page="pl"><span class="nav-full">Profit &amp; Loss</span><span class="nav-short">P&amp;L</span></button>
       <button type="button" data-page="commission"><span class="nav-full">Commission Calculator</span><span class="nav-short">Commission</span></button>
       <button type="button" data-page="marketing">Marketing</button>
+      <button type="button" data-page="alerts"><span class="nav-full">Alert history</span><span class="nav-short">Alerts</span></button>
       <button type="button" data-page="other">Other details</button>
     </nav>
 
@@ -975,7 +976,7 @@
       <div class="subtitle">
         Non-void invoices in the last <span id="mismatch_window">30</span> days
         where <strong>invoice doctor</strong> doesn't match the same-day
-        <strong>appointment calendar doctor</strong>. Dismiss rows you've already fixed in Plato — they'll disappear automatically on the next data refresh.
+        <strong>appointment calendar doctor</strong>. Dismiss rows you've already fixed in Plato — dismissals are saved and the row moves to the <strong>Alert history</strong> tab, where you can restore it.
       </div>
       <div style="overflow-x: auto;">
         <table id="mismatch_table">
@@ -1882,6 +1883,38 @@
     </section>
 
     </div><!-- /#page-marketing -->
+
+    <div id="page-alerts" class="page" hidden>
+
+      <section class="q">
+        <h2>Alert history <span class="alert-count" id="alert_history_count">0</span></h2>
+        <div class="subtitle">
+          Provider-attribution alerts you've dismissed. Dismissals are saved and
+          shared across devices; <strong>Restore</strong> brings one back — it
+          reappears on the Overview tab if the invoice still mismatches.
+        </div>
+        <div id="alert_history_empty" class="subtitle" hidden>Nothing dismissed yet.</div>
+        <div style="overflow-x: auto;">
+          <table id="alert_history_table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Invoice</th>
+                <th>Patient</th>
+                <th>Appt → Invoice</th>
+                <th class="num">Total</th>
+                <th>Dismissed by</th>
+                <th>Dismissed</th>
+                <th>Reason</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="alert_history_tbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+    </div><!-- /#page-alerts -->
 
     <div id="page-other" class="page" hidden>
 
@@ -3387,7 +3420,9 @@
       applyRange(initial);
       renderDemographics(DATA.demographics);
       renderReferrals(DATA.referrals);
+      mismatchHistory = (DATA.mismatch_history || []).slice();
       renderDoctorMismatches(DATA.doctor_mismatches);
+      renderMismatchHistory();
       renderProjection(DATA.projection);
       initMarketing();
 
@@ -3397,40 +3432,41 @@
       initPrintOverview();
     }
 
-    // Dismissed mismatch invoice IDs stored in localStorage.
-    // Format: { invoice_id: iso_timestamp_dismissed }
-    const DM_KEY = 'dm_dismissed';
-    const DM_TTL_DAYS = 7;
+    // Provider-attribution alert dismissals are persisted server-side
+    // (marts.mismatch_dismissal_events) and filtered out of DATA.doctor_mismatches
+    // by the backend, so the front end only fires the POST and updates the UI
+    // optimistically. The dismissed rows live on in the Alert-history tab, where
+    // they can be restored. `mismatchHistory` mirrors DATA.mismatch_history and
+    // is mutated optimistically so both tables update without a full reload.
+    let mismatchHistory = [];
 
-    function dmGetDismissed() {
-      try {
-        const raw = localStorage.getItem(DM_KEY);
-        if (!raw) return {};
-        const obj = JSON.parse(raw);
-        const cutoff = Date.now() - DM_TTL_DAYS * 86400 * 1000;
-        // Evict entries older than TTL
-        const pruned = {};
-        for (const [id, ts] of Object.entries(obj)) {
-          if (new Date(ts).getTime() > cutoff) pruned[id] = ts;
-        }
-        if (Object.keys(pruned).length !== Object.keys(obj).length) {
-          localStorage.setItem(DM_KEY, JSON.stringify(pruned));
-        }
-        return pruned;
-      } catch (_) { return {}; }
+    async function postDismissal(action, items, reason) {
+      const res = await fetch('api/mismatch/dismiss', {
+        method: 'POST', credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, items, reason: reason || null }),
+      });
+      if (!res.ok) {
+        let msg = 'Could not save — please try again.';
+        try { msg = (await res.json()).error || msg; } catch (e) {}
+        throw new Error(msg);
+      }
     }
 
-    function dmDismiss(invoiceId) {
-      const obj = dmGetDismissed();
-      obj[invoiceId] = new Date().toISOString();
-      try { localStorage.setItem(DM_KEY, JSON.stringify(obj)); } catch (_) {}
-    }
-
-    function dmDismissAll(invoiceIds) {
-      const obj = dmGetDismissed();
-      const ts = new Date().toISOString();
-      invoiceIds.forEach(id => { obj[id] = ts; });
-      try { localStorage.setItem(DM_KEY, JSON.stringify(obj)); } catch (_) {}
+    // The snapshot stored with each dismissal — display strings (names, not ids),
+    // so the history tab renders correctly even after the invoice ages out.
+    function mismatchSnapshot(r) {
+      return {
+        invoice_id:     r.invoice_id,
+        invoice_no:     r.invoice_no,
+        date:           r.date,
+        patient:        r.patient,
+        invoice_doctor: r.invoice_doctor_name || r.invoice_doctor || '(unset)',
+        appt_doctors:   (r.appt_doctor_names || []).join(' / '),
+        total:          r.total,
+        created_by:     r.created_by,
+        last_edited_by: r.last_edited_by,
+      };
     }
 
     function renderDoctorMismatches(m) {
@@ -3463,23 +3499,16 @@
         note.textContent = 'Plato API check failed: ' + m.error + '. Will retry on next refresh.';
         return;
       }
-      const allRows  = m.mismatches || [];
-      if (!allRows.length) { section.hidden = true; return; }
-
-      const dismissed = dmGetDismissed();
-      // Also clear dismissals for invoices no longer in the mismatch list (resolved in Plato)
-      const activeIds = new Set(allRows.map(r => r.invoice_id));
-      const visibleRows = allRows.filter(r => !dismissed[r.invoice_id]);
-
-      if (!visibleRows.length) { section.hidden = true; return; }
+      const rows = m.mismatches || [];   // backend already drops dismissed rows
+      if (!rows.length) { section.hidden = true; return; }
 
       section.hidden = false;
-      countEl.textContent = visibleRows.length;
+      countEl.textContent = rows.length;
 
       const sgd = v => '$' + (v || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
       const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
-      visibleRows.forEach(r => {
+      rows.forEach(r => {
         const tr = document.createElement('tr');
         const apptList = (r.appt_doctor_names || []).map(esc).join(' / ');
         const invDoc = esc(r.invoice_doctor_name || r.invoice_doctor || '(unset)');
@@ -3497,22 +3526,105 @@
         tbody.appendChild(tr);
       });
 
-      // Wire per-row dismiss buttons
+      // Wire per-row dismiss buttons — POST, then update both tables optimistically.
       tbody.querySelectorAll('.dismiss-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          dmDismiss(btn.dataset.invoice);
-          renderDoctorMismatches(m);
+        btn.addEventListener('click', async () => {
+          const r = rows.find(x => x.invoice_id === btn.dataset.invoice);
+          if (!r) return;
+          btn.disabled = true; btn.textContent = 'Dismissing…';
+          const snap = mismatchSnapshot(r);
+          try {
+            await postDismissal('dismiss', [snap]);
+            m.mismatches = (m.mismatches || []).filter(x => x.invoice_id !== r.invoice_id);
+            addToMismatchHistory(snap);
+            renderDoctorMismatches(m);
+            renderMismatchHistory();
+          } catch (err) {
+            btn.disabled = false; btn.textContent = 'Dismiss';
+            alert(err.message);
+          }
         });
       });
 
       // Wire "Dismiss all" button
       if (dismissAll) {
         dismissAll.style.display = '';
-        dismissAll.onclick = () => {
-          dmDismissAll(visibleRows.map(r => r.invoice_id));
-          renderDoctorMismatches(m);
+        dismissAll.textContent = 'Dismiss all';
+        dismissAll.disabled = false;
+        dismissAll.onclick = async () => {
+          const snaps = rows.map(mismatchSnapshot);
+          dismissAll.disabled = true; dismissAll.textContent = 'Dismissing…';
+          try {
+            await postDismissal('dismiss', snaps);
+            snaps.forEach(addToMismatchHistory);
+            m.mismatches = [];
+            renderDoctorMismatches(m);
+            renderMismatchHistory();
+          } catch (err) {
+            dismissAll.disabled = false; dismissAll.textContent = 'Dismiss all';
+            alert(err.message);
+          }
         };
       }
+    }
+
+    // Prepend a just-dismissed row to the in-memory history (authoritative
+    // dismissed_by/at land on the next full reload). De-dupes by invoice_id so a
+    // dismiss→restore→dismiss cycle doesn't stack.
+    function addToMismatchHistory(snap) {
+      mismatchHistory = mismatchHistory.filter(x => x.invoice_id !== snap.invoice_id);
+      mismatchHistory.unshift({ ...snap, reason: null, dismissed_by: null,
+                                dismissed_at: new Date().toISOString() });
+    }
+
+    function renderMismatchHistory() {
+      const section = document.getElementById('page-alerts');
+      const tbody   = document.getElementById('alert_history_tbody');
+      const empty   = document.getElementById('alert_history_empty');
+      const countEl = document.getElementById('alert_history_count');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+      const list = mismatchHistory || [];
+      if (countEl) countEl.textContent = list.length;
+      if (empty) empty.hidden = list.length > 0;
+
+      const sgd = v => '$' + (v || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+      const fmtWhen = iso => { if (!iso) return '—'; const d = new Date(iso);
+        return isNaN(d) ? esc(iso) : d.toLocaleDateString('en-SG', { day: 'numeric', month: 'short', year: 'numeric' }); };
+
+      list.forEach(r => {
+        const tr = document.createElement('tr');
+        const flip = `<span class="doctor-flip"><span class="right">${esc(r.appt_doctors) || '?'}</span> → <span class="wrong">${esc(r.invoice_doctor) || '(unset)'}</span></span>`;
+        tr.innerHTML = `
+          <td>${esc(r.date)}</td>
+          <td>${esc(r.invoice_no)}</td>
+          <td>${esc(r.patient)}</td>
+          <td>${flip}</td>
+          <td class="num">${sgd(r.total)}</td>
+          <td>${esc(r.dismissed_by) || '<span class="alert-meta">—</span>'}</td>
+          <td>${fmtWhen(r.dismissed_at)}</td>
+          <td>${esc(r.reason) || '<span class="alert-meta">—</span>'}</td>
+          <td><button type="button" class="dismiss-btn restore-btn" data-invoice="${esc(r.invoice_id)}">Restore</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      tbody.querySelectorAll('.restore-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const r = list.find(x => x.invoice_id === btn.dataset.invoice);
+          if (!r) return;
+          btn.disabled = true; btn.textContent = 'Restoring…';
+          try {
+            await postDismissal('restore', [r]);
+            mismatchHistory = mismatchHistory.filter(x => x.invoice_id !== r.invoice_id);
+            renderMismatchHistory();
+          } catch (err) {
+            btn.disabled = false; btn.textContent = 'Restore';
+            alert(err.message);
+          }
+        });
+      });
     }
 
     function hideLoadingOverlay() {
@@ -4049,6 +4161,7 @@
       document.getElementById('page-pl').hidden         = (page !== 'pl');
       document.getElementById('page-commission').hidden = (page !== 'commission');
       document.getElementById('page-marketing').hidden  = (page !== 'marketing');
+      document.getElementById('page-alerts').hidden     = (page !== 'alerts');
       document.getElementById('page-other').hidden      = (page !== 'other');
       // Charts created while their page was hidden render at 0×0; resize once
       // the marketing page is first shown so the canvases pick up real dims.

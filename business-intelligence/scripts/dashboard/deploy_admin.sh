@@ -104,6 +104,7 @@ grant_editor marketing_ops_events       "marketing operating tools"
 grant_editor link_click_events          "click-to-WhatsApp tracking"
 grant_editor booking_funnel_events      "website booking-funnel tracking (goji-booking)"
 grant_editor web_session_events         "website landing/attribution beacon (goji-booking)"
+grant_editor mismatch_dismissal_events  "provider-attribution alert dismissals"
 
 # --- Step 4: refresh patient names ------------------------------------------
 # Names + phones now come from BigQuery (marts.dim_patient_contact), filled by

@@ -368,6 +368,82 @@ def test_marketing_ops_save_validates_before_bq(client, body):
     assert resp.status_code == 400
 
 
+# --- provider-attribution alert dismissals (persistent, server-side) --------
+
+def test_mismatch_dismiss_requires_auth(client):
+    assert client.post("/api/mismatch/dismiss",
+                       json={"action": "dismiss", "items": [{"invoice_id": "x"}]}).status_code == 401
+
+
+def test_mismatch_dismiss_404_on_frontdesk_subdomain(frontdesk_client):
+    # Founder alert surface — gated routes 404 on the public/front-desk surfaces.
+    assert frontdesk_client.post("/api/mismatch/dismiss",
+                                 headers=_auth("founder", "founder-pw"),
+                                 json={"action": "dismiss", "items": [{"invoice_id": "x"}]}).status_code == 404
+
+
+@pytest.mark.parametrize("body", [
+    {},                                              # nothing
+    {"action": "dismiss"},                           # no items
+    {"action": "dismiss", "items": []},              # empty items
+    {"action": "dismiss", "items": [{"reason": "no id"}]},  # item without invoice_id
+    {"action": "bogus", "items": [{"invoice_id": "x"}]},    # unknown action
+])
+def test_mismatch_dismiss_validates_before_bq(client, body):
+    # Valid founder auth, malformed body — rejected 400 before record touches BQ.
+    resp = client.post("/api/mismatch/dismiss", headers=_auth("founder", "founder-pw"), json=body)
+    assert resp.status_code == 400
+
+
+def test_mismatch_dismiss_records_each_item(client, monkeypatch):
+    # A valid dismiss-all writes one event per item, carrying the snapshot and
+    # the mapped action. Patch record_mismatch_dismissal so no BigQuery is hit.
+    calls = []
+    monkeypatch.setattr(app, "record_mismatch_dismissal",
+                        lambda invoice_id, action, **k: calls.append((invoice_id, action, k)))
+    resp = client.post("/api/mismatch/dismiss", headers=_auth("founder", "founder-pw"),
+                       json={"action": "dismiss", "items": [
+                           {"invoice_id": "inv-1", "patient": "V. Maung", "total": 729.0},
+                           {"invoice_id": "inv-2"}]})
+    assert resp.status_code == 200
+    assert [c[0] for c in calls] == ["inv-1", "inv-2"]
+    assert {c[1] for c in calls} == {"dismissed"}
+    # snapshot is threaded through so the history tab can render it later
+    assert calls[0][2]["snapshot"]["patient"] == "V. Maung"
+
+
+def test_mismatch_restore_maps_action(client, monkeypatch):
+    calls = []
+    monkeypatch.setattr(app, "record_mismatch_dismissal",
+                        lambda invoice_id, action, **k: calls.append((invoice_id, action)))
+    resp = client.post("/api/mismatch/dismiss", headers=_auth("founder", "founder-pw"),
+                       json={"action": "restore", "items": [{"invoice_id": "inv-1"}]})
+    assert resp.status_code == 200
+    assert calls == [("inv-1", "restored")]
+
+
+def test_dismissed_invoices_drop_out_of_live_alert(monkeypatch):
+    # The core promise: a dismissed invoice never reappears in the live alert,
+    # even while it still mismatches in the mart. Feed canned mismatch rows and
+    # a dismissed-id set; only the undismissed one should survive.
+    import datetime as _dt
+    rows = [
+        {"invoice_id": "inv-1", "invoice_label": "GLM-1", "invoice_date": _dt.date(2026, 6, 22),
+         "patient_id": "p1", "initial_lastname": "V. Maung", "invoice_clinician_id": "PKN",
+         "appt_clinician_ids": ["PCL"], "status": "mismatch",
+         "created_by": "u", "last_edited_by": "u", "total": 729.0},
+        {"invoice_id": "inv-2", "invoice_label": "GLM-2", "invoice_date": _dt.date(2026, 6, 23),
+         "patient_id": "p2", "initial_lastname": "A. Tan", "invoice_clinician_id": "PKN",
+         "appt_clinician_ids": ["PCL"], "status": "mismatch",
+         "created_by": "u", "last_edited_by": "u", "total": 100.0},
+    ]
+    monkeypatch.setattr(app, "_query", lambda *a, **k: rows)
+    monkeypatch.setattr(app, "fetch_dismissed_mismatch_ids", lambda: {"inv-1"})
+    out = app.fetch_invoice_doctor_mismatches()
+    ids = [m["invoice_id"] for m in out["mismatches"]]
+    assert ids == ["inv-2"]
+
+
 # --- click-to-WhatsApp redirect (public) ------------------------------------
 
 @pytest.fixture

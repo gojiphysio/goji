@@ -90,10 +90,10 @@ Deploy the follow-up state objects (idempotent; the events table is
 
 Grant the dashboard SA write on **only** the append-only event tables (so it
 can append "contacted/snoozed/dismissed" follow-up events, appointment
-confirmations, marketing operating-tool state, and click-to-WhatsApp link
-clicks; everything else stays read-only):
+confirmations, marketing operating-tool state, click-to-WhatsApp link clicks,
+and provider-attribution alert dismissals; everything else stays read-only):
 
-    for t in patient_followup_events lead_events marketing_ops_events link_click_events booking_funnel_events web_session_events; do
+    for t in patient_followup_events lead_events marketing_ops_events link_click_events booking_funnel_events web_session_events mismatch_dismissal_events; do
       bq add-iam-policy-binding \
         --member="serviceAccount:dashboard-sa@goji-bi.iam.gserviceaccount.com" \
         --role="roles/bigquery.dataEditor" \
@@ -149,12 +149,13 @@ mounted here.
 The dashboard SA must have **write** access to the relevant append-only table:
 `marts.patient_followup_events` (retention worklist),
 `marts.lead_events` (Leads pipeline),
-`marts.marketing_ops_events` (founder Marketing tab operating tools), and
-`marts.link_click_events` (click-to-WhatsApp tracking).
-`deploy_admin.sh` grants and verifies all four, but if you ever see a save
+`marts.marketing_ops_events` (founder Marketing tab operating tools),
+`marts.link_click_events` (click-to-WhatsApp tracking), and
+`marts.mismatch_dismissal_events` (provider-attribution alert dismissals).
+`deploy_admin.sh` grants and verifies them all, but if you ever see a save
 error, grant them directly:
 
-    for t in patient_followup_events lead_events marketing_ops_events link_click_events booking_funnel_events web_session_events; do
+    for t in patient_followup_events lead_events marketing_ops_events link_click_events booking_funnel_events web_session_events mismatch_dismissal_events; do
       bq add-iam-policy-binding \
         --member="serviceAccount:dashboard-sa@goji-bi.iam.gserviceaccount.com" \
         --role="roles/bigquery.dataEditor" \
@@ -232,6 +233,16 @@ URLs** to the site with `utm_source=google&utm_medium=cpc&utm_campaign=<name>`
 The beacon captures both; `utm_campaign` is the deterministic join key and
 `gclid` the backup. Do the equivalent for Meta/IG paid (`fbclid` + utm). This is
 what powers **cost-per-booking by campaign** on the Marketing tab.
+
+**Google Ads conversion tracking (feeds Smart Bidding):** the booking flow fires a
+`booking_confirmed` event on the confirmation step (valued at the service price),
+via gtag. It reports a Google Ads conversion when the site build sets
+`PUBLIC_GADS_ID` (`AW-…`) and `PUBLIC_GADS_BOOKING_LABEL` (the conversion-action
+label) — both inert until set, same PDPA gate as GA4. Create the Website
+conversion action in Google Ads to get those two values. The same event is
+importable via GA4 if `PUBLIC_GA4_ID` is set instead. Full step-by-step:
+**`marketing/ads/google-ads-playbook.md`** (also covers fixing the branded/junk
+search-terms problem: campaign type, keyword match types, negatives, GBP).
 
 ## Plato online-booking attribution — spike verdict (2026-06)
 
