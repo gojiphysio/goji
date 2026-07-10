@@ -258,60 +258,70 @@ def test_lead_stage_and_channel_vocab():
 # end-to-end per DEPLOY.md). The pure builder that turns those slug counts into
 # Source -> bio.site -> CTA flows is unit-tested here.
 
-def test_build_funnel_paths_sources_ctas_and_biosite_hop():
+def test_build_funnel_paths_discovery_surface_cta_booked():
     link_clicks = {
         "wa_by_slug":   {"ig-wa": 50, "bio-wa": 60, "web-wa": 40, "gbp-wa": 30, "wa": 5},
         # book_by_slug carries both the website /book slugs (*-book) and any legacy
-        # Plato slugs (*-plato); both are the "Booking" CTA in the funnel.
-        "book_by_slug": {"bio-book": 20, "web-book": 24, "ads-book": 28, "book": 3},
+        # Plato slugs (*-plato): -book => "Native booking", -plato => "Plato booking".
+        "book_by_slug": {"bio-book": 20, "web-book": 24, "ads-book": 28, "web-plato": 9, "book": 3},
     }
+    web_channels = {"Google Ads": 100, "Instagram": 70, "Direct": 55}
+    booking_funnel = {"booked": 7}
     f = app._build_funnel_paths(link_clicks, {"new_patients": 47},
-                                {"whatsapp": 12, "instagram": 3})
+                                {"whatsapp": 12, "instagram": 3},
+                                web_channels, booking_funnel)
     flows = {(d["from"], d["to"]): d["flow"] for d in f["flows"]}
 
-    # ig-* is a direct Instagram tap; bio-* routes Instagram -> bio.site -> CTA.
-    assert flows[("Instagram", "WhatsApp")] == 50        # ig-wa direct
+    # Discovery -> Website (arrival), from the landing beacon (sessions).
+    assert flows[("Google Ads", "Website")] == 100
+    assert flows[("Direct", "Website")] == 55
+    # web-* taps sit under the Website surface; bio-* under bio.site + IG hop.
+    assert flows[("Website", "WhatsApp")] == 40
+    assert flows[("Website", "Native booking")] == 24
+    assert flows[("Website", "Plato booking")] == 9
     assert flows[("Instagram", "bio.site")] == 80        # bio-wa 60 + bio-book 20
     assert flows[("bio.site", "WhatsApp")] == 60
-    assert flows[("bio.site", "Booking")] == 20
-    # Other sources map by slug prefix; gbp -> Google.
-    assert flows[("Web", "WhatsApp")] == 40
-    assert flows[("Google", "WhatsApp")] == 30
-    assert flows[("Web", "Booking")] == 24
-    assert flows[("Ads", "Booking")] == 28
+    assert flows[("bio.site", "Native booking")] == 20
+    # ig-* is a direct Instagram tap; gbp/ads bypass the site straight to a CTA.
+    assert flows[("Instagram", "WhatsApp")] == 50
+    assert flows[("Google", "WhatsApp")] == 30           # gbp -> Google
+    assert flows[("Ads", "Native booking")] == 28
     # Generic fallback slugs ('wa' / 'book') have no source prefix -> "Other".
     assert flows[("Other", "WhatsApp")] == 5
-    assert flows[("Other", "Booking")] == 3
+    assert flows[("Other", "Native booking")] == 3
 
-    # Patient outcome: WhatsApp-only bridge from the lead pipeline (won whatsapp
-    # leads). Non-whatsapp wins (instagram) are NOT pulled into the tap funnel.
-    assert flows[("WhatsApp", "Became a patient")] == 12
-    assert flows[("WhatsApp", "Not linked yet")] == 185 - 12   # remaining WhatsApp taps
-    assert flows[("Booking", "Not linked yet")] == 75    # bookings aren't lead-linked yet
-    assert f["became_patient"] == 12
+    # Outcome: Native booking -> Booked = confirmed bookings; WhatsApp -> Booked =
+    # won whatsapp leads (non-whatsapp wins are NOT pulled in).
+    assert flows[("Native booking", "Booked")] == 7
+    assert flows[("WhatsApp", "Booked")] == 12
+    assert f["booked_native"] == 7 and f["booked_wa"] == 12
 
-    assert f["wa_taps"] == 185 and f["plato_taps"] == 75
-    assert f["total_taps"] == 260
+    assert f["wa_taps"] == 185 and f["book_taps"] == 84
+    assert f["total_taps"] == 269
+    assert f["sessions"] == 225
     assert f["first_visits"] == 47
 
 
-def test_build_funnel_paths_patient_node_absent_without_wins():
-    # No logged wins → no "Became a patient" flow (the node simply doesn't draw),
-    # and the WhatsApp clamp can't go negative.
+def test_build_funnel_paths_booked_nodes_absent_without_data():
+    # No confirmed bookings and no logged wins → no "Booked" edges (the outcome
+    # node simply doesn't draw), and the WhatsApp clamp can't go negative.
     f = app._build_funnel_paths(
-        {"wa_by_slug": {"ig-wa": 10}, "book_by_slug": {}}, {"new_patients": 4}, {})
+        {"wa_by_slug": {"ig-wa": 10}, "book_by_slug": {}}, {"new_patients": 4},
+        {}, {}, {})
     flows = {(d["from"], d["to"]): d["flow"] for d in f["flows"]}
-    assert ("WhatsApp", "Became a patient") not in flows
-    assert flows[("WhatsApp", "Not linked yet")] == 10
-    assert f["became_patient"] == 0
+    assert ("Native booking", "Booked") not in flows
+    assert ("WhatsApp", "Booked") not in flows
+    assert flows[("Instagram", "WhatsApp")] == 10
+    assert f["booked_native"] == 0 and f["booked_wa"] == 0
 
 
-def test_build_funnel_paths_degrades_without_clicks():
-    # No clicks / no kpis / no wins → empty flows and safe nulls, never an exception.
-    f = app._build_funnel_paths({}, {}, {})
+def test_build_funnel_paths_degrades_without_data():
+    # No clicks / kpis / wins / channels / bookings → empty flows and safe nulls.
+    f = app._build_funnel_paths({}, {}, {}, {}, {})
     assert f["flows"] == []
     assert f["total_taps"] == 0
-    assert f["became_patient"] == 0
+    assert f["sessions"] == 0
+    assert f["booked_native"] == 0
     assert f["first_visits"] is None
 
 
@@ -408,12 +418,28 @@ def test_booking_falls_back_when_unset(client, monkeypatch, _no_click_logging):
 
 
 def test_book_redirect_goes_to_site_booking_form(client, monkeypatch, _no_click_logging):
-    # The current booking CTA: a *-book slug 302s to our own /book form.
+    # The current booking CTA: a *-book slug 302s to our own /book form, with the
+    # click-id + channel passed through (?cid&src) so the landing beacon can join
+    # the click to the on-site booking session (origin→booking attribution).
     monkeypatch.setattr(app, "SITE_BOOKING_URL", "https://www.gojiphysio.com/book")
     resp = client.get("/r/web-book")
     assert resp.status_code == 302
-    assert resp.headers["Location"] == "https://www.gojiphysio.com/book"
+    loc = resp.headers["Location"]
+    assert loc.startswith("https://www.gojiphysio.com/book?")
+    from urllib.parse import urlparse, parse_qs
+    q = parse_qs(urlparse(loc).query)
+    assert q["src"] == ["web-book"]
+    assert len(q["cid"][0]) >= 8  # a uuid passthrough
     assert app.LINK_SLUG_KIND["web-book"] == "book"
+
+
+def test_whatsapp_redirect_has_no_click_id_passthrough(client, monkeypatch, _no_click_logging):
+    # The cid/src passthrough only applies to on-site /book targets; a wa.me deep
+    # link must stay clean (the click_id can't join anything on WhatsApp's side).
+    monkeypatch.setattr(app, "WHATSAPP_NUMBER", "6580000000")
+    resp = client.get("/r/web-wa")
+    assert resp.status_code == 302
+    assert "cid=" not in resp.headers["Location"]
 
 
 def test_book_slug_counts_as_a_booking_click():

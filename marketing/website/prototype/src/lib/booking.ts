@@ -47,13 +47,15 @@ export type FunnelStage =
   | "service_selected"
   | "time_selected"
   | "details"
-  | "submitted";
+  | "submitted"
+  | "validation_error";
 
 export interface BookingApi {
   getAvailability(query: AvailabilityQuery): Promise<string[]>;
   createBooking(draft: BookingDraft): Promise<BookingResult>;
-  /** Fire-and-forget funnel event; no-op in the mock. */
-  track(stage: FunnelStage): void;
+  /** Fire-and-forget funnel event; no-op in the mock. `detail` adds context for
+   *  stuck events (e.g. which field failed validation). */
+  track(stage: FunnelStage, detail?: string): void;
 }
 
 const API = import.meta.env.PUBLIC_BOOKING_API as string | undefined;
@@ -71,6 +73,42 @@ export function bookingSessionId(): string {
   } catch {
     return "nosession";
   }
+}
+
+/** First-party visitor id (localStorage, stable across sessions). Set by the
+ *  landing beacon in BaseLayout; read here so booking events carry the same id
+ *  and join to marts.web_session_events. No PII. */
+export function visitorId(): string {
+  try {
+    const key = "goji_vid";
+    let v = localStorage.getItem(key);
+    if (!v) {
+      v = crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2);
+      localStorage.setItem(key, v);
+    }
+    return v;
+  } catch {
+    return "novisitor";
+  }
+}
+
+/** First-touch arrival attribution the landing beacon stashed in localStorage,
+ *  reduced to the subset the booking backend stores (visitor_id + utm/gclid/
+ *  go_click_id). {} keys absent if storage is blocked or the visit was direct. */
+export function bookingAttribution(): Record<string, string> {
+  const attr: Record<string, string> = { visitor_id: visitorId() };
+  try {
+    const raw = localStorage.getItem("goji_attr");
+    if (raw) {
+      const a = JSON.parse(raw) as Record<string, unknown>;
+      for (const k of ["utm_source", "utm_campaign", "gclid", "go_click_id"]) {
+        if (a[k]) attr[k] = String(a[k]);
+      }
+    }
+  } catch {
+    /* ignore — attribution is best-effort */
+  }
+  return attr;
 }
 
 // ---- Real backend ----------------------------------------------------------
@@ -106,6 +144,7 @@ const realApi: BookingApi = {
           address: draft.address,
           notes: draft.notes,
           session_id: bookingSessionId(),
+          attribution: bookingAttribution(),
         }),
       });
       const d = await r.json().catch(() => ({}));
@@ -120,12 +159,17 @@ const realApi: BookingApi = {
     }
   },
 
-  track(stage) {
+  track(stage, detail) {
     try {
       fetch(`${API}/api/track`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ stage, session_id: bookingSessionId() }),
+        body: JSON.stringify({
+          stage,
+          detail,
+          session_id: bookingSessionId(),
+          attribution: bookingAttribution(),
+        }),
         keepalive: true,
       }).catch(() => {});
     } catch {
@@ -173,7 +217,7 @@ const mockApi: BookingApi = {
         .padStart(4, "0");
     return { ok: true, reference: ref };
   },
-  track() {
+  track(_stage, _detail) {
     /* no-op in the mock */
   },
 };

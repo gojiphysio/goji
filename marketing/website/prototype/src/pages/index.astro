@@ -10,6 +10,45 @@ import { Icon } from "astro-icon/components";
 import { SITE } from "../lib/site.ts";
 import { services } from "../lib/services.ts";
 
+// FAQ — single source for both the on-page accordion and the FAQPage JSON-LD
+// (so AI answer engines and Google rich results read the same Q&A).
+const faqs = [
+  {
+    q: "What should I expect at my first visit?",
+    a: "Your first session starts with a conversation. We'll ask about your history, your current concerns, and your goals. Then we'll do a physical assessment and walk you through what we find. You'll leave with a clear understanding of what's going on and a plan for what comes next. First sessions typically run 55 minutes.",
+  },
+  {
+    q: "What should I wear to my appointment?",
+    a: "Comfortable clothing that allows movement. Think activewear, loose shorts, or leggings. We'll provide anything else you need during your session.",
+  },
+  {
+    q: "Can I see a physio during pregnancy?",
+    a: "Absolutely. Prenatal physiotherapy is safe and recommended. We treat common pregnancy concerns like pelvic girdle pain, lower back pain, and pelvic floor changes. We also help you prepare physically for birth and postpartum recovery.",
+  },
+  {
+    q: "Do you treat children? What ages?",
+    a: "Yes. We see children from infancy through to 18. Our paediatric physiotherapy covers developmental concerns, movement milestones, sports injuries, scoliosis, and paediatric pelvic health. Sessions are designed to be comfortable for kids and informative for parents.",
+  },
+  {
+    q: "How is Goji different from other physio clinics?",
+    a: "We specialise in providing a continuum of care for women. We built Goji so you can trust one clinic for your pelvic health, your postpartum recovery, and your child's physio needs. You don't have to start over with a new provider when your family's needs change.",
+  },
+  {
+    q: "Do you accept insurance?",
+    a: "We do not do direct billing. We recommend checking with your insurer before your first visit. Most of our patients pay first and claim later with their relevant corporate and personal insurance providers. Some insurance providers require a referral letter from a doctor.",
+  },
+];
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: faqs.map((f) => ({
+    "@type": "Question",
+    name: f.q,
+    acceptedAnswer: { "@type": "Answer", text: f.a },
+  })),
+};
+
 // Trust marquee items, repeated in the loop so the track always exceeds the
 // viewport width (prevents a blank gap in the scroll).
 const tickerItems = [
@@ -150,6 +189,7 @@ const reviews = [
 <BaseLayout
   title="Women's Physiotherapy at Lentor Modern | Goji Health"
   description="Expert women's and family physiotherapy at Lentor Modern, Singapore. Pelvic health, pregnancy and postpartum care, paediatrics, and everyday strength — one minute from Lentor MRT."
+  schema={faqSchema}
 >
   {/* ---- Hero (copy left, clinic photos right) ---- */}
   <section class="hero">
@@ -444,32 +484,7 @@ const reviews = [
       <h2>Frequently asked questions</h2>
     </header>
     <div class="faq-list">
-      {[
-        {
-          q: "What should I expect at my first visit?",
-          a: "Your first session starts with a conversation. We'll ask about your history, your current concerns, and your goals. Then we'll do a physical assessment and walk you through what we find. You'll leave with a clear understanding of what's going on and a plan for what comes next. First sessions typically run 55 minutes.",
-        },
-        {
-          q: "What should I wear to my appointment?",
-          a: "Comfortable clothing that allows movement. Think activewear, loose shorts, or leggings. We'll provide anything else you need during your session.",
-        },
-        {
-          q: "Can I see a physio during pregnancy?",
-          a: "Absolutely. Prenatal physiotherapy is safe and recommended. We treat common pregnancy concerns like pelvic girdle pain, lower back pain, and pelvic floor changes. We also help you prepare physically for birth and postpartum recovery.",
-        },
-        {
-          q: "Do you treat children? What ages?",
-          a: "Yes. We see children from infancy through to 18. Our paediatric physiotherapy covers developmental concerns, movement milestones, sports injuries, scoliosis, and paediatric pelvic health. Sessions are designed to be comfortable for kids and informative for parents.",
-        },
-        {
-          q: "How is Goji different from other physio clinics?",
-          a: "We specialise in providing a continuum of care for women. We built Goji so you can trust one clinic for your pelvic health, your postpartum recovery, and your child's physio needs. You don't have to start over with a new provider when your family's needs change.",
-        },
-        {
-          q: "Do you accept insurance?",
-          a: "We do not do direct billing. We recommend checking with your insurer before your first visit. Most of our patients pay first and claim later with their relevant corporate and personal insurance providers. Some insurance providers require a referral letter from a doctor.",
-        },
-      ].map((item) => (
+      {faqs.map((item) => (
         <details class="faq-item">
           <summary class="faq-q">
             {item.q}
