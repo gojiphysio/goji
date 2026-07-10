@@ -1056,6 +1056,62 @@ ORDER BY month
 MISMATCH_WINDOW_DAYS = int(os.environ.get("MISMATCH_WINDOW_DAYS", "30"))
 
 
+def fetch_dismissed_mismatch_ids() -> set[str]:
+    """Invoice ids whose provider-attribution alert has been dismissed
+    (latest action = 'dismissed'). Used to hide them from the live alert list.
+
+    Dismissals are persistent and server-side (marts.mismatch_dismissal_events),
+    replacing the old browser-local localStorage dismiss. Degrades gracefully to
+    an empty set if the view hasn't been deployed yet (see DEPLOY.md) — the alert
+    must still render.
+    """
+    try:
+        rows = _query(f"""
+SELECT invoice_id
+FROM `{PROJECT}.marts.mismatch_dismissal_latest`
+WHERE action = 'dismissed'
+""")
+    except Exception as e:
+        log.warning("mismatch_dismissal_latest unavailable (run deploy_all.sh?): %s", e)
+        return set()
+    return {r["invoice_id"] for r in rows}
+
+
+def fetch_mismatch_history() -> list[dict]:
+    """Currently-dismissed provider-attribution alerts, for the Alert-history
+    tab. Reads the snapshot captured at dismiss time, so a row still renders even
+    after the invoice fell out of the 30-day window or was corrected in Plato.
+
+    Degrades gracefully to [] if the table hasn't been deployed yet.
+    """
+    try:
+        rows = _query(f"""
+SELECT invoice_id, reason, invoice_label, invoice_date, patient,
+       invoice_doctor, appt_doctors, total, created_by, last_edited_by,
+       updated_by, updated_at
+FROM `{PROJECT}.marts.mismatch_dismissal_latest`
+WHERE action = 'dismissed'
+ORDER BY updated_at DESC
+""")
+    except Exception as e:
+        log.warning("mismatch history unavailable (run deploy_all.sh?): %s", e)
+        return []
+    return [{
+        "invoice_id":     r["invoice_id"],
+        "invoice_no":     r.get("invoice_label") or (r["invoice_id"] or "")[:8],
+        "date":           r["invoice_date"].isoformat() if r.get("invoice_date") else None,
+        "patient":        r.get("patient") or "—",
+        "invoice_doctor": r.get("invoice_doctor"),
+        "appt_doctors":   r.get("appt_doctors"),
+        "total":          _to_float(r.get("total")),
+        "created_by":     r.get("created_by"),
+        "last_edited_by": r.get("last_edited_by"),
+        "reason":         r.get("reason"),
+        "dismissed_by":   r.get("updated_by"),
+        "dismissed_at":   r["updated_at"].isoformat() if r.get("updated_at") else None,
+    } for r in rows]
+
+
 def fetch_invoice_doctor_mismatches() -> dict:
     """Alert-only check: list non-void invoices whose `doctor` disagrees
     with the same-day appointment-calendar doctor for the same patient.
@@ -1067,7 +1123,9 @@ def fetch_invoice_doctor_mismatches() -> dict:
 
     Cleared automatically — when an invoice is corrected in Plato, the next
     appointment ingestion + dashboard cache refresh drops the resolved invoice
-    off the list.
+    off the list. Rows the founder explicitly dismisses are also hidden here
+    (persistent, server-side — see fetch_dismissed_mismatch_ids); they live on in
+    the Alert-history tab and can be restored.
 
     Returns:
         {
@@ -1136,10 +1194,15 @@ ORDER BY invoice_date DESC, invoice_label DESC
             "total":               _to_float(r.get("total")),
         })
 
+    # Hide invoices the founder has explicitly dismissed (persistent, server-side).
+    dismissed = fetch_dismissed_mismatch_ids()
+    if dismissed:
+        mismatches = [m for m in mismatches if m["invoice_id"] not in dismissed]
+
     result["mismatches"]    = mismatches
     result["no_appt_count"] = no_appt
-    log.info("  mismatches found: %d (window=%dd, %d invoices had no same-day appt)",
-             len(mismatches), MISMATCH_WINDOW_DAYS, no_appt)
+    log.info("  mismatches found: %d (window=%dd, %d invoices had no same-day appt, %d dismissed)",
+             len(mismatches), MISMATCH_WINDOW_DAYS, no_appt, len(dismissed))
     return result
 
 
@@ -1565,7 +1628,7 @@ def build_payload() -> dict:
     presets    = preset_ranges()
 
     # max_workers sized to cover every concurrent fetch this request fires:
-    # 8 top-level + 4 ranges × 12 metrics + 3 ranges × 4 previous-window jobs = 68.
+    # 9 top-level + 4 ranges × 12 metrics + 3 ranges × 4 previous-window jobs = 69.
     # Round up to 70 for headroom.
     with ThreadPoolExecutor(max_workers=70, thread_name_prefix="bq") as ex:
         # Range-independent (or fixed-window) fetches.
@@ -1576,6 +1639,7 @@ def build_payload() -> dict:
         f_payments      = ex.submit(fetch_payment_methods, pmt_start, today)
         f_appointments  = ex.submit(fetch_appointments, appt_start, today)
         f_mismatches    = ex.submit(fetch_invoice_doctor_mismatches)
+        f_mismatch_hist = ex.submit(fetch_mismatch_history)
         f_marketing_ops = ex.submit(fetch_marketing_ops)
         f_projection    = ex.submit(fetch_monthly_projection, today)
 
@@ -1664,6 +1728,7 @@ def build_payload() -> dict:
             "payment_by_method": f_payments.result(),
             "ranges":            ranges,
             "doctor_mismatches": f_mismatches.result(),
+            "mismatch_history":  f_mismatch_hist.result(),
             "marketing_ops":     f_marketing_ops.result(),
             "projection":        f_projection.result(),
         }
@@ -2148,6 +2213,52 @@ VALUES
         _cache.pop("payload", None)
 
 
+def record_mismatch_dismissal(invoice_id: str, action: str, *,
+                              reason: str | None = None,
+                              snapshot: dict | None = None,
+                              updated_by: str | None = None) -> None:
+    """Append one provider-attribution alert dismissal/restore event.
+
+    Append-only; latest action per invoice_id wins (mismatch_dismissal_latest).
+    Same parameterised DML-INSERT pattern as record_marketing_ops — honours the
+    dashboard SA's table-level dataEditor grant on mismatch_dismissal_events
+    (least-privilege). The client passes the alert snapshot it already has in
+    hand so the Alert-history tab can render the row even after the invoice falls
+    out of the mismatch window. Pops the founder payload cache so both the live
+    alert list and the history tab reflect it on the next reload.
+    """
+    s = snapshot or {}
+    sql = f"""
+INSERT INTO `{PROJECT}.marts.mismatch_dismissal_events`
+  (event_id, invoice_id, action, reason, invoice_label, invoice_date, patient,
+   invoice_doctor, appt_doctors, total, created_by, last_edited_by,
+   updated_by, updated_at)
+VALUES
+  (@event_id, @invoice_id, @action, @reason, @invoice_label, @invoice_date, @patient,
+   @invoice_doctor, @appt_doctors, @total, @created_by, @last_edited_by,
+   @updated_by, CURRENT_TIMESTAMP())
+"""
+    job_config = bigquery.QueryJobConfig(query_parameters=[
+        bigquery.ScalarQueryParameter("event_id",       "STRING",  str(uuid.uuid4())),
+        bigquery.ScalarQueryParameter("invoice_id",     "STRING",  invoice_id),
+        bigquery.ScalarQueryParameter("action",         "STRING",  action),
+        bigquery.ScalarQueryParameter("reason",         "STRING",  (reason or None)),
+        bigquery.ScalarQueryParameter("invoice_label",  "STRING",  (s.get("invoice_no") or None)),
+        bigquery.ScalarQueryParameter("invoice_date",   "DATE",    (s.get("date") or None)),
+        bigquery.ScalarQueryParameter("patient",        "STRING",  (s.get("patient") or None)),
+        bigquery.ScalarQueryParameter("invoice_doctor", "STRING",  (s.get("invoice_doctor") or None)),
+        bigquery.ScalarQueryParameter("appt_doctors",   "STRING",  (s.get("appt_doctors") or None)),
+        bigquery.ScalarQueryParameter("total",          "NUMERIC",
+                                      (str(s["total"]) if s.get("total") is not None else None)),
+        bigquery.ScalarQueryParameter("created_by",     "STRING",  (s.get("created_by") or None)),
+        bigquery.ScalarQueryParameter("last_edited_by", "STRING",  (s.get("last_edited_by") or None)),
+        bigquery.ScalarQueryParameter("updated_by",     "STRING",  updated_by),
+    ])
+    _bq().query(sql, job_config=job_config).result()
+    with _cache_lock:
+        _cache.pop("payload", None)
+
+
 def fetch_pl_window(start: date, end: date) -> dict:
     """Recompute the P&L revenue + payment fee inputs for an arbitrary window.
 
@@ -2607,6 +2718,55 @@ def api_marketing_ops_save() -> Response:
                 json.dumps({"error": "The dashboard isn't allowed to save yet — its "
                             "service account needs write access to "
                             "marts.marketing_ops_events. See DEPLOY.md."}),
+                status=403, mimetype="application/json")
+        return Response('{"error": "Could not save — please try again."}',
+                        status=500, mimetype="application/json")
+    return Response('{"ok": true}', mimetype="application/json")
+
+
+@app.route("/api/mismatch/dismiss", methods=["POST"])
+@require_roles("founder")
+def api_mismatch_dismiss() -> Response:
+    """Dismiss or restore provider-attribution alerts (persistent, server-side).
+
+    Body: {action, reason?, items:[{invoice_id, invoice_no?, date?, patient?,
+    invoice_doctor?, appt_doctors?, total?, created_by?, last_edited_by?}, ...]}.
+    action is 'dismiss' (hide the live alert) or 'restore' (un-dismiss — it
+    reappears if the invoice still mismatches). Each item carries the snapshot the
+    front end already rendered so the Alert-history tab can show the row later.
+    Appends one event per item; the latest action per invoice wins. Handles both
+    a single row and "Dismiss all" (multiple items) in one request.
+    """
+    body   = request.get_json(silent=True) or {}
+    action = (body.get("action") or "dismiss").strip().lower()
+    if action not in ("dismiss", "restore"):
+        return Response('{"error": "action must be dismiss or restore"}',
+                        status=400, mimetype="application/json")
+    stored = "dismissed" if action == "dismiss" else "restored"
+    reason = body.get("reason")
+    reason = str(reason).strip() if reason else None
+    items  = body.get("items")
+    if not isinstance(items, list) or not items:
+        return Response('{"error": "items[] with at least one invoice_id is required"}',
+                        status=400, mimetype="application/json")
+    rows = [it for it in items
+            if isinstance(it, dict) and (it.get("invoice_id") or "").strip()]
+    if not rows:
+        return Response('{"error": "each item needs an invoice_id"}',
+                        status=400, mimetype="application/json")
+    try:
+        for it in rows:
+            record_mismatch_dismissal((it.get("invoice_id") or "").strip(), stored,
+                                      reason=reason, snapshot=it,
+                                      updated_by=getattr(g, "user", None))
+    except Exception as e:
+        log.exception("mismatch dismissal write failed: %s", e)
+        msg = str(e).lower()
+        if "permission" in msg or "denied" in msg or "403" in msg or "access" in msg:
+            return Response(
+                json.dumps({"error": "The dashboard isn't allowed to save yet — its "
+                            "service account needs write access to "
+                            "marts.mismatch_dismissal_events. See DEPLOY.md."}),
                 status=403, mimetype="application/json")
         return Response('{"error": "Could not save — please try again."}',
                         status=500, mimetype="application/json")
