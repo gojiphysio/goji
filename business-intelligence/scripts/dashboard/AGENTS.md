@@ -32,7 +32,7 @@ See `DEPLOY.md`.
   the slug served at the root `/<slug>`).
 - **Graceful degradation.** Every `fetch_*` wraps its query in try/except and
   returns a safe empty value, so a not-yet-deployed table never breaks the page
-  (see `fetch_marketing_ops`, `fetch_link_clicks`).
+  (see `fetch_link_clicks`, `fetch_leads`).
 - **Cache:** `get_payload()` caches `build_payload()` for `CACHE_TTL` (5 min);
   writes pop the cache. `build_payload()` fans queries out in a thread pool —
   add per-range work to `range_jobs[key]` and mirror it in the results assembly.
@@ -65,9 +65,12 @@ See `DEPLOY.md`.
 - WIP "pending integration" cards are the **seams** where live integrations plug
   in. Convert a WIP card to a live card (value id + `kpi-trend` div + `badge live`)
   and wire it in `renderMarketingMetrics(r)`.
-- The manual enquiry log is being **replaced by the front-desk Leads pipeline**
-  (`marts.lead_events`) — the single source of truth for inbound inquiries. Don't
-  build new enquiry capture here.
+- Inbound inquiries live in the **front-desk Leads pipeline** (`marts.lead_events`),
+  the single source of truth. Don't add enquiry capture or other static "operating
+  tool" widgets here — the old 90-day-plan tools (rhythm checklist, content
+  calendar, partnership pipeline, manual enquiry log) and their
+  `marts.marketing_ops_events` backing were removed once the plan lapsed. Keep the
+  tab a **read-only marketing lens** on the warehouse.
 - The **acquisition funnel** ("by path") is a 4-column Sankey (`chartjs-chart-sankey`,
   **vendored in `static/`**, not a CDN — registered once near the top of the main
   script, guarded): **Discovery → Owned surface → CTA → Booked**. Web is the

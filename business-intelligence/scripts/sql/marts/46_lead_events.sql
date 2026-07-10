@@ -9,11 +9,10 @@
 -- appt_confirmation_events, and it sidesteps BigQuery's restrictions on mutating
 -- recently-streamed rows.
 --
--- This is the structured replacement for the founder Marketing tab's manual
--- enquiry log: it adds a contact key and explicit funnel stages, and it's the
--- middle of the acquisition funnel — the click is already logged
--- (marts.link_click_events, slug = channel) and the first visit lands in Plato;
--- the lead is the named person in between.
+-- This is the single source of truth for inbound inquiries: a contact key plus
+-- explicit funnel stages, and it's the middle of the acquisition funnel — the
+-- click is already logged (marts.link_click_events, slug = channel) and the
+-- first visit lands in Plato; the lead is the named person in between.
 --
 -- PII NOTE — deliberate exception. Unlike the patient worklists (which key on
 -- patient_id and hydrate name/phone live from marts.dim_patient_contact), a lead
@@ -23,7 +22,7 @@
 -- founder+staff on the frontdesk subdomain with a table-level dataEditor grant;
 -- keep `note` operational, not clinical.
 --
--- channel values (reuse the enquiry-log / LINK_SLUGS vocabulary):
+-- channel values (reuse the LINK_SLUGS vocabulary):
 --   whatsapp | instagram | google | referral | walk_in | form | call | other
 -- stage values (append-only transitions):
 --   inquiry   — just came in (the default on capture).
