@@ -1272,20 +1272,23 @@ const steps = [
         return ok;
       }
       if (step === 3) {
-        let ok = true;
+        const bad: string[] = [];
         if (!d.name) {
           setFieldError("name", "Please enter your name.");
-          ok = false;
+          bad.push("name");
         } else setFieldError("name", "");
         if (!isValidSgPhone(d.phone)) {
           setFieldError("phone", "Please enter a valid 8-digit Singapore number.");
-          ok = false;
+          bad.push("phone");
         } else setFieldError("phone", "");
         if (!isValidEmail(d.email)) {
           setFieldError("email", "Please enter a valid email address.");
-          ok = false;
+          bad.push("email");
         } else setFieldError("email", "");
-        return ok;
+        // Form-friction is a real stuck point: log which field(s) the visitor
+        // got wrong so the funnel shows where the details step bleeds people.
+        if (bad.length) bookingApi.track("validation_error", bad.join(","));
+        return bad.length === 0;
       }
       return true;
     }

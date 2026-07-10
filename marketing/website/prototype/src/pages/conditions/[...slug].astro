@@ -12,9 +12,35 @@ export async function getStaticPaths() {
 const { entry } = Astro.props;
 const { Content } = await entry.render();
 const { title, description, cardTitle, category, ctaSlug } = entry.data;
+
+const origin = Astro.site ?? new URL(Astro.url.origin);
+const pageURL = new URL(Astro.url.pathname, origin).href;
+// MedicalWebPage marks this as clinical reference content (GEO: answer engines
+// prefer typed medical pages); BreadcrumbList gives crawlers the Home ›
+// Conditions › <page> trail on these nested routes.
+const conditionSchema = [
+  {
+    "@context": "https://schema.org",
+    "@type": "MedicalWebPage",
+    name: title,
+    description,
+    url: pageURL,
+    about: { "@type": "MedicalCondition", name: cardTitle ?? title },
+    audience: { "@type": "MedicalAudience", audienceType: "Patient" },
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: origin.href },
+      { "@type": "ListItem", position: 2, name: "Conditions", item: new URL("/conditions", origin).href },
+      { "@type": "ListItem", position: 3, name: cardTitle ?? title, item: pageURL },
+    ],
+  },
+];
 ---
 
-<BaseLayout title={`${title} | Goji Physiotherapy`} description={description}>
+<BaseLayout title={`${title} | Goji Physiotherapy`} description={description} schema={conditionSchema}>
   {/* Page header */}
   <section class="cond-header">
     <div class="container cond-header__inner">

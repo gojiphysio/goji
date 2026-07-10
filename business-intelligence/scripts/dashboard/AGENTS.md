@@ -68,13 +68,21 @@ See `DEPLOY.md`.
 - The manual enquiry log is being **replaced by the front-desk Leads pipeline**
   (`marts.lead_events`) — the single source of truth for inbound inquiries. Don't
   build new enquiry capture here.
-- The **acquisition funnel** ("by path") is a Sankey (`chartjs-chart-sankey`,
+- The **acquisition funnel** ("by path") is a 4-column Sankey (`chartjs-chart-sankey`,
   **vendored in `static/`**, not a CDN — registered once near the top of the main
-  script, guarded). `_build_funnel_paths` builds Source → bio.site → CTA flows
-  from `link_click_events` slug splits (the `wa_by_slug` / `book_by_slug` already
-  in the payload — no extra query). bio.site is the Instagram link-in-bio hop
-  (`bio-*` slugs route Instagram → bio.site → CTA; `ig-*` are direct). First
-  visits show as a single stat: a tap can't yet be traced to the booking it leads
-  to (no FK from `link_click_events` to `lead_events`/invoices — closing that gap
-  needs a click-id passthrough). `renderFunnelSankey` degrades gracefully if the
-  plugin or the slug data is missing.
+  script, guarded): **Discovery → Owned surface → CTA → Booked**. Web is the
+  *surface*, not the top of funnel. `_build_funnel_paths` joins the three
+  first-party streams (each edge its own honest measure; units shift across
+  columns): **Discovery → Website** = landings by channel from the beacon
+  (`fetch_web_channels` / `web_session_events`, classified by utm/gclid/referer);
+  **Surface → CTA** = go-link taps (`link_click_events` slug splits; `web-*` under
+  Website, `bio-*` under bio.site + an Instagram→bio.site edge, `gbp/ads/qr/ig`
+  bypass the site straight to a CTA); **CTA → Booked** = confirmed native bookings
+  (`booking_funnel.booked`) and won WhatsApp leads (`lead_wins`). The click-id
+  passthrough (`/r/<slug>?cid=` for `-book` slugs → beacon `go_click_id`) closes
+  the old "no FK from `link_click_events`" gap for the on-site journey.
+  `renderFunnelSankey` degrades gracefully if the plugin or any stream is missing.
+- The **booking funnel card** (`fetch_booking_funnel` / `renderBookingFunnel`)
+  shows stage drop-off **plus a "Stuck" line**: `availability_empty` (date with no
+  slots), `validation_error` (bad phone/email), and `book_error` by reason code —
+  the silent dead-ends the progress bars can't show.

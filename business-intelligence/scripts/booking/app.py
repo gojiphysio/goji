@@ -35,8 +35,17 @@ app = Flask(__name__)
 CORS_ORIGIN = os.environ.get("CORS_ORIGIN", "https://www.gojiphysio.com")
 PROJECT = os.environ.get("GCP_PROJECT", "goji-bi")
 FUNNEL_TABLE = f"{PROJECT}.marts.booking_funnel_events"
+WEB_EVENT_TABLE = f"{PROJECT}.marts.web_session_events"
+# Progress stages plus "stuck" events that make silent drop-off visible:
+#   availability_empty — picked a date with no free slots (server-side)
+#   validation_error   — bad phone/email on the form (client-side)
+#   book_error         — submit failed (server-side; `detail` = the reason code)
 VALID_STAGES = {"page_view", "service_selected", "time_selected", "details",
-                "submitted", "confirmed"}
+                "submitted", "confirmed",
+                "availability_empty", "validation_error", "book_error"}
+# Attribution fields the browser may attach (first-touch, from the landing
+# beacon) so a booking event can be traced to how the visitor arrived.
+ATTRIB_KEYS = ("visitor_id", "utm_source", "utm_campaign", "gclid", "go_click_id")
 
 _plato: PlatoClient | None = None
 _bq = None
@@ -111,6 +120,15 @@ def availability():
         log.warning("availability failed (%s %s): %s", service, day, e)
         return jsonify({"error": "unavailable", "times": []}), 502
     times = sorted({t for slots in avail.values() for t in slots})
+    # A date with zero free slots is a silent drop-off point: the visitor picked
+    # a day and hit a dead end. Log it (server-side, so it's authoritative) with
+    # the service+date as detail. session_id comes from the query so it ties into
+    # that visitor's funnel; skipped if the browser didn't send one.
+    if not times:
+        _track_async("availability_empty", request.args.get("session_id"),
+                     service, request.headers.get("User-Agent"),
+                     request.headers.get("Referer"),
+                     detail=f"{service}:{day.isoformat()}")
     payload = {
         "date": day.isoformat(),
         "times": times,
@@ -127,19 +145,27 @@ def book():
     if request.method == "OPTIONS":
         return "", 204
     draft = request.get_json(silent=True) or {}
+    ua, ref = request.headers.get("User-Agent"), request.headers.get("Referer")
+    attribution = draft.get("attribution") or {}
     try:
         result = create_booking(plato(), draft)
     except BookingError as e:
         status = 409 if e.code == "slot_taken" else 400
+        # A failed submit is where a ready-to-book visitor gets stuck. Record it
+        # with the reason code so "book_error" drop-off is visible and typed.
+        _track_async("book_error", draft.get("session_id"), draft.get("service"),
+                     ua, ref, detail=(e.code or "error"), attribution=attribution)
         return jsonify({"ok": False, "error": str(e), "code": e.code}), status
     except Exception:
         log.exception("booking failed")
+        _track_async("book_error", draft.get("session_id"), draft.get("service"),
+                     ua, ref, detail="plato_error", attribution=attribution)
         return jsonify({"ok": False,
                         "error": "Something went wrong. Please try again or message us."}), 502
     mailer.send_admin_booking_email(result, draft)     # best-effort
     mailer.send_customer_booking_email(result, draft)  # best-effort
     _track_async("confirmed", draft.get("session_id"), draft.get("service"),
-                 request.headers.get("User-Agent"), request.headers.get("Referer"))
+                 ua, ref, attribution=attribution)
     return jsonify({"ok": True, "reference": result["reference"]})
 
 
@@ -149,12 +175,31 @@ def track():
         return "", 204
     data = request.get_json(silent=True) or {}
     _track_async(data.get("stage"), data.get("session_id"), data.get("service"),
-                 request.headers.get("User-Agent"), request.headers.get("Referer"))
+                 request.headers.get("User-Agent"), request.headers.get("Referer"),
+                 detail=data.get("detail"), attribution=data.get("attribution"))
     return "", 204
 
 
-def _track_async(stage, session_id, service, user_agent, referer) -> None:
-    """Fire-and-forget funnel event (mirrors the dashboard's _record_link_click)."""
+@app.route("/api/web-event", methods=["POST", "OPTIONS"])
+def web_event():
+    """Landing beacon from the site (BaseLayout): one row per session_start /
+    page_view capturing arrival attribution. Fire-and-forget; always 204."""
+    if request.method == "OPTIONS":
+        return "", 204
+    data = request.get_json(silent=True) or {}
+    _record_web_event_async(data, request.headers.get("User-Agent"),
+                            request.headers.get("Referer"))
+    return "", 204
+
+
+def _track_async(stage, session_id, service, user_agent, referer,
+                 detail=None, attribution=None) -> None:
+    """Fire-and-forget funnel event (mirrors the dashboard's _record_link_click).
+
+    `detail` carries context for stuck events (a book_error code, or the date
+    with no availability). `attribution` is the first-touch blob from the landing
+    beacon (visitor_id / utm_* / gclid / go_click_id) so a confirmed booking can
+    be traced back to how the visitor arrived; only known keys are copied."""
     if not stage or stage not in VALID_STAGES or not session_id:
         return
     row = {
@@ -165,7 +210,13 @@ def _track_async(stage, session_id, service, user_agent, referer) -> None:
         "occurred_at": datetime.now(timezone.utc).isoformat(),
         "user_agent": ((user_agent or "")[:512] or None),
         "referer": ((referer or "")[:512] or None),
+        "detail": ((str(detail)[:256]) if detail else None),
     }
+    if attribution:
+        for k in ATTRIB_KEYS:
+            v = attribution.get(k)
+            if v:
+                row[k] = str(v)[:256]
 
     def _insert():
         try:
@@ -174,5 +225,38 @@ def _track_async(stage, session_id, service, user_agent, referer) -> None:
                 log.warning("funnel insert returned errors: %s", errors)
         except Exception as e:
             log.warning("funnel event not recorded (stage=%s): %s", stage, e)
+
+    threading.Thread(target=_insert, daemon=True).start()
+
+
+def _record_web_event_async(data, user_agent, referer) -> None:
+    """Fire-and-forget landing-beacon event → marts.web_session_events. This is
+    the top of the funnel: how the visitor arrived (utm_*, gclid, referer,
+    landing_path) plus the go-link click_id passthrough (cid) for the exact
+    origin→booking join. Best-effort; never blocks the page."""
+    event_type = (data.get("event_type") or "page_view")
+    row = {
+        "event_id": str(uuid.uuid4()),
+        "event_type": str(event_type)[:32],
+        "occurred_at": datetime.now(timezone.utc).isoformat(),
+        "user_agent": ((user_agent or "")[:512] or None),
+        "referer": ((referer or data.get("referrer") or "")[:512] or None),
+    }
+    # Copy known string fields when present (keeps the row tidy; unknown keys
+    # from a future beacon version are simply ignored).
+    for k in ("visitor_id", "session_id", "utm_source", "utm_medium",
+              "utm_campaign", "utm_content", "utm_term", "gclid", "fbclid",
+              "landing_path", "go_click_id"):
+        v = data.get(k)
+        if v:
+            row[k] = str(v)[:512]
+
+    def _insert():
+        try:
+            errors = bq().insert_rows_json(WEB_EVENT_TABLE, [row])
+            if errors:
+                log.warning("web event insert returned errors: %s", errors)
+        except Exception as e:
+            log.warning("web event not recorded (%s): %s", event_type, e)
 
     threading.Thread(target=_insert, daemon=True).start()

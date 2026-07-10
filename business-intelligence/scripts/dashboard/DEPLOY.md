@@ -93,7 +93,7 @@ can append "contacted/snoozed/dismissed" follow-up events, appointment
 confirmations, marketing operating-tool state, and click-to-WhatsApp link
 clicks; everything else stays read-only):
 
-    for t in patient_followup_events lead_events marketing_ops_events link_click_events; do
+    for t in patient_followup_events lead_events marketing_ops_events link_click_events booking_funnel_events web_session_events; do
       bq add-iam-policy-binding \
         --member="serviceAccount:dashboard-sa@goji-bi.iam.gserviceaccount.com" \
         --role="roles/bigquery.dataEditor" \
@@ -154,7 +154,7 @@ The dashboard SA must have **write** access to the relevant append-only table:
 `deploy_admin.sh` grants and verifies all four, but if you ever see a save
 error, grant them directly:
 
-    for t in patient_followup_events lead_events marketing_ops_events link_click_events; do
+    for t in patient_followup_events lead_events marketing_ops_events link_click_events booking_funnel_events web_session_events; do
       bq add-iam-policy-binding \
         --member="serviceAccount:dashboard-sa@goji-bi.iam.gserviceaccount.com" \
         --role="roles/bigquery.dataEditor" \
@@ -211,8 +211,27 @@ zeros, so nothing breaks before the export exists. To light it up — one-time:
 **Channel attribution:** GA4 auto-captures `utm_*` on inbound links. Tag links
 that point *into* the website (IG bio, GBP, ads, email) with
 `utm_source=<slug>` matching the `LINK_SLUGS` taxonomy so sessions attribute to
-the same channels the funnel uses. (The `go.gojiphysio.com/<slug>` redirector
-sends taps to WhatsApp/Plato, not the site, so it's unaffected.)
+the same channels the funnel uses. The `go.gojiphysio.com/<slug>` redirector
+sends WhatsApp/Plato taps off-site (unaffected), but **`*-book` slugs land on our
+own `/book`**, and the redirect now appends `?cid=<click_id>&src=<slug>` — the
+first-party landing beacon records those on `marts.web_session_events`, closing
+the click → session join without GA4.
+
+**First-party arrival beacon (`marts.web_session_events`):** the Astro site's
+`BaseLayout` posts a `session_start`/`page_view` to `goji-booking`
+`POST /api/web-event` on every landing, capturing `utm_*`, `gclid`, `fbclid`,
+`referrer`, `landing_path`, `cid` (go-link passthrough) against a first-party
+`visitor_id` + the shared booking `session_id`. This is the deterministic
+origin → surface → CTA → booked chain for the on-site booking journey; it's inert
+until the site build sets `PUBLIC_BOOKING_API` (same PDPA-consent gate as GA4).
+
+**Google Ads inflow:** turn on **auto-tagging** in Google Ads (Settings → Account
+settings → Auto-tagging) so every ad click carries a `gclid`, and set ad **final
+URLs** to the site with `utm_source=google&utm_medium=cpc&utm_campaign=<name>`
+(use the same `<name>` as the campaign so it joins the `google_ads` transfer).
+The beacon captures both; `utm_campaign` is the deterministic join key and
+`gclid` the backup. Do the equivalent for Meta/IG paid (`fbclid` + utm). This is
+what powers **cost-per-booking by campaign** on the Marketing tab.
 
 ## Plato online-booking attribution — spike verdict (2026-06)
 
@@ -375,6 +394,10 @@ Three tabs — the worklists Plato doesn't track:
 ## Cost
 
 - Cloud Run: scales to zero. With a few visits a day, well under $1/month.
+  **Exception:** `goji-links` runs `--min-instances=1` (a warm container, a few
+  $/month) — it's the public CTA redirector, and a cold start added several
+  seconds to the first click after idle, long enough to lose the tap. Every other
+  service still scales to zero.
 - BQ: each page load is ~10 cheap queries (~few MB scanned each). Cached
   for 5 minutes so reloads don't multiply that. Should be free-tier-shaped.
 - Secret Manager: 6 secret access calls per cold start. Free tier covers it.

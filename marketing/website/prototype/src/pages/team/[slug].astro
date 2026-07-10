@@ -3,6 +3,7 @@ import { getCollection } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Button from "../../components/Button.astro";
 import LogoLockup from "../../components/LogoLockup.astro";
+import { SITE } from "../../lib/site.ts";
 
 export async function getStaticPaths() {
   const entries = await getCollection("team", ({ data }) => !data.draft);
@@ -16,11 +17,39 @@ const { entry } = Astro.props;
 const { Content } = await entry.render();
 const d = entry.data;
 const firstName = d.name.split(" ")[0];
+
+const origin = Astro.site ?? new URL(Astro.url.origin);
+const pageURL = new URL(Astro.url.pathname, origin).href;
+// Person schema ties each physiotherapist to the clinic (E-E-A-T / author
+// authority for GEO); BreadcrumbList gives the Home › Team › <name> trail.
+const teamSchema = [
+  {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: d.name,
+    jobTitle: d.role,
+    description: d.tagline,
+    image: d.photo ? new URL(d.photo, origin).href : undefined,
+    url: pageURL,
+    knowsLanguage: d.languages,
+    worksFor: { "@type": "MedicalClinic", name: SITE.fullName, url: origin.href },
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: origin.href },
+      { "@type": "ListItem", position: 2, name: "Team", item: new URL("/#team", origin).href },
+      { "@type": "ListItem", position: 3, name: d.name, item: pageURL },
+    ],
+  },
+];
 ---
 
 <BaseLayout
   title={`${d.name} — ${d.role} | Goji Health`}
   description={d.tagline}
+  schema={teamSchema}
 >
   {/* ---- Hero ---- */}
   <section class="bio-hero">

@@ -111,7 +111,7 @@ jobs:
           # append-only event logs — follow-ups, inbound leads, marketing
           # operating tools, and click-to-WhatsApp link clicks.
           # Everything else stays read-only.
-          for t in patient_followup_events lead_events marketing_ops_events link_click_events; do
+          for t in patient_followup_events lead_events marketing_ops_events link_click_events booking_funnel_events web_session_events; do
             bq add-iam-policy-binding \
               --member="serviceAccount:${DASHBOARD_SA}" \
               --role="roles/bigquery.dataEditor" \
@@ -172,10 +172,16 @@ jobs:
           # deploy` creates the service the first time and updates it after, so
           # there's no manual Cloud Shell step. Full env set so WHATSAPP_NUMBER
           # (from the repo variable) stays in sync on every deploy.
+          # --min-instances=1 keeps one container warm: the redirector is a
+          # public CTA hop, so a cold start (scale-to-zero + BigQuery client init)
+          # added several seconds to the first click after idle — long enough to
+          # lose the tap. A single always-on instance is a few $/month and makes
+          # every redirect sub-second. 512Mi matches the dashboard image headroom.
           gcloud run deploy "${LINKS_SERVICE}" \
             --source . --region "${REGION}" --project "${PROJECT}" \
             --service-account "${DASHBOARD_SA}" \
             --set-env-vars=GCP_PROJECT=${PROJECT},CACHE_TTL_SECONDS=300,APP_MODE=links,WHATSAPP_NUMBER=${WHATSAPP_NUMBER},WHATSAPP_FALLBACK_URL=${WHATSAPP_FALLBACK_URL},PLATO_BOOKING_URL=${PLATO_BOOKING_URL} \
+            --min-instances=1 --memory=512Mi \
             --allow-unauthenticated \
             --quiet
           # Ensure the go.gojiphysio.com domain mapping exists (create once —

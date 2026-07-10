@@ -19,13 +19,19 @@ interface Props {
   description?: string;
   bare?: boolean;
   noindex?: boolean;
+  /** Extra JSON-LD blocks (FAQPage, MedicalWebPage, BreadcrumbList, Person …)
+   *  rendered alongside the site-wide LocalBusiness schema. Helps AI answer
+   *  engines and rich results parse each page's specific content. */
+  schema?: Record<string, unknown> | Record<string, unknown>[];
 }
 const {
   title = SITE.seoTitle,
   description = SITE.seoDescription,
   bare = false,
   noindex = false,
+  schema,
 } = Astro.props;
+const extraSchemas = schema ? (Array.isArray(schema) ? schema : [schema]) : [];
 
 const origin = Astro.site ?? new URL(Astro.url.origin);
 const canonicalURL = new URL(Astro.url.pathname, origin);
@@ -92,6 +98,14 @@ const nav = [
 // NOTE: a PDPA consent mechanism must be in place before enabling in
 // production (see business-intelligence/scripts/dashboard/DEPLOY.md).
 const GA4_ID = import.meta.env.PUBLIC_GA4_ID;
+
+// First-party landing beacon → goji-booking /api/web-event. Captures HOW the
+// visitor arrived (utm_*, gclid, fbclid, referrer, and the go-link click-id
+// passthrough `?cid`) against a first-party visitor_id + the shared booking
+// session_id, so the dashboard funnel can trace origin → surface → CTA → booked.
+// Inert until PUBLIC_BOOKING_API is set (same seam the booking form uses), so
+// dev/preview/mock builds emit nothing. Same PDPA-consent caveat as GA4.
+const BOOKING_API = import.meta.env.PUBLIC_BOOKING_API;
 ---
 
 <!doctype html>
@@ -119,6 +133,65 @@ const GA4_ID = import.meta.env.PUBLIC_GA4_ID;
     <meta name="twitter:image" content={ogImage.href} />
 
     {!bare && <script type="application/ld+json" set:html={JSON.stringify(businessSchema)} />}
+    {extraSchemas.map((s) => (
+      <script type="application/ld+json" set:html={JSON.stringify(s)} />
+    ))}
+
+    {/* First-party landing beacon (attribution). Inert without PUBLIC_BOOKING_API. */}
+    {
+      BOOKING_API && (
+        <script is:inline define:vars={{ BOOKING_API }}>
+          (function () {
+            try {
+              var qp = new URLSearchParams(location.search);
+              var pick = function (k) { return qp.get(k) || ""; };
+              var rid = function () { return (crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2)); };
+              var vid = localStorage.getItem("goji_vid");
+              if (!vid) { vid = rid(); localStorage.setItem("goji_vid", vid); }
+              var sid = sessionStorage.getItem("goji_booking_sid");
+              var newSession = false;
+              if (!sid) { sid = rid(); sessionStorage.setItem("goji_booking_sid", sid); newSession = true; }
+              // First-touch attribution: capture once, never overwrite, and only when
+              // there is a real signal (so a direct hit doesn't claim an empty first-touch).
+              if (!localStorage.getItem("goji_attr")) {
+                var a = {
+                  utm_source: pick("utm_source"), utm_medium: pick("utm_medium"),
+                  utm_campaign: pick("utm_campaign"), utm_content: pick("utm_content"),
+                  utm_term: pick("utm_term"), gclid: pick("gclid"), fbclid: pick("fbclid"),
+                  go_click_id: pick("cid"), referrer: document.referrer || "",
+                  landing_path: location.pathname || ""
+                };
+                var extRef = a.referrer && a.referrer.indexOf(location.host) === -1;
+                if (a.utm_source || a.gclid || a.fbclid || a.go_click_id || extRef) {
+                  localStorage.setItem("goji_attr", JSON.stringify(a));
+                }
+              }
+              var s = {};
+              try { s = JSON.parse(localStorage.getItem("goji_attr") || "{}"); } catch (e) {}
+              fetch(BOOKING_API + "/api/web-event", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  event_type: newSession ? "session_start" : "page_view",
+                  visitor_id: vid, session_id: sid,
+                  utm_source: s.utm_source || pick("utm_source"),
+                  utm_medium: s.utm_medium || pick("utm_medium"),
+                  utm_campaign: s.utm_campaign || pick("utm_campaign"),
+                  utm_content: s.utm_content || pick("utm_content"),
+                  utm_term: s.utm_term || pick("utm_term"),
+                  gclid: s.gclid || pick("gclid"),
+                  fbclid: s.fbclid || pick("fbclid"),
+                  go_click_id: s.go_click_id || pick("cid"),
+                  referrer: document.referrer || "",
+                  landing_path: location.pathname || ""
+                }),
+                keepalive: true
+              }).catch(function () {});
+            } catch (e) { /* never break the page for analytics */ }
+          })();
+        </script>
+      )
+    }
 
     {/* GA4 (website tracking). Inert until PUBLIC_GA4_ID is set in the build env. */}
     {

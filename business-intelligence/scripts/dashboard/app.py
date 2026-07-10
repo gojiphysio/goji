@@ -1190,15 +1190,16 @@ ORDER BY item_type, updated_at DESC
 LINK_CLICK_TABLE = f"{PROJECT}.marts.link_click_events"
 
 
-def _record_link_click(slug: str, user_agent: str | None, referer: str | None) -> None:
+def _record_link_click(click_id: str, slug: str, user_agent: str | None, referer: str | None) -> None:
     """Append one click via the streaming insert API (insert_rows_json), NOT
     DML: clicks are public/high-frequency, so this dodges BigQuery's 1,500
     DML-statements-per-table-per-day cap and the latency of a query job.
     Best-effort — never raise into the request; a logging hiccup must not break
-    the redirect."""
+    the redirect. `click_id` is minted by the caller so the same id can be passed
+    through to the /book landing (?cid=…) for an exact origin→booking join."""
     try:
         row = {
-            "click_id":   str(uuid.uuid4()),
+            "click_id":   click_id,
             "slug":       (slug or "")[:64],
             "clicked_at": datetime.now(timezone.utc).isoformat(),
             "user_agent": ((user_agent or "")[:512] or None),
@@ -1211,10 +1212,10 @@ def _record_link_click(slug: str, user_agent: str | None, referer: str | None) -
         log.warning("link click not recorded (slug=%s): %s", slug, e)
 
 
-def _record_link_click_async(slug: str, user_agent: str | None, referer: str | None) -> None:
+def _record_link_click_async(click_id: str, slug: str, user_agent: str | None, referer: str | None) -> None:
     """Fire-and-forget so the public redirect returns immediately."""
     threading.Thread(target=_record_link_click,
-                     args=(slug, user_agent, referer), daemon=True).start()
+                     args=(click_id, slug, user_agent, referer), daemon=True).start()
 
 
 def fetch_link_clicks(start: date, end: date) -> dict:
@@ -1272,18 +1273,29 @@ def fetch_booking_funnel(start: date, end: date) -> dict:
     labels = dict(BOOKING_FUNNEL_STAGES)
     order = [s for s, _ in BOOKING_FUNNEL_STAGES]
     empty = {"stages": [{"stage": s, "label": labels[s], "sessions": 0} for s in order],
-             "viewed": 0, "booked": 0, "conversion_pct": 0.0}
+             "viewed": 0, "booked": 0, "conversion_pct": 0.0,
+             "stuck": {"availability_empty": 0, "validation_error": 0,
+                       "book_error": 0, "book_error_by_code": {}}}
     try:
+        # Group by (stage, detail) in one pass: progress stages ignore detail;
+        # the "stuck" stages use it (book_error's reason code, etc.).
         rows = _query(f"""
-SELECT stage, COUNT(DISTINCT session_id) AS sessions
+SELECT stage, detail, COUNT(DISTINCT session_id) AS sessions
 FROM `{PROJECT}.marts.booking_funnel_events`
 WHERE DATE(occurred_at) BETWEEN '{start}' AND '{end}'
-GROUP BY stage
+GROUP BY stage, detail
 """)
     except Exception as e:
         log.warning("booking_funnel_events unavailable (run deploy_all.sh?): %s", e)
         return empty
-    counts = {r["stage"]: _to_int(r["sessions"]) for r in rows}
+    counts: dict[str, int] = {}
+    book_error_by_code: dict[str, int] = {}
+    for r in rows:
+        stage, n = r["stage"], _to_int(r["sessions"])
+        counts[stage] = counts.get(stage, 0) + n
+        if stage == "book_error":
+            code = r.get("detail") or "error"
+            book_error_by_code[code] = book_error_by_code.get(code, 0) + n
     viewed = counts.get("page_view", 0)
     booked = counts.get("confirmed", 0)
     return {
@@ -1291,6 +1303,13 @@ GROUP BY stage
         "viewed": viewed,
         "booked": booked,
         "conversion_pct": round(booked / viewed * 100.0, 1) if viewed else 0.0,
+        # "Where they get stuck" — silent dead-ends, distinct sessions each.
+        "stuck": {
+            "availability_empty": counts.get("availability_empty", 0),
+            "validation_error":   counts.get("validation_error", 0),
+            "book_error":         counts.get("book_error", 0),
+            "book_error_by_code": book_error_by_code,
+        },
     }
 
 
@@ -1399,33 +1418,78 @@ GROUP BY channel
     return {r["channel"]: _to_int(r["won"]) for r in rows}
 
 
+def fetch_web_channels(start: date, end: date) -> dict:
+    """Website landings for [start, end] grouped into a discovery *channel*, from
+    the first-party landing beacon (marts.web_session_events). This is the top of
+    the funnel — how visitors ARRIVE at the site — so "Website" becomes the owned
+    surface fed by Google Ads / Instagram / Google / Direct, not a phantom source.
+
+    A session (distinct session_id) is one landing. Degrades to {} until the
+    beacon is deployed and PUBLIC_BOOKING_API is set, so the funnel just omits the
+    discovery→Website edges rather than breaking.
+    """
+    try:
+        rows = _query(f"""
+SELECT
+  CASE
+    WHEN gclid IS NOT NULL AND gclid != '' THEN 'Google Ads'
+    WHEN LOWER(utm_medium) IN ('cpc','ppc','paid') AND LOWER(utm_source) LIKE 'google%' THEN 'Google Ads'
+    WHEN (fbclid IS NOT NULL AND fbclid != '') OR LOWER(utm_source) IN ('facebook','meta','fb') THEN 'Meta Ads'
+    WHEN LOWER(utm_source) IN ('instagram','ig') OR REGEXP_CONTAINS(LOWER(referer), r'instagram') THEN 'Instagram'
+    WHEN LOWER(utm_source) LIKE 'gbp%' OR LOWER(utm_source) LIKE 'google_business%' THEN 'Google'
+    WHEN LOWER(utm_source) LIKE 'google%' OR REGEXP_CONTAINS(LOWER(referer), r'google\\.') THEN 'Google'
+    WHEN utm_source IS NOT NULL AND utm_source != '' THEN utm_source
+    WHEN referer IS NULL OR referer = '' THEN 'Direct'
+    ELSE 'Referral'
+  END AS channel,
+  COUNT(DISTINCT session_id) AS sessions
+FROM `{PROJECT}.marts.web_session_events`
+WHERE DATE(occurred_at) BETWEEN '{start}' AND '{end}'
+GROUP BY channel
+""")
+    except Exception as e:
+        log.warning("web_session_events unavailable (run deploy_all.sh?): %s", e)
+        return {}
+    return {r["channel"]: _to_int(r["sessions"]) for r in rows if r["channel"]}
+
+
 # Funnel-path source label per link slug prefix (slug = "<source>-<cta>", see
 # LINK_SLUGS). `bio` is handled specially: bio.site is the Instagram link-in-bio
-# page, so bio-* taps flow Instagram -> bio.site -> CTA rather than being their
-# own discovery source. A generic slug with no prefix ('wa' / 'plato') is "Other".
-FUNNEL_SOURCE = {"web": "Web", "gbp": "Google", "ads": "Ads", "qr": "QR", "ig": "Instagram"}
+# page, so bio-* taps flow Instagram -> bio.site -> CTA. `web` is the owned
+# Website surface (fed by discovery channels from the landing beacon), not a
+# discovery source itself. A generic slug with no prefix ('wa'/'book') is "Other".
+FUNNEL_SOURCE = {"gbp": "Google", "ads": "Ads", "qr": "QR", "ig": "Instagram"}
+# CTA label per slug suffix.
+FUNNEL_CTA = {"wa": "WhatsApp", "book": "Native booking", "plato": "Plato booking"}
 
 
-def _build_funnel_paths(link_clicks: dict, kpis: dict, lead_wins: dict) -> dict:
-    """Build the acquisition-funnel Sankey flows for the front-end from the
-    per-slug click counts already in `link_clicks` (exact, from
-    marts.link_click_events) — no extra query.
+def _build_funnel_paths(link_clicks: dict, kpis: dict, lead_wins: dict,
+                        web_channels: dict, booking_funnel: dict) -> dict:
+    """Build the acquisition-funnel Sankey as a 4-column hierarchy so the *web is
+    no longer the top of funnel* — it's the owned surface that discovery channels
+    drive people into:
 
-    Flows are Source -> CTA, with one intermediate hop: Instagram -> bio.site ->
-    CTA for bio-* taps (the link-in-bio page), while ig-* taps are a direct
-    Instagram -> CTA.
+        Discovery ─▶ Owned surface ─▶ CTA / intent ─▶ Outcome
+        (how they arrive)  (Website,     (WhatsApp,      (Booked)
+                            bio.site)     Native booking,
+                                          Plato booking)
 
-    A terminal patient outcome is added off the WhatsApp CTA only, fed by the
-    front-desk lead pipeline (`lead_wins`, won leads by channel): WhatsApp ->
-    "Became a patient" = won whatsapp-channel leads. This is the only
-    marketing-channel -> patient bridge we have, and it's WhatsApp-only — direct
-    Plato bookings aren't logged as leads (no 'online' lead channel), so they
-    route to "Not linked yet" (which means "not converted OR not yet tracked",
-    NOT "failed"). The remaining WhatsApp taps go there too. `first_visits` (the
-    all-source first-visit count) rides along as a stat so the gap between
-    tracked-tap conversions and total new patients stays visible. Units shift
-    from taps to people at the patient step. Degrades gracefully: no clicks ->
-    empty flows; no logged wins -> no patient node.
+    Data, joined across the three first-party event streams (each edge is its own
+    honest measure; units shift across columns — sessions → taps → bookings —
+    like any acquisition funnel):
+      - Discovery → Website: landings by channel from the beacon (`web_channels`,
+        marts.web_session_events). This is the arrival layer.
+      - Surface → CTA: go-link taps (`link_clicks`, marts.link_click_events),
+        slug = "<source>-<cta>". web-* sit under Website; bio-* under bio.site
+        (plus an Instagram → bio.site edge); gbp-/ads-/qr-/ig-* bypass our site,
+        so they run Discovery → CTA directly.
+      - CTA → Booked: Native booking → Booked = confirmed bookings
+        (`booking_funnel`); WhatsApp → Booked = won WhatsApp leads (`lead_wins`,
+        the one channel→patient bridge). Plato booking has no logged outcome yet.
+
+    `first_visits` (all-source new patients) rides along as a stat so the gap to
+    tracked conversions stays visible. Degrades gracefully: any missing stream
+    just drops its edges rather than breaking the chart.
     """
     lc = link_clicks or {}
     wa = lc.get("wa_by_slug", {}) or {}
@@ -1436,37 +1500,49 @@ def _build_funnel_paths(link_clicks: dict, kpis: dict, lead_wins: dict) -> dict:
         if n:
             flows[(src, dst)] = flows.get((src, dst), 0) + n
 
+    # 1) Discovery → Website (arrival), from the landing beacon.
+    for channel, n in (web_channels or {}).items():
+        add(channel, "Website", n)
+
+    # 2) Surface → CTA (taps). Suffix = CTA; prefix = surface/source.
     bio_total = 0
-    for by_slug, cta in ((wa, "WhatsApp"), (bk, "Booking")):
+    for by_slug in (wa, bk):
         for slug, n in by_slug.items():
-            prefix = slug.split("-")[0] if "-" in slug else None
-            if prefix == "bio":
-                add("bio.site", cta, n)   # Instagram -> bio.site edge added once below
+            prefix, _, suffix = slug.partition("-")
+            cta = FUNNEL_CTA.get(suffix or prefix, "WhatsApp")
+            if suffix == "" :  # generic slug ('wa'/'book'/'plato') → Other source
+                add("Other", cta, n)
+            elif prefix == "web":
+                add("Website", cta, n)
+            elif prefix == "bio":
+                add("bio.site", cta, n)
                 bio_total += n
             elif prefix == "ig":
-                add("Instagram", cta, n)  # direct Instagram tap (story/post sticker)
+                add("Instagram", cta, n)          # direct IG tap (story/post)
             else:
-                add(FUNNEL_SOURCE.get(prefix, "Other"), cta, n)
+                add(FUNNEL_SOURCE.get(prefix, "Other"), cta, n)  # gbp/ads/qr bypass the site
     if bio_total:
         add("Instagram", "bio.site", bio_total)
 
     wa_taps    = sum(wa.values())
     plato_taps = sum(bk.values())
 
-    # Patient outcome via the lead pipeline (WhatsApp-only bridge). Clamp so a
-    # period with more logged wins than taps can't draw a negative remainder.
-    became_patient = min(wa_taps, _to_int((lead_wins or {}).get("whatsapp", 0)))
-    add("WhatsApp", "Became a patient", became_patient)
-    add("WhatsApp", "Not linked yet", max(0, wa_taps - became_patient))
-    add("Booking", "Not linked yet", plato_taps)
+    # 3) CTA → Booked. Native booking's outcome is the real confirmed count from
+    # the on-site funnel; WhatsApp's is the won-lead bridge (clamped to taps).
+    booked_native = _to_int((booking_funnel or {}).get("booked", 0))
+    add("Native booking", "Booked", booked_native)
+    booked_wa = min(wa_taps, _to_int((lead_wins or {}).get("whatsapp", 0)))
+    add("WhatsApp", "Booked", booked_wa)
 
     return {
-        "flows":          [{"from": a, "to": b, "flow": n} for (a, b), n in flows.items()],
-        "total_taps":     wa_taps + plato_taps,
-        "wa_taps":        wa_taps,
-        "plato_taps":     plato_taps,
-        "became_patient": became_patient,
-        "first_visits": (kpis or {}).get("new_patients"),
+        "flows":         [{"from": a, "to": b, "flow": n} for (a, b), n in flows.items()],
+        "total_taps":    wa_taps + plato_taps,
+        "wa_taps":       wa_taps,
+        "book_taps":     plato_taps,
+        "booked_native": booked_native,
+        "booked_wa":     booked_wa,
+        "sessions":      sum((web_channels or {}).values()),
+        "first_visits":  (kpis or {}).get("new_patients"),
     }
 
 
@@ -1522,6 +1598,7 @@ def build_payload() -> dict:
                 "booking_funnel": ex.submit(fetch_booking_funnel, start, end),
                 "google_ads":     ex.submit(fetch_google_ads, start, end),
                 "web_sessions":   ex.submit(fetch_web_sessions, start, end),
+                "web_channels":   ex.submit(fetch_web_channels, start, end),
                 "lead_wins":      ex.submit(fetch_lead_wins, start, end),
             }
             # Trend indicators compare each range against the immediately
@@ -1572,7 +1649,9 @@ def build_payload() -> dict:
                 "web_sessions":      v["web_sessions"].result(),
                 "web_sessions_prev": v["web_sessions_prev"].result() if v["web_sessions_prev"] else None,
                 "funnel_paths":     _build_funnel_paths(v["link_clicks"].result(), v["kpis"].result(),
-                                                        v["lead_wins"].result()),
+                                                        v["lead_wins"].result(),
+                                                        v["web_channels"].result(),
+                                                        v["booking_funnel"].result()),
             }
 
         return {
@@ -2704,14 +2783,24 @@ def api_frontdesk_package_alerts() -> Response:
                     mimetype="application/json")
 
 
-def _slug_target(slug: str) -> str:
+def _slug_target(slug: str, click_id: str | None = None) -> str:
     """Resolve a slug to its redirect destination. Never dead-ends: an unknown
-    or not-yet-configured target falls back to the marketing site."""
+    or not-yet-configured target falls back to the marketing site.
+
+    For `book` slugs (which land on our own /book form) we append the go-link's
+    click_id as `?cid=` plus `?src=<slug>`, so the site's landing beacon can
+    record them on web_session_events — that's the exact join back to this click
+    (link_click_events.click_id) and the origin→booking attribution chain.
+    WhatsApp/Plato targets are external, so the passthrough doesn't apply."""
     cfg = LINK_SLUGS.get(slug)
     if not cfg:
         return WHATSAPP_FALLBACK_URL
     if cfg["kind"] == "book":
-        return SITE_BOOKING_URL or WHATSAPP_FALLBACK_URL
+        base = SITE_BOOKING_URL or WHATSAPP_FALLBACK_URL
+        if click_id and base:
+            sep = "&" if "?" in base else "?"
+            return f"{base}{sep}cid={click_id}&src={slug}"
+        return base
     if cfg["kind"] == "booking":
         return PLATO_BOOKING_URL or WHATSAPP_FALLBACK_URL
     if WHATSAPP_NUMBER:  # whatsapp
@@ -2733,9 +2822,10 @@ def tracked_redirect(slug: str):
     unauthenticated; the rest of the dashboard stays founder-only.
     """
     slug = (slug or "").lower().strip()
-    _record_link_click_async(slug, request.headers.get("User-Agent"),
+    click_id = str(uuid.uuid4())
+    _record_link_click_async(click_id, slug, request.headers.get("User-Agent"),
                              request.headers.get("Referer"))
-    return redirect(_slug_target(slug), code=302)
+    return redirect(_slug_target(slug, click_id), code=302)
 
 
 # On the public links subdomain the slug sits at the root (go.gojiphysio.com/ig),
