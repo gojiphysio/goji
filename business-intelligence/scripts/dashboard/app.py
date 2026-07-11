@@ -123,7 +123,7 @@ def parse_promo_sku(item_given_id: str) -> tuple[str, int] | None:
 
 # --- Click-to-WhatsApp / booking tracking ---------------------------------
 # WhatsApp is the primary CTA (customers message before booking), but socials
-# (bio.site/gojiphysio) also offer direct Plato booking, so we track both. Every
+# (bio.site/gojiphysio) also link straight to our /book form, so we track both. Every
 # outbound CTA routes through the public GET /r/<slug> route (and the public
 # go.gojiphysio.com/<slug>), which logs the click and 302-redirects to the slug's
 # destination. WhatsApp slugs carry a channel-specific prefilled message.
@@ -131,24 +131,24 @@ def parse_promo_sku(item_given_id: str) -> tuple[str, int] | None:
 # Digits only — wa.me wants no '+', spaces, or dashes, so we strip them defensively
 # (the repo variable might be entered as "+65 8377 0401").
 WHATSAPP_NUMBER = re.sub(r"\D", "", os.environ.get("WHATSAPP_NUMBER", ""))
-# Plato online-booking URL — the legacy booking CTA. Set it to enable 'booking'
-# ('*-plato') slugs; until then they fall back to the site so the link never
-# dead-ends.
-PLATO_BOOKING_URL = os.environ.get("PLATO_BOOKING_URL", "")
-# Our own website booking form — the current booking CTA. 'book' ('*-book') slugs
-# redirect here so a click lands on /book and is still logged + attributable.
+# Our own website booking form — the only booking CTA now. 'book' ('*-book')
+# slugs redirect here so a click lands on /book and is still logged +
+# attributable. Legacy '*-plato' slugs (the old Plato online-booking page, which
+# we no longer offer) alias to the same URL below — old published QR codes,
+# GBP listings, etc. still work, they just land on the flow we actually track.
 SITE_BOOKING_URL = os.environ.get("SITE_BOOKING_URL", "https://www.gojiphysio.com/book")
 # Where a click goes when its target isn't configured yet or the slug is unknown.
 WHATSAPP_FALLBACK_URL = os.environ.get("WHATSAPP_FALLBACK_URL",
                                        "https://www.gojiphysio.com")
 # slug -> {kind, label, text?}. kind="whatsapp" → wa.me deep link with `text`;
-# kind="book" → our website /book form; kind="booking" → legacy Plato booking.
-# The founder signs off on the WhatsApp wording.
+# kind="book" → our website /book form (also covers legacy '*-plato' slugs —
+# see LINK_SLUGS below). The founder signs off on the WhatsApp wording.
 LINK_SLUGS: dict[str, dict] = {
     # Slug = "<channel>-<destination>" — both explicit, no assumed default, so a
     # channel whose primary CTA isn't WhatsApp reads just as clearly.
-    #   destination: "wa" = WhatsApp deep link, "book" = website /book form,
-    #                "plato" = legacy Plato online booking.
+    #   destination: "wa" = WhatsApp deep link, "book"/"plato" = website /book
+    #                form ("plato" is the retired Plato-booking page name, kept
+    #                only so old published links redirect somewhere real).
     # --- WhatsApp ---
     "web-wa": {"kind": "whatsapp", "label": "Web",      "text": "Hi Goji! I have a question about physio (via your website)."},
     "bio-wa": {"kind": "whatsapp", "label": "bio.site", "text": "Hi Goji! I found you via your Instagram/socials and have a question about physio."},
@@ -164,13 +164,14 @@ LINK_SLUGS: dict[str, dict] = {
     "ads-book": {"kind": "book", "label": "Ads"},
     "qr-book":  {"kind": "book", "label": "QR"},
     "book":     {"kind": "book", "label": "Social"},  # generic fallback
-    # --- Plato booking (legacy; kept so old published links never dead-end) ---
-    "web-plato": {"kind": "booking", "label": "Web"},
-    "bio-plato": {"kind": "booking", "label": "bio.site"},
-    "gbp-plato": {"kind": "booking", "label": "Google"},
-    "ads-plato": {"kind": "booking", "label": "Ads"},
-    "qr-plato":  {"kind": "booking", "label": "QR"},
-    "plato":     {"kind": "booking", "label": "Social"},  # generic fallback
+    # --- Legacy Plato-booking slugs (retired; alias to the native /book form
+    #     below so old published links never dead-end) ---
+    "web-plato": {"kind": "book", "label": "Web"},
+    "bio-plato": {"kind": "book", "label": "bio.site"},
+    "gbp-plato": {"kind": "book", "label": "Google"},
+    "ads-plato": {"kind": "book", "label": "Ads"},
+    "qr-plato":  {"kind": "book", "label": "QR"},
+    "plato":     {"kind": "book", "label": "Social"},  # generic fallback
 }
 # slug -> kind, for splitting the click metric (WhatsApp vs booking).
 LINK_SLUG_KIND = {s: c["kind"] for s, c in LINK_SLUGS.items()}
@@ -1261,7 +1262,7 @@ GROUP BY slug
         if kind is None:
             continue  # unknown slug = bot/scanner traffic, not a marketing channel
         n = _to_int(r["clicks"])
-        if kind in ("book", "booking"):  # website /book form or legacy Plato
+        if kind == "book":  # website /book form (incl. retired *-plato slugs)
             book_by_slug[r["slug"]] = n
         else:
             wa_by_slug[r["slug"]] = n
@@ -1436,6 +1437,24 @@ GROUP BY channel
     return {r["channel"]: _to_int(r["won"]) for r in rows}
 
 
+# Discovery-channel classification, shared by fetch_web_channels (the channel
+# totals feeding the Sankey) and fetch_referral_domains (which de-blackboxes the
+# 'Referral' catch-all below) so the two classifiers can never drift apart.
+_WEB_CHANNEL_CASE_SQL = """
+CASE
+  WHEN gclid IS NOT NULL AND gclid != '' THEN 'Google Ads'
+  WHEN LOWER(utm_medium) IN ('cpc','ppc','paid') AND LOWER(utm_source) LIKE 'google%' THEN 'Google Ads'
+  WHEN (fbclid IS NOT NULL AND fbclid != '') OR LOWER(utm_source) IN ('facebook','meta','fb') THEN 'Meta Ads'
+  WHEN LOWER(utm_source) IN ('instagram','ig') OR REGEXP_CONTAINS(LOWER(referer), r'instagram') THEN 'Instagram'
+  WHEN LOWER(utm_source) LIKE 'gbp%' OR LOWER(utm_source) LIKE 'google_business%' THEN 'Google'
+  WHEN LOWER(utm_source) LIKE 'google%' OR REGEXP_CONTAINS(LOWER(referer), r'google\\.') THEN 'Google'
+  WHEN utm_source IS NOT NULL AND utm_source != '' THEN utm_source
+  WHEN referer IS NULL OR referer = '' THEN 'Direct'
+  ELSE 'Referral'
+END
+"""
+
+
 def fetch_web_channels(start: date, end: date) -> dict:
     """Website landings for [start, end] grouped into a discovery *channel*, from
     the first-party landing beacon (marts.web_session_events). This is the top of
@@ -1449,17 +1468,7 @@ def fetch_web_channels(start: date, end: date) -> dict:
     try:
         rows = _query(f"""
 SELECT
-  CASE
-    WHEN gclid IS NOT NULL AND gclid != '' THEN 'Google Ads'
-    WHEN LOWER(utm_medium) IN ('cpc','ppc','paid') AND LOWER(utm_source) LIKE 'google%' THEN 'Google Ads'
-    WHEN (fbclid IS NOT NULL AND fbclid != '') OR LOWER(utm_source) IN ('facebook','meta','fb') THEN 'Meta Ads'
-    WHEN LOWER(utm_source) IN ('instagram','ig') OR REGEXP_CONTAINS(LOWER(referer), r'instagram') THEN 'Instagram'
-    WHEN LOWER(utm_source) LIKE 'gbp%' OR LOWER(utm_source) LIKE 'google_business%' THEN 'Google'
-    WHEN LOWER(utm_source) LIKE 'google%' OR REGEXP_CONTAINS(LOWER(referer), r'google\\.') THEN 'Google'
-    WHEN utm_source IS NOT NULL AND utm_source != '' THEN utm_source
-    WHEN referer IS NULL OR referer = '' THEN 'Direct'
-    ELSE 'Referral'
-  END AS channel,
+  {_WEB_CHANNEL_CASE_SQL} AS channel,
   COUNT(DISTINCT session_id) AS sessions
 FROM `{PROJECT}.marts.web_session_events`
 WHERE DATE(occurred_at) BETWEEN '{start}' AND '{end}'
@@ -1471,39 +1480,83 @@ GROUP BY channel
     return {r["channel"]: _to_int(r["sessions"]) for r in rows if r["channel"]}
 
 
+REFERRAL_DOMAIN_TOP_N = 5
+
+
+def fetch_referral_domains(start: date, end: date) -> dict:
+    """De-blackboxes the Sankey's "Referral" catch-all: the actual registrable
+    domains behind untagged external-referrer landings (fetch_web_channels
+    collapses every one of these into a single 'Referral' node — this recovers
+    what's actually in it). Rendered as a hover tooltip on the Referral legend
+    swatch rather than a table, so it stays glanceable.
+
+    Top REFERRAL_DOMAIN_TOP_N domains by distinct-session count; the remainder
+    rolls into "other" so a long tail of one-off domains doesn't dominate.
+    Shares _WEB_CHANNEL_CASE_SQL with fetch_web_channels so "which rows count as
+    Referral" can't drift between the two. Degrades to {} like every fetch_* here.
+    """
+    try:
+        rows = _query(f"""
+WITH classified AS (
+  SELECT session_id, referer, {_WEB_CHANNEL_CASE_SQL} AS channel
+  FROM `{PROJECT}.marts.web_session_events`
+  WHERE DATE(occurred_at) BETWEEN '{start}' AND '{end}'
+)
+SELECT NET.REG_DOMAIN(NET.HOST(referer)) AS domain, COUNT(DISTINCT session_id) AS sessions
+FROM classified
+WHERE channel = 'Referral'
+GROUP BY domain
+ORDER BY sessions DESC
+""")
+    except Exception as e:
+        log.warning("referral domain breakdown unavailable: %s", e)
+        return {}
+    domains = [(r["domain"] or "unknown", _to_int(r["sessions"])) for r in rows]
+    top = dict(domains[:REFERRAL_DOMAIN_TOP_N])
+    rest = sum(n for _, n in domains[REFERRAL_DOMAIN_TOP_N:])
+    if rest:
+        top["other"] = rest
+    return top
+
+
 # Funnel-path source label per link slug prefix (slug = "<source>-<cta>", see
 # LINK_SLUGS). `bio` is handled specially: bio.site is the Instagram link-in-bio
 # page, so bio-* taps flow Instagram -> bio.site -> CTA. `web` is the owned
 # Website surface (fed by discovery channels from the landing beacon), not a
 # discovery source itself. A generic slug with no prefix ('wa'/'book') is "Other".
 FUNNEL_SOURCE = {"gbp": "Google", "ads": "Ads", "qr": "QR", "ig": "Instagram"}
-# CTA label per slug suffix.
-FUNNEL_CTA = {"wa": "WhatsApp", "book": "Native booking", "plato": "Plato booking"}
+# CTA label per slug suffix. "plato" (the retired Plato-booking flow) merges
+# into "Native booking" — those taps now land on the same tracked /book form.
+FUNNEL_CTA = {"wa": "WhatsApp", "book": "Native booking", "plato": "Native booking"}
 
 
 def _build_funnel_paths(link_clicks: dict, kpis: dict, lead_wins: dict,
-                        web_channels: dict, booking_funnel: dict) -> dict:
+                        web_channels: dict, booking_funnel: dict,
+                        referral_domains: dict | None = None) -> dict:
     """Build the acquisition-funnel Sankey as a 4-column hierarchy so the *web is
     no longer the top of funnel* — it's the owned surface that discovery channels
     drive people into:
 
         Discovery ─▶ Owned surface ─▶ CTA / intent ─▶ Outcome
         (how they arrive)  (Website,     (WhatsApp,      (Booked)
-                            bio.site)     Native booking,
-                                          Plato booking)
+                            bio.site)     Native booking)
 
     Data, joined across the three first-party event streams (each edge is its own
     honest measure; units shift across columns — sessions → taps → bookings —
     like any acquisition funnel):
       - Discovery → Website: landings by channel from the beacon (`web_channels`,
-        marts.web_session_events). This is the arrival layer.
+        marts.web_session_events). This is the arrival layer. "Referral" is a
+        catch-all for untagged external referrers — see `referral_domains`
+        (from `fetch_referral_domains`) for what's actually in it.
       - Surface → CTA: go-link taps (`link_clicks`, marts.link_click_events),
         slug = "<source>-<cta>". web-* sit under Website; bio-* under bio.site
         (plus an Instagram → bio.site edge); gbp-/ads-/qr-/ig-* bypass our site,
-        so they run Discovery → CTA directly.
+        so they run Discovery → CTA directly. Retired Plato-booking slugs
+        (`*-plato`) merge into "Native booking" — they redirect to the same
+        /book form now, so there's a single trackable booking CTA.
       - CTA → Booked: Native booking → Booked = confirmed bookings
         (`booking_funnel`); WhatsApp → Booked = won WhatsApp leads (`lead_wins`,
-        the one channel→patient bridge). Plato booking has no logged outcome yet.
+        the one channel→patient bridge).
 
     `first_visits` (all-source new patients) rides along as a stat so the gap to
     tracked conversions stays visible. Degrades gracefully: any missing stream
@@ -1542,8 +1595,8 @@ def _build_funnel_paths(link_clicks: dict, kpis: dict, lead_wins: dict,
     if bio_total:
         add("Instagram", "bio.site", bio_total)
 
-    wa_taps    = sum(wa.values())
-    plato_taps = sum(bk.values())
+    wa_taps   = sum(wa.values())
+    book_taps = sum(bk.values())  # native /book taps, incl. retired plato-slug clicks
 
     # 3) CTA → Booked. Native booking's outcome is the real confirmed count from
     # the on-site funnel; WhatsApp's is the won-lead bridge (clamped to taps).
@@ -1553,13 +1606,16 @@ def _build_funnel_paths(link_clicks: dict, kpis: dict, lead_wins: dict,
     add("WhatsApp", "Booked", booked_wa)
 
     return {
-        "flows":         [{"from": a, "to": b, "flow": n} for (a, b), n in flows.items()],
-        "total_taps":    wa_taps + plato_taps,
-        "wa_taps":       wa_taps,
-        "book_taps":     plato_taps,
-        "booked_native": booked_native,
-        "booked_wa":     booked_wa,
-        "sessions":      sum((web_channels or {}).values()),
+        "flows":            [{"from": a, "to": b, "flow": n} for (a, b), n in flows.items()],
+        "total_taps":       wa_taps + book_taps,
+        "wa_taps":          wa_taps,
+        "book_taps":        book_taps,
+        "booked_native":    booked_native,
+        "booked_wa":        booked_wa,
+        "sessions":         sum((web_channels or {}).values()),
+        # De-blackboxes the "Referral" node — top domains, rendered as a hover
+        # tooltip on its legend swatch (see renderFunnelSankey in template.html).
+        "referral_domains": referral_domains or {},
         "first_visits":  (kpis or {}).get("new_patients"),
     }
 
@@ -1616,8 +1672,9 @@ def build_payload() -> dict:
                 "booking_funnel": ex.submit(fetch_booking_funnel, start, end),
                 "google_ads":     ex.submit(fetch_google_ads, start, end),
                 "web_sessions":   ex.submit(fetch_web_sessions, start, end),
-                "web_channels":   ex.submit(fetch_web_channels, start, end),
-                "lead_wins":      ex.submit(fetch_lead_wins, start, end),
+                "web_channels":     ex.submit(fetch_web_channels, start, end),
+                "referral_domains": ex.submit(fetch_referral_domains, start, end),
+                "lead_wins":        ex.submit(fetch_lead_wins, start, end),
             }
             # Trend indicators compare each range against the immediately
             # preceding window of equal length (e.g. the 30 days before the
@@ -1669,7 +1726,8 @@ def build_payload() -> dict:
                 "funnel_paths":     _build_funnel_paths(v["link_clicks"].result(), v["kpis"].result(),
                                                         v["lead_wins"].result(),
                                                         v["web_channels"].result(),
-                                                        v["booking_funnel"].result()),
+                                                        v["booking_funnel"].result(),
+                                                        v["referral_domains"].result()),
             }
 
         return {
@@ -2823,11 +2881,12 @@ def _slug_target(slug: str, click_id: str | None = None) -> str:
     """Resolve a slug to its redirect destination. Never dead-ends: an unknown
     or not-yet-configured target falls back to the marketing site.
 
-    For `book` slugs (which land on our own /book form) we append the go-link's
-    click_id as `?cid=` plus `?src=<slug>`, so the site's landing beacon can
-    record them on web_session_events — that's the exact join back to this click
+    For `book` slugs (which land on our own /book form — this includes retired
+    `*-plato` slugs, now aliased here) we append the go-link's click_id as
+    `?cid=` plus `?src=<slug>`, so the site's landing beacon can record them on
+    web_session_events — that's the exact join back to this click
     (link_click_events.click_id) and the origin→booking attribution chain.
-    WhatsApp/Plato targets are external, so the passthrough doesn't apply."""
+    WhatsApp targets are external, so the passthrough doesn't apply there."""
     cfg = LINK_SLUGS.get(slug)
     if not cfg:
         return WHATSAPP_FALLBACK_URL
@@ -2837,8 +2896,6 @@ def _slug_target(slug: str, click_id: str | None = None) -> str:
             sep = "&" if "?" in base else "?"
             return f"{base}{sep}cid={click_id}&src={slug}"
         return base
-    if cfg["kind"] == "booking":
-        return PLATO_BOOKING_URL or WHATSAPP_FALLBACK_URL
     if WHATSAPP_NUMBER:  # whatsapp
         return f"https://wa.me/{WHATSAPP_NUMBER}?text={quote(cfg.get('text', ''))}"
     return WHATSAPP_FALLBACK_URL
