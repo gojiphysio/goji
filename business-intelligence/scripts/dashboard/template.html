@@ -1691,9 +1691,10 @@
         </div>
       </div>
       <div class="kpi-row mkt-kpis-3">
-        <div class="kpi-card wip">
-          <div class="kpi-label">Instagram reach / month</div>
-          <div class="kpi-value">— pending integration</div>
+        <div class="kpi-card">
+          <div class="kpi-label">Instagram reach <span class="range-label">last 28 days</span> <span class="badge live">Meta API</span></div>
+          <div class="kpi-value" id="mkt_ig_reach">-</div>
+          <div class="kpi-trend" id="mkt_ig_reach_trend" hidden></div>
           <div class="mkt-target">Target 3–5× (Reels-led)</div>
         </div>
         <div class="kpi-card wip">
@@ -2818,6 +2819,14 @@
         document.getElementById('mkt_web_pageviews').textContent = ws.pageviews
           ? `${fmtInt(ws.pageviews)} page views` : 'Condition-page views, booking starts';
         renderTrend('mkt_web_sessions_trend', ws.sessions, wsp && wsp.sessions, ps, pe);
+      }
+
+      // Instagram reach (Meta Graph API). De-duplicated trailing-28-day reach —
+      // a point-in-time snapshot, not a range sum (see fetch_instagram_reach).
+      const ir = r.instagram_reach, irp = r.instagram_reach_prev;
+      if (ir) {
+        document.getElementById('mkt_ig_reach').textContent = ir.reach ? fmtInt(ir.reach) : '—';
+        renderTrend('mkt_ig_reach_trend', ir.reach, irp && irp.reach, ps, pe);
       }
 
       renderBookingFunnel(r.booking_funnel);

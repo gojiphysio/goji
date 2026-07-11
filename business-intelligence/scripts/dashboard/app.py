@@ -1381,6 +1381,37 @@ WHERE _TABLE_SUFFIX BETWEEN '{start.strftime("%Y%m%d")}' AND '{end.strftime("%Y%
         return empty
 
 
+def fetch_instagram_reach(start: date, end: date) -> dict:
+    """Instagram account reach (de-duplicated) from marts.fct_instagram_reach,
+    fed by the marketing_ingest Cloud Run Job (Meta Graph API).
+
+    Reach counts *unique accounts reached*, so it is NOT additive — monthly reach
+    is not the sum of daily reach. We ingest Meta's rolling 28-day reach once a
+    day and here return the latest reading on or before `end` (reach "as of" the
+    period end); the trend compares that against the reading at the previous
+    period's end. Windowing by [start, end] would wrongly imply summability, so
+    we intentionally read a single snapshot, not a range aggregate.
+
+    Degrades to zero if the table/data isn't there yet (like fetch_google_ads),
+    so the Marketing tab still renders.
+    """
+    empty = {"reach": 0}
+    try:
+        rows = _query(f"""
+SELECT value AS reach
+FROM `{PROJECT}.marts.fct_instagram_reach`
+WHERE metric_date <= '{end}'
+ORDER BY metric_date DESC
+LIMIT 1
+""")
+        if not rows or rows[0]["reach"] is None:
+            return empty
+        return {"reach": _to_int(rows[0]["reach"])}
+    except Exception as e:
+        log.warning("instagram_reach unavailable: %s", e)
+        return empty
+
+
 def fetch_web_sessions(start: date, end: date) -> dict:
     """Website sessions & pageviews for [start, end] from the GA4 BigQuery export
     (the free native daily export; dataset `analytics_<propertyId>`, tables
@@ -1671,6 +1702,7 @@ def build_payload() -> dict:
                 "link_clicks":    ex.submit(fetch_link_clicks, start, end),
                 "booking_funnel": ex.submit(fetch_booking_funnel, start, end),
                 "google_ads":     ex.submit(fetch_google_ads, start, end),
+                "instagram_reach": ex.submit(fetch_instagram_reach, start, end),
                 "web_sessions":   ex.submit(fetch_web_sessions, start, end),
                 "web_channels":     ex.submit(fetch_web_channels, start, end),
                 "referral_domains": ex.submit(fetch_referral_domains, start, end),
@@ -1684,6 +1716,7 @@ def build_payload() -> dict:
                 range_jobs[key]["prev_kpis"]         = None
                 range_jobs[key]["link_clicks_prev"]  = None
                 range_jobs[key]["google_ads_prev"]   = None
+                range_jobs[key]["instagram_reach_prev"] = None
                 range_jobs[key]["web_sessions_prev"] = None
                 range_jobs[key]["prev_start"]        = None
                 range_jobs[key]["prev_end"]          = None
@@ -1693,6 +1726,7 @@ def build_payload() -> dict:
                 range_jobs[key]["prev_kpis"]         = ex.submit(fetch_kpis, prev_start, prev_end)
                 range_jobs[key]["link_clicks_prev"]  = ex.submit(fetch_link_clicks, prev_start, prev_end)
                 range_jobs[key]["google_ads_prev"]   = ex.submit(fetch_google_ads, prev_start, prev_end)
+                range_jobs[key]["instagram_reach_prev"] = ex.submit(fetch_instagram_reach, prev_start, prev_end)
                 range_jobs[key]["web_sessions_prev"] = ex.submit(fetch_web_sessions, prev_start, prev_end)
                 range_jobs[key]["prev_start"]        = prev_start.isoformat()
                 range_jobs[key]["prev_end"]          = prev_end.isoformat()
@@ -1721,6 +1755,8 @@ def build_payload() -> dict:
                 "booking_funnel":   v["booking_funnel"].result(),
                 "google_ads":       v["google_ads"].result(),
                 "google_ads_prev":  v["google_ads_prev"].result() if v["google_ads_prev"] else None,
+                "instagram_reach":      v["instagram_reach"].result(),
+                "instagram_reach_prev": v["instagram_reach_prev"].result() if v["instagram_reach_prev"] else None,
                 "web_sessions":      v["web_sessions"].result(),
                 "web_sessions_prev": v["web_sessions_prev"].result() if v["web_sessions_prev"] else None,
                 "funnel_paths":     _build_funnel_paths(v["link_clicks"].result(), v["kpis"].result(),

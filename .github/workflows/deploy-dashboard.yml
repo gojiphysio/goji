@@ -19,6 +19,7 @@ on:
       - "business-intelligence/scripts/dashboard/**"
       - "business-intelligence/scripts/sql/**"
       - "business-intelligence/scripts/ingestion/plato_patients/**"
+      - "business-intelligence/scripts/ingestion/marketing_ingest/**"
       - ".github/workflows/deploy-dashboard.yml"
   workflow_dispatch: {}   # allow manual "Run workflow" from the Actions tab
 
@@ -43,10 +44,16 @@ env:
   # (E.164 digits, no '+') to go live; until then the redirect falls back to the site.
   WHATSAPP_NUMBER: ${{ vars.WHATSAPP_NUMBER }}
   WHATSAPP_FALLBACK_URL: ${{ vars.WHATSAPP_FALLBACK_URL || 'https://www.gojiphysio.com' }}
-  PLATO_BOOKING_URL: ${{ vars.PLATO_BOOKING_URL }}   # Plato online-booking URL (the 'book' slugs)
+  # Our own /book form — the only booking CTA now (retired '*-plato' slugs alias
+  # to it). Defaults to the live page; the code default matches this.
+  SITE_BOOKING_URL: ${{ vars.SITE_BOOKING_URL || 'https://www.gojiphysio.com/book' }}
   # GA4 BigQuery export dataset (analytics_<propertyId>) for the Website-sessions
   # card. Empty until the repo variable GA4_DATASET is set → the card stays inert.
   GA4_DATASET: ${{ vars.GA4_DATASET }}
+  # Instagram Business/Creator account id for the marketing-ingest job (reach
+  # card). Empty until the repo variable IG_USER_ID is set → the job deploy is
+  # skipped and the card stays "—". The Meta token lives in Secret Manager.
+  IG_USER_ID: ${{ vars.IG_USER_ID }}
 
 jobs:
   # ---- 1. Tests gate the deploy -------------------------------------------
@@ -65,6 +72,11 @@ jobs:
       - name: Ingestion tests
         working-directory: business-intelligence/scripts/ingestion/plato_patients
         run: python -m pytest test_extract.py -q
+      - name: Marketing-ingest tests
+        working-directory: business-intelligence/scripts/ingestion/marketing_ingest
+        run: |
+          pip install -r requirements.txt
+          python -m pytest test_extract.py -q
 
   # ---- 2. Deploy (only after tests pass) ----------------------------------
   deploy:
@@ -83,7 +95,7 @@ jobs:
              || [ "$base" = "0000000000000000000000000000000000000000" ] \
              || ! git cat-file -e "${base}^{commit}" 2>/dev/null; then
             echo "No usable base commit — deploying everything."
-            { echo "sql=true"; echo "patients=true"; echo "dashboard=true"; } >> "$GITHUB_OUTPUT"
+            { echo "sql=true"; echo "patients=true"; echo "marketing=true"; echo "dashboard=true"; } >> "$GITHUB_OUTPUT"
             exit 0
           fi
           changed="$(git diff --name-only "$base" "${{ github.sha }}")"
@@ -91,6 +103,7 @@ jobs:
           base_path="business-intelligence/scripts"
           grep -q "^${base_path}/sql/"                      <<<"$changed" && echo "sql=true"       >>"$GITHUB_OUTPUT" || echo "sql=false"       >>"$GITHUB_OUTPUT"
           grep -q "^${base_path}/ingestion/plato_patients/" <<<"$changed" && echo "patients=true"  >>"$GITHUB_OUTPUT" || echo "patients=false"  >>"$GITHUB_OUTPUT"
+          grep -q "^${base_path}/ingestion/marketing_ingest/" <<<"$changed" && echo "marketing=true" >>"$GITHUB_OUTPUT" || echo "marketing=false" >>"$GITHUB_OUTPUT"
           grep -q "^${base_path}/dashboard/"                <<<"$changed" && echo "dashboard=true" >>"$GITHUB_OUTPUT" || echo "dashboard=false" >>"$GITHUB_OUTPUT"
 
       - name: Authenticate to Google Cloud
@@ -128,6 +141,30 @@ jobs:
           gcloud run jobs execute plato-patients-ingest \
             --region "${REGION}" --project "${PROJECT}" --wait
 
+      - name: Deploy marketing-ingest job
+        if: steps.changes.outputs.marketing == 'true'
+        working-directory: business-intelligence/scripts/ingestion/marketing_ingest
+        run: |
+          # Pulls Instagram reach (Meta Graph API) into raw_marketing. Needs the
+          # long-lived token in Secret Manager (meta-graph-token) + the IG_USER_ID
+          # repo var. Until both exist the job can't run, so skip the deploy
+          # (non-fatal, like the domain-mapping step) rather than fail CI — the
+          # dashboard card just stays "—". The daily Cloud Scheduler trigger (set
+          # up once during provisioning) runs it; we don't execute here.
+          if ! gcloud secrets describe meta-graph-token --project "${PROJECT}" >/dev/null 2>&1; then
+            echo "meta-graph-token secret not found — skipping marketing-ingest deploy. Provision it to enable (see the job README)."
+            exit 0
+          fi
+          if [ -z "${IG_USER_ID}" ]; then
+            echo "IG_USER_ID repo var not set — skipping marketing-ingest deploy."
+            exit 0
+          fi
+          gcloud run jobs deploy marketing-ingest \
+            --source . --region "${REGION}" --project "${PROJECT}" \
+            --set-secrets=META_GRAPH_TOKEN=meta-graph-token:latest \
+            --set-env-vars=BQ_PROJECT=${PROJECT},SOURCES=instagram,IG_USER_ID=${IG_USER_ID} \
+            --quiet
+
       - name: Deploy dashboard
         if: steps.changes.outputs.dashboard == 'true'
         working-directory: business-intelligence/scripts/dashboard
@@ -136,7 +173,7 @@ jobs:
             --source . --region "${REGION}" --project "${PROJECT}" \
             --service-account "${DASHBOARD_SA}" \
             --set-secrets=DASHBOARD_USER=dashboard-user:latest,DASHBOARD_PASS=dashboard-pass:latest,STAFF_USER=dashboard-staff-user:latest,STAFF_PASS=dashboard-staff-pass:latest \
-            --set-env-vars=GCP_PROJECT=${PROJECT},CACHE_TTL_SECONDS=300,APP_MODE=dashboard,WHATSAPP_NUMBER=${WHATSAPP_NUMBER},WHATSAPP_FALLBACK_URL=${WHATSAPP_FALLBACK_URL},PLATO_BOOKING_URL=${PLATO_BOOKING_URL},GA4_DATASET=${GA4_DATASET} \
+            --set-env-vars=GCP_PROJECT=${PROJECT},CACHE_TTL_SECONDS=300,APP_MODE=dashboard,WHATSAPP_NUMBER=${WHATSAPP_NUMBER},WHATSAPP_FALLBACK_URL=${WHATSAPP_FALLBACK_URL},SITE_BOOKING_URL=${SITE_BOOKING_URL},GA4_DATASET=${GA4_DATASET} \
             --allow-unauthenticated \
             --quiet
 
@@ -180,7 +217,7 @@ jobs:
           gcloud run deploy "${LINKS_SERVICE}" \
             --source . --region "${REGION}" --project "${PROJECT}" \
             --service-account "${DASHBOARD_SA}" \
-            --set-env-vars=GCP_PROJECT=${PROJECT},CACHE_TTL_SECONDS=300,APP_MODE=links,WHATSAPP_NUMBER=${WHATSAPP_NUMBER},WHATSAPP_FALLBACK_URL=${WHATSAPP_FALLBACK_URL},PLATO_BOOKING_URL=${PLATO_BOOKING_URL} \
+            --set-env-vars=GCP_PROJECT=${PROJECT},CACHE_TTL_SECONDS=300,APP_MODE=links,WHATSAPP_NUMBER=${WHATSAPP_NUMBER},WHATSAPP_FALLBACK_URL=${WHATSAPP_FALLBACK_URL},SITE_BOOKING_URL=${SITE_BOOKING_URL} \
             --min-instances=1 --memory=512Mi \
             --allow-unauthenticated \
             --quiet
