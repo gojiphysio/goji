@@ -246,6 +246,11 @@ search-terms problem: campaign type, keyword match types, negatives, GBP).
 
 ## Plato online-booking attribution — spike verdict (2026-06)
 
+> **Retired (2026-07):** we no longer offer a Plato online-booking CTA — the
+> `*-plato` slugs now alias to our own `/book` form, whose attribution *is*
+> linked via the `cid`/`src` passthrough. This spike is kept for the reasoning
+> (Plato can't carry a booking-origin param); the empirical test below is moot.
+
 **Question:** can a `?ref=<code>` we append to the Plato booking URL be traced
 back through Plato so a tap → first-visit is linkable (the "click-id passthrough"
 for the funnel's Plato-booking CTA)?
@@ -346,10 +351,9 @@ service also keeps `GET /r/<slug>` working internally, but the published links a
    - `WHATSAPP_NUMBER` — WhatsApp business number, E.164 digits, no `+`
      (e.g. `6580000000`). Enables the WhatsApp slugs.
    - `SITE_BOOKING_URL` — the website booking form (defaults to
-     `https://www.gojiphysio.com/book`). Enables the `*-book` slugs (the current
-     booking CTA).
-   - `PLATO_BOOKING_URL` — legacy Plato online-booking page URL. Enables the
-     `*-plato` slugs (kept so old published links never dead-end).
+     `https://www.gojiphysio.com/book`). Enables the `*-book` slugs — the only
+     booking CTA now — and also backs the retired `*-plato` slugs, which alias
+     to it (see below).
    - `WHATSAPP_FALLBACK_URL` — optional; where the bare root and any unconfigured
      slug go (defaults to `https://www.gojiphysio.com`). Until a target is set,
      links fall back here so they never dead-end.
@@ -378,9 +382,9 @@ own `/book` form** (`-book`), not Plato. Publish each as
 | QR codes (print / events / in-person) | `…/qr-wa` | `…/qr-book` |
 
 `…/ig-wa` is available for any direct Instagram link; `…/wa` and `…/book` are
-generic fallbacks. The legacy `…/*-plato` slugs still resolve (to
-`PLATO_BOOKING_URL`) so previously-published booking links never dead-end, but new
-surfaces should use `…/*-book`. **bio.site mailing-list button:** point it straight at the
+generic fallbacks. The retired `…/*-plato` slugs still resolve — they now alias
+to the same `/book` form (`SITE_BOOKING_URL`) so previously-published booking
+links never dead-end, but new surfaces should use `…/*-book`. **bio.site mailing-list button:** point it straight at the
 signup page (untracked — nurture, not a primary CTA). **Instagram native
 WhatsApp/email action buttons can't be wrapped** (not custom URLs); keep the IG
 bio link pointing at bio.site so those clicks are tracked. Edit wording, change a

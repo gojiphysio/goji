@@ -261,8 +261,9 @@ def test_lead_stage_and_channel_vocab():
 def test_build_funnel_paths_discovery_surface_cta_booked():
     link_clicks = {
         "wa_by_slug":   {"ig-wa": 50, "bio-wa": 60, "web-wa": 40, "gbp-wa": 30, "wa": 5},
-        # book_by_slug carries both the website /book slugs (*-book) and any legacy
-        # Plato slugs (*-plato): -book => "Native booking", -plato => "Plato booking".
+        # book_by_slug carries both the website /book slugs (*-book) and retired
+        # Plato slugs (*-plato) — both now merge into the single "Native booking"
+        # CTA, since a *-plato click also lands on the /book form.
         "book_by_slug": {"bio-book": 20, "web-book": 24, "ads-book": 28, "web-plato": 9, "book": 3},
     }
     web_channels = {"Google Ads": 100, "Instagram": 70, "Direct": 55}
@@ -276,9 +277,10 @@ def test_build_funnel_paths_discovery_surface_cta_booked():
     assert flows[("Google Ads", "Website")] == 100
     assert flows[("Direct", "Website")] == 55
     # web-* taps sit under the Website surface; bio-* under bio.site + IG hop.
+    # web-plato (9) merges into the same "Native booking" CTA as web-book (24).
     assert flows[("Website", "WhatsApp")] == 40
-    assert flows[("Website", "Native booking")] == 24
-    assert flows[("Website", "Plato booking")] == 9
+    assert flows[("Website", "Native booking")] == 33
+    assert ("Website", "Plato booking") not in flows
     assert flows[("Instagram", "bio.site")] == 80        # bio-wa 60 + bio-book 20
     assert flows[("bio.site", "WhatsApp")] == 60
     assert flows[("bio.site", "Native booking")] == 20
@@ -300,6 +302,15 @@ def test_build_funnel_paths_discovery_surface_cta_booked():
     assert f["total_taps"] == 269
     assert f["sessions"] == 225
     assert f["first_visits"] == 47
+    assert f["referral_domains"] == {}  # not passed -> defaults empty
+
+
+def test_build_funnel_paths_referral_domains_passthrough():
+    # referral_domains (from fetch_referral_domains) rides through untouched so
+    # the frontend can render it as a hover tooltip on the "Referral" swatch.
+    domains = {"clinicfinder.sg": 12, "sgparenting.com": 8, "other": 5}
+    f = app._build_funnel_paths({}, {}, {}, {}, {}, domains)
+    assert f["referral_domains"] == domains
 
 
 def test_build_funnel_paths_booked_nodes_absent_without_data():
@@ -464,33 +475,37 @@ def test_whatsapp_redirect_known_slug(client, monkeypatch, _no_click_logging):
 
 
 def test_booking_redirect_known_slug(client, monkeypatch, _no_click_logging):
-    # A booking slug 302s to the Plato booking URL when configured.
-    monkeypatch.setattr(app, "PLATO_BOOKING_URL", "https://book.plato.test/goji")
+    # Retired *-plato slugs now alias to the native /book form — we no longer
+    # support a separate Plato-booking flow, so old published links redirect to
+    # the one booking flow we actually track.
+    monkeypatch.setattr(app, "SITE_BOOKING_URL", "https://www.gojiphysio.com/book")
     resp = client.get("/r/web-plato")
     assert resp.status_code == 302
-    assert resp.headers["Location"] == "https://book.plato.test/goji"
+    assert resp.headers["Location"].startswith("https://www.gojiphysio.com/book?")
 
 
 def test_per_channel_slugs_resolve_by_kind(client, monkeypatch, _no_click_logging):
     # Slugs are "<channel>-<destination>": the -wa slug -> wa.me, the matching
-    # -plato slug -> Plato.
+    # -plato slug now resolves the same as -book (the native booking form).
     monkeypatch.setattr(app, "WHATSAPP_NUMBER", "6580000000")
-    monkeypatch.setattr(app, "PLATO_BOOKING_URL", "https://book.plato.test/goji")
+    monkeypatch.setattr(app, "SITE_BOOKING_URL", "https://www.gojiphysio.com/book")
     assert client.get("/r/bio-wa").headers["Location"].startswith("https://wa.me/6580000000?text=")
-    assert client.get("/r/web-plato").headers["Location"] == "https://book.plato.test/goji"
-    assert client.get("/r/bio-plato").headers["Location"] == "https://book.plato.test/goji"
+    assert client.get("/r/web-plato").headers["Location"].startswith("https://www.gojiphysio.com/book?")
+    assert client.get("/r/bio-plato").headers["Location"].startswith("https://www.gojiphysio.com/book?")
     # Sanity: kind buckets are consistent with the slug naming.
     assert app.LINK_SLUG_KIND["bio-wa"] == "whatsapp"
-    assert app.LINK_SLUG_KIND["bio-plato"] == "booking"
+    assert app.LINK_SLUG_KIND["bio-plato"] == "book"
 
 
 def test_booking_falls_back_when_unset(client, monkeypatch, _no_click_logging):
-    # Until PLATO_BOOKING_URL is set, the booking slug falls back to the site.
-    monkeypatch.setattr(app, "PLATO_BOOKING_URL", "")
+    # Until SITE_BOOKING_URL is set, a booking slug (incl. retired -plato) falls
+    # back to the site so a published link never dead-ends (cid/src still append
+    # — harmless query params on the fallback homepage).
+    monkeypatch.setattr(app, "SITE_BOOKING_URL", "")
     monkeypatch.setattr(app, "WHATSAPP_FALLBACK_URL", "https://example.test/site")
     resp = client.get("/r/web-plato")
     assert resp.status_code == 302
-    assert resp.headers["Location"] == "https://example.test/site"
+    assert resp.headers["Location"].startswith("https://example.test/site")
 
 
 def test_book_redirect_goes_to_site_booking_form(client, monkeypatch, _no_click_logging):

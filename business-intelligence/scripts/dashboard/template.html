@@ -235,9 +235,6 @@
     .funnel-legend .item { display: inline-flex; align-items: center; gap: 5px; }
     .funnel-legend .sw { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
     .funnel-legend .grp-lbl { color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.04em; font-size: 10px; }
-    .funnel-stats { display: flex; flex-wrap: wrap; gap: 22px; margin-top: 16px; }
-    .funnel-stats .stat { font-size: 12px; color: var(--ink-soft); }
-    .funnel-stats .stat b { display: block; font-size: 19px; color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
 
     /* Website booking funnel (drop-off bars) */
     .bfunnel { display: flex; flex-direction: column; gap: 7px; margin-top: 12px; }
@@ -1746,12 +1743,6 @@
           <div class="kpi-trend" id="mkt_web_sessions_trend" hidden></div>
           <div class="mkt-target" id="mkt_web_pageviews">Condition-page views, booking starts</div>
         </div>
-        <div class="kpi-card" style="grid-column: 1 / -1;">
-          <div class="kpi-label">Website booking funnel <span class="range-label">this period</span> <span class="badge live">Live</span></div>
-          <div id="mkt_booking_funnel" class="bfunnel"></div>
-          <div class="bfstuck" id="mkt_booking_stuck" hidden></div>
-          <div class="mkt-target" id="mkt_booking_conv">Viewed to booked</div>
-        </div>
         <div class="kpi-card">
           <div class="kpi-label">Ads spend (SGD) <span class="range-label">this period</span> <span class="badge live">Google Ads</span></div>
           <div class="kpi-value" id="mkt_ads_spend">-</div>
@@ -1778,8 +1769,15 @@
       <div class="subtitle">How people reach a booking: <strong>where they arrive from</strong> &rarr; the <strong>surface</strong> they land on (our website or the bio.site link-in-bio) &rarr; the <strong>CTA</strong> they tap &rarr; whether they <strong>booked</strong>. The website is a surface here, fed by discovery channels &mdash; not the top of the funnel. Thicker bands mean more people.</div>
       <div class="chart-wrap tall"><canvas id="mktFunnelChart"></canvas></div>
       <div class="funnel-legend" id="mkt_funnel_legend"></div>
-      <div class="funnel-stats" id="mkt_funnel_stats"></div>
-      <div class="mkt-target" style="margin-top:12px;">Units shift across the funnel: arrivals are website sessions (from the landing beacon), CTAs are tracked taps, and &ldquo;Booked&rdquo; is confirmed native bookings plus won WhatsApp enquiries the front desk logged. Discovery channels come from utm/gclid/referrer; direct Plato-booking taps have no logged outcome yet. Compare against new patients this period for the full picture.</div>
+
+      <div class="kpi-row mkt-kpis-3" style="margin-top:20px;">
+        <div class="kpi-card" style="grid-column: 1 / -1;">
+          <div class="kpi-label">Website booking funnel <span class="range-label">this period</span> <span class="badge live">Live</span></div>
+          <div id="mkt_booking_funnel" class="bfunnel"></div>
+          <div class="bfstuck" id="mkt_booking_stuck" hidden></div>
+          <div class="mkt-target" id="mkt_booking_conv">Viewed to booked</div>
+        </div>
+      </div>
     </section>
 
     <!-- Marketing mix lens + ICP -->
@@ -3024,11 +3022,13 @@
 
     // Acquisition funnel (by path): a 4-column Sankey built from r.funnel_paths.
     //   Discovery (how they arrive) -> Owned surface (Website / bio.site)
-    //     -> CTA (WhatsApp / Native booking / Plato booking) -> Booked.
+    //     -> CTA (WhatsApp / Native booking) -> Booked.
     // Web is now the SURFACE, fed by discovery channels (from the landing
     // beacon), not the top of funnel. Each edge is its own honest measure: the
     // Discovery->Website edges are sessions, Surface->CTA are taps, CTA->Booked
-    // are bookings. Degrades: any missing stream just drops its edges.
+    // are bookings. Degrades: any missing stream just drops its edges. The
+    // retired Plato-booking flow no longer has its own CTA node — those clicks
+    // merge into "Native booking" (see FUNNEL_CTA in app.py).
     const FUNNEL_COLUMN = {
       // col 0 — discovery
       'Google Ads': 0, 'Meta Ads': 0, 'Instagram': 0, 'Google': 0, 'Ads': 0,
@@ -3036,7 +3036,7 @@
       // col 1 — owned surface
       'Website': 1, 'bio.site': 1,
       // col 2 — CTA / intent
-      'WhatsApp': 2, 'Native booking': 2, 'Plato booking': 2,
+      'WhatsApp': 2, 'Native booking': 2,
       // col 3 — outcome
       'Booked': 3,
     };
@@ -3045,33 +3045,48 @@
       'Google': COBALT, 'Ads': '#caa24a', 'QR': SAGE, 'Direct': NEUTRAL,
       'Referral': '#8a8378', 'Other': '#b0a89c',
       'Website': '#9a8f7d', 'bio.site': '#c6a36b',
-      'WhatsApp': '#2f8f8f', 'Native booking': '#b9791b', 'Plato booking': '#cdb48a',
+      'WhatsApp': '#2f8f8f', 'Native booking': '#b9791b',
       'Booked': GREEN,
     };
     const FUNNEL_PRIORITY = {
       'Google Ads': 0, 'Meta Ads': 1, 'Instagram': 2, 'Google': 3, 'Ads': 4,
       'QR': 5, 'Direct': 6, 'Referral': 7, 'Other': 8,
       'Website': 0, 'bio.site': 1,
-      'Native booking': 0, 'WhatsApp': 1, 'Plato booking': 2,
+      'Native booking': 0, 'WhatsApp': 1,
       'Booked': 0,
     };
     const FUNNEL_DISCOVERY_NODES = ['Google Ads', 'Meta Ads', 'Instagram', 'Google', 'Ads', 'QR', 'Direct', 'Referral', 'Other'];
     const FUNNEL_SURFACE_NODES = ['Website', 'bio.site'];
-    const FUNNEL_CTA_NODES = ['WhatsApp', 'Native booking', 'Plato booking'];
-    const funnelSw = id => `<span class="item"><span class="sw" style="background:${FUNNEL_COLOR[id] || NEUTRAL}"></span>${id}</span>`;
+    const FUNNEL_CTA_NODES = ['WhatsApp', 'Native booking'];
+    // "Referral" is a catch-all for untagged external referrers (fetch_web_channels
+    // in app.py) — de-blackboxed here with a native hover tooltip listing the
+    // actual top domains (fp.referral_domains, from fetch_referral_domains),
+    // instead of a table. `title` is omitted (and no tooltip shows) for every
+    // other node.
+    const funnelSw = (id, title) =>
+      `<span class="item"${title ? ` title="${title.replace(/"/g, '&quot;')}"` : ''}><span class="sw" style="background:${FUNNEL_COLOR[id] || NEUTRAL}"></span>${id}${title ? ' ⓘ' : ''}</span>`;
+    const referralTitle = (domains) => {
+      const entries = Object.entries(domains || {});
+      if (!entries.length) return '';
+      const parts = entries
+        .filter(([d]) => d !== 'other')
+        .sort((a, b) => b[1] - a[1])
+        .map(([d, n]) => `${d} (${fmtInt(n)})`);
+      if (domains.other) parts.push(`other (${fmtInt(domains.other)})`);
+      return 'Referral sources: ' + parts.join(', ');
+    };
 
     function renderFunnelSankey(r) {
       const fp = (r && r.funnel_paths) || {};
       const flows = fp.flows || [];
       const legend = document.getElementById('mkt_funnel_legend');
-      const statsEl = document.getElementById('mkt_funnel_stats');
       const haveSankey = !!(window.Chart && window['chartjs-chart-sankey']);
 
       if (!haveSankey || !flows.length) {
         if (mktFunnelChart) { mktFunnelChart.data.datasets[0].data = []; mktFunnelChart.update(); }
-        legend.innerHTML = '';
-        statsEl.innerHTML = !haveSankey ? ''
-          : '<div class="stat" style="color:var(--ink-muted);font-style:italic;">No arrivals or tracked taps in this period yet.</div>';
+        legend.innerHTML = haveSankey
+          ? '<div class="stat" style="color:var(--ink-muted);font-style:italic;">No arrivals or tracked taps in this period yet.</div>'
+          : '';
         return;
       }
 
@@ -3109,24 +3124,12 @@
         });
       }
 
-      // Summary stats beside the chart.
-      const toCta = flows.filter(d => FUNNEL_CTA_NODES.includes(d.to))
-                         .sort((a, b) => b.flow - a.flow)[0];
-      const stats = [
-        [fmtInt(fp.sessions), 'website landings (beacon)'],
-        [fmtInt(fp.total_taps), 'tracked CTA taps'],
-        [`${fmtInt(fp.wa_taps)} / ${fmtInt(fp.book_taps)}`, 'WhatsApp / booking taps'],
-        [fmtInt(fp.booked_native), 'native bookings confirmed'],
-      ];
-      if (fp.first_visits != null) stats.push([fmtInt(fp.first_visits), 'new patients this period (all sources)']);
-      if (toCta) stats.push([`${toCta.from} \u2192 ${toCta.to}`, `busiest path (${fmtInt(toCta.flow)})`]);
-      statsEl.innerHTML = stats.map(([b, l]) => `<div class="stat"><b>${b}</b>${l}</div>`).join('');
-
       // Legend — only the nodes that actually appear this period.
       const present = new Set(flows.flatMap(d => [d.from, d.to]));
-      const discItems = FUNNEL_DISCOVERY_NODES.filter(s => present.has(s)).map(funnelSw).join('');
-      const surfItems = FUNNEL_SURFACE_NODES.filter(s => present.has(s)).map(funnelSw).join('');
-      const ctaItems  = FUNNEL_CTA_NODES.filter(s => present.has(s)).map(funnelSw).join('');
+      const discItems = FUNNEL_DISCOVERY_NODES.filter(s => present.has(s))
+        .map(s => funnelSw(s, s === 'Referral' ? referralTitle(fp.referral_domains) : '')).join('');
+      const surfItems = FUNNEL_SURFACE_NODES.filter(s => present.has(s)).map(s => funnelSw(s)).join('');
+      const ctaItems  = FUNNEL_CTA_NODES.filter(s => present.has(s)).map(s => funnelSw(s)).join('');
       const outItems  = present.has('Booked') ? funnelSw('Booked') : '';
       legend.innerHTML =
         (discItems ? `<div class="grp"><span class="grp-lbl">Arrived via</span>${discItems}</div>` : '') +

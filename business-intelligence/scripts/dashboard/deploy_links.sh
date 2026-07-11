@@ -29,11 +29,12 @@ DOMAIN="${DOMAIN:-go.gojiphysio.com}"
 SA="dashboard-sa@${PROJECT}.iam.gserviceaccount.com"
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Public-link config. WHATSAPP_NUMBER is E.164 digits, no '+'. PLATO_BOOKING_URL
-# is the Plato online-booking page (the 'book' slug). If unset, the relevant
-# links fall back to the site (never dead-end) — but you'll want them set.
+# Public-link config. WHATSAPP_NUMBER is E.164 digits, no '+'. SITE_BOOKING_URL
+# is our own /book form — the only booking CTA now, used by every 'book' slug
+# (and the retired '*-plato' slugs, which alias to it). Defaults to the live
+# /book page; override only to point at a different booking form.
 WHATSAPP_NUMBER="${WHATSAPP_NUMBER:-}"
-PLATO_BOOKING_URL="${PLATO_BOOKING_URL:-}"
+SITE_BOOKING_URL="${SITE_BOOKING_URL:-https://www.gojiphysio.com/book}"
 WHATSAPP_FALLBACK_URL="${WHATSAPP_FALLBACK_URL:-https://www.gojiphysio.com}"
 
 echo "============================================================"
@@ -52,7 +53,7 @@ echo "==> Deploying ${SERVICE} (APP_MODE=links)"
 gcloud run deploy "${SERVICE}" \
   --project="${PROJECT}" --region="${REGION}" --source="${HERE}" \
   --service-account="${SA}" \
-  --set-env-vars=GCP_PROJECT=${PROJECT},CACHE_TTL_SECONDS=300,APP_MODE=links,WHATSAPP_NUMBER=${WHATSAPP_NUMBER},WHATSAPP_FALLBACK_URL=${WHATSAPP_FALLBACK_URL},PLATO_BOOKING_URL=${PLATO_BOOKING_URL} \
+  --set-env-vars=GCP_PROJECT=${PROJECT},CACHE_TTL_SECONDS=300,APP_MODE=links,WHATSAPP_NUMBER=${WHATSAPP_NUMBER},WHATSAPP_FALLBACK_URL=${WHATSAPP_FALLBACK_URL},SITE_BOOKING_URL=${SITE_BOOKING_URL} \
   --allow-unauthenticated \
   --quiet
 
