@@ -30,12 +30,10 @@ Founder dashboard (`dashboard.gojiphysio.com`, `/`):
 - **P&L** — Singapore-style P&L with a revenue/bookings toggle, period selector
   (Last 30D / current cycle / previous cycle / custom), and XLSX export.
 - **Commission** — per-clinician commission calculator over real appointment data.
-- **Marketing** — 90-day-campaign view: north-star KPIs and acquisition live from
+- **Marketing** — marketing-lens view: north-star KPIs and acquisition live from
   BQ; channel leading indicators (Instagram, GBP, website, paid) as WIP
-  placeholders pending integrations; delivery-lane mix + ICP/clinical-focus;
-  referral-source breakdown (Plato attribution is coarse); and light operating
-  tools (weekly rhythm, content calendar, partnership pipeline, enquiry log)
-  persisted to `marts.marketing_ops_events` via `/api/marketing/ops`.
+  placeholders pending integrations; delivery-lane mix + ICP/clinical-focus; and
+  a referral-source breakdown (Plato attribution is coarse).
 
 Front Desk portal (`frontdesk.gojiphysio.com`, served at `/`, no financials;
 the legacy `/admin` path redirects to `/`) — three tabs, the worklists Plato
@@ -46,8 +44,8 @@ own calendar, which the team uses directly):
   acquisition funnel (`inquiry → qualified → booked → won`, or `lost` + reason),
   with a capture form and a funnel summary (inquiries, open, won, lost, close
   rate). "Won" = the lead became a patient/customer (first visit), **not**
-  "bought a package". Writes `marts.lead_events`; the structured replacement for
-  the founder Marketing tab's manual enquiry log.
+  "bought a package". Writes `marts.lead_events` — the single source of truth for
+  inbound inquiries.
 - **Package alerts** — patients with ≤2 prepaid sessions left
   (`marts.fct_package_balance`), most urgent (0) first, for renewal calls.
 - **Follow-ups** — patients tiered by time since last visit

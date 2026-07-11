@@ -126,8 +126,8 @@ def parse_promo_sku(item_given_id: str) -> tuple[str, int] | None:
 # (bio.site/gojiphysio) also link straight to our /book form, so we track both. Every
 # outbound CTA routes through the public GET /r/<slug> route (and the public
 # go.gojiphysio.com/<slug>), which logs the click and 302-redirects to the slug's
-# destination. WhatsApp slugs carry a channel-specific prefilled message that
-# also seeds the enquiry-log source. Adding an entry point = add a slug here.
+# destination. WhatsApp slugs carry a channel-specific prefilled message.
+# Adding an entry point = add a slug here.
 # Digits only — wa.me wants no '+', spaces, or dashes, so we strip them defensively
 # (the repo variable might be entered as "+65 8377 0401").
 WHATSAPP_NUMBER = re.sub(r"\D", "", os.environ.get("WHATSAPP_NUMBER", ""))
@@ -149,7 +149,6 @@ LINK_SLUGS: dict[str, dict] = {
     #   destination: "wa" = WhatsApp deep link, "book"/"plato" = website /book
     #                form ("plato" is the retired Plato-booking page name, kept
     #                only so old published links redirect somewhere real).
-    # The WhatsApp prefilled text also seeds the enquiry-log source.
     # --- WhatsApp ---
     "web-wa": {"kind": "whatsapp", "label": "Web",      "text": "Hi Goji! I have a question about physio (via your website)."},
     "bio-wa": {"kind": "whatsapp", "label": "bio.site", "text": "Hi Goji! I found you via your Instagram/socials and have a question about physio."},
@@ -1207,50 +1206,6 @@ ORDER BY invoice_date DESC, invoice_label DESC
     return result
 
 
-# Marketing tab — operating-tool state ---------------------------------------
-#
-# The founder Marketing tab presents clinic metrics (read from the existing
-# marts) PLUS a few light operating tools whose state has no source in Plato:
-# the weekly-rhythm checklist, the content-calendar status, the partnership
-# pipeline, and the enquiry log. That mutable state lives in the append-only
-# marts.marketing_ops_events table (latest event wins), surfaced via
-# marts.marketing_ops_latest. Same least-privilege write pattern as the
-# front-desk follow-up log. See scripts/sql/marts/50_marketing_ops_events.sql.
-
-VALID_MARKETING_ITEM_TYPES = {"checklist", "content", "partnership", "enquiry"}
-
-
-def fetch_marketing_ops() -> list[dict]:
-    """Current state of every marketing operating-tool item (latest event each).
-
-    A tiny table (one row per checklist slot / content week / partner / enquiry),
-    so this stays cheap to read on every load. The Marketing tab decides how to
-    render each row from item_type; the back end just returns the latest state.
-
-    Degrades gracefully to [] if the table hasn't been deployed yet (see
-    DEPLOY.md): the rest of the founder dashboard must still load. The Marketing
-    tab renders its clinic metrics regardless and shows an empty operating-tools
-    state until the first write lands.
-    """
-    try:
-        rows = _query(f"""
-SELECT item_type, item_key, state, payload, updated_by, updated_at
-FROM `{PROJECT}.marts.marketing_ops_latest`
-ORDER BY item_type, updated_at DESC
-""")
-    except Exception as e:
-        log.warning("marketing_ops_latest unavailable (run deploy_all.sh?): %s", e)
-        return []
-    return [{
-        "item_type":  r["item_type"],
-        "item_key":   r["item_key"],
-        "state":      r["state"],
-        "payload":    r["payload"],
-        "updated_by": r["updated_by"],
-        "updated_at": r["updated_at"].isoformat() if r.get("updated_at") else None,
-    } for r in rows]
-
-
 LINK_CLICK_TABLE = f"{PROJECT}.marts.link_click_events"
 
 
@@ -1286,8 +1241,8 @@ def fetch_link_clicks(start: date, end: date) -> dict:
     """Tracked-link clicks for [start, end], split into WhatsApp vs booking
     (the two CTAs) with a per-channel breakdown each.
 
-    Degrades to zeros if the table isn't deployed yet (see DEPLOY.md), like
-    fetch_marketing_ops: the Marketing tab must still render.
+    Degrades to zeros if the table isn't deployed yet (see DEPLOY.md): the
+    Marketing tab must still render.
     """
     empty = {"whatsapp": 0, "booking": 0, "total": 0, "wa_by_slug": {}, "book_by_slug": {}}
     try:
@@ -1696,7 +1651,6 @@ def build_payload() -> dict:
         f_appointments  = ex.submit(fetch_appointments, appt_start, today)
         f_mismatches    = ex.submit(fetch_invoice_doctor_mismatches)
         f_mismatch_hist = ex.submit(fetch_mismatch_history)
-        f_marketing_ops = ex.submit(fetch_marketing_ops)
         f_projection    = ex.submit(fetch_monthly_projection, today)
 
         # Per-range fetches. Each fetch_* is independent so they all race.
@@ -1787,7 +1741,6 @@ def build_payload() -> dict:
             "ranges":            ranges,
             "doctor_mismatches": f_mismatches.result(),
             "mismatch_history":  f_mismatch_hist.result(),
-            "marketing_ops":     f_marketing_ops.result(),
             "projection":        f_projection.result(),
         }
 
@@ -2110,13 +2063,13 @@ def get_package_alerts() -> dict:
 # Front-desk portal: inbound-lead pipeline -----------------------------------
 #
 # The "Leads" tab: inbound WhatsApp/Instagram/etc. inquiries tracked through the
-# funnel (inquiry -> qualified -> booked -> won, or lost). This is the structured
-# replacement for the founder Marketing tab's manual enquiry log — it adds a
-# contact key and explicit stages. "won" = the lead became a paying patient /
-# customer (their first visit), NOT that they bought a package; packages are a
-# separate worklist. Reads/writes marts.lead_events (+ marts.lead_latest).
+# funnel (inquiry -> qualified -> booked -> won, or lost). The single source of
+# truth for inbound inquiries — a contact key plus explicit stages. "won" = the
+# lead became a paying patient / customer (their first visit), NOT that they
+# bought a package; packages are a separate worklist. Reads/writes
+# marts.lead_events (+ marts.lead_latest).
 
-# Funnel stages and the inbound channels we tag (reuse the LINK_SLUGS / enquiry
+# Funnel stages and the inbound channels we tag (reuse the LINK_SLUGS channel
 # vocabulary). OPEN_LEAD_STAGES = still in play (neither won nor lost).
 VALID_LEAD_STAGES   = {"inquiry", "qualified", "booked", "won", "lost"}
 OPEN_LEAD_STAGES    = {"inquiry", "qualified", "booked"}
@@ -2241,36 +2194,6 @@ VALUES
         _cache.pop("leads", None)
 
 
-def record_marketing_ops(item_type: str, item_key: str, *, state: str | None = None,
-                         payload: str | None = None,
-                         updated_by: str | None = None) -> None:
-    """Append one marketing operating-tool event (append-only; latest wins).
-
-    Same parameterised DML-INSERT pattern as record_followup / record_lead:
-    a query/DML write honours the dashboard SA's table-level dataEditor grant on
-    marketing_ops_events, keeping least-privilege (no dataset-wide write). Visible
-    to marketing_ops_latest immediately; pops the founder payload cache so the
-    Marketing tab's first-paint snapshot reflects it on the next reload too.
-    """
-    sql = f"""
-INSERT INTO `{PROJECT}.marts.marketing_ops_events`
-  (event_id, item_type, item_key, state, payload, updated_by, updated_at)
-VALUES
-  (@event_id, @item_type, @item_key, @state, @payload, @updated_by, CURRENT_TIMESTAMP())
-"""
-    job_config = bigquery.QueryJobConfig(query_parameters=[
-        bigquery.ScalarQueryParameter("event_id",   "STRING", str(uuid.uuid4())),
-        bigquery.ScalarQueryParameter("item_type",  "STRING", item_type),
-        bigquery.ScalarQueryParameter("item_key",   "STRING", item_key),
-        bigquery.ScalarQueryParameter("state",      "STRING", (state or None)),
-        bigquery.ScalarQueryParameter("payload",    "STRING", (payload or None)),
-        bigquery.ScalarQueryParameter("updated_by", "STRING", updated_by),
-    ])
-    _bq().query(sql, job_config=job_config).result()
-    with _cache_lock:
-        _cache.pop("payload", None)
-
-
 def record_mismatch_dismissal(invoice_id: str, action: str, *,
                               reason: str | None = None,
                               snapshot: dict | None = None,
@@ -2278,9 +2201,10 @@ def record_mismatch_dismissal(invoice_id: str, action: str, *,
     """Append one provider-attribution alert dismissal/restore event.
 
     Append-only; latest action per invoice_id wins (mismatch_dismissal_latest).
-    Same parameterised DML-INSERT pattern as record_marketing_ops — honours the
-    dashboard SA's table-level dataEditor grant on mismatch_dismissal_events
-    (least-privilege). The client passes the alert snapshot it already has in
+    Same parameterised DML-INSERT pattern as record_followup / record_lead —
+    honours the dashboard SA's table-level dataEditor grant on
+    mismatch_dismissal_events (least-privilege). The client passes the alert
+    snapshot it already has in
     hand so the Alert-history tab can render the row even after the invoice falls
     out of the mismatch window. Pops the founder payload cache so both the live
     alert list and the history tab reflect it on the next reload.
@@ -2734,54 +2658,6 @@ def api_range() -> Response:
     return Response(json.dumps(result), mimetype="application/json")
 
 
-@app.route("/api/marketing/ops")
-@require_roles("founder")
-def api_marketing_ops() -> Response:
-    """Current marketing operating-tool state (checklist / content / pipeline /
-    enquiries). Founder-only and dashboard-mode only — the decorator 404s this
-    on the frontdesk subdomain. Read straight from marts.marketing_ops_latest
-    (a tiny table) so it reflects writes immediately, no cache."""
-    return Response(json.dumps({"items": fetch_marketing_ops()}, default=str),
-                    mimetype="application/json")
-
-
-@app.route("/api/marketing/ops", methods=["POST"])
-@require_roles("founder")
-def api_marketing_ops_save() -> Response:
-    """Record one marketing operating-tool event.
-
-    Body: {item_type, item_key, state?, payload?}. Appends one event row; the
-    Marketing tab reflects it on the next fetch. item_type must be one of
-    checklist / content / partnership / enquiry; item_key is the stable id the
-    front end owns (rhythm-slot+week, content week, partner slug, enquiry UUID).
-    """
-    body      = request.get_json(silent=True) or {}
-    item_type = (body.get("item_type") or "").strip()
-    item_key  = (body.get("item_key") or "").strip()
-    if item_type not in VALID_MARKETING_ITEM_TYPES or not item_key:
-        return Response('{"error": "a valid item_type and item_key are required"}',
-                        status=400, mimetype="application/json")
-    state   = body.get("state")
-    payload = body.get("payload")
-    try:
-        record_marketing_ops(item_type, item_key,
-                             state=(str(state).strip() if state is not None else None),
-                             payload=(str(payload).strip() if payload is not None else None),
-                             updated_by=getattr(g, "user", None))
-    except Exception as e:
-        log.exception("marketing-ops write failed: %s", e)
-        msg = str(e).lower()
-        if "permission" in msg or "denied" in msg or "403" in msg or "access" in msg:
-            return Response(
-                json.dumps({"error": "The dashboard isn't allowed to save yet — its "
-                            "service account needs write access to "
-                            "marts.marketing_ops_events. See DEPLOY.md."}),
-                status=403, mimetype="application/json")
-        return Response('{"error": "Could not save — please try again."}',
-                        status=500, mimetype="application/json")
-    return Response('{"ok": true}', mimetype="application/json")
-
-
 @app.route("/api/mismatch/dismiss", methods=["POST"])
 @require_roles("founder")
 def api_mismatch_dismiss() -> Response:
@@ -3033,8 +2909,8 @@ def tracked_redirect(slug: str):
     link, ad destinations, email signature, printed QR codes — points here. We
     log the click (best-effort, off the request thread) and 302 to the slug's
     destination: a wa.me deep link (WhatsApp slugs, with a channel-specific
-    prefilled message that also seeds the enquiry-log source) or Plato online
-    booking (booking slugs). Unknown/unconfigured slugs fall back to the site so
+    prefilled message) or Plato online booking (booking slugs). Unknown/
+    unconfigured slugs fall back to the site so
     a published link never dead-ends. This route is intentionally
     unauthenticated; the rest of the dashboard stays founder-only.
     """

@@ -10,9 +10,8 @@
 -- Profile link, ad destinations, email signature, printed QR codes) points at
 -- the dashboard's public GET /r/<slug> route. That route logs one row here and
 -- 302-redirects to a wa.me deep link whose prefilled message is channel-
--- specific, which also seeds the source tag in the enquiry log. The Marketing
--- tab reads counts from this table (total + per-slug split) so cross-channel
--- WhatsApp intent is attributable.
+-- specific. The Marketing tab reads counts from this table (total + per-slug
+-- split) so cross-channel WhatsApp intent is attributable.
 --
 -- slug: the channel the click came from (e.g. 'web' | 'ig' | 'gbp' | 'ads' |
 --   'email' | 'qr'). The redirect logs whatever slug was hit, including unknown

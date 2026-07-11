@@ -90,10 +90,10 @@ Deploy the follow-up state objects (idempotent; the events table is
 
 Grant the dashboard SA write on **only** the append-only event tables (so it
 can append "contacted/snoozed/dismissed" follow-up events, appointment
-confirmations, marketing operating-tool state, click-to-WhatsApp link clicks,
-and provider-attribution alert dismissals; everything else stays read-only):
+confirmations, click-to-WhatsApp link clicks, and provider-attribution alert
+dismissals; everything else stays read-only):
 
-    for t in patient_followup_events lead_events marketing_ops_events link_click_events booking_funnel_events web_session_events mismatch_dismissal_events; do
+    for t in patient_followup_events lead_events link_click_events booking_funnel_events web_session_events mismatch_dismissal_events; do
       bq add-iam-policy-binding \
         --member="serviceAccount:dashboard-sa@goji-bi.iam.gserviceaccount.com" \
         --role="roles/bigquery.dataEditor" \
@@ -149,13 +149,12 @@ mounted here.
 The dashboard SA must have **write** access to the relevant append-only table:
 `marts.patient_followup_events` (retention worklist),
 `marts.lead_events` (Leads pipeline),
-`marts.marketing_ops_events` (founder Marketing tab operating tools),
 `marts.link_click_events` (click-to-WhatsApp tracking), and
 `marts.mismatch_dismissal_events` (provider-attribution alert dismissals).
 `deploy_admin.sh` grants and verifies them all, but if you ever see a save
 error, grant them directly:
 
-    for t in patient_followup_events lead_events marketing_ops_events link_click_events booking_funnel_events web_session_events mismatch_dismissal_events; do
+    for t in patient_followup_events lead_events link_click_events booking_funnel_events web_session_events mismatch_dismissal_events; do
       bq add-iam-policy-binding \
         --member="serviceAccount:dashboard-sa@goji-bi.iam.gserviceaccount.com" \
         --role="roles/bigquery.dataEditor" \
@@ -319,15 +318,12 @@ Founder dashboard — four pages, all live from BQ:
 - **P&L** — Singapore-style P&L with revenue/bookings toggle, period selector,
   and XLSX export.
 - **Commission** — per-clinician commission calculator over real appointment data.
-- **Marketing** — campaign view for the 90-day plan: north-star KPIs (visits,
-  active patients, bookings) and patient acquisition live from BQ; channel
-  leading indicators (Instagram, GBP, website, paid) as **WIP placeholders**
-  until those integrations land; a delivery-lane mix + ICP/clinical-focus
-  readout; referral-source breakdown (with a note that Plato attribution is
-  coarse); plus light operating tools — a weekly-rhythm checklist, the 12-week
-  content calendar, a partnership pipeline, and an enquiry log. The operating
-  tools persist to `marts.marketing_ops_events` (append-only, latest wins; same
-  pattern as the follow-up log). The **Click-to-WhatsApp** card is live from
+- **Marketing** — marketing-lens view of the clinic numbers: north-star KPIs
+  (visits, active patients, bookings) and patient acquisition live from BQ;
+  channel leading indicators (Instagram, GBP, website, paid) as **WIP
+  placeholders** until those integrations land; a delivery-lane mix +
+  ICP/clinical-focus readout; and a referral-source breakdown (with a note that
+  Plato attribution is coarse). The **Click-to-WhatsApp** card is live from
   `marts.link_click_events` (see below).
 
 ### Trackable CTA links (`go.gojiphysio.com/<slug>`)
@@ -339,8 +335,8 @@ service `goji-links` (`APP_MODE=links`) on `go.gojiphysio.com` — a short, on-b
 domain that serves *only* the redirects, keeping the internal
 `dashboard.gojiphysio.com` tool out of public view. Each hit logs a row to
 `marts.link_click_events` (streaming insert, off-thread); WhatsApp slugs add a
-channel-specific prefilled message that also seeds the enquiry-log source.
-Slugs/kinds/messages are defined in `LINK_SLUGS` in `app.py`. (The dashboard
+channel-specific prefilled message. Slugs/kinds/messages are defined in
+`LINK_SLUGS` in `app.py`. (The dashboard
 service also keeps `GET /r/<slug>` working internally, but the published links are
 `go.gojiphysio.com/<slug>`.)
 
@@ -398,7 +394,7 @@ Three tabs — the worklists Plato doesn't track:
 - **Leads** — inbound WhatsApp/Instagram/etc. inquiries tracked through the
   funnel (inquiry → booked → won, or lost), with a capture form and a funnel
   summary. "Won" = became a patient/customer, not "bought a package". Writes
-  `marts.lead_events`. Replaces the founder Marketing tab's manual enquiry log.
+  `marts.lead_events` — the single source of truth for inbound inquiries.
 - **Package alerts** (≤2 prepaid sessions left) — for renewal calls.
 - **Follow-ups** — patients tiered by time since last visit
   (green ≤1wk / yellow >1wk / orange >2wk / red >4wk), excluding anyone with a
