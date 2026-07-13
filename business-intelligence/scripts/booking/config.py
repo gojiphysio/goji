@@ -44,7 +44,7 @@ SERVICES: dict[str, dict] = {
         "title": "Mummy & Baby Assessment",
         "online_calendar": "z1xE8rP",  # Paediatric (Cheryl + Kristy)
         "type_code": "hDWW",
-        "duration_min": 90,
+        "duration_min": 85,  # matches the website (services.ts); was 90
         "supports_home": True,
     },
     "clinical-pilates": {
@@ -61,6 +61,18 @@ SERVICES: dict[str, dict] = {
         "duration_min": 60,
         "supports_home": False,
     },
+}
+
+# Physiotherapy sub-type (the website's "What type of physiotherapy?" step) ->
+# label written into the Plato appointment note, so the clinic can see what a
+# physio session is for (the Plato calendar/type is the same for all of them).
+# Mirrors the ids in the website's src/lib/physioCategories.ts; keep in sync.
+PHYSIO_FOCUS_LABELS: dict[str, str] = {
+    "general": "General MSK",
+    "womens-health": "Women's Health",
+    "paediatrics": "Paediatrics",
+    "scoliosis": "Scoliosis (Schroth)",
+    "others": "Others",
 }
 
 # Home visits: Cheryl only, typed "Home Visit" in Plato regardless of service.

@@ -41,30 +41,33 @@ const steps = [
       <h2>What would you like to book?</h2>
     </legend>
 
-    <div class="booking__services" role="radiogroup" aria-label="Service">
-      {services.map((s) => <ServiceOption service={s} />)}
+    {/* The physiotherapy sub-type sits directly under the Physiotherapy option,
+        so choosing it is the immediate next step. It's required and narrows which
+        clinicians' calendars open (see src/lib/physioCategories.ts). */}
+    <div class="booking__services" role="group" aria-label="Service">
+      {services.map((s) => (
+        <Fragment>
+          <ServiceOption service={s} />
+          {s.id === "physiotherapy" && (
+            <div class="booking__focus" data-physio-focus hidden>
+              <p class="booking__sublabel" id="focus-label">What type of physiotherapy?</p>
+              <div class="booking__focus-opts" role="radiogroup" aria-labelledby="focus-label">
+                {physioCategories.map((c) => (
+                  <label class="fopt">
+                    <input class="fopt__input visually-hidden" type="radio" name="physioFocus" value={c.id} />
+                    <span class="fopt__name">{c.label}</span>
+                    <span class="fopt__hint">{c.hint}</span>
+                    <span class="fopt__tick" aria-hidden="true" />
+                  </label>
+                ))}
+              </div>
+              <p class="booking__error" data-error="physioFocus" role="alert" hidden></p>
+            </div>
+          )}
+        </Fragment>
+      ))}
     </div>
     <p class="booking__error" data-error="service" role="alert" hidden></p>
-
-    {/* Physiotherapy sub-type — shown only when Physiotherapy is selected. It's
-        required, and it narrows which clinicians' calendars open (see
-        src/lib/physioCategories.ts). */}
-    <div class="booking__focus" data-physio-focus hidden>
-      <p class="booking__sublabel" id="focus-label">What type of physiotherapy?</p>
-      <div class="booking__focus-opts" role="radiogroup" aria-labelledby="focus-label">
-        {
-          physioCategories.map((c) => (
-            <label class="fopt">
-              <input class="fopt__input visually-hidden" type="radio" name="physioFocus" value={c.id} />
-              <span class="fopt__name">{c.label}</span>
-              <span class="fopt__hint">{c.hint}</span>
-              <span class="fopt__tick" aria-hidden="true" />
-            </label>
-          ))
-        }
-      </div>
-      <p class="booking__error" data-error="physioFocus" role="alert" hidden></p>
-    </div>
 
     <div class="booking__where" data-where hidden>
       <p class="booking__sublabel">Where would you like to be seen?</p>
@@ -197,22 +200,13 @@ const steps = [
 
     <div class="field booking__condition-field">
       <p class="field__label" id="notes-label">Tell us about your condition (optional)</p>
-      <div class="booking__conditions" role="group" aria-labelledby="notes-label" data-conditions>
-        {
-          ["Prenatal", "Postpartum", "Injury", "Pain", "Scoliosis", "Paediatrics", "Others"].map((c) => (
-            <button type="button" class="ccond" data-condition={c} aria-pressed="false">
-              {c}
-            </button>
-          ))
-        }
-      </div>
       <textarea
         id="notes"
         name="notes"
         class="field__control booking__notes"
-        rows="2"
+        rows="3"
         aria-describedby="notes-label"
-        placeholder="Add anything else that helps us prepare — symptoms, injury, or goals (optional)."
+        placeholder="Describe your symptoms, injury, history or any relevant information that will help us prepare for your session."
       ></textarea>
     </div>
 
@@ -432,39 +426,8 @@ const steps = [
     line-height: var(--lh-body);
   }
 
-  /* Quick-select condition chips above the free-text notes box. */
   .booking__condition-field {
     gap: var(--space-3);
-  }
-  .booking__conditions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-2);
-  }
-  .ccond {
-    padding: 0.4rem 0.85rem;
-    border: 1.5px solid var(--color-border);
-    border-radius: var(--radius-pill);
-    background: var(--bg-content);
-    font-family: var(--font-body);
-    font-size: var(--fs-small);
-    font-weight: var(--weight-semibold);
-    color: var(--text-default);
-    cursor: pointer;
-    transition: border-color var(--dur) var(--ease),
-      background-color var(--dur) var(--ease), color var(--dur) var(--ease);
-  }
-  .ccond:hover {
-    border-color: var(--color-border-strong);
-  }
-  .ccond[aria-pressed="true"] {
-    background: var(--color-primary);
-    border-color: var(--color-primary);
-    color: var(--color-linen);
-  }
-  .ccond:focus-visible {
-    outline: 3px solid var(--color-accent);
-    outline-offset: 2px;
   }
   .booking__notes {
     margin-top: var(--space-1);
@@ -716,9 +679,13 @@ const steps = [
     transform: translateY(-1px) rotate(45deg);
   }
 
-  /* Physiotherapy sub-type (mirrors the clinician options) */
+  /* Physiotherapy sub-type (mirrors the clinician options). Sits inside the
+     service list, just under the Physiotherapy option — a left accent shows it
+     belongs to that choice. */
   .booking__focus {
-    margin-top: var(--space-4);
+    margin-left: var(--space-3);
+    padding-left: var(--space-4);
+    border-left: 2px solid var(--color-primary);
   }
   .booking__focus-opts {
     display: grid;
@@ -1009,13 +976,9 @@ const steps = [
       notes: composeNotes(),
     });
 
-    /** Combine the quick-select condition chips with any free-text detail. */
+    /** Free-text detail the patient shares about their condition. */
     function composeNotes(): string {
-      const tags = Array.from(
-        form!.querySelectorAll<HTMLElement>('[data-condition][aria-pressed="true"]'),
-      ).map((b) => b.dataset.condition || "");
-      const extra = getValue("notes");
-      return [tags.join(", "), extra].filter(Boolean).join(" — ");
+      return getValue("notes");
     }
 
     function getChecked(name: string): string | null {
@@ -1417,16 +1380,6 @@ const steps = [
       });
     });
 
-    // Quick-select condition chips: toggle aria-pressed; the chosen ones are
-    // folded into the notes by composeNotes(). A tap also counts as engaging the
-    // details step for the funnel.
-    form.querySelectorAll<HTMLButtonElement>("[data-condition]").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const on = btn.getAttribute("aria-pressed") === "true";
-        btn.setAttribute("aria-pressed", String(!on));
-        markDetailsEngaged();
-      });
-    });
 
     // ----- Validation per step -----
     /**
