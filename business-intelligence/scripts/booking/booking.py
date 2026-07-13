@@ -24,6 +24,7 @@ from .config import (
     HOME_VISIT_CLINICIAN,
     HOME_VISIT_TYPE_CODE,
     MAX_ADVANCE_DAYS,
+    PHYSIO_FOCUS_CLINICIANS,
     PHYSIO_FOCUS_LABELS,
     SERVICES,
 )
@@ -168,10 +169,12 @@ def create_booking(plato, draft: dict, *, now: datetime | None = None) -> dict:
     notes = (draft.get("notes") or "").strip()[:1000]
 
     # Physiotherapy sub-type the patient chose (website's "What type of
-    # physiotherapy?" step). Surfaced in the Plato note so the clinic sees what
-    # the session is for. Only meaningful for physiotherapy.
-    focus_label = (PHYSIO_FOCUS_LABELS.get((draft.get("physio_focus") or "").strip(), "")
-                   if service_id == "physiotherapy" else "")
+    # physiotherapy?" step). Only meaningful for physiotherapy. `focus_label` is
+    # written into the Plato note; `focus_clinicians` (None = no restriction)
+    # limits availability + assignment to who offers the sub-type.
+    focus_id = (draft.get("physio_focus") or "").strip() if service_id == "physiotherapy" else ""
+    focus_label = PHYSIO_FOCUS_LABELS.get(focus_id, "")
+    focus_clinicians = PHYSIO_FOCUS_CLINICIANS.get(focus_id)
 
     # What the customer asked for on the form, for the confirmation email: an
     # explicit clinician by name, or "First available" when they let us match.
@@ -191,10 +194,17 @@ def create_booking(plato, draft: dict, *, now: datetime | None = None) -> dict:
         candidates = [HOME_VISIT_CLINICIAN]
     elif draft.get("clinician_id"):
         _require(draft["clinician_id"] in CLINICIANS, "Unknown clinician.")
+        # A direct API call could pick a clinician who doesn't offer the chosen
+        # sub-type (the website only offers valid ones); refuse it.
+        _require(focus_clinicians is None or draft["clinician_id"] in focus_clinicians,
+                 "That clinician doesn't offer this type of physiotherapy.")
         candidates = [draft["clinician_id"]]
         clinician_requested = True
     else:
-        avail = derive_availability(plato, service_id, day, home=home, now=now)
+        # First available: restrict auto-assignment to the sub-type's clinicians
+        # (e.g. a scoliosis booking must never land on someone who isn't Cheryl).
+        avail = derive_availability(plato, service_id, day,
+                                    focus=focus_id or None, home=home, now=now)
         candidates = [cid for cid, slots in avail.items() if time_ in slots]
         _require(candidates, "That time is no longer available.", "slot_taken")
 

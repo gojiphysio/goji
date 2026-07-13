@@ -21,6 +21,7 @@ from .config import (
     HOME_TRAVEL_MINUTES,
     HOME_VISIT_CLINICIAN,
     MAX_ADVANCE_DAYS,
+    PHYSIO_FOCUS_CLINICIANS,
     SERVICES,
     SLOT_MINUTES,
     clinician_by_calendar,
@@ -48,20 +49,28 @@ def derive_availability(
     day: date,
     *,
     clinician_id: str | None = None,
+    focus: str | None = None,
     home: bool = False,
     now: datetime | None = None,
 ) -> dict[str, list[str]]:
     """Return {clinician_id: ["HH:MM", ...]} of free 30-min starts for `day`.
 
-    `clinician_id` restricts to one clinician; `home` restricts to the home-visit
-    clinician and pads each slot with travel time on both sides. `now` (naive SGT)
-    is injectable for testing; defaults to the current SGT time.
+    `clinician_id` restricts to one clinician; `focus` (a physiotherapy sub-type)
+    restricts to the clinicians who offer it (e.g. scoliosis -> Cheryl only);
+    `home` restricts to the home-visit clinician and pads each slot with travel
+    time on both sides. `now` (naive SGT) is injectable for testing; defaults to
+    the current SGT time.
     """
     svc = SERVICES.get(service_id)
     if not svc:
         raise ValueError(f"unknown service {service_id!r}")
     if home and not svc["supports_home"]:
         return {}
+
+    # A physiotherapy sub-type opens only its clinicians' calendars. Ignored for
+    # non-physio services and unknown sub-types (treated as "no restriction").
+    focus_allowed = (PHYSIO_FOCUS_CLINICIANS.get(focus or "")
+                     if service_id == "physiotherapy" else None)
 
     dur = timedelta(minutes=svc["duration_min"])
     pad = timedelta(minutes=HOME_TRAVEL_MINUTES if home else 0)
@@ -98,6 +107,8 @@ def derive_availability(
         if home and cid != HOME_VISIT_CLINICIAN:
             continue
         if clinician_id and cid != clinician_id:
+            continue
+        if focus_allowed is not None and cid not in focus_allowed:
             continue
         if dow in (rule.get("restricted_days") or []):
             continue

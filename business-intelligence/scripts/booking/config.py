@@ -75,6 +75,18 @@ PHYSIO_FOCUS_LABELS: dict[str, str] = {
     "others": "Others",
 }
 
+# Physiotherapy sub-type -> the clinician_ids whose calendars open for it, so
+# availability (and first-available assignment) is restricted to who actually
+# offers that sub-type (e.g. scoliosis -> Cheryl only). Mirrors `clinicianIds`
+# in the website's src/lib/physioCategories.ts; keep the two in sync.
+PHYSIO_FOCUS_CLINICIANS: dict[str, list[str]] = {
+    "general": ["cheryl-long", "claire-ng", "kristy-ng"],
+    "womens-health": ["cheryl-long", "claire-ng", "kristy-ng"],
+    "paediatrics": ["kristy-ng", "cheryl-long"],
+    "scoliosis": ["cheryl-long"],
+    "others": ["cheryl-long", "claire-ng", "kristy-ng"],
+}
+
 # Home visits: Cheryl only, typed "Home Visit" in Plato regardless of service.
 HOME_VISIT_CLINICIAN = "cheryl-long"
 HOME_VISIT_TYPE_CODE = "sCla"

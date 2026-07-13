@@ -105,8 +105,9 @@ def availability():
         return jsonify({"error": "bad date"}), 400
     home = request.args.get("home", "") in ("1", "true", "yes")
     clinician = request.args.get("clinician") or None
+    focus = request.args.get("focus") or None
 
-    cache_key = (service, day.isoformat(), clinician or "", home)
+    cache_key = (service, day.isoformat(), clinician or "", focus or "", home)
     nowm = time.monotonic()
     with _avail_cache_lock:
         hit = _avail_cache.get(cache_key)
@@ -115,7 +116,7 @@ def availability():
 
     try:
         avail = derive_availability(plato(), service, day,
-                                    clinician_id=clinician, home=home)
+                                    clinician_id=clinician, focus=focus, home=home)
     except Exception as e:  # Plato hiccup — degrade to no slots, don't 500 loudly
         log.warning("availability failed (%s %s): %s", service, day, e)
         return jsonify({"error": "unavailable", "times": []}), 502
