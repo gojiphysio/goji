@@ -1,0 +1,170 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Section from "../../components/Section.astro";
+import Button from "../../components/Button.astro";
+
+const allServices = await getCollection("services", ({ data }) => !data.draft);
+allServices.sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99));
+
+// Group by category (index order = display order).
+const categories = [
+  "Pregnancy & Postpartum",
+  "Paediatrics",
+  "Scoliosis (Schroth Method)",
+] as const;
+
+type Category = (typeof categories)[number];
+
+const grouped = categories.reduce(
+  (acc, cat) => {
+    acc[cat] = allServices.filter((s) => s.data.category === cat);
+    return acc;
+  },
+  {} as Record<Category, typeof allServices>,
+);
+
+/** "From $X" using the lower of clinic/home price. */
+const fromPrice = (clinic: number, home?: number) =>
+  `From $${Math.min(clinic, home ?? clinic)}`;
+---
+
+<BaseLayout
+  title="Our Services | Goji Physiotherapy Singapore"
+  description="Physiotherapy services at Goji, Lentor MRT: prenatal and postpartum physio, Mummy & Baby assessments, and Schroth therapy for scoliosis in children and adults. In-clinic or home visits."
+>
+  <section class="services-hero">
+    <div class="container">
+      <h1>Our services</h1>
+      <p class="services-hero__lead">
+        Every visit starts with a thorough assessment and a plan built around you.
+        These pages explain what each appointment involves, who it is for, and what
+        you will leave with, so you can book with confidence. Not sure which fits?
+        <a href="https://go.gojiphysio.com/web-wa" target="_blank" rel="noopener">Message us</a>
+        and we will help you choose.
+      </p>
+    </div>
+  </section>
+
+  {
+    categories.map((cat) => {
+      const items = grouped[cat];
+      if (!items.length) return null;
+      return (
+        <Section tone={cat === "Pregnancy & Postpartum" ? "linen" : "surface"}>
+          <div class="section-head">
+            <h2>{cat}</h2>
+          </div>
+          <div class="svc-grid">
+            {items.map((s) => (
+              <a href={`/services/${s.slug}`} class="svc-card">
+                <h3 class="svc-card__title">{s.data.cardTitle ?? s.data.title}</h3>
+                <p class="svc-card__meta">
+                  {s.data.durationMin} min · {fromPrice(s.data.priceClinic, s.data.priceHome)}
+                </p>
+                <p class="svc-card__lead">{s.data.cardLead}</p>
+                <span class="svc-card__cta">Learn more</span>
+              </a>
+            ))}
+          </div>
+        </Section>
+      );
+    })
+  }
+
+  <Section tone="linen" id="contact-cta">
+    <div class="contact-strip">
+      <h2>Not sure where to start?</h2>
+      <p>Message us on WhatsApp - describe what you are experiencing and we will help you find the right appointment type.</p>
+      <Button slug="web-wa" variant="whatsapp" size="lg">Ask us on WhatsApp</Button>
+    </div>
+  </Section>
+</BaseLayout>
+
+<style>
+  .services-hero {
+    background: var(--bg-page);
+    padding-block: clamp(2.5rem, 1.5rem + 4vw, 5rem);
+    border-bottom: 1px solid var(--color-border);
+  }
+  .services-hero__lead {
+    max-width: 56ch;
+    color: var(--text-muted);
+    margin-top: var(--space-4);
+  }
+  .services-hero__lead a {
+    color: var(--color-primary);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+
+  .section-head {
+    margin-bottom: var(--space-5);
+  }
+
+  .svc-grid {
+    display: grid;
+    gap: var(--space-4);
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 640px) {
+    .svc-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (min-width: 980px) {
+    .svc-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+
+  .svc-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding: var(--space-5);
+    background: var(--bg-content);
+    border: 1px solid var(--color-border);
+    border-top: 3px solid var(--color-primary);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    text-decoration: none;
+    color: inherit;
+    transition: box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease);
+  }
+  .svc-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+  .svc-card__title {
+    font-size: var(--fs-h3);
+    color: var(--text-default);
+  }
+  .svc-card__meta {
+    font-size: var(--fs-caption);
+    font-weight: var(--weight-semibold);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .svc-card__lead {
+    font-size: var(--fs-body);
+    color: var(--text-muted);
+    flex: 1;
+    line-height: var(--lh-snug);
+  }
+  .svc-card__cta {
+    font-size: var(--fs-caption);
+    font-weight: var(--weight-semibold);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--color-primary);
+    margin-top: var(--space-2);
+  }
+
+  .contact-strip {
+    max-width: 44ch;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+  .contact-strip p {
+    color: var(--text-muted);
+  }
+</style>

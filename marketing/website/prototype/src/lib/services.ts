@@ -13,7 +13,10 @@
  *   Plato condition-calendars; it maps to Women's/Pelvic (all three clinicians)
  *   and the front desk triages the specific condition. "Mummy & Baby" has no
  *   dedicated Plato calendar yet — mapped to Paediatric (Cheryl + Kristy); a
- *   dedicated 90-min calendar should be created in Plato (its interval is 60m).
+ *   dedicated 85-min calendar should be created in Plato (its interval is 60m).
+ *   NOTE: duration/age/price were reconciled to the clinic's service doc on
+ *   2026-07-13 (85 min, babies 0–12 months, in-clinic $330 / home $380);
+ *   confirm the 85-min Plato calendar exists before launch.
  */
 export type ServiceId =
   | "physiotherapy"
@@ -62,12 +65,12 @@ export const services: Service[] = [
     id: "mummy-baby",
     icon: "tabler:baby-carriage",
     title: "Mummy & Baby Assessment",
-    lead: "A joint assessment for postpartum mothers (suitable after both vaginal and Caesarean birth) and babies aged 0 to 6 months, supporting recovery, development concerns, and early physical needs.",
-    meta: ["90 min", "In-clinic & home visits"],
+    lead: "A joint assessment for postpartum mothers (suitable after both vaginal and Caesarean birth) and babies aged 0 to 12 months, supporting recovery, development concerns, and early physical needs.",
+    meta: ["85 min", "In-clinic & home visits"],
     price: "330",
-    priceNote: "",
+    priceNote: "Home visits from $380",
     supportsHome: true,
-    durationMin: 90,
+    durationMin: 85,
     platoCalendarId: "z1xE8rP",
     platoTypeCode: "hDWW",
   },

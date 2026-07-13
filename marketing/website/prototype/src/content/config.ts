@@ -24,6 +24,47 @@ const conditions = defineCollection({
   }),
 });
 
+const services = defineCollection({
+  type: "content",
+  schema: z.object({
+    title: z.string(),
+    /** Meta description (SEO) — also the default OG/description. */
+    description: z.string(),
+    /** Short heading shown on the index card (defaults to title). */
+    cardTitle: z.string().optional(),
+    /** One-sentence summary for the index card. */
+    cardLead: z.string(),
+    /** Grouping bucket on the /services index. */
+    category: z.enum([
+      "Pregnancy & Postpartum",
+      "Paediatrics",
+      "Scoliosis (Schroth Method)",
+    ]),
+    /** Facts header (from the source doc's Duration / Options / Physios lines). */
+    durationMin: z.number(),
+    priceClinic: z.number(),
+    priceHome: z.number().optional(),
+    /** Clinician display names for the "Seen by" line. */
+    clinicians: z.array(z.string()),
+    /** Which existing booking option this page preselects. */
+    bookingService: z.enum([
+      "physiotherapy",
+      "mummy-baby",
+      "clinical-pilates",
+      "strength-conditioning",
+    ]),
+    /** Physio sub-type to preselect on the booking form (omit for mummy-baby). */
+    bookingFocus: z
+      .enum(["general", "womens-health", "paediatrics", "scoliosis", "others"])
+      .optional(),
+    /** Optional structured Q&A → FAQPage JSON-LD (progressive; add later). */
+    faqs: z.array(z.object({ q: z.string(), a: z.string() })).optional(),
+    /** Ordering within a category on the index page. */
+    order: z.number().optional(),
+    draft: z.boolean().default(false),
+  }),
+});
+
 const team = defineCollection({
   type: "content",
   schema: z.object({
@@ -46,4 +87,4 @@ const team = defineCollection({
   }),
 });
 
-export const collections = { conditions, team };
+export const collections = { conditions, services, team };
