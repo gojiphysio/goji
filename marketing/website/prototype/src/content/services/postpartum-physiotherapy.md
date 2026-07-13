@@ -3,6 +3,8 @@ title: "Postpartum Physiotherapy"
 description: "A comprehensive postpartum physiotherapy assessment to understand how your body is recovering after pregnancy and birth, and to create a clear plan for returning to daily activities, exercise and sport. Suitable after both vaginal and Caesarean birth."
 cardTitle: "Postpartum Physiotherapy"
 cardLead: "Understand how your body is recovering after birth and get a personalised plan for returning to movement, exercise and sport."
+heroImage: "/photos/services/postpartum-physiotherapy.webp"
+heroAlt: "A Goji physiotherapist guiding a mother through a postpartum recovery assessment."
 category: "Pregnancy & Postpartum"
 durationMin: 55
 priceClinic: 260

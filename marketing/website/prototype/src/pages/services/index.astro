@@ -58,12 +58,19 @@ const fromPrice = (clinic: number, home?: number) =>
           <div class="svc-grid">
             {items.map((s) => (
               <a href={`/services/${s.slug}`} class="svc-card">
-                <h3 class="svc-card__title">{s.data.cardTitle ?? s.data.title}</h3>
-                <p class="svc-card__meta">
-                  {s.data.durationMin} min · {fromPrice(s.data.priceClinic, s.data.priceHome)}
-                </p>
-                <p class="svc-card__lead">{s.data.cardLead}</p>
-                <span class="svc-card__cta">Learn more</span>
+                {s.data.heroImage && (
+                  <div class="svc-card__media">
+                    <img src={s.data.heroImage} alt={s.data.heroAlt ?? ""} width="480" height="300" loading="lazy" />
+                  </div>
+                )}
+                <div class="svc-card__body">
+                  <h3 class="svc-card__title">{s.data.cardTitle ?? s.data.title}</h3>
+                  <p class="svc-card__meta">
+                    {s.data.durationMin} min · {fromPrice(s.data.priceClinic, s.data.priceHome)}
+                  </p>
+                  <p class="svc-card__lead">{s.data.cardLead}</p>
+                  <span class="svc-card__cta">Learn more</span>
+                </div>
               </a>
             ))}
           </div>
@@ -117,13 +124,11 @@ const fromPrice = (clinic: number, home?: number) =>
   .svc-card {
     display: flex;
     flex-direction: column;
-    gap: var(--space-2);
-    padding: var(--space-5);
     background: var(--bg-content);
     border: 1px solid var(--color-border);
-    border-top: 3px solid var(--color-primary);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-sm);
+    overflow: hidden;
     text-decoration: none;
     color: inherit;
     transition: box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease);
@@ -131,6 +136,28 @@ const fromPrice = (clinic: number, home?: number) =>
   .svc-card:hover {
     box-shadow: var(--shadow-md);
     transform: translateY(-2px);
+  }
+  .svc-card__media {
+    background: var(--color-linen);
+  }
+  .svc-card__media img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    aspect-ratio: 8 / 5;
+    object-fit: cover;
+    transition: transform var(--dur) var(--ease);
+  }
+  .svc-card:hover .svc-card__media img {
+    transform: scale(1.03);
+  }
+  .svc-card__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding: var(--space-5);
+    border-top: 3px solid var(--color-primary);
+    flex: 1;
   }
   .svc-card__title {
     font-size: var(--fs-h3);

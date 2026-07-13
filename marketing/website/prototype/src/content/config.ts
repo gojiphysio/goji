@@ -34,6 +34,10 @@ const services = defineCollection({
     cardTitle: z.string().optional(),
     /** One-sentence summary for the index card. */
     cardLead: z.string(),
+    /** Hero image (path under /public) + its alt text. Shown on the detail page
+     *  and the index card. */
+    heroImage: z.string().optional(),
+    heroAlt: z.string().optional(),
     /** Grouping bucket on the /services index. */
     category: z.enum([
       "Pregnancy & Postpartum",
