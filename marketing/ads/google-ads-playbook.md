@@ -1,5 +1,10 @@
 # Google Ads playbook (Goji)
 
+> **The live campaign spec — exact ad groups, keywords, ad copy, budget and
+> launch runbook — is `google-ads-campaign-plan.md`.** This playbook is the
+> evergreen how-to: where each screen lives and why each rule exists. Where
+> the two disagree, the campaign plan wins.
+
 A practical, beginner-friendly guide to fixing Goji's Google Ads so budget goes to
 **high-intent searches** (physio near me, women's physio, pelvic floor, postnatal)
 instead of our own brand name and random clinic queries.
@@ -61,11 +66,10 @@ One campaign ("Goji - Search - Non-brand"), a few tightly-themed **ad groups**.
 Each ad group points its ads at the **most relevant page** - this raises your
 Quality Score, which makes you show for the right terms at a lower cost.
 
-| Ad group | Landing page (Final URL) |
-|---|---|
-| Women's / pelvic health | `https://www.gojiphysio.com/conditions/pelvic-organ-prolapse` (or `/conditions`) |
-| Postnatal / pregnancy | `https://www.gojiphysio.com/conditions/caesarean-recovery` (or `/conditions/prenatal-care`) |
-| General physio / near me | `https://www.gojiphysio.com/` or `https://www.gojiphysio.com/book` |
+The current ad-group → landing-page mapping lives in
+`google-ads-campaign-plan.md` §3 (the site now has dedicated money pages:
+`/services/pelvic-floor-physiotherapy`, the postnatal/prenatal service
+pages, and `/physiotherapy-lentor`).
 
 Send booking-ready traffic to `/book`; send "learn about it" traffic to the
 matching condition page (which has its own WhatsApp + Book buttons).
