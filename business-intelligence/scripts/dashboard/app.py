@@ -1398,7 +1398,7 @@ def fetch_instagram_reach(start: date, end: date) -> dict:
     empty = {"reach": 0}
     try:
         rows = _query(f"""
-SELECT value AS reach
+SELECT reach
 FROM `{PROJECT}.marts.fct_instagram_reach`
 WHERE metric_date <= '{end}'
 ORDER BY metric_date DESC

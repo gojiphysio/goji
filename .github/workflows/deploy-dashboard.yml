@@ -161,6 +161,7 @@ jobs:
           fi
           gcloud run jobs deploy marketing-ingest \
             --source . --region "${REGION}" --project "${PROJECT}" \
+            --service-account "ingestion-sa@${PROJECT}.iam.gserviceaccount.com" \
             --set-secrets=META_GRAPH_TOKEN=meta-graph-token:latest \
             --set-env-vars=BQ_PROJECT=${PROJECT},SOURCES=instagram,IG_USER_ID=${IG_USER_ID} \
             --quiet
