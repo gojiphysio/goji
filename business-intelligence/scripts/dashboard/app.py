@@ -330,21 +330,51 @@ ORDER BY bucket
     return [{"label": r["label"], "value": _to_float(r["value"])} for r in _query(sql)]
 
 
+def _fetch_new_patients_series(start: date, end: date) -> list[dict]:
+    """New-patients series (first-visit cohort size) bucketed at the range's
+    granularity — the north-star companion to the active-patients series.
+
+    Can't use _fetch_series: "new" is per-patient (MIN(delivery_date)), not a
+    row count by date, so it needs a first-visit CTE. Buckets/format match
+    _granularity_for so the two north-star series share an x-axis.
+    """
+    gran, date_fmt = _granularity_for(start, end)
+    sql = f"""
+WITH fv AS (
+  SELECT patient_id, MIN(delivery_date) AS first_visit
+  FROM `{PROJECT}.marts.fct_service_delivered`
+  WHERE patient_id IS NOT NULL
+  GROUP BY patient_id
+)
+SELECT
+  FORMAT_DATE('{date_fmt}', DATE_TRUNC(first_visit, {gran})) AS label,
+  DATE_TRUNC(first_visit, {gran})                            AS bucket,
+  COUNT(*)                                                   AS value
+FROM fv
+WHERE first_visit BETWEEN '{start}' AND '{end}'
+GROUP BY bucket, label
+ORDER BY bucket
+"""
+    return [{"label": r["label"], "value": _to_float(r["value"])} for r in _query(sql)]
+
+
 def fetch_trends(start: date, end: date) -> dict:
-    # Four independent BQ queries — fan out so the slowest single series is
+    # Five independent BQ queries — fan out so the slowest single series is
     # the wall-time floor instead of their sum.
     gran, _ = _granularity_for(start, end)
-    with ThreadPoolExecutor(max_workers=4, thread_name_prefix="trends") as ex:
+    with ThreadPoolExecutor(max_workers=5, thread_name_prefix="trends") as ex:
         f_bookings        = ex.submit(_fetch_series, "marts.fct_invoice_line",      "invoice_date",  "SUM(booking_amount)",        start, end)
         f_recognised      = ex.submit(_fetch_series, "marts.fct_service_delivered", "delivery_date", "SUM(recognised_revenue)",    start, end)
         f_visits          = ex.submit(_fetch_series, "marts.fct_service_delivered", "delivery_date", "COUNT(*)",                   start, end)
         f_active_patients = ex.submit(_fetch_series, "marts.fct_service_delivered", "delivery_date", "COUNT(DISTINCT patient_id)", start, end, "AND patient_id IS NOT NULL")
+        f_new_patients    = ex.submit(_fetch_new_patients_series, start, end)
         return {
             "granularity":     gran,
             "bookings":        f_bookings.result(),
             "recognised":      f_recognised.result(),
             "visits":          f_visits.result(),
             "active_patients": f_active_patients.result(),
+            "new_patients":    f_new_patients.result(),
         }
 
 
@@ -1209,13 +1239,17 @@ ORDER BY invoice_date DESC, invoice_label DESC
 LINK_CLICK_TABLE = f"{PROJECT}.marts.link_click_events"
 
 
-def _record_link_click(click_id: str, slug: str, user_agent: str | None, referer: str | None) -> None:
+def _record_link_click(click_id: str, slug: str, user_agent: str | None, referer: str | None,
+                       session_id: str | None = None, page: str | None = None) -> None:
     """Append one click via the streaming insert API (insert_rows_json), NOT
     DML: clicks are public/high-frequency, so this dodges BigQuery's 1,500
     DML-statements-per-table-per-day cap and the latency of a query job.
     Best-effort — never raise into the request; a logging hiccup must not break
     the redirect. `click_id` is minted by the caller so the same id can be passed
-    through to the /book landing (?cid=…) for an exact origin→booking join."""
+    through to the /book landing (?cid=…) for an exact origin→booking join.
+    `session_id`/`page` come from on-site CTA taps (the site appends ?sid=&p=) so
+    a WhatsApp tap can be tied back to the booking session it came from — the
+    golden-flow join. NULL for off-site channels."""
     try:
         row = {
             "click_id":   click_id,
@@ -1223,6 +1257,8 @@ def _record_link_click(click_id: str, slug: str, user_agent: str | None, referer
             "clicked_at": datetime.now(timezone.utc).isoformat(),
             "user_agent": ((user_agent or "")[:512] or None),
             "referer":    ((referer or "")[:512] or None),
+            "session_id": ((session_id or "")[:128] or None),
+            "page":       ((page or "")[:512] or None),
         }
         errors = _bq().insert_rows_json(LINK_CLICK_TABLE, [row])
         if errors:
@@ -1231,10 +1267,12 @@ def _record_link_click(click_id: str, slug: str, user_agent: str | None, referer
         log.warning("link click not recorded (slug=%s): %s", slug, e)
 
 
-def _record_link_click_async(click_id: str, slug: str, user_agent: str | None, referer: str | None) -> None:
+def _record_link_click_async(click_id: str, slug: str, user_agent: str | None, referer: str | None,
+                             session_id: str | None = None, page: str | None = None) -> None:
     """Fire-and-forget so the public redirect returns immediately."""
     threading.Thread(target=_record_link_click,
-                     args=(click_id, slug, user_agent, referer), daemon=True).start()
+                     args=(click_id, slug, user_agent, referer, session_id, page),
+                     daemon=True).start()
 
 
 def fetch_link_clicks(start: date, end: date) -> dict:
@@ -1412,6 +1450,50 @@ LIMIT 1
         return empty
 
 
+def fetch_instagram_engagement(start: date, end: date) -> dict:
+    """Actionable Instagram signals beyond reach — the "did reach turn into
+    interest, and is the audience growing?" step — fed by the marketing_ingest job.
+
+    - profile_views: ADDITIVE daily count → SUM over [start, end]
+      (marts.fct_instagram_profile_views).
+    - followers: a running TOTAL snapshot → the latest reading ≤ end for the
+      count, and growth = latest − first-in-window (marts.fct_instagram_followers,
+      same read-latest pattern as fetch_instagram_reach; never SUM a total).
+
+    Each metric degrades independently to None if its data isn't there yet, so the
+    card shows "—" per-metric rather than breaking the tab.
+    """
+    out: dict[str, int | None] = {"profile_views": None, "followers": None, "follower_growth": None}
+    try:
+        rows = _query(f"""
+SELECT SUM(profile_views) AS profile_views
+FROM `{PROJECT}.marts.fct_instagram_profile_views`
+WHERE metric_date BETWEEN '{start}' AND '{end}'
+""")
+        if rows and rows[0]["profile_views"] is not None:
+            out["profile_views"] = _to_int(rows[0]["profile_views"])
+    except Exception as e:
+        log.warning("instagram profile_views unavailable: %s", e)
+    try:
+        rows = _query(f"""
+SELECT
+  (SELECT followers FROM `{PROJECT}.marts.fct_instagram_followers`
+   WHERE metric_date <= '{end}' ORDER BY metric_date DESC LIMIT 1)   AS latest,
+  (SELECT followers FROM `{PROJECT}.marts.fct_instagram_followers`
+   WHERE metric_date BETWEEN '{start}' AND '{end}'
+   ORDER BY metric_date ASC LIMIT 1)                                 AS first_in_window
+""")
+        if rows and rows[0]["latest"] is not None:
+            latest = _to_int(rows[0]["latest"])
+            out["followers"] = latest
+            first = rows[0]["first_in_window"]
+            if first is not None:
+                out["follower_growth"] = latest - _to_int(first)
+    except Exception as e:
+        log.warning("instagram followers unavailable: %s", e)
+    return out
+
+
 def fetch_web_sessions(start: date, end: date) -> dict:
     """Website sessions & pageviews for [start, end] from the GA4 BigQuery export
     (the free native daily export; dataset `analytics_<propertyId>`, tables
@@ -1550,12 +1632,122 @@ ORDER BY sessions DESC
     return top
 
 
+# Website page taxonomy for per-page attribution. The landing beacon records
+# location.pathname on EVERY event (session_start AND page_view — see
+# BaseLayout.astro), so web_session_events.landing_path is the current page per
+# pageview, not just the session's first landing. This CASE turns raw paths into
+# a small, stable set of pages so "Website" splits into Home / Booking /
+# Conditions / … instead of one vague surface. Keep buckets in sync with the
+# site's route tree (marketing/website/prototype/src/pages).
+_WEB_PAGE_CASE_SQL = """
+CASE
+  WHEN landing_path = '/' OR landing_path = '' OR landing_path IS NULL THEN 'Home'
+  WHEN landing_path LIKE '/book%'       THEN 'Booking'
+  WHEN landing_path LIKE '/conditions%' THEN 'Conditions'
+  WHEN landing_path LIKE '/services%'   THEN 'Services'
+  WHEN landing_path LIKE '/team%'       THEN 'Team'
+  WHEN landing_path LIKE '/blog%'       THEN 'Blog'
+  ELSE 'Other'
+END
+"""
+
+# Display order for the per-page bars (buckets not present are simply skipped).
+WEB_PAGE_ORDER = ["Home", "Booking", "Conditions", "Services", "Team", "Blog", "Other"]
+
+
+def fetch_web_pages(start: date, end: date) -> list[dict]:
+    """Per-page website engagement for [start, end] from the landing beacon
+    (marts.web_session_events): landings (sessions that STARTED on the page) and
+    total pageviews per page bucket. De-blackboxes the old single "Website"
+    surface into Home / Booking / Conditions / … so we can see which pages pull
+    people in and which get browsed.
+
+    A "landing" is a session_start row (where the visit began); a "pageview" is
+    any event on that page. Ordered by WEB_PAGE_ORDER. Degrades to [] until the
+    beacon is deployed, like fetch_web_channels.
+    """
+    try:
+        rows = _query(f"""
+SELECT
+  {_WEB_PAGE_CASE_SQL} AS page,
+  COUNTIF(event_type = 'session_start') AS landings,
+  COUNT(*)                              AS pageviews
+FROM `{PROJECT}.marts.web_session_events`
+WHERE DATE(occurred_at) BETWEEN '{start}' AND '{end}'
+GROUP BY page
+""")
+    except Exception as e:
+        log.warning("web_session_events per-page unavailable (run deploy_all.sh?): %s", e)
+        return []
+    by_page = {r["page"]: {"landings": _to_int(r["landings"]),
+                           "pageviews": _to_int(r["pageviews"])} for r in rows}
+    return [{"page": p, "landings": by_page[p]["landings"], "pageviews": by_page[p]["pageviews"]}
+            for p in WEB_PAGE_ORDER if p in by_page]
+
+
+def fetch_onsite_flow(start: date, end: date) -> dict:
+    """Golden-flow outcomes for on-site booking-page sessions in [start, end]:
+    of the sessions that reached /book, how many BOOKED, how many bailed to
+    WhatsApp, and how many DROPPED (left with neither).
+
+    Booking-page sessions and their confirmed count come from
+    marts.booking_funnel_events (session_id grain). The WhatsApp bail-out is the
+    golden-flow join enabled by the on-site CTA passthrough: link_click_events
+    rows for WhatsApp slugs carrying a session_id that also appears in the
+    booking funnel (see marts/51_link_click_events.sql). Until the passthrough
+    has data, tapped_whatsapp is 0 and the section shows booked-vs-dropped only.
+
+    Degrades to zeros if either table is missing — the Marketing tab still renders.
+    """
+    empty = {"booking_sessions": 0, "booked": 0, "tapped_whatsapp": 0, "dropped": 0}
+    try:
+        rows = _query(f"""
+WITH bf AS (
+  SELECT
+    COUNT(DISTINCT session_id)                                          AS booking_sessions,
+    COUNT(DISTINCT IF(stage = 'confirmed', session_id, NULL))          AS booked,
+    ARRAY_AGG(DISTINCT session_id IGNORE NULLS)                        AS sids
+  FROM `{PROJECT}.marts.booking_funnel_events`
+  WHERE DATE(occurred_at) BETWEEN '{start}' AND '{end}'
+),
+wa AS (
+  SELECT COUNT(DISTINCT c.session_id) AS tapped_whatsapp
+  FROM `{PROJECT}.marts.link_click_events` c, bf
+  WHERE DATE(c.clicked_at) BETWEEN '{start}' AND '{end}'
+    AND c.session_id IS NOT NULL
+    AND ENDS_WITH(c.slug, '-wa')
+    AND c.session_id IN UNNEST(bf.sids)
+    AND c.session_id NOT IN UNNEST(
+      (SELECT ARRAY_AGG(DISTINCT session_id IGNORE NULLS)
+       FROM `{PROJECT}.marts.booking_funnel_events`
+       WHERE DATE(occurred_at) BETWEEN '{start}' AND '{end}' AND stage = 'confirmed'))
+)
+SELECT bf.booking_sessions, bf.booked, wa.tapped_whatsapp
+FROM bf, wa
+""")
+    except Exception as e:
+        log.warning("onsite_flow unavailable (run deploy_all.sh?): %s", e)
+        return empty
+    if not rows or rows[0]["booking_sessions"] is None:
+        return empty
+    r = rows[0]
+    sessions = _to_int(r["booking_sessions"])
+    booked   = _to_int(r["booked"])
+    tapped   = _to_int(r["tapped_whatsapp"])
+    dropped  = max(0, sessions - booked - tapped)
+    return {"booking_sessions": sessions, "booked": booked,
+            "tapped_whatsapp": tapped, "dropped": dropped}
+
+
 # Funnel-path source label per link slug prefix (slug = "<source>-<cta>", see
 # LINK_SLUGS). `bio` is handled specially: bio.site is the Instagram link-in-bio
 # page, so bio-* taps flow Instagram -> bio.site -> CTA. `web` is the owned
 # Website surface (fed by discovery channels from the landing beacon), not a
 # discovery source itself. A generic slug with no prefix ('wa'/'book') is "Other".
 FUNNEL_SOURCE = {"gbp": "Google", "ads": "Ads", "qr": "QR", "ig": "Instagram"}
+# Discovery channels below this many arrival sessions fold into "Other" so the
+# Sankey doesn't sprout hairline bands for one-off referrers (see _build_funnel_paths).
+FUNNEL_DISCOVERY_MIN = 2
 # CTA label per slug suffix. "plato" (the retired Plato-booking flow) merges
 # into "Native booking" — those taps now land on the same tracked /book form.
 FUNNEL_CTA = {"wa": "WhatsApp", "book": "Native booking", "plato": "Native booking"}
@@ -1602,9 +1794,20 @@ def _build_funnel_paths(link_clicks: dict, kpis: dict, lead_wins: dict,
         if n:
             flows[(src, dst)] = flows.get((src, dst), 0) + n
 
-    # 1) Discovery → Website (arrival), from the landing beacon.
-    for channel, n in (web_channels or {}).items():
-        add(channel, "Website", n)
+    # 1) Discovery → Website (arrival), from the landing beacon. Fold the tiny
+    # long-tail (a stray session or two from an odd channel) into "Other" so the
+    # Sankey stays readable — the granular per-page/per-domain story lives in the
+    # separate on-site-path viz and the Referral hover, not in a forest of
+    # hairline bands. "Direct" is never folded (it's a meaningful arrival mode).
+    web_ch = dict(web_channels or {})
+    folded = 0
+    for channel, n in web_ch.items():
+        if channel != "Direct" and n < FUNNEL_DISCOVERY_MIN:
+            folded += n
+        else:
+            add(channel, "Website", n)
+    if folded:
+        add("Other", "Website", folded)
 
     # 2) Surface → CTA (taps). Suffix = CTA; prefix = surface/source.
     bio_total = 0
@@ -1670,9 +1873,9 @@ def build_payload() -> dict:
     presets    = preset_ranges()
 
     # max_workers sized to cover every concurrent fetch this request fires:
-    # 9 top-level + 4 ranges × 12 metrics + 3 ranges × 4 previous-window jobs = 69.
+    # 9 top-level + 4 ranges × 15 metrics + 3 ranges × 5 previous-window jobs = 84.
     # Round up to 70 for headroom.
-    with ThreadPoolExecutor(max_workers=70, thread_name_prefix="bq") as ex:
+    with ThreadPoolExecutor(max_workers=90, thread_name_prefix="bq") as ex:
         # Range-independent (or fixed-window) fetches.
         # fetch_deferred is now per-range (moved into range_jobs below).
         f_cohorts       = ex.submit(fetch_cohorts)
@@ -1703,10 +1906,13 @@ def build_payload() -> dict:
                 "booking_funnel": ex.submit(fetch_booking_funnel, start, end),
                 "google_ads":     ex.submit(fetch_google_ads, start, end),
                 "instagram_reach": ex.submit(fetch_instagram_reach, start, end),
+                "instagram_engagement": ex.submit(fetch_instagram_engagement, start, end),
                 "web_sessions":   ex.submit(fetch_web_sessions, start, end),
                 "web_channels":     ex.submit(fetch_web_channels, start, end),
+                "web_pages":        ex.submit(fetch_web_pages, start, end),
                 "referral_domains": ex.submit(fetch_referral_domains, start, end),
                 "lead_wins":        ex.submit(fetch_lead_wins, start, end),
+                "onsite_flow":      ex.submit(fetch_onsite_flow, start, end),
             }
             # Trend indicators compare each range against the immediately
             # preceding window of equal length (e.g. the 30 days before the
@@ -1717,6 +1923,7 @@ def build_payload() -> dict:
                 range_jobs[key]["link_clicks_prev"]  = None
                 range_jobs[key]["google_ads_prev"]   = None
                 range_jobs[key]["instagram_reach_prev"] = None
+                range_jobs[key]["instagram_engagement_prev"] = None
                 range_jobs[key]["web_sessions_prev"] = None
                 range_jobs[key]["prev_start"]        = None
                 range_jobs[key]["prev_end"]          = None
@@ -1727,6 +1934,7 @@ def build_payload() -> dict:
                 range_jobs[key]["link_clicks_prev"]  = ex.submit(fetch_link_clicks, prev_start, prev_end)
                 range_jobs[key]["google_ads_prev"]   = ex.submit(fetch_google_ads, prev_start, prev_end)
                 range_jobs[key]["instagram_reach_prev"] = ex.submit(fetch_instagram_reach, prev_start, prev_end)
+                range_jobs[key]["instagram_engagement_prev"] = ex.submit(fetch_instagram_engagement, prev_start, prev_end)
                 range_jobs[key]["web_sessions_prev"] = ex.submit(fetch_web_sessions, prev_start, prev_end)
                 range_jobs[key]["prev_start"]        = prev_start.isoformat()
                 range_jobs[key]["prev_end"]          = prev_end.isoformat()
@@ -1757,8 +1965,12 @@ def build_payload() -> dict:
                 "google_ads_prev":  v["google_ads_prev"].result() if v["google_ads_prev"] else None,
                 "instagram_reach":      v["instagram_reach"].result(),
                 "instagram_reach_prev": v["instagram_reach_prev"].result() if v["instagram_reach_prev"] else None,
+                "instagram_engagement":      v["instagram_engagement"].result(),
+                "instagram_engagement_prev": v["instagram_engagement_prev"].result() if v["instagram_engagement_prev"] else None,
                 "web_sessions":      v["web_sessions"].result(),
                 "web_sessions_prev": v["web_sessions_prev"].result() if v["web_sessions_prev"] else None,
+                "web_pages":         v["web_pages"].result(),
+                "onsite_flow":       v["onsite_flow"].result(),
                 "funnel_paths":     _build_funnel_paths(v["link_clicks"].result(), v["kpis"].result(),
                                                         v["lead_wins"].result(),
                                                         v["web_channels"].result(),
@@ -2952,8 +3164,14 @@ def tracked_redirect(slug: str):
     """
     slug = (slug or "").lower().strip()
     click_id = str(uuid.uuid4())
+    # On-site CTA taps carry the booking session_id + page path (?sid=&p=) so a
+    # WhatsApp tap can be tied back to the booking session it came from (the
+    # golden-flow join; wa.me redirects can't use the ?cid passthrough and
+    # cross-origin Referer is trimmed to the origin). Absent for off-site links.
     _record_link_click_async(click_id, slug, request.headers.get("User-Agent"),
-                             request.headers.get("Referer"))
+                             request.headers.get("Referer"),
+                             session_id=request.args.get("sid"),
+                             page=request.args.get("p"))
     return redirect(_slug_target(slug, click_id), code=302)
 
 

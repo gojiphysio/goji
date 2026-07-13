@@ -9,6 +9,12 @@
  * (business-intelligence/scripts/dashboard/app.py) are exposed here. Adding a
  * new slug means adding it to that map first — the union type below will then
  * stop a typo or an un-wired slug from shipping.
+ *
+ * Golden-flow attribution: on-site `web-*` CTA links are decorated at runtime by
+ * a small inline script in `BaseLayout.astro` that appends `?sid=<booking
+ * session>&p=<path>`. The redirector logs those onto `link_click_events` so a
+ * WhatsApp/book tap can be tied back to the booking session + page it came from.
+ * Nothing to do at each call site — just use `cta()` / the `Button` `slug` prop.
  */
 
 const REDIRECT_BASE = "https://go.gojiphysio.com";

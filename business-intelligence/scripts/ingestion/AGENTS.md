@@ -16,9 +16,13 @@ source (Instagram, Search Console, GBP, …).
 - **Generic raw shape** (`_loaded_at, …keys…, metric, metric_date, value, payload
   JSON`): the `metric` column means adding metrics later is more rows, not a schema
   change.
-- Additive metrics (clicks, impressions, followers) sum daily downstream — no
-  special handling. Only de-duplicated metrics (e.g. Instagram reach) need a
-  period-level fetch.
+- Additive metrics (clicks, impressions, profile views) sum daily downstream — no
+  special handling. De-duplicated metrics (e.g. Instagram reach) need a
+  period-level fetch. Running **totals** (e.g. `followers_count`) are snapshots:
+  store one row per day and read the **latest** in-window (growth = latest−first),
+  never SUM. `marketing_ingest` today pulls reach (dedup), `profile_views`
+  (additive), and `followers_count` (total) — reach is fatal-on-failure, the other
+  two are best-effort so a metric-name/permission hiccup can't break reach ingest.
 
 ## Ops
 - **Secrets** live in Secret Manager, mounted to the Job via `--set-secrets`;

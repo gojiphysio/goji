@@ -2,8 +2,9 @@
 
 One consolidated Cloud Run **Job** for the Marketing-tab integration seams. Each
 run pulls the enabled `SOURCES` (comma list) from their external APIs and appends
-to `goji-bi.raw_marketing.*`. Today: **Instagram reach**. Next seams (same job,
-sibling handlers + tables): GBP booking clicks/calls, Google-review velocity.
+to `goji-bi.raw_marketing.*`. Today: **Instagram reach, profile views, and
+follower count**. Next seams (same job, sibling handlers + tables): GBP booking
+clicks/calls, Google-review velocity.
 
 Why one job and not one-per-card: cost is identical (~$0 — a daily job is well
 inside the Cloud Run free tier); consolidating cuts the operational surface to a
@@ -26,15 +27,24 @@ marketing_ingest/
 ## Data flow
 
 ```
-Meta Graph API ─▶ raw_marketing.instagram_raw ─▶ stg.instagram ─▶ marts.fct_instagram_reach ─▶ dashboard card
-   (per run)        (append-only)                 (latest per       (reach series)             (Marketing tab)
-                                                    metric,date)
+Meta Graph API ─▶ raw_marketing.instagram_raw ─▶ stg.instagram ─▶ marts.fct_instagram_* ─▶ dashboard cards
+   (per run)        (append-only)                 (latest per       (reach / profile_views /  (Marketing tab)
+                                                    metric,date)      followers)
 ```
 
-Reach is **de-duplicated** (unique accounts), so it is not additive: monthly
-reach ≠ sum of daily reach. The job stores Meta's rolling 28-day reach
-(`metric = 'reach_days_28'`); downstream reads the **latest reading in-window**,
-never a SUM.
+Each metric aggregates differently, and the marts encode how to read it:
+- **reach** (`metric = 'reach_days_28'`) is **de-duplicated** (unique accounts),
+  so it is not additive: monthly reach ≠ sum of daily reach. Downstream reads the
+  **latest reading in-window** (`marts.fct_instagram_reach`), never a SUM.
+- **profile_views** (`metric = 'profile_views'`, `period=day`) IS additive:
+  downstream **SUMs** over the window (`marts.fct_instagram_profile_views`).
+- **followers_count** (`metric = 'followers_count'`) is a running **total**
+  snapshot: downstream reads the **latest** for the count and derives growth as
+  `latest − first` (`marts.fct_instagram_followers`), never a SUM.
+
+Reach is the proven core and is fatal on API failure (exit 3); profile_views and
+followers_count are **best-effort** (a metric-name/permission hiccup logs a
+warning and is skipped) so they can never break reach ingestion.
 
 ## One-time setup
 

@@ -153,9 +153,17 @@ ICP/clinical-focus, referral sources). The static 90-day-plan operating tools
 removed once the plan lapsed — inbound inquiries now live in the front-desk
 Leads pipeline (`marts.lead_events`). Open follow-ups:
 
-- **Channel integrations** (the WIP placeholder cards): Instagram reach, Google
-  Business Profile clicks/calls, website sessions (GA4/PostHog), paid spend +
-  cost-per-first-visit, review velocity. Each card is the seam to plug into.
+- **Marketing tab redesign — DONE.** The tab is now ordered by decision
+  hierarchy: north stars (active + new patients, one range-bucketed chart; Revenue
+  dropped from this tab) → top-of-funnel channels (Instagram promoted to
+  reach + profile visits + follower growth) → cleaner acquisition Sankey →
+  **on-site path & booking drop-off** (per-page attribution from the beacon's
+  `landing_path`, plus booked / bailed-to-WhatsApp / dropped for booking-page
+  sessions via the on-site CTA `?sid=&p=` passthrough) → base/ICP/referral lenses.
+- **Channel integrations** (the remaining WIP cards): Google Business Profile
+  clicks/calls, website sessions (GA4/PostHog), paid spend + cost-per-first-visit,
+  review velocity. Instagram is live (reach + profile views + followers). Each
+  card is the seam to plug into.
 - **Enquiry → first-visit attribution**: Plato only records a coarse
   `referred_by` per patient, so first visits can't be split by marketing channel
   today. The front-desk Leads pipeline is the manual bridge; later, tag enquiry
@@ -211,3 +219,43 @@ event-log pattern (`patient_followup_events`, `appt_confirmation_events`).
   reliably captured on both sides?
 - **Dedup / identity.** One person messaging twice shouldn't double-count
   inquiries — key on phone, not message.
+
+---
+
+## Phase 5 — Google Ads relaunch prep (idea / to-do)
+
+### Goal
+
+The Google Ads campaign was suspended for underperforming (spend went to brand +
+junk queries, not high-intent searches — see `marketing/ads/google-ads-playbook.md`).
+Before relaunching, put the few numbers we'd otherwise open the Google Ads UI for
+**on the Marketing tab**, so the founder can steer the relaunch from one place.
+
+### What to surface (from the BQ Data Transfer `google_ads` dataset)
+
+`fetch_google_ads` already reads campaign/account stats. Add sibling graceful-
+degradation fetches (same shape) reading the transfer's keyword/search-term views:
+- **Routing keywords** — the keywords actually serving us (`keyword_view` /
+  `ad_group_criterion`): keyword, match type, impressions, clicks, cost, conv.
+- **Top search terms** — the real queries coming in (`search_term_view`): term,
+  clicks, cost, whether it converted. This is where brand/junk shows up.
+- **Expert additions** (all cheap once the views are in the transfer):
+  - **Brand vs non-brand split** of spend & conversions (regex on the term/keyword
+    against the brand words) — the exact leak that got us suspended.
+  - **Search-term → booking conversions** — join the `booking_confirmed`
+    conversion (already fired site-side, see the playbook §6) back to the term, so
+    we optimise toward booking-producing queries, not cheap clicks.
+  - **Wasted-spend list** — terms with spend but zero conversions → negative-
+    keyword candidates (surface as a "consider excluding" list).
+  - **Impression share / lost-to-budget** if the transfer exposes it — are we
+    capped by budget or rank on the terms we want?
+
+### Notes before starting
+
+- Cards stay **inert/graceful** until the transfer includes the keyword +
+  search-term views (the transfer config may need those tables enabled) — same
+  "WIP seam → live card" pattern as the other channel integrations.
+- Keep it a **read-only lens**: the actual keyword/negative/bid changes happen in
+  the Google Ads UI per the playbook; the dashboard just tells us *what* to change.
+- The `google_ads` dataset is **US region** — query it directly (a mart view can't
+  cross regions), exactly like `fetch_google_ads` does today.
