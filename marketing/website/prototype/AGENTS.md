@@ -1,9 +1,9 @@
-# Website prototype — conventions
+# Website — conventions
 
-The Goji public website, rebuilt off Squarespace. **Astro** (static output),
-bound for **Cloudflare Pages**. This is currently a *design-system prototype*:
-a living styleguide (`/styleguide`) + one composed homepage (`/`) so we can land
-on a look before porting all content and going to production.
+The Goji public website: **Astro** (static output) on **Cloudflare Pages**,
+**live in production at gojiphysio.com** since the Squarespace cutover
+(directory name "prototype" is historical). `/styleguide` remains the design
+QA surface (noindexed).
 
 > **This subtree owns the repo's only Node/npm build step**, on purpose. The
 > rest of the repo is deliberately no-build (the Flask dashboard is inline
@@ -38,6 +38,25 @@ so a token change reflows everything (styleguide is the QA surface).
   down to ~375px.
 - **Branch & PR to `main`** — never push to `main` directly.
 
+## SEO/GEO rules (from the 2026-07 review — full map in `../../seo/seo-geo-review.md`)
+- **Per-page schema is required**, by page type: conditions emit MedicalWebPage
+  + author/reviewedBy + dates + BreadcrumbList + FAQPage; services emit
+  Service + Offer + BreadcrumbList + FAQPage (frontmatter `faqs`); team pages
+  emit enriched Person. New page types define their schema before merging.
+- **Condition FAQPage is parsed from the body**: keep the exact format
+  `## Frequently asked questions` with `### <question>` blocks — other
+  heading levels or bullet questions silently emit no FAQPage.
+- **Every condition page carries a byline** (`author`, `datePublished`,
+  `lastReviewed` frontmatter). Bump `lastReviewed` only on a real clinical
+  re-review.
+- **Meta descriptions ≤160 chars.**
+- **Only claim a physical presence at Lentor.** Wider reach is "home visits
+  across Singapore" — no neighbourhood pages implying a clinic elsewhere.
+- **Update `public/llms.txt` in the same PR** as any page/service/price/team
+  change — it is the canonical machine brief for AI answer engines.
+- **Ad final URLs are direct site URLs, never `go.gojiphysio.com` links**
+  (Google disallows redirector final URLs); on-page CTAs stay go-links.
+
 ## Assets
 Logos in `public/brand/` are **copies** of the source of truth at
 `business-intelligence/design/brand_assets/`. Re-sync if the brand updates.
@@ -48,12 +67,10 @@ no before/after. Components show branded placeholders until photos land.
 See `README.md`. `npm install` then `npm run dev` (hot reload). `npm run build`
 + `npm run preview` is the Cloudflare-Pages-parity dry run (serves `dist/`).
 
-## Roadmap (not built yet)
-Active focus (see `HANDOFF.md` for the ordered plan): design polish (via
-`tokens.css`), a blog (Astro content collection at `src/content/blog/` with an
-index + post template) seeded with backdated posts, and a free Cloudflare Pages
-deploy. Then: hosting hardening (+ per-PR preview URLs), porting
-`../site-capture/content-inventory.md` + `../condition-pages/` + 3 bios, an
+## Roadmap (remaining)
+Active focus (see `HANDOFF.md` for status): design polish (via `tokens.css`),
+a blog (Astro content collection at `src/content/blog/` with an index + post
+template) seeded with backdated posts — the biggest open GEO lever — and an
 enquiry-form handler (free/DIY, a Pages Function feeding the front-desk Leads
-pipeline), SEO/schema, and DNS cutover from Squarespace. Capture new rules here
-as they surface.
+pipeline). Deploy, content porting, SEO/schema and the Squarespace cutover are
+done. Capture new rules here as they surface.

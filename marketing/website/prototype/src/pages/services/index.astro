@@ -9,6 +9,7 @@ allServices.sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99));
 
 // Group by category (index order = display order).
 const categories = [
+  "Pelvic Health",
   "Pregnancy & Postpartum",
   "Paediatrics",
   "Scoliosis (Schroth Method)",
@@ -51,7 +52,7 @@ const fromPrice = (clinic: number, home?: number) =>
       const items = grouped[cat];
       if (!items.length) return null;
       return (
-        <Section tone={cat === "Pregnancy & Postpartum" ? "linen" : "surface"}>
+        <Section tone={cat === "Pelvic Health" || cat === "Paediatrics" ? "linen" : "surface"}>
           <div class="section-head">
             <h2>{cat}</h2>
           </div>

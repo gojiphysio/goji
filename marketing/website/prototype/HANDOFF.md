@@ -1,11 +1,22 @@
-# Handoff — Goji website design-system prototype
+# Handoff — Goji website
 
 Pick-up notes for continuing this work in a local session.
 
-- **Branch:** `claude/trusting-franklin-itc74a` (all work is here; nothing merged to `main`).
-- **Project root:** `marketing/website/prototype/`
-- **Status:** Phase 1 complete — scaffolding + design system + a living styleguide
-  and a composed sample homepage. No hosting, no content porting, no PR yet.
+- **Project root:** `marketing/website/prototype/` (directory name is
+  historical — this is the production site source).
+- **Status (2026-07-13): LIVE IN PRODUCTION at gojiphysio.com** on
+  Cloudflare Pages, deploying from `main`. Squarespace is deprecated. Built
+  out: homepage, `/book` (native booking + attribution), 11 condition pages,
+  6 service pages, 3 team bios, `/physiotherapy-lentor`, privacy, sitemap,
+  robots, llms.txt, per-page JSON-LD (MedicalWebPage + bylines + FAQPage on
+  conditions; Service + Offer + FAQPage on services; enriched Person on
+  team). Remaining: blog (biggest open item), design polish, per-page OG
+  images.
+- **Live ops notes:** the apex→www 301 is a Cloudflare zone rule (not in
+  `public/_redirects`) — verify it exists when touching DNS. Google Search
+  Console ownership + sitemap submission is an operator task tracked in
+  `../../seo/seo-geo-review.md` §1 (P0: inner pages were not indexed at the
+  2026-07-13 audit).
 
 ## Where we're heading next (owner's priorities)
 
@@ -96,10 +107,13 @@ on push — needs a `CLOUDFLARE_API_TOKEN` + `CLOUDFLARE_ACCOUNT_ID` as repo sec
 - Branch + PR to `main`; never push to `main` directly.
 - Logos in `public/brand/` are copies of `business-intelligence/design/brand_assets/`.
 
-## Next phases (not started)
+## Next phases
 
-Ordered to match the owner's priorities above. 1-4 are the active focus; 5-7 are
-the still-standing items from the original plan.
+Status re-marked 2026-07-13 now the site is live: phases 4 (deploy), 5
+(content porting) and 6 (SEO/schema — delivered via the SEO/GEO PR: per-page
+JSON-LD, bylines, FAQPage, per-page meta, sitemap) are **done**; the enquiry
+form piece of 7 remains. The active items are 1 (design polish), 2-3 (blog +
+backdated seed content), and per-page OG images.
 
 1. **Design polish** — raise the look + feel. Work in `src/styles/tokens.css`
    (the single knob) and the component CSS; `/styleguide` is the QA surface so a

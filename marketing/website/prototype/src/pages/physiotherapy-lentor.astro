@@ -1,0 +1,212 @@
+---
+/**
+ * Local SEO landing page for "physiotherapy lentor" / near-me intent along the
+ * Thomson-East Coast Line. Honesty rule: we only claim a physical presence at
+ * Lentor Modern; wider coverage is via home visits, stated plainly.
+ */
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Section from "../components/Section.astro";
+import Button from "../components/Button.astro";
+import { SITE } from "../lib/site.ts";
+
+const title = "Physiotherapy in Lentor | Goji Physiotherapy";
+const description =
+  "Physiotherapy clinic at Lentor Modern, 1 minute from Lentor MRT (TEL Exit 1). Women's, family and musculoskeletal physio. Home visits island-wide.";
+
+const nearby = [
+  "Ang Mo Kio",
+  "Yio Chu Kang",
+  "Upper Thomson",
+  "Springleaf",
+  "Mayflower",
+  "Bishan",
+];
+
+const faqs = [
+  {
+    q: "Where exactly is the clinic?",
+    a: "Goji is at Lentor Modern, #01-13, Lentor Central, Singapore 788887 - a one-minute walk from Exit 1 of Lentor MRT on the Thomson-East Coast Line. The clinic is open Monday to Saturday, 8am to 8pm.",
+  },
+  {
+    q: "I don't live in Lentor. Can I still see you?",
+    a: "Yes. Many of our patients come from nearby neighbourhoods such as Ang Mo Kio, Yio Chu Kang, Upper Thomson, Springleaf, Mayflower and Bishan - Lentor MRT makes the clinic easy to reach along the Thomson-East Coast Line. We also offer home-visit physiotherapy across Singapore, including the East Coast.",
+  },
+  {
+    q: "What kinds of physiotherapy do you offer?",
+    a: "We are a women's and family physiotherapy clinic: pelvic floor physiotherapy, prenatal and postpartum care, Mummy and Baby assessments, paediatric physiotherapy, musculoskeletal and sports physiotherapy, Schroth therapy for scoliosis, clinical Pilates, and strength and conditioning. All physiotherapists are AHPC-registered.",
+  },
+  {
+    q: "How do I book an appointment?",
+    a: "Book online at gojiphysio.com/book, or message us on WhatsApp first if you would like to describe your symptoms and check which appointment fits - we will point you to the right one before you book.",
+  },
+];
+
+const origin = Astro.site ?? new URL(Astro.url.origin);
+const pageURL = new URL(Astro.url.pathname, origin).href;
+const schema = [
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: origin.href },
+      { "@type": "ListItem", position: 2, name: "Physiotherapy in Lentor", item: pageURL },
+    ],
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((f) => ({
+      "@type": "Question",
+      name: f.q,
+      acceptedAnswer: { "@type": "Answer", text: f.a },
+    })),
+  },
+];
+---
+
+<BaseLayout title={title} description={description} schema={schema}>
+  <section class="lentor-hero">
+    <div class="container">
+      <h1>Physiotherapy in Lentor</h1>
+      <p class="lentor-hero__lead">
+        Goji is a women's and family physiotherapy clinic at Lentor Modern, a
+        one-minute walk from Lentor MRT (Thomson-East Coast Line, Exit 1).
+        Pelvic health, prenatal and postpartum care, paediatrics, and
+        musculoskeletal physiotherapy - delivered by AHPC-registered
+        physiotherapists, in one clinic.
+      </p>
+      <div class="lentor-hero__cta">
+        <Button slug="web-book" variant="primary" size="lg">Book an appointment</Button>
+        <Button slug="web-wa" variant="whatsapp" size="lg">Ask us on WhatsApp</Button>
+      </div>
+    </div>
+  </section>
+
+  <Section tone="surface">
+    <div class="lentor-body container--narrow">
+      <h2>Getting here</h2>
+      <p>
+        You'll find us at {SITE.address.line1}, {SITE.address.line2} - inside
+        Lentor Modern, directly above Lentor MRT. Take Exit 1 and you are a
+        one-minute walk from the clinic door. {SITE.hours[0].days}, {SITE.hours[0].time};
+        {SITE.hours[1].days.toLowerCase()} {SITE.hours[1].time.toLowerCase()}.
+      </p>
+      <p>
+        <a href={SITE.googleMaps} target="_blank" rel="noopener noreferrer">Open in Google Maps ↗</a>
+      </p>
+
+      <h2>Who we see</h2>
+      <p>
+        Most of our patients are women and families: mums recovering after
+        birth, women with <a href="/conditions/urinary-incontinence">bladder leakage</a>,
+        <a href="/conditions/pelvic-organ-prolapse">prolapse symptoms</a> or
+        <a href="/conditions/pelvic-pain">pelvic pain</a>, parents booking a
+        <a href="/services/mummy-baby-assessment">Mummy &amp; Baby assessment</a>,
+        children and teens with <a href="/services/schroth-scoliosis-children">scoliosis</a>,
+        and anyone nearby with a back, neck, shoulder or knee that needs looking
+        at. Browse <a href="/services">all services</a> and
+        <a href="/conditions">conditions we treat</a>.
+      </p>
+
+      <h2>Beyond Lentor</h2>
+      <p>
+        The clinic serves the neighbourhoods around us - {nearby.join(", ")} -
+        with the Thomson-East Coast Line putting us a few stops from much of
+        the North and Central. If coming in is the hard part (a newborn at
+        home, limited mobility), we also offer home-visit physiotherapy across
+        Singapore, including the East Coast.
+      </p>
+
+      <h2>Frequently asked questions</h2>
+      {faqs.map((f) => (
+        <details class="lentor-faq">
+          <summary>{f.q}</summary>
+          <p>{f.a}</p>
+        </details>
+      ))}
+    </div>
+  </Section>
+
+  <Section tone="linen">
+    <div class="lentor-cta">
+      <div>
+        <h2>Ready when you are</h2>
+        <p>Book online, or message us on WhatsApp to talk through your symptoms first - we'll recommend the right appointment type before you book.</p>
+      </div>
+      <div class="lentor-cta__btns">
+        <Button slug="web-book" variant="primary" size="lg">Book an appointment</Button>
+        <Button slug="web-wa" variant="whatsapp" size="lg">Ask us on WhatsApp</Button>
+      </div>
+    </div>
+  </Section>
+</BaseLayout>
+
+<style>
+  .lentor-hero {
+    background: var(--bg-page);
+    padding-block: clamp(2.5rem, 2rem + 3vw, 5rem);
+    border-bottom: 1px solid var(--color-border);
+  }
+  .lentor-hero__lead {
+    margin-top: var(--space-4);
+    max-width: 62ch;
+    color: var(--text-muted);
+    line-height: var(--lh-body);
+  }
+  .lentor-hero__cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-top: var(--space-5);
+  }
+
+  .lentor-body :global(h2) {
+    margin-top: var(--space-7);
+    margin-bottom: var(--space-3);
+  }
+  .lentor-body :global(h2:first-child) { margin-top: 0; }
+  .lentor-body p {
+    color: var(--text-muted);
+    margin-bottom: var(--space-4);
+    line-height: var(--lh-body);
+  }
+  .lentor-body a {
+    color: var(--color-primary);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+
+  .lentor-faq {
+    border-top: 1px solid var(--color-border);
+    padding-block: var(--space-3);
+  }
+  .lentor-faq:last-of-type { border-bottom: 1px solid var(--color-border); }
+  .lentor-faq summary {
+    cursor: pointer;
+    font-weight: var(--weight-semibold);
+    color: var(--text-default);
+  }
+  .lentor-faq p {
+    margin-top: var(--space-3);
+    margin-bottom: var(--space-2);
+  }
+
+  .lentor-cta {
+    display: grid;
+    gap: var(--space-5);
+    align-items: start;
+  }
+  @media (min-width: 760px) {
+    .lentor-cta {
+      grid-template-columns: 1fr auto;
+      align-items: center;
+    }
+  }
+  .lentor-cta h2 { margin-bottom: var(--space-2); }
+  .lentor-cta p { color: var(--text-muted); max-width: 44ch; }
+  .lentor-cta__btns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+</style>

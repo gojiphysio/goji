@@ -19,6 +19,11 @@
 /blog/*             /conditions  301
 /blog               /conditions  301
 
+# Old standalone Squarespace bio pages → team pages.
+/cheryl-long        /team/cheryl-long  301
+/claire-ng          /team/claire-ng    301
+/kristy-ng          /team/kristy-ng    301
+
 # Old standalone pages now live as homepage sections.
 /about-us           /#about      301
 /team               /#team       301
