@@ -116,6 +116,22 @@ def test_empty_notes_are_a_no_op():
     assert "Condition:" not in p.created[0][0]["description"]
 
 
+def test_physio_focus_is_written_to_note():
+    # The physio sub-type is surfaced in the Plato note so the clinic sees what
+    # the session is for.
+    p = StubPlato()
+    res = create_booking(p, {**BASE, "clinician_id": "cheryl-long",
+                             "physio_focus": "womens-health"}, now=NOW)
+    assert res["ok"]
+    assert "Type: Women's Health" in p.created[0][0]["description"]
+
+
+def test_no_physio_focus_means_no_type_line():
+    p = StubPlato()
+    create_booking(p, {**BASE, "clinician_id": "cheryl-long"}, now=NOW)
+    assert "Type:" not in p.created[0][0]["description"]
+
+
 def test_first_available_assigns_a_free_clinician():
     p = StubPlato()
     res = create_booking(p, {**BASE, "clinician_id": ""}, now=NOW)

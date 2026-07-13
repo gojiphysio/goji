@@ -24,6 +24,7 @@ from .config import (
     HOME_VISIT_CLINICIAN,
     HOME_VISIT_TYPE_CODE,
     MAX_ADVANCE_DAYS,
+    PHYSIO_FOCUS_LABELS,
     SERVICES,
 )
 
@@ -166,6 +167,12 @@ def create_booking(plato, draft: dict, *, now: datetime | None = None) -> dict:
     # runaway paste can't bloat the Plato appointment note.
     notes = (draft.get("notes") or "").strip()[:1000]
 
+    # Physiotherapy sub-type the patient chose (website's "What type of
+    # physiotherapy?" step). Surfaced in the Plato note so the clinic sees what
+    # the session is for. Only meaningful for physiotherapy.
+    focus_label = (PHYSIO_FOCUS_LABELS.get((draft.get("physio_focus") or "").strip(), "")
+                   if service_id == "physiotherapy" else "")
+
     # What the customer asked for on the form, for the confirmation email: an
     # explicit clinician by name, or "First available" when they let us match.
     # (Home visits are always Cheryl, but we still report what they selected.)
@@ -201,7 +208,7 @@ def create_booking(plato, draft: dict, *, now: datetime | None = None) -> dict:
                 continue
             ids, visit_id = _create_appointments(
                 plato, svc, cid, day, time_, home, name, phone, email, address,
-                notes, clinician_requested)
+                notes, clinician_requested, focus_label)
             return {
                 "ok": True,
                 "reference": "GOJI-" + visit_id[-6:].upper(),
@@ -227,11 +234,14 @@ def _post(plato, payload: dict) -> str:
 
 def _create_appointments(plato, svc, cid, day, time_, home, name, phone, email,
                          address, notes="", clinician_requested=False,
-                         ) -> tuple[list[str], str]:
+                         focus_label="") -> tuple[list[str], str]:
     """Create the appointment(s). Returns (all_ids, visit_id). Rolls back on any
     failure so a partial home visit never lingers."""
     clin = CLINICIANS[cid]
     color, doctor, dur = clin["calendar"], clin["doctor"], svc["duration_min"]
+    # Physiotherapy sub-type, so the clinic sees what the session is for (the
+    # Plato type is the same for every physio booking).
+    focus_line = f"\nType: {focus_label}" if focus_label else ""
     # Patient's condition note, appended to the visit description when present.
     note_line = f"\nCondition: {notes}" if notes else ""
     # Flag how the clinician was assigned so the clinic can reallocate. Home
@@ -254,7 +264,7 @@ def _create_appointments(plato, svc, cid, day, time_, home, name, phone, email,
                 "title": name,
                 "description": (f"HOME VISIT — {svc['title']}. Booked via website.\n"
                                 f"Patient: {name} ({phone}).\nAddress: {address}"
-                                f"{note_line}"),
+                                f"{focus_line}{note_line}"),
                 "starttime": _dt(day, time_),
                 "endtime": _dt(day, time_, dur),
                 "color": color, "doctor": doctor,
@@ -274,7 +284,7 @@ def _create_appointments(plato, svc, cid, day, time_, home, name, phone, email,
                 "title": name,
                 "description": (f"{svc['title']}. Booked via website.\n"
                                 f"Patient: {name} ({phone})."
-                                f"{clin_line}{note_line}"),
+                                f"{focus_line}{clin_line}{note_line}"),
                 "starttime": _dt(day, time_),
                 "endtime": _dt(day, time_, dur),
                 "color": color, "doctor": doctor,

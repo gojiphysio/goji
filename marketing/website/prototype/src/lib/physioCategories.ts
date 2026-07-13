@@ -32,8 +32,8 @@ export interface PhysioCategory {
 export const physioCategories: PhysioCategory[] = [
   {
     id: "general",
-    label: "General Physiotherapy",
-    hint: "Pain, injury, recovery, and movement.",
+    label: "General Musculoskeletal (MSK)",
+    hint: "Pain management, post-op rehab, injury, recovery and other MSK concerns.",
     clinicianIds: ["cheryl-long", "claire-ng", "kristy-ng"],
   },
   {
@@ -45,7 +45,7 @@ export const physioCategories: PhysioCategory[] = [
   {
     id: "paediatrics",
     label: "Paediatrics",
-    hint: "Babies and children's development and movement.",
+    hint: "Injury, recovery, and developmental concerns for minors (up to 18Y).",
     clinicianIds: ["kristy-ng", "cheryl-long"],
   },
   {
@@ -56,8 +56,8 @@ export const physioCategories: PhysioCategory[] = [
   },
   {
     id: "others",
-    label: "Others / Not sure",
-    hint: "We'll help match you to the right physiotherapist.",
+    label: "Others",
+    hint: "Please indicate your conditions / goals in the last booking step.",
     clinicianIds: ["cheryl-long", "claire-ng", "kristy-ng"],
   },
 ];
