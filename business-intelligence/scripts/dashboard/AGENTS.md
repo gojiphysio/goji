@@ -62,9 +62,39 @@ See `DEPLOY.md`.
   (founder+staff, frontdesk) and keep `note` operational, not clinical.
 
 ## Marketing tab
+- **Hierarchy = decision order.** The tab reads top-down: (1) **North stars** —
+  active + new patients on one range-bucketed chart (`renderNorthStarChart`, from
+  `trends.active_patients` + `trends.new_patients`; Revenue is deliberately *off*
+  this tab); (2) **Top-of-funnel channels** — reach/intent per source, with
+  Instagram promoted to a grouped card (reach + profile visits + follower growth);
+  (3) the **acquisition Sankey** (channel-level); (4) **on-site path & booking
+  drop-off** (the golden flow); then the base/ICP/referral lenses. Keep new work
+  in the band that matches its altitude — don't scatter a north-star number into
+  the channel grid.
 - WIP "pending integration" cards are the **seams** where live integrations plug
   in. Convert a WIP card to a live card (value id + `kpi-trend` div + `badge live`)
   and wire it in `renderMarketingMetrics(r)`.
+- **Per-page attribution comes free from the beacon.** The landing beacon records
+  `location.pathname` on **every** event (session_start *and* page_view — see
+  `BaseLayout.astro`), so `web_session_events.landing_path` is the page per
+  pageview, not just the session's first landing. `fetch_web_pages` /
+  `_WEB_PAGE_CASE_SQL` bucket it into Home / Booking / Conditions / … — that's the
+  per-page split, no new site tracking needed. Keep the buckets in sync with the
+  site's route tree.
+- **Golden flow = on-site path + booking drop-off + CTA session passthrough.**
+  `fetch_onsite_flow` classifies booking-page sessions as booked / bailed-to-
+  WhatsApp / dropped by joining `link_click_events.session_id` →
+  `booking_funnel_events.session_id`. A WhatsApp tap can't use the `?cid`
+  passthrough (external wa.me) and cross-origin `Referer` is trimmed to the
+  origin, so on-site `web-*` CTA links are decorated client-side with
+  `?sid=<booking session>&p=<path>` (inline script in `BaseLayout.astro`); the
+  redirect logs them onto `link_click_events.session_id`/`page`. Off-site channels
+  (ig/gbp/ads/qr) never carry these — they're NULL.
+- **Instagram is more than reach.** The `marketing_ingest` job now pulls
+  `profile_views` (additive → SUM) and `followers_count` (running total → read
+  latest, growth = latest−first) alongside reach; `fetch_instagram_engagement`
+  reads `marts.fct_instagram_profile_views` / `fct_instagram_followers`. Reach is
+  fatal-on-failure; the two newer pulls are best-effort (skip, don't break reach).
 - Inbound inquiries live in the **front-desk Leads pipeline** (`marts.lead_events`),
   the single source of truth. Don't add enquiry capture or other static "operating
   tool" widgets here — the old 90-day-plan tools (rhythm checklist, content
@@ -85,7 +115,13 @@ See `DEPLOY.md`.
   passthrough (`/r/<slug>?cid=` for `-book` slugs → beacon `go_click_id`) closes
   the old "no FK from `link_click_events`" gap for the on-site journey.
   `renderFunnelSankey` degrades gracefully if the plugin or any stream is missing.
+  The Sankey stays **channel-level and tidy**: discovery channels below
+  `FUNNEL_DISCOVERY_MIN` arrival sessions fold into "Other" (except Direct) so it
+  doesn't sprout hairline bands — the granular story lives in the on-site-path viz.
 - The **booking funnel card** (`fetch_booking_funnel` / `renderBookingFunnel`)
   shows stage drop-off **plus a "Stuck" line**: `availability_empty` (date with no
   slots), `validation_error` (bad phone/email), and `book_error` by reason code —
-  the silent dead-ends the progress bars can't show.
+  the silent dead-ends the progress bars can't show. It now lives in the **on-site
+  path & booking drop-off** section next to `renderWebPages` (per-page bars) and
+  `renderOnsiteFlow` (booked / bailed-to-WhatsApp / dropped), so the whole golden
+  flow reads in one place.

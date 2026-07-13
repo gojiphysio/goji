@@ -202,6 +202,48 @@ const GADS_BOOKING_LABEL = import.meta.env.PUBLIC_GADS_BOOKING_LABEL;
       )
     }
 
+    {/* On-site CTA golden-flow decorator. Appends ?sid=<booking session>&p=<path>
+        to our own go-link CTAs (go.gojiphysio.com/web-*) so a WhatsApp/book tap
+        can be tied back to the booking session + page it came from (the dashboard
+        joins link_click_events.session_id -> booking_funnel_events.session_id).
+        A wa.me redirect can't use the ?cid passthrough and cross-origin Referer is
+        trimmed to the origin, so we pass session context explicitly. Always on —
+        it only rewrites our own links and degrades to just ?p= when no session id
+        exists yet. Never breaks the page. */}
+    <script is:inline>
+      (function () {
+        try {
+          var PREFIX = "https://go.gojiphysio.com/web-";
+          var decorate = function (a) {
+            try {
+              var href = a.getAttribute("href") || "";
+              if (href.indexOf(PREFIX) !== 0) return;
+              var sid = "";
+              try { sid = sessionStorage.getItem("goji_booking_sid") || ""; } catch (e) {}
+              var u = new URL(href);
+              if (sid) u.searchParams.set("sid", sid); else u.searchParams.delete("sid");
+              u.searchParams.set("p", location.pathname || "");
+              a.setAttribute("href", u.toString());
+            } catch (e) { /* leave the link as-is */ }
+          };
+          var decorateAll = function () {
+            var links = document.querySelectorAll('a[href^="' + PREFIX + '"]');
+            for (var i = 0; i < links.length; i++) decorate(links[i]);
+          };
+          if (document.readyState !== "loading") decorateAll();
+          else document.addEventListener("DOMContentLoaded", decorateAll);
+          // Re-decorate at interaction time so late/dynamic links and a session id
+          // set after load (e.g. by the booking form) are still captured.
+          var onInteract = function (ev) {
+            var a = ev.target && ev.target.closest ? ev.target.closest('a[href^="' + PREFIX + '"]') : null;
+            if (a) decorate(a);
+          };
+          document.addEventListener("pointerdown", onInteract, true);
+          document.addEventListener("focusin", onInteract, true);
+        } catch (e) { /* never break the page for analytics */ }
+      })();
+    </script>
+
     {/* GA4 (website tracking). Inert until PUBLIC_GA4_ID is set in the build env. */}
     {
       GA4_ID && (

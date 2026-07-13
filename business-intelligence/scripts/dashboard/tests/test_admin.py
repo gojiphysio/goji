@@ -86,6 +86,41 @@ def test_contacted_stays_actionable():
     assert app.is_actionable("yellow", False, "contacted", None, TODAY) is True
 
 
+# --- acquisition funnel: the "Other" fold keeps the Sankey readable ---------
+# _build_funnel_paths is pure given its stream inputs, so we can assert the
+# discovery-layer folding without touching BigQuery.
+
+def _flows(result):
+    """{(from, to): flow} for easy assertions."""
+    return {(e["from"], e["to"]): e["flow"] for e in result["flows"]}
+
+
+def test_funnel_folds_tiny_discovery_into_other():
+    # Weirdo (1 session) is below FUNNEL_DISCOVERY_MIN (2) -> folds into Other.
+    # Instagram/Google are above it; Direct is exempt even at 1 session.
+    web_channels = {"Instagram": 10, "Google": 5, "Weirdo": 1, "Direct": 1}
+    res = app._build_funnel_paths({}, {}, {}, web_channels, {}, {})
+    f = _flows(res)
+    assert f[("Instagram", "Website")] == 10
+    assert f[("Google", "Website")] == 5
+    assert f[("Other", "Website")] == 1        # Weirdo folded in
+    assert f[("Direct", "Website")] == 1       # Direct never folds
+    assert ("Weirdo", "Website") not in f
+
+
+def test_funnel_folds_multiple_tiny_channels_together():
+    web_channels = {"A": 1, "B": 1, "Instagram": 3}
+    res = app._build_funnel_paths({}, {}, {}, web_channels, {}, {})
+    f = _flows(res)
+    assert f[("Other", "Website")] == 2        # A + B combined
+    assert f[("Instagram", "Website")] == 3
+
+
+def test_funnel_empty_streams_degrade_to_no_flows():
+    res = app._build_funnel_paths({}, {}, {}, {}, {}, {})
+    assert res["flows"] == []
+
+
 # --- route gating: the security boundary, end-to-end ------------------------
 # These exercise the real decorators. Auth is checked before the handler runs,
 # so the founder-only routes 401 a staff login without ever touching BigQuery.

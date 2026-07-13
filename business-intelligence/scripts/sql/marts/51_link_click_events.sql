@@ -18,6 +18,14 @@
 --   ones, so a mistyped/retired link still shows up rather than vanishing.
 -- user_agent / referer: low-signal context kept only for later bot filtering
 --   if click counts get noisy. No PII (no IP, no patient identifiers).
+-- session_id / page: for ON-SITE CTA taps (web-*), the site appends the visitor's
+--   booking session_id and the page path they tapped from (?sid=…&p=…). This is
+--   the golden-flow join: a WhatsApp tap can't carry a ?cid passthrough (it's an
+--   external wa.me redirect) and cross-origin Referer is trimmed to the origin,
+--   so the site passes session_id explicitly. session_id joins
+--   booking_funnel_events.session_id / web_session_events.session_id, letting the
+--   dashboard tell "reached /book then tapped WhatsApp" from "reached /book then
+--   dropped". NULL for off-site channels (ig/gbp/ads/qr) that never touch the site.
 --
 -- Written via the streaming insert API (insert_rows_json), NOT DML: clicks are
 -- public and potentially high-frequency, so we avoid BigQuery's 1,500
@@ -34,3 +42,10 @@ CREATE TABLE IF NOT EXISTS `goji-bi.marts.link_click_events` (
 )
 PARTITION BY DATE(clicked_at)
 CLUSTER BY slug;
+
+-- On-site golden-flow attribution columns, added idempotently so an already-
+-- deployed table gains them without a rebuild (CREATE TABLE IF NOT EXISTS above
+-- won't alter an existing table). Safe to re-run. No PII.
+ALTER TABLE `goji-bi.marts.link_click_events`
+  ADD COLUMN IF NOT EXISTS session_id STRING OPTIONS(description="On-site booking session_id the tap came from (joins booking_funnel_events / web_session_events). NULL for off-site channels."),
+  ADD COLUMN IF NOT EXISTS page       STRING OPTIONS(description="Page path the on-site CTA was tapped from (e.g. /book). NULL for off-site channels.");

@@ -837,14 +837,38 @@
        Desktop: 4-up north-star, 3-up channels. Tablet: 2-up. Mobile: stacked. */
     #page-marketing .kpi-row.mkt-kpis-4 { grid-template-columns: repeat(4, 1fr); }
     #page-marketing .kpi-row.mkt-kpis-3 { grid-template-columns: repeat(3, 1fr); }
+    #page-marketing .kpi-row.mkt-kpis-2 { grid-template-columns: repeat(2, 1fr); }
     @media (max-width: 900px) {
       #page-marketing .kpi-row.mkt-kpis-4,
       #page-marketing .kpi-row.mkt-kpis-3 { grid-template-columns: repeat(2, 1fr); }
     }
     @media (max-width: 640px) {
       #page-marketing .kpi-row.mkt-kpis-4,
-      #page-marketing .kpi-row.mkt-kpis-3 { grid-template-columns: 1fr; }
+      #page-marketing .kpi-row.mkt-kpis-3,
+      #page-marketing .kpi-row.mkt-kpis-2 { grid-template-columns: 1fr; }
     }
+    /* Instagram grouped card: reach / profile visits / followers as sub-stats. */
+    .ig-substats { display: flex; flex-wrap: wrap; gap: 18px 26px; margin-top: 4px; }
+    .ig-substat .ig-sv { font-size: 24px; font-weight: 650; line-height: 1.1; }
+    .ig-substat .ig-sl { font-size: 11px; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.04em; }
+    .ig-substat .kpi-trend { margin-top: 2px; }
+    /* Per-page website bars (on-site path). Label · bar · count, scrollable. */
+    .pagebars { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+    .pagebar { display: grid; grid-template-columns: 92px 1fr auto; align-items: center; gap: 10px; font-size: 12px; }
+    .pagebar .pbl { color: var(--ink-soft); }
+    .pagebar .pbtrack { position: relative; height: 14px; background: var(--goji-soft); border-radius: 4px; overflow: hidden; }
+    .pagebar .pbfill { position: absolute; inset: 0 auto 0 0; background: var(--goji); border-radius: 4px; }
+    .pagebar .pbn { font-variant-numeric: tabular-nums; color: var(--ink); font-weight: 600; }
+    .pagebar .pbn small { color: var(--ink-muted); font-weight: 400; }
+    .pagebars-empty { font-size: 12px; color: var(--ink-soft); font-style: italic; }
+    /* Golden-flow outcome chips for booking-page sessions. */
+    .flow-outcome { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+    .flow-chip { flex: 1 1 120px; border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+    .flow-chip .fcn { font-size: 22px; font-weight: 650; }
+    .flow-chip .fcl { font-size: 11px; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.04em; }
+    .flow-chip.booked { border-color: #bfe0cb; background: #f3faf5; }
+    .flow-chip.wa { border-color: #bfe0e0; background: #f2fafa; }
+    .flow-chip.dropped { border-color: #e9d3ce; background: #fbf5f4; }
     /* WIP channel cards: real layout, but visibly "no data yet" so no one
        mistakes a placeholder for a live number. */
     .mkt-target { font-size: 12px; color: var(--ink-soft); margin-top: 6px; }
@@ -1629,54 +1653,35 @@
 
     <div id="page-marketing" class="page" hidden>
 
-    <!-- North-star KPIs (live) -->
-    <div class="kpi-row mkt-kpis-4">
-      <div class="kpi-card">
-        <div class="kpi-label">Visits <span class="range-label">last 30 days</span> <span class="badge live">Live</span></div>
-        <div class="kpi-value" id="mkt_visits">-</div>
-        <div class="kpi-trend" id="mkt_visits_trend" hidden></div>
-        <div class="mkt-target">North-star · track up with active patients</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-label">Active patients <span class="range-label">last 30 days</span> <span class="badge live">Live</span></div>
-        <div class="kpi-value" id="mkt_active">-</div>
-        <div class="kpi-trend" id="mkt_active_trend" hidden></div>
-        <div class="mkt-target">North-star · baseline ~72 · grow materially MoM</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-label">Bookings <span class="range-label">last 30 days</span> <span class="badge live">Live</span></div>
-        <div class="kpi-value" id="mkt_bookings">-</div>
-        <div class="kpi-trend" id="mkt_bookings_trend" hidden></div>
-        <div class="mkt-target">North-star · dollar value of packs/sales</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-label">Patients on file <span class="badge live">Live</span></div>
-        <div class="kpi-value" id="mkt_total_patients">-</div>
-        <div class="mkt-target">All-time, whole base</div>
-      </div>
-    </div>
-
-    <!-- Acquisition -->
+    <!-- 1. North stars — the two numbers that matter, on one graph. -->
     <section class="q">
-      <h2>Patient acquisition</h2>
-      <div class="subtitle">New patients by first-visit month (whole base) and active patients over the selected range — the loop the campaign is trying to bend upward.</div>
-      <div class="two-col">
-        <div>
-          <div style="font-size:13px; font-weight:500; margin-bottom:8px;">New patients / month <span style="color:var(--ink-muted);">— target +50–100% by month 3</span></div>
-          <div class="chart-wrap"><canvas id="mktAcqChart"></canvas></div>
+      <h2>North stars <span class="badge live">Live</span></h2>
+      <div class="subtitle"><strong>Active patients</strong> (distinct patients seen) and <strong>new patients</strong> (first-ever visits) over the selected range — the loop the whole clinic is bending upward. Buckets follow the range: daily, weekly, or monthly.</div>
+      <div class="kpi-row mkt-kpis-2">
+        <div class="kpi-card">
+          <div class="kpi-label">Active patients <span class="range-label">last 30 days</span> <span class="badge live">Live</span></div>
+          <div class="kpi-value" id="mkt_active">-</div>
+          <div class="kpi-trend" id="mkt_active_trend" hidden></div>
+          <div class="mkt-target">Baseline ~72 · grow materially period-on-period</div>
         </div>
-        <div>
-          <div style="font-size:13px; font-weight:500; margin-bottom:8px;">Active patients<span class="range-label">last 30 days</span></div>
-          <div class="chart-wrap"><canvas id="mktActiveChart"></canvas></div>
+        <div class="kpi-card">
+          <div class="kpi-label">New patients <span class="range-label">last 30 days</span> <span class="badge live">Live</span></div>
+          <div class="kpi-value" id="mkt_new">-</div>
+          <div class="kpi-trend" id="mkt_new_trend" hidden></div>
+          <div class="mkt-target">First-ever visits · target +50–100% by month 3</div>
         </div>
       </div>
+      <div class="chart-wrap tall"><canvas id="mktNorthStarChart"></canvas></div>
+      <div class="funnel-legend" id="mkt_ns_legend"></div>
     </section>
 
-    <!-- Channel leading indicators -->
+    <!-- 2. Top-of-funnel channels — reach & intent from each source. -->
     <section class="q">
-      <h2>Channel leading indicators</h2>
-      <div class="subtitle">Leading indicators for the funnel. <strong>Click-to-WhatsApp</strong> and <strong>booking-link clicks</strong> are live — the two intent signals from our tracked links (WhatsApp is the primary CTA; socials also offer online booking). The rest fill as each integration lands; targets shown are from the strategy.</div>
-      <div class="kpi-row mkt-kpis-3">
+      <h2>Top-of-funnel channels</h2>
+      <div class="subtitle">Reach and intent from each source above the funnel. <strong>Click-to-WhatsApp</strong> and <strong>booking-link clicks</strong> are the two live intent signals from our tracked links (WhatsApp is the primary CTA; socials also offer online booking). The rest fill as each integration lands; targets shown are from the strategy.</div>
+
+      <!-- Intent signals (tracked-link taps). -->
+      <div class="kpi-row mkt-kpis-2">
         <div class="kpi-card">
           <div class="kpi-label">Click-to-WhatsApp <span class="range-label">last 30 days</span> <span class="badge live">Live</span></div>
           <div class="kpi-value" id="mkt_wa_clicks">-</div>
@@ -1690,18 +1695,35 @@
           <div class="mkt-target" id="mkt_book_clicks_split">Taps to book</div>
         </div>
       </div>
-      <div class="kpi-row mkt-kpis-3">
-        <div class="kpi-card">
-          <div class="kpi-label">Instagram reach <span class="range-label">last 28 days</span> <span class="badge live">Meta API</span></div>
-          <div class="kpi-value" id="mkt_ig_reach">-</div>
-          <div class="kpi-trend" id="mkt_ig_reach_trend" hidden></div>
-          <div class="mkt-target">Target 3–5× (Reels-led)</div>
+
+      <!-- Instagram: reach is huge for us, so go beyond a single number —
+           did reach turn into profile visits and follower growth? -->
+      <div class="kpi-row" style="margin-top:14px;">
+        <div class="kpi-card" style="grid-column: 1 / -1;">
+          <div class="kpi-label">Instagram <span class="badge live">Meta API</span></div>
+          <div class="ig-substats">
+            <div class="ig-substat">
+              <div class="ig-sl">Reach <span class="range-label">last 28 days</span></div>
+              <div class="ig-sv" id="mkt_ig_reach">-</div>
+              <div class="kpi-trend" id="mkt_ig_reach_trend" hidden></div>
+            </div>
+            <div class="ig-substat">
+              <div class="ig-sl">Profile visits <span class="range-label">this period</span></div>
+              <div class="ig-sv" id="mkt_ig_profile_views">-</div>
+              <div class="kpi-trend" id="mkt_ig_profile_views_trend" hidden></div>
+            </div>
+            <div class="ig-substat">
+              <div class="ig-sl">Followers</div>
+              <div class="ig-sv" id="mkt_ig_followers">-</div>
+              <div class="kpi-trend" id="mkt_ig_followers_trend" hidden></div>
+            </div>
+          </div>
+          <div class="mkt-target">Reach → profile visits → follows is the interest ladder. Target reach 3–5× (Reels-led); watch visits and net follower growth, not reach alone.</div>
         </div>
-        <div class="kpi-card wip">
-          <div class="kpi-label">GBP booking clicks + calls</div>
-          <div class="kpi-value">— pending integration</div>
-          <div class="mkt-target">Target 2–3×</div>
-        </div>
+      </div>
+
+      <!-- Website, paid, and the still-WIP seams. -->
+      <div class="kpi-row mkt-kpis-3" style="margin-top:14px;">
         <div class="kpi-card">
           <div class="kpi-label">Website sessions <span class="range-label">this period</span> <span class="badge live">GA4</span></div>
           <div class="kpi-value" id="mkt_web_sessions">-</div>
@@ -1721,6 +1743,11 @@
           <div class="mkt-target">Avg CPC: <span id="mkt_ads_cpc">-</span></div>
         </div>
         <div class="kpi-card wip">
+          <div class="kpi-label">GBP booking clicks + calls</div>
+          <div class="kpi-value">— pending integration</div>
+          <div class="mkt-target">Target 2–3×</div>
+        </div>
+        <div class="kpi-card wip">
           <div class="kpi-label">Google reviews / month</div>
           <div class="kpi-value">— pending integration</div>
           <div class="mkt-target">Steady velocity, +2–4 / month</div>
@@ -1728,20 +1755,34 @@
       </div>
     </section>
 
-    <!-- Acquisition funnel · by path (Discovery → Surface → CTA → Booked) -->
+    <!-- 3. Acquisition funnel · by path (Discovery → Surface → CTA → Booked) -->
     <section class="q">
       <h2>Acquisition funnel · by path <span class="badge live">Live</span></h2>
-      <div class="subtitle">How people reach a booking: <strong>where they arrive from</strong> &rarr; the <strong>surface</strong> they land on (our website or the bio.site link-in-bio) &rarr; the <strong>CTA</strong> they tap &rarr; whether they <strong>booked</strong>. The website is a surface here, fed by discovery channels &mdash; not the top of the funnel. Thicker bands mean more people.</div>
+      <div class="subtitle">How people reach a booking: <strong>where they arrive from</strong> &rarr; the <strong>surface</strong> they land on (our website or the bio.site link-in-bio) &rarr; the <strong>CTA</strong> they tap &rarr; whether they <strong>booked</strong>. The website is a surface here, fed by discovery channels &mdash; not the top of the funnel. Thicker bands mean more people; one-off referrers fold into “Other” to keep it readable.</div>
       <div class="chart-wrap tall"><canvas id="mktFunnelChart"></canvas></div>
       <div class="funnel-legend" id="mkt_funnel_legend"></div>
+    </section>
 
-      <div class="kpi-row mkt-kpis-3" style="margin-top:20px;">
-        <div class="kpi-card" style="grid-column: 1 / -1;">
-          <div class="kpi-label">Website booking funnel <span class="range-label">this period</span> <span class="badge live">Live</span></div>
-          <div id="mkt_booking_funnel" class="bfunnel"></div>
-          <div class="bfstuck" id="mkt_booking_stuck" hidden></div>
-          <div class="mkt-target" id="mkt_booking_conv">Viewed to booked</div>
+    <!-- 4. On-site path & booking drop-off — the golden flow. -->
+    <section class="q">
+      <h2>On-site path &amp; booking drop-off <span class="badge live">Live</span></h2>
+      <div class="subtitle">Once people are on the site: which <strong>page</strong> they enter and browse, and for everyone who reached the <strong>booking page</strong>, whether they booked, bailed to WhatsApp, or dropped — and <strong>at which step</strong> booking sessions stall. This is where we optimise the golden flow.</div>
+      <div class="two-col">
+        <div>
+          <div style="font-size:13px; font-weight:500; margin-bottom:8px;">Where visitors land &amp; browse <span class="range-label">this period</span></div>
+          <div class="pagebars" id="mkt_web_pages"></div>
         </div>
+        <div>
+          <div style="font-size:13px; font-weight:500; margin-bottom:8px;">Booking-page sessions <span class="range-label">this period</span></div>
+          <div class="flow-outcome" id="mkt_onsite_flow"></div>
+          <div class="mkt-target" id="mkt_onsite_flow_note">Of sessions that reached /book: booked, bailed to WhatsApp, or dropped.</div>
+        </div>
+      </div>
+      <div style="margin-top:18px;">
+        <div style="font-size:13px; font-weight:500; margin-bottom:4px;">Booking funnel — where they fall off <span class="range-label">this period</span></div>
+        <div id="mkt_booking_funnel" class="bfunnel"></div>
+        <div class="bfstuck" id="mkt_booking_stuck" hidden></div>
+        <div class="mkt-target" id="mkt_booking_conv">Viewed to booked</div>
       </div>
     </section>
 
@@ -1756,7 +1797,7 @@
           <div class="pillar-legend" id="mkt_pillar_legend"></div>
         </div>
         <div>
-          <div style="font-size:13px; font-weight:500; margin-bottom:8px;">ICP fit &amp; clinical focus (whole base)</div>
+          <div style="font-size:13px; font-weight:500; margin-bottom:8px;">ICP fit &amp; clinical focus <span style="color:var(--ink-muted);">— whole base, <span id="mkt_total_patients">-</span> patients on file</span></div>
           <table>
             <tbody id="mkt_icp_tbody"></tbody>
           </table>
@@ -2718,7 +2759,7 @@
     }
 
     /* ===== Marketing tab ===== */
-    let mktAcqChart, mktActiveChart, mktPillarChart, mktSourceChart, mktFunnelChart;
+    let mktNorthStarChart, mktPillarChart, mktSourceChart, mktFunnelChart;
 
     // Range-dependent marketing tiles (KPIs, active trend, pillar mix).
     // Website booking funnel: drop-off bars (distinct sessions per stage).
@@ -2766,17 +2807,16 @@
 
     function renderMarketingMetrics(r) {
       if (!r || !r.kpis) return;
-      document.getElementById('mkt_visits').textContent   = fmtInt(r.kpis.visits);
-      document.getElementById('mkt_active').textContent   = fmtInt(r.kpis.active_patients);
-      document.getElementById('mkt_bookings').textContent = fmt$(r.kpis.bookings);
+      // North stars: active + new patients (Revenue intentionally off this tab).
+      document.getElementById('mkt_active').textContent = fmtInt(r.kpis.active_patients);
+      document.getElementById('mkt_new').textContent    = fmtInt(r.kpis.new_patients);
       if (DATA.demographics)
         document.getElementById('mkt_total_patients').textContent = fmtInt(DATA.demographics.total_patients);
 
       const p  = r.prev_kpis;
       const ps = r.prev_start, pe = r.prev_end;
-      renderTrend('mkt_visits_trend',   r.kpis.visits,          p && p.visits,          ps, pe);
-      renderTrend('mkt_active_trend',   r.kpis.active_patients, p && p.active_patients, ps, pe);
-      renderTrend('mkt_bookings_trend', r.kpis.bookings,        p && p.bookings,        ps, pe);
+      renderTrend('mkt_active_trend', r.kpis.active_patients, p && p.active_patients, ps, pe);
+      renderTrend('mkt_new_trend',    r.kpis.new_patients,    p && p.new_patients,    ps, pe);
 
       // Tracked-link intent — WhatsApp + booking clicks, each with a per-channel split.
       const lc = r.link_clicks, lcp = r.link_clicks_prev;
@@ -2821,18 +2861,42 @@
         renderTrend('mkt_web_sessions_trend', ws.sessions, wsp && wsp.sessions, ps, pe);
       }
 
-      // Instagram reach (Meta Graph API). De-duplicated trailing-28-day reach —
-      // a point-in-time snapshot, not a range sum (see fetch_instagram_reach).
+      // Instagram (Meta Graph API). Reach is a de-duplicated trailing-28-day
+      // snapshot (not a range sum, see fetch_instagram_reach); profile visits sum
+      // over the range; followers is a total with a growth ticker. Each stays '—'
+      // until its metric flows.
       const ir = r.instagram_reach, irp = r.instagram_reach_prev;
       if (ir) {
         document.getElementById('mkt_ig_reach').textContent = ir.reach ? fmtInt(ir.reach) : '—';
         renderTrend('mkt_ig_reach_trend', ir.reach, irp && irp.reach, ps, pe);
       }
+      const ie = r.instagram_engagement, iep = r.instagram_engagement_prev;
+      if (ie) {
+        const pv = ie.profile_views, fol = ie.followers, grow = ie.follower_growth;
+        document.getElementById('mkt_ig_profile_views').textContent = pv != null ? fmtInt(pv) : '—';
+        document.getElementById('mkt_ig_followers').textContent     = fol != null ? fmtInt(fol) : '—';
+        renderTrend('mkt_ig_profile_views_trend', pv, iep && iep.profile_views, ps, pe);
+        // Follower growth: show the net change over the window as its own ticker.
+        const grEl = document.getElementById('mkt_ig_followers_trend');
+        if (grEl) {
+          if (grow != null && grow !== 0) {
+            grEl.hidden = false;
+            grEl.textContent = (grow > 0 ? '▲ +' : '▼ ') + fmtInt(grow) + ' this period';
+            grEl.style.color = grow > 0 ? GREEN : GOJI;
+          } else if (grow === 0) {
+            grEl.hidden = false; grEl.textContent = '— no change'; grEl.style.color = '';
+          } else {
+            grEl.hidden = true;
+          }
+        }
+      }
 
       renderBookingFunnel(r.booking_funnel);
+      renderWebPages(r.web_pages);
+      renderOnsiteFlow(r.onsite_flow);
 
-      mktActiveChart = renderTrendChart(mktActiveChart, 'mktActiveChart',
-        (r.trends && r.trends.active_patients) || [], GOJI, false);
+      // North-star dual chart: active + new patients, bucketed to the range.
+      renderNorthStarChart(r.trends || {});
 
       // Delivered mix → lanes.
       const byPillar = {};
@@ -2861,6 +2925,98 @@
       ).join('');
 
       renderFunnelSankey(r);
+    }
+
+    // North-star chart: two lines (active + new patients) sharing the range's
+    // x-axis. active_patients and new_patients series come from fetch_trends and
+    // are already bucketed to the selected range (day/week/month).
+    const NS_ACTIVE_COLOR = GOJI, NS_NEW_COLOR = COBALT;
+    function renderNorthStarChart(trends) {
+      const active = trends.active_patients || [];
+      const news   = trends.new_patients || [];
+      const labels = (active.length >= news.length ? active : news).map(s => s.label);
+      const ds = (series, color) => ({
+        label: '', data: series.map(s => s.value),
+        borderColor: color, backgroundColor: color + '22',
+        tension: 0.25, fill: false,
+        pointRadius: labels.length <= 14 ? 3 : 2, pointHoverRadius: 5,
+        pointBackgroundColor: color, borderWidth: 2,
+      });
+      const legend = document.getElementById('mkt_ns_legend');
+      if (legend) legend.innerHTML =
+        `<div class="grp">` +
+        `<span class="item"><span class="sw" style="background:${NS_ACTIVE_COLOR}"></span>Active patients</span>` +
+        `<span class="item"><span class="sw" style="background:${NS_NEW_COLOR}"></span>New patients</span></div>`;
+      if (mktNorthStarChart) {
+        mktNorthStarChart.data.labels = labels;
+        mktNorthStarChart.data.datasets[0].data = active.map(s => s.value);
+        mktNorthStarChart.data.datasets[1].data = news.map(s => s.value);
+        mktNorthStarChart.update();
+        return;
+      }
+      mktNorthStarChart = new Chart(document.getElementById('mktNorthStarChart'), {
+        type: 'line',
+        data: { labels, datasets: [ds(active, NS_ACTIVE_COLOR), ds(news, NS_NEW_COLOR)] },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          plugins: {
+            legend: { display: false },
+            tooltip: { callbacks: {
+              title: items => items.length ? labelWithDow(items[0].label) : '',
+              label: ctx => `${ctx.datasetIndex === 0 ? 'Active' : 'New'}: ${ctx.parsed.y}`,
+            } }
+          },
+          scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+        }
+      });
+    }
+
+    // Per-page website engagement bars (r.web_pages: [{page, landings, pageviews}]).
+    // Bar width = landings (where sessions START); the count shows landings + total
+    // pageviews so a browsed-but-not-landed page (e.g. Booking) still reads.
+    function renderWebPages(pages) {
+      const el = document.getElementById('mkt_web_pages');
+      if (!el) return;
+      const rows = (pages || []).filter(p => (p.landings || 0) + (p.pageviews || 0) > 0);
+      if (!rows.length) {
+        el.innerHTML = '<div class="pagebars-empty">No website page data in this period yet.</div>';
+        return;
+      }
+      const max = Math.max(1, ...rows.map(p => p.landings || 0));
+      el.innerHTML = rows.map(p => {
+        const pct = Math.round(((p.landings || 0) / max) * 100);
+        return `<div class="pagebar">`
+          + `<span class="pbl">${escapeHtml(p.page)}</span>`
+          + `<span class="pbtrack"><span class="pbfill" style="width:${pct}%"></span></span>`
+          + `<span class="pbn">${fmtInt(p.landings || 0)} <small>land · ${fmtInt(p.pageviews || 0)} views</small></span>`
+          + `</div>`;
+      }).join('');
+    }
+
+    // Golden-flow outcome for booking-page sessions (r.onsite_flow):
+    // booked vs bailed-to-WhatsApp vs dropped. The WhatsApp split fills once the
+    // on-site CTA session passthrough has data (see marts/51_link_click_events.sql).
+    function renderOnsiteFlow(flow) {
+      const el = document.getElementById('mkt_onsite_flow');
+      const note = document.getElementById('mkt_onsite_flow_note');
+      if (!el) return;
+      const f = flow || {};
+      if (!f.booking_sessions) {
+        el.innerHTML = '<div class="pagebars-empty">No booking-page sessions in this period yet.</div>';
+        if (note) note.textContent = 'Of sessions that reached /book: booked, bailed to WhatsApp, or dropped.';
+        return;
+      }
+      const chip = (cls, n, label) =>
+        `<div class="flow-chip ${cls}"><div class="fcn">${fmtInt(n)}</div><div class="fcl">${label}</div></div>`;
+      el.innerHTML = chip('booked', f.booked || 0, 'Booked')
+        + chip('wa', f.tapped_whatsapp || 0, 'Bailed to WhatsApp')
+        + chip('dropped', f.dropped || 0, 'Dropped off');
+      if (note) {
+        const conv = f.booking_sessions ? Math.round((f.booked || 0) / f.booking_sessions * 100) : 0;
+        note.textContent = `${fmtInt(f.booking_sessions)} reached /book · ${conv}% booked`
+          + (f.tapped_whatsapp ? '' : ' · WhatsApp bail-outs appear once on-site CTA session tracking has data');
+      }
     }
 
     // Acquisition funnel (by path): a 4-column Sankey built from r.funnel_paths.
@@ -2981,24 +3137,9 @@
         (outItems  ? `<div class="grp"><span class="grp-lbl">Outcome</span>${outItems}</div>` : '');
     }
 
-    // Range-independent marketing tiles (acquisition, sources, ICP).
+    // Range-independent marketing tiles (sources, ICP). New-patients-by-period
+    // now lives in the range-driven north-star chart (renderNorthStarChart).
     function renderMarketingStatic() {
-      // New patients / month (first-visit cohort size).
-      const cohorts = DATA.cohorts || [];
-      if (!mktAcqChart) {
-        mktAcqChart = new Chart(document.getElementById('mktAcqChart'), {
-          type: 'bar',
-          data: { labels: cohorts.map(c => c.cohort),
-                  datasets: [{ data: cohorts.map(c => c.patients), backgroundColor: GOJI, borderRadius: 4 }] },
-          options: {
-            responsive: true, maintainAspectRatio: false,
-            plugins: { legend: { display: false },
-                       tooltip: { callbacks: { label: ctx => ' ' + ctx.parsed.y + ' new patients' } } },
-            scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
-          }
-        });
-      }
-
       // Where patients come from (referral source).
       const ref = DATA.referrals || {};
       const srcRows = (ref.by_source_type || []).slice().sort((a, b) => b.count - a.count);
@@ -3040,7 +3181,7 @@
     }
 
     function resizeMarketingCharts() {
-      [mktAcqChart, mktActiveChart, mktPillarChart, mktSourceChart, mktFunnelChart].forEach(c => { if (c) c.resize(); });
+      [mktNorthStarChart, mktPillarChart, mktSourceChart, mktFunnelChart].forEach(c => { if (c) c.resize(); });
     }
 
     function applyRange(key) {
