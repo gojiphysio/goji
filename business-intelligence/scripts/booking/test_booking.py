@@ -59,6 +59,10 @@ def test_clinic_booking_success():
     assert payload["starttime"] == "2026-07-15 10:00:00"
     assert payload["endtime"] == "2026-07-15 11:00:00"
     assert res["reference"].startswith("GOJI-")
+    # An explicit clinician pick is recorded by name in the result + flagged in
+    # the Plato note so the clinic can reallocate.
+    assert res["clinician_requested"] == "Cheryl Long"
+    assert "Clinician: chosen by patient" in payload["description"]
 
 
 def test_conflicting_slot_is_refused():
@@ -117,6 +121,31 @@ def test_first_available_assigns_a_free_clinician():
     res = create_booking(p, {**BASE, "clinician_id": ""}, now=NOW)
     assert res["clinician_id"] in ("cheryl-long", "claire-ng")
     assert len(p.created) == 1
+    # No explicit pick -> "First available" recorded in the result + flagged
+    # earliest-available in the Plato note.
+    assert res["clinician_requested"] == "First available"
+    assert "Clinician: earliest available" in p.created[0][0]["description"]
+
+
+def test_typo_email_is_refused():
+    # A substitution (.con) and an adjacent swap (gmial) are both caught.
+    for bad in ("jane@gmail.con", "jane@gmial.com"):
+        p = StubPlato()
+        try:
+            create_booking(p, {**BASE, "clinician_id": "cheryl-long",
+                               "email": bad}, now=NOW)
+            assert False, f"expected BookingError for {bad}"
+        except BookingError as e:
+            assert e.code == "bad_email"
+        assert p.created == []  # nothing written for a mistyped email
+
+
+def test_unusual_but_valid_email_is_accepted():
+    # A real, uncommon domain must not be mistaken for a typo.
+    p = StubPlato()
+    res = create_booking(p, {**BASE, "clinician_id": "cheryl-long",
+                             "email": "jane@lentormodern.sg"}, now=NOW)
+    assert res["ok"]
 
 
 def test_booking_beyond_60_days_is_refused():
