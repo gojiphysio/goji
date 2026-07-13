@@ -3,6 +3,8 @@ title: "Mummy and Baby Assessment"
 description: "A combined physiotherapy assessment for you and your baby, designed to support postpartum recovery and your baby's early development. Suitable for babies from 0-12 months, and for mothers at any stage of postpartum recovery."
 cardTitle: "Mummy & Baby Assessment"
 cardLead: "A combined assessment supporting your postpartum recovery and reassurance about your baby's early movement and development."
+heroImage: "/photos/services/mummy-baby-assessment.webp"
+heroAlt: "A mother and baby with a Goji physiotherapist during a combined Mummy and Baby assessment."
 category: "Pregnancy & Postpartum"
 durationMin: 85
 priceClinic: 330

@@ -3,6 +3,8 @@ title: "Prenatal Physiotherapy"
 description: "A comprehensive prenatal physiotherapy assessment to help you move comfortably through pregnancy, manage symptoms and prepare your body for birth and postpartum recovery. Suitable at any stage of pregnancy."
 cardTitle: "Prenatal Physiotherapy"
 cardLead: "Move with greater comfort through pregnancy with a personalised plan for your symptoms, activity goals and preparation for birth."
+heroImage: "/photos/services/prenatal-physiotherapy.webp"
+heroAlt: "A pregnant woman working with a Goji physiotherapist during a prenatal assessment."
 category: "Pregnancy & Postpartum"
 durationMin: 55
 priceClinic: 260

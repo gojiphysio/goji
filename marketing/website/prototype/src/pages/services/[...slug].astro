@@ -16,6 +16,9 @@ const {
   title,
   description,
   cardTitle,
+  cardLead,
+  heroImage,
+  heroAlt,
   category,
   durationMin,
   priceClinic,
@@ -25,6 +28,14 @@ const {
   bookingFocus,
   faqs,
 } = entry.data;
+
+// Link each clinician to their team page where one exists (matched by name).
+const team = await getCollection("team", ({ data }) => !data.draft);
+const slugForName = new Map(team.map((t) => [t.data.name, t.slug]));
+const clinicianLinks = clinicians.map((name) => ({
+  name,
+  slug: slugForName.get(name),
+}));
 
 // Book CTA deep-links into the booking form: preselects the existing option and,
 // for physiotherapy, the compulsory sub-type (so the right clinicians' calendars
@@ -37,7 +48,6 @@ const priceLabel =
   priceHome && priceHome !== priceClinic
     ? `In-clinic $${priceClinic} · Home visit $${priceHome}`
     : `$${priceClinic}`;
-const clinicianLabel = new Intl.ListFormat("en", { style: "long", type: "conjunction" }).format(clinicians);
 
 const origin = Astro.site ?? new URL(Astro.url.origin);
 const pageURL = new URL(Astro.url.pathname, origin).href;
@@ -95,16 +105,35 @@ if (faqs?.length) {
 ---
 
 <BaseLayout title={`${title} | Goji Physiotherapy`} description={description} schema={schema}>
-  {/* Page header + facts */}
-  <section class="svc-header">
-    <div class="container svc-header__inner">
-      <a href="/services" class="svc-header__back">
-        <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M10 3L5 8l5 5"/>
-        </svg>
-        All services
-      </a>
-      <h1>{cardTitle ?? title}</h1>
+  {/* Hero: text + image */}
+  <section class="svc-hero">
+    <div class="container svc-hero__grid">
+      <div class="svc-hero__text">
+        <a href="/services" class="svc-hero__back">
+          <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M10 3L5 8l5 5"/>
+          </svg>
+          All services
+        </a>
+        <p class="svc-hero__eyebrow">{category}</p>
+        <h1>{cardTitle ?? title}</h1>
+        <p class="svc-hero__lead">{cardLead}</p>
+        <div class="svc-hero__cta">
+          <Button href={bookHref} variant="primary" size="lg">Book an appointment</Button>
+          <Button slug="web-wa" variant="whatsapp" size="lg">Ask on WhatsApp</Button>
+        </div>
+      </div>
+      {heroImage && (
+        <div class="svc-hero__media">
+          <img src={heroImage} alt={heroAlt ?? (cardTitle ?? title)} width="720" height="560" fetchpriority="high" />
+        </div>
+      )}
+    </div>
+  </section>
+
+  {/* Quick facts — an evenly-spaced strip */}
+  <section class="svc-facts-band">
+    <div class="container">
       <dl class="svc-facts">
         <div class="svc-facts__item">
           <dt>Duration</dt>
@@ -116,7 +145,14 @@ if (faqs?.length) {
         </div>
         <div class="svc-facts__item">
           <dt>Seen by</dt>
-          <dd>{clinicianLabel}</dd>
+          <dd class="svc-facts__clin">
+            {clinicianLinks.map((c, i) => (
+              <Fragment>
+                {i > 0 && <span aria-hidden="true">, </span>}
+                {c.slug ? <a href={`/team/${c.slug}`}>{c.name}</a> : <span>{c.name}</span>}
+              </Fragment>
+            ))}
+          </dd>
         </div>
       </dl>
     </div>
@@ -145,17 +181,28 @@ if (faqs?.length) {
 </BaseLayout>
 
 <style>
-  .svc-header {
+  /* Hero */
+  .svc-hero {
     background: var(--bg-page);
-    padding-block: clamp(2rem, 1.5rem + 3vw, 4rem);
-    border-bottom: 1px solid var(--color-border);
+    padding-block: clamp(2rem, 1.5rem + 3vw, 4.5rem);
   }
-  .svc-header__inner {
+  .svc-hero__grid {
+    display: grid;
+    gap: clamp(var(--space-5), 4vw, var(--space-7));
+    align-items: center;
+  }
+  @media (min-width: 860px) {
+    .svc-hero__grid {
+      grid-template-columns: 1.05fr 0.95fr;
+    }
+  }
+  .svc-hero__text {
     display: flex;
     flex-direction: column;
+    align-items: flex-start;
     gap: var(--space-3);
   }
-  .svc-header__back {
+  .svc-hero__back {
     display: inline-flex;
     align-items: center;
     gap: var(--space-2);
@@ -163,19 +210,78 @@ if (faqs?.length) {
     font-weight: var(--weight-medium);
     color: var(--text-muted);
     text-decoration: none;
+    margin-bottom: var(--space-2);
   }
-  .svc-header__back:hover { color: var(--color-primary); }
-
-  .svc-facts {
+  .svc-hero__back:hover { color: var(--color-primary); }
+  .svc-hero__eyebrow {
+    font-size: var(--fs-caption);
+    font-weight: var(--weight-semibold);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--color-primary);
+  }
+  .svc-hero__text h1 {
+    margin: 0;
+  }
+  .svc-hero__lead {
+    font-size: var(--fs-lead, var(--fs-body));
+    color: var(--text-muted);
+    line-height: var(--lh-body);
+    max-width: 46ch;
+  }
+  .svc-hero__cta {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-3) var(--space-6);
-    margin-top: var(--space-2);
+    gap: var(--space-3);
+    margin-top: var(--space-3);
+  }
+  .svc-hero__media {
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+    background: var(--color-linen);
+  }
+  .svc-hero__media img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    aspect-ratio: 5 / 4;
+    object-fit: cover;
+  }
+
+  /* Quick-facts strip — three evenly-spaced cells with dividers */
+  .svc-facts-band {
+    background: var(--bg-page);
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+  }
+  .svc-facts {
+    display: grid;
+    grid-template-columns: 1fr;
+    margin: 0;
   }
   .svc-facts__item {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 4px;
+    padding: var(--space-4) 0;
+    border-top: 1px solid var(--color-border);
+  }
+  .svc-facts__item:first-child { border-top: none; }
+  @media (min-width: 640px) {
+    .svc-facts {
+      grid-template-columns: repeat(3, 1fr);
+    }
+    .svc-facts__item {
+      padding: var(--space-5) var(--space-5);
+      border-top: none;
+      border-left: 1px solid var(--color-border);
+      align-items: flex-start;
+    }
+    .svc-facts__item:first-child {
+      padding-left: 0;
+      border-left: none;
+    }
   }
   .svc-facts__item dt {
     font-size: var(--fs-caption);
@@ -185,10 +291,18 @@ if (faqs?.length) {
     color: var(--text-muted);
   }
   .svc-facts__item dd {
+    margin: 0;
     font-size: var(--fs-body);
     color: var(--text-default);
     font-weight: var(--weight-medium);
   }
+  .svc-facts__clin a {
+    color: var(--color-primary);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+    text-decoration-thickness: 1px;
+  }
+  .svc-facts__clin a:hover { text-decoration-thickness: 2px; }
 
   /* Prose content (mirrors the conditions page) */
   .svc-body :global(h2) {
