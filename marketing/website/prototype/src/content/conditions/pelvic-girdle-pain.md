@@ -1,9 +1,12 @@
 ---
 title: "Pelvic Girdle Pain and Mummy's Wrist"
-description: "Pelvic girdle pain (PGP) and de Quervain's tenosynovitis - colloquially called \"mummy's wrist\" - are two of the most common but undertreated musculoskeletal conditions associated with pregnancy and early parenthood. Both respond well to physiotherapy. Neither needs to be waited out."
+description: "Physiotherapy for pelvic girdle pain and mummy's wrist in pregnancy and early parenthood. Both respond well to treatment - neither needs waiting out."
 cardTitle: "Pelvic Girdle Pain and Mummy's Wrist"
 cardLead: "Pelvic girdle pain (PGP) and de Quervain's tenosynovitis - colloquially called \"mummy's wrist\" - are two of the most common but undertreated musculoskeletal..."
 category: "Women's Health"
+datePublished: "2026-06-29"
+lastReviewed: "2026-06-29"
+relatedService: "prenatal-physiotherapy"
 ctaSlug: "web-wa"
 order: 8
 draft: false
@@ -53,26 +56,26 @@ There is no single intervention that prevents PGP. However, early physiotherapy 
 
 ## Frequently asked questions
 
-#### Is pelvic girdle pain the same as sciatica?
+### Is pelvic girdle pain the same as sciatica?
 
 No. Sciatica involves irritation of the sciatic nerve, which causes pain, tingling, or numbness that radiates from the lower back down the leg, often below the knee. PGP is a joint and soft tissue problem localised to the pelvis. Both can occur in pregnancy and both are addressable with physiotherapy, but the assessment and management differ.
 
-#### Will PGP resolve on its own after birth?
+### Will PGP resolve on its own after birth?
 
 For most women, symptoms improve in the weeks following birth. However, a proportion of women experience persistent PGP postnatally - particularly those whose symptoms were more severe during pregnancy or who did not receive physiotherapy input. Postnatal assessment is recommended if symptoms have not resolved by 8-12 weeks postpartum.
 
-#### Is a support belt or brace helpful for PGP?
+### Is a support belt or brace helpful for PGP?
 
 For some women, a pelvic support belt can reduce pain during activity by providing additional support to the sacroiliac joints. It is most useful as a short-term aid alongside targeted exercise, not as a long-term solution. Our physiotherapist will advise whether a belt is appropriate for your presentation.
 
-#### Can I still exercise with PGP?
+### Can I still exercise with PGP?
 
 Often yes, with modifications. The goal is not to stop moving but to identify which movements are provocative and find alternatives that maintain your fitness and function. Symmetric activities (cycling, swimming) are often better tolerated than asymmetric loading (lunges, single-leg exercises) during an acute flare.
 
-#### How long does mummy's wrist take to resolve?
+### How long does mummy's wrist take to resolve?
 
 Most presentations of de Quervain's tenosynovitis improve within 4-8 weeks with appropriate management. In some cases - particularly where symptoms are severe or have been present for several months - a corticosteroid injection (administered by a specialist) may be considered alongside physiotherapy. Our physiotherapist will discuss your options according to your presentation.
 
-#### Does the feeding position affect mummy's wrist?
+### Does the feeding position affect mummy's wrist?
 
 Yes. Sustained awkward wrist and thumb positions during breastfeeding are a common aggravating factor. Our physiotherapist can advise on ergonomic adjustments - including feeding pillow positioning and grip adaptations - that reduce load on the tendons while you continue to feed.

@@ -1,9 +1,12 @@
 ---
 title: "Perimenopause, Menopause, and Bone Health"
-description: "Perimenopause and menopause bring significant changes to the musculoskeletal system, pelvic floor, and bone density - changes that are often attributed to ageing rather than recognised as hormone-driven and addressable. Physiotherapy focuses on building and maintaining the physical reserves that protect quality of life in the decades ahead."
+description: "Physiotherapy for perimenopause and menopause: pelvic floor, joint and bone health support to stay strong through hormonal change."
 cardTitle: "Perimenopause, Menopause, and Bone Health"
 cardLead: "Perimenopause and menopause bring significant changes to the musculoskeletal system, pelvic floor, and bone density - changes that are often attributed to ag..."
 category: "Women's Health"
+datePublished: "2026-06-29"
+lastReviewed: "2026-06-29"
+relatedService: "pelvic-floor-physiotherapy"
 ctaSlug: "web-wa"
 order: 11
 draft: false

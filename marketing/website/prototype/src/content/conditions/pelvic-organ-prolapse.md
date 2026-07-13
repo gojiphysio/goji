@@ -1,9 +1,12 @@
 ---
 title: "Pelvic Organ Prolapse"
-description: "Pelvic organ prolapse (POP) affects approximately 1 in 3 women who have given birth, though many are unaware they have it. The large majority of women with POP can achieve meaningful improvement with physiotherapy, particularly when identified and managed early."
+description: "Pelvic organ prolapse affects about 1 in 3 women after birth. Pelvic floor physiotherapy in Singapore to assess, manage and improve symptoms early."
 cardTitle: "Pelvic Organ Prolapse"
 cardLead: "Pelvic organ prolapse (POP) affects approximately 1 in 3 women who have given birth, though many are unaware they have it."
 category: "Women's Health"
+datePublished: "2026-06-29"
+lastReviewed: "2026-06-29"
+relatedService: "pelvic-floor-physiotherapy"
 ctaSlug: "web-wa"
 order: 6
 draft: false

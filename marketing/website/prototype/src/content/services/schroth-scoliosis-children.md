@@ -12,6 +12,13 @@ priceHome: 330
 clinicians: ["Cheryl Long"]
 bookingService: "physiotherapy"
 bookingFocus: "scoliosis"
+faqs:
+  - q: "What age can my child start Schroth therapy?"
+    a: "Sessions are adapted to your child's age, stage of growth and attention span - the exercises need active participation, so suitability depends on the child as much as the curve. Message us about your child's situation and we will advise honestly whether an assessment makes sense now."
+  - q: "Does my child need an X-ray before the first session?"
+    a: "A recent spinal X-ray or specialist report helps us classify the curve precisely and tailor the programme, so bring one if you have it. If not, we can still assess posture, movement and function, and advise on sensible next steps."
+  - q: "Does Schroth therapy replace bracing or specialist review?"
+    a: "No. Scoliosis-specific exercises are typically used alongside specialist monitoring, and alongside bracing where a brace has been prescribed. We work with your child's orthopaedic specialist, not instead of them."
 order: 1
 draft: false
 ---

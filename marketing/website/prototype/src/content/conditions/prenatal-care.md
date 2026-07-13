@@ -1,9 +1,12 @@
 ---
 title: "Prenatal Care and Birth Preparation"
-description: "Prenatal physiotherapy addresses the musculoskeletal and pelvic floor changes that happen as your body adapts to pregnancy. A physiotherapist can help you stay active safely, manage pain, prepare your body for labour, and reduce the risk of complications that are often left untreated because they are assumed to be a normal part of being pregnant."
+description: "Prenatal physiotherapy in Singapore: manage pregnancy aches, stay active safely and prepare your body for labour with an AHPC-registered physio."
 cardTitle: "Prenatal Care and Birth Preparation"
 cardLead: "Prenatal physiotherapy addresses the musculoskeletal and pelvic floor changes that happen as your body adapts to pregnancy."
 category: "Women's Health"
+datePublished: "2026-06-29"
+lastReviewed: "2026-06-29"
+relatedService: "prenatal-physiotherapy"
 ctaSlug: "web-wa"
 order: 1
 draft: false
@@ -63,26 +66,20 @@ This session is typically done at 32-36 weeks. You are welcome to come with your
 
 ## Frequently asked questions
 
-- Is physiotherapy safe during pregnancy?
-
+### Is physiotherapy safe during pregnancy?
 Yes. Physiotherapy is safe across all trimesters of an uncomplicated pregnancy. Our Physiotherapist will adapt the assessment and any hands-on treatment to your stage and clinical picture. If you have a high-risk pregnancy, we will coordinate with your obstetric team before proceeding.
 
-- When is the best time to start prenatal physiotherapy?
-
+### When is the best time to start prenatal physiotherapy?
 Any time a concern arises is the right time. Many women first come with a specific symptom - pelvic girdle pain at 20 weeks, or wrist pain in the third trimester. Others come earlier to build a plan for staying active. A dedicated birth preparation session is most useful at 32-36 weeks.
 
-- My pain only started in third trimester. Is it too late to seek help?
-
+### My pain only started in third trimester. Is it too late to seek help?
 No. Even late in the third trimester, addressing posture, load strategies, and pelvic floor function can meaningfully reduce discomfort and improve your readiness for birth and the postnatal period.
 
-- Will there be an internal (vaginal) examination?
-
+### Will there be an internal (vaginal) examination?
 Internal pelvic floor assessment is offered when it is clinically relevant. It is never required. Our Physiotherapist will explain what is being assessed and why before proceeding; you can decline at any point.
 
-- I have no pain. Is there still a reason to see a physio?
-
+### I have no pain. Is there still a reason to see a physio?
 Depends, but likely. A prenatal check can identify pelvic floor or movement patterns that are not causing pain now but may increase your risk of postnatal complications. Many women find a single birth-preparation session useful regardless of whether they had symptoms during pregnancy.
 
-- Do you see women with high-risk pregnancies?
-
+### Do you see women with high-risk pregnancies?
 Goji works with most presentations in pregnancy. For high-risk cases - including placenta praevia, cerclage, or preterm labour risk - we coordinate with your obstetric team before we begin.

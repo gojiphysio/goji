@@ -12,6 +12,15 @@ priceHome: 330
 clinicians: ["Kristy Ng", "Claire Ng", "Cheryl Long"]
 bookingService: "physiotherapy"
 bookingFocus: "womens-health"
+faqs:
+  - q: "When in pregnancy can I start prenatal physiotherapy?"
+    a: "At any stage. Some women come early to stay ahead of symptoms and keep exercising confidently; others come in the second or third trimester when aches, pelvic pain or pelvic floor symptoms appear. Techniques and positioning are adapted to your stage of pregnancy."
+  - q: "Can prenatal physiotherapy help me prepare for birth?"
+    a: "Yes - birth preparation is a core part of prenatal physiotherapy. Depending on your stage and goals, this can include pelvic floor preparation, perineal massage instruction, labour positions and breathing strategies."
+  - q: "Is physiotherapy safe during pregnancy?"
+    a: "Assessment and treatment are adapted to your stage of pregnancy by AHPC-registered physiotherapists experienced in prenatal care, and we coordinate with your obstetrician or gynaecologist where relevant. If anything in your pregnancy needs medical clearance first, we will say so."
+  - q: "Do I need a doctor's referral?"
+    a: "No referral is needed - you can book directly. If your assessment suggests medical input, we will let you know and can work alongside your obstetrician."
 order: 2
 draft: false
 ---

@@ -12,6 +12,15 @@ priceHome: 330
 clinicians: ["Kristy Ng", "Claire Ng", "Cheryl Long"]
 bookingService: "physiotherapy"
 bookingFocus: "womens-health"
+faqs:
+  - q: "When can I have a postpartum physiotherapy assessment?"
+    a: "At any stage - weeks, months or years after birth. Many mothers come after their six-week postnatal review, but if something is bothering you earlier, you do not need to wait. Recovery questions remain assessable and treatable long after the first year."
+  - q: "Is this suitable after a Caesarean birth?"
+    a: "Yes. The assessment is designed for recovery after both vaginal and Caesarean birth, and includes scar assessment and advice on returning to activity after abdominal surgery."
+  - q: "Can I bring my baby to the appointment?"
+    a: "Yes - many mothers bring their babies along. If travelling with a newborn is the hard part, the same assessment is also available as a home visit, or you can combine your recovery check with a developmental check for your baby in a Mummy and Baby assessment."
+  - q: "Do I need a doctor's referral, and can I claim insurance?"
+    a: "No referral is needed - you can book directly. We do not offer direct billing: most patients pay first and claim from their insurer afterwards, depending on their policy's physiotherapy coverage."
 order: 1
 draft: false
 ---

@@ -1,9 +1,12 @@
 ---
 title: "Caesarean Recovery and Scar Management"
-description: "A Caesarean section is a major abdominal operation - seven layers of tissue are incised and sutured. Physiotherapy supports recovery from early mobilisation and pain management through to scar tissue work and a safe return to exercise."
+description: "C-section recovery physiotherapy in Singapore: early mobility, pain management, scar tissue work and a plan for returning safely to exercise."
 cardTitle: "Caesarean Recovery and Scar Management"
 cardLead: "A Caesarean section is a major abdominal operation - seven layers of tissue are incised and sutured."
 category: "Women's Health"
+datePublished: "2026-06-29"
+lastReviewed: "2026-06-29"
+relatedService: "postpartum-physiotherapy"
 ctaSlug: "web-wa"
 order: 3
 draft: false

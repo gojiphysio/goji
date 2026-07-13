@@ -12,6 +12,13 @@ priceHome: 330
 clinicians: ["Cheryl Long"]
 bookingService: "physiotherapy"
 bookingFocus: "scoliosis"
+faqs:
+  - q: "I was diagnosed with scoliosis years ago. Is therapy still worth it?"
+    a: "Yes - adults commonly seek scoliosis-specific physiotherapy for pain, stiffness, posture and confidence in movement, long after growth has finished. The programme targets your current symptoms and goals, not just the curve itself."
+  - q: "How is Schroth therapy different from general physiotherapy?"
+    a: "The Schroth Method is scoliosis-specific: exercises are built around your individual curve pattern in three dimensions, combining postural correction, breathing mechanics and targeted strengthening, rather than generic back exercises."
+  - q: "Do I need an X-ray before starting?"
+    a: "A recent spinal X-ray or specialist report helps us classify your curve and tailor the programme, so bring one if you have it. Without one, we can still assess your posture, movement and symptoms and advise on next steps."
 order: 2
 draft: false
 ---

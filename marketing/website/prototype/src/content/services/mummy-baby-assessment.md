@@ -11,6 +11,13 @@ priceClinic: 330
 priceHome: 380
 clinicians: ["Kristy Ng", "Cheryl Long"]
 bookingService: "mummy-baby"
+faqs:
+  - q: "What age should my baby be for the assessment?"
+    a: "The baby portion is designed for infants from birth to around 12 months. The mother's portion suits any stage of postpartum recovery."
+  - q: "What does the baby's assessment cover?"
+    a: "Your physiotherapist reviews your baby's movement and early motor development - how they move, hold their head, roll and progress towards their milestones - and answers your questions about positioning, tummy time and play. It is designed to be comfortable for your baby and informative for you."
+  - q: "What happens if the assessment picks something up?"
+    a: "You will get a plain-language explanation of what was observed, a home plan where appropriate, and honest guidance on whether follow-up physiotherapy or a review by a paediatrician is worth considering. Most findings are things you can work on through positioning and play."
 order: 3
 draft: false
 ---
