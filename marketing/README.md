@@ -28,6 +28,13 @@ See `strategy/01-campaign-strategy.md` for the full funnel and leading indicator
 |   |-- 02-market-research.md          Singapore market intelligence, sourced.
 |   |-- 03-compliance-guardrails.md    SG healthcare advertising rules. NON-NEGOTIABLE.
 |   `-- 04-90-day-plan.md              Month-by-month + weekly sprint plan.
+|-- seo/
+|   `-- seo-geo-review.md              SEO + GEO audit, keyword->page map, AI-answer strategy.
+|-- ads/
+|   |-- google-ads-campaign-plan.md    The live Google Ads campaign spec (launch-ready).
+|   `-- google-ads-playbook.md         Beginner how-to for the Ads UI.
+|-- website/
+|   `-- prototype/                     The LIVE production site (Astro, Cloudflare Pages).
 |-- design-system/
 |   `-- design-system-brief.md         Brief for Claude Design app (brand tokens, components).
 |-- assets/
@@ -46,7 +53,9 @@ See `strategy/01-campaign-strategy.md` for the full funnel and leading indicator
 | Primary wedge | Post-partum / women's health |
 | Budget posture | Organic-led + modest compliance-safe paid (see strategy for $) |
 | Execution model | In-house operator runs delivery; Claude is the content + strategy engine |
-| Existing foundation | Website live, Instagram active, Google Business Profile, email/WhatsApp list |
+| Existing foundation | Website live (Astro on Cloudflare Pages since 2026-07; Squarespace deprecated), Instagram active, Google Business Profile, email/WhatsApp list |
+| Brand names (2026-07-13) | Own BOTH: "Goji Women's and Family Physiotherapy" (canonical/structured) + "Goji Physio" (shorthand) |
+| Katong (2026-07-13) | Downgraded to secondary, content-only target — see `seo/seo-geo-review.md` §3 |
 | Design system | Built in Claude Design app from the official Goji brand guidelines |
 
 ## Status
