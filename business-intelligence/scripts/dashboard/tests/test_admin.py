@@ -344,6 +344,23 @@ def test_fetch_web_sessions_noop_until_ga4_linked():
     assert app.fetch_web_sessions(TODAY - timedelta(days=30), TODAY) == {"sessions": 0, "pageviews": 0}
 
 
+def test_fetch_instagram_reach_degrades_without_table(monkeypatch):
+    # Marketing card must stay empty (never error) until marketing_ingest has run
+    # and marts.fct_instagram_reach exists.
+    def _boom(*a, **k):
+        raise RuntimeError("Not found: Table goji-bi:marts.fct_instagram_reach")
+    monkeypatch.setattr(app, "_query", _boom)
+    assert app.fetch_instagram_reach(TODAY - timedelta(days=30), TODAY) == {"reach": 0}
+
+
+def test_fetch_instagram_reach_returns_latest_snapshot(monkeypatch):
+    # Reach is de-duplicated: the fetch returns the latest reading (a snapshot),
+    # not a range sum. The query already ORDER BY metric_date DESC LIMIT 1, so the
+    # first row is authoritative.
+    monkeypatch.setattr(app, "_query", lambda *a, **k: [{"reach": 4200}])
+    assert app.fetch_instagram_reach(TODAY - timedelta(days=30), TODAY) == {"reach": 4200}
+
+
 # --- provider-attribution alert dismissals (persistent, server-side) --------
 
 def test_mismatch_dismiss_requires_auth(client):
