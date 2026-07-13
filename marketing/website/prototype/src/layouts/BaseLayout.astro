@@ -87,7 +87,7 @@ const businessSchema = {
 const isHome = Astro.url.pathname === "/";
 const nav = [
   { href: isHome ? "#about" : "/#about", label: "About" },
-  { href: isHome ? "#services" : "/#services", label: "Services" },
+  { href: "/services", label: "Services" },
   { href: "/conditions", label: "Conditions" },
   { href: isHome ? "#team" : "/#team", label: "Team" },
   { href: isHome ? "#contact" : "/#contact", label: "Find us" },

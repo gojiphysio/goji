@@ -10,6 +10,13 @@ import { Icon } from "astro-icon/components";
 import { SITE } from "../lib/site.ts";
 import { services } from "../lib/services.ts";
 
+// Service cards that have a matching explanatory page under /services link to it.
+// Physiotherapy spans several sub-types, so it points at the index.
+const serviceLearnMore: Record<string, string> = {
+  physiotherapy: "/services",
+  "mummy-baby": "/services/mummy-baby-assessment",
+};
+
 // FAQ — single source for both the on-page accordion and the FAQPage JSON-LD
 // (so AI answer engines and Google rich results read the same Q&A).
 const faqs = [
@@ -288,6 +295,9 @@ const reviews = [
                 )}
                 <div class="service-card__cta">
                   <Button href="/book" variant="secondary">Book {s.title}</Button>
+                  {serviceLearnMore[s.id] && (
+                    <a href={serviceLearnMore[s.id]} class="service-card__learn">Learn more</a>
+                  )}
                 </div>
               </article>
             ))
@@ -814,6 +824,20 @@ const reviews = [
   .service-card__cta {
     margin-top: auto;
     padding-top: var(--space-4);
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-3) var(--space-4);
+  }
+  .service-card__learn {
+    font-size: var(--fs-small);
+    font-weight: var(--weight-semibold);
+    color: var(--color-primary);
+    text-decoration: none;
+  }
+  .service-card__learn:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
   }
 
 

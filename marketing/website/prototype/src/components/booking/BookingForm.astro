@@ -13,6 +13,7 @@ import Button from "../Button.astro";
 import BloomFlipbook from "../BloomFlipbook.astro";
 import { services } from "../../lib/services";
 import { clinicians } from "../../lib/clinicians";
+import { physioCategories } from "../../lib/physioCategories";
 import { cta } from "../../lib/links";
 
 const steps = [
@@ -44,6 +45,26 @@ const steps = [
       {services.map((s) => <ServiceOption service={s} />)}
     </div>
     <p class="booking__error" data-error="service" role="alert" hidden></p>
+
+    {/* Physiotherapy sub-type — shown only when Physiotherapy is selected. It's
+        required, and it narrows which clinicians' calendars open (see
+        src/lib/physioCategories.ts). */}
+    <div class="booking__focus" data-physio-focus hidden>
+      <p class="booking__sublabel" id="focus-label">What type of physiotherapy?</p>
+      <div class="booking__focus-opts" role="radiogroup" aria-labelledby="focus-label">
+        {
+          physioCategories.map((c) => (
+            <label class="fopt">
+              <input class="fopt__input visually-hidden" type="radio" name="physioFocus" value={c.id} />
+              <span class="fopt__name">{c.label}</span>
+              <span class="fopt__hint">{c.hint}</span>
+              <span class="fopt__tick" aria-hidden="true" />
+            </label>
+          ))
+        }
+      </div>
+      <p class="booking__error" data-error="physioFocus" role="alert" hidden></p>
+    </div>
 
     <div class="booking__where" data-where hidden>
       <p class="booking__sublabel">Where would you like to be seen?</p>
@@ -172,6 +193,7 @@ const steps = [
       <FormField id="phone" name="phone" label="Phone" type="tel" required={true} autocomplete="tel" inputmode="tel" placeholder="e.g. 9123 4567" />
       <FormField id="email" name="email" label="Email" type="email" required={true} autocomplete="email" inputmode="email" />
     </div>
+    <p class="booking__suggest" data-email-suggest role="status" hidden></p>
 
     <div class="field booking__condition-field">
       <p class="field__label" id="notes-label">Tell us about your condition (optional)</p>
@@ -694,6 +716,79 @@ const steps = [
     transform: translateY(-1px) rotate(45deg);
   }
 
+  /* Physiotherapy sub-type (mirrors the clinician options) */
+  .booking__focus {
+    margin-top: var(--space-4);
+  }
+  .booking__focus-opts {
+    display: grid;
+    gap: var(--space-2);
+    margin-top: var(--space-2);
+  }
+  @media (min-width: 560px) {
+    .booking__focus-opts {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .fopt {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 0.15rem var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    border: 1.5px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--bg-content);
+    cursor: pointer;
+    transition: border-color var(--dur) var(--ease),
+      box-shadow var(--dur) var(--ease);
+  }
+  .fopt:hover {
+    border-color: var(--color-border-strong);
+  }
+  .fopt:has(.fopt__input:checked) {
+    border-color: var(--color-primary);
+    box-shadow: var(--shadow-sm);
+  }
+  .fopt:has(.fopt__input:focus-visible) {
+    outline: 3px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+  .fopt__name {
+    font-family: var(--font-display);
+    font-weight: var(--weight-semibold);
+    color: var(--text-default);
+  }
+  .fopt__hint {
+    grid-column: 1;
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+  }
+  .fopt__tick {
+    grid-row: 1 / span 2;
+    grid-column: 2;
+    width: 1.1rem;
+    height: 1.1rem;
+    border-radius: 50%;
+    border: 1.5px solid var(--color-border-strong);
+    position: relative;
+  }
+  .fopt:has(.fopt__input:checked) .fopt__tick {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+  }
+  .fopt:has(.fopt__input:checked) .fopt__tick::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 0.34rem;
+    height: 0.55rem;
+    border: solid var(--color-linen);
+    border-width: 0 2px 2px 0;
+    transform: translateY(-1px) rotate(45deg);
+  }
+
   /* "First available" is the recommended default — give it a tinted, primary-
      edged card and a badge so it clearly stands apart from the named options,
      and reads as pre-selected the moment the step opens. */
@@ -773,6 +868,30 @@ const steps = [
   }
   .booking__changes-note a {
     font-weight: var(--weight-semibold);
+  }
+
+  /* "Did you mean gmail.com?" one-tap email typo correction. */
+  .booking__suggest {
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+    margin-top: calc(-1 * var(--space-2));
+  }
+  .booking__suggest[hidden] {
+    display: none;
+  }
+  .booking__suggest-fix {
+    border: 0;
+    background: none;
+    padding: 0;
+    font: inherit;
+    font-weight: var(--weight-semibold);
+    color: var(--color-primary);
+    cursor: pointer;
+    text-decoration: underline;
+  }
+  .booking__suggest-fix:focus-visible {
+    outline: 3px solid var(--color-accent);
+    outline-offset: 2px;
   }
 
   /* Nav + local buttons (native <button>, mirrors .btn tokens) */
@@ -855,6 +974,7 @@ const steps = [
 <script>
   import { services, serviceById } from "../../lib/services";
   import { cliniciansForService, HOME_VISIT_CLINICIAN_ID } from "../../lib/clinicians";
+  import { cliniciansForPhysioFocus, isPhysioFocus } from "../../lib/physioCategories";
   import { bookingApi, type BookingDraft } from "../../lib/booking";
 
   const form = document.getElementById("booking-form") as HTMLFormElement | null;
@@ -877,6 +997,7 @@ const steps = [
 
     const draft = (): BookingDraft => ({
       service: (getChecked("service") as BookingDraft["service"]) ?? null,
+      physioFocus: (getChecked("physioFocus") as BookingDraft["physioFocus"]) ?? null,
       format: (getChecked("format") as BookingDraft["format"]) || "clinic",
       address: composeAddress(),
       date: getValue("date"),
@@ -947,6 +1068,7 @@ const steps = [
 
     // ----- Step 1: service + format wiring -----
     const whereBlock = form.querySelector<HTMLElement>("[data-where]");
+    const focusBlock = form.querySelector<HTMLElement>("[data-physio-focus]");
     const homeLabel = form.querySelector<HTMLElement>("[data-home-label]");
     const homeHint = form.querySelector<HTMLElement>("[data-home-hint]");
     const addressBlock = form.querySelector<HTMLElement>("[data-address]");
@@ -978,12 +1100,36 @@ const steps = [
         });
       },
     );
+    form.querySelectorAll<HTMLInputElement>('input[name="physioFocus"]').forEach(
+      (input) => {
+        input.addEventListener("change", () => {
+          setError("physioFocus", "");
+          filterClinicians();  // sub-type narrows the clinician set
+          selectedTime = "";
+          scheduleRefresh();   // sub-type changes who's available
+        });
+      },
+    );
 
     function onServiceChange() {
       setError("service", "");
       const svc = serviceById(getChecked("service") ?? "");
       if (!svc) return;
       if (whereBlock) whereBlock.hidden = false;
+
+      // Physiotherapy needs a sub-type (it filters clinicians); other services
+      // don't. Show the block for physio only, and clear any stale selection
+      // when switching away so it can't leak into the booking.
+      if (focusBlock) {
+        const isPhysio = svc.id === "physiotherapy";
+        focusBlock.hidden = !isPhysio;
+        if (!isPhysio) {
+          setError("physioFocus", "");
+          focusBlock
+            .querySelectorAll<HTMLInputElement>('input[name="physioFocus"]')
+            .forEach((i) => (i.checked = false));
+        }
+      }
 
       // Home-visit availability depends on the service.
       if (homeLabel && homeHint) {
@@ -1021,7 +1167,14 @@ const steps = [
       const svc = serviceById(getChecked("service") ?? "");
       if (!svc) return;
       const home = getChecked("format") === "home";
-      const serviceEligible = cliniciansForService(svc.id).map((c) => c.id);
+      let serviceEligible = cliniciansForService(svc.id).map((c) => c.id);
+      // Within Physiotherapy, the chosen sub-type narrows the clinician set
+      // (e.g. Scoliosis -> Cheryl only). No sub-type yet -> leave the full set.
+      const focus = getChecked("physioFocus");
+      if (svc.id === "physiotherapy" && focus) {
+        const focusIds = new Set(cliniciansForPhysioFocus(focus));
+        serviceEligible = serviceEligible.filter((id) => focusIds.has(id));
+      }
       const allowed = new Set(
         home
           ? serviceEligible.filter((id) => id === HOME_VISIT_CLINICIAN_ID)
@@ -1182,6 +1335,7 @@ const steps = [
       try {
         times = await bookingApi.getAvailability({
           service: d.service,
+          focus: d.physioFocus ?? undefined,
           clinicianId: d.clinicianId,
           date: d.date,
           home: d.format === "home",
@@ -1256,6 +1410,10 @@ const steps = [
       document.getElementById(id)?.addEventListener("input", () => {
         markDetailsEngaged();
         if (id !== "notes") setFieldError(id, ""); // clear the error as they correct it
+        if (id === "email") {
+          emailTypoAck = false; // a fresh edit re-arms the typo check
+          refreshEmailSuggestion();
+        }
       });
     });
 
@@ -1286,11 +1444,99 @@ const steps = [
       return /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/.test(raw.trim());
     }
 
+    // Common consumer webmail domains. A typo like "gmail.con" passes the format
+    // check above but bounces, so the confirmation never arrives. We suggest a
+    // fix when the domain is a single-edit miss of one of these (insert, delete,
+    // substitution, or adjacent swap, so "gmail.con" and "gmial.com" are both
+    // caught). Deliberately short (big providers only) and distance-1 only, so a
+    // real but unusual domain is never mistaken for a typo; short/ambiguous names
+    // (me.com, qq.com) are left out. The backend has the same list (see
+    // scripts/booking/booking.py); keep the two in sync.
+    const COMMON_EMAIL_DOMAINS = [
+      "gmail.com", "googlemail.com", "yahoo.com", "yahoo.com.sg", "ymail.com",
+      "hotmail.com", "hotmail.sg", "outlook.com", "outlook.sg", "live.com",
+      "icloud.com", "singnet.com.sg",
+    ];
+
+    /** Optimal string alignment distance: Levenshtein + adjacent transposition. */
+    function osaDistance(a: string, b: string): number {
+      if (a === b) return 0;
+      const lb = b.length;
+      let prev2: number[] = [];
+      let prev = Array.from({ length: lb + 1 }, (_, i) => i);
+      for (let i = 1; i <= a.length; i++) {
+        const cur = [i, ...Array(lb).fill(0)];
+        for (let j = 1; j <= lb; j++) {
+          const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+          cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + cost);
+          if (i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) {
+            cur[j] = Math.min(cur[j], prev2[j - 2] + 1);
+          }
+        }
+        prev2 = prev;
+        prev = cur;
+      }
+      return prev[lb];
+    }
+
+    /**
+     * If the email's domain is a one-edit miss of a common webmail domain
+     * (e.g. "gmail.con" -> "gmail.com"), return the corrected address; else null.
+     */
+    function suggestEmailFix(raw: string): string | null {
+      const email = raw.trim();
+      const at = email.lastIndexOf("@");
+      if (at < 0) return null;
+      const local = email.slice(0, at);
+      const domain = email.slice(at + 1).toLowerCase();
+      if (!domain || COMMON_EMAIL_DOMAINS.includes(domain)) return null;
+      for (const good of COMMON_EMAIL_DOMAINS) {
+        if (osaDistance(domain, good) === 1) return `${local}@${good}`;
+      }
+      return null;
+    }
+
+    // "Did you mean …?" element under the email field + a one-shot flag: we
+    // block the first submit with a suspected typo, but let a genuinely-unusual
+    // address through on a second submit so we never trap a real email.
+    const emailSuggest = form.querySelector<HTMLElement>("[data-email-suggest]");
+    let emailTypoAck = false;
+
+    /** Render (or clear) the one-tap email correction under the email field. */
+    function refreshEmailSuggestion() {
+      if (!emailSuggest) return;
+      const fix = suggestEmailFix(getValue("email"));
+      emailSuggest.textContent = "";
+      if (!fix) {
+        emailSuggest.hidden = true;
+        return;
+      }
+      emailSuggest.hidden = false;
+      emailSuggest.append("Did you mean ");
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "booking__suggest-fix";
+      btn.textContent = fix;
+      btn.addEventListener("click", () => {
+        const el = document.getElementById("email") as HTMLInputElement | null;
+        if (el) el.value = fix;
+        emailTypoAck = false;
+        setFieldError("email", "");
+        refreshEmailSuggestion();
+      });
+      emailSuggest.append(btn, "?");
+    }
+
     function validate(step: number): boolean {
       const d = draft();
       if (step === 1) {
         if (!d.service) {
           setError("service", "Please choose a service to continue.");
+          return false;
+        }
+        if (d.service === "physiotherapy" && !d.physioFocus) {
+          setError("physioFocus", "Please choose a type of physiotherapy.");
+          bookingApi.track("validation_error", "physioFocus");
           return false;
         }
         if (d.format === "home") {
@@ -1334,7 +1580,22 @@ const steps = [
         if (!isValidEmail(d.email)) {
           setFieldError("email", "Please enter a valid email address.");
           bad.push("email");
-        } else setFieldError("email", "");
+        } else {
+          setFieldError("email", "");
+          // Catch common-domain typos (gmail.con) that pass the format check but
+          // bounce. Block once with a suggestion; a second submit keeps the
+          // typed address, so a genuinely-unusual email is never trapped.
+          const fix = suggestEmailFix(d.email);
+          refreshEmailSuggestion();
+          if (fix && !emailTypoAck) {
+            emailTypoAck = true;
+            setFieldError(
+              "email",
+              `This looks like a typo. Did you mean ${fix}? Tap the suggestion above, or submit again to keep this address.`,
+            );
+            bad.push("email");
+          }
+        }
         // Form-friction is a real stuck point: log which field(s) the visitor
         // got wrong so the funnel shows where the details step bleeds people.
         if (bad.length) bookingApi.track("validation_error", bad.join(","));
@@ -1485,9 +1746,38 @@ const steps = [
       }
     });
 
+    /**
+     * Deep-link preselect: service pages link to /book?service=…&focus=… so the
+     * visitor lands on the right option (and physio sub-type) already chosen.
+     * We only act on known ids, and fire "change" so the same handlers run as a
+     * click would (show sub-type, filter clinicians, update availability).
+     */
+    function applyDeepLink() {
+      const params = new URLSearchParams(location.search);
+      const service = params.get("service");
+      if (service && form!.querySelector(`input[name="service"][value="${service}"]`)) {
+        const el = form!.querySelector<HTMLInputElement>(
+          `input[name="service"][value="${service}"]`,
+        )!;
+        el.checked = true;
+        el.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+      const focus = params.get("focus");
+      if (focus && isPhysioFocus(focus)) {
+        const el = form!.querySelector<HTMLInputElement>(
+          `input[name="physioFocus"][value="${focus}"]`,
+        );
+        if (el) {
+          el.checked = true;
+          el.dispatchEvent(new Event("change", { bubbles: true }));
+        }
+      }
+    }
+
     // Initial state (no scroll — keep the page heading in view on load).
     bookingApi.track("page_view");
     syncAddress();
+    applyDeepLink();
     goto(1, false);
   }
 </script>

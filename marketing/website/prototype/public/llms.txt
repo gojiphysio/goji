@@ -31,6 +31,15 @@
 - Vestibular rehabilitation
 - Lymphoedema physiotherapy
 
+## Service details
+
+- All services: https://www.gojiphysio.com/services
+- Prenatal physiotherapy (55 min, from $260): https://www.gojiphysio.com/services/prenatal-physiotherapy
+- Postpartum physiotherapy (55 min, from $260): https://www.gojiphysio.com/services/postpartum-physiotherapy
+- Mummy & Baby assessment (85 min, from $330): https://www.gojiphysio.com/services/mummy-baby-assessment
+- Schroth therapy for scoliosis in children (55 min, from $260): https://www.gojiphysio.com/services/schroth-scoliosis-children
+- Schroth therapy for scoliosis in adults (55 min, from $260): https://www.gojiphysio.com/services/schroth-scoliosis-adults
+
 ## Conditions we treat
 
 - Prenatal care and birth preparation: https://www.gojiphysio.com/conditions/prenatal-care

@@ -10,11 +10,15 @@
  * to `https://booking.gojiphysio.com`.
  */
 import type { ServiceId } from "./services";
+import type { PhysioFocusId } from "./physioCategories";
 
 export type BookingFormat = "clinic" | "home";
 
 export interface BookingDraft {
   service: ServiceId | null;
+  /** Physiotherapy sub-type (null for non-physio services). Narrows clinicians
+   *  and tells the clinic what the physio session is for. */
+  physioFocus: PhysioFocusId | null;
   format: BookingFormat;
   address: string;
   date: string; // YYYY-MM-DD
@@ -30,6 +34,9 @@ export interface BookingDraft {
 
 export interface AvailabilityQuery {
   service: ServiceId;
+  /** Physio sub-type, when the service is physiotherapy. Lets the backend
+   *  restrict availability to the mapped clinicians. */
+  focus?: PhysioFocusId;
   clinicianId: string;
   date: string;
   home: boolean;
@@ -113,9 +120,10 @@ export function bookingAttribution(): Record<string, string> {
 
 // ---- Real backend ----------------------------------------------------------
 const realApi: BookingApi = {
-  async getAvailability({ service, clinicianId, date, home }) {
+  async getAvailability({ service, focus, clinicianId, date, home }) {
     if (!date) return [];
     const p = new URLSearchParams({ service, date });
+    if (focus) p.set("focus", focus);
     if (clinicianId) p.set("clinician", clinicianId);
     if (home) p.set("home", "1");
     // Throw on a failed fetch (network / 5xx) so the caller can tell "couldn't
@@ -134,6 +142,7 @@ const realApi: BookingApi = {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           service: draft.service,
+          physio_focus: draft.physioFocus,
           date: draft.date,
           time: draft.time,
           format: draft.format,
