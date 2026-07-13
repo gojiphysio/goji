@@ -30,7 +30,41 @@ CFG = {
         }],
     }],
 }
+# Same calendar, but all three clinicians rostered — for the sub-type filter.
+CFG_ALL = {
+    "calendars": [{
+        "id": "dDIjWJp",
+        "rules": [
+            {"name": "Cheryl Long", "book_calendar": "blue", "starttime": "09:00",
+             "endtime": "12:00", "min_days": 1, "max_days": 365,
+             "restricted_days": [], "restricted_blocks": []},
+            {"name": "Claire Ng", "book_calendar": "6hpO", "starttime": "09:00",
+             "endtime": "12:00", "min_days": 1, "max_days": 365,
+             "restricted_days": [], "restricted_blocks": []},
+            {"name": "Kristy Ng", "book_calendar": "green", "starttime": "09:00",
+             "endtime": "12:00", "min_days": 1, "max_days": 365,
+             "restricted_days": [], "restricted_blocks": []},
+        ],
+    }],
+}
 WED = date(2026, 7, 15)  # a Wednesday, in the future
+
+
+def test_no_focus_offers_all_rostered_clinicians():
+    out = derive_availability(StubPlato([], CFG_ALL), "physiotherapy", WED)
+    assert set(out) == {"cheryl-long", "claire-ng", "kristy-ng"}
+
+
+def test_scoliosis_focus_restricts_to_cheryl():
+    out = derive_availability(StubPlato([], CFG_ALL), "physiotherapy", WED,
+                              focus="scoliosis")
+    assert set(out) == {"cheryl-long"}
+
+
+def test_paediatrics_focus_excludes_claire():
+    out = derive_availability(StubPlato([], CFG_ALL), "physiotherapy", WED,
+                              focus="paediatrics")
+    assert set(out) == {"cheryl-long", "kristy-ng"}
 
 
 def test_free_day_gives_all_30min_starts():

@@ -132,6 +132,26 @@ def test_no_physio_focus_means_no_type_line():
     assert "Type:" not in p.created[0][0]["description"]
 
 
+def test_first_available_respects_physio_focus():
+    # Scoliosis is Cheryl-only, so first-available must never assign Claire.
+    p = StubPlato()
+    res = create_booking(p, {**BASE, "clinician_id": "", "physio_focus": "scoliosis"}, now=NOW)
+    assert res["clinician_id"] == "cheryl-long"
+
+
+def test_focus_refuses_a_clinician_who_does_not_offer_it():
+    # A direct pick of Claire for a scoliosis session is refused (the website
+    # never offers it, but a raw API call could).
+    p = StubPlato()
+    try:
+        create_booking(p, {**BASE, "clinician_id": "claire-ng",
+                           "physio_focus": "scoliosis"}, now=NOW)
+        assert False, "expected BookingError"
+    except BookingError:
+        pass
+    assert p.created == []  # nothing written
+
+
 def test_first_available_assigns_a_free_clinician():
     p = StubPlato()
     res = create_booking(p, {**BASE, "clinician_id": ""}, now=NOW)
