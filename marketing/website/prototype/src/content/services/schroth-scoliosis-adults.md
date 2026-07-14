@@ -12,6 +12,7 @@ priceHome: 330
 clinicians: ["Cheryl Long"]
 bookingService: "physiotherapy"
 bookingFocus: "scoliosis"
+physioType: "scoliosis"
 order: 2
 draft: false
 ---

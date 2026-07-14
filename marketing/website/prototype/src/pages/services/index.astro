@@ -3,80 +3,143 @@ import { getCollection } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Section from "../../components/Section.astro";
 import Button from "../../components/Button.astro";
+import { Icon } from "astro-icon/components";
+import { serviceById } from "../../lib/services";
+import { physioCategories } from "../../lib/physioCategories";
 
 const allServices = await getCollection("services", ({ data }) => !data.draft);
 allServices.sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99));
 
-// Group by category (index order = display order).
-const categories = [
-  "Pregnancy & Postpartum",
-  "Paediatrics",
-  "Scoliosis (Schroth Method)",
-] as const;
+// Physiotherapy types shown on this page, in display order. ("others" is a
+// booking-form catch-all, not a marketed type, so it's excluded.)
+const physioTypeOrder = ["general", "womens-health", "paediatrics", "scoliosis"] as const;
+type PhysioType = (typeof physioTypeOrder)[number];
 
-type Category = (typeof categories)[number];
+const labelForType = new Map(physioCategories.map((c) => [c.id, c.label]));
 
-const grouped = categories.reduce(
-  (acc, cat) => {
-    acc[cat] = allServices.filter((s) => s.data.category === cat);
+// Clearer, compliance-safe descriptions for each physiotherapy type.
+const typeCopy: Record<PhysioType, string> = {
+  general:
+    "Assessment and treatment for pain, injuries and post-surgical recovery — backs, necks, shoulders, knees, sports injuries and everyday aches.",
+  "womens-health":
+    "Support through pregnancy, postpartum recovery and pelvic health, including pelvic floor, bladder and bowel concerns.",
+  paediatrics:
+    "Movement, development and injury support for babies, children and teens (up to 18), including our combined Mummy & Baby assessment.",
+  scoliosis:
+    "Scoliosis-specific physiotherapy using the Schroth Method, tailored to each person's spinal curve — for children and adults.",
+};
+
+// Detail pages grouped by their physiotherapy type.
+const pagesByType = physioTypeOrder.reduce(
+  (acc, t) => {
+    acc[t] = allServices.filter((s) => s.data.physioType === t);
     return acc;
   },
-  {} as Record<Category, typeof allServices>,
+  {} as Record<PhysioType, typeof allServices>,
 );
 
-/** "From $X" using the lower of clinic/home price. */
 const fromPrice = (clinic: number, home?: number) =>
   `From $${Math.min(clinic, home ?? clinic)}`;
+
+// Secondary modalities: their own booking option, no detail page (yet).
+const pilates = serviceById("clinical-pilates")!;
+const strength = serviceById("strength-conditioning")!;
 ---
 
 <BaseLayout
-  title="Our Services | Goji Physiotherapy Singapore"
-  description="Physiotherapy services at Goji, Lentor MRT: prenatal and postpartum physio, Mummy & Baby assessments, and Schroth therapy for scoliosis in children and adults. In-clinic or home visits."
+  title="Our Services | Physiotherapy, Clinical Pilates & Strength — Goji Singapore"
+  description="Care at Goji comes in three modalities: physiotherapy (women's health, paediatrics, scoliosis/Schroth and general musculoskeletal), clinical Pilates, and strength & conditioning. Lentor MRT, in-clinic or home visits."
 >
   <section class="services-hero">
     <div class="container">
       <h1>Our services</h1>
       <p class="services-hero__lead">
-        Every visit starts with a thorough assessment and a plan built around you.
-        These pages explain what each appointment involves, who it is for, and what
-        you will leave with, so you can book with confidence. Not sure which fits?
-        <a href="https://go.gojiphysio.com/web-wa" target="_blank" rel="noopener">Message us</a>
+        Care at Goji comes in three modalities — <strong>physiotherapy</strong>,
+        <strong>clinical Pilates</strong> and <strong>strength &amp; conditioning</strong>.
+        Physiotherapy spans several types; explore what fits below, or
+        <a href="https://go.gojiphysio.com/web-wa" target="_blank" rel="noopener">message us</a>
         and we will help you choose.
       </p>
     </div>
   </section>
 
-  {
-    categories.map((cat) => {
-      const items = grouped[cat];
-      if (!items.length) return null;
-      return (
-        <Section tone={cat === "Pregnancy & Postpartum" ? "linen" : "surface"}>
-          <div class="section-head">
-            <h2>{cat}</h2>
-          </div>
-          <div class="svc-grid">
-            {items.map((s) => (
-              <a href={`/services/${s.slug}`} class="svc-card">
-                {s.data.heroImage && (
-                  <div class="svc-card__media">
-                    <img src={s.data.heroImage} alt={s.data.heroAlt ?? ""} width="480" height="300" loading="lazy" />
-                  </div>
-                )}
-                <div class="svc-card__body">
-                  <h3 class="svc-card__title">{s.data.cardTitle ?? s.data.title}</h3>
-                  <p class="svc-card__meta">
-                    {s.data.durationMin} min · {fromPrice(s.data.priceClinic, s.data.priceHome)}
-                  </p>
-                  <p class="svc-card__lead">{s.data.cardLead}</p>
-                  <span class="svc-card__cta">Learn more</span>
+  {/* ---------- Modality 1: Physiotherapy (with types) ---------- */}
+  <Section tone="linen" id="physiotherapy">
+    <div class="section-head">
+      <p class="modality-eyebrow">Modality</p>
+      <h2>Physiotherapy</h2>
+      <p class="section-head__lead">
+        One-to-one, physiotherapist-led assessment and treatment. Every visit
+        starts with a thorough assessment and a plan built around you. We work
+        across four main areas:
+      </p>
+    </div>
+
+    <div class="ptypes">
+      {
+        physioTypeOrder.map((t) => {
+          const pages = pagesByType[t];
+          const label = labelForType.get(t) ?? t;
+          return (
+            <div class="ptype">
+              <div class="ptype__head">
+                <h3 class="ptype__title">{label}</h3>
+                <p class="ptype__desc">{typeCopy[t]}</p>
+              </div>
+              {pages.length > 0 && (
+                <div class="svc-grid">
+                  {pages.map((s) => (
+                    <a href={`/services/${s.slug}`} class="svc-card">
+                      {s.data.heroImage && (
+                        <div class="svc-card__media">
+                          <img src={s.data.heroImage} alt={s.data.heroAlt ?? ""} width="480" height="300" loading="lazy" />
+                        </div>
+                      )}
+                      <div class="svc-card__body">
+                        <h4 class="svc-card__title">{s.data.cardTitle ?? s.data.title}</h4>
+                        <p class="svc-card__meta">
+                          {s.data.durationMin} min · {fromPrice(s.data.priceClinic, s.data.priceHome)}
+                        </p>
+                        <p class="svc-card__lead">{s.data.cardLead}</p>
+                        <span class="svc-card__cta">Learn more</span>
+                      </div>
+                    </a>
+                  ))}
                 </div>
-              </a>
-            ))}
+              )}
+              <div class="ptype__cta">
+                <Button href={`/book?service=physiotherapy&focus=${t}`} variant="secondary">
+                  Book {label}
+                </Button>
+              </div>
+            </div>
+          );
+        })
+      }
+    </div>
+  </Section>
+
+  {/* ---------- Modalities 2 & 3: Pilates + Strength & Conditioning ---------- */}
+  {
+    [pilates, strength].map((s, i) => (
+      <Section tone={i % 2 === 0 ? "surface" : "linen"} id={s.id}>
+        <div class="modality">
+          <div class="modality__text">
+            <p class="modality-eyebrow">Modality</p>
+            <h2>{s.title}</h2>
+            <p class="modality__meta">{s.meta.join(" · ")} · {fromPrice(Number(s.price))}</p>
+            <p class="modality__lead">{s.lead}</p>
+            <div class="modality__cta">
+              <Button href={`/book?service=${s.id}`} variant="primary">Book {s.title}</Button>
+              <Button slug="web-wa" variant="whatsapp">Ask on WhatsApp</Button>
+            </div>
           </div>
-        </Section>
-      );
-    })
+          <div class="modality__icon" aria-hidden="true">
+            <Icon name={s.icon} size={64} />
+          </div>
+        </div>
+      </Section>
+    ))
   }
 
   <Section tone="linen" id="contact-cta">
@@ -95,20 +158,67 @@ const fromPrice = (clinic: number, home?: number) =>
     border-bottom: 1px solid var(--color-border);
   }
   .services-hero__lead {
-    max-width: 56ch;
+    max-width: 60ch;
     color: var(--text-muted);
     margin-top: var(--space-4);
   }
+  .services-hero__lead strong { color: var(--text-default); font-weight: var(--weight-semibold); }
   .services-hero__lead a {
     color: var(--color-primary);
     text-decoration: underline;
     text-underline-offset: 0.2em;
   }
 
+  .modality-eyebrow {
+    font-size: var(--fs-caption);
+    font-weight: var(--weight-semibold);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--color-primary);
+    margin-bottom: var(--space-2);
+  }
   .section-head {
-    margin-bottom: var(--space-5);
+    margin-bottom: var(--space-6);
+    max-width: 62ch;
+  }
+  .section-head__lead {
+    margin-top: var(--space-3);
+    color: var(--text-muted);
+    line-height: var(--lh-body);
   }
 
+  /* Physiotherapy types */
+  .ptypes {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-7);
+  }
+  .ptype {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+  .ptype__head {
+    border-left: 3px solid var(--color-primary);
+    padding-left: var(--space-4);
+    max-width: 66ch;
+  }
+  .ptype__title {
+    font-size: var(--fs-h3);
+    color: var(--text-default);
+  }
+  .ptype__desc {
+    margin-top: var(--space-2);
+    color: var(--text-muted);
+    line-height: var(--lh-body);
+  }
+  .ptype__cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+
+  /* Detail-page cards (image-led) */
   .svc-grid {
     display: grid;
     gap: var(--space-4);
@@ -120,7 +230,6 @@ const fromPrice = (clinic: number, home?: number) =>
   @media (min-width: 980px) {
     .svc-grid { grid-template-columns: repeat(3, 1fr); }
   }
-
   .svc-card {
     display: flex;
     flex-direction: column;
@@ -137,9 +246,7 @@ const fromPrice = (clinic: number, home?: number) =>
     box-shadow: var(--shadow-md);
     transform: translateY(-2px);
   }
-  .svc-card__media {
-    background: var(--color-linen);
-  }
+  .svc-card__media { background: var(--color-linen); }
   .svc-card__media img {
     display: block;
     width: 100%;
@@ -148,9 +255,7 @@ const fromPrice = (clinic: number, home?: number) =>
     object-fit: cover;
     transition: transform var(--dur) var(--ease);
   }
-  .svc-card:hover .svc-card__media img {
-    transform: scale(1.03);
-  }
+  .svc-card:hover .svc-card__media img { transform: scale(1.03); }
   .svc-card__body {
     display: flex;
     flex-direction: column;
@@ -160,7 +265,7 @@ const fromPrice = (clinic: number, home?: number) =>
     flex: 1;
   }
   .svc-card__title {
-    font-size: var(--fs-h3);
+    font-size: var(--fs-h4, var(--fs-h3));
     color: var(--text-default);
   }
   .svc-card__meta {
@@ -185,13 +290,53 @@ const fromPrice = (clinic: number, home?: number) =>
     margin-top: var(--space-2);
   }
 
+  /* Pilates / S&C modality blocks */
+  .modality {
+    display: grid;
+    gap: var(--space-5);
+    align-items: center;
+  }
+  @media (min-width: 760px) {
+    .modality { grid-template-columns: 1fr auto; }
+  }
+  .modality__text { max-width: 56ch; }
+  .modality__meta {
+    margin-top: var(--space-2);
+    font-size: var(--fs-caption);
+    font-weight: var(--weight-semibold);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .modality__lead {
+    margin-top: var(--space-3);
+    color: var(--text-muted);
+    line-height: var(--lh-body);
+  }
+  .modality__cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-top: var(--space-4);
+  }
+  .modality__icon {
+    display: none;
+    color: var(--color-primary);
+    background: var(--bg-content);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-5);
+    box-shadow: var(--shadow-sm);
+  }
+  @media (min-width: 760px) {
+    .modality__icon { display: grid; place-items: center; }
+  }
+
   .contact-strip {
     max-width: 44ch;
     display: flex;
     flex-direction: column;
     gap: var(--space-4);
   }
-  .contact-strip p {
-    color: var(--text-muted);
-  }
+  .contact-strip p { color: var(--text-muted); }
 </style>

@@ -12,6 +12,7 @@ priceHome: 330
 clinicians: ["Kristy Ng", "Claire Ng", "Cheryl Long"]
 bookingService: "physiotherapy"
 bookingFocus: "womens-health"
+physioType: "womens-health"
 order: 1
 draft: false
 ---

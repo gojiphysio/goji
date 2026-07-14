@@ -61,6 +61,12 @@ const services = defineCollection({
     bookingFocus: z
       .enum(["general", "womens-health", "paediatrics", "scoliosis", "others"])
       .optional(),
+    /** Which physiotherapy type this page sits under on the /services index.
+     *  (Distinct from bookingFocus: Mummy & Baby books as `mummy-baby` but is
+     *  shown under the Paediatrics type.) */
+    physioType: z
+      .enum(["general", "womens-health", "paediatrics", "scoliosis"])
+      .optional(),
     /** Optional structured Q&A → FAQPage JSON-LD (progressive; add later). */
     faqs: z.array(z.object({ q: z.string(), a: z.string() })).optional(),
     /** Ordering within a category on the index page. */

@@ -11,6 +11,7 @@ priceClinic: 330
 priceHome: 380
 clinicians: ["Kristy Ng", "Cheryl Long"]
 bookingService: "mummy-baby"
+physioType: "paediatrics"
 order: 3
 draft: false
 ---
