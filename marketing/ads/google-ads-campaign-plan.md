@@ -197,9 +197,11 @@ Book online or message us on WhatsApp first - we will recommend the right appoin
 
 ## 7. Assets (extensions)
 
-- **Sitelinks:** Book an appointment → `/book` · Pelvic floor physio →
-  `/services/pelvic-floor-physiotherapy` · Conditions we treat →
+- **Sitelinks:** Book an appointment → `/book` · Conditions we treat →
   `/conditions` · Physiotherapy in Lentor → `/physiotherapy-lentor`
+  · ⏸ *Pelvic floor physio → `/services/pelvic-floor-physiotherapy` — HELD;
+  add only once the page is live (campaign-level asset, would 404 on all ad
+  groups otherwise).*
 - **Callouts:** AHPC-Registered Physios · 1 Min From Lentor MRT · Home
   Visits Island-Wide · Open Mon-Sat 8am-8pm · Women's & Family Focus
 - **Structured snippet (Services):** Pelvic Floor Physio, Prenatal,
