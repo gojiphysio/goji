@@ -48,10 +48,6 @@ All copy follows the AHPC advertising floor (`strategy/03`): **no** superlatives
 - A clear plan for symptoms many women are told to live with. Book online or WhatsApp us.  **[87]**
 - 55-minute one-on-one sessions from $260. Home visits available across Singapore.  **[80]**
 
-**Changes requested for this ad group (optional):**
-
-_                                                                      _
-
 ---
 
 ## AG2 — Postnatal / postpartum
@@ -79,10 +75,6 @@ _                                                                      _
 - Suitable after vaginal and Caesarean birth - weeks, months or years postpartum.  **[79]**
 - One-on-one care with physios experienced in women's health. Home visits island-wide.  **[84]**
 - Not sure what you need? Message us on WhatsApp and we will point you to the right session.  **[90]**
-
-**Changes requested for this ad group (optional):**
-
-_                                                                      _
 
 ---
 
@@ -112,10 +104,6 @@ _                                                                      _
 - Manage pain, keep exercising confidently and prepare your body for birth.  **[73]**
 - At Lentor Modern, above Lentor MRT. Home visits available across Singapore.  **[75]**
 
-**Changes requested for this ad group (optional):**
-
-_                                                                      _
-
 ---
 
 ## AG4 — General / near me / Lentor
@@ -144,10 +132,6 @@ _                                                                      _
 - Easy to reach from Ang Mo Kio, Yio Chu Kang, Upper Thomson, Springleaf and Bishan.  **[82]**
 - Book online or message us on WhatsApp first - we will recommend the right appointment.  **[86]**
 
-**Changes requested for this ad group (optional):**
-
-_                                                                      _
-
 ---
 
 ## Negative keywords — searches we will NOT show for
@@ -155,18 +139,3 @@ _                                                                      _
 polyclinic, community hospital, hospital, chiropractor, chiro, massage, sports massage, tcm, 诊所, government, subsidised, chas, medisave, free, cheap, job, jobs, vacancy, course, salary, internship, goji, goji physio, goji physiotherapy, goji womens
 
 *(Includes brand terms so brand searches stay organic, plus junk like “free / cheap / jobs / course”. This list grows weekly from real search-term reports.)*
-
----
-
-## Sign-off
-
-| Approver | Role | Approved | Changes requested | Date |
-|---|---|:--:|:--:|---|
-| **Cheryl Long** | Clinical accuracy & AHPC compliance | ☐ | ☐ | |
-| **Chris** | Business & brand | ☐ | ☐ | |
-
-**Notes / requested changes:**
-
-_                                                                                          _
-
-_                                                                                          _
