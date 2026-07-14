@@ -42,9 +42,15 @@ prices are allowed. Do not edit copy in the UI without rechecking.
 One campaign: **"Goji - Search - Non-brand"**. Four ad groups, each pointed
 at its money page (Quality Score = message match):
 
+> ⏸ **AG1 is BLOCKED at launch:** its landing page
+> `/services/pelvic-floor-physiotherapy` is currently held (`draft: true`)
+> pending Kristy's copy + a hero photo (see seo-geo-review.md P0). Launch
+> AG2–AG4 first; add AG1 only once that page is live. Do not point paid
+> traffic at a 404.
+
 | # | Ad group | Final URL |
 |---|---|---|
-| 1 | Pelvic floor / women's health | `https://www.gojiphysio.com/services/pelvic-floor-physiotherapy` |
+| 1 | Pelvic floor / women's health *(blocked — page held)* | `https://www.gojiphysio.com/services/pelvic-floor-physiotherapy` |
 | 2 | Postnatal / postpartum | `https://www.gojiphysio.com/services/postpartum-physiotherapy` |
 | 3 | Prenatal / pregnancy | `https://www.gojiphysio.com/services/prenatal-physiotherapy` |
 | 4 | General physio / near me / Lentor | `https://www.gojiphysio.com/physiotherapy-lentor` |

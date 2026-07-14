@@ -36,7 +36,6 @@
 ## Service details
 
 - All services: https://www.gojiphysio.com/services
-- Pelvic floor physiotherapy (55 min, from $260): https://www.gojiphysio.com/services/pelvic-floor-physiotherapy
 - Prenatal physiotherapy (55 min, from $260): https://www.gojiphysio.com/services/prenatal-physiotherapy
 - Postpartum physiotherapy (55 min, from $260): https://www.gojiphysio.com/services/postpartum-physiotherapy
 - Mummy & Baby assessment (85 min, from $330): https://www.gojiphysio.com/services/mummy-baby-assessment

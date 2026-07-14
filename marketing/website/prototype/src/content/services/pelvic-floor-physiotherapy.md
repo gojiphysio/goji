@@ -22,7 +22,11 @@ faqs:
   - q: "Do I need a doctor's referral?"
     a: "No referral is needed. You can book directly with us. If your assessment suggests input from a gynaecologist, colorectal specialist or other doctor would help, we will let you know and can work alongside them."
 order: 1
-draft: false
+# Held from build pending Kristy's revised copy + a real hero photo (no stock).
+# Flip to false once both land. While held: excluded from /services, sitemap,
+# and llms.txt; condition relatedService links to it drop gracefully; Google
+# Ads AG1 (points at this URL) stays blocked. See seo-geo-review.md P0.
+draft: true
 ---
 
 A private, comprehensive assessment of your pelvic floor with an AHPC-registered physiotherapist trained in pelvic health - and a clear plan for symptoms that many women assume they simply have to live with.
