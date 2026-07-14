@@ -17,3 +17,6 @@ __pycache__/
 
 # Regenerable handoff bundle (build artifact)
 marketing/goji-website-handoff.zip
+
+# Generated ad review PDFs (regenerate via marketing/ads/import/review_sheet.py + make-pdf)
+marketing/ads/*.pdf
