@@ -4,6 +4,9 @@ description: "Pelvic organ prolapse (POP) affects approximately 1 in 3 women who
 cardTitle: "Pelvic Organ Prolapse"
 cardLead: "Pelvic organ prolapse (POP) affects approximately 1 in 3 women who have given birth, though many are unaware they have it."
 category: "Women's Health"
+reviewer:
+  name: "Cheryl Long"
+  slug: "cheryl-long"
 ctaSlug: "web-wa"
 order: 6
 draft: false

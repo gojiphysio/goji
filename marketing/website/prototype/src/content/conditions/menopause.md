@@ -4,6 +4,9 @@ description: "Perimenopause and menopause bring significant changes to the muscu
 cardTitle: "Perimenopause, Menopause, and Bone Health"
 cardLead: "Perimenopause and menopause bring significant changes to the musculoskeletal system, pelvic floor, and bone density - changes that are often attributed to ag..."
 category: "Women's Health"
+reviewer:
+  name: "Cheryl Long"
+  slug: "cheryl-long"
 ctaSlug: "web-wa"
 order: 11
 draft: false

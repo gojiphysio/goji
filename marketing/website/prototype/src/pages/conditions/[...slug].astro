@@ -11,10 +11,13 @@ export async function getStaticPaths() {
 
 const { entry } = Astro.props;
 const { Content } = await entry.render();
-const { title, description, cardTitle, category, ctaSlug } = entry.data;
+const { title, description, cardTitle, category, ctaSlug, reviewer } = entry.data;
 
 const origin = Astro.site ?? new URL(Astro.url.origin);
 const pageURL = new URL(Astro.url.pathname, origin).href;
+const reviewerURL = reviewer
+  ? new URL(`/team/${reviewer.slug}`, origin).href
+  : undefined;
 // MedicalWebPage marks this as clinical reference content (GEO: answer engines
 // prefer typed medical pages); BreadcrumbList gives crawlers the Home ›
 // Conditions › <page> trail on these nested routes.
@@ -27,6 +30,15 @@ const conditionSchema = [
     url: pageURL,
     about: { "@type": "MedicalCondition", name: cardTitle ?? title },
     audience: { "@type": "MedicalAudience", audienceType: "Patient" },
+    ...(reviewer && reviewerURL
+      ? {
+          reviewedBy: {
+            "@type": "Person",
+            name: reviewer.name,
+            url: reviewerURL,
+          },
+        }
+      : {}),
   },
   {
     "@context": "https://schema.org",
@@ -51,6 +63,12 @@ const conditionSchema = [
         All conditions
       </a>
       <h1>{cardTitle ?? title}</h1>
+      {reviewer && (
+        <p class="cond-header__review">
+          Reviewed by{" "}
+          <a href={`/team/${reviewer.slug}`}>{reviewer.name}</a>, AHPC-registered physiotherapist
+        </p>
+      )}
     </div>
   </section>
 
@@ -97,6 +115,17 @@ const conditionSchema = [
     text-decoration: none;
   }
   .cond-header__back:hover { color: var(--color-primary); }
+
+  .cond-header__review {
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+  }
+  .cond-header__review a {
+    color: var(--color-primary);
+    font-weight: var(--weight-medium);
+    text-decoration: none;
+  }
+  .cond-header__review a:hover { text-decoration: underline; }
 
   /* Prose content */
   .cond-body {

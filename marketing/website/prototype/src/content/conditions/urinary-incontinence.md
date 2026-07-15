@@ -4,6 +4,9 @@ description: "Urinary incontinence is among the most common and most treatable c
 cardTitle: "Urinary Incontinence"
 cardLead: "Urinary incontinence is among the most common and most treatable conditions in women's health."
 category: "Women's Health"
+reviewer:
+  name: "Cheryl Long"
+  slug: "cheryl-long"
 ctaSlug: "web-wa"
 order: 5
 draft: false

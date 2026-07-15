@@ -34,6 +34,12 @@ so a token change reflows everything (styleguide is the QA surface).
   for the brand promise, not a testimonial.
 - **Voice/style:** warm, plain, educational. Regular dashes (no emdashes), no
   emojis in brand copy, **never italic** (enforced in `base.css`).
+- **Condition pages carry a clinician byline.** Every `conditions` entry sets a
+  `reviewer: { name, slug }` (the reviewing physio, from the source doc). The
+  detail template renders a "Reviewed by <name>" line linking to `/team/<slug>`
+  and emits `reviewedBy` in the MedicalWebPage JSON-LD. Strip the source doc's
+  italic reviewer/status/SEO-slug/structured-data notes and inline CTA — the
+  template supplies the H1, byline, and CTA.
 - **Mobile-first.** Most reach is on a phone. Base CSS before `@media`; check
   down to ~375px.
 - **Branch & PR to `main`** — never push to `main` directly.

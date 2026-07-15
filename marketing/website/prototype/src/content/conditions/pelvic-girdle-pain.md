@@ -4,6 +4,9 @@ description: "Pelvic girdle pain (PGP) and de Quervain's tenosynovitis - colloqu
 cardTitle: "Pelvic Girdle Pain and Mummy's Wrist"
 cardLead: "Pelvic girdle pain (PGP) and de Quervain's tenosynovitis - colloquially called \"mummy's wrist\" - are two of the most common but undertreated musculoskeletal..."
 category: "Women's Health"
+reviewer:
+  name: "Cheryl Long"
+  slug: "cheryl-long"
 ctaSlug: "web-wa"
 order: 8
 draft: false

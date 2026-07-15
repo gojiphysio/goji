@@ -4,6 +4,9 @@ description: "Diastasis recti is the widening of the two sides of the rectus abd
 cardTitle: "Diastasis Recti"
 cardLead: "Diastasis recti is the widening of the two sides of the rectus abdominis at the linea alba."
 category: "Women's Health"
+reviewer:
+  name: "Cheryl Long"
+  slug: "cheryl-long"
 ctaSlug: "web-wa"
 order: 2
 draft: false

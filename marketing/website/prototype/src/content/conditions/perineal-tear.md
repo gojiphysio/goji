@@ -4,6 +4,9 @@ description: "Around 9 in 10 first-time mothers experience some degree of perine
 cardTitle: "Perineal Tear, Scar, and Birth Trauma"
 cardLead: "Around 9 in 10 first-time mothers experience some degree of perineal trauma."
 category: "Women's Health"
+reviewer:
+  name: "Cheryl Long"
+  slug: "cheryl-long"
 ctaSlug: "web-wa"
 order: 4
 draft: false

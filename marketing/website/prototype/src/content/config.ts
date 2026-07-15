@@ -18,6 +18,11 @@ const conditions = defineCollection({
     ]),
     /** WhatsApp CTA slug — use "web-wa" until condition-specific slugs are wired in app.py */
     ctaSlug: z.string().default("web-wa"),
+    /** Clinician who clinically reviewed the page. `slug` links to their
+     *  /team/<slug> bio; every condition page carries a "Reviewed by" byline. */
+    reviewer: z
+      .object({ name: z.string(), slug: z.string() })
+      .optional(),
     /** Optional ordering within category on the index page */
     order: z.number().optional(),
     draft: z.boolean().default(false),

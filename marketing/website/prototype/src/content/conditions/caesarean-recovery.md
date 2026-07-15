@@ -4,6 +4,9 @@ description: "A Caesarean section is a major abdominal operation - seven layers 
 cardTitle: "Caesarean Recovery and Scar Management"
 cardLead: "A Caesarean section is a major abdominal operation - seven layers of tissue are incised and sutured."
 category: "Women's Health"
+reviewer:
+  name: "Cheryl Long"
+  slug: "cheryl-long"
 ctaSlug: "web-wa"
 order: 3
 draft: false
