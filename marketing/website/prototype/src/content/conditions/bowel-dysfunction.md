@@ -4,6 +4,9 @@ description: "Bowel dysfunction - including constipation, straining, incomplete 
 cardTitle: "Bowel Dysfunction and Constipation"
 cardLead: "Bowel dysfunction - including constipation, straining, incomplete evacuation, and accidental bowel leakage - is more common in women than is often recognised..."
 category: "Women's Health"
+reviewer:
+  name: "Cheryl Long"
+  slug: "cheryl-long"
 ctaSlug: "web-wa"
 order: 9
 draft: false

@@ -4,6 +4,9 @@ description: "Pelvic pain and dyspareunia (pain with intercourse) are real, phys
 cardTitle: "Pelvic Pain and Dyspareunia"
 cardLead: "Pelvic pain and dyspareunia (pain with intercourse) are real, physical conditions that are frequently under-investigated and under-treated."
 category: "Women's Health"
+reviewer:
+  name: "Cheryl Long"
+  slug: "cheryl-long"
 ctaSlug: "web-wa"
 order: 7
 draft: false

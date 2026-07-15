@@ -4,6 +4,9 @@ description: "Blocked milk ducts and mastitis are painful and common challenges 
 cardTitle: "Blocked Ducts and Mastitis"
 cardLead: "Blocked milk ducts and mastitis are painful and common challenges during breastfeeding."
 category: "Women's Health"
+reviewer:
+  name: "Cheryl Long"
+  slug: "cheryl-long"
 ctaSlug: "web-wa"
 order: 10
 draft: false

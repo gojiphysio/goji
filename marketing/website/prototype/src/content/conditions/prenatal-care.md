@@ -4,6 +4,9 @@ description: "Prenatal physiotherapy addresses the musculoskeletal and pelvic fl
 cardTitle: "Prenatal Care and Birth Preparation"
 cardLead: "Prenatal physiotherapy addresses the musculoskeletal and pelvic floor changes that happen as your body adapts to pregnancy."
 category: "Women's Health"
+reviewer:
+  name: "Cheryl Long"
+  slug: "cheryl-long"
 ctaSlug: "web-wa"
 order: 1
 draft: false
