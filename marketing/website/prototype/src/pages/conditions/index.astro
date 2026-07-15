@@ -49,10 +49,11 @@ const grouped = categories.reduce(
       if (!items.length) return null;
       return (
         <Section tone={cat === "Women's Health" ? "linen" : "surface"}>
+          <h2 class="cond-cat">{cat}</h2>
           <div class="cond-grid">
             {items.map((c) => (
               <a href={`/conditions/${c.slug}`} class="cond-card">
-                <h2 class="cond-card__title">{c.data.cardTitle ?? c.data.title}</h2>
+                <h3 class="cond-card__title">{c.data.cardTitle ?? c.data.title}</h3>
                 <p class="cond-card__lead">{c.data.cardLead}</p>
                 <span class="cond-card__cta">Read more</span>
               </a>
@@ -85,6 +86,12 @@ const grouped = categories.reduce(
   }
 
   .section-head {
+    margin-bottom: var(--space-5);
+  }
+
+  .cond-cat {
+    font-size: var(--fs-h2);
+    color: var(--text-default);
     margin-bottom: var(--space-5);
   }
 
