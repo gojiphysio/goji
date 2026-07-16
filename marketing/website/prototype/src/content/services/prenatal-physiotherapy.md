@@ -21,7 +21,7 @@ faqs:
     a: "Assessment and treatment are adapted to your stage of pregnancy by AHPC-registered physiotherapists experienced in prenatal care, and we coordinate with your obstetrician or gynaecologist where relevant. If anything in your pregnancy needs medical clearance first, we will say so."
   - q: "Do I need a doctor's referral?"
     a: "No referral is needed - you can book directly. If your assessment suggests medical input, we will let you know and can work alongside your obstetrician."
-order: 2
+order: 1
 draft: false
 ---
 

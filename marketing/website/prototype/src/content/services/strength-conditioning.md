@@ -3,7 +3,7 @@ title: "Strength & Conditioning"
 description: "Strength & Conditioning in Singapore: coach-guided sessions to build strength, movement capacity and progress towards your physical or sporting goals."
 cardTitle: "Strength & Conditioning"
 cardLead: "Coach-guided training to build strength, movement capacity and confidence - adapted to your ability, experience and goals."
-category: "Movement & Exercise"
+category: "Holistic Care"
 durationMin: 55
 priceClinic: 180
 clinicians: ["Kristy Ng", "Claire Ng"]

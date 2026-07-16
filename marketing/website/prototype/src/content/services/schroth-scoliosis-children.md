@@ -5,7 +5,7 @@ cardTitle: "Schroth Therapy - Children"
 cardLead: "Scoliosis-specific physiotherapy (Schroth Method) tailored to your child's curve, growth and goals, to support posture, strength and confidence."
 heroImage: "/photos/services/schroth-scoliosis-children.webp"
 heroAlt: "A child practising Schroth Method scoliosis exercises with a Goji physiotherapist."
-category: "Scoliosis (Schroth Method)"
+category: "General Health"
 durationMin: 55
 priceClinic: 260
 priceHome: 330
@@ -19,7 +19,7 @@ faqs:
     a: "A recent spinal X-ray or specialist report helps us classify the curve precisely and tailor the programme, so bring one if you have it. If not, we can still assess posture, movement and function, and advise on sensible next steps."
   - q: "Does Schroth therapy replace bracing or specialist review?"
     a: "No. Scoliosis-specific exercises are typically used alongside specialist monitoring, and alongside bracing where a brace has been prescribed. We work with your child's orthopaedic specialist, not instead of them."
-order: 1
+order: 3
 draft: false
 ---
 

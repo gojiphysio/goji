@@ -5,7 +5,7 @@ cardTitle: "Pelvic Floor Physiotherapy"
 cardLead: "A private, unhurried assessment for bladder, bowel, pelvic floor or pelvic pain concerns - with a clear plan to help you move and live more comfortably."
 heroImage: "/photos/services/pelvic-floor-physiotherapy.webp"
 heroAlt: "A Goji physiotherapist showing a pelvic model to a client during a pelvic floor assessment."
-category: "Pelvic Health"
+category: "General Health"
 durationMin: 55
 priceClinic: 260
 priceHome: 330

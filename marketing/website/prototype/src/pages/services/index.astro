@@ -9,11 +9,10 @@ allServices.sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99));
 
 // Group by category (index order = display order).
 const categories = [
-  "Pelvic Health",
   "Pregnancy & Postpartum",
-  "Paediatrics",
-  "Scoliosis (Schroth Method)",
-  "Movement & Exercise",
+  "General Health",
+  "Children",
+  "Holistic Care",
 ] as const;
 
 type Category = (typeof categories)[number];

@@ -5,7 +5,7 @@ cardTitle: "Schroth Therapy - Adults"
 cardLead: "Scoliosis-specific physiotherapy (Schroth Method) tailored to your curve and symptoms, to move with greater comfort, confidence and control."
 heroImage: "/photos/services/schroth-scoliosis-adults.webp"
 heroAlt: "An adult practising Schroth Method scoliosis exercises with a Goji physiotherapist."
-category: "Scoliosis (Schroth Method)"
+category: "General Health"
 durationMin: 55
 priceClinic: 260
 priceHome: 330
@@ -19,7 +19,7 @@ faqs:
     a: "The Schroth Method is scoliosis-specific: exercises are built around your individual curve pattern in three dimensions, combining postural correction, breathing mechanics and targeted strengthening, rather than generic back exercises."
   - q: "Do I need an X-ray before starting?"
     a: "A recent spinal X-ray or specialist report helps us classify your curve and tailor the programme, so bring one if you have it. Without one, we can still assess your posture, movement and symptoms and advise on next steps."
-order: 2
+order: 4
 draft: false
 ---
 

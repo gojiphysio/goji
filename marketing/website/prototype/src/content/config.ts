@@ -45,11 +45,10 @@ const services = defineCollection({
     heroAlt: z.string().optional(),
     /** Grouping bucket on the /services index. */
     category: z.enum([
-      "Pelvic Health",
       "Pregnancy & Postpartum",
-      "Paediatrics",
-      "Scoliosis (Schroth Method)",
-      "Movement & Exercise",
+      "General Health",
+      "Children",
+      "Holistic Care",
     ]),
     /** Facts header (from the source doc's Duration / Options / Physios lines). */
     durationMin: z.number(),
