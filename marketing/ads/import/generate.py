@@ -13,8 +13,9 @@ PLAN = os.path.join(HERE, "..", "google-ads-campaign-plan.md")
 OUT = HERE
 CAMP = "Goji - Search - Non-brand"
 
-# Ad group -> final URL. AG1 held (page draft); add when live.
+# Ad group -> final URL. All live as of 2026-07-16 (pelvic-floor page un-held).
 AG = {
+    "Pelvic floor / women's health": "https://www.gojiphysio.com/services/pelvic-floor-physiotherapy",
     "Postnatal / postpartum":     "https://www.gojiphysio.com/services/postpartum-physiotherapy",
     "Prenatal / pregnancy":       "https://www.gojiphysio.com/services/prenatal-physiotherapy",
     "General / near me / Lentor": "https://www.gojiphysio.com/physiotherapy-lentor",

@@ -2,7 +2,7 @@
 title: "Pelvic Floor Physiotherapy"
 description: "Pelvic floor physiotherapy in Singapore for leakage, prolapse, pelvic pain and postnatal recovery. Private 55-minute sessions with AHPC-registered physios."
 cardTitle: "Pelvic Floor Physiotherapy"
-cardLead: "A private, unhurried assessment of your pelvic floor - and a clear, personalised plan for symptoms many women are told to just live with."
+cardLead: "A private, unhurried assessment for bladder, bowel, pelvic floor or pelvic pain concerns - with a clear plan to help you move and live more comfortably."
 category: "Pelvic Health"
 durationMin: 55
 priceClinic: 260
@@ -22,45 +22,78 @@ faqs:
   - q: "Do I need a doctor's referral?"
     a: "No referral is needed. You can book directly with us. If your assessment suggests input from a gynaecologist, colorectal specialist or other doctor would help, we will let you know and can work alongside them."
 order: 1
-# Held from build pending Kristy's revised copy + a real hero photo (no stock).
-# Flip to false once both land. While held: excluded from /services, sitemap,
-# and llms.txt; condition relatedService links to it drop gracefully; Google
-# Ads AG1 (points at this URL) stays blocked. See seo-geo-review.md P0.
-draft: true
+draft: false
 ---
 
-A private, comprehensive assessment of your pelvic floor with an AHPC-registered physiotherapist trained in pelvic health - and a clear plan for symptoms that many women assume they simply have to live with.
+A personalised physiotherapy assessment for bladder, bowel, pelvic floor or pelvic pain concerns.
 
-Pelvic floor physiotherapy is the first-line, evidence-based treatment for many of the most common conditions in women's health. Leaking, heaviness, pain and urgency are common - but they are not something you have to accept.
+Suitable for women at different stages of life, whether your symptoms are new, longstanding, related to childbirth or changing around menopause. Pelvic health physiotherapy may involve strengthening or relaxing the pelvic floor, depending on your symptoms and assessment findings.
 
-## Who is this for?
+Note: The assessment and treatment described below are indicative. Your session will be tailored to your individual condition, needs and goals, and may be modified by your physiotherapist based on their clinical judgement.
 
-Pelvic floor physiotherapy may help if you:
+## Who is pelvic floor physiotherapy for?
 
-- Leak urine when you cough, sneeze, laugh, run or jump
-- Feel a heaviness, bulge or dragging sensation in your pelvis
-- Have pain with intercourse, tampon use or gynaecological exams
-- Strain with bowel movements, or struggle with urgency or leakage
-- Are pregnant or postpartum and want to understand your pelvic floor
-- Are approaching or past menopause and noticing new symptoms
-- Are returning to running, impact sport or heavy lifting and want your pelvic floor to keep up
+Pelvic floor physiotherapy may be suitable if you:
 
-## What happens during your session?
+- Experience urine leakage during coughing, sneezing, exercise or daily activities
+- Have urinary urgency, frequency or difficulty emptying your bladder
+- Experience constipation, straining or difficulty controlling your bowels
+- Feel pelvic heaviness, pressure or symptoms of prolapse
+- Experience pelvic, vaginal or tailbone pain, or pain during intimacy
+- Find it difficult to contract or relax your pelvic floor
+- Have symptoms following childbirth, pelvic surgery or changes around menopause
+- Want guidance on returning to exercise with pelvic floor symptoms
 
-Your first session is a full 55-minute, one-on-one assessment in a private treatment room:
+## Common pelvic health conditions and symptoms we assess
 
-- **A proper conversation first.** Your history, your symptoms, your goals - bladder, bowel, birth history, activity levels and anything else that matters.
-- **A whole-body look.** Posture, breathing, core strategy and movement, because the pelvic floor never works in isolation.
-- **A pelvic floor assessment.** Where appropriate and only with your informed consent, this may include an internal examination - the most accurate way to assess muscle function. It is always optional, and the assessment adapts to what you are comfortable with.
-- **A plain-language explanation.** What we found, what it means, and what we recommend.
+We assess and manage a range of pelvic health concerns, including:
 
-## What you'll leave with
+- Bladder leakage, urinary urgency, frequency or difficulty emptying your bladder
+- Constipation, straining or difficulty controlling your bowels or wind
+- Pelvic heaviness, pressure or pelvic organ prolapse symptoms
+- Pelvic, vaginal or tailbone pain, or pain during intimacy
+- Pelvic girdle, hip or lower back pain
+- Symptoms changing around perimenopause and menopause
+- Pelvic floor weakness, tension or coordination difficulties
 
-- A clear picture of how your pelvic floor is functioning
-- A personalised programme you can actually do - not a generic sheet of Kegels
-- A recommended plan for follow-up, with honest guidance on what physiotherapy can and cannot help with
-- Referral guidance if your assessment suggests a doctor should be involved
+## What happens during the appointment?
 
-## Conditions this can help with
+Your physiotherapist will first discuss your:
 
-We treat the full range of pelvic health conditions, including [urinary incontinence](/conditions/urinary-incontinence), [pelvic organ prolapse](/conditions/pelvic-organ-prolapse), [pelvic pain and dyspareunia](/conditions/pelvic-pain), [bowel dysfunction](/conditions/bowel-dysfunction), and pelvic floor changes through [perimenopause and menopause](/conditions/menopause). Pregnant or newly postpartum? Our [prenatal](/services/prenatal-physiotherapy) and [postpartum](/services/postpartum-physiotherapy) assessments include the pelvic floor as part of a wider whole-body review.
+- Medical history
+- Bladder, bowel and pelvic symptoms
+- Daily routines
+- Goals
+
+This is followed by a physical assessment tailored to your concerns, which may include:
+
+- Breathing, abdominal and movement assessment
+- Assessment of the back, hips and pelvis
+- Functional tasks such as lifting, squatting or impact movements
+- Pelvic floor assessment via transabdominal ultrasound, external observation or internal vaginal examination, where relevant
+
+An internal vaginal examination is always optional. Your physiotherapist will explain what it involves and why it may be helpful before asking for your consent. You can decline or stop the examination at any time without affecting your care. Rest assured that our physiotherapists are all female.
+
+Treatment may begin during the same session and may include manual therapy, exercise, symptom management strategies, and guidance on returning to daily activities, exercise or sport.
+
+## What you will leave with
+
+You will receive:
+
+- A clear explanation of your assessment findings
+- Guidance on whether your pelvic floor needs strengthening, relaxation or improved coordination
+- Practical strategies for managing bladder, bowel or prolapse symptoms
+- Advice on breathing, pressure management and daily movement
+- A personalised exercise plan, where appropriate
+- Guidance on returning to exercise, running or sport
+- Recommendations for follow-up care
+
+## Your next steps
+
+Depending on your assessment and goals, we may recommend:
+
+- Pelvic Health Physiotherapy follow-up
+- Clinical Pilates
+- Strength and Conditioning
+- Return-to-running or return-to-sport rehabilitation
+- Referral to another healthcare professional, where appropriate

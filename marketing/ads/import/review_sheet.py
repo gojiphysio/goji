@@ -19,7 +19,7 @@ def section(a, b):
 
 # ad group order + landing pages + held flag
 AGS = [
-    ("AG1", "Pelvic floor / women's health", "/services/pelvic-floor-physiotherapy", True),
+    ("AG1", "Pelvic floor / women's health", "/services/pelvic-floor-physiotherapy", False),
     ("AG2", "Postnatal / postpartum",        "/services/postpartum-physiotherapy",   False),
     ("AG3", "Prenatal / pregnancy",          "/services/prenatal-physiotherapy",     False),
     ("AG4", "General / near me / Lentor",     "/physiotherapy-lentor",                False),

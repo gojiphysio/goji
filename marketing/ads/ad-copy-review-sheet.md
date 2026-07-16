@@ -18,9 +18,7 @@ All copy follows the AHPC advertising floor (`strategy/03`): **no** superlatives
 > ### ⚠️ One item flagged for Cheryl
 > **AG1 headline “Leakage Is Common & Treatable”** — “Treatable” is accurate (pelvic-floor physiotherapy is first-line care for incontinence) but is stronger than our usual “can help” wording. Please confirm it’s acceptable, or suggest an alternative.
 
-## AG1 — Pelvic floor / women's health  ⏸️ **HELD**
-
-> Landing page is held (pending Kristy’s copy + a photo), so these ads won’t run yet. Please still approve the copy now so it’s ready the moment the page is live.
+## AG1 — Pelvic floor / women's health
 
 **Landing page:** `https://www.gojiphysio.com/services/pelvic-floor-physiotherapy`
 
