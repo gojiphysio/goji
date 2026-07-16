@@ -1,7 +1,13 @@
 # Google Ads campaign plan (launch spec)
 
-**Status: ready to launch, pending (a) Cheryl's review of all ad copy and
-(b) the conversion-tracking gates below.** This is the live campaign spec —
+**Status: ready to launch, pending the conversion-tracking gates below.**
+Ad copy **reviewed by Cheryl + team 2026-07-16** and incorporated (new
+keywords across AG2–AG4; "leakage"→"incontinence" framing; "tummy
+gap"→"diastasis"). "Treatable" was reviewed and kept. Three of their edits
+exceeded Google's char limits and were trimmed to fit while preserving intent
+(AG1 headline → "Incontinence Is Treatable"; AG1 desc drops redundant "urinary
+leakage"; AG4 headline → "Physio Near Upper Thomson") — reconfirm these three
+with Cheryl if the exact wording matters. This is the live campaign spec —
 what to actually build in the Google Ads UI. The how-to mechanics (where
 each screen is, why each rule exists) live in `google-ads-playbook.md`;
 SEO/keyword context lives in `../seo/seo-geo-review.md`. Update this file
@@ -80,6 +86,8 @@ still tracked via the site's own go-links).
 "post pregnancy physio"           "postnatal check physio"
 "diastasis recti physio"          "abdominal separation treatment"
 "c section recovery physio"       "physio after birth"
+"returning to sports postpartum"  "low back pain postpartum"
+"pelvic pain pregnancy"
 ```
 
 **AG3 — Prenatal / pregnancy**
@@ -88,6 +96,8 @@ still tracked via the site's own go-links).
 "pregnancy physio"                "antenatal physiotherapy"
 "pregnancy back pain physio"      "pelvic girdle pain physio"
 "pregnancy pelvic pain treatment" "physio for pregnant women"
+"exercise during pregnancy"       "pubic pain during pregnancy"
+"birth prep physio"               "epino physio"
 ```
 
 **AG4 — General / near me / Lentor**
@@ -97,6 +107,9 @@ still tracked via the site's own go-links).
 "physiotherapy ang mo kio"        "physio upper thomson"
 "physiotherapy clinic singapore"  "physiotherapist singapore"
 "back pain physio singapore"      "neck and shoulder physio"
+"physiotherapy upper thomson"     "physiotherapy sengkang"
+"physiotherapy punggol"           "physiotherapy for elderly"
+"physiotherapy in yio chu kang"   "physiotherapy in woodlands"
 ```
 
 ## 5. Negative keywords (shared campaign list)
@@ -128,17 +141,17 @@ Headlines (≤30 chars):
 ```
 Pelvic Floor Physiotherapy      Women's Health Physio
 AHPC-Registered Physios         1 Min From Lentor MRT
-Private 55-Minute Sessions      Leakage Is Common & Treatable
+Private 55-Minute Sessions      Incontinence Is Treatable
 First-Line Care, No Referral    Prolapse & Pelvic Pain Care
 Book Online In Minutes          Ask Us On WhatsApp First
 Home Visits Island-Wide         Open Mon-Sat, 8am To 8pm
 ```
 Descriptions (≤90 chars):
 ```
-Physio for leakage, prolapse and pelvic pain. Private, unhurried, evidence-based care.
+Physio for incontinence, prolapse & pelvic pain. Private, unhurried, evidence-based care.
 Assessment with an AHPC-registered physiotherapist at Lentor Modern, 1 min from the MRT.
 A clear plan for symptoms many women are told to live with. Book online or WhatsApp us.
-55-minute one-on-one sessions from $260. Home visits available across Singapore.
+55-minute one-on-one sessions at $260. Home visits available across Singapore.
 ```
 
 **AG2 — Postnatal / postpartum**
@@ -147,13 +160,13 @@ Headlines:
 ```
 Postnatal Physiotherapy         Postpartum Recovery Check
 Diastasis Recti Assessment      C-Section Recovery Support
-Weeks Or Years After Birth      Bring Your Baby Along
+Returning to Sports Postpartum  Bring Your Baby Along
 Home Visits Island-Wide         1 Min From Lentor MRT
 AHPC-Registered Physios         Book Online In Minutes
 ```
 Descriptions:
 ```
-Pelvic floor, tummy gap and scar assessment, with a plan for your return to exercise.
+Pelvic floor, diastasis and scar assessment, with a plan for your return to exercise.
 Suitable after vaginal and Caesarean birth - weeks, months or years postpartum.
 One-on-one care with physios experienced in women's health. Home visits island-wide.
 Not sure what you need? Message us on WhatsApp and we will point you to the right session.
@@ -183,14 +196,14 @@ Headlines:
 ```
 Physiotherapy In Lentor         Physio Above Lentor MRT
 Women's & Family Physio         Back, Neck & Knee Physio
-Open Mon-Sat, 8am To 8pm        AHPC-Registered Physios
+Open Mon-Sat, 8am To 8pm        Physio Near Upper Thomson
 Book Online In Minutes          Home Visits Island-Wide
 Serving Ang Mo Kio & Bishan     WhatsApp Us Your Symptoms
 ```
 Descriptions:
 ```
 Physiotherapy at Lentor Modern, a 1-minute walk from Lentor MRT Exit 1 (TEL).
-Women's, family and musculoskeletal physio - one clinic, AHPC-registered physios.
+Women's, family, and musculoskeletal physio - one clinic, AHPC-registered physios.
 Easy to reach from Ang Mo Kio, Yio Chu Kang, Upper Thomson, Springleaf and Bishan.
 Book online or message us on WhatsApp first - we will recommend the right appointment.
 ```

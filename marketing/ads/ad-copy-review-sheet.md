@@ -33,7 +33,7 @@ All copy follows the AHPC advertising floor (`strategy/03`): **no** superlatives
 - AHPC-Registered Physios  **[23]**
 - 1 Min From Lentor MRT  **[21]**
 - Private 55-Minute Sessions  **[26]**
-- Leakage Is Common & Treatable  **[29]**
+- Incontinence Is Treatable  **[25]**
 - First-Line Care, No Referral  **[28]**
 - Prolapse & Pelvic Pain Care  **[27]**
 - Book Online In Minutes  **[22]**
@@ -43,10 +43,10 @@ All copy follows the AHPC advertising floor (`strategy/03`): **no** superlatives
 
 **Descriptions**
 
-- Physio for leakage, prolapse and pelvic pain. Private, unhurried, evidence-based care.  **[86]**
+- Physio for incontinence, prolapse & pelvic pain. Private, unhurried, evidence-based care.  **[89]**
 - Assessment with an AHPC-registered physiotherapist at Lentor Modern, 1 min from the MRT.  **[88]**
 - A clear plan for symptoms many women are told to live with. Book online or WhatsApp us.  **[87]**
-- 55-minute one-on-one sessions from $260. Home visits available across Singapore.  **[80]**
+- 55-minute one-on-one sessions at $260. Home visits available across Singapore.  **[78]**
 
 ---
 
@@ -54,7 +54,7 @@ All copy follows the AHPC advertising floor (`strategy/03`): **no** superlatives
 
 **Landing page:** `https://www.gojiphysio.com/services/postpartum-physiotherapy`
 
-**Shows for searches like:** "postnatal physio" (phrase), [postnatal physiotherapy singapore] (exact), "postpartum physio" (phrase), "postpartum physiotherapy" (phrase), "post pregnancy physio" (phrase), "postnatal check physio" (phrase), "diastasis recti physio" (phrase), "abdominal separation treatment" (phrase), "c section recovery physio" (phrase), "physio after birth" (phrase)
+**Shows for searches like:** "postnatal physio" (phrase), [postnatal physiotherapy singapore] (exact), "postpartum physio" (phrase), "postpartum physiotherapy" (phrase), "post pregnancy physio" (phrase), "postnatal check physio" (phrase), "diastasis recti physio" (phrase), "abdominal separation treatment" (phrase), "c section recovery physio" (phrase), "physio after birth" (phrase), "returning to sports postpartum" (phrase), "low back pain postpartum" (phrase), "pelvic pain pregnancy" (phrase)
 
 **Headlines**
 
@@ -62,7 +62,7 @@ All copy follows the AHPC advertising floor (`strategy/03`): **no** superlatives
 - Postpartum Recovery Check  **[25]**
 - Diastasis Recti Assessment  **[26]**
 - C-Section Recovery Support  **[26]**
-- Weeks Or Years After Birth  **[26]**
+- Returning to Sports Postpartum  **[30]**
 - Bring Your Baby Along  **[21]**
 - Home Visits Island-Wide  **[23]**
 - 1 Min From Lentor MRT  **[21]**
@@ -71,7 +71,7 @@ All copy follows the AHPC advertising floor (`strategy/03`): **no** superlatives
 
 **Descriptions**
 
-- Pelvic floor, tummy gap and scar assessment, with a plan for your return to exercise.  **[85]**
+- Pelvic floor, diastasis and scar assessment, with a plan for your return to exercise.  **[85]**
 - Suitable after vaginal and Caesarean birth - weeks, months or years postpartum.  **[79]**
 - One-on-one care with physios experienced in women's health. Home visits island-wide.  **[84]**
 - Not sure what you need? Message us on WhatsApp and we will point you to the right session.  **[90]**
@@ -82,7 +82,7 @@ All copy follows the AHPC advertising floor (`strategy/03`): **no** superlatives
 
 **Landing page:** `https://www.gojiphysio.com/services/prenatal-physiotherapy`
 
-**Shows for searches like:** "prenatal physiotherapy" (phrase), [prenatal physio singapore] (exact), "pregnancy physio" (phrase), "antenatal physiotherapy" (phrase), "pregnancy back pain physio" (phrase), "pelvic girdle pain physio" (phrase), "pregnancy pelvic pain treatment" "physio for pregnant women" (phrase)
+**Shows for searches like:** "prenatal physiotherapy" (phrase), [prenatal physio singapore] (exact), "pregnancy physio" (phrase), "antenatal physiotherapy" (phrase), "pregnancy back pain physio" (phrase), "pelvic girdle pain physio" (phrase), "pregnancy pelvic pain treatment" "physio for pregnant women" (phrase), "exercise during pregnancy" (phrase), "pubic pain during pregnancy" (phrase), "birth prep physio" (phrase), "epino physio" (phrase)
 
 **Headlines**
 
@@ -110,7 +110,7 @@ All copy follows the AHPC advertising floor (`strategy/03`): **no** superlatives
 
 **Landing page:** `https://www.gojiphysio.com/physiotherapy-lentor`
 
-**Shows for searches like:** "physio near me" (phrase), [physiotherapy near me] (exact), "physiotherapy lentor" (phrase), "physio lentor" (phrase), "physiotherapy ang mo kio" (phrase), "physio upper thomson" (phrase), "physiotherapy clinic singapore" (phrase), "physiotherapist singapore" (phrase), "back pain physio singapore" (phrase), "neck and shoulder physio" (phrase)
+**Shows for searches like:** "physio near me" (phrase), [physiotherapy near me] (exact), "physiotherapy lentor" (phrase), "physio lentor" (phrase), "physiotherapy ang mo kio" (phrase), "physio upper thomson" (phrase), "physiotherapy clinic singapore" (phrase), "physiotherapist singapore" (phrase), "back pain physio singapore" (phrase), "neck and shoulder physio" (phrase), "physiotherapy upper thomson" (phrase), "physiotherapy sengkang" (phrase), "physiotherapy punggol" (phrase), "physiotherapy for elderly" (phrase), "physiotherapy in yio chu kang" (phrase), "physiotherapy in woodlands" (phrase)
 
 **Headlines**
 
@@ -119,7 +119,7 @@ All copy follows the AHPC advertising floor (`strategy/03`): **no** superlatives
 - Women's & Family Physio  **[23]**
 - Back, Neck & Knee Physio  **[24]**
 - Open Mon-Sat, 8am To 8pm  **[24]**
-- AHPC-Registered Physios  **[23]**
+- Physio Near Upper Thomson  **[25]**
 - Book Online In Minutes  **[22]**
 - Home Visits Island-Wide  **[23]**
 - Serving Ang Mo Kio & Bishan  **[27]**
@@ -128,7 +128,7 @@ All copy follows the AHPC advertising floor (`strategy/03`): **no** superlatives
 **Descriptions**
 
 - Physiotherapy at Lentor Modern, a 1-minute walk from Lentor MRT Exit 1 (TEL).  **[77]**
-- Women's, family and musculoskeletal physio - one clinic, AHPC-registered physios.  **[81]**
+- Women's, family, and musculoskeletal physio - one clinic, AHPC-registered physios.  **[82]**
 - Easy to reach from Ang Mo Kio, Yio Chu Kang, Upper Thomson, Springleaf and Bishan.  **[82]**
 - Book online or message us on WhatsApp first - we will recommend the right appointment.  **[86]**
 
