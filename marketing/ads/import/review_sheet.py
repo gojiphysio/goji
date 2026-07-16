@@ -45,14 +45,15 @@ def fenced(body, after=None):
     return m.group(1) if m else ""
 
 def keywords(ag):
+    # Extract "phrase" / [exact] tokens by delimiter, not whitespace, so a single
+    # space between two quoted keywords doesn't fuse them (bug 2026-07-16).
     toks = []
     for line in fenced(kw_c.get(ag, "")).splitlines():
-        for t in re.split(r'\s{2,}', line.strip()):
-            t = t.strip()
-            if t.startswith('['):
+        for t in re.findall(r'"[^"]+"|\[[^\]]+\]', line):
+            if t[0] == '[':
                 toks.append(f"[{t[1:-1]}] (exact)")
-            elif t.startswith('"'):
-                toks.append(f'"{t.strip(chr(34))}" (phrase)')
+            else:
+                toks.append(f'{t} (phrase)')
     return toks
 
 def rsa(ag):
