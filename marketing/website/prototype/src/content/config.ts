@@ -49,6 +49,7 @@ const services = defineCollection({
       "Pregnancy & Postpartum",
       "Paediatrics",
       "Scoliosis (Schroth Method)",
+      "Movement & Exercise",
     ]),
     /** Facts header (from the source doc's Duration / Options / Physios lines). */
     durationMin: z.number(),
