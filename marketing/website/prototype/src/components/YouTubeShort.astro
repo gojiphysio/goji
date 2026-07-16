@@ -8,17 +8,21 @@
 interface Props {
   id: string;
   title: string;
+  /** Self-hosted cover still (the Short's own title card). Decorative: the
+   *  trigger's aria-label and the figcaption carry the meaning. */
+  poster: string;
 }
-const { id, title } = Astro.props;
+const { id, title, poster } = Astro.props;
 ---
 
 <figure class="yts">
   <div class="yts__stage" data-yt>
     <button class="yts__trigger" type="button" data-yt-id={id} aria-label={`Play video: ${title}`}>
+      <img class="yts__poster" src={poster} alt="" width="540" height="960" loading="lazy" decoding="async" />
+      <span class="yts__scrim" aria-hidden="true"></span>
       <span class="yts__play" aria-hidden="true">
         <svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
       </span>
-      <span class="yts__hint">Tap to play</span>
     </button>
   </div>
   <figcaption class="yts__title">{title}</figcaption>
@@ -55,21 +59,46 @@ const { id, title } = Astro.props;
   .yts__trigger {
     position: absolute;
     inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-3);
+    display: grid;
+    place-items: stretch;
+    padding: 0;
     background: transparent;
     border: 0;
     cursor: pointer;
     color: var(--color-linen);
   }
+  /* Poster, scrim and play button all stack in the single grid cell. */
+  .yts__poster,
+  .yts__scrim,
   .yts__play {
+    grid-area: 1 / 1;
+  }
+  .yts__poster {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  /* Bottom-up wash: lifts the play button off the image without dimming the
+     Short's own title text, which sits centred on the card. */
+  .yts__scrim {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      to top,
+      color-mix(in srgb, var(--color-ink) 72%, transparent) 0%,
+      transparent 42%
+    );
+    transition: opacity var(--dur) var(--ease);
+  }
+  .yts__play {
+    align-self: end;
+    justify-self: center;
+    margin-bottom: var(--space-4);
     display: grid;
     place-items: center;
-    width: 3.5rem;
-    height: 3.5rem;
+    width: 3rem;
+    height: 3rem;
     border-radius: 50%;
     background: color-mix(in srgb, var(--color-linen) 92%, transparent);
     color: var(--color-primary);
@@ -81,14 +110,6 @@ const { id, title } = Astro.props;
   .yts__trigger:focus-visible .yts__play {
     transform: scale(1.06);
     background: var(--color-linen);
-  }
-  .yts__hint {
-    font-family: var(--font-display);
-    font-size: var(--fs-caption);
-    font-weight: var(--weight-semibold);
-    letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
-    color: color-mix(in srgb, var(--color-linen) 85%, transparent);
   }
   .yts__title {
     font-size: var(--fs-small);
