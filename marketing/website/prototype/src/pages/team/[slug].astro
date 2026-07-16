@@ -32,7 +32,20 @@ const teamSchema = [
     image: d.photo ? new URL(d.photo, origin).href : undefined,
     url: pageURL,
     knowsLanguage: d.languages,
-    worksFor: { "@type": "MedicalClinic", name: SITE.fullName, url: origin.href },
+    // E-E-A-T signals for answer engines: credentials and specialty topics
+    // straight from the bio frontmatter, plus the clinic's public profiles.
+    hasCredential: {
+      "@type": "EducationalOccupationalCredential",
+      name: d.credentials,
+    },
+    knowsAbout: d.specialties.map((s) => s.title),
+    sameAs: [SITE.instagram],
+    worksFor: {
+      "@type": "MedicalClinic",
+      name: SITE.fullName,
+      alternateName: [SITE.name, "Goji Physio"],
+      url: origin.href,
+    },
   },
   {
     "@context": "https://schema.org",

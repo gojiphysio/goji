@@ -1,6 +1,6 @@
 ---
 title: "Prenatal Physiotherapy"
-description: "A comprehensive prenatal physiotherapy assessment to help you move comfortably through pregnancy, manage symptoms and prepare your body for birth and postpartum recovery. Suitable at any stage of pregnancy."
+description: "Prenatal physiotherapy in Singapore to move comfortably through pregnancy, manage pain and pelvic floor symptoms, and prepare your body for birth."
 cardTitle: "Prenatal Physiotherapy"
 cardLead: "Move with greater comfort through pregnancy with a personalised plan for your symptoms, activity goals and preparation for birth."
 heroImage: "/photos/services/prenatal-physiotherapy.webp"
@@ -12,55 +12,75 @@ priceHome: 330
 clinicians: ["Kristy Ng", "Claire Ng", "Cheryl Long"]
 bookingService: "physiotherapy"
 bookingFocus: "womens-health"
-order: 2
+faqs:
+  - q: "When in pregnancy can I start prenatal physiotherapy?"
+    a: "At any stage. Some women come early to stay ahead of symptoms and keep exercising confidently; others come in the second or third trimester when aches, pelvic pain or pelvic floor symptoms appear. Techniques and positioning are adapted to your stage of pregnancy."
+  - q: "Can prenatal physiotherapy help me prepare for birth?"
+    a: "Yes - birth preparation is a core part of prenatal physiotherapy. Depending on your stage and goals, this can include pelvic floor preparation, perineal massage instruction, labour positions and breathing strategies."
+  - q: "Is physiotherapy safe during pregnancy?"
+    a: "Assessment and treatment are adapted to your stage of pregnancy by AHPC-registered physiotherapists experienced in prenatal care, and we coordinate with your obstetrician or gynaecologist where relevant. If anything in your pregnancy needs medical clearance first, we will say so."
+  - q: "Do I need a doctor's referral?"
+    a: "No referral is needed - you can book directly. If your assessment suggests medical input, we will let you know and can work alongside your obstetrician."
+order: 1
 draft: false
 ---
 
-A comprehensive physiotherapy assessment to help you move comfortably through pregnancy, manage symptoms and prepare your body for birth and postpartum recovery.
+A comprehensive physiotherapy assessment to help you move comfortably through pregnancy, manage symptoms and prepare your body for birth.
 
 Suitable at any stage of pregnancy, whether you are experiencing pain, pelvic floor symptoms or simply want guidance on staying active safely.
 
-## Who is this for?
+Note: The assessment and treatment described below are indicative. Your session will be tailored to your individual condition, needs and goals, and may be modified by your physiotherapist based on their clinical judgement.
 
-This assessment may be helpful if you:
+## Who is prenatal physiotherapy for?
+
+Prenatal physiotherapy may be suitable if you:
 
 - Have pelvic girdle, lower back, hip or pubic pain
-- Experience bladder leakage, urgency, constipation or pelvic heaviness
+- Experience urine leakage, urgency, constipation or pelvic heaviness
 - Have abdominal, rib, groin or tailbone discomfort
 - Experience neck, shoulder or wrist pain
-- Feel discomfort when walking, climbing stairs, turning in bed or getting in and out of a car
+- Feel discomfort walking, climbing stairs, turning in bed or getting in and out of a car
 - Want guidance on exercising safely during pregnancy
 - Want to prepare your pelvic floor and body for birth
 - Want support planning your postpartum recovery
 
-## What we assess
+## Common prenatal conditions and symptoms we assess
 
-Your assessment is tailored to your symptoms, stage of pregnancy and goals. It may include:
+We assess and manage a range of pregnancy-related concerns, including:
 
-- Posture, mobility and movement
-- Pelvic girdle, lower back and hip function
-- Abdominal and core coordination
-- Breathing and pressure management
-- Pelvic floor strength, relaxation and coordination
-- Bladder, bowel and prolapse symptoms
-- Functional strength and load tolerance
-- Exercise technique and activity modifications
-- Movement strategies for daily activities
-- Physical preparation for labour and birth
+- Pelvic girdle pain, lower back, hip or pubic pain
+- Urine leakage, urinary urgency or frequency
+- Constipation or difficulty emptying your bowels
+- Pelvic heaviness, pressure or prolapse symptoms
+- Abdominal, rib, groin or tailbone discomfort
+- Neck, shoulder or wrist pain
+- Pelvic floor weakness, tension or coordination difficulties
 
 ## What happens during the appointment?
 
-Your physiotherapist will discuss your medical history, pregnancy, symptoms, activity levels and goals.
+Your physiotherapist will first discuss your:
 
-The physical assessment may include:
+- Medical history
+- Pregnancy and symptoms
+- Activity levels
+- Goals
 
-- Breathing, posture and movement
-- Abdominal and pelvic assessment
+This is followed by a physical assessment tailored to your concerns, which may include:
+
+- Breathing and posture assessment
 - Assessment of your back, hips and pelvic girdle
 - Functional tasks such as walking, squatting, lifting or balancing
-- Pelvic floor assessment using external observation, transabdominal ultrasound or an internal vaginal examination
+- Pelvic floor assessment via transabdominal ultrasound, external observation or internal vaginal examination, where relevant
 
-An internal vaginal examination is always optional and will only be performed when appropriate and with your consent.
+An internal vaginal examination is always optional and will only be performed when appropriate and with your informed consent. Rest assured that our physiotherapists are all female.
+
+Treatment may begin during the same session and may include:
+
+- Manual therapy
+- Exercise
+- Symptom management strategies
+- Guidance on staying active safely
+- Birth prep education and perineal massage (past week 34)
 
 ## What you will leave with
 
@@ -72,17 +92,15 @@ You will receive:
 - A personalised exercise plan, where appropriate
 - Advice on staying active safely during pregnancy
 - Guidance on preparing your body for labour, birth and postpartum recovery
-- Recommendations for any follow-up care
+- Recommendations for follow-up care
 
 ## Your next steps
 
 Depending on your assessment and goals, we may recommend:
 
-- [Physiotherapy](/book?service=physiotherapy&focus=womens-health)
-- [Prenatal Clinical Pilates Reformer](/book?service=clinical-pilates)
-- [Strength and Conditioning](/book?service=strength-conditioning)
+- Prenatal Physiotherapy follow-up
+- Prenatal Clinical Pilates
+- Strength and Conditioning
 - Birth preparation sessions
-- [Postpartum Physiotherapy](/services/postpartum-physiotherapy)
+- Postpartum Physiotherapy
 - Referral to another healthcare professional, where appropriate
-
-Move with greater comfort and confidence through pregnancy with a personalised plan for your symptoms, activity goals and preparation for birth.

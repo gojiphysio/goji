@@ -231,6 +231,11 @@ junk queries, not high-intent searches — see `marketing/ads/google-ads-playboo
 Before relaunching, put the few numbers we'd otherwise open the Google Ads UI for
 **on the Marketing tab**, so the founder can steer the relaunch from one place.
 
+> The relaunch itself is specced in `marketing/ads/google-ads-campaign-plan.md`
+> (2026-07). Note its final-URL suffix adds `utm_term={keyword}`, so
+> `marts.web_session_events.utm_term` now carries the matched keyword —
+> keyword→session→booking joins work today, before these transfer views land.
+
 ### What to surface (from the BQ Data Transfer `google_ads` dataset)
 
 `fetch_google_ads` already reads campaign/account stats. Add sibling graceful-

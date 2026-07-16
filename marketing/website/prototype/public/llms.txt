@@ -1,15 +1,17 @@
 # Goji Women's and Family Physiotherapy
 
-> Goji Physiotherapy is a women's and family physiotherapy clinic at Lentor
-> Modern, Singapore (1 minute from Lentor MRT, Thomson-East Coast Line, Exit 1).
-> We provide prenatal, postnatal, pelvic-health, paediatric, and musculoskeletal
-> physiotherapy — a continuum of care for women and their families in one clinic.
-> AHPC-registered physiotherapists. Home visits available.
+> Goji Physiotherapy (also known as Goji Physio) is a women's and family
+> physiotherapy clinic at Lentor Modern, Singapore (1 minute from Lentor MRT,
+> Thomson-East Coast Line, Exit 1). We provide prenatal, postnatal,
+> pelvic-health, paediatric, and musculoskeletal physiotherapy — a continuum of
+> care for women and their families in one clinic. AHPC-registered
+> physiotherapists. Home visits available across Singapore, including the East
+> Coast.
 
 ## About
 
-- Name: Goji Women's and Family Physiotherapy (Goji Physiotherapy)
-- Location: Lentor Modern, #01-13, Lentor Central, Singapore 788887
+- Name: Goji Women's and Family Physiotherapy (short forms: Goji Physiotherapy, Goji Physio)
+- Location: Lentor Modern, #01-13, Lentor Central, Singapore 788887 (above Lentor MRT station; serves Lentor, Ang Mo Kio, Yio Chu Kang, Upper Thomson, Springleaf and Bishan, with home visits island-wide)
 - Hours: Monday–Saturday 8am–8pm; Sunday & public holidays by appointment only
 - Phone: +65 8377 0401
 - Email: hello@gojiphysio.com
@@ -34,11 +36,16 @@
 ## Service details
 
 - All services: https://www.gojiphysio.com/services
+- Pelvic floor physiotherapy (55 min, from $260): https://www.gojiphysio.com/services/pelvic-floor-physiotherapy
 - Prenatal physiotherapy (55 min, from $260): https://www.gojiphysio.com/services/prenatal-physiotherapy
 - Postpartum physiotherapy (55 min, from $260): https://www.gojiphysio.com/services/postpartum-physiotherapy
 - Mummy & Baby assessment (85 min, from $330): https://www.gojiphysio.com/services/mummy-baby-assessment
 - Schroth therapy for scoliosis in children (55 min, from $260): https://www.gojiphysio.com/services/schroth-scoliosis-children
 - Schroth therapy for scoliosis in adults (55 min, from $260): https://www.gojiphysio.com/services/schroth-scoliosis-adults
+- Musculoskeletal & general physiotherapy (55 min, from $260): https://www.gojiphysio.com/services/musculoskeletal-physiotherapy
+- Paediatric physiotherapy (55 min, from $260): https://www.gojiphysio.com/services/paediatric-physiotherapy
+- Clinical Pilates (55 min, $180 in-clinic): https://www.gojiphysio.com/services/clinical-pilates
+- Strength & Conditioning (55 min, $180 in-clinic): https://www.gojiphysio.com/services/strength-conditioning
 
 ## Conditions we treat
 
@@ -53,6 +60,10 @@
 - Urinary incontinence: https://www.gojiphysio.com/conditions/urinary-incontinence
 - Bowel dysfunction: https://www.gojiphysio.com/conditions/bowel-dysfunction
 - Menopause, osteopenia & osteoporosis: https://www.gojiphysio.com/conditions/menopause
+
+## Location pages
+
+- Physiotherapy in Lentor: https://www.gojiphysio.com/physiotherapy-lentor
 
 ## Team
 

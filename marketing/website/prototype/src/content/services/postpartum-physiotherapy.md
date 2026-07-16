@@ -1,6 +1,6 @@
 ---
 title: "Postpartum Physiotherapy"
-description: "A comprehensive postpartum physiotherapy assessment to understand how your body is recovering after pregnancy and birth, and to create a clear plan for returning to daily activities, exercise and sport. Suitable after both vaginal and Caesarean birth."
+description: "Postpartum physiotherapy in Singapore: assess your recovery after birth and plan your return to movement, exercise and sport. After vaginal or Caesarean birth."
 cardTitle: "Postpartum Physiotherapy"
 cardLead: "Understand how your body is recovering after birth and get a personalised plan for returning to movement, exercise and sport."
 heroImage: "/photos/services/postpartum-physiotherapy.webp"
@@ -12,72 +12,91 @@ priceHome: 330
 clinicians: ["Kristy Ng", "Claire Ng", "Cheryl Long"]
 bookingService: "physiotherapy"
 bookingFocus: "womens-health"
-order: 1
+faqs:
+  - q: "When can I have a postpartum physiotherapy assessment?"
+    a: "At any stage - weeks, months or years after birth. Many mothers come after their six-week postnatal review, but if something is bothering you earlier, you do not need to wait. Recovery questions remain assessable and treatable long after the first year."
+  - q: "Is this suitable after a Caesarean birth?"
+    a: "Yes. The assessment is designed for recovery after both vaginal and Caesarean birth, and includes scar assessment and advice on returning to activity after abdominal surgery."
+  - q: "Can I bring my baby to the appointment?"
+    a: "Yes - many mothers bring their babies along. If travelling with a newborn is the hard part, the same assessment is also available as a home visit, or you can combine your recovery check with a developmental check for your baby in a Mummy and Baby assessment."
+  - q: "Do I need a doctor's referral, and can I claim insurance?"
+    a: "No referral is needed - you can book directly. We do not offer direct billing: most patients pay first and claim from their insurer afterwards, depending on their policy's physiotherapy coverage."
+order: 2
 draft: false
 ---
 
 A comprehensive physiotherapy assessment to understand how your body is recovering after pregnancy and birth, and to create a clear plan for returning to daily activities, exercise and sport.
 
-Suitable after both vaginal and Caesarean birth, whether you are weeks, months or a year postpartum.
+Suitable after both vaginal and Caesarean birth, whether you are weeks, months or more than a year postpartum.
 
-## Who is this for?
+Note: The assessment and treatment described below are indicative. Your session will be tailored to your individual condition, needs and goals, and may be modified by your physiotherapist based on their clinical judgement.
 
-This assessment may be helpful if you:
+## Who is postpartum physiotherapy for?
 
-- Have abdominal separation or concerns about your core
-- Experience bladder leakage, urgency, constipation or pelvic heaviness
-- Have pelvic, back, hip, neck, shoulder or wrist pain
-- Have discomfort around a Caesarean, perineal or episiotomy scar
-- Experience pelvic pain or discomfort during intimacy
-- Feel unsure about returning to exercise, running, lifting or sport
+Postpartum physiotherapy may be suitable if you:
+
+- Are recovering after a vaginal or Caesarean delivery
+- Have symptoms affecting your movement or daily activities
+- Feel unsure whether your recovery is progressing as expected
+- Want to return to exercise, running, lifting or sport
 - Want professional guidance on your postpartum recovery
 
-## What we assess
+## Common postpartum conditions and symptoms we assess
 
-Your assessment is tailored to your symptoms and goals. It may include:
+We assess and manage a range of postpartum concerns, including:
 
-- Abdominal separation and core function
-- Breathing and pressure management
-- Pelvic floor strength, relaxation and coordination
-- Bladder, bowel and prolapse symptoms
-- Caesarean, perineal or episiotomy scar healing
+- Abdominal widening, also known as Diastasis Recti (DR)
+- Urine leakage or urinary urgency
+- Constipation and bowel symptoms
+- Pelvic heaviness or pelvic organ prolapse symptoms
+- Pelvic floor weakness, tension or coordination difficulties
+- Caesarean, perineal or episiotomy scar pain
 - Pelvic, back, hip or pelvic girdle pain
-- Posture, mobility and movement
-- Functional strength and load tolerance
-- Readiness to return to exercise or sport
+- Neck, shoulder or wrist pain
+- Pelvic pain or discomfort during intimacy
 
 ## What happens during the appointment?
 
-Your physiotherapist will discuss your medical history, pregnancy, birth, recovery, symptoms and goals.
+Your physiotherapist will first discuss your:
 
-The physical assessment may include:
+- Medical history
+- Pregnancy and birth
+- Postpartum recovery
+- Current symptoms
+- Goals
 
-- Breathing, posture and movement
-- Abdominal and scar assessment
-- Functional tasks such as squatting, lifting or balancing
-- Pelvic floor assessment using external observation, transabdominal/transperineal ultrasound or an internal vaginal examination
+This is followed by a physical assessment tailored to your concerns, which may include:
 
-An internal vaginal examination is always optional and will only be performed with your consent.
+- General postural assessment
+- Pelvic floor assessment via transabdominal ultrasound, external observation or internal vaginal examination, where appropriate
+- DR and abdominal assessment
+- Caesarean and perineal scar assessment
+- Movement and functional testing
+
+An internal vaginal examination is always optional and will only be performed with your informed consent. Rest assured that our physiotherapists are all female.
+
+Treatment may begin during the same session and may include:
+
+- Manual therapy
+- Exercise
+- Symptom management strategies
+- Guidance on returning to daily activities, exercise or sport
 
 ## What you will leave with
 
 You will receive:
 
 - A clear explanation of your assessment findings
-- Practical guidance for increasing daily movement
-- Guidance for managing pelvic floor, abdominal or scar symptoms
+- Practical guidance for managing your symptoms
 - A personalised exercise plan, where appropriate
-- Guidance on returning to exercise and sports
-- Recommendations for any follow-up care
+- Guidance on returning to exercise or sport
+- Recommendations for follow-up care
 
 ## Your next steps
 
 Depending on your assessment and goals, we may recommend:
 
-- [Physiotherapy](/book?service=physiotherapy&focus=womens-health)
-- Signature Postpartum Pathway
-- [Clinical Pilates Reformer](/book?service=clinical-pilates)
-- [Strength and Conditioning](/book?service=strength-conditioning)
+- Physiotherapy follow-up
+- Clinical Pilates
+- Strength and Conditioning
 - Referral to another healthcare professional, where appropriate
-
-Understand how your body is recovering and receive a personalised plan for your next stage of movement and recovery.

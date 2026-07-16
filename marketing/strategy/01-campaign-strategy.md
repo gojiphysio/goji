@@ -64,7 +64,7 @@ Foundation already exists (website, Instagram, Google Business Profile, email/Wh
 |---|---|---|
 | **Instagram (Reels + carousels)** | Primary reach + authority. Practitioner-led education. | Lane A education (wedge + MSK), Lane B for fitness offers |
 | **Google Business Profile** | Highest-leverage local discovery. Posts 2-3x/week, reviews, photos, booking link. | Both |
-| **Local SEO + website** | Capture "physio near me" + condition/neighbourhood intent. Condition landing pages. Target both **Lentor** (home base) and **Katong** (intentional — Embrace's catchment area). | Both |
+| **Local SEO + website** | Capture "physio near me" + condition/neighbourhood intent. Condition landing pages. Primary: **Lentor** (home base) + Singapore-wide wedge terms. **Katong downgraded 2026-07-13** to secondary/content-only (no physical presence there; reached via SG-wide content, island-wide home visits, ads — see `../seo/seo-geo-review.md` §3). | Both |
 | **Email + WhatsApp** | Nurture and retention. WhatsApp is the SG booking/reminder default (~98% open). | Both |
 | **Partnerships & referrals** | Gynae, confinement, doulas, lactation, prenatal studios. The post-partum referral ecosystem. | Lane A wedge |
 | **Workshops & events** | In-clinic and partner-hosted sessions; baby fairs. Trust at scale. | Wedge + fitness |

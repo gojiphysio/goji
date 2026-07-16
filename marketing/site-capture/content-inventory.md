@@ -1,8 +1,13 @@
-# Goji Physiotherapy — Current Site Content Inventory
+# Goji Physiotherapy — Squarespace Site Content Inventory (historical)
 
-Captured 2026-05-30 from the live Squarespace site (gojiphysio.com). This is the
-verbatim copy, structure, and asset list of the existing site — the source of
-truth for the rebuild. Nothing here is invented; it's what's live today.
+> **HISTORICAL SNAPSHOT — the Squarespace site is deprecated.** The live site
+> is now the Astro build in `../website/prototype/` (gojiphysio.com, Cloudflare
+> Pages). This capture is kept as the content-porting record and the source of
+> the old-URL → new-URL 301 map (`../website/prototype/public/_redirects`).
+
+Captured 2026-05-30 from the then-live Squarespace site (gojiphysio.com). This
+is the verbatim copy, structure, and asset list of that site — nothing here is
+invented; it is what was live at capture time.
 
 ## Site at a glance
 

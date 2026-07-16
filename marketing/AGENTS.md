@@ -17,7 +17,12 @@ tab, honour these:
 - **Priority SEO terms** (from `strategy/01-campaign-strategy.md` /
   `strategy/04-90-day-plan.md`): *women's physio singapore, postnatal physio,
   pelvic floor physiotherapy, physiotherapy [neighbourhood], physio near me,
-  branded.*
+  branded.* The full **keyword → page map, GEO conventions and SEO audit**
+  live in `seo/seo-geo-review.md`; the **live Google Ads campaign spec** is
+  `ads/google-ads-campaign-plan.md` (mechanics in `ads/google-ads-playbook.md`).
+  We own **both brand names**: "Goji Women's and Family Physiotherapy"
+  (canonical/structured) and "Goji Physio" (shorthand) — naming rules in the
+  review doc §2.
 - **Compliance is a hard constraint.** `strategy/03-compliance-guardrails.md`
   (Singapore healthcare-advertising rules) governs all copy and claims — check it
   before writing any patient-facing or ad content.
