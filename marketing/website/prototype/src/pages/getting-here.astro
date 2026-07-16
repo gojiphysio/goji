@@ -1,0 +1,613 @@
+---
+/**
+ * Getting here — wayfinding to the clinic at Lentor Modern.
+ *
+ * A dedicated directions page: hero + at-a-glance, an embedded map, and one
+ * block per travel mode (MRT / car / taxi & private hire) pairing written,
+ * turn-by-turn steps with a short YouTube walkthrough for that route.
+ *
+ * Compliance/style (prototype AGENTS.md): warm, plain, no emojis in copy (the
+ * source emojis become Tabler icons), regular dashes, never italic, tokens only.
+ */
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Section from "../components/Section.astro";
+import Button from "../components/Button.astro";
+import YouTubeShort from "../components/YouTubeShort.astro";
+import { Icon } from "astro-icon/components";
+import { SITE } from "../lib/site.ts";
+
+const title = "Getting Here | Goji Physiotherapy at Lentor MRT";
+const description =
+  "How to find Goji Physiotherapy at Lentor Modern - by MRT, by car with basement parking, or by taxi. Step-by-step directions and short video guides for each route.";
+
+// Quick facts for the hero at-a-glance strip.
+const glance = [
+  { icon: "subway", value: "1 min", label: "from Lentor MRT, Exit 1" },
+  { icon: "tabler:parking", value: "Parking", label: "in the Lentor Modern basement" },
+  { icon: "tabler:wheelchair", value: "Step-free", label: "wheelchair and stroller access along Lentor Drive" },
+];
+
+// Breadcrumb for rich results (Home -> Getting here).
+const origin = Astro.site ?? new URL(Astro.url.origin);
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Home", item: new URL("/", origin).href },
+    { "@type": "ListItem", position: 2, name: "Getting here", item: new URL("/getting-here", origin).href },
+  ],
+};
+---
+
+<BaseLayout title={title} description={description} schema={breadcrumbSchema}>
+  {/* ---- Hero ---- */}
+  <section class="gh-hero">
+    <div class="container gh-hero__grid">
+      <div class="gh-hero__text" data-reveal>
+        <p class="eyebrow">Getting here</p>
+        <h1>Finding us at Lentor Modern</h1>
+        <p class="gh-hero__lead">
+          We are on the ground floor of Lentor Modern, a one-minute walk from
+          Lentor MRT and right beside the pick-up point. However you are
+          travelling, here is exactly how to reach us - with a short video guide
+          for each route.
+        </p>
+        <address class="gh-hero__address">
+          {SITE.address.line1}<br />
+          {SITE.address.line2}
+        </address>
+        <div class="gh-hero__cta">
+          <Button href={SITE.googleMaps} variant="primary" size="lg">Get directions</Button>
+          <Button slug="web-wa" variant="whatsapp" size="lg">Ask us on WhatsApp</Button>
+        </div>
+      </div>
+
+      <figure class="gh-photo gh-hero__photo" data-reveal>
+        <img
+          src="/photos/directions/exterior-frontage.webp"
+          alt="The Goji Physiotherapy frontage at Lentor Modern, beside the pick-up point"
+          width="1600"
+          height="1200"
+          loading="eager"
+          fetchpriority="high"
+          decoding="async"
+          onerror="this.closest('.gh-photo').setAttribute('data-missing','')"
+        />
+        <figcaption class="gh-photo__placeholder" aria-hidden="true">
+          <Icon name="tabler:photo" width={26} height={26} />
+          <span>Photo of our frontage coming soon</span>
+        </figcaption>
+      </figure>
+    </div>
+
+    <div class="container">
+      <nav class="gh-modes" aria-label="Choose how you are travelling" data-reveal>
+        <p class="gh-modes__label">How are you getting here?</p>
+        <div class="gh-modes__chips">
+          <a href="#by-mrt" class="gh-mode-chip">
+            <Icon name="subway" width={20} height={20} aria-hidden="true" /><span>By MRT</span>
+          </a>
+          <a href="#by-car" class="gh-mode-chip">
+            <Icon name="tabler:steering-wheel" width={20} height={20} aria-hidden="true" /><span>By car</span>
+          </a>
+          <a href="#by-taxi" class="gh-mode-chip">
+            <Icon name="tabler:car" width={20} height={20} aria-hidden="true" /><span>By taxi</span>
+          </a>
+        </div>
+      </nav>
+
+      <ul class="gh-glance" data-reveal>
+        {glance.map((g) => (
+          <li class="gh-glance__item">
+            <span class="gh-glance__icon" aria-hidden="true"><Icon name={g.icon} width={22} height={22} /></span>
+            <span class="gh-glance__text">
+              <span class="gh-glance__value">{g.value}</span>
+              <span class="gh-glance__label">{g.label}</span>
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  {/* ---- Map ---- */}
+  <Section tone="surface">
+    <div class="gh-block-head" data-reveal>
+      <p class="eyebrow">On the map</p>
+      <h2>Lentor Modern, beside Lentor MRT</h2>
+    </div>
+    <div class="gh-map" data-reveal>
+      <iframe
+        class="gh-map__frame"
+        src={SITE.googleMapsEmbed}
+        title="Map showing Goji Physiotherapy at Lentor Modern"
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade"
+      ></iframe>
+    </div>
+    <div class="gh-map__cta" data-reveal>
+      <Button href={SITE.googleMaps} variant="secondary">Open in Google Maps</Button>
+    </div>
+  </Section>
+
+  {/* ---- By MRT ---- */}
+  <Section tone="linen" id="by-mrt" class="gh-anchor">
+    <div class="gh-mode" data-reveal>
+      <div class="gh-mode__head">
+        <span class="gh-mode__icon" aria-hidden="true"><Icon name="tabler:train" width={24} height={24} /></span>
+        <div>
+          <p class="eyebrow">By MRT</p>
+          <h2>A one-minute walk from Lentor MRT</h2>
+        </div>
+      </div>
+      <div class="gh-mode__body">
+        <ol class="gh-steps">
+          <li><span class="gh-steps__n">1</span><p>Exit Lentor MRT via <strong>Exit 1</strong>.</p></li>
+          <li><span class="gh-steps__n">2</span><p>Turn right, then left.</p></li>
+          <li><span class="gh-steps__n">3</span><p>We are next to <strong>Burger King</strong>, beside the pick-up point.</p></li>
+        </ol>
+        <div class="gh-mode__video">
+          <YouTubeShort id="2-uAkhJUNgE" title="Walking from Lentor MRT" />
+        </div>
+      </div>
+    </div>
+  </Section>
+
+  {/* ---- By car ---- */}
+  <Section tone="surface" id="by-car" class="gh-anchor">
+    <div class="gh-mode" data-reveal>
+      <div class="gh-mode__head">
+        <span class="gh-mode__icon" aria-hidden="true"><Icon name="tabler:steering-wheel" width={24} height={24} /></span>
+        <div>
+          <p class="eyebrow">By car</p>
+          <h2>Basement parking at Lentor Modern</h2>
+        </div>
+      </div>
+      <div class="gh-mode__body">
+        <div class="gh-mode__main">
+          <p class="gh-mode__lead">
+            Park in the Lentor Modern basement, then take either route up to
+            Level M. Turn right at Level M and continue to the end of the row.
+          </p>
+          <div class="gh-routes">
+            <div class="gh-route">
+              <p class="gh-route__pace"><Icon name="tabler:escalator" width={18} height={18} aria-hidden="true" /> Travellator</p>
+              <p class="gh-route__desc">
+                Take the travellator up to the mall, then the escalator beside
+                <strong>KFC</strong> down to Level M. Turn right along the outer
+                ring to the end of the row.
+              </p>
+            </div>
+            <div class="gh-route">
+              <p class="gh-route__pace"><Icon name="tabler:elevator" width={18} height={18} aria-hidden="true" /> Lift</p>
+              <p class="gh-route__desc">
+                Take the rightmost lift and press <strong>Level M</strong> (not
+                Level 1, even though our unit is #01-13). Turn right after exiting
+                and continue to the end of the row.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="gh-mode__video">
+          <YouTubeShort id="uJ1_yvA-Zzk" title="From the car park" />
+        </div>
+      </div>
+    </div>
+  </Section>
+
+  {/* ---- By taxi / private hire ---- */}
+  <Section tone="linen" id="by-taxi" class="gh-anchor">
+    <div class="gh-mode" data-reveal>
+      <div class="gh-mode__head">
+        <span class="gh-mode__icon" aria-hidden="true"><Icon name="tabler:car" width={24} height={24} /></span>
+        <div>
+          <p class="eyebrow">By taxi or private hire</p>
+          <h2>Two drop-off points, both sheltered</h2>
+        </div>
+      </div>
+      <div class="gh-mode__taxi">
+        <div class="gh-taxi">
+          <div class="gh-taxi__text">
+            <h3>Lentor Drive taxi stand (nearest)</h3>
+            <p>
+              Set the <strong>Lentor Drive taxi stand</strong> as your drop-off
+              point. The clinic is beside the stand, with a fully sheltered
+              walkway to our door.
+            </p>
+          </div>
+          <div class="gh-mode__video">
+            <YouTubeShort id="RbvIrfjta7Y" title="From the nearest taxi stand" />
+          </div>
+        </div>
+        <div class="gh-taxi">
+          <div class="gh-taxi__text">
+            <h3>Lentor Modern main taxi stand</h3>
+            <p>
+              From the <strong>Cold Storage</strong> entrance, enter the mall and
+              take the escalator beside <strong>KFC</strong> down to Level M. Turn
+              right along the outer ring and continue to the end of the row.
+            </p>
+          </div>
+          <div class="gh-mode__video">
+            <YouTubeShort id="cvayU97-EOw" title="From Lentor Modern's main taxi stand" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </Section>
+
+  {/* ---- Closing CTA ---- */}
+  <Section tone="closing">
+    <div class="gh-closing" data-reveal>
+      <h2>Can't find us?</h2>
+      <p>
+        If anything is unclear on the day, message us on WhatsApp and we will
+        guide you in. We look forward to seeing you.
+      </p>
+      <div class="gh-closing__cta">
+        <Button slug="web-wa" variant="whatsapp" size="lg">Message us on WhatsApp</Button>
+        <Button href="/book" variant="primary" size="lg" class="gh-btn-light">Book an appointment</Button>
+      </div>
+    </div>
+  </Section>
+
+  {/* Reveal-on-scroll: progressive enhancement only. */}
+  <noscript>
+    <style>[data-reveal] { opacity: 1 !important; transform: none !important; }</style>
+  </noscript>
+  <script is:inline>
+    (function () {
+      var items = document.querySelectorAll("[data-reveal]");
+      var reveal = function (el) { el.classList.add("is-visible"); };
+      var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (reduced || !("IntersectionObserver" in window)) {
+        items.forEach(reveal);
+        return;
+      }
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (e.isIntersecting) { reveal(e.target); io.unobserve(e.target); }
+        });
+      }, { rootMargin: "0px 0px -12% 0px", threshold: 0.15 });
+      items.forEach(function (el) { io.observe(el); });
+    })();
+  </script>
+</BaseLayout>
+
+<style>
+  /* ---- Hero ---- */
+  .gh-hero {
+    background: var(--bg-page);
+    padding-block: clamp(2.5rem, 1.5rem + 4vw, 5rem);
+    border-bottom: 1px solid var(--color-border);
+    overflow: hidden;
+  }
+  .gh-hero__grid {
+    display: grid;
+    gap: clamp(var(--space-5), 4vw, var(--space-7));
+    align-items: center;
+  }
+  @media (min-width: 860px) {
+    .gh-hero__grid { grid-template-columns: 1.05fr 0.95fr; }
+  }
+  .gh-hero__text {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-3);
+  }
+  .gh-hero__text h1 { margin-top: var(--space-2); }
+  .gh-hero__lead {
+    font-size: var(--fs-body);
+    color: var(--text-muted);
+    line-height: var(--lh-body);
+    max-width: 52ch;
+  }
+  .gh-hero__address {
+    font-style: normal;
+    font-family: var(--font-display);
+    font-weight: var(--weight-semibold);
+    color: var(--text-default);
+    line-height: var(--lh-snug);
+    padding-left: var(--space-4);
+    border-left: 3px solid var(--color-primary);
+  }
+  .gh-hero__cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-top: var(--space-4);
+  }
+
+  /* Photo treatment (frontage) with graceful missing-file fallback. */
+  .gh-photo {
+    position: relative;
+    margin: 0;
+    aspect-ratio: 4 / 3;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-sm);
+    background: var(--bg-content);
+  }
+  .gh-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .gh-photo__placeholder {
+    display: none;
+    position: absolute;
+    inset: 0;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    text-align: center;
+    padding: var(--space-5);
+    color: var(--text-muted);
+    font-size: var(--fs-small);
+    background:
+      radial-gradient(120% 90% at 50% 0%, color-mix(in srgb, var(--color-primary) 12%, transparent), transparent 70%),
+      var(--bg-content);
+  }
+  .gh-photo[data-missing] img { display: none; }
+  .gh-photo[data-missing] .gh-photo__placeholder { display: flex; }
+
+  /* Travel-mode selector (jump links) */
+  .gh-modes {
+    margin-top: clamp(var(--space-6), 4vw, var(--space-8));
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+  .gh-modes__label {
+    font-family: var(--font-display);
+    font-size: var(--fs-small);
+    font-weight: var(--weight-semibold);
+    color: var(--text-default);
+  }
+  .gh-modes__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+  .gh-mode-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.7rem 1.15rem;
+    border-radius: var(--radius-pill);
+    background: var(--bg-content);
+    border: 1px solid var(--color-border);
+    color: var(--text-default);
+    font-family: var(--font-display);
+    font-size: var(--fs-small);
+    font-weight: var(--weight-semibold);
+    text-decoration: none;
+    box-shadow: var(--shadow-sm);
+    transition: border-color var(--dur) var(--ease), color var(--dur) var(--ease),
+      transform var(--dur) var(--ease);
+  }
+  .gh-mode-chip :global(svg) { color: var(--color-primary); flex: none; }
+  .gh-mode-chip:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    transform: translateY(-1px);
+  }
+
+  /* Anchor offset so the sticky header does not cover a jumped-to heading. */
+  .gh-anchor { scroll-margin-top: 84px; }
+
+  /* At-a-glance strip */
+  .gh-glance {
+    list-style: none;
+    padding: 0;
+    margin-top: clamp(var(--space-5), 3vw, var(--space-6));
+    display: grid;
+    gap: var(--space-4);
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 620px) {
+    .gh-glance { grid-template-columns: repeat(3, 1fr); }
+  }
+  .gh-glance__item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-4) var(--space-5);
+    background: var(--bg-content);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+  }
+  .gh-glance__icon {
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    flex: none;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--color-primary) 10%, var(--bg-page));
+    color: var(--color-primary);
+  }
+  .gh-glance__text { display: flex; flex-direction: column; gap: 0.15rem; }
+  .gh-glance__value {
+    font-family: var(--font-display);
+    font-size: var(--fs-h3);
+    font-weight: var(--weight-bold);
+    color: var(--color-primary);
+    line-height: 1.1;
+  }
+  .gh-glance__label {
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+    line-height: var(--lh-snug);
+  }
+
+  /* ---- Section heads ---- */
+  .gh-block-head { margin-bottom: var(--space-5); }
+  .gh-block-head h2 { margin-top: var(--space-2); }
+
+  /* ---- Map ---- */
+  .gh-map {
+    aspect-ratio: 16 / 9;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-sm);
+  }
+  .gh-map__frame { width: 100%; height: 100%; border: 0; display: block; }
+  .gh-map__cta { margin-top: var(--space-5); }
+
+  /* ---- Travel mode blocks ---- */
+  .gh-mode__head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-bottom: var(--space-5);
+  }
+  .gh-mode__icon {
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    flex: none;
+    border-radius: 50%;
+    background: var(--color-primary);
+    color: var(--color-linen);
+  }
+  .gh-mode__head h2 { margin-top: var(--space-1); }
+
+  .gh-mode__body {
+    display: grid;
+    gap: clamp(var(--space-5), 4vw, var(--space-7));
+    align-items: start;
+  }
+  @media (min-width: 720px) {
+    .gh-mode__body { grid-template-columns: 1fr 15rem; }
+  }
+  .gh-mode__lead { color: var(--text-muted); max-width: 54ch; }
+
+  /* Numbered steps */
+  .gh-steps {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    max-width: 52ch;
+  }
+  .gh-steps li {
+    display: grid;
+    grid-template-columns: 2rem 1fr;
+    gap: var(--space-3);
+    align-items: start;
+  }
+  .gh-steps__n {
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--color-primary) 12%, var(--bg-page));
+    color: var(--color-primary);
+    font-family: var(--font-display);
+    font-weight: var(--weight-bold);
+    font-size: var(--fs-small);
+  }
+  .gh-steps li p { color: var(--text-muted); padding-top: 0.3rem; }
+  .gh-steps strong { color: var(--text-default); }
+
+  /* Car routes (travellator / lift) */
+  .gh-routes {
+    margin-top: var(--space-5);
+    display: grid;
+    gap: var(--space-4);
+    grid-template-columns: 1fr;
+    max-width: 46rem;
+  }
+  @media (min-width: 520px) {
+    .gh-routes { grid-template-columns: 1fr 1fr; }
+  }
+  .gh-route {
+    padding: var(--space-5);
+    background: var(--bg-page);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+  }
+  .gh-route__pace {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: var(--font-display);
+    font-size: var(--fs-small);
+    font-weight: var(--weight-bold);
+    color: var(--color-primary);
+    margin-bottom: var(--space-2);
+  }
+  .gh-route__desc { font-size: var(--fs-small); color: var(--text-muted); line-height: var(--lh-snug); }
+  .gh-route strong { color: var(--text-default); }
+
+  /* Fill the fixed 15rem column so every Short renders at an identical size
+     (the .yts max-width caps it, and left-aligns it when the row stacks). */
+  .gh-mode__video { justify-self: stretch; }
+
+  /* Taxi: two routes stacked, each with its own video */
+  .gh-mode__taxi { display: grid; gap: var(--space-6); }
+  .gh-taxi {
+    display: grid;
+    gap: var(--space-5);
+    align-items: start;
+    padding-bottom: var(--space-6);
+    border-bottom: 1px solid var(--color-border);
+  }
+  .gh-taxi:last-child { padding-bottom: 0; border-bottom: 0; }
+  @media (min-width: 720px) {
+    .gh-taxi { grid-template-columns: 1fr 15rem; gap: var(--space-7); }
+  }
+  .gh-taxi__text h3 { margin-bottom: var(--space-2); }
+  .gh-taxi__text p { color: var(--text-muted); max-width: 52ch; }
+  .gh-taxi strong { color: var(--text-default); }
+
+  /* ---- Closing ---- */
+  .gh-closing {
+    max-width: 48ch;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    align-items: flex-start;
+  }
+  .gh-closing h2 { color: var(--text-on-dark); }
+  .gh-closing p { color: color-mix(in srgb, var(--color-linen) 82%, transparent); }
+  .gh-closing__cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-top: var(--space-2);
+  }
+  /* The primary red fill is invisible on the deep-red closing surface, so the
+     Book CTA gets a linen fill to stand out (Button forwards the class). */
+  .gh-closing__cta :global(.gh-btn-light) {
+    background-color: var(--color-linen);
+    color: var(--color-ink);
+    border-color: var(--color-linen);
+  }
+  .gh-closing__cta :global(.gh-btn-light:hover) {
+    background-color: color-mix(in srgb, var(--color-linen) 88%, var(--color-ink));
+    color: var(--color-ink);
+  }
+
+  /* ---- Scroll reveal ---- */
+  [data-reveal] {
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 620ms var(--ease), transform 620ms var(--ease);
+  }
+  [data-reveal].is-visible { opacity: 1; transform: none; }
+  @media (prefers-reduced-motion: reduce) {
+    [data-reveal] { opacity: 1; transform: none; transition: none; }
+  }
+</style>

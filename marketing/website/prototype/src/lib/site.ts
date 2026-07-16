@@ -18,6 +18,10 @@ export const SITE = {
   phoneE164: "+6583770401",
   instagram: "https://www.instagram.com/gojiphysio/",
   googleMaps: "https://maps.app.goo.gl/wBaCkBiDNfF7JCGv8",
+  // Keyless embeddable map (the goo.gl short link above will not render in an
+  // iframe). Centres on the clinic by name + address; no Maps API key needed.
+  googleMapsEmbed:
+    "https://maps.google.com/maps?q=Goji%20Physiotherapy%2C%20Lentor%20Modern%2C%20Lentor%20Central%2C%20Singapore%20788887&output=embed",
   address: {
     line1: "Lentor Modern, #01-13",
     line2: "Lentor Central, Singapore 788887",

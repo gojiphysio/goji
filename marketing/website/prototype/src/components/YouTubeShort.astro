@@ -1,0 +1,122 @@
+---
+/**
+ * YouTubeShort — a privacy-friendly facade for a vertical YouTube Short.
+ * Renders a branded poster + play button; the actual YouTube <iframe> is only
+ * injected on click, so the page makes no third-party request until the visitor
+ * chooses to watch. Portrait 9:16 to match Shorts.
+ */
+interface Props {
+  id: string;
+  title: string;
+}
+const { id, title } = Astro.props;
+---
+
+<figure class="yts">
+  <div class="yts__stage" data-yt>
+    <button class="yts__trigger" type="button" data-yt-id={id} aria-label={`Play video: ${title}`}>
+      <span class="yts__play" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
+      </span>
+      <span class="yts__hint">Tap to play</span>
+    </button>
+  </div>
+  <figcaption class="yts__title">{title}</figcaption>
+</figure>
+
+<style>
+  .yts {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    width: 100%;
+    max-width: 15rem;
+  }
+  .yts__stage {
+    position: relative;
+    aspect-ratio: 9 / 16;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    background:
+      radial-gradient(120% 90% at 50% 0%, color-mix(in srgb, var(--color-primary) 22%, transparent), transparent 70%),
+      var(--color-ink);
+    box-shadow: var(--shadow-sm);
+  }
+  .yts__stage :global(iframe) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: block;
+  }
+  .yts__trigger {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-3);
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    color: var(--color-linen);
+  }
+  .yts__play {
+    display: grid;
+    place-items: center;
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--color-linen) 92%, transparent);
+    color: var(--color-primary);
+    padding-left: 0.15rem;
+    box-shadow: var(--shadow-md);
+    transition: transform var(--dur) var(--ease), background var(--dur) var(--ease);
+  }
+  .yts__trigger:hover .yts__play,
+  .yts__trigger:focus-visible .yts__play {
+    transform: scale(1.06);
+    background: var(--color-linen);
+  }
+  .yts__hint {
+    font-family: var(--font-display);
+    font-size: var(--fs-caption);
+    font-weight: var(--weight-semibold);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--color-linen) 85%, transparent);
+  }
+  .yts__title {
+    font-size: var(--fs-small);
+    font-weight: var(--weight-semibold);
+    color: var(--text-default);
+    line-height: var(--lh-snug);
+  }
+</style>
+
+{/* Bundled once by Astro regardless of how many Shorts render. Delegated click
+    swaps the facade for the real embed, with autoplay since it is user-initiated. */}
+<script>
+  document.addEventListener("click", (e) => {
+    const target = e.target as HTMLElement;
+    const btn = target.closest<HTMLButtonElement>(".yts__trigger");
+    if (!btn) return;
+    const stage = btn.closest<HTMLElement>("[data-yt]");
+    const id = btn.dataset.ytId;
+    if (!stage || !id) return;
+    const iframe = document.createElement("iframe");
+    iframe.src = `https://www.youtube.com/embed/${id}?autoplay=1&rel=0&playsinline=1`;
+    iframe.title = btn.getAttribute("aria-label") || "YouTube video";
+    iframe.setAttribute(
+      "allow",
+      "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share",
+    );
+    iframe.setAttribute("allowfullscreen", "");
+    iframe.loading = "lazy";
+    stage.replaceChildren(iframe);
+  });
+</script>
