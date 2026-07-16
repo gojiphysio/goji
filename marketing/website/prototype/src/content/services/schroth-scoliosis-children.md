@@ -4,7 +4,7 @@ description: "Schroth Method scoliosis physiotherapy for children in Singapore: 
 cardTitle: "Schroth Therapy - Children"
 cardLead: "Scoliosis-specific physiotherapy (Schroth Method) tailored to your child's curve, growth and goals, to support posture, strength and confidence."
 heroImage: "/photos/services/schroth-scoliosis-children.webp"
-heroAlt: "A child practising Schroth Method scoliosis exercises with a Goji physiotherapist."
+heroAlt: "A Goji physiotherapist guiding a young person through Schroth Method scoliosis exercises at the wall bars."
 category: "Children"
 durationMin: 55
 priceClinic: 260
