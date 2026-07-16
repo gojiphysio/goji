@@ -38,11 +38,14 @@ for i in range(1, len(chunks), 2):
         continue
     m = re.search(r'```(.*?)```', chunks[i + 1], re.S)
     for line in (m.group(1).splitlines() if m else []):
-        for tok in re.split(r'\s{2,}', line.strip()):
-            tok = tok.strip()
-            if tok.startswith('[') and tok.endswith(']'):
+        # Extract each "phrase" or [exact] token by its own delimiters, never by
+        # whitespace. A single space between two quoted keywords must not fuse
+        # them (bug 2026-07-16: `"pregnancy pelvic pain treatment" "physio for
+        # pregnant women"` imported as one mangled keyword).
+        for tok in re.findall(r'"[^"]+"|\[[^\]]+\]', line):
+            if tok[0] == '[':
                 kw_rows.append([CAMP, key, tok[1:-1], "Exact"])
-            elif tok.startswith('"') and tok.endswith('"'):
+            else:
                 kw_rows.append([CAMP, key, tok.strip('"'), "Phrase"])
 
 # --- RSAs (§6) ---
@@ -65,24 +68,25 @@ for i in range(1, len(chunks), 2):
     rsa_rows.append([CAMP, key] + (heads + [""] * maxH)[:maxH]
                     + (descs + [""] * maxD)[:maxD] + [AG[key]])
 
-# --- negatives (§5): bare = Broad, "quoted" = Phrase ---
+# --- negatives (§5): bare = broad, "quoted" = phrase ---
+# NOT a CSV. Campaign negatives can't be file-imported into Editor cleanly — a
+# Keyword column is read as ad-group keywords, so Editor invents an ad group
+# (bug 2026-07-16). Emit a plain paste list for Editor's "Make multiple changes
+# -> Add as campaign-level negative keywords" dialog instead.
 neg = []
 for b in re.findall(r'```(.*?)```', section(txt, "## 5.", "## 6."), re.S):
     for line in b.splitlines():
         for tok in re.split(r'\s{2,}', line.strip()):
             tok = tok.strip()
-            if not tok:
-                continue
-            if tok.startswith('"') and tok.endswith('"'):
-                neg.append([CAMP, tok.strip('"'), "Phrase"])
-            else:
-                neg.append([CAMP, tok, "Broad"])
+            if tok:
+                neg.append(tok)  # keep "quotes" (phrase); bare stays broad
 
-def write(name, header, rows):
+def write_csv(name, header, rows):
     with open(os.path.join(OUT, name), "w", newline="") as f:
         w = csv.writer(f); w.writerow(header); w.writerows(rows)
 
-write("keywords.csv", ["Campaign", "Ad group", "Keyword", "Match type"], kw_rows)
-write("responsive-search-ads.csv", hdr, rsa_rows)
-write("negative-keywords.csv", ["Campaign", "Keyword", "Match type"], neg)
-print(f"keywords.csv: {len(kw_rows)} | responsive-search-ads.csv: {len(rsa_rows)} | negative-keywords.csv: {len(neg)}")
+write_csv("keywords.csv", ["Campaign", "Ad group", "Keyword", "Match type"], kw_rows)
+write_csv("responsive-search-ads.csv", hdr, rsa_rows)
+with open(os.path.join(OUT, "negative-keywords.txt"), "w") as f:
+    f.write("\n".join(neg) + "\n")
+print(f"keywords.csv: {len(kw_rows)} | responsive-search-ads.csv: {len(rsa_rows)} | negative-keywords.txt: {len(neg)}")

@@ -1,6 +1,14 @@
 # Google Ads campaign plan (launch spec)
 
-**Status: ready to launch, pending the conversion-tracking gates below.**
+**Status: LIVE (launched 2026-07-16).** Campaign `Goji - Search - Non-brand`
+(id 24037615913): Enabled · Search · SGD 20/day · Maximize clicks + SGD 3.50
+CPC cap · Singapore (Presence) · auto-tagging ON · final-URL suffix set · 4 ad
+groups · 25 campaign negatives. Conversion action live (`AW-18230150966` +
+booking label). Most keywords cleared the healthcare-policy review via exemption;
+a few tail terms may stay limited. The prior Smart campaign "Goji Physio
+Singapore" is paused; the first `[DEPRECATED]` Search build was removed. Next:
+day-3 search-terms check (§11).
+
 Ad copy **reviewed by Cheryl + team 2026-07-16** and incorporated (new
 keywords across AG2–AG4; "leakage"→"incontinence" framing; "tummy
 gap"→"diastasis"). "Treatable" was reviewed and kept. Three of their edits

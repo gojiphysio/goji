@@ -4,35 +4,46 @@ Importable CSVs generated **from `../google-ads-campaign-plan.md`** (the source
 of truth — never hand-edit these; regenerate instead). They save the operator
 from hand-typing the campaign into the Google Ads UI.
 
-**Scope: AG2–AG4 only.** AG1 (pelvic floor) is intentionally excluded because
-its landing page is held (`draft: true`) pending Kristy's copy + photo — see the
-plan's §3 note. Regenerate to include AG1 once that page is live.
+**Scope: all four ad groups** (AG1 pelvic floor included since its page went live
+2026-07-16). The campaign is already built and live — these files are the
+regenerable source for re-imports and the weekly negatives ritual.
 
 ## Files
 | File | Contents | Google Ads Editor import target |
 |---|---|---|
-| `keywords.csv` | 27 phrase/exact keywords, AG2–AG4 | Keywords |
-| `responsive-search-ads.csv` | 3 RSAs (10 headlines + 4 descriptions each), with final URLs | Responsive search ads |
-| `negative-keywords.csv` | 25 shared campaign negatives incl. brand negatives | Campaign negative keywords |
+| `keywords.csv` | 55 phrase/exact keywords, AG1–AG4 | Keywords |
+| `responsive-search-ads.csv` | 4 RSAs (10-12 headlines + 4 descriptions each), with final URLs | Responsive search ads |
+| `negative-keywords.txt` | 25 shared campaign negatives incl. brand negatives | Campaign negative keywords (paste, see below) |
 
 ## How to import (Google Ads Editor)
-1. Create the campaign shell first in the UI/Editor — type **Search**, budget,
-   bidding, geo, and the final-URL suffix per the plan §2 & §8 (these are
-   campaign-level settings, not in these CSVs). Name it exactly
-   **`Goji - Search - Non-brand`** so the CSV `Campaign` column matches.
-2. Editor → **Account → Import → From file** (or Ctrl/Cmd-V paste) → select each
-   CSV. Editor matches on the `Campaign` / `Ad group` columns and creates the
-   ad groups if they don't exist.
-3. Review the proposed changes, then **Post**.
-4. Copy is Lane-A compliant and char-limit-validated, but **Cheryl still signs
-   off before the ads serve** (plan §6). One flag for her: the AG1 headline
-   "Leakage Is Common & Treatable" (AG1 is held anyway).
-5. Extensions (sitelinks/callouts/snippets) are set in the UI — plan §7. Do
-   **not** add the "Pelvic floor physio" sitelink until that page is live.
+1. **Create the campaign shell first** — type **Search**, budget, bidding, geo,
+   and the final-URL suffix per plan §2 & §8 (campaign-level settings, not in
+   these files). Name it exactly **`Goji - Search - Non-brand`** so the
+   `Campaign` column matches.
+2. **Keywords + RSAs:** Editor → **Account → Import → From file** → import
+   `keywords.csv` then `responsive-search-ads.csv`. Editor matches on the
+   `Campaign` / `Ad group` columns and creates the ad groups.
+3. **Negatives:** do NOT file-import them. Select the campaign → **Keywords,
+   Negative → Make multiple changes → "Add as campaign-level negative keywords"**
+   → paste the contents of `negative-keywords.txt` → tick the campaign in the
+   destination list → set the pasted column heading to **Keyword** → OK.
+4. Review proposed changes, clear any violations, then **Post**.
+5. Extensions (sitelinks/callouts/snippets) are set in the UI — plan §7.
 
-## Regenerate (after editing the plan, or to add AG1)
+### Gotchas learned at launch (2026-07-16)
+- **Campaign-name match is exact.** A CSV whose `Campaign` differs (even
+  `Non brand` vs `Non-brand`) spawns a *duplicate* campaign. Rename to match
+  before importing.
+- **Negatives can't be file-imported.** A `Keyword` column is read as ad-group
+  keywords, so Editor invents an empty ad group. Use the paste route in step 3.
+- **Healthcare policy pre-check** blocks most physio keywords locally. Select
+  them → **Request exemption** (they're lawful allied-health services) → Post →
+  server-side review clears in hours to ~3 days.
+
+## Regenerate (after editing the plan)
 ```
-cd marketing/ads && python3 import/generate.py
+cd marketing/ads && python3 import/generate.py     # keywords.csv, RSAs, negatives.txt
+cd marketing/ads && python3 import/review_sheet.py > ad-copy-review-sheet.md
 ```
-Re-parses the plan and rewrites all three CSVs. To add AG1, un-hold the page,
-then add its row to the `AG` map in `generate.py`.
+Both parse the plan (the source of truth). Keyword tokens are extracted by their
+`"` / `[` delimiters, so single-spaced adjacent keywords no longer fuse.

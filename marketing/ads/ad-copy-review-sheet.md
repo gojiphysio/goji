@@ -22,7 +22,7 @@ All copy follows the AHPC advertising floor (`strategy/03`): **no** superlatives
 
 **Landing page:** `https://www.gojiphysio.com/services/pelvic-floor-physiotherapy`
 
-**Shows for searches like:** "pelvic floor physiotherapy" (phrase), [pelvic floor physiotherapy singapore] (exact), "pelvic floor physio" (phrase), [pelvic floor physio near me] (exact), "pelvic floor therapy" (phrase), "pelvic physiotherapist" (phrase), "womens physiotherapy" (phrase), [womens physio singapore] (exact), "womens health physio" (phrase), "prolapse physio" (phrase), "incontinence physiotherapy" (phrase), "physio for incontinence" (phrase), "best pelvic floor physio singapore" (phrase)
+**Shows for searches like:** "pelvic floor physiotherapy" (phrase), [pelvic floor physiotherapy singapore] (exact), "pelvic floor physio" (phrase), [pelvic floor physio near me] (exact), "pelvic floor therapy" (phrase), "pelvic physiotherapist" (phrase), "womens physiotherapy" (phrase), [womens physio singapore] (exact), "womens health physio" (phrase), "prolapse physio" (phrase), "incontinence physiotherapy" (phrase), "physio for incontinence" (phrase), "best pelvic floor physio singapore" (phrase), "best" (phrase)
 
 **Headlines**
 
@@ -80,7 +80,7 @@ All copy follows the AHPC advertising floor (`strategy/03`): **no** superlatives
 
 **Landing page:** `https://www.gojiphysio.com/services/prenatal-physiotherapy`
 
-**Shows for searches like:** "prenatal physiotherapy" (phrase), [prenatal physio singapore] (exact), "pregnancy physio" (phrase), "antenatal physiotherapy" (phrase), "pregnancy back pain physio" (phrase), "pelvic girdle pain physio" (phrase), "pregnancy pelvic pain treatment" "physio for pregnant women" (phrase), "exercise during pregnancy" (phrase), "pubic pain during pregnancy" (phrase), "birth prep physio" (phrase), "epino physio" (phrase)
+**Shows for searches like:** "prenatal physiotherapy" (phrase), [prenatal physio singapore] (exact), "pregnancy physio" (phrase), "antenatal physiotherapy" (phrase), "pregnancy back pain physio" (phrase), "pelvic girdle pain physio" (phrase), "pregnancy pelvic pain treatment" (phrase), "physio for pregnant women" (phrase), "exercise during pregnancy" (phrase), "pubic pain during pregnancy" (phrase), "birth prep physio" (phrase), "epino physio" (phrase)
 
 **Headlines**
 
