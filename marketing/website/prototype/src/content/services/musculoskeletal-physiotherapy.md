@@ -10,7 +10,7 @@ priceHome: 330
 clinicians: ["Kristy Ng", "Claire Ng", "Cheryl Long"]
 bookingService: "physiotherapy"
 bookingFocus: "general"
-order: 2
+order: 3
 draft: false
 ---
 
