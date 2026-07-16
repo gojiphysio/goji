@@ -1,12 +1,12 @@
 ---
 title: "Perineal Tear, Scar, and Birth Trauma"
-description: "Physiotherapy for perineal tears and scar recovery after birth: assessment, scar tissue work and rehabilitation when healing needs support."
+description: "Around 9 in 10 first-time mothers experience some degree of perineal trauma. Most tears are minor and heal well without intervention. But when healing is incomplete, scar tissue becomes restrictive or sensitive, or a more significant tear has occurred, physiotherapy plays an important role in recovery."
 cardTitle: "Perineal Tear, Scar, and Birth Trauma"
 cardLead: "Around 9 in 10 first-time mothers experience some degree of perineal trauma."
 category: "Women's Health"
-datePublished: "2026-06-29"
-lastReviewed: "2026-06-29"
-relatedService: "postpartum-physiotherapy"
+reviewer:
+  name: "Cheryl Long"
+  slug: "cheryl-long"
 ctaSlug: "web-wa"
 order: 4
 draft: false

@@ -34,21 +34,27 @@ so a token change reflows everything (styleguide is the QA surface).
   for the brand promise, not a testimonial.
 - **Voice/style:** warm, plain, educational. Regular dashes (no emdashes), no
   emojis in brand copy, **never italic** (enforced in `base.css`).
+- **Condition pages carry a clinician byline.** Every `conditions` entry sets a
+  `reviewer: { name, slug }` (the reviewing physio, from the source doc). The
+  detail template renders a "Reviewed by <name>" line linking to `/team/<slug>`
+  and emits `reviewedBy` in the MedicalWebPage JSON-LD. Strip the source doc's
+  italic reviewer/status/SEO-slug/structured-data notes and inline CTA — the
+  template supplies the H1, byline, and CTA.
 - **Mobile-first.** Most reach is on a phone. Base CSS before `@media`; check
   down to ~375px.
 - **Branch & PR to `main`** — never push to `main` directly.
 
 ## SEO/GEO rules (from the 2026-07 review — full map in `../../seo/seo-geo-review.md`)
 - **Per-page schema is required**, by page type: conditions emit MedicalWebPage
-  + author/reviewedBy + dates + BreadcrumbList + FAQPage; services emit
+  + reviewedBy (from `reviewer`) + BreadcrumbList + FAQPage; services emit
   Service + Offer + BreadcrumbList + FAQPage (frontmatter `faqs`); team pages
   emit enriched Person. New page types define their schema before merging.
 - **Condition FAQPage is parsed from the body**: keep the exact format
   `## Frequently asked questions` with `### <question>` blocks — other
-  heading levels or bullet questions silently emit no FAQPage.
-- **Every condition page carries a byline** (`author`, `datePublished`,
-  `lastReviewed` frontmatter). Bump `lastReviewed` only on a real clinical
-  re-review.
+  heading levels (e.g. `####`) or bullet questions silently emit no FAQPage.
+- **Every condition page carries a byline** via `reviewer: { name, slug }`
+  frontmatter; the template renders "Reviewed by <name>" linking to
+  `/team/<slug>` and emits `reviewedBy` in the MedicalWebPage JSON-LD.
 - **Meta descriptions ≤160 chars.**
 - **Only claim a physical presence at Lentor.** Wider reach is "home visits
   across Singapore" — no neighbourhood pages implying a clinic elsewhere.

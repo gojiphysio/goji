@@ -18,14 +18,11 @@ const conditions = defineCollection({
     ]),
     /** WhatsApp CTA slug — use "web-wa" until condition-specific slugs are wired in app.py */
     ctaSlug: z.string().default("web-wa"),
-    /** Byline + E-E-A-T (GEO): who wrote/clinically reviewed this page. Rendered
-     *  under the H1 and emitted as author/reviewedBy on the MedicalWebPage schema. */
-    author: z.string().default("Cheryl Long"),
-    datePublished: z.string().date().optional(),
-    lastReviewed: z.string().date().optional(),
-    /** Slug of the most relevant service page — drives the "Related" links row
-     *  (internal linking: condition spoke → service hub). */
-    relatedService: z.string().optional(),
+    /** Clinician who clinically reviewed the page. `slug` links to their
+     *  /team/<slug> bio; every condition page carries a "Reviewed by" byline. */
+    reviewer: z
+      .object({ name: z.string(), slug: z.string() })
+      .optional(),
     /** Optional ordering within category on the index page */
     order: z.number().optional(),
     draft: z.boolean().default(false),

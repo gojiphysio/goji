@@ -11,37 +11,13 @@ export async function getStaticPaths() {
 
 const { entry } = Astro.props;
 const { Content } = await entry.render();
-const {
-  title,
-  description,
-  cardTitle,
-  category,
-  ctaSlug,
-  author,
-  datePublished,
-  lastReviewed,
-  relatedService,
-} = entry.data;
+const { title, description, cardTitle, category, ctaSlug, reviewer } = entry.data;
 
-// Byline links to the clinician's bio page (E-E-A-T: a named, credentialed
-// reviewer that answer engines can resolve to a Person entity).
-const team = await getCollection("team", ({ data }) => !data.draft);
-const authorEntry = team.find((t) => t.data.name === author);
-
-// "Related" row: condition spoke → service hub internal link.
-const services = await getCollection("services", ({ data }) => !data.draft);
-const related = relatedService
-  ? services.find((s) => s.slug === relatedService)
+const origin = Astro.site ?? new URL(Astro.url.origin);
+const pageURL = new URL(Astro.url.pathname, origin).href;
+const reviewerURL = reviewer
+  ? new URL(`/team/${reviewer.slug}`, origin).href
   : undefined;
-
-const reviewedDate = lastReviewed ?? datePublished;
-const formatDate = (iso: string) =>
-  new Date(`${iso}T00:00:00Z`).toLocaleDateString("en-SG", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    timeZone: "UTC",
-  });
 
 // FAQPage JSON-LD is extracted from the body's "## Frequently asked questions"
 // section (### question + answer paragraphs) so the visible copy stays the
@@ -74,19 +50,9 @@ function extractFaqs(body: string): { q: string; a: string }[] {
 }
 const faqs = extractFaqs(entry.body);
 
-const origin = Astro.site ?? new URL(Astro.url.origin);
-const pageURL = new URL(Astro.url.pathname, origin).href;
 // MedicalWebPage marks this as clinical reference content (GEO: answer engines
 // prefer typed medical pages); BreadcrumbList gives crawlers the Home ›
 // Conditions › <page> trail on these nested routes.
-const authorPerson = {
-  "@type": "Person",
-  name: author,
-  ...(authorEntry && {
-    jobTitle: authorEntry.data.role,
-    url: new URL(`/team/${authorEntry.slug}`, origin).href,
-  }),
-};
 const conditionSchema: Record<string, unknown>[] = [
   {
     "@context": "https://schema.org",
@@ -94,13 +60,17 @@ const conditionSchema: Record<string, unknown>[] = [
     name: title,
     description,
     url: pageURL,
-    mainEntityOfPage: pageURL,
     about: { "@type": "MedicalCondition", name: cardTitle ?? title },
     audience: { "@type": "MedicalAudience", audienceType: "Patient" },
-    author: authorPerson,
-    reviewedBy: authorPerson,
-    ...(datePublished && { datePublished }),
-    ...(reviewedDate && { lastReviewed: reviewedDate }),
+    ...(reviewer && reviewerURL
+      ? {
+          reviewedBy: {
+            "@type": "Person",
+            name: reviewer.name,
+            url: reviewerURL,
+          },
+        }
+      : {}),
   },
   {
     "@context": "https://schema.org",
@@ -136,14 +106,12 @@ if (faqs.length) {
         All conditions
       </a>
       <h1>{cardTitle ?? title}</h1>
-      <p class="cond-header__byline">
-        Clinically reviewed by
-        {authorEntry ? (
-          <a href={`/team/${authorEntry.slug}`}>{author}</a>
-        ) : (
-          <span>{author}</span>
-        )}{authorEntry && `, ${authorEntry.data.role}`}{reviewedDate && ` · Last reviewed ${formatDate(reviewedDate)}`}
-      </p>
+      {reviewer && (
+        <p class="cond-header__review">
+          Reviewed by{" "}
+          <a href={`/team/${reviewer.slug}`}>{reviewer.name}</a>, AHPC-registered physiotherapist
+        </p>
+      )}
     </div>
   </section>
 
@@ -151,16 +119,6 @@ if (faqs.length) {
   <Section tone="surface">
     <div class="cond-body container--narrow">
       <Content />
-      {(related || authorEntry) && (
-        <nav class="cond-related" aria-label="Related pages">
-          <span class="cond-related__label">Related</span>
-          {related && (
-            <a href={`/services/${related.slug}`}>{related.data.cardTitle ?? related.data.title}</a>
-          )}
-          {authorEntry && <a href={`/team/${authorEntry.slug}`}>Meet {author}</a>}
-          <a href="/conditions">All conditions we treat</a>
-        </nav>
-      )}
     </div>
   </Section>
 
@@ -200,40 +158,17 @@ if (faqs.length) {
     text-decoration: none;
   }
   .cond-header__back:hover { color: var(--color-primary); }
-  .cond-header__byline {
-    font-size: var(--fs-small);
-    color: var(--text-muted);
-  }
-  .cond-header__byline a {
-    color: var(--text-muted);
-    text-decoration: underline;
-    text-underline-offset: 0.2em;
-  }
-  .cond-header__byline a:hover { color: var(--color-primary); }
 
-  /* Related links row (internal linking: condition → service hub / clinician) */
-  .cond-related {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--space-3) var(--space-4);
-    margin-top: var(--space-7);
-    padding-top: var(--space-5);
-    border-top: 1px solid var(--color-border);
+  .cond-header__review {
     font-size: var(--fs-small);
-  }
-  .cond-related__label {
-    font-weight: var(--weight-semibold);
-    letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
-    font-size: var(--fs-caption);
     color: var(--text-muted);
   }
-  .cond-related a {
+  .cond-header__review a {
     color: var(--color-primary);
-    text-decoration: underline;
-    text-underline-offset: 0.2em;
+    font-weight: var(--weight-medium);
+    text-decoration: none;
   }
+  .cond-header__review a:hover { text-decoration: underline; }
 
   /* Prose content */
   .cond-body {

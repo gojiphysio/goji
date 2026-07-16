@@ -1,12 +1,12 @@
 ---
 title: "Pelvic Girdle Pain and Mummy's Wrist"
-description: "Physiotherapy for pelvic girdle pain and mummy's wrist in pregnancy and early parenthood. Both respond well to treatment - neither needs waiting out."
+description: "Pelvic girdle pain (PGP) and de Quervain's tenosynovitis - colloquially called \"mummy's wrist\" - are two of the most common but undertreated musculoskeletal conditions associated with pregnancy and early parenthood. Both respond well to physiotherapy. Neither needs to be waited out."
 cardTitle: "Pelvic Girdle Pain and Mummy's Wrist"
 cardLead: "Pelvic girdle pain (PGP) and de Quervain's tenosynovitis - colloquially called \"mummy's wrist\" - are two of the most common but undertreated musculoskeletal..."
 category: "Women's Health"
-datePublished: "2026-06-29"
-lastReviewed: "2026-06-29"
-relatedService: "prenatal-physiotherapy"
+reviewer:
+  name: "Cheryl Long"
+  slug: "cheryl-long"
 ctaSlug: "web-wa"
 order: 8
 draft: false

@@ -1,12 +1,12 @@
 ---
 title: "Blocked Ducts and Mastitis"
-description: "Physiotherapy for blocked milk ducts and mastitis in Singapore: therapeutic ultrasound and gentle hands-on care to support breastfeeding recovery."
+description: "Blocked milk ducts and mastitis are painful and common challenges during breastfeeding. Physiotherapy - specifically therapeutic ultrasound and hands-on breast massage - is an evidence-supported adjunct for resolving blocked ducts and supporting recovery from mastitis."
 cardTitle: "Blocked Ducts and Mastitis"
 cardLead: "Blocked milk ducts and mastitis are painful and common challenges during breastfeeding."
 category: "Women's Health"
-datePublished: "2026-06-29"
-lastReviewed: "2026-06-29"
-relatedService: "postpartum-physiotherapy"
+reviewer:
+  name: "Cheryl Long"
+  slug: "cheryl-long"
 ctaSlug: "web-wa"
 order: 10
 draft: false
