@@ -11,7 +11,7 @@ clinicians: ["Kristy Ng", "Claire Ng", "Cheryl Long"]
 bookingService: "physiotherapy"
 bookingFocus: "general"
 order: 2
-draft: true
+draft: false
 ---
 
 Physiotherapy assessment and treatment for musculoskeletal pain and injuries, from back, neck and shoulder pain to joint problems and sports injuries.
