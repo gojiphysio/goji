@@ -40,6 +40,15 @@ so a token change reflows everything (styleguide is the QA surface).
   and emits `reviewedBy` in the MedicalWebPage JSON-LD. Strip the source doc's
   italic reviewer/status/SEO-slug/structured-data notes and inline CTA — the
   template supplies the H1, byline, and CTA.
+- **Third-party embeds are click-to-load.** Nothing may fire a third-party
+  request on page view. Videos use the `YouTubeShort` facade (branded poster;
+  the iframe is injected only on click). The map uses `SITE.googleMapsEmbed` —
+  a keyless `output=embed` URL, because the `maps.app.goo.gl` short link in
+  `SITE.googleMaps` cannot be iframed. Keep both URLs in `site.ts`, never
+  hardcoded in a component.
+- **`tone="closing"` needs an on-dark CTA.** The `primary` button is Deep Red on
+  the Deep Red closing surface and disappears. Give the non-WhatsApp CTA a linen
+  fill (see `.gh-btn-light` on `/getting-here`).
 - **Mobile-first.** Most reach is on a phone. Base CSS before `@media`; check
   down to ~375px.
 - **Branch & PR to `main`** — never push to `main` directly.
@@ -67,7 +76,13 @@ so a token change reflows everything (styleguide is the QA surface).
 Logos in `public/brand/` are **copies** of the source of truth at
 `business-intelligence/design/brand_assets/`. Re-sync if the brand updates.
 Photos are real, consented clinic/practitioner images in production — no stock,
-no before/after. Components show branded placeholders until photos land.
+no before/after. Components show branded placeholders until photos land (a
+`public/` photo that isn't in yet should degrade to a placeholder, not a broken
+`<img>` — see the `.gh-photo[data-missing]` pattern on `/getting-here`).
+
+Icons come from Tabler via `astro-icon` (`<Icon name="tabler:*" />`). When Tabler
+has no suitable glyph, drop a stroke-styled SVG into `src/icons/` and reference
+it by filename (`<Icon name="subway" />`) — don't pull in another icon set.
 
 ## Run it
 See `README.md`. `npm install` then `npm run dev` (hot reload). `npm run build`

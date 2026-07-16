@@ -29,14 +29,19 @@ import { SITE } from "../lib/site.ts";
         {SITE.address.line2}
       </p>
       <p class="contact__note">{SITE.address.note}</p>
-      <a
-        href="https://maps.app.goo.gl/wBaCkBiDNfF7JCGv8"
-        class="contact__directions"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        Get directions &rarr;
-      </a>
+      <div class="contact__links">
+        <a href="/getting-here" class="contact__directions">
+          Getting here: parking, MRT &amp; video guides &rarr;
+        </a>
+        <a
+          href={SITE.googleMaps}
+          class="contact__directions"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Open in Google Maps &rarr;
+        </a>
+      </div>
     </div>
     <div class="contact__group">
       <h3>Hours</h3>
@@ -90,9 +95,15 @@ import { SITE } from "../lib/site.ts";
     color: var(--text-muted);
     margin-top: var(--space-2);
   }
+  .contact__links {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2);
+    margin-top: var(--space-3);
+  }
   .contact__directions {
     display: inline-block;
-    margin-top: var(--space-3);
     font-family: var(--font-display);
     font-size: var(--fs-small);
     font-weight: var(--weight-medium);
