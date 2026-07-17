@@ -81,7 +81,12 @@ const team = defineCollection({
     name: z.string(),
     role: z.string(),
     credentials: z.string(),
+    /** The hero lede. Long-form; use `metaDescription` for the <meta> tag. */
     tagline: z.string(),
+    /** The <meta description>. Falls back to `tagline`, which may exceed 160. */
+    metaDescription: z.string().max(160).optional(),
+    /** Substring of `tagline` to underline in the hero. Ignored if it doesn't match. */
+    taglineHighlight: z.string().optional(),
     photo: z.string().optional(),
     specialties: z.array(z.object({
       title: z.string(),
@@ -93,6 +98,9 @@ const team = defineCollection({
     training: z.array(z.string()),
     languages: z.array(z.string()),
     personalNote: z.string().optional(),
+    /** Candid photo beside the personal note; degrades to a placeholder if unset. */
+    personalPhoto: z.string().optional(),
+    personalPhotoAlt: z.string().optional(),
     draft: z.boolean().default(false),
   }),
 });

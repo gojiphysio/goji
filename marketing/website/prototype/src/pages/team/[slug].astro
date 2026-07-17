@@ -3,6 +3,7 @@ import { getCollection } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Button from "../../components/Button.astro";
 import LogoLockup from "../../components/LogoLockup.astro";
+import ImageTextSplit from "../../components/ImageTextSplit.astro";
 import { SITE } from "../../lib/site.ts";
 
 export async function getStaticPaths() {
@@ -17,6 +18,16 @@ const { entry } = Astro.props;
 const { Content } = await entry.render();
 const d = entry.data;
 const firstName = d.name.split(" ")[0];
+
+// The hero lede underlines one phrase in Deep Red, as the old bio pages did. Split it
+// here so the markup stays flat. A highlight that no longer matches its tagline falls
+// back to plain text rather than breaking the page.
+const hl = d.taglineHighlight;
+const hlAt = hl ? d.tagline.indexOf(hl) : -1;
+const taglineParts =
+  hl && hlAt >= 0
+    ? [d.tagline.slice(0, hlAt), hl, d.tagline.slice(hlAt + hl.length)]
+    : null;
 
 const origin = Astro.site ?? new URL(Astro.url.origin);
 const pageURL = new URL(Astro.url.pathname, origin).href;
@@ -61,7 +72,7 @@ const teamSchema = [
 
 <BaseLayout
   title={`${d.name} — ${d.role} | Goji Health`}
-  description={d.tagline}
+  description={d.metaDescription ?? d.tagline}
   schema={teamSchema}
 >
   {/* ---- Hero ---- */}
@@ -81,7 +92,15 @@ const teamSchema = [
         <h1 class="bio-hero__name">{d.name}</h1>
         <p class="bio-hero__role">{d.role}</p>
         <p class="bio-hero__creds">{d.credentials}</p>
-        <p class="bio-hero__tagline">{d.tagline}</p>
+        <p class="bio-hero__tagline">
+          {taglineParts ? (
+            <>
+              {taglineParts[0]}<span class="tagline-hl">{taglineParts[1]}</span>{taglineParts[2]}
+            </>
+          ) : (
+            d.tagline
+          )}
+        </p>
         <div class="bio-hero__actions">
           <Button slug="web-book" variant="primary">Book with {firstName}</Button>
           <Button slug="web-wa" variant="whatsapp">WhatsApp us</Button>
@@ -154,8 +173,11 @@ const teamSchema = [
   {/* ---- Personal note (optional) ---- */}
   {d.personalNote && (
     <section class="bio-personal">
-      <div class="container bio-personal__inner">
-        <p class="bio-personal__text">{d.personalNote}</p>
+      <div class="container">
+        <ImageTextSplit image={d.personalPhoto} imageAlt={d.personalPhotoAlt}>
+          <h2 class="bio-personal__heading">Personal note</h2>
+          <p class="bio-personal__text">{d.personalNote}</p>
+        </ImageTextSplit>
       </div>
     </section>
   )}
@@ -174,12 +196,13 @@ const teamSchema = [
 </BaseLayout>
 
 <style>
-  /* Swap the editorial red dash for a small bloom icon on this page's eyebrows */
+  /* Swap the editorial red dash for the open goji bloom on this page's eyebrows.
+     bloom-4 is the full-open flower; the later frames are the wilt and the berry. */
   .eyebrow--flower::before {
     content: '';
     width: 20px;
     height: 20px;
-    background: url('/illustrations/bloom-7.png') center / contain no-repeat;
+    background: url('/illustrations/bloom-4.png') center / contain no-repeat;
     border-radius: 0;
   }
 
@@ -214,29 +237,37 @@ const teamSchema = [
   }
   .bio-hero__name {
     font-size: var(--fs-h1);
+    color: var(--color-primary);
     margin-top: var(--space-3);
     margin-bottom: var(--space-2);
   }
+  /* Reads as a bold dark line under the now-red name, rather than competing with it */
   .bio-hero__role {
     font-family: var(--font-body);
-    font-size: var(--fs-caption);
+    font-size: var(--fs-body);
     font-weight: var(--weight-semibold);
-    letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
-    color: var(--color-primary);
-    margin-bottom: var(--space-3);
+    color: var(--text-default);
+    margin-bottom: var(--space-1);
   }
   .bio-hero__creds {
     font-size: var(--fs-small);
     color: var(--text-muted);
-    margin-bottom: var(--space-4);
+    margin-bottom: var(--space-5);
   }
   .bio-hero__tagline {
-    font-size: var(--fs-body);
-    color: var(--text-muted);
-    line-height: var(--lh-body);
-    max-width: 44ch;
+    font-family: var(--font-display);
+    font-size: var(--fs-h3);
+    font-weight: var(--weight-medium);
+    color: var(--text-default);
+    line-height: var(--lh-snug);
+    letter-spacing: var(--tracking-tight);
+    max-width: 30ch;
     margin-bottom: var(--space-6);
+    text-wrap: pretty;
+  }
+  .tagline-hl {
+    border-bottom: 2px solid var(--color-primary);
+    padding-bottom: 0.04em;
   }
   .bio-hero__actions {
     display: flex;
@@ -366,11 +397,10 @@ const teamSchema = [
     padding-block: var(--section-y);
     border-top: 1px solid var(--rule);
   }
-  .bio-personal__inner {
-    max-width: var(--container-narrow);
+  .bio-personal__heading {
+    font-size: var(--fs-h2);
   }
   .bio-personal__text {
-    margin-top: var(--space-4);
     font-size: var(--fs-body);
     color: var(--text-muted);
     line-height: var(--lh-body);

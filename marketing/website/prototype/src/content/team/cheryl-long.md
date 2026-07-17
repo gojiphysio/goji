@@ -4,8 +4,12 @@ photo: "/photos/team/cheryl-long.webp"
 role: Clinical Director
 credentials: "AHPC-registered Physiotherapist | BSc (Hons) Physiotherapy"
 tagline: >
-  Provides thoughtful, evidence-informed physiotherapy for women, children, and families
-  across all stages of life.
+  Cheryl provides thoughtful, evidence-informed physiotherapy for
+  women, children, and families,
+  from injury recovery and pregnancy to pelvic health, scoliosis, and long-term
+  movement care.
+metaDescription: "Cheryl Long, Clinical Director at Goji. Evidence-informed physiotherapy for women, children, and families in Singapore."
+taglineHighlight: "women, children, and families"
 specialties:
   - title: "Women's health physiotherapy"
     description: "Pregnancy-related pain, birth preparation, diastasis recti management, postpartum recovery and return to sport, and menopausal bone health support."
@@ -60,6 +64,8 @@ personalNote: >
   children, and families can feel well cared for through different seasons of life. I hope
   every patient who walks through our doors feels heard, understood, and empowered to live
   well at every life stage.
+personalPhoto: "/photos/team/personal/cheryl-long.webp"
+personalPhotoAlt: "Cheryl outdoors in a park with her husband and their three children"
 draft: false
 ---
 
