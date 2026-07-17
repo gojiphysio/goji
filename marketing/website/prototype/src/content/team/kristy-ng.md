@@ -4,9 +4,13 @@ photo: "/photos/team/kristy-ng.webp"
 role: Senior Physiotherapist
 credentials: "AHPC-registered Physiotherapist | Master of Physiotherapy Studies (MPhtyst)"
 tagline: >
-  Supports women, children, and seniors to recover, build strength, and move with confidence
+  Kristy supports
+  women, children, and seniors
+  to recover, build strength, and move with confidence
   across pelvic health, pregnancy and postpartum care, paediatric physiotherapy, and
   long-term movement rehabilitation.
+metaDescription: "Kristy Ng, Senior Physiotherapist at Goji. Pelvic health, pregnancy and postpartum care, and paediatric physiotherapy in Singapore."
+taglineHighlight: "women, children, and seniors"
 specialties:
   - title: "Women's health physiotherapy"
     description: "Pregnancy-related pain, birth preparation, diastasis recti management, postpartum recovery and return to sport, and menopausal bone health support."
@@ -55,6 +59,8 @@ personalNote: >
   day at home doing colour by numbers or singing karaoke. Being part of Goji is an exciting
   new chapter for me, and I look forward to connecting with you and supporting you in feeling
   more confident as you lead an active lifestyle.
+personalPhoto: "/photos/team/personal/kristy-ng.webp"
+personalPhotoAlt: "Kristy wearing themed ears at a Disney park, beside a Little Mermaid lagoon set"
 draft: false
 ---
 
