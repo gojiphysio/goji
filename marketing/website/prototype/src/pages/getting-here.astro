@@ -3,8 +3,8 @@
  * Getting here — wayfinding to the clinic at Lentor Modern.
  *
  * A dedicated directions page: hero + at-a-glance, an embedded map, and one
- * block per travel mode (MRT / car / taxi & private hire) pairing written,
- * turn-by-turn steps with a short YouTube walkthrough for that route.
+ * block per travel mode (MRT / car / taxi & Grab) pairing written, turn-by-turn
+ * steps with a short YouTube walkthrough for that route.
  *
  * Compliance/style (prototype AGENTS.md): warm, plain, no emojis in copy (the
  * source emojis become Tabler icons), regular dashes, never italic, tokens only.
@@ -22,9 +22,9 @@ const description =
 
 // Quick facts for the hero at-a-glance strip.
 const glance = [
-  { icon: "subway", value: "1 min", label: "from Lentor MRT, Exit 1" },
-  { icon: "tabler:parking", value: "Parking", label: "in the Lentor Modern basement" },
-  { icon: "tabler:wheelchair", value: "Step-free", label: "wheelchair and stroller access along Lentor Drive" },
+  { icon: "subway", value: "1-minute", label: "walk from Lentor MRT, Exit 1" },
+  { icon: "tabler:parking", value: "Basement", label: "parking at Lentor Modern" },
+  { icon: "tabler:wheelchair", value: "Step-free", label: "access for wheelchairs and strollers via Lentor Drive" },
 ];
 
 // Breadcrumb for rich results (Home -> Getting here).
@@ -47,10 +47,10 @@ const breadcrumbSchema = {
         <p class="eyebrow">Getting here</p>
         <h1>Finding us at Lentor Modern</h1>
         <p class="gh-hero__lead">
-          We are on the ground floor of Lentor Modern, a one-minute walk from
-          Lentor MRT and right beside the pick-up point. However you are
-          travelling, here is exactly how to reach us - with a short video guide
-          for each route.
+          We are on the ground floor of Lentor Modern, next to
+          <strong>Burger King</strong> and beside the Lentor Drive pick-up point.
+          However you choose to travel, here's exactly how to find us, with a
+          short video guide for each route.
         </p>
         <address class="gh-hero__address">
           {SITE.address.line1}<br />
@@ -65,7 +65,7 @@ const breadcrumbSchema = {
       <figure class="gh-photo gh-hero__photo" data-reveal>
         <img
           src="/photos/directions/exterior-frontage.webp"
-          alt="The Goji Physiotherapy frontage at Lentor Modern, beside the pick-up point"
+          alt="Entrance to Goji Women's and Family Physiotherapy on the ground floor of Lentor Modern, next to Burger King and beside the Lentor Drive pick-up point"
           width="1600"
           height="1173"
           loading="eager"
@@ -134,10 +134,10 @@ const breadcrumbSchema = {
   <Section tone="linen" id="by-mrt" class="gh-anchor">
     <div class="gh-mode" data-reveal>
       <div class="gh-mode__head">
-        <span class="gh-mode__icon" aria-hidden="true"><Icon name="tabler:train" width={24} height={24} /></span>
+        <span class="gh-mode__icon" aria-hidden="true"><Icon name="subway" width={24} height={24} /></span>
         <div>
           <p class="eyebrow">By MRT</p>
-          <h2>A one-minute walk from Lentor MRT</h2>
+          <h2>A 1-minute walk from Lentor MRT</h2>
         </div>
       </div>
       <div class="gh-mode__body">
@@ -170,23 +170,23 @@ const breadcrumbSchema = {
       <div class="gh-mode__body">
         <div class="gh-mode__main">
           <p class="gh-mode__lead">
-            Entrance to parking is situated on Lentor Central. Finding
-            <strong>Lentor Modern</strong> on Google Maps will bring you to the
-            right entrance.
+            The entrance to the car park is on Lentor Central. Searching for
+            <strong>Lentor Modern</strong> on Google Maps will direct you to the
+            correct entrance.
           </p>
           <div class="gh-routes">
             <div class="gh-route">
-              <p class="gh-route__pace"><Icon name="tabler:escalator" width={18} height={18} aria-hidden="true" /> Travellator</p>
+              <p class="gh-route__pace"><Icon name="tabler:escalator" width={18} height={18} aria-hidden="true" /> Moving walkway</p>
               <p class="gh-route__desc">
-                Take the travellator up to the mall, then the escalator beside
-                <strong>KFC</strong> down to Level M. Turn right along the outer
-                ring to the end of the row.
+                Take the moving walkway up to the mall, then take the escalator
+                beside <strong>KFC</strong> down to Level M. Turn right along the
+                outer corridor to the end of the row.
               </p>
             </div>
             <div class="gh-route">
               <p class="gh-route__pace"><Icon name="tabler:elevator" width={18} height={18} aria-hidden="true" /> Lift</p>
               <p class="gh-route__desc">
-                Take the rightmost lift and press <strong>Level M</strong> (not
+                Take the rightmost lift and select <strong>Level M</strong> (not
                 Level 1, even though our unit is #01-13). Turn right after exiting
                 and continue to the end of the row.
               </p>
@@ -204,24 +204,52 @@ const breadcrumbSchema = {
     </div>
   </Section>
 
-  {/* ---- By taxi / private hire ---- */}
+  {/* ---- By taxi / Grab ---- */}
   <Section tone="linen" id="by-taxi" class="gh-anchor">
     <div class="gh-mode" data-reveal>
       <div class="gh-mode__head">
         <span class="gh-mode__icon" aria-hidden="true"><Icon name="tabler:car" width={24} height={24} /></span>
         <div>
-          <p class="eyebrow">By taxi or private hire</p>
+          <p class="eyebrow">By taxi or Grab</p>
           <h2>Two drop-off points, both sheltered</h2>
         </div>
       </div>
+
+      <div class="gh-grab" data-reveal>
+        <p class="gh-grab__label">Open in Grab</p>
+        <ul class="gh-grab__links">
+          <li>
+            <a
+              class="gh-grab__link"
+              href="https://app.grab.com/s/MBrymmum"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Icon name="tabler:map-pin" width={18} height={18} aria-hidden="true" />
+              <span>Exit 1 (Lentor Drive), Lentor MRT Station (TE5)</span>
+            </a>
+          </li>
+          <li>
+            <a
+              class="gh-grab__link"
+              href="https://app.grab.com/s/j6NRBBzy"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Icon name="tabler:map-pin" width={18} height={18} aria-hidden="true" />
+              <span>Lentor Modern Mall</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+
       <div class="gh-mode__taxi">
         <div class="gh-taxi">
           <div class="gh-taxi__text">
-            <h3>Lentor Drive taxi stand (nearest)</h3>
+            <h3>Lentor Drive drop-off point (nearest)</h3>
             <p>
-              Set the <strong>Lentor Drive taxi stand</strong> as your drop-off
-              point. The clinic is beside the stand, with a fully sheltered
-              walkway to our door.
+              Set <strong>Lentor Drive</strong> as your drop-off point. The clinic
+              is beside it, with a fully sheltered walkway to our door.
             </p>
           </div>
           <div class="gh-mode__video">
@@ -234,11 +262,12 @@ const breadcrumbSchema = {
         </div>
         <div class="gh-taxi">
           <div class="gh-taxi__text">
-            <h3>Lentor Modern main taxi stand</h3>
+            <h3>Lentor Modern main drop-off point</h3>
             <p>
-              From the <strong>Cold Storage</strong> entrance, enter the mall and
-              take the escalator beside <strong>KFC</strong> down to Level M. Turn
-              right along the outer ring and continue to the end of the row.
+              Enter the mall through the <strong>Cold Storage</strong> entrance,
+              then take the escalator beside <strong>KFC</strong> down to Level M.
+              Turn right along the outer corridor and continue to the end of the
+              row.
             </p>
           </div>
           <div class="gh-mode__video">
@@ -258,8 +287,8 @@ const breadcrumbSchema = {
     <div class="gh-closing" data-reveal>
       <h2>Can't find us?</h2>
       <p>
-        If anything is unclear on the day, message us on WhatsApp and we will
-        guide you in. We look forward to seeing you.
+        If you have trouble finding us, message us on WhatsApp and we'll guide
+        you to the clinic. We look forward to seeing you.
       </p>
       <div class="gh-closing__cta">
         <Button slug="web-wa" variant="whatsapp" size="lg">Message us on WhatsApp</Button>
@@ -538,7 +567,7 @@ const breadcrumbSchema = {
   .gh-steps li p { color: var(--text-muted); padding-top: 0.3rem; }
   .gh-steps strong { color: var(--text-default); }
 
-  /* Car routes (travellator / lift) */
+  /* Car routes (moving walkway / lift) */
   .gh-routes {
     margin-top: var(--space-5);
     display: grid;
@@ -571,6 +600,52 @@ const breadcrumbSchema = {
   /* Fill the fixed 15rem column so every Short renders at an identical size
      (the .yts max-width caps it, and left-aligns it when the row stacks). */
   .gh-mode__video { justify-self: stretch; }
+
+  /* "Open in Grab" deep links (drop-off pins) */
+  .gh-grab {
+    margin-bottom: clamp(var(--space-5), 3vw, var(--space-6));
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+  .gh-grab__label {
+    font-family: var(--font-display);
+    font-size: var(--fs-caption);
+    font-weight: var(--weight-semibold);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--color-accent);
+  }
+  .gh-grab__links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+  .gh-grab__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.7rem 1.15rem;
+    border-radius: var(--radius-pill);
+    background: var(--bg-content);
+    border: 1px solid var(--color-border);
+    color: var(--text-default);
+    font-size: var(--fs-small);
+    font-weight: var(--weight-semibold);
+    text-decoration: none;
+    box-shadow: var(--shadow-sm);
+    transition: border-color var(--dur) var(--ease), color var(--dur) var(--ease),
+      transform var(--dur) var(--ease);
+  }
+  .gh-grab__link :global(svg) { color: var(--color-primary); flex: none; }
+  .gh-grab__link:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    transform: translateY(-1px);
+  }
 
   /* Taxi: two routes stacked, each with its own video */
   .gh-mode__taxi { display: grid; gap: var(--space-6); }
