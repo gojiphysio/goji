@@ -14,6 +14,11 @@ from __future__ import annotations
 SLOT_MINUTES = 30
 HOME_TRAVEL_MINUTES = 30  # travel block before AND after a home visit
 MAX_ADVANCE_DAYS = 60  # bookings are capped at 60 days into the future
+# How far back the recurrence/long-block sweep looks for still-active recurring
+# masters and multi-day blocks (Plato returns a recurring series only on its
+# first date). Covers observed active recurrences with margin. This sweep runs in
+# the BACKGROUND only, gently paced — never on the request path (see plato.py).
+RECUR_LOOKBACK_DAYS = 120
 
 # clinician_id -> Plato calendar `color` (the appointment calendar) + doctor code.
 # online_start / online_end (optional) clamp the online-bookable window when the

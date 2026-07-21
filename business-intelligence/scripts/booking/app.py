@@ -67,7 +67,23 @@ def plato() -> PlatoClient:
         with _init_lock:
             if _plato is None:
                 _plato = PlatoClient()
+                _warm_broad(_plato)  # prime the recurrence sweep off the hot path
     return _plato
+
+
+def _warm_broad(client: PlatoClient) -> None:
+    """Kick off the background recurrence/long-block sweep so it's warm before the
+    first availability request (which otherwise sees an empty overlay). Best-effort."""
+    from datetime import date as _date, timedelta
+    from .config import MAX_ADVANCE_DAYS, RECUR_LOOKBACK_DAYS
+    try:
+        today = _date.today()
+        client.warm_broad(
+            (today - timedelta(days=RECUR_LOOKBACK_DAYS)).isoformat(),
+            (today + timedelta(days=MAX_ADVANCE_DAYS)).isoformat(),
+        )
+    except Exception:
+        pass  # the first request will trigger the refresh anyway
 
 
 def bq():

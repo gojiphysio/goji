@@ -13,6 +13,7 @@ padding on both sides, and only Cheryl is considered.
 """
 from __future__ import annotations
 
+import logging
 from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
 
@@ -22,10 +23,14 @@ from .config import (
     HOME_VISIT_CLINICIAN,
     MAX_ADVANCE_DAYS,
     PHYSIO_FOCUS_CLINICIANS,
+    RECUR_LOOKBACK_DAYS,
     SERVICES,
     SLOT_MINUTES,
     clinician_by_calendar,
 )
+from .recurrence import parse_recur, recurs_on
+
+log = logging.getLogger("booking.availability")
 
 SGT = ZoneInfo("Asia/Singapore")
 _DOW = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]  # python weekday() order
@@ -41,6 +46,40 @@ def _rules_for(cfg: dict, online_calendar_id: str) -> list[dict]:
 def _overlaps(a_start: datetime, a_end: datetime,
               b_start: datetime, b_end: datetime) -> bool:
     return a_start < b_end and a_end > b_start
+
+
+def _overlay_recurring_and_multiday(plato, day, today, booked) -> None:
+    """Add to `booked` the occupancy the single-day fetch can't see: a RECURRING
+    appointment/block whose series began earlier (Plato returns a series only on
+    its first date), and a MULTI-DAY block that started before `day`. Both would
+    otherwise leave an occupied slot bookable — the clinic hit this with Kristy's
+    alternate-Wednesday time-off.
+
+    Best-effort by design: the source (`appointments_broad`) never blocks and
+    returns empty on a cold instance, and ANY failure here is swallowed so the
+    overlay can only ever ADD blocks, never break availability. Same-day single
+    -day appointments are already in `booked`; re-adding one is harmless."""
+    try:
+        lo = (today - timedelta(days=RECUR_LOOKBACK_DAYS)).isoformat()
+        hi = (today + timedelta(days=MAX_ADVANCE_DAYS)).isoformat()
+        for a in plato.appointments_broad(lo, hi):
+            try:
+                s = datetime.fromisoformat(a["starttime"])
+                e = datetime.fromisoformat(a["endtime"])
+            except (KeyError, ValueError, TypeError):
+                continue
+            color = a.get("color", "")
+            recur = parse_recur(a.get("recur"))
+            if recur:
+                if recurs_on(recur, s, day):
+                    occ = datetime(day.year, day.month, day.day,
+                                   s.hour, s.minute, s.second)
+                    booked.setdefault(color, []).append((occ, occ + (e - s)))
+            elif e.date() > s.date() and s.date() <= day <= e.date():
+                # Multi-day block spanning `day` (single-day fetch missed it).
+                booked.setdefault(color, []).append((s, e))
+    except Exception as e:  # never let the overlay break availability
+        log.warning("recurrence/multi-day overlay skipped: %s", e)
 
 
 def derive_availability(
@@ -94,6 +133,8 @@ def derive_availability(
         except (KeyError, ValueError, TypeError):
             continue
         booked.setdefault(a.get("color", ""), []).append((s, e))
+
+    _overlay_recurring_and_multiday(plato, day, today, booked)
     clinic_wide = booked.get("-all-", [])
 
     cfg = plato.online_booking_config()
