@@ -19,12 +19,17 @@ MAX_ADVANCE_DAYS = 60  # bookings are capped at 60 days into the future
 # online_start / online_end (optional) clamp the online-bookable window when the
 # clinic's intended online hours differ from the raw Plato rule hours. Cheryl's
 # online bookings don't start until 09:00 (her rule says 08:00).
+# `email` is the clinician's work inbox; the matched clinician is CC'd on the
+# internal booking heads-up so the assigned physio sees their own new bookings.
 CLINICIANS: dict[str, dict] = {
     # Cheryl is fixed 09:00-17:00, Mon-Fri (Sat/Sun already off in Plato rules).
     "cheryl-long": {"name": "Cheryl Long", "calendar": "blue", "doctor": "PCL",
-                    "online_start": "09:00", "online_end": "17:00"},
-    "claire-ng": {"name": "Claire Ng", "calendar": "6hpO", "doctor": "PCN"},
-    "kristy-ng": {"name": "Kristy Ng", "calendar": "green", "doctor": "PKN"},
+                    "online_start": "09:00", "online_end": "17:00",
+                    "email": "cheryl.long@gojiphysio.com"},
+    "claire-ng": {"name": "Claire Ng", "calendar": "6hpO", "doctor": "PCN",
+                  "email": "claire.ng@gojiphysio.com"},
+    "kristy-ng": {"name": "Kristy Ng", "calendar": "green", "doctor": "PKN",
+                  "email": "kristy.ng@gojiphysio.com"},
 }
 
 # website service id -> Plato mapping.
@@ -68,10 +73,10 @@ SERVICES: dict[str, dict] = {
 # physio session is for (the Plato calendar/type is the same for all of them).
 # Mirrors the ids in the website's src/lib/physioCategories.ts; keep in sync.
 PHYSIO_FOCUS_LABELS: dict[str, str] = {
-    "general": "General MSK",
+    "general": "General Musculoskeletal (MSK)",
     "womens-health": "Women's Health",
     "paediatrics": "Paediatrics",
-    "scoliosis": "Scoliosis (Schroth)",
+    "scoliosis": "Scoliosis (Schroth Method)",
     "others": "Others",
 }
 

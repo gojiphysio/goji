@@ -132,6 +132,22 @@ def test_no_physio_focus_means_no_type_line():
     assert "Type:" not in p.created[0][0]["description"]
 
 
+def test_result_carries_focus_label_and_clinician_email():
+    # The result feeds the booking emails: the physio sub-type label is surfaced
+    # there, and the matched clinician's inbox is used to CC them.
+    p = StubPlato()
+    res = create_booking(p, {**BASE, "clinician_id": "cheryl-long",
+                             "physio_focus": "general"}, now=NOW)
+    assert res["physio_focus"] == "General Musculoskeletal (MSK)"
+    assert res["clinician_email"] == "cheryl.long@gojiphysio.com"
+
+
+def test_result_focus_label_empty_without_focus():
+    p = StubPlato()
+    res = create_booking(p, {**BASE, "clinician_id": "cheryl-long"}, now=NOW)
+    assert res["physio_focus"] == ""
+
+
 def test_first_available_respects_physio_focus():
     # Scoliosis is Cheryl-only, so first-available must never assign Claire.
     p = StubPlato()

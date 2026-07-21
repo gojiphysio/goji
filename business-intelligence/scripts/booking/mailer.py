@@ -83,10 +83,18 @@ def send_admin_booking_email(result: dict, draft: dict) -> None:
                           f"({result['date']} {result['time']})")
         msg["From"] = SMTP_USER
         msg["To"] = ADMIN_TO
+        # CC the matched clinician so the assigned physio sees their own booking.
+        cc = result.get("clinician_email")
+        if cc:
+            msg["Cc"] = cc
         lines = [
             "A new booking came in via the website:",
             "",
             _row("Service", result['service']),
+        ]
+        if result.get("physio_focus"):
+            lines.append(_row("Type", result['physio_focus']))
+        lines += [
             _row("When", f"{result['date']} {result['time']} (SGT)"),
             _row("Where", where),
             *_clinician_lines(result),
@@ -132,6 +140,10 @@ def send_customer_booking_email(result: dict, draft: dict) -> None:
             "request and here are the details:",
             "",
             _row("Service", result['service']),
+        ]
+        if result.get("physio_focus"):
+            lines.append(_row("Type", result['physio_focus']))
+        lines += [
             _row("When", f"{when} (Singapore time)"),
             _row("Where", where),
             *_clinician_lines(result),
@@ -139,7 +151,7 @@ def send_customer_booking_email(result: dict, draft: dict) -> None:
         if result.get("home") and draft.get("address"):
             lines.append(_row("Address", draft.get('address')))
         if (draft.get("notes") or "").strip():
-            lines.append(_row("You told us", draft.get('notes').strip()))
+            lines.append(_row("Remarks", draft.get('notes').strip()))
         lines += [
             _row("Reference", result['reference']),
             "",
