@@ -151,7 +151,7 @@ def send_customer_booking_email(result: dict, draft: dict) -> None:
         if result.get("home") and draft.get("address"):
             lines.append(_row("Address", draft.get('address')))
         if (draft.get("notes") or "").strip():
-            lines.append(_row("You told us", draft.get('notes').strip()))
+            lines.append(_row("Remarks", draft.get('notes').strip()))
         lines += [
             _row("Reference", result['reference']),
             "",
