@@ -50,6 +50,14 @@ Plato's `onlineapptbooking/list`.
 
 ## Run / test / deploy
 - Tests: `cd scripts && python3 -m booking.test_booking && python3 -m booking.test_availability`
+  - **CI runs these on every push to `main` and a failure blocks the deploy** —
+    a red booking test means nothing ships. Keep the suite green.
+  - **Any test that uses a fixed date MUST pass an explicit `now=`** to
+    `derive_availability` / `create_booking`. Otherwise `now` defaults to the real
+    calendar date, and once real time passes the hardcoded test date it reads as
+    a past booking and returns no slots — the test "time-bombs" (green in CI today,
+    red weeks later, and it takes the deploy down with it). Pin `now` to the day
+    before the test date (see `NOW` in both test files).
 - Probe live availability (read-only): `PLATO_API_KEY=… python3 -m booking.probe_availability 2026-07-18 physiotherapy`
 - Deploy: `bash deploy.sh` (see the header — needs `plato-api-key`, optional
   `gmail-app-password`; add `booking_funnel_events` to `deploy_admin.sh` grants first).
