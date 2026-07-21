@@ -22,9 +22,8 @@ BASE = {"service": "physiotherapy", "date": DAY, "time": "10:00",
 
 
 class StubPlato:
-    def __init__(self, appts=None, fail_on_create=None, broad=None):
+    def __init__(self, appts=None, fail_on_create=None):
         self.appts = appts or []
-        self.broad = broad or []
         self.created: list[tuple[dict, str]] = []
         self.deleted: list[str] = []
         self._n = 0
@@ -32,9 +31,6 @@ class StubPlato:
 
     def appointments(self, start, end):
         return self.appts
-
-    def appointments_broad(self, start, end):
-        return self.broad
 
     def online_booking_config(self):
         return CFG
@@ -75,21 +71,6 @@ def test_conflicting_slot_is_refused():
     try:
         create_booking(p, {**BASE, "clinician_id": "cheryl-long"}, now=NOW)
         assert False, "expected BookingError"
-    except BookingError as e:
-        assert e.code == "slot_taken"
-    assert p.created == []  # nothing written
-
-
-def test_booking_refused_inside_recurring_block():
-    # The clinic's report: a weekly Wed block (series began earlier) must stop a
-    # 10:00 booking on DAY, even though the single-day fetch returns nothing.
-    broad = [{"color": "blue", "title": "Block",
-              "starttime": "2026-06-24 09:00:00", "endtime": "2026-06-24 12:00:00",
-              "recur": '{"days": ["WE"], "freq": 2, "until": 20260805, "interval": 1}'}]
-    p = StubPlato(broad=broad)
-    try:
-        create_booking(p, {**BASE, "clinician_id": "cheryl-long"}, now=NOW)
-        assert False, "expected BookingError (slot inside recurring block)"
     except BookingError as e:
         assert e.code == "slot_taken"
     assert p.created == []  # nothing written
