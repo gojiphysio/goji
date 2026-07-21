@@ -22,12 +22,10 @@ from .config import (
     HOME_VISIT_CLINICIAN,
     MAX_ADVANCE_DAYS,
     PHYSIO_FOCUS_CLINICIANS,
-    RECUR_LOOKBACK_DAYS,
     SERVICES,
     SLOT_MINUTES,
     clinician_by_calendar,
 )
-from .recurrence import parse_recur, recurs_on
 
 SGT = ZoneInfo("Asia/Singapore")
 _DOW = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]  # python weekday() order
@@ -96,32 +94,6 @@ def derive_availability(
         except (KeyError, ValueError, TypeError):
             continue
         booked.setdefault(a.get("color", ""), []).append((s, e))
-
-    # The single-day fetch above can't see two things: a RECURRING appointment or
-    # block whose series began on an earlier date (Plato returns the series only
-    # on its first day, never expanding future instances), and a MULTI-DAY block
-    # that started before `day`. Both would let us offer a slot that is actually
-    # taken — the clinic hit exactly this (a booking inside a weekly Wed block).
-    # Overlay them from the broad, slow-changing look-back sweep. Same-day, single
-    # -day appointments are already covered above, so we only take recurrences and
-    # true multi-day spanners here (re-adding an identical interval is harmless).
-    lo = (today - timedelta(days=RECUR_LOOKBACK_DAYS)).isoformat()
-    hi = (today + timedelta(days=MAX_ADVANCE_DAYS)).isoformat()
-    for a in plato.appointments_broad(lo, hi):
-        try:
-            s = datetime.fromisoformat(a["starttime"])
-            e = datetime.fromisoformat(a["endtime"])
-        except (KeyError, ValueError, TypeError):
-            continue
-        color = a.get("color", "")
-        recur = parse_recur(a.get("recur"))
-        if recur:
-            if recurs_on(recur, s, day):
-                occ_start = datetime(day.year, day.month, day.day,
-                                     s.hour, s.minute, s.second)
-                booked.setdefault(color, []).append((occ_start, occ_start + (e - s)))
-        elif e.date() > s.date() and s.date() <= day <= e.date():
-            booked.setdefault(color, []).append((s, e))
     clinic_wide = booked.get("-all-", [])
 
     cfg = plato.online_booking_config()
