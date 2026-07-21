@@ -3,6 +3,8 @@ title: "Clinical Pilates"
 description: "Clinical Pilates in Singapore: controlled, low-impact sessions guided by a physiotherapist to build strength, mobility, balance and movement confidence."
 cardTitle: "Clinical Pilates"
 cardLead: "Physiotherapist-guided, low-impact Pilates to build strength, mobility and movement confidence - adapted to your ability and goals."
+heroImage: "/photos/services/clinical-pilates.webp"
+heroAlt: "A Goji physiotherapist guiding two clients through a reformer Clinical Pilates session."
 category: "Holistic Care"
 durationMin: 55
 priceClinic: 180

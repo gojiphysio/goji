@@ -3,6 +3,8 @@ title: "Paediatric Physiotherapy"
 description: "Paediatric physiotherapy in Singapore for children 0-18: movement, pain, injury and developmental concerns, assessed and managed with a personalised plan."
 cardTitle: "Paediatric Physiotherapy"
 cardLead: "Individualised assessment and practical guidance for your child's movement, development, pain or injury - from babies to teens."
+heroImage: "/photos/services/paediatric-physiotherapy.webp"
+heroAlt: "A parent and baby during tummy time at a Goji paediatric physiotherapy session."
 category: "Children"
 durationMin: 55
 priceClinic: 260

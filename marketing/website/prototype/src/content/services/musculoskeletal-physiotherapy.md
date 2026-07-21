@@ -3,6 +3,8 @@ title: "Musculoskeletal Physiotherapy"
 description: "Musculoskeletal physiotherapy in Singapore for back, neck, shoulder, knee and sports injuries: assessment, hands-on treatment and a plan to get you moving."
 cardTitle: "MSK & General Physiotherapy"
 cardLead: "Assessment and treatment for back, neck, shoulder, joint and sports injuries - with a clear, personalised plan to get you moving well again."
+heroImage: "/photos/services/musculoskeletal-physiotherapy.webp"
+heroAlt: "A Goji physiotherapist taping a client's foot during a musculoskeletal physiotherapy session."
 category: "General Health"
 durationMin: 55
 priceClinic: 260
@@ -66,9 +68,12 @@ This is followed by a physical assessment tailored to your concerns, which may i
 Treatment may begin during the same session and may include:
 
 - Manual therapy
+- Dry needling (only available for sessions with Cheryl Long)
 - Exercise and rehabilitation
 - Pain and symptom management strategies
 - Guidance on activity, load management and return to work, exercise or sport
+
+![A Goji physiotherapist applying dry needling to a client's forearm.](/photos/services/dry-needling.webp)
 
 ## What you will leave with
 
