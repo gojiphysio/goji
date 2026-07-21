@@ -9,6 +9,7 @@ jobs. Read helpers are safe; write helpers (`create_appointment`,
 from __future__ import annotations
 
 import os
+import threading
 import time
 
 import requests
@@ -26,6 +27,13 @@ CONFIG_TTL_S = float(os.environ.get("PLATO_CONFIG_TTL", "300"))
 # Short TTL: create_booking re-derives under a lock before writing, so a booking
 # made within the window is still caught at submit.
 APPTS_TTL_S = float(os.environ.get("PLATO_APPTS_TTL", "20"))
+# The broad look-back sweep (recurring masters + multi-day blocks) is many pages
+# and slow-changing, so it's cached far longer than the per-day fetch and served
+# stale-while-revalidate: a stale hit returns immediately and refreshes in the
+# background, so only the first request on a cold instance ever blocks on it.
+# Staleness only affects recurrences/long blocks (planned well ahead); same-day
+# conflicts come from the short-TTL per-day fetch, and our own writes clear both.
+BROAD_TTL_S = float(os.environ.get("PLATO_BROAD_TTL", "900"))
 
 
 class PlatoError(RuntimeError):
@@ -48,6 +56,10 @@ class PlatoClient:
         self._cfg_cache: dict | None = None
         self._cfg_ts = 0.0
         self._appts_cache: dict[tuple[str, str], tuple[float, list[dict]]] = {}
+        # (monotonic_ts, rows, (start,end)) for the broad recurrence/long-block sweep.
+        self._broad_cache: tuple[float, list[dict], tuple[str, str]] | None = None
+        self._broad_lock = threading.Lock()
+        self._broad_refreshing = False
 
     def _url(self, path: str) -> str:
         return f"{BASE}/{self.db}/{path.lstrip('/')}"
@@ -113,6 +125,48 @@ class PlatoClient:
                             {"start_date": start_date, "end_date": end_date})
         self._appts_cache[key] = (now, rows)
         return rows
+
+    def appointments_broad(self, start_date: str, end_date: str) -> list[dict]:
+        """Appointments across a wide window (YYYY-MM-DD), for recurrence + multi-day
+        expansion. Cached for BROAD_TTL_S and served stale-while-revalidate: a fresh
+        hit returns cached rows, a stale hit returns them AND kicks off a background
+        refresh, and only a cold instance (no cache yet, or a changed window) blocks
+        on the fetch. The window is stable within a day, so it's one cache entry."""
+        key = (start_date, end_date)
+        now = time.monotonic()
+        c = self._broad_cache
+        if c and c[2] == key:
+            if now - c[0] < BROAD_TTL_S:
+                return c[1]
+            self._refresh_broad_async(key)  # stale: serve now, refresh behind it
+            return c[1]
+        rows = self.get_all("appointment",
+                            {"start_date": start_date, "end_date": end_date})
+        self._broad_cache = (now, rows, key)
+        return rows
+
+    def warm_broad(self, start_date: str, end_date: str) -> None:
+        """Populate the broad cache in the background (call at startup) so the first
+        real availability request never eats the cold fetch."""
+        self._refresh_broad_async((start_date, end_date))
+
+    def _refresh_broad_async(self, key: tuple[str, str]) -> None:
+        with self._broad_lock:
+            if self._broad_refreshing:
+                return  # one refresh in flight is enough
+            self._broad_refreshing = True
+
+        def _run():
+            try:
+                rows = self.get_all("appointment",
+                                    {"start_date": key[0], "end_date": key[1]})
+                self._broad_cache = (time.monotonic(), rows, key)
+            except Exception:
+                pass  # keep serving the last good rows; try again next stale hit
+            finally:
+                self._broad_refreshing = False
+
+        threading.Thread(target=_run, daemon=True).start()
 
     def online_booking_config(self) -> dict:
         """The clinic's online-booking calendars + per-clinician rules.

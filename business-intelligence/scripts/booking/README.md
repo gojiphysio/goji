@@ -18,9 +18,8 @@ the clinic's real rules — see the plan/validation notes in the repo.
 ## How availability works (`availability.py`)
 Derived, NOT taken from Plato's hourly `onlineapptbooking/slots` (locked to 60m).
 For each clinician's `onlineapptbooking/list` rule (hours, days off, restricted
-blocks) minus their real `GET /appointment` bookings (paginated; single-day query
-expands recurring), we emit free **30-min** starts where `[t, t+duration]` is
-clear. Rules layered on top (`config.py`):
+blocks) minus their real `GET /appointment` bookings, we emit free **30-min**
+starts where `[t, t+duration]` is clear. Rules layered on top (`config.py`):
 - Cheryl 09:00–17:00 Mon–Fri; Kristy/Claire follow their calendars.
 - Clinic-wide `-all-` blocks apply to everyone.
 - Lead time follows Plato's `min_days` (1 day ahead — no same-day).
@@ -28,6 +27,29 @@ clear. Rules layered on top (`config.py`):
   availability and as an explicit `too_far` guard in `create_booking`; the site
   calendar can't select past it either.
 - Home visits: **Cheryl only**, ±30-min travel padding.
+
+### Recurring + multi-day blocks (`recurrence.py`) — do not remove
+**Plato does NOT expand recurrences.** `GET /appointment?start_date&end_date`
+filters by each row's stored `starttime`, and a recurring series is a **single
+row dated at its first occurrence** carrying a `recur` rule (verified against live
+data — no per-instance rows exist). So a naive single-day query is blind to any
+recurring block/appointment (or multi-day block) that *began on an earlier date*,
+and would offer a slot that's actually taken — the clinic hit exactly this (a
+website booking landed inside a weekly Wednesday block).
+
+So availability uses **two** appointment fetches:
+1. **Per-day** (`appointments`, 20s TTL) — fresh same-day bookings, for conflict
+   detection of the common case.
+2. **Broad look-back sweep** (`appointments_broad`, `[today-RECUR_LOOKBACK_DAYS,
+   today+MAX_ADVANCE_DAYS]`) — from it we expand `recur` rules onto the queried
+   day (`recurrence.recurs_on`, weekly cadence + `interval`/`until`/`ex`) and add
+   multi-day blocks that span it. It's many pages and slow-changing, so it's
+   cached `BROAD_TTL_S` (15m) and served **stale-while-revalidate** (only a cold
+   instance blocks; `plato.warm_broad` primes it at startup).
+
+`recur` shape: `{"days":["WE"],"freq":2,"interval":1,"until":YYYYMMDD,"ex":[...]}`.
+Only weekly cadence is modelled (100% of live rules); the bias is to over-block
+rather than under-block, since a missed block is a double-booking.
 
 ## How booking works (`booking.py`)
 Plato does **not** reject conflicts, so `create_booking` re-derives availability
