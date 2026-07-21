@@ -47,28 +47,32 @@ CFG_ALL = {
         ],
     }],
 }
-WED = date(2026, 7, 15)  # a Wednesday, in the future
+WED = date(2026, 7, 15)  # a Wednesday
+# Pin "now" to the day before WED so these tests are deterministic regardless of
+# the real calendar date — otherwise, once real time passes WED, derive_availability
+# treats it as a past date and returns no slots (which broke CI and the deploy).
+NOW = datetime(2026, 7, 14, 9, 0)
 
 
 def test_no_focus_offers_all_rostered_clinicians():
-    out = derive_availability(StubPlato([], CFG_ALL), "physiotherapy", WED)
+    out = derive_availability(StubPlato([], CFG_ALL), "physiotherapy", WED, now=NOW)
     assert set(out) == {"cheryl-long", "claire-ng", "kristy-ng"}
 
 
 def test_scoliosis_focus_restricts_to_cheryl():
     out = derive_availability(StubPlato([], CFG_ALL), "physiotherapy", WED,
-                              focus="scoliosis")
+                              focus="scoliosis", now=NOW)
     assert set(out) == {"cheryl-long"}
 
 
 def test_paediatrics_focus_excludes_claire():
     out = derive_availability(StubPlato([], CFG_ALL), "physiotherapy", WED,
-                              focus="paediatrics")
+                              focus="paediatrics", now=NOW)
     assert set(out) == {"cheryl-long", "kristy-ng"}
 
 
 def test_free_day_gives_all_30min_starts():
-    out = derive_availability(StubPlato([], CFG), "physiotherapy", WED)
+    out = derive_availability(StubPlato([], CFG), "physiotherapy", WED, now=NOW)
     # 60-min appts, 30-min steps, window 09:00-12:00 -> last start 11:00.
     assert out["cheryl-long"] == ["09:00", "09:30", "10:00", "10:30", "11:00"]
 
@@ -76,7 +80,7 @@ def test_free_day_gives_all_30min_starts():
 def test_own_booking_blocks_overlapping_slots():
     appts = [{"color": "blue", "starttime": "2026-07-15 10:00:00",
               "endtime": "2026-07-15 11:00:00"}]
-    out = derive_availability(StubPlato(appts, CFG), "physiotherapy", WED)
+    out = derive_availability(StubPlato(appts, CFG), "physiotherapy", WED, now=NOW)
     # 10:00-11:00 booked removes 09:30/10:00/10:30 (all overlap a 60-min appt).
     assert out["cheryl-long"] == ["09:00", "11:00"]
 
@@ -84,7 +88,7 @@ def test_own_booking_blocks_overlapping_slots():
 def test_clinic_wide_all_block_applies_to_everyone():
     appts = [{"color": "-all-", "starttime": "2026-07-15 10:00:00",
               "endtime": "2026-07-15 11:00:00"}]
-    out = derive_availability(StubPlato(appts, CFG), "physiotherapy", WED)
+    out = derive_availability(StubPlato(appts, CFG), "physiotherapy", WED, now=NOW)
     assert out["cheryl-long"] == ["09:00", "11:00"]
 
 
@@ -101,7 +105,7 @@ def test_day_off_returns_no_slots():
         "starttime": "09:00", "endtime": "12:00", "min_days": 0, "max_days": 365,
         "restricted_days": ["Wed"], "restricted_blocks": [],
     }]}]}
-    out = derive_availability(StubPlato([], cfg), "physiotherapy", WED)
+    out = derive_availability(StubPlato([], cfg), "physiotherapy", WED, now=NOW)
     assert out.get("cheryl-long", []) == []
 
 
