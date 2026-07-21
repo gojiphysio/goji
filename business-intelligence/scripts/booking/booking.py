@@ -225,8 +225,13 @@ def create_booking(plato, draft: dict, *, now: datetime | None = None) -> dict:
                 "appointment_ids": ids,
                 "clinician_id": cid,
                 "clinician_name": CLINICIANS[cid]["name"],
+                # Matched clinician's inbox, so the admin email can CC them.
+                "clinician_email": CLINICIANS[cid].get("email"),
                 "clinician_requested": requested_name,
                 "service": svc["title"],
+                # Physio sub-type label (empty for non-physio), surfaced in the
+                # booking emails alongside the Plato note.
+                "physio_focus": focus_label,
                 "date": day.isoformat(),
                 "time": time_,
                 "home": home,
