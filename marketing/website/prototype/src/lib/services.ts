@@ -1,6 +1,6 @@
 /**
  * Services — single source of truth shared by the homepage service cards and the
- * booking form. `price` is the "From $" figure; leave "" to hide the price line.
+ * booking form. `price` is the base price figure; leave "" to hide the price line.
  * `priceNote` is an optional secondary line.
  *
  * Booking-only fields:
@@ -55,7 +55,7 @@ export const services: Service[] = [
     lead: "Assessment and treatment for pain, injury, recovery, pelvic health, women's health, paediatric, vestibular, and lymphatic concerns.",
     meta: ["55 min initial consult", "In-clinic & home visits"],
     price: "260",
-    priceNote: "Home visits from $330",
+    priceNote: "Home visits $330",
     supportsHome: true,
     durationMin: 55,
     platoCalendarId: "dDIjWJp",
@@ -68,7 +68,7 @@ export const services: Service[] = [
     lead: "A joint assessment for postpartum mothers (suitable after both vaginal and Caesarean birth) and babies aged 0 to 12 months, supporting recovery, development concerns, and early physical needs.",
     meta: ["85 min", "In-clinic & home visits"],
     price: "330",
-    priceNote: "Home visits from $380",
+    priceNote: "Home visits $380",
     supportsHome: true,
     durationMin: 85,
     platoCalendarId: "z1xE8rP",

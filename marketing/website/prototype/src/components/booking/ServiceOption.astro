@@ -32,7 +32,7 @@ const { service: s } = Astro.props;
     <span class="soption__meta">{s.meta.join(" · ")}</span>
   </span>
   {s.price && (
-    <span class="soption__price">From ${s.price}</span>
+    <span class="soption__price">${s.price}</span>
   )}
   <span class="soption__tick" aria-hidden="true"></span>
 </label>
