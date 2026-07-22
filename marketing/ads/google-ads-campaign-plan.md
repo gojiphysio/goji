@@ -6,8 +6,9 @@ CPC cap · Singapore (Presence) · auto-tagging ON · final-URL suffix set · 4 
 groups · 25 campaign negatives. Conversion action live (`AW-18230150966` +
 booking label). Most keywords cleared the healthcare-policy review via exemption;
 a few tail terms may stay limited. The prior Smart campaign "Goji Physio
-Singapore" is paused; the first `[DEPRECATED]` Search build was removed. Next:
-day-3 search-terms check (§11).
+Singapore" is paused; the first `[DEPRECATED]` Search build was removed.
+**First-pass readout + broad-match fix done 2026-07-22 — see §12.** Next:
+re-measure after ~5–7 days of clean traffic.
 
 Ad copy **reviewed by Cheryl + team 2026-07-16** and incorporated (new
 keywords across AG2–AG4; "leakage"→"incontinence" framing; "tummy
@@ -70,6 +71,18 @@ still tracked via the site's own go-links).
 
 ## 4. Keywords (phrase + exact only, never broad)
 
+> **Match-type incident (2026-07-22).** The live build had two keywords as
+> **broad** and duplicated across all four ad groups — `physio for pregnant
+> women` and `pregnancy pelvic pain treatment`. Broad match generated **80% of
+> impressions and 71% of spend** on junk (pilates studios, gynae/GP searches,
+> competitor names, how-to queries) and drove **0 bookings**. Fixed: deleted all
+> 8 broad instances, re-created each as **phrase in Prenatal/pregnancy only** (a
+> pregnancy searcher must not land on the pelvic-floor/postnatal/general page).
+> Changing match type = delete + re-create (new policy review), so re-create only
+> where the keyword belongs — don't convert duplicates. `exercise during
+> pregnancy` **paused** (informational intent, 0 engagement). Winners added from
+> the first search-terms pass are marked ⊕ below.
+
 **AG1 — Pelvic floor / women's health**
 ```
 "pelvic floor physiotherapy"      [pelvic floor physiotherapy singapore]
@@ -79,6 +92,8 @@ still tracked via the site's own go-links).
 "womens health physio"            "prolapse physio"
 "incontinence physiotherapy"      "physio for incontinence"
 "best pelvic floor physio singapore"   <- targeting only; ad copy never says "best"
+"pelvic health physiotherapy" ⊕   "pelvic floor dysfunction" ⊕
+"pelvic floor therapist singapore" ⊕
 ```
 
 **AG2 — Postnatal / postpartum**
@@ -98,8 +113,9 @@ still tracked via the site's own go-links).
 "pregnancy physio"                "antenatal physiotherapy"
 "pregnancy back pain physio"      "pelvic girdle pain physio"
 "pregnancy pelvic pain treatment" "physio for pregnant women"
-"exercise during pregnancy"       "pubic pain during pregnancy"
+"pubic pain during pregnancy"     "pelvic girdle pain in pregnancy" ⊕
 "birth prep physio"               "epino physio"
+# "exercise during pregnancy" — PAUSED 2026-07-22 (informational intent)
 ```
 
 **AG4 — General / near me / Lentor**
@@ -112,6 +128,7 @@ still tracked via the site's own go-links).
 "physiotherapy upper thomson"     "physiotherapy sengkang"
 "physiotherapy punggol"           "physiotherapy for elderly"
 "physiotherapy in yio chu kang"   "physiotherapy in woodlands"
+[physiotherapy yishun] ⊕          "home physiotherapy singapore" ⊕
 ```
 
 ## 5. Negative keywords (shared campaign list)
@@ -129,6 +146,22 @@ Brand negatives in this non-brand campaign (keeps brand traffic organic):
 ```
 goji    "goji physio"    "goji physiotherapy"    "goji womens"
 ```
+**Added 2026-07-22** (from search-terms pass): gynae/gynecologist/obgyn,
+"female doctor"/"women's clinic" (they want an OB/GP, not physio), confinement,
+osteopath/osteo, acupuncture, "bone setting"/sinseh/"chinese physician",
+craniosacral/"myofascial release"/"dry needling"/cupping/gyrotonic,
+emsella/ceragem, kegel(s), informational ("how to"/"what is"/exercises/
+stretches/symptoms), and competitor clinic names. Full paste list is
+`import/negative-keywords.txt` (source of truth).
+
+**Pilates/yoga deliberately NOT negatived.** Clinical Pilates is a real Goji
+offering. The junk was generic *fitness* Pilates ("pilates near me", "reformer")
+— a $30–45/class buyer, wrong for physio-priced clinical Pilates. It only entered
+via broad match, so deleting the broad keywords (§4) removed it without a
+negative. If we ever buy Pilates paid, it's a **separate ring-fenced ad group +
+its own landing page + own budget** (exact "clinical/rehab pilates" only), tested
+after the wedge is proven — never blended into the physio ad groups.
+
 Weekly ritual (§9) grows this list from real search terms.
 
 ## 6. Responsive Search Ads
@@ -283,3 +316,27 @@ exact-match brand campaign (playbook §2 has the steps).
 - **Week 4:** review vs the M1 budget; if ≥15-30 conversions, switch to
   Maximize conversions; write the month-1 readout (spend, CPC,
   cost-per-booking, search-term winners) into this doc.
+
+## 12. First-pass readout (2026-07-22, days 1–6)
+
+**Verified end-to-end in BigQuery** (`web_session_events`,
+`booking_funnel_events`, `link_click_events`). The funnel machine is **sound**;
+the only fault was targeting.
+
+- **Tracking works.** Booking conversion tag (`AW-18230150966/t--8CKuH8LwcEL…`)
+  is installed and armed — confirmed the `send_to` global loads at runtime.
+  Google Ads showing **0 conversions is accurate**, not a bug. ⚠️ **Tag Assistant
+  gives a false negative** on this site (Cloudflare blocks its fetcher → "timeout");
+  verify with curl/runtime globals or a real test booking, not Tag Assistant.
+- **Ads drove 0 bookings.** 47 paid sessions landed (gclid + utm_term capture
+  100% OK) → **0 entered the booking funnel**, 1 WhatsApp tap. The 9 real
+  on-site bookings since launch all came from **non-ad** sources (GBP `gbp-book`
+  ×1, link-in-bio `bio-book` ×2, direct ×6) — none carried a gclid.
+- **Cause = broad-match junk** (§4 incident), now fixed. Landing pages + CTAs +
+  `/book` funnel dogfooded and healthy (clear CTAs, deep-link pre-selects the
+  service, WhatsApp routes through the tracked go-link). No page fix needed.
+- **Next:** let clean phrase keywords run ~5–7 days, then re-pull search terms +
+  the BQ funnel and judge on cost-per-booking + WhatsApp taps. Before switching
+  to Maximize Conversions, set a **campaign-specific goal = website booking
+  action only** — the account still has Smart-campaign/GBP Local actions as
+  Primary account-default goals (would misdirect Smart Bidding).

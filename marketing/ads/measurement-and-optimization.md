@@ -5,6 +5,16 @@ monitor the Search campaign and, more importantly, how we feed Google the right
 conversion signal so Smart Bidding finds users who actually book *and show up* —
 not just form-fillers. Grounded in the current data stack (`business-intelligence`).
 
+> **Launch verification (2026-07-22).** L0 tag confirmed installed + armed
+> end-to-end (BigQuery + runtime globals). ⚠️ **Tag Assistant is unreliable on
+> this site** — Cloudflare blocks its fetcher, so it reports "no tag / timeout"
+> even though the tag is present and firing; verify via curl page source, the
+> `window.__gojiBookingConversion` runtime global, or a real test booking.
+> First-pass: ads drove 0 bookings (broad-match junk, since fixed); the 9 real
+> on-site bookings came from non-ad sources with no gclid — so **L3 offline-
+> conversion-import only helps once ad-clicked visitors actually book**. Judge
+> the on-site path first. Full readout: `google-ads-campaign-plan.md` §12.
+
 ## Core principle
 
 Smart Bidding optimizes toward whatever you call a "conversion." Feed it
