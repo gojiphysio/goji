@@ -120,8 +120,15 @@ See `DEPLOY.md`.
   doesn't sprout hairline bands — the granular story lives in the on-site-path viz.
 - The **booking funnel card** (`fetch_booking_funnel` / `renderBookingFunnel`)
   shows stage drop-off **plus a "Stuck" line**: `availability_empty` (date with no
-  slots), `validation_error` (bad phone/email), and `book_error` by reason code —
-  the silent dead-ends the progress bars can't show. It now lives in the **on-site
+  slots), `availability_error` (the times fetch failed in the browser),
+  `validation_error` (bad phone/email), and `book_error` by reason code —
+  the silent dead-ends the progress bars can't show. The caption carries a
+  `clinician_changed` behaviour note (sessions that touched the clinician
+  picker). Funnel-event details vary by stage (date_picked = the date), so the
+  funnel query collapses `detail` for everything except `book_error` — raw
+  (stage, detail) grouping would over-count sessions. A stage that's zero
+  mid-funnel while later stages have data renders as "not instrumented yet"
+  (hidden), not a 100% drop. It now lives in the **on-site
   path & booking drop-off** section next to `renderWebPages` (per-page bars) and
   `renderOnsiteFlow` (booked / bailed-to-WhatsApp / dropped), so the whole golden
   flow reads in one place.
