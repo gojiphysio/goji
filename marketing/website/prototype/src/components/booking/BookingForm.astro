@@ -119,32 +119,8 @@ const steps = [
       <h2>When works for you?</h2>
     </legend>
 
-    <div class="booking__clinician">
-      <p class="booking__sublabel">Preferred clinician (optional)</p>
-      <p class="booking__hint">Choose who you'd like to see first — availability updates to match. Not sure? Leave it on "First available" and we'll match you.</p>
-      <div class="booking__clinicians" role="radiogroup" aria-label="Preferred clinician">
-        <label class="copt copt--first" data-clinician-opt data-first-available>
-          <input class="copt__input visually-hidden" type="radio" name="clinician" value="" checked />
-          <span class="copt__name">
-            First available
-            <span class="copt__badge">Recommended</span>
-          </span>
-          <span class="copt__role">We'll match you with the soonest clinician for your service</span>
-          <span class="copt__tick" aria-hidden="true"></span>
-        </label>
-        <p class="booking__clinician-or" aria-hidden="true">Or pick someone specific</p>
-        {
-          clinicians.map((c) => (
-            <label class="copt" data-clinician-opt data-services={c.services.join(" ")} hidden>
-              <input class="copt__input visually-hidden" type="radio" name="clinician" value={c.id} />
-              <span class="copt__name">{c.name}</span>
-              <span class="copt__role">{c.role}</span>
-              <span class="copt__tick" aria-hidden="true" />
-            </label>
-          ))
-        }
-      </div>
-    </div>
+    {/* What step 1 chose, so this step doesn't feel unmoored from it. */}
+    <p class="booking__recap" data-recap hidden></p>
 
     <div class="booking__datewrap">
       <p class="booking__sublabel" id="date-label">
@@ -175,7 +151,48 @@ const steps = [
       <div class="booking__slotlist" data-slots></div>
       <p class="booking__hint" data-slots-msg>Pick a date to see available times.</p>
       <p class="booking__error" data-error="time" role="alert" hidden></p>
+      {/* The one WhatsApp escape hatch on this step: covers same-day/urgent
+          (online booking opens from tomorrow) and can't-find-a-time. */}
+      <p class="booking__hint booking__wa-note">
+        Online booking opens from tomorrow. Need to be seen sooner, or can't
+        find a time that works?
+        <a href={cta("web-wa")} target="_blank" rel="noopener">Message us on WhatsApp</a>
+        and we'll help.
+      </p>
     </div>
+
+    {/* Most bookers have no clinician preference, so the picker lives behind a
+        disclosure and "First available" stays the pre-selected default. */}
+    <details class="booking__clinician" data-clinician-details>
+      <summary class="booking__clinician-summary">
+        <span>Prefer a specific clinician?</span>
+        <span class="booking__clinician-cur" data-clinician-current>First available</span>
+      </summary>
+      <div class="booking__clinician-body">
+        <div class="booking__clinicians" role="radiogroup" aria-label="Preferred clinician">
+          <label class="copt copt--first" data-clinician-opt data-first-available>
+            <input class="copt__input visually-hidden" type="radio" name="clinician" value="" checked />
+            <span class="copt__name">
+              First available
+              <span class="copt__badge">Recommended</span>
+            </span>
+            <span class="copt__role">We'll match you with the soonest clinician for your service</span>
+            <span class="copt__tick" aria-hidden="true"></span>
+          </label>
+          <p class="booking__clinician-or" aria-hidden="true">Or pick someone specific</p>
+          {
+            clinicians.map((c) => (
+              <label class="copt" data-clinician-opt data-services={c.services.join(" ")} hidden>
+                <input class="copt__input visually-hidden" type="radio" name="clinician" value={c.id} />
+                <span class="copt__name">{c.name}</span>
+                <span class="copt__role">{c.role}</span>
+                <span class="copt__tick" aria-hidden="true" />
+              </label>
+            ))
+          }
+        </div>
+      </div>
+    </details>
 
     <div class="booking__nav">
       <button type="button" class="bbtn bbtn--ghost" data-nav="back">Back</button>
@@ -332,7 +349,7 @@ const steps = [
     margin: 0;
     display: flex;
     flex-direction: column;
-    gap: var(--space-5);
+    gap: var(--space-6); /* generous — each block (label + control) reads as its own group */
   }
   /* [hidden] must win over the display above (class beats the UA [hidden] rule). */
   .booking__step[hidden],
@@ -342,7 +359,9 @@ const steps = [
   .booking__legend {
     padding: 0;
     width: 100%;
-    margin-bottom: var(--space-3);
+    /* A <legend> is not a flex item, so the step's gap never applies after
+       it — this margin is the only space under the heading. */
+    margin-bottom: var(--space-4);
   }
   .booking__legend h2 {
     font-size: var(--fs-h2);
@@ -354,16 +373,39 @@ const steps = [
     gap: var(--space-3);
   }
 
+  /* Step-2 recap of the step-1 choice ("Physiotherapy · In-clinic"). First
+     flex item after the (non-flex) legend, so it sits at the legend's own
+     margin — right under the heading it annotates. */
+  .booking__recap {
+    font-size: var(--fs-small);
+    font-weight: var(--weight-semibold);
+    color: var(--text-muted);
+  }
+  .booking__recap[hidden] {
+    display: none;
+  }
+
+  /* The step's single WhatsApp escape hatch (same-day/urgent + can't-find-a-
+     time), spaced clear of the times grid above it. */
+  .booking__wa-note {
+    margin-top: var(--space-4);
+    max-width: 46ch;
+  }
+  .booking__wa-note a {
+    font-weight: var(--weight-semibold);
+  }
+
   .booking__sublabel {
     font-family: var(--font-display);
     font-size: var(--fs-small);
     font-weight: var(--weight-semibold);
     color: var(--text-default);
-    margin-bottom: var(--space-2);
+    margin-bottom: var(--space-3);
   }
   .booking__hint {
     font-size: var(--fs-small);
     color: var(--text-muted);
+    max-width: 52ch; /* readable measure — don't run wall to wall on desktop */
   }
   .booking__error {
     font-size: var(--fs-small);
@@ -599,6 +641,95 @@ const steps = [
   .booking :global(.slot:focus-visible) {
     outline: 3px solid var(--color-accent);
     outline-offset: 2px;
+  }
+  /* Loading placeholders while times fetch — same footprint as real slots so
+     the list doesn't jump when they land. (Astro keyframes stay global.) */
+  .booking :global(.slot--skeleton) {
+    min-height: 2.55rem;
+    background: color-mix(in srgb, var(--color-border) 40%, var(--bg-content));
+    border-color: transparent;
+    cursor: default;
+    animation: slot-pulse 1.2s ease-in-out infinite;
+  }
+  @keyframes slot-pulse {
+    0%, 100% { opacity: 0.55; }
+    50% { opacity: 1; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .booking :global(.slot--skeleton) {
+      animation: none;
+    }
+  }
+
+  /* Clinician picker — collapsed by default (most bookers have no preference;
+     "First available" is pre-selected). The whole <details> is the card, so
+     the expanded options stay contained inside it; the summary is its header
+     row, styled to match the .copt options with a chevron so it clearly reads
+     as clickable, and shows the current pick while closed. */
+  .booking__clinician {
+    border: 1.5px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--bg-content);
+    transition: border-color var(--dur) var(--ease),
+      box-shadow var(--dur) var(--ease);
+  }
+  .booking__clinician[hidden] {
+    display: none;
+  }
+  .booking__clinician:has(.booking__clinician-summary:hover) {
+    border-color: var(--color-border-strong);
+    box-shadow: var(--shadow-sm);
+  }
+  .booking__clinician-summary {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 0.15rem var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    cursor: pointer;
+    list-style: none;
+    border-radius: var(--radius-md); /* keeps the focus ring on the card's shape */
+    font-family: var(--font-display);
+    font-weight: var(--weight-semibold);
+    color: var(--text-default);
+  }
+  .booking__clinician-summary::-webkit-details-marker {
+    display: none;
+  }
+  .booking__clinician-summary:focus-visible {
+    outline: 3px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+  /* Chevron in the card's right column (where .copt puts its tick); flips
+     when the disclosure opens. */
+  .booking__clinician-summary::after {
+    content: "";
+    grid-row: 1 / span 2;
+    grid-column: 2;
+    width: 0.55rem;
+    height: 0.55rem;
+    border: solid var(--color-primary);
+    border-width: 0 2px 2px 0;
+    transform: translateY(-2px) rotate(45deg);
+    transition: transform var(--dur) var(--ease);
+  }
+  .booking__clinician[open] .booking__clinician-summary::after {
+    transform: translateY(2px) rotate(-135deg);
+  }
+  .booking__clinician-cur {
+    grid-column: 1;
+    font-family: var(--font-body);
+    font-size: var(--fs-small);
+    font-weight: var(--weight-medium);
+    color: var(--text-muted);
+  }
+  .booking__clinician-cur::before {
+    content: "Currently: ";
+  }
+  /* Expanded options, inside the card under a separator. */
+  .booking__clinician-body {
+    border-top: 1px solid var(--color-border);
+    padding: var(--space-4);
   }
 
   /* Clinician options */
@@ -941,7 +1072,11 @@ const steps = [
 <script>
   import { services, serviceById } from "../../lib/services";
   import { cliniciansForService, HOME_VISIT_CLINICIAN_ID } from "../../lib/clinicians";
-  import { cliniciansForPhysioFocus, isPhysioFocus } from "../../lib/physioCategories";
+  import {
+    cliniciansForPhysioFocus,
+    isPhysioFocus,
+    physioCategories,
+  } from "../../lib/physioCategories";
   import { bookingApi, type BookingDraft } from "../../lib/booking";
 
   const form = document.getElementById("booking-form") as HTMLFormElement | null;
@@ -1059,6 +1194,7 @@ const steps = [
           syncAddress();
           filterClinicians();  // home visit -> Cheryl only
           selectedTime = "";
+          cal?.rerender();     // re-shade the calendar for the new format
           scheduleRefresh();   // format affects availability (travel padding)
         });
       },
@@ -1069,6 +1205,7 @@ const steps = [
           setError("physioFocus", "");
           filterClinicians();  // sub-type narrows the clinician set
           selectedTime = "";
+          cal?.rerender();     // re-shade the calendar for the new sub-type
           scheduleRefresh();   // sub-type changes who's available
         });
       },
@@ -1154,6 +1291,9 @@ const steps = [
       // "First available" default is shown (it's hidden for home visits).
       const orSep = form!.querySelector<HTMLElement>(".booking__clinician-or");
       if (orSep) orSep.hidden = home;
+      // A home visit has exactly one clinician (auto-selected below), so the
+      // whole disclosure disappears rather than offering a one-option picker.
+      if (clinicianDetails) clinicianDetails.hidden = home;
       // Ensure something stays selected: home -> Cheryl, otherwise First available.
       if (!form!.querySelector('input[name="clinician"]:checked')) {
         const fallback = home ? HOME_VISIT_CLINICIAN_ID : "";
@@ -1162,30 +1302,80 @@ const steps = [
         );
         if (fb) fb.checked = true;
       }
+      updateClinicianCurrent();
     }
 
     // ----- Step 2: date (inline calendar) + slots -----
     const dateInput = document.getElementById("date") as HTMLInputElement | null;
     const chips = form.querySelector<HTMLElement>("[data-slots]");
     const slotsMsg = form.querySelector<HTMLElement>("[data-slots-msg]");
+    const slotsSection = form.querySelector<HTMLElement>(".booking__slots");
+    const recapEl = form.querySelector<HTMLElement>("[data-recap]");
+    const clinicianDetails = form.querySelector<HTMLElement>("[data-clinician-details]");
+    const clinicianCurrent = form.querySelector<HTMLElement>("[data-clinician-current]");
 
-    initCalendar();
+    const cal = initCalendar();
+
+    /** Reflect the chosen clinician in the collapsed disclosure's summary row. */
+    function updateClinicianCurrent() {
+      if (!clinicianCurrent) return;
+      const val = getChecked("clinician");
+      // A named clinician's .copt__name is plain text (the badge only exists on
+      // the "First available" card, which is the value="" fallback below).
+      const name = val
+        ? form!
+            .querySelector(`input[name="clinician"][value="${val}"]`)
+            ?.closest(".copt")
+            ?.querySelector(".copt__name")
+            ?.textContent?.trim()
+        : "";
+      clinicianCurrent.textContent = name || "First available";
+    }
 
     form.querySelectorAll<HTMLInputElement>('input[name="clinician"]').forEach(
-      (input) => input.addEventListener("change", scheduleRefresh),
+      (input) =>
+        input.addEventListener("change", () => {
+          bookingApi.track("clinician_changed", input.value || "first-available");
+          updateClinicianCurrent();
+          cal?.rerender(); // re-shade the calendar for the new clinician
+          scheduleRefresh();
+        }),
     );
+
+    /** Step-1 recap shown at the top of step 2 ("Physiotherapy · In-clinic"). */
+    function buildRecap() {
+      if (!recapEl) return;
+      const d = draft();
+      const svc = serviceById(d.service ?? "");
+      if (!svc) {
+        recapEl.hidden = true;
+        return;
+      }
+      const parts = [svc.title];
+      const focus = physioCategories.find((c) => c.id === d.physioFocus);
+      if (focus) parts.push(focus.label);
+      parts.push(d.format === "home" ? "Home visit" : "In-clinic");
+      recapEl.textContent = parts.join(" · ");
+      recapEl.hidden = false;
+    }
 
     /**
      * Inline month calendar — the primary date picker (no click-to-open icon).
      * Writes YYYY-MM-DD into the hidden #date input, then refreshes slots.
      * Bounded to [tomorrow, +60 days]; Sundays (clinic closed) are disabled.
+     *
+     * Days with no bookable slot are disabled too, from the month availability
+     * summary — so nobody clicks through empty dates hunting for an opening.
+     * The summary is best-effort: if it fails, the calendar stays unshaded and
+     * the per-day slot fetch remains the truth. Returns {rerender,
+     * autoPickFirstAvailable} for the step-1 handlers / step-2 entry.
      */
     function initCalendar() {
       const grid = form!.querySelector<HTMLElement>("[data-cal-grid]");
       const title = form!.querySelector<HTMLElement>("[data-cal-title]");
       const prev = form!.querySelector<HTMLButtonElement>("[data-cal-prev]");
       const next = form!.querySelector<HTMLButtonElement>("[data-cal-next]");
-      if (!grid || !title || !prev || !next || !dateInput) return;
+      if (!grid || !title || !prev || !next || !dateInput) return null;
 
       const startOfDay = (d: Date) => {
         const x = new Date(d);
@@ -1203,6 +1393,58 @@ const steps = [
         a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth();
 
       let view = new Date(minDate.getFullYear(), minDate.getMonth(), 1);
+      let shadeSeq = 0; // only the latest summary response may shade the grid
+
+      // Month summaries, keyed by the selection that shapes availability + the
+      // month. Keys are immutable, so a service/clinician/format change simply
+      // reads (or fetches) a different entry — no invalidation needed.
+      const summaryCache = new Map<string, Promise<string[]>>();
+      function fetchMonthDays(month: string): Promise<string[]> | null {
+        const d = draft();
+        if (!d.service) return null;
+        const key = `${d.service}|${d.physioFocus ?? ""}|${d.clinicianId}|${d.format}|${month}`;
+        let p = summaryCache.get(key);
+        if (!p) {
+          p = bookingApi.getAvailableDays({
+            service: d.service,
+            focus: d.physioFocus ?? undefined,
+            clinicianId: d.clinicianId,
+            month,
+            home: d.format === "home",
+          });
+          p.catch(() => summaryCache.delete(key)); // don't cache failures
+          summaryCache.set(key, p);
+        }
+        return p;
+      }
+
+      const monthOf = (d: Date) =>
+        `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+
+      /** Disable the shown month's days that have no bookable slot. Best-effort:
+       *  on fetch failure the grid stays as render() painted it (clickable), and
+       *  the per-day slot fetch remains the source of truth. */
+      async function applyShading() {
+        const source = fetchMonthDays(monthOf(view));
+        if (!source) return; // no service chosen yet (step 1 not done)
+        const shownMonth = monthOf(view);
+        const mySeq = ++shadeSeq;
+        let days: string[];
+        try {
+          days = await source;
+        } catch {
+          return;
+        }
+        if (mySeq !== shadeSeq || monthOf(view) !== shownMonth) return;
+        const open = new Set(days);
+        grid!.querySelectorAll<HTMLButtonElement>(".cal__day").forEach((btn) => {
+          const value = btn.dataset.date ?? "";
+          // Leave the already-picked day alone so the selection stays visible.
+          if (!btn.disabled && value !== dateInput!.value && !open.has(value)) {
+            btn.disabled = true;
+          }
+        });
+      }
 
       function render() {
         title!.textContent = view.toLocaleDateString("en-SG", {
@@ -1231,17 +1473,57 @@ const steps = [
           btn.className = "cal__day";
           btn.textContent = String(d);
           btn.disabled = disabled;
+          btn.dataset.date = value;
           btn.setAttribute("aria-pressed", String(value === dateInput!.value));
           if (!disabled) {
             btn.addEventListener("click", () => {
               dateInput!.value = value;
               selectedTime = "";
               setFieldError("date", "");
+              bookingApi.track("date_picked", value);
               render();
               scheduleRefresh();
+              // On a phone the times render below the fold — bring them into
+              // view so the next action is visible without hunting.
+              slotsSection?.scrollIntoView({ behavior: "smooth", block: "nearest" });
             });
           }
           grid!.appendChild(btn);
+        }
+        applyShading();
+      }
+
+      /**
+       * Pick the first date with availability so the step never opens empty.
+       * Walks month summaries from the earliest bookable month; a no-op once
+       * the visitor has chosen a date (or if the summaries can't load).
+       */
+      async function autoPickFirstAvailable() {
+        if (dateInput!.value) return;
+        const minYmd = ymd(minDate);
+        const maxYmd = ymd(maxDate);
+        let m = new Date(minDate.getFullYear(), minDate.getMonth(), 1);
+        while (m <= maxDate) {
+          const source = fetchMonthDays(monthOf(m));
+          if (!source) return;
+          let days: string[];
+          try {
+            days = await source;
+          } catch {
+            return; // degrade: the visitor picks a date themselves
+          }
+          if (dateInput!.value) return; // they beat us to it
+          const first = days.find((x) => x >= minYmd && x <= maxYmd);
+          if (first) {
+            const dt = new Date(`${first}T00:00:00`);
+            view = new Date(dt.getFullYear(), dt.getMonth(), 1);
+            dateInput!.value = first;
+            setFieldError("date", "");
+            render();
+            scheduleRefresh();
+            return;
+          }
+          m = new Date(m.getFullYear(), m.getMonth() + 1, 1);
         }
       }
 
@@ -1254,6 +1536,7 @@ const steps = [
         render();
       });
       render();
+      return { rerender: render, autoPickFirstAvailable };
     }
 
     function fmtTime(t: string): string {
@@ -1263,6 +1546,24 @@ const steps = [
       return `${h12}:${String(m).padStart(2, "0")} ${ap}`;
     }
 
+    /** Skeleton slot chips (same footprint as the real ones) while times load,
+     *  so the list doesn't collapse to a bare text swap. */
+    function showSlotsLoading() {
+      if (!chips || !slotsMsg) return;
+      chips.innerHTML = "";
+      const gr = document.createElement("div");
+      gr.className = "slots__grid";
+      gr.setAttribute("aria-hidden", "true");
+      for (let i = 0; i < 6; i++) {
+        const sk = document.createElement("span");
+        sk.className = "slot slot--skeleton";
+        gr.appendChild(sk);
+      }
+      chips.appendChild(gr);
+      slotsMsg.hidden = false;
+      slotsMsg.textContent = "Finding available times…";
+    }
+
     /**
      * Debounced entry point for availability. Rapid date/clinician/format
      * changes collapse to a single fetch after a short idle, so a burst of clicks
@@ -1270,11 +1571,7 @@ const steps = [
      */
     function scheduleRefresh() {
       if (availTimer) clearTimeout(availTimer);
-      if (chips && slotsMsg && getValue("date")) {
-        chips.innerHTML = "";
-        slotsMsg.hidden = false;
-        slotsMsg.textContent = "Finding available times…";
-      }
+      if (getValue("date")) showSlotsLoading();
       availTimer = setTimeout(refreshSlots, 250);
     }
 
@@ -1291,9 +1588,7 @@ const steps = [
       // a double-click on the same date (identical key) safe, where the old
       // key-equality check let both responses render and duplicated the slots.
       const mySeq = ++availSeq;
-      chips.innerHTML = "";
-      slotsMsg.hidden = false;
-      slotsMsg.textContent = "Finding available times…";
+      showSlotsLoading();
       let times: string[];
       try {
         times = await bookingApi.getAvailability({
@@ -1305,9 +1600,11 @@ const steps = [
         });
       } catch {
         if (mySeq !== availSeq) return;
+        bookingApi.track("availability_error", d.date);
+        chips.innerHTML = "";
         slotsMsg.hidden = false;
         slotsMsg.textContent =
-          "We couldn't load times just now. Please pick the date again.";
+          "We couldn't load times just now. Please pick the date again, or message us on WhatsApp below.";
         selectedTime = "";
         return;
       }
@@ -1614,6 +1911,9 @@ const steps = [
         if (!validate(current)) return;
         if (current === 1) {
           bookingApi.track("service_selected");
+          buildRecap();
+          cal?.rerender(); // shade the calendar for the step-1 selection
+          cal?.autoPickFirstAvailable(); // never open the step on an empty date
           scheduleRefresh();
         }
         if (current === 2) bookingApi.track("time_selected");

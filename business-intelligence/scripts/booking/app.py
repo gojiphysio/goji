@@ -6,6 +6,7 @@ single gunicorn worker so the per-clinician locks in booking.py are
 authoritative. Holds the Plato key server-side; the static site calls it via
 CORS. Endpoints:
   GET  /api/availability?service=&date=&clinician=&home=  -> free 30-min slots
+  GET  /api/availability-summary?service=&month=&...      -> dates with any slot
   POST /api/book                                          -> create the booking
   POST /api/track                                         -> funnel event (fire-and-forget)
   GET  /healthcheck
@@ -17,13 +18,13 @@ import os
 import threading
 import time
 import uuid
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 
 from flask import Flask, jsonify, request
 
-from .availability import derive_availability
+from .availability import SGT, derive_availability, derive_available_days
 from .booking import BookingError, create_booking
-from .config import CLINICIANS, SERVICES
+from .config import CLINICIANS, MAX_ADVANCE_DAYS, SERVICES
 from .plato import PlatoClient
 from . import mailer
 
@@ -40,9 +41,14 @@ WEB_EVENT_TABLE = f"{PROJECT}.marts.web_session_events"
 #   availability_empty — picked a date with no free slots (server-side)
 #   validation_error   — bad phone/email on the form (client-side)
 #   book_error         — submit failed (server-side; `detail` = the reason code)
+# and step-2 behaviour events so the clinician/date/time drop-off is legible:
+#   date_picked        — clicked a calendar date (`detail` = the date)
+#   availability_error — the times fetch failed in the browser (`detail` = date)
+#   clinician_changed  — switched the preferred-clinician option (`detail` = id)
 VALID_STAGES = {"page_view", "service_selected", "time_selected", "details",
                 "submitted", "confirmed",
-                "availability_empty", "validation_error", "book_error"}
+                "availability_empty", "availability_error", "validation_error",
+                "book_error", "date_picked", "clinician_changed"}
 # Attribution fields the browser may attach (first-touch, from the landing
 # beacon) so a booking event can be traced to how the visitor arrived.
 ATTRIB_KEYS = ("visitor_id", "utm_source", "utm_campaign", "gclid", "go_click_id")
@@ -59,6 +65,13 @@ _init_lock = threading.Lock()
 AVAIL_TTL_S = float(os.environ.get("AVAIL_CACHE_TTL", "45"))
 _avail_cache: dict[tuple, tuple[float, dict]] = {}
 _avail_cache_lock = threading.Lock()
+
+# Month-summary cache (which dates have ANY slot — the calendar shading on the
+# website). Cached longer than per-day availability: it only paints the
+# calendar, and the visitor's actual date pick (and the submit, under a lock)
+# still checks day-level truth fresh.
+SUMMARY_TTL_S = float(os.environ.get("AVAIL_SUMMARY_CACHE_TTL", "300"))
+_summary_cache: dict[tuple, tuple[float, dict]] = {}
 
 
 def plato() -> PlatoClient:
@@ -138,6 +151,54 @@ def availability():
     }
     with _avail_cache_lock:
         _avail_cache[cache_key] = (nowm, payload)
+    return jsonify(payload)
+
+
+@app.route("/api/availability-summary")
+def availability_summary():
+    """Which dates in a calendar month have at least one bookable slot.
+
+    Feeds the website's calendar shading and its first-free-date auto-pick, so
+    a visitor never clicks through empty dates hunting for availability. One
+    derivation covers the month (a single Plato appointments fetch)."""
+    service = request.args.get("service", "")
+    if service not in SERVICES:
+        return jsonify({"error": "unknown service"}), 400
+    month_s = request.args.get("month", "")
+    try:
+        month_start = datetime.strptime(month_s, "%Y-%m").date()
+    except ValueError:
+        return jsonify({"error": "bad month"}), 400
+    home = request.args.get("home", "") in ("1", "true", "yes")
+    clinician = request.args.get("clinician") or None
+    focus = request.args.get("focus") or None
+
+    # Clamp to [today, today + MAX_ADVANCE_DAYS] (SGT — the clinic's clock, not
+    # the server's UTC). Rule-level min/max_days still apply per day inside the
+    # derivation; this just bounds the work to the bookable window.
+    today = datetime.now(SGT).date()
+    next_month = (month_start.replace(day=28) + timedelta(days=4)).replace(day=1)
+    start = max(month_start, today)
+    end = min(next_month - timedelta(days=1), today + timedelta(days=MAX_ADVANCE_DAYS))
+    if start > end:
+        return jsonify({"month": month_s, "available": []})
+
+    cache_key = (service, month_s, clinician or "", focus or "", home)
+    nowm = time.monotonic()
+    with _avail_cache_lock:
+        hit = _summary_cache.get(cache_key)
+        if hit and nowm - hit[0] < SUMMARY_TTL_S:
+            return jsonify(hit[1])
+
+    try:
+        days = derive_available_days(plato(), service, start, end,
+                                     clinician_id=clinician, focus=focus, home=home)
+    except Exception as e:  # Plato hiccup — the calendar degrades to unshaded
+        log.warning("availability summary failed (%s %s): %s", service, month_s, e)
+        return jsonify({"error": "unavailable", "available": []}), 502
+    payload = {"month": month_s, "available": days}
+    with _avail_cache_lock:
+        _summary_cache[cache_key] = (nowm, payload)
     return jsonify(payload)
 
 
