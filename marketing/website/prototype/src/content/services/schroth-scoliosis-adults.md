@@ -5,7 +5,7 @@ cardTitle: "Schroth Therapy - Adults"
 cardLead: "Scoliosis-specific physiotherapy (Schroth Method) tailored to your curve and symptoms, to move with greater comfort, confidence and control."
 heroImage: "/photos/services/schroth-scoliosis-adults.webp"
 heroAlt: "An adult practising Schroth Method scoliosis exercises with a Goji physiotherapist."
-category: "General Health"
+category: "Musculoskeletal Physiotherapy"
 durationMin: 55
 priceClinic: 260
 priceHome: 330

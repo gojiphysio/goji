@@ -45,9 +45,9 @@ const services = defineCollection({
     heroAlt: z.string().optional(),
     /** Grouping bucket on the /services index. */
     category: z.enum([
-      "Pregnancy & Postpartum",
-      "General Health",
-      "Children",
+      "Women's Health Physiotherapy",
+      "Paediatrics Physiotherapy (0-18Y)",
+      "Musculoskeletal Physiotherapy",
       "Holistic Care",
     ]),
     /** Facts header (from the source doc's Duration / Options / Physios lines). */
