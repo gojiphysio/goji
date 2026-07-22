@@ -3,14 +3,16 @@ from __future__ import annotations
 
 from datetime import date, datetime
 
-from booking.availability import derive_availability
+from booking.availability import derive_availability, derive_available_days
 
 
 class StubPlato:
     def __init__(self, appts, cfg):
         self._a, self._c = appts, cfg
+        self.appointment_fetches = 0
 
     def appointments(self, start, end):
+        self.appointment_fetches += 1
         return self._a
 
     def online_booking_config(self):
@@ -107,6 +109,28 @@ def test_day_off_returns_no_slots():
     }]}]}
     out = derive_availability(StubPlato([], cfg), "physiotherapy", WED, now=NOW)
     assert out.get("cheryl-long", []) == []
+
+
+def test_available_days_skips_day_off_and_fetches_once():
+    # Wed 15th is Cheryl's day off; every other day in the range has slots.
+    cfg = {"calendars": [{"id": "dDIjWJp", "rules": [{
+        "name": "Cheryl Long", "book_calendar": "blue",
+        "starttime": "09:00", "endtime": "12:00", "min_days": 1, "max_days": 365,
+        "restricted_days": ["Wed"], "restricted_blocks": [],
+    }]}]}
+    stub = StubPlato([], cfg)
+    days = derive_available_days(stub, "physiotherapy",
+                                 date(2026, 7, 14), date(2026, 7, 17), now=NOW)
+    assert days == ["2026-07-16", "2026-07-17"]  # Tue 14 < min_days, Wed 15 off
+    assert stub.appointment_fetches == 1  # one fetch covers the whole range
+
+
+def test_available_days_excludes_fully_booked_day():
+    appts = [{"color": "blue", "starttime": "2026-07-15 08:30:00",
+              "endtime": "2026-07-15 12:00:00"}]
+    days = derive_available_days(StubPlato(appts, CFG), "physiotherapy",
+                                 date(2026, 7, 15), date(2026, 7, 16), now=NOW)
+    assert days == ["2026-07-16"]  # WED is booked wall-to-wall, Thu is free
 
 
 if __name__ == "__main__":

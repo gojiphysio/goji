@@ -27,6 +27,10 @@ so a token change reflows everything (styleguide is the QA surface).
   that exist in `LINK_SLUGS` (`business-intelligence/scripts/dashboard/app.py`)
   are exposed today: `web-wa`, `web-book` (the Book CTA points at our own `/book`
   form via `web-book`, not Plato). A new CTA needs its slug added there first.
+- **Booking funnel stages are allowlisted server-side.** A new
+  `bookingApi.track()` stage must be added to `VALID_STAGES` in
+  `business-intelligence/scripts/booking/app.py` (and the `FunnelStage` type in
+  `src/lib/booking.ts`) in the same PR, or the backend silently drops it.
 - **Compliance is a hard constraint** (`marketing/strategy/03-compliance-guardrails.md`).
   Applies to placeholder copy too: no cure/outcome/time guarantees, no
   superlatives ("best/leading/No.1"), no comparative claims, no before/after

@@ -42,6 +42,15 @@ export interface AvailabilityQuery {
   home: boolean;
 }
 
+export interface AvailableDaysQuery {
+  service: ServiceId;
+  focus?: PhysioFocusId;
+  clinicianId: string;
+  /** Calendar month, YYYY-MM. */
+  month: string;
+  home: boolean;
+}
+
 export interface BookingResult {
   ok: boolean;
   reference?: string;
@@ -49,16 +58,24 @@ export interface BookingResult {
   code?: string;
 }
 
+// Keep in sync with VALID_STAGES in the backend
+// (business-intelligence/scripts/booking/app.py) — unknown stages are dropped.
 export type FunnelStage =
   | "page_view"
   | "service_selected"
+  | "date_picked"
   | "time_selected"
   | "details"
   | "submitted"
-  | "validation_error";
+  | "validation_error"
+  | "availability_error"
+  | "clinician_changed";
 
 export interface BookingApi {
   getAvailability(query: AvailabilityQuery): Promise<string[]>;
+  /** The dates in a calendar month with at least one bookable slot — powers the
+   *  calendar's availability shading and the first-free-date auto-pick. */
+  getAvailableDays(query: AvailableDaysQuery): Promise<string[]>;
   createBooking(draft: BookingDraft): Promise<BookingResult>;
   /** Fire-and-forget funnel event; no-op in the mock. `detail` adds context for
    *  stuck events (e.g. which field failed validation). */
@@ -126,6 +143,9 @@ const realApi: BookingApi = {
     if (focus) p.set("focus", focus);
     if (clinicianId) p.set("clinician", clinicianId);
     if (home) p.set("home", "1");
+    // session_id lets the backend log its authoritative availability_empty
+    // funnel event against this visitor when the chosen date has no slots.
+    p.set("session_id", bookingSessionId());
     // Throw on a failed fetch (network / 5xx) so the caller can tell "couldn't
     // load" apart from a genuine "no slots" (200 with an empty list) — a
     // rate-limited request must not read as "no availability".
@@ -133,6 +153,17 @@ const realApi: BookingApi = {
     if (!r.ok) throw new Error(`availability ${r.status}`);
     const d = await r.json();
     return Array.isArray(d.times) ? d.times : [];
+  },
+
+  async getAvailableDays({ service, focus, clinicianId, month, home }) {
+    const p = new URLSearchParams({ service, month });
+    if (focus) p.set("focus", focus);
+    if (clinicianId) p.set("clinician", clinicianId);
+    if (home) p.set("home", "1");
+    const r = await fetch(`${API}/api/availability-summary?${p.toString()}`);
+    if (!r.ok) throw new Error(`availability-summary ${r.status}`);
+    const d = await r.json();
+    return Array.isArray(d.available) ? d.available : [];
   },
 
   async createBooking(draft) {
@@ -198,20 +229,45 @@ function seededUnit(seed: string, salt: number): number {
 }
 const MOCK_LATENCY_MS = 450;
 
+function mockDayTimes(service: string, clinicianId: string, date: string): string[] {
+  if (!date) return [];
+  if (new Date(`${date}T00:00:00`).getDay() === 0) return []; // Sunday closed
+  const open: string[] = [];
+  const key = `${service}|${clinicianId}|${date}`;
+  for (let i = 0; i < 16; i++) {
+    const mins = 9 * 60 + i * 30; // 09:00–16:30, 30-min steps
+    const hh = String(Math.floor(mins / 60)).padStart(2, "0");
+    const mm = String(mins % 60).padStart(2, "0");
+    if (seededUnit(key, i) > 0.45) open.push(`${hh}:${mm}`);
+  }
+  return open;
+}
+
 const mockApi: BookingApi = {
   async getAvailability({ service, clinicianId, date }) {
     await new Promise((r) => setTimeout(r, MOCK_LATENCY_MS));
-    if (!date) return [];
-    if (new Date(`${date}T00:00:00`).getDay() === 0) return []; // Sunday closed
-    const open: string[] = [];
-    const key = `${service}|${clinicianId}|${date}`;
-    for (let i = 0; i < 16; i++) {
-      const mins = 9 * 60 + i * 30; // 09:00–16:30, 30-min steps
-      const hh = String(Math.floor(mins / 60)).padStart(2, "0");
-      const mm = String(mins % 60).padStart(2, "0");
-      if (seededUnit(key, i) > 0.45) open.push(`${hh}:${mm}`);
+    return mockDayTimes(service, clinicianId, date);
+  },
+
+  async getAvailableDays({ service, clinicianId, month }) {
+    await new Promise((r) => setTimeout(r, MOCK_LATENCY_MS));
+    // Mirror the real endpoint's window: [tomorrow, +60 days], Sundays closed.
+    const [y, m] = month.split("-").map(Number);
+    if (!y || !m) return [];
+    const min = new Date();
+    min.setHours(0, 0, 0, 0);
+    min.setDate(min.getDate() + 1);
+    const max = new Date(min);
+    max.setDate(max.getDate() + 59);
+    const out: string[] = [];
+    const daysInMonth = new Date(y, m, 0).getDate();
+    for (let d = 1; d <= daysInMonth; d++) {
+      const day = new Date(y, m - 1, d);
+      if (day < min || day > max) continue;
+      const iso = `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+      if (mockDayTimes(service, clinicianId, iso).length) out.push(iso);
     }
-    return open;
+    return out;
   },
   async createBooking(draft) {
     await new Promise((r) => setTimeout(r, MOCK_LATENCY_MS));

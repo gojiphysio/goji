@@ -43,6 +43,20 @@ def _overlaps(a_start: datetime, a_end: datetime,
     return a_start < b_end and a_end > b_start
 
 
+def _booked_by_calendar(appointments: list[dict]) -> dict[str, list[tuple[datetime, datetime]]]:
+    """Group appointment (start, end) ranges by calendar `color`. `-all-` entries
+    (e.g. a clinic-wide meeting) block every clinician."""
+    booked: dict[str, list[tuple[datetime, datetime]]] = {}
+    for a in appointments:
+        try:
+            s = datetime.fromisoformat(a["starttime"])
+            e = datetime.fromisoformat(a["endtime"])
+        except (KeyError, ValueError, TypeError):
+            continue
+        booked.setdefault(a.get("color", ""), []).append((s, e))
+    return booked
+
+
 def derive_availability(
     plato,
     service_id: str,
@@ -60,6 +74,61 @@ def derive_availability(
     `home` restricts to the home-visit clinician and pads each slot with travel
     time on both sides. `now` (naive SGT) is injectable for testing; defaults to
     the current SGT time.
+    """
+    booked = _booked_by_calendar(plato.appointments(day.isoformat(), day.isoformat()))
+    cfg = plato.online_booking_config()
+    return _derive_day(cfg, booked, service_id, day, clinician_id=clinician_id,
+                       focus=focus, home=home, now=now)
+
+
+def derive_available_days(
+    plato,
+    service_id: str,
+    start: date,
+    end: date,
+    *,
+    clinician_id: str | None = None,
+    focus: str | None = None,
+    home: bool = False,
+    now: datetime | None = None,
+) -> list[str]:
+    """Return the sorted ISO dates in [start, end] with at least one free slot.
+
+    Powers the website calendar's availability shading (and its first-free-date
+    pick), so a visitor never has to click through empty dates. One appointments
+    fetch covers the whole range — per-day fetches would blow Plato's 20 req/min
+    budget for a single month view.
+    """
+    booked = _booked_by_calendar(
+        plato.appointments(start.isoformat(), end.isoformat()))
+    cfg = plato.online_booking_config()
+    out: list[str] = []
+    day = start
+    while day <= end:
+        avail = _derive_day(cfg, booked, service_id, day,
+                            clinician_id=clinician_id, focus=focus, home=home,
+                            now=now)
+        if any(avail.values()):
+            out.append(day.isoformat())
+        day += timedelta(days=1)
+    return out
+
+
+def _derive_day(
+    cfg: dict,
+    booked: dict[str, list[tuple[datetime, datetime]]],
+    service_id: str,
+    day: date,
+    *,
+    clinician_id: str | None = None,
+    focus: str | None = None,
+    home: bool = False,
+    now: datetime | None = None,
+) -> dict[str, list[str]]:
+    """The per-day core of derive_availability, on pre-fetched Plato data.
+
+    `booked` may span more days than `day` (the range derivation fetches a whole
+    month at once) — overlap checks only ever match same-day times.
     """
     svc = SERVICES.get(service_id)
     if not svc:
@@ -83,20 +152,9 @@ def derive_availability(
         h, m = (int(x) for x in hhmm.split(":"))
         return datetime(day.year, day.month, day.day, h, m)
 
-    # Booked ranges per calendar `color`, from the day's real appointments.
-    # `-all-` entries (e.g. a clinic-wide "Clinical Meeting") block EVERY
-    # clinician and are applied on top of each clinician's own bookings.
-    booked: dict[str, list[tuple[datetime, datetime]]] = {}
-    for a in plato.appointments(day.isoformat(), day.isoformat()):
-        try:
-            s = datetime.fromisoformat(a["starttime"])
-            e = datetime.fromisoformat(a["endtime"])
-        except (KeyError, ValueError, TypeError):
-            continue
-        booked.setdefault(a.get("color", ""), []).append((s, e))
+    # Clinic-wide `-all-` blocks apply on top of each clinician's own bookings.
     clinic_wide = booked.get("-all-", [])
 
-    cfg = plato.online_booking_config()
     out: dict[str, list[str]] = {}
 
     for rule in _rules_for(cfg, svc["online_calendar"]):

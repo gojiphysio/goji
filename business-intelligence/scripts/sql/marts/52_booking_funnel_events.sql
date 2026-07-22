@@ -15,8 +15,11 @@
 --   -> confirmed. Plus "stuck" events that make silent drop-off visible:
 --   availability_empty (picked a date with no slots), validation_error (bad
 --   phone/email on the form), book_error (submit failed — see `detail` for the
---   code: slot_taken | validation | plato_error). Unknown stages are still
---   stored (forward-compatible).
+--   code: slot_taken | validation | plato_error). And step-2 behaviour events
+--   that make the date/time drop-off legible: date_picked (detail = the date),
+--   availability_error (the times fetch failed in the browser; detail = date),
+--   clinician_changed (detail = clinician id or "first-available"). Unknown
+--   stages are still stored (forward-compatible).
 -- session_id: opaque per-session id from the browser (sessionStorage UUID). No
 --   PII — not linkable to a patient; just for funnel counting.
 -- visitor_id / utm_* / gclid / go_click_id: attribution carried from the landing
@@ -36,7 +39,7 @@
 CREATE TABLE IF NOT EXISTS `goji-bi.marts.booking_funnel_events` (
   event_id    STRING    NOT NULL OPTIONS(description="UUID for this event row"),
   session_id  STRING    NOT NULL OPTIONS(description="Per-session id from the browser; distinct-count per stage = funnel. No PII."),
-  stage       STRING    NOT NULL OPTIONS(description="Funnel stage: page_view | service_selected | time_selected | details | submitted | confirmed | availability_empty | validation_error | book_error"),
+  stage       STRING    NOT NULL OPTIONS(description="Funnel stage: page_view | service_selected | date_picked | time_selected | details | submitted | confirmed | availability_empty | availability_error | validation_error | book_error | clinician_changed"),
   service     STRING    OPTIONS(description="Selected service id if known (physiotherapy | mummy-baby | clinical-pilates | strength-conditioning)"),
   occurred_at TIMESTAMP NOT NULL OPTIONS(description="When the event fired (UTC)"),
   user_agent  STRING    OPTIONS(description="Requesting User-Agent, for later bot filtering. No PII."),

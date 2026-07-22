@@ -11,8 +11,14 @@ the clinic's real rules — see the plan/validation notes in the repo.
 
 ## Endpoints (public, CORS-limited to www.gojiphysio.com)
 - `GET /api/availability?service=&date=&clinician=&home=` → `{times, by_clinician, clinicians}`
+- `GET /api/availability-summary?service=&month=YYYY-MM&clinician=&focus=&home=` →
+  `{available: [dates]}` — which dates in the month have any slot (the website
+  calendar's shading + first-free-date auto-pick). One Plato appointments fetch
+  covers the month; cached ~5 min (`AVAIL_SUMMARY_CACHE_TTL`).
 - `POST /api/book` → `{ok, reference}` (409 if the slot was just taken)
 - `POST /api/track` → funnel event (fire-and-forget) → `marts.booking_funnel_events`
+  (stages must be in `VALID_STAGES` in `app.py` — unknown stages are dropped;
+  keep the website's `FunnelStage` type in `src/lib/booking.ts` in sync)
 - `GET /healthcheck`
 
 ## How availability works (`availability.py`)
