@@ -25,9 +25,9 @@ const grouped = categories.reduce(
   {} as Record<Category, typeof allServices>,
 );
 
-/** "From $X" using the lower of clinic/home price. */
+/** "$X" using the lower of clinic/home price. */
 const fromPrice = (clinic: number, home?: number) =>
-  `From $${Math.min(clinic, home ?? clinic)}`;
+  `$${Math.min(clinic, home ?? clinic)}`;
 ---
 
 <BaseLayout
