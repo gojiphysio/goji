@@ -318,6 +318,21 @@ const GADS_BOOKING_LABEL = import.meta.env.PUBLIC_GADS_BOOKING_LABEL;
                 <span class="header-wa__text">WhatsApp</span>
               </a>
               <Button href="/book" variant="primary">Book</Button>
+              <details class="mobile-menu">
+                <summary class="nav-toggle" aria-label="Menu">
+                  <svg class="nav-toggle__open" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                    <path d="M4 7h16M4 12h16M4 17h16" />
+                  </svg>
+                  <svg class="nav-toggle__close" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                    <path d="M6 6l12 12M18 6L6 18" />
+                  </svg>
+                </summary>
+                <nav class="site-nav-mobile" aria-label="Primary">
+                  {nav.map((item) => (
+                    <a href={item.href}>{item.label}</a>
+                  ))}
+                </nav>
+              </details>
             </div>
           </div>
         </header>
@@ -485,6 +500,85 @@ const GADS_BOOKING_LABEL = import.meta.env.PUBLIC_GADS_BOOKING_LABEL;
       @media (min-width: 480px) {
         .header-wa__text { display: inline; }
       }
+
+      /* Mobile menu: hamburger toggle + dropdown, shown below the desktop-nav
+         breakpoint. Uses <details> so the toggle works without JS. */
+      .mobile-menu {
+        position: static;
+      }
+      .nav-toggle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: var(--radius-sm);
+        color: var(--color-linen);
+        cursor: pointer;
+        list-style: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .nav-toggle::-webkit-details-marker { display: none; }
+      .nav-toggle:hover {
+        background: color-mix(in srgb, var(--color-linen) 12%, transparent);
+      }
+      .nav-toggle:focus-visible {
+        outline: 2px solid var(--color-linen);
+        outline-offset: 2px;
+      }
+      .nav-toggle__close { display: none; }
+      .mobile-menu[open] .nav-toggle__open { display: none; }
+      .mobile-menu[open] .nav-toggle__close { display: block; }
+
+      .site-nav-mobile {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        flex-direction: column;
+        background: var(--color-ink);
+        border-bottom: 1px solid color-mix(in srgb, var(--color-linen) 15%, transparent);
+        padding: var(--space-2) var(--space-4) var(--space-4);
+        box-shadow: var(--shadow-md);
+      }
+      .mobile-menu[open] .site-nav-mobile { display: flex; }
+      .site-nav-mobile a {
+        font-family: var(--font-display);
+        color: color-mix(in srgb, var(--color-linen) 85%, transparent);
+        text-decoration: none;
+        font-size: var(--fs-base);
+        font-weight: var(--weight-medium);
+        padding: var(--space-3) var(--space-2);
+        border-bottom: 1px solid color-mix(in srgb, var(--color-linen) 10%, transparent);
+      }
+      .site-nav-mobile a:last-child { border-bottom: none; }
+      .site-nav-mobile a:hover { color: var(--color-linen); }
+
+      /* Desktop: hide the hamburger; the inline nav takes over. */
+      @media (min-width: 880px) {
+        .mobile-menu { display: none; }
+      }
     </style>
+
+    <script>
+      // Close the mobile menu on link tap (for same-page anchors), Escape, or
+      // when the viewport grows into the desktop-nav layout.
+      const menu = document.querySelector(".mobile-menu");
+      if (menu) {
+        const close = () => menu.removeAttribute("open");
+        menu.querySelectorAll(".site-nav-mobile a").forEach((a) =>
+          a.addEventListener("click", close),
+        );
+        document.addEventListener("keydown", (e) => {
+          if (e.key === "Escape") close();
+        });
+        window
+          .matchMedia("(min-width: 880px)")
+          .addEventListener("change", (e) => {
+            if (e.matches) close();
+          });
+      }
+    </script>
   </body>
 </html>
