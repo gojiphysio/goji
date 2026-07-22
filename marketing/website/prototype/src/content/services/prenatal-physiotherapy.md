@@ -5,7 +5,7 @@ cardTitle: "Prenatal Physiotherapy"
 cardLead: "Move with greater comfort through pregnancy with a personalised plan for your symptoms, activity goals and preparation for birth."
 heroImage: "/photos/services/prenatal-physiotherapy.webp"
 heroAlt: "A pregnant woman working with a Goji physiotherapist during a prenatal assessment."
-category: "Pregnancy & Postpartum"
+category: "Women's Health Physiotherapy"
 durationMin: 55
 priceClinic: 260
 priceHome: 330

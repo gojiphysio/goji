@@ -5,7 +5,7 @@ cardTitle: "Pelvic Floor Physiotherapy"
 cardLead: "A private, unhurried assessment for bladder, bowel, pelvic floor or pelvic pain concerns - with a clear plan to help you move and live more comfortably."
 heroImage: "/photos/services/pelvic-floor-physiotherapy.webp"
 heroAlt: "A Goji physiotherapist showing a pelvic model to a client during a pelvic floor assessment."
-category: "General Health"
+category: "Women's Health Physiotherapy"
 durationMin: 55
 priceClinic: 260
 priceHome: 330
@@ -23,7 +23,7 @@ faqs:
     a: "No. Pelvic floor muscles respond to training at any age and any stage - whether you are newly postpartum, years past your last birth, or navigating perimenopause. Longstanding symptoms are still assessable and treatable."
   - q: "Do I need a doctor's referral?"
     a: "No referral is needed. You can book directly with us. If your assessment suggests input from a gynaecologist, colorectal specialist or other doctor would help, we will let you know and can work alongside them."
-order: 1
+order: 4
 draft: false
 ---
 
