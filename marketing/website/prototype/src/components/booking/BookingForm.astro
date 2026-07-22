@@ -169,7 +169,6 @@ const steps = [
         <span class="booking__clinician-cur" data-clinician-current>First available</span>
       </summary>
       <div class="booking__clinician-body">
-        <p class="booking__hint">Choose who you'd like to see. Availability updates to match. Not sure? Leave it on "First available" and we'll match you.</p>
         <div class="booking__clinicians" role="radiogroup" aria-label="Preferred clinician">
           <label class="copt copt--first" data-clinician-opt data-first-available>
             <input class="copt__input visually-hidden" type="radio" name="clinician" value="" checked />
@@ -663,11 +662,23 @@ const steps = [
   }
 
   /* Clinician picker — collapsed by default (most bookers have no preference;
-     "First available" is pre-selected). The summary row is styled as a card
-     matching the .copt options, with a chevron, so it clearly reads as
-     clickable; it shows the current pick while closed. */
+     "First available" is pre-selected). The whole <details> is the card, so
+     the expanded options stay contained inside it; the summary is its header
+     row, styled to match the .copt options with a chevron so it clearly reads
+     as clickable, and shows the current pick while closed. */
+  .booking__clinician {
+    border: 1.5px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--bg-content);
+    transition: border-color var(--dur) var(--ease),
+      box-shadow var(--dur) var(--ease);
+  }
   .booking__clinician[hidden] {
     display: none;
+  }
+  .booking__clinician:has(.booking__clinician-summary:hover) {
+    border-color: var(--color-border-strong);
+    box-shadow: var(--shadow-sm);
   }
   .booking__clinician-summary {
     display: grid;
@@ -675,23 +686,15 @@ const steps = [
     align-items: center;
     gap: 0.15rem var(--space-3);
     padding: var(--space-3) var(--space-4);
-    border: 1.5px solid var(--color-border);
-    border-radius: var(--radius-md);
-    background: var(--bg-content);
     cursor: pointer;
     list-style: none;
+    border-radius: var(--radius-md); /* keeps the focus ring on the card's shape */
     font-family: var(--font-display);
     font-weight: var(--weight-semibold);
     color: var(--text-default);
-    transition: border-color var(--dur) var(--ease),
-      box-shadow var(--dur) var(--ease);
   }
   .booking__clinician-summary::-webkit-details-marker {
     display: none;
-  }
-  .booking__clinician-summary:hover {
-    border-color: var(--color-border-strong);
-    box-shadow: var(--shadow-sm);
   }
   .booking__clinician-summary:focus-visible {
     outline: 3px solid var(--color-accent);
@@ -723,11 +726,10 @@ const steps = [
   .booking__clinician-cur::before {
     content: "Currently: ";
   }
+  /* Expanded options, inside the card under a separator. */
   .booking__clinician-body {
-    margin-top: var(--space-4);
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-4);
+    border-top: 1px solid var(--color-border);
+    padding: var(--space-4);
   }
 
   /* Clinician options */
