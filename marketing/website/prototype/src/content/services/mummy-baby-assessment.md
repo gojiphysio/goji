@@ -5,7 +5,7 @@ cardTitle: "Mummy & Baby Assessment"
 cardLead: "A combined assessment supporting your postpartum recovery and reassurance about your baby's early movement and development."
 heroImage: "/photos/services/mummy-baby-assessment.webp"
 heroAlt: "A mother and baby with a Goji physiotherapist during a combined Mummy and Baby assessment."
-category: "Pregnancy & Postpartum"
+category: "Women's Health Physiotherapy"
 durationMin: 85
 priceClinic: 330
 priceHome: 380

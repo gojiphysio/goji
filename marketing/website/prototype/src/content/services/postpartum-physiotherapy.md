@@ -5,7 +5,7 @@ cardTitle: "Postpartum Physiotherapy"
 cardLead: "Understand how your body is recovering after birth and get a personalised plan for returning to movement, exercise and sport."
 heroImage: "/photos/services/postpartum-physiotherapy.webp"
 heroAlt: "A Goji physiotherapist guiding a mother through a postpartum recovery assessment."
-category: "Pregnancy & Postpartum"
+category: "Women's Health Physiotherapy"
 durationMin: 55
 priceClinic: 260
 priceHome: 330
