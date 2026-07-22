@@ -1310,9 +1310,12 @@ GROUP BY slug
 
 
 # Ordered website booking-funnel stages (event stage -> display label).
+# date_picked only started recording 2026-07-22, so ranges before that show 0
+# for it — the render treats a zero mid-stage as "no data", not a 100% drop.
 BOOKING_FUNNEL_STAGES = [
     ("page_view", "Viewed"),
     ("service_selected", "Chose service"),
+    ("date_picked", "Picked date"),
     ("time_selected", "Chose time"),
     ("details", "Entered details"),
     ("submitted", "Submitted"),
@@ -1331,13 +1334,19 @@ def fetch_booking_funnel(start: date, end: date) -> dict:
     order = [s for s, _ in BOOKING_FUNNEL_STAGES]
     empty = {"stages": [{"stage": s, "label": labels[s], "sessions": 0} for s in order],
              "viewed": 0, "booked": 0, "conversion_pct": 0.0,
-             "stuck": {"availability_empty": 0, "validation_error": 0,
+             "clinician_changed": 0,
+             "stuck": {"availability_empty": 0, "availability_error": 0,
+                       "validation_error": 0,
                        "book_error": 0, "book_error_by_code": {}}}
     try:
-        # Group by (stage, detail) in one pass: progress stages ignore detail;
-        # the "stuck" stages use it (book_error's reason code, etc.).
+        # One pass, but detail is collapsed for every stage except book_error
+        # (whose reason code we split on). Several stages now carry a detail
+        # (date_picked = the date, clinician_changed = the clinician id) —
+        # grouping raw (stage, detail) would over-count a session that e.g.
+        # picked three dates, so the distinct-session count must be per stage.
         rows = _query(f"""
-SELECT stage, detail, COUNT(DISTINCT session_id) AS sessions
+SELECT stage, IF(stage = 'book_error', detail, NULL) AS detail,
+       COUNT(DISTINCT session_id) AS sessions
 FROM `{PROJECT}.marts.booking_funnel_events`
 WHERE DATE(occurred_at) BETWEEN '{start}' AND '{end}'
 GROUP BY stage, detail
@@ -1360,9 +1369,13 @@ GROUP BY stage, detail
         "viewed": viewed,
         "booked": booked,
         "conversion_pct": round(booked / viewed * 100.0, 1) if viewed else 0.0,
+        # Behaviour note, not a stage: sessions that touched the clinician
+        # picker (the default "First available" needs no interaction).
+        "clinician_changed": counts.get("clinician_changed", 0),
         # "Where they get stuck" — silent dead-ends, distinct sessions each.
         "stuck": {
             "availability_empty": counts.get("availability_empty", 0),
+            "availability_error": counts.get("availability_error", 0),
             "validation_error":   counts.get("validation_error", 0),
             "book_error":         counts.get("book_error", 0),
             "book_error_by_code": book_error_by_code,

@@ -2772,17 +2772,27 @@
         if (cap) cap.textContent = 'Viewed to booked';
         return;
       }
-      const top = bf.stages[0].sessions || 1;
-      el.innerHTML = bf.stages.map((s, i) => {
+      // A zero mid-funnel with later stages populated means the stage wasn't
+      // instrumented for (part of) the range (e.g. date_picked, added
+      // 2026-07-22) — hide it rather than draw a bogus 100% drop. Trailing
+      // zeros are genuine drop-off and stay.
+      const stages = bf.stages.filter((s, i) =>
+        s.sessions > 0 || !bf.stages.slice(i + 1).some(t => t.sessions > 0));
+      const top = stages[0].sessions || 1;
+      el.innerHTML = stages.map((s, i) => {
         const pct = Math.round((s.sessions / top) * 100);
-        const prev = i ? bf.stages[i - 1].sessions : s.sessions;
+        const prev = i ? stages[i - 1].sessions : s.sessions;
         const drop = (i && prev) ? Math.round((1 - s.sessions / prev) * 100) : 0;
         const dropTag = (i && drop > 0) ? ` <span class="bfdrop">-${drop}%</span>` : '';
         return `<div class="bfrow"><span class="bfl">${s.label}</span>`
           + `<span class="bfbar"><span class="bffill" style="width:${pct}%"></span></span>`
           + `<span class="bfn">${fmtInt(s.sessions)}${dropTag}</span></div>`;
       }).join('');
-      if (cap) cap.textContent = `${fmtInt(bf.viewed)} viewed to ${fmtInt(bf.booked)} booked (${bf.conversion_pct}%)`;
+      if (cap) {
+        let t = `${fmtInt(bf.viewed)} viewed to ${fmtInt(bf.booked)} booked (${bf.conversion_pct}%)`;
+        if (bf.clinician_changed) t += ` · ${fmtInt(bf.clinician_changed)} set a clinician preference`;
+        cap.textContent = t;
+      }
 
       // "Where they get stuck" — silent dead-ends the progress bars don't show:
       // empty availability, form-validation rejects, and failed submits by reason.
@@ -2792,6 +2802,7 @@
         const ERR_LABEL = { slot_taken: 'slot taken', validation: 'invalid details', plato_error: 'system error', error: 'error' };
         const items = [];
         if (st.availability_empty) items.push(`<span class="stuck-item">no slots on chosen date <b>${fmtInt(st.availability_empty)}</b></span>`);
+        if (st.availability_error) items.push(`<span class="stuck-item">times failed to load <b>${fmtInt(st.availability_error)}</b></span>`);
         if (st.validation_error)   items.push(`<span class="stuck-item">form errors <b>${fmtInt(st.validation_error)}</b></span>`);
         const byCode = st.book_error_by_code || {};
         Object.entries(byCode).sort((a, b) => b[1] - a[1]).forEach(([code, n]) =>

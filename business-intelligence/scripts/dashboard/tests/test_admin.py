@@ -565,6 +565,13 @@ def test_booking_funnel_labels_include_details():
     assert dict(app.BOOKING_FUNNEL_STAGES)["details"] == "Entered details"
 
 
+def test_booking_funnel_date_picked_sits_between_service_and_time():
+    # "Picked date" (step-2 instrumentation, 2026-07) slots into the flow order.
+    stages = [s for s, _ in app.BOOKING_FUNNEL_STAGES]
+    assert stages.index("service_selected") < stages.index("date_picked") < stages.index("time_selected")
+    assert dict(app.BOOKING_FUNNEL_STAGES)["date_picked"] == "Picked date"
+
+
 def test_whatsapp_redirect_unknown_slug_falls_back(client, monkeypatch, _no_click_logging):
     # Unknown slug (or unconfigured number) must never dead-end — it falls back
     # to the site URL rather than erroring.
