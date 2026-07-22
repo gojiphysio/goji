@@ -23,3 +23,43 @@ goji
 "goji physio"
 "goji physiotherapy"
 "goji womens"
+gynae
+gynaecologist
+gynecologist
+obgyn
+"female doctor"
+"female clinic"
+"women's clinic"
+"woman clinic"
+"women's specialist"
+confinement
+osteopath
+osteo
+acupuncture
+"bone setting"
+sinseh
+"chinese physician"
+craniosacral
+"myofascial release"
+"dry needling"
+cupping
+gyrotonic
+emsella
+ceragem
+kegel
+kegels
+"how to"
+"what is"
+exercises
+stretches
+symptoms
+"physio and sole"
+"bmj physiotherapy"
+"dr stretch"
+"balance physiotherapy"
+"heartland physio"
+"corevia physio"
+"rapid physio"
+"movefree physiotherapy"
+"arko physio"
+"yinee posture"
