@@ -90,16 +90,17 @@ const careAreas = [
   },
   {
     title: "Paediatrics",
+    guideHref: "/conditions",
     points: [
-      "Congenital torticollis",
-      "Postural / structural congenital talipes equinovarus (CTEV)",
-      "Developmental dysplasia of the hip (DDH)",
-      "Developmental concerns and early intervention",
-      "Neurodevelopmental conditions",
-      "Adolescent idiopathic scoliosis and Schroth therapy",
-      "Paediatric pelvic health (bedwetting, soiling, and constipation)",
-      "Musculoskeletal and sports injury",
-      "Post-fracture rehabilitation",
+      { text: "Congenital torticollis", href: "/conditions/congenital-torticollis" },
+      { text: "Postural / structural congenital talipes equinovarus (CTEV)", href: "/conditions/clubfoot-ctev" },
+      { text: "Developmental dysplasia of the hip (DDH)", href: "/conditions/hip-dysplasia-ddh" },
+      { text: "Developmental concerns and early intervention", href: "/conditions/developmental-concerns" },
+      { text: "Neurodevelopmental conditions", href: "/conditions/neurodevelopmental-conditions" },
+      { text: "Adolescent idiopathic scoliosis and Schroth therapy", href: "/conditions/adolescent-scoliosis-schroth" },
+      { text: "Paediatric pelvic health (bedwetting, soiling, and constipation)", href: "/conditions/paediatric-pelvic-health" },
+      { text: "Musculoskeletal and sports injury", href: "/conditions/paediatric-sports-injuries" },
+      { text: "Post-fracture rehabilitation", href: "/conditions/post-fracture-rehab" },
     ],
   },
   {
@@ -968,17 +969,24 @@ const reviews = [
     margin: 0 0 var(--space-3) var(--space-5);
   }
   .care-list li {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5em;
     font-family: var(--font-body);
     font-size: var(--fs-small);
     color: var(--text-muted);
     padding-block: var(--space-1);
     line-height: var(--lh-body);
   }
+  /* Dash as a fixed marker (flex item) so every row's text starts at the
+     same column — and wrapped lines hang-indent under the text, not the dash.
+     Flex also drops the stray whitespace node Astro emits before linked items,
+     which otherwise nudged linked rows a few px right of plain-text rows. */
   .care-list li::before {
     content: "–";
-    margin-right: 0.5em;
     color: var(--color-primary);
     font-weight: var(--weight-semibold);
+    flex-shrink: 0;
   }
   .care-list a {
     color: inherit;
