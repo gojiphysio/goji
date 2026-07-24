@@ -15,6 +15,8 @@ import { services } from "../lib/services.ts";
 const serviceLearnMore: Record<string, string> = {
   physiotherapy: "/services",
   "mummy-baby": "/services/mummy-baby-assessment",
+  "clinical-pilates": "/services/clinical-pilates",
+  "strength-conditioning": "/services/strength-conditioning",
 };
 
 // FAQ — single source for both the on-page accordion and the FAQPage JSON-LD
@@ -287,17 +289,20 @@ const reviews = [
                 </span>
                 <h3 class="service-card__name">{s.title}</h3>
                 <p class="service-card__meta">{s.meta.join(" · ")}</p>
-                <p class="service-card__lead">{s.lead}</p>
                 {s.price && (
                   <p class="service-card__price">
                     <strong>${s.price}</strong>
                     {s.priceNote && <span class="service-card__price-note">{s.priceNote}</span>}
                   </p>
                 )}
+                <p class="service-card__lead">{s.lead}</p>
                 <div class="service-card__cta">
-                  <Button href="/book" variant="secondary">Book {s.title}</Button>
+                  <Button href="/book" variant="secondary" class="service-card__book">Book {s.title}</Button>
                   {serviceLearnMore[s.id] && (
-                    <a href={serviceLearnMore[s.id]} class="service-card__learn">Learn more</a>
+                    <a href={serviceLearnMore[s.id]} class="service-card__learn">
+                      Learn more
+                      <Icon name="tabler:arrow-right" size={16} />
+                    </a>
                   )}
                 </div>
               </article>
@@ -808,7 +813,6 @@ const reviews = [
   .service-card__price {
     font-size: var(--fs-small);
     color: var(--text-default);
-    margin-top: var(--space-1);
   }
   .service-card__price strong {
     font-family: var(--font-display);
@@ -826,19 +830,32 @@ const reviews = [
     margin-top: auto;
     padding-top: var(--space-4);
     display: flex;
+    flex-direction: column;
     align-items: center;
-    flex-wrap: wrap;
-    gap: var(--space-3) var(--space-4);
+    gap: var(--space-3);
+  }
+  .service-card__cta :global(.service-card__book) {
+    width: 100%;
+    justify-content: center;
   }
   .service-card__learn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
     font-size: var(--fs-small);
     font-weight: var(--weight-semibold);
     color: var(--color-primary);
     text-decoration: none;
   }
+  .service-card__learn [data-icon] {
+    transition: transform var(--dur) var(--ease);
+  }
   .service-card__learn:hover {
     text-decoration: underline;
     text-underline-offset: 0.2em;
+  }
+  .service-card__learn:hover [data-icon] {
+    transform: translateX(3px);
   }
 
 
