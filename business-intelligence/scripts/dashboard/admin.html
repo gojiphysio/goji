@@ -184,6 +184,9 @@
       background: var(--goji-soft); color: var(--goji); text-transform: capitalize;
     }
     .pill-booked { background: #e3f2e8; color: var(--good); }
+    /* Handled welcome rows stay on the list but recede. */
+    tr.row-done td { opacity: 0.55; }
+    tr.row-done td:last-child { opacity: 1; }  /* keep Undo legible */
 
     /* Sessions-left chip on Package Alerts. */
     .sessions { font-variant-numeric: tabular-nums; font-weight: 700; }
@@ -279,12 +282,13 @@
     <div class="panel active" id="panel-welcome">
       <div class="tabs">
         <button class="tab active" id="wtab-48h" onclick="setWelcomeWindow(48)">Next 48 hours</button>
-        <button class="tab" id="wtab-week" onclick="setWelcomeWindow(168)">This week</button>
+        <button class="tab" id="wtab-week" onclick="setWelcomeWindow(168)">Next 7 days</button>
       </div>
 
       <section class="q">
         <div class="toolbar">
           <h2 id="welcomeListTitle">New patients — next 48 hours</h2>
+          <span class="muted" id="welcomeDoneNote" style="font-size:12px;"></span>
         </div>
         <div class="table-scroll">
         <table>
@@ -453,10 +457,11 @@
     // ======================= WELCOME (new patients) =========================
     // Upcoming FIRST visits — message them directions/arrival info before they
     // turn up. Not a schedule mirror: filtered to first-timers, with an action.
-    // Reads /api/frontdesk/new_patients (contact hydrated live); "Contacted"
-    // POSTs to the same route and drops the row.
+    // Reads /api/frontdesk/new_patients (contact hydrated live). Contacted/Skip
+    // POST to the same route; the row STAYS on the list marked done (with Undo)
+    // so the front desk can see what's handled — it doesn't disappear.
     let WELCOME = { patients: [] };
-    let welcomeHours = 48;              // 48 | 168 (this week)
+    let welcomeHours = 48;              // 48 | 168 (next 7 days)
 
     // WhatsApp deep link to the PATIENT's own number (staff → patient outreach;
     // distinct from the published go.gojiphysio.com CTAs, which are for tracking
@@ -500,25 +505,33 @@
       }
     }
 
+    const welcomeWindowLabel = () => welcomeHours === 48 ? "next 48 hours" : "next 7 days";
     function setWelcomeWindow(hours) {
       welcomeHours = hours;
       document.getElementById("wtab-48h").classList.toggle("active", hours === 48);
       document.getElementById("wtab-week").classList.toggle("active", hours === 168);
-      document.getElementById("welcomeListTitle").textContent =
-        hours === 48 ? "New patients — next 48 hours" : "New patients — this week";
+      document.getElementById("welcomeListTitle").textContent = "New patients — " + welcomeWindowLabel();
       renderWelcome();
       updateCounts();
     }
+
+    // Outstanding = in the window and not yet actioned.
+    const welcomeOutstanding = () =>
+      (WELCOME.patients || []).filter(p => withinWindow(p) && !p.welcome_status);
 
     function renderWelcome() {
       const list = (WELCOME.patients || []).filter(withinWindow);
       const tbody = document.getElementById("welcomeRows");
       const empty = document.getElementById("welcomeEmpty");
+      const doneNote = document.getElementById("welcomeDoneNote");
+      // Outstanding first, then handled ones; keep booking time order within each.
+      list.sort((a, b) => (a.welcome_status ? 1 : 0) - (b.welcome_status ? 1 : 0));
+      const doneCount = list.filter(p => p.welcome_status).length;
+      if (doneNote) doneNote.textContent =
+        doneCount ? `${doneCount} handled` : "";
       if (!list.length) {
         tbody.innerHTML = "";
-        empty.textContent = welcomeHours === 48
-          ? "No new patients booked in the next 48 hours."
-          : "No new patients booked this week.";
+        empty.textContent = "No new patients booked in the " + welcomeWindowLabel() + ".";
         empty.style.display = "block";
         return;
       }
@@ -528,23 +541,37 @@
           ? '<span class="status-pill pill-booked">Website</span>'
           : '<span class="status-pill">Manual</span>';
         const profile = p.has_profile ? "" : ' <span class="muted">· no profile</span>';
-        return `<tr data-id="${escapeHtml(p.appointment_id)}">
+        const id = escapeHtml(p.appointment_id);
+        let action;
+        if (p.welcome_status === "contacted" || p.welcome_status === "skipped") {
+          const label = p.welcome_status === "contacted" ? "Contacted ✓" : "Skipped";
+          const cls = p.welcome_status === "contacted" ? "pill-booked" : "";
+          action = `<div class="actions">
+            <span class="status-pill ${cls}">${label}</span>
+            <button onclick="welcomeAct('${id}','active')">Undo</button>
+          </div>`;
+        } else {
+          action = `<div class="actions">
+            <button class="primary" onclick="welcomeAct('${id}','contacted')">Contacted</button>
+            <button onclick="welcomeAct('${id}','skipped')">Skip</button>
+          </div>`;
+        }
+        return `<tr data-id="${id}" class="${p.welcome_status ? 'row-done' : ''}">
           <td><span class="name">${escapeHtml(p.name)}</span>${profile}</td>
           <td>${contactCell(p)}</td>
           <td class="num">${fmtApptTime(p.appt_datetime)}</td>
           <td>${escapeHtml(p.clinician || "—")}</td>
           <td>${source}</td>
-          <td class="num"><div class="actions">
-            <button class="primary" onclick="welcomeAct('${escapeHtml(p.appointment_id)}','contacted')">Contacted</button>
-            <button onclick="welcomeAct('${escapeHtml(p.appointment_id)}','skipped')">Skip</button>
-          </div></td>
+          <td class="num">${action}</td>
         </tr>`;
       }).join("");
     }
 
     async function welcomeAct(appointmentId, status) {
-      // Optimistic: drop the row locally, then persist.
-      WELCOME.patients = (WELCOME.patients || []).filter(x => x.appointment_id !== appointmentId);
+      const p = (WELCOME.patients || []).find(x => x.appointment_id === appointmentId);
+      if (!p) return;
+      // Optimistic: mark the row done (or clear on undo) but keep it on the list.
+      p.welcome_status = (status === "active") ? null : status;
       renderWelcome();
       updateCounts();
       try {
@@ -605,9 +632,8 @@
     // ======================= COUNTS ON THE TABS =============================
     function updateCounts() {
       if (loaded.welcome) {
-        // Nav badge = new patients inside the current window (48h / this week).
-        const n = (WELCOME.patients || []).filter(withinWindow).length;
-        document.getElementById("welcomeCount").textContent = n;
+        // Nav badge = new patients still to contact in the current window.
+        document.getElementById("welcomeCount").textContent = welcomeOutstanding().length;
       }
       if (loaded.packages) document.getElementById("packagesCount").textContent = (PKG.patients || []).length;
     }

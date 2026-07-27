@@ -2463,9 +2463,9 @@ ORDER BY w.appt_datetime
     patients: list[dict] = []
     for r in _query(sql):
         status = r.get("welcome_status")
-        # contacted / skipped -> handled, drop from the actionable list.
-        if status in ("contacted", "skipped"):
-            continue
+        # Keep contacted / skipped rows on the list (marked done) so the front
+        # desk can see what's been handled; only 'active' (undo) or no event is
+        # still outstanding. Rows age off naturally once the appointment passes.
         name  = r.get("profile_name")  or r.get("appt_title") or "—"
         phone = (r.get("appt_phone") or "").strip() or r.get("profile_phone")
         email = (r.get("appt_email") or "").strip() or None
@@ -2479,6 +2479,8 @@ ORDER BY w.appt_datetime
             "name":           name,
             "phone":          phone,
             "email":          email,
+            # 'contacted' | 'skipped' | 'active' | None (never actioned).
+            "welcome_status": status if status in ("contacted", "skipped") else None,
         })
     return {
         "generated_at": datetime.now().astimezone().isoformat(timespec="seconds"),
