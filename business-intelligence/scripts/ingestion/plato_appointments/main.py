@@ -25,7 +25,7 @@ Env vars:
   PLATO_DB           Plato database name              default: gojihealth
   PLATO_API_KEY      Plato bearer token               (required, from Secret Manager)
   PAST_DAYS          Days of past sessions to scan    default: 14
-  FUTURE_DAYS        Days of future sessions to scan  default: 7
+  FUTURE_DAYS        Days of future sessions to scan  default: 31
   BQ_PROJECT         Target BQ project                default: goji-bi
   BQ_DATASET         Target dataset                   default: raw_plato
   BQ_TABLE           Target table                     default: appointments_raw
@@ -108,7 +108,7 @@ def main() -> None:
     plato_db = env("PLATO_DB", "gojihealth", required=False)
     plato_key = env("PLATO_API_KEY")
     past_days = int(env("PAST_DAYS", "14", required=False))
-    future_days = int(env("FUTURE_DAYS", "7", required=False))
+    future_days = int(env("FUTURE_DAYS", "31", required=False))
     bq_project = env("BQ_PROJECT", "goji-bi", required=False)
     bq_dataset = env("BQ_DATASET", "raw_plato", required=False)
     bq_table = env("BQ_TABLE", "appointments_raw", required=False)

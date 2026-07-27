@@ -186,6 +186,19 @@
     /* The display:inline-flex above would otherwise defeat the hidden attr. */
     .kpi-trend[hidden] { display: none; }
 
+    /* Segmented 7d/30d toggle on the Upcoming sessions card. */
+    .seg-toggle {
+      display: inline-flex; margin-left: 8px; vertical-align: middle;
+      border: 1px solid var(--border); border-radius: 999px; overflow: hidden;
+    }
+    .seg-toggle .seg {
+      appearance: none; border: 0; background: transparent; cursor: pointer;
+      padding: 3px 10px; font-size: 11px; font-weight: 600; color: var(--ink-soft);
+      line-height: 1.4;
+    }
+    .seg-toggle .seg + .seg { border-left: 1px solid var(--border); }
+    .seg-toggle .seg.active { background: var(--goji); color: #fff; }
+
     section.q {
       background: var(--card); border: 1px solid var(--border);
       border-radius: 12px; padding: 22px 24px; margin-bottom: 20px;
@@ -1029,6 +1042,25 @@
         <div class="kpi-value" id="kpi_visits">-</div>
         <div class="kpi-trend" id="kpi_visits_trend" hidden></div>
         <div class="kpi-sub">Sessions delivered (single-use + package burns)</div>
+      </div>
+    </div>
+
+    <!-- Upcoming demand: forward-looking, NOT range-scoped. Sessions = distinct
+         clinician time-slots so a group / 2:1 class counts once; deleted
+         appointments ("ghosts") are excluded via the ingestion freshness filter.
+         Backed by DATA.upcoming_sessions (build_payload). -->
+    <div class="kpi-row" style="margin-top:14px;">
+      <div class="kpi-card">
+        <div class="kpi-label">Upcoming sessions
+          <span class="seg-toggle" id="upcoming_toggle">
+            <button type="button" class="seg active" data-win="7">Next 7 days</button>
+            <button type="button" class="seg" data-win="30">Next 30 days</button>
+          </span>
+          <span class="badge live">Live</span>
+        </div>
+        <div class="kpi-value" id="kpi_upcoming">-</div>
+        <div class="kpi-trend" id="kpi_upcoming_trend" hidden></div>
+        <div class="kpi-sub" id="kpi_upcoming_sub">Booked patient sessions on the calendar — group classes count once</div>
       </div>
     </div>
 
@@ -2367,6 +2399,47 @@
       renderTrend('kpi_visits_trend',          r.kpis.visits,          p && p.visits,          ps, pe);
     }
 
+    // Upcoming sessions — top-level (not range-scoped). 7d/30d toggle swaps which
+    // count and trailing-window trend is shown. Trend compares forward demand vs
+    // the equivalent trailing window's actual sessions ("vs previous N days").
+    let upcomingWin = 7;
+    // The 30-day count needs the ingestion to pull ≥ this many days ahead
+    // (FUTURE_DAYS). Below it, the warehouse only holds the coming week, so a
+    // "next 30 days" number would misleadingly equal the 7-day one — show a
+    // placeholder instead until the window is widened (then it self-heals).
+    const UPCOMING_30D_MIN_COVERAGE = 25;
+    function renderUpcoming(u) {
+      if (!u) return;
+      const valEl   = document.getElementById('kpi_upcoming');
+      const trendEl = document.getElementById('kpi_upcoming_trend');
+      const subEl   = document.getElementById('kpi_upcoming_sub');
+      const partial = upcomingWin === 30 &&
+                      (u.covered_days == null || u.covered_days < UPCOMING_30D_MIN_COVERAGE);
+      if (partial) {
+        valEl.textContent = '—';
+        trendEl.hidden = true; trendEl.className = 'kpi-trend';
+        subEl.textContent = 'Next 30 days isn’t available yet — the appointment ingestion currently pulls only ~'
+          + (u.covered_days || 7) + ' days ahead. Widen FUTURE_DAYS to 31 to enable it.';
+        return;
+      }
+      const cur  = upcomingWin === 7 ? u.next_7 : u.next_30;
+      const prev = upcomingWin === 7 ? u.prev_7 : u.prev_30;
+      valEl.textContent = fmtInt(cur);
+      renderTrend('kpi_upcoming_trend', cur, prev, null, null);
+      if (!trendEl.hidden) trendEl.title = 'vs previous ' + upcomingWin + ' days';
+      subEl.textContent =
+        'Booked patient sessions in the next ' + upcomingWin + ' days — group classes count once';
+    }
+    function initUpcomingToggle() {
+      document.querySelectorAll('#upcoming_toggle .seg').forEach(b =>
+        b.addEventListener('click', () => {
+          upcomingWin = parseInt(b.dataset.win, 10);
+          document.querySelectorAll('#upcoming_toggle .seg')
+            .forEach(x => x.classList.toggle('active', x === b));
+          renderUpcoming(DATA.upcoming_sessions);
+        }));
+    }
+
     function renderClinicians(rows) {
       const tbody = document.getElementById('clinicianTbody');
       if (!rows.length) {
@@ -3287,6 +3360,8 @@
       renderDoctorMismatches(DATA.doctor_mismatches);
       renderMismatchHistory();
       renderProjection(DATA.projection);
+      initUpcomingToggle();
+      renderUpcoming(DATA.upcoming_sessions);
       renderMarketingStatic();
 
       initPL();

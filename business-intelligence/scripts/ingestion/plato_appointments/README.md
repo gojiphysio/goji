@@ -2,7 +2,9 @@
 
 Cloud Run **Job** that pulls Plato `/appointment` filtered by session date (`start_date`/`end_date`) and appends each appointment as one row into `goji-bi.raw_plato.appointments_raw`. Triggered every 15 minutes by Cloud Scheduler.
 
-Default window each run: `[today - PAST_DAYS, today + FUTURE_DAYS]` = `[today - 14d, today + 7d]`. The window is intentionally generous on the past side to catch any edit to a recent appointment, and on the future side so newly-booked appointments are visible before their session date. `stg.appointments` dedupes by latest `_loaded_at`, so re-pulls of unchanged rows are tolerated.
+Default window each run: `[today - PAST_DAYS, today + FUTURE_DAYS]` = `[today - 14d, today + 31d]`. The window is intentionally generous on the past side to catch any edit to a recent appointment, and a **full month** on the future side so the founder dashboard's "upcoming sessions (next 7 / 30 days)" card and the front-desk new-patient welcome list have real forward data — not just the coming week. `stg.appointments` dedupes by latest `_loaded_at`, so re-pulls of unchanged rows are tolerated.
+
+Because the whole window is re-pulled every run, a *live* appointment's `_loaded_at` advances each run while a **deleted** one goes stale (the API just stops returning it — the ingestion is append-only with no deletion tombstone). Downstream reads that must exclude deleted "ghosts" (the upcoming-count card, `marts.fct_new_patient_welcome`) filter to rows whose `_loaded_at` is within ~30 min of the newest load. Keep `FUTURE_DAYS` ≥ the furthest forward horizon any such reader needs (currently 30), or appointments beyond the window won't refresh and would look stale.
 
 **Why this exists:** the dashboard's invoice-doctor mismatch alert needs appointment data to cross-reference invoice.doctor against the calendar-color-mapped doctor for the same patient on the same day. Originally the dashboard hit Plato live on every cold cache miss; that pushed the cold load to ~90s and burned the rate-limit budget on user-facing requests. Moving ingestion to a background job lets the dashboard read appointments straight from BQ.
 
@@ -49,7 +51,7 @@ gcloud run jobs deploy plato-appointments-ingest \
   --region asia-southeast1 \
   --service-account ingestion-sa@goji-bi.iam.gserviceaccount.com \
   --set-secrets PLATO_API_KEY=plato-api-key:latest \
-  --set-env-vars PLATO_DB=gojihealth,PAST_DAYS=14,FUTURE_DAYS=7,BQ_PROJECT=goji-bi,BQ_DATASET=raw_plato,BQ_TABLE=appointments_raw \
+  --set-env-vars PLATO_DB=gojihealth,PAST_DAYS=14,FUTURE_DAYS=31,BQ_PROJECT=goji-bi,BQ_DATASET=raw_plato,BQ_TABLE=appointments_raw \
   --max-retries 1 \
   --task-timeout 600s \
   --memory 512Mi

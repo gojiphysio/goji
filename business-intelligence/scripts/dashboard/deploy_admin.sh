@@ -99,6 +99,7 @@ grant_editor() {
   fi
 }
 grant_editor patient_followup_events    "follow-up actions"
+grant_editor new_patient_welcome_events "new-patient welcome contacted/skipped"
 grant_editor lead_events                "inbound leads"
 grant_editor link_click_events          "click-to-WhatsApp tracking"
 grant_editor booking_funnel_events      "website booking-funnel tracking (goji-booking)"

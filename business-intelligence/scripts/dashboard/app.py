@@ -707,6 +707,87 @@ ORDER BY sd.delivery_date, sd.clinician_id
     } for r in _query(sql)]
 
 
+def fetch_upcoming_sessions(today: date) -> dict:
+    """Booked patient SESSIONS in the next 7 and 30 days (founder demand card).
+
+    Counts distinct clinician time-slots, not appointment rows, so a group /
+    2:1 class (two patients sharing one clinician + start + end) counts once —
+    this is the calendar-occupancy number, matching how the clinic thinks about
+    capacity. Mirrors marts.fct_new_patient_welcome's qualifier; keep the two in
+    sync.
+
+    A slot qualifies as a patient session when it isn't cancelled / void /
+    no-show AND it looks like a real booking: a linked patient_id, OR inline
+    contact (handphone/email — how a profile-less website/walk-in booking still
+    carries the patient), OR a real treatment_type. That drops lunches, 1:1s,
+    time blocks, shifts, travel and admin.
+
+    GHOST GUARD: the plato_appointments ingestion is append-only with no
+    deletion detection, so a deleted Plato appointment lingers in
+    stg.appointments as its last-known version. Every run re-pulls the whole
+    window, so a live appointment's _loaded_at advances while a deleted one goes
+    stale; we count only forward slots reloaded in the most recent run
+    (_loaded_at within 30 min of the newest load). The trailing "previous"
+    windows are actual past sessions, so they don't need (and can't get, beyond
+    the past ingest window) the freshness filter.
+    """
+    # Session-date windows. Forward windows include today (upcoming incl. today);
+    # the trailing comparison windows stop yesterday so they never overlap.
+    d7   = today + timedelta(days=7)
+    d30  = today + timedelta(days=30)
+    p7   = today - timedelta(days=7)
+    p30  = today - timedelta(days=30)
+    yday = today - timedelta(days=1)
+    slot = "FORMAT('%s|%d|%d', COALESCE(calendar_color,''), UNIX_SECONDS(start_at), UNIX_SECONDS(end_at))"
+    sql = f"""
+WITH fresh AS (
+  SELECT TIMESTAMP_SUB(MAX(_loaded_at), INTERVAL 30 MINUTE) AS min_loaded_at
+  FROM `{PROJECT}.stg.appointments`
+),
+base AS (
+  SELECT calendar_color, start_at, end_at, appt_date, _loaded_at
+  FROM `{PROJECT}.stg.appointments`
+  WHERE appt_date BETWEEN '{p30}' AND '{d30}'
+    AND COALESCE(SAFE_CAST(JSON_VALUE(payload, '$.cancelled') AS INT64), 0) = 0
+    AND COALESCE(SAFE_CAST(JSON_VALUE(payload, '$.void')      AS INT64), 0) = 0
+    AND LOWER(COALESCE(JSON_VALUE(payload, '$.status'), '')) NOT IN
+        ('cancelled', 'canceled', 'no_show', 'noshow', 'no-show')
+    AND (
+         (patient_id IS NOT NULL AND patient_id != '')
+      OR COALESCE(JSON_VALUE(payload, '$.handphone'), '') != ''
+      OR COALESCE(JSON_VALUE(payload, '$.email'), '')     != ''
+      OR treatment_type NOT IN ('Untyped', 'Unknown')
+    )
+)
+SELECT
+  COUNT(DISTINCT IF(appt_date BETWEEN '{today}' AND '{d7}'
+                    AND _loaded_at >= f.min_loaded_at, {slot}, NULL)) AS next_7,
+  COUNT(DISTINCT IF(appt_date BETWEEN '{today}' AND '{d30}'
+                    AND _loaded_at >= f.min_loaded_at, {slot}, NULL)) AS next_30,
+  COUNT(DISTINCT IF(appt_date BETWEEN '{p7}'  AND '{yday}', {slot}, NULL)) AS prev_7,
+  COUNT(DISTINCT IF(appt_date BETWEEN '{p30}' AND '{yday}', {slot}, NULL)) AS prev_30,
+  -- Furthest forward day we hold *fresh* data for. The ingestion pulls only
+  -- FUTURE_DAYS ahead, so if that's < 30 the "next 30 days" count is
+  -- incomplete; the card uses this to avoid showing a misleading number until
+  -- the window is widened (then it self-heals).
+  DATE_DIFF(MAX(IF(appt_date >= '{today}' AND _loaded_at >= f.min_loaded_at,
+                   appt_date, NULL)), '{today}', DAY) AS covered_days
+FROM base, fresh f
+"""
+    try:
+        r = _query(sql)[0]
+        return {
+            "next_7":       _to_int(r["next_7"]),
+            "next_30":      _to_int(r["next_30"]),
+            "prev_7":       _to_int(r["prev_7"]),
+            "prev_30":      _to_int(r["prev_30"]),
+            "covered_days": _to_int(r["covered_days"]),
+        }
+    except Exception as e:
+        log.warning("fetch_upcoming_sessions failed: %s", e)
+        return {"next_7": 0, "next_30": 0, "prev_7": 0, "prev_30": 0, "covered_days": 0}
+
+
 def fetch_treatment_mix(start: date, end: date) -> list[dict]:
     sql = f"""
 WITH classified AS (
@@ -1899,6 +1980,7 @@ def build_payload() -> dict:
         f_mismatches    = ex.submit(fetch_invoice_doctor_mismatches)
         f_mismatch_hist = ex.submit(fetch_mismatch_history)
         f_projection    = ex.submit(fetch_monthly_projection, today)
+        f_upcoming      = ex.submit(fetch_upcoming_sessions, today)
 
         # Per-range fetches. Each fetch_* is independent so they all race.
         range_jobs: dict[str, dict] = {}
@@ -2003,6 +2085,7 @@ def build_payload() -> dict:
             "doctor_mismatches": f_mismatches.result(),
             "mismatch_history":  f_mismatch_hist.result(),
             "projection":        f_projection.result(),
+            "upcoming_sessions": f_upcoming.result(),
         }
 
 
@@ -2319,6 +2402,129 @@ def get_package_alerts() -> dict:
     with _cache_lock:
         _cache["package_alerts"] = (now, data)
     return data
+
+
+# Front-desk portal: new-patient welcome worklist ----------------------------
+#
+# The FIRST tab: patients whose first visit is coming up, so the front desk can
+# message them directions / arrival info before they turn up. A worklist Plato
+# doesn't track — not a schedule mirror. Reads marts.fct_new_patient_welcome
+# (PII-free) and hydrates name/phone/email live at render time; write state
+# (contacted / skipped) goes to marts.new_patient_welcome_events.
+#
+# Contact hydration fallback chain — the crux of "new bookings with no profile
+# yet": a profile-less website/walk-in booking carries its own handphone/email/
+# name inside the appointment payload, so we read those straight from
+# stg.appointments (keyed on appointment_id) and only fall back to
+# dim_patient_contact for patients who already have a Plato profile. Contact is
+# never stored in the mart — same PII boundary as the other worklists, with the
+# appointment payload as the profile-less exception (like lead_events).
+
+VALID_WELCOME_STATUSES = {"contacted", "skipped", "active"}
+
+# Default view window (hours ahead) for the welcome list; the UI can widen it to
+# the whole week. The mart already caps the horizon at 30 days.
+WELCOME_DEFAULT_HOURS = 48
+
+
+def fetch_new_patient_welcome() -> dict:
+    """Upcoming first-visit patients + a per-booking worklist.
+
+    Rows come from marts.fct_new_patient_welcome (PII-free). Already-handled
+    bookings (contacted / skipped) are dropped via
+    marts.new_patient_welcome_latest. Name/phone/email are hydrated at render:
+    inline from the appointment payload for profile-less bookings, else from
+    marts.dim_patient_contact for linked patients.
+    """
+    sql = f"""
+SELECT
+  w.appointment_id,
+  w.patient_id,
+  w.appt_datetime,
+  w.appt_date,
+  w.clinician_id,
+  w.treatment_type,
+  w.booking_source,
+  w.has_profile,
+  -- Inline contact from the appointment payload (profile-less bookings carry it).
+  JSON_VALUE(a.payload, '$.title')     AS appt_title,
+  JSON_VALUE(a.payload, '$.handphone') AS appt_phone,
+  JSON_VALUE(a.payload, '$.email')     AS appt_email,
+  -- Profile contact for linked patients.
+  c.full_name AS profile_name,
+  c.phone     AS profile_phone,
+  e.status    AS welcome_status
+FROM `{PROJECT}.marts.fct_new_patient_welcome` w
+LEFT JOIN `{PROJECT}.stg.appointments`             a USING (appointment_id)
+LEFT JOIN `{PROJECT}.marts.dim_patient_contact`    c ON w.patient_id = c.patient_id
+LEFT JOIN `{PROJECT}.marts.new_patient_welcome_latest` e USING (appointment_id)
+ORDER BY w.appt_datetime
+"""
+    patients: list[dict] = []
+    for r in _query(sql):
+        status = r.get("welcome_status")
+        # contacted / skipped -> handled, drop from the actionable list.
+        if status in ("contacted", "skipped"):
+            continue
+        name  = r.get("profile_name")  or r.get("appt_title") or "—"
+        phone = (r.get("appt_phone") or "").strip() or r.get("profile_phone")
+        email = (r.get("appt_email") or "").strip() or None
+        patients.append({
+            "appointment_id": r["appointment_id"],
+            "appt_datetime":  r["appt_datetime"].isoformat() if r["appt_datetime"] else None,
+            "clinician":      _clinician_name(r["clinician_id"]),
+            "treatment_type": r["treatment_type"],
+            "booking_source": r["booking_source"],
+            "has_profile":    bool(r["has_profile"]),
+            "name":           name,
+            "phone":          phone,
+            "email":          email,
+        })
+    return {
+        "generated_at": datetime.now().astimezone().isoformat(timespec="seconds"),
+        "patients":     patients,
+    }
+
+
+def get_new_patient_welcome() -> dict:
+    """Cached accessor for the welcome worklist (invalidated on a write)."""
+    now = time.time()
+    with _cache_lock:
+        entry = _cache.get("welcome")
+        if entry and now - entry[0] < CACHE_TTL:
+            return entry[1]
+    data = fetch_new_patient_welcome()
+    with _cache_lock:
+        _cache["welcome"] = (now, data)
+    return data
+
+
+def record_welcome_contacted(appointment_id: str, status: str, *,
+                             note: str | None = None,
+                             updated_by: str | None = None) -> None:
+    """Append one welcome-list event (append-only; latest wins).
+
+    Parameterised DML INSERT (a query job), honouring the dashboard SA's
+    table-level dataEditor grant on new_patient_welcome_events — same pattern as
+    record_followup. Keyed on appointment_id (profile-less bookings have no
+    patient_id).
+    """
+    sql = f"""
+INSERT INTO `{PROJECT}.marts.new_patient_welcome_events`
+  (event_id, appointment_id, status, note, updated_by, updated_at)
+VALUES
+  (@event_id, @appointment_id, @status, @note, @updated_by, CURRENT_TIMESTAMP())
+"""
+    job_config = bigquery.QueryJobConfig(query_parameters=[
+        bigquery.ScalarQueryParameter("event_id",       "STRING", str(uuid.uuid4())),
+        bigquery.ScalarQueryParameter("appointment_id", "STRING", appointment_id),
+        bigquery.ScalarQueryParameter("status",         "STRING", status),
+        bigquery.ScalarQueryParameter("note",           "STRING", (note or None)),
+        bigquery.ScalarQueryParameter("updated_by",     "STRING", updated_by),
+    ])
+    _bq().query(sql, job_config=job_config).result()
+    with _cache_lock:
+        _cache.pop("welcome", None)
 
 
 # Front-desk portal: inbound-lead pipeline -----------------------------------
@@ -3136,6 +3342,45 @@ def api_frontdesk_package_alerts() -> Response:
     """Patients with <=2 prepaid sessions left, most urgent (0) first."""
     return Response(json.dumps(get_package_alerts(), default=str),
                     mimetype="application/json")
+
+
+@app.route("/api/frontdesk/new_patients")
+@require_roles("founder", "staff", only_mode="frontdesk")
+def api_frontdesk_new_patients() -> Response:
+    """New-patient welcome worklist: upcoming first visits to reach out to."""
+    return Response(json.dumps(get_new_patient_welcome(), default=str),
+                    mimetype="application/json")
+
+
+@app.route("/api/frontdesk/new_patients", methods=["POST"])
+@require_roles("founder", "staff", only_mode="frontdesk")
+def api_frontdesk_new_patients_save() -> Response:
+    """Mark an upcoming new patient contacted / skipped (or restore to the list).
+
+    Body: {appointment_id, status, note?}. Appends one event row; the worklist
+    reflects it on the next reload.
+    """
+    body   = request.get_json(silent=True) or {}
+    appt   = (body.get("appointment_id") or "").strip()
+    status = (body.get("status") or "").strip()
+    if not appt or status not in VALID_WELCOME_STATUSES:
+        return Response('{"error": "appointment_id and a valid status are required"}',
+                        status=400, mimetype="application/json")
+    try:
+        record_welcome_contacted(appt, status, note=body.get("note"),
+                                 updated_by=getattr(g, "user", None))
+    except Exception as e:
+        log.exception("welcome write failed: %s", e)
+        msg = str(e).lower()
+        if "permission" in msg or "denied" in msg or "403" in msg or "access" in msg:
+            return Response(
+                json.dumps({"error": "The dashboard isn't allowed to save yet — its "
+                            "service account needs write access to "
+                            "marts.new_patient_welcome_events. See DEPLOY.md."}),
+                status=403, mimetype="application/json")
+        return Response('{"error": "Could not save — please try again."}',
+                        status=500, mimetype="application/json")
+    return Response('{"ok": true}', mimetype="application/json")
 
 
 def _slug_target(slug: str, click_id: str | None = None) -> str:
