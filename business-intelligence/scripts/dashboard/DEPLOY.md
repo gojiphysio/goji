@@ -93,7 +93,7 @@ can append "contacted/snoozed/dismissed" follow-up events, appointment
 confirmations, click-to-WhatsApp link clicks, and provider-attribution alert
 dismissals; everything else stays read-only):
 
-    for t in patient_followup_events lead_events link_click_events booking_funnel_events web_session_events mismatch_dismissal_events; do
+    for t in patient_followup_events new_patient_welcome_events lead_events link_click_events booking_funnel_events web_session_events mismatch_dismissal_events; do
       bq add-iam-policy-binding \
         --member="serviceAccount:dashboard-sa@goji-bi.iam.gserviceaccount.com" \
         --role="roles/bigquery.dataEditor" \
@@ -148,13 +148,14 @@ mounted here.
 
 The dashboard SA must have **write** access to the relevant append-only table:
 `marts.patient_followup_events` (retention worklist),
+`marts.new_patient_welcome_events` (new-patient welcome list),
 `marts.lead_events` (Leads pipeline),
 `marts.link_click_events` (click-to-WhatsApp tracking), and
 `marts.mismatch_dismissal_events` (provider-attribution alert dismissals).
 `deploy_admin.sh` grants and verifies them all, but if you ever see a save
 error, grant them directly:
 
-    for t in patient_followup_events lead_events link_click_events booking_funnel_events web_session_events mismatch_dismissal_events; do
+    for t in patient_followup_events new_patient_welcome_events lead_events link_click_events booking_funnel_events web_session_events mismatch_dismissal_events; do
       bq add-iam-policy-binding \
         --member="serviceAccount:dashboard-sa@goji-bi.iam.gserviceaccount.com" \
         --role="roles/bigquery.dataEditor" \

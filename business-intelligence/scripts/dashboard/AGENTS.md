@@ -50,16 +50,47 @@ See `DEPLOY.md`.
   `deploy_admin.sh`, `DEPLOY.md`, and `.github/workflows/deploy-dashboard.yml`.
 
 ## Front desk portal (`frontdesk.*`)
-- It's the **worklists Plato doesn't track**, not a second calendar: **Leads**
-  (inbound funnel) → **Package alerts** (renewals) → **Follow-ups** (win-backs).
-  Don't re-add a Today/schedule/call-list mirror of Plato — that was removed
-  precisely to avoid two sources of truth.
-- **"Won" = the lead became a patient/customer** (their first visit), **not**
-  "bought a package". Packages are a separate worklist, never a funnel stage.
-- **Lead `contact` PII is stored on purpose** — a pre-patient isn't in Plato to
-  hydrate from, so `marts.lead_events` is the *only* exception to the
-  patient-worklist rule of "key on id, never persist name/phone". Keep it gated
-  (founder+staff, frontdesk) and keep `note` operational, not clinical.
+- It's the **worklists Plato doesn't track**, not a second calendar. Tabs read
+  along the patient's arc: **Welcome** (new patients coming in) → **Follow-ups**
+  (win-backs) → **Package alerts** (renewals). A **count** or a first-timer
+  **worklist** is fine; don't re-add a Today/schedule/call-list mirror of Plato —
+  that was removed precisely to avoid two sources of truth. (The **Leads** tab
+  was retired from the UI; its routes + `marts.lead_events` stay so it can be
+  revived — see the retired-Leads note below.)
+- **Welcome list = upcoming first visits** (`marts.fct_new_patient_welcome`,
+  keyed on `appointment_id`; contacted/skipped state in
+  `new_patient_welcome_events`). "New" = no prior delivered service **and** no
+  prior appointment (linked patients), or no Plato profile yet with the same
+  phone/email unseen before (profile-less website/walk-in bookings). Contact is
+  hydrated live: **inline `handphone`/`email`/`title` from the appointment
+  payload** for profile-less bookings, else `dim_patient_contact` — never stored
+  in the mart. Staff→patient outreach uses a direct `wa.me/<patient number>`
+  link, **not** the go.gojiphysio.com redirector (that's for tracking *inbound*
+  customer taps, not messaging one patient).
+- **Ghost appointments (invariant for anything reading `stg.appointments`
+  forward).** The `plato_appointments` ingestion is append-only with no deletion
+  detection, so a deleted Plato appointment lingers as its last-known version.
+  The whole `[today-PAST, today+FUTURE]` window is re-pulled each run, so a live
+  appointment's `_loaded_at` advances while a deleted one goes stale — filter to
+  `_loaded_at >= MAX(_loaded_at) - 30min` to drop ghosts. `FUTURE_DAYS=31` so a
+  month of forward bookings is covered and refreshed (needed by the upcoming
+  count + welcome list). Keep `FUTURE_DAYS` ≥ the furthest forward horizon any
+  reader needs.
+- **Upcoming-sessions count grain = distinct clinician slot.** A group / 2:1
+  class is two `appointment_id` rows sharing the same `(calendar_color,
+  start_at, end_at)`; count `COUNT(DISTINCT that tuple)` so it's one session
+  (calendar occupancy), not two. The patient-session qualifier (shared by
+  `fetch_upcoming_sessions` and `fct_new_patient_welcome`): not cancelled/void/
+  no-show AND (`patient_id` OR inline `handphone`/`email` OR real
+  `treatment_type`). `treatment_type` alone is not a qualifier (~45% Untyped).
+- **Retired Leads (revivable).** **"Won" = the lead became a patient/customer**
+  (their first visit), **not** "bought a package"; packages are a separate
+  worklist, never a funnel stage. **Lead `contact` PII is stored on purpose** —
+  a pre-patient isn't in Plato to hydrate from, so `marts.lead_events` is the
+  *only* exception to the patient-worklist rule of "key on id, never persist
+  name/phone" (the welcome list's profile-less bookings hydrate from the
+  appointment payload, which is Plato, so they don't persist either). Keep it
+  gated (founder+staff, frontdesk) and keep `note` operational, not clinical.
 
 ## Marketing tab
 - **Hierarchy = decision order.** The tab reads top-down: (1) **North stars** —
