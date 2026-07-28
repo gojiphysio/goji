@@ -171,12 +171,23 @@ def test_focus_refuses_a_clinician_who_does_not_offer_it():
 def test_first_available_assigns_a_free_clinician():
     p = StubPlato()
     res = create_booking(p, {**BASE, "clinician_id": ""}, now=NOW)
-    assert res["clinician_id"] in ("cheryl-long", "claire-ng")
+    # Both Claire and Cheryl are free at 10:00, so the priority order
+    # (Kristy -> Claire -> Cheryl) picks Claire over Cheryl.
+    assert res["clinician_id"] == "claire-ng"
     assert len(p.created) == 1
     # No explicit pick -> "First available" recorded in the result + flagged
     # earliest-available in the Plato note.
     assert res["clinician_requested"] == "First available"
     assert "Clinician: earliest available" in p.created[0][0]["description"]
+
+
+def test_first_available_falls_back_to_cheryl_when_claire_is_busy():
+    # Claire (6hpO) is booked at 10:00; with Kristy absent from this calendar,
+    # first-available must fall back to Cheryl rather than refuse the slot.
+    p = StubPlato([{"color": "6hpO", "starttime": "2026-07-15 10:00:00",
+                    "endtime": "2026-07-15 11:00:00"}])
+    res = create_booking(p, {**BASE, "clinician_id": ""}, now=NOW)
+    assert res["clinician_id"] == "cheryl-long"
 
 
 def test_typo_email_is_refused():
