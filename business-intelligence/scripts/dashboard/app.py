@@ -99,6 +99,34 @@ PROVIDERS = {
 }
 DIRECTOR_ID = "PCL"
 
+# Clinician utilisation = patient-facing booked hours / contracted hours.
+# Contracted weekly clinical capacity per clinician. Cheryl (the director) runs
+# a lower clinical base because much of her week is non-clinical (ops, funnelling
+# bookings to others). Edit here if hours change or a clinician joins/leaves.
+CONTRACTED_HOURS: dict[str, float] = {
+    "PCN": 42.0,   # Claire Ng
+    "PKN": 42.0,   # Kristy Ng
+    "PCL": 30.0,   # Cheryl Long (director)
+}
+
+# Singapore public holidays the clinic is closed on. These days are removed from
+# the utilisation denominator so a clinician isn't scored against a day nobody
+# could work. This is a BACKSTOP: the clinic normally blocks closed days as
+# all-day events in Plato too (picked up dynamically via `is_all_day_leave`), and
+# a day counts as "off" if EITHER signal fires, so listing a date twice is
+# harmless. Only fixed-date, high-confidence holidays are hardcoded; the movable
+# ones (CNY, Vesak, Hari Raya, Deepavali) are left to the Plato all-day blocks so
+# a wrong guessed date can't silently shrink the denominator. Verify/extend each
+# year. Dates are ISO strings compared against SGT calendar days.
+SG_PUBLIC_HOLIDAYS: set[str] = {
+    "2026-01-01",  # New Year's Day
+    "2026-04-03",  # Good Friday
+    "2026-05-01",  # Labour Day
+    "2026-08-09",  # National Day
+    "2026-08-10",  # National Day (observed, Mon)
+    "2026-12-25",  # Christmas Day
+}
+
 # Opening-promo "true discount cost" tile: for each pack SKU, we compute the
 # implicit discount as (units * pack_size * usual_per_session) - sold_total.
 # These usual single-session prices come from the published price list; they
@@ -527,6 +555,98 @@ ORDER BY bookings DESC
         "recognised":   _to_float(r["recognised"]),
         "is_director":  r["clinician_id"] == DIRECTOR_ID,
     } for r in _query(sql)]
+
+
+def fetch_utilization(start: date, end: date) -> list[dict]:
+    """Per-clinician utilisation = patient-facing booked hours / contracted hours.
+
+    The denominator shrinks dynamically for days off: each clinician's normal
+    working weekdays are inferred from their own calendar history, then public
+    holidays (SG_PUBLIC_HOLIDAYS) and all-day Plato blocks (leave / closures) are
+    subtracted. Booked hours come from `marts.fct_clinician_utilization_daily`
+    (slot-grain minutes). The window is capped at today so an in-progress week's
+    not-yet-worked days don't drag the ratio down.
+
+    Graceful degradation: returns [] if the view isn't deployed yet.
+    """
+    try:
+        rows = _query(f"""
+SELECT clinician_id, day, booked_minutes, is_all_day_leave
+FROM `{PROJECT}.marts.fct_clinician_utilization_daily`
+""")
+    except Exception as e:
+        log.warning("fct_clinician_utilization_daily unavailable (run deploy_all.sh?): %s", e)
+        return []
+
+    today   = datetime.now(ZoneInfo("Asia/Singapore")).date()
+    eff_end = min(end, today)
+
+    # Infer each clinician's normal working weekdays from history: a weekday is
+    # "normal" if they saw patients on it in a meaningful share of the clinic's
+    # operating weeks (not a one-off cover shift). Keyed on Python weekday()
+    # (Mon=0 .. Sun=6). Also collect all-day-leave dates per clinician.
+    operating_weeks: set = set()
+    present: dict[str, dict[int, set]] = {}
+    leave_days: dict[str, set] = {}
+    for r in rows:
+        d, cid = r["day"], r["clinician_id"]
+        if r.get("is_all_day_leave"):
+            leave_days.setdefault(cid, set()).add(d)
+        if _to_float(r["booked_minutes"]) > 0:
+            isoyw = tuple(d.isocalendar()[:2])
+            operating_weeks.add(isoyw)
+            present.setdefault(cid, {}).setdefault(d.weekday(), set()).add(isoyw)
+
+    total_weeks    = len(operating_weeks) or 1
+    week_threshold = max(3, round(0.34 * total_weeks))
+
+    def normal_weekdays(cid: str) -> set:
+        wds = {wd for wd, weeks in present.get(cid, {}).items()
+               if len(weeks) >= week_threshold}
+        # Fallback for a clinician with too little history to infer a pattern:
+        # assume Mon–Fri so we still show a denominator rather than none.
+        return wds or {0, 1, 2, 3, 4}
+
+    # Booked minutes within the (capped) range, per clinician.
+    booked_min: dict[str, float] = {}
+    for r in rows:
+        if start <= r["day"] <= eff_end:
+            booked_min[r["clinician_id"]] = (
+                booked_min.get(r["clinician_id"], 0.0) + _to_float(r["booked_minutes"]))
+
+    out: list[dict] = []
+    for cid, contracted in CONTRACTED_HOURS.items():
+        wds       = normal_weekdays(cid)
+        ndays     = len(wds) or 5
+        daily_cap = contracted / ndays
+        cleave    = leave_days.get(cid, set())
+
+        working_days = days_off = 0
+        d = start
+        while d <= eff_end:
+            if d.weekday() in wds:
+                if d.isoformat() in SG_PUBLIC_HOLIDAYS or d in cleave:
+                    days_off += 1
+                else:
+                    working_days += 1
+            d += timedelta(days=1)
+
+        available_hours = working_days * daily_cap
+        booked_hours    = booked_min.get(cid, 0.0) / 60.0
+        util = round(100.0 * booked_hours / available_hours, 1) if available_hours > 0 else None
+        out.append({
+            "clinician_id":          cid,
+            "name":                  PROVIDERS.get(cid, cid),
+            "is_director":           cid == DIRECTOR_ID,
+            "booked_hours":          round(booked_hours, 1),
+            "available_hours":       round(available_hours, 1),
+            "contracted_hours":      contracted,
+            "working_days_per_week": ndays,
+            "days_off":              days_off,
+            "utilization_pct":       util,
+        })
+    out.sort(key=lambda x: (x["utilization_pct"] is None, -(x["utilization_pct"] or 0)))
+    return out
 
 
 def fetch_discounts(start: date, end: date) -> dict:
@@ -1898,6 +2018,7 @@ def build_payload() -> dict:
                 "trends":         ex.submit(fetch_trends, start, end),
                 "weekly_visits":  ex.submit(fetch_weekly_visits, start, end),
                 "clinicians":     ex.submit(fetch_clinicians, start, end),
+                "utilization":    ex.submit(fetch_utilization, start, end),
                 "discounts":      ex.submit(fetch_discounts, start, end),
                 "treatment_mix":  ex.submit(fetch_treatment_mix, start, end),
                 "packages":       ex.submit(fetch_packages, start, end),
@@ -1925,6 +2046,7 @@ def build_payload() -> dict:
                 range_jobs[key]["instagram_reach_prev"] = None
                 range_jobs[key]["instagram_engagement_prev"] = None
                 range_jobs[key]["web_sessions_prev"] = None
+                range_jobs[key]["utilization_prev"]  = None
                 range_jobs[key]["prev_start"]        = None
                 range_jobs[key]["prev_end"]          = None
             else:
@@ -1936,6 +2058,7 @@ def build_payload() -> dict:
                 range_jobs[key]["instagram_reach_prev"] = ex.submit(fetch_instagram_reach, prev_start, prev_end)
                 range_jobs[key]["instagram_engagement_prev"] = ex.submit(fetch_instagram_engagement, prev_start, prev_end)
                 range_jobs[key]["web_sessions_prev"] = ex.submit(fetch_web_sessions, prev_start, prev_end)
+                range_jobs[key]["utilization_prev"]  = ex.submit(fetch_utilization, prev_start, prev_end)
                 range_jobs[key]["prev_start"]        = prev_start.isoformat()
                 range_jobs[key]["prev_end"]          = prev_end.isoformat()
 
@@ -1954,6 +2077,8 @@ def build_payload() -> dict:
                 "trends":           v["trends"].result(),
                 "weekly_visits":    v["weekly_visits"].result(),
                 "clinicians":       v["clinicians"].result(),
+                "utilization":      v["utilization"].result(),
+                "utilization_prev": v["utilization_prev"].result() if v["utilization_prev"] else None,
                 "discounts":        v["discounts"].result(),
                 "treatment_mix":    v["treatment_mix"].result(),
                 "packages":         v["packages"].result(),
@@ -2876,6 +3001,8 @@ def api_range() -> Response:
         f_tr        = ex.submit(fetch_trends,        start,      end)
         f_wv        = ex.submit(fetch_weekly_visits, start,      end)
         f_clin      = ex.submit(fetch_clinicians,    start,      end)
+        f_util      = ex.submit(fetch_utilization,   start,      end)
+        f_util_prev = ex.submit(fetch_utilization,   prev_start, prev_end)
         f_disc      = ex.submit(fetch_discounts,     start,      end)
         f_mix       = ex.submit(fetch_treatment_mix, start,      end)
         f_pkgs      = ex.submit(fetch_packages,      start,      end)
@@ -2895,6 +3022,8 @@ def api_range() -> Response:
         "trends":           f_tr.result(),
         "weekly_visits":    f_wv.result(),
         "clinicians":       f_clin.result(),
+        "utilization":      f_util.result(),
+        "utilization_prev": f_util_prev.result(),
         "discounts":        f_disc.result(),
         "treatment_mix":    f_mix.result(),
         "packages":         f_pkgs.result(),

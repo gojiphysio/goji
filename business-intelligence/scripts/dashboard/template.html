@@ -1073,7 +1073,7 @@
       <div class="subtitle">
         Bookings ($ invoiced) vs recognised revenue ($ earned through delivered sessions), <span class="range-label">last 30 days</span>.
         The <strong>gap</strong> is deferred revenue: packages committed but sessions not yet used. A large gap can mean strong forward sales — or a churn risk if patients stop coming in.
-        Clinician <strong>utilisation %</strong> (slots filled ÷ slots available) requires appointment data — flagged for Charles.
+        See <strong>Clinician utilisation</strong> below for patient-facing hours vs contracted capacity.
       </div>
       <div class="two-col">
         <div><div class="chart-wrap"><canvas id="clinicianChart"></canvas></div></div>
@@ -1095,6 +1095,18 @@
           </div>
         </div>
       </div>
+    </section>
+
+    <section class="q">
+      <h2>Clinician utilisation <span class="badge live">Live</span></h2>
+      <div class="subtitle">
+        Patient-facing <strong>booked hours ÷ contracted hours</strong>, <span class="range-label">last 30 days</span>.
+        The denominator follows each clinician's normal working days and drops public
+        holidays and all-day leave blocks, so time off isn't counted against them.
+        Contracted base: Claire &amp; Kristy 42h/week, Cheryl 30h (director).
+        This is the <em>patient-facing share of paid time</em> — the rest is notes, admin and breaks — not "wasted" time.
+      </div>
+      <div class="kpi-row" id="utilizationCards" style="margin-top: 12px;"></div>
     </section>
 
     <section class="q">
@@ -1972,6 +1984,7 @@
 
     const fmt$  = v => (v == null || isNaN(v)) ? '-' : '$' + Number(v).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     const fmtPct = v => (v == null || isNaN(v)) ? '-' : Number(v).toFixed(1) + '%';
+    const fmtHrs = v => (v == null || isNaN(v)) ? '-' : Number(v).toFixed(1) + 'h';
     const fmtInt = v => (v == null || isNaN(v)) ? '-' : Math.round(Number(v)).toLocaleString();
     const fmtNum1 = v => (v == null || isNaN(v)) ? '-' : Number(v).toFixed(1);
     const escapeHtml = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({
@@ -2410,6 +2423,40 @@
           }
         });
       }
+    }
+
+    // Per-clinician utilisation cards. `r` is the whole range object so we can
+    // read utilization, utilization_prev (for the trend chip) and the prev
+    // window dates in one place, like renderKpis.
+    function renderUtilization(r) {
+      const wrap = document.getElementById('utilizationCards');
+      if (!wrap) return;
+      const rows = (r && r.utilization) || [];
+      if (!rows.length) {
+        wrap.innerHTML = '<div class="empty" style="padding:8px 0;">No utilisation data for this period.</div>';
+        return;
+      }
+      const prevById = {};
+      ((r && r.utilization_prev) || []).forEach(p => { prevById[p.clinician_id] = p; });
+
+      wrap.innerHTML = rows.map(row => {
+        const tag  = row.is_director ? ' <span class="role-tag">Director</span>' : '';
+        const util = row.utilization_pct == null ? '—' : fmtPct(row.utilization_pct);
+        const off  = row.days_off ? ` · ${row.days_off} day${row.days_off > 1 ? 's' : ''} off` : '';
+        const first = escapeHtml(String(row.name || '').split(' ')[0]);
+        return `<div class="kpi-card">
+          <div class="kpi-label">${first} (${escapeHtml(row.clinician_id)})${tag}</div>
+          <div class="kpi-value">${util}</div>
+          <div class="kpi-trend" id="util_trend_${escapeHtml(row.clinician_id)}" hidden></div>
+          <div class="kpi-sub">${fmtHrs(row.booked_hours)} / ${fmtHrs(row.available_hours)} booked${off}</div>
+        </div>`;
+      }).join('');
+
+      rows.forEach(row => {
+        const p = prevById[row.clinician_id];
+        renderTrend('util_trend_' + row.clinician_id, row.utilization_pct,
+                    p ? p.utilization_pct : null, r.prev_start, r.prev_end);
+      });
     }
 
     function renderDiscounts(d) {
@@ -3206,6 +3253,7 @@
       renderTrends(r.trends, r.kpis);
       renderWeeklyVisits(r.weekly_visits, resolvedKey);
       renderClinicians(r.clinicians);
+      renderUtilization(r);
       renderDiscounts(r.discounts);
       renderMix(r.treatment_mix);
       renderPackages(r.packages);

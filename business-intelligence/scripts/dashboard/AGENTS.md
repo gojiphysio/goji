@@ -43,6 +43,19 @@ See `DEPLOY.md`.
   session count), not `len(redeem_alloc)`. When a redemption spans two packages
   (cross-package transition), `redeem_alloc` has 2 entries for 1 visit — using
   `qty` keeps the count correct.
+- **Clinician utilisation = facts in SQL, policy in Python.**
+  `marts.fct_clinician_utilization_daily` is a thin view over the calendar
+  (per clinician×day: slot-grain `booked_minutes` + `is_all_day_leave`); the
+  capacity *policy* — `CONTRACTED_HOURS` (Claire/Kristy 42h, Cheryl 30h),
+  `SG_PUBLIC_HOLIDAYS`, and the working-weekday inference — lives in
+  `fetch_utilization` so nothing in BigQuery changes when someone's hours do.
+  The denominator is **dynamic**: each clinician's normal working weekdays are
+  inferred from their own history, then public holidays and all-day Plato leave
+  blocks are subtracted, and the window is capped at *today* so an in-progress
+  week doesn't dip. Leave/closures are read straight from Plato all-day blocks
+  (per-clinician colour, plus the booking service's clinic-wide `-all-`); the
+  hardcoded holiday list is only a backstop for closures not entered on the
+  calendar (fixed-date holidays only — movable ones are left to the blocks).
 - **Writes are append-only event logs** with table-level `dataEditor` grants
   (`record_*` → parameterised DML). **High-frequency / public** writes (e.g. link
   clicks) use the **streaming API** (`insert_rows_json`), not DML — DML is capped
