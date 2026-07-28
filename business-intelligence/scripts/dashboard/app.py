@@ -109,15 +109,16 @@ CONTRACTED_HOURS: dict[str, float] = {
     "PCL": 30.0,   # Cheryl Long (director)
 }
 
-# Singapore public holidays the clinic is closed on. These days are removed from
-# the utilisation denominator so a clinician isn't scored against a day nobody
-# could work. This is a BACKSTOP: the clinic normally blocks closed days as
-# all-day events in Plato too (picked up dynamically via `is_all_day_leave`), and
-# a day counts as "off" if EITHER signal fires, so listing a date twice is
-# harmless. Only fixed-date, high-confidence holidays are hardcoded; the movable
-# ones (CNY, Vesak, Hari Raya, Deepavali) are left to the Plato all-day blocks so
-# a wrong guessed date can't silently shrink the denominator. Verify/extend each
-# year. Dates are ISO strings compared against SGT calendar days.
+# Singapore public holidays / clinic-closure dates removed from the utilisation
+# denominator so a clinician isn't scored against a day nobody could work.
+# Individual leave is picked up dynamically from the calendar (leave-titled blocks
+# on a clinician's own calendar — see `is_leave` in
+# marts.fct_clinician_utilization_daily); clinic-wide closures are NOT reliably in
+# the calendar (the `-all-` calendar is shared admin noise, not a leave marker),
+# so public holidays and any ad-hoc closure the clinic observes belong HERE. A day
+# counts as "off" if EITHER this list or a leave block fires, so a duplicate date
+# is harmless. Verify/extend each year — a wrong date silently shrinks the
+# denominator. Dates are ISO strings compared against SGT calendar days.
 SG_PUBLIC_HOLIDAYS: set[str] = {
     "2026-01-01",  # New Year's Day
     "2026-04-03",  # Good Friday
@@ -571,7 +572,7 @@ def fetch_utilization(start: date, end: date) -> list[dict]:
     """
     try:
         rows = _query(f"""
-SELECT clinician_id, day, booked_minutes, is_all_day_leave
+SELECT clinician_id, day, booked_minutes, is_leave
 FROM `{PROJECT}.marts.fct_clinician_utilization_daily`
 """)
     except Exception as e:
@@ -590,7 +591,7 @@ FROM `{PROJECT}.marts.fct_clinician_utilization_daily`
     leave_days: dict[str, set] = {}
     for r in rows:
         d, cid = r["day"], r["clinician_id"]
-        if r.get("is_all_day_leave"):
+        if r.get("is_leave"):
             leave_days.setdefault(cid, set()).add(d)
         if _to_float(r["booked_minutes"]) > 0:
             isoyw = tuple(d.isocalendar()[:2])

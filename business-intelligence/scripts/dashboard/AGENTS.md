@@ -50,12 +50,14 @@ See `DEPLOY.md`.
   `SG_PUBLIC_HOLIDAYS`, and the working-weekday inference — lives in
   `fetch_utilization` so nothing in BigQuery changes when someone's hours do.
   The denominator is **dynamic**: each clinician's normal working weekdays are
-  inferred from their own history, then public holidays and all-day Plato leave
-  blocks are subtracted, and the window is capped at *today* so an in-progress
-  week doesn't dip. Leave/closures are read straight from Plato all-day blocks
-  (per-clinician colour, plus the booking service's clinic-wide `-all-`); the
-  hardcoded holiday list is only a backstop for closures not entered on the
-  calendar (fixed-date holidays only — movable ones are left to the blocks).
+  inferred from their own history, then public holidays and individual leave are
+  subtracted, and the window is capped at *today* so an in-progress week doesn't
+  dip. **Leave detection is title-based, verified against real data:** Plato's
+  `allDay` is an unreliable string and the `-all-` calendar is shared admin noise
+  (meetings/OOO/travel), *not* a leave marker — so a leave day is a block on the
+  clinician's **own** calendar with a leave-word title (`is_leave` in the view).
+  Public/clinic closures aren't reliably on the calendar, so they live in the
+  `SG_PUBLIC_HOLIDAYS` list in app.py, not in SQL.
 - **Writes are append-only event logs** with table-level `dataEditor` grants
   (`record_*` → parameterised DML). **High-frequency / public** writes (e.g. link
   clicks) use the **streaming API** (`insert_rows_json`), not DML — DML is capped
