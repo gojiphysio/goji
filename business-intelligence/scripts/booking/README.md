@@ -33,7 +33,14 @@ clear. Rules layered on top (`config.py`):
 Plato does **not** reject conflicts, so `create_booking` re-derives availability
 for the exact slot inside a **per-clinician lock**, then `POST /appointment`
 (`connect:true` fires Plato's own customer confirmation). Home visit = 3
-appointments (travel/visit/travel), all-or-nothing. Then `mailer.py` sends two
+appointments (travel/visit/travel), all-or-nothing.
+
+When the patient picks **"Earliest available"** (no explicit clinician — the
+default for a new patient), auto-assignment walks `FIRST_AVAILABLE_PRIORITY` in
+`config.py` (**Kristy → Claire → Cheryl**) and takes the first clinician who is
+free at that slot and offers the chosen sub-type. Availability still decides who
+*can* take it; the order only breaks ties — and it keeps Cheryl's diary open for
+the work only she covers (scoliosis, home visits). Then `mailer.py` sends two
 best-effort emails — the clinic heads-up (hello@) **and** our own on-brand
 confirmation to the customer (so it's guaranteed even if Plato's template isn't
 sending) — and a `confirmed` funnel event is logged.

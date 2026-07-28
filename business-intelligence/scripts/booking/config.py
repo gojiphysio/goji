@@ -92,6 +92,16 @@ PHYSIO_FOCUS_CLINICIANS: dict[str, list[str]] = {
     "others": ["cheryl-long", "claire-ng", "kristy-ng"],
 }
 
+# "First available" auto-assignment order. When a patient lets us pick the
+# clinician (the website's "Earliest available" option — the default path for a
+# new patient), we walk this order and take the first clinician who is actually
+# free at the chosen slot AND offers the chosen sub-type (availability still
+# decides; this only breaks the tie between clinicians who are all free). Kristy
+# first, then Claire, and Cheryl only as a fallback — this keeps Cheryl's diary
+# open for the work only she covers (scoliosis, home visits). Any clinician not
+# listed here sorts last, in config order.
+FIRST_AVAILABLE_PRIORITY: list[str] = ["kristy-ng", "claire-ng", "cheryl-long"]
+
 # Home visits: Cheryl only, typed "Home Visit" in Plato regardless of service.
 HOME_VISIT_CLINICIAN = "cheryl-long"
 HOME_VISIT_TYPE_CODE = "sCla"

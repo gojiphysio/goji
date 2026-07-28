@@ -20,6 +20,7 @@ from zoneinfo import ZoneInfo
 from .availability import derive_availability
 from .config import (
     CLINICIANS,
+    FIRST_AVAILABLE_PRIORITY,
     HOME_TRAVEL_MINUTES,
     HOME_VISIT_CLINICIAN,
     HOME_VISIT_TYPE_CODE,
@@ -207,6 +208,12 @@ def create_booking(plato, draft: dict, *, now: datetime | None = None) -> dict:
                                     focus=focus_id or None, home=home, now=now)
         candidates = [cid for cid, slots in avail.items() if time_ in slots]
         _require(candidates, "That time is no longer available.", "slot_taken")
+        # Walk the clinic's preferred order (Kristy -> Claire -> Cheryl) so a
+        # "First available" booking fills higher-priority clinicians first; the
+        # loop below takes the first one that survives the locked re-check.
+        # Unlisted clinicians sort last, keeping their relative (config) order.
+        _rank = {cid: i for i, cid in enumerate(FIRST_AVAILABLE_PRIORITY)}
+        candidates.sort(key=lambda cid: _rank.get(cid, len(_rank)))
 
     last_err: BookingError | None = None
     for cid in candidates:
