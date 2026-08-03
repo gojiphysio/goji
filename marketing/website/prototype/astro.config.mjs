@@ -12,7 +12,11 @@ export default defineConfig({
   output: "static",
   integrations: [
     icon(),
-    // Generates /sitemap-index.xml; keep the internal styleguide out of it.
-    sitemap({ filter: (page) => !page.includes("/styleguide") }),
+    // Generates /sitemap-index.xml; keep the internal styleguide and the
+    // noindexed /search results page out of it.
+    sitemap({
+      filter: (page) =>
+        !page.includes("/styleguide") && !page.includes("/search"),
+    }),
   ],
 });

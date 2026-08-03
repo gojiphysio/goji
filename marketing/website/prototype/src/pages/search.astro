@@ -1,0 +1,270 @@
+---
+/**
+ * /search — the standalone results page.
+ *
+ * The header sheet (SearchDialog) is the primary surface; this page exists so
+ * that a shared or bookmarked `/search?q=…` link works, and so the search form
+ * still does something useful before JS runs. It is `noindex` (thin, and the
+ * query is user-supplied) and excluded from the sitemap and the search index.
+ */
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Section from "../components/Section.astro";
+import Button from "../components/Button.astro";
+---
+
+<BaseLayout
+  title="Search | Goji Physiotherapy"
+  description="Search conditions, services, articles and clinician profiles at Goji Physiotherapy, Lentor MRT Singapore."
+  noindex={true}
+  searchable={false}
+>
+  <Section tone="linen">
+    <div class="container--narrow">
+      <h1>Search</h1>
+      <form class="sp-form" role="search" method="get" action="/search">
+        <label class="visually-hidden" for="sp-input">Search this site</label>
+        <input
+          id="sp-input"
+          class="sp-input"
+          type="search"
+          name="q"
+          inputmode="search"
+          autocomplete="off"
+          placeholder="Conditions, services, articles"
+        />
+        <button type="submit" class="sp-submit">Search</button>
+      </form>
+
+      <p class="sp-status visually-hidden" role="status" aria-live="polite" data-search-status></p>
+
+      <ul class="sp-results" data-search-results hidden></ul>
+
+      <div class="sp-empty" data-search-empty hidden>
+        <h2>Nothing matched that</h2>
+        <p>
+          Tell us what you are looking for and we will point you to the right
+          page or the right appointment type.
+        </p>
+        <Button slug="web-wa" variant="whatsapp">Ask us on WhatsApp</Button>
+      </div>
+
+      {/* Shown before a query, without JS, and when the index is missing. */}
+      <div class="sp-browse" data-search-browse>
+        <p>Or browse the site:</p>
+        <ul>
+          <li><a href="/services">All services</a></li>
+          <li><a href="/conditions">Conditions we treat</a></li>
+          <li><a href="/blog">Blog</a></li>
+          <li><a href="/press">Press</a></li>
+          <li><a href="/getting-here">Getting here</a></li>
+        </ul>
+      </div>
+
+      <p class="sp-unavailable" data-search-unavailable hidden>
+        Search is generated at build time. Run <code>npm run build</code> then
+        <code>npm run preview</code> to try it locally.
+      </p>
+    </div>
+  </Section>
+</BaseLayout>
+
+<style>
+  .sp-form {
+    display: flex;
+    gap: var(--space-2);
+    margin-block: var(--space-5);
+  }
+  .sp-input {
+    flex: 1;
+    font-size: 1rem; /* >=16px stops iOS zooming on focus */
+  }
+  .sp-submit {
+    flex: none;
+    border: 1.5px solid transparent;
+    border-radius: var(--radius-pill);
+    background: var(--cta-bg);
+    color: var(--cta-text);
+    font-family: var(--font-body);
+    font-weight: var(--weight-semibold);
+    font-size: var(--fs-small);
+    padding: 0 var(--space-5);
+    min-height: 44px;
+    cursor: pointer;
+  }
+  .sp-submit:hover { background: var(--cta-bg-hover); }
+
+  .sp-results {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+  }
+  /* A `display` declaration beats the UA's `[hidden] { display: none }`, so
+     every pane that sets display needs this guard. See the website AGENTS.md. */
+  .sp-results[hidden],
+  .sp-empty[hidden],
+  .sp-browse[hidden],
+  .sp-unavailable[hidden] {
+    display: none;
+  }
+  .sp-results :global(.search__group-title) {
+    font-size: var(--fs-caption);
+    font-weight: var(--weight-semibold);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: var(--space-2);
+  }
+  .sp-results :global(.search__group-list) {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+  .sp-results :global(.search__hit) {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    padding: var(--space-3);
+    min-height: 44px;
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    color: inherit;
+    background: var(--bg-content);
+    border: 1px solid var(--color-border);
+  }
+  .sp-results :global(.search__hit:hover),
+  .sp-results :global(.search__hit:focus-visible) {
+    border-color: var(--color-primary);
+  }
+  .sp-results :global(.search__hit-title) {
+    font-family: var(--font-display);
+    font-weight: var(--weight-semibold);
+    color: var(--text-default);
+  }
+  .sp-results :global(.search__hit-excerpt) {
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+    line-height: var(--lh-snug);
+  }
+  .sp-results :global(mark) {
+    background: color-mix(in srgb, var(--color-primary) 14%, transparent);
+    color: var(--text-default);
+    border-radius: 3px;
+    padding: 0 0.15em;
+  }
+
+  .sp-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    gap: var(--space-3);
+    padding-block: var(--space-4);
+  }
+  .sp-empty p { color: var(--text-muted); max-width: 44ch; }
+
+  .sp-browse {
+    margin-top: var(--space-6);
+    color: var(--text-muted);
+    font-size: var(--fs-small);
+  }
+  .sp-browse ul {
+    margin-top: var(--space-2);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-5);
+    list-style: none;
+    padding: 0;
+  }
+
+  .sp-unavailable { font-size: var(--fs-small); color: var(--text-muted); }
+  .sp-unavailable code {
+    background: var(--color-linen-deep);
+    border-radius: 3px;
+    padding: 0.1em 0.35em;
+  }
+</style>
+
+<script>
+  import { runSearch, renderResults } from "../lib/search.ts";
+
+  const input = document.getElementById("sp-input") as HTMLInputElement | null;
+  const results = document.querySelector<HTMLElement>("[data-search-results]");
+  const empty = document.querySelector<HTMLElement>("[data-search-empty]");
+  const browse = document.querySelector<HTMLElement>("[data-search-browse]");
+  const missing = document.querySelector<HTMLElement>("[data-search-unavailable]");
+  const status = document.querySelector<HTMLElement>("[data-search-status]");
+
+  if (input && results && empty && browse && missing && status) {
+    const show = (el: HTMLElement, on: boolean) => {
+      if (on) el.removeAttribute("hidden");
+      else el.setAttribute("hidden", "");
+    };
+
+    let generation = 0;
+
+    const update = async (query: string, pushUrl: boolean) => {
+      const mine = ++generation;
+      const trimmed = query.trim();
+
+      if (pushUrl) {
+        const url = new URL(location.href);
+        if (trimmed) url.searchParams.set("q", trimmed);
+        else url.searchParams.delete("q");
+        history.replaceState(null, "", url);
+      }
+
+      if (!trimmed) {
+        results.innerHTML = "";
+        show(results, false);
+        show(empty, false);
+        show(missing, false);
+        show(browse, true);
+        status.textContent = "";
+        return;
+      }
+
+      const hits = await runSearch(trimmed, 30);
+      if (mine !== generation) return;
+
+      show(missing, hits === null);
+      show(results, hits !== null && hits.length > 0);
+      show(empty, hits !== null && hits.length === 0);
+      // Keep the browse links up whenever there is nothing better to show.
+      show(browse, hits === null || hits.length === 0);
+
+      if (hits === null) {
+        results.innerHTML = "";
+        status.textContent = "Search is not available in this build.";
+      } else if (!hits.length) {
+        results.innerHTML = "";
+        status.textContent = `No results for ${trimmed}.`;
+      } else {
+        renderResults(results, hits);
+        status.textContent = `${hits.length} result${hits.length === 1 ? "" : "s"} for ${trimmed}.`;
+      }
+    };
+
+    // Run whatever came in on ?q= (shared or bookmarked link).
+    const initial = new URLSearchParams(location.search).get("q") || "";
+    if (initial) {
+      input.value = initial;
+      update(initial, false);
+    }
+
+    let timer: number | undefined;
+    input.addEventListener("input", () => {
+      window.clearTimeout(timer);
+      const value = input.value;
+      timer = window.setTimeout(() => update(value, true), 150);
+    });
+
+    // With JS available we search in place rather than reloading the page.
+    input.form?.addEventListener("submit", (e) => {
+      e.preventDefault();
+      update(input.value, true);
+    });
+  }
+</script>

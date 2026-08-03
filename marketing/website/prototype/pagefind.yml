@@ -1,0 +1,24 @@
+# Pagefind config for the site search index.
+#
+# Runs after `astro build` (see the `build` script in package.json) over the
+# generated `dist/`, writing `dist/pagefind/`. Cloudflare Pages needs no config
+# change - the build command is still `npm run build`.
+#
+# What gets indexed is decided in the markup, not here:
+#   - BaseLayout tags <main> with `data-pagefind-body`, so the header, footer
+#     and floating WhatsApp button are never indexed.
+#   - Pages opting out (search, book, privacy, 404, styleguide) pass
+#     `searchable={false}`, which emits `data-pagefind-ignore` instead.
+#   - `data-pagefind-filter="type:…"` on <main> drives the result grouping.
+#
+# The selectors below strip the CTA blocks that repeat on almost every page.
+# Without them every query matches "Message us on WhatsApp" and the excerpts
+# are useless.
+site: dist
+
+exclude_selectors:
+  - ".contact-strip"
+  - ".cond-cta"
+  - ".svc-cta"
+  - ".site-footer"
+  - "[data-search-ignore]"

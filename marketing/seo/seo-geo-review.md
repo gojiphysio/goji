@@ -35,7 +35,8 @@ Rank Sweep `../strategy/05-30-day-campaigns.md` (Campaign 5).
 
 | Action | Owner |
 |---|---|
-| **Blog** (Astro content collection) — the single biggest GEO content lever we lack. Competitors winning AI answers (Embrace, PhysioMatters) all publish. Start with question-phrased posts from the Discovery Rank prompt set ("Is leaking after birth normal?"). | Repo + Cheryl |
+| ~~**Blog** (Astro content collection)~~ **SHIPPED (2026-08-03)** — `/blog` + `/press` + site search. Three seed posts live (see §3 blog rows), each BlogPosting + BreadcrumbList + FAQPage. **Cheryl's clinical review of all three is outstanding — do retroactively**, same as the MSK page. Ongoing: keep publishing against the §3 clusters. | Repo + Cheryl |
+| **Press/citation surface now exists** — `/press` carries the Lianhe Zaobao interview (21 Jul 2026) as our summary + attributed quote + link out, with `citation`/`subjectOf` NewsArticle schema. This is the first owned third-party corroboration signal (§4.5). Add each new piece of coverage here in the same PR as it lands. | Repo |
 | Pitch the three roundups that own our SERPs: Sassy Mama pelvic-floor experts, Homage women's physio, Little Steps Asia pregnancy physio (see §4 citations table) | Operator |
 | Bing Places + Apple Business Connect listings (free; Bing feeds ChatGPT answers) | Operator |
 | GSC ingestion job → `marts.gsc_search_performance` (see §6) | Repo |
@@ -148,6 +149,16 @@ physio child → /services/schroth-scoliosis-children|adults.
 
 **Quiet pillar (65+)** — menopause physio, osteoporosis exercise singapore
 → /conditions/menopause now; blog posts P1.
+
+**Blog (question-shaped long-tail — supports, never competes with, the
+condition/service page that owns the cluster)**
+
+| Keyword / prompt | Target page |
+|---|---|
+| is leaking after birth normal, leaking when I sneeze postpartum | /blog/is-leaking-after-birth-normal (supports /conditions/urinary-incontinence) |
+| what happens at a physio appointment, first physiotherapy visit singapore | /blog/what-happens-at-your-first-physiotherapy-visit |
+| when can I run after birth, returning to exercise postpartum | /blog/returning-to-exercise-after-birth (supports /services/postpartum-physiotherapy) |
+| goji physio zaobao, goji physio news | /press |
 
 **Branded** — both names + variants → homepage. Organic-owned; ads
 monitor-only.

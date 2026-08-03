@@ -7,6 +7,13 @@
       "runtimeArgs": ["run", "dev", "--", "--port", "4232"],
       "cwd": "marketing/website/prototype",
       "port": 4232
+    },
+    {
+      "name": "website-preview",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "preview", "--", "--port", "4233"],
+      "cwd": "marketing/website/prototype",
+      "port": 4233
     }
   ]
 }

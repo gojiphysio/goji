@@ -105,4 +105,85 @@ const team = defineCollection({
   }),
 });
 
-export const collections = { conditions, services, team };
+/**
+ * Blog — the educational surface. Posts follow the answer-block pattern
+ * (plain answer high on the page, question-phrased H2s, an FAQ section) that
+ * `marketing/seo/seo-geo-review.md` §4.4 asks for, and the body's
+ * `## Frequently asked questions` section is parsed into FAQPage JSON-LD by
+ * the shared `src/lib/faq.ts` parser — same contract as condition pages.
+ */
+const blog = defineCollection({
+  type: "content",
+  schema: z.object({
+    title: z.string(),
+    /** Meta description. Hard SEO rule: 160 chars max. */
+    description: z.string().max(160),
+    /** Short heading shown on the index card (defaults to title). */
+    cardTitle: z.string().optional(),
+    /** One-sentence summary for the index card. */
+    cardLead: z.string(),
+    pubDate: z.date(),
+    /** Set when a post is meaningfully revised, not for cosmetic edits. */
+    updatedDate: z.date().optional(),
+    /** Byline. `slug` links to the author's /team/<slug> bio. */
+    author: z.object({ name: z.string(), slug: z.string() }),
+    /** Clinician who clinically reviewed the post — same E-E-A-T byline
+     *  pattern as conditions. Omit while a post is awaiting review. */
+    reviewer: z.object({ name: z.string(), slug: z.string() }).optional(),
+    /** Content pillars, from marketing/content-engine/content-pillars-and-calendar.md */
+    category: z.enum([
+      "Pelvic & Perinatal Health",
+      "Musculoskeletal",
+      "Movement & Fitness",
+      "Active Ageing & Family",
+      "Clinic News",
+    ]),
+    tags: z.array(z.string()).default([]),
+    heroImage: z.string().optional(),
+    heroAlt: z.string().optional(),
+    /** Slugs of related content, rendered as an internal-links block. */
+    relatedConditions: z.array(z.string()).default([]),
+    relatedServices: z.array(z.string()).default([]),
+    ctaSlug: z.string().default("web-wa"),
+    draft: z.boolean().default(false),
+  }),
+});
+
+/**
+ * Press — third-party media coverage and events. We are NOT the publisher of
+ * the source article: entries carry our own summary plus a link out, never a
+ * copy of the outlet's text. `originalUrl` is the canonical source and is what
+ * the page's `citation` JSON-LD points at.
+ */
+const press = defineCollection({
+  type: "content",
+  schema: z.object({
+    /** Our headline for the entry (not the outlet's). */
+    title: z.string(),
+    description: z.string().max(160),
+    cardLead: z.string(),
+    /** Publication name, e.g. "Lianhe Zaobao". */
+    outlet: z.string(),
+    outletUrl: z.string().url(),
+    /** The headline as published, in the language it was published in. */
+    originalTitle: z.string(),
+    /** Canonical source URL — the "Read the full article" destination. */
+    originalUrl: z.string().url(),
+    language: z.enum(["en", "zh"]).default("en"),
+    pubDate: z.date(),
+    /** The journalist's byline, as credited by the outlet. */
+    author: z.string().optional(),
+    kind: z.enum(["press", "event"]).default("press"),
+    /** Team members featured, linking to their /team/<slug> bios. */
+    featuring: z
+      .array(z.object({ name: z.string(), slug: z.string() }))
+      .default([]),
+    /** One short attributed quote. Keep it short - this is someone else's
+     *  copyrighted text, quoted for attribution, not reproduced. */
+    pullQuote: z.string().optional(),
+    order: z.number().optional(),
+    draft: z.boolean().default(false),
+  }),
+});
+
+export const collections = { conditions, services, team, blog, press };
