@@ -92,6 +92,18 @@ so a token change reflows everything (styleguide is the QA surface).
   frontmatter; the template renders "Reviewed by <name>" linking to
   `/team/<slug>` and emits `reviewedBy` in the MedicalWebPage JSON-LD.
 - **Meta descriptions ≤160 chars.**
+- **`seoTitle` (services) overrides only the `<title>`.** Use it to target the
+  national query ("Pelvic Floor Physiotherapy Singapore") without "Singapore"
+  leaking into the H1, breadcrumbs or schema `name`, which read from
+  `title`/`cardTitle`. Don't stuff the geo into `title` itself.
+- **`/womens-health-physiotherapy-singapore` is the women's-health hub.** It
+  owns the broad national query; the four women's-health service pages own
+  their own keyword and each links back up to it. Adding a women's-health
+  service or condition page means adding it to the hub's `services` /
+  `conditionGroups` list in the same PR, or the hub goes stale. The hub is
+  deliberately **not** in the primary nav (kept short for phones) — it is
+  reachable from `/services` and from every child page, so don't let those
+  links rot or it becomes an orphan.
 - **Only claim a physical presence at Lentor.** Wider reach is "home visits
   across Singapore" — no neighbourhood pages implying a clinic elsewhere.
 - **Update `public/llms.txt` in the same PR** as any page/service/price/team

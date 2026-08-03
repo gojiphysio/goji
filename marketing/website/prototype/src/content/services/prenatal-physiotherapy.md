@@ -1,5 +1,6 @@
 ---
 title: "Prenatal Physiotherapy"
+seoTitle: "Prenatal Physiotherapy Singapore"
 description: "Prenatal physiotherapy in Singapore to move comfortably through pregnancy, manage pain and pelvic floor symptoms, and prepare your body for birth."
 cardTitle: "Prenatal Physiotherapy"
 cardLead: "Move with greater comfort through pregnancy with a personalised plan for your symptoms, activity goals and preparation for birth."
@@ -104,3 +105,9 @@ Depending on your assessment and goals, we may recommend:
 - Birth preparation sessions
 - Postpartum Physiotherapy
 - Referral to another healthcare professional, where appropriate
+
+## Part of our women's health service
+
+Prenatal physiotherapy is one of four appointment types in our
+[women's health physiotherapy in Singapore](/womens-health-physiotherapy-singapore)
+service, alongside pelvic floor, postpartum and Mummy and Baby care.

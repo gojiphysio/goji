@@ -1,5 +1,6 @@
 ---
 title: "Pelvic Floor Physiotherapy"
+seoTitle: "Pelvic Floor Physiotherapy Singapore"
 description: "Pelvic floor physiotherapy in Singapore for leakage, prolapse, pelvic pain and postnatal recovery. Private 55-minute sessions with AHPC-registered physios."
 cardTitle: "Pelvic Floor Physiotherapy"
 cardLead: "A private, unhurried assessment for bladder, bowel, pelvic floor or pelvic pain concerns - with a clear plan to help you move and live more comfortably."
@@ -99,3 +100,9 @@ Depending on your assessment and goals, we may recommend:
 - Strength and Conditioning
 - Return-to-running or return-to-sport rehabilitation
 - Referral to another healthcare professional, where appropriate
+
+## Part of our women's health service
+
+Pelvic floor physiotherapy is one of four appointment types in our
+[women's health physiotherapy in Singapore](/womens-health-physiotherapy-singapore)
+service, alongside prenatal, postpartum and Mummy and Baby care.

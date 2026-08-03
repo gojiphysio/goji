@@ -14,6 +14,7 @@ const { entry } = Astro.props;
 const { Content } = await entry.render();
 const {
   title,
+  seoTitle,
   description,
   cardTitle,
   cardLead,
@@ -104,7 +105,7 @@ if (faqs?.length) {
 }
 ---
 
-<BaseLayout title={`${title} | Goji Physiotherapy`} description={description} schema={schema} searchType="Service">
+<BaseLayout title={`${seoTitle ?? title} | Goji Physiotherapy`} description={description} schema={schema} searchType="Service">
   {/* Hero: text + image */}
   <section class="svc-hero">
     <div class="container svc-hero__grid">
