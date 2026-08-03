@@ -3,6 +3,7 @@ import { getCollection, getEntry } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Section from "../../components/Section.astro";
 import Button from "../../components/Button.astro";
+import { extractFaqs, faqSchema } from "../../lib/faq.ts";
 
 export async function getStaticPaths() {
   const conditions = await getCollection("conditions", ({ data }) => !data.draft);
@@ -21,33 +22,7 @@ const reviewerURL = reviewer
 
 // FAQPage JSON-LD is extracted from the body's "## Frequently asked questions"
 // section (### question + answer paragraphs) so the visible copy stays the
-// single source of truth. Defensive: any parse miss emits nothing.
-function extractFaqs(body: string): { q: string; a: string }[] {
-  try {
-    const heading = body.match(/^##\s+Frequently asked questions\s*$/im);
-    if (!heading || heading.index === undefined) return [];
-    const rest = body.slice(heading.index + heading[0].length);
-    const nextH2 = rest.search(/^##\s+/m);
-    const section = nextH2 === -1 ? rest : rest.slice(0, nextH2);
-    return section
-      .split(/^###\s+/m)
-      .slice(1)
-      .map((block) => {
-        const newline = block.indexOf("\n");
-        const q = (newline === -1 ? block : block.slice(0, newline)).trim();
-        const a = (newline === -1 ? "" : block.slice(newline + 1))
-          .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1") // links → plain text
-          .replace(/[*_`]/g, "")
-          .replace(/^\s*[-*]\s+/gm, "") // list markers (line starts only)
-          .replace(/\s*\n\s*/g, " ")
-          .trim();
-        return { q, a };
-      })
-      .filter((f) => f.q && f.a);
-  } catch {
-    return [];
-  }
-}
+// single source of truth. Shared with the blog template — see src/lib/faq.ts.
 const faqs = extractFaqs(entry.body);
 
 // MedicalWebPage marks this as clinical reference content (GEO: answer engines
@@ -82,20 +57,11 @@ const conditionSchema: Record<string, unknown>[] = [
     ],
   },
 ];
-if (faqs.length) {
-  conditionSchema.push({
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: faqs.map((f) => ({
-      "@type": "Question",
-      name: f.q,
-      acceptedAnswer: { "@type": "Answer", text: f.a },
-    })),
-  });
-}
+const conditionFaqSchema = faqSchema(faqs);
+if (conditionFaqSchema) conditionSchema.push(conditionFaqSchema);
 ---
 
-<BaseLayout title={`${title} | Goji Physiotherapy`} description={description} schema={conditionSchema}>
+<BaseLayout title={`${title} | Goji Physiotherapy`} description={description} schema={conditionSchema} searchType="Condition">
   {/* Page header */}
   <section class="cond-header">
     <div class="container cond-header__inner">

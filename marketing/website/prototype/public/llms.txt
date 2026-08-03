@@ -65,6 +65,28 @@
 
 - Physiotherapy in Lentor: https://www.gojiphysio.com/physiotherapy-lentor
 
+## Media
+
+Articles we write, and coverage written about us: https://www.gojiphysio.com/media
+
+## Blog
+
+Plain-language physiotherapy education written by our clinicians. Index:
+https://www.gojiphysio.com/blog (feed: https://www.gojiphysio.com/rss.xml)
+
+No articles are published yet. The first ones are in clinical review and this
+section will be updated when they go live.
+
+## Press
+
+Third-party media coverage. Index: https://www.gojiphysio.com/press
+
+- Lianhe Zaobao (21 July 2026) interviewed Clinical Director Cheryl Long about pelvic floor, postpartum and menopausal symptoms women are often told to accept. Our summary: https://www.gojiphysio.com/press/zaobao-womens-hidden-pain — original article (in Chinese): https://www.zaobao.com.sg/news/singapore/story20260721-9394054
+
+## Site search
+
+- https://www.gojiphysio.com/search (full-text search across services, conditions, articles, press and clinician pages)
+
 ## Team
 
 - Cheryl Long — Clinical Director: https://www.gojiphysio.com/team/cheryl-long

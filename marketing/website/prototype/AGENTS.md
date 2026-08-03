@@ -61,10 +61,20 @@ so a token change reflows everything (styleguide is the QA surface).
 - **Per-page schema is required**, by page type: conditions emit MedicalWebPage
   + reviewedBy (from `reviewer`) + BreadcrumbList + FAQPage; services emit
   Service + Offer + BreadcrumbList + FAQPage (frontmatter `faqs`); team pages
-  emit enriched Person. New page types define their schema before merging.
-- **Condition FAQPage is parsed from the body**: keep the exact format
+  emit enriched Person; blog posts emit BlogPosting (author + optional
+  reviewedBy Person, both linking to `/team/<slug>`) + BreadcrumbList +
+  FAQPage. New page types define their schema before merging.
+- **Press pages never claim authorship.** A `/press/<slug>` page is a `WebPage`
+  whose `citation` is the outlet's `NewsArticle` (their headline, their URL,
+  their publisher); the index adds `subjectOf` against the clinic
+  Organization. The visible page is **our** summary plus at most one short
+  attributed quote and a link out - never a copy of the outlet's article, in
+  any language. It is their copyright, and a duplicate would be ignored by
+  search engines anyway.
+- **Condition and blog FAQPage is parsed from the body**: keep the exact format
   `## Frequently asked questions` with `### <question>` blocks — other
   heading levels (e.g. `####`) or bullet questions silently emit no FAQPage.
+  The parser is shared (`src/lib/faq.ts`) — don't re-implement it per template.
 - **Every condition page carries a byline** via `reviewer: { name, slug }`
   frontmatter; the template renders "Reviewed by <name>" linking to
   `/team/<slug>` and emits `reviewedBy` in the MedicalWebPage JSON-LD.
@@ -88,14 +98,61 @@ Icons come from Tabler via `astro-icon` (`<Icon name="tabler:*" />`). When Table
 has no suitable glyph, drop a stroke-styled SVG into `src/icons/` and reference
 it by filename (`<Icon name="subway" />`) — don't pull in another icon set.
 
+## Media IA (/media, /blog, /press)
+One nav item, **Media**, fronts two children: `/blog` (what we write) and
+`/press` (what others write about us). They stay separate pages — different
+schema, different intent — but a single nav entry keeps the primary nav short
+on a phone. Breadcrumbs on all four pages read Home › Media › …
+
+**The blog is empty on purpose.** Drafts live in the shared Drive folder
+"Articles" (`1_7lYb2OiP3x3qORovG6Wg6TxLVClE7Nb`) until Cheryl has clinically
+reviewed them; see `src/content/blog/.gitkeep`. `src/pages/blog/index.astro`
+branches on `posts.length`: with none it renders a "Coming soon" placeholder
+that is `noindex` and excluded from search, and with one or more it becomes the
+real index and re-enables both. **Don't hardcode the placeholder away** — drop
+an approved `.md` into the collection and the page fixes itself.
+
+## Site search (Pagefind)
+Full-text search, built by the `pagefind` CLI over `dist/` as the second half
+of `npm run build`. Config in `pagefind.yml`; Cloudflare Pages needs no change.
+
+- **It only exists after a build.** `astro dev` has no `/pagefind/`, so
+  `src/lib/search.ts` returns `null` and the UI shows a "production build only"
+  note. To exercise search locally use the `website-preview` launch config, or
+  `npm run build && npm run preview`.
+- **What gets indexed is decided in markup.** `BaseLayout` puts
+  `data-pagefind-body` on `<main>` (so header/footer/floating CTA never match)
+  plus `data-pagefind-filter="type:<SearchType>"` for the result grouping.
+  Pages pass `searchType`; utility pages (search, book, privacy, 404,
+  styleguide) pass `searchable={false}`, which emits `data-pagefind-ignore`.
+  Repeated in-page CTA blocks are stripped by `exclude_selectors` in
+  `pagefind.yml` — add a selector there when you add a new repeating CTA, or
+  every query will match "Message us on WhatsApp".
+- A new page type needs a `SearchType` in `src/lib/search.ts` (add it to
+  `TYPE_ORDER` and `typeLabel` too) before it will group correctly.
+
+## Gotchas worth remembering
+- **`_redirects` beats static assets on Cloudflare Pages.** A wildcard rule
+  shadows real pages under that path. `/blog/*` and `/blog` used to 301 to
+  `/conditions` and had to be removed when the blog shipped; the legacy rule is
+  now scoped to `/blog/conditions/*`. Check `public/_redirects` before adding
+  any new top-level section.
+- **A `display` declaration beats `[hidden]`.** The UA rule is
+  `[hidden] { display: none }`, so any element you toggle with the `hidden`
+  attribute *and* style with `display: flex/grid` needs an explicit
+  `.thing[hidden] { display: none }`. Hit by the booking form and again by the
+  search panes.
+- **Astro frontmatter can't `export type`.** Shared types live in `src/lib/*`
+  and are imported with `import type` (esbuild fails on the union otherwise).
+
 ## Run it
 See `README.md`. `npm install` then `npm run dev` (hot reload). `npm run build`
-+ `npm run preview` is the Cloudflare-Pages-parity dry run (serves `dist/`).
++ `npm run preview` is the Cloudflare-Pages-parity dry run (serves `dist/`) and
+the only way to test search.
 
 ## Roadmap (remaining)
 Active focus (see `HANDOFF.md` for status): design polish (via `tokens.css`),
-a blog (Astro content collection at `src/content/blog/` with an index + post
-template) seeded with backdated posts — the biggest open GEO lever — and an
+more blog posts on the clusters in `../../seo/seo-geo-review.md` §3, and an
 enquiry-form handler (free/DIY, a Pages Function feeding the front-desk Leads
-pipeline). Deploy, content porting, SEO/schema and the Squarespace cutover are
-done. Capture new rules here as they surface.
+pipeline). Deploy, content porting, SEO/schema, the Squarespace cutover, and
+the blog/press/search surfaces are done. Capture new rules here as they surface.

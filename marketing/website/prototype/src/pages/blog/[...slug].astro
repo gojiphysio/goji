@@ -1,0 +1,314 @@
+---
+/**
+ * /blog/<slug> — the post template.
+ *
+ * Mirrors the condition-page archetype (back link, H1, byline, prose body,
+ * closing CTA) so the two read as one system, and emits the schema set the
+ * SEO/GEO conventions require for an article: BlogPosting with a named author
+ * and reviewer, BreadcrumbList, and FAQPage parsed from the body.
+ */
+import { getCollection, getEntry } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Section from "../../components/Section.astro";
+import Button from "../../components/Button.astro";
+import { extractFaqs, faqSchema } from "../../lib/faq.ts";
+import { formatDate, isoDate } from "../../lib/dates.ts";
+import { SITE } from "../../lib/site.ts";
+
+export async function getStaticPaths() {
+  const posts = await getCollection("blog", ({ data }) => !data.draft);
+  return posts.map((p) => ({ params: { slug: p.slug }, props: { entry: p } }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await entry.render();
+const {
+  title,
+  description,
+  cardTitle,
+  category,
+  pubDate,
+  updatedDate,
+  author,
+  reviewer,
+  heroImage,
+  heroAlt,
+  relatedConditions,
+  relatedServices,
+  ctaSlug,
+} = entry.data;
+
+const origin = Astro.site ?? new URL(Astro.url.origin);
+const pageURL = new URL(Astro.url.pathname, origin).href;
+
+// Resolve the related-content slugs to real entries so a typo in frontmatter
+// surfaces as a missing link rather than a 404 for the reader.
+const related = (
+  await Promise.all([
+    ...relatedConditions.map(async (slug) => {
+      const e = await getEntry("conditions", slug);
+      return e && !e.data.draft
+        ? { href: `/conditions/${e.slug}`, label: e.data.cardTitle ?? e.data.title }
+        : null;
+    }),
+    ...relatedServices.map(async (slug) => {
+      const e = await getEntry("services", slug);
+      return e && !e.data.draft
+        ? { href: `/services/${e.slug}`, label: e.data.cardTitle ?? e.data.title }
+        : null;
+    }),
+  ])
+).filter((x): x is { href: string; label: string } => x !== null);
+
+const faqs = extractFaqs(entry.body);
+
+const postSchema: Record<string, unknown>[] = [
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: title,
+    description,
+    url: pageURL,
+    mainEntityOfPage: { "@type": "WebPage", "@id": pageURL },
+    inLanguage: "en-SG",
+    datePublished: isoDate(pubDate),
+    dateModified: isoDate(updatedDate ?? pubDate),
+    articleSection: category,
+    author: {
+      "@type": "Person",
+      name: author.name,
+      url: new URL(`/team/${author.slug}`, origin).href,
+    },
+    ...(reviewer
+      ? {
+          reviewedBy: {
+            "@type": "Person",
+            name: reviewer.name,
+            url: new URL(`/team/${reviewer.slug}`, origin).href,
+          },
+        }
+      : {}),
+    publisher: {
+      "@type": "Organization",
+      name: SITE.fullName,
+      url: origin.href,
+    },
+    ...(heroImage ? { image: new URL(heroImage, origin).href } : {}),
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: origin.href },
+      { "@type": "ListItem", position: 2, name: "Media", item: new URL("/media", origin).href },
+      { "@type": "ListItem", position: 3, name: "Blog", item: new URL("/blog", origin).href },
+      { "@type": "ListItem", position: 4, name: cardTitle ?? title, item: pageURL },
+    ],
+  },
+];
+const postFaqSchema = faqSchema(faqs);
+if (postFaqSchema) postSchema.push(postFaqSchema);
+---
+
+<BaseLayout
+  title={`${title} | Goji Physiotherapy`}
+  description={description}
+  schema={postSchema}
+  searchType="Article"
+>
+  <section class="post-header">
+    <div class="container container--narrow post-header__inner">
+      <a href="/blog" class="post-header__back">
+        <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M10 3L5 8l5 5"></path>
+        </svg>
+        All articles
+      </a>
+      <p class="post-header__cat">{category}</p>
+      <h1>{title}</h1>
+      <p class="post-header__byline">
+        By <a href={`/team/${author.slug}`}>{author.name}</a>
+        <span aria-hidden="true"> &middot; </span>
+        <time datetime={isoDate(pubDate)}>{formatDate(pubDate)}</time>
+        {updatedDate && (
+          <span>
+            <span aria-hidden="true"> &middot; </span>
+            Updated <time datetime={isoDate(updatedDate)}>{formatDate(updatedDate)}</time>
+          </span>
+        )}
+      </p>
+      {reviewer && (
+        <p class="post-header__review">
+          Clinically reviewed by{" "}
+          <a href={`/team/${reviewer.slug}`}>{reviewer.name}</a>, AHPC-registered physiotherapist
+        </p>
+      )}
+    </div>
+  </section>
+
+  {
+    heroImage && (
+      <div class="container container--narrow post-hero">
+        <img src={heroImage} alt={heroAlt ?? ""} width="760" height="440" loading="eager" />
+      </div>
+    )
+  }
+
+  <Section tone="surface">
+    <div class="post-body container--narrow">
+      <Content />
+    </div>
+  </Section>
+
+  {
+    related.length > 0 && (
+      <Section tone="linen">
+        <div class="container--narrow post-related">
+          <h2>Related pages</h2>
+          <ul>
+            {related.map((r) => (
+              <li><a href={r.href}>{r.label}</a></li>
+            ))}
+          </ul>
+        </div>
+      </Section>
+    )
+  }
+
+  <Section tone="surface">
+    <div class="cond-cta">
+      <div>
+        <h2>Want this looked at properly?</h2>
+        <p>
+          An assessment is the only way to know what is going on in your case.
+          Message us to describe your symptoms and we will recommend the right
+          appointment type.
+        </p>
+      </div>
+      <div class="cond-cta__btns">
+        <Button slug={ctaSlug as "web-wa" | "web-book"} variant="whatsapp" size="lg">Ask us on WhatsApp</Button>
+        <Button href="/book" variant="secondary" size="lg">Book an appointment</Button>
+      </div>
+    </div>
+  </Section>
+</BaseLayout>
+
+<style>
+  .post-header {
+    background: var(--bg-page);
+    padding-block: clamp(2rem, 1.5rem + 3vw, 4rem);
+    border-bottom: 1px solid var(--color-border);
+  }
+  .post-header__inner {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+  .post-header__back {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--fs-small);
+    font-weight: var(--weight-medium);
+    color: var(--text-muted);
+    text-decoration: none;
+    align-self: start;
+  }
+  .post-header__back:hover { color: var(--color-primary); }
+  .post-header__cat {
+    font-size: var(--fs-caption);
+    font-weight: var(--weight-semibold);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--color-primary);
+  }
+  .post-header__byline,
+  .post-header__review {
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+  }
+  .post-header__byline a,
+  .post-header__review a {
+    color: var(--color-primary);
+    font-weight: var(--weight-medium);
+    text-decoration: none;
+  }
+  .post-header__byline a:hover,
+  .post-header__review a:hover { text-decoration: underline; }
+
+  .post-hero {
+    margin-top: var(--space-6);
+  }
+  .post-hero img {
+    width: 100%;
+    aspect-ratio: 8 / 5;
+    object-fit: cover;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* Prose — matches the condition-page reading surface. */
+  .post-body :global(h2) {
+    margin-top: var(--space-7);
+    margin-bottom: var(--space-3);
+  }
+  .post-body :global(h2:first-child) { margin-top: 0; }
+  .post-body :global(h3) {
+    margin-top: var(--space-5);
+    margin-bottom: var(--space-2);
+  }
+  .post-body :global(p) {
+    color: var(--text-muted);
+    margin-bottom: var(--space-4);
+    line-height: var(--lh-body);
+  }
+  .post-body :global(ul), .post-body :global(ol) {
+    color: var(--text-muted);
+    margin-bottom: var(--space-4);
+    padding-left: 1.4rem;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  .post-body :global(strong) {
+    font-weight: var(--weight-semibold);
+    color: var(--text-default);
+  }
+  .post-body :global(hr) {
+    border: none;
+    border-top: 1px solid var(--color-border);
+    margin-block: var(--space-7);
+  }
+  .post-body :global(blockquote) {
+    border-left: 3px solid var(--color-primary);
+    padding-left: var(--space-5);
+    color: var(--text-muted);
+  }
+
+  .post-related h2 { margin-bottom: var(--space-3); }
+  .post-related ul {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding-left: 1.25rem;
+  }
+
+  .cond-cta {
+    display: grid;
+    gap: var(--space-5);
+    align-items: start;
+  }
+  @media (min-width: 760px) {
+    .cond-cta {
+      grid-template-columns: 1fr auto;
+      align-items: center;
+    }
+  }
+  .cond-cta h2 { margin-bottom: var(--space-2); }
+  .cond-cta p { color: var(--text-muted); max-width: 44ch; }
+  .cond-cta__btns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+</style>

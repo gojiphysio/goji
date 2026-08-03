@@ -14,10 +14,12 @@
 /blog/conditions/blocked-ducts-mastitis            /conditions/blocked-ducts-mastitis   301
 /blog/conditions/menopause-physiotherapy           /conditions/menopause                301
 
-# Any other old condition/blog URLs fall back to the conditions index.
+# Any other old Squarespace condition URL falls back to the conditions index.
+# NOTE: scoped to /blog/conditions/* on purpose. `/blog/*` and `/blog` used to
+# be listed here too, but /blog is now a real section of this site and
+# Cloudflare Pages evaluates _redirects BEFORE serving static assets - those two
+# rules would 301 every blog post to /conditions. Never re-add them.
 /blog/conditions/*  /conditions  301
-/blog/*             /conditions  301
-/blog               /conditions  301
 
 # Old standalone Squarespace bio pages → team pages.
 /cheryl-long        /team/cheryl-long  301

@@ -12,7 +12,9 @@ import "../styles/base.css";
 
 import LogoLockup from "../components/LogoLockup.astro";
 import Button from "../components/Button.astro";
+import SearchDialog from "../components/SearchDialog.astro";
 import { SITE } from "../lib/site.ts";
+import type { SearchType } from "../lib/search.ts";
 
 interface Props {
   title?: string;
@@ -23,6 +25,12 @@ interface Props {
    *  rendered alongside the site-wide LocalBusiness schema. Helps AI answer
    *  engines and rich results parse each page's specific content. */
   schema?: Record<string, unknown> | Record<string, unknown>[];
+  /** Whether this page belongs in site search. Set false for utility pages
+   *  (search itself, the booking form, privacy, 404, styleguide) so results
+   *  stay content pages people actually want to land on. */
+  searchable?: boolean;
+  /** Which bucket this page shows under in search results. */
+  searchType?: SearchType;
 }
 const {
   title = SITE.seoTitle,
@@ -30,7 +38,17 @@ const {
   bare = false,
   noindex = false,
   schema,
+  searchable = true,
+  searchType = "Page",
 } = Astro.props;
+
+// Pagefind indexes only what is inside a `data-pagefind-body` element, so
+// tagging <main> keeps the header, footer and floating CTA out of every result.
+// Repeated in-page CTA blocks are stripped via `exclude_selectors` in
+// pagefind.yml. See the website AGENTS.md for the full contract.
+const searchAttrs = searchable
+  ? { "data-pagefind-body": true, "data-pagefind-filter": `type:${searchType}` }
+  : { "data-pagefind-ignore": true };
 const extraSchemas = schema ? (Array.isArray(schema) ? schema : [schema]) : [];
 
 const origin = Astro.site ?? new URL(Astro.url.origin);
@@ -96,6 +114,7 @@ const nav = [
   { href: isHome ? "#about" : "/#about", label: "About" },
   { href: "/services", label: "Services" },
   { href: "/conditions", label: "Conditions" },
+  { href: "/media", label: "Media" },
   { href: isHome ? "#team" : "/#team", label: "Team" },
   { href: "/getting-here", label: "Find us" },
 ];
@@ -305,6 +324,12 @@ const GADS_BOOKING_LABEL = import.meta.env.PUBLIC_GADS_BOOKING_LABEL;
               ))}
             </nav>
             <div class="site-header__cta">
+              <button type="button" class="nav-search" data-search-open aria-label="Search this site">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                  <circle cx="11" cy="11" r="7" />
+                  <path d="M20 20l-3.5-3.5" />
+                </svg>
+              </button>
               <a
                 href="https://go.gojiphysio.com/web-wa"
                 class="header-wa"
@@ -339,9 +364,11 @@ const GADS_BOOKING_LABEL = import.meta.env.PUBLIC_GADS_BOOKING_LABEL;
       )
     }
 
-    <main id="main">
+    <main id="main" {...searchAttrs}>
       <slot />
     </main>
+
+    {!bare && <SearchDialog />}
 
     {
       !bare && (
@@ -360,6 +387,7 @@ const GADS_BOOKING_LABEL = import.meta.env.PUBLIC_GADS_BOOKING_LABEL;
                 </a>
               </p>
               <p><a href="/physiotherapy-lentor">Physiotherapy in Lentor</a></p>
+              <p><a href="/media">Media</a> &middot; <a href="/press">Press</a></p>
             </div>
           </div>
           <div class="container site-footer__copyright">
@@ -494,6 +522,33 @@ const GADS_BOOKING_LABEL = import.meta.env.PUBLIC_GADS_BOOKING_LABEL;
         color: #ffffff;
         transform: translateY(-1px);
       }
+      /* Search trigger. Present at every width - on a phone it is the fastest
+         route to a condition or service, ahead of the hamburger. */
+      .nav-search {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        /* 44px: the comfortable-thumb minimum, and most of our traffic is
+           on a phone. Matches .nav-toggle beside it. */
+        width: 2.75rem;
+        height: 2.75rem;
+        padding: 0;
+        border: none;
+        border-radius: var(--radius-sm);
+        background: transparent;
+        color: var(--color-linen);
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+        transition: background var(--dur) var(--ease);
+      }
+      .nav-search:hover {
+        background: color-mix(in srgb, var(--color-linen) 12%, transparent);
+      }
+      .nav-search:focus-visible {
+        outline: 2px solid var(--color-linen);
+        outline-offset: 2px;
+      }
+
       .header-wa__icon { flex: none; display: block; }
       /* Icon-only on the smallest screens so it sits cleanly next to Book. */
       .header-wa__text { display: none; }
@@ -510,8 +565,9 @@ const GADS_BOOKING_LABEL = import.meta.env.PUBLIC_GADS_BOOKING_LABEL;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        width: 2.5rem;
-        height: 2.5rem;
+        /* 44px tap target, matching .nav-search. */
+        width: 2.75rem;
+        height: 2.75rem;
         border-radius: var(--radius-sm);
         color: var(--color-linen);
         cursor: pointer;

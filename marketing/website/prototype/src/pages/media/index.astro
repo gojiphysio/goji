@@ -1,0 +1,216 @@
+---
+/**
+ * /media — the hub for everything we publish or get published in.
+ *
+ * Two children: /blog (our own writing) and /press (third-party coverage).
+ * They stay separate pages because they are different things - one is
+ * education we author, the other is corroboration we do not - but a single
+ * nav item keeps the primary navigation short, which matters most on a phone.
+ */
+import { getCollection } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Section from "../../components/Section.astro";
+import Button from "../../components/Button.astro";
+import { formatDate } from "../../lib/dates.ts";
+
+const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+const press = (await getCollection("press", ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+
+const latestPress = press[0];
+
+const origin = Astro.site ?? new URL(Astro.url.origin);
+const pageURL = new URL("/media", origin).href;
+
+const schema = [
+  {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: "Media",
+    description:
+      "Articles from the Goji physiotherapy team, and media coverage of the clinic.",
+    url: pageURL,
+    hasPart: [
+      { "@type": "WebPage", name: "Blog", url: new URL("/blog", origin).href },
+      { "@type": "WebPage", name: "Press", url: new URL("/press", origin).href },
+    ],
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: origin.href },
+      { "@type": "ListItem", position: 2, name: "Media", item: pageURL },
+    ],
+  },
+];
+---
+
+<BaseLayout
+  title="Media | Goji Physiotherapy Singapore"
+  description="Articles from the physiotherapists at Goji, and media coverage of the clinic. Women's and family physiotherapy at Lentor MRT, Singapore."
+  schema={schema}
+>
+  <section class="media-hero">
+    <div class="container">
+      <p class="eyebrow">Media</p>
+      <h1>Reading and coverage</h1>
+      <p class="media-hero__lead">
+        Writing from our physiotherapists, and the places our work has been
+        covered.
+      </p>
+    </div>
+  </section>
+
+  <Section tone="surface">
+    <div class="media-choices">
+      <a href="/blog" class="media-choice">
+        <span class="media-choice__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H13l5 5v9.5A1.5 1.5 0 0 1 16.5 20h-11A1.5 1.5 0 0 1 4 18.5z"></path>
+            <path d="M13 4v5h5"></path>
+            <path d="M8 13h6M8 16.5h4"></path>
+          </svg>
+        </span>
+        <h2>Blog</h2>
+        <p>
+          Plain-language answers to the questions we get asked in the clinic
+          every week, written by the physiotherapists who answer them.
+        </p>
+        <span class="media-choice__cta">
+          {posts.length > 0
+            ? `Read the articles (${posts.length})`
+            : "Coming soon"}
+        </span>
+      </a>
+
+      <a href="/press" class="media-choice">
+        <span class="media-choice__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 6a1.5 1.5 0 0 1 1.5-1.5h10A1.5 1.5 0 0 1 17 6v12H6a2 2 0 0 1-2-2z"></path>
+            <path d="M17 9h1.5A1.5 1.5 0 0 1 20 10.5V16a2 2 0 0 1-2 2h-1"></path>
+            <path d="M7.5 8h6M7.5 11.5h6M7.5 15h3"></path>
+          </svg>
+        </span>
+        <h2>Press</h2>
+        <p>
+          Interviews and features about the clinic and the people in it, each
+          linking to the original article on the publisher's own site.
+        </p>
+        <span class="media-choice__cta">
+          {latestPress
+            ? `See the coverage (${press.length})`
+            : "Coming soon"}
+        </span>
+      </a>
+    </div>
+
+    {
+      latestPress && (
+        <p class="media-latest">
+          Most recent: <a href={`/press/${latestPress.slug}`}>{latestPress.data.title}</a>,
+          {" "}{latestPress.data.outlet}, {formatDate(latestPress.data.pubDate)}.
+        </p>
+      )
+    }
+  </Section>
+
+  <Section tone="linen">
+    <div class="contact-strip">
+      <h2>Looking for something specific?</h2>
+      <p>
+        Our condition and service pages cover what we treat and what each
+        appointment involves. If you cannot find it, just ask.
+      </p>
+      <Button slug="web-wa" variant="whatsapp" size="lg">Ask us on WhatsApp</Button>
+    </div>
+  </Section>
+</BaseLayout>
+
+<style>
+  .media-hero {
+    background: var(--bg-page);
+    padding-block: clamp(2.5rem, 1.5rem + 4vw, 5rem);
+    border-bottom: 1px solid var(--color-border);
+  }
+  .media-hero h1 { margin-top: var(--space-3); }
+  .media-hero__lead {
+    max-width: 48ch;
+    color: var(--text-muted);
+    margin-top: var(--space-4);
+  }
+
+  /* The two doors. Stacked on a phone, side by side from 640px. */
+  .media-choices {
+    display: grid;
+    gap: var(--space-4);
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 640px) {
+    .media-choices { grid-template-columns: 1fr 1fr; }
+  }
+
+  .media-choice {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding: var(--space-6) var(--space-5);
+    background: var(--bg-content);
+    border: 1px solid var(--color-border);
+    border-top: 3px solid var(--color-primary);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    text-decoration: none;
+    color: inherit;
+    transition: box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease);
+  }
+  .media-choice:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+  .media-choice__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: var(--radius-md);
+    background: var(--color-linen);
+    color: var(--color-primary);
+  }
+  .media-choice h2 { font-size: var(--fs-h2); }
+  .media-choice p {
+    color: var(--text-muted);
+    flex: 1;
+    line-height: var(--lh-snug);
+  }
+  .media-choice__cta {
+    font-size: var(--fs-caption);
+    font-weight: var(--weight-semibold);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--color-primary);
+  }
+
+  .media-latest {
+    margin-top: var(--space-5);
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+  }
+  .media-latest a {
+    color: var(--color-primary);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+
+  .contact-strip {
+    max-width: 46ch;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+  .contact-strip p { color: var(--text-muted); }
+</style>

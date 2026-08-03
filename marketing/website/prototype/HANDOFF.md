@@ -10,8 +10,13 @@ Pick-up notes for continuing this work in a local session.
   6 service pages, 3 team bios, `/physiotherapy-lentor`, privacy, sitemap,
   robots, llms.txt, per-page JSON-LD (MedicalWebPage + bylines + FAQPage on
   conditions; Service + Offer + FAQPage on services; enriched Person on
-  team). Remaining: blog (biggest open item), design polish, per-page OG
-  images.
+  team). **Added 2026-08-03:** a `/media` hub with two children — `/blog`
+  (template + schema ready, **no posts published yet**) and `/press` (the
+  Lianhe Zaobao interview, citation schema) — plus `/rss.xml` and Pagefind
+  full-text site search with a mobile-first search sheet.
+  Remaining: design polish, per-page OG images, and **publishing the blog** —
+  the first three drafts are awaiting Cheryl's clinical review in the Drive
+  folder "Articles" (`1_7lYb2OiP3x3qORovG6Wg6TxLVClE7Nb`).
 - **Live ops notes:** the apex→www 301 is a Cloudflare zone rule (not in
   `public/_redirects`) — verify it exists when touching DNS. Google Search
   Console ownership + sitemap submission is an operator task tracked in
@@ -109,11 +114,13 @@ on push — needs a `CLOUDFLARE_API_TOKEN` + `CLOUDFLARE_ACCOUNT_ID` as repo sec
 
 ## Next phases
 
-Status re-marked 2026-07-13 now the site is live: phases 4 (deploy), 5
-(content porting) and 6 (SEO/schema — delivered via the SEO/GEO PR: per-page
-JSON-LD, bylines, FAQPage, per-page meta, sitemap) are **done**; the enquiry
-form piece of 7 remains. The active items are 1 (design polish), 2-3 (blog +
-backdated seed content), and per-page OG images.
+Status re-marked 2026-08-03: phase 2 (blog scaffolding) is **done** alongside 4
+(deploy), 5 (content porting) and 6 (SEO/schema). Phase 3 (seed content) is
+**drafted but not published** — the three posts are in clinical review in Drive,
+and `/blog` shows a "Coming soon" placeholder until one is approved. The enquiry
+form piece of 7 remains. Active items: 1 (design polish), per-page OG images,
+and getting the drafts reviewed and published against the clusters in
+`../../seo/seo-geo-review.md` §3.
 
 1. **Design polish** — raise the look + feel. Work in `src/styles/tokens.css`
    (the single knob) and the component CSS; `/styleguide` is the QA surface so a

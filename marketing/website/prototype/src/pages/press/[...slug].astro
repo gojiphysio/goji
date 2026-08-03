@@ -1,0 +1,307 @@
+---
+/**
+ * /press/<slug> — a single piece of coverage.
+ *
+ * Copyright discipline: the body of this page is OUR summary and commentary.
+ * The outlet's article is quoted at most once (frontmatter `pullQuote`), with
+ * attribution, and linked. Never paste the article text here, in either
+ * language - it is the publisher's copyright, and a duplicate of their page
+ * would be ignored by search engines anyway.
+ *
+ * Schema follows the same honesty rule: the page is a WebPage whose `citation`
+ * is the outlet's NewsArticle. We do not claim to be the article's publisher.
+ */
+import { getCollection } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Section from "../../components/Section.astro";
+import Button from "../../components/Button.astro";
+import { formatDate, isoDate } from "../../lib/dates.ts";
+import { SITE } from "../../lib/site.ts";
+
+export async function getStaticPaths() {
+  const entries = await getCollection("press", ({ data }) => !data.draft);
+  return entries.map((e) => ({ params: { slug: e.slug }, props: { entry: e } }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await entry.render();
+const {
+  title,
+  description,
+  outlet,
+  outletUrl,
+  originalTitle,
+  originalUrl,
+  language,
+  pubDate,
+  author,
+  featuring,
+  pullQuote,
+} = entry.data;
+
+const origin = Astro.site ?? new URL(Astro.url.origin);
+const pageURL = new URL(Astro.url.pathname, origin).href;
+
+const newsArticle = {
+  "@type": "NewsArticle",
+  headline: originalTitle,
+  url: originalUrl,
+  datePublished: isoDate(pubDate),
+  inLanguage: language === "zh" ? "zh-SG" : "en-SG",
+  ...(author ? { author: { "@type": "Person", name: author } } : {}),
+  publisher: { "@type": "Organization", name: outlet, url: outletUrl },
+  about: { "@type": "Organization", name: SITE.fullName, url: origin.href },
+};
+
+const pressSchema = [
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name: title,
+    description,
+    url: pageURL,
+    inLanguage: "en-SG",
+    citation: newsArticle,
+    about: {
+      "@type": "Organization",
+      name: SITE.fullName,
+      url: origin.href,
+      subjectOf: newsArticle,
+    },
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: origin.href },
+      { "@type": "ListItem", position: 2, name: "Media", item: new URL("/media", origin).href },
+      { "@type": "ListItem", position: 3, name: "Press", item: new URL("/press", origin).href },
+      { "@type": "ListItem", position: 4, name: title, item: pageURL },
+    ],
+  },
+];
+---
+
+<BaseLayout
+  title={`${title} | Goji Physiotherapy`}
+  description={description}
+  schema={pressSchema}
+  searchType="Press"
+>
+  <section class="pr-header">
+    <div class="container container--narrow pr-header__inner">
+      <a href="/press" class="pr-header__back">
+        <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M10 3L5 8l5 5"></path>
+        </svg>
+        All press
+      </a>
+      <p class="pr-header__outlet">{outlet}</p>
+      <h1>{title}</h1>
+      <p class="pr-header__meta">
+        Published <time datetime={isoDate(pubDate)}>{formatDate(pubDate)}</time>
+        {author && <span> &middot; by {author}</span>}
+        {language === "zh" && <span> &middot; originally published in Chinese</span>}
+      </p>
+      {
+        featuring.length > 0 && (
+          <p class="pr-header__featuring">
+            Featuring{" "}
+            {featuring.map((person, i) => (
+              <>
+                {i > 0 && ", "}
+                <a href={`/team/${person.slug}`}>{person.name}</a>
+              </>
+            ))}
+          </p>
+        )
+      }
+    </div>
+  </section>
+
+  <Section tone="surface">
+    <div class="pr-body container--narrow">
+      <Content />
+
+      {
+        pullQuote && (
+          <figure class="pr-quote">
+            <blockquote>{pullQuote}</blockquote>
+            <figcaption>
+              Quoted in {originalTitle}, {outlet}, {formatDate(pubDate)}
+            </figcaption>
+          </figure>
+        )
+      }
+
+      <div class="pr-source">
+        <p class="pr-source__label">The original article</p>
+        <p class="pr-source__title">{originalTitle}</p>
+        <a
+          class="pr-source__link"
+          href={originalUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Read the full article on {outlet}
+          <span aria-hidden="true"> &#8599;</span>
+        </a>
+        <p class="pr-source__note">
+          The full article is the publisher's and stays on their site.
+        </p>
+      </div>
+    </div>
+  </Section>
+
+  <Section tone="linen">
+    <div class="pr-cta">
+      <div>
+        <h2>Thinking about getting something looked at?</h2>
+        <p>
+          Message us to describe what you are experiencing and we will recommend
+          the right appointment type.
+        </p>
+      </div>
+      <div class="pr-cta__btns">
+        <Button slug="web-wa" variant="whatsapp" size="lg">Ask us on WhatsApp</Button>
+        <Button href="/book" variant="secondary" size="lg">Book an appointment</Button>
+      </div>
+    </div>
+  </Section>
+</BaseLayout>
+
+<style>
+  .pr-header {
+    background: var(--bg-page);
+    padding-block: clamp(2rem, 1.5rem + 3vw, 4rem);
+    border-bottom: 1px solid var(--color-border);
+  }
+  .pr-header__inner {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+  .pr-header__back {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--fs-small);
+    font-weight: var(--weight-medium);
+    color: var(--text-muted);
+    text-decoration: none;
+    align-self: start;
+  }
+  .pr-header__back:hover { color: var(--color-primary); }
+  .pr-header__outlet {
+    font-size: var(--fs-caption);
+    font-weight: var(--weight-semibold);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--color-accent);
+  }
+  .pr-header__meta,
+  .pr-header__featuring {
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+  }
+  .pr-header__featuring a {
+    color: var(--color-primary);
+    font-weight: var(--weight-medium);
+    text-decoration: none;
+  }
+  .pr-header__featuring a:hover { text-decoration: underline; }
+
+  .pr-body :global(h2) {
+    margin-top: var(--space-7);
+    margin-bottom: var(--space-3);
+  }
+  .pr-body :global(h2:first-child) { margin-top: 0; }
+  .pr-body :global(p) {
+    color: var(--text-muted);
+    margin-bottom: var(--space-4);
+    line-height: var(--lh-body);
+  }
+  .pr-body :global(ul) {
+    color: var(--text-muted);
+    margin-bottom: var(--space-4);
+    padding-left: 1.4rem;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  .pr-body :global(strong) {
+    font-weight: var(--weight-semibold);
+    color: var(--text-default);
+  }
+
+  /* The single attributed quote from the outlet's piece. */
+  .pr-quote {
+    margin-block: var(--space-6);
+    padding-left: var(--space-5);
+    border-left: 3px solid var(--color-primary);
+  }
+  .pr-quote blockquote {
+    font-family: var(--font-display);
+    font-size: var(--fs-h3);
+    line-height: var(--lh-snug);
+    color: var(--text-default);
+  }
+  .pr-quote figcaption {
+    margin-top: var(--space-3);
+    font-size: var(--fs-caption);
+    color: var(--text-muted);
+  }
+
+  .pr-source {
+    margin-top: var(--space-7);
+    padding: var(--space-5);
+    background: var(--bg-page);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+  }
+  .pr-source__label {
+    font-size: var(--fs-caption);
+    font-weight: var(--weight-semibold);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .pr-source__title {
+    margin-top: var(--space-2);
+    font-family: var(--font-display);
+    font-weight: var(--weight-semibold);
+    color: var(--text-default);
+  }
+  .pr-source__link {
+    display: inline-block;
+    margin-top: var(--space-3);
+    font-weight: var(--weight-semibold);
+    color: var(--color-primary);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+  .pr-source__note {
+    margin-top: var(--space-3);
+    font-size: var(--fs-caption);
+    color: var(--text-muted);
+  }
+
+  .pr-cta {
+    display: grid;
+    gap: var(--space-5);
+    align-items: start;
+  }
+  @media (min-width: 760px) {
+    .pr-cta {
+      grid-template-columns: 1fr auto;
+      align-items: center;
+    }
+  }
+  .pr-cta h2 { margin-bottom: var(--space-2); }
+  .pr-cta p { color: var(--text-muted); max-width: 44ch; }
+  .pr-cta__btns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+</style>
