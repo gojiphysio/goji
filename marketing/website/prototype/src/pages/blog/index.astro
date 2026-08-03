@@ -5,59 +5,82 @@
  * Deliberately a single flat index: at this size, per-category index pages
  * would be thin and would compete with the posts themselves. Categories are
  * shown as badges so the shape of the archive is still readable.
+ *
+ * The collection is currently EMPTY - the first drafts are with Cheryl for
+ * clinical review (see src/content/blog/.gitkeep). Rather than hardcode a
+ * placeholder page, this template branches on `posts.length`: with no posts it
+ * renders "Coming soon", noindexed and kept out of site search; drop an
+ * approved .md into the collection and it becomes a real index on the next
+ * build, with no code change needed.
  */
 import { getCollection } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Section from "../../components/Section.astro";
 import Button from "../../components/Button.astro";
+import BerrySprig from "../../components/BerrySprig.astro";
 import { formatDate, isoDate } from "../../lib/dates.ts";
 
 const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
   (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
 );
+const hasPosts = posts.length > 0;
 
 const [featured, ...rest] = posts;
 
 const origin = Astro.site ?? new URL(Astro.url.origin);
 const pageURL = new URL("/blog", origin).href;
 
-const schema = [
-  {
-    "@context": "https://schema.org",
-    "@type": "Blog",
-    name: "Goji Physiotherapy Blog",
-    description:
-      "Plain-language physiotherapy education for women and families from the team at Goji, Lentor MRT Singapore.",
-    url: pageURL,
-    inLanguage: "en-SG",
-    blogPost: posts.map((post) => ({
-      "@type": "BlogPosting",
-      headline: post.data.title,
-      description: post.data.description,
-      url: new URL(`/blog/${post.slug}`, origin).href,
-      datePublished: isoDate(post.data.pubDate),
-      author: { "@type": "Person", name: post.data.author.name },
-    })),
-  },
-  {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: origin.href },
-      { "@type": "ListItem", position: 2, name: "Blog", item: pageURL },
-    ],
-  },
-];
+const breadcrumb = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Home", item: origin.href },
+    { "@type": "ListItem", position: 2, name: "Media", item: new URL("/media", origin).href },
+    { "@type": "ListItem", position: 3, name: "Blog", item: pageURL },
+  ],
+};
+
+// An empty blog gets no Blog schema - there is nothing to describe yet.
+const schema = hasPosts
+  ? [
+      {
+        "@context": "https://schema.org",
+        "@type": "Blog",
+        name: "Goji Physiotherapy Blog",
+        description:
+          "Plain-language physiotherapy education for women and families from the team at Goji, Lentor MRT Singapore.",
+        url: pageURL,
+        inLanguage: "en-SG",
+        blogPost: posts.map((post) => ({
+          "@type": "BlogPosting",
+          headline: post.data.title,
+          description: post.data.description,
+          url: new URL(`/blog/${post.slug}`, origin).href,
+          datePublished: isoDate(post.data.pubDate),
+          author: { "@type": "Person", name: post.data.author.name },
+        })),
+      },
+      breadcrumb,
+    ]
+  : [breadcrumb];
 ---
 
 <BaseLayout
   title="Blog | Physiotherapy Education | Goji Physiotherapy Singapore"
   description="Plain-language physiotherapy articles on pelvic health, pregnancy and postnatal recovery, and getting back to movement, from the team at Goji, Lentor MRT."
   schema={schema}
+  noindex={!hasPosts}
+  searchable={hasPosts}
+  searchType="Article"
 >
   <section class="blog-hero">
     <div class="container">
-      <p class="eyebrow">Blog</p>
+      <a href="/media" class="blog-hero__back">
+        <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M10 3L5 8l5 5"></path>
+        </svg>
+        Media
+      </a>
       <h1>Answers, in plain language</h1>
       <p class="blog-hero__lead">
         Questions we get asked in the clinic every week, written out properly by
@@ -70,9 +93,31 @@ const schema = [
   </section>
 
   {
-    posts.length === 0 && (
+    !hasPosts && (
       <Section tone="surface">
-        <p>The first articles are being written. Check back shortly.</p>
+        <div class="blog-soon">
+          <div class="blog-soon__text">
+            <p class="eyebrow">Coming soon</p>
+            <h2>The first articles are being written</h2>
+            <p class="blog-soon__lead">
+              Our physiotherapists are drafting them now, and every one gets a
+              clinical review before it goes up. In the meantime, the condition
+              and service pages cover what we treat and what each appointment
+              involves.
+            </p>
+            <div class="blog-soon__links">
+              <Button href="/conditions" variant="primary">Conditions we treat</Button>
+              <Button href="/services" variant="secondary">Our services</Button>
+            </div>
+            <p class="blog-soon__note">
+              Have a question you would like us to write about? Tell us and we
+              will put it on the list.
+            </p>
+          </div>
+          <div class="blog-soon__sprig" aria-hidden="true">
+            <BerrySprig />
+          </div>
+        </div>
       </Section>
     )
   }
@@ -150,6 +195,16 @@ const schema = [
     border-bottom: 1px solid var(--color-border);
   }
   .blog-hero h1 { margin-top: var(--space-3); }
+  .blog-hero__back {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--fs-small);
+    font-weight: var(--weight-medium);
+    color: var(--text-muted);
+    text-decoration: none;
+  }
+  .blog-hero__back:hover { color: var(--color-primary); }
   .blog-hero__lead {
     max-width: 56ch;
     color: var(--text-muted);
@@ -159,6 +214,46 @@ const schema = [
     color: var(--color-primary);
     text-decoration: underline;
     text-underline-offset: 0.2em;
+  }
+
+  /* Coming-soon placeholder. Removed automatically once a post exists. */
+  .blog-soon {
+    display: grid;
+    gap: var(--space-5);
+    align-items: center;
+  }
+  .blog-soon__text {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    gap: var(--space-3);
+    max-width: 52ch;
+  }
+  /* The sprig is decoration only: it gets its own column when there is room,
+     and is dropped entirely on a phone rather than sitting behind the copy. */
+  .blog-soon__sprig { display: none; }
+  @media (min-width: 900px) {
+    .blog-soon {
+      grid-template-columns: minmax(0, 1fr) 200px;
+      gap: var(--space-7);
+    }
+    .blog-soon__sprig {
+      display: block;
+      opacity: 0.5;
+      pointer-events: none;
+    }
+  }
+  .blog-soon__lead { color: var(--text-muted); }
+  .blog-soon__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-top: var(--space-2);
+  }
+  .blog-soon__note {
+    margin-top: var(--space-3);
+    font-size: var(--fs-small);
+    color: var(--text-muted);
   }
 
   .blog-meta {

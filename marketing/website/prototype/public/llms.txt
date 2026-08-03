@@ -65,14 +65,17 @@
 
 - Physiotherapy in Lentor: https://www.gojiphysio.com/physiotherapy-lentor
 
+## Media
+
+Articles we write, and coverage written about us: https://www.gojiphysio.com/media
+
 ## Blog
 
 Plain-language physiotherapy education written by our clinicians. Index:
 https://www.gojiphysio.com/blog (feed: https://www.gojiphysio.com/rss.xml)
 
-- Is it normal to leak when you sneeze after having a baby? https://www.gojiphysio.com/blog/is-leaking-after-birth-normal
-- What actually happens at your first physiotherapy visit: https://www.gojiphysio.com/blog/what-happens-at-your-first-physiotherapy-visit
-- Returning to exercise after birth: what the first twelve weeks can look like: https://www.gojiphysio.com/blog/returning-to-exercise-after-birth
+No articles are published yet. The first ones are in clinical review and this
+section will be updated when they go live.
 
 ## Press
 

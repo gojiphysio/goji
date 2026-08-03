@@ -74,8 +74,9 @@ const pressSchema = [
     "@type": "BreadcrumbList",
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "Home", item: origin.href },
-      { "@type": "ListItem", position: 2, name: "Press", item: new URL("/press", origin).href },
-      { "@type": "ListItem", position: 3, name: title, item: pageURL },
+      { "@type": "ListItem", position: 2, name: "Media", item: new URL("/media", origin).href },
+      { "@type": "ListItem", position: 3, name: "Press", item: new URL("/press", origin).href },
+      { "@type": "ListItem", position: 4, name: title, item: pageURL },
     ],
   },
 ];

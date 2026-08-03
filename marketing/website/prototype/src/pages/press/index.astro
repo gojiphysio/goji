@@ -61,7 +61,8 @@ const schema = [
     "@type": "BreadcrumbList",
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "Home", item: origin.href },
-      { "@type": "ListItem", position: 2, name: "Press", item: pageURL },
+      { "@type": "ListItem", position: 2, name: "Media", item: new URL("/media", origin).href },
+      { "@type": "ListItem", position: 3, name: "Press", item: pageURL },
     ],
   },
 ];
@@ -75,7 +76,12 @@ const schema = [
 >
   <section class="press-hero">
     <div class="container">
-      <p class="eyebrow">Press</p>
+      <a href="/media" class="press-hero__back">
+        <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M10 3L5 8l5 5"></path>
+        </svg>
+        Media
+      </a>
       <h1>Where our work has been covered</h1>
       <p class="press-hero__lead">
         Interviews and features about the clinic and the people in it. Each
@@ -142,6 +148,16 @@ const schema = [
     border-bottom: 1px solid var(--color-border);
   }
   .press-hero h1 { margin-top: var(--space-3); }
+  .press-hero__back {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--fs-small);
+    font-weight: var(--weight-medium);
+    color: var(--text-muted);
+    text-decoration: none;
+  }
+  .press-hero__back:hover { color: var(--color-primary); }
   .press-hero__lead {
     max-width: 54ch;
     color: var(--text-muted);

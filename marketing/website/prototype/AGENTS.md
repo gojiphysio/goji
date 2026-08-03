@@ -98,6 +98,20 @@ Icons come from Tabler via `astro-icon` (`<Icon name="tabler:*" />`). When Table
 has no suitable glyph, drop a stroke-styled SVG into `src/icons/` and reference
 it by filename (`<Icon name="subway" />`) — don't pull in another icon set.
 
+## Media IA (/media, /blog, /press)
+One nav item, **Media**, fronts two children: `/blog` (what we write) and
+`/press` (what others write about us). They stay separate pages — different
+schema, different intent — but a single nav entry keeps the primary nav short
+on a phone. Breadcrumbs on all four pages read Home › Media › …
+
+**The blog is empty on purpose.** Drafts live in the shared Drive folder
+"Articles" (`1_7lYb2OiP3x3qORovG6Wg6TxLVClE7Nb`) until Cheryl has clinically
+reviewed them; see `src/content/blog/.gitkeep`. `src/pages/blog/index.astro`
+branches on `posts.length`: with none it renders a "Coming soon" placeholder
+that is `noindex` and excluded from search, and with one or more it becomes the
+real index and re-enables both. **Don't hardcode the placeholder away** — drop
+an approved `.md` into the collection and the page fixes itself.
+
 ## Site search (Pagefind)
 Full-text search, built by the `pagefind` CLI over `dist/` as the second half
 of `npm run build`. Config in `pagefind.yml`; Cloudflare Pages needs no change.
