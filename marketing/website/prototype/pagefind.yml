@@ -20,5 +20,6 @@ exclude_selectors:
   - ".contact-strip"
   - ".cond-cta"
   - ".svc-cta"
+  - ".wh-cta"
   - ".site-footer"
   - "[data-search-ignore]"

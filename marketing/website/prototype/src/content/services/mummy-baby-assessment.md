@@ -1,5 +1,6 @@
 ---
 title: "Mummy and Baby Assessment"
+seoTitle: "Mummy and Baby Physiotherapy Singapore"
 description: "Mummy and Baby physiotherapy assessment in Singapore, supporting your postpartum recovery and your baby's early development from 0-12 months."
 cardTitle: "Mummy & Baby Assessment"
 cardLead: "A combined assessment supporting your postpartum recovery and reassurance about your baby's early movement and development."
@@ -98,3 +99,9 @@ Depending on your assessment and goals, we may recommend:
 - Clinical Pilates
 - Strength and Conditioning
 - Referral to another healthcare professional, where appropriate
+
+## Part of our women's health service
+
+The Mummy and Baby assessment is one of four appointment types in our
+[women's health physiotherapy in Singapore](/womens-health-physiotherapy-singapore)
+service, alongside pelvic floor, prenatal and postpartum care.

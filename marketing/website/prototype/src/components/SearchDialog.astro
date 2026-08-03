@@ -66,10 +66,26 @@ import Button from "./Button.astro";
       <Button slug="web-wa" variant="whatsapp">Ask us on WhatsApp</Button>
     </div>
 
-    <p class="search__unavailable" data-search-unavailable hidden>
-      Search is generated at build time. Run <code>npm run build</code> then
-      <code>npm run preview</code> to try it locally.
-    </p>
+    {/* The Pagefind index only exists after a build, so `astro dev` always
+        lands on this pane. The developer note that explains that must never
+        reach production HTML — in a real build the same pane is a genuine
+        runtime fallback (index failed to load), so it gets copy written for a
+        patient, not an engineer. import.meta.env.DEV is statically replaced,
+        so the unused branch is not shipped. */}
+    {import.meta.env.DEV ? (
+      <p class="search__unavailable" data-search-unavailable hidden>
+        Search is generated at build time. Run <code>npm run build</code> then
+        <code>npm run preview</code> to try it locally.
+      </p>
+    ) : (
+      <div class="search__unavailable" data-search-unavailable hidden>
+        <p>
+          Search is not available right now. Tell us what you are looking for
+          and we will point you to the right page or the right appointment type.
+        </p>
+        <Button slug="web-wa" variant="whatsapp">Ask us on WhatsApp</Button>
+      </div>
+    )}
   </div>
 </dialog>
 
@@ -264,6 +280,17 @@ import Button from "./Button.astro";
     font-size: var(--fs-small);
     color: var(--text-muted);
   }
+  /* The production variant is a block with a CTA, so it needs the same
+     `display` guard as the other panes (see the [hidden] rule above). */
+  div.search__unavailable {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-4);
+  }
+  .search__unavailable p {
+    max-width: 44ch;
+  }
   .search__unavailable code {
     background: var(--color-linen-deep);
     border-radius: 3px;
@@ -313,7 +340,7 @@ import Button from "./Button.astro";
       if (hits === null) {
         results.innerHTML = "";
         showPane("missing");
-        status.textContent = "Search is not available in this build.";
+        status.textContent = "Search is not available right now.";
         return;
       }
       if (!hits.length) {

@@ -1,5 +1,6 @@
 ---
 title: "Postpartum Physiotherapy"
+seoTitle: "Postnatal & Postpartum Physiotherapy Singapore"
 description: "Postpartum physiotherapy in Singapore: assess your recovery after birth and plan your return to movement, exercise and sport. After vaginal or Caesarean birth."
 cardTitle: "Postpartum Physiotherapy"
 cardLead: "Understand how your body is recovering after birth and get a personalised plan for returning to movement, exercise and sport."
@@ -100,3 +101,9 @@ Depending on your assessment and goals, we may recommend:
 - Clinical Pilates
 - Strength and Conditioning
 - Referral to another healthcare professional, where appropriate
+
+## Part of our women's health service
+
+Postpartum physiotherapy is one of four appointment types in our
+[women's health physiotherapy in Singapore](/womens-health-physiotherapy-singapore)
+service, alongside pelvic floor, prenatal and Mummy and Baby care.

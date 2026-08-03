@@ -33,6 +33,10 @@ const services = defineCollection({
   type: "content",
   schema: z.object({
     title: z.string(),
+    /** Overrides only the <title> tag, so a page can target the national
+     *  query ("… Singapore") without that wording leaking into the H1,
+     *  breadcrumbs or schema `name`, which all read from `title`/`cardTitle`. */
+    seoTitle: z.string().optional(),
     /** Meta description (SEO) — also the default OG/description. */
     description: z.string(),
     /** Short heading shown on the index card (defaults to title). */
