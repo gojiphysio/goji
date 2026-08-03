@@ -31,6 +31,19 @@ so a token change reflows everything (styleguide is the QA surface).
   `bookingApi.track()` stage must be added to `VALID_STAGES` in
   `business-intelligence/scripts/booking/app.py` (and the `FunnelStage` type in
   `src/lib/booking.ts`) in the same PR, or the backend silently drops it.
+- **The landing beacon sends three event types**, all to `/api/web-event`:
+  `session_start` / `page_view` on arrival, and `page_engagement` once per page
+  load on first hide (`visibilitychange` → hidden, or `pagehide`), carrying
+  `dwell_ms` (visible time only) + `scroll_pct`. New fields must be copied
+  through `web_event_row()` in `business-intelligence/scripts/booking/app.py`
+  **and** added to `marts/53_web_session_events.sql` in the same PR, or the
+  backend silently drops them (same allowlist idiom as the funnel stages).
+  Two traps, both learned the hard way: **never measure scroll depth at init**
+  (during first layout `scrollHeight` isn't final, which reads as "whole page
+  seen" and pins the metric at 100 forever — measure on scroll and at flush),
+  and **use `fetch(..., {keepalive:true})`, not `sendBeacon`** (the API is
+  cross-origin and `sendBeacon` can't run the CORS preflight a JSON body needs,
+  so the browser drops it on unload without an error).
 - **Compliance is a hard constraint** (`marketing/strategy/03-compliance-guardrails.md`).
   Applies to placeholder copy too: no cure/outcome/time guarantees, no
   superlatives ("best/leading/No.1"), no comparative claims, no before/after

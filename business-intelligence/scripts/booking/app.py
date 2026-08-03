@@ -245,7 +245,8 @@ def track():
 @app.route("/api/web-event", methods=["POST", "OPTIONS"])
 def web_event():
     """Landing beacon from the site (BaseLayout): one row per session_start /
-    page_view capturing arrival attribution. Fire-and-forget; always 204."""
+    page_view capturing arrival attribution, plus a page_engagement row on exit
+    carrying dwell_ms / scroll_pct. Fire-and-forget; always 204."""
     if request.method == "OPTIONS":
         return "", 204
     data = request.get_json(silent=True) or {}
@@ -291,15 +292,15 @@ def _track_async(stage, session_id, service, user_agent, referer,
     threading.Thread(target=_insert, daemon=True).start()
 
 
-def _record_web_event_async(data, user_agent, referer) -> None:
-    """Fire-and-forget landing-beacon event → marts.web_session_events. This is
-    the top of the funnel: how the visitor arrived (utm_*, gclid, referer,
-    landing_path) plus the go-link click_id passthrough (cid) for the exact
-    origin→booking join. Best-effort; never blocks the page."""
-    event_type = (data.get("event_type") or "page_view")
+def web_event_row(data, user_agent, referer) -> dict:
+    """Build the marts.web_session_events row for a beacon payload.
+
+    Pure (bar the uuid/clock) so the coercion rules are unit-testable: the
+    endpoint is public and unauthenticated, so every value here is untrusted.
+    """
     row = {
         "event_id": str(uuid.uuid4()),
-        "event_type": str(event_type)[:32],
+        "event_type": str(data.get("event_type") or "page_view")[:32],
         "occurred_at": datetime.now(timezone.utc).isoformat(),
         "user_agent": ((user_agent or "")[:512] or None),
         "referer": ((referer or data.get("referrer") or "")[:512] or None),
@@ -312,6 +313,30 @@ def _record_web_event_async(data, user_agent, referer) -> None:
         v = data.get(k)
         if v:
             row[k] = str(v)[:512]
+    # Engagement metrics (page_engagement rows). Coerced and clamped: a
+    # malformed or hostile payload must not poison the column. Checked against
+    # None rather than falsiness — scroll_pct = 0 (landed, never scrolled) is
+    # exactly the signal we're here to measure.
+    for k, hi in (("dwell_ms", 86_400_000), ("scroll_pct", 100)):
+        v = data.get(k)
+        if v is None:
+            continue
+        try:
+            row[k] = max(0, min(int(v), hi))
+        except (TypeError, ValueError):
+            pass  # ignore junk; the rest of the row is still worth writing
+    return row
+
+
+def _record_web_event_async(data, user_agent, referer) -> None:
+    """Fire-and-forget landing-beacon event → marts.web_session_events. This is
+    the top of the funnel: how the visitor arrived (utm_*, gclid, referer,
+    landing_path) plus the go-link click_id passthrough (cid) for the exact
+    origin→booking join. A page_engagement event additionally carries dwell_ms /
+    scroll_pct, which separate a bounce from a read. Best-effort; never blocks
+    the page."""
+    row = web_event_row(data, user_agent, referer)
+    event_type = row["event_type"]
 
     def _insert():
         try:

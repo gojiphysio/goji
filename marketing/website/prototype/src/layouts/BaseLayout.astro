@@ -203,11 +203,11 @@ const GADS_BOOKING_LABEL = import.meta.env.PUBLIC_GADS_BOOKING_LABEL;
               }
               var s = {};
               try { s = JSON.parse(localStorage.getItem("goji_attr") || "{}"); } catch (e) {}
-              fetch(BOOKING_API + "/api/web-event", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  event_type: newSession ? "session_start" : "page_view",
+              // One payload shape for every event type, so an engagement row is
+              // attributable exactly like the arrival row it belongs to.
+              var send = function (type, extra) {
+                var body = {
+                  event_type: type,
                   visitor_id: vid, session_id: sid,
                   utm_source: s.utm_source || pick("utm_source"),
                   utm_medium: s.utm_medium || pick("utm_medium"),
@@ -219,9 +219,67 @@ const GADS_BOOKING_LABEL = import.meta.env.PUBLIC_GADS_BOOKING_LABEL;
                   go_click_id: s.go_click_id || pick("cid"),
                   referrer: document.referrer || "",
                   landing_path: location.pathname || ""
-                }),
-                keepalive: true
-              }).catch(function () {});
+                };
+                if (extra) for (var k in extra) body[k] = extra[k];
+                // keepalive (not sendBeacon): the API is cross-origin, and
+                // sendBeacon cannot run the CORS preflight a JSON body needs,
+                // so the browser would silently drop it on unload.
+                fetch(BOOKING_API + "/api/web-event", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify(body),
+                  keepalive: true
+                }).catch(function () {});
+              };
+              send(newSession ? "session_start" : "page_view");
+
+              // --- Engagement: how long was this page VISIBLE, and how far was
+              // it read? Arrival rows alone can't tell a 3-second bounce from a
+              // 90-second read, and that distinction decides whether a landing
+              // page fails on load or fails to close.
+              var maxScroll = 0;
+              var measureScroll = function () {
+                try {
+                  var h = document.documentElement.scrollHeight;
+                  if (!h) return;
+                  // How far down the page the BOTTOM of the viewport reached, so
+                  // a page shorter than the viewport is 100% seen without any
+                  // scrolling — no special case to mis-fire.
+                  var pct = Math.round(((window.scrollY + window.innerHeight) / h) * 100);
+                  if (pct > maxScroll) maxScroll = Math.max(0, Math.min(pct, 100));
+                } catch (e) { /* ignore */ }
+              };
+              // Deliberately NOT measured at init: during first layout
+              // scrollHeight is not yet final, which reads as "whole page seen"
+              // and pins maxScroll at 100 for the rest of the page's life. The
+              // scroll listener and the flush below both measure post-layout.
+              window.addEventListener("scroll", measureScroll, { passive: true });
+
+              // Accumulate only foreground time — a tab left open in the
+              // background all afternoon is not 4 hours of attention.
+              var visibleSince = document.visibilityState === "visible" ? Date.now() : 0;
+              var dwell = 0;
+              var sent = false;
+              var flush = function () {
+                if (sent) return;
+                sent = true;
+                if (visibleSince) { dwell += Date.now() - visibleSince; visibleSince = 0; }
+                measureScroll();
+                send("page_engagement", { dwell_ms: dwell, scroll_pct: maxScroll });
+              };
+              document.addEventListener("visibilitychange", function () {
+                if (document.visibilityState === "visible") {
+                  if (!visibleSince) visibleSince = Date.now();
+                } else {
+                  // First hide is the exit for our purposes. If they come back
+                  // and keep reading we undercount rather than emit a second
+                  // row — one row per page load keeps the grain simple.
+                  flush();
+                }
+              });
+              // Back button / bfcache / close. visibilitychange covers app
+              // switches; pagehide covers navigations that skip it.
+              window.addEventListener("pagehide", flush);
             } catch (e) { /* never break the page for analytics */ }
           })();
         </script>
