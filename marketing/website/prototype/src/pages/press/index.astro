@@ -75,8 +75,8 @@ const schema = [
 ---
 
 <BaseLayout
-  title="Press & Media | Goji Physiotherapy Singapore"
-  description="Media coverage of Goji Women's and Family Physiotherapy, the women's and family physiotherapy clinic at Lentor MRT, Singapore."
+  title="Press and Media | Goji Physiotherapy Singapore"
+  description="Explore interviews, features, and expert commentary from Goji Physiotherapy on women's health, children's physiotherapy, and family care."
   schema={schema}
   searchType="Press"
 >
@@ -88,15 +88,14 @@ const schema = [
         </svg>
         Media
       </a>
-      <h1>Where our work has been covered</h1>
+      <h1>Goji in the media</h1>
       <p class="press-hero__lead">
-        Interviews and features about the clinic and the people in it. Each
-        entry links to the original article on the publisher's own site.
+        Explore interviews, features, and commentary involving Goji, our clinicians, and our work in women's and children's health. Select a feature to read our summary and visit the original article on the publisher's website.
       </p>
       {
         outlets.length > 0 && (
           <div class="press-outlets">
-            <p class="press-outlets__label">As covered by</p>
+            <p class="press-outlets__label">Featured in</p>
             <ul>
               {outlets.map((outlet) => {
                 const logo = outletLogos.get(outlet);
@@ -152,12 +151,17 @@ const schema = [
 
   <Section tone="linen">
     <div class="contact-strip">
-      <h2>Writing about women's health or paediatric physiotherapy?</h2>
+      <h2>For media enquiries</h2>
       <p>
-        Our physiotherapists are available for comment and background. Email
-        <a href={`mailto:${SITE.email}`}>{SITE.email}</a> and we will come back to you.
+        Writing about women's health, children's physiotherapy, or family care? Our physiotherapists and team may be available for interviews, expert commentary, and background conversations.
       </p>
-      <Button slug="web-wa" variant="whatsapp" size="lg">Message us on WhatsApp</Button>
+      <p>
+        Email <a href={`mailto:${SITE.email}`}>{SITE.email}</a> with your publication, topic, deadline, and what you need from us.
+      </p>
+      <div style="display: flex; gap: var(--space-3); flex-wrap: wrap;">
+        <Button href={`mailto:${SITE.email}`} variant="primary">Email our team</Button>
+        <Button slug="web-wa" variant="whatsapp" size="lg">Message us on WhatsApp</Button>
+      </div>
     </div>
   </Section>
 </BaseLayout>
@@ -209,7 +213,7 @@ const schema = [
     color: var(--text-default);
   }
   .press-outlets__logo {
-    height: 60px;
+    height: 90px;
     width: auto;
     max-width: 150px;
     object-fit: contain;

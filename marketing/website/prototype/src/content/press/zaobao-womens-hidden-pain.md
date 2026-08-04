@@ -1,7 +1,7 @@
 ---
-title: "Lianhe Zaobao interviews Cheryl Long on women's unspoken pain"
+title: "Cheryl Long speaks to Lianhe Zaobao about women's hidden pain"
 description: "Lianhe Zaobao interviewed Goji Clinical Director Cheryl Long about pelvic floor, postpartum and menopausal symptoms that women are often told to accept."
-cardLead: "Zaobao's Street Interviews column spoke to our Clinical Director about why so many women are told that pelvic floor and postpartum symptoms are simply the price of motherhood."
+cardLead: "Goji Clinical Director Cheryl Long discusses why pelvic floor, postpartum, and menopausal symptoms are so often normalised, and why women deserve clearer answers and earlier care."
 outlet: "Lianhe Zaobao"
 outletUrl: "https://www.zaobao.com.sg"
 logo: "zaobao-logo.png"

@@ -50,17 +50,16 @@ const schema = [
 ---
 
 <BaseLayout
-  title="Media | Goji Physiotherapy Singapore"
-  description="Articles from the physiotherapists at Goji, and media coverage of the clinic. Women's and family physiotherapy at Lentor MRT, Singapore."
+  title="Articles and Media | Goji Physiotherapy Singapore"
+  description="Read practical articles from the Goji team and explore media coverage of our work in women's and children's physiotherapy."
   schema={schema}
 >
   <section class="media-hero">
     <div class="container">
       <p class="eyebrow">Media</p>
-      <h1>Reading and coverage</h1>
+      <h1>Articles and media coverage</h1>
       <p class="media-hero__lead">
-        Writing from our physiotherapists, and the places our work has been
-        covered.
+        Explore practical articles from the Goji team, alongside interviews and features about our clinic, our people, and our work.
       </p>
     </div>
   </section>
@@ -77,8 +76,7 @@ const schema = [
         </span>
         <h2>Blog</h2>
         <p>
-          Plain-language answers to the questions we get asked in the clinic
-          every week, written by the physiotherapists who answer them.
+          Practical articles from our physiotherapists and team to help you better understand your body, your care, and your options.
         </p>
         <span class="media-choice__cta">
           {posts.length > 0
@@ -97,13 +95,11 @@ const schema = [
         </span>
         <h2>Press</h2>
         <p>
-          Interviews and features spotlighting the clinic and the people behind
-          it. All content and copyrights remain the property of the original
-          publisher.
+          Interviews, features, and expert commentary involving Goji, our clinicians, and our work in women's and children's health.
         </p>
         <span class="media-choice__cta">
           {latestPress
-            ? `See the coverage (${press.length})`
+            ? `View press coverage (${press.length})`
             : "Coming soon"}
         </span>
       </a>
@@ -236,7 +232,7 @@ const schema = [
     box-shadow: var(--shadow-sm);
   }
   .media-latest__logo {
-    height: 50px;
+    height: 75px;
     width: auto;
     max-width: 100px;
     object-fit: contain;
