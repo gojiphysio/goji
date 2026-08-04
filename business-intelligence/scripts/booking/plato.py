@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import os
 import time
+from datetime import datetime, timedelta
 
 import requests
 
@@ -118,12 +119,31 @@ class PlatoClient:
                                 {"start_date": start_date, "end_date": end_date})
             # Convert leave entries to appointment format so they block availability
             for l in leave:
+                # Handle date vs datetime fields: convert date-only strings to ISO datetimes
+                starttime = l.get("starttime")
+                if not starttime:
+                    start_date_val = l.get("start_date")
+                    if start_date_val:
+                        starttime = f"{start_date_val}T00:00:00"
+
+                endtime = l.get("endtime")
+                if not endtime:
+                    end_date_val = l.get("end_date")
+                    if end_date_val:
+                        # End of day: next day at 00:00:00 for full-day leave blocking
+                        try:
+                            end_dt = datetime.fromisoformat(end_date_val)
+                            end_dt = end_dt + timedelta(days=1)
+                            endtime = end_dt.isoformat()
+                        except (ValueError, TypeError):
+                            endtime = f"{end_date_val}T23:59:59"
+
                 rows.append({
                     "title": l.get("title", "Leave"),
                     "color": l.get("color") or l.get("clinician_calendar"),
                     "doctor": l.get("doctor"),
-                    "starttime": l.get("starttime") or l.get("start_date"),
-                    "endtime": l.get("endtime") or l.get("end_date"),
+                    "starttime": starttime,
+                    "endtime": endtime,
                     "type": "leave",  # mark as leave for diagnostics
                 })
         except Exception:
