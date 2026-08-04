@@ -46,7 +46,7 @@ const services = defineCollection({
     /** Grouping bucket on the /services index. */
     category: z.enum([
       "Women's Health Physiotherapy",
-      "Paediatrics Physiotherapy (0-18Y)",
+      "Paediatric Physiotherapy (0-18Y)",
       "Musculoskeletal Physiotherapy",
       "Holistic Care",
     ]),

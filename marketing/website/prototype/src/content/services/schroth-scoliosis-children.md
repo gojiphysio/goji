@@ -5,7 +5,7 @@ cardTitle: "Schroth Therapy - Children"
 cardLead: "Scoliosis-specific physiotherapy (Schroth Method) tailored to your child's curve, growth and goals, to support posture, strength and confidence."
 heroImage: "/photos/services/schroth-scoliosis-children.webp"
 heroAlt: "A Goji physiotherapist assessing a child's spine and posture at the wall bars during a scoliosis screening."
-category: "Paediatrics Physiotherapy (0-18Y)"
+category: "Paediatric Physiotherapy (0-18Y)"
 durationMin: 55
 priceClinic: 260
 priceHome: 330

@@ -5,7 +5,7 @@ cardTitle: "Paediatric Physiotherapy"
 cardLead: "Individualised assessment and practical guidance for your child's movement, development, pain or injury - from babies to teens."
 heroImage: "/photos/services/paediatric-physiotherapy.webp"
 heroAlt: "A parent and baby during tummy time at a Goji paediatric physiotherapy session."
-category: "Paediatrics Physiotherapy (0-18Y)"
+category: "Paediatric Physiotherapy (0-18Y)"
 durationMin: 55
 priceClinic: 260
 priceHome: 330
