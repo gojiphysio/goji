@@ -102,6 +102,15 @@ PHYSIO_FOCUS_CLINICIANS: dict[str, list[str]] = {
 # listed here sorts last, in config order.
 FIRST_AVAILABLE_PRIORITY: list[str] = ["kristy-ng", "claire-ng", "cheryl-long"]
 
+# Service-clinician eligibility: which clinicians are rostered to provide each
+# service. If empty/absent, all clinicians in the service's online_calendar are
+# eligible (the default). When populated, availability is restricted to the
+# listed clinicians; this enforces service-specific roster changes (e.g. removing
+# a clinician from one service while keeping them in others).
+SERVICE_CLINICIANS: dict[str, list[str] | None] = {
+    "clinical-pilates": ["claire-ng"],  # Cheryl Long removed from Clinical Pilates
+}
+
 # Home visits: Cheryl only, typed "Home Visit" in Plato regardless of service.
 HOME_VISIT_CLINICIAN = "cheryl-long"
 HOME_VISIT_TYPE_CODE = "sCla"
