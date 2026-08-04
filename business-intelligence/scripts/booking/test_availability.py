@@ -217,6 +217,24 @@ def test_appointment_with_doctor_field_blocks_slots():
     assert out["claire-ng"] == ["08:00", "11:00"]
 
 
+def test_leave_entry_blocks_all_day():
+    # Test that leave/vacation entries block entire day availability.
+    # Leave entries should come as full-day (00:00-23:59 or start_date-end_date).
+    sat = date(2026, 8, 8)  # Saturday
+    # Leave entry for entire day
+    appts = [{"color": "6hpO", "title": "AL", "type": "leave",
+              "starttime": "2026-08-08 00:00:00", "endtime": "2026-08-08 23:59:59"}]
+    cfg = {"calendars": [{"id": "dDIjWJp", "rules": [{
+        "name": "Claire Ng", "book_calendar": "6hpO",
+        "starttime": "08:00", "endtime": "18:00", "min_days": 0, "max_days": 365,
+        "restricted_days": [], "restricted_blocks": [],
+    }]}]}
+    now = datetime(2026, 8, 7, 9, 0)
+    out = derive_availability(StubPlato(appts, cfg), "physiotherapy", sat, now=now)
+    # Entire day is on leave, so no slots available
+    assert out["claire-ng"] == []
+
+
 if __name__ == "__main__":
     for name, fn in sorted(globals().items()):
         if name.startswith("test_") and callable(fn):

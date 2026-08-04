@@ -203,12 +203,16 @@ def _derive_day(
         if same_day_appts:
             log.info(f"RAW APPOINTMENTS for {day.isoformat()}:")
             for a in same_day_appts:
+                appt_type = f"[{a.get('type', 'appt')}]" if a.get('type') else ""
                 log.info(f"  {a.get('color', '?'):8} {a.get('title', '?'):20} "
-                        f"{a.get('starttime', '?')} - {a.get('endtime', '?')}")
+                        f"{a.get('starttime', '?')} - {a.get('endtime', '?')} {appt_type}")
                 # Check for recurrence fields that might not be handled
                 for key in a:
                     if 'recur' in key.lower() or 'repeat' in key.lower():
                         log.info(f"    RECURRING FIELD: {key} = {a[key]}")
+                # Show leave entries prominently
+                if a.get('type') == 'leave' or 'leave' in a.get('title', '').lower():
+                    log.info(f"    ⚠️  LEAVE/UNAVAILABLE ENTRY")
 
     # A physiotherapy sub-type opens only its clinicians' calendars. Ignored for
     # non-physio services and unknown sub-types (treated as "no restriction").
