@@ -53,17 +53,63 @@ def _overlaps(a_start: datetime, a_end: datetime,
     return a_start < b_end and a_end > b_start
 
 
+def _calendar_color_for_appointment(a: dict) -> str:
+    """Extract calendar color from appointment, trying multiple field names.
+
+    Plato may return appointments with 'color' (preferred), 'doctor', or 'calendar' fields.
+    Attempts to match 'doctor' code to a clinician's calendar color.
+    Falls back to empty string if none found.
+    """
+    # Try direct color field first (preferred)
+    if a.get("color"):
+        return a["color"]
+
+    # Try doctor code field as fallback (map to calendar color)
+    doctor = a.get("doctor")
+    if doctor:
+        for cid, meta in CLINICIANS.items():
+            if meta.get("doctor") == doctor:
+                return meta["calendar"]
+
+    # Try calendar field if present
+    if a.get("calendar"):
+        return a["calendar"]
+
+    return ""
+
+
 def _booked_by_calendar(appointments: list[dict]) -> dict[str, list[tuple[datetime, datetime]]]:
     """Group appointment (start, end) ranges by calendar `color`. `-all-` entries
     (e.g. a clinic-wide meeting) block every clinician."""
     booked: dict[str, list[tuple[datetime, datetime]]] = {}
+    skipped = 0
+    unmapped = 0
     for a in appointments:
         try:
             s = datetime.fromisoformat(a["starttime"])
             e = datetime.fromisoformat(a["endtime"])
-        except (KeyError, ValueError, TypeError):
+        except (KeyError, ValueError, TypeError) as err:
+            if _DIAG:
+                log.warning(f"  Skipped appointment (parse error: {err}): {a.get('title', '?')} - "
+                           f"starttime={a.get('starttime')}, endtime={a.get('endtime')}")
+            skipped += 1
             continue
-        booked.setdefault(a.get("color", ""), []).append((s, e))
+
+        # Extract calendar color, trying multiple field names
+        color = _calendar_color_for_appointment(a)
+        if not color:
+            # Appointment has no recognizable calendar/color/doctor field
+            if _DIAG:
+                log.warning(f"  Appointment has no mappable color/calendar/doctor: {a.get('title', '?')} "
+                           f"({s.isoformat()} - {e.isoformat()}). Fields: {list(a.keys())}")
+            unmapped += 1
+
+        booked.setdefault(color, []).append((s, e))
+
+    if _DIAG and (skipped or unmapped):
+        log.info(f"  _booked_by_calendar: {len(appointments)} appointments, "
+                f"skipped={skipped} (parse error), unmapped={unmapped} (no color)")
+
     return booked
 
 
