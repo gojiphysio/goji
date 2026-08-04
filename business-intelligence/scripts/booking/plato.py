@@ -17,10 +17,10 @@ import requests
 BASE = "https://clinic.platomedical.com/api"
 TIMEOUT_S = 30
 PER_PAGE_SLEEP_S = 1.0  # pace multi-page reads under Plato's 20 req/min limit
-# Leave/vacation title keywords (case-insensitive): appointments with these in the title
+# Leave/vacation/block title keywords (case-insensitive): appointments with these in the title
 # block availability like normal appointments (they're just regular appointments on the
 # clinician's calendar in Plato, identified by title pattern from real data analysis).
-LEAVE_KEYWORDS = ("leave", "holiday", "vacation", "pto", "ooo", "out of office")
+LEAVE_KEYWORDS = ("leave", "holiday", "vacation", "pto", "ooo", "out of office", "block")
 # The online-booking config (clinician hours/rules) is effectively static, but
 # derive_availability reads it on every slot lookup. Cache it briefly so a burst
 # of availability calls (a user clicking around dates/clinicians) hits Plato once.
@@ -133,9 +133,6 @@ class PlatoClient:
         for appointment in rows:
             if _is_leave_title(appointment.get("title", "")):
                 appointment["type"] = "leave"
-                # DEBUG: log leave appointments to understand Plato's data structure
-                import sys
-                print(f"DEBUG: Found leave appointment: {appointment}", file=sys.stderr)
 
             # Convert date-only fields to ISO datetimes if needed
             starttime = appointment.get("starttime")
