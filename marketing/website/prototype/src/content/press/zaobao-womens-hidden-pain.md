@@ -4,7 +4,8 @@ description: "Lianhe Zaobao interviewed Goji Clinical Director Cheryl Long about
 cardLead: "Zaobao's Street Interviews column spoke to our Clinical Director about why so many women are told that pelvic floor and postpartum symptoms are simply the price of motherhood."
 outlet: "Lianhe Zaobao"
 outletUrl: "https://www.zaobao.com.sg"
-originalTitle: "三娃母亲用物理治疗 治愈女性“隐秘的痛”"
+logo: "zaobao-logo.png"
+originalTitle: '三娃母亲用物理治疗 治愈女性"隐秘的痛"'
 originalUrl: "https://www.zaobao.com.sg/news/singapore/story20260721-9394054"
 language: "zh"
 pubDate: 2026-07-21

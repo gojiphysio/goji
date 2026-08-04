@@ -21,6 +21,12 @@ const entries = (await getCollection("press", ({ data }) => !data.draft)).sort(
   (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
 );
 
+// Map outlets to their logos (if available)
+const outletLogos = new Map<string, string | undefined>();
+entries.forEach((e) => {
+  outletLogos.set(e.data.outlet, e.data.logo);
+});
+
 const outlets = [...new Set(entries.map((e) => e.data.outlet))];
 
 const origin = Astro.site ?? new URL(Astro.url.origin);
@@ -92,9 +98,24 @@ const schema = [
           <div class="press-outlets">
             <p class="press-outlets__label">As covered by</p>
             <ul>
-              {outlets.map((outlet) => (
-                <li>{outlet}</li>
-              ))}
+              {outlets.map((outlet) => {
+                const logo = outletLogos.get(outlet);
+                return (
+                  <li>
+                    {logo ? (
+                      <img
+                        src={`/press/${logo}`}
+                        alt={outlet}
+                        width="120"
+                        height="120"
+                        class="press-outlets__logo"
+                      />
+                    ) : (
+                      <span>{outlet}</span>
+                    )}
+                  </li>
+                );
+              })}
             </ul>
           </div>
         )
@@ -131,7 +152,7 @@ const schema = [
 
   <Section tone="linen">
     <div class="contact-strip">
-      <h2>Writing about women's or children's physiotherapy?</h2>
+      <h2>Writing about women's health or paediatric physiotherapy?</h2>
       <p>
         Our physiotherapists are available for comment and background. Email
         <a href={`mailto:${SITE.email}`}>{SITE.email}</a> and we will come back to you.
@@ -186,6 +207,12 @@ const schema = [
     font-weight: var(--weight-semibold);
     letter-spacing: var(--tracking-tight);
     color: var(--text-default);
+  }
+  .press-outlets__logo {
+    height: 60px;
+    width: auto;
+    max-width: 150px;
+    object-fit: contain;
   }
 
   .press-list {

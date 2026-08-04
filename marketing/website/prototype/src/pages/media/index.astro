@@ -97,8 +97,9 @@ const schema = [
         </span>
         <h2>Press</h2>
         <p>
-          Interviews and features about the clinic and the people in it, each
-          linking to the original article on the publisher's own site.
+          Interviews and features spotlighting the clinic and the people behind
+          it. All content and copyrights remain the property of the original
+          publisher.
         </p>
         <span class="media-choice__cta">
           {latestPress
@@ -110,10 +111,26 @@ const schema = [
 
     {
       latestPress && (
-        <p class="media-latest">
-          Most recent: <a href={`/press/${latestPress.slug}`}>{latestPress.data.title}</a>,
-          {" "}{latestPress.data.outlet}, {formatDate(latestPress.data.pubDate)}.
-        </p>
+        <div class="media-latest">
+          <p>Most recent:</p>
+          <a href={`/press/${latestPress.slug}`} class="media-latest__item">
+            {latestPress.data.logo && (
+              <img
+                src={`/press/${latestPress.data.logo}`}
+                alt={latestPress.data.outlet}
+                width="100"
+                height="100"
+                class="media-latest__logo"
+              />
+            )}
+            <span class="media-latest__text">
+              <span class="media-latest__title">{latestPress.data.title}</span>
+              <span class="media-latest__meta">
+                {latestPress.data.outlet}, {formatDate(latestPress.data.pubDate)}
+              </span>
+            </span>
+          </a>
+        </div>
       )
     }
   </Section>
@@ -197,13 +214,50 @@ const schema = [
 
   .media-latest {
     margin-top: var(--space-5);
+  }
+  .media-latest > p {
     font-size: var(--fs-small);
     color: var(--text-muted);
+    margin-bottom: var(--space-3);
   }
-  .media-latest a {
+  .media-latest__item {
+    display: flex;
+    gap: var(--space-3);
+    align-items: center;
+    padding: var(--space-3);
+    background: var(--bg-content);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    color: inherit;
+    transition: box-shadow var(--dur) var(--ease);
+  }
+  .media-latest__item:hover {
+    box-shadow: var(--shadow-sm);
+  }
+  .media-latest__logo {
+    height: 50px;
+    width: auto;
+    max-width: 100px;
+    object-fit: contain;
+    flex-shrink: 0;
+  }
+  .media-latest__text {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    flex: 1;
+  }
+  .media-latest__title {
+    font-size: var(--fs-body);
+    font-weight: var(--weight-semibold);
     color: var(--color-primary);
     text-decoration: underline;
     text-underline-offset: 0.2em;
+  }
+  .media-latest__meta {
+    font-size: var(--fs-small);
+    color: var(--text-muted);
   }
 
   .contact-strip {
