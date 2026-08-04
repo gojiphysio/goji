@@ -163,6 +163,39 @@ def test_clinician_still_available_in_other_services():
     assert "cheryl-long" in out  # Cheryl still available in Physiotherapy
 
 
+def test_recurring_appointment_blocks_slots():
+    # Test case: A clinician has a recurring appointment (e.g., every Saturday 9-10am)
+    # that should block availability at those times.
+    # This simulates what should happen when Plato returns a recurring appointment
+    # that has been expanded or needs to be checked.
+    sat = date(2026, 7, 18)  # A Saturday
+    # Appointment from 9:00-10:00 on Saturday
+    appts = [{"color": "6hpO", "starttime": "2026-07-18 09:00:00",
+              "endtime": "2026-07-18 10:00:00"}]
+    cfg = {"calendars": [{"id": "dDIjWJp", "rules": [{
+        "name": "Claire Ng", "book_calendar": "6hpO",
+        "starttime": "08:00", "endtime": "12:00", "min_days": 1, "max_days": 365,
+        "restricted_days": [], "restricted_blocks": [],
+    }]}]}
+    now = datetime(2026, 7, 17, 9, 0)  # Day before Saturday
+    out = derive_availability(StubPlato(appts, cfg), "physiotherapy", sat, now=now)
+    # 9:00-10:00 is booked, so 08:30 and 09:00 and 09:30 should be blocked
+    # (60-min appts, 30-min steps)
+    assert out["claire-ng"] == ["08:00", "10:00", "10:30", "11:00"]
+
+
+def test_recurring_appointment_expansion_needed():
+    # DIAGNOSTIC TEST: If Plato returns a single recurring entry,
+    # it needs to be expanded to check for conflicts on specific dates.
+    # This test documents the expected behavior when a recurring appointment
+    # (e.g., "every Saturday 9-10am") is returned by Plato.
+    # Currently: needs investigation - how does Plato represent recurring appointments?
+    #   - Single entry with recurrence rule?
+    #   - Pre-expanded individual entries?
+    #   - Both formats mixed?
+    pass  # Placeholder for recurring appointment investigation
+
+
 if __name__ == "__main__":
     for name, fn in sorted(globals().items()):
         if name.startswith("test_") and callable(fn):
