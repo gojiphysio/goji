@@ -14,6 +14,8 @@ kind: "press"
 featuring:
   - name: "Cheryl Long"
     slug: "cheryl-long"
+heroImage: "/photos/team/cheryl-long.webp"
+heroAlt: "Portrait of Cheryl Long, Clinical Director at Goji Physiotherapy"
 pullQuote: "Women's health services in Singapore often taper off after the early postpartum period, overlooking women's evolving physical needs from pregnancy through menopause."
 order: 1
 draft: false
@@ -29,6 +31,8 @@ That gap is why she started Goji: a practice built around women and children, co
 
 The article also touches on the wider shift of physiotherapists from public hospitals into private practice. Cheryl's read on it is that the move is less about pay than it is about flexible hours and having a say in how care is delivered, particularly for those who are also mothers.
 
-## What we would add
+## Further reading from Goji
 
-If any of this sounds familiar, the practical point is a small one. Symptoms that are common are not automatically symptoms you have to accept, and an assessment is the way to find out which is which in your case. Our pages on [urinary incontinence](/conditions/urinary-incontinence), [pelvic organ prolapse](/conditions/pelvic-organ-prolapse) and [menopause](/conditions/menopause) set out what an assessment involves and when it is worth booking one.
+The article brings welcome attention to symptoms that many women quietly live with through pregnancy, postpartum recovery and menopause.
+
+For readers who recognise some of these experiences, our guides to [urinary incontinence](/conditions/urinary-incontinence), [pelvic organ prolapse](/conditions/pelvic-organ-prolapse) and [menopause](/conditions/menopause) explain common signs, what a physiotherapy assessment may involve and the kinds of support that may be available.
