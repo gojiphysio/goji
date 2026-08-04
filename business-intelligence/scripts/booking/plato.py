@@ -17,6 +17,10 @@ import requests
 BASE = "https://clinic.platomedical.com/api"
 TIMEOUT_S = 30
 PER_PAGE_SLEEP_S = 1.0  # pace multi-page reads under Plato's 20 req/min limit
+# Leave/vacation title keywords (case-insensitive): appointments with these in the title
+# block availability like normal appointments (they're just regular appointments on the
+# clinician's calendar in Plato, identified by title pattern from real data analysis).
+LEAVE_KEYWORDS = ("leave", "holiday", "vacation", "pto", "ooo", "out of office")
 # The online-booking config (clinician hours/rules) is effectively static, but
 # derive_availability reads it on every slot lookup. Cache it briefly so a burst
 # of availability calls (a user clicking around dates/clinicians) hits Plato once.
@@ -27,6 +31,14 @@ CONFIG_TTL_S = float(os.environ.get("PLATO_CONFIG_TTL", "300"))
 # Short TTL: create_booking re-derives under a lock before writing, so a booking
 # made within the window is still caught at submit.
 APPTS_TTL_S = float(os.environ.get("PLATO_APPTS_TTL", "20"))
+
+
+def _is_leave_title(title: str) -> bool:
+    """Check if an appointment title indicates a leave/vacation/holiday block."""
+    if not title:
+        return False
+    title_lower = title.lower()
+    return any(keyword in title_lower for keyword in LEAVE_KEYWORDS)
 
 
 class PlatoError(RuntimeError):
@@ -113,41 +125,13 @@ class PlatoClient:
             return hit[1]
         rows = self.get_all("appointment",
                             {"start_date": start_date, "end_date": end_date})
-        # Also fetch leave/vacation entries if the endpoint exists
-        try:
-            leave = self.get_all("clinician_leave",
-                                {"start_date": start_date, "end_date": end_date})
-            # Convert leave entries to appointment format so they block availability
-            for l in leave:
-                # Handle date vs datetime fields: convert date-only strings to ISO datetimes
-                starttime = l.get("starttime")
-                if not starttime:
-                    start_date_val = l.get("start_date")
-                    if start_date_val:
-                        starttime = f"{start_date_val}T00:00:00"
-
-                endtime = l.get("endtime")
-                if not endtime:
-                    end_date_val = l.get("end_date")
-                    if end_date_val:
-                        # End of day: next day at 00:00:00 for full-day leave blocking
-                        try:
-                            end_dt = datetime.fromisoformat(end_date_val)
-                            end_dt = end_dt + timedelta(days=1)
-                            endtime = end_dt.isoformat()
-                        except (ValueError, TypeError):
-                            endtime = f"{end_date_val}T23:59:59"
-
-                rows.append({
-                    "title": l.get("title", "Leave"),
-                    "color": l.get("color") or l.get("clinician_calendar"),
-                    "doctor": l.get("doctor"),
-                    "starttime": starttime,
-                    "endtime": endtime,
-                    "type": "leave",  # mark as leave for diagnostics
-                })
-        except Exception:
-            pass  # clinician_leave endpoint may not exist; continue with regular appointments
+        # Mark leave/vacation appointments by title pattern. Holiday blocks are regular
+        # appointments on the clinician's own calendar, identified by title (from real
+        # Plato data analysis; see commit f56b63e). This approach doesn't rely on a
+        # non-existent clinician_leave endpoint.
+        for appointment in rows:
+            if _is_leave_title(appointment.get("title", "")):
+                appointment["type"] = "leave"
         self._appts_cache[key] = (now, rows)
         return rows
 

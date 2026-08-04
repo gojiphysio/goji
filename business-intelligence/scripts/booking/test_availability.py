@@ -254,6 +254,56 @@ def test_leave_entry_blocks_all_day():
     assert out["claire-ng"] == []
 
 
+def test_holiday_titled_appointment_blocks_availability():
+    # Holiday blocks are just regular appointments with "Holiday" title on the
+    # clinician's calendar. Test that title-based detection marks them as leave.
+    sat = date(2026, 8, 8)
+    appts = [{"color": "6hpO", "title": "Holiday", "type": "leave",
+              "starttime": "2026-08-08T00:00:00", "endtime": "2026-08-09T00:00:00"}]
+    cfg = {"calendars": [{"id": "dDIjWJp", "rules": [{
+        "name": "Claire Ng", "book_calendar": "6hpO",
+        "starttime": "08:00", "endtime": "18:00", "min_days": 0, "max_days": 365,
+        "restricted_days": [], "restricted_blocks": [],
+    }]}]}
+    now = datetime(2026, 8, 7, 9, 0)
+    out = derive_availability(StubPlato(appts, cfg), "physiotherapy", sat, now=now)
+    # Full-day holiday block prevents all bookings
+    assert out["claire-ng"] == []
+
+
+def test_leave_titled_appointment_blocks_slots():
+    # "Annual Leave" should block availability.
+    fri = date(2026, 8, 7)
+    # 10:00-11:00 leave block (60-min appts, so 09:30, 10:00, 10:30 slots are blocked)
+    appts = [{"color": "6hpO", "title": "Annual Leave", "type": "leave",
+              "starttime": "2026-08-07T10:00:00", "endtime": "2026-08-07T11:00:00"}]
+    cfg = {"calendars": [{"id": "dDIjWJp", "rules": [{
+        "name": "Claire Ng", "book_calendar": "6hpO",
+        "starttime": "08:00", "endtime": "12:00", "min_days": 0, "max_days": 365,
+        "restricted_days": [], "restricted_blocks": [],
+    }]}]}
+    now = datetime(2026, 8, 6, 9, 0)
+    out = derive_availability(StubPlato(appts, cfg), "physiotherapy", fri, now=now)
+    # Available: 08:00, 08:30, 09:00, 11:00. Blocked: 09:30, 10:00, 10:30
+    assert out["claire-ng"] == ["08:00", "08:30", "09:00", "11:00"]
+
+
+def test_ooo_titled_appointment_blocks_availability():
+    # "OOO" (out of office) should be recognized as leave.
+    wed = date(2026, 8, 5)
+    appts = [{"color": "6hpO", "title": "OOO", "type": "leave",
+              "starttime": "2026-08-05T00:00:00", "endtime": "2026-08-06T00:00:00"}]
+    cfg = {"calendars": [{"id": "dDIjWJp", "rules": [{
+        "name": "Claire Ng", "book_calendar": "6hpO",
+        "starttime": "08:00", "endtime": "18:00", "min_days": 0, "max_days": 365,
+        "restricted_days": [], "restricted_blocks": [],
+    }]}]}
+    now = datetime(2026, 8, 4, 9, 0)
+    out = derive_availability(StubPlato(appts, cfg), "physiotherapy", wed, now=now)
+    # Entire day blocked by OOO
+    assert out["claire-ng"] == []
+
+
 if __name__ == "__main__":
     for name, fn in sorted(globals().items()):
         if name.startswith("test_") and callable(fn):
