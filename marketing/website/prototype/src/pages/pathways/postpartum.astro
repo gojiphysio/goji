@@ -1,0 +1,473 @@
+---
+/**
+ * Postpartum return-to-movement pathway.
+ *
+ * An illustrative timeline of how a typical, uncomplicated journey back to
+ * movement after birth can unfold: assessment → weekly exercise block → review.
+ * Scroll-reveal is progressive-enhancement only (IntersectionObserver): the
+ * <noscript> block and the reduced-motion / no-IO fallbacks reveal everything
+ * so the content is never gated behind JS or motion.
+ *
+ * Compliance (marketing/strategy/03-compliance-guardrails.md): framed as an
+ * illustration, not a promise. No outcome or recovery-time guarantees, no
+ * superlatives, no testimonials. Timings are "typical" ranges the physio
+ * tailors to the individual.
+ */
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Section from "../../components/Section.astro";
+import Button from "../../components/Button.astro";
+import BerrySprig from "../../components/BerrySprig.astro";
+
+const title = "Postpartum Pathway | Return to Movement After Birth | Goji Physiotherapy";
+const description =
+  "See how a typical return-to-movement journey after birth can unfold at Goji: a postpartum physiotherapy assessment, a weekly strength and reformer Pilates block, and a final review.";
+
+// Deep-link the assessment CTA straight into the booking form's Women's Health
+// physio sub-type (opens Cheryl, Kristy and Claire's calendars).
+const assessmentHref = "/book?service=physiotherapy&focus=womens-health";
+
+const clinicians = [
+  { name: "Cheryl Long", slug: "cheryl-long" },
+  { name: "Kristy Ng", slug: "kristy-ng" },
+  { name: "Claire Ng", slug: "claire-ng" },
+];
+
+// Illustrative journey summary — reads as a range, never a guarantee.
+const glance = [
+  { value: "1", label: "Assessment to set your baseline" },
+  { value: "10", label: "Weekly strength or reformer sessions" },
+  { value: "1", label: "Review to see how far you've come" },
+];
+---
+
+<BaseLayout title={title} description={description}>
+  {/* ---- Hero ---- */}
+  <section class="pp-hero">
+    <div class="container pp-hero__grid">
+      <div class="pp-hero__text" data-reveal>
+        <p class="eyebrow">Postpartum pathway</p>
+        <h1>Your return to movement after birth</h1>
+        <p class="pp-hero__lead">
+          Coming back to exercise after having a baby doesn't have to be guesswork.
+          This is a look at how a typical, uncomplicated journey can unfold with us
+          - from your first assessment to a final review - so you know what to
+          expect before you start.
+        </p>
+        <p class="pp-hero__note">
+          Every body and birth is different. Think of this as a map, not a
+          timetable: your physiotherapist sets the pace and the plan with you.
+        </p>
+        <div class="pp-hero__cta">
+          <Button href={assessmentHref} variant="primary" size="lg">Start with an assessment</Button>
+          <Button slug="web-wa" variant="whatsapp" size="lg">Ask on WhatsApp</Button>
+        </div>
+      </div>
+      <div class="pp-hero__sprig" aria-hidden="true">
+        <BerrySprig animate={true} />
+      </div>
+    </div>
+
+    {/* At-a-glance summary */}
+    <div class="container">
+      <ul class="pp-glance" data-reveal>
+        {glance.map((g) => (
+          <li class="pp-glance__item">
+            <span class="pp-glance__value">{g.value}</span>
+            <span class="pp-glance__label">{g.label}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  {/* ---- Timeline ---- */}
+  <Section tone="surface">
+    <div class="pp-timeline-head" data-reveal>
+      <p class="eyebrow">The journey, step by step</p>
+      <h2>Three phases, at your pace</h2>
+    </div>
+
+    <ol class="pp-timeline">
+      {/* Step 1 — Assessment */}
+      <li class="pp-step" data-reveal>
+        <div class="pp-step__marker" aria-hidden="true"><span>1</span></div>
+        <div class="pp-step__body">
+          <p class="pp-step__kicker">Week 1 · Where you start</p>
+          <h3>A postpartum physiotherapy assessment</h3>
+          <p>
+            We begin with a one-to-one assessment to understand your birth, your
+            recovery so far, and your goals - whether that's lifting your baby
+            without pain, running again, or simply feeling steady in your body.
+            It gives us the baseline we build everything else on.
+          </p>
+          <p class="pp-step__aside">
+            Your assessment is with one of our women's health physiotherapists:
+          </p>
+          <ul class="pp-chips">
+            {clinicians.map((c) => (
+              <li>
+                <a href={`/team/${c.slug}`} class="pp-chip">{c.name}</a>
+              </li>
+            ))}
+          </ul>
+          <div class="pp-step__cta">
+            <Button href={assessmentHref} variant="secondary">Book your assessment</Button>
+          </div>
+        </div>
+      </li>
+
+      {/* Step 2 — Weekly exercise block */}
+      <li class="pp-step" data-reveal>
+        <div class="pp-step__marker" aria-hidden="true"><span>2</span></div>
+        <div class="pp-step__body">
+          <p class="pp-step__kicker">The main block · Building strength</p>
+          <h3>A weekly rhythm of strength &amp; reformer Pilates</h3>
+          <p>
+            From there, we move into a steady weekly rhythm of Strength &amp;
+            Conditioning and/or Reformer Pilates - guided, progressive, and shaped
+            around how you're feeling and what you're working towards. Most
+            journeys are built around ten sessions; how quickly you get through
+            them is up to you and your goals.
+          </p>
+
+          <div class="pp-cadence">
+            <div class="pp-cadence__opt">
+              <p class="pp-cadence__pace">Once a week</p>
+              <p class="pp-cadence__weeks">≈ 10 weeks</p>
+              <p class="pp-cadence__desc">A gentle, sustainable cadence that fits around life with a newborn.</p>
+            </div>
+            <div class="pp-cadence__opt pp-cadence__opt--accent">
+              <p class="pp-cadence__pace">Twice a week</p>
+              <p class="pp-cadence__weeks">≈ 5 weeks</p>
+              <p class="pp-cadence__desc">A quicker pace when you have the time and capacity to progress sooner.</p>
+            </div>
+          </div>
+          <p class="pp-step__aside">
+            Same ten sessions either way - the mix of strength and reformer, and
+            the pace, is decided with your physiotherapist.
+          </p>
+        </div>
+      </li>
+
+      {/* Step 3 — Review */}
+      <li class="pp-step" data-reveal>
+        <div class="pp-step__marker" aria-hidden="true"><span>3</span></div>
+        <div class="pp-step__body">
+          <p class="pp-step__kicker">Wrapping up · Seeing your progress</p>
+          <h3>A final review physiotherapy session</h3>
+          <p>
+            After your ten sessions, we come back together for a review
+            physiotherapy session. We revisit the baseline from day one, look at
+            how far you've come, and map out what's next - whether that's
+            continuing independently, progressing your training, or focusing on a
+            specific goal.
+          </p>
+        </div>
+      </li>
+    </ol>
+  </Section>
+
+  {/* ---- Closing CTA ---- */}
+  <Section tone="closing">
+    <div class="pp-closing" data-reveal>
+      <h2>Ready to take the first step?</h2>
+      <p>
+        It all starts with an assessment. If you'd like to talk it through first,
+        message us on WhatsApp and we'll help you find the right starting point.
+      </p>
+      <div class="pp-closing__cta">
+        <Button href={assessmentHref} variant="primary" size="lg">Start with an assessment</Button>
+        <Button slug="web-wa" variant="whatsapp" size="lg">Ask us on WhatsApp</Button>
+      </div>
+    </div>
+  </Section>
+
+  {/* Reveal-on-scroll: progressive enhancement only. */}
+  <noscript>
+    <style>[data-reveal] { opacity: 1 !important; transform: none !important; }</style>
+  </noscript>
+  <script is:inline>
+    (function () {
+      var items = document.querySelectorAll("[data-reveal]");
+      var reveal = function (el) { el.classList.add("is-visible"); };
+      var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (reduced || !("IntersectionObserver" in window)) {
+        items.forEach(reveal);
+        return;
+      }
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (e.isIntersecting) { reveal(e.target); io.unobserve(e.target); }
+        });
+      }, { rootMargin: "0px 0px -12% 0px", threshold: 0.15 });
+      items.forEach(function (el) { io.observe(el); });
+    })();
+  </script>
+</BaseLayout>
+
+<style>
+  /* ---- Hero ---- */
+  .pp-hero {
+    background: var(--bg-page);
+    padding-block: clamp(2.5rem, 1.5rem + 4vw, 5rem);
+    border-bottom: 1px solid var(--color-border);
+    overflow: hidden;
+  }
+  .pp-hero__grid {
+    display: grid;
+    gap: clamp(var(--space-5), 4vw, var(--space-7));
+    align-items: center;
+  }
+  @media (min-width: 860px) {
+    .pp-hero__grid { grid-template-columns: 1.1fr 0.9fr; }
+  }
+  .pp-hero__text {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-3);
+  }
+  .pp-hero__text h1 { margin-top: var(--space-2); }
+  .pp-hero__lead {
+    font-size: var(--fs-body);
+    color: var(--text-muted);
+    line-height: var(--lh-body);
+    max-width: 52ch;
+  }
+  .pp-hero__note {
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+    max-width: 50ch;
+    padding-left: var(--space-4);
+    border-left: 3px solid var(--color-primary);
+  }
+  .pp-hero__cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-top: var(--space-4);
+  }
+  .pp-hero__sprig {
+    display: none;
+    opacity: 0.85;
+  }
+  @media (min-width: 860px) {
+    .pp-hero__sprig { display: block; }
+  }
+
+  /* At-a-glance strip */
+  .pp-glance {
+    list-style: none;
+    padding: 0;
+    margin-top: clamp(var(--space-6), 4vw, var(--space-8));
+    display: grid;
+    gap: var(--space-4);
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 560px) {
+    .pp-glance { grid-template-columns: repeat(3, 1fr); }
+  }
+  .pp-glance__item {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-3);
+    padding: var(--space-4) var(--space-5);
+    background: var(--bg-content);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+  }
+  .pp-glance__value {
+    font-family: var(--font-display);
+    font-size: var(--fs-h1);
+    font-weight: var(--weight-bold);
+    color: var(--color-primary);
+    line-height: 1;
+    flex: none;
+  }
+  .pp-glance__label {
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+    line-height: var(--lh-snug);
+  }
+
+  /* ---- Timeline ---- */
+  .pp-timeline-head { margin-bottom: var(--space-6); }
+  .pp-timeline-head h2 { margin-top: var(--space-2); }
+
+  .pp-timeline {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    position: relative;
+  }
+  /* The vertical rail: sits under the markers, running the full column. */
+  .pp-timeline::before {
+    content: "";
+    position: absolute;
+    left: 19px;
+    top: 8px;
+    bottom: 8px;
+    width: 2px;
+    background: linear-gradient(
+      to bottom,
+      var(--color-border) 0%,
+      var(--color-border-strong) 100%
+    );
+  }
+  @media (min-width: 560px) {
+    .pp-timeline::before { left: 23px; }
+  }
+
+  .pp-step {
+    position: relative;
+    display: grid;
+    grid-template-columns: 40px 1fr;
+    gap: var(--space-4);
+    padding-bottom: clamp(var(--space-6), 4vw, var(--space-8));
+  }
+  .pp-step:last-child { padding-bottom: 0; }
+  @media (min-width: 560px) {
+    .pp-step { grid-template-columns: 48px 1fr; gap: var(--space-5); }
+  }
+
+  .pp-step__marker {
+    position: relative;
+    z-index: 1;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    color: var(--color-linen);
+    display: grid;
+    place-items: center;
+    font-family: var(--font-display);
+    font-weight: var(--weight-bold);
+    font-size: var(--fs-h3);
+    box-shadow: 0 0 0 5px var(--bg-content);
+  }
+  @media (min-width: 560px) {
+    .pp-step__marker { width: 48px; height: 48px; }
+  }
+
+  .pp-step__body {
+    padding-top: var(--space-1);
+  }
+  .pp-step__kicker {
+    font-size: var(--fs-caption);
+    font-weight: var(--weight-semibold);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--color-accent);
+    margin-bottom: var(--space-2);
+  }
+  .pp-step__body h3 { margin-bottom: var(--space-3); }
+  .pp-step__body p {
+    color: var(--text-muted);
+    max-width: 58ch;
+  }
+  .pp-step__aside {
+    margin-top: var(--space-4);
+    font-size: var(--fs-small);
+  }
+  .pp-step__cta { margin-top: var(--space-4); }
+
+  /* Clinician chips (step 1) */
+  .pp-chips {
+    list-style: none;
+    padding: 0;
+    margin-top: var(--space-3);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+  .pp-chip {
+    display: inline-block;
+    padding: 0.4rem 0.9rem;
+    border-radius: var(--radius-pill);
+    background: var(--bg-page);
+    border: 1px solid var(--color-border);
+    color: var(--text-default);
+    font-size: var(--fs-small);
+    font-weight: var(--weight-semibold);
+    text-decoration: none;
+    transition: border-color var(--dur) var(--ease), color var(--dur) var(--ease);
+  }
+  .pp-chip:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+  }
+
+  /* Cadence options (step 2) */
+  .pp-cadence {
+    margin-top: var(--space-5);
+    display: grid;
+    gap: var(--space-4);
+    grid-template-columns: 1fr;
+    max-width: 42rem;
+  }
+  @media (min-width: 560px) {
+    .pp-cadence { grid-template-columns: 1fr 1fr; }
+  }
+  .pp-cadence__opt {
+    padding: var(--space-5);
+    background: var(--bg-page);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+  }
+  .pp-cadence__opt--accent {
+    border-color: var(--color-primary);
+    background: color-mix(in srgb, var(--color-primary) 5%, var(--bg-content));
+  }
+  .pp-cadence__pace {
+    font-size: var(--fs-caption);
+    font-weight: var(--weight-semibold);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--text-muted) !important;
+  }
+  .pp-cadence__weeks {
+    font-family: var(--font-display);
+    font-size: var(--fs-h2);
+    font-weight: var(--weight-bold);
+    color: var(--color-primary) !important;
+    margin-top: var(--space-1);
+    line-height: 1.1;
+  }
+  .pp-cadence__desc {
+    margin-top: var(--space-2);
+    font-size: var(--fs-small);
+    line-height: var(--lh-snug);
+  }
+
+  /* ---- Closing ---- */
+  .pp-closing {
+    max-width: 48ch;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    align-items: flex-start;
+  }
+  .pp-closing h2 { color: var(--text-on-dark); }
+  .pp-closing p { color: color-mix(in srgb, var(--color-linen) 82%, transparent); }
+  .pp-closing__cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-top: var(--space-2);
+  }
+
+  /* ---- Scroll reveal ---- */
+  [data-reveal] {
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 620ms var(--ease), transform 620ms var(--ease);
+  }
+  [data-reveal].is-visible {
+    opacity: 1;
+    transform: none;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    [data-reveal] { opacity: 1; transform: none; transition: none; }
+  }
+</style>

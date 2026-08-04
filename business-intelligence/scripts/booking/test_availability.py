@@ -196,6 +196,27 @@ def test_recurring_appointment_expansion_needed():
     pass  # Placeholder for recurring appointment investigation
 
 
+def test_appointment_with_doctor_field_blocks_slots():
+    # Test that appointments with "doctor" field (instead of "color") are properly
+    # mapped to clinician calendars and block availability.
+    sat = date(2026, 7, 18)
+    # Appointment using "doctor" field instead of "color"
+    appts = [{"doctor": "PCN", "title": "Blocked Time", "starttime": "2026-07-18 09:00:00",
+              "endtime": "2026-07-18 11:00:00"}]
+    cfg = {"calendars": [{"id": "dDIjWJp", "rules": [{
+        "name": "Claire Ng", "book_calendar": "6hpO",
+        "starttime": "08:00", "endtime": "12:00", "min_days": 1, "max_days": 365,
+        "restricted_days": [], "restricted_blocks": [],
+    }]}]}
+    now = datetime(2026, 7, 17, 9, 0)
+    out = derive_availability(StubPlato(appts, cfg), "physiotherapy", sat, now=now)
+    # 9:00-11:00 should be blocked (PCN = Claire)
+    # Window is 08:00-12:00, appointments are 60min
+    # So 08:00-09:00 is free, 09:00-11:00 is blocked, 11:00-12:00 is free
+    # 11:30-12:30 would exceed window, so only 08:00 and 11:00
+    assert out["claire-ng"] == ["08:00", "11:00"]
+
+
 if __name__ == "__main__":
     for name, fn in sorted(globals().items()):
         if name.startswith("test_") and callable(fn):
