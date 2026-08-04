@@ -37,6 +37,8 @@ const {
   author,
   featuring,
   pullQuote,
+  heroImage,
+  heroAlt,
 } = entry.data;
 
 const origin = Astro.site ?? new URL(Astro.url.origin);
@@ -88,44 +90,53 @@ const pressSchema = [
   schema={pressSchema}
   searchType="Press"
 >
-  <section class="pr-header">
-    <div class="container container--narrow pr-header__inner">
-      <a href="/press" class="pr-header__back">
-        <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M10 3L5 8l5 5"></path>
-        </svg>
-        All press
-      </a>
-      <p class="pr-header__outlet">{outlet}</p>
-      <h1>{title}</h1>
-      <p class="pr-header__meta">
-        Published <time datetime={isoDate(pubDate)}>{formatDate(pubDate)}</time>
-        {author && <span> &middot; by {author}</span>}
-        {language === "zh" && <span> &middot; originally published in Chinese</span>}
-      </p>
+  <article class="article-container">
+    <div class="article-editorial">
+      <div class="article-header">
+        <a href="/press" class="article-breadcrumb">
+          <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M10 3L5 8l5 5"></path>
+          </svg>
+          All press
+        </a>
+        <p class="article-category">{outlet}</p>
+        <h1 class="article-title">{title}</h1>
+        <p class="article-meta">
+          Published <time datetime={isoDate(pubDate)}>{formatDate(pubDate)}</time>
+          {author && <span> &middot; by {author}</span>}
+          {language === "zh" && <span> &middot; originally published in Chinese</span>}
+        </p>
+        {
+          featuring.length > 0 && (
+            <p class="article-featuring">
+              Featuring{" "}
+              {featuring.map((person, i) => (
+                <>
+                  {i > 0 && ", "}
+                  <a href={`/team/${person.slug}`}>{person.name}</a>
+                </>
+              ))}
+            </p>
+          )
+        }
+      </div>
+
       {
-        featuring.length > 0 && (
-          <p class="pr-header__featuring">
-            Featuring{" "}
-            {featuring.map((person, i) => (
-              <>
-                {i > 0 && ", "}
-                <a href={`/team/${person.slug}`}>{person.name}</a>
-              </>
-            ))}
-          </p>
+        heroImage && (
+          <figure class="article-hero">
+            <img src={heroImage} alt={heroAlt ?? ""} width="900" height="600" loading="eager" />
+            {heroAlt && <figcaption class="article-hero__caption">{heroAlt}</figcaption>}
+          </figure>
         )
       }
-    </div>
-  </section>
 
-  <Section tone="surface">
-    <div class="pr-body container--narrow">
-      <Content />
+      <div class="article-body">
+        <Content />
+      </div>
 
       {
         pullQuote && (
-          <figure class="pr-quote">
+          <figure class="article-quote">
             <blockquote>{pullQuote}</blockquote>
             <figcaption>
               Quoted in {originalTitle}, {outlet}, {formatDate(pubDate)}
@@ -134,11 +145,11 @@ const pressSchema = [
         )
       }
 
-      <div class="pr-source">
-        <p class="pr-source__label">The original article</p>
-        <p class="pr-source__title">{originalTitle}</p>
+      <div class="article-source">
+        <h3 class="article-source__label">The original article</h3>
+        <p class="article-source__title">{originalTitle}</p>
         <a
-          class="pr-source__link"
+          class="article-source__link"
           href={originalUrl}
           target="_blank"
           rel="noopener noreferrer"
@@ -146,15 +157,15 @@ const pressSchema = [
           Read the full article on {outlet}
           <span aria-hidden="true"> &#8599;</span>
         </a>
-        <p class="pr-source__note">
+        <p class="article-source__note">
           The full article is the publisher's and stays on their site.
         </p>
       </div>
     </div>
-  </Section>
+  </article>
 
   <Section tone="linen">
-    <div class="pr-cta">
+    <div class="article-cta">
       <div>
         <h2>Thinking about getting something looked at?</h2>
         <p>
@@ -162,7 +173,7 @@ const pressSchema = [
           the right appointment type.
         </p>
       </div>
-      <div class="pr-cta__btns">
+      <div class="article-cta__btns">
         <Button slug="web-wa" variant="whatsapp" size="lg">Ask us on WhatsApp</Button>
         <Button href="/book" variant="secondary" size="lg">Book an appointment</Button>
       </div>
@@ -171,17 +182,31 @@ const pressSchema = [
 </BaseLayout>
 
 <style>
-  .pr-header {
+  .article-container {
     background: var(--bg-page);
     padding-block: clamp(2rem, 1.5rem + 3vw, 4rem);
     border-bottom: 1px solid var(--color-border);
   }
-  .pr-header__inner {
+
+  .article-editorial {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 var(--space-5);
+  }
+
+  @media (max-width: 640px) {
+    .article-editorial {
+      padding: 0 var(--space-4);
+    }
+  }
+
+  .article-header {
     display: flex;
     flex-direction: column;
-    gap: var(--space-3);
+    gap: var(--space-2);
   }
-  .pr-header__back {
+
+  .article-breadcrumb {
     display: inline-flex;
     align-items: center;
     gap: var(--space-2);
@@ -191,37 +216,80 @@ const pressSchema = [
     text-decoration: none;
     align-self: start;
   }
-  .pr-header__back:hover { color: var(--color-primary); }
-  .pr-header__outlet {
+  .article-breadcrumb:hover { color: var(--color-primary); }
+
+  .article-category {
     font-size: var(--fs-caption);
     font-weight: var(--weight-semibold);
     letter-spacing: var(--tracking-label);
     text-transform: uppercase;
     color: var(--color-accent);
+    margin: 0;
   }
-  .pr-header__meta,
-  .pr-header__featuring {
+
+  .article-title {
+    font-size: clamp(1.75rem, 4vw, 2.5rem);
+    line-height: var(--lh-snug);
+    color: var(--text-default);
+    margin: 0;
+  }
+
+  .article-meta,
+  .article-featuring {
     font-size: var(--fs-small);
     color: var(--text-muted);
+    margin: 0;
   }
-  .pr-header__featuring a {
+
+  .article-featuring a {
     color: var(--color-primary);
     font-weight: var(--weight-medium);
     text-decoration: none;
   }
-  .pr-header__featuring a:hover { text-decoration: underline; }
+  .article-featuring a:hover { text-decoration: underline; }
 
-  .pr-body :global(h2) {
+  .article-hero {
+    margin: var(--space-6) 0;
+    padding: 0;
+  }
+
+  .article-hero img {
+    width: 100%;
+    max-width: 900px;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+    display: block;
+  }
+
+  .article-hero__caption {
+    margin-top: var(--space-3);
+    font-size: var(--fs-caption);
+    color: var(--text-muted);
+  }
+
+  .article-body {
+    max-width: 740px;
+  }
+
+  .article-body :global(h2) {
     margin-top: var(--space-7);
     margin-bottom: var(--space-3);
   }
-  .pr-body :global(h2:first-child) { margin-top: 0; }
-  .pr-body :global(p) {
+  .article-body :global(h2:first-child) { margin-top: 0; }
+
+  .article-body :global(h3) {
+    margin-top: var(--space-5);
+    margin-bottom: var(--space-2);
+  }
+
+  .article-body :global(p) {
     color: var(--text-muted);
     margin-bottom: var(--space-4);
     line-height: var(--lh-body);
   }
-  .pr-body :global(ul) {
+
+  .article-body :global(ul),
+  .article-body :global(ol) {
     color: var(--text-muted);
     margin-bottom: var(--space-4);
     padding-left: 1.4rem;
@@ -229,77 +297,89 @@ const pressSchema = [
     flex-direction: column;
     gap: var(--space-2);
   }
-  .pr-body :global(strong) {
+
+  .article-body :global(strong) {
     font-weight: var(--weight-semibold);
     color: var(--text-default);
   }
 
-  /* The single attributed quote from the outlet's piece. */
-  .pr-quote {
-    margin-block: var(--space-6);
+  .article-quote {
+    margin: var(--space-6) 0;
     padding-left: var(--space-5);
     border-left: 3px solid var(--color-primary);
+    max-width: 740px;
   }
-  .pr-quote blockquote {
+
+  .article-quote blockquote {
     font-family: var(--font-display);
     font-size: var(--fs-h3);
     line-height: var(--lh-snug);
     color: var(--text-default);
+    margin: 0;
   }
-  .pr-quote figcaption {
+
+  .article-quote figcaption {
     margin-top: var(--space-3);
     font-size: var(--fs-caption);
     color: var(--text-muted);
   }
 
-  .pr-source {
+  .article-source {
     margin-top: var(--space-7);
     padding: var(--space-5);
     background: var(--bg-page);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
+    max-width: 740px;
   }
-  .pr-source__label {
+
+  .article-source__label {
     font-size: var(--fs-caption);
     font-weight: var(--weight-semibold);
     letter-spacing: var(--tracking-label);
     text-transform: uppercase;
     color: var(--text-muted);
+    margin: 0;
   }
-  .pr-source__title {
+
+  .article-source__title {
     margin-top: var(--space-2);
+    margin-bottom: var(--space-3);
     font-family: var(--font-display);
     font-weight: var(--weight-semibold);
     color: var(--text-default);
   }
-  .pr-source__link {
+
+  .article-source__link {
     display: inline-block;
-    margin-top: var(--space-3);
     font-weight: var(--weight-semibold);
     color: var(--color-primary);
     text-decoration: underline;
     text-underline-offset: 0.2em;
   }
-  .pr-source__note {
+
+  .article-source__note {
     margin-top: var(--space-3);
     font-size: var(--fs-caption);
     color: var(--text-muted);
   }
 
-  .pr-cta {
+  .article-cta {
     display: grid;
     gap: var(--space-5);
     align-items: start;
   }
+
   @media (min-width: 760px) {
-    .pr-cta {
+    .article-cta {
       grid-template-columns: 1fr auto;
       align-items: center;
     }
   }
-  .pr-cta h2 { margin-bottom: var(--space-2); }
-  .pr-cta p { color: var(--text-muted); max-width: 44ch; }
-  .pr-cta__btns {
+
+  .article-cta h2 { margin-bottom: var(--space-2); }
+  .article-cta p { color: var(--text-muted); max-width: 44ch; }
+  .article-cta__btns {
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-3);

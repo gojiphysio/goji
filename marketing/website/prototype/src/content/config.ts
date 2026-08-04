@@ -180,6 +180,9 @@ const press = defineCollection({
     featuring: z
       .array(z.object({ name: z.string(), slug: z.string() }))
       .default([]),
+    /** Optional hero image (path under /public) + its alt text. */
+    heroImage: z.string().optional(),
+    heroAlt: z.string().optional(),
     /** One short attributed quote. Keep it short - this is someone else's
      *  copyrighted text, quoted for attribution, not reproduced. */
     pullQuote: z.string().optional(),
