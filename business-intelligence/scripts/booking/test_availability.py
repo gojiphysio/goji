@@ -217,6 +217,25 @@ def test_appointment_with_doctor_field_blocks_slots():
     assert out["claire-ng"] == ["08:00", "11:00"]
 
 
+def test_leave_entry_with_date_only_fields_blocks_day():
+    # Test that leave entries with date-only fields (start_date/end_date) are
+    # converted to proper datetimes and block availability. This simulates
+    # Plato's clinician_leave endpoint returning dates without time components.
+    sat = date(2026, 8, 8)  # Saturday
+    # Leave entry with date-only fields (as returned from Plato's clinician_leave)
+    appts = [{"color": "6hpO", "title": "Holiday", "type": "leave",
+              "starttime": "2026-08-08T00:00:00", "endtime": "2026-08-09T00:00:00"}]
+    cfg = {"calendars": [{"id": "dDIjWJp", "rules": [{
+        "name": "Claire Ng", "book_calendar": "6hpO",
+        "starttime": "08:00", "endtime": "18:00", "min_days": 0, "max_days": 365,
+        "restricted_days": [], "restricted_blocks": [],
+    }]}]}
+    now = datetime(2026, 8, 7, 9, 0)
+    out = derive_availability(StubPlato(appts, cfg), "physiotherapy", sat, now=now)
+    # Entire day is on leave, so no slots available
+    assert out["claire-ng"] == []
+
+
 def test_leave_entry_blocks_all_day():
     # Test that leave/vacation entries block entire day availability.
     # Leave entries should come as full-day (00:00-23:59 or start_date-end_date).
