@@ -12,7 +12,7 @@
  * Plato calendar:
  * - Physiotherapy -> Women's/Pelvic calendar: Cheryl, Kristy, Claire.
  * - Mummy & Baby  -> Paediatric calendar:     Cheryl, Kristy.
- * - Clinical Pilates -> Pilates 1:1 calendar: Cheryl, Claire.
+ * - Clinical Pilates -> Pilates 1:1 calendar: Claire (Cheryl removed).
  * - Strength & Conditioning -> S&C calendar:  Kristy, Claire.
  * calendarId is the Plato booking calendar `color` used when creating the
  * appointment; doctorCode is the Plato doctor code. Keep this in sync with
@@ -36,7 +36,7 @@ export const clinicians: Clinician[] = [
     id: "cheryl-long",
     name: "Cheryl Long",
     role: "Senior Physiotherapist",
-    services: ["physiotherapy", "mummy-baby", "clinical-pilates"],
+    services: ["physiotherapy", "mummy-baby"],
     calendarId: "blue",
     doctorCode: "PCL",
   },

@@ -85,10 +85,11 @@ def derive_availability(
     time on both sides. `now` (naive SGT) is injectable for testing; defaults to
     the current SGT time.
     """
-    booked = _booked_by_calendar(plato.appointments(day.isoformat(), day.isoformat()))
+    raw_appts = plato.appointments(day.isoformat(), day.isoformat())
+    booked = _booked_by_calendar(raw_appts)
     cfg = plato.online_booking_config()
     return _derive_day(cfg, booked, service_id, day, clinician_id=clinician_id,
-                       focus=focus, home=home, now=now)
+                       focus=focus, home=home, now=now, _raw_appointments=raw_appts if _DIAG else None)
 
 
 def derive_available_days(
@@ -109,15 +110,15 @@ def derive_available_days(
     fetch covers the whole range — per-day fetches would blow Plato's 20 req/min
     budget for a single month view.
     """
-    booked = _booked_by_calendar(
-        plato.appointments(start.isoformat(), end.isoformat()))
+    raw_appts = plato.appointments(start.isoformat(), end.isoformat())
+    booked = _booked_by_calendar(raw_appts)
     cfg = plato.online_booking_config()
     out: list[str] = []
     day = start
     while day <= end:
         avail = _derive_day(cfg, booked, service_id, day,
                             clinician_id=clinician_id, focus=focus, home=home,
-                            now=now)
+                            now=now, _raw_appointments=raw_appts if _DIAG else None)
         if any(avail.values()):
             out.append(day.isoformat())
         day += timedelta(days=1)
@@ -134,17 +135,34 @@ def _derive_day(
     focus: str | None = None,
     home: bool = False,
     now: datetime | None = None,
+    _raw_appointments: list[dict] | None = None,
 ) -> dict[str, list[str]]:
     """The per-day core of derive_availability, on pre-fetched Plato data.
 
     `booked` may span more days than `day` (the range derivation fetches a whole
     month at once) — overlap checks only ever match same-day times.
+
+    `_raw_appointments` is optionally passed for diagnostic logging only.
     """
     svc = SERVICES.get(service_id)
     if not svc:
         raise ValueError(f"unknown service {service_id!r}")
     if home and not svc["supports_home"]:
         return {}
+
+    # Diagnostic: log raw appointment data to understand recurring appointment format
+    if _DIAG and _raw_appointments:
+        same_day_appts = [a for a in _raw_appointments
+                         if a.get("starttime", "").startswith(day.isoformat())]
+        if same_day_appts:
+            log.info(f"RAW APPOINTMENTS for {day.isoformat()}:")
+            for a in same_day_appts:
+                log.info(f"  {a.get('color', '?'):8} {a.get('title', '?'):20} "
+                        f"{a.get('starttime', '?')} - {a.get('endtime', '?')}")
+                # Check for recurrence fields that might not be handled
+                for key in a:
+                    if 'recur' in key.lower() or 'repeat' in key.lower():
+                        log.info(f"    RECURRING FIELD: {key} = {a[key]}")
 
     # A physiotherapy sub-type opens only its clinicians' calendars. Ignored for
     # non-physio services and unknown sub-types (treated as "no restriction").
