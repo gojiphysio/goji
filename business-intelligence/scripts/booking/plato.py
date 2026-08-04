@@ -117,14 +117,36 @@ class PlatoClient:
         """Every appointment with starttime in [start_date, end_date] (YYYY-MM-DD),
         across all pages. Cached per range for APPTS_TTL_S (the availability hot
         path re-reads the same day repeatedly). Includes regular appointments and
-        leave/unavailable entries."""
+        leave/unavailable entries.
+
+        IMPORTANT: For single-day queries, also fetches a broader window to catch
+        recurring appointments that may not be explicitly returned for that day."""
+        from datetime import date as dateclass
+
         key = (start_date, end_date)
         now = time.monotonic()
         hit = self._appts_cache.get(key)
         if hit and now - hit[0] < APPTS_TTL_S:
             return hit[1]
+
+        # For single-day queries, fetch a broader window to catch recurring entries
+        # that started earlier but may recur on the queried date.
+        query_start, query_end = start_date, end_date
+        try:
+            start_obj = dateclass.fromisoformat(start_date)
+            end_obj = dateclass.fromisoformat(end_date)
+            if start_obj == end_obj:
+                # Single day: expand window to ±30 days to catch recurring entries
+                expanded_start = start_obj - timedelta(days=30)
+                expanded_end = end_obj + timedelta(days=30)
+                query_start = expanded_start.isoformat()
+                query_end = expanded_end.isoformat()
+        except (ValueError, AttributeError):
+            pass
+
         rows = self.get_all("appointment",
-                            {"start_date": start_date, "end_date": end_date})
+                            {"start_date": query_start, "end_date": query_end})
+
         # Mark leave/vacation appointments by title pattern, and ensure all appointments
         # have proper ISO datetime strings (not just dates). Holiday blocks are regular
         # appointments on the clinician's own calendar, identified by title (from real
