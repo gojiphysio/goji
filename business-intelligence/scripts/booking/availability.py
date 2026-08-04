@@ -10,9 +10,15 @@ A slot at time T is offered iff [T, T+duration] is inside the clinician's window
 outside every restricted block, and free of any existing appointment on that
 clinician's calendar. For home visits, the free interval is widened by the travel
 padding on both sides, and only Cheryl is considered.
+
+DIAGNOSTIC_LOGGING: set environment variable BOOKING_AVAILABILITY_DEBUG=1 to enable
+detailed per-slot logging (clinician, service, date, rule, candidate slots, exclusions,
+final slots). Used to diagnose recurring entry issues.
 """
 from __future__ import annotations
 
+import logging
+import os
 from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
 
@@ -22,6 +28,7 @@ from .config import (
     HOME_VISIT_CLINICIAN,
     MAX_ADVANCE_DAYS,
     PHYSIO_FOCUS_CLINICIANS,
+    SERVICE_CLINICIANS,
     SERVICES,
     SLOT_MINUTES,
     clinician_by_calendar,
@@ -29,6 +36,9 @@ from .config import (
 
 SGT = ZoneInfo("Asia/Singapore")
 _DOW = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]  # python weekday() order
+
+log = logging.getLogger("booking.availability")
+_DIAG = os.environ.get("BOOKING_AVAILABILITY_DEBUG", "").lower() in ("1", "true", "yes")
 
 
 def _rules_for(cfg: dict, online_calendar_id: str) -> list[dict]:
@@ -141,6 +151,10 @@ def _derive_day(
     focus_allowed = (PHYSIO_FOCUS_CLINICIANS.get(focus or "")
                      if service_id == "physiotherapy" else None)
 
+    # Service-specific clinician roster: if defined, only these clinicians can
+    # provide this service (e.g. Cheryl removed from Clinical Pilates).
+    service_clinicians = SERVICE_CLINICIANS.get(service_id)
+
     dur = timedelta(minutes=svc["duration_min"])
     pad = timedelta(minutes=HOME_TRAVEL_MINUTES if home else 0)
     step = timedelta(minutes=SLOT_MINUTES)
@@ -162,22 +176,39 @@ def _derive_day(
         cid = clinician_by_calendar(color or "")
         if not cid:
             continue
+
+        # Early exclusion checks
         if home and cid != HOME_VISIT_CLINICIAN:
             continue
         if clinician_id and cid != clinician_id:
             continue
         if focus_allowed is not None and cid not in focus_allowed:
             continue
+        if service_clinicians is not None and cid not in service_clinicians:
+            continue
         if dow in (rule.get("restricted_days") or []):
+            if _DIAG:
+                log.info(f"  {cid}: day-off ({dow})")
             continue
 
         # Booking must be at least `min_days` ahead (Plato's rule; 1 = no same-day)
         # and within `max_days`.
         delta = (day - today).days
         if delta < (rule.get("min_days") or 0):
+            if _DIAG:
+                log.info(f"  {cid}: outside min_days window (delta={delta}, min={rule.get('min_days', 0)})")
             continue
         if delta > min(rule.get("max_days") or 365, MAX_ADVANCE_DAYS):
+            if _DIAG:
+                log.info(f"  {cid}: outside max_days window (delta={delta}, max={min(rule.get('max_days', 365), MAX_ADVANCE_DAYS)})")
             continue
+
+        if _DIAG:
+            log.info(f"== {service_id} / {day} ({dow}) / {cid} ==")
+            log.info(f"  rule: {rule.get('name')} (calendar={color})")
+            start_h = rule.get('starttime', '08:00')
+            end_h = rule.get('endtime', '18:00')
+            log.info(f"  rule hours: {start_h}-{end_h}")
 
         # Window = the clinician's rule hours, clamped by any online-hours
         # override (e.g. Cheryl's online bookings don't start until 09:00).
@@ -193,20 +224,47 @@ def _derive_day(
         ]
         taken = booked.get(color, []) + clinic_wide
 
+        if _DIAG:
+            win_start_str = win_start.strftime('%H:%M')
+            win_end_str = win_end.strftime('%H:%M')
+            log.info(f"  final window: {win_start_str}-{win_end_str} (after online_start/end override)")
+            if blocks:
+                blocks_str = [f"{s.strftime('%H:%M')}-{e.strftime('%H:%M')}" for s, e in blocks]
+                log.info(f"  restricted blocks: {blocks_str}")
+            log.info(f"  taken slots ({color}): {len(taken)} appointments")
+            if taken:
+                taken_str = [f"{s.strftime('%H:%M:%S')}-{e.strftime('%H:%M:%S')}" for s, e in taken[:5]]
+                log.info(f"    {taken_str}")
+
         slots: list[str] = []
         t = win_start
         while t + dur <= win_end:
             occ_start, occ_end = t - pad, t + dur + pad
             free = occ_start >= win_start  # travel-before must fit the working day
+            exclusion = None
             if free and day == today and t <= _now:
                 free = False  # no past slots (same-day is also gated by min_days)
+                exclusion = "past"
             if free and any(_overlaps(occ_start, occ_end, bs, be) for bs, be in blocks):
                 free = False
+                exclusion = "restricted_block"
             if free and any(_overlaps(occ_start, occ_end, bs, be) for bs, be in taken):
                 free = False
+                exclusion = "booked"
             if free:
                 slots.append(t.strftime("%H:%M"))
+            elif _DIAG and False:  # set to True to log every excluded slot (verbose)
+                log.debug(f"    {t.strftime('%H:%M')} excluded: {exclusion}")
             t += step
+
+        if _DIAG:
+            slots_str = ', '.join(slots[:10]) if slots else '(none)'
+            ellipsis = '...' if len(slots) > 10 else ''
+            log.info(f"  final slots: {len(slots)} ({slots_str}{ellipsis})")
+
         out[cid] = slots
+
+    if _DIAG:
+        log.info(f"AVAILABILITY SUMMARY: service={service_id} date={day} found {sum(len(s) for s in out.values())} total slots across {len(out)} clinicians")
 
     return out

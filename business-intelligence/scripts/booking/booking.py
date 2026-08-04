@@ -27,6 +27,7 @@ from .config import (
     MAX_ADVANCE_DAYS,
     PHYSIO_FOCUS_CLINICIANS,
     PHYSIO_FOCUS_LABELS,
+    SERVICE_CLINICIANS,
     SERVICES,
 )
 
@@ -199,6 +200,11 @@ def create_booking(plato, draft: dict, *, now: datetime | None = None) -> dict:
         # sub-type (the website only offers valid ones); refuse it.
         _require(focus_clinicians is None or draft["clinician_id"] in focus_clinicians,
                  "That clinician doesn't offer this type of physiotherapy.")
+        # Check if the clinician is eligible for this service (e.g. removed from
+        # Clinical Pilates while still available in other services).
+        service_clinicians = SERVICE_CLINICIANS.get(service_id)
+        _require(service_clinicians is None or draft["clinician_id"] in service_clinicians,
+                 "That clinician is not available for this service.")
         candidates = [draft["clinician_id"]]
         clinician_requested = True
     else:

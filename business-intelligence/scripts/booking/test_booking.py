@@ -223,6 +223,52 @@ def test_booking_beyond_60_days_is_refused():
     assert p.created == []  # nothing written
 
 
+def test_booking_clinician_ineligible_for_service():
+    # Cheryl is excluded from Clinical Pilates by SERVICE_CLINICIANS config.
+    # Attempting to book her for that service should fail.
+    p = StubPlato()
+    try:
+        create_booking(p, {"service": "clinical-pilates", "date": DAY,
+                           "time": "10:00", "format": "clinic",
+                           "name": "Jane Tan", "phone": "+65 9123 4567",
+                           "email": "jane@example.com",
+                           "clinician_id": "cheryl-long"}, now=NOW)
+        assert False, "expected BookingError"
+    except BookingError:
+        pass
+    assert p.created == []  # nothing written
+
+
+def test_first_available_respects_service_clinician_eligibility():
+    # Clinical Pilates is restricted to Claire by SERVICE_CLINICIANS.
+    # "First available" for Clinical Pilates should assign Claire, never Cheryl.
+    # Config for Clinical Pilates with both Cheryl and Claire.
+    cfg_pilates = {
+        "calendars": [{
+            "id": "ne8sgkb",
+            "rules": [
+                {"name": "Cheryl Long", "book_calendar": "blue", "starttime": "09:00",
+                 "endtime": "17:00", "restricted_days": [], "restricted_blocks": []},
+                {"name": "Claire Ng", "book_calendar": "6hpO", "starttime": "09:00",
+                 "endtime": "17:00", "restricted_days": [], "restricted_blocks": []},
+            ],
+        }],
+    }
+
+    class StubPlatoCP(StubPlato):
+        def online_booking_config(self):
+            return cfg_pilates
+
+    p = StubPlatoCP()
+    res = create_booking(p, {"service": "clinical-pilates", "date": DAY,
+                             "time": "10:00", "format": "clinic",
+                             "name": "Jane Tan", "phone": "+65 9123 4567",
+                             "email": "jane@example.com",
+                             "clinician_id": ""}, now=NOW)
+    # Should be assigned to Claire, not Cheryl (even though Cheryl might be free).
+    assert res["clinician_id"] == "claire-ng"
+
+
 if __name__ == "__main__":
     for name, fn in sorted(globals().items()):
         if name.startswith("test_") and callable(fn):

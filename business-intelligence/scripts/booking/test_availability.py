@@ -133,6 +133,36 @@ def test_available_days_excludes_fully_booked_day():
     assert days == ["2026-07-16"]  # WED is booked wall-to-wall, Thu is free
 
 
+def test_service_clinician_eligibility_excludes_ineligible_clinicians():
+    # Clinical Pilates allows only Claire (Cheryl is excluded).
+    # Both Cheryl and Claire are available in the config, but only Claire should appear.
+    cfg = {
+        "calendars": [{
+            "id": "ne8sgkb",  # Clinical Pilates online calendar
+            "rules": [
+                {"name": "Cheryl Long", "book_calendar": "blue",
+                 "starttime": "09:00", "endtime": "12:00", "min_days": 1,
+                 "max_days": 365, "restricted_days": [], "restricted_blocks": []},
+                {"name": "Claire Ng", "book_calendar": "6hpO",
+                 "starttime": "09:00", "endtime": "12:00", "min_days": 1,
+                 "max_days": 365, "restricted_days": [], "restricted_blocks": []},
+            ],
+        }],
+    }
+    out = derive_availability(StubPlato([], cfg), "clinical-pilates", WED, now=NOW)
+    # Only Claire should be available; Cheryl is excluded by SERVICE_CLINICIANS.
+    assert set(out) == {"claire-ng"}
+    assert out["claire-ng"] == ["09:00", "09:30", "10:00", "10:30", "11:00"]
+    # Cheryl should not appear in the result.
+    assert "cheryl-long" not in out
+
+
+def test_clinician_still_available_in_other_services():
+    # Cheryl is excluded from Clinical Pilates but should be available in Physiotherapy.
+    out = derive_availability(StubPlato([], CFG_ALL), "physiotherapy", WED, now=NOW)
+    assert "cheryl-long" in out  # Cheryl still available in Physiotherapy
+
+
 if __name__ == "__main__":
     for name, fn in sorted(globals().items()):
         if name.startswith("test_") and callable(fn):
