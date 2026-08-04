@@ -304,6 +304,26 @@ def test_ooo_titled_appointment_blocks_availability():
     assert out["claire-ng"] == []
 
 
+def test_recurring_appointment_partial_day_blocks():
+    # Recurring appointments (like recurring patient sessions 9-11am) should block
+    # the overlapping slots. After plato.py converts date-only fields to datetimes,
+    # these appointments block availability correctly.
+    fri = date(2026, 8, 15)
+    # Recurring appointment 9:00-11:00 (already converted to proper datetime by plato.py)
+    appts = [{"color": "6hpO", "title": "Matthew (recurring)",
+              "starttime": "2026-08-15T09:00:00", "endtime": "2026-08-15T11:00:00"}]
+    cfg = {"calendars": [{"id": "dDIjWJp", "rules": [{
+        "name": "Claire Ng", "book_calendar": "6hpO",
+        "starttime": "08:00", "endtime": "12:00", "min_days": 0, "max_days": 365,
+        "restricted_days": [], "restricted_blocks": [],
+    }]}]}
+    now = datetime(2026, 8, 14, 9, 0)
+    out = derive_availability(StubPlato(appts, cfg), "physiotherapy", fri, now=now)
+    # 9:00-11:00 recurring appointment blocks 09:00, 09:30, 10:00, 10:30 (60-min slots)
+    # Available: 08:00, 11:00
+    assert out["claire-ng"] == ["08:00", "11:00"]
+
+
 if __name__ == "__main__":
     for name, fn in sorted(globals().items()):
         if name.startswith("test_") and callable(fn):

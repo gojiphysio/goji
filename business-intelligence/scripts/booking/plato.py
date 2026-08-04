@@ -125,13 +125,31 @@ class PlatoClient:
             return hit[1]
         rows = self.get_all("appointment",
                             {"start_date": start_date, "end_date": end_date})
-        # Mark leave/vacation appointments by title pattern. Holiday blocks are regular
+        # Mark leave/vacation appointments by title pattern, and ensure all appointments
+        # have proper ISO datetime strings (not just dates). Holiday blocks are regular
         # appointments on the clinician's own calendar, identified by title (from real
         # Plato data analysis; see commit f56b63e). This approach doesn't rely on a
         # non-existent clinician_leave endpoint.
         for appointment in rows:
             if _is_leave_title(appointment.get("title", "")):
                 appointment["type"] = "leave"
+
+            # Convert date-only fields to ISO datetimes if needed
+            starttime = appointment.get("starttime")
+            if starttime and not ("T" in starttime or " " in starttime):
+                # Date-only string (e.g., "2026-08-15"), convert to datetime at start of day
+                appointment["starttime"] = f"{starttime}T00:00:00"
+
+            endtime = appointment.get("endtime")
+            if endtime and not ("T" in endtime or " " in endtime):
+                # Date-only string (e.g., "2026-08-15"), convert to next day at start of day
+                try:
+                    end_dt = datetime.fromisoformat(endtime)
+                    end_dt = end_dt + timedelta(days=1)
+                    appointment["endtime"] = end_dt.isoformat()
+                except (ValueError, TypeError):
+                    appointment["endtime"] = f"{endtime}T23:59:59"
+
         self._appts_cache[key] = (now, rows)
         return rows
 
