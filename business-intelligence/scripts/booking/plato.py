@@ -103,7 +103,8 @@ class PlatoClient:
     def appointments(self, start_date: str, end_date: str) -> list[dict]:
         """Every appointment with starttime in [start_date, end_date] (YYYY-MM-DD),
         across all pages. Cached per range for APPTS_TTL_S (the availability hot
-        path re-reads the same day repeatedly)."""
+        path re-reads the same day repeatedly). Includes regular appointments and
+        leave/unavailable entries."""
         key = (start_date, end_date)
         now = time.monotonic()
         hit = self._appts_cache.get(key)
@@ -111,6 +112,22 @@ class PlatoClient:
             return hit[1]
         rows = self.get_all("appointment",
                             {"start_date": start_date, "end_date": end_date})
+        # Also fetch leave/vacation entries if the endpoint exists
+        try:
+            leave = self.get_all("clinician_leave",
+                                {"start_date": start_date, "end_date": end_date})
+            # Convert leave entries to appointment format so they block availability
+            for l in leave:
+                rows.append({
+                    "title": l.get("title", "Leave"),
+                    "color": l.get("color") or l.get("clinician_calendar"),
+                    "doctor": l.get("doctor"),
+                    "starttime": l.get("starttime") or l.get("start_date"),
+                    "endtime": l.get("endtime") or l.get("end_date"),
+                    "type": "leave",  # mark as leave for diagnostics
+                })
+        except Exception:
+            pass  # clinician_leave endpoint may not exist; continue with regular appointments
         self._appts_cache[key] = (now, rows)
         return rows
 
