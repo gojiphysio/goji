@@ -130,9 +130,13 @@ class PlatoClient:
         # appointments on the clinician's own calendar, identified by title (from real
         # Plato data analysis; see commit f56b63e). This approach doesn't rely on a
         # non-existent clinician_leave endpoint.
+        import sys
         for appointment in rows:
-            if _is_leave_title(appointment.get("title", "")):
+            title = appointment.get("title", "")
+            if _is_leave_title(title):
                 appointment["type"] = "leave"
+                # Log all leave appointments with their structure for debugging
+                print(f"DEBUG LEAVE: {title} | start={appointment.get('starttime')} | end={appointment.get('endtime')} | color={appointment.get('color')} | doctor={appointment.get('doctor')}", file=sys.stderr)
 
             # Convert date-only fields to ISO datetimes if needed
             starttime = appointment.get("starttime")
