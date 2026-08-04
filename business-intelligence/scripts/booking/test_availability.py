@@ -324,6 +324,45 @@ def test_recurring_appointment_partial_day_blocks():
     assert out["claire-ng"] == ["08:00", "11:00"]
 
 
+def test_multiday_block_on_first_day():
+    # Multi-day recurring blocks (e.g., Fri 8am - Sat 8:30pm) should block
+    # availability on both Friday and Saturday.
+    # Test Friday: a multi-day block starting Friday 8am should block Fri slots.
+    fri = date(2026, 8, 15)
+    # Block spans Friday 8am to Saturday 8:30pm
+    appts = [{"color": "6hpO", "title": "Block",
+              "starttime": "2026-08-15T08:00:00", "endtime": "2026-08-16T20:30:00"}]
+    cfg = {"calendars": [{"id": "dDIjWJp", "rules": [{
+        "name": "Claire Ng", "book_calendar": "6hpO",
+        "starttime": "08:00", "endtime": "21:00", "min_days": 0, "max_days": 365,
+        "restricted_days": [], "restricted_blocks": [],
+    }]}]}
+    now = datetime(2026, 8, 14, 9, 0)
+    out = derive_availability(StubPlato(appts, cfg), "physiotherapy", fri, now=now)
+    # Entire Friday is blocked by the multi-day block (08:00-20:30 span)
+    assert out["claire-ng"] == []
+
+
+def test_multiday_block_on_second_day():
+    # Same multi-day block should also block the second day (Saturday).
+    sat = date(2026, 8, 16)
+    # Block spans Friday 8am to Saturday 8:30pm
+    appts = [{"color": "6hpO", "title": "Block",
+              "starttime": "2026-08-15T08:00:00", "endtime": "2026-08-16T20:30:00"}]
+    cfg = {"calendars": [{"id": "dDIjWJp", "rules": [{
+        "name": "Claire Ng", "book_calendar": "6hpO",
+        "starttime": "08:00", "endtime": "21:00", "min_days": 0, "max_days": 365,
+        "restricted_days": [], "restricted_blocks": [],
+    }]}]}
+    now = datetime(2026, 8, 14, 9, 0)
+    out = derive_availability(StubPlato(appts, cfg), "physiotherapy", sat, now=now)
+    # Saturday up to 8:30pm is blocked
+    # Working hours 08:00-21:00; block goes 08:00(Fri) to 20:30(Sat)
+    # Available slots on Saturday after 20:30: only 21:00 (but need 60-min appt, so no slots)
+    # Actually, 20:30 blocks everything up to then, and 21:00-21:59 would exceed window
+    assert out["claire-ng"] == []
+
+
 if __name__ == "__main__":
     for name, fn in sorted(globals().items()):
         if name.startswith("test_") and callable(fn):

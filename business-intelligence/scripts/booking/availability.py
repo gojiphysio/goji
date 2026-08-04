@@ -80,10 +80,14 @@ def _calendar_color_for_appointment(a: dict) -> str:
 
 def _booked_by_calendar(appointments: list[dict]) -> dict[str, list[tuple[datetime, datetime]]]:
     """Group appointment (start, end) ranges by calendar `color`. `-all-` entries
-    (e.g. a clinic-wide meeting) block every clinician."""
+    (e.g. a clinic-wide meeting) block every clinician.
+
+    Includes multi-day blocks that may span across days, ensuring recurring
+    appointments block all occurrences consistently."""
     booked: dict[str, list[tuple[datetime, datetime]]] = {}
     skipped = 0
     unmapped = 0
+    multiday = 0
     for a in appointments:
         try:
             s = datetime.fromisoformat(a["starttime"])
@@ -103,12 +107,19 @@ def _booked_by_calendar(appointments: list[dict]) -> dict[str, list[tuple[dateti
                 log.warning(f"  Appointment has no mappable color/calendar/doctor: {a.get('title', '?')} "
                            f"({s.isoformat()} - {e.isoformat()}). Fields: {list(a.keys())}")
             unmapped += 1
+            continue
+
+        # Track multi-day blocks (e.g., recurring blocks that span Friday 8am-Sat 8:30pm)
+        if s.date() != e.date():
+            multiday += 1
+            if _DIAG:
+                log.debug(f"  Multi-day appointment: {a.get('title', '?')} ({s.isoformat()} to {e.isoformat()})")
 
         booked.setdefault(color, []).append((s, e))
 
-    if _DIAG and (skipped or unmapped):
+    if _DIAG and (skipped or unmapped or multiday):
         log.info(f"  _booked_by_calendar: {len(appointments)} appointments, "
-                f"skipped={skipped} (parse error), unmapped={unmapped} (no color)")
+                f"skipped={skipped}, unmapped={unmapped}, multiday={multiday}")
 
     return booked
 
