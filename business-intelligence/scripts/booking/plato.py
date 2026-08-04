@@ -133,6 +133,9 @@ class PlatoClient:
         for appointment in rows:
             if _is_leave_title(appointment.get("title", "")):
                 appointment["type"] = "leave"
+                # DEBUG: log leave appointments to understand Plato's data structure
+                import sys
+                print(f"DEBUG: Found leave appointment: {appointment}", file=sys.stderr)
 
             # Convert date-only fields to ISO datetimes if needed
             starttime = appointment.get("starttime")
