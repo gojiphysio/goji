@@ -50,17 +50,16 @@ const schema = [
 ---
 
 <BaseLayout
-  title="Media | Goji Physiotherapy Singapore"
-  description="Articles from the physiotherapists at Goji, and media coverage of the clinic. Women's and family physiotherapy at Lentor MRT, Singapore."
+  title="Articles and Media | Goji Physiotherapy Singapore"
+  description="Read practical articles from the Goji team and explore media coverage of our work in women's and children's physiotherapy."
   schema={schema}
 >
   <section class="media-hero">
     <div class="container">
       <p class="eyebrow">Media</p>
-      <h1>Reading and coverage</h1>
+      <h1>Articles and media coverage</h1>
       <p class="media-hero__lead">
-        Writing from our physiotherapists, and the places our work has been
-        covered.
+        Explore practical articles from the Goji team, alongside interviews and features about our clinic, our people, and our work.
       </p>
     </div>
   </section>
@@ -77,8 +76,7 @@ const schema = [
         </span>
         <h2>Blog</h2>
         <p>
-          Plain-language answers to the questions we get asked in the clinic
-          every week, written by the physiotherapists who answer them.
+          Practical articles from our physiotherapists and team to help you better understand your body, your care, and your options.
         </p>
         <span class="media-choice__cta">
           {posts.length > 0
@@ -97,12 +95,11 @@ const schema = [
         </span>
         <h2>Press</h2>
         <p>
-          Interviews and features about the clinic and the people in it, each
-          linking to the original article on the publisher's own site.
+          Interviews, features, and expert commentary involving Goji, our clinicians, and our work in women's and children's health.
         </p>
         <span class="media-choice__cta">
           {latestPress
-            ? `See the coverage (${press.length})`
+            ? `View press coverage (${press.length})`
             : "Coming soon"}
         </span>
       </a>
@@ -110,10 +107,26 @@ const schema = [
 
     {
       latestPress && (
-        <p class="media-latest">
-          Most recent: <a href={`/press/${latestPress.slug}`}>{latestPress.data.title}</a>,
-          {" "}{latestPress.data.outlet}, {formatDate(latestPress.data.pubDate)}.
-        </p>
+        <div class="media-latest">
+          <p>Most recent:</p>
+          <a href={`/press/${latestPress.slug}`} class="media-latest__item">
+            {latestPress.data.logo && (
+              <img
+                src={`/press/${latestPress.data.logo}`}
+                alt={latestPress.data.outlet}
+                width="100"
+                height="100"
+                class="media-latest__logo"
+              />
+            )}
+            <span class="media-latest__text">
+              <span class="media-latest__title">{latestPress.data.title}</span>
+              <span class="media-latest__meta">
+                {latestPress.data.outlet}, {formatDate(latestPress.data.pubDate)}
+              </span>
+            </span>
+          </a>
+        </div>
       )
     }
   </Section>
@@ -197,13 +210,50 @@ const schema = [
 
   .media-latest {
     margin-top: var(--space-5);
+  }
+  .media-latest > p {
     font-size: var(--fs-small);
     color: var(--text-muted);
+    margin-bottom: var(--space-3);
   }
-  .media-latest a {
+  .media-latest__item {
+    display: flex;
+    gap: var(--space-3);
+    align-items: center;
+    padding: var(--space-3);
+    background: var(--bg-content);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    color: inherit;
+    transition: box-shadow var(--dur) var(--ease);
+  }
+  .media-latest__item:hover {
+    box-shadow: var(--shadow-sm);
+  }
+  .media-latest__logo {
+    height: 75px;
+    width: auto;
+    max-width: 100px;
+    object-fit: contain;
+    flex-shrink: 0;
+  }
+  .media-latest__text {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    flex: 1;
+  }
+  .media-latest__title {
+    font-size: var(--fs-body);
+    font-weight: var(--weight-semibold);
     color: var(--color-primary);
     text-decoration: underline;
     text-underline-offset: 0.2em;
+  }
+  .media-latest__meta {
+    font-size: var(--fs-small);
+    color: var(--text-muted);
   }
 
   .contact-strip {

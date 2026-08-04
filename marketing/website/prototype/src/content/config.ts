@@ -169,6 +169,8 @@ const press = defineCollection({
     /** Publication name, e.g. "Lianhe Zaobao". */
     outlet: z.string(),
     outletUrl: z.string().url(),
+    /** Optional outlet logo filename (path under /public/press). */
+    logo: z.string().optional(),
     /** The headline as published, in the language it was published in. */
     originalTitle: z.string(),
     /** Canonical source URL — the "Read the full article" destination. */
