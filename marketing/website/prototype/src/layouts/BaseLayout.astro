@@ -19,6 +19,7 @@ import type { SearchType } from "../lib/search.ts";
 interface Props {
   title?: string;
   description?: string;
+  ogImage?: string;
   bare?: boolean;
   noindex?: boolean;
   /** Extra JSON-LD blocks (FAQPage, MedicalWebPage, BreadcrumbList, Person …)
@@ -35,6 +36,7 @@ interface Props {
 const {
   title = SITE.seoTitle,
   description = SITE.seoDescription,
+  ogImage,
   bare = false,
   noindex = false,
   schema,
@@ -53,7 +55,8 @@ const extraSchemas = schema ? (Array.isArray(schema) ? schema : [schema]) : [];
 
 const origin = Astro.site ?? new URL(Astro.url.origin);
 const canonicalURL = new URL(Astro.url.pathname, origin);
-const ogImage = new URL("/og-image.jpg", origin);
+const ogImagePath = ogImage ? ogImage : "/og-image.jpg";
+const ogImageURL = new URL(ogImagePath, origin);
 
 // LocalBusiness structured data for local SEO (NAP from SITE).
 const businessSchema = {
@@ -62,7 +65,7 @@ const businessSchema = {
   name: SITE.fullName,
   alternateName: [SITE.name, "Goji Physio"],
   url: origin.href,
-  image: ogImage.href,
+  image: ogImageURL.href,
   email: SITE.email,
   telephone: SITE.phoneE164,
   priceRange: "$$",
@@ -161,11 +164,11 @@ const GADS_BOOKING_LABEL = import.meta.env.PUBLIC_GADS_BOOKING_LABEL;
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonicalURL.href} />
-    <meta property="og:image" content={ogImage.href} />
+    <meta property="og:image" content={ogImageURL.href} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
-    <meta name="twitter:image" content={ogImage.href} />
+    <meta name="twitter:image" content={ogImageURL.href} />
 
     {!bare && <script type="application/ld+json" set:html={JSON.stringify(businessSchema)} />}
     {extraSchemas.map((s) => (
