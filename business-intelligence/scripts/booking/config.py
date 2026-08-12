@@ -86,7 +86,7 @@ PHYSIO_FOCUS_LABELS: dict[str, str] = {
 # in the website's src/lib/physioCategories.ts; keep the two in sync.
 PHYSIO_FOCUS_CLINICIANS: dict[str, list[str]] = {
     "general": ["cheryl-long", "claire-ng", "kristy-ng"],
-    "womens-health": ["cheryl-long", "claire-ng", "kristy-ng"],
+    "womens-health": ["claire-ng", "kristy-ng"],
     "paediatrics": ["kristy-ng", "cheryl-long"],
     "scoliosis": ["cheryl-long"],
     "others": ["cheryl-long", "claire-ng", "kristy-ng"],

@@ -363,6 +363,49 @@ def test_multiday_block_on_second_day():
     assert out["claire-ng"] == []
 
 
+def test_womens_health_excludes_cheryl():
+    # With womens-health focus, Cheryl should not appear (config updated to ["claire-ng", "kristy-ng"]).
+    day = date(2026, 8, 20)
+    out = derive_availability(
+        StubPlato([], CFG_ALL), "physiotherapy", day,
+        focus="womens-health", now=datetime(2026, 8, 19, 9, 0)
+    )
+    # Should have claire-ng and kristy-ng but NOT cheryl-long
+    assert "claire-ng" in out
+    assert "kristy-ng" in out
+    assert "cheryl-long" not in out
+
+
+def test_womens_health_has_two_clinicians():
+    # Women's Health should have 2 clinicians: Claire and Kristy
+    day = date(2026, 8, 20)
+    out = derive_availability(
+        StubPlato([], CFG_ALL), "physiotherapy", day,
+        focus="womens-health", now=datetime(2026, 8, 19, 9, 0)
+    )
+    # Should have exactly 2 clinicians available
+    assert len(out) == 2
+    # Verify they have available times (9:00-12:00 window, 60-min service)
+    # Slots at 30-min intervals: 09:00, 09:30, 10:00, 10:30, 11:00
+    # (11:30 + 60min = 12:30, exceeds 12:00 end, so excluded)
+    assert out["claire-ng"] == ["09:00", "09:30", "10:00", "10:30", "11:00"]
+    assert out["kristy-ng"] == ["09:00", "09:30", "10:00", "10:30", "11:00"]
+
+
+def test_cheryl_still_available_in_general():
+    # Cheryl should still be available for general physiotherapy (not excluded from that focus)
+    day = date(2026, 8, 20)
+    out = derive_availability(
+        StubPlato([], CFG_ALL), "physiotherapy", day,
+        focus="general", now=datetime(2026, 8, 19, 9, 0)
+    )
+    # Should have all three clinicians for general focus
+    assert "cheryl-long" in out
+    assert "claire-ng" in out
+    assert "kristy-ng" in out
+    assert len(out) == 3
+
+
 if __name__ == "__main__":
     for name, fn in sorted(globals().items()):
         if name.startswith("test_") and callable(fn):
