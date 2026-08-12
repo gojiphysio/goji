@@ -40,7 +40,7 @@ export const physioCategories: PhysioCategory[] = [
     id: "womens-health",
     label: "Women's Health",
     hint: "Prenatal, postpartum, and pelvic health.",
-    clinicianIds: ["cheryl-long", "claire-ng", "kristy-ng"],
+    clinicianIds: ["claire-ng", "kristy-ng"],
   },
   {
     id: "paediatrics",

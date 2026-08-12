@@ -150,9 +150,36 @@ python3 -m pytest test_availability.py test_booking.py -v
   - Temporary vs. permanent exclusions
   - Condition-based restrictions (e.g., "only for scoliosis in Physiotherapy")
 
+## Issue 3: Block Cheryl Long from Women's Health Physiotherapy
+**Status**: ✅ COMPLETE
+
+**Changes Made** (2026-08-12):
+
+1. **Backend Config (config.py)**
+   - Updated `PHYSIO_FOCUS_CLINICIANS["womens-health"]` from `["cheryl-long", "claire-ng", "kristy-ng"]` to `["claire-ng", "kristy-ng"]`
+   - Cheryl is now excluded from Women's Health bookings while retaining access to General MSK, Paediatrics, Scoliosis, and Others
+
+2. **Frontend Config (physioCategories.ts)**
+   - Updated `womens-health` category `clinicianIds` to `["claire-ng", "kristy-ng"]` for sync with backend
+   - UI will only show Claire and Kristy in the clinician picker when Women's Health is selected
+
+3. **Tests Added**
+   - `test_womens_health_excludes_cheryl()` — verifies Cheryl does not appear for Women's Health focus
+   - `test_womens_health_has_two_clinicians()` — confirms 2 clinicians available with correct slots
+   - `test_cheryl_still_available_in_general()` — ensures Cheryl remains available for general physiotherapy
+   - Updated `test_physio_focus_is_written_to_note()` to use Claire instead of Cheryl
+
+**Acceptance Criteria** (verified):
+✅ Cheryl Long is not displayed for Women's Health physio focus
+✅ First available never assigns Cheryl for Women's Health bookings
+✅ Claire and Kristy are available for Women's Health
+✅ Cheryl remains available in General MSK, Paediatrics, Scoliosis, Others
+✅ Cheryl's historical bookings were not deleted
+✅ All 45 booking+availability tests pass
+
 ## References
 
 - Audit Document: `Goji Booking System Audit and Fix.docx`
 - Booking Service: `business-intelligence/scripts/booking/`
 - Config Source of Truth: Plato's `GET /onlineapptbooking/list`
-- Website Config Mirror: `marketing/website/prototype/src/lib/services.ts`, `src/lib/clinicians.ts`
+- Website Config Mirror: `marketing/website/prototype/src/lib/services.ts`, `src/lib/clinicians.ts`, `src/lib/physioCategories.ts`

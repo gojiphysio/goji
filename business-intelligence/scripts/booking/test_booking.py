@@ -118,9 +118,9 @@ def test_empty_notes_are_a_no_op():
 
 def test_physio_focus_is_written_to_note():
     # The physio sub-type is surfaced in the Plato note so the clinic sees what
-    # the session is for.
+    # the session is for. Use Claire (not Cheryl, who is blocked from Women's Health).
     p = StubPlato()
-    res = create_booking(p, {**BASE, "clinician_id": "cheryl-long",
+    res = create_booking(p, {**BASE, "clinician_id": "claire-ng",
                              "physio_focus": "womens-health"}, now=NOW)
     assert res["ok"]
     assert "Type: Women's Health" in p.created[0][0]["description"]

@@ -24,9 +24,11 @@ the clinic's real rules — see the plan/validation notes in the repo.
 ## How availability works (`availability.py`)
 Derived, NOT taken from Plato's hourly `onlineapptbooking/slots` (locked to 60m).
 For each clinician's `onlineapptbooking/list` rule (hours, days off, restricted
-blocks) minus their real `GET /appointment` bookings (paginated; single-day query
-expands recurring), we emit free **30-min** starts where `[t, t+duration]` is
-clear. Rules layered on top (`config.py`):
+blocks) minus their real `GET /appointment` bookings (paginated), we emit free
+**30-min** starts where `[t, t+duration]` is clear. The single-day appointment
+fetch retrieves all recurring entries that Plato returns (we do not expand
+recurrence rules locally; a future Plato API improvement could pre-expand these).
+Rules layered on top (`config.py`):
 - Cheryl 09:00–17:00 Mon–Fri; Kristy/Claire follow their calendars.
 - Clinic-wide `-all-` blocks apply to everyone.
 - Lead time follows Plato's `min_days` (1 day ahead — no same-day).
