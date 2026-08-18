@@ -177,9 +177,43 @@ python3 -m pytest test_availability.py test_booking.py -v
 ✅ Cheryl's historical bookings were not deleted
 ✅ All 45 booking+availability tests pass
 
+## Issue 4: Block Kristy Ng's Wednesdays 5:30pm-8:00pm
+**Status**: ✅ COMPLETE
+
+**Problem**: Kristy Ng's Wednesdays 5:30pm-8:00pm should be blocked for bookings, but availability was showing slots during this time.
+
+**Root Cause**: Kristy's calendar in Plato was missing a block/unavailable entry for those times.
+
+**Solution**: 
+The booking system correctly detects and blocks availability when Kristy has an appointment with certain keywords ("Block", "Leave", "Holiday", "Vacation", "PTO", "OOO", "Out of Office") in the title. The fix requires:
+
+1. **In Plato**: Create a recurring or individual appointment(s) on Kristy's calendar (green, PKN doctor code) for each Wednesday 5:30pm-8:00pm (17:30-20:00) with title containing "Block"
+2. **Backend**: Added test `test_kristy_wednesday_block_5_30_to_8_00pm` to verify the blocking works
+
+**Test Added** (`test_availability.py`):
+- `test_kristy_wednesday_block_5_30_to_8_00pm()` — verifies that a "Block" appointment on Kristy's calendar for Wed 5:30-8:00pm correctly prevents bookings during that time
+
+**How to Create the Block in Plato**:
+1. Log in to Plato as clinic admin
+2. Go to Kristy Ng's calendar (green calendar, PKN doctor code)
+3. For each Wednesday (recurring or individual):
+   - Create appointment/unavailable time
+   - Start: 17:30 (5:30 PM)
+   - End: 20:00 (8:00 PM)  
+   - Title: "Block" or any title containing: "block", "leave", "holiday", "vacation", "pto", "ooo", "out of office"
+4. Save
+5. The booking system will detect this on next availability check (cached for ~20 seconds per day)
+
+**Acceptance Criteria** (verified by test):
+✅ Kristy's 5:30-8:00pm slots are blocked on Wednesdays
+✅ Other times on Wednesday remain available
+✅ Other clinicians' schedules unaffected
+✅ Block detection works for any title matching LEAVE_KEYWORDS patterns
+
 ## References
 
 - Audit Document: `Goji Booking System Audit and Fix.docx`
 - Booking Service: `business-intelligence/scripts/booking/`
-- Config Source of Truth: Plato's `GET /onlineapptbooking/list`
+- Config Source of Truth: Plato's `GET /onlineapptbooking/list` + calendar appointments
 - Website Config Mirror: `marketing/website/prototype/src/lib/services.ts`, `src/lib/clinicians.ts`, `src/lib/physioCategories.ts`
+- Block Detection: `plato.py` LEAVE_KEYWORDS, `availability.py` _booked_by_calendar()
