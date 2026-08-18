@@ -23,6 +23,7 @@ from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
 
 from .config import (
+    CLINICIAN_RESTRICTED_BLOCKS,
     CLINICIANS,
     HOME_TRAVEL_MINUTES,
     HOME_VISIT_CLINICIAN,
@@ -296,11 +297,19 @@ def _derive_day(
                         at(meta["online_start"]) if meta.get("online_start") else at("00:00"))
         win_end = min(at(rule.get("endtime", "18:00")),
                       at(meta["online_end"]) if meta.get("online_end") else at("23:59"))
+        # Merge Plato-provided restricted blocks with hard-coded clinician blocks
         blocks = [
             (at(b["starttime"]), at(b["endtime"]))
             for b in (rule.get("restricted_blocks") or [])
             if b.get("day") == dow
         ]
+        # Add hard-coded blocks for this clinician (e.g., Kristy Wed 5:30-8:00pm)
+        hard_blocks = CLINICIAN_RESTRICTED_BLOCKS.get(cid, [])
+        blocks.extend([
+            (at(b["starttime"]), at(b["endtime"]))
+            for b in hard_blocks
+            if b.get("day") == dow
+        ])
         taken = booked.get(color, []) + clinic_wide
 
         if _DIAG:

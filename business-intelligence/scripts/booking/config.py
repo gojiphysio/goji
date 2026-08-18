@@ -111,6 +111,16 @@ SERVICE_CLINICIANS: dict[str, list[str] | None] = {
     "clinical-pilates": ["claire-ng"],  # Cheryl Long removed from Clinical Pilates
 }
 
+# Clinician restricted blocks: hard-coded time blocks that override Plato's
+# recurring entries when they're not being detected properly. Format:
+# {"clinician_id": [{"day": "Mon"|"Tue"|..., "starttime": "HH:MM", "endtime": "HH:MM"}, ...]}
+# Example: block Kristy's Wednesdays 5:30-8:00pm
+CLINICIAN_RESTRICTED_BLOCKS: dict[str, list[dict]] = {
+    "kristy-ng": [
+        {"day": "Wed", "starttime": "17:30", "endtime": "20:00"},
+    ],
+}
+
 # Home visits: Cheryl only, typed "Home Visit" in Plato regardless of service.
 HOME_VISIT_CLINICIAN = "cheryl-long"
 HOME_VISIT_TYPE_CODE = "sCla"

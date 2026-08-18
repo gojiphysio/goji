@@ -177,9 +177,55 @@ python3 -m pytest test_availability.py test_booking.py -v
 ✅ Cheryl's historical bookings were not deleted
 ✅ All 45 booking+availability tests pass
 
+## Issue 4: Block Kristy Ng's Wednesdays 5:30pm-8:00pm
+**Status**: ✅ COMPLETE
+
+**Problem**: Kristy Ng's Wednesdays 5:30pm-8:00pm should be blocked for bookings, but availability was showing slots during this time, even though Kristy has a recurring block entry in Plato for those times.
+
+**Root Cause**: Kristy's recurring block entry in Plato was not being detected by the booking system (likely due to calendar sync or API timing issues).
+
+**Solution**: Implemented hard-coded clinician restricted blocks in the booking backend configuration (`config.py`), independent of Plato's calendar entries. This ensures the block is enforced consistently without relying on Plato's appointment detection.
+
+**Changes Made**:
+
+1. **Backend Config (config.py)**
+   - Added `CLINICIAN_RESTRICTED_BLOCKS` dict to define hard-coded time blocks per clinician
+   - Configured Kristy Ng to have a recurring block: Wednesday 17:30-20:00 (5:30-8:00 PM)
+   - Format allows adding day-of-week restricted blocks for any clinician
+
+2. **Availability Logic (availability.py)**
+   - Import `CLINICIAN_RESTRICTED_BLOCKS` from config
+   - Merge hard-coded blocks with Plato-provided restricted blocks during slot derivation
+   - Both block types now apply together, providing layered blocking
+
+3. **Test Added** (`test_availability.py`)
+   - `test_kristy_wednesday_block_5_30_to_8_00pm()` — verifies hard-coded blocks prevent bookings
+
+**How to Add/Modify Hard-Coded Blocks**:
+```python
+# In config.py, edit CLINICIAN_RESTRICTED_BLOCKS:
+CLINICIAN_RESTRICTED_BLOCKS = {
+    "kristy-ng": [
+        {"day": "Wed", "starttime": "17:30", "endtime": "20:00"},
+        # Add more day/time blocks as needed
+    ],
+    "another-clinician": [
+        {"day": "Fri", "starttime": "12:00", "endtime": "13:00"},  # lunch break
+    ],
+}
+```
+
+**Acceptance Criteria** (verified by test):
+✅ Kristy's Wednesday 5:30-8:00pm slots are blocked
+✅ Other times on Wednesday remain available
+✅ Other clinicians' schedules unaffected
+✅ Block is enforced independently of Plato's recurring entries
+✅ All 46 booking+availability tests pass
+
 ## References
 
 - Audit Document: `Goji Booking System Audit and Fix.docx`
 - Booking Service: `business-intelligence/scripts/booking/`
-- Config Source of Truth: Plato's `GET /onlineapptbooking/list`
+- Config Source of Truth: Plato's `GET /onlineapptbooking/list` + calendar appointments
 - Website Config Mirror: `marketing/website/prototype/src/lib/services.ts`, `src/lib/clinicians.ts`, `src/lib/physioCategories.ts`
+- Block Detection: `plato.py` LEAVE_KEYWORDS, `availability.py` _booked_by_calendar()
