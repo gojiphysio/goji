@@ -1,4 +1,15 @@
 /**
+ * DurationVariant represents an alternative duration and price for a service
+ * or physiotherapy sub-type (e.g., paediatric physio offers both 30-min/$160 and
+ * 55-min/$260 options).
+ */
+export interface DurationVariant {
+  durationMin: number;
+  price: string;
+  priceNote?: string;
+}
+
+/**
  * Services — single source of truth shared by the homepage service cards and the
  * booking form. `price` is the base price figure; leave "" to hide the price line.
  * `priceNote` is an optional secondary line.

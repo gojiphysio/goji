@@ -1,3 +1,5 @@
+import type { DurationVariant } from "./services";
+
 /**
  * Physiotherapy sub-types (the "What type of physiotherapy?" step on the booking
  * form) and the clinicians each one opens.
@@ -11,6 +13,9 @@
  * `clinicianIds` MUST stay consistent with `clinicians.ts` coverage — e.g. Claire
  * does not do paediatrics, and only Cheryl offers Schroth/scoliosis. Do not widen
  * a category beyond who actually offers it in the roster.
+ *
+ * Some sub-types (e.g., paediatrics) offer multiple duration variants.
+ * `variants` maps variant ids to their duration and pricing (e.g., "30min", "55min").
  */
 
 export type PhysioFocusId =
@@ -27,6 +32,8 @@ export interface PhysioCategory {
   hint: string;
   /** Clinician ids (from clinicians.ts) this sub-type opens. */
   clinicianIds: string[];
+  /** Optional: variant durations/prices (e.g., { "30min": {...}, "55min": {...} }). */
+  variants?: Record<string, DurationVariant>;
 }
 
 export const physioCategories: PhysioCategory[] = [
@@ -47,6 +54,10 @@ export const physioCategories: PhysioCategory[] = [
     label: "Paediatrics",
     hint: "Injury, recovery, and developmental concerns for minors (up to 18Y).",
     clinicianIds: ["kristy-ng", "cheryl-long"],
+    variants: {
+      "30min": { durationMin: 30, price: "160" },
+      "55min": { durationMin: 55, price: "260" },
+    },
   },
   {
     id: "scoliosis",

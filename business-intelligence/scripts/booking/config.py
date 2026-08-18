@@ -37,6 +37,8 @@ CLINICIANS: dict[str, dict] = {
 # type_code: Plato "Appointment Type" (code_Bottom).
 # duration_min: appointment length used for slot occupancy (clinic books hourly;
 #   confirm 55 vs 60 with the clinic — using 60 to match observed real bookings).
+# variants: optional duration variants (e.g., paediatric physio offers 30-min and
+#   55-min options with different pricing). Keyed by variant id (e.g., "30min").
 SERVICES: dict[str, dict] = {
     "physiotherapy": {
         "title": "Physiotherapy",
@@ -44,6 +46,11 @@ SERVICES: dict[str, dict] = {
         "type_code": "hDWW",
         "duration_min": 60,
         "supports_home": True,
+        "variants": {
+            "30min": {"duration_min": 30, "price": 160},
+            "55min": {"duration_min": 55, "price": 260},
+        },
+        "variant_focus": "paediatrics",  # variants only apply to this physio sub-type
     },
     "mummy-baby": {
         "title": "Mummy & Baby Assessment",

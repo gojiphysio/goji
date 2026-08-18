@@ -2,7 +2,7 @@
 title: "Paediatric Physiotherapy"
 description: "Paediatric physiotherapy in Singapore for children 0-18: movement, pain, injury and developmental concerns, assessed and managed with a personalised plan."
 cardTitle: "Paediatric Physiotherapy"
-cardLead: "Individualised assessment and practical guidance for your child's movement, development, pain or injury - from babies to teens."
+cardLead: "Individualised assessment and practical guidance for your child's movement, development, pain or injury - from babies to teens. 30-min and 55-min options available."
 heroImage: "/photos/services/paediatric-physiotherapy.webp"
 heroAlt: "A parent and baby during tummy time at a Goji paediatric physiotherapy session."
 category: "Paediatric Physiotherapy (0-18Y)"
@@ -18,7 +18,7 @@ draft: false
 
 Paediatric physiotherapy supports children with movement, pain, injury and developmental concerns, from birth to 18 years.
 
-As every child presents differently, the assessment and plan will depend on their age, symptoms, stage of development and individual goals.
+As every child presents differently, the assessment and plan will depend on their age, symptoms, stage of development and individual goals. We offer both 30-minute and 55-minute session lengths — for children aged 0-2 years, a 30-minute session may be a good fit; older children typically benefit from the full 55-minute appointment.
 
 Note: The assessment and treatment described below are indicative. Your child's session will be tailored to their individual condition, needs and goals, and may be modified by your physiotherapist based on their clinical judgement.
 
