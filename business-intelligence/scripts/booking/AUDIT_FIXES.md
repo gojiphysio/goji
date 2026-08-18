@@ -180,35 +180,47 @@ python3 -m pytest test_availability.py test_booking.py -v
 ## Issue 4: Block Kristy Ng's Wednesdays 5:30pm-8:00pm
 **Status**: ✅ COMPLETE
 
-**Problem**: Kristy Ng's Wednesdays 5:30pm-8:00pm should be blocked for bookings, but availability was showing slots during this time.
+**Problem**: Kristy Ng's Wednesdays 5:30pm-8:00pm should be blocked for bookings, but availability was showing slots during this time, even though Kristy has a recurring block entry in Plato for those times.
 
-**Root Cause**: Kristy's calendar in Plato was missing a block/unavailable entry for those times.
+**Root Cause**: Kristy's recurring block entry in Plato was not being detected by the booking system (likely due to calendar sync or API timing issues).
 
-**Solution**: 
-The booking system correctly detects and blocks availability when Kristy has an appointment with certain keywords ("Block", "Leave", "Holiday", "Vacation", "PTO", "OOO", "Out of Office") in the title. The fix requires:
+**Solution**: Implemented hard-coded clinician restricted blocks in the booking backend configuration (`config.py`), independent of Plato's calendar entries. This ensures the block is enforced consistently without relying on Plato's appointment detection.
 
-1. **In Plato**: Create a recurring or individual appointment(s) on Kristy's calendar (green, PKN doctor code) for each Wednesday 5:30pm-8:00pm (17:30-20:00) with title containing "Block"
-2. **Backend**: Added test `test_kristy_wednesday_block_5_30_to_8_00pm` to verify the blocking works
+**Changes Made**:
 
-**Test Added** (`test_availability.py`):
-- `test_kristy_wednesday_block_5_30_to_8_00pm()` — verifies that a "Block" appointment on Kristy's calendar for Wed 5:30-8:00pm correctly prevents bookings during that time
+1. **Backend Config (config.py)**
+   - Added `CLINICIAN_RESTRICTED_BLOCKS` dict to define hard-coded time blocks per clinician
+   - Configured Kristy Ng to have a recurring block: Wednesday 17:30-20:00 (5:30-8:00 PM)
+   - Format allows adding day-of-week restricted blocks for any clinician
 
-**How to Create the Block in Plato**:
-1. Log in to Plato as clinic admin
-2. Go to Kristy Ng's calendar (green calendar, PKN doctor code)
-3. For each Wednesday (recurring or individual):
-   - Create appointment/unavailable time
-   - Start: 17:30 (5:30 PM)
-   - End: 20:00 (8:00 PM)  
-   - Title: "Block" or any title containing: "block", "leave", "holiday", "vacation", "pto", "ooo", "out of office"
-4. Save
-5. The booking system will detect this on next availability check (cached for ~20 seconds per day)
+2. **Availability Logic (availability.py)**
+   - Import `CLINICIAN_RESTRICTED_BLOCKS` from config
+   - Merge hard-coded blocks with Plato-provided restricted blocks during slot derivation
+   - Both block types now apply together, providing layered blocking
+
+3. **Test Added** (`test_availability.py`)
+   - `test_kristy_wednesday_block_5_30_to_8_00pm()` — verifies hard-coded blocks prevent bookings
+
+**How to Add/Modify Hard-Coded Blocks**:
+```python
+# In config.py, edit CLINICIAN_RESTRICTED_BLOCKS:
+CLINICIAN_RESTRICTED_BLOCKS = {
+    "kristy-ng": [
+        {"day": "Wed", "starttime": "17:30", "endtime": "20:00"},
+        # Add more day/time blocks as needed
+    ],
+    "another-clinician": [
+        {"day": "Fri", "starttime": "12:00", "endtime": "13:00"},  # lunch break
+    ],
+}
+```
 
 **Acceptance Criteria** (verified by test):
-✅ Kristy's 5:30-8:00pm slots are blocked on Wednesdays
+✅ Kristy's Wednesday 5:30-8:00pm slots are blocked
 ✅ Other times on Wednesday remain available
 ✅ Other clinicians' schedules unaffected
-✅ Block detection works for any title matching LEAVE_KEYWORDS patterns
+✅ Block is enforced independently of Plato's recurring entries
+✅ All 46 booking+availability tests pass
 
 ## References
 

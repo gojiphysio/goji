@@ -407,24 +407,20 @@ def test_cheryl_still_available_in_general():
 
 
 def test_kristy_wednesday_block_5_30_to_8_00pm():
-    # Kristy Ng's Wednesdays 5:30pm-8:00pm should be blocked.
-    # This test verifies that a "Block" appointment on her calendar prevents bookings.
-    wed = date(2026, 8, 20)  # a Wednesday
-    appts = [{"color": "green", "title": "Block", "type": "leave",
-              "starttime": f"{wed.isoformat()}T17:30:00",
-              "endtime": f"{wed.isoformat()}T20:00:00"}]
+    # Kristy Ng's Wednesdays 5:30pm-8:00pm should be blocked via hard-coded config.
+    # This test verifies that hard-coded restricted blocks prevent bookings.
+    wed = date(2026, 8, 19)  # a Wednesday
     cfg = {"calendars": [{"id": "dDIjWJp", "rules": [{
         "name": "Kristy Ng", "book_calendar": "green",
         "starttime": "08:00", "endtime": "21:00",
         "min_days": 1, "max_days": 365,
         "restricted_days": [], "restricted_blocks": [],
     }]}]}
-    now = datetime(2026, 8, 19, 9, 0)  # day before wed
-    out = derive_availability(StubPlato(appts, cfg), "physiotherapy", wed, now=now)
+    now = datetime(2026, 8, 18, 9, 0)  # day before wed
+    # No appointments needed; the block is configured in CLINICIAN_RESTRICTED_BLOCKS
+    out = derive_availability(StubPlato([], cfg), "physiotherapy", wed, now=now)
     # Window 08:00-21:00, 60-min service, 30-min steps
-    # Slots: 08:00, 08:30, 09:00, 09:30, 10:00, 10:30, 11:00, 11:30, 12:00, 12:30, 13:00,
-    #        13:30, 14:00, 14:30, 15:00, 15:30, 16:00, 16:30, 17:00, 17:30, 18:00, 18:30, 19:00, 19:30, 20:00
-    # Block 17:30-20:00 removes all slots that overlap: 17:00, 17:30, 18:00, 18:30, 19:00, 19:30
+    # Hard-coded block 17:30-20:00 removes all slots that overlap: 17:00, 17:30, 18:00, 18:30, 19:00, 19:30
     # (20:00-21:00 does not overlap 17:30-20:00, so 20:00 remains available)
     expected_slots = ["08:00", "08:30", "09:00", "09:30", "10:00", "10:30", "11:00", "11:30",
                       "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30",
