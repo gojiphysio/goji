@@ -64,6 +64,24 @@ const steps = [
               <p class="booking__error" data-error="physioFocus" role="alert" hidden></p>
             </div>
           )}
+          {s.id === "physiotherapy" && (
+            <div class="booking__variant" data-physio-variant hidden>
+              <p class="booking__sublabel" id="variant-label">How long would the session be?</p>
+              <div class="booking__variant-opts" role="radiogroup" aria-labelledby="variant-label">
+                {physioCategories
+                  .find((c) => c.id === "paediatrics")
+                  ?.variants && Object.entries(physioCategories.find((c) => c.id === "paediatrics")!.variants!).map(([variantId, variant]) => (
+                  <label class="vopt">
+                    <input class="vopt__input visually-hidden" type="radio" name="variant" value={variantId} />
+                    <span class="vopt__name">{variant.durationMin} min</span>
+                    <span class="vopt__price">${variant.price}</span>
+                    <span class="vopt__tick" aria-hidden="true" />
+                  </label>
+                ))}
+              </div>
+              <p class="booking__error" data-error="variant" role="alert" hidden></p>
+            </div>
+          )}
         </Fragment>
       ))}
     </div>
@@ -887,6 +905,65 @@ const steps = [
     transform: translateY(-1px) rotate(45deg);
   }
 
+  /* Variant options (duration/price selector for paediatric physio). */
+  .vopt {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    border: 1.5px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--bg-content);
+    cursor: pointer;
+    transition: border-color var(--dur) var(--ease),
+      box-shadow var(--dur) var(--ease);
+  }
+  .vopt:hover {
+    border-color: var(--color-border-strong);
+  }
+  .vopt:has(.vopt__input:checked) {
+    border-color: var(--color-primary);
+    box-shadow: var(--shadow-sm);
+  }
+  .vopt:has(.vopt__input:focus-visible) {
+    outline: 3px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+  .vopt__name {
+    flex: 1;
+    font-family: var(--font-display);
+    font-weight: var(--weight-semibold);
+    color: var(--text-default);
+  }
+  .vopt__price {
+    font-family: var(--font-display);
+    font-weight: var(--weight-semibold);
+    color: var(--text-muted);
+  }
+  .vopt__tick {
+    width: 1.1rem;
+    height: 1.1rem;
+    border-radius: 50%;
+    border: 1.5px solid var(--color-border-strong);
+    position: relative;
+    flex-shrink: 0;
+  }
+  .vopt:has(.vopt__input:checked) .vopt__tick {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+  }
+  .vopt:has(.vopt__input:checked) .vopt__tick::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 0.34rem;
+    height: 0.55rem;
+    border: solid var(--color-linen);
+    border-width: 0 2px 2px 0;
+    transform: translateY(-1px) rotate(45deg);
+  }
+
   /* "First available" is the recommended default — give it a tinted, primary-
      edged card and a badge so it clearly stands apart from the named options,
      and reads as pre-selected the moment the step opens. */
@@ -1100,6 +1177,7 @@ const steps = [
     const draft = (): BookingDraft => ({
       service: (getChecked("service") as BookingDraft["service"]) ?? null,
       physioFocus: (getChecked("physioFocus") as BookingDraft["physioFocus"]) ?? null,
+      variant: getChecked("variant") ?? null,
       format: (getChecked("format") as BookingDraft["format"]) || "clinic",
       address: composeAddress(),
       date: getValue("date"),
@@ -1167,6 +1245,7 @@ const steps = [
     // ----- Step 1: service + format wiring -----
     const whereBlock = form.querySelector<HTMLElement>("[data-where]");
     const focusBlock = form.querySelector<HTMLElement>("[data-physio-focus]");
+    const variantBlock = form.querySelector<HTMLElement>("[data-physio-variant]");
     const homeLabel = form.querySelector<HTMLElement>("[data-home-label]");
     const homeHint = form.querySelector<HTMLElement>("[data-home-hint]");
     const addressBlock = form.querySelector<HTMLElement>("[data-address]");
@@ -1203,6 +1282,7 @@ const steps = [
       (input) => {
         input.addEventListener("change", () => {
           setError("physioFocus", "");
+          syncVariantVisibility();  // show/hide variant block based on sub-type
           filterClinicians();  // sub-type narrows the clinician set
           selectedTime = "";
           cal?.rerender();     // re-shade the calendar for the new sub-type
@@ -1210,6 +1290,31 @@ const steps = [
         });
       },
     );
+    form.querySelectorAll<HTMLInputElement>('input[name="variant"]').forEach(
+      (input) => {
+        input.addEventListener("change", () => {
+          setError("variant", "");
+          filterClinicians();  // variant might change availability
+          selectedTime = "";
+          cal?.rerender();     // re-shade the calendar for the new variant
+          scheduleRefresh();   // variant changes availability
+        });
+      },
+    );
+
+    /** Show/hide the variant selector based on whether paediatrics is selected. */
+    function syncVariantVisibility() {
+      if (!variantBlock) return;
+      const focus = getChecked("physioFocus");
+      const showVariants = focus === "paediatrics";
+      variantBlock.hidden = !showVariants;
+      if (!showVariants) {
+        setError("variant", "");
+        variantBlock
+          .querySelectorAll<HTMLInputElement>('input[name="variant"]')
+          .forEach((i) => (i.checked = false));
+      }
+    }
 
     function onServiceChange() {
       setError("service", "");
@@ -1228,6 +1333,8 @@ const steps = [
           focusBlock
             .querySelectorAll<HTMLInputElement>('input[name="physioFocus"]')
             .forEach((i) => (i.checked = false));
+          // Also hide variants when switching away from physio
+          syncVariantVisibility();
         }
       }
 
@@ -1354,6 +1461,9 @@ const steps = [
       const parts = [svc.title];
       const focus = physioCategories.find((c) => c.id === d.physioFocus);
       if (focus) parts.push(focus.label);
+      if (d.variant && focus?.variants && focus.variants[d.variant]) {
+        parts.push(`${focus.variants[d.variant].durationMin} min`);
+      }
       parts.push(d.format === "home" ? "Home visit" : "In-clinic");
       recapEl.textContent = parts.join(" · ");
       recapEl.hidden = false;
@@ -1402,12 +1512,13 @@ const steps = [
       function fetchMonthDays(month: string): Promise<string[]> | null {
         const d = draft();
         if (!d.service) return null;
-        const key = `${d.service}|${d.physioFocus ?? ""}|${d.clinicianId}|${d.format}|${month}`;
+        const key = `${d.service}|${d.physioFocus ?? ""}|${d.variant ?? ""}|${d.clinicianId}|${d.format}|${month}`;
         let p = summaryCache.get(key);
         if (!p) {
           p = bookingApi.getAvailableDays({
             service: d.service,
             focus: d.physioFocus ?? undefined,
+            variant: d.variant ?? undefined,
             clinicianId: d.clinicianId,
             month,
             home: d.format === "home",
@@ -1594,6 +1705,7 @@ const steps = [
         times = await bookingApi.getAvailability({
           service: d.service,
           focus: d.physioFocus ?? undefined,
+          variant: d.variant ?? undefined,
           clinicianId: d.clinicianId,
           date: d.date,
           home: d.format === "home",
@@ -1787,6 +1899,11 @@ const steps = [
         if (d.service === "physiotherapy" && !d.physioFocus) {
           setError("physioFocus", "Please choose a type of physiotherapy.");
           bookingApi.track("validation_error", "physioFocus");
+          return false;
+        }
+        if (d.physioFocus === "paediatrics" && !d.variant) {
+          setError("variant", "Please choose a session duration.");
+          bookingApi.track("validation_error", "variant");
           return false;
         }
         if (d.format === "home") {
@@ -2019,6 +2136,16 @@ const steps = [
       if (focus && isPhysioFocus(focus)) {
         const el = form!.querySelector<HTMLInputElement>(
           `input[name="physioFocus"][value="${focus}"]`,
+        );
+        if (el) {
+          el.checked = true;
+          el.dispatchEvent(new Event("change", { bubbles: true }));
+        }
+      }
+      const variant = params.get("variant");
+      if (variant) {
+        const el = form!.querySelector<HTMLInputElement>(
+          `input[name="variant"][value="${variant}"]`,
         );
         if (el) {
           el.checked = true;

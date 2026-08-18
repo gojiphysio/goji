@@ -28,6 +28,22 @@ const grouped = categories.reduce(
 /** "$X" using the lower of clinic/home price. */
 const fromPrice = (clinic: number, home?: number) =>
   `$${Math.min(clinic, home ?? clinic)}`;
+
+/** For paediatric physio, show the lowest variant price ("From $160"). */
+const displayPrice = (service: any) => {
+  if (service.data.category === "Paediatric Physiotherapy (0-18Y)") {
+    return "From $160";  // lowest paediatric variant
+  }
+  return fromPrice(service.data.priceClinic, service.data.priceHome);
+};
+
+/** For paediatric physio, show the shortest variant duration ("From 30 min"). */
+const displayDuration = (service: any) => {
+  if (service.data.category === "Paediatric Physiotherapy (0-18Y)") {
+    return "From 30 min";  // shortest paediatric variant
+  }
+  return `${service.data.durationMin} min`;
+};
 ---
 
 <BaseLayout
@@ -77,7 +93,7 @@ const fromPrice = (clinic: number, home?: number) =>
                 <div class="svc-card__body">
                   <h3 class="svc-card__title">{s.data.cardTitle ?? s.data.title}</h3>
                   <p class="svc-card__meta">
-                    {s.data.durationMin} min · {fromPrice(s.data.priceClinic, s.data.priceHome)}
+                    {displayDuration(s)} · {displayPrice(s)}
                   </p>
                   <p class="svc-card__lead">{s.data.cardLead}</p>
                   <span class="svc-card__cta">Learn more</span>
