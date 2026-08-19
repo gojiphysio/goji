@@ -181,6 +181,7 @@ const realApi: BookingApi = {
         body: JSON.stringify({
           service: draft.service,
           physio_focus: draft.physioFocus,
+          variant: draft.variant,
           date: draft.date,
           time: draft.time,
           format: draft.format,
