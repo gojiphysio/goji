@@ -45,7 +45,7 @@ const steps = [
         so choosing it is the immediate next step. It's required and narrows which
         clinicians' calendars open (see src/lib/physioCategories.ts). */}
     <div class="booking__services" role="group" aria-label="Service">
-      {services.map((s) => (
+      {services.filter((s) => !s.bookingHidden).map((s) => (
         <Fragment>
           <ServiceOption service={s} />
           {s.id === "physiotherapy" && (
@@ -64,7 +64,7 @@ const steps = [
               <p class="booking__error" data-error="physioFocus" role="alert" hidden></p>
             </div>
           )}
-          {s.id === "physiotherapy" && (
+          {(s.id === "physiotherapy" || s.id === "paediatric-physiotherapy") && (
             <div class="booking__variant" data-physio-variant hidden>
               <p class="booking__sublabel" id="variant-label">How long would the session be?</p>
               <div class="booking__variant-opts" role="radiogroup" aria-labelledby="variant-label">
@@ -1306,7 +1306,8 @@ const steps = [
     function syncVariantVisibility() {
       if (!variantBlock) return;
       const focus = getChecked("physioFocus");
-      const showVariants = focus === "paediatrics";
+      const service = getChecked("service");
+      const showVariants = focus === "paediatrics" || service === "paediatric-physiotherapy";
       variantBlock.hidden = !showVariants;
       if (!showVariants) {
         setError("variant", "");
@@ -1323,8 +1324,9 @@ const steps = [
       if (whereBlock) whereBlock.hidden = false;
 
       // Physiotherapy needs a sub-type (it filters clinicians); other services
-      // don't. Show the block for physio only, and clear any stale selection
+      // don't. Show the focus block for physio only, and clear any stale selection
       // when switching away so it can't leak into the booking.
+      // Paediatric-physiotherapy is pre-focused, so don't show the focus block.
       if (focusBlock) {
         const isPhysio = svc.id === "physiotherapy";
         focusBlock.hidden = !isPhysio;
@@ -1333,10 +1335,10 @@ const steps = [
           focusBlock
             .querySelectorAll<HTMLInputElement>('input[name="physioFocus"]')
             .forEach((i) => (i.checked = false));
-          // Also hide variants when switching away from physio
-          syncVariantVisibility();
         }
       }
+      // Show/hide variants for paediatric-physiotherapy service
+      syncVariantVisibility();
 
       // Home-visit availability depends on the service.
       if (homeLabel && homeHint) {

@@ -56,6 +56,7 @@ export interface Service {
    * backend uses `format === "home" ? "sCla" : service.platoTypeCode`.
    */
   platoTypeCode: string;
+  bookingHidden?: boolean;
 }
 
 export const services: Service[] = [
@@ -64,7 +65,7 @@ export const services: Service[] = [
     icon: "tabler:stretching",
     title: "Physiotherapy",
     lead: "Assessment and treatment for pain, injury, recovery, pelvic health, women's health, paediatric, vestibular, and lymphatic concerns.",
-    meta: ["55 min initial consult", "In-clinic & home visits"],
+    meta: ["55 min Initial consult", "In-clinic & home visits"],
     price: "260",
     priceNote: "Home visits $330",
     supportsHome: true,
@@ -73,24 +74,25 @@ export const services: Service[] = [
     platoTypeCode: "hDWW",
   },
   {
-    id: "mummy-baby",
-    icon: "tabler:baby-carriage",
-    title: "Mummy & Baby Assessment",
-    lead: "A joint assessment for postpartum mothers (suitable after both vaginal and Caesarean birth) and babies aged 0 to 12 months, supporting recovery, development concerns, and early physical needs.",
-    meta: ["85 min", "In-clinic & home visits"],
-    price: "330",
-    priceNote: "Home visits $380",
+    id: "paediatric-physiotherapy",
+    icon: "tabler:stretching",
+    title: "Paediatric Physiotherapy",
+    lead: "Injury, recovery, and developmental concerns for minors. Sessions designed to be comfortable for kids and informative for parents.",
+    meta: ["From 30 min", "In-clinic & home visits"],
+    price: "160",
+    priceNote: "From 30 min. Home visits available on request with parent supervision",
     supportsHome: true,
-    durationMin: 85,
+    durationMin: 30,
     platoCalendarId: "z1xE8rP",
     platoTypeCode: "hDWW",
+    bookingHidden: true,
   },
   {
     id: "clinical-pilates",
     icon: "tabler:yoga",
     title: "Clinical Pilates",
     lead: "Physiotherapist-led reformer Pilates for rehabilitation, movement retraining, strength, and a safe return to activity or sport.",
-    meta: ["55 min", "1:1 or 2:1 reformer"],
+    meta: ["55 min Initial consult", "1:1 or 2:1 reformer"],
     price: "180",
     priceNote: "",
     supportsHome: false,
@@ -103,13 +105,26 @@ export const services: Service[] = [
     icon: "tabler:barbell",
     title: "Strength & Conditioning",
     lead: "Build strength and resilience through tailored exercise, with guidance from professionals to sustain your momentum.",
-    meta: ["55 min", "1:1 or 2:1 sessions"],
+    meta: ["55 min Initial consult", "1:1 or 2:1 sessions"],
     price: "180",
     priceNote: "",
     supportsHome: false,
     durationMin: 55,
     platoCalendarId: "XV1FDpu",
     platoTypeCode: "qLbH",
+  },
+  {
+    id: "mummy-baby",
+    icon: "tabler:baby-carriage",
+    title: "Mummy & Baby Assessment",
+    lead: "A joint assessment for postpartum mothers (suitable after both vaginal and Caesarean birth) and babies aged 0 to 12 months, supporting recovery, development concerns, and early physical needs.",
+    meta: ["85 min Initial consult", "In-clinic & home visits"],
+    price: "330",
+    priceNote: "Home visits $380",
+    supportsHome: true,
+    durationMin: 85,
+    platoCalendarId: "z1xE8rP",
+    platoTypeCode: "hDWW",
   },
 ];
 
