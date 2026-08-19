@@ -132,6 +132,7 @@ def derive_availability(
     *,
     clinician_id: str | None = None,
     focus: str | None = None,
+    variant: str | None = None,
     home: bool = False,
     now: datetime | None = None,
 ) -> dict[str, list[str]]:
@@ -139,6 +140,7 @@ def derive_availability(
 
     `clinician_id` restricts to one clinician; `focus` (a physiotherapy sub-type)
     restricts to the clinicians who offer it (e.g. scoliosis -> Cheryl only);
+    `variant` specifies a duration variant (e.g. "30min" for paediatric physio);
     `home` restricts to the home-visit clinician and pads each slot with travel
     time on both sides. `now` (naive SGT) is injectable for testing; defaults to
     the current SGT time.
@@ -147,7 +149,7 @@ def derive_availability(
     booked = _booked_by_calendar(raw_appts)
     cfg = plato.online_booking_config()
     return _derive_day(cfg, booked, service_id, day, clinician_id=clinician_id,
-                       focus=focus, home=home, now=now, _raw_appointments=raw_appts if _DIAG else None)
+                       focus=focus, variant=variant, home=home, now=now, _raw_appointments=raw_appts if _DIAG else None)
 
 
 def derive_available_days(
@@ -158,6 +160,7 @@ def derive_available_days(
     *,
     clinician_id: str | None = None,
     focus: str | None = None,
+    variant: str | None = None,
     home: bool = False,
     now: datetime | None = None,
 ) -> list[str]:
@@ -166,7 +169,8 @@ def derive_available_days(
     Powers the website calendar's availability shading (and its first-free-date
     pick), so a visitor never has to click through empty dates. One appointments
     fetch covers the whole range — per-day fetches would blow Plato's 20 req/min
-    budget for a single month view.
+    budget for a single month view. `variant` specifies a duration variant if
+    applicable (e.g. "30min" for paediatric physio).
     """
     raw_appts = plato.appointments(start.isoformat(), end.isoformat())
     booked = _booked_by_calendar(raw_appts)
@@ -175,7 +179,7 @@ def derive_available_days(
     day = start
     while day <= end:
         avail = _derive_day(cfg, booked, service_id, day,
-                            clinician_id=clinician_id, focus=focus, home=home,
+                            clinician_id=clinician_id, focus=focus, variant=variant, home=home,
                             now=now, _raw_appointments=raw_appts if _DIAG else None)
         if any(avail.values()):
             out.append(day.isoformat())
@@ -191,6 +195,7 @@ def _derive_day(
     *,
     clinician_id: str | None = None,
     focus: str | None = None,
+    variant: str | None = None,
     home: bool = False,
     now: datetime | None = None,
     _raw_appointments: list[dict] | None = None,
@@ -198,7 +203,8 @@ def _derive_day(
     """The per-day core of derive_availability, on pre-fetched Plato data.
 
     `booked` may span more days than `day` (the range derivation fetches a whole
-    month at once) — overlap checks only ever match same-day times.
+    month at once) — overlap checks only ever match same-day times. `variant`
+    specifies a duration variant if applicable (e.g. "30min" for paediatric physio).
 
     `_raw_appointments` is optionally passed for diagnostic logging only.
     """
@@ -235,7 +241,11 @@ def _derive_day(
     # provide this service (e.g. Cheryl removed from Clinical Pilates).
     service_clinicians = SERVICE_CLINICIANS.get(service_id)
 
-    dur = timedelta(minutes=svc["duration_min"])
+    # Duration: use variant duration if provided and available, else base service duration.
+    duration_min = svc["duration_min"]
+    if variant and svc.get("variants", {}).get(variant):
+        duration_min = svc["variants"][variant]["duration_min"]
+    dur = timedelta(minutes=duration_min)
     pad = timedelta(minutes=HOME_TRAVEL_MINUTES if home else 0)
     step = timedelta(minutes=SLOT_MINUTES)
     dow = _DOW[day.weekday()]

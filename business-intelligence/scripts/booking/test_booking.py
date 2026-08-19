@@ -269,6 +269,28 @@ def test_first_available_respects_service_clinician_eligibility():
     assert res["clinician_id"] == "claire-ng"
 
 
+def test_30min_paediatric_variant_duration():
+    # Paediatric physiotherapy with 30-min variant should create a 30-min slot.
+    p = StubPlato()
+    res = create_booking(p, {**BASE, "clinician_id": "cheryl-long",
+                             "physio_focus": "paediatrics", "variant": "30min"}, now=NOW)
+    assert res["ok"]
+    payload = p.created[0][0]
+    assert payload["starttime"] == "2026-07-15 10:00:00"
+    assert payload["endtime"] == "2026-07-15 10:30:00"  # 30 mins later
+
+
+def test_55min_paediatric_variant_duration():
+    # Paediatric physiotherapy with 55-min variant should create a 55-min slot.
+    p = StubPlato()
+    res = create_booking(p, {**BASE, "clinician_id": "cheryl-long",
+                             "physio_focus": "paediatrics", "variant": "55min"}, now=NOW)
+    assert res["ok"]
+    payload = p.created[0][0]
+    assert payload["starttime"] == "2026-07-15 10:00:00"
+    assert payload["endtime"] == "2026-07-15 10:55:00"  # 55 mins later
+
+
 if __name__ == "__main__":
     for name, fn in sorted(globals().items()):
         if name.startswith("test_") and callable(fn):

@@ -119,8 +119,9 @@ def availability():
     home = request.args.get("home", "") in ("1", "true", "yes")
     clinician = request.args.get("clinician") or None
     focus = request.args.get("focus") or None
+    variant = request.args.get("variant") or None
 
-    cache_key = (service, day.isoformat(), clinician or "", focus or "", home)
+    cache_key = (service, day.isoformat(), clinician or "", focus or "", variant or "", home)
     nowm = time.monotonic()
     with _avail_cache_lock:
         hit = _avail_cache.get(cache_key)
@@ -129,7 +130,7 @@ def availability():
 
     try:
         avail = derive_availability(plato(), service, day,
-                                    clinician_id=clinician, focus=focus, home=home)
+                                    clinician_id=clinician, focus=focus, variant=variant, home=home)
     except Exception as e:  # Plato hiccup — degrade to no slots, don't 500 loudly
         log.warning("availability failed (%s %s): %s", service, day, e)
         return jsonify({"error": "unavailable", "times": []}), 502
@@ -172,6 +173,7 @@ def availability_summary():
     home = request.args.get("home", "") in ("1", "true", "yes")
     clinician = request.args.get("clinician") or None
     focus = request.args.get("focus") or None
+    variant = request.args.get("variant") or None
 
     # Clamp to [today, today + MAX_ADVANCE_DAYS] (SGT — the clinic's clock, not
     # the server's UTC). Rule-level min/max_days still apply per day inside the
@@ -183,7 +185,7 @@ def availability_summary():
     if start > end:
         return jsonify({"month": month_s, "available": []})
 
-    cache_key = (service, month_s, clinician or "", focus or "", home)
+    cache_key = (service, month_s, clinician or "", focus or "", variant or "", home)
     nowm = time.monotonic()
     with _avail_cache_lock:
         hit = _summary_cache.get(cache_key)
@@ -192,7 +194,7 @@ def availability_summary():
 
     try:
         days = derive_available_days(plato(), service, start, end,
-                                     clinician_id=clinician, focus=focus, home=home)
+                                     clinician_id=clinician, focus=focus, variant=variant, home=home)
     except Exception as e:  # Plato hiccup — the calendar degrades to unshaded
         log.warning("availability summary failed (%s %s): %s", service, month_s, e)
         return jsonify({"error": "unavailable", "available": []}), 502

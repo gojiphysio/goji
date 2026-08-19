@@ -178,6 +178,11 @@ def create_booking(plato, draft: dict, *, now: datetime | None = None) -> dict:
     focus_label = PHYSIO_FOCUS_LABELS.get(focus_id, "")
     focus_clinicians = PHYSIO_FOCUS_CLINICIANS.get(focus_id)
 
+    # Duration variant (e.g., "30min" or "55min" for paediatric physiotherapy).
+    # Only meaningful for services that define variants. Extracted from draft for
+    # availability calculations and used when creating the Plato appointment.
+    variant = (draft.get("variant") or "").strip() if svc.get("variants") else ""
+
     # What the customer asked for on the form, for the confirmation email: an
     # explicit clinician by name, or "First available" when they let us match.
     # (Home visits are always Cheryl, but we still report what they selected.)
@@ -211,7 +216,7 @@ def create_booking(plato, draft: dict, *, now: datetime | None = None) -> dict:
         # First available: restrict auto-assignment to the sub-type's clinicians
         # (e.g. a scoliosis booking must never land on someone who isn't Cheryl).
         avail = derive_availability(plato, service_id, day,
-                                    focus=focus_id or None, home=home, now=now)
+                                    focus=focus_id or None, variant=variant or None, home=home, now=now)
         candidates = [cid for cid, slots in avail.items() if time_ in slots]
         _require(candidates, "That time is no longer available.", "slot_taken")
         # Walk the clinic's preferred order (Kristy -> Claire -> Cheryl) so a
@@ -225,13 +230,13 @@ def create_booking(plato, draft: dict, *, now: datetime | None = None) -> dict:
     for cid in candidates:
         with _lock_for(cid):
             avail = derive_availability(plato, service_id, day,
-                                       clinician_id=cid, home=home, now=now)
+                                       clinician_id=cid, variant=variant or None, home=home, now=now)
             if time_ not in avail.get(cid, []):
                 last_err = BookingError("That time is no longer available.", "slot_taken")
                 continue
             ids, visit_id = _create_appointments(
                 plato, svc, cid, day, time_, home, name, phone, email, address,
-                notes, clinician_requested, focus_label)
+                notes, clinician_requested, focus_label, variant)
             return {
                 "ok": True,
                 "reference": "GOJI-" + visit_id[-6:].upper(),
@@ -262,11 +267,16 @@ def _post(plato, payload: dict) -> str:
 
 def _create_appointments(plato, svc, cid, day, time_, home, name, phone, email,
                          address, notes="", clinician_requested=False,
-                         focus_label="") -> tuple[list[str], str]:
+                         focus_label="", variant="") -> tuple[list[str], str]:
     """Create the appointment(s). Returns (all_ids, visit_id). Rolls back on any
     failure so a partial home visit never lingers."""
     clin = CLINICIANS[cid]
-    color, doctor, dur = clin["calendar"], clin["doctor"], svc["duration_min"]
+    color, doctor = clin["calendar"], clin["doctor"]
+    # Duration: use variant duration if provided and available, else base service duration.
+    duration_min = svc["duration_min"]
+    if variant and svc.get("variants", {}).get(variant):
+        duration_min = svc["variants"][variant]["duration_min"]
+    dur = duration_min
     # Physiotherapy sub-type, so the clinic sees what the session is for (the
     # Plato type is the same for every physio booking).
     focus_line = f"\nType: {focus_label}" if focus_label else ""
