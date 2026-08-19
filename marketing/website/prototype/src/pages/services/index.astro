@@ -29,17 +29,17 @@ const grouped = categories.reduce(
 const fromPrice = (clinic: number, home?: number) =>
   `$${Math.min(clinic, home ?? clinic)}`;
 
-/** For paediatric physio, show the lowest variant price ("From $160"). */
+/** For paediatric physio only (not Schroth), show the lowest variant price ("From $160"). */
 const displayPrice = (service: any) => {
-  if (service.data.category === "Paediatric Physiotherapy (0-18Y)") {
+  if (service.slug === "paediatric-physiotherapy") {
     return "From $160";  // lowest paediatric variant
   }
   return fromPrice(service.data.priceClinic, service.data.priceHome);
 };
 
-/** For paediatric physio, show the shortest variant duration ("From 30 min"). */
+/** For paediatric physio only (not Schroth), show the shortest variant duration ("From 30 min"). */
 const displayDuration = (service: any) => {
-  if (service.data.category === "Paediatric Physiotherapy (0-18Y)") {
+  if (service.slug === "paediatric-physiotherapy") {
     return "From 30 min";  // shortest paediatric variant
   }
   return `${service.data.durationMin} min`;
