@@ -7,6 +7,7 @@ export interface DurationVariant {
   durationMin: number;
   price: string;
   priceNote?: string;
+  description?: string;
 }
 
 /**
@@ -64,7 +65,7 @@ export const services: Service[] = [
     id: "physiotherapy",
     icon: "tabler:stretching",
     title: "Physiotherapy",
-    lead: "Assessment and treatment for pain, injury, recovery, pelvic health, women's health, paediatric, vestibular, and lymphatic concerns.",
+    lead: "Assessment and treatment for pain, injury, pelvic health, women's health, paediatric, vestibular, and lymphatic concerns.",
     meta: ["55 min Initial consult", "In-clinic & home visits"],
     price: "260",
     priceNote: "Home visits $330",
@@ -77,7 +78,7 @@ export const services: Service[] = [
     id: "paediatric-physiotherapy",
     icon: "tabler:stretching",
     title: "Paediatric Physiotherapy",
-    lead: "Injury, recovery, and developmental concerns for minors. Sessions designed to be comfortable for kids and informative for parents.",
+    lead: "Neurodevelopmental concerns, congenital conditions, chest physio, pelvic health (bed wetting / constipation) and other injuries.",
     meta: ["From 30 min", "In-clinic & home visits"],
     price: "160",
     priceNote: "From 30 min. Home visits available on request with parent supervision",
@@ -117,7 +118,7 @@ export const services: Service[] = [
     id: "mummy-baby",
     icon: "tabler:baby-carriage",
     title: "Mummy & Baby Assessment",
-    lead: "A joint assessment for postpartum mothers (suitable after both vaginal and Caesarean birth) and babies aged 0 to 12 months, supporting recovery, development concerns, and early physical needs.",
+    lead: "A joint assessment for postpartum mothers (suitable after both vaginal and Caesarean birth) and babies aged 0 to 12 months, supporting physical screening, developmental concerns, and early intervention therapy.",
     meta: ["85 min Initial consult", "In-clinic & home visits"],
     price: "330",
     priceNote: "Home visits $380",

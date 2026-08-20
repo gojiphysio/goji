@@ -47,8 +47,9 @@ SERVICES: dict[str, dict] = {
         "duration_min": 60,
         "supports_home": True,
         "variants": {
-            "30min": {"duration_min": 30, "price": 160},
-            "55min": {"duration_min": 55, "price": 260},
+            "30min": {"duration_min": 30, "price": 160, "description": "Only if prescribed by physio"},
+            "45min": {"duration_min": 45, "price": 230, "description": "Review session"},
+            "55min": {"duration_min": 55, "price": 260, "description": "Initial consultation"},
         },
         "variant_focus": "paediatrics",  # variants only apply to this physio sub-type
     },
