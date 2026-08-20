@@ -52,11 +52,12 @@ export const physioCategories: PhysioCategory[] = [
   {
     id: "paediatrics",
     label: "Paediatrics",
-    hint: "Injury, recovery, and developmental concerns for minors (up to 18Y).",
+    hint: "Neurodevelopmental concerns, congenital conditions, chest physio, pelvic health (bed wetting / constipation) and other injuries.",
     clinicianIds: ["kristy-ng", "cheryl-long"],
     variants: {
-      "30min": { durationMin: 30, price: "160" },
-      "55min": { durationMin: 55, price: "260" },
+      "30min": { durationMin: 30, price: "160", description: "Only if prescribed by physio" },
+      "45min": { durationMin: 45, price: "230", description: "Review session" },
+      "55min": { durationMin: 55, price: "260", description: "Initial consultation" },
     },
   },
   {

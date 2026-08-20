@@ -66,14 +66,14 @@ const steps = [
           )}
           {(s.id === "physiotherapy" || s.id === "paediatric-physiotherapy") && (
             <div class="booking__variant" data-physio-variant hidden>
-              <p class="booking__sublabel" id="variant-label">How long would the session be?</p>
+              <p class="booking__sublabel" id="variant-label">Select session duration</p>
               <div class="booking__variant-opts" role="radiogroup" aria-labelledby="variant-label">
                 {physioCategories
                   .find((c) => c.id === "paediatrics")
                   ?.variants && Object.entries(physioCategories.find((c) => c.id === "paediatrics")!.variants!).map(([variantId, variant]) => (
                   <label class="vopt">
                     <input class="vopt__input visually-hidden" type="radio" name="variant" value={variantId} />
-                    <span class="vopt__name">{variant.durationMin} min</span>
+                    <span class="vopt__name">{variant.durationMin} min {variant.description && <span class="vopt__desc">{`(${variant.description})`}</span>}</span>
                     <span class="vopt__price">${variant.price}</span>
                     <span class="vopt__tick" aria-hidden="true" />
                   </label>
@@ -934,6 +934,9 @@ const steps = [
     font-family: var(--font-display);
     font-weight: var(--weight-semibold);
     color: var(--text-default);
+  }
+  .vopt__desc {
+    font-weight: normal;
   }
   .vopt__price {
     font-family: var(--font-display);
