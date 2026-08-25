@@ -1481,20 +1481,11 @@ LIMIT 5
         if not tables:
             return empty
         table_name = tables[0]["table_name"]
-        if table_name.startswith("p_"):
-            # Standard transfer: date-partitioned table, filter on _PARTITIONDATE
-            sql = f"""
-SELECT SUM(cost_micros) / 1e6 AS spend, SUM(clicks) AS clicks, SUM(impressions) AS impressions
+        # Google Ads API transfer uses metrics_* and segments_date
+        sql = f"""
+SELECT SUM(metrics_cost_micros) / 1e6 AS spend, SUM(metrics_clicks) AS clicks, SUM(metrics_impressions) AS impressions
 FROM `{PROJECT}.google_ads.{table_name}`
-WHERE _PARTITIONDATE BETWEEN '{start}' AND '{end}'
-"""
-        else:
-            # Legacy transfer: date-sharded tables, filter via _TABLE_SUFFIX
-            base = table_name.rstrip("_0123456789")
-            sql = f"""
-SELECT SUM(Cost) / 1e6 AS spend, SUM(Clicks) AS clicks, SUM(Impressions) AS impressions
-FROM `{PROJECT}.google_ads.{base}_*`
-WHERE _TABLE_SUFFIX BETWEEN '{start.strftime("%Y%m%d")}' AND '{end.strftime("%Y%m%d")}'
+WHERE segments_date BETWEEN '{start}' AND '{end}'
 """
         rows = _query(sql)
         if not rows or rows[0]["clicks"] is None:
