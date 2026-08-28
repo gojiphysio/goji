@@ -29,6 +29,7 @@ from .config import (
     HOME_VISIT_CLINICIAN,
     MAX_ADVANCE_DAYS,
     PHYSIO_FOCUS_CLINICIANS,
+    SATURDAY_SLOT_MINUTES,
     SERVICE_CLINICIANS,
     SERVICES,
     SLOT_MINUTES,
@@ -247,8 +248,9 @@ def _derive_day(
         duration_min = svc["variants"][variant]["duration_min"]
     dur = timedelta(minutes=duration_min)
     pad = timedelta(minutes=HOME_TRAVEL_MINUTES if home else 0)
-    step = timedelta(minutes=SLOT_MINUTES)
     dow = _DOW[day.weekday()]
+    slot_minutes = SATURDAY_SLOT_MINUTES if dow == "Sat" else SLOT_MINUTES
+    step = timedelta(minutes=slot_minutes)
     _now = now if now is not None else datetime.now(SGT).replace(tzinfo=None)
     today = _now.date()
 
