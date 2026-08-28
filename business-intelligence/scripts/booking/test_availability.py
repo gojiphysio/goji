@@ -179,9 +179,9 @@ def test_recurring_appointment_blocks_slots():
     }]}]}
     now = datetime(2026, 7, 17, 9, 0)  # Day before Saturday
     out = derive_availability(StubPlato(appts, cfg), "physiotherapy", sat, now=now)
-    # 9:00-10:00 is booked, so 08:30 and 09:00 and 09:30 should be blocked
-    # (60-min appts, 30-min steps)
-    assert out["claire-ng"] == ["08:00", "10:00", "10:30", "11:00"]
+    # 9:00-10:00 is booked, so 09:00 should be blocked
+    # Saturday uses 60-min slots (hourly only), so only 08:00, 10:00, 11:00 available
+    assert out["claire-ng"] == ["08:00", "10:00", "11:00"]
 
 
 def test_recurring_appointment_expansion_needed():

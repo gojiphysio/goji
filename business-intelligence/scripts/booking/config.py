@@ -12,6 +12,7 @@ changeable via the API). Home visits are Cheryl-only and padded with travel.
 from __future__ import annotations
 
 SLOT_MINUTES = 30
+SATURDAY_SLOT_MINUTES = 60  # Saturdays: on-the-hour slots only (no :30 slots)
 HOME_TRAVEL_MINUTES = 30  # travel block before AND after a home visit
 MAX_ADVANCE_DAYS = 60  # bookings are capped at 60 days into the future
 
