@@ -239,11 +239,15 @@ const MOCK_LATENCY_MS = 450;
 
 function mockDayTimes(service: string, clinicianId: string, date: string): string[] {
   if (!date) return [];
-  if (new Date(`${date}T00:00:00`).getDay() === 0) return []; // Sunday closed
+  const day = new Date(`${date}T00:00:00`);
+  if (day.getDay() === 0) return []; // Sunday closed
   const open: string[] = [];
   const key = `${service}|${clinicianId}|${date}`;
-  for (let i = 0; i < 16; i++) {
-    const mins = 9 * 60 + i * 30; // 09:00–16:30, 30-min steps
+  const isSaturday = day.getDay() === 6;
+  const step = isSaturday ? 60 : 30; // Saturday: hourly; other days: 30-min
+  const maxSlots = isSaturday ? 8 : 16; // Adjust slot count for Saturday hourly
+  for (let i = 0; i < maxSlots; i++) {
+    const mins = 9 * 60 + i * step; // 09:00 start, varying step size
     const hh = String(Math.floor(mins / 60)).padStart(2, "0");
     const mm = String(mins % 60).padStart(2, "0");
     if (seededUnit(key, i) > 0.45) open.push(`${hh}:${mm}`);
