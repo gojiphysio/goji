@@ -226,6 +226,25 @@ the click → session join without GA4.
 origin → surface → CTA → booked chain for the on-site booking journey; it's inert
 until the site build sets `PUBLIC_BOOKING_API` (same PDPA-consent gate as GA4).
 
+**Organic search (Search Console → BigQuery):** the `marketing_ingest` job's
+`search_console` source fills the organic blind spot (`ads_PaidOrganicStats` is
+empty because GSC isn't linked to Ads either). **No secret** — it authenticates
+as the job's own service account, so the only setup is:
+
+1. Search Console → **Settings** → **Users and permissions** → add
+   `ingestion-sa@goji-bi.iam.gserviceaccount.com` as a **Restricted** user.
+2. Create the landing table once:
+   `bq query --use_legacy_sql=false < scripts/ingestion/marketing_ingest/schema.sql`
+3. Set the repo variable **`GSC_SITE_URL`** (e.g. `sc-domain:gojiphysio.com`).
+   The deploy step then adds `search_console` to `SOURCES`; sources gate
+   independently, so this can go live with or without Instagram.
+4. Run `sql/deploy_all.sh` so `stg.search_console` +
+   `marts.fct_search_console_{daily,terms}` exist.
+
+Separately, **link Search Console to Google Ads** (Tools → Setup → Linked
+accounts) to populate `ads_PaidOrganicStats` — that's the paid-vs-organic view
+per query, and it's a different thing from the ingestion above.
+
 **Google Ads inflow:** turn on **auto-tagging** in Google Ads (Settings → Account
 settings → Auto-tagging) so every ad click carries a `gclid`, and set ad **final
 URLs** to the site with `utm_source=google&utm_medium=cpc&utm_campaign=<name>`

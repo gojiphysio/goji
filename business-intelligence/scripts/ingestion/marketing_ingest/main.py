@@ -32,12 +32,22 @@ permission hiccup on them logs a warning and is skipped, so it can never break t
 established reach ingestion. Each metric the run captures is buffered and written
 in a single append load.
 
+### Search Console — additive counts vs weighted position
+`clicks` and `impressions` are additive; `ctr` and `position` are NOT. Position
+is an impression-weighted average, so a window's position is
+SUM(position*impressions)/SUM(impressions), never AVG(position) — the mart
+encodes this so no caller has to remember. Search Console also backfills for
+~2-3 days, so each run re-pulls a trailing window and the latest row wins in stg.
+
 Env vars:
   SOURCES              Comma list of sources to run     default: instagram
   IG_USER_ID           Instagram Business/Creator id     (required for instagram)
   META_GRAPH_TOKEN     Long-lived Meta access token      (required for instagram; secret)
   GRAPH_API_VERSION    Graph API version                 default: v21.0
   IG_METRIC_PERIOD     Reach aggregation period          default: days_28
+  GSC_SITE_URL         Property, e.g. sc-domain:gojiphysio.com  (required for search_console)
+  GSC_LOOKBACK_DAYS    Trailing re-pull window           default: 7
+  GSC_ROW_LIMIT        Max rows per dimension call       default: 5000
   BQ_PROJECT           Target BQ project                 default: goji-bi
   BQ_DATASET           Target dataset                    default: raw_marketing
 
@@ -48,7 +58,8 @@ from __future__ import annotations
 import logging
 import os
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
+from urllib.parse import quote
 
 import requests
 from google.cloud import bigquery
@@ -202,9 +213,141 @@ def ingest_instagram(project: str, dataset: str) -> None:
     _bq_load(rows, f"{project}.{dataset}.instagram_raw", schema, project)
 
 
+def parse_search_analytics(body: dict, dimension: str) -> list[dict]:
+    """Flatten a Search Console `searchAnalytics.query` response into rows.
+
+    Pure, so the response-shape handling is unit-tested without a network call
+    (same reason `parse_insight_latest` is pure).
+
+    Shape: {"rows":[{"keys":["2026-08-30","physio near me"],
+                     "clicks":3,"impressions":40,"ctr":0.075,"position":8.2}]}
+
+    The `date` dimension is always requested first, so `keys[0]` is the date and
+    `keys[1]` (when present) is the query/page. A response with no `rows` at all
+    is normal — Search Console returns nothing for a day with no impressions —
+    so it yields [] rather than raising.
+
+    **`position` is an impression-weighted average, never a sum.** It is stored
+    per row and must be re-weighted downstream, which is why `impressions`
+    always travels beside it.
+    """
+    out: list[dict] = []
+    for r in body.get("rows", []) or []:
+        keys = r.get("keys") or []
+        if not keys:
+            continue
+        out.append({
+            "metric_date":     keys[0],
+            "dimension":       dimension,
+            "dimension_value": keys[1] if len(keys) > 1 else "",
+            "clicks":          int(r.get("clicks") or 0),
+            "impressions":     int(r.get("impressions") or 0),
+            "ctr":             float(r.get("ctr") or 0.0),
+            "position":        float(r.get("position") or 0.0),
+        })
+    return out
+
+
+def ingest_search_console(project: str, dataset: str) -> None:
+    """Pull Google Search Console performance into raw_marketing.search_console_raw.
+
+    Closes the organic-search blind spot: 30-odd condition/service pages are
+    built for organic with no visibility into impressions, position, or query
+    (`ads_PaidOrganicStats` is empty because GSC isn't linked to Ads either).
+
+    Three dimensions per run, each a separate API call and all best-effort after
+    the first:
+      - `total` — one row per day, the headline clicks/impressions/CTR/position
+      - `query` — top queries per day (what we actually rank for)
+      - `page`  — top pages per day (which content earns the impressions)
+
+    **Auth is the job's own service account** (ADC), not a stored secret — add
+    the SA email as a *restricted* user on the Search Console property. That
+    keeps this in the "free / DIY first" lane with no token to rotate.
+
+    **Re-pulls a trailing window on every run** (`GSC_LOOKBACK_DAYS`, default 7)
+    because Search Console backfills for ~2-3 days after the fact: a row pulled
+    on day 1 is provisional. Append-only + dedupe-to-latest in `stg.search_console`
+    means the late correction simply wins, same as the plato_* re-pull window.
+    """
+    site_url = env("GSC_SITE_URL")                                  # e.g. sc-domain:gojiphysio.com
+    lookback = int(env("GSC_LOOKBACK_DAYS", "7", required=False))
+    row_limit = int(env("GSC_ROW_LIMIT", "5000", required=False))
+    loaded_at = datetime.now(timezone.utc).isoformat()
+
+    # GSC has no data for the last ~2 days; asking anyway is harmless (empty rows).
+    end = datetime.now(timezone.utc).date()
+    start = end - timedelta(days=lookback)
+
+    try:
+        import google.auth
+        from google.auth.transport.requests import AuthorizedSession
+        creds, _ = google.auth.default(
+            scopes=["https://www.googleapis.com/auth/webmasters.readonly"])
+        session = AuthorizedSession(creds)
+    except Exception as e:
+        log.exception("search console auth failed: %s", e)
+        sys.exit(1)
+
+    endpoint = ("https://searchconsole.googleapis.com/webmasters/v3/sites/"
+                f"{quote(site_url, safe='')}/searchAnalytics/query")
+
+    def fetch(dimensions: list[str]) -> dict:
+        r = session.post(endpoint, json={
+            "startDate":  start.isoformat(),
+            "endDate":    end.isoformat(),
+            "dimensions": dimensions,
+            "rowLimit":   row_limit,
+            "dataState":  "all",     # include still-fresh (provisional) days
+        }, timeout=TIMEOUT_S)
+        r.raise_for_status()
+        return r.json()
+
+    rows: list[dict] = []
+
+    # 1) Daily totals. FATAL — if this fails the source produced nothing useful.
+    log.info("fetching GSC totals: site=%s %s..%s", site_url, start, end)
+    try:
+        body = fetch(["date"])
+        rows.extend(parse_search_analytics(body, "total"))
+    except requests.RequestException as e:
+        log.exception("search console totals fetch failed "
+                      "(is the job SA a user on %s?): %s", site_url, e)
+        sys.exit(3)
+    except (KeyError, IndexError, ValueError, TypeError) as e:
+        log.error("unexpected search console payload: %s", e)
+        sys.exit(3)
+
+    # 2) + 3) Query and page breakdowns. BEST-EFFORT — a quota or shape problem
+    # on these must not lose the day's headline numbers.
+    for dim in ("query", "page"):
+        log.info("fetching GSC by %s", dim)
+        try:
+            body = fetch(["date", dim])
+            rows.extend(parse_search_analytics(body, dim))
+        except (requests.RequestException, KeyError, IndexError, ValueError, TypeError) as e:
+            log.warning("GSC %s breakdown skipped (%s)", dim, e)
+
+    for r in rows:
+        r["_loaded_at"] = loaded_at
+
+    schema = [
+        bigquery.SchemaField("_loaded_at", "TIMESTAMP", mode="REQUIRED"),
+        bigquery.SchemaField("metric_date", "DATE", mode="REQUIRED"),
+        bigquery.SchemaField("dimension", "STRING", mode="REQUIRED"),
+        bigquery.SchemaField("dimension_value", "STRING"),
+        bigquery.SchemaField("clicks", "INT64", mode="REQUIRED"),
+        bigquery.SchemaField("impressions", "INT64", mode="REQUIRED"),
+        bigquery.SchemaField("ctr", "FLOAT64"),
+        bigquery.SchemaField("position", "FLOAT64"),
+    ]
+    _bq_load(rows, f"{project}.{dataset}.search_console_raw", schema, project)
+
+
 # source name -> handler(project, dataset). Add "gbp"/"reviews" here next.
 SOURCES = {
-    "instagram": ingest_instagram,
+    "instagram":      ingest_instagram,
+    "search_console": ingest_search_console,
 }
 
 

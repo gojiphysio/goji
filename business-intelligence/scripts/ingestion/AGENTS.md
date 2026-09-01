@@ -20,13 +20,23 @@ source (Instagram, Search Console, GBP, …).
   special handling. De-duplicated metrics (e.g. Instagram reach) need a
   period-level fetch. Running **totals** (e.g. `followers_count`) are snapshots:
   store one row per day and read the **latest** in-window (growth = latest−first),
-  never SUM. `marketing_ingest` today pulls reach (dedup), `profile_views`
+  never SUM. **Weighted averages** (e.g. Search Console `position`) are a fourth
+  kind: store the per-row value *and* its weight (impressions) so a window can
+  compute `SUM(value*weight)/SUM(weight)` — never `AVG()`. The mart exposes the
+  weight column so no caller has to remember this. `marketing_ingest` today pulls reach (dedup), `profile_views`
   (additive), and `followers_count` (total) — reach is fatal-on-failure, the other
   two are best-effort so a metric-name/permission hiccup can't break reach ingest.
 
 ## Ops
 - **Secrets** live in Secret Manager, mounted to the Job via `--set-secrets`;
   never in code or git. BigQuery auth is ADC (the Job's service account).
+  **Prefer no secret at all** where the API accepts the Job's own service
+  account (Search Console: add `ingestion-sa@` as a restricted user on the
+  property) — nothing to mint, store, or rotate.
+- **Sources gate independently.** The deploy step builds `SOURCES` from whatever
+  is configured and deploys if *any* source is ready, so a new source can go
+  live before an existing one is provisioned (and a missing token can't block
+  it). An unconfigured source is left out; its dashboard card stays "—".
 - The **ingestion SA** writes `raw_*`; the **dashboard SA** reads `stg`/`marts`
   (one `dataViewer` grant per new `raw_*` dataset, or authorized views).
 - Schedule with **Cloud Scheduler** (daily unless the source needs more).

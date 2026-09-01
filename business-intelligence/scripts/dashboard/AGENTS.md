@@ -13,7 +13,11 @@ See `DEPLOY.md`.
 
 ## UI
 - **Reuse the trend ticker.** New metric cards show change vs the previous period
-  via `renderTrend(id, current, previous, prevStart, prevEnd)` (green ▲ / red ▼ / grey —).
+  via `renderTrend(id, current, previous, prevStart, prevEnd, opts)` (green ▲ / red ▼ / grey —).
+  For a **lower-is-better** metric (cost per booking) pass
+  `{ lowerIsBetter: true }`: it flips only the colour, never the arrow or the
+  percentage, so the number stays truthful. Don't negate the inputs to fake it —
+  that colours correctly but prints the percentage with the wrong sign.
   Back it with `ranges[key].prev_kpis.<metric>`, `ranges[key].prev_start`, and
   `ranges[key].prev_end` from `build_payload()`. The tooltip shows "vs D–D Mon".
 - **Mobile rules** (learned the hard way):
@@ -121,6 +125,23 @@ See `DEPLOY.md`.
   `?sid=<booking session>&p=<path>` (inline script in `BaseLayout.astro`); the
   redirect logs them onto `link_click_events.session_id`/`page`. Off-site channels
   (ig/gbp/ads/qr) never carry these — they're NULL.
+- **Cost per booking is the paid headline** (`_paid_performance`), and it is
+  assembled in Python: `fetch_google_ads` reads the US-multi-region transfer
+  while `fetch_paid_funnel` reads `marts`, and the two **cannot be joined in one
+  query**. A session counts as paid when its *first* `web_session_events` row
+  carries a `gclid` — keying off any row would count sessions that merely passed
+  through a tagged landing, since a session spans pages. When bookings are zero
+  the metric is **None, not the spend**: "$607 per booking" and "$607, none
+  booked" are different claims, so the card shows "—" plus the at-risk spend in
+  the subtext. `cost_per_funnel_entry` is the leading indicator — at SGD 20/day
+  bookings are too sparse to move week to week.
+- **Google Ads table choice must stay deterministic.** `fetch_google_ads` picks
+  `ads_CampaignBasicStats_*` by an explicit preference order. The old loose
+  regex + `tables[0]` with no `ORDER BY` silently landed on
+  `p_ads_HourlyAccountStats` (account-grain impressions disagree with the
+  campaign roll-up: 21,202 vs 12,851 for Aug 2026) and was one row-order change
+  away from a `*ConversionStats` table, which has no cost/click columns at all
+  and would degrade the card to zeros without an error.
 - **Instagram is more than reach.** The `marketing_ingest` job now pulls
   `profile_views` (additive → SUM) and `followers_count` (running total → read
   latest, growth = latest−first) alongside reach; `fetch_instagram_engagement`

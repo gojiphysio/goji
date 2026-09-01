@@ -1774,6 +1774,18 @@
           <div class="kpi-trend" id="mkt_ads_clicks_trend" hidden></div>
           <div class="mkt-target">Avg CPC: <span id="mkt_ads_cpc">-</span></div>
         </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Cost per booking <span class="range-label">this period</span> <span class="badge live">Google Ads</span></div>
+          <div class="kpi-value" id="mkt_ads_cpb">-</div>
+          <div class="kpi-trend" id="mkt_ads_cpb_trend" hidden></div>
+          <div class="mkt-target" id="mkt_ads_cpb_note">Ad spend &divide; bookings from ad clicks</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Organic search clicks <span class="range-label">this period</span> <span class="badge live">Search Console</span></div>
+          <div class="kpi-value" id="mkt_gsc_clicks">-</div>
+          <div class="kpi-trend" id="mkt_gsc_clicks_trend" hidden></div>
+          <div class="mkt-target" id="mkt_gsc_note">Impressions, CTR, avg position</div>
+        </div>
         <div class="kpi-card wip">
           <div class="kpi-label">GBP booking clicks + calls</div>
           <div class="kpi-value">— pending integration</div>
@@ -2346,9 +2358,14 @@
     // previous equal-length window (r.prev_kpis from the backend). previous
     // being null/undefined — e.g. the "all time" range — hides the chip.
     const TREND_FLAT_PCT = 0.5;  // |change| under this reads as "maintain"
-    function renderTrend(id, current, previous, prevStart, prevEnd) {
+    // `opts.lowerIsBetter` flips only the good/bad colouring, never the number.
+    // Cost-per-booking falling is good; every other card on the page is the
+    // other way round. (Negating the inputs would colour it correctly but
+    // print the percentage with the wrong sign, so the flag lives here.)
+    function renderTrend(id, current, previous, prevStart, prevEnd, opts) {
       const el = document.getElementById(id);
       if (!el) return;
+      const lowerIsBetter = !!(opts && opts.lowerIsBetter);
       const ok = current != null && isFinite(current) &&
                  previous != null && isFinite(previous);
       if (!ok) { el.hidden = true; el.className = 'kpi-trend'; el.textContent = ''; return; }
@@ -2360,14 +2377,15 @@
       let dir, arrow, text;
       if (previous === 0) {
         // No baseline to take a percentage against — report direction only.
-        if (current > 0)      { dir = 'up';   arrow = '▲'; text = 'new'; }
-        else if (current < 0) { dir = 'down'; arrow = '▼'; text = 'new'; }
+        if (current > 0)      { dir = lowerIsBetter ? 'down' : 'up';   arrow = '▲'; text = 'new'; }
+        else if (current < 0) { dir = lowerIsBetter ? 'up'   : 'down'; arrow = '▼'; text = 'new'; }
         else                  { dir = 'flat'; arrow = '—'; text = 'no change'; }
       } else {
         const pct = (current - previous) / Math.abs(previous) * 100;
-        if (pct > TREND_FLAT_PCT)       { dir = 'up';   arrow = '▲'; }
-        else if (pct < -TREND_FLAT_PCT) { dir = 'down'; arrow = '▼'; }
-        else                            { dir = 'flat'; arrow = '—'; }
+        // Arrow always follows the number; only the colour respects direction.
+        if (pct > TREND_FLAT_PCT)       { arrow = '▲'; dir = lowerIsBetter ? 'down' : 'up';   }
+        else if (pct < -TREND_FLAT_PCT) { arrow = '▼'; dir = lowerIsBetter ? 'up'   : 'down'; }
+        else                            { arrow = '—'; dir = 'flat'; }
         const mag = Math.abs(pct);
         const sign = pct > 0 ? '+' : pct < 0 ? '−' : '';
         text = sign + (mag >= 100 ? mag.toFixed(0) : mag.toFixed(1)) + '%';
@@ -2933,6 +2951,46 @@
         document.getElementById('mkt_ads_cpc').textContent    = ga.cpc    ? '$' + ga.cpc.toFixed(2)   : '—';
         renderTrend('mkt_ads_spend_trend',  ga.spend,  gap && gap.spend,  ps, pe);
         renderTrend('mkt_ads_clicks_trend', ga.clicks, gap && gap.clicks, ps, pe);
+      }
+
+      // Cost per booking. Deliberately does NOT fall back to showing spend as
+      // the headline when nothing booked — "$607 per booking" and "$607, none
+      // booked" are different claims. Zero-booking spend is called out in the
+      // subtext instead, where it reads as the warning it is.
+      const pp = r.paid_performance, ppp = r.paid_performance_prev;
+      if (pp) {
+        const cpbEl  = document.getElementById('mkt_ads_cpb');
+        const noteEl = document.getElementById('mkt_ads_cpb_note');
+        if (pp.cost_per_booking != null) {
+          cpbEl.textContent = fmt$(pp.cost_per_booking);
+          noteEl.textContent = `${fmt$(pp.spend)} spend · ${fmtInt(pp.bookings)} booked`
+            + (pp.cost_per_funnel_entry != null
+                ? ` · ${fmt$(pp.cost_per_funnel_entry)} / booking start` : '');
+        } else if (pp.spend_without_booking != null) {
+          cpbEl.textContent = '—';
+          noteEl.textContent = `${fmt$(pp.spend_without_booking)} spent, 0 bookings from ad clicks`
+            + (pp.entered_funnel ? ` (${fmtInt(pp.entered_funnel)} booking starts)` : '');
+        } else {
+          cpbEl.textContent = '—';
+          noteEl.textContent = 'Ad spend ÷ bookings from ad clicks';
+        }
+        renderTrend('mkt_ads_cpb_trend', pp.cost_per_booking,
+                    ppp && ppp.cost_per_booking, ps, pe, { lowerIsBetter: true });
+      }
+
+      // Organic search (Search Console). Position is impression-weighted
+      // server-side, so it's already correct here — don't re-average it.
+      const gsc = r.organic_search, gscp = r.organic_search_prev;
+      if (gsc) {
+        document.getElementById('mkt_gsc_clicks').textContent =
+          gsc.clicks ? fmtInt(gsc.clicks) : '—';
+        const bits = [];
+        if (gsc.impressions) bits.push(`${fmtInt(gsc.impressions)} impressions`);
+        if (gsc.ctr != null)      bits.push(`${gsc.ctr}% CTR`);
+        if (gsc.position != null) bits.push(`avg pos ${gsc.position}`);
+        document.getElementById('mkt_gsc_note').textContent =
+          bits.length ? bits.join(' · ') : 'Impressions, CTR, avg position';
+        renderTrend('mkt_gsc_clicks_trend', gsc.clicks, gscp && gscp.clicks, ps, pe);
       }
 
       // Website sessions (GA4 BigQuery export). Stays '—' until the export is

@@ -95,3 +95,68 @@ runs the job. Until the token + data exist, the dashboard card degrades to "—"
 | `BQ_PROJECT` / `BQ_DATASET` | `goji-bi` / `raw_marketing` | target |
 
 Exit codes: 0 ok / 1 config / 2 BQ / 3 API.
+
+---
+
+## Source: Google Search Console (organic search)
+
+Closes the organic blind spot — 30-odd condition/service pages are built for
+organic search with no visibility into impressions, position, or query.
+
+### Why no secret
+
+Unlike Instagram, this source authenticates as the **job's own service account**
+(ADC). There is no token to mint, store, or rotate. One manual step instead:
+
+> Search Console → **Settings** → **Users and permissions** → **Add user** →
+> `ingestion-sa@goji-bi.iam.gserviceaccount.com`, permission **Restricted**.
+
+Then set the repo variable `GSC_SITE_URL` (e.g. `sc-domain:gojiphysio.com` for a
+domain property, or `https://www.gojiphysio.com/` for a URL-prefix property).
+The deploy step adds `search_console` to `SOURCES` once that variable exists;
+Instagram and Search Console gate independently, so either can go live alone.
+
+### One-time table
+
+```bash
+bq query --use_legacy_sql=false < schema.sql   # creates search_console_raw
+```
+
+### What it pulls
+
+Three dimensions per run, into `raw_marketing.search_console_raw`:
+
+| `dimension` | Grain | Purpose |
+|---|---|---|
+| `total` | one row/day | headline clicks, impressions, CTR, position |
+| `query` | day × query | what we actually rank for |
+| `page`  | day × page  | which content earns the impressions |
+
+`total` is fatal on failure; the two breakdowns are best-effort (a quota or
+shape problem must not lose the day's headline numbers) — the same
+fatal-core / best-effort-extras split as Instagram reach.
+
+### Two traps this encodes
+
+1. **`position` is impression-weighted, never averaged.** A window's true
+   average position is `SUM(position*impressions)/SUM(impressions)`.
+   `marts.fct_search_console_daily` exposes `position_weight` precisely so no
+   caller reaches for `AVG(position)` and quietly gets a wrong number. CTR is
+   likewise recomputed from summed clicks/impressions, never averaged.
+2. **Search Console backfills for ~2-3 days.** Every run re-pulls a trailing
+   window (`GSC_LOOKBACK_DAYS`, default 7) and the latest row per key wins in
+   `stg.search_console` — same re-pull idiom as the `plato_*` jobs. A row read
+   on day 1 is provisional; the correction simply overwrites it.
+
+Also note Search Console **omits low-volume queries** for privacy, so the
+`query` rows for a day will not sum to that day's `total` row. That is expected.
+Use `fct_search_console_daily` for headline numbers and
+`fct_search_console_terms` only for "what are we ranking for".
+
+### Data flow
+
+```
+Search Console API ─▶ raw_marketing.search_console_raw ─▶ stg.search_console ─▶ marts.fct_search_console_daily  ─▶ Organic search card
+      (per run)          (append-only)                     (latest per            marts.fct_search_console_terms
+                                                            date+dim+value)
+```
