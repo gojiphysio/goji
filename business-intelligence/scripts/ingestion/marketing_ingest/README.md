@@ -118,9 +118,16 @@ Instagram and Search Console gate independently, so either can go live alone.
 
 ### One-time table
 
+Paths below are **from the repo root** — `schema.sql` lives in this job's
+directory, so a bare `< schema.sql` only works if you have already `cd`'d here.
+
 ```bash
-bq query --use_legacy_sql=false < schema.sql   # creates search_console_raw
+bq query --use_legacy_sql=false \
+  < business-intelligence/scripts/ingestion/marketing_ingest/schema.sql
 ```
+
+The file holds both landing tables and every statement is
+`CREATE TABLE IF NOT EXISTS`, so re-running it is a no-op for `instagram_raw`.
 
 ### What it pulls
 

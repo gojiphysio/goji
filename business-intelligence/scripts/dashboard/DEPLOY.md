@@ -233,8 +233,8 @@ as the job's own service account, so the only setup is:
 
 1. Search Console → **Settings** → **Users and permissions** → add
    `ingestion-sa@goji-bi.iam.gserviceaccount.com` as a **Restricted** user.
-2. Create the landing table once:
-   `bq query --use_legacy_sql=false < scripts/ingestion/marketing_ingest/schema.sql`
+2. Create the landing table once (path is **from the repo root**):
+   `bq query --use_legacy_sql=false < business-intelligence/scripts/ingestion/marketing_ingest/schema.sql`
 3. Set the repo variable **`GSC_SITE_URL`** (e.g. `sc-domain:gojiphysio.com`).
    The deploy step then adds `search_console` to `SOURCES`; sources gate
    independently, so this can go live with or without Instagram.
