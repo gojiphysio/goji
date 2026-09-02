@@ -163,14 +163,25 @@ jobs:
           secrets=""
           envs="BQ_PROJECT=${PROJECT}"
 
-          # Instagram: needs the long-lived Meta token in Secret Manager + IG_USER_ID.
-          if gcloud secrets describe meta-graph-token --project "${PROJECT}" >/dev/null 2>&1 \
-             && [ -n "${IG_USER_ID}" ]; then
+          # Instagram: gated on IG_USER_ID ONLY.
+          #
+          # Do NOT re-add a `gcloud secrets describe meta-graph-token` probe here.
+          # The deployer SA has no Secret Manager role at all, so that call always
+          # fails with PERMISSION_DENIED regardless of whether the secret exists.
+          # It used to sit in front of an `exit 0`, so the whole step silently
+          # no-op'd and the job kept whatever config it was last given by hand —
+          # which is why nobody noticed. Once this step actually deploys (because
+          # some *other* source is configured), the same false negative drops
+          # Instagram from SOURCES and --set-env-vars wipes IG_USER_ID with it.
+          # Mounting the secret needs secretAccessor on the *runtime* SA
+          # (ingestion-sa has it), not read access for the deployer — so if the
+          # secret is genuinely missing, let the deploy fail loudly instead.
+          if [ -n "${IG_USER_ID}" ]; then
             sources="${sources:+$sources,}instagram"
             secrets="META_GRAPH_TOKEN=meta-graph-token:latest"
             envs="${envs},IG_USER_ID=${IG_USER_ID}"
           else
-            echo "instagram not configured (meta-graph-token secret and/or IG_USER_ID var missing) — leaving it out of SOURCES."
+            echo "IG_USER_ID repo var not set — leaving instagram out of SOURCES."
           fi
 
           # Search Console: no secret at all — auth is the job's own service
