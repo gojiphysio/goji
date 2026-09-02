@@ -1472,11 +1472,32 @@ def fetch_google_ads(start: date, end: date) -> dict:
     """
     empty = {"spend": 0.0, "clicks": 0, "impressions": 0, "cpc": None}
     try:
+        # Pick the table deterministically. The old regex
+        # (`campaign.*(basic)?stats|account.*(basic)?stats`) matched ~20 tables
+        # and took `tables[0]` with no ORDER BY, so the choice depended on
+        # whatever INFORMATION_SCHEMA happened to return first. Two ways that
+        # bit us: it landed on `p_ads_HourlyAccountStats` (account-level, whose
+        # impressions disagree with the campaign roll-up — 21,202 vs 12,851 for
+        # Aug 2026), and a *ConversionStats table is one row-order change away
+        # from being picked, which has no cost/click columns at all and would
+        # silently degrade the whole card to zeros.
+        #
+        # CampaignBasicStats is the canonical spend/clicks/impressions grain.
+        # Prefer the plain table, then its `p_`-prefixed partitioned twin, and
+        # only then fall back to account-level basic stats.
         tables = _query(f"""
-SELECT table_name
+SELECT table_name,
+       CASE
+         WHEN REGEXP_CONTAINS(LOWER(table_name), r'^ads_campaignbasicstats_')   THEN 1
+         WHEN REGEXP_CONTAINS(LOWER(table_name), r'^p_ads_campaignbasicstats_') THEN 2
+         WHEN REGEXP_CONTAINS(LOWER(table_name), r'^ads_accountbasicstats_')    THEN 3
+         WHEN REGEXP_CONTAINS(LOWER(table_name), r'^p_ads_accountbasicstats_')  THEN 4
+       END AS preference
 FROM `{PROJECT}.google_ads.INFORMATION_SCHEMA.TABLES`
-WHERE REGEXP_CONTAINS(LOWER(table_name), r'campaign.*(basic)?stats|account.*(basic)?stats')
-LIMIT 5
+WHERE REGEXP_CONTAINS(LOWER(table_name),
+        r'^p?_?ads_(campaign|account)basicstats_')
+ORDER BY preference, table_name
+LIMIT 1
 """)
         if not tables:
             return empty
@@ -1501,6 +1522,139 @@ WHERE segments_date BETWEEN '{start}' AND '{end}'
         }
     except Exception as e:
         log.warning("google_ads unavailable: %s", e)
+        return empty
+
+
+def fetch_paid_funnel(start: date, end: date) -> dict:
+    """On-site outcome of paid (gclid-carrying) sessions in [start, end].
+
+    The other half of cost-per-booking: `fetch_google_ads` has the money,
+    this has what the money bought. Kept as a separate query on purpose —
+    `google_ads` lives in the US multi-region and cannot be joined to `marts`
+    in one statement, so the two are combined in Python (same reason
+    `fetch_google_ads` talks to the transfer dataset directly).
+
+    A session is "paid" when its **first** event carries a `gclid`. Using the
+    first event matters: `web_session_events` rows persist across navigation
+    (a session can span 11 paths), so keying off any-row would count a session
+    that merely *passed through* a tagged landing. Auto-tagging puts the gclid
+    on the ad click's landing only.
+
+    Degrades to zeros if the beacon tables aren't deployed, like the rest of
+    the Marketing tab.
+    """
+    empty = {"sessions": 0, "entered_funnel": 0, "bookings": 0,
+             "funnel_entry_pct": 0.0, "booking_pct": 0.0}
+    try:
+        rows = _query(f"""
+WITH first_hit AS (
+  SELECT session_id, gclid,
+         ROW_NUMBER() OVER (PARTITION BY session_id ORDER BY occurred_at) AS rn
+  FROM `{PROJECT}.marts.web_session_events`
+  WHERE DATE(occurred_at) BETWEEN '{start}' AND '{end}'
+),
+paid AS (
+  SELECT session_id FROM first_hit
+  WHERE rn = 1 AND gclid IS NOT NULL AND gclid != ''
+),
+funnel AS (
+  SELECT DISTINCT session_id
+  FROM `{PROJECT}.marts.booking_funnel_events`
+  WHERE DATE(occurred_at) BETWEEN '{start}' AND '{end}'
+),
+booked AS (
+  SELECT DISTINCT session_id
+  FROM `{PROJECT}.marts.booking_funnel_events`
+  WHERE DATE(occurred_at) BETWEEN '{start}' AND '{end}' AND stage = 'confirmed'
+)
+SELECT COUNT(*)                                        AS sessions,
+       COUNTIF(f.session_id IS NOT NULL)               AS entered_funnel,
+       COUNTIF(b.session_id IS NOT NULL)               AS bookings
+FROM paid p
+LEFT JOIN funnel f USING (session_id)
+LEFT JOIN booked b USING (session_id)
+""")
+        if not rows or rows[0]["sessions"] is None:
+            return empty
+        r        = rows[0]
+        sessions = _to_int(r["sessions"])
+        entered  = _to_int(r["entered_funnel"])
+        booked   = _to_int(r["bookings"])
+        return {
+            "sessions":         sessions,
+            "entered_funnel":   entered,
+            "bookings":         booked,
+            "funnel_entry_pct": round(entered / sessions * 100.0, 1) if sessions else 0.0,
+            "booking_pct":      round(booked / sessions * 100.0, 2) if sessions else 0.0,
+        }
+    except Exception as e:
+        log.warning("paid_funnel unavailable (run deploy_all.sh?): %s", e)
+        return empty
+
+
+def _paid_performance(ads: dict, paid: dict) -> dict:
+    """Combine ad spend with the paid on-site outcome into the numbers the
+    Marketing tab actually decides on.
+
+    `cost_per_booking` is genuinely undefined at zero bookings, so it stays
+    None rather than collapsing to the spend figure — a card reading
+    "SGD 607 per booking" when nothing was booked is a different (and much
+    rosier) claim than "SGD 607, nothing booked". The UI needs both numbers to
+    say the true thing, so `spend` and `bookings` travel alongside it and
+    `spend_without_booking` names the at-risk case explicitly.
+
+    `cost_per_funnel_entry` is the leading indicator: at SGD 20/day, bookings
+    are too sparse to move week to week, but funnel entries move first.
+    """
+    spend    = float(ads.get("spend") or 0.0)
+    bookings = _to_int(paid.get("bookings") or 0)
+    entered  = _to_int(paid.get("entered_funnel") or 0)
+    return {
+        "spend":                 round(spend, 2),
+        "bookings":              bookings,
+        "entered_funnel":        entered,
+        "cost_per_booking":      round(spend / bookings, 2) if bookings else None,
+        "spend_without_booking": round(spend, 2) if spend and not bookings else None,
+        "cost_per_funnel_entry": round(spend / entered, 2) if entered else None,
+    }
+
+
+def fetch_organic_search(start: date, end: date) -> dict:
+    """Organic Google Search performance for [start, end] from
+    marts.fct_search_console_daily (fed by the marketing_ingest `search_console`
+    source).
+
+    Clicks and impressions SUM. **Average position is impression-weighted** —
+    SUM(position_weight)/SUM(impressions), never AVG(position_avg) — which is
+    exactly why the mart carries `position_weight`. CTR is likewise recomputed
+    from the summed clicks/impressions, not averaged.
+
+    Degrades to zeros if the ingestion hasn't run yet, so the Marketing tab
+    renders before Search Console is wired up.
+    """
+    empty = {"clicks": 0, "impressions": 0, "ctr": None, "position": None}
+    try:
+        rows = _query(f"""
+SELECT SUM(clicks)          AS clicks,
+       SUM(impressions)     AS impressions,
+       SUM(position_weight) AS position_weight
+FROM `{PROJECT}.marts.fct_search_console_daily`
+WHERE metric_date BETWEEN '{start}' AND '{end}'
+""")
+        if not rows or rows[0]["impressions"] is None:
+            return empty
+        r      = rows[0]
+        clicks = _to_int(r["clicks"])
+        impr   = _to_int(r["impressions"])
+        weight = float(r["position_weight"] or 0)
+        return {
+            "clicks":      clicks,
+            "impressions": impr,
+            "ctr":         round(clicks / impr * 100.0, 2) if impr else None,
+            "position":    round(weight / impr, 1) if impr else None,
+        }
+    except Exception as e:
+        log.warning("organic_search unavailable (search_console ingested?): %s", e)
         return empty
 
 
@@ -1991,6 +2145,8 @@ def build_payload() -> dict:
                 "link_clicks":    ex.submit(fetch_link_clicks, start, end),
                 "booking_funnel": ex.submit(fetch_booking_funnel, start, end),
                 "google_ads":     ex.submit(fetch_google_ads, start, end),
+                "paid_funnel":    ex.submit(fetch_paid_funnel, start, end),
+                "organic_search": ex.submit(fetch_organic_search, start, end),
                 "instagram_reach": ex.submit(fetch_instagram_reach, start, end),
                 "instagram_engagement": ex.submit(fetch_instagram_engagement, start, end),
                 "web_sessions":   ex.submit(fetch_web_sessions, start, end),
@@ -2008,6 +2164,8 @@ def build_payload() -> dict:
                 range_jobs[key]["prev_kpis"]         = None
                 range_jobs[key]["link_clicks_prev"]  = None
                 range_jobs[key]["google_ads_prev"]   = None
+                range_jobs[key]["paid_funnel_prev"]  = None
+                range_jobs[key]["organic_search_prev"] = None
                 range_jobs[key]["instagram_reach_prev"] = None
                 range_jobs[key]["instagram_engagement_prev"] = None
                 range_jobs[key]["web_sessions_prev"] = None
@@ -2019,6 +2177,8 @@ def build_payload() -> dict:
                 range_jobs[key]["prev_kpis"]         = ex.submit(fetch_kpis, prev_start, prev_end)
                 range_jobs[key]["link_clicks_prev"]  = ex.submit(fetch_link_clicks, prev_start, prev_end)
                 range_jobs[key]["google_ads_prev"]   = ex.submit(fetch_google_ads, prev_start, prev_end)
+                range_jobs[key]["paid_funnel_prev"]  = ex.submit(fetch_paid_funnel, prev_start, prev_end)
+                range_jobs[key]["organic_search_prev"] = ex.submit(fetch_organic_search, prev_start, prev_end)
                 range_jobs[key]["instagram_reach_prev"] = ex.submit(fetch_instagram_reach, prev_start, prev_end)
                 range_jobs[key]["instagram_engagement_prev"] = ex.submit(fetch_instagram_engagement, prev_start, prev_end)
                 range_jobs[key]["web_sessions_prev"] = ex.submit(fetch_web_sessions, prev_start, prev_end)
@@ -2049,6 +2209,18 @@ def build_payload() -> dict:
                 "booking_funnel":   v["booking_funnel"].result(),
                 "google_ads":       v["google_ads"].result(),
                 "google_ads_prev":  v["google_ads_prev"].result() if v["google_ads_prev"] else None,
+                "paid_funnel":      v["paid_funnel"].result(),
+                "organic_search":      v["organic_search"].result(),
+                "organic_search_prev": v["organic_search_prev"].result() if v["organic_search_prev"] else None,
+                # Cost-per-booking: ad spend (US-region transfer) meets the
+                # on-site outcome (marts). Assembled here because the two
+                # sources can't be joined in one query.
+                "paid_performance": _paid_performance(v["google_ads"].result(),
+                                                      v["paid_funnel"].result()),
+                "paid_performance_prev": (
+                    _paid_performance(v["google_ads_prev"].result(),
+                                      v["paid_funnel_prev"].result())
+                    if v["google_ads_prev"] and v["paid_funnel_prev"] else None),
                 "instagram_reach":      v["instagram_reach"].result(),
                 "instagram_reach_prev": v["instagram_reach_prev"].result() if v["instagram_reach_prev"] else None,
                 "instagram_engagement":      v["instagram_engagement"].result(),

@@ -54,6 +54,13 @@ env:
   # card). Empty until the repo variable IG_USER_ID is set → the job deploy is
   # skipped and the card stays "—". The Meta token lives in Secret Manager.
   IG_USER_ID: ${{ vars.IG_USER_ID }}
+  # Search Console property for the marketing-ingest job (organic-search card),
+  # e.g. 'sc-domain:gojiphysio.com'. Empty until the repo variable is set → the
+  # search_console source is left out of SOURCES and the card stays "—". No
+  # secret: the job's service account authenticates, so add
+  # ingestion-sa@goji-bi.iam.gserviceaccount.com as a restricted user on the
+  # property in Search Console → Settings → Users and permissions.
+  GSC_SITE_URL: ${{ vars.GSC_SITE_URL }}
 
 jobs:
   # ---- 1. Tests gate the deploy -------------------------------------------
@@ -145,25 +152,47 @@ jobs:
         if: steps.changes.outputs.marketing == 'true'
         working-directory: business-intelligence/scripts/ingestion/marketing_ingest
         run: |
-          # Pulls Instagram reach (Meta Graph API) into raw_marketing. Needs the
-          # long-lived token in Secret Manager (meta-graph-token) + the IG_USER_ID
-          # repo var. Until both exist the job can't run, so skip the deploy
-          # (non-fatal, like the domain-mapping step) rather than fail CI — the
-          # dashboard card just stays "—". The daily Cloud Scheduler trigger (set
-          # up once during provisioning) runs it; we don't execute here.
-          if ! gcloud secrets describe meta-graph-token --project "${PROJECT}" >/dev/null 2>&1; then
-            echo "meta-graph-token secret not found — skipping marketing-ingest deploy. Provision it to enable (see the job README)."
+          # Pulls marketing-channel metrics into raw_marketing. Each source is
+          # independently gated on its own config, and the job deploys if *any*
+          # of them is ready — so Search Console can go live before Instagram is
+          # provisioned, or vice versa. An unconfigured source is simply left out
+          # of SOURCES and its dashboard card stays "—". Skipping is non-fatal
+          # (like the domain-mapping step) rather than failing CI. The daily
+          # Cloud Scheduler trigger runs it; we don't execute here.
+          sources=""
+          secrets=""
+          envs="BQ_PROJECT=${PROJECT}"
+
+          # Instagram: needs the long-lived Meta token in Secret Manager + IG_USER_ID.
+          if gcloud secrets describe meta-graph-token --project "${PROJECT}" >/dev/null 2>&1 \
+             && [ -n "${IG_USER_ID}" ]; then
+            sources="${sources:+$sources,}instagram"
+            secrets="META_GRAPH_TOKEN=meta-graph-token:latest"
+            envs="${envs},IG_USER_ID=${IG_USER_ID}"
+          else
+            echo "instagram not configured (meta-graph-token secret and/or IG_USER_ID var missing) — leaving it out of SOURCES."
+          fi
+
+          # Search Console: no secret at all — auth is the job's own service
+          # account, which must be added as a restricted user on the property.
+          if [ -n "${GSC_SITE_URL}" ]; then
+            sources="${sources:+$sources,}search_console"
+            envs="${envs},GSC_SITE_URL=${GSC_SITE_URL}"
+          else
+            echo "GSC_SITE_URL repo var not set — leaving search_console out of SOURCES."
+          fi
+
+          if [ -z "$sources" ]; then
+            echo "No marketing sources configured — skipping marketing-ingest deploy."
             exit 0
           fi
-          if [ -z "${IG_USER_ID}" ]; then
-            echo "IG_USER_ID repo var not set — skipping marketing-ingest deploy."
-            exit 0
-          fi
+          echo "Deploying marketing-ingest with SOURCES=${sources}"
+
           gcloud run jobs deploy marketing-ingest \
             --source . --region "${REGION}" --project "${PROJECT}" \
             --service-account "ingestion-sa@${PROJECT}.iam.gserviceaccount.com" \
-            --set-secrets=META_GRAPH_TOKEN=meta-graph-token:latest \
-            --set-env-vars=BQ_PROJECT=${PROJECT},SOURCES=instagram,IG_USER_ID=${IG_USER_ID} \
+            ${secrets:+--set-secrets=$secrets} \
+            --set-env-vars="${envs},SOURCES=${sources}" \
             --quiet
 
       - name: Deploy dashboard

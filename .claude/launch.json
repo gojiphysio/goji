@@ -4,16 +4,38 @@
     {
       "name": "website-prototype",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev", "--", "--port", "4232"],
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "--",
+        "--port",
+        "4232"
+      ],
       "cwd": "marketing/website/prototype",
       "port": 4232
     },
     {
       "name": "website-preview",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "preview", "--", "--port", "4233"],
+      "runtimeArgs": [
+        "run",
+        "preview",
+        "--",
+        "--port",
+        "4233"
+      ],
       "cwd": "marketing/website/prototype",
       "port": 4233
+    },
+    {
+      "name": "dashboard",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": [
+        "-c",
+        "DASHBOARD_USER=dev DASHBOARD_PASS=dev DASHBOARD_DEV=1 python3 app.py"
+      ],
+      "cwd": "business-intelligence/scripts/dashboard",
+      "port": 8080
     }
   ]
 }

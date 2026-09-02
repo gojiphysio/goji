@@ -340,3 +340,209 @@ the only fault was targeting.
   to Maximize Conversions, set a **campaign-specific goal = website booking
   action only** — the account still has Smart-campaign/GBP Local actions as
   Primary account-default goals (would misdirect Smart Bidding).
+
+## 13. Month-2 readout (2026-09-01, covering 2026-07-16 → 2026-08-31)
+
+**Verdict: targeting is fixed, conversion is not. The campaign is buying the
+right traffic and that traffic does not book.** Pulled from the `google_ads`
+BQ transfer + `marts.web_session_events` / `booking_funnel_events` /
+`link_click_events`. Everything below is BigQuery-verified; no UI screenshots.
+
+### Spend vs bookings
+
+| Month | Spend | Clicks | CPC | `Book appointment` conv |
+|---|---|---|---|---|
+| Jul (from 16th) | SGD 330.55 | 191 | 1.73 | **1** |
+| Aug | SGD 607.45 | 294 | 2.07 | **1** |
+
+~SGD 948 for **2 bookings** ≈ **SGD 474 per booking** against a SGD 260 clinic
+session. August nearly doubled July's spend and produced the same one booking.
+Campaign ran all of August at the full SGD 20/day on `TARGET_SPEND`
+(= Maximize Clicks), so it optimised for clicks and delivered clicks.
+
+### The 78 "conversions" were not bookings
+
+Account-wide conversions since June are dominated by
+**`Local actions - Directions`** (36 in Jun, 39 in Jul) from the now-paused
+Smart campaign, plus 1 `Clicks to call`. Only **2** `Book appointment`
+conversions exist in the entire account.
+
+**This is a reporting trap, not a bidding defect** — and *not* the §12 landmine,
+which on inspection never materialised. Every Directions row belongs to the
+Smart campaign and stops the day it was paused (10 Jul); the live Search
+campaign has only ever recorded `Book appointment`. Its goal was correct all
+along. The trap is that the account headline (78) looks like traffic is
+converting when the campaign under review produced 2.
+
+### Targeting: fixed
+
+August search terms are on-profile — *pelvic floor physiotherapy singapore,
+physio near me, prenatal physiotherapy, pelvic organ prolapse*. The broad-match
+junk of §12 is gone. Residual leakage is ~SGD 40/mo: competitor names
+(*keo ran*, *yip wan hui*, *xuan kai*), wrong-geo (*physio orchard*,
+*joo chiat*, *ang mo kio*, *jurong east*, *bedok*), and off-service
+(*hydrotherapy*, *indiba*, *eswt*, *intellicare*). Negatives listed in §14.
+
+### Where it actually dies: on-site conversion
+
+| Cohort (Aug) | Sessions | Entered funnel | Booked |
+|---|---|---|---|
+| Paid (gclid) | 198 | 9 (4.6%) | 1 (0.51%) |
+| Organic/other | 1,488 | 250 (16.8%) | 18 (1.21%) |
+
+Paid visitors are **engaged, not bouncing**: 40–52s dwell, 70–74% scroll on the
+money pages. They read the page and leave. `/physiotherapy-lentor/` — the #1
+paid landing page — took **83 paid sessions and produced 0 funnel entries**;
+across paid+organic it is 125 sessions → 1 entry.
+
+Per ad group (Aug), the generic head-term group burns 59% of budget for nothing:
+
+| Ad group | Spend | Clicks | Conv |
+|---|---|---|---|
+| General / near me / Lentor | 358.79 | 173 | **0** |
+| Pelvic floor / women's health | 186.33 | 91 | **0** |
+| Prenatal / pregnancy | 40.51 | 20 | **1** |
+| Postnatal / postpartum | 21.82 | 10 | **0** |
+
+### What is working: GBP, for free
+
+Recovering channel via the go-link `cid` passthrough (August arrivals → booked):
+
+| Origin | Arrivals | Bookings | Rate |
+|---|---|---|---|
+| **Google Business Profile** (`gbp-book`) | 69 | **6** | **8.7%** |
+| Instagram bio (`bio-book`) | 53 | 1 | 1.9% |
+| Website CTA (`web-book`) | 5 | 0 | — |
+
+GBP converts ~17× better than paid and costs nothing. It has no dashboard card
+and no owner. That is the highest-ROI gap on this list.
+
+### Attribution: verified healthy (a correction)
+
+An earlier pass suspected the on-site `?sid=` passthrough was missing because it
+is absent from `curl`'d HTML. **It is not missing** — the decorator in
+`BaseLayout.astro` runs client-side and appends `?sid=<session>&p=<path>` to
+every `go.gojiphysio.com/web-*` link. Verified in a real browser. `sessionStorage`
+survives the redirector round-trip (same origin), so paid sessions keep their
+`session_id` through to `/book`. **The paid funnel numbers above are real, not an
+attribution artifact.**
+
+Caveat worth fixing: `link_click_events` counts bot traffic. 85 of 95 sid-less
+`web-wa` taps have **no referer at all**, and the redirector logs crawler hits on
+`/robots.txt` as a slug (167 rows in Aug). Filter bots before trusting tap counts.
+
+### Organic search: still blind
+
+`ads_PaidOrganicStats` is **empty** — Search Console is not linked to Google Ads,
+and is not ingested into BigQuery either. 30 content pages are built for organic
+with no visibility into impressions, position, or query. Unchanged since §12.
+
+## 14. Action list (2026-09-01) — UI changes, in order
+
+Do these in the Google Ads UI. Each is independent; 1–3 are the money savers.
+
+### 1. Pause the "General / near me / Lentor" ad group (2 min)
+
+Campaigns → **Goji - Search - Non-brand** → Ad groups → tick
+**General / near me / Lentor** → Edit → **Pause**.
+
+It spent SGD 358.79 in August (59% of budget) for 0 bookings across 173 clicks.
+These are the most competitive, lowest-intent head terms in the account and we
+lose them to bigger budgets. Freed budget flows to the wedge groups below.
+
+### 2. Cut daily budget SGD 20 → SGD 8 (2 min)
+
+Campaign → Settings → Budget → **SGD 8/day**.
+
+Not a full pause: keeping it live preserves account history and Quality Score,
+and the prenatal group is showing signal. At SGD 8/day the worst case is ~SGD
+240/mo while the landing pages get fixed. Revisit once cost-per-booking is on
+the dashboard.
+
+### 3. Leave the conversion goal alone — it is already correct
+
+**No action.** An earlier draft of this list said to set a campaign-specific
+goal because the §12 (July) note warned that account-default Local actions were
+Primary. Checked against the transfer, that was never true of this campaign:
+
+| Campaign | Conversion actions ever recorded | Window |
+|---|---|---|
+| **Goji - Search - Non-brand** (live) | `Book appointment` only — 2 | 29 Jul – 6 Aug |
+| Goji Physio Singapore (SMART, paused) | `Local actions - Directions` 75, `Clicks to call` 1 | 13 Jun – 10 Jul |
+
+The Directions conversions belong solely to the paused Smart campaign and stop
+the day it was paused. The Search campaign has only ever counted
+`Book appointment` (`AW-18230150966/t--8CKuH8LwcELaO6PRD`). §12's warning was a
+concern that never materialised, not a live defect.
+
+What remains true is the **reporting trap**: account-level "conversions" totals
+78, of which 76 are directions taps from a paused campaign. Judge this campaign
+on its own conversion rows, never on the account headline.
+
+**Stay on Maximize Clicks.** Only move to Maximize Conversions after ~15–30
+`Book appointment` conversions — at current rates that is a long way off, which
+is itself the argument for fixing the landing pages first.
+
+### 4. Add negatives from the August terms pass (5 min)
+
+Campaign → Settings → Negative keywords → add as **phrase** match. Also append
+to `import/negative-keywords.txt` (source of truth) in the same change:
+
+```
+hydrotherapy      indiba          eswt            intellicare
+"keo ran"         "yip wan hui"   "xuan kai"      "city osteopathy"
+"movemed"         "physio & sole"
+orchard           "joo chiat"     "ang mo kio"    amk
+"jurong east"     jurong          bedok           tampines
+hougang           yishun          novena          clementi
+woodlands         bishan          "senior day care"   dementia
+```
+
+Geo negatives matter more than they look: we only have a physical presence at
+Lentor (site AGENTS.md forbids implying otherwise), so a *physiotherapy bedok*
+click can never convert. ~SGD 40/mo recovered, and it compounds.
+
+### 5. Point the two surviving ad groups at their money pages (5 min)
+
+Confirm final URLs — **direct site URLs, never `go.gojiphysio.com`** (Google
+rejects redirector final URLs; on-page CTAs stay go-links):
+
+| Ad group | Final URL |
+|---|---|
+| Pelvic floor / women's health | `https://www.gojiphysio.com/services/pelvic-floor-physiotherapy/` |
+| Prenatal / pregnancy | `https://www.gojiphysio.com/services/prenatal-physiotherapy/` |
+| Postnatal / postpartum | `https://www.gojiphysio.com/services/postpartum-physiotherapy/` |
+
+Keep auto-tagging on (it is) so `gclid` keeps landing in `web_session_events`.
+
+### 6. Link Search Console to Google Ads (5 min) — optional, do last
+
+**The menu moved.** "Linked accounts" under Admin is gone; product links now
+live at **Tools → Data manager → Featured products → Search Console → Proceed**,
+then scroll to *"Link other sites you own"* and click **Link**. (If you can't
+find it, the top search box in Google Ads jumps straight there — the nav has
+been reorganised more than once.)
+
+Two prerequisites, and the second is the one that usually blocks:
+- **admin** access on the Google Ads account, and
+- your Google account must be listed as an **owner** of the property in Search
+  Console. If you're not, the link sits at *"Requested"* pending owner approval
+  rather than failing outright.
+
+**This is optional for organic visibility.** It populates `ads_PaidOrganicStats`
+(currently empty), which is only the paid-*vs*-organic joint view: which queries
+we pay for that we already rank for. The organic numbers themselves come from
+our own Search Console ingestion (§ DEPLOY.md), which does **not** depend on
+this link. Don't let this block the ingestion setup.
+
+> Same owner requirement gates the ingestion's one manual step — adding
+> `ingestion-sa@goji-bi.iam.gserviceaccount.com` as a *restricted* user in
+> Search Console → Settings → Users and permissions. If you're an owner, both
+> are unblocked together.
+
+### Not an Ads change, but the biggest win
+
+GBP converts at 8.7% for free (§13) versus paid at 0.51%. Before spending more
+on Ads, give Google Business Profile an owner: posts, photos, review velocity,
+and the `gbp-book` CTA. It is already the best acquisition channel in the
+business and nobody is running it.
