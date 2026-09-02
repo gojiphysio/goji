@@ -515,13 +515,30 @@ rejects redirector final URLs; on-page CTAs stay go-links):
 
 Keep auto-tagging on (it is) so `gclid` keeps landing in `web_session_events`.
 
-### 6. Link Search Console to Google Ads (5 min)
+### 6. Link Search Console to Google Ads (5 min) — optional, do last
 
-Tools → Setup → **Linked accounts** → Search Console → Link.
+**The menu moved.** "Linked accounts" under Admin is gone; product links now
+live at **Tools → Data manager → Featured products → Search Console → Proceed**,
+then scroll to *"Link other sites you own"* and click **Link**. (If you can't
+find it, the top search box in Google Ads jumps straight there — the nav has
+been reorganised more than once.)
 
-Populates `ads_PaidOrganicStats` (currently empty), which gives the paid-vs-
-organic view per query: where we pay for a click we already rank for, and where
-organic has impressions but no rank worth having.
+Two prerequisites, and the second is the one that usually blocks:
+- **admin** access on the Google Ads account, and
+- your Google account must be listed as an **owner** of the property in Search
+  Console. If you're not, the link sits at *"Requested"* pending owner approval
+  rather than failing outright.
+
+**This is optional for organic visibility.** It populates `ads_PaidOrganicStats`
+(currently empty), which is only the paid-*vs*-organic joint view: which queries
+we pay for that we already rank for. The organic numbers themselves come from
+our own Search Console ingestion (§ DEPLOY.md), which does **not** depend on
+this link. Don't let this block the ingestion setup.
+
+> Same owner requirement gates the ingestion's one manual step — adding
+> `ingestion-sa@goji-bi.iam.gserviceaccount.com` as a *restricted* user in
+> Search Console → Settings → Users and permissions. If you're an owner, both
+> are unblocked together.
 
 ### Not an Ads change, but the biggest win
 
