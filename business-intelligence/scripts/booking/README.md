@@ -39,10 +39,16 @@ summaries and booking writes. `plato.py` paces itself with a token bucket
 (`PLATO_RATE_PER_MIN`, default 18, burst 20) instead of discovering the cap via
 429s — one 429 costs 7s of retry backoff and still surfaces as a 502 on the form.
 Three rules follow from that budget:
-- **Never cache an unvalidated Plato response.** `online_booking_config()` only
-  caches a dict with `calendars`, and serves the last known-good copy when a
-  refresh fails. Plato returns `200` with a bare `[]` under throttling; caching
-  that for 5 min is what turned a 2026-09-01 blip into a multi-hour outage.
+- **Never hand a Plato response straight to code that assumes a shape, and never
+  cache one you haven't validated.** On 2026-09-01 Plato changed
+  `onlineapptbooking/list` from returning the config object to returning a list
+  of them, unannounced, and took `/book` down for ~9 hours.
+  `_normalise_booking_config()` now accepts both shapes (preferring the `active`
+  entry), only something carrying `calendars` is cached, and a failed refresh
+  serves the last known-good copy. See `DIAGNOSIS.md`.
+- **Fetch the config before the appointments.** The config is one cached call;
+  appointments are paginated. Failing after the crawl wastes the budget on a
+  request that was never going to succeed.
 - **Range fetches cache far longer than single days** (`PLATO_APPTS_RANGE_TTL`,
   5 min vs 20s). A month is 10+ pages; without this, every focus/clinician
   variant of the same month re-pages it.

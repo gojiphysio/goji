@@ -173,3 +173,46 @@ def test_stale_config_backs_off_before_retrying_plato():
     p.replies.append(GOOD_CFG)
     assert p.online_booking_config() == GOOD_CFG
     assert len(p.calls) == before + 1
+
+
+# --- Plato's 2026-09-01 response-shape change -------------------------------
+
+WRAPPED_CFG = [{"key": "abc", "active": True, "calendars": GOOD_CFG["calendars"],
+                "welcome_title": "Book with Goji"}]
+
+
+def test_list_wrapped_config_is_unwrapped():
+    """Plato changed onlineapptbooking/list from returning the config object to
+    returning a list of them. That is what took /book down on 2026-09-01."""
+    p = FakePlato([WRAPPED_CFG])
+    cfg = p.online_booking_config()
+    assert isinstance(cfg, dict)
+    assert cfg["calendars"] == GOOD_CFG["calendars"]
+
+
+def test_bare_object_shape_still_works():
+    """Their previous shape must keep working — we don't know which they'll serve."""
+    p = FakePlato([GOOD_CFG])
+    assert p.online_booking_config() == GOOD_CFG
+
+
+def test_active_config_wins_over_inactive_ones():
+    """Plato allows several booking keys; only the active one is what customers
+    see, and it is not necessarily first in the list."""
+    inactive = {"key": "old", "active": False, "calendars": []}
+    active = {"key": "live", "active": True, "calendars": GOOD_CFG["calendars"]}
+    p = FakePlato([[inactive, active]])
+    assert p.online_booking_config()["key"] == "live"
+
+
+def test_falls_back_to_first_entry_with_calendars_when_none_are_active():
+    p = FakePlato([[{"key": "x"}, {"key": "y", "calendars": GOOD_CFG["calendars"]}]])
+    assert p.online_booking_config()["key"] == "y"
+
+
+def test_empty_list_is_still_rejected():
+    """An empty list carries no calendars — that is a real fault, not a shape
+    we should quietly accept."""
+    p = FakePlato([[]])
+    with pytest.raises(PlatoError, match="malformed booking config"):
+        p.online_booking_config()

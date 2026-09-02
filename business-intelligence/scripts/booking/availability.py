@@ -146,9 +146,13 @@ def derive_availability(
     time on both sides. `now` (naive SGT) is injectable for testing; defaults to
     the current SGT time.
     """
+    # Config first: it is one cached call, while the appointments fetch is
+    # paginated and expensive. If Plato is broken we want to find out before
+    # spending the request budget, not after — during the 2026-09-01 outage
+    # every doomed request crawled a full day of appointments first.
+    cfg = plato.online_booking_config()
     raw_appts = plato.appointments(day.isoformat(), day.isoformat())
     booked = _booked_by_calendar(raw_appts)
-    cfg = plato.online_booking_config()
     return _derive_day(cfg, booked, service_id, day, clinician_id=clinician_id,
                        focus=focus, variant=variant, home=home, now=now, _raw_appointments=raw_appts if _DIAG else None)
 
@@ -173,9 +177,12 @@ def derive_available_days(
     budget for a single month view. `variant` specifies a duration variant if
     applicable (e.g. "30min" for paediatric physio).
     """
+    # Config first — see derive_availability. It matters more here: a month is
+    # 10+ paginated pages, so failing after that crawl wastes half of Plato's
+    # per-minute budget on a request that was never going to succeed.
+    cfg = plato.online_booking_config()
     raw_appts = plato.appointments(start.isoformat(), end.isoformat())
     booked = _booked_by_calendar(raw_appts)
-    cfg = plato.online_booking_config()
     out: list[str] = []
     day = start
     while day <= end:
