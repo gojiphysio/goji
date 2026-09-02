@@ -138,7 +138,7 @@ def test_limiter_raises_rather_than_hanging_when_drained():
     """Better to degrade to "no slots" than hold a booking request open."""
     lim = _RateLimiter(rate_per_min=60, burst=1)
     lim.acquire(max_wait_s=0.0)
-    with pytest.raises(PlatoError, match="rate budget exhausted"):
+    with pytest.raises(PlatoError, match="budget exhausted"):
         lim.acquire(max_wait_s=0.0)
 
 
@@ -146,6 +146,41 @@ def test_limiter_refills_over_time():
     lim = _RateLimiter(rate_per_min=6000, burst=1)  # 10ms per token
     lim.acquire(max_wait_s=0.0)
     lim.acquire(max_wait_s=1.0)  # waits ~10ms rather than raising
+
+
+def test_penalise_stops_every_caller_not_just_the_throttled_one():
+    """The circuit breaker: retrying into a 429 is what pins the budget, so one
+    429 has to stand the whole process down."""
+    lim = _RateLimiter(rate_per_min=6000, burst=10)  # plenty of tokens
+    lim.acquire(max_wait_s=0.0)                      # freely available
+    lim.penalise(cooldown_s=30)
+    with pytest.raises(PlatoError, match="cooling down after a 429"):
+        lim.acquire(max_wait_s=0.0)
+
+
+def test_penalty_expires():
+    lim = _RateLimiter(rate_per_min=6000, burst=10)
+    lim.penalise(cooldown_s=0.05)
+    lim.acquire(max_wait_s=1.0)  # waits out the cooldown instead of raising
+
+
+def test_penalty_never_shortens_an_existing_cooldown():
+    """Concurrent 429s must not let a later, shorter penalty undo a longer one."""
+    lim = _RateLimiter(rate_per_min=6000, burst=10)
+    lim.penalise(cooldown_s=30)
+    lim.penalise(cooldown_s=0.01)
+    with pytest.raises(PlatoError, match="cooling down"):
+        lim.acquire(max_wait_s=0.0)
+
+
+def test_bucket_refills_normally_after_a_cooldown():
+    """A cooldown must not leave the bucket permanently degraded — once it
+    lapses, normal pacing resumes."""
+    lim = _RateLimiter(rate_per_min=6000, burst=10)
+    lim.penalise(cooldown_s=0.05)
+    lim.acquire(max_wait_s=1.0)
+    for _ in range(5):
+        lim.acquire(max_wait_s=1.0)  # refills normally after the cooldown
 
 
 def test_limiter_disabled_when_rate_is_zero():
