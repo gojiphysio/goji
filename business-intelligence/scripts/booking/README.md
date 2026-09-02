@@ -19,7 +19,41 @@ the clinic's real rules — see the plan/validation notes in the repo.
 - `POST /api/track` → funnel event (fire-and-forget) → `marts.booking_funnel_events`
   (stages must be in `VALID_STAGES` in `app.py` — unknown stages are dropped;
   keep the website's `FunnelStage` type in `src/lib/booking.ts` in sync)
-- `GET /healthcheck`
+- `GET /healthcheck` → liveness only ("is the container up"). Never touches Plato.
+- `GET /healthcheck/deep` → **readiness**: derives real availability for the next
+  14 days. `200 {"ok":true,...}` = a visitor can book; `503` = they can't, with
+  `reason` = `derivation_failed` (Plato/derivation threw) or `no_bookable_dates`
+  (ran clean, empty calendar). Result cached 60s so probing it can't eat Plato's
+  budget. This is what the uptime check watches — plain `/healthcheck` stayed
+  green through the 2026-09-01 outage, which is why it exists.
+
+## Monitoring
+`setup_monitoring.sh` (re-runnable) provisions a Cloud Monitoring uptime check on
+`/healthcheck/deep` every 5 min plus an alert policy emailing
+`hello@gojiphysio.com` when more than one probe region fails for 5 minutes.
+Runbook for what to do when it fires: `DIAGNOSIS.md`.
+
+## Plato's rate limit — the thing that keeps breaking us
+Plato caps at **20 requests/min per API key**, clinic-wide across availability,
+summaries and booking writes. `plato.py` paces itself with a token bucket
+(`PLATO_RATE_PER_MIN`, default 18, burst 20) instead of discovering the cap via
+429s — one 429 costs 7s of retry backoff and still surfaces as a 502 on the form.
+Three rules follow from that budget:
+- **Never hand a Plato response straight to code that assumes a shape, and never
+  cache one you haven't validated.** On 2026-09-01 Plato changed
+  `onlineapptbooking/list` from returning the config object to returning a list
+  of them, unannounced, and took `/book` down for ~9 hours.
+  `_normalise_booking_config()` now accepts both shapes (preferring the `active`
+  entry), only something carrying `calendars` is cached, and a failed refresh
+  serves the last known-good copy. See `DIAGNOSIS.md`.
+- **Fetch the config before the appointments.** The config is one cached call;
+  appointments are paginated. Failing after the crawl wastes the budget on a
+  request that was never going to succeed.
+- **Range fetches cache far longer than single days** (`PLATO_APPTS_RANGE_TTL`,
+  5 min vs 20s). A month is 10+ pages; without this, every focus/clinician
+  variant of the same month re-pages it.
+- **`--max-instances=1` is load-bearing** for the limiter, not just the booking
+  locks. Raising it multiplies our request rate by the instance count.
 
 ## How availability works (`availability.py`)
 Derived, NOT taken from Plato's hourly `onlineapptbooking/slots` (locked to 60m).

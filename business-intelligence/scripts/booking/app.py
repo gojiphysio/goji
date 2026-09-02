@@ -104,7 +104,83 @@ def _cors(resp):
 
 @app.route("/healthcheck")
 def healthcheck():
+    """Liveness only: is the container up. Deliberately does NOT touch Plato.
+
+    This stayed a cheerful 200 through the whole 2026-09-01 outage while /book
+    was unusable, which is why the uptime check watches /healthcheck/deep."""
     return "ok", 200
+
+
+# Readiness cache: the deep check costs a Plato read, and Plato's budget is 20
+# req/min for the entire clinic. One derivation per DEEP_TTL_S is plenty for a
+# 5-minute uptime check, and it stops a bot hammering the URL from eating the
+# booking form's budget.
+DEEP_TTL_S = float(os.environ.get("DEEP_HEALTH_CACHE_TTL", "60"))
+# How far ahead the check looks for a bookable date. Wide enough that a
+# genuinely full stretch (holiday week) can't trip the alert on its own, but
+# still a single Plato appointments fetch.
+DEEP_HORIZON_DAYS = int(os.environ.get("DEEP_HEALTH_HORIZON_DAYS", "14"))
+DEEP_SERVICE = os.environ.get("DEEP_HEALTH_SERVICE", "physiotherapy")
+_deep_cache: tuple[float, dict, int] | None = None
+_deep_lock = threading.Lock()
+
+
+@app.route("/healthcheck/deep")
+def healthcheck_deep():
+    """Readiness: can a visitor actually get times on /book right now?
+
+    Exercises the real failure surface end to end — Plato auth, the appointments
+    fetch, the online-booking config (including the shape guard that the
+    2026-09-01 cache-poisoning bug slipped past), and slot derivation — then
+    asserts at least one bookable date exists in the next DEEP_HORIZON_DAYS.
+
+    200 `{"ok": true, ...}`   — the booking form works.
+    503 `{"ok": false, ...}`  — it does not; `reason` says which failure it is:
+        `derivation_failed`   — Plato or our derivation threw (the 502 the
+                                visitor sees as "We couldn't load times just now")
+        `no_bookable_dates`   — it ran clean but returned an empty calendar
+
+    Uses one range fetch, which the Plato client caches, and the whole answer is
+    cached for DEEP_TTL_S. Public by design: the uptime check is unauthenticated
+    and the payload is a date list, no patient data.
+    """
+    global _deep_cache
+    nowm = time.monotonic()
+    with _deep_lock:
+        if _deep_cache and nowm - _deep_cache[0] < DEEP_TTL_S:
+            return jsonify(_deep_cache[1]), _deep_cache[2]
+
+    today = datetime.now(SGT).date()
+    start = today + timedelta(days=1)  # lead time: Plato's min_days, no same-day
+    end = min(today + timedelta(days=DEEP_HORIZON_DAYS),
+              today + timedelta(days=MAX_ADVANCE_DAYS))
+    started = time.monotonic()
+    try:
+        days = derive_available_days(plato(), DEEP_SERVICE, start, end)
+    except Exception as e:
+        log.error("deep healthcheck failed (%s %s..%s): %s",
+                  DEEP_SERVICE, start, end, e, exc_info=True)
+        payload = {"ok": False, "reason": "derivation_failed", "error": str(e),
+                   "service": DEEP_SERVICE,
+                   "window": [start.isoformat(), end.isoformat()]}
+        status = 503
+    else:
+        ok = bool(days)
+        if not ok:
+            log.error("deep healthcheck: no bookable dates for %s in %s..%s",
+                      DEEP_SERVICE, start, end)
+        payload = {"ok": ok, "service": DEEP_SERVICE,
+                   "window": [start.isoformat(), end.isoformat()],
+                   "bookable_dates": len(days),
+                   "first_available": days[0] if days else None,
+                   "took_ms": int((time.monotonic() - started) * 1000)}
+        if not ok:
+            payload["reason"] = "no_bookable_dates"
+        status = 200 if ok else 503
+
+    with _deep_lock:
+        _deep_cache = (nowm, payload, status)
+    return jsonify(payload), status
 
 
 @app.route("/api/availability")
@@ -132,7 +208,7 @@ def availability():
         avail = derive_availability(plato(), service, day,
                                     clinician_id=clinician, focus=focus, variant=variant, home=home)
     except Exception as e:  # Plato hiccup — degrade to no slots, don't 500 loudly
-        log.warning("availability failed (%s %s): %s", service, day, e)
+        log.warning("availability failed (%s %s): %s", service, day, e, exc_info=True)
         return jsonify({"error": "unavailable", "times": []}), 502
     times = sorted({t for slots in avail.values() for t in slots})
     # A date with zero free slots is a silent drop-off point: the visitor picked
@@ -196,7 +272,8 @@ def availability_summary():
         days = derive_available_days(plato(), service, start, end,
                                      clinician_id=clinician, focus=focus, variant=variant, home=home)
     except Exception as e:  # Plato hiccup — the calendar degrades to unshaded
-        log.warning("availability summary failed (%s %s): %s", service, month_s, e)
+        log.warning("availability summary failed (%s %s): %s", service, month_s, e,
+                    exc_info=True)
         return jsonify({"error": "unavailable", "available": []}), 502
     payload = {"month": month_s, "available": days}
     with _avail_cache_lock:
