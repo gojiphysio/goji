@@ -37,6 +37,17 @@ source (Instagram, Search Console, GBP, …).
   is configured and deploys if *any* source is ready, so a new source can go
   live before an existing one is provisioned (and a missing token can't block
   it). An unconfigured source is left out; its dashboard card stays "—".
+- **Gate a source on a repo var, never on `gcloud secrets describe`.** The
+  deployer SA has no Secret Manager role, so that probe always returns
+  PERMISSION_DENIED whether or not the secret exists. It is a false negative that
+  hides while the step no-ops, then drops the source the first time the step
+  actually runs. Mounting a secret needs `secretAccessor` on the **runtime** SA,
+  not read access for the deployer — so if a secret is truly missing, let the
+  deploy fail loudly. (Cost us Instagram ingestion for one cycle, 2026-09-02.)
+- **`--set-env-vars` REPLACES the whole env block.** Every deploy must pass every
+  var the job needs; a var omitted because its branch didn't run is silently
+  deleted from the live job. This is what turns the gating false-negative above
+  from "skipped a source" into "wiped `IG_USER_ID`".
 - The **ingestion SA** writes `raw_*`; the **dashboard SA** reads `stg`/`marts`
   (one `dataViewer` grant per new `raw_*` dataset, or authorized views).
 - Schedule with **Cloud Scheduler** (daily unless the source needs more).
