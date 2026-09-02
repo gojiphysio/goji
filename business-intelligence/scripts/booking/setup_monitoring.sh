@@ -56,10 +56,12 @@ echo "============================================================"
 # --- 1. Notification channel -------------------------------------------------
 echo
 echo "==> Notification channel"
+# NB: these Monitoring APIs accept --filter but silently ignore displayName
+# ("filter keys were not present in any resource"), so match client-side —
+# otherwise every re-run of this script creates another channel/check.
 CHANNEL="$(gcloud beta monitoring channels list \
-  --project="${PROJECT}" \
-  --filter="displayName=\"${CHANNEL_NAME}\"" \
-  --format="value(name)" --limit=1)"
+  --project="${PROJECT}" --format="value(name,displayName)" \
+  | awk -F'\t' -v n="${CHANNEL_NAME}" '$2 == n {print $1; exit}')"
 if [[ -n "${CHANNEL}" ]]; then
   echo "    reusing ${CHANNEL}"
 else
@@ -79,9 +81,8 @@ fi
 echo
 echo "==> Uptime check"
 CHECK_ID="$(gcloud monitoring uptime list-configs \
-  --project="${PROJECT}" \
-  --filter="displayName=\"${UPTIME_NAME}\"" \
-  --format="value(name)" --limit=1 | awk -F/ '{print $NF}')"
+  --project="${PROJECT}" --format="value(name,displayName)" \
+  | awk -F'\t' -v n="${UPTIME_NAME}" '$2 == n {print $1; exit}' | awk -F/ '{print $NF}')"
 if [[ -n "${CHECK_ID}" ]]; then
   echo "    reusing ${CHECK_ID}"
 else
@@ -97,9 +98,8 @@ else
     --status-classes=2xx \
     --quiet
   CHECK_ID="$(gcloud monitoring uptime list-configs \
-    --project="${PROJECT}" \
-    --filter="displayName=\"${UPTIME_NAME}\"" \
-    --format="value(name)" --limit=1 | awk -F/ '{print $NF}')"
+    --project="${PROJECT}" --format="value(name,displayName)" \
+    | awk -F'\t' -v n="${UPTIME_NAME}" '$2 == n {print $1; exit}' | awk -F/ '{print $NF}')"
   echo "    created ${CHECK_ID}"
 fi
 [[ -n "${CHECK_ID}" ]] || { echo "!! could not resolve the uptime check id"; exit 1; }
@@ -110,10 +110,13 @@ fi
 # for a network hiccup rather than a real outage.
 echo
 echo "==> Alert policy"
+# Alert policies live in the alpha surface; install it the same way deploy.sh
+# installs beta, or this step dies on a non-interactive "do you want to
+# continue?" prompt.
+gcloud components install alpha --quiet >/dev/null 2>&1 || true
 EXISTING_POLICY="$(gcloud alpha monitoring policies list \
-  --project="${PROJECT}" \
-  --filter="displayName=\"${POLICY_NAME}\"" \
-  --format="value(name)" --limit=1)"
+  --project="${PROJECT}" --format="value(name,displayName)" \
+  | awk -F'\t' -v n="${POLICY_NAME}" '$2 == n {print $1; exit}')"
 
 POLICY_FILE="$(mktemp)"
 trap 'rm -f "${POLICY_FILE}"' EXIT
