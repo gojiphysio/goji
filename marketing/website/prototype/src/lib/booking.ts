@@ -241,9 +241,13 @@ function mockDayTimes(service: string, clinicianId: string, date: string): strin
   if (!date) return [];
   const day = new Date(`${date}T00:00:00`);
   if (day.getDay() === 0) return []; // Sunday closed
+  const isSaturday = day.getDay() === 6;
+  // Saturday: no new bookings for pilates or strength & conditioning
+  if (isSaturday && (service === "clinical-pilates" || service === "strength-conditioning")) {
+    return [];
+  }
   const open: string[] = [];
   const key = `${service}|${clinicianId}|${date}`;
-  const isSaturday = day.getDay() === 6;
   const step = isSaturday ? 60 : 30; // Saturday: hourly; other days: 30-min
   const maxSlots = isSaturday ? 8 : 16; // Adjust slot count for Saturday hourly
   for (let i = 0; i < maxSlots; i++) {
