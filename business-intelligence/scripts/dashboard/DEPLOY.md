@@ -233,6 +233,10 @@ as the job's own service account, so the only setup is:
 
 1. Search Console → **Settings** → **Users and permissions** → add
    `ingestion-sa@goji-bi.iam.gserviceaccount.com` as a **Restricted** user.
+   Requires you to be an **owner** of the property.
+1a. Enable the API once (nothing else here uses it; skipping it fails at
+   runtime with `SERVICE_DISABLED`, not at deploy):
+   `gcloud services enable searchconsole.googleapis.com --project=goji-bi`
 2. Create the landing table once (path is **from the repo root**):
    `bq query --use_legacy_sql=false < business-intelligence/scripts/ingestion/marketing_ingest/schema.sql`
 3. Set the repo variable **`GSC_SITE_URL`** (e.g. `sc-domain:gojiphysio.com`).

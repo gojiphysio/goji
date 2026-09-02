@@ -111,6 +111,14 @@ Unlike Instagram, this source authenticates as the **job's own service account**
 > Search Console → **Settings** → **Users and permissions** → **Add user** →
 > `ingestion-sa@goji-bi.iam.gserviceaccount.com`, permission **Restricted**.
 
+And enable the API once on the project — easy to miss, because nothing else in
+this repo uses it and the failure is a runtime `SERVICE_DISABLED`, not a deploy
+error:
+
+```bash
+gcloud services enable searchconsole.googleapis.com --project=goji-bi
+```
+
 Then set the repo variable `GSC_SITE_URL` (e.g. `sc-domain:gojiphysio.com` for a
 domain property, or `https://www.gojiphysio.com/` for a URL-prefix property).
 The deploy step adds `search_console` to `SOURCES` once that variable exists;
