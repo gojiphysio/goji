@@ -93,29 +93,58 @@ cd business-intelligence/scripts && python3 -m pytest booking/ -q
 
 # Incident log
 
-## 2026-09-01 — booking form down, `/healthcheck` green throughout
+## 2026-09-01 — Plato changed a response shape; /book down for ~9 hours
 
 **Symptom.** Every `/api/availability` and `/api/availability-summary` call
-returned `502 {"error":"unavailable"}`. The go-link redirector
-(`go.gojiphysio.com/web-book`) and the `/book` page itself were fine — the
-outage was entirely in the times fetch. Plain `/healthcheck` returned 200 the
-whole time, so nothing alerted.
+returned `502 {"error":"unavailable"}` — "We couldn't load times just now". The
+go-link redirector (`go.gojiphysio.com/web-book`) and the `/book` page itself
+were fine; the outage was entirely in the times fetch. Plain `/healthcheck`
+returned 200 throughout, so nothing alerted and it was found by a human.
 
-**Root cause.** Two faults compounding:
+**Root cause — a breaking change on Plato's side, unannounced.**
+`GET /onlineapptbooking/list` used to return the booking-config object:
 
-1. *Trigger* — sustained `429`s from Plato. We had no client-side pacing, and
-   month-summary calls re-paged the same month for every focus/clinician variant
-   because the appointments cache TTL was 20s for ranges as well as single days.
-2. *Amplifier* — cache poisoning. Under throttling Plato returned `200` with a
-   bare `[]`, `online_booking_config()` cached it for 5 minutes unvalidated, and
-   every derivation in that window died with `'list' object has no attribute
-   'get'` — including after Plato recovered. Requests alternated between the two
-   errors in the logs, which is what made it look intermittent.
+```json
+{"key": "…", "active": true, "calendars": [ … ]}
+```
 
-**Fixes.** Token-bucket pacing; range-aware appointments TTL; config-shape
-validation with last-known-good fallback; `exc_info` on availability failures;
-`/healthcheck/deep`; a Cloud Monitoring uptime check + alert policy
-(`setup_monitoring.sh`) so this is never found by a customer again.
+From ~15:27 UTC it returned a **list of** those objects:
+
+```json
+[{"key": "…", "active": true, "calendars": [ … ]}]
+```
+
+`_rules_for` does `cfg.get("calendars")`, so every derivation died with `'list'
+object has no attribute 'get'`. Nothing we shipped caused it — the last deploy
+was four days earlier, and the first failure came from a container that had
+booted three minutes before, with no 429 ahead of it. The config itself was
+never damaged: `active: true`, all 7 calendars and their rules intact.
+
+**What made it worse than a one-line bug:**
+
+- *Cache poisoning.* `online_booking_config()` cached the response unvalidated
+  for 5 minutes, so recovery would have lagged the fix by a TTL — and it made
+  the logs alternate between two unrelated errors, which read as "intermittent"
+  and sent the first diagnosis down the rate-limit path.
+- *Wasted budget.* `derive_*` fetched appointments **before** the config, so
+  every doomed request first crawled a paginated day/month from Plato and only
+  then hit the error. During a month view that is 10+ requests of a 20/min
+  budget spent on a request that could never succeed.
+- *Real 429s on top.* Plato throttling was genuinely happening (53 in the week
+  before, 27 in the final day) and was a second, independent failure mode. It
+  was not the trigger, but it did make the picture harder to read.
+
+**Fixes.**
+`_normalise_booking_config()` accepts both shapes and prefers the `active`
+entry; only something carrying `calendars` is ever cached, with a last-known-good
+fallback and a retry back-off; config is fetched before appointments; token-bucket
+pacing at 18/min; range-aware appointments TTL; `exc_info` on failures;
+`/healthcheck/deep`; and a Cloud Monitoring uptime check + alert
+(`setup_monitoring.sh`) so the next one pages us instead of a customer.
+
+**Standing lesson.** Plato is a third-party API that changes shape without
+notice. Never hand a Plato response straight to code that assumes a shape, and
+never cache one that hasn't been validated.
 
 ## 2026-08-12 — Women's Health times not loading
 

@@ -75,6 +75,33 @@ class PlatoError(RuntimeError):
     pass
 
 
+def _normalise_booking_config(payload):
+    """Coerce whatever `onlineapptbooking/list` returned into the config dict,
+    or None if it isn't one.
+
+    Plato changed this endpoint's shape on 2026-09-01 with no notice: it used to
+    return the booking-config object directly, and now returns a *list* of them
+    (one per booking key). That took the /book form down for hours, because
+    `_rules_for` does `cfg.get("calendars")` and a list has no `.get`. We accept
+    both shapes so their next flip back doesn't repeat it.
+
+    From a list we prefer the entry with `active: true`, falling back to the
+    first one carrying `calendars` — Plato allows several booking keys and only
+    the active one reflects what customers actually see.
+    """
+    if isinstance(payload, dict) and "calendars" in payload:
+        return payload
+    if isinstance(payload, list):
+        candidates = [e for e in payload
+                      if isinstance(e, dict) and "calendars" in e]
+        for entry in candidates:
+            if entry.get("active"):
+                return entry
+        if candidates:
+            return candidates[0]
+    return None
+
+
 class _RateLimiter:
     """Token bucket that paces our own calls under Plato's 20 req/min cap.
 
@@ -267,12 +294,11 @@ class PlatoClient:
 
         Two guards, both learned from the 2026-09-01 outage:
 
-        1. **Only a well-formed dict is ever cached.** Plato answers some
-           throttled/degraded reads with HTTP 200 and a bare `[]` body. That
-           used to be cached verbatim, and every availability call for the next
-           5 minutes died in `_rules_for` with "'list' object has no attribute
-           'get'" — long after Plato had recovered. A transient blip became a
-           sustained outage.
+        1. **The response is normalised, then shape-checked.** Plato silently
+           changed this endpoint from returning the config object to returning a
+           list of them (see `_normalise_booking_config`), which took /book down
+           on 2026-09-01. Only something with `calendars` is ever cached — a
+           shape we don't recognise is an error, never a poisoned cache entry.
         2. **A stale-but-good config beats no config.** The rules change maybe
            a few times a year, so when a refresh fails we keep serving the last
            good copy instead of failing the booking form. Only a cold cache
@@ -291,7 +317,8 @@ class PlatoClient:
                 return self._serve_stale_config(now)
             raise
 
-        if not isinstance(fresh, dict) or "calendars" not in fresh:
+        cfg = _normalise_booking_config(fresh)
+        if cfg is None:
             got = type(fresh).__name__
             if self._cfg_cache is not None:
                 log.warning("Plato returned a malformed booking config (%s, not a "
@@ -300,9 +327,9 @@ class PlatoClient:
                 return self._serve_stale_config(now)
             raise PlatoError(
                 f"Plato returned a malformed booking config ({got}, expected a dict "
-                "with 'calendars'); refusing to cache it")
+                "with 'calendars' or a list of them); refusing to cache it")
 
-        self._cfg_cache = fresh
+        self._cfg_cache = cfg
         self._cfg_ts = now
         return self._cfg_cache
 
