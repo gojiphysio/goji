@@ -365,10 +365,14 @@ Campaign ran all of August at the full SGD 20/day on `TARGET_SPEND`
 Account-wide conversions since June are dominated by
 **`Local actions - Directions`** (36 in Jun, 39 in Jul) from the now-paused
 Smart campaign, plus 1 `Clicks to call`. Only **2** `Book appointment`
-conversions exist in the entire account. This is the §12 landmine confirmed:
-the account-default Local goals are live and would misdirect Smart Bidding.
-**Do not switch to Maximize Conversions before setting a campaign-specific
-goal** (see §14).
+conversions exist in the entire account.
+
+**This is a reporting trap, not a bidding defect** — and *not* the §12 landmine,
+which on inspection never materialised. Every Directions row belongs to the
+Smart campaign and stops the day it was paused (10 Jul); the live Search
+campaign has only ever recorded `Book appointment`. Its goal was correct all
+along. The trap is that the account headline (78) looks like traffic is
+converting when the campaign under review produced 2.
 
 ### Targeting: fixed
 
@@ -455,19 +459,29 @@ and the prenatal group is showing signal. At SGD 8/day the worst case is ~SGD
 240/mo while the landing pages get fixed. Revisit once cost-per-booking is on
 the dashboard.
 
-### 3. Set a campaign-specific conversion goal (5 min) — **do before any bidding change**
+### 3. Leave the conversion goal alone — it is already correct
 
-Campaign → Settings → **Goals** → "Use campaign-specific goals" → select
-**only** `Book appointment` (`AW-18230150966/t--8CKuH8LwcELaO6PRD`).
-Deselect `Local actions - Directions` and `Clicks to call`.
+**No action.** An earlier draft of this list said to set a campaign-specific
+goal because the §12 (July) note warned that account-default Local actions were
+Primary. Checked against the transfer, that was never true of this campaign:
 
-Without this, the account-default Local goals stay Primary. Those are the 76
-"conversions" in §13 and they are directions taps, not patients. Any future
-switch to Maximize Conversions would optimise straight toward them.
+| Campaign | Conversion actions ever recorded | Window |
+|---|---|---|
+| **Goji - Search - Non-brand** (live) | `Book appointment` only — 2 | 29 Jul – 6 Aug |
+| Goji Physio Singapore (SMART, paused) | `Local actions - Directions` 75, `Clicks to call` 1 | 13 Jun – 10 Jul |
 
-**Stay on Maximize Clicks for now.** Only move to Maximize Conversions after
-~15–30 `Book appointment` conversions — at current rates that is a long way off,
-which is itself the argument for fixing the landing pages first.
+The Directions conversions belong solely to the paused Smart campaign and stop
+the day it was paused. The Search campaign has only ever counted
+`Book appointment` (`AW-18230150966/t--8CKuH8LwcELaO6PRD`). §12's warning was a
+concern that never materialised, not a live defect.
+
+What remains true is the **reporting trap**: account-level "conversions" totals
+78, of which 76 are directions taps from a paused campaign. Judge this campaign
+on its own conversion rows, never on the account headline.
+
+**Stay on Maximize Clicks.** Only move to Maximize Conversions after ~15–30
+`Book appointment` conversions — at current rates that is a long way off, which
+is itself the argument for fixing the landing pages first.
 
 ### 4. Add negatives from the August terms pass (5 min)
 
