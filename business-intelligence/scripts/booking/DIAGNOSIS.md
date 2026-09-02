@@ -44,8 +44,20 @@ Plato throttles per API key, so every availability lookup, month summary and
 booking write shares one clinic-wide budget. `plato.py` now paces itself with a
 token bucket (`_RateLimiter`, 18/min with a burst of 20) rather than discovering
 the cap via 429s — a 429 costs 7s of retry backoff and still ends as a 502 on the
-form. If you see `Plato rate budget exhausted` we are genuinely over budget:
-find what is fanning out, don't just raise `PLATO_RATE_PER_MIN`.
+form.
+
+A 429 also **trips a process-wide circuit breaker** (`_RateLimiter.penalise`,
+`PLATO_429_COOLDOWN`, 20s): every caller stands down, rather than each failing
+request retrying 3x and multiplying our rate by four while Plato is already
+throttling us. That retry storm is why the 2026-09-01 recovery took several
+deploys — the budget stayed pinned even after the real bug was fixed.
+
+In the logs:
+* `Plato rate limit — cooling down after a 429` — the breaker is open, working
+  as intended. It clears itself; wait it out.
+* `Plato rate limit — budget exhausted at 18 req/min` — we are genuinely
+  over budget without Plato having said so. Find what is fanning out; do not
+  just raise `PLATO_RATE_PER_MIN`.
 
 The usual culprit is the month summary: it pages a whole month of appointments
 (20 rows/page, 10+ pages for a busy month — half the minute's budget in one

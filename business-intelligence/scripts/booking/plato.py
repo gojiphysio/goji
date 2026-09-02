@@ -27,12 +27,18 @@ TIMEOUT_S = 30
 # under that (see _RateLimiter) rather than discovering the cap via 429s: a 429
 # costs 7s of retry backoff and then surfaces as a 502 on the booking form.
 PLATO_RATE_PER_MIN = float(os.environ.get("PLATO_RATE_PER_MIN", "18"))
-PLATO_RATE_BURST = float(os.environ.get("PLATO_RATE_BURST", "20"))
+PLATO_RATE_BURST = float(os.environ.get("PLATO_RATE_BURST", "12"))
 # How long a caller will wait for a token before giving up. Longer than a
 # couple of refills is worse than degrading — the visitor is staring at a
 # spinner on /book. Note `get()` spends this per retry attempt, so the worst
 # case for one call is ~4 x this plus the 7s of 429 backoff; keep it small.
 PLATO_RATE_MAX_WAIT_S = float(os.environ.get("PLATO_RATE_MAX_WAIT", "10"))
+# When Plato does say 429, every caller in the process stops for this long.
+# Without a shared cooldown, N in-flight requests each retry 3x, so being
+# throttled multiplies our request rate by four and the budget never recovers —
+# a retry storm that outlives whatever caused the first 429. Slightly longer
+# than Plato's 60s window would be wasteful; ~20s lets it drain and refill.
+PLATO_429_COOLDOWN_S = float(os.environ.get("PLATO_429_COOLDOWN", "20"))
 # Leave/vacation/block title keywords (case-insensitive): appointments with these in the title
 # block availability like normal appointments (they're just regular appointments on the
 # clinician's calendar in Plato, identified by title pattern from real data analysis).
@@ -122,32 +128,60 @@ class _RateLimiter:
         self._burst = max(1.0, burst)
         self._tokens = self._burst
         self._updated = time.monotonic()
+        self._penalty_until = 0.0
         self._lock = threading.Lock()
 
     def acquire(self, max_wait_s: float) -> None:
         """Consume one token, sleeping until one is free. Raises PlatoError if
         the wait would exceed `max_wait_s` — the caller degrades to "no slots"
-        rather than holding the request open."""
+        rather than holding the request open.
+
+        During a cooldown (see `penalise`) the wait is by definition longer than
+        a token refill, so callers give up immediately instead of queueing. That
+        is the point: while Plato is throttling us, the cheapest thing we can do
+        is stop calling it at all and let its window reset.
+        """
         if not self._interval:
             return
         deadline = time.monotonic() + max_wait_s
         while True:
             with self._lock:
                 now = time.monotonic()
-                self._tokens = min(
-                    self._burst,
-                    self._tokens + (now - self._updated) / self._interval,
-                )
-                self._updated = now
-                if self._tokens >= 1.0:
-                    self._tokens -= 1.0
-                    return
-                wait = (1.0 - self._tokens) * self._interval
+                if now < self._penalty_until:
+                    wait = self._penalty_until - now
+                    reason = "cooling down after a 429"
+                else:
+                    # Defensive clamp. Nothing sets _updated into the future
+                    # today, but if anything ever does, a negative elapsed would
+                    # silently *remove* tokens and never recover.
+                    elapsed = max(0.0, now - self._updated)
+                    self._tokens = min(self._burst,
+                                       self._tokens + elapsed / self._interval)
+                    self._updated = now
+                    if self._tokens >= 1.0:
+                        self._tokens -= 1.0
+                        return
+                    wait = (1.0 - self._tokens) * self._interval
+                    reason = f"budget exhausted at {60.0 / self._interval:.0f} req/min"
             if now + wait > deadline:
                 raise PlatoError(
-                    f"Plato rate budget exhausted (waited {max_wait_s:.0f}s for a slot "
-                    f"under {60.0 / self._interval:.0f} req/min)")
+                    f"Plato rate limit — {reason}; would need {wait:.0f}s, "
+                    f"waited {max_wait_s:.0f}s")
             time.sleep(min(wait, max(0.0, deadline - now)))
+
+    def penalise(self, cooldown_s: float) -> None:
+        """Plato returned 429: drain the bucket and hold every caller off for
+        `cooldown_s`, not just the one that got throttled.
+
+        This is the circuit breaker. Retrying into a 429 is what keeps the
+        budget pinned — each failing request costs four Plato calls, so a burst
+        of visitors during a throttle keeps us throttled indefinitely.
+        """
+        with self._lock:
+            now = time.monotonic()
+            self._tokens = 0.0
+            self._updated = now
+            self._penalty_until = max(self._penalty_until, now + cooldown_s)
 
 
 # One bucket for the whole process — see _RateLimiter on why that is enough.
@@ -185,6 +219,10 @@ class PlatoClient:
         for attempt in range(_retries + 1):
             _limiter.acquire(PLATO_RATE_MAX_WAIT_S)
             r = self.s.get(self._url(path), params=params, timeout=self.timeout)
+            if r.status_code == 429:
+                # Tell the whole process to stand down, then let the retry (if
+                # any) fail fast against the cooldown rather than calling Plato.
+                _limiter.penalise(PLATO_429_COOLDOWN_S)
             if r.status_code in (429, 500, 502, 503) and attempt < _retries:
                 time.sleep(delay)
                 delay = min(delay * 2, 8)
