@@ -35,6 +35,18 @@ class FakePlato(PlatoClient):
 GOOD_CFG = {"calendars": [{"id": "dDIjWJp", "rules": []}]}
 
 
+def expire_config(p: FakePlato) -> None:
+    """Age the config cache past CONFIG_TTL_S.
+
+    Must be relative to `time.monotonic()`, not set to 0.0: monotonic() is
+    seconds-since-boot, so on a fresh CI runner it is far below CONFIG_TTL_S
+    and a literal 0.0 leaves the entry looking *fresh*. That made these tests
+    pass vacuously on the runner while exercising nothing.
+    """
+    from booking import plato as plato_mod
+    p._cfg_ts = time.monotonic() - plato_mod.CONFIG_TTL_S - 1
+
+
 # --- config cache poisoning -------------------------------------------------
 
 def test_malformed_config_raises_on_cold_cache():
@@ -57,14 +69,14 @@ def test_malformed_config_is_never_cached():
 def test_malformed_config_falls_back_to_last_good_copy():
     p = FakePlato([GOOD_CFG, []])
     assert p.online_booking_config() == GOOD_CFG
-    p._cfg_ts = 0.0  # force the TTL to expire
+    expire_config(p)
     assert p.online_booking_config() == GOOD_CFG  # stale-but-good beats failing
 
 
 def test_config_refresh_error_falls_back_to_last_good_copy():
     p = FakePlato([GOOD_CFG, RuntimeError("429 Too Many Requests")])
     assert p.online_booking_config() == GOOD_CFG
-    p._cfg_ts = 0.0
+    expire_config(p)
     assert p.online_booking_config() == GOOD_CFG
 
 
@@ -149,7 +161,7 @@ def test_stale_config_backs_off_before_retrying_plato():
 
     p = FakePlato([GOOD_CFG, RuntimeError("429")])
     assert p.online_booking_config() == GOOD_CFG
-    p._cfg_ts = 0.0
+    expire_config(p)
     assert p.online_booking_config() == GOOD_CFG  # consumes the failing reply
 
     before = len(p.calls)
