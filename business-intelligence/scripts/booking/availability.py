@@ -256,6 +256,9 @@ def _derive_day(
     dur = timedelta(minutes=duration_min)
     pad = timedelta(minutes=HOME_TRAVEL_MINUTES if home else 0)
     dow = _DOW[day.weekday()]
+    # Saturday: no new bookings for pilates or strength & conditioning
+    if dow == "Sat" and service_id in ("clinical-pilates", "strength-conditioning"):
+        return {}
     slot_minutes = SATURDAY_SLOT_MINUTES if dow == "Sat" else SLOT_MINUTES
     step = timedelta(minutes=slot_minutes)
     _now = now if now is not None else datetime.now(SGT).replace(tzinfo=None)
