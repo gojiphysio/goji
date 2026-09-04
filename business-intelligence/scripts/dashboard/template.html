@@ -1272,10 +1272,10 @@
       <div class="pl-period-bar" role="group" aria-label="P&L period">
         <button type="button" data-plperiod="30d" class="active">Last 30 days</button>
         <button type="button" data-plperiod="cycle">
-          Current cycle <span class="pl-cycle-month" id="pl_cycle_month">(26th → 25th)</span>
+          This month <span class="pl-cycle-month" id="pl_cycle_month"></span>
         </button>
         <button type="button" data-plperiod="prev_cycle">
-          Previous cycle <span class="pl-cycle-month" id="pl_prev_cycle_month">(26th → 25th)</span>
+          Last month <span class="pl-cycle-month" id="pl_prev_cycle_month"></span>
         </button>
         <button type="button" data-plperiod="custom">Custom</button>
       </div>
@@ -1559,7 +1559,7 @@
           <div class="form-row">
             <label for="calc_period">Pay period</label>
             <select id="calc_period">
-              <option value="cycle" selected>26th to 25th of month</option>
+              <option value="cycle" selected>Full calendar month</option>
               <option value="custom">Custom start and end</option>
             </select>
             <div class="hint" id="period_dates">-</div>
@@ -3650,7 +3650,7 @@
       // DATA.ranges['30d'] so the page can render before the first fetch.
       let plWindow = null;
       // Cache + in-flight tracking. Keyed by `${start}|${end}` so 30d and the
-      // pay cycle are both instant after the initial dashboard load, and the
+      // current month are both instant after the initial dashboard load, and the
       // user only sees a loading state on cache-miss (Custom).
       const plWindowCache = new Map();
       const plInFlight    = new Map();
@@ -3664,20 +3664,18 @@
         const day = String(d.getDate()).padStart(2,'0');
         return `${y}-${m}-${day}`;
       }
+      // Reporting periods are calendar months: 1st -> last day. `new Date(y, m+1, 0)`
+      // is the last day of month m, so 28/29/30/31 all fall out automatically.
       function payCycleRange() {
         const today = new Date(DATA.generated_at);
-        const y = today.getFullYear(), m = today.getMonth(), d = today.getDate();
-        let s, e;
-        if (d >= 26) { s = new Date(y, m, 26);     e = new Date(y, m+1, 25); }
-        else         { s = new Date(y, m-1, 26);   e = new Date(y, m, 25);   }
-        return { start: ymdLocal(s), end: ymdLocal(e) };
+        const y = today.getFullYear(), m = today.getMonth();
+        return { start: ymdLocal(new Date(y, m, 1)), end: ymdLocal(new Date(y, m + 1, 0)) };
       }
       function prevPayCycleRange() {
-        const c = payCycleRange();
-        const [sy, sm, sd] = c.start.split('-').map(Number);
-        const s = new Date(sy, sm - 1 - 1, sd);  // one month earlier
-        const e = new Date(sy, sm - 1, sd - 1);  // day before current cycle starts
-        return { start: ymdLocal(s), end: ymdLocal(e) };
+        // Date normalises m-1 === -1 to December of the prior year, so no wrap case.
+        const today = new Date(DATA.generated_at);
+        const y = today.getFullYear(), m = today.getMonth();
+        return { start: ymdLocal(new Date(y, m - 1, 1)), end: ymdLocal(new Date(y, m, 0)) };
       }
       function last30Range() {
         const today = new Date(DATA.generated_at);
@@ -3760,7 +3758,7 @@
         const key = cacheKey(start, end);
         plRequestedKey = key;
         // Cache hit: render synchronously, no spinner. This is the happy path
-        // for 30d (seeded) and the pay cycle (background-prefetched on init).
+        // for 30d (seeded) and the current month (background-prefetched on init).
         if (plWindowCache.has(key)) {
           plWindow = plWindowCache.get(key);
           renderPL();
@@ -3784,7 +3782,7 @@
         }
       }
 
-      // Fire-and-forget: warm the cache for the pay cycle so the second tab
+      // Fire-and-forget: warm the cache for the current month so the second tab
       // is instant the first time the user clicks it.
       function prefetchPayCycle() {
         const r = payCycleRange();
@@ -3837,7 +3835,7 @@
       document.querySelectorAll('[data-plperiod]').forEach(btn => {
         btn.addEventListener('click', () => applyPeriod(btn.dataset.plperiod));
       });
-      // Initialise custom date pickers to the current pay cycle (sensible default)
+      // Initialise custom date pickers to the current month (sensible default)
       const pc = payCycleRange();
       document.getElementById('pl_period_start').value = pc.start;
       document.getElementById('pl_period_end').value   = pc.end;
@@ -3867,7 +3865,7 @@
       document.getElementById('pl_period_dates').textContent = fmtPeriodLabel(plWindow);
       updateCycleMonthLabel();
       renderPL();
-      // Background-warm the pay cycle so toggling to it is instant. No UI
+      // Background-warm the current month so toggling to it is instant. No UI
       // until the user actually clicks; failures are silent.
       prefetchPayCycle();
 
@@ -3984,8 +3982,8 @@
         const days = (plWindow && plWindow.days) || 0;
         const revName = (plRevenueMode === 'bookings') ? 'Bookings' : 'Revenue';
         const lbl  = (plPeriod === '30d')        ? `${revName} (last ${days || 30} days)`
-                   : (plPeriod === 'cycle')      ? `${revName} (pay cycle, ${days}d)`
-                   : (plPeriod === 'prev_cycle') ? `${revName} (previous cycle, ${days}d)`
+                   : (plPeriod === 'cycle')      ? `${revName} (this month, ${days}d)`
+                   : (plPeriod === 'prev_cycle') ? `${revName} (last month, ${days}d)`
                                                  : `${revName} (custom, ${days}d)`;
         document.getElementById('pl_revenue_label').textContent = lbl;
         document.getElementById('pl_period_dates').textContent  = fmtPeriodLabel(plWindow);
@@ -4083,9 +4081,10 @@
         const revenue    = (plWindow && plWindow[revField]) || 0;
 
         const periodLabel =
-          (plPeriod === '30d')   ? 'Last 30 days' :
-          (plPeriod === 'cycle') ? 'Pay cycle (26th → 25th)' :
-                                   'Custom period';
+          (plPeriod === '30d')        ? 'Last 30 days' :
+          (plPeriod === 'cycle')      ? 'This month' :
+          (plPeriod === 'prev_cycle') ? 'Last month' :
+                                        'Custom period';
 
         const body = {
           entity: 'Goji Health Pte Ltd',
@@ -4209,21 +4208,13 @@
       return Array.from(map.values());
     }
 
-    /* Pay cycle runs 26th of prev month through 25th of current month.
-       If today is the 26th or later, the cycle is current-month-26 -> next-25.
-       If today is the 25th or earlier, the cycle is prev-month-26 -> this-month-25. */
+    /* The pay period is the calendar month containing `today`: 1st -> last day.
+       `new Date(y, m+1, 0)` is the last day of month m, so 28/29/30/31 (and leap
+       years) all fall out automatically. Returns Date objects, not strings. */
     function currentPayCycle(today) {
       today = today || new Date(DATA.generated_at);
-      const y = today.getFullYear(), m = today.getMonth(), d = today.getDate();
-      let start, end;
-      if (d >= 26) {
-        start = new Date(y, m, 26);
-        end   = new Date(y, m + 1, 25);
-      } else {
-        start = new Date(y, m - 1, 26);
-        end   = new Date(y, m, 25);
-      }
-      return { start, end };
+      const y = today.getFullYear(), m = today.getMonth();
+      return { start: new Date(y, m, 1), end: new Date(y, m + 1, 0) };
     }
     function ymd(date) {
       const y = date.getFullYear();

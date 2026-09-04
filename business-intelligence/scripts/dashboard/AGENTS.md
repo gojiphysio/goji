@@ -40,6 +40,14 @@ See `DEPLOY.md`.
 - **Cache:** `get_payload()` caches `build_payload()` for `CACHE_TTL` (5 min);
   writes pop the cache. `build_payload()` fans queries out in a thread pool —
   add per-range work to `range_jobs[key]` and mirror it in the results assembly.
+- **Reporting periods are calendar months** — 1st → last day, derived dynamically so
+  28/29/30/31-day months and leap years are handled. Month end is *first of next
+  month minus one day* in Python and `new Date(y, m + 1, 0)` in JS. Three helpers
+  implement it independently and **must stay in agreement**: `_fiscal_period()` /
+  `_prior_fiscal_start()` (projection chart, `app.py`), `payCycleRange()` /
+  `prevPayCycleRange()` (P&L selector), and `currentPayCycle()` (commission
+  calculator). The `cycle` / `payCycle` names are historical — the dashboard used
+  to run a 26th→25th pay cycle; the period is now the plain calendar month.
 - **`date.today()` must use SGT.** All `date.today()` / `datetime.now()` calls in
   the backend use `datetime.now(ZoneInfo("Asia/Singapore")).date()` so the date
   boundaries match the clinic's operating timezone, not the UTC Cloud Run host.

@@ -28,7 +28,7 @@ Founder dashboard (`dashboard.gojiphysio.com`, `/`):
   discount cost + top discounted items, treatment-mix donuts, cohort/LTV table,
   patient demographics, referral analytics, and the invoice-doctor mismatch alert.
 - **P&L** — Singapore-style P&L with a revenue/bookings toggle, period selector
-  (Last 30D / current cycle / previous cycle / custom), and XLSX export.
+  (Last 30D / this month / last month / custom), and XLSX export.
 - **Commission** — per-clinician commission calculator over real appointment data.
 - **Marketing** — marketing-lens view: north-star KPIs and acquisition live from
   BQ; channel leading indicators (Instagram, GBP, website, paid) as WIP
