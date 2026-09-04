@@ -169,6 +169,19 @@ of `npm run build`. Config in `pagefind.yml`; Cloudflare Pages needs no change.
   search panes.
 - **Astro frontmatter can't `export type`.** Shared types live in `src/lib/*`
   and are imported with `import type` (esbuild fails on the union otherwise).
+- **White fill + `--color-border` + `--shadow-sm` is the *interactive* recipe.**
+  Buttons, chips and linked cards wear it, so a static fact/stat strip that wears
+  it reads as tappable and people poke at it. Facts belong on the page ground
+  with hairline `--rule` dividers instead - see `.gh-glance` on `/getting-here`.
+  Same trap in reverse: an affordance ("Enlarge map") must sit *inside* the
+  element that handles the click, not beside it.
+- **A `class` passed to a child component needs `:global()` to style.** The class
+  lands on that component's root element, which carries the *component's* scope
+  attribute, not the page's - so a page-scoped `.foo { }` compiles to
+  `.foo[data-astro-cid-<page>]` and silently matches nothing. `.gh-anchor`'s
+  `scroll-margin-top` was dead this way for months. Related to the "scoped CSS
+  doesn't reach into child components" rule, but easier to miss because the class
+  *is* on the element you can see in devtools.
 
 ## Run it
 See `README.md`. `npm install` then `npm run dev` (hot reload). `npm run build`
