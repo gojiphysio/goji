@@ -449,7 +449,13 @@ SELECT
    WHERE delivery_date BETWEEN '{period_start}' AND '{today}') AS actual_mtd,
   (SELECT COALESCE(SUM(recognised_revenue), 0)
    FROM `{PROJECT}.marts.fct_service_delivered`
-   WHERE delivery_date BETWEEN '{p1_start}' AND '{p1_end}')   AS prev_month_actual
+   WHERE delivery_date BETWEEN '{p1_start}' AND '{p1_end}')   AS prev_month_actual,
+  (SELECT COALESCE(SUM(booking_amount), 0)
+   FROM `{PROJECT}.marts.fct_invoice_line`
+   WHERE invoice_date BETWEEN '{period_start}' AND '{today}') AS bookings_mtd,
+  (SELECT COALESCE(SUM(booking_amount), 0)
+   FROM `{PROJECT}.marts.fct_invoice_line`
+   WHERE invoice_date BETWEEN '{p1_start}' AND '{p1_end}')    AS prev_month_bookings
 """
         history_sql = f"""
 SELECT
@@ -462,36 +468,69 @@ SELECT
 FROM `{PROJECT}.marts.fct_service_delivered`
 WHERE delivery_date BETWEEN '{p3_start}' AND '{p1_end}'
 GROUP BY 1
-ORDER BY MIN(delivery_date)
 """
-        with ThreadPoolExecutor(max_workers=2) as ex:
-            f_kpi     = ex.submit(_query, kpi_sql)
-            f_history = ex.submit(_query, history_sql)
-            row     = f_kpi.result()[0]
-            history = f_history.result()
+        bookings_history_sql = f"""
+SELECT
+  CASE
+    WHEN invoice_date BETWEEN '{p3_start}' AND '{p3_end}' THEN '{p3_lbl}'
+    WHEN invoice_date BETWEEN '{p2_start}' AND '{p2_end}' THEN '{p2_lbl}'
+    WHEN invoice_date BETWEEN '{p1_start}' AND '{p1_end}' THEN '{p1_lbl}'
+  END AS label,
+  COALESCE(SUM(booking_amount), 0) AS bookings
+FROM `{PROJECT}.marts.fct_invoice_line`
+WHERE invoice_date BETWEEN '{p3_start}' AND '{p1_end}'
+GROUP BY 1
+"""
+        with ThreadPoolExecutor(max_workers=3) as ex:
+            f_kpi      = ex.submit(_query, kpi_sql)
+            f_history  = ex.submit(_query, history_sql)
+            f_bhistory = ex.submit(_query, bookings_history_sql)
+            row      = f_kpi.result()[0]
+            history  = f_history.result()
+            bhistory = f_bhistory.result()
 
-        actual_mtd        = _to_float(row["actual_mtd"])
-        prev_month_actual = _to_float(row["prev_month_actual"])
-        days_elapsed      = _business_days(period_start, today)
-        days_total        = _business_days(period_start, period_end)
-        projected_eom     = (actual_mtd / days_elapsed * days_total) if days_elapsed else 0.0
+        # Month order is fixed (oldest -> newest) rather than derived from the
+        # rows, so a month with no delivered sessions / no invoices still shows
+        # as a zero bar instead of dropping out of the series.
+        rec_by_label  = {r["label"]: _to_float(r["actual"])   for r in history}
+        book_by_label = {r["label"]: _to_float(r["bookings"]) for r in bhistory}
+        monthly_history = [
+            {"label": lb,
+             "actual":   rec_by_label.get(lb, 0.0),
+             "bookings": book_by_label.get(lb, 0.0)}
+            for lb in (p3_lbl, p2_lbl, p1_lbl)
+        ]
+
+        actual_mtd          = _to_float(row["actual_mtd"])
+        prev_month_actual   = _to_float(row["prev_month_actual"])
+        bookings_mtd        = _to_float(row["bookings_mtd"])
+        prev_month_bookings = _to_float(row["prev_month_bookings"])
+        days_elapsed        = _business_days(period_start, today)
+        days_total          = _business_days(period_start, period_end)
+        run_rate            = lambda v: (v / days_elapsed * days_total) if days_elapsed else 0.0
+        projected_eom          = run_rate(actual_mtd)
+        projected_bookings_eom = run_rate(bookings_mtd)
 
         return {
-            "actual_mtd":        actual_mtd,
-            "projected_eom":     projected_eom,
-            "prev_month_actual": prev_month_actual,
-            "days_elapsed":      days_elapsed,
-            "days_total":        days_total,
-            "month_label":       period_end.strftime("%b %Y"),
-            "prev_month_label":  p1_end.strftime("%b %Y"),
-            "monthly_history":   [{"label": r["label"], "actual": _to_float(r["actual"])}
-                                  for r in history],
+            "actual_mtd":             actual_mtd,
+            "projected_eom":          projected_eom,
+            "prev_month_actual":      prev_month_actual,
+            "bookings_mtd":           bookings_mtd,
+            "projected_bookings_eom": projected_bookings_eom,
+            "prev_month_bookings":    prev_month_bookings,
+            "days_elapsed":           days_elapsed,
+            "days_total":             days_total,
+            "month_label":            period_end.strftime("%b %Y"),
+            "prev_month_label":       p1_end.strftime("%b %Y"),
+            "monthly_history":        monthly_history,
         }
     except Exception as exc:
         log.warning("fetch_monthly_projection failed: %s", exc)
         return {
             "actual_mtd": None, "projected_eom": None,
-            "prev_month_actual": None, "days_elapsed": None,
+            "prev_month_actual": None, "bookings_mtd": None,
+            "projected_bookings_eom": None, "prev_month_bookings": None,
+            "days_elapsed": None,
             "days_total": None, "month_label": None, "prev_month_label": None,
             "monthly_history": [],
         }
