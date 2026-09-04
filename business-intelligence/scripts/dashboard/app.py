@@ -408,29 +408,29 @@ def _business_days(start: date, end: date) -> int:
 
 
 def _fiscal_period(today: date) -> tuple[date, date]:
-    """Return (start, end) of the fiscal month containing today (26th → 25th)."""
-    if today.day >= 26:
-        fs = today.replace(day=26)
-        fe = date(today.year + 1, 1, 25) if today.month == 12 \
-             else date(today.year, today.month + 1, 25)
-    else:
-        fs = date(today.year - 1, 12, 26) if today.month == 1 \
-             else date(today.year, today.month - 1, 26)
-        fe = today.replace(day=25)
+    """Return (start, end) of the calendar month containing today (1st → last day).
+
+    The month end is derived as first-of-next-month minus one day, so 28/29/30/31
+    day months (and leap years) all fall out correctly.
+    """
+    fs = today.replace(day=1)
+    next_month_start = date(today.year + 1, 1, 1) if today.month == 12 \
+                       else date(today.year, today.month + 1, 1)
+    fe = next_month_start - timedelta(days=1)
     return fs, fe
 
 
 def _prior_fiscal_start(fs: date) -> date:
-    """Return the 26th of the calendar month before fs."""
-    return date(fs.year - 1, 12, 26) if fs.month == 1 \
-           else date(fs.year, fs.month - 1, 26)
+    """Return the 1st of the calendar month before fs."""
+    return date(fs.year - 1, 12, 1) if fs.month == 1 \
+           else date(fs.year, fs.month - 1, 1)
 
 
 def fetch_monthly_projection(today: date) -> dict:
     try:
         period_start, period_end = _fiscal_period(today)
 
-        # 3 prior complete fiscal periods (each 26th → 25th)
+        # 3 prior complete calendar months
         p1_start = _prior_fiscal_start(period_start)
         p1_end   = period_start - timedelta(days=1)
         p2_start = _prior_fiscal_start(p1_start)
@@ -438,7 +438,7 @@ def fetch_monthly_projection(today: date) -> dict:
         p3_start = _prior_fiscal_start(p2_start)
         p3_end   = p2_start - timedelta(days=1)
 
-        # Labels named by ending month (e.g. "May 26" = Apr 26–May 25 fiscal period)
+        # Labels named by the month itself (e.g. "May 26" = 1–31 May 2026)
         lbl = lambda d: d.strftime('%b %y')
         p1_lbl, p2_lbl, p3_lbl = lbl(p1_end), lbl(p2_end), lbl(p3_end)
 
@@ -2105,9 +2105,9 @@ def build_payload() -> dict:
     log.info("Building dashboard payload from BigQuery (parallel)")
     today      = datetime.now(ZoneInfo("Asia/Singapore")).date()
     pmt_start  = today - timedelta(days=30)
-    # Commission calculator needs the per-session ledger for the current pay
-    # cycle plus a generous trailing window so custom-range reports still work.
-    # 120 days covers ~4 pay cycles (26th -> 25th).
+    # Commission calculator needs the per-session ledger for the current
+    # calendar month plus a generous trailing window so custom-range reports work.
+    # 120 days covers ~4 calendar months.
     appt_start = today - timedelta(days=120)
     presets    = preset_ranges()
 
@@ -3344,7 +3344,7 @@ def api_mismatch_dismiss() -> Response:
 def api_pl_window() -> Response:
     """Recompute the P&L revenue + payment fees for an arbitrary date window.
 
-    Used by the P&L tab's date selector ("Last 30D" / "Pay cycle" / "Custom").
+    Used by the P&L tab's date selector ("Last 30D" / "This month" / "Custom").
     """
     start = _parse_iso_date(request.args.get("start"))
     end   = _parse_iso_date(request.args.get("end"))
