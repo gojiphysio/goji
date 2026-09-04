@@ -86,21 +86,6 @@ const breadcrumbSchema = {
     </div>
 
     <div class="container">
-      <nav class="gh-modes" aria-label="Choose how you are travelling" data-reveal>
-        <p class="gh-modes__label">How are you getting here?</p>
-        <div class="gh-modes__chips">
-          <a href="#by-mrt" class="gh-mode-chip">
-            <Icon name="subway" width={20} height={20} aria-hidden="true" /><span>By MRT</span>
-          </a>
-          <a href="#by-car" class="gh-mode-chip">
-            <Icon name="tabler:steering-wheel" width={20} height={20} aria-hidden="true" /><span>By car</span>
-          </a>
-          <a href="#by-taxi" class="gh-mode-chip">
-            <Icon name="tabler:car" width={20} height={20} aria-hidden="true" /><span>By taxi</span>
-          </a>
-        </div>
-      </nav>
-
       <ul class="gh-glance" data-reveal>
         {glance.map((g) => (
           <li class="gh-glance__item">
@@ -125,6 +110,8 @@ const breadcrumbSchema = {
       Level 1 site plan. The graphic is wide and finely labelled, so the inline
       copy is a link to the full-size file - JS upgrades that link into a
       full-screen dialog, and without JS the image still opens on its own.
+      The long alt describes the graphic; the anchor carries its own short label
+      so the link name isn't a paragraph.
     */}
     <figure class="gh-plan" data-reveal>
       <a
@@ -132,6 +119,7 @@ const breadcrumbSchema = {
         href={planSrc}
         target="_blank"
         rel="noopener noreferrer"
+        aria-label="Open the full-size Level 1 site plan"
         data-plan-open
       >
         <img
@@ -142,16 +130,13 @@ const breadcrumbSchema = {
           loading="lazy"
           decoding="async"
         />
+        <span class="gh-plan__zoom" aria-hidden="true">
+          <Icon name="tabler:zoom-in" width={20} height={20} />
+        </span>
       </a>
       <figcaption class="gh-plan__caption">
-        <span>
-          Level 1 at Lentor Modern. We are at <strong>#01-13</strong>, next to
-          Burger King and beside the Lentor Drive pick-up point.
-        </span>
-        <span class="gh-plan__hint" aria-hidden="true">
-          <Icon name="tabler:zoom-in" width={16} height={16} />
-          <span>Enlarge map</span>
-        </span>
+        Level 1 at Lentor Modern. We are at <strong>#01-13</strong>, next to
+        Burger King and beside the Lentor Drive pick-up point.
       </figcaption>
     </figure>
 
@@ -177,6 +162,32 @@ const breadcrumbSchema = {
       <Button href={SITE.googleMaps} variant="secondary">Open in Google Maps</Button>
     </div>
   </Section>
+
+  {/*
+    Travel-mode jump links. They sit here, directly above the three mode blocks
+    they point at, rather than up in the hero - a nav that far from its targets
+    read as a standalone control, and it pushed the map below the fold on a
+    phone. Linen ground with no bottom padding so it flows into the By-MRT
+    section as that group's header.
+  */}
+  <section class="gh-modes-bar">
+    <div class="container">
+      <nav class="gh-modes" aria-label="Choose how you are travelling" data-reveal>
+        <p class="gh-modes__label">How are you getting here?</p>
+        <div class="gh-modes__chips">
+          <a href="#by-mrt" class="gh-mode-chip">
+            <Icon name="subway" width={20} height={20} aria-hidden="true" /><span>By MRT</span>
+          </a>
+          <a href="#by-car" class="gh-mode-chip">
+            <Icon name="tabler:steering-wheel" width={20} height={20} aria-hidden="true" /><span>By car</span>
+          </a>
+          <a href="#by-taxi" class="gh-mode-chip">
+            <Icon name="tabler:car" width={20} height={20} aria-hidden="true" /><span>By taxi</span>
+          </a>
+        </div>
+      </nav>
+    </div>
+  </section>
 
   {/* ---- By MRT ---- */}
   <Section tone="linen" id="by-mrt" class="gh-anchor">
@@ -468,9 +479,12 @@ const breadcrumbSchema = {
   .gh-photo[data-missing] img { display: none; }
   .gh-photo[data-missing] .gh-photo__placeholder { display: flex; }
 
-  /* Travel-mode selector (jump links) */
+  /* Travel-mode selector (jump links), sitting above the three mode blocks. */
+  .gh-modes-bar {
+    background: var(--bg-page);
+    padding-block-start: var(--section-y);
+  }
   .gh-modes {
-    margin-top: clamp(var(--space-6), 4vw, var(--space-8));
     display: flex;
     flex-direction: column;
     gap: var(--space-3);
@@ -510,30 +524,42 @@ const breadcrumbSchema = {
     transform: translateY(-1px);
   }
 
-  /* Anchor offset so the sticky header does not cover a jumped-to heading. */
-  .gh-anchor { scroll-margin-top: 84px; }
+  /* Anchor offset so the sticky header does not cover a jumped-to heading.
+     :global is required, not optional - this class is passed through to
+     Section.astro and lands on *its* root element, which carries Section's
+     scope attribute, not this page's. Scoped `.gh-anchor` silently matched
+     nothing. */
+  :global(.gh-anchor) { scroll-margin-top: 84px; }
 
-  /* At-a-glance strip */
+  /* At-a-glance strip. Deliberately NOT cards: white fill + border + shadow is
+     this site's interactive recipe (buttons, chips, linked cards), and wearing
+     it made these three static facts read as tappable. Bare rows on the linen
+     ground, separated by hairlines - horizontal when stacked, vertical once
+     they sit side by side. */
   .gh-glance {
     list-style: none;
     padding: 0;
-    margin-top: clamp(var(--space-5), 3vw, var(--space-6));
+    margin-top: clamp(var(--space-4), 2.5vw, var(--space-5));
+    border-top: 1px solid var(--rule);
     display: grid;
-    gap: var(--space-4);
+    gap: 0;
     grid-template-columns: 1fr;
-  }
-  @media (min-width: 620px) {
-    .gh-glance { grid-template-columns: repeat(3, 1fr); }
   }
   .gh-glance__item {
     display: flex;
     align-items: center;
     gap: var(--space-3);
-    padding: var(--space-4) var(--space-5);
-    background: var(--bg-content);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-sm);
+    padding-block: var(--space-3);
+  }
+  .gh-glance__item + .gh-glance__item { border-top: 1px solid var(--rule); }
+  @media (min-width: 620px) {
+    .gh-glance { grid-template-columns: repeat(3, 1fr); }
+    .gh-glance__item { padding-inline: var(--space-5); }
+    .gh-glance__item:first-child { padding-inline-start: 0; }
+    .gh-glance__item + .gh-glance__item {
+      border-top: 0;
+      border-left: 1px solid var(--rule);
+    }
   }
   .gh-glance__icon {
     display: grid;
@@ -587,26 +613,32 @@ const breadcrumbSchema = {
     cursor: zoom-in;
   }
   .gh-plan__frame img { width: 100%; height: auto; display: block; }
-  /* The affordance sits under the plan, not on it - the legend runs the full
-     width of the graphic and a badge would cover it. */
+  /* The affordance is a badge on the plan itself, matching the modal's close
+     button - the same red circle opens it and closes it. It used to be a line
+     of caption text below, which looked like a control but wasn't one (the
+     whole image is the link, the caption sat outside it).
+     Bottom-right, not top-right: the top-right of the plan carries the Lentor
+     Drive drop-off callout, which is exactly what a taxi arrival needs. Down
+     here it only overlaps the tail of the legend strip, and that legend is
+     fully readable in the enlarged view. */
+  .gh-plan__zoom {
+    position: absolute;
+    bottom: var(--space-3);
+    right: var(--space-3);
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background: var(--color-primary);
+    color: var(--color-linen);
+    box-shadow: var(--shadow-sm);
+  }
   .gh-plan__caption {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: var(--space-2) var(--space-4);
     margin-top: var(--space-3);
     color: var(--text-muted);
     font-size: var(--fs-small);
     line-height: var(--lh-body);
-  }
-  .gh-plan__hint {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-2);
-    flex: none;
-    color: var(--color-primary);
-    font-weight: var(--weight-semibold);
   }
 
   /* Full-screen view. Progressive enhancement: without JS the link opens the
