@@ -27,6 +27,11 @@ const glance = [
   { icon: "tabler:wheelchair", value: "Step-free", label: "access for wheelchairs and strollers via Lentor Drive" },
 ];
 
+// Level 1 site plan of the mall, shown above the Google map.
+const planSrc = "/photos/directions/lentor-modern-level-1.webp";
+const planAlt =
+  "Level 1 site plan of Lentor Modern showing Goji at unit #01-13, between Burger King and the Lentor MRT exit, with walking routes marked from Lentor MRT Exit 1, the Lentor Drive taxi stand, the Lentor Modern drop-off point and the travelator from the car park";
+
 // Breadcrumb for rich results (Home -> Getting here).
 const origin = Astro.site ?? new URL(Astro.url.origin);
 const breadcrumbSchema = {
@@ -116,6 +121,49 @@ const breadcrumbSchema = {
       <p class="eyebrow">On the map</p>
       <h2>Lentor Modern, beside Lentor MRT</h2>
     </div>
+    {/*
+      Level 1 site plan. The graphic is wide and finely labelled, so the inline
+      copy is a link to the full-size file - JS upgrades that link into a
+      full-screen dialog, and without JS the image still opens on its own.
+    */}
+    <figure class="gh-plan" data-reveal>
+      <a
+        class="gh-plan__frame"
+        href={planSrc}
+        target="_blank"
+        rel="noopener noreferrer"
+        data-plan-open
+      >
+        <img
+          src={planSrc}
+          alt={planAlt}
+          width="1920"
+          height="870"
+          loading="lazy"
+          decoding="async"
+        />
+      </a>
+      <figcaption class="gh-plan__caption">
+        <span>
+          Level 1 at Lentor Modern. We are at <strong>#01-13</strong>, next to
+          Burger King and beside the Lentor Drive pick-up point.
+        </span>
+        <span class="gh-plan__hint" aria-hidden="true">
+          <Icon name="tabler:zoom-in" width={16} height={16} />
+          <span>Enlarge map</span>
+        </span>
+      </figcaption>
+    </figure>
+
+    <dialog class="gh-plan-modal" data-plan-modal aria-label="Lentor Modern Level 1 site plan">
+      <button type="button" class="gh-plan-modal__close" data-plan-close aria-label="Close the map">
+        <Icon name="tabler:x" width={22} height={22} aria-hidden="true" />
+      </button>
+      <div class="gh-plan-modal__scroll">
+        <img class="gh-plan-modal__img" src={planSrc} alt={planAlt} decoding="async" />
+      </div>
+    </dialog>
+
     <div class="gh-map" data-reveal>
       <iframe
         class="gh-map__frame"
@@ -301,6 +349,25 @@ const breadcrumbSchema = {
   <noscript>
     <style>[data-reveal] { opacity: 1 !important; transform: none !important; }</style>
   </noscript>
+  {/* Click-to-enlarge for the site plan; the link works on its own without JS. */}
+  <script is:inline>
+    (function () {
+      var trigger = document.querySelector("[data-plan-open]");
+      var modal = document.querySelector("[data-plan-modal]");
+      if (!trigger || !modal || typeof modal.showModal !== "function") return;
+      trigger.addEventListener("click", function (e) {
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+        e.preventDefault();
+        modal.showModal();
+      });
+      var close = modal.querySelector("[data-plan-close]");
+      if (close) close.addEventListener("click", function () { modal.close(); });
+      modal.addEventListener("click", function (e) {
+        if (e.target === modal) modal.close();
+      });
+    })();
+  </script>
+
   <script is:inline>
     (function () {
       var items = document.querySelectorAll("[data-reveal]");
@@ -506,6 +573,85 @@ const breadcrumbSchema = {
   }
   .gh-map__frame { width: 100%; height: 100%; border: 0; display: block; }
   .gh-map__cta { margin-top: var(--space-5); }
+
+  /* ---- Level 1 site plan ---- */
+  .gh-plan { margin: 0 0 var(--space-5); }
+  .gh-plan__frame {
+    position: relative;
+    display: block;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-sm);
+    background: var(--color-linen);
+    cursor: zoom-in;
+  }
+  .gh-plan__frame img { width: 100%; height: auto; display: block; }
+  /* The affordance sits under the plan, not on it - the legend runs the full
+     width of the graphic and a badge would cover it. */
+  .gh-plan__caption {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-2) var(--space-4);
+    margin-top: var(--space-3);
+    color: var(--text-muted);
+    font-size: var(--fs-small);
+    line-height: var(--lh-body);
+  }
+  .gh-plan__hint {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex: none;
+    color: var(--color-primary);
+    font-weight: var(--weight-semibold);
+  }
+
+  /* Full-screen view. Progressive enhancement: without JS the link opens the
+     image file directly, so the dialog never traps anyone. */
+  .gh-plan-modal {
+    width: min(96vw, 1600px);
+    max-width: 96vw;
+    max-height: 92vh;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-lg);
+    background: var(--color-linen);
+    overflow: hidden;
+  }
+  .gh-plan-modal::backdrop { background: rgb(0 0 0 / 0.65); }
+  /* The image scrolls inside this box; the close button stays pinned to the
+     dialog (which is already a positioned containing block - don't give it
+     `position: relative`, that would break the browser's centring). */
+  .gh-plan-modal__scroll { max-height: 92vh; overflow: auto; }
+  .gh-plan-modal__img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .gh-plan-modal__close {
+    position: absolute;
+    top: var(--space-2);
+    right: var(--space-2);
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 0;
+    border-radius: 50%;
+    background: var(--color-primary);
+    color: var(--color-linen);
+    box-shadow: var(--shadow-sm);
+    cursor: pointer;
+  }
+  /* On a phone the plan is far wider than the screen, so let it scroll
+     sideways at a readable height instead of shrinking to illegibility. */
+  @media (max-width: 640px) {
+    .gh-plan-modal__img { width: auto; height: 74vh; max-width: none; }
+  }
 
   /* ---- Travel mode blocks ---- */
   .gh-mode__head {
