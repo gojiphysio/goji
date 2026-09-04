@@ -1065,8 +1065,15 @@
     </div>
 
     <section class="q" id="projection_section" style="display:none;">
-      <h2>Monthly revenue trajectory <span class="badge live">Live</span></h2>
-      <div class="chart-wrap" style="height:220px; margin-top:12px;">
+      <h2>Monthly revenue &amp; bookings trajectory <span class="badge live">Live</span></h2>
+      <div class="subtitle">
+        Calendar months, side by side.
+        <strong>Bookings</strong> = cash invoiced that month (packages counted upfront).
+        <strong>Recognised</strong> = revenue earned as sessions were delivered.
+        The current month (✦) shows actual-so-far solid, with the faded block on top being the
+        run-rate projection to month end.
+      </div>
+      <div class="chart-wrap" style="height:260px; margin-top:12px;">
         <canvas id="projectionChart"></canvas>
       </div>
     </section>
@@ -2158,21 +2165,32 @@
       if (!p || p.actual_mtd == null) { section.style.display = 'none'; return; }
       section.style.display = '';
 
-      // Build chart data: 3 prior months + current month (split actual / projected remainder)
+      // Two grouped bars per month — bookings ($ invoiced) and recognised
+      // ($ earned) — each stacked as [actual so far, projected remainder].
+      // Only the current month carries a projected remainder; prior months are
+      // complete so their remainder is 0.
       const history     = p.monthly_history || [];
       const histLabels  = history.map(x => x.label);
       const histActuals = history.map(x => x.actual || 0);
+      const histBookings= history.map(x => x.bookings || 0);
 
       const curLabel    = (p.month_label || '').replace(' 20', ' ').replace(' 2', ' \'2') + ' ✦';
       const labels      = [...histLabels, curLabel];
+      const zeros       = histLabels.map(() => 0);
+
       const actualData  = [...histActuals, p.actual_mtd || 0];
       const remainder   = Math.max(0, (p.projected_eom || 0) - (p.actual_mtd || 0));
-      const remData     = [...histActuals.map(() => 0), remainder];
+      const remData     = [...zeros, remainder];
+
+      const bookData    = [...histBookings, p.bookings_mtd || 0];
+      const bookRem     = Math.max(0, (p.projected_bookings_eom || 0) - (p.bookings_mtd || 0));
+      const bookRemData = [...zeros, bookRem];
+
+      const seriesData  = [bookData, bookRemData, actualData, remData];
 
       if (projectionChart) {
         projectionChart.data.labels = labels;
-        projectionChart.data.datasets[0].data = actualData;
-        projectionChart.data.datasets[1].data = remData;
+        seriesData.forEach((d, i) => { projectionChart.data.datasets[i].data = d; });
         projectionChart.update();
       } else {
         projectionChart = new Chart(document.getElementById('projectionChart'), {
@@ -2181,14 +2199,28 @@
             labels,
             datasets: [
               {
-                label: 'Actual',
+                label: 'Bookings',
+                data: bookData,
+                backgroundColor: GOJI,
+                borderRadius: 4,
+                stack: 'book',
+              },
+              {
+                label: 'Projected bookings remainder',
+                data: bookRemData,
+                backgroundColor: GOJI + '44',
+                borderRadius: 4,
+                stack: 'book',
+              },
+              {
+                label: 'Recognised',
                 data: actualData,
                 backgroundColor: COBALT,
                 borderRadius: 4,
                 stack: 'rev',
               },
               {
-                label: 'Projected remainder',
+                label: 'Projected recognised remainder',
                 data: remData,
                 backgroundColor: COBALT + '44',
                 borderRadius: 4,
@@ -2199,7 +2231,24 @@
           options: {
             responsive: true, maintainAspectRatio: false,
             plugins: {
-              legend: { display: false },
+              // Only the two solid datasets carry a legend entry — the faded
+              // "projected remainder" halves are explained by the subtitle.
+              legend: {
+                display: true,
+                position: 'bottom',
+                labels: {
+                  boxWidth: 12,
+                  filter: item => item.datasetIndex === 0 || item.datasetIndex === 2,
+                },
+                onClick: (e, item, legend) => {
+                  // Toggling a series hides its actual + projected halves together.
+                  const ch = legend.chart;
+                  const pair = item.datasetIndex === 0 ? [0, 1] : [2, 3];
+                  const hide = ch.isDatasetVisible(pair[0]);
+                  pair.forEach(i => ch.setDatasetVisibility(i, !hide));
+                  ch.update();
+                },
+              },
               tooltip: {
                 mode: 'index', intersect: false,
                 callbacks: {
@@ -2213,15 +2262,21 @@
                   label: ctx => {
                     if (ctx.parsed.y === 0) return null;
                     const isCurrentMonth = ctx.dataIndex === labels.length - 1;
-                    if (!isCurrentMonth) return 'Actual: ' + fmt$(ctx.parsed.y);
-                    if (ctx.datasetIndex === 0) return 'Actual so far: ' + fmt$(p.actual_mtd);
-                    const pct = p.prev_month_actual > 0
-                      ? ((p.projected_eom - p.prev_month_actual) / p.prev_month_actual * 100)
-                      : null;
+                    const isBookings     = ctx.datasetIndex <= 1;
+                    const name           = isBookings ? 'Bookings' : 'Recognised';
+                    if (!isCurrentMonth) return name + ': ' + fmt$(ctx.parsed.y);
+
+                    const soFar = isBookings ? p.bookings_mtd : p.actual_mtd;
+                    if (ctx.datasetIndex === 0 || ctx.datasetIndex === 2)
+                      return name + ' so far: ' + fmt$(soFar);
+
+                    const eom  = isBookings ? p.projected_bookings_eom : p.projected_eom;
+                    const prev = isBookings ? p.prev_month_bookings    : p.prev_month_actual;
+                    const pct  = prev > 0 ? ((eom - prev) / prev * 100) : null;
                     const trend = pct != null
                       ? '  ' + (pct >= 0 ? '▲ +' : '▼ ') + Math.abs(pct).toFixed(1) + '% vs ' + (p.prev_month_label || 'prior month')
                       : '';
-                    return 'Projected EOM: ' + fmt$(p.projected_eom) + trend;
+                    return 'Projected ' + name.toLowerCase() + ' EOM: ' + fmt$(eom) + trend;
                   }
                 }
               }
