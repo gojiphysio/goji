@@ -402,7 +402,20 @@ own `/book` form** (`-book`), not Plato. Publish each as
 | QR codes (print / events / in-person) | `…/qr-wa` | `…/qr-book` |
 
 `…/ig-wa` is available for any direct Instagram link; `…/wa` and `…/book` are
-generic fallbacks. The retired `…/*-plato` slugs still resolve — they now alias
+generic fallbacks.
+
+**Campaign slugs** slot the campaign between channel and destination —
+`<channel>-<campaign>-<destination>` — so a promo is tracked as its own line in
+the Marketing split while still attributing to the channel it came from. Live
+today: the **9.9 Pilates / S&C package promo**, `…/web-99-wa`, `…/bio-99-wa`,
+`…/gbp-99-wa`, `…/ads-99-wa`, `…/qr-99-wa`, `…/ig-99-wa`, and `…/99-wa` as the
+generic. They share one prefilled message (`PROMO_99_TEXT` in `app.py`) that asks
+the customer for package, name, mobile and email up front. Campaign slugs live in
+their own block at the end of `LINK_SLUGS` (plus `SLUG_LABELS` in
+`template.html`) so the whole campaign is one edit to retire — published links
+then fall back to the site rather than dead-ending. **A customer volunteering
+contact details in that message is an inbound enquiry, not marketing consent** —
+record consent in Front Desk → Contactability before any outbound send. The retired `…/*-plato` slugs still resolve — they now alias
 to the same `/book` form (`SITE_BOOKING_URL`) so previously-published booking
 links never dead-end, but new surfaces should use `…/*-book`. **bio.site mailing-list button:** point it straight at the
 signup page (untracked — nurture, not a primary CTA). **Instagram native
