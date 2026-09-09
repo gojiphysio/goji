@@ -140,6 +140,21 @@ SITE_BOOKING_URL = os.environ.get("SITE_BOOKING_URL", "https://www.gojiphysio.co
 # Where a click goes when its target isn't configured yet or the slug is unknown.
 WHATSAPP_FALLBACK_URL = os.environ.get("WHATSAPP_FALLBACK_URL",
                                        "https://www.gojiphysio.com")
+# 9.9 promo (Pilates / S&C packages) — one prefilled template, reused by every
+# channel's campaign slug below. WhatsApp has no form, so the message is a
+# fill-in block that hands the front desk name/mobile/email + which package in
+# the very first message, and still reads sensibly if the customer sends it
+# untouched. PDPA: details volunteered here are an inbound enquiry, NOT consent
+# to market — record consent in Front Desk → Contactability before any outbound
+# send (see repo AGENTS.md).
+PROMO_99_TEXT = (
+    "Hi Goji! I'd like to claim the 9.9 offer on your Pilates / S&C packages.\n"
+    "\n"
+    "Package: Interchangeable Pilates and S&C\n"
+    "Name:\n"
+    "Mobile:\n"
+    "Email:"
+)
 # slug -> {kind, label, text?}. kind="whatsapp" → wa.me deep link with `text`;
 # kind="book" → our website /book form (also covers legacy '*-plato' slugs —
 # see LINK_SLUGS below). The founder signs off on the WhatsApp wording.
@@ -172,6 +187,18 @@ LINK_SLUGS: dict[str, dict] = {
     "ads-plato": {"kind": "book", "label": "Ads"},
     "qr-plato":  {"kind": "book", "label": "QR"},
     "plato":     {"kind": "book", "label": "Social"},  # generic fallback
+    # --- Campaign: 9.9 Pilates / S&C packages (retire when the offer ends) ---
+    # Campaign slugs keep the channel + destination explicit and slot the
+    # campaign in between: "<channel>-99-wa". Kept in their own block so the
+    # whole campaign can be deleted in one edit without touching the evergreen
+    # slugs above (published links then fall back to the site, never dead-end).
+    "web-99-wa": {"kind": "whatsapp", "label": "Web",      "text": PROMO_99_TEXT},
+    "bio-99-wa": {"kind": "whatsapp", "label": "bio.site", "text": PROMO_99_TEXT},
+    "gbp-99-wa": {"kind": "whatsapp", "label": "Google",   "text": PROMO_99_TEXT},
+    "ads-99-wa": {"kind": "whatsapp", "label": "Ads",      "text": PROMO_99_TEXT},
+    "qr-99-wa":  {"kind": "whatsapp", "label": "QR",       "text": PROMO_99_TEXT},
+    "ig-99-wa":  {"kind": "whatsapp", "label": "IG",       "text": PROMO_99_TEXT},
+    "99-wa":     {"kind": "whatsapp", "label": "Social",   "text": PROMO_99_TEXT},  # generic fallback
 }
 # slug -> kind, for splitting the click metric (WhatsApp vs booking).
 LINK_SLUG_KIND = {s: c["kind"] for s, c in LINK_SLUGS.items()}
@@ -2028,7 +2055,10 @@ FUNNEL_SOURCE = {"gbp": "Google", "ads": "Ads", "qr": "QR", "ig": "Instagram"}
 FUNNEL_DISCOVERY_MIN = 2
 # CTA label per slug suffix. "plato" (the retired Plato-booking flow) merges
 # into "Native booking" — those taps now land on the same tracked /book form.
-FUNNEL_CTA = {"wa": "WhatsApp", "book": "Native booking", "plato": "Native booking"}
+# Campaign slugs ("<channel>-99-wa") partition to the suffix "99-wa"; map it so
+# the Sankey attributes campaign taps to WhatsApp explicitly, not by fallback.
+FUNNEL_CTA = {"wa": "WhatsApp", "book": "Native booking", "plato": "Native booking",
+              "99-wa": "WhatsApp"}
 
 
 def _build_funnel_paths(link_clicks: dict, kpis: dict, lead_wins: dict,

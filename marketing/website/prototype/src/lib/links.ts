@@ -19,16 +19,19 @@
 
 const REDIRECT_BASE = "https://go.gojiphysio.com";
 
-/** Slugs the redirector serves today. Keep in sync with app.py `LINK_SLUGS`. */
-export type CtaSlug = "web-wa" | "web-book";
+/** Slugs the redirector serves today. Keep in sync with app.py `LINK_SLUGS`.
+ * `web-99-wa` is the 9.9 Pilates / S&C promo CTA — a campaign slug, so drop it
+ * from this union (and from `LINK_SLUGS`) when the offer ends. */
+export type CtaSlug = "web-wa" | "web-book" | "web-99-wa";
 
 /** Resolve a slug to its tracked redirect URL. */
 export function cta(slug: CtaSlug): string {
   return `${REDIRECT_BASE}/${slug}`;
 }
 
-/** Human-friendly defaults for the two web CTAs. */
+/** Human-friendly defaults for the web CTAs. */
 export const CTA = {
   whatsapp: { slug: "web-wa" as CtaSlug, label: "Message us on WhatsApp" },
   book: { slug: "web-book" as CtaSlug, label: "Book an appointment" },
+  promo99: { slug: "web-99-wa" as CtaSlug, label: "Claim the 9.9 offer on WhatsApp" },
 } as const;
