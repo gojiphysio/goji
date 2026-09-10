@@ -292,3 +292,73 @@ def test_no_log_line_interpolates_a_recipient_address():
                 offenders.append(f"line {node.lineno}: log(..., {flat})")
     assert not offenders, "recipient address in a log line: " + "; ".join(offenders)
 
+
+# --- test mode (REMINDER_OVERRIDE_TO) --------------------------------------
+
+def _sent_messages(monkeypatch):
+    """Capture EmailMessages instead of opening an SMTP connection."""
+    captured = []
+    monkeypatch.setattr(mailer, "_send", lambda msg, what, ref: captured.append(msg))
+    monkeypatch.setattr(mailer, "SMTP_PASS", "x")
+    return captured
+
+
+def test_override_sends_to_the_override_address_not_the_patient(monkeypatch):
+    monkeypatch.setattr(mailer, "OVERRIDE_TO", "hello@gojiphysio.com")
+    msgs = _sent_messages(monkeypatch)
+    mailer.send_reminder("patient@example.com", "Sarah Tan", "2026-09-12",
+                         ["09:00"], has_clinic=True, has_home_visit=False)
+    assert len(msgs) == 1
+    assert msgs[0]["To"] == "hello@gojiphysio.com"
+    assert "patient@example.com" not in str(msgs[0]["To"])
+    # The intended recipient is visible in the subject so each can be checked.
+    assert "patient@example.com" in msgs[0]["Subject"]
+    assert msgs[0]["Subject"].startswith("[TEST -> ")
+
+
+def test_override_body_is_identical_to_the_real_thing(monkeypatch):
+    """The point of test mode is seeing exactly what the patient would get."""
+    args = ("Sarah Tan", "2026-09-12", ["09:00"])
+    kw = dict(has_clinic=True, has_home_visit=False)
+    real = mailer.render_reminder_body(*args, **kw)
+
+    monkeypatch.setattr(mailer, "OVERRIDE_TO", "hello@gojiphysio.com")
+    msgs = _sent_messages(monkeypatch)
+    mailer.send_reminder("patient@example.com", *args, **kw)
+    assert msgs[0].get_content().rstrip("\n") == real.rstrip("\n")
+
+
+def test_without_override_the_patient_is_the_recipient(monkeypatch):
+    monkeypatch.setattr(mailer, "OVERRIDE_TO", "")
+    msgs = _sent_messages(monkeypatch)
+    mailer.send_reminder("patient@example.com", "Sarah Tan", "2026-09-12",
+                         ["09:00"], has_clinic=True, has_home_visit=False)
+    assert msgs[0]["To"] == "patient@example.com"
+    assert msgs[0]["Subject"] == mailer.SUBJECT
+    assert "TEST" not in msgs[0]["Subject"]
+
+
+def test_test_mode_ledgers_test_never_sent():
+    """A 'sent' row would suppress the real reminder on the day, so an
+    end-to-end test would silently cost those patients their reminder."""
+    import pathlib
+    src = pathlib.Path(main.__file__).read_text()
+    assert '"test" if mailer.OVERRIDE_TO else "sent"' in src
+
+
+def test_recipient_query_does_not_suppress_test_or_dry_run_rows():
+    """Only 'sent' suppresses. 'test', 'dry_run' and 'failed' must fall through
+    so the real reminder still goes out."""
+    assert "!= 'sent'" in main.RECIPIENTS_SQL
+    for status in ("test", "dry_run", "failed"):
+        assert f"!= '{status}'" not in main.RECIPIENTS_SQL
+
+
+def test_digest_announces_test_mode(monkeypatch):
+    monkeypatch.setattr(mailer, "OVERRIDE_TO", "hello@gojiphysio.com")
+    body = mailer.render_digest_body(
+        sent=[{"name": "Sarah Tan", "time": "09:00"}], skipped=[], failed=[],
+        target_date="2026-09-12", dry_run=False)
+    assert body.startswith("TEST MODE")
+    assert "No patient was emailed." in body
+

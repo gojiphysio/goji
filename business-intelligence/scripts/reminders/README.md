@@ -61,6 +61,7 @@ it, so SQL and Python can't drift apart and mail someone a date that doesn't mat
 their appointment. To change the window, change the view.
 
 | `DRY_RUN` | `true` | **Defaults to true** — a misconfigured deploy must never surprise-mail patients |
+| `REMINDER_OVERRIDE_TO` | unset | Test mode: send every reminder here instead of to the patient. See below |
 | `GMAIL_APP_PASSWORD` | — | Secret Manager `gmail-app-password`. Required unless `DRY_RUN` |
 | `REMINDER_ADMIN_EMAIL` | `hello@gojiphysio.com` | Digest recipient |
 
@@ -100,6 +101,36 @@ gcloud scheduler jobs create http appointment-reminders-daily \
 
 Runs all 7 days on purpose: Saturday covers Monday, Sunday covers Tuesday, so no
 weekend gap.
+
+## Test mode — prove the real send without mailing a patient
+
+`DRY_RUN=true` never sends a patient email, so it can't tell you whether the
+reminders themselves go out correctly. `REMINDER_OVERRIDE_TO` closes that gap:
+every reminder is really sent — real names, times, grouping, SMTP — but every
+one goes to the override address instead of the patient.
+
+```bash
+gcloud run jobs update appointment-reminders --region asia-southeast1   --update-env-vars DRY_RUN=false,REMINDER_OVERRIDE_TO=hello@gojiphysio.com
+
+gcloud run jobs execute appointment-reminders --region asia-southeast1 --wait
+```
+
+You get one email per recipient, body byte-identical to the patient's, subject
+prefixed `[TEST -> their@address]` so you can check each landed on the right
+person. **Put it back afterwards:**
+
+```bash
+gcloud run jobs update appointment-reminders --region asia-southeast1   --update-env-vars DRY_RUN=true --remove-env-vars REMINDER_OVERRIDE_TO
+```
+
+Two properties worth knowing:
+
+- **The override is applied at the point of send**, so there is no code path
+  where a patient is mailed while it has a value.
+- **Test runs are ledgered `test`, never `sent`.** A `sent` row would suppress
+  the real reminder on the day, so testing against a live cohort would silently
+  cost those patients their reminder. Only `sent` suppresses; `test`, `dry_run`
+  and `failed` all fall through.
 
 ## Going live — the part that actually bites
 
