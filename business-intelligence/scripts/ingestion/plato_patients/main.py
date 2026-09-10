@@ -14,7 +14,11 @@ DOB/postal are discarded before the BQ load.
 
 SCOPED EXCEPTION (added deliberately, signed off by the founders): the staff
 Front Desk dashboard needs to phone patients, so this job ALSO writes a second,
-separate table — dim_patient_contact — holding the full_name + phone. That is
+separate table — dim_patient_contact — holding the full_name + phone + email.
+The email was added so the daily appointment-reminder job can reach patients:
+an appointment payload carries an address only when the front desk types one in
+(~4% of upcoming appointments), while the profile has it for nearly everyone.
+That is
 the only place PII lands in the warehouse; it is read solely by the staff
 worklist path and never appears on the financial dashboard. dim_patient itself
 stays PII-free. Keep these two concerns in separate tables.
@@ -122,6 +126,43 @@ def extract_phone(patient: dict) -> str | None:
                 if isinstance(vv, str) and vv.strip():
                     return vv.strip()
     return None
+
+
+# Email, same probe shape as _PHONE_KEYS. Plato's patient record has a
+# top-level "email", but keep the alternates so a differently-configured
+# deployment still works. Added so the appointment-reminder job can actually
+# reach people: email lands on an appointment payload only when the front desk
+# types it in (~4% of upcoming appointments), while the patient profile carries
+# it for nearly everyone.
+_EMAIL_KEYS = ("email", "email_address", "emailaddress", "e_mail", "mail")
+
+
+def extract_email(patient: dict) -> str | None:
+    """Best-effort email from a Plato patient record, or None.
+
+    Only returns something that looks like an address — a stray "-" or "n/a" in
+    the field would otherwise become a hard SMTP bounce every single day.
+    """
+    for k in _EMAIL_KEYS:
+        v = patient.get(k)
+        if isinstance(v, str) and _looks_like_email(v):
+            return v.strip()
+        if isinstance(v, dict):
+            for kk in ("address", "value", "email"):
+                vv = v.get(kk)
+                if isinstance(vv, str) and _looks_like_email(vv):
+                    return vv.strip()
+    return None
+
+
+def _looks_like_email(raw: str) -> bool:
+    """Cheap sanity check — one @, something either side, a dot in the domain."""
+    v = raw.strip()
+    if not v or v.count("@") != 1 or any(c.isspace() for c in v):
+        return False
+    local, _, domain = v.partition("@")
+    return bool(local) and "." in domain and not domain.startswith(".") \
+        and not domain.endswith(".")
 
 
 def age_band(dob_str: str | None, today: date | None = None) -> str | None:
@@ -343,13 +384,15 @@ def main() -> None:
                 "_updated_at":      updated_at_iso,
             })
 
-            # PII contact row (full name + phone) for the staff worklist. Kept in
-            # a SEPARATE table/buffer from the PII-free dimension above. Captured
-            # here, before `del p`, since it reads the raw record.
+            # PII contact row (full name + phone + email) for the staff worklist
+            # and the appointment-reminder job. Kept in a SEPARATE table/buffer
+            # from the PII-free dimension above. Captured here, before `del p`,
+            # since it reads the raw record.
             contact_rows.append({
                 "patient_id":  patient_id,
                 "full_name":   full_name(raw_name),
                 "phone":       extract_phone(p),
+                "email":       extract_email(p),
                 "_updated_at": updated_at_iso,
             })
 
@@ -395,8 +438,10 @@ def main() -> None:
 
     log.info(f"done: wrote {load_job.output_rows} rows to {table_ref}")
 
-    # Second load: the PII contact table (full name + phone) for the staff
-    # Front Desk dashboard. Same WRITE_TRUNCATE snapshot pattern, separate table.
+    # Second load: the PII contact table (full name + phone + email) for the
+    # staff Front Desk dashboard and the appointment-reminder job. Same
+    # WRITE_TRUNCATE snapshot pattern, separate table. WRITE_TRUNCATE replaces
+    # the schema too, so adding a column here needs no migration.
     log.info(f"loading {len(contact_rows)} contact rows into {contact_ref}")
     contact_job_config = bigquery.LoadJobConfig(
         source_format=bigquery.SourceFormat.NEWLINE_DELIMITED_JSON,
@@ -405,6 +450,7 @@ def main() -> None:
             bigquery.SchemaField("patient_id",  "STRING", mode="REQUIRED"),
             bigquery.SchemaField("full_name",   "STRING"),
             bigquery.SchemaField("phone",       "STRING"),
+            bigquery.SchemaField("email",       "STRING"),
             bigquery.SchemaField("_updated_at", "TIMESTAMP", mode="REQUIRED"),
         ],
     )

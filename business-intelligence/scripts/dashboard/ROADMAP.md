@@ -307,8 +307,17 @@ Notes: `scripts/reminders/README.md`, ops in `DEPLOY.md`.
 
 ### Watch
 
-- Email coverage: reminders only reach patients with an address on the
-  appointment payload (`dim_patient_contact` has name + phone but **no email**).
-  If the unreachable list in the digest stays large, either add `extract_email()`
-  to the patients ingest or bring the WhatsApp phase forward.
+- **Email coverage was the near-miss here.** Measured at build time, only
+  **4 of 91** upcoming appointments (4.4%) carried an inline email — an address
+  lands on the payload only when the front desk types one in, and every booking
+  in the window was manual rather than from the website form. The Plato *profile*
+  has an email for nearly everyone, so `plato_patients` was extended with
+  `extract_email()` and `dim_patient_contact` gained an `email` column. Confirm
+  actual coverage from the first dry-run digests rather than assuming it worked.
+- If the unreachable list is still large, ~90% of patients are reachable by phone
+  via the profile — that's the argument for bringing the WhatsApp phase forward.
+- **`dnd` on the Plato patient record is deliberately ignored.** A 48-hour
+  reminder is transactional, not marketing. Revisit if outbound marketing is ever
+  added here — and note the flag exists, since it may be the "Contactability"
+  concept the repo docs reference but never built.
 

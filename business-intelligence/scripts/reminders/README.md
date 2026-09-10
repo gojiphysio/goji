@@ -18,7 +18,7 @@ its own send ledger.
 | | |
 |---|---|
 | Who gets one | `marts.fct_appointment_reminders` — `appt_date = CURRENT_DATE('Asia/Singapore') + 2`, PII-free |
-| Contact | Hydrated at query time: appointment payload (profile-less bookings) then `marts.dim_patient_contact` (linked patients). `dim_patient_contact` has **no email column**, so email is payload-only |
+| Contact | Hydrated at query time: appointment payload first (the front desk typed it for *this* booking), then `marts.dim_patient_contact` (the Plato profile). The profile fallback is what makes this viable — only ~4% of upcoming appointments carry an inline address |
 | Never twice | `marts.appointment_reminder_events` / `_latest`. Anything already `sent` is suppressed in SQL |
 | Grouping | One email per patient per day, listing every session that day |
 | Transport | Gmail SMTP as `hello@gojiphysio.com`, app password from Secret Manager — same path as `scripts/booking/mailer.py` |

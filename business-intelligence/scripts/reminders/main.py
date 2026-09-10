@@ -193,10 +193,14 @@ SELECT
   -- Hydrate contact at query time (the view itself is PII-free). Inline payload
   -- contact covers profile-less website/walk-in bookings; dim_patient_contact
   -- covers linked patients. Mirrors fetch_new_patient_welcome in dashboard/app.py.
-  -- NOTE dim_patient_contact has no email column, so email is payload-only.
   COALESCE(NULLIF(TRIM(c.full_name), ''),
            NULLIF(TRIM(JSON_VALUE(a.payload, '$.title')), ''))  AS name,
-  NULLIF(TRIM(JSON_VALUE(a.payload, '$.email')), '')            AS email,
+  -- Payload email first (the front desk typed it for THIS booking, so it's the
+  -- most current), then the Plato profile. The profile is what makes this job
+  -- viable at all: only ~4% of upcoming appointments carry an inline address,
+  -- while the profile has one for nearly every linked patient.
+  COALESCE(NULLIF(TRIM(JSON_VALUE(a.payload, '$.email')), ''),
+           NULLIF(TRIM(c.email), ''))                           AS email,
   COALESCE(NULLIF(TRIM(JSON_VALUE(a.payload, '$.handphone')), ''),
            NULLIF(TRIM(c.phone), ''))                           AS phone
 FROM `{project}.{dataset}.fct_appointment_reminders` r

@@ -114,6 +114,18 @@ See `DEPLOY.md`.
   gated (founder+staff, frontdesk) and keep `note` operational, not clinical.
 
 ## Outbound patient email
+- **`dim_patient_contact` is the one sanctioned PII table** (name, phone,
+  email) — a deliberate, founder-signed-off exception, written only by
+  `plato_patients` and read only by the staff worklist and the reminder job.
+  `dim_patient` stays PII-free. Adding a contact field goes here, never there.
+  Note `CREATE TABLE IF NOT EXISTS` is a no-op on an existing table, so a new
+  column needs the explicit `ALTER TABLE ... ADD COLUMN IF NOT EXISTS` that
+  `42_dim_patient_contact.sql` now carries.
+- **Contact on an appointment payload is the exception, not the rule.** Only
+  ~4% of upcoming appointments carry an inline email (it's there when the front
+  desk types it, and website bookings collect it); the Plato profile has one for
+  nearly everyone. Hydrate payload-first then profile — and measure coverage
+  before building anything that assumes a channel can reach people.
 - **Two senders, one transport.** `scripts/booking/mailer.py` (booking
   confirmations, triggered by a booking) and `scripts/reminders/` (the daily
   48-hour reminder Cloud Run Job). Both send over Gmail SMTP as
