@@ -31,6 +31,11 @@
 --   'failed'           — send raised; `note` has the error. NOT treated as sent,
 --                        so the next run retries it (until the appointment
 --                        falls out of the D+2 window).
+--   'test'             — REMINDER_OVERRIDE_TO was set: a real email went out,
+--                        but to the override address, not the patient.
+--                        Deliberately NOT 'sent' — otherwise an end-to-end test
+--                        would suppress the real reminder on the day and those
+--                        patients would silently never hear from us.
 --   'dry_run'          — DRY_RUN=true: we would have sent. Deliberately a
 --                        distinct status so a dry-run row never suppresses the
 --                        real send when the flag is flipped.
@@ -42,7 +47,7 @@ CREATE TABLE IF NOT EXISTS `goji-bi.marts.appointment_reminder_events` (
   event_id       STRING    NOT NULL OPTIONS(description="UUID for this event row"),
   appointment_id STRING    NOT NULL OPTIONS(description="Plato appointment id this reminder applies to"),
   appt_date      DATE      OPTIONS(description="Clinic-local date of the appointment being reminded about"),
-  status         STRING    NOT NULL OPTIONS(description="sent | skipped_no_email | failed | dry_run"),
+  status         STRING    NOT NULL OPTIONS(description="sent | test | skipped_no_email | failed | dry_run"),
   note           STRING    OPTIONS(description="Operational note / SMTP error text. Never PII"),
   sent_at        TIMESTAMP NOT NULL OPTIONS(description="When the job attempted the send")
 );
