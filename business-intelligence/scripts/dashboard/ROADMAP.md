@@ -11,7 +11,15 @@
 
 ---
 
-## ✅ Phase 2 — Today's Schedule on `frontdesk.*` (done)
+## ✅ Phase 2 — Today's Schedule on `frontdesk.*` (done, then partly reverted)
+
+> **Stale below.** `fct_upcoming_appointments` and `appt_confirmation_events`
+> described in this phase were **removed** by `7361f8b` ("Front desk: drop
+> Plato-mirror tabs, add WhatsApp/Instagram Leads pipeline"). What survives is the
+> new-patient welcome worklist (`fct_new_patient_welcome` +
+> `new_patient_welcome_events`) and its "Next 48 hours" tab. Kept for the
+> reasoning, not as a description of the code.
+
 
 ### Goal
 
@@ -264,3 +272,52 @@ degradation fetches (same shape) reading the transfer's keyword/search-term view
   the Google Ads UI per the playbook; the dashboard just tells us *what* to change.
 - The `google_ads` dataset is **US region** — query it directly (a mart view can't
   cross regions), exactly like `fetch_google_ads` does today.
+
+---
+
+## ✅ Phase 6 — Automated 48-hour appointment reminders (done)
+
+### Goal
+
+Stop someone having to log into Plato every day to fire the reminder template by
+hand. Plato's API has no notification/template endpoint, so we send it ourselves.
+
+### What shipped
+
+- `marts.fct_appointment_reminders` — who to remind (D+2 calendar date, PII-free,
+  reusing the appointment qualifier + ghost guard from `fct_new_patient_welcome`).
+- `marts.appointment_reminder_events` (+ `_latest`) — append-only send ledger and
+  idempotency guard.
+- `scripts/reminders/` — the `appointment-reminders` Cloud Run Job. Reads marts,
+  sends over Gmail SMTP as `hello@gojiphysio.com`, one email per patient per day.
+- Cloud Scheduler `appointment-reminders-daily`, 12:00 SGT, all 7 days.
+- `reminder-wa` link slug so reminder-driven WhatsApp traffic is attributable.
+
+Notes: `scripts/reminders/README.md`, ops in `DEPLOY.md`.
+
+### Deliberately not done
+
+- **WhatsApp.** Every strategy doc calls it the SG default (~98% open vs ~20%
+  email), but it needs Meta Business verification and a pre-approved UTILITY
+  template. Email is the channel that already worked end-to-end, so it shipped
+  first. The job groups recipients before sending, so a second channel slots in
+  at the send step.
+- **A Front Desk "Reminders" tab.** Patients with no email are digested to
+  `hello@` instead. Build the tab if the digest turns out to be ignored.
+
+### Watch
+
+- **Email coverage was the near-miss here.** Measured at build time, only
+  **4 of 91** upcoming appointments (4.4%) carried an inline email — an address
+  lands on the payload only when the front desk types one in, and every booking
+  in the window was manual rather than from the website form. The Plato *profile*
+  has an email for nearly everyone, so `plato_patients` was extended with
+  `extract_email()` and `dim_patient_contact` gained an `email` column. Confirm
+  actual coverage from the first dry-run digests rather than assuming it worked.
+- If the unreachable list is still large, ~90% of patients are reachable by phone
+  via the profile — that's the argument for bringing the WhatsApp phase forward.
+- **`dnd` on the Plato patient record is deliberately ignored.** A 48-hour
+  reminder is transactional, not marketing. Revisit if outbound marketing is ever
+  added here — and note the flag exists, since it may be the "Contactability"
+  concept the repo docs reference but never built.
+

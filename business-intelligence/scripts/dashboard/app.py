@@ -171,6 +171,11 @@ LINK_SLUGS: dict[str, dict] = {
     "ads-wa": {"kind": "whatsapp", "label": "Ads",      "text": "Hi Goji! I saw your ad and have a question about physio."},
     "qr-wa":  {"kind": "whatsapp", "label": "QR",       "text": "Hi Goji! I scanned your QR code and have a question about physio."},
     "ig-wa":  {"kind": "whatsapp", "label": "IG",       "text": "Hi Goji! I found you on Instagram and have a question about physio."},
+    # Outbound: the CTA in the automated 48-hour appointment reminder email
+    # (scripts/reminders). Its own slug so reminder-driven WhatsApp traffic —
+    # mostly reschedules and cancellations — is separable from inbound enquiry
+    # channels in the link-click stats.
+    "reminder-wa": {"kind": "whatsapp", "label": "Reminder", "text": "Hi Goji! I have a question about my upcoming appointment."},
     "wa":     {"kind": "whatsapp", "label": "Social",   "text": "Hi Goji! I have a question about physio."},  # generic fallback
     # --- Website /book form (current booking CTA) ---
     "web-book": {"kind": "book", "label": "Web"},

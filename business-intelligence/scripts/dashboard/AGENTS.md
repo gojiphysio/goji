@@ -51,6 +51,15 @@ See `DEPLOY.md`.
 - **`date.today()` must use SGT.** All `date.today()` / `datetime.now()` calls in
   the backend use `datetime.now(ZoneInfo("Asia/Singapore")).date()` so the date
   boundaries match the clinic's operating timezone, not the UTC Cloud Run host.
+- **Appointment times are clinic wall-clock stored as UTC (invariant for anything
+  rendering a time from `stg.appointments`).** `start_at` / `end_at` are
+  `PARSE_TIMESTAMP`'d as if UTC, but Plato stores naive SGT wall-clock. So to
+  display the time, format at **`'UTC'`** — that reads the wall clock back out.
+  Converting to `Asia/Singapore` shifts everything by 8 hours. `admin.html`
+  compensates client-side (`- 8`); `marts/47_fct_appointment_reminders.sql`
+  formats at `'UTC'`; `reminders/test_reminders.py` pins it. Note this is the
+  opposite of the `date.today()` rule above — *dates* are clinic-local
+  (`appt_date` already is, so key windows on it), *times* are naive.
 - **Session grain.** `fct_service_delivered` Part A fans out by `qty` (physical
   session count), not `len(redeem_alloc)`. When a redemption spans two packages
   (cross-package transition), `redeem_alloc` has 2 entries for 1 visit — using
@@ -103,6 +112,36 @@ See `DEPLOY.md`.
   name/phone" (the welcome list's profile-less bookings hydrate from the
   appointment payload, which is Plato, so they don't persist either). Keep it
   gated (founder+staff, frontdesk) and keep `note` operational, not clinical.
+
+## Outbound patient email
+- **`dim_patient_contact` is the one sanctioned PII table** (name, phone,
+  email) — a deliberate, founder-signed-off exception, written only by
+  `plato_patients` and read only by the staff worklist and the reminder job.
+  `dim_patient` stays PII-free. Adding a contact field goes here, never there.
+  Note `CREATE TABLE IF NOT EXISTS` is a no-op on an existing table, so a new
+  column needs the explicit `ALTER TABLE ... ADD COLUMN IF NOT EXISTS` that
+  `42_dim_patient_contact.sql` now carries.
+- **Contact on an appointment payload is the exception, not the rule.** Only
+  ~4% of upcoming appointments carry an inline email (it's there when the front
+  desk types it, and website bookings collect it); the Plato profile has one for
+  nearly everyone. Hydrate payload-first then profile — and measure coverage
+  before building anything that assumes a channel can reach people.
+- **Two senders, one transport.** `scripts/booking/mailer.py` (booking
+  confirmations, triggered by a booking) and `scripts/reminders/` (the daily
+  48-hour reminder Cloud Run Job). Both send over Gmail SMTP as
+  `hello@gojiphysio.com` with `gmail-app-password` from Secret Manager. Add a
+  third sender the same way rather than introducing an ESP.
+- **Anything that mails patients on a schedule ships with `DRY_RUN=true`** and a
+  digest to `hello@`, and is flipped by hand only once the manual process it
+  replaces has stopped. The reminder job replaced a button someone clicked in
+  Plato daily; going live without stopping that would have double-mailed every
+  patient.
+- **Sends are ledgered append-only and checked before sending**
+  (`marts.appointment_reminder_events`). That is what makes the job safe to
+  re-run after a partial failure — never rely on the job completing once.
+- **Every outbound CTA routes through `go.gojiphysio.com/<slug>`** with its own
+  slug, so the channel is attributable (`reminder-wa` for reminder emails). Never
+  paste a raw `wa.me` link into an email body.
 
 ## Marketing tab
 - **Hierarchy = decision order.** The tab reads top-down: (1) **North stars** —

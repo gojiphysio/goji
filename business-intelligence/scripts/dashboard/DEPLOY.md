@@ -93,7 +93,7 @@ can append "contacted/snoozed/dismissed" follow-up events, appointment
 confirmations, click-to-WhatsApp link clicks, and provider-attribution alert
 dismissals; everything else stays read-only):
 
-    for t in patient_followup_events new_patient_welcome_events lead_events link_click_events booking_funnel_events web_session_events mismatch_dismissal_events; do
+    for t in patient_followup_events new_patient_welcome_events lead_events link_click_events booking_funnel_events web_session_events mismatch_dismissal_events appointment_reminder_events; do
       bq add-iam-policy-binding \
         --member="serviceAccount:dashboard-sa@goji-bi.iam.gserviceaccount.com" \
         --role="roles/bigquery.dataEditor" \
@@ -151,11 +151,12 @@ The dashboard SA must have **write** access to the relevant append-only table:
 `marts.new_patient_welcome_events` (new-patient welcome list),
 `marts.lead_events` (Leads pipeline),
 `marts.link_click_events` (click-to-WhatsApp tracking), and
-`marts.mismatch_dismissal_events` (provider-attribution alert dismissals).
+`marts.mismatch_dismissal_events` (provider-attribution alert dismissals), and
+`marts.appointment_reminder_events` (48-hour reminder send ledger).
 `deploy_admin.sh` grants and verifies them all, but if you ever see a save
 error, grant them directly:
 
-    for t in patient_followup_events new_patient_welcome_events lead_events link_click_events booking_funnel_events web_session_events mismatch_dismissal_events; do
+    for t in patient_followup_events new_patient_welcome_events lead_events link_click_events booking_funnel_events web_session_events mismatch_dismissal_events appointment_reminder_events; do
       bq add-iam-policy-binding \
         --member="serviceAccount:dashboard-sa@goji-bi.iam.gserviceaccount.com" \
         --role="roles/bigquery.dataEditor" \
@@ -438,6 +439,51 @@ Three tabs — the worklists Plato doesn't track:
   future appointment booked or marked dismissed/snoozed. Front desk can mark
   **contacted / snooze / dismiss**; name + phone come from BigQuery
   (`dim_patient_contact`), plus a count of patients active in the last 12 months.
+
+## Appointment reminders (`appointment-reminders` Cloud Run Job)
+
+Daily at **12:00 SGT**, emails every patient whose appointment is **two calendar
+days out** — Monday's run covers Wednesday. Replaces a manual chore: Plato's
+reminder template can only be fired by hand from its UI (its API has no
+notification endpoint), so someone had to log in and click it every day.
+
+Code and full notes: `scripts/reminders/README.md`. Summary:
+
+- Reads `marts.fct_appointment_reminders` (PII-free) and hydrates contact at
+  query time. Writes `marts.appointment_reminder_events` — the idempotency
+  guard, which is why the job is safe to re-run.
+- Sends over Gmail SMTP as `hello@gojiphysio.com` (`gmail-app-password`), the
+  same path as booking confirmations.
+- Runs as `dashboard-sa` — no new identity. It already had marts read, the
+  event-table `dataEditor` grant, and `secretAccessor` on the app password.
+- Patients with no email on file are skipped and listed in a daily digest to
+  `hello@` so the front desk can WhatsApp them instead.
+
+Scheduler (one-off; the repo has no Terraform):
+
+    gcloud scheduler jobs create http appointment-reminders-daily \
+      --location asia-southeast1 \
+      --schedule "0 12 * * *" \
+      --time-zone "Asia/Singapore" \
+      --uri "https://run.googleapis.com/v2/projects/goji-bi/locations/asia-southeast1/jobs/appointment-reminders:run" \
+      --http-method POST \
+      --oauth-service-account-email "scheduler-sa@goji-bi.iam.gserviceaccount.com"
+
+### Going live
+
+`DRY_RUN` ships as **`true`** — the job runs, digests what it *would* send to
+`hello@`, and mails no patient. The CI deploy reads the live value back and
+preserves it, so a redeploy never flips it by accident.
+
+**Before flipping it, the front desk must stop clicking the reminder button in
+Plato** — otherwise every patient gets two reminder emails. That's the whole
+risk of this feature, and it's a people step, not a code step.
+
+    gcloud run jobs update appointment-reminders --region asia-southeast1 \
+      --update-env-vars DRY_RUN=false
+
+`--update-env-vars`, never `--set-env-vars` — the latter replaces the entire env
+block and would silently drop `BQ_PROJECT` with it.
 
 ## Cost
 
