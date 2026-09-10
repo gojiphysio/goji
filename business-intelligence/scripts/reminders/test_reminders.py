@@ -264,3 +264,31 @@ def test_dockerfile_copies_every_module_main_imports():
     for mod in local_modules:
         assert mod in dockerfile, f"{mod} is never COPYed into the image"
 
+
+def test_no_log_line_interpolates_a_recipient_address():
+    """Cloud Logging is a different surface from BigQuery, but the same PII
+    boundary applies: it's retained ~30 days and readable by anyone with a
+    logging role. This shipped leaking addresses once —
+
+        INFO DRY RUN would send to beatricekohh@gmail.com (1 appt)
+
+    — so log lines key on appointment_id instead. The digest to hello@ is where
+    the human-readable list belongs."""
+    import ast, pathlib
+    src = pathlib.Path(main.__file__).read_text()
+    tree = ast.parse(src)
+    offenders = []
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+        f = node.func
+        if not (isinstance(f, ast.Attribute)
+                and isinstance(f.value, ast.Name) and f.value.id == "log"):
+            continue
+        for arg in node.args[1:]:            # args after the format string
+            flat = ast.unparse(arg)
+            # g["email"] / r["email"] / .get("email") in a log argument.
+            if "email" in flat and "no email" not in flat:
+                offenders.append(f"line {node.lineno}: log(..., {flat})")
+    assert not offenders, "recipient address in a log line: " + "; ".join(offenders)
+

@@ -280,11 +280,16 @@ def main() -> int:
     ledger: list[tuple[str, str, str | None]] = []
 
     for g in groups:
+        # Log lines key on appointment_id, never on the recipient address.
+        # Cloud Logging is a different surface from BigQuery but the same PII
+        # boundary applies: it's retained ~30 days and readable by anyone with a
+        # logging role. The appointment_id is enough to trace a send, and the
+        # digest to hello@ carries the human-readable list.
         ref = g["appointment_ids"][0]
         summary = {"name": g["name"], "time": g["times"][0] if g["times"] else "",
                    "email": g["email"]}
         if dry_run:
-            log.info("DRY RUN would send to %s (%d appt)", g["email"],
+            log.info("DRY RUN would send to appointment %s (%d appt)", ref,
                      len(g["appointment_ids"]))
             sent.append(summary)
             ledger += [(i, "dry_run", None) for i in g["appointment_ids"]]
@@ -299,7 +304,7 @@ def main() -> int:
         except Exception as e:
             # One bad address must not stop the rest of the list. 'failed' rows
             # aren't 'sent', so the next run retries them.
-            log.warning("reminder to %s failed: %s", g["email"], e)
+            log.warning("reminder for appointment %s failed: %s", ref, scrub(str(e)))
             failed.append({**summary, "error": str(e)})
             ledger += [(i, "failed", scrub(str(e))) for i in g["appointment_ids"]]
 
