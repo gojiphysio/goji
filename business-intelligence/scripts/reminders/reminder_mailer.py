@@ -11,11 +11,12 @@ see test_reminders.py.
 
 Content is the clinic's existing Plato reminder template, with two changes
 agreed when this was automated:
-  - Greeting is the patient's FIRST NAME ("Dear Sarah,"). Plato's template used
-    "%title% %name%", but we store no Mr/Ms salutation anywhere — dim_patient
-    has `sex` but no title, and an appointment's $.title is the appointment
-    title, not a salutation. First name also matches how booking confirmations
-    already greet people.
+  - Greeting is the patient's FIRST NAME ("Dear Sarah,") rather than Plato's
+    "%title% %name%". The clinic chose this; don't "restore" the salutation.
+    (Plato's patient record does carry a `title` field, but we deliberately
+    don't ingest it — an appointment's own $.title is the appointment title,
+    not a salutation, so it is not a substitute.) First name also matches how
+    booking confirmations already greet people.
   - The clinic-directions block and the home-visit paragraph are chosen per
     appointment rather than both being sent to everyone.
 """
