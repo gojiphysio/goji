@@ -29,11 +29,14 @@ FLOW
      had no email address and needs a WhatsApp instead.
 
 SAFETY
-  Two independent guards, and they compose:
+  Two guards. Test mode deliberately WINS over DRY_RUN:
     DRY_RUN=true            -> nothing is sent to anyone but the digest.
     REMINDER_OVERRIDE_TO=x  -> reminders are really sent, but every one goes to
-                               x. Use with DRY_RUN=false to prove the whole path
-                               end to end without mailing a patient.
+                               x. Sufficient on its own; do NOT pair it with
+                               DRY_RUN=false. On an image that predates this
+                               flag the override is ignored, and DRY_RUN=false
+                               then mails real patients — which is exactly how 8
+                               were emailed on 2026-09-10.
   DRY_RUN=true renders and groups everything, sends NO patient email, writes
   'dry_run' ledger rows (a distinct status, so it never suppresses the real send)
   and still delivers the digest. This is how the job ships; flip the flag only
@@ -47,7 +50,11 @@ Env vars:
   REMINDER_OVERRIDE_TO  test mode: send every patient reminder HERE instead of
                         to the patient. Real end-to-end send, reaches nobody.
                         Ledgered as 'test', so it never suppresses the real
-                        reminder. Unset in normal operation.
+                        reminder. Setting this ALONE is enough — it overrides
+                        DRY_RUN, so testing never requires DRY_RUN=false.
+                        Unset in normal operation.
+  REMINDER_BCC          copy every real patient send here (Bcc).
+                        default: hello@gojiphysio.com
   GMAIL_APP_PASSWORD    SMTP app password           (required unless DRY_RUN)
   REMINDER_ADMIN_EMAIL  Digest recipient            default: hello@gojiphysio.com
   (see reminder_mailer.py for the SMTP_* / link overrides)
@@ -265,6 +272,20 @@ def main() -> int:
     # Defaults to TRUE: a misconfigured deploy must never surprise-mail patients.
     dry_run = env_bool("DRY_RUN", True)
 
+    # TEST MODE OVERRIDES DRY_RUN, and that asymmetry is deliberate.
+    #
+    # Test mode used to require DRY_RUN=false as well, which meant the test
+    # procedure was two settings where one of them is "mail real patients". Run
+    # against an image that predates REMINDER_OVERRIDE_TO, the override is
+    # silently ignored and DRY_RUN=false does exactly what it says — which is
+    # how 8 patients were emailed on 2026-09-10.
+    #
+    # Now REMINDER_OVERRIDE_TO alone is enough. On an older image, setting it
+    # does nothing at all and the job stays in dry run. The failure mode of
+    # "wrong image" is now "nothing happens" instead of "mails patients".
+    if mailer.OVERRIDE_TO:
+        dry_run = False
+
     if not dry_run and not mailer.SMTP_PASS:
         log.error("DRY_RUN is false but GMAIL_APP_PASSWORD is unset; refusing to run")
         return 1
@@ -279,7 +300,8 @@ def main() -> int:
     # Read the date off the rows, never recompute it — see resolve_appt_date.
     day = resolve_appt_date(rows)
     if mailer.OVERRIDE_TO:
-        log.warning("TEST MODE: every reminder goes to %s, no patient is mailed",
+        log.warning("TEST MODE: really sending, but every reminder goes to %s. "
+                    "No patient is mailed. (DRY_RUN is ignored in test mode.)",
                     mailer.OVERRIDE_TO)
     log.info("reminders for %s (dry_run=%s, test_mode=%s)",
              day, dry_run, bool(mailer.OVERRIDE_TO))

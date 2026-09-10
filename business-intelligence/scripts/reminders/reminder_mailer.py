@@ -46,6 +46,13 @@ ADMIN_TO   = os.environ.get("REMINDER_ADMIN_EMAIL", "hello@gojiphysio.com")
 # operation; when set it overrides the recipient unconditionally, so there is no
 # path where a patient is mailed while this has a value.
 OVERRIDE_TO = os.environ.get("REMINDER_OVERRIDE_TO", "").strip()
+# Clinic practice: every reminder sent to a patient is copied to the clinic
+# inbox, so there's always a record of exactly what the patient received and
+# when. Bcc rather than Cc — the patient must not see an internal address on
+# their mail. smtplib puts a Bcc recipient on the envelope and strips the header
+# before transmitting, so the copy arrives without the patient ever seeing it.
+# Set REMINDER_BCC="" to disable.
+BCC_TO = os.environ.get("REMINDER_BCC", "hello@gojiphysio.com").strip()
 
 # Tracked WhatsApp CTA. Repo rule: every outbound customer CTA routes through the
 # go.gojiphysio.com redirector so the click is logged and attributable — never a
@@ -223,6 +230,9 @@ def send_reminder(to: str, name: str | None, date_str: str, times: list[str],
                   ref: str | None = None) -> None:
     """Send one patient reminder. Raises on failure so the caller can ledger it.
 
+    A real patient send is Bcc'd to the clinic (REMINDER_BCC) so there's always
+    a record of what the patient received.
+
     With REMINDER_OVERRIDE_TO set, the body is byte-identical to the patient's
     but the message goes to the override address, with the intended recipient in
     the subject so the clinic can check each one landed on the right person.
@@ -236,6 +246,11 @@ def send_reminder(to: str, name: str | None, date_str: str, times: list[str],
     else:
         msg["Subject"] = SUBJECT
         msg["To"] = to
+        # Copy the clinic on real patient mail. Skipped in test mode, where the
+        # message is already addressed to the clinic and a Bcc would just
+        # deliver everything twice.
+        if BCC_TO:
+            msg["Bcc"] = BCC_TO
     msg["From"] = formataddr((FROM_NAME, SMTP_USER))
     msg["Reply-To"] = SMTP_USER
     msg.set_content(render_reminder_body(

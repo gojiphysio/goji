@@ -109,28 +109,49 @@ reminders themselves go out correctly. `REMINDER_OVERRIDE_TO` closes that gap:
 every reminder is really sent — real names, times, grouping, SMTP — but every
 one goes to the override address instead of the patient.
 
+**Set this one variable. Do not touch `DRY_RUN`.**
+
 ```bash
-gcloud run jobs update appointment-reminders --region asia-southeast1   --update-env-vars DRY_RUN=false,REMINDER_OVERRIDE_TO=hello@gojiphysio.com
+gcloud run jobs update appointment-reminders --region asia-southeast1 \
+  --update-env-vars REMINDER_OVERRIDE_TO=hello@gojiphysio.com
 
 gcloud run jobs execute appointment-reminders --region asia-southeast1 --wait
+
+gcloud run jobs update appointment-reminders --region asia-southeast1 \
+  --remove-env-vars REMINDER_OVERRIDE_TO
 ```
 
 You get one email per recipient, body byte-identical to the patient's, subject
 prefixed `[TEST -> their@address]` so you can check each landed on the right
-person. **Put it back afterwards:**
+person.
 
-```bash
-gcloud run jobs update appointment-reminders --region asia-southeast1   --update-env-vars DRY_RUN=true --remove-env-vars REMINDER_OVERRIDE_TO
-```
+Three properties worth knowing:
 
-Two properties worth knowing:
-
+- **The override wins over `DRY_RUN`**, so testing never requires setting
+  `DRY_RUN=false`. That pairing is what mailed 8 real patients on 2026-09-10:
+  run against an image predating this flag, the override was silently ignored
+  and `DRY_RUN=false` did exactly what it says. Now a wrong image means the job
+  simply stays in dry run and nothing happens.
 - **The override is applied at the point of send**, so there is no code path
   where a patient is mailed while it has a value.
 - **Test runs are ledgered `test`, never `sent`.** A `sent` row would suppress
   the real reminder on the day, so testing against a live cohort would silently
   cost those patients their reminder. Only `sent` suppresses; `test`, `dry_run`
   and `failed` all fall through.
+
+## Clinic copy on every reminder
+
+Every reminder a patient receives is Bcc'd to `hello@gojiphysio.com`
+(`REMINDER_BCC`), so the clinic always has a record of exactly what was sent and
+when — the same practice as sending reminders by hand from Plato.
+
+Bcc rather than Cc: the patient must not see an internal address on their mail.
+`smtplib` puts a Bcc recipient on the envelope and strips the header before
+transmitting, so the copy arrives without the patient ever knowing. Both halves
+of that are pinned by tests.
+
+Test mode doesn't also Bcc — the message is already addressed to the clinic, and
+a Bcc would deliver everything there twice.
 
 ## Going live — the part that actually bites
 

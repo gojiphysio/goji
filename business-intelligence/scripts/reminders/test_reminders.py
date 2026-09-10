@@ -362,3 +362,84 @@ def test_digest_announces_test_mode(monkeypatch):
     assert body.startswith("TEST MODE")
     assert "No patient was emailed." in body
 
+
+# --- clinic copy (Bcc) -----------------------------------------------------
+
+def test_patient_reminder_is_bcc_to_the_clinic(monkeypatch):
+    """Clinic practice: every reminder a patient receives is copied to the
+    clinic inbox, so there's always a record of what went out."""
+    monkeypatch.setattr(mailer, "OVERRIDE_TO", "")
+    monkeypatch.setattr(mailer, "BCC_TO", "hello@gojiphysio.com")
+    msgs = _sent_messages(monkeypatch)
+    mailer.send_reminder("patient@example.com", "Sarah Tan", "2026-09-12",
+                         ["09:00"], has_clinic=True, has_home_visit=False)
+    assert msgs[0]["To"] == "patient@example.com"
+    assert msgs[0]["Bcc"] == "hello@gojiphysio.com"
+    # Bcc, never Cc — the patient must not see an internal address.
+    assert msgs[0]["Cc"] is None
+
+
+def test_bcc_is_not_transmitted_to_the_patient(monkeypatch):
+    """smtplib puts a Bcc recipient on the envelope and strips the header before
+    transmitting. Pinned because the whole point is the patient not seeing it."""
+    import smtplib
+    from email.message import EmailMessage
+
+    class FakeSMTP(smtplib.SMTP):
+        def __init__(self): self.calls = []
+        def ehlo_or_helo_if_needed(self): pass
+        def sendmail(self, f, to, msg, *a, **k): self.calls.append((f, to, msg))
+        does_esmtp = 0
+        esmtp_features: dict = {}
+
+    m = EmailMessage()
+    m["Subject"] = mailer.SUBJECT
+    m["From"] = mailer.SMTP_USER
+    m["To"] = "patient@example.com"
+    m["Bcc"] = "hello@gojiphysio.com"
+    m.set_content("body")
+
+    s = FakeSMTP()
+    s.send_message(m)
+    _, recipients, raw = s.calls[0]
+    raw = raw.decode() if isinstance(raw, bytes) else raw
+    assert "hello@gojiphysio.com" in recipients   # clinic really gets a copy
+    assert "patient@example.com" in recipients
+    assert "bcc:" not in raw.lower()              # but the patient can't see it
+
+
+def test_test_mode_does_not_also_bcc(monkeypatch):
+    """In test mode the message already goes to the clinic; a Bcc would deliver
+    every reminder to that inbox twice."""
+    monkeypatch.setattr(mailer, "OVERRIDE_TO", "hello@gojiphysio.com")
+    monkeypatch.setattr(mailer, "BCC_TO", "hello@gojiphysio.com")
+    msgs = _sent_messages(monkeypatch)
+    mailer.send_reminder("patient@example.com", "Sarah Tan", "2026-09-12",
+                         ["09:00"], has_clinic=True, has_home_visit=False)
+    assert msgs[0]["To"] == "hello@gojiphysio.com"
+    assert msgs[0]["Bcc"] is None
+
+
+def test_override_alone_is_enough_no_dry_run_change_needed():
+    """The test procedure must never require DRY_RUN=false. Pairing them is what
+    mailed 8 real patients on 2026-09-10: run against an image predating
+    REMINDER_OVERRIDE_TO, the override is ignored and DRY_RUN=false sends for
+    real. With the override winning, a wrong image means nothing happens."""
+    import pathlib
+    src = pathlib.Path(main.__file__).read_text()
+    assert "if mailer.OVERRIDE_TO:\n        dry_run = False" in src
+
+
+def test_readme_test_procedure_does_not_set_dry_run_false():
+    """The runbook is part of the safety mechanism — a doc telling someone to set
+    DRY_RUN=false for a test would reintroduce the incident."""
+    import pathlib, re
+    readme = pathlib.Path(__file__).with_name("README.md").read_text()
+    section = readme.split("## Test mode")[1].split("## Going live")[0]
+    assert "REMINDER_OVERRIDE_TO" in section
+    # Only the runnable commands matter — the prose deliberately mentions
+    # DRY_RUN=false to explain why the two must not be paired.
+    commands = "\n".join(re.findall(r"```bash\n(.*?)```", section, re.S))
+    assert "DRY_RUN=false" not in commands, (
+        "the test-mode runbook must not tell anyone to set DRY_RUN=false")
+

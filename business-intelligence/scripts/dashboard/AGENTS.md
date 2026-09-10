@@ -131,6 +131,16 @@ See `DEPLOY.md`.
   48-hour reminder Cloud Run Job). Both send over Gmail SMTP as
   `hello@gojiphysio.com` with `gmail-app-password` from Secret Manager. Add a
   third sender the same way rather than introducing an ESP.
+- **Every reminder sent to a patient is Bcc'd to `hello@gojiphysio.com`.**
+  Clinic practice: there is always a record of exactly what a patient received
+  and when, the same as when reminders were sent by hand from Plato. Bcc, never
+  Cc — the patient must not see an internal address.
+- **A test path must never require turning a safety flag off.** Test mode
+  (`REMINDER_OVERRIDE_TO`) overrides `DRY_RUN` rather than requiring
+  `DRY_RUN=false` alongside it. The pairing mailed 8 real patients on
+  2026-09-10: the running image predated the override flag, ignored it, and
+  `DRY_RUN=false` did exactly what it says. Design test switches so that an
+  unsupported one fails closed — a wrong image should mean nothing happens.
 - **Anything that mails patients on a schedule ships with `DRY_RUN=true`** and a
   digest to `hello@`, and is flipped by hand only once the manual process it
   replaces has stopped. The reminder job replaced a button someone clicked in
