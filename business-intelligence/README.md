@@ -77,6 +77,9 @@ and `scripts/fix_invoice_doctor.py`.
     ├── dashboard/             The live Cloud Run service (app.py, template.html,
     │                          Dockerfile). DEPLOY.md has redeploy/rotate steps.
     ├── ingestion/             One folder per Cloud Run ingestion Job.
+    ├── reminders/             Cloud Run Job: the daily 48-hour appointment
+    │                          reminder email (12:00 SGT). README.md has the
+    │                          dry-run/go-live steps.
     ├── sql/                   stg + marts BigQuery views (deploy_all.sh).
     ├── cross_reference_invoice_doctor.py  Invoice-doctor mismatch detection.
     ├── fix_invoice_doctor.py              Correction script for mismatches.

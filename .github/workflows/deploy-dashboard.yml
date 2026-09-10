@@ -8,6 +8,9 @@ name: Deploy dashboard
 #   - SQL files               -> redeploy BigQuery views/tables (+ ensure the
 #                                 dashboard's write grant on the follow-up table)
 #   - patients ingest job     -> redeploy the Cloud Run Job + run it once
+#   - reminders job           -> redeploy the Cloud Run Job (NEVER run it here —
+#                                 it sends patient email; only Cloud Scheduler
+#                                 may trigger it)
 #   - dashboard app           -> redeploy BOTH Cloud Run services that run this
 #                                 image: goji-dashboard (APP_MODE=dashboard) and
 #                                 goji-frontdesk (APP_MODE=frontdesk)
@@ -20,6 +23,7 @@ on:
       - "business-intelligence/scripts/sql/**"
       - "business-intelligence/scripts/ingestion/plato_patients/**"
       - "business-intelligence/scripts/ingestion/marketing_ingest/**"
+      - "business-intelligence/scripts/reminders/**"
       - ".github/workflows/deploy-dashboard.yml"
   workflow_dispatch: {}   # allow manual "Run workflow" from the Actions tab
 
@@ -84,6 +88,11 @@ jobs:
         run: |
           pip install -r requirements.txt
           python -m pytest test_extract.py -q
+      - name: Appointment-reminder tests
+        working-directory: business-intelligence/scripts/reminders
+        run: |
+          pip install -r requirements.txt
+          python -m pytest test_reminders.py -q
 
   # ---- 2. Deploy (only after tests pass) ----------------------------------
   deploy:
@@ -102,7 +111,7 @@ jobs:
              || [ "$base" = "0000000000000000000000000000000000000000" ] \
              || ! git cat-file -e "${base}^{commit}" 2>/dev/null; then
             echo "No usable base commit — deploying everything."
-            { echo "sql=true"; echo "patients=true"; echo "marketing=true"; echo "dashboard=true"; } >> "$GITHUB_OUTPUT"
+            { echo "sql=true"; echo "patients=true"; echo "marketing=true"; echo "dashboard=true"; echo "reminders=true"; } >> "$GITHUB_OUTPUT"
             exit 0
           fi
           changed="$(git diff --name-only "$base" "${{ github.sha }}")"
@@ -112,6 +121,7 @@ jobs:
           grep -q "^${base_path}/ingestion/plato_patients/" <<<"$changed" && echo "patients=true"  >>"$GITHUB_OUTPUT" || echo "patients=false"  >>"$GITHUB_OUTPUT"
           grep -q "^${base_path}/ingestion/marketing_ingest/" <<<"$changed" && echo "marketing=true" >>"$GITHUB_OUTPUT" || echo "marketing=false" >>"$GITHUB_OUTPUT"
           grep -q "^${base_path}/dashboard/"                <<<"$changed" && echo "dashboard=true" >>"$GITHUB_OUTPUT" || echo "dashboard=false" >>"$GITHUB_OUTPUT"
+          grep -q "^${base_path}/reminders/"                <<<"$changed" && echo "reminders=true" >>"$GITHUB_OUTPUT" || echo "reminders=false" >>"$GITHUB_OUTPUT"
 
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
@@ -130,8 +140,9 @@ jobs:
           # Idempotent: the dashboard SA needs table-level write on the
           # append-only event logs — follow-ups, inbound leads,
           # click-to-WhatsApp link clicks, and provider-attribution alert
-          # dismissals. Everything else stays read-only.
-          for t in patient_followup_events new_patient_welcome_events lead_events link_click_events booking_funnel_events web_session_events mismatch_dismissal_events; do
+          # dismissals. The same SA runs the appointment-reminders job, which
+          # writes its own send ledger. Everything else stays read-only.
+          for t in patient_followup_events new_patient_welcome_events lead_events link_click_events booking_funnel_events web_session_events mismatch_dismissal_events appointment_reminder_events; do
             bq add-iam-policy-binding \
               --member="serviceAccount:${DASHBOARD_SA}" \
               --role="roles/bigquery.dataEditor" \
@@ -147,6 +158,44 @@ jobs:
           # Run once so name/phone changes show up immediately (else nightly).
           gcloud run jobs execute plato-patients-ingest \
             --region "${REGION}" --project "${PROJECT}" --wait
+
+      - name: Deploy appointment-reminders job
+        if: steps.changes.outputs.reminders == 'true'
+        working-directory: business-intelligence/scripts/reminders
+        run: |
+          # Sends the 48-hour reminder emails. Cloud Scheduler triggers it at
+          # 12:00 SGT; we deliberately do NOT `gcloud run jobs execute` here —
+          # a deploy must never mail patients.
+          #
+          # DRY_RUN ships as 'true' and is flipped by hand once the front desk
+          # has stopped clicking the reminder button in Plato (otherwise every
+          # patient gets two reminders). To go live:
+          #   gcloud run jobs update appointment-reminders --region asia-southeast1 \
+          #     --update-env-vars DRY_RUN=false
+          # Use --update-env-vars, never --set-env-vars, which replaces the whole
+          # block and would silently drop BQ_PROJECT with it.
+          #
+          # Do NOT add a `gcloud secrets describe gmail-app-password` guard in
+          # front of --set-secrets. The deployer SA has no Secret Manager role,
+          # so that probe always fails with PERMISSION_DENIED whether or not the
+          # secret exists — a false negative that silently drops the mount and
+          # disables sending. This exact mistake broke booking emails once.
+          #
+          # Preserve the live DRY_RUN across redeploys: read it back, defaulting
+          # to the safe 'true' when the job doesn't exist yet.
+          dry="$(gcloud run jobs describe appointment-reminders \
+                   --region "${REGION}" --project "${PROJECT}" \
+                   --format='value(template.template.containers[0].env.filter("name:DRY_RUN").extract(value))' \
+                   2>/dev/null || true)"
+          dry="${dry:-true}"
+          echo "Deploying appointment-reminders with DRY_RUN=${dry}"
+          gcloud run jobs deploy appointment-reminders \
+            --source . --region "${REGION}" --project "${PROJECT}" \
+            --service-account "${DASHBOARD_SA}" \
+            --set-env-vars="BQ_PROJECT=${PROJECT},BQ_DATASET=marts,DRY_RUN=${dry}" \
+            --set-secrets=GMAIL_APP_PASSWORD=gmail-app-password:latest \
+            --max-retries=0 \
+            --quiet
 
       - name: Deploy marketing-ingest job
         if: steps.changes.outputs.marketing == 'true'

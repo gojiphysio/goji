@@ -71,7 +71,8 @@ echo "==> Step 2/5: building the behind-the-scenes data"
 # The dashboard writes several append-only event logs: follow-up actions
 # (retention worklist), inbound leads (the Leads pipeline), click-to-WhatsApp
 # link clicks, website booking-funnel + landing beacons, and provider-attribution
-# alert dismissals. Each needs a table-level dataEditor grant on the SA — we keep
+# alert dismissals. The same SA also runs the appointment-reminders job, which
+# writes its own send ledger. Each needs a table-level dataEditor grant — we keep
 # it table-level, not dataset-wide, for least privilege.
 echo
 echo "==> Step 3/5: allowing the dashboard to save front-desk actions"
@@ -105,6 +106,7 @@ grant_editor link_click_events          "click-to-WhatsApp tracking"
 grant_editor booking_funnel_events      "website booking-funnel tracking (goji-booking)"
 grant_editor web_session_events         "website landing/attribution beacon (goji-booking)"
 grant_editor mismatch_dismissal_events  "provider-attribution alert dismissals"
+grant_editor appointment_reminder_events "48-hour appointment reminder send ledger"
 
 # --- Step 4: refresh patient names ------------------------------------------
 # Names + phones now come from BigQuery (marts.dim_patient_contact), filled by
