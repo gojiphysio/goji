@@ -210,6 +210,15 @@ jobs:
           # Cloud Scheduler trigger runs it; we don't execute here.
           sources=""
           secrets=""
+          # Env pairs are joined with '@', not ',', and passed with gcloud's
+          # custom-delimiter prefix below. SOURCES is itself a comma-separated
+          # list, and a plain --set-env-vars splits the whole string on commas —
+          # so "SOURCES=instagram,search_console" made gcloud read
+          # 'search_console' as a key with no value and fail the deploy. This
+          # only bites with 2+ sources configured, which is why it stayed latent
+          # until a full workflow_dispatch ran every step.
+          # '@' is safe: no value here contains one (project id, numeric IG id,
+          # 'sc-domain:...'). If a value ever might, pick another delimiter.
           envs="BQ_PROJECT=${PROJECT}"
 
           # Instagram: gated on IG_USER_ID ONLY.
@@ -228,7 +237,7 @@ jobs:
           if [ -n "${IG_USER_ID}" ]; then
             sources="${sources:+$sources,}instagram"
             secrets="META_GRAPH_TOKEN=meta-graph-token:latest"
-            envs="${envs},IG_USER_ID=${IG_USER_ID}"
+            envs="${envs}@IG_USER_ID=${IG_USER_ID}"
           else
             echo "IG_USER_ID repo var not set — leaving instagram out of SOURCES."
           fi
@@ -237,7 +246,7 @@ jobs:
           # account, which must be added as a restricted user on the property.
           if [ -n "${GSC_SITE_URL}" ]; then
             sources="${sources:+$sources,}search_console"
-            envs="${envs},GSC_SITE_URL=${GSC_SITE_URL}"
+            envs="${envs}@GSC_SITE_URL=${GSC_SITE_URL}"
           else
             echo "GSC_SITE_URL repo var not set — leaving search_console out of SOURCES."
           fi
@@ -252,7 +261,7 @@ jobs:
             --source . --region "${REGION}" --project "${PROJECT}" \
             --service-account "ingestion-sa@${PROJECT}.iam.gserviceaccount.com" \
             ${secrets:+--set-secrets=$secrets} \
-            --set-env-vars="${envs},SOURCES=${sources}" \
+            --set-env-vars="^@^${envs}@SOURCES=${sources}" \
             --quiet
 
       - name: Deploy dashboard
