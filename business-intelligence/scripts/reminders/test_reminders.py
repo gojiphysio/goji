@@ -230,3 +230,37 @@ def test_scrub_handles_empty_and_long_input():
     assert main.scrub("") is None
     assert len(main.scrub("x" * 900)) == 400
 
+
+# --- container build -------------------------------------------------------
+
+def test_multi_source_copy_ends_with_slash():
+    """Docker rejects a multi-source COPY whose destination isn't a directory
+    ending in '/'. This shipped broken once: the sibling ingestion jobs copy a
+    single file, so their `COPY main.py .` is fine and the pattern doesn't carry
+    over to two files. The failure only surfaced in Cloud Build, after merge to
+    main, and it blocked every deploy step behind it."""
+    import pathlib
+    dockerfile = pathlib.Path(__file__).with_name("Dockerfile").read_text()
+    for line in dockerfile.splitlines():
+        line = line.strip()
+        if not line.upper().startswith("COPY "):
+            continue
+        parts = line.split()[1:]          # drop 'COPY'
+        parts = [p for p in parts if not p.startswith("--")]
+        if len(parts) > 2:                # >1 source + 1 destination
+            dest = parts[-1]
+            assert dest.endswith("/"), (
+                f"multi-source COPY needs a trailing slash on the destination: {line!r}")
+
+
+def test_dockerfile_copies_every_module_main_imports():
+    """A module left out of the COPY builds fine and then crashes on the first
+    scheduled run, which is the worst place to find out."""
+    import pathlib
+    here = pathlib.Path(__file__).parent
+    dockerfile = (here / "Dockerfile").read_text()
+    local_modules = {p.name for p in here.glob("*.py")
+                     if not p.name.startswith("test_")}
+    for mod in local_modules:
+        assert mod in dockerfile, f"{mod} is never COPYed into the image"
+
