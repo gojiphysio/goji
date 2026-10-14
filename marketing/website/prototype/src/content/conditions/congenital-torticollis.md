@@ -1,6 +1,6 @@
 ---
 title: "Congenital Torticollis"
-description: "Does your baby tilt their head to one side or struggle to turn their neck fully? Goji's physiotherapists treat congenital torticollis in infants and children at Lentor, Singapore."
+description: "Does your baby tilt their head to one side or struggle to turn their neck? Goji's physiotherapists treat congenital torticollis in infants and children."
 cardTitle: "Congenital Torticollis"
 cardLead: "Physiotherapy for babies whose head tilts to one side or who cannot turn their neck fully, caused by tightness in the neck muscle."
 category: "Paediatrics"

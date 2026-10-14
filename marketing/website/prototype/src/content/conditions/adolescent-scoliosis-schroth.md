@@ -1,6 +1,6 @@
 ---
-title: "Adolescent Idiopathic Scoliosis and Schroth Therapy"
-description: "Schroth therapy is an evidence-based physiotherapy approach for adolescent scoliosis. Goji's physiotherapists offer Schroth-based scoliosis rehabilitation at Lentor, Singapore."
+title: "Adolescent Scoliosis and Schroth Therapy"
+description: "Schroth therapy is an evidence-based physiotherapy approach for adolescent scoliosis, offered by Goji's physiotherapists at Lentor, Singapore."
 cardTitle: "Adolescent Scoliosis (Schroth)"
 cardLead: "Schroth therapy is a scoliosis-specific exercise approach for adolescent idiopathic scoliosis, used alongside monitoring and bracing."
 category: "Paediatrics"

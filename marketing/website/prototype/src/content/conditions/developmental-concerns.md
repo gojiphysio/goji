@@ -1,6 +1,6 @@
 ---
-title: "Developmental Concerns and Early Intervention"
-description: "Is your child not meeting motor milestones? Goji's physiotherapists support early intervention for gross motor delays, hypotonia, and developmental concerns in Singapore."
+title: "Developmental Concerns: Early Intervention"
+description: "Is your child not meeting motor milestones? Goji's physiotherapists support early intervention for gross motor delays, hypotonia and developmental concerns."
 cardTitle: "Developmental Concerns"
 cardLead: "Early physiotherapy for children who are not meeting expected gross motor milestones, or who are moving differently from their peers."
 category: "Paediatrics"
