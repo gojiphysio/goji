@@ -207,7 +207,7 @@ const reviews = [
     <div class="container hero__inner">
       <div class="hero__text">
         <p class="hero__tagline">{SITE.tagline}</p>
-        <p class="hero__sub">Women's and Family Physiotherapy in Lentor, Singapore</p>
+        <h1 class="hero__sub">Women's and Family Physiotherapy in Lentor, Singapore</h1>
         <p class="hero__lead">
           Expert care for pelvic health, pregnancy and postpartum recovery,
           paediatrics and everyday strength.
@@ -636,6 +636,11 @@ const reviews = [
     margin-top: 0;
     margin-bottom: var(--space-4);
     max-width: 30ch;
+    /* It is the page h1 (keyword line); undo the base h1 type so it looks
+       like the body-size subline it was. */
+    line-height: var(--lh-body);
+    letter-spacing: normal;
+    text-wrap: wrap;
   }
   /* ======================================================
      Trust marquee — full-width, scrolls right to left
