@@ -3,7 +3,7 @@
  * /search — the standalone results page.
  *
  * The header sheet (SearchDialog) is the primary surface; this page exists so
- * that a shared or bookmarked `/search?q=…` link works, and so the search form
+ * that a shared or bookmarked `/search/?q=…` link works, and so the search form
  * still does something useful before JS runs. It is `noindex` (thin, and the
  * query is user-supplied) and excluded from the sitemap and the search index.
  */
@@ -21,7 +21,7 @@ import Button from "../components/Button.astro";
   <Section tone="linen">
     <div class="container--narrow">
       <h1>Search</h1>
-      <form class="sp-form" role="search" method="get" action="/search">
+      <form class="sp-form" role="search" method="get" action="/search/">
         <label class="visually-hidden" for="sp-input">Search this site</label>
         <input
           id="sp-input"
@@ -52,11 +52,11 @@ import Button from "../components/Button.astro";
       <div class="sp-browse" data-search-browse>
         <p>Or browse the site:</p>
         <ul>
-          <li><a href="/services">All services</a></li>
-          <li><a href="/conditions">Conditions we treat</a></li>
-          <li><a href="/blog">Blog</a></li>
-          <li><a href="/press">Press</a></li>
-          <li><a href="/getting-here">Getting here</a></li>
+          <li><a href="/services/">All services</a></li>
+          <li><a href="/conditions/">Conditions we treat</a></li>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/press/">Press</a></li>
+          <li><a href="/getting-here/">Getting here</a></li>
         </ul>
       </div>
 

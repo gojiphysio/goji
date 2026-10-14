@@ -109,5 +109,5 @@ Depending on your assessment and goals, we may recommend:
 ## Part of our women's health service
 
 Prenatal physiotherapy is one of four appointment types in our
-[women's health physiotherapy in Singapore](/womens-health-physiotherapy-singapore)
+[women's health physiotherapy in Singapore](/womens-health-physiotherapy-singapore/)
 service, alongside pelvic floor, postpartum and Mummy and Baby care.

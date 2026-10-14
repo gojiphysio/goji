@@ -103,5 +103,5 @@ Depending on your assessment and goals, we may recommend:
 ## Part of our women's health service
 
 The Mummy and Baby assessment is one of four appointment types in our
-[women's health physiotherapy in Singapore](/womens-health-physiotherapy-singapore)
+[women's health physiotherapy in Singapore](/womens-health-physiotherapy-singapore/)
 service, alongside pelvic floor, prenatal and postpartum care.

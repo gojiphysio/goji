@@ -52,7 +52,7 @@ const grouped = categories.reduce(
           <h2 class="cond-cat">{cat}</h2>
           <div class="cond-grid">
             {items.map((c) => (
-              <a href={`/conditions/${c.slug}`} class="cond-card">
+              <a href={`/conditions/${c.slug}/`} class="cond-card">
                 <h3 class="cond-card__title">{c.data.cardTitle ?? c.data.title}</h3>
                 <p class="cond-card__lead">{c.data.cardLead}</p>
                 <span class="cond-card__cta">Read more</span>
