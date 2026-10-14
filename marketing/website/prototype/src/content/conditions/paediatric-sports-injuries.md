@@ -1,6 +1,6 @@
 ---
-title: "Paediatric Musculoskeletal and Sports Injuries"
-description: "Growing bodies need careful management after sports injuries. Goji's physiotherapists treat children's musculoskeletal and sports injuries at Lentor, Singapore. AHPC-registered."
+title: "Paediatric Musculoskeletal & Sports Injuries"
+description: "Growing bodies need careful management after sports injuries. Goji's physiotherapists treat children's musculoskeletal and sports injuries at Lentor, Singapore."
 cardTitle: "Paediatric Sports Injuries"
 cardLead: "Assessment and rehabilitation for children's and adolescents' sports injuries, managed with an understanding of growing bones and open growth plates."
 category: "Paediatrics"

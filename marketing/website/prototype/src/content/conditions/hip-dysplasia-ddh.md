@@ -1,6 +1,6 @@
 ---
 title: "Developmental Dysplasia of the Hip (DDH)"
-description: "Physiotherapy for DDH - before, during, and after harness or surgical treatment. Supporting hip development and gross motor progress in infants and children in Singapore."
+description: "Physiotherapy for DDH before, during and after harness or surgical treatment, supporting hip development and gross motor progress in infants and children."
 cardTitle: "Hip Dysplasia (DDH)"
 cardLead: "Physiotherapy that supports hip development and gross motor progress before, during, and after harness or surgical treatment for DDH."
 category: "Paediatrics"

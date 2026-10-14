@@ -1,6 +1,6 @@
 ---
 title: "Clubfoot (Congenital Talipes Equinovarus)"
-description: "Congenital talipes equinovarus (clubfoot) in infants - physiotherapy for postural CTEV and post-Ponseti maintenance. Goji Physio, Lentor, Singapore. AHPC-registered."
+description: "Clubfoot (congenital talipes equinovarus) in infants - physiotherapy for postural CTEV and post-Ponseti maintenance. Goji Physio, Lentor, Singapore."
 cardTitle: "Clubfoot (CTEV)"
 cardLead: "Physiotherapy for clubfoot in infants - direct treatment for postural CTEV, and support alongside the Ponseti pathway for structural CTEV."
 category: "Paediatrics"

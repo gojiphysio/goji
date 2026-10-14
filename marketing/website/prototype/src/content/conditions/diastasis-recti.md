@@ -1,6 +1,6 @@
 ---
 title: "Diastasis Recti"
-description: "Diastasis recti is the widening of the two sides of the rectus abdominis at the linea alba. By the end of the third trimester, diastasis happens in virtually every pregnancy - it is a completely normal adaptation. Postnatally, the extent of natural recovery varies widely, and a clinical assessment determines whether physiotherapy is needed."
+description: "Diastasis recti is the widening of the rectus abdominis at the linea alba, a normal adaptation in pregnancy. An assessment shows if physiotherapy is needed."
 cardTitle: "Diastasis Recti"
 cardLead: "Diastasis recti is the widening of the two sides of the rectus abdominis at the linea alba."
 category: "Women's Health"
