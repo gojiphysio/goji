@@ -10,6 +10,7 @@ reviewer:
 ctaSlug: "web-wa"
 order: 10
 draft: false
+relatedServices: ["postpartum-physiotherapy"]
 ---
 
 Blocked milk ducts and mastitis are painful and common challenges during breastfeeding. Physiotherapy - specifically therapeutic ultrasound and hands-on breast massage - is an evidence-supported adjunct for resolving blocked ducts and supporting recovery from mastitis. This is not a substitute for medical care or lactation support, but it is a meaningful complement to it.

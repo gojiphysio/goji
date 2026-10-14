@@ -10,6 +10,7 @@ reviewer:
 ctaSlug: "web-wa"
 order: 3
 draft: false
+relatedServices: ["paediatric-physiotherapy", "mummy-baby-assessment"]
 ---
 
 Congenital muscular torticollis (CMT) is a condition in which an infant's head tilts to one side and rotates in the opposite direction, caused by tightness or shortening in the sternocleidomastoid (SCM) muscle of the neck. It is one of the most common musculoskeletal conditions in newborns, affecting approximately 0.3-2% of infants. Early physiotherapy is the first-line treatment, and outcomes are consistently better when intervention begins in the first few months of life.

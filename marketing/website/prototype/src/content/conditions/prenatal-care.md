@@ -10,6 +10,7 @@ reviewer:
 ctaSlug: "web-wa"
 order: 1
 draft: false
+relatedServices: ["prenatal-physiotherapy"]
 ---
 
 Prenatal physiotherapy addresses the musculoskeletal and pelvic floor changes that happen as your body adapts to pregnancy. A physiotherapist can help you stay active safely, manage pain, prepare your body for labour, and reduce the risk of complications that are often left untreated because they are assumed to be a normal part of being pregnant.

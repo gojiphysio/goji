@@ -10,6 +10,7 @@ reviewer:
 ctaSlug: "web-wa"
 order: 8
 draft: false
+relatedServices: ["prenatal-physiotherapy", "postpartum-physiotherapy"]
 ---
 
 Pelvic girdle pain (PGP) and de Quervain's tenosynovitis - colloquially called "mummy's wrist" - are two of the most common but undertreated musculoskeletal conditions associated with pregnancy and early parenthood. Both respond well to physiotherapy. Neither needs to be waited out.

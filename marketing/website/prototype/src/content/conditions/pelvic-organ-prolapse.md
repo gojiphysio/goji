@@ -10,6 +10,7 @@ reviewer:
 ctaSlug: "web-wa"
 order: 6
 draft: false
+relatedServices: ["pelvic-floor-physiotherapy"]
 ---
 
 Pelvic organ prolapse (POP) occurs when one or more of the pelvic organs - the bladder, uterus, or rectum - descend from their normal position. It affects approximately 1 in 3 women who have given birth, though many women are not aware they have it. The large majority of women with POP can achieve meaningful improvement with physiotherapy, particularly when it is identified and managed early.

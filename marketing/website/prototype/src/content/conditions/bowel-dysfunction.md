@@ -10,6 +10,7 @@ reviewer:
 ctaSlug: "web-wa"
 order: 9
 draft: false
+relatedServices: ["pelvic-floor-physiotherapy"]
 ---
 
 Bowel dysfunction - including constipation, straining, incomplete evacuation, urgency, and accidental bowel leakage - is more common in women than is often recognised, and its connection to the pelvic floor is frequently missed. The pelvic floor is directly involved in both the storage and evacuation of stool. When pelvic floor coordination is disrupted - whether by pregnancy, birth, surgery, or chronic straining habits - bowel function suffers. Physiotherapy addresses these neuromuscular and structural contributors.
