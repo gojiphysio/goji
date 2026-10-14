@@ -13,11 +13,11 @@ import { services } from "../lib/services.ts";
 // Service cards that have a matching explanatory page under /services link to it.
 // Physiotherapy spans several sub-types, so it points at the index.
 const serviceLearnMore: Record<string, string> = {
-  physiotherapy: "/services",
-  "paediatric-physiotherapy": "/services",
-  "mummy-baby": "/services/mummy-baby-assessment",
-  "clinical-pilates": "/services/clinical-pilates",
-  "strength-conditioning": "/services/strength-conditioning",
+  physiotherapy: "/services/",
+  "paediatric-physiotherapy": "/services/",
+  "mummy-baby": "/services/mummy-baby-assessment/",
+  "clinical-pilates": "/services/clinical-pilates/",
+  "strength-conditioning": "/services/strength-conditioning/",
 };
 
 // FAQ — single source for both the on-page accordion and the FAQPage JSON-LD
@@ -74,36 +74,36 @@ const tickerItems = [
 const careAreas = [
   {
     title: "Women's Health",
-    guideHref: "/conditions",
+    guideHref: "/conditions/",
     points: [
-      { text: "Prenatal care and birth preparation", href: "/conditions/prenatal-care" },
-      { text: "Antenatal and postnatal musculoskeletal concerns (pelvic girdle pain and mummy's wrist)", href: "/conditions/pelvic-girdle-pain" },
+      { text: "Prenatal care and birth preparation", href: "/conditions/prenatal-care/" },
+      { text: "Antenatal and postnatal musculoskeletal concerns (pelvic girdle pain and mummy's wrist)", href: "/conditions/pelvic-girdle-pain/" },
       "Postpartum recovery and return to sport",
-      { text: "Diastasis recti", href: "/conditions/diastasis-recti" },
-      { text: "Caesarean recovery and scar management", href: "/conditions/caesarean-recovery" },
-      { text: "Perineal tear, scar, and birth trauma", href: "/conditions/perineal-tear" },
-      { text: "Blocked ducts and mastitis", href: "/conditions/blocked-ducts-mastitis" },
+      { text: "Diastasis recti", href: "/conditions/diastasis-recti/" },
+      { text: "Caesarean recovery and scar management", href: "/conditions/caesarean-recovery/" },
+      { text: "Perineal tear, scar, and birth trauma", href: "/conditions/perineal-tear/" },
+      { text: "Blocked ducts and mastitis", href: "/conditions/blocked-ducts-mastitis/" },
       "Pelvic floor dysfunction",
-      { text: "Pelvic organ prolapse (POP)", href: "/conditions/pelvic-organ-prolapse" },
-      { text: "Pelvic pain and dyspareunia", href: "/conditions/pelvic-pain" },
-      { text: "Osteopenia / osteoporosis and fragility fractures management", href: "/conditions/menopause" },
-      { text: "Urinary incontinence", href: "/conditions/urinary-incontinence" },
-      { text: "Bowel dysfunction and constipation", href: "/conditions/bowel-dysfunction" },
+      { text: "Pelvic organ prolapse (POP)", href: "/conditions/pelvic-organ-prolapse/" },
+      { text: "Pelvic pain and dyspareunia", href: "/conditions/pelvic-pain/" },
+      { text: "Osteopenia / osteoporosis and fragility fractures management", href: "/conditions/menopause/" },
+      { text: "Urinary incontinence", href: "/conditions/urinary-incontinence/" },
+      { text: "Bowel dysfunction and constipation", href: "/conditions/bowel-dysfunction/" },
     ],
   },
   {
     title: "Paediatrics",
-    guideHref: "/conditions",
+    guideHref: "/conditions/",
     points: [
-      { text: "Congenital torticollis", href: "/conditions/congenital-torticollis" },
-      { text: "Postural / structural congenital talipes equinovarus (CTEV)", href: "/conditions/clubfoot-ctev" },
-      { text: "Developmental dysplasia of the hip (DDH)", href: "/conditions/hip-dysplasia-ddh" },
-      { text: "Developmental concerns and early intervention", href: "/conditions/developmental-concerns" },
-      { text: "Neurodevelopmental conditions", href: "/conditions/neurodevelopmental-conditions" },
-      { text: "Adolescent idiopathic scoliosis and Schroth therapy", href: "/conditions/adolescent-scoliosis-schroth" },
-      { text: "Paediatric pelvic health (bedwetting, soiling, and constipation)", href: "/conditions/paediatric-pelvic-health" },
-      { text: "Musculoskeletal and sports injury", href: "/conditions/paediatric-sports-injuries" },
-      { text: "Post-fracture rehabilitation", href: "/conditions/post-fracture-rehab" },
+      { text: "Congenital torticollis", href: "/conditions/congenital-torticollis/" },
+      { text: "Postural / structural congenital talipes equinovarus (CTEV)", href: "/conditions/clubfoot-ctev/" },
+      { text: "Developmental dysplasia of the hip (DDH)", href: "/conditions/hip-dysplasia-ddh/" },
+      { text: "Developmental concerns and early intervention", href: "/conditions/developmental-concerns/" },
+      { text: "Neurodevelopmental conditions", href: "/conditions/neurodevelopmental-conditions/" },
+      { text: "Adolescent idiopathic scoliosis and Schroth therapy", href: "/conditions/adolescent-scoliosis-schroth/" },
+      { text: "Paediatric pelvic health (bedwetting, soiling, and constipation)", href: "/conditions/paediatric-pelvic-health/" },
+      { text: "Musculoskeletal and sports injury", href: "/conditions/paediatric-sports-injuries/" },
+      { text: "Post-fracture rehabilitation", href: "/conditions/post-fracture-rehab/" },
     ],
   },
   {
@@ -411,7 +411,7 @@ const reviews = [
         {
           team.map((t) => (
             <div class="team-slide">
-              <PractitionerCard name={t.name} role={t.role} interests={t.interests} image={`/photos/team/${t.slug}.webp`} href={`/team/${t.slug}`} />
+              <PractitionerCard name={t.name} role={t.role} interests={t.interests} image={`/photos/team/${t.slug}.webp`} href={`/team/${t.slug}/`} />
             </div>
           ))
         }

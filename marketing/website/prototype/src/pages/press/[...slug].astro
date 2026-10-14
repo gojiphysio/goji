@@ -76,8 +76,8 @@ const pressSchema = [
     "@type": "BreadcrumbList",
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "Home", item: origin.href },
-      { "@type": "ListItem", position: 2, name: "Media", item: new URL("/media", origin).href },
-      { "@type": "ListItem", position: 3, name: "Press", item: new URL("/press", origin).href },
+      { "@type": "ListItem", position: 2, name: "Media", item: new URL("/media/", origin).href },
+      { "@type": "ListItem", position: 3, name: "Press", item: new URL("/press/", origin).href },
       { "@type": "ListItem", position: 4, name: title, item: pageURL },
     ],
   },
@@ -93,7 +93,7 @@ const pressSchema = [
   <article class="article-container">
     <div class="article-editorial">
       <div class="article-header">
-        <a href="/press" class="article-breadcrumb">
+        <a href="/press/" class="article-breadcrumb">
           <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M10 3L5 8l5 5"></path>
           </svg>
@@ -113,7 +113,7 @@ const pressSchema = [
               {featuring.map((person, i) => (
                 <>
                   {i > 0 && ", "}
-                  <a href={`/team/${person.slug}`}>{person.name}</a>
+                  <a href={`/team/${person.slug}/`}>{person.name}</a>
                 </>
               ))}
             </p>
