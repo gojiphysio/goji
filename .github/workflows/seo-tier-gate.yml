@@ -1,0 +1,31 @@
+name: SEO tier gate
+
+# Classifies every PR into approval tier A/B/C for the automated SEO loop
+# (marketing/seo/AGENTS.md). Fails only when a PR is labelled `tier-a` but its
+# diff is not tier A, so the loop can never self-merge a booking, pricing,
+# CTA, CI or new-clinical-claim change. Runs on ALL PRs (no paths filter): the
+# loop must see this check pass before it merges anything.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+permissions:
+  contents: read
+
+jobs:
+  tier-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Gate tests
+        run: python -m unittest marketing/seo/tools/test_tier_gate.py
+      - name: Classify diff
+        env:
+          PR_LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
+        run: python marketing/seo/tools/tier_gate.py --base "origin/${{ github.base_ref }}"

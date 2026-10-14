@@ -1,0 +1,1171 @@
+{
+ "pages": {
+  "/": {
+   "top_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "FAQPage": 1
+   },
+   "all_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "PostalAddress": 1,
+    "Place": 7,
+    "OpeningHoursSpecification": 1,
+    "MedicalTherapy": 12,
+    "FAQPage": 1,
+    "Question": 6,
+    "Answer": 6
+   },
+   "issues": []
+  },
+  "/book/": {
+   "top_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1
+   },
+   "all_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "PostalAddress": 1,
+    "Place": 7,
+    "OpeningHoursSpecification": 1,
+    "MedicalTherapy": 12
+   },
+   "issues": [
+    "no BreadcrumbList"
+   ]
+  },
+  "/conditions/": {
+   "top_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1
+   },
+   "all_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "PostalAddress": 1,
+    "Place": 7,
+    "OpeningHoursSpecification": 1,
+    "MedicalTherapy": 12
+   },
+   "issues": [
+    "no BreadcrumbList"
+   ]
+  },
+  "/conditions/adolescent-scoliosis-schroth/": {
+   "top_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "MedicalWebPage": 1,
+    "BreadcrumbList": 1,
+    "FAQPage": 1
+   },
+   "all_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "PostalAddress": 1,
+    "Place": 7,
+    "OpeningHoursSpecification": 1,
+    "MedicalTherapy": 12,
+    "MedicalWebPage": 1,
+    "MedicalCondition": 1,
+    "MedicalAudience": 1,
+    "Person": 1,
+    "BreadcrumbList": 1,
+    "ListItem": 3,
+    "FAQPage": 1,
+    "Question": 6,
+    "Answer": 6
+   },
+   "issues": [
+    "MedicalWebPage no lastReviewed",
+    "MedicalWebPage no dateModified"
+   ]
+  },
+  "/conditions/blocked-ducts-mastitis/": {
+   "top_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "MedicalWebPage": 1,
+    "BreadcrumbList": 1,
+    "FAQPage": 1
+   },
+   "all_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "PostalAddress": 1,
+    "Place": 7,
+    "OpeningHoursSpecification": 1,
+    "MedicalTherapy": 12,
+    "MedicalWebPage": 1,
+    "MedicalCondition": 1,
+    "MedicalAudience": 1,
+    "Person": 1,
+    "BreadcrumbList": 1,
+    "ListItem": 3,
+    "FAQPage": 1,
+    "Question": 6,
+    "Answer": 6
+   },
+   "issues": [
+    "MedicalWebPage no lastReviewed",
+    "MedicalWebPage no dateModified"
+   ]
+  },
+  "/conditions/bowel-dysfunction/": {
+   "top_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "MedicalWebPage": 1,
+    "BreadcrumbList": 1,
+    "FAQPage": 1
+   },
+   "all_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "PostalAddress": 1,
+    "Place": 7,
+    "OpeningHoursSpecification": 1,
+    "MedicalTherapy": 12,
+    "MedicalWebPage": 1,
+    "MedicalCondition": 1,
+    "MedicalAudience": 1,
+    "Person": 1,
+    "BreadcrumbList": 1,
+    "ListItem": 3,
+    "FAQPage": 1,
+    "Question": 5,
+    "Answer": 5
+   },
+   "issues": [
+    "MedicalWebPage no lastReviewed",
+    "MedicalWebPage no dateModified"
+   ]
+  },
+  "/conditions/caesarean-recovery/": {
+   "top_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "MedicalWebPage": 1,
+    "BreadcrumbList": 1,
+    "FAQPage": 1
+   },
+   "all_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "PostalAddress": 1,
+    "Place": 7,
+    "OpeningHoursSpecification": 1,
+    "MedicalTherapy": 12,
+    "MedicalWebPage": 1,
+    "MedicalCondition": 1,
+    "MedicalAudience": 1,
+    "Person": 1,
+    "BreadcrumbList": 1,
+    "ListItem": 3,
+    "FAQPage": 1,
+    "Question": 6,
+    "Answer": 6
+   },
+   "issues": [
+    "MedicalWebPage no lastReviewed",
+    "MedicalWebPage no dateModified"
+   ]
+  },
+  "/conditions/clubfoot-ctev/": {
+   "top_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "MedicalWebPage": 1,
+    "BreadcrumbList": 1,
+    "FAQPage": 1
+   },
+   "all_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "PostalAddress": 1,
+    "Place": 7,
+    "OpeningHoursSpecification": 1,
+    "MedicalTherapy": 12,
+    "MedicalWebPage": 1,
+    "MedicalCondition": 1,
+    "MedicalAudience": 1,
+    "Person": 1,
+    "BreadcrumbList": 1,
+    "ListItem": 3,
+    "FAQPage": 1,
+    "Question": 6,
+    "Answer": 6
+   },
+   "issues": [
+    "MedicalWebPage no lastReviewed",
+    "MedicalWebPage no dateModified"
+   ]
+  },
+  "/conditions/congenital-torticollis/": {
+   "top_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "MedicalWebPage": 1,
+    "BreadcrumbList": 1,
+    "FAQPage": 1
+   },
+   "all_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "PostalAddress": 1,
+    "Place": 7,
+    "OpeningHoursSpecification": 1,
+    "MedicalTherapy": 12,
+    "MedicalWebPage": 1,
+    "MedicalCondition": 1,
+    "MedicalAudience": 1,
+    "Person": 1,
+    "BreadcrumbList": 1,
+    "ListItem": 3,
+    "FAQPage": 1,
+    "Question": 6,
+    "Answer": 6
+   },
+   "issues": [
+    "MedicalWebPage no lastReviewed",
+    "MedicalWebPage no dateModified"
+   ]
+  },
+  "/conditions/developmental-concerns/": {
+   "top_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "MedicalWebPage": 1,
+    "BreadcrumbList": 1,
+    "FAQPage": 1
+   },
+   "all_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "PostalAddress": 1,
+    "Place": 7,
+    "OpeningHoursSpecification": 1,
+    "MedicalTherapy": 12,
+    "MedicalWebPage": 1,
+    "MedicalCondition": 1,
+    "MedicalAudience": 1,
+    "Person": 1,
+    "BreadcrumbList": 1,
+    "ListItem": 3,
+    "FAQPage": 1,
+    "Question": 6,
+    "Answer": 6
+   },
+   "issues": [
+    "MedicalWebPage no lastReviewed",
+    "MedicalWebPage no dateModified"
+   ]
+  },
+  "/conditions/diastasis-recti/": {
+   "top_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "MedicalWebPage": 1,
+    "BreadcrumbList": 1,
+    "FAQPage": 1
+   },
+   "all_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "PostalAddress": 1,
+    "Place": 7,
+    "OpeningHoursSpecification": 1,
+    "MedicalTherapy": 12,
+    "MedicalWebPage": 1,
+    "MedicalCondition": 1,
+    "MedicalAudience": 1,
+    "Person": 1,
+    "BreadcrumbList": 1,
+    "ListItem": 3,
+    "FAQPage": 1,
+    "Question": 6,
+    "Answer": 6
+   },
+   "issues": [
+    "MedicalWebPage no lastReviewed",
+    "MedicalWebPage no dateModified"
+   ]
+  },
+  "/conditions/hip-dysplasia-ddh/": {
+   "top_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "MedicalWebPage": 1,
+    "BreadcrumbList": 1,
+    "FAQPage": 1
+   },
+   "all_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "PostalAddress": 1,
+    "Place": 7,
+    "OpeningHoursSpecification": 1,
+    "MedicalTherapy": 12,
+    "MedicalWebPage": 1,
+    "MedicalCondition": 1,
+    "MedicalAudience": 1,
+    "Person": 1,
+    "BreadcrumbList": 1,
+    "ListItem": 3,
+    "FAQPage": 1,
+    "Question": 6,
+    "Answer": 6
+   },
+   "issues": [
+    "MedicalWebPage no lastReviewed",
+    "MedicalWebPage no dateModified"
+   ]
+  },
+  "/conditions/menopause/": {
+   "top_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "MedicalWebPage": 1,
+    "BreadcrumbList": 1,
+    "FAQPage": 1
+   },
+   "all_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "PostalAddress": 1,
+    "Place": 7,
+    "OpeningHoursSpecification": 1,
+    "MedicalTherapy": 12,
+    "MedicalWebPage": 1,
+    "MedicalCondition": 1,
+    "MedicalAudience": 1,
+    "Person": 1,
+    "BreadcrumbList": 1,
+    "ListItem": 3,
+    "FAQPage": 1,
+    "Question": 6,
+    "Answer": 6
+   },
+   "issues": [
+    "MedicalWebPage no lastReviewed",
+    "MedicalWebPage no dateModified"
+   ]
+  },
+  "/conditions/neurodevelopmental-conditions/": {
+   "top_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "MedicalWebPage": 1,
+    "BreadcrumbList": 1,
+    "FAQPage": 1
+   },
+   "all_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "PostalAddress": 1,
+    "Place": 7,
+    "OpeningHoursSpecification": 1,
+    "MedicalTherapy": 12,
+    "MedicalWebPage": 1,
+    "MedicalCondition": 1,
+    "MedicalAudience": 1,
+    "Person": 1,
+    "BreadcrumbList": 1,
+    "ListItem": 3,
+    "FAQPage": 1,
+    "Question": 6,
+    "Answer": 6
+   },
+   "issues": [
+    "MedicalWebPage no lastReviewed",
+    "MedicalWebPage no dateModified"
+   ]
+  },
+  "/conditions/paediatric-pelvic-health/": {
+   "top_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "MedicalWebPage": 1,
+    "BreadcrumbList": 1,
+    "FAQPage": 1
+   },
+   "all_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "PostalAddress": 1,
+    "Place": 7,
+    "OpeningHoursSpecification": 1,
+    "MedicalTherapy": 12,
+    "MedicalWebPage": 1,
+    "MedicalCondition": 1,
+    "MedicalAudience": 1,
+    "Person": 1,
+    "BreadcrumbList": 1,
+    "ListItem": 3,
+    "FAQPage": 1,
+    "Question": 6,
+    "Answer": 6
+   },
+   "issues": [
+    "MedicalWebPage no lastReviewed",
+    "MedicalWebPage no dateModified"
+   ]
+  },
+  "/conditions/paediatric-sports-injuries/": {
+   "top_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "MedicalWebPage": 1,
+    "BreadcrumbList": 1,
+    "FAQPage": 1
+   },
+   "all_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "PostalAddress": 1,
+    "Place": 7,
+    "OpeningHoursSpecification": 1,
+    "MedicalTherapy": 12,
+    "MedicalWebPage": 1,
+    "MedicalCondition": 1,
+    "MedicalAudience": 1,
+    "Person": 1,
+    "BreadcrumbList": 1,
+    "ListItem": 3,
+    "FAQPage": 1,
+    "Question": 6,
+    "Answer": 6
+   },
+   "issues": [
+    "MedicalWebPage no lastReviewed",
+    "MedicalWebPage no dateModified"
+   ]
+  },
+  "/conditions/pelvic-girdle-pain/": {
+   "top_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "MedicalWebPage": 1,
+    "BreadcrumbList": 1,
+    "FAQPage": 1
+   },
+   "all_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "PostalAddress": 1,
+    "Place": 7,
+    "OpeningHoursSpecification": 1,
+    "MedicalTherapy": 12,
+    "MedicalWebPage": 1,
+    "MedicalCondition": 1,
+    "MedicalAudience": 1,
+    "Person": 1,
+    "BreadcrumbList": 1,
+    "ListItem": 3,
+    "FAQPage": 1,
+    "Question": 6,
+    "Answer": 6
+   },
+   "issues": [
+    "MedicalWebPage no lastReviewed",
+    "MedicalWebPage no dateModified"
+   ]
+  },
+  "/conditions/pelvic-organ-prolapse/": {
+   "top_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "MedicalWebPage": 1,
+    "BreadcrumbList": 1,
+    "FAQPage": 1
+   },
+   "all_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "PostalAddress": 1,
+    "Place": 7,
+    "OpeningHoursSpecification": 1,
+    "MedicalTherapy": 12,
+    "MedicalWebPage": 1,
+    "MedicalCondition": 1,
+    "MedicalAudience": 1,
+    "Person": 1,
+    "BreadcrumbList": 1,
+    "ListItem": 3,
+    "FAQPage": 1,
+    "Question": 6,
+    "Answer": 6
+   },
+   "issues": [
+    "MedicalWebPage no lastReviewed",
+    "MedicalWebPage no dateModified"
+   ]
+  },
+  "/conditions/pelvic-pain/": {
+   "top_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "MedicalWebPage": 1,
+    "BreadcrumbList": 1,
+    "FAQPage": 1
+   },
+   "all_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "PostalAddress": 1,
+    "Place": 7,
+    "OpeningHoursSpecification": 1,
+    "MedicalTherapy": 12,
+    "MedicalWebPage": 1,
+    "MedicalCondition": 1,
+    "MedicalAudience": 1,
+    "Person": 1,
+    "BreadcrumbList": 1,
+    "ListItem": 3,
+    "FAQPage": 1,
+    "Question": 5,
+    "Answer": 5
+   },
+   "issues": [
+    "MedicalWebPage no lastReviewed",
+    "MedicalWebPage no dateModified"
+   ]
+  },
+  "/conditions/perineal-tear/": {
+   "top_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "MedicalWebPage": 1,
+    "BreadcrumbList": 1,
+    "FAQPage": 1
+   },
+   "all_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "PostalAddress": 1,
+    "Place": 7,
+    "OpeningHoursSpecification": 1,
+    "MedicalTherapy": 12,
+    "MedicalWebPage": 1,
+    "MedicalCondition": 1,
+    "MedicalAudience": 1,
+    "Person": 1,
+    "BreadcrumbList": 1,
+    "ListItem": 3,
+    "FAQPage": 1,
+    "Question": 6,
+    "Answer": 6
+   },
+   "issues": [
+    "MedicalWebPage no lastReviewed",
+    "MedicalWebPage no dateModified"
+   ]
+  },
+  "/conditions/post-fracture-rehab/": {
+   "top_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "MedicalWebPage": 1,
+    "BreadcrumbList": 1,
+    "FAQPage": 1
+   },
+   "all_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "PostalAddress": 1,
+    "Place": 7,
+    "OpeningHoursSpecification": 1,
+    "MedicalTherapy": 12,
+    "MedicalWebPage": 1,
+    "MedicalCondition": 1,
+    "MedicalAudience": 1,
+    "Person": 1,
+    "BreadcrumbList": 1,
+    "ListItem": 3,
+    "FAQPage": 1,
+    "Question": 6,
+    "Answer": 6
+   },
+   "issues": [
+    "MedicalWebPage no lastReviewed",
+    "MedicalWebPage no dateModified"
+   ]
+  },
+  "/conditions/prenatal-care/": {
+   "top_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "MedicalWebPage": 1,
+    "BreadcrumbList": 1,
+    "FAQPage": 1
+   },
+   "all_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "PostalAddress": 1,
+    "Place": 7,
+    "OpeningHoursSpecification": 1,
+    "MedicalTherapy": 12,
+    "MedicalWebPage": 1,
+    "MedicalCondition": 1,
+    "MedicalAudience": 1,
+    "Person": 1,
+    "BreadcrumbList": 1,
+    "ListItem": 3,
+    "FAQPage": 1,
+    "Question": 6,
+    "Answer": 6
+   },
+   "issues": [
+    "MedicalWebPage no lastReviewed",
+    "MedicalWebPage no dateModified"
+   ]
+  },
+  "/conditions/urinary-incontinence/": {
+   "top_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "MedicalWebPage": 1,
+    "BreadcrumbList": 1,
+    "FAQPage": 1
+   },
+   "all_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "PostalAddress": 1,
+    "Place": 7,
+    "OpeningHoursSpecification": 1,
+    "MedicalTherapy": 12,
+    "MedicalWebPage": 1,
+    "MedicalCondition": 1,
+    "MedicalAudience": 1,
+    "Person": 1,
+    "BreadcrumbList": 1,
+    "ListItem": 3,
+    "FAQPage": 1,
+    "Question": 6,
+    "Answer": 6
+   },
+   "issues": [
+    "MedicalWebPage no lastReviewed",
+    "MedicalWebPage no dateModified"
+   ]
+  },
+  "/getting-here/": {
+   "top_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "BreadcrumbList": 1
+   },
+   "all_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "PostalAddress": 1,
+    "Place": 7,
+    "OpeningHoursSpecification": 1,
+    "MedicalTherapy": 12,
+    "BreadcrumbList": 1,
+    "ListItem": 2
+   },
+   "issues": []
+  },
+  "/media/": {
+   "top_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "CollectionPage": 1,
+    "BreadcrumbList": 1
+   },
+   "all_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "PostalAddress": 1,
+    "Place": 7,
+    "OpeningHoursSpecification": 1,
+    "MedicalTherapy": 12,
+    "CollectionPage": 1,
+    "WebPage": 2,
+    "BreadcrumbList": 1,
+    "ListItem": 2
+   },
+   "issues": []
+  },
+  "/pathways/postpartum/": {
+   "top_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1
+   },
+   "all_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "PostalAddress": 1,
+    "Place": 7,
+    "OpeningHoursSpecification": 1,
+    "MedicalTherapy": 12
+   },
+   "issues": [
+    "no BreadcrumbList"
+   ]
+  },
+  "/physiotherapy-lentor/": {
+   "top_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "BreadcrumbList": 1,
+    "FAQPage": 1
+   },
+   "all_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "PostalAddress": 1,
+    "Place": 7,
+    "OpeningHoursSpecification": 1,
+    "MedicalTherapy": 12,
+    "BreadcrumbList": 1,
+    "ListItem": 2,
+    "FAQPage": 1,
+    "Question": 4,
+    "Answer": 4
+   },
+   "issues": []
+  },
+  "/press/": {
+   "top_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "CollectionPage": 1,
+    "BreadcrumbList": 1
+   },
+   "all_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "PostalAddress": 1,
+    "Place": 7,
+    "OpeningHoursSpecification": 1,
+    "MedicalTherapy": 12,
+    "CollectionPage": 1,
+    "Organization": 2,
+    "NewsArticle": 1,
+    "Person": 1,
+    "BreadcrumbList": 1,
+    "ListItem": 3
+   },
+   "issues": []
+  },
+  "/press/zaobao-womens-hidden-pain/": {
+   "top_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "WebPage": 1,
+    "BreadcrumbList": 1
+   },
+   "all_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "PostalAddress": 1,
+    "Place": 7,
+    "OpeningHoursSpecification": 1,
+    "MedicalTherapy": 12,
+    "WebPage": 1,
+    "NewsArticle": 2,
+    "Person": 2,
+    "Organization": 5,
+    "BreadcrumbList": 1,
+    "ListItem": 4
+   },
+   "issues": []
+  },
+  "/privacy/": {
+   "top_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1
+   },
+   "all_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "PostalAddress": 1,
+    "Place": 7,
+    "OpeningHoursSpecification": 1,
+    "MedicalTherapy": 12
+   },
+   "issues": [
+    "no BreadcrumbList"
+   ]
+  },
+  "/services/": {
+   "top_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1
+   },
+   "all_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "PostalAddress": 1,
+    "Place": 7,
+    "OpeningHoursSpecification": 1,
+    "MedicalTherapy": 12
+   },
+   "issues": [
+    "no BreadcrumbList"
+   ]
+  },
+  "/services/clinical-pilates/": {
+   "top_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "Service": 1,
+    "BreadcrumbList": 1
+   },
+   "all_types": {
+    "MedicalClinic": 2,
+    "LocalBusiness": 2,
+    "PostalAddress": 1,
+    "Place": 8,
+    "OpeningHoursSpecification": 1,
+    "MedicalTherapy": 12,
+    "Service": 1,
+    "Offer": 1,
+    "BreadcrumbList": 1,
+    "ListItem": 3
+   },
+   "issues": [
+    "missing FAQPage"
+   ]
+  },
+  "/services/mummy-baby-assessment/": {
+   "top_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "Service": 1,
+    "BreadcrumbList": 1,
+    "FAQPage": 1
+   },
+   "all_types": {
+    "MedicalClinic": 2,
+    "LocalBusiness": 2,
+    "PostalAddress": 1,
+    "Place": 8,
+    "OpeningHoursSpecification": 1,
+    "MedicalTherapy": 12,
+    "Service": 1,
+    "Offer": 1,
+    "BreadcrumbList": 1,
+    "ListItem": 3,
+    "FAQPage": 1,
+    "Question": 3,
+    "Answer": 3
+   },
+   "issues": []
+  },
+  "/services/musculoskeletal-physiotherapy/": {
+   "top_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "Service": 1,
+    "BreadcrumbList": 1
+   },
+   "all_types": {
+    "MedicalClinic": 2,
+    "LocalBusiness": 2,
+    "PostalAddress": 1,
+    "Place": 8,
+    "OpeningHoursSpecification": 1,
+    "MedicalTherapy": 12,
+    "Service": 1,
+    "Offer": 1,
+    "BreadcrumbList": 1,
+    "ListItem": 3
+   },
+   "issues": [
+    "missing FAQPage"
+   ]
+  },
+  "/services/paediatric-physiotherapy/": {
+   "top_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "Service": 1,
+    "BreadcrumbList": 1
+   },
+   "all_types": {
+    "MedicalClinic": 2,
+    "LocalBusiness": 2,
+    "PostalAddress": 1,
+    "Place": 8,
+    "OpeningHoursSpecification": 1,
+    "MedicalTherapy": 12,
+    "Service": 1,
+    "Offer": 1,
+    "BreadcrumbList": 1,
+    "ListItem": 3
+   },
+   "issues": [
+    "missing FAQPage"
+   ]
+  },
+  "/services/pelvic-floor-physiotherapy/": {
+   "top_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "Service": 1,
+    "BreadcrumbList": 1,
+    "FAQPage": 1
+   },
+   "all_types": {
+    "MedicalClinic": 2,
+    "LocalBusiness": 2,
+    "PostalAddress": 1,
+    "Place": 8,
+    "OpeningHoursSpecification": 1,
+    "MedicalTherapy": 12,
+    "Service": 1,
+    "Offer": 1,
+    "BreadcrumbList": 1,
+    "ListItem": 3,
+    "FAQPage": 1,
+    "Question": 5,
+    "Answer": 5
+   },
+   "issues": []
+  },
+  "/services/postpartum-physiotherapy/": {
+   "top_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "Service": 1,
+    "BreadcrumbList": 1,
+    "FAQPage": 1
+   },
+   "all_types": {
+    "MedicalClinic": 2,
+    "LocalBusiness": 2,
+    "PostalAddress": 1,
+    "Place": 8,
+    "OpeningHoursSpecification": 1,
+    "MedicalTherapy": 12,
+    "Service": 1,
+    "Offer": 1,
+    "BreadcrumbList": 1,
+    "ListItem": 3,
+    "FAQPage": 1,
+    "Question": 4,
+    "Answer": 4
+   },
+   "issues": []
+  },
+  "/services/prenatal-physiotherapy/": {
+   "top_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "Service": 1,
+    "BreadcrumbList": 1,
+    "FAQPage": 1
+   },
+   "all_types": {
+    "MedicalClinic": 2,
+    "LocalBusiness": 2,
+    "PostalAddress": 1,
+    "Place": 8,
+    "OpeningHoursSpecification": 1,
+    "MedicalTherapy": 12,
+    "Service": 1,
+    "Offer": 1,
+    "BreadcrumbList": 1,
+    "ListItem": 3,
+    "FAQPage": 1,
+    "Question": 4,
+    "Answer": 4
+   },
+   "issues": []
+  },
+  "/services/schroth-scoliosis-adults/": {
+   "top_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "Service": 1,
+    "BreadcrumbList": 1,
+    "FAQPage": 1
+   },
+   "all_types": {
+    "MedicalClinic": 2,
+    "LocalBusiness": 2,
+    "PostalAddress": 1,
+    "Place": 8,
+    "OpeningHoursSpecification": 1,
+    "MedicalTherapy": 12,
+    "Service": 1,
+    "Offer": 1,
+    "BreadcrumbList": 1,
+    "ListItem": 3,
+    "FAQPage": 1,
+    "Question": 3,
+    "Answer": 3
+   },
+   "issues": []
+  },
+  "/services/schroth-scoliosis-children/": {
+   "top_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "Service": 1,
+    "BreadcrumbList": 1,
+    "FAQPage": 1
+   },
+   "all_types": {
+    "MedicalClinic": 2,
+    "LocalBusiness": 2,
+    "PostalAddress": 1,
+    "Place": 8,
+    "OpeningHoursSpecification": 1,
+    "MedicalTherapy": 12,
+    "Service": 1,
+    "Offer": 1,
+    "BreadcrumbList": 1,
+    "ListItem": 3,
+    "FAQPage": 1,
+    "Question": 3,
+    "Answer": 3
+   },
+   "issues": []
+  },
+  "/services/strength-conditioning/": {
+   "top_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "Service": 1,
+    "BreadcrumbList": 1
+   },
+   "all_types": {
+    "MedicalClinic": 2,
+    "LocalBusiness": 2,
+    "PostalAddress": 1,
+    "Place": 8,
+    "OpeningHoursSpecification": 1,
+    "MedicalTherapy": 12,
+    "Service": 1,
+    "Offer": 1,
+    "BreadcrumbList": 1,
+    "ListItem": 3
+   },
+   "issues": [
+    "missing FAQPage"
+   ]
+  },
+  "/team/cheryl-long/": {
+   "top_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "Person": 1,
+    "BreadcrumbList": 1
+   },
+   "all_types": {
+    "MedicalClinic": 2,
+    "LocalBusiness": 1,
+    "PostalAddress": 1,
+    "Place": 7,
+    "OpeningHoursSpecification": 1,
+    "MedicalTherapy": 12,
+    "Person": 1,
+    "EducationalOccupationalCredential": 1,
+    "BreadcrumbList": 1,
+    "ListItem": 3
+   },
+   "issues": []
+  },
+  "/team/claire-ng/": {
+   "top_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "Person": 1,
+    "BreadcrumbList": 1
+   },
+   "all_types": {
+    "MedicalClinic": 2,
+    "LocalBusiness": 1,
+    "PostalAddress": 1,
+    "Place": 7,
+    "OpeningHoursSpecification": 1,
+    "MedicalTherapy": 12,
+    "Person": 1,
+    "EducationalOccupationalCredential": 1,
+    "BreadcrumbList": 1,
+    "ListItem": 3
+   },
+   "issues": []
+  },
+  "/team/kristy-ng/": {
+   "top_types": {
+    "MedicalClinic": 1,
+    "LocalBusiness": 1,
+    "Person": 1,
+    "BreadcrumbList": 1
+   },
+   "all_types": {
+    "MedicalClinic": 2,
+    "LocalBusiness": 1,
+    "PostalAddress": 1,
+    "Place": 7,
+    "OpeningHoursSpecification": 1,
+    "MedicalTherapy": 12,
+    "Person": 1,
+    "EducationalOccupationalCredential": 1,
+    "BreadcrumbList": 1,
+    "ListItem": 3
+   },
+   "issues": []
+  }
+ },
+ "org": {
+  "@type": [
+   "MedicalClinic",
+   "LocalBusiness"
+  ],
+  "@id": null,
+  "name": "Goji Women's and Family Physiotherapy",
+  "alternateName": [
+   "Goji Physiotherapy",
+   "Goji Physio"
+  ],
+  "url": "https://www.gojiphysio.com/",
+  "telephone": "+6583770401",
+  "address": {
+   "@type": "PostalAddress",
+   "streetAddress": "Lentor Modern, #01-13",
+   "addressLocality": "Singapore",
+   "postalCode": "788887",
+   "addressCountry": "SG"
+  },
+  "geo": null,
+  "openingHours": null,
+  "openingHoursSpecification": [
+   {
+    "@type": "OpeningHoursSpecification",
+    "dayOfWeek": [
+     "Monday",
+     "Tuesday",
+     "Wednesday",
+     "Thursday",
+     "Friday",
+     "Saturday"
+    ],
+    "opens": "08:00",
+    "closes": "20:00"
+   }
+  ],
+  "sameAs": [
+   "https://www.instagram.com/gojiphysio/",
+   "https://maps.app.goo.gl/wBaCkBiDNfF7JCGv8"
+  ],
+  "logo": false,
+  "image": true,
+  "priceRange": "$$",
+  "hasMap": "https://maps.app.goo.gl/wBaCkBiDNfF7JCGv8",
+  "areaServed": true,
+  "aggregateRating": null
+ },
+ "org_ids": {
+  "null": 95
+ }
+}

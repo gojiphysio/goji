@@ -1,0 +1,1666 @@
+[
+ {
+  "id": "local-lentor",
+  "q": "physiotherapy lentor",
+  "engine": "claude-websearch",
+  "date": "2026-10-12",
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [],
+  "top_sources": [
+   {
+    "url": "https://www.zorgkaartnederland.nl/fysiotherapiepraktijk/lent",
+    "owner": "ZorgkaartNederland",
+    "type": "directory"
+   }
+  ],
+  "winning_format": "none (no relevant SG result)",
+  "notes": "Search misread 'Lentor' as Lent, Netherlands; zero Singapore results returned (US-located search). Would not cite anything SG-specific."
+ },
+ {
+  "id": "local-lentor-mrt",
+  "q": "physio near lentor mrt",
+  "engine": "claude-websearch",
+  "date": "2026-10-12",
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [
+   "Physio & Sole Clinic (Kovan)",
+   "HelloPhysio",
+   "City Osteopathy and Physiotherapy"
+  ],
+  "top_sources": [
+   {
+    "url": "https://physioandsole.com.sg/?p=20573",
+    "owner": "Physio & Sole",
+    "type": "clinic"
+   },
+   {
+    "url": "https://www.whatclinic.com/physiotherapy/singapore",
+    "owner": "WhatClinic",
+    "type": "directory"
+   },
+   {
+    "url": "https://www.timeout.com/singapore/things-to-do/the-best-physiotherapy-clinics-in-singapore-to-soothe-body-pains",
+    "owner": "Time Out Singapore",
+    "type": "roundup"
+   },
+   {
+    "url": "https://thehoneycombers.com/singapore/?p=144334",
+    "owner": "Honeycombers",
+    "type": "roundup"
+   }
+  ],
+  "winning_format": "multi-location clinic location page (MRT/bus access)",
+  "notes": "No clinic actually in Lentor surfaced; Physio & Sole Kovan offered as 'closest' via location pages listing nearest MRT."
+ },
+ {
+  "id": "local-amk",
+  "q": "physio ang mo kio",
+  "engine": "claude-websearch",
+  "date": "2026-10-12",
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [
+   "Physio & Sole Clinic"
+  ],
+  "top_sources": [
+   {
+    "url": "https://physioandsole.com.sg/our-clinicians/joel-ng-ze-mian/",
+    "owner": "Physio & Sole",
+    "type": "clinic"
+   },
+   {
+    "url": "https://www.singsaver.com.sg/page/blog/8-best-physiotherapy-clinics-in-singapore-2020",
+    "owner": "SingSaver",
+    "type": "roundup"
+   },
+   {
+    "url": "https://careers.renci.org.sg/job/Singapore-Physiotherapist-Sing/39911544",
+    "owner": "Ren Ci Hospital careers",
+    "type": "other"
+   }
+  ],
+  "winning_format": "roundup listicle / clinician bio page",
+  "notes": "Weak results: job ad, HK/MY/NZ noise; no AMK clinic page surfaced. Non-SG noise heavy."
+ },
+ {
+  "id": "local-thomson",
+  "q": "physiotherapy upper thomson",
+  "engine": "claude-websearch",
+  "date": "2026-10-12",
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [],
+  "top_sources": [
+   {
+    "url": "https://en.wikipedia.org/wiki/Upper_Thomson_(subzone)",
+    "owner": "Wikipedia",
+    "type": "other"
+   }
+  ],
+  "winning_format": "none (no relevant SG clinic)",
+  "notes": "Results dominated by Thomson GA (US) and St Thomas Ontario; only SG hit was Wikipedia subzone page. Clear US-location bias."
+ },
+ {
+  "id": "local-wh-lentor",
+  "q": "women's health physio lentor",
+  "engine": "claude-websearch",
+  "date": "2026-10-12",
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [],
+  "top_sources": [
+   {
+    "url": "https://www.canberrahealthservices.act.gov.au/services-and-clinics/services/womens-health-physiotherapy",
+    "owner": "Canberra Health Services",
+    "type": "government"
+   },
+   {
+    "url": "https://sixphysio.com/specialties/womens-health-physio",
+    "owner": "Six Physio (UK)",
+    "type": "clinic"
+   },
+   {
+    "url": "https://mft.nhs.uk/community/trafford-services/womens-physiotherapy",
+    "owner": "NHS MFT",
+    "type": "hospital"
+   }
+  ],
+  "winning_format": "generic service explainer (non-SG)",
+  "notes": "No Singapore results at all; Australian/UK/spam pages. Open gap: nobody owns 'women's health physio Lentor'."
+ },
+ {
+  "id": "local-wh-katong",
+  "q": "women's health physio katong",
+  "engine": "claude-websearch",
+  "date": "2026-10-12",
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [
+   "Physio & Sole Clinic (East Gate @ Katong)"
+  ],
+  "top_sources": [
+   {
+    "url": "https://physioandsole.com.sg/locations/east-gate-katong/",
+    "owner": "Physio & Sole",
+    "type": "clinic"
+   },
+   {
+    "url": "https://physioandsole.com.sg/?p=4320",
+    "owner": "Physio & Sole",
+    "type": "clinic"
+   },
+   {
+    "url": "https://www.thomsonmedical.com/centres/women-clinic/katong",
+    "owner": "Thomson Medical",
+    "type": "hospital"
+   }
+  ],
+  "winning_format": "clinic location page (address, hours, MRT, services)",
+  "notes": "Physio & Sole owns this with a dedicated Katong location page; HK noise in remaining results."
+ },
+ {
+  "id": "wedge-womens-physio",
+  "q": "women's physio singapore",
+  "engine": "claude-websearch",
+  "date": "2026-10-12",
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [
+   "In Touch Physio",
+   "Physio Focus",
+   "Singapore Physio",
+   "OnePhysio",
+   "Physio Asia Therapy Centre",
+   "Physio & Sole"
+  ],
+  "top_sources": [
+   {
+    "url": "https://physioandsole.com.sg/blog/physiotherapy-in-singapore/",
+    "owner": "Physio & Sole",
+    "type": "clinic"
+   },
+   {
+    "url": "https://thehoneycombers.com/singapore/physiotherapy-in-singapore/",
+    "owner": "Honeycombers",
+    "type": "roundup"
+   },
+   {
+    "url": "https://littlestepsasia.com/singapore/pregnancy/prenatal-and-postnatal-services/pregnancy-physiotherapy",
+    "owner": "Little Steps Asia",
+    "type": "roundup"
+   },
+   {
+    "url": "https://sbo.sg/?p=10432",
+    "owner": "SBO.sg",
+    "type": "roundup"
+   },
+   {
+    "url": "https://www.sassymamasg.com/experts-top-pelvic-floor-experts-postnatal-physiotherapists-pregnancy-singapore/",
+    "owner": "Sassy Mama SG",
+    "type": "roundup"
+   }
+  ],
+  "winning_format": "roundup listicle",
+  "notes": "Parenting/lifestyle roundups name the providers; Physio & Sole blog guide supplies the definition text."
+ },
+ {
+  "id": "wedge-wh-physio",
+  "q": "women's health physiotherapist singapore",
+  "engine": "claude-websearch",
+  "date": "2026-10-12",
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [
+   "Posture Plus",
+   "OnePhysio",
+   "Physio Down Under",
+   "In Touch Physiotherapy Clinic",
+   "Physio Focus",
+   "Physio & Sole"
+  ],
+  "top_sources": [
+   {
+    "url": "https://expatliving.sg/physiotherapist-in-singapore-how-physiotherapy-helps/",
+    "owner": "Expat Living",
+    "type": "media"
+   },
+   {
+    "url": "https://physioandsole.com.sg/blog/physiotherapy-in-singapore/",
+    "owner": "Physio & Sole",
+    "type": "clinic"
+   },
+   {
+    "url": "https://thehoneycombers.com/singapore/physiotherapy-in-singapore/",
+    "owner": "Honeycombers",
+    "type": "roundup"
+   },
+   {
+    "url": "https://littlestepsasia.com/singapore/pregnancy/prenatal-and-postnatal-services/pregnancy-physiotherapy",
+    "owner": "Little Steps Asia",
+    "type": "roundup"
+   }
+  ],
+  "winning_format": "roundup listicle",
+  "notes": "Physio Down Under framed as 'Singapore's first dedicated women's health practice'."
+ },
+ {
+  "id": "wedge-pf",
+  "q": "pelvic floor physiotherapy singapore",
+  "engine": "claude-websearch",
+  "date": "2026-10-12",
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [
+   "Physio Down Under",
+   "In Touch Physiotherapy Clinic",
+   "Physio Focus",
+   "Orchard Clinic",
+   "Singapore General Hospital Pelvic Floor Disorder Service",
+   "SingHealth Duke-NUS Pelvic Floor Disorders Centre"
+  ],
+  "top_sources": [
+   {
+    "url": "https://expatliving.sg/physio-down-under-womens-health-physiotherapy-clinic/",
+    "owner": "Expat Living",
+    "type": "media"
+   },
+   {
+    "url": "https://www.sgh.com.sg/our-specialties/pelvic-floor-disorder",
+    "owner": "SGH",
+    "type": "hospital"
+   },
+   {
+    "url": "https://www.singhealth.com.sg/our-specialties/pelvic-floor-disorders-centre",
+    "owner": "SingHealth",
+    "type": "hospital"
+   },
+   {
+    "url": "https://www.littlestepsasia.com/singapore/pregnancy/prenatal-and-postnatal-services/physiotherapy-in-singapore/",
+    "owner": "Little Steps Asia",
+    "type": "roundup"
+   },
+   {
+    "url": "https://www.sassymamasg.com/pregnancy/experts-wellness-pelvic-floor-physio/",
+    "owner": "Sassy Mama SG",
+    "type": "media"
+   }
+  ],
+  "winning_format": "hospital specialty page + sponsored clinic profile",
+  "notes": "Public hospital centre pages plus Expat Living clinic feature; private clinics' own pages not surfaced."
+ },
+ {
+  "id": "wedge-pf-near-me",
+  "q": "pelvic floor physio near me singapore",
+  "engine": "claude-websearch",
+  "date": "2026-10-12",
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [
+   "Physio Down Under",
+   "Physio Focus",
+   "InTouch Physio",
+   "Urban Rehab",
+   "Singapore General Hospital Pelvic Floor Disorder Service"
+  ],
+  "top_sources": [
+   {
+    "url": "https://www.littlestepsasia.com/singapore/pregnancy/prenatal-and-postnatal-services/physiotherapy-in-singapore/",
+    "owner": "Little Steps Asia",
+    "type": "roundup"
+   },
+   {
+    "url": "https://www.sgh.com.sg/our-specialties/pelvic-floor-disorder",
+    "owner": "SGH",
+    "type": "hospital"
+   },
+   {
+    "url": "https://expatliving.sg/physio-down-under-womens-health-physiotherapy-clinic/",
+    "owner": "Expat Living",
+    "type": "media"
+   },
+   {
+    "url": "https://www.sassymamasg.com/experts-wellness-pelvic-floor-appointment-physio-exam-expect/",
+    "owner": "Sassy Mama SG",
+    "type": "media"
+   },
+   {
+    "url": "https://physioandsole.com.sg/blog/physiotherapy-in-singapore/",
+    "owner": "Physio & Sole",
+    "type": "clinic"
+   }
+  ],
+  "winning_format": "roundup listicle with addresses",
+  "notes": "'Near me' unresolvable from US; answer built from roundups listing addresses/branches."
+ },
+ {
+  "id": "wedge-postnatal",
+  "q": "postnatal physio singapore",
+  "engine": "claude-websearch",
+  "date": "2026-10-12",
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [
+   "Edge Healthcare",
+   "Health2Mama",
+   "Embrace Physiotherapy",
+   "Prohealth Physio Focus"
+  ],
+  "top_sources": [
+   {
+    "url": "https://www.womensweekly.com.sg/parenting/benefits-physiotherapy-pregnant-postpartum",
+    "owner": "Women's Weekly SG",
+    "type": "media"
+   },
+   {
+    "url": "https://www.littlestepsasia.com/singapore/pregnancy/prenatal-and-postnatal-services/physiotherapy-in-singapore/",
+    "owner": "Little Steps Asia",
+    "type": "roundup"
+   },
+   {
+    "url": "https://www.littlestepsasia.com/singapore/pregnancy/prenatal-and-postnatal-services/post-pregnancy-prohealth",
+    "owner": "Little Steps Asia (Prohealth feature)",
+    "type": "media"
+   },
+   {
+    "url": "https://www.sassymamasg.com/experts-top-pelvic-floor-experts-postnatal-physiotherapists-pregnancy-singapore/",
+    "owner": "Sassy Mama SG",
+    "type": "roundup"
+   },
+   {
+    "url": "https://www.healthxchange.sg/video/womens-health/postnatal-care",
+    "owner": "HealthXchange (SingHealth)",
+    "type": "hospital"
+   }
+  ],
+  "winning_format": "magazine guide + roundup listicle",
+  "notes": "Women's Weekly 'ultimate guide' and Little Steps roundup carry the provider list; Prohealth has sponsored feature pages."
+ },
+ {
+  "id": "wedge-postnatal-best",
+  "q": "best postnatal physio in singapore",
+  "engine": "claude-websearch",
+  "date": "2026-10-12",
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [
+   "Prohealth In Touch Physio",
+   "Prohealth Physio Focus",
+   "Edge Healthcare",
+   "Health2Mama",
+   "Embrace Physiotherapy"
+  ],
+  "top_sources": [
+   {
+    "url": "https://www.littlestepsasia.com/singapore/pregnancy/prenatal-and-postnatal-services/physiotherapy-in-singapore/",
+    "owner": "Little Steps Asia",
+    "type": "roundup"
+   },
+   {
+    "url": "https://www.littlestepsasia.com/singapore/pregnancy/prenatal-and-postnatal-services/pregnancy-physiotherapy/",
+    "owner": "Little Steps Asia",
+    "type": "roundup"
+   },
+   {
+    "url": "https://www.womensweekly.com.sg/parenting/benefits-physiotherapy-pregnant-postpartum",
+    "owner": "Women's Weekly SG",
+    "type": "media"
+   },
+   {
+    "url": "https://www.littlestepsasia.com/singapore/pregnancy/prenatal-and-postnatal-services/post-pregnancy-prohealth",
+    "owner": "Little Steps Asia (Prohealth feature)",
+    "type": "media"
+   }
+  ],
+  "winning_format": "roundup listicle",
+  "notes": "Little Steps Asia dominates (3 of top results); Prohealth (In Touch + Physio Focus) placed 1-2."
+ },
+ {
+  "id": "wedge-prenatal",
+  "q": "prenatal physiotherapy singapore",
+  "engine": "claude-websearch",
+  "date": "2026-10-12",
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [
+   "Prohealth In Touch Physio",
+   "Physio Focus",
+   "Health2Mama",
+   "Embrace Physiotherapy",
+   "HelloPhysio"
+  ],
+  "top_sources": [
+   {
+    "url": "https://www.littlestepsasia.com/singapore/pregnancy/prenatal-and-postnatal-services/pregnancy-physiotherapy/",
+    "owner": "Little Steps Asia",
+    "type": "roundup"
+   },
+   {
+    "url": "https://www.littlestepsasia.com/singapore/pregnancy/prenatal-and-postnatal-services/physiotherapy-in-singapore/",
+    "owner": "Little Steps Asia",
+    "type": "roundup"
+   },
+   {
+    "url": "https://www.womensweekly.com.sg/parenting/benefits-physiotherapy-pregnant-postpartum",
+    "owner": "Women's Weekly SG",
+    "type": "media"
+   },
+   {
+    "url": "https://www.hellophysio.sg/?p=36967",
+    "owner": "HelloPhysio",
+    "type": "clinic"
+   }
+  ],
+  "winning_format": "roundup listicle",
+  "notes": "HelloPhysio prenatal Pilates blog is the only clinic-owned page surfacing."
+ },
+ {
+  "id": "wedge-pregnancy",
+  "q": "physio during pregnancy singapore",
+  "engine": "claude-websearch",
+  "date": "2026-10-12",
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [
+   "In Touch Physio",
+   "Physio Focus",
+   "Urban Rehab Physio",
+   "River Physio",
+   "Physio & Sole"
+  ],
+  "top_sources": [
+   {
+    "url": "https://littlestepsasia.com/singapore/pregnancy/prenatal-and-postnatal-services/physio-focus-physiotherapy",
+    "owner": "Little Steps Asia (Physio Focus feature)",
+    "type": "media"
+   },
+   {
+    "url": "https://www.littlestepsasia.com/singapore/pregnancy/prenatal-and-postnatal-services/physiotherapy-in-singapore/",
+    "owner": "Little Steps Asia",
+    "type": "roundup"
+   },
+   {
+    "url": "https://www.womensweekly.com.sg/parenting/benefits-physiotherapy-pregnant-postpartum",
+    "owner": "Women's Weekly SG",
+    "type": "media"
+   },
+   {
+    "url": "https://physioandsole.com.sg/zaobao-sg-feature-exercises-for-pregnancy/",
+    "owner": "Physio & Sole",
+    "type": "clinic"
+   }
+  ],
+  "winning_format": "roundup listicle",
+  "notes": "Physio & Sole surfaces via a press-feature (Zaobao) page on pregnancy exercises."
+ },
+ {
+  "id": "wedge-mummy-baby",
+  "q": "mummy and baby assessment singapore",
+  "engine": "claude-websearch",
+  "date": "2026-10-12",
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [
+   "KK Women's and Children's Hospital"
+  ],
+  "top_sources": [
+   {
+    "url": "https://kkh.com.sg/maternity-services",
+    "owner": "KKH",
+    "type": "hospital"
+   },
+   {
+    "url": "https://www.expatexchange.com/ctryguide/21774/6/Singapore/Healthcare-in-Singapore-Having-a-Baby-in-Singapore",
+    "owner": "Expat Exchange",
+    "type": "media"
+   },
+   {
+    "url": "https://askexplorer.com/singapore/residents/living/health/maternity",
+    "owner": "AskExplorer",
+    "type": "directory"
+   }
+  ],
+  "winning_format": "hospital maternity services page",
+  "notes": "No physio 'mummy & baby assessment' product surfaced at all; term is unowned. Would fall back to KKH."
+ },
+ {
+  "id": "wedge-home-visit",
+  "q": "postnatal physio home visit singapore",
+  "engine": "claude-websearch",
+  "date": "2026-10-12",
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [
+   "Health2Mama",
+   "Embrace Physiotherapy",
+   "Prohealth Physio Focus",
+   "M.Wellness",
+   "Postnatal Massage Singapore (PNSG)"
+  ],
+  "top_sources": [
+   {
+    "url": "https://www.womensweekly.com.sg/parenting/benefits-physiotherapy-pregnant-postpartum",
+    "owner": "Women's Weekly SG",
+    "type": "media"
+   },
+   {
+    "url": "https://www.littlestepsasia.com/singapore/pregnancy/prenatal-and-postnatal-services/post-pregnancy-prohealth",
+    "owner": "Little Steps Asia",
+    "type": "media"
+   },
+   {
+    "url": "https://www.pacificprime.com/blog/postpartum-care-in-singapore.html",
+    "owner": "Pacific Prime",
+    "type": "media"
+   },
+   {
+    "url": "https://business.google.com/v/m-wellness-pte-ltd/014135858783482364810/cc70/_",
+    "owner": "M.Wellness (GBP)",
+    "type": "directory"
+   }
+  ],
+  "winning_format": "magazine guide; massage-provider GBP for 'home visit'",
+  "notes": "No dedicated home-visit physio page surfaced; massage providers fill the 'home' slot. Open gap."
+ },
+ {
+  "id": "wedge-postnatal-pilates",
+  "q": "postnatal pilates singapore",
+  "engine": "claude-websearch",
+  "date": "2026-10-12",
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [
+   "Core Fitness",
+   "Sky Pilates",
+   "Kindle Space",
+   "Focus Pilates"
+  ],
+  "top_sources": [
+   {
+    "url": "https://honeykidsasia.com/prenatal-postnatal-yoga-pilates-classes-singapore/",
+    "owner": "HoneyKids Asia",
+    "type": "roundup"
+   },
+   {
+    "url": "https://www.sassymamasg.com/best-prenatal-pilates-classes-singapore/",
+    "owner": "Sassy Mama SG",
+    "type": "roundup"
+   },
+   {
+    "url": "https://scalar.usc.edu/works/rise/postnatal-pilates-singapore-restore-strength",
+    "owner": "scalar.usc.edu (parasite SEO)",
+    "type": "other"
+   },
+   {
+    "url": "https://mummysmarket.com.sg/product/kindle-space-prenatal-and-postpartum-pilates-yoga-50-classes-2-free",
+    "owner": "Mummy's Market",
+    "type": "other"
+   }
+  ],
+  "winning_format": "roundup listicle",
+  "notes": "Pilates studios, not physio clinics, win; a parasite-SEO page on a USC domain ranks top."
+ },
+ {
+  "id": "cond-diastasis",
+  "q": "diastasis recti physiotherapy singapore",
+  "engine": "claude-websearch",
+  "date": "2026-10-12",
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [
+   "Health2Mama",
+   "Orchard Clinic",
+   "Physio & Sole",
+   "HelloPhysio"
+  ],
+  "top_sources": [
+   {
+    "url": "https://expatliving.sg/how-to-fix-abdominal-separation-diastasis-recti/",
+    "owner": "Expat Living",
+    "type": "media"
+   },
+   {
+    "url": "https://expatliving.sg/pelvic-floor-exercises-diastasis-recti-health2mama-plan",
+    "owner": "Expat Living (Health2Mama)",
+    "type": "media"
+   },
+   {
+    "url": "https://physioandsole.com.sg/diastasis-of-rectus-abdominis-muscle-dram-abdominal-separation",
+    "owner": "Physio & Sole",
+    "type": "clinic"
+   },
+   {
+    "url": "https://www.hellophysio.sg/?p=34072",
+    "owner": "HelloPhysio",
+    "type": "clinic"
+   },
+   {
+    "url": "https://www.womensweekly.com.sg/parenting/benefits-physiotherapy-pregnant-postpartum",
+    "owner": "Women's Weekly SG",
+    "type": "media"
+   }
+  ],
+  "winning_format": "clinic condition explainer + clinician-authored magazine article",
+  "notes": "Health2Mama wins via Expat Living how-to pieces; Physio & Sole and HelloPhysio via condition blog posts."
+ },
+ {
+  "id": "cond-diastasis-how",
+  "q": "how to fix abdominal separation after pregnancy",
+  "engine": "claude-websearch",
+  "date": "2026-10-12",
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [],
+  "top_sources": [
+   {
+    "url": "https://my.clevelandclinic.org/health/diseases/22346-diastasis-recti",
+    "owner": "Cleveland Clinic",
+    "type": "hospital"
+   },
+   {
+    "url": "https://www.bswhealth.com/blog/diastasis-recti-how-to-heal-ab-separation-after-pregnancy",
+    "owner": "Baylor Scott & White",
+    "type": "hospital"
+   },
+   {
+    "url": "https://www.pregnancybirthbaby.org.au/abdominal-separation",
+    "owner": "Pregnancy Birth Baby (Healthdirect AU)",
+    "type": "government"
+   },
+   {
+    "url": "https://expatliving.sg/how-to-fix-abdominal-separation-diastasis-recti/",
+    "owner": "Expat Living",
+    "type": "media"
+   }
+  ],
+  "winning_format": "hospital condition page with exercise do/don't lists",
+  "notes": "US/AU health-system pages dominate (US-located search); Expat Living is the only SG source."
+ },
+ {
+  "id": "cond-leaking",
+  "q": "is leaking after birth normal",
+  "engine": "claude-websearch",
+  "date": "2026-10-12",
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [],
+  "top_sources": [
+   {
+    "url": "https://sciencesources.eurekalert.org/multimedia/1033862",
+    "owner": "EurekAlert (survey)",
+    "type": "media"
+   },
+   {
+    "url": "https://becausemarket.com/blogs/news/postpartum-leaks-whats-normal-what-helps-when-to-get-checked",
+    "owner": "Because Market",
+    "type": "other"
+   },
+   {
+    "url": "https://www.mazewomenshealth.com/blog/whats-with-all-the-leaking/",
+    "owner": "Maze Women's Health (US)",
+    "type": "clinic"
+   },
+   {
+    "url": "https://www.nhs.uk/conditions/pregnancy-and-baby/leaking-nipples-pregnant/",
+    "owner": "NHS",
+    "type": "government"
+   }
+  ],
+  "winning_format": "'common but not normal' explainer splitting lochia/urine/bowel",
+  "notes": "Entirely non-SG (US/UK) sources; no Singapore page competes for this question."
+ },
+ {
+  "id": "cond-incontinence",
+  "q": "urinary incontinence physio singapore",
+  "engine": "claude-websearch",
+  "date": "2026-10-12",
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [
+   "Singapore General Hospital",
+   "KK Women's and Children's Hospital",
+   "Prohealth In Touch Physio",
+   "Physio Down Under",
+   "Physio Asia Therapy Centre"
+  ],
+  "top_sources": [
+   {
+    "url": "https://www.sgh.com.sg/symptoms-treatments/physiotherapy-for-stress-urinary-incontinence-female-urinary-disorders",
+    "owner": "SGH",
+    "type": "hospital"
+   },
+   {
+    "url": "https://www.singhealth.com.sg/symptoms-treatments/physiotherapy-for-stress-urinary-incontinence-female-urinary-disorders",
+    "owner": "SingHealth",
+    "type": "hospital"
+   },
+   {
+    "url": "https://www.littlestepsasia.com/singapore/health/medical-specialists/physiotherapy-incontinence",
+    "owner": "Little Steps Asia (Prohealth feature)",
+    "type": "media"
+   },
+   {
+    "url": "https://www.whatclinic.com/urology/asia/urinary-incontinence?page=1",
+    "owner": "WhatClinic",
+    "type": "directory"
+   }
+  ],
+  "winning_format": "hospital condition-treatment page",
+  "notes": "SingHealth cluster condition pages (same content on sgh/singhealth/skh) dominate; Prohealth via sponsored Little Steps article."
+ },
+ {
+  "id": "cond-prolapse",
+  "q": "pelvic organ prolapse physiotherapy singapore",
+  "engine": "claude-websearch",
+  "date": "2026-10-12",
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [
+   "KK Women's and Children's Hospital",
+   "Sengkang General Hospital",
+   "Singapore General Hospital",
+   "Physio Down Under"
+  ],
+  "top_sources": [
+   {
+    "url": "https://www.singhealth.com.sg/symptoms-treatments/physiotherapy-for-pelvic-organ-prolapse-female-urinary-disorders",
+    "owner": "SingHealth",
+    "type": "hospital"
+   },
+   {
+    "url": "https://www.skh.com.sg/symptoms-treatments/physiotherapy-for-pelvic-organ-prolapse-female-urinary-disorders",
+    "owner": "Sengkang General Hospital",
+    "type": "hospital"
+   },
+   {
+    "url": "https://www.sgh.com.sg/symptoms-treatments/pelvic-organ-prolapse",
+    "owner": "SGH",
+    "type": "hospital"
+   },
+   {
+    "url": "https://expatliving.sg/physio-down-under-womens-health-physiotherapy-clinic/",
+    "owner": "Expat Living",
+    "type": "media"
+   }
+  ],
+  "winning_format": "hospital condition-treatment page",
+  "notes": "Public-hospital pages own this; one private clinic (Physio Down Under) via Expat Living. AU clinic noise."
+ },
+ {
+  "id": "cond-heaviness",
+  "q": "feeling of heaviness down there after giving birth",
+  "engine": "claude-websearch",
+  "date": "2026-10-12",
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [],
+  "top_sources": [
+   {
+    "url": "https://acc.co.nz/im-injured/what-we-cover/cover-for-maternal-birth-injuries/whats-normal-and-whats-not-after-giving-birth",
+    "owner": "ACC New Zealand",
+    "type": "government"
+   },
+   {
+    "url": "https://austinurogynecology.com/?p=1250",
+    "owner": "Austin Urogynecology (US)",
+    "type": "clinic"
+   },
+   {
+    "url": "https://www.ummhealth.org/health-library/after-giving-birth-how-to-feel-healthy",
+    "owner": "UMass Memorial Health",
+    "type": "hospital"
+   }
+  ],
+  "winning_format": "'what's normal vs not after birth' explainer",
+  "notes": "No SG sources; results include spammy scraped pages. Weak, contestable SERP."
+ },
+ {
+  "id": "cond-csection",
+  "q": "c-section recovery physiotherapy singapore",
+  "engine": "claude-websearch",
+  "date": "2026-10-12",
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [
+   "Physio & Sole",
+   "HelloPhysio",
+   "Singapore General Hospital",
+   "Mount Elizabeth Hospitals"
+  ],
+  "top_sources": [
+   {
+    "url": "https://physioandsole.com.sg/blog/physio-post-op-recovery/",
+    "owner": "Physio & Sole",
+    "type": "clinic"
+   },
+   {
+    "url": "https://www.sassymamasg.com/caesarean-sections-the-ultimate-guide-part-two/",
+    "owner": "Sassy Mama SG",
+    "type": "media"
+   },
+   {
+    "url": "https://www.hellophysio.sg/?p=32401",
+    "owner": "HelloPhysio",
+    "type": "clinic"
+   },
+   {
+    "url": "https://www.sgh.com.sg/our-specialties/physiotherapy/surgical-physiotherapy",
+    "owner": "SGH",
+    "type": "hospital"
+   },
+   {
+    "url": "https://mountelizabeth.com.sg/tests-treatments/physiotherapy",
+    "owner": "Mount Elizabeth",
+    "type": "hospital"
+   }
+  ],
+  "winning_format": "generic post-op recovery clinic blog",
+  "notes": "No C-section-specific physio page surfaced; generic post-op pages win by default. Clear gap."
+ },
+ {
+  "id": "cond-pgp",
+  "q": "pelvic girdle pain in pregnancy physio",
+  "engine": "claude-websearch",
+  "date": "2026-10-12",
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [
+   "Prohealth Physio Focus"
+  ],
+  "top_sources": [
+   {
+    "url": "https://littlestepsasia.com/singapore/pregnancy/prenatal-and-postnatal-services/physio-focus-physiotherapy",
+    "owner": "Little Steps Asia (Physio Focus feature)",
+    "type": "media"
+   },
+   {
+    "url": "https://www.southtees.nhs.uk/resources/pelvic-girdle-pain-in-pregnancy/",
+    "owner": "NHS South Tees",
+    "type": "hospital"
+   },
+   {
+    "url": "https://www.northerncarealliance.nhs.uk/patient-information/patient-leaflets/physiotherapy-pelvic-girdle-pain-pgp",
+    "owner": "NHS Northern Care Alliance",
+    "type": "hospital"
+   },
+   {
+    "url": "https://gophysiotherapy.co.uk/pelvic-girdle-pain-in-pregnancy",
+    "owner": "Go Physiotherapy (UK)",
+    "type": "clinic"
+   }
+  ],
+  "winning_format": "NHS patient leaflet + sponsored clinic feature",
+  "notes": "Searched with ' singapore' appended. Mostly UK NHS leaflets; only SG hit is Physio Focus feature on Little Steps."
+ },
+ {
+  "id": "cond-perineal",
+  "q": "perineal tear recovery physio singapore",
+  "engine": "claude-websearch",
+  "date": "2026-10-12",
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [
+   "National University Hospital"
+  ],
+  "top_sources": [
+   {
+    "url": "https://www.nuh.com.sg:443/our-services/Specialties/Rehabilitation/Documents/Patient%20and%20Caregiver%20Resources/Physiotherapy/Pelvic%20floor%20exercises%20for%20post-perineal%20tears.pdf",
+    "owner": "NUH",
+    "type": "hospital"
+   },
+   {
+    "url": "https://matermothers.org.au/journey/childbirth/perineal-tearing",
+    "owner": "Mater Mothers (AU)",
+    "type": "hospital"
+   },
+   {
+    "url": "https://www.sfh-tr.nhs.uk/services/pelvic-health-physiotherapy/pelvic-floor-dysfunction/perineal-tears",
+    "owner": "NHS Sherwood Forest",
+    "type": "hospital"
+   },
+   {
+    "url": "https://healthtranslations.vic.gov.au/resources/physiotherapy-after-a-third-or-fourth-degree-tear",
+    "owner": "Health Translations Victoria",
+    "type": "government"
+   }
+  ],
+  "winning_format": "hospital patient-education PDF",
+  "notes": "Only SG source is an NUH PDF; no private clinic surfaces. Wide open for a clinic condition page."
+ },
+ {
+  "id": "cond-mastitis",
+  "q": "physiotherapy for blocked milk ducts singapore",
+  "engine": "claude-websearch",
+  "date": "2026-10-12",
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [
+   "Thomson Medical"
+  ],
+  "top_sources": [
+   {
+    "url": "https://www.thomsonmedical.com/blog/lactation-massage-singapore",
+    "owner": "Thomson Medical",
+    "type": "hospital"
+   },
+   {
+    "url": "https://www.brighamandwomens.org:443/assets/BWH/patients-and-families/rehabilitation-services/pdfs/physical-therapy-treatment-of-blocked-milk-ducts.pdf",
+    "owner": "Brigham and Women's (US)",
+    "type": "hospital"
+   },
+   {
+    "url": "https://www.coremedicalgroup.com/blog/physical-therapy-blocked-milk-ducts",
+    "owner": "Core Medical Group (US)",
+    "type": "other"
+   },
+   {
+    "url": "https://vinmec.com/eng/article/treatment-of-blocked-milk-ducts-after-birth-with-physical-therapy-en",
+    "owner": "Vinmec (VN)",
+    "type": "hospital"
+   }
+  ],
+  "winning_format": "hospital blog on lactation massage",
+  "notes": "Thomson Medical lactation-massage blog is the only SG page; rest US/VN/HK. No SG physio clinic owns therapeutic-ultrasound-for-ducts."
+ },
+ {
+  "id": "cond-pelvic-pain",
+  "q": "pelvic pain physiotherapy singapore",
+  "engine": "claude-websearch",
+  "date": "2026-10-12",
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [
+   "Physio Down Under",
+   "In Touch Physiotherapy Clinic",
+   "Physio Focus",
+   "Orchard Clinic",
+   "City Osteopathy and Physiotherapy"
+  ],
+  "top_sources": [
+   {
+    "url": "https://expatliving.sg/physio-down-under-womens-health-physiotherapy-clinic/",
+    "owner": "Expat Living",
+    "type": "media"
+   },
+   {
+    "url": "https://www.littlestepsasia.com/singapore/pregnancy/prenatal-and-postnatal-services/physiotherapy-in-singapore/",
+    "owner": "Little Steps Asia",
+    "type": "roundup"
+   },
+   {
+    "url": "https://littlestepsasia.com/singapore/pregnancy/prenatal-and-postnatal-services/pregnancy-physiotherapy",
+    "owner": "Little Steps Asia",
+    "type": "roundup"
+   },
+   {
+    "url": "https://www.timeout.com/singapore/things-to-do/the-best-physiotherapy-clinics-in-singapore-to-soothe-body-pains",
+    "owner": "Time Out Singapore",
+    "type": "roundup"
+   }
+  ],
+  "winning_format": "roundup listicle + sponsored clinic profile",
+  "notes": "Same roundup cluster as pelvic-floor queries."
+ },
+ {
+  "id": "cond-menopause",
+  "q": "menopause physiotherapy singapore",
+  "engine": "claude-websearch",
+  "date": "2026-10-12",
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [
+   "KK Women's and Children's Hospital (KK Menopause Centre)"
+  ],
+  "top_sources": [
+   {
+    "url": "https://www.healthxchange.sg/news/kkh-launches-kk-menopause-centre-expands-service-to-support-women-through-their-transformative-journey",
+    "owner": "HealthXchange (SingHealth)",
+    "type": "hospital"
+   },
+   {
+    "url": "https://www.kkh.com.sg/news/patient-care/is-singapore-ready-for-the-menopause-wave-from-a-super-ageing-society",
+    "owner": "KKH",
+    "type": "hospital"
+   },
+   {
+    "url": "https://www.singhealthacademy.edu.sg/semconf2023/past-conference/semconf2021/speakers-ms-caroline-chua",
+    "owner": "SingHealth Academy",
+    "type": "hospital"
+   },
+   {
+    "url": "https://annals.edu.sg/navigating-menopause-in-singapore-sociocultural-clinical-and-policy-implications-from-a-qualitative-study-marie-singapore/",
+    "owner": "Annals, Academy of Medicine SG",
+    "type": "media"
+   }
+  ],
+  "winning_format": "hospital news/feature article",
+  "notes": "No private physio clinic has a menopause page surfacing; KKH owns the topic. Open gap."
+ },
+ {
+  "id": "cond-run-after-birth",
+  "q": "when can i start running after giving birth",
+  "engine": "claude-websearch",
+  "date": "2026-10-12",
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [],
+  "top_sources": [
+   {
+    "url": "https://www.hingehealth.com/resources/articles/postpartum-running/",
+    "owner": "Hinge Health",
+    "type": "other"
+   },
+   {
+    "url": "https://www.womensrunning.co.uk/?p=39429",
+    "owner": "Women's Running UK",
+    "type": "media"
+   },
+   {
+    "url": "https://lauranorrisrunning.com/when-can-you-start-running-after-giving-birth/",
+    "owner": "Laura Norris Running",
+    "type": "other"
+   },
+   {
+    "url": "https://marathonhandbook.com/running-postpartum/",
+    "owner": "Marathon Handbook",
+    "type": "media"
+   },
+   {
+    "url": "https://www.themotherrunners.com/6-weeks-too-soon-to-start-running-after-having-a-baby/",
+    "owner": "The Mother Runners",
+    "type": "other"
+   }
+  ],
+  "winning_format": "timeline answer (6-12 weeks) with vaginal vs C-section split",
+  "notes": "All US/UK running-coach and media pages; no SG source."
+ },
+ {
+  "id": "paeds-schroth",
+  "q": "schroth therapy singapore",
+  "engine": "claude-websearch",
+  "date": "2026-10-12",
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [
+   "Physio & Sole",
+   "Dr Kevin Lau (ScolioLife)"
+  ],
+  "top_sources": [
+   {
+    "url": "https://physioandsole.com.sg/blog/schroth-therapy-for-scoliosis/",
+    "owner": "Physio & Sole",
+    "type": "clinic"
+   },
+   {
+    "url": "https://physioandsole.com.sg/schroth-therapy-for-scoliosis/",
+    "owner": "Physio & Sole",
+    "type": "clinic"
+   },
+   {
+    "url": "https://en.wikipedia.org/wiki/Katharina_Schroth",
+    "owner": "Wikipedia",
+    "type": "other"
+   },
+   {
+    "url": "https://www.sralab.org/services/schroth-method",
+    "owner": "Shirley Ryan AbilityLab (US)",
+    "type": "hospital"
+   }
+  ],
+  "winning_format": "clinic service explainer (what it is, 3 principles)",
+  "notes": "Physio & Sole owns the SG answer with a Schroth explainer; rest is US hospitals/Wikipedia."
+ },
+ {
+  "id": "paeds-scoliosis-child",
+  "q": "scoliosis physiotherapy for child singapore",
+  "engine": "claude-websearch",
+  "date": "2026-10-12",
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [
+   "Prohealth Physio Focus",
+   "Family Health Chiropractic",
+   "HelloPhysio",
+   "Changi General Hospital"
+  ],
+  "top_sources": [
+   {
+    "url": "https://www.littlestepsasia.com/singapore/health/medical-specialists/scoliosis-prohealth-physio-focus/",
+    "owner": "Little Steps Asia (Prohealth feature)",
+    "type": "media"
+   },
+   {
+    "url": "https://familyhealthchiro.sg/scoliosis-children-teenagers-singapore/",
+    "owner": "Family Health Chiropractic",
+    "type": "clinic"
+   },
+   {
+    "url": "https://thenewageparents.com/scoliosis-singapore-teens-adolescents/",
+    "owner": "The New Age Parents",
+    "type": "media"
+   },
+   {
+    "url": "https://www.hellophysio.sg/?p=38202",
+    "owner": "HelloPhysio",
+    "type": "clinic"
+   },
+   {
+    "url": "https://www.cgh.com.sg/SSMC/Documents/WendyNg.pdf",
+    "owner": "CGH",
+    "type": "hospital"
+   }
+  ],
+  "winning_format": "parenting-media sponsored feature + chiro condition page",
+  "notes": "Mentions SG School Health Service screening at P6/Sec 2 — SG-specific detail wins. Chiropractor ranks."
+ },
+ {
+  "id": "paeds-physio",
+  "q": "paediatric physiotherapy singapore",
+  "engine": "claude-websearch",
+  "date": "2026-10-12",
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [
+   "Singapore General Hospital",
+   "Orchard Health Clinic",
+   "KK Women's and Children's Hospital",
+   "Physio Asia Therapy Centre",
+   "Rainbow Centre",
+   "Kids Focus Physiotherapy",
+   "Farrer Park Hospital",
+   "OptiMove Physio",
+   "The Physio Studios",
+   "Physio & Sole",
+   "Tiny and Mighty Physiotherapy"
+  ],
+  "top_sources": [
+   {
+    "url": "https://honeykidsasia.com/physiotherapy-centres-in-singapore-for-kids/",
+    "owner": "HoneyKids Asia",
+    "type": "roundup"
+   },
+   {
+    "url": "https://www.sgh.com.sg/our-specialties/physiotherapy/paediatric-physiotherapy",
+    "owner": "SGH",
+    "type": "hospital"
+   },
+   {
+    "url": "https://www.littlestepsasia.com/singapore/health/medical-specialists/physiotherapists-for-kids",
+    "owner": "Little Steps Asia",
+    "type": "roundup"
+   },
+   {
+    "url": "https://physioandsole.com.sg/paediatric-physiotherapy-singapore-early-intervention/",
+    "owner": "Physio & Sole",
+    "type": "clinic"
+   }
+  ],
+  "winning_format": "roundup listicle ('best for X' categories)",
+  "notes": "HoneyKids 'best for newborns / neuro / sports' segmentation drives the named list."
+ },
+ {
+  "id": "paeds-torticollis",
+  "q": "baby torticollis physiotherapy singapore",
+  "engine": "claude-websearch",
+  "date": "2026-10-12",
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [
+   "Singapore General Hospital",
+   "NUHS",
+   "Physio & Sole"
+  ],
+  "top_sources": [
+   {
+    "url": "https://www.nuh.com.sg:443/our-services/Specialties/Rehabilitation/Documents/Patient%20and%20Caregiver%20Resources/Physiotherapy/Management%20of%20Torticollis%20Left%20side.pdf",
+    "owner": "NUH",
+    "type": "hospital"
+   },
+   {
+    "url": "https://www.singhealth.com.sg/symptoms-treatments/torticollis-childhood-illnesses",
+    "owner": "SingHealth",
+    "type": "hospital"
+   },
+   {
+    "url": "https://www.nuhs.edu.sg/patient-care/find-a-condition/torticollis-wry-neck",
+    "owner": "NUHS",
+    "type": "hospital"
+   },
+   {
+    "url": "https://thenewageparents.com/orthopaedic-conditions-in-babies-and-children-part-i/",
+    "owner": "The New Age Parents",
+    "type": "media"
+   },
+   {
+    "url": "https://physioandsole.com.sg/physiotherapy-conditions/wry-neck/",
+    "owner": "Physio & Sole",
+    "type": "clinic"
+   }
+  ],
+  "winning_format": "hospital condition page / home-exercise PDF",
+  "notes": "Public hospitals own it; Physio & Sole page is adult wry neck, not congenital. No private congenital-torticollis page surfaced."
+ },
+ {
+  "id": "paeds-ddh",
+  "q": "hip dysplasia baby physio singapore",
+  "engine": "claude-websearch",
+  "date": "2026-10-12",
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [
+   "Singapore General Hospital",
+   "KK Women's and Children's Hospital",
+   "National University Hospital"
+  ],
+  "top_sources": [
+   {
+    "url": "https://www.singhealth.com.sg/symptoms-treatments/developmental-dysplasia-childhood-illnesses",
+    "owner": "SingHealth",
+    "type": "hospital"
+   },
+   {
+    "url": "https://www.kkh.com.sg/symptoms-treatments/developmental-dysplasia-childhood-illnesses",
+    "owner": "KKH",
+    "type": "hospital"
+   },
+   {
+    "url": "https://nuh.com.sg/health-resources/diseases-and-conditions/developmental-hip-dysplasia",
+    "owner": "NUH",
+    "type": "hospital"
+   },
+   {
+    "url": "https://www.sgh.com.sg/our-specialties/physiotherapy/paediatric-physiotherapy",
+    "owner": "SGH",
+    "type": "hospital"
+   }
+  ],
+  "winning_format": "hospital condition page with age-banded treatment table",
+  "notes": "Fully owned by public hospitals; no private physio clinic surfaced."
+ },
+ {
+  "id": "paeds-clubfoot",
+  "q": "clubfoot physiotherapy singapore",
+  "engine": "claude-websearch",
+  "date": "2026-10-12",
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [
+   "Singapore General Hospital",
+   "Mount Elizabeth Hospital",
+   "Gleneagles Hospital"
+  ],
+  "top_sources": [
+   {
+    "url": "https://www.sgh.com.sg/symptoms-treatments/clubfoot-child",
+    "owner": "SGH",
+    "type": "hospital"
+   },
+   {
+    "url": "https://www.singhealth.com.sg:443/patient-care/conditions-treatments/clubfoot-child/treatment",
+    "owner": "SingHealth",
+    "type": "hospital"
+   },
+   {
+    "url": "https://www.lyfboat.com/hospitals/club-foot-treatment-hospitals-and-costs-in-singapore/",
+    "owner": "Lyfboat",
+    "type": "directory"
+   },
+   {
+    "url": "https://world.physio/congress-proceeding/clubfoot-treatment-around-world-progress-challenges-and-role-physiotherapist",
+    "owner": "World Physiotherapy",
+    "type": "other"
+   }
+  ],
+  "winning_format": "hospital condition page",
+  "notes": "Hospital pages + medical-tourism directory; no private physio surfaced."
+ },
+ {
+  "id": "msk-back",
+  "q": "back pain physio singapore",
+  "engine": "claude-websearch",
+  "date": "2026-10-12",
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [
+   "Core Concepts Physiotherapy",
+   "PhysioNovena",
+   "Physio & Sole",
+   "HelloPhysio"
+  ],
+  "top_sources": [
+   {
+    "url": "https://www.hellophysio.sg/?p=38812",
+    "owner": "HelloPhysio",
+    "type": "clinic"
+   },
+   {
+    "url": "https://sbo.sg/listing/core-concepts/",
+    "owner": "SBO.sg",
+    "type": "directory"
+   },
+   {
+    "url": "https://www.whatclinic.com/physiotherapy/singapore",
+    "owner": "WhatClinic",
+    "type": "directory"
+   },
+   {
+    "url": "https://physioandsole.com.sg/blog/physiotherapy-in-singapore/",
+    "owner": "Physio & Sole",
+    "type": "clinic"
+   }
+  ],
+  "winning_format": "clinic condition/service page + directory listing",
+  "notes": "Physio & Sole holds 4 of 9 results; large chains dominate generic MSK."
+ },
+ {
+  "id": "msk-fracture",
+  "q": "physiotherapy after fracture singapore",
+  "engine": "claude-websearch",
+  "date": "2026-10-12",
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [
+   "Singapore General Hospital",
+   "Go!Physio",
+   "East Coast Physiotherapy and Sports Injury Clinic",
+   "Physio Asia Therapy Centre",
+   "Physio & Sole"
+  ],
+  "top_sources": [
+   {
+    "url": "https://ask.gov.sg/sgh-ahpedia/questions/cmq5xgty100a44f01tl43u5bg",
+    "owner": "Ask.gov.sg (SGH AHPedia)",
+    "type": "government"
+   },
+   {
+    "url": "https://www.whatclinic.com/physiotherapy/singapore/central-singapore/marine-parade/post-op-rehabilitation",
+    "owner": "WhatClinic",
+    "type": "directory"
+   },
+   {
+    "url": "https://physioandsole.com.sg/blog/physio-singapore/",
+    "owner": "Physio & Sole",
+    "type": "clinic"
+   }
+  ],
+  "winning_format": "government Q&A + directory with price range",
+  "notes": "ask.gov.sg Q&A gives the definitive answer; WhatClinic supplies S$140-180 price range."
+ },
+ {
+  "id": "holistic-pilates",
+  "q": "clinical pilates with physiotherapist singapore",
+  "engine": "claude-websearch",
+  "date": "2026-10-12",
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [
+   "HelloPhysio",
+   "Breathe Pilates",
+   "Prohealth Physio Focus"
+  ],
+  "top_sources": [
+   {
+    "url": "https://www.hellophysio.sg/clinical-pilates",
+    "owner": "HelloPhysio",
+    "type": "clinic"
+   },
+   {
+    "url": "https://www.littlestepsasia.com/singapore/health/family-medicine/roadtest-clinical-pilates-with-prohealth-physio-focus",
+    "owner": "Little Steps Asia",
+    "type": "media"
+   },
+   {
+    "url": "https://www.malaymail.com/news/money/mediaoutreach/2026/04/27/breathe-pilates-moves-flagship-outlet-from-novena-to-united-square/461119",
+    "owner": "Malay Mail (press release)",
+    "type": "media"
+   },
+   {
+    "url": "https://www.whatclinic.com/physiotherapy/singapore/pilates",
+    "owner": "WhatClinic",
+    "type": "directory"
+   }
+  ],
+  "winning_format": "clinic service page",
+  "notes": "HelloPhysio dedicated clinical-pilates page wins; Breathe Pilates via syndicated press releases."
+ },
+ {
+  "id": "gen-first-visit",
+  "q": "what happens at a first physiotherapy appointment",
+  "engine": "claude-websearch",
+  "date": "2026-10-12",
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [],
+  "top_sources": [
+   {
+    "url": "https://www.simplyhealth.co.uk/health-treatments/physiotherapy/what-does-a-physiotherapist-do",
+    "owner": "Simplyhealth (UK)",
+    "type": "other"
+   },
+   {
+    "url": "https://www.nhstayside.scot.nhs.uk/OurServicesA-Z/Physiotherapy/PROD_292672/index.htm",
+    "owner": "NHS Tayside",
+    "type": "hospital"
+   },
+   {
+    "url": "https://www.spectrumhealth.ie/physiotherapy/what-to-expect",
+    "owner": "Spectrum Physio (IE)",
+    "type": "clinic"
+   },
+   {
+    "url": "https://www.neilminterassociates.co.uk/your-first-physio-appointment-what-to-expect-and-how-to-prepare/",
+    "owner": "Neil Minter Associates (UK)",
+    "type": "clinic"
+   }
+  ],
+  "winning_format": "step-by-step 'what to expect' page (history, exam, plan, what to wear)",
+  "notes": "All UK/IE sources; no SG page surfaced (not geo-qualified query)."
+ },
+ {
+  "id": "gen-cost",
+  "q": "how much does physiotherapy cost in singapore",
+  "engine": "claude-websearch",
+  "date": "2026-10-12",
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [
+   "Physio & Sole"
+  ],
+  "top_sources": [
+   {
+    "url": "https://dollarsandsense.sg/how-much-does-seeing-a-physiotherapist-cost/",
+    "owner": "DollarsAndSense",
+    "type": "media"
+   },
+   {
+    "url": "https://physioandsole.com.sg/blog/private-vs-public-physiotherapy-singapore/",
+    "owner": "Physio & Sole",
+    "type": "clinic"
+   },
+   {
+    "url": "https://expatliving.sg/physiotheraphy-insurance-plans-pacific-prime/",
+    "owner": "Expat Living / Pacific Prime",
+    "type": "media"
+   },
+   {
+    "url": "https://physioandsole.com.sg/blog/physio-singapore/",
+    "owner": "Physio & Sole",
+    "type": "clinic"
+   }
+  ],
+  "winning_format": "price-range explainer (private vs public, S$ figures, insurance)",
+  "notes": "Physio & Sole holds 6 of 9 results with private-vs-public cost guides; DollarsAndSense ranks first."
+ },
+ {
+  "id": "gen-referral",
+  "q": "do i need a doctor's referral to see a physiotherapist in singapore",
+  "engine": "claude-websearch",
+  "date": "2026-10-12",
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [
+   "NTUC Health",
+   "Physio & Sole"
+  ],
+  "top_sources": [
+   {
+    "url": "https://ntuchealth.sg/elderly-care/resources/health-and-wellness/physiotherapy-in-singapore-5-misconceptions",
+    "owner": "NTUC Health",
+    "type": "other"
+   },
+   {
+    "url": "https://physioandsole.com.sg/blog/7-common-physiotherapy-myths-singaporeans-still-believe/",
+    "owner": "Physio & Sole",
+    "type": "clinic"
+   },
+   {
+    "url": "https://ask.gov.sg/sgh-ahpedia/questions/cmeqy6tpy00hzf2j1moutd9tk",
+    "owner": "Ask.gov.sg (SGH AHPedia)",
+    "type": "government"
+   },
+   {
+    "url": "https://physioandsole.com.sg/blog/5-common-misconceptions-about-physiotherapists/",
+    "owner": "Physio & Sole",
+    "type": "clinic"
+   }
+  ],
+  "winning_format": "myth-busting listicle with direct yes/no answer + exceptions",
+  "notes": "Physio & Sole holds 7 of 10 results via myth-buster posts; ask.gov.sg gives authoritative answer."
+ },
+ {
+  "id": "brand-goji",
+  "q": "goji physio",
+  "engine": "claude-websearch",
+  "date": "2026-10-12",
+  "goji_named": true,
+  "goji_cited_url": "https://imginn.com/gojiphysio/",
+  "goji_position": 1,
+  "providers_named": [
+   "Goji Physiotherapy"
+  ],
+  "top_sources": [
+   {
+    "url": "https://imginn.com/gojiphysio/",
+    "owner": "Imginn (Instagram mirror of @gojiphysio)",
+    "type": "other"
+   },
+   {
+    "url": "https://physioandsole.com.sg/physio-singapore/",
+    "owner": "Physio & Sole",
+    "type": "clinic"
+   },
+   {
+    "url": "https://www.whatclinic.com/physiotherapy/singapore?page=1",
+    "owner": "WhatClinic",
+    "type": "directory"
+   }
+  ],
+  "winning_format": "Instagram bio (via third-party mirror)",
+  "notes": "Searched as 'goji physio singapore'. Goji described correctly (Lentor Modern #01-13, services, WhatsApp) but ONLY via imginn IG mirror; gojiphysio.com did not surface at all. Physio & Sole pages fill remaining slots."
+ },
+ {
+  "id": "brand-formal",
+  "q": "goji women's and family physiotherapy",
+  "engine": "claude-websearch",
+  "date": "2026-10-12",
+  "goji_named": true,
+  "goji_cited_url": "https://imginn.com/gojiphysio/",
+  "goji_position": 1,
+  "providers_named": [
+   "Goji Women's and Family Physiotherapy"
+  ],
+  "top_sources": [
+   {
+    "url": "https://imginn.com/gojiphysio/",
+    "owner": "Imginn (Instagram mirror of @gojiphysio)",
+    "type": "other"
+   },
+   {
+    "url": "https://sg.linkedin.com/in/ashton-wu",
+    "owner": "LinkedIn (staff profile)",
+    "type": "other"
+   },
+   {
+    "url": "https://physioandsole.com.sg/blog/physiotherapy-in-singapore/",
+    "owner": "Physio & Sole",
+    "type": "clinic"
+   }
+  ],
+  "winning_format": "Instagram bio + staff LinkedIn",
+  "notes": "Searched as 'goji women's and family physiotherapy singapore'. Origin story pulled from a staff LinkedIn; gojiphysio.com absent from results."
+ },
+ {
+  "id": "brand-what",
+  "q": "what is goji physio singapore and what do they offer",
+  "engine": "claude-websearch",
+  "date": "2026-10-12",
+  "goji_named": true,
+  "goji_cited_url": "https://imginn.com/gojiphysio/",
+  "goji_position": 1,
+  "providers_named": [
+   "Goji Physiotherapy"
+  ],
+  "top_sources": [
+   {
+    "url": "https://imginn.com/gojiphysio/",
+    "owner": "Imginn (Instagram mirror of @gojiphysio)",
+    "type": "other"
+   },
+   {
+    "url": "https://sbo.sg/?p=10432",
+    "owner": "SBO.sg",
+    "type": "roundup"
+   },
+   {
+    "url": "https://physioandsole.com.sg/blog/physio-in-singapore-guide/",
+    "owner": "Physio & Sole",
+    "type": "clinic"
+   }
+  ],
+  "winning_format": "Instagram bio (via third-party mirror)",
+  "notes": "Answer possible only from IG mirror; no own-site, GBP or directory listing for Goji surfaced. Physio & Sole occupies 5 of 9 results even on a Goji brand query."
+ }
+]

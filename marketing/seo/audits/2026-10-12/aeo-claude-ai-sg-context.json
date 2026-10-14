@@ -1,0 +1,1755 @@
+[
+ {
+  "id": "local-lentor",
+  "q": "physiotherapy lentor",
+  "prompt_sent": "physiotherapy lentor",
+  "engine": "claude-ai",
+  "variant": "sg-context",
+  "date": "2026-10-13",
+  "model": "Opus 5.5 (Medium)",
+  "searched": true,
+  "goji_named": true,
+  "goji_cited_url": null,
+  "goji_position": 1,
+  "providers_named": [
+   "Goji Women's and Family Physiotherapy",
+   "Specialist Physio Jonathan",
+   "Hallmark Physiotherapy Singapore"
+  ],
+  "cited_sources": [],
+  "place_cards": [
+   "Goji Women's and Family Physiotherapy",
+   "Specialist Physio Jonathan, Central Singapore",
+   "Hallmark Physiotherapy Singapore"
+  ],
+  "answer_excerpt": "The only physiotherapy clinic right in Lentor is Goji Women's and Family Physiotherapy, at 1 Lentor Central (#01-13, Lentor Modern), a few steps from Lentor MRT. It opened recently, has a 5.0 rating, and reviewers mention dry needling, post-op recovery, plantar fasciitis, back pain, and postpartum rehab.",
+  "notes": "Places search only (Google Maps cards, no web URLs). Text says 'book through gojiphysio.com' (unlinked); says 'closed Sundays' (site: Sun/PH by appointment)."
+ },
+ {
+  "id": "local-lentor-mrt",
+  "q": "physio near lentor mrt",
+  "prompt_sent": "physio near lentor mrt",
+  "engine": "claude-ai",
+  "variant": "sg-context",
+  "date": "2026-10-13",
+  "model": "Opus 5.5 (Medium)",
+  "searched": true,
+  "goji_named": true,
+  "goji_cited_url": null,
+  "goji_position": 1,
+  "providers_named": [
+   "Goji Women's and Family Physiotherapy",
+   "ProRehab Physiotherapy Upper Thomson",
+   "The Physiotherapy Department",
+   "BMJ Physiotherapy (Ang Mo Kio)"
+  ],
+  "cited_sources": [],
+  "place_cards": [
+   "Goji Women's and Family Physiotherapy",
+   "ProRehab Physiotherapy Upper Thomson",
+   "The Physiotherapy Department (The Physio Dept.)",
+   "BMJ Physiotherapy (Ang Mo Kio)"
+  ],
+  "answer_excerpt": "The closest option by far is Goji Women's and Family Physiotherapy, right inside Lentor Modern (1 Lentor Central, #01-13), basically at the MRT. It's newer with fewer reviews (5.0 from 21), but patients mention back, plantar fasciitis, post-op wrist rehab and dry needling, not just women's health. Open Mon to Sat, 8am to 8pm.",
+  "notes": "Places search only, no web URLs. First attempt accidentally ran as a follow-up in Q1's chat; discarded and re-run in a fresh incognito chat."
+ },
+ {
+  "id": "local-amk",
+  "q": "physio ang mo kio",
+  "prompt_sent": "physio ang mo kio",
+  "engine": "claude-ai",
+  "variant": "sg-context",
+  "date": "2026-10-13",
+  "model": "Opus 5.5 (Medium)",
+  "searched": true,
+  "goji_named": true,
+  "goji_cited_url": null,
+  "goji_position": 4,
+  "providers_named": [
+   "BMJ Physiotherapy (Ang Mo Kio)",
+   "Flex Physiocare",
+   "Refresh Physiocare @ AMK",
+   "Goji Women's and Family Physiotherapy",
+   "ProRehab Physiotherapy Upper Thomson"
+  ],
+  "cited_sources": [],
+  "place_cards": [
+   "BMJ Physiotherapy (Ang Mo Kio)",
+   "Flex physiocare",
+   "Refresh Physiocare @ AMK",
+   "Goji Women's and Family Physiotherapy"
+  ],
+  "answer_excerpt": "Here are the main physio options in and around Ang Mo Kio. BMJ Physiotherapy (Blk 727 AMK Ave 6) is the safest pick. It has by far the most reviews in the area, with patients praising its post-surgery and nerve-pain rehab... Goji Women's and Family Physiotherapy (Lentor Modern) is just north of AMK. It's worth it for pelvic floor, pregnancy or postnatal issues, or sports injuries.",
+  "notes": "Places search only. Goji framed as 'just north of AMK', good for pelvic floor/pregnancy/sports."
+ },
+ {
+  "id": "local-thomson",
+  "q": "physiotherapy upper thomson",
+  "prompt_sent": "physiotherapy upper thomson",
+  "engine": "claude-ai",
+  "variant": "sg-context",
+  "date": "2026-10-13",
+  "model": "Opus 5.5 (Medium)",
+  "searched": true,
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [
+   "ProRehab Physiotherapy Upper Thomson",
+   "The Physiotherapy Department (The Physio Dept.)",
+   "Physio Wing",
+   "DR+ Medical & Paincare Upper Thomson",
+   "Physio Jonathan / On Point Physiotherapy",
+   "Hallmark Physiotherapy"
+  ],
+  "cited_sources": [],
+  "place_cards": [
+   "ProRehab Physiotherapy Upper Thomson",
+   "The Physiotherapy Department (The Physio Dept.)",
+   "Physio Wing",
+   "DR+ Medical & Paincare Upper Thomson"
+  ],
+  "answer_excerpt": "Here are the physio options right in the Upper Thomson / Sin Ming stretch. ProRehab Physiotherapy (Sin Ming Plaza) is the safest all-round pick. It has a bigger team and is open 7 days (8am to 8pm on weekdays, shorter hours on weekends).",
+  "notes": "Places search only. Goji absent; Places results bounded to Upper Thomson/Sin Ming."
+ },
+ {
+  "id": "local-wh-lentor",
+  "q": "women's health physio lentor",
+  "prompt_sent": "women's health physio lentor",
+  "engine": "claude-ai",
+  "variant": "sg-context",
+  "date": "2026-10-13",
+  "model": "Opus 5.5 (Medium)",
+  "searched": true,
+  "goji_named": true,
+  "goji_cited_url": null,
+  "goji_position": 1,
+  "providers_named": [
+   "Goji Women's and Family Physiotherapy",
+   "Calyx Women's Health Physiotherapy",
+   "Embrace Physiotherapy"
+  ],
+  "cited_sources": [],
+  "place_cards": [
+   "Goji Women's and Family Physiotherapy",
+   "Calyx Women's Health Physiotherapy",
+   "Embrace Physiotherapy"
+  ],
+  "answer_excerpt": "The clear pick if you're in Lentor is Goji Women's and Family Physiotherapy, which is right inside Lentor Modern (#01-13), directly above Lentor MRT. It opens 8am to 8pm Monday to Saturday, which makes it easy to fit around work. Reviewers specifically mention postpartum care alongside sports and general physio.",
+  "notes": "Places search only. Caveat about Goji: 'it's worth asking whether the physio doing your session has specific pelvic health training. Ask this especially at Goji, since it also handles general and sports cases.'"
+ },
+ {
+  "id": "local-wh-katong",
+  "q": "women's health physio katong",
+  "prompt_sent": "women's health physio katong",
+  "engine": "claude-ai",
+  "variant": "sg-context",
+  "date": "2026-10-13",
+  "model": "Opus 5.5 (Medium)",
+  "searched": true,
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [
+   "Embrace Physiotherapy",
+   "Women And Children Centre by PSC",
+   "City Osteopathy & Physiotherapy @ East Coast",
+   "Strong Again"
+  ],
+  "cited_sources": [],
+  "place_cards": [
+   "Embrace Physiotherapy",
+   "Women And Children Centre by PSC",
+   "City Osteopathy & Physiotherapy @ East Coast",
+   "Strong Again"
+  ],
+  "answer_excerpt": "The clearest fit is Embrace Physiotherapy on Joo Chiat Road, which bills itself as a dedicated women's physio clinic. Reviews consistently mention pregnancy and postpartum care, pelvic floor rehab, and returning to strength training after birth.",
+  "notes": "Places search only. Goji's East Coast home visits not surfaced."
+ },
+ {
+  "id": "wedge-womens-physio",
+  "q": "women's physio singapore",
+  "prompt_sent": "women's physio singapore",
+  "engine": "claude-ai",
+  "variant": "sg-context",
+  "date": "2026-10-13",
+  "model": "Opus 5.5 (Medium)",
+  "searched": true,
+  "goji_named": true,
+  "goji_cited_url": null,
+  "goji_position": 5,
+  "providers_named": [
+   "Embrace Physiotherapy",
+   "Calyx Women's Health Physiotherapy",
+   "PhysioMatters Singapore",
+   "Women And Children Centre by PSC",
+   "Goji Women's and Family Physiotherapy",
+   "Physio Therapy Singapore Collective"
+  ],
+  "cited_sources": [],
+  "place_cards": [
+   "Embrace Physiotherapy",
+   "Calyx Women's Health Physiotherapy",
+   "Women And Children Centre by PSC",
+   "Goji Women's and Family Physiotherapy",
+   "PhysioMatters Singapore",
+   "Physio Therapy Singapore Collective",
+   "Physio Down Under"
+  ],
+  "answer_excerpt": "Here are some well-regarded women's health physio options across Singapore. Embrace Physiotherapy in Joo Chiat is a dedicated women's clinic and probably the most established name for pregnancy, postpartum and pelvic floor care.",
+  "notes": "Places search only. Goji framed only as 'most convenient option if you're in the north'; home visits credited to Physio Therapy Singapore Collective, not Goji."
+ },
+ {
+  "id": "wedge-wh-physio",
+  "q": "women's health physiotherapist singapore",
+  "prompt_sent": "women's health physiotherapist singapore",
+  "engine": "claude-ai",
+  "variant": "sg-context",
+  "date": "2026-10-13",
+  "model": "Opus 5.5 (Medium)",
+  "searched": true,
+  "goji_named": true,
+  "goji_cited_url": null,
+  "goji_position": 3,
+  "providers_named": [
+   "Embrace Physiotherapy",
+   "Calyx Women's Health Physiotherapy",
+   "Goji Women's and Family Physiotherapy",
+   "Physio Therapy Singapore Collective",
+   "City Osteopathy and Physiotherapy @ Novena",
+   "Spine and Pelvis Clinic Singapore"
+  ],
+  "cited_sources": [],
+  "place_cards": [
+   "Embrace Physiotherapy",
+   "Calyx Women's Health Physiotherapy",
+   "Goji Women's and Family Physiotherapy",
+   "Women And Children Centre by PSC",
+   "Spine and Pelvis Clinic Singapore",
+   "City Osteopathy and Physiotherapy @ Novena",
+   "Physio Therapy Singapore Collective",
+   "Physio Down Under"
+  ],
+  "answer_excerpt": "If you want a clinic that does only women's health, start with Embrace Physiotherapy in Joo Chiat or Calyx in the CBD. Embrace has the most reviews of the specialist clinics, and patients often mention help during pregnancy, after birth, and with pelvic floor problems.",
+  "notes": "Places search only. Goji in 'depends where you live' tier: 'Goji, in the north at Lentor, is open until 8pm on Saturdays.' Not treated as a women's-health-only clinic."
+ },
+ {
+  "id": "wedge-pf",
+  "q": "pelvic floor physiotherapy singapore",
+  "prompt_sent": "pelvic floor physiotherapy singapore",
+  "engine": "claude-ai",
+  "variant": "sg-context",
+  "date": "2026-10-13",
+  "model": "Opus 5.5 (Medium)",
+  "searched": true,
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [
+   "Embrace Physiotherapy",
+   "Calyx Women's Health Physiotherapy",
+   "Spine and Pelvis Clinic Singapore",
+   "City Osteopathy and Physiotherapy @ Novena",
+   "Women And Children Centre by PSC",
+   "Physio Down Under",
+   "KK Women's and Children's Hospital",
+   "Singapore General Hospital"
+  ],
+  "cited_sources": [],
+  "place_cards": [
+   "Embrace Physiotherapy",
+   "Calyx Women's Health Physiotherapy",
+   "Spine and Pelvis Clinic Singapore",
+   "City Osteopathy and Physiotherapy @ Novena",
+   "Women And Children Centre by PSC",
+   "Physio Down Under"
+  ],
+  "answer_excerpt": "If you want a clinic that does only women's health, the two to look at first are Embrace Physiotherapy in Joo Chiat and Calyx on Robinson Road in the CBD. Reviewers describe both as good for pregnancy, birth prep and postpartum pelvic floor work.",
+  "notes": "Places search only. Goji absent; KKH and SGH mentioned for subsidised pelvic floor physio."
+ },
+ {
+  "id": "wedge-pf-near-me",
+  "q": "pelvic floor physio near me singapore",
+  "prompt_sent": "pelvic floor physio near me singapore",
+  "engine": "claude-ai",
+  "variant": "sg-context",
+  "date": "2026-10-13",
+  "model": "Opus 5.5 (Medium)",
+  "searched": true,
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [
+   "Embrace Physiotherapy",
+   "Calyx Women's Health Physiotherapy",
+   "Women And Children Centre by PSC",
+   "Physio Therapy Singapore Collective",
+   "Spine and Pelvis Clinic Singapore",
+   "Physio Down Under"
+  ],
+  "cited_sources": [],
+  "place_cards": [
+   "Embrace Physiotherapy",
+   "Calyx Women's Health Physiotherapy",
+   "Women And Children Centre by PSC",
+   "Physio Therapy Singapore Collective",
+   "Spine and Pelvis Clinic Singapore",
+   "Physio Down Under"
+  ],
+  "answer_excerpt": "Here are some well-regarded options across Singapore. The two dedicated women's health clinics are the strongest bets if pelvic floor care is your main need. Embrace Physiotherapy (Joo Chiat) is focused entirely on women's health...",
+  "notes": "Places search only. Goji absent."
+ },
+ {
+  "id": "wedge-postnatal",
+  "q": "postnatal physio singapore",
+  "prompt_sent": "postnatal physio singapore",
+  "engine": "claude-ai",
+  "variant": "sg-context",
+  "date": "2026-10-13",
+  "model": "Opus 5.5 (Medium)",
+  "searched": true,
+  "goji_named": true,
+  "goji_cited_url": null,
+  "goji_position": 6,
+  "providers_named": [
+   "Embrace Physiotherapy",
+   "Calyx Women's Health Physiotherapy",
+   "Physio Therapy Singapore Collective",
+   "Women And Children Centre by PSC",
+   "Physio Down Under",
+   "Goji Women's and Family Physiotherapy"
+  ],
+  "cited_sources": [],
+  "place_cards": [
+   "Embrace Physiotherapy",
+   "Calyx Women's Health Physiotherapy",
+   "Physio Down Under",
+   "Physio Therapy Singapore Collective",
+   "Women And Children Centre by PSC",
+   "Goji Women's and Family Physiotherapy",
+   "Spine and Pelvis Clinic Singapore"
+  ],
+  "answer_excerpt": "If you want a clinic that does only women's health, Embrace Physiotherapy (Joo Chiat) and Calyx (Robinson Road, CBD) are the most focused. Embrace has the most reviews of that group and gets a lot of praise for pelvic floor rehab...",
+  "notes": "Places search only. Goji only as 'best option if you're in the north'; home visits credited to Physio Therapy Singapore Collective."
+ },
+ {
+  "id": "wedge-postnatal-best",
+  "q": "best postnatal physio in singapore",
+  "prompt_sent": "best postnatal physio in singapore",
+  "engine": "claude-ai",
+  "variant": "sg-context",
+  "date": "2026-10-13",
+  "model": "Opus 5.5 (Medium)",
+  "searched": true,
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [
+   "Physio Down Under",
+   "Prohealth In Touch Physio / Physio Focus",
+   "Health2Mama",
+   "Embrace Physiotherapy",
+   "Physio Active",
+   "Urban Rehab",
+   "Core Concepts",
+   "Singapore General Hospital"
+  ],
+  "cited_sources": [
+   {
+    "url": "https://expatliving.sg/physio-down-under-womens-health-physiotherapy-clinic/",
+    "owner": "Expat Living",
+    "type": "media"
+   },
+   {
+    "url": "https://www.littlestepsasia.com/singapore/pregnancy/prenatal-and-postnatal-services/physiotherapy-in-singapore/",
+    "owner": "Little Steps Asia",
+    "type": "roundup"
+   },
+   {
+    "url": "https://www.littlestepsasia.com/singapore/pregnancy/prenatal-and-postnatal-services/post-pregnancy-prohealth",
+    "owner": "Little Steps Asia",
+    "type": "media"
+   },
+   {
+    "url": "https://www.sassymamasg.com/experts-top-pelvic-floor-experts-postnatal-physiotherapists-pregnancy-singapore/",
+    "owner": "Sassy Mama SG",
+    "type": "roundup"
+   },
+   {
+    "url": "https://www.womensweekly.com.sg/parenting/benefits-physiotherapy-pregnant-postpartum",
+    "owner": "Singapore Women's Weekly",
+    "type": "media"
+   },
+   {
+    "url": "https://www.littlestepsasia.com/singapore/pregnancy/prenatal-and-postnatal-services/pregnancy-physiotherapy/",
+    "owner": "Little Steps Asia",
+    "type": "roundup"
+   },
+   {
+    "url": "https://www.healthxchange.sg/pregnancy/postnatal/prevent-pelvic-floor-disorder-pregnancy-postnatal-assessment-service",
+    "owner": "HealthXchange (SingHealth)",
+    "type": "hospital"
+   }
+  ],
+  "answer_excerpt": "There's no single \"best,\" but a few clinics come up again and again as specialists in women's health and pelvic floor rehab: Physio Down Under is a strong pick if your main concern is pelvic floor (leaking, prolapse, pain). It was co-founded by Tamara Gerdis and Monica Donaldson...",
+  "notes": "Web search (not Places); answer built entirely from parenting/lifestyle roundups. Goji absent from all cited roundups."
+ },
+ {
+  "id": "wedge-prenatal",
+  "q": "prenatal physiotherapy singapore",
+  "prompt_sent": "prenatal physiotherapy singapore",
+  "engine": "claude-ai",
+  "variant": "sg-context",
+  "date": "2026-10-13",
+  "model": "Opus 5.5 (Medium)",
+  "searched": true,
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [
+   "Embrace Physiotherapy",
+   "Calyx Women's Health Physiotherapy",
+   "Physio Down Under",
+   "KK Women's and Children's Hospital",
+   "Thomson Medical",
+   "Mount Alvernia Hospital",
+   "Gleneagles Hospital"
+  ],
+  "cited_sources": [],
+  "place_cards": [
+   "Embrace Physiotherapy",
+   "Calyx Women's Health Physiotherapy",
+   "Physio Down Under",
+   "Women And Children Centre by PSC",
+   "Goji Women's and Family Physiotherapy"
+  ],
+  "answer_excerpt": "If you want a clinic that only does women's health, Embrace and Calyx are the most focused picks. Embrace is in Joo Chiat and is good if you want to keep exercising or strength training through pregnancy. Calyx is in the CBD and suits you if you want hands-on birth prep...",
+  "notes": "Places search only. Goji appears as a place card (5th) but is not mentioned in the answer text."
+ },
+ {
+  "id": "wedge-pregnancy",
+  "q": "physio during pregnancy singapore",
+  "prompt_sent": "physio during pregnancy singapore",
+  "engine": "claude-ai",
+  "variant": "sg-context",
+  "date": "2026-10-13",
+  "model": "Opus 5.5 (Medium)",
+  "searched": true,
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [
+   "Physio Focus",
+   "In Touch Physio",
+   "Urban Rehab",
+   "Core Concepts",
+   "Embrace Physiotherapy",
+   "Physio Active",
+   "Heal360",
+   "City Osteopathy & Physiotherapy",
+   "Physio Down Under",
+   "River Physio",
+   "KK Women's and Children's Hospital",
+   "National University Hospital",
+   "Thomson Medical",
+   "Mount Elizabeth Hospital"
+  ],
+  "cited_sources": [
+   {
+    "url": "https://www.littlestepsasia.com/singapore/pregnancy/prenatal-and-postnatal-services/physiotherapy-in-singapore/",
+    "owner": "Little Steps Asia",
+    "type": "roundup"
+   },
+   {
+    "url": "https://physioandsole.com.sg/blog/zaobao-sg-feature-exercises-for-pregnancy/",
+    "owner": "Physio & Sole",
+    "type": "clinic"
+   },
+   {
+    "url": "https://littlestepsasia.com/singapore/pregnancy/prenatal-and-postnatal-services/physio-focus-physiotherapy",
+    "owner": "Little Steps Asia",
+    "type": "directory"
+   },
+   {
+    "url": "https://www.littlestepsasia.com/singapore/pregnancy/prenatal-and-postnatal-services/pregnancy-physiotherapy/",
+    "owner": "Little Steps Asia",
+    "type": "roundup"
+   },
+   {
+    "url": "https://www.womensweekly.com.sg/parenting/benefits-physiotherapy-pregnant-postpartum",
+    "owner": "Singapore Women's Weekly",
+    "type": "media"
+   }
+  ],
+  "answer_excerpt": "Physio during pregnancy is common in Singapore, and you'll want a women's health physiotherapist specifically, since they're trained in pregnancy and pelvic floor issues rather than general sports or back pain.",
+  "notes": "Web search; Little Steps Asia dominates citations (3 of 5). Goji absent."
+ },
+ {
+  "id": "wedge-mummy-baby",
+  "q": "mummy and baby assessment singapore",
+  "prompt_sent": "mummy and baby assessment singapore",
+  "engine": "claude-ai",
+  "variant": "sg-context",
+  "date": "2026-10-13",
+  "model": "Opus 5.5 (Medium)",
+  "searched": true,
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [
+   "SingHealth Polyclinics (Punggol)",
+   "KK Women's and Children's Hospital",
+   "Integrated Maternal and Child Wellness Hub"
+  ],
+  "cited_sources": [
+   {
+    "url": "https://www.moh.gov.sg/newsroom/expanding-postnatal-support-through-universal-or-needs-based-home-visits-and-increased-polyclinic-postnatal-service-subsidies/",
+    "owner": "Ministry of Health Singapore",
+    "type": "government"
+   },
+   {
+    "url": "https://polyclinic.singhealth.com.sg/Documents/Programme%20Brochure_FA.PDF",
+    "owner": "SingHealth Polyclinics",
+    "type": "government"
+   },
+   {
+    "url": "https://www.temasek.com.sg/en/news-and-resources/stories/community/Integrated-Maternal-Child-Wellness-Hub",
+    "owner": "Temasek",
+    "type": "other"
+   },
+   {
+    "url": "https://osler-health.com/news/infant-developmental-assessments-in-singapore",
+    "owner": "Osler Health",
+    "type": "clinic"
+   }
+  ],
+  "answer_excerpt": "There isn't one single official \"mummy and baby assessment\" in Singapore, but here are the main mother-and-baby checks you're probably looking for: For mum: the postnatal check-up. The recommendation is to book a postnatal check-up 6 weeks after delivery...",
+  "notes": "Web search; interpreted as public postnatal/developmental checks, not physio. No physio clinic named; Goji's Mummy & Baby assessment not surfaced."
+ },
+ {
+  "id": "wedge-home-visit",
+  "q": "postnatal physio home visit singapore",
+  "prompt_sent": "postnatal physio home visit singapore",
+  "engine": "claude-ai",
+  "variant": "sg-context",
+  "date": "2026-10-13",
+  "model": "Opus 5.5 (Medium)",
+  "searched": true,
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [
+   "Health2Mama",
+   "Physio Avenue",
+   "Edge Healthcare",
+   "Physio Down Under",
+   "In Touch / Prohealth",
+   "Urban Rehab",
+   "City Osteopathy & Physiotherapy",
+   "Core Concepts"
+  ],
+  "cited_sources": [
+   {
+    "url": "https://www.sassymamasg.com/experts-top-pelvic-floor-experts-postnatal-physiotherapists-pregnancy-singapore/",
+    "owner": "Sassy Mama SG",
+    "type": "roundup"
+   },
+   {
+    "url": "https://www.womensweekly.com.sg/parenting/benefits-physiotherapy-pregnant-postpartum",
+    "owner": "Singapore Women's Weekly",
+    "type": "media"
+   },
+   {
+    "url": "https://shiftwithshubhra.podbean.com/e/pelvic-floor-and-the-core/",
+    "owner": "Shift with Shubhra (podcast)",
+    "type": "media"
+   }
+  ],
+  "answer_excerpt": "Here are the main options I found for women's health physiotherapists in Singapore who come to your home: Health2Mama is probably the best-known option. Besides their clinic in Telok Ayer, their pelvic floor experts can also see you at home anywhere in Singapore.",
+  "notes": "Web search. One chip read 'Social Media +2' (2 extra sources hidden in chip, not captured). Goji's island-wide home visits not surfaced."
+ },
+ {
+  "id": "wedge-postnatal-pilates",
+  "q": "postnatal pilates singapore",
+  "prompt_sent": "postnatal pilates singapore",
+  "engine": "claude-ai",
+  "variant": "sg-context",
+  "date": "2026-10-13",
+  "model": "Opus 5.5 (Medium)",
+  "searched": true,
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [
+   "Kindle Space",
+   "Inspire Mum & Baby",
+   "Grounded Spaces",
+   "Focus Movement",
+   "Echo Pilates & Wellness"
+  ],
+  "cited_sources": [],
+  "place_cards": [
+   "Kindle Space",
+   "Inspire Mum & Baby",
+   "Grounded Spaces",
+   "Focus Movement (RB Capital)",
+   "Echo Pilates & Wellness"
+  ],
+  "answer_excerpt": "If you want classes built entirely around mums, Kindle Space in Joo Chiat is the strongest fit. It's a dedicated prenatal and postpartum studio, and reviewers specifically mention instructors working around C-section recovery and diastasis recti (ab separation).",
+  "notes": "Places search only; all Pilates studios, no physio clinics except Focus Movement. Goji absent."
+ },
+ {
+  "id": "cond-diastasis",
+  "q": "diastasis recti physiotherapy singapore",
+  "prompt_sent": "diastasis recti physiotherapy singapore",
+  "engine": "claude-ai",
+  "variant": "sg-context",
+  "date": "2026-10-13",
+  "model": "Opus 5.5 (Medium)",
+  "searched": true,
+  "goji_named": true,
+  "goji_cited_url": "https://luma.com/9kptu5pu",
+  "goji_position": 7,
+  "providers_named": [
+   "Health2mama",
+   "Embrace Physiotherapy",
+   "Edge Healthcare",
+   "Physio Avenue",
+   "HelloPhysio",
+   "Physio & Sole",
+   "Goji Physiotherapy",
+   "KK Women's and Children's Hospital",
+   "National University Hospital",
+   "Singapore General Hospital"
+  ],
+  "cited_sources": [
+   {
+    "url": "https://expatliving.sg/how-to-fix-abdominal-separation-diastasis-recti/",
+    "owner": "Expat Living",
+    "type": "media"
+   },
+   {
+    "url": "https://www.womensweekly.com.sg/parenting/benefits-physiotherapy-pregnant-postpartum",
+    "owner": "Singapore Women's Weekly",
+    "type": "media"
+   },
+   {
+    "url": "https://www.hellophysio.sg/?p=34072",
+    "owner": "HelloPhysio",
+    "type": "clinic"
+   },
+   {
+    "url": "https://physioandsole.com.sg/?p=11238",
+    "owner": "Physio & Sole",
+    "type": "clinic"
+   },
+   {
+    "url": "https://luma.com/9kptu5pu",
+    "owner": "Luma (Goji event page)",
+    "type": "other"
+   },
+   {
+    "url": "https://gracevillephysio.com.au/news/march-2/",
+    "owner": "Graceville Physio (Australia)",
+    "type": "clinic"
+   }
+  ],
+  "answer_excerpt": "Singapore has a good number of women's health physiotherapists who treat diastasis recti (abdominal separation). Some options turned up in my search: Health2mama: Founded by physio Bex Aldridge, it offers physiotherapy, personal training, wellness and postpartum recovery services...",
+  "notes": "Web search. Goji named last among clinics, cited only via a Luma event page: 'Goji Physiotherapy (Lentor): Has been running talks for mums with a surgeon, including short individual diastasis assessments'. gojiphysio.com not cited."
+ },
+ {
+  "id": "cond-diastasis-how",
+  "q": "how to fix abdominal separation after pregnancy",
+  "prompt_sent": "I'm in Singapore. how to fix abdominal separation after pregnancy",
+  "engine": "claude-ai",
+  "variant": "sg-context",
+  "date": "2026-10-13",
+  "model": "Opus 5.5 (Medium)",
+  "searched": false,
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [
+   "KK Women's and Children's Hospital",
+   "National University Hospital",
+   "Singapore General Hospital"
+  ],
+  "cited_sources": [],
+  "place_cards": [],
+  "answer_excerpt": "Abdominal separation (diastasis recti) is very common after pregnancy, and most cases improve a lot with the right exercises, especially in the first year postpartum. A quick self-check: lie on your back with knees bent, lift your head slightly, and press your fingertips above and below your belly button.",
+  "notes": "No search; answered from model knowledge (structured card). Recommends women's health physio via KKH/NUH/SGH or 'private physio clinics'; no private clinic named."
+ },
+ {
+  "id": "cond-leaking",
+  "q": "is leaking after birth normal",
+  "prompt_sent": "I'm in Singapore. is leaking after birth normal",
+  "engine": "claude-ai",
+  "variant": "sg-context",
+  "date": "2026-10-13",
+  "model": "Opus 5.5 (Medium)",
+  "searched": false,
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [
+   "KK Women's and Children's Hospital",
+   "National University Hospital",
+   "Singapore General Hospital"
+  ],
+  "cited_sources": [],
+  "place_cards": [],
+  "answer_excerpt": "Yes, most kinds of leaking after birth are very common and usually improve with time. It depends on what's leaking, though, so here's a quick rundown. Urine (when you cough, sneeze, laugh, or lift) is very common after both vaginal and C-section births...",
+  "notes": "No search. Pelvic floor physio pointed to KKH/NUH/SGH only."
+ },
+ {
+  "id": "cond-incontinence",
+  "q": "urinary incontinence physio singapore",
+  "prompt_sent": "urinary incontinence physio singapore",
+  "engine": "claude-ai",
+  "variant": "sg-context",
+  "date": "2026-10-13",
+  "model": "Opus 5.5 (Medium)",
+  "searched": true,
+  "goji_named": true,
+  "goji_cited_url": null,
+  "goji_position": 4,
+  "providers_named": [
+   "Embrace Physiotherapy",
+   "Calyx Women's Health Physiotherapy",
+   "PhysioMatters Singapore",
+   "Goji Women's and Family Physiotherapy",
+   "Women And Children Centre by PSC",
+   "Physio Down Under",
+   "KK Women's and Children's Hospital",
+   "Singapore General Hospital",
+   "National University Hospital",
+   "Changi General Hospital"
+  ],
+  "cited_sources": [],
+  "place_cards": [
+   "Embrace Physiotherapy",
+   "Calyx Women's Health Physiotherapy",
+   "PhysioMatters Singapore",
+   "Physio Down Under",
+   "Women And Children Centre by PSC",
+   "Goji Women's and Family Physiotherapy"
+  ],
+  "answer_excerpt": "Here are some well-regarded pelvic floor physio options across Singapore. Embrace Physiotherapy (Joo Chiat) is a dedicated women's physio clinic and probably the most focused option for pelvic floor work.",
+  "notes": "Places search only. Goji: 'convenient if you're up north. It has the longest hours of the group, open until 8pm Mon through Sat.'"
+ },
+ {
+  "id": "cond-prolapse",
+  "q": "pelvic organ prolapse physiotherapy singapore",
+  "prompt_sent": "pelvic organ prolapse physiotherapy singapore",
+  "engine": "claude-ai",
+  "variant": "sg-context",
+  "date": "2026-10-13",
+  "model": "Opus 5.5 (Medium)",
+  "searched": true,
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [
+   "SingHealth Duke-NUS Pelvic Floor Disorders Centre",
+   "KK Women's and Children's Hospital",
+   "Singapore General Hospital",
+   "Sengkang General Hospital",
+   "Physio Down Under"
+  ],
+  "cited_sources": [
+   {
+    "url": "https://www.singhealth.com.sg/our-specialties/pelvic-floor-disorders-centre",
+    "owner": "SingHealth",
+    "type": "hospital"
+   },
+   {
+    "url": "https://www.kkh.com.sg/our-specialties/allied-health-specialties/physiotherapy",
+    "owner": "KK Women's and Children's Hospital",
+    "type": "hospital"
+   },
+   {
+    "url": "https://www.sgh.com.sg/pgahi/programmes/courses/pt-courses/Fundaments-in-Common-Bladder,-Bowel-Conditions-and-Pelvic-Floor-Rehabilitation",
+    "owner": "Singapore General Hospital",
+    "type": "hospital"
+   },
+   {
+    "url": "https://www.kkh.com.sg/symptoms-treatments/physiotherapy-for-stress-urinary-incontinence-female-urinary-disorders",
+    "owner": "KK Women's and Children's Hospital",
+    "type": "hospital"
+   },
+   {
+    "url": "https://www.sfcs.org.sg/?p=290",
+    "owner": "Society for Continence Singapore",
+    "type": "other"
+   },
+   {
+    "url": "https://expatliving.sg/physio-down-under-womens-health-physiotherapy-clinic/",
+    "owner": "Expat Living",
+    "type": "media"
+   },
+   {
+    "url": "https://www.singhealth.com.sg/symptoms-treatments/physiotherapy-for-pelvic-organ-prolapse-female-urinary-disorders",
+    "owner": "SingHealth",
+    "type": "hospital"
+   },
+   {
+    "url": "https://www.healthxchange.sg/women/urology/pelvic-organ-prolapse-management-treatment",
+    "owner": "HealthXchange (SingHealth)",
+    "type": "hospital"
+   }
+  ],
+  "answer_excerpt": "In Singapore you have two main routes for pelvic organ prolapse physiotherapy: the public hospitals (cheaper with a referral) and private women's health physio clinics (faster access, no referral needed).",
+  "notes": "Web search; SingHealth/KKH dominate. Only private clinic named: Physio Down Under. Goji absent."
+ },
+ {
+  "id": "cond-heaviness",
+  "q": "feeling of heaviness down there after giving birth",
+  "prompt_sent": "I'm in Singapore. feeling of heaviness down there after giving birth",
+  "engine": "claude-ai",
+  "variant": "sg-context",
+  "date": "2026-10-13",
+  "model": "Opus 5.5 (Medium)",
+  "searched": false,
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [
+   "KK Women's and Children's Hospital",
+   "Singapore General Hospital",
+   "National University Hospital"
+  ],
+  "cited_sources": [],
+  "place_cards": [],
+  "answer_excerpt": "That heavy, dragging or \"something falling out\" feeling is really common after giving birth, especially in the first few weeks. Your pelvic floor muscles and the tissues supporting your bladder, uterus and bowel have been stretched a lot, and they need time to recover.",
+  "notes": "No search. Refers to KKH/SGH/NUH 'and many private clinics' for women's health physio; no private clinic named."
+ },
+ {
+  "id": "cond-csection",
+  "q": "c-section recovery physiotherapy singapore",
+  "prompt_sent": "c-section recovery physiotherapy singapore",
+  "engine": "claude-ai",
+  "variant": "sg-context",
+  "date": "2026-10-13",
+  "model": "Opus 5.5 (Medium)",
+  "searched": true,
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [
+   "KK Women's and Children's Hospital",
+   "Embrace Physiotherapy",
+   "Edge Healthcare",
+   "Prohealth Physio Focus",
+   "Thomson Medical",
+   "Mount Elizabeth Hospital",
+   "Gleneagles Hospital",
+   "Mount Alvernia Hospital"
+  ],
+  "cited_sources": [
+   {
+    "url": "https://www.womensweekly.com.sg/parenting/benefits-physiotherapy-pregnant-postpartum",
+    "owner": "Singapore Women's Weekly",
+    "type": "media"
+   },
+   {
+    "url": "https://www.enherts-tr.nhs.uk/content/uploads/2019/10/M-After-Your-C-Section-c-section_infoleaflet2014-1.pdf",
+    "owner": "East and North Hertfordshire NHS Trust (UK)",
+    "type": "hospital"
+   },
+   {
+    "url": "https://www.littlestepsasia.com/singapore/pregnancy/prenatal-and-postnatal-services/post-pregnancy-prohealth",
+    "owner": "Little Steps Asia",
+    "type": "media"
+   },
+   {
+    "url": "https://www.kkh.com.sg/patient-care/areas-of-care/allied-health-services/pages/physiotherapy.aspx",
+    "owner": "KK Women's and Children's Hospital",
+    "type": "hospital"
+   }
+  ],
+  "answer_excerpt": "Postnatal physio after a C-section is well supported in Singapore, through both public hospitals and private women's health clinics. The usual starting point is a full assessment around your 6-week postnatal check.",
+  "notes": "Web search. Claims private initial consults 'typically run roughly S$120 to S$200'. Goji absent."
+ },
+ {
+  "id": "cond-pgp",
+  "q": "pelvic girdle pain in pregnancy physio",
+  "prompt_sent": "I'm in Singapore. pelvic girdle pain in pregnancy physio",
+  "engine": "claude-ai",
+  "variant": "sg-context",
+  "date": "2026-10-13",
+  "model": "Opus 5.5 (Medium)",
+  "searched": true,
+  "goji_named": true,
+  "goji_cited_url": null,
+  "goji_position": 4,
+  "providers_named": [
+   "Embrace Physiotherapy",
+   "Calyx Women's Health Physiotherapy",
+   "Women And Children Centre by PSC",
+   "Goji Women's and Family Physiotherapy",
+   "Spine and Pelvis Clinic Singapore",
+   "Physio Down Under",
+   "KK Women's and Children's Hospital",
+   "National University Hospital",
+   "Singapore General Hospital",
+   "Thomson Medical",
+   "Mount Elizabeth Hospital"
+  ],
+  "cited_sources": [],
+  "place_cards": [
+   "Embrace Physiotherapy",
+   "Calyx Women's Health Physiotherapy",
+   "Women And Children Centre by PSC",
+   "Goji Women's and Family Physiotherapy",
+   "Spine and Pelvis Clinic Singapore",
+   "Physio Down Under"
+  ],
+  "answer_excerpt": "Here are some physio options in Singapore that treat pregnancy-related pelvic girdle pain. The key thing when booking is to ask specifically for a women's health (or pelvic health) physiotherapist, since pelvic girdle pain (PGP) responds best to someone who sees it regularly.",
+  "notes": "Places search only. 'Women And Children Centre by PSC and Goji are good if you're in the east or north respectively'."
+ },
+ {
+  "id": "cond-perineal",
+  "q": "perineal tear recovery physio singapore",
+  "prompt_sent": "perineal tear recovery physio singapore",
+  "engine": "claude-ai",
+  "variant": "sg-context",
+  "date": "2026-10-13",
+  "model": "Opus 5.5 (Medium)",
+  "searched": true,
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [
+   "KK Women's and Children's Hospital",
+   "National University Hospital",
+   "SingHealth",
+   "Physio Down Under",
+   "Physio Focus",
+   "In Touch Physio",
+   "Embrace Physiotherapy",
+   "River Physio",
+   "Urban Rehab",
+   "PhysioActive",
+   "Heal360",
+   "City Osteopathy & Physiotherapy"
+  ],
+  "cited_sources": [
+   {
+    "url": "https://www.ics.org/2024/abstract/752",
+    "owner": "International Continence Society",
+    "type": "other"
+   },
+   {
+    "url": "https://www.healthxchange.sg/pregnancy/postnatal/prevent-pelvic-floor-disorder-pregnancy-postnatal-assessment-service",
+    "owner": "HealthXchange (SingHealth)",
+    "type": "hospital"
+   },
+   {
+    "url": "https://expatliving.sg/physio-down-under-womens-health-physiotherapy-clinic/",
+    "owner": "Expat Living",
+    "type": "media"
+   },
+   {
+    "url": "https://www.sassymamasg.com/pregnancy/experts-wellness-pelvic-floor-physio/",
+    "owner": "Sassy Mama SG",
+    "type": "roundup"
+   },
+   {
+    "url": "https://health-services.mercyhealth.com.au/wp-content/uploads/sites/31/downloads/PATIENT-INFORMATION-MHVL-Physiotherapy-after-3rd-or-4th-degree-tear.pdf",
+    "owner": "Mercy Health (Australia)",
+    "type": "hospital"
+   }
+  ],
+  "answer_excerpt": "Here's a rundown of where to get perineal tear rehab in Singapore, split between public hospital services and private specialist clinics. If you delivered at KK Women's and Children's Hospital and had a 3rd or 4th degree tear (OASI), ask about their dedicated perineal clinic.",
+  "notes": "Web search. One chip 'physio down under womens health physiotherapy clinic +3' hides 3 extra sources. Goji absent."
+ },
+ {
+  "id": "cond-mastitis",
+  "q": "physiotherapy for blocked milk ducts singapore",
+  "prompt_sent": "physiotherapy for blocked milk ducts singapore",
+  "engine": "claude-ai",
+  "variant": "sg-context",
+  "date": "2026-10-13",
+  "model": "Opus 5.5 (Medium)",
+  "searched": true,
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [
+   "Women & Children Centre by PSC",
+   "Physio Edge",
+   "Health2mama / Health2u",
+   "PhysioActive",
+   "Physio Therapy Singapore"
+  ],
+  "cited_sources": [
+   {
+    "url": "https://health2u.sg/lactation-relief/",
+    "owner": "Health2u / Health2mama",
+    "type": "clinic"
+   },
+   {
+    "url": "https://pscwomenandchildren.sg/blog/blocked-milk-duct-mastitis-physiotherapy-singapore/",
+    "owner": "Women & Children Centre by PSC",
+    "type": "clinic"
+   },
+   {
+    "url": "https://physioedgesg.com/",
+    "owner": "Physio Edge",
+    "type": "clinic"
+   },
+   {
+    "url": "https://physioactive.sg/mastitis-and-blocked-milk-ducts/",
+    "owner": "PhysioActive",
+    "type": "clinic"
+   },
+   {
+    "url": "https://www.physiotherapysgc.com/womens-health/lactation-relief",
+    "owner": "Physio Therapy Singapore Collective",
+    "type": "clinic"
+   },
+   {
+    "url": "https://pscwomenandchildren.sg/womens-health-physiotherapy-services/ultrasound-for-mastitis/",
+    "owner": "Women & Children Centre by PSC",
+    "type": "clinic"
+   }
+  ],
+  "answer_excerpt": "Several clinics in Singapore offer physiotherapy for blocked milk ducts and mastitis. The main tool is therapeutic ultrasound, which sends soundwaves into the tissue, creating a micromassage effect and deep heat that helps loosen the milk, unblock the duct, reduce pain and increase milk flow.",
+  "notes": "Web search; all citations are clinic service pages (PSC blog page ranks). Chip 'Blocked Milk Duct or Mastitis? When Physio Can Help +2' hides 2 extra sources. Goji absent."
+ },
+ {
+  "id": "cond-pelvic-pain",
+  "q": "pelvic pain physiotherapy singapore",
+  "prompt_sent": "pelvic pain physiotherapy singapore",
+  "engine": "claude-ai",
+  "variant": "sg-context",
+  "date": "2026-10-13",
+  "model": "Opus 5.5 (Medium)",
+  "searched": true,
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [
+   "Physio Down Under",
+   "City Osteopathy & Physiotherapy",
+   "In Touch Physiotherapy",
+   "Urban Rehab",
+   "Physio Focus",
+   "Heal360 Physio Clinic",
+   "KK Women's and Children's Hospital",
+   "Singapore General Hospital",
+   "National University Hospital"
+  ],
+  "cited_sources": [
+   {
+    "url": "https://expatliving.sg/physio-down-under-womens-health-physiotherapy-clinic/",
+    "owner": "Expat Living",
+    "type": "media"
+   },
+   {
+    "url": "https://www.timeout.com/singapore/sport-and-fitness/city-osteopathy-and-physiotherapy",
+    "owner": "Time Out Singapore",
+    "type": "media"
+   },
+   {
+    "url": "https://singmalls.app/en/malls/the-woodleigh-mall/merchants/the-woodleigh-mall-chiropractic-sg-city-osteopathy-physiotherapy",
+    "owner": "SingMalls",
+    "type": "directory"
+   },
+   {
+    "url": "https://www.littlestepsasia.com/singapore/pregnancy/prenatal-and-postnatal-services/physiotherapy-in-singapore/",
+    "owner": "Little Steps Asia",
+    "type": "roundup"
+   },
+   {
+    "url": "https://littlestepsasia.com/singapore/pregnancy/prenatal-and-postnatal-services/pregnancy-physiotherapy",
+    "owner": "Little Steps Asia",
+    "type": "roundup"
+   }
+  ],
+  "answer_excerpt": "Singapore has a solid set of private clinics for pelvic pain physiotherapy, and here are some that come up most often: Physio Down Under is the most specialised option. Its founders, Tamara and Monica, have 40 years of combined clinical experience in pelvic health...",
+  "notes": "Web search. Chip 'physio down under womens health physiotherapy clinic +2' hides 2 extra sources. Goji absent."
+ },
+ {
+  "id": "cond-menopause",
+  "q": "menopause physiotherapy singapore",
+  "prompt_sent": "menopause physiotherapy singapore",
+  "engine": "claude-ai",
+  "variant": "sg-context",
+  "date": "2026-10-13",
+  "model": "Opus 5.5 (Medium)",
+  "searched": true,
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [
+   "KK Women's and Children's Hospital (KK Menopause Centre)",
+   "Singapore General Hospital",
+   "Physio Down Under",
+   "Embrace Physiotherapy"
+  ],
+  "cited_sources": [
+   {
+    "url": "https://www.kkh.com.sg/news/singapore-health/singapore-health-mar-apr-2024-issue",
+    "owner": "KK Women's and Children's Hospital",
+    "type": "hospital"
+   },
+   {
+    "url": "https://www.singhealthacademy.edu.sg/semconf2023/past-conference/semconf2021/speakers-ms-caroline-chua",
+    "owner": "SingHealth Academy",
+    "type": "hospital"
+   },
+   {
+    "url": "https://www.sgh.com.sg/our-specialties/pelvic-floor-disorder",
+    "owner": "Singapore General Hospital",
+    "type": "hospital"
+   },
+   {
+    "url": "https://expatliving.sg/physio-down-under-womens-health-physiotherapy-clinic/",
+    "owner": "Expat Living",
+    "type": "media"
+   },
+   {
+    "url": "https://recordowl.com/company/embrace-physiotherapy-pte-ltd",
+    "owner": "RecordOwl",
+    "type": "directory"
+   },
+   {
+    "url": "https://nuhsplus.edu.sg/article/shedding-light-on-menopausal-joint-pain",
+    "owner": "NUHS",
+    "type": "hospital"
+   }
+  ],
+  "answer_excerpt": "Menopause physiotherapy usually falls under \"women's health\" or \"pelvic health\" physiotherapy. Here are the main options in Singapore. Public hospitals (subsidised with a referral): KK Women's and Children's Hospital is the strongest public option.",
+  "notes": "Web search. Chip 'shedding light on menopausal joint pain +2' hides 2 extra sources. Goji absent despite having a menopause page."
+ },
+ {
+  "id": "cond-run-after-birth",
+  "q": "when can i start running after giving birth",
+  "prompt_sent": "I'm in Singapore. when can i start running after giving birth",
+  "engine": "claude-ai",
+  "variant": "sg-context",
+  "date": "2026-10-13",
+  "model": "Opus 5.5 (Medium)",
+  "searched": false,
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [
+   "KK Women's and Children's Hospital",
+   "National University Hospital",
+   "Singapore General Hospital"
+  ],
+  "cited_sources": [],
+  "place_cards": [],
+  "answer_excerpt": "Most current guidance says to wait at least 12 weeks after birth before running, and only once your body is ready. Many women need longer, and that's normal. This comes from the 2019 UK return-to-running guidelines (Goom, Donnelly and Brockwell)...",
+  "notes": "No search. Recommends women's health physio at KKH/NUH/SGH 'and several private clinics'; none named."
+ },
+ {
+  "id": "paeds-schroth",
+  "q": "schroth therapy singapore",
+  "prompt_sent": "schroth therapy singapore",
+  "engine": "claude-ai",
+  "variant": "sg-context",
+  "date": "2026-10-13",
+  "model": "Opus 5.5 (Medium)",
+  "searched": true,
+  "goji_named": true,
+  "goji_cited_url": "https://www.gojiphysio.com/services/schroth-scoliosis-adults/",
+  "goji_position": 5,
+  "providers_named": [
+   "Posture Plus",
+   "Physio & Sole / Women And Children Centre",
+   "Core Fitness",
+   "BREMJ Scoliosis Treatment & Physio",
+   "Goji Women's and Family Physiotherapy",
+   "Edge Healthcare"
+  ],
+  "cited_sources": [
+   {
+    "url": "https://postureplus.sg/schroth-therapy/",
+    "owner": "Posture Plus",
+    "type": "clinic"
+   },
+   {
+    "url": "https://pscwomenandchildren.sg/paediatric-physiotherapy-services/schroth-for-scoliosis/",
+    "owner": "Women & Children Centre by PSC",
+    "type": "clinic"
+   },
+   {
+    "url": "https://physioandsole.com.sg/schroth-therapy-for-scoliosis/",
+    "owner": "Physio & Sole",
+    "type": "clinic"
+   },
+   {
+    "url": "https://www.corefitness.com.sg/scoliosis-physiotherapy/",
+    "owner": "Core Fitness",
+    "type": "clinic"
+   },
+   {
+    "url": "https://www.bremj.com/",
+    "owner": "BREMJ",
+    "type": "clinic"
+   },
+   {
+    "url": "https://www.gojiphysio.com/services/schroth-scoliosis-adults/",
+    "owner": "Goji Women's and Family Physiotherapy",
+    "type": "clinic"
+   },
+   {
+    "url": "https://www.edgehealthcare.com.sg/meet-the-team/",
+    "owner": "Edge Healthcare",
+    "type": "clinic"
+   }
+  ],
+  "answer_excerpt": "Several clinics in Singapore offer Schroth therapy for scoliosis. Here are the main ones I found: Posture Plus (Haig Road and Somerset Road): They describe themselves as the only clinic in Singapore with a physiotherapist fully certified in International Schroth 3D Scoliosis Therapy (ISST)...",
+  "notes": "Web search. Goji cited via gojiphysio.com adults Schroth page: 'This one lists pricing openly. Their adult Schroth session runs 55 minutes, at $260 in-clinic or $330 for a home visit, at Lentor Modern #01-13.' (matches site). Chip 'Schroth Therapy for Scoliosis Treatment +2' hides 2 sources."
+ },
+ {
+  "id": "paeds-scoliosis-child",
+  "q": "scoliosis physiotherapy for child singapore",
+  "prompt_sent": "scoliosis physiotherapy for child singapore",
+  "engine": "claude-ai",
+  "variant": "sg-context",
+  "date": "2026-10-13",
+  "model": "Opus 5.5 (Medium)",
+  "searched": true,
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [
+   "KK Women's and Children's Hospital",
+   "National University Hospital",
+   "Physio & Sole",
+   "Prohealth Physio Focus"
+  ],
+  "cited_sources": [
+   {
+    "url": "https://www.kkh.com.sg/publications/patient-care/setting-a-new-standard-for-orthopaedic-and-spine-care-in-children",
+    "owner": "KK Women's and Children's Hospital",
+    "type": "hospital"
+   },
+   {
+    "url": "https://www.singhealth.com.sg/news/defining-med/new-musculoskeletal-centre-at-kkh-provides-one-stop-care-for-children-with-orthopaedic-and-spine-conditions",
+    "owner": "SingHealth",
+    "type": "hospital"
+   },
+   {
+    "url": "https://www.singhealth.com.sg/news/patient-care/kkh-opens-new-one-stop-dedicated-paediatric-orthotic-centre",
+    "owner": "SingHealth",
+    "type": "hospital"
+   },
+   {
+    "url": "https://physioandsole.com.sg/physiotherapy-treatments/scroth-for-scoliosis",
+    "owner": "Physio & Sole",
+    "type": "clinic"
+   },
+   {
+    "url": "https://physioandsole.com.sg/schroth-therapy-for-scoliosis/",
+    "owner": "Physio & Sole",
+    "type": "clinic"
+   },
+   {
+    "url": "https://www.littlestepsasia.com/singapore/health/medical-specialists/scoliosis-prohealth-physio-focus/",
+    "owner": "Little Steps Asia",
+    "type": "media"
+   },
+   {
+    "url": "https://www.hopkinsmedicine.org/healthlibrary/test_procedures/orthopaedic/schroth_method_physical_therapy_scoliosis_22,schrothmethodphysicaltherapyscoliosis",
+    "owner": "Johns Hopkins Medicine",
+    "type": "hospital"
+   }
+  ],
+  "answer_excerpt": "For a child in Singapore, the usual path is to get a proper diagnosis and curve measurement from a paediatric orthopaedic doctor first, then do scoliosis-specific physiotherapy (most commonly the Schroth method) alongside monitoring and, if needed, bracing.",
+  "notes": "Web search. Hidden '+N' chip sources captured via hover. Goji's children's Schroth page not surfaced."
+ },
+ {
+  "id": "paeds-physio",
+  "q": "paediatric physiotherapy singapore",
+  "prompt_sent": "paediatric physiotherapy singapore",
+  "engine": "claude-ai",
+  "variant": "sg-context",
+  "date": "2026-10-13",
+  "model": "Opus 5.5 (Medium)",
+  "searched": true,
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [
+   "Kids Focus Physiotherapy",
+   "Wings Therapy Center",
+   "City Osteopathy & Physiotherapy @ Woodleigh",
+   "Women And Children Centre by PSC",
+   "Collaborative Centre",
+   "KK Women's and Children's Hospital",
+   "Khoo Teck Puat-National University Children's Medical Institute (NUH)"
+  ],
+  "cited_sources": [],
+  "place_cards": [
+   "Kids Focus Physiotherapy",
+   "WINGS THERAPY CENTER",
+   "City Osteopathy & Physiotherapy @ Woodleigh",
+   "Women And Children Centre by PSC",
+   "Collaborative Centre"
+  ],
+  "answer_excerpt": "Here's a quick rundown of the options on the map, plus the public-hospital route. Private clinics: Kids Focus Physiotherapy (Orange Grove Rd) is a dedicated paediatric practice. Parents mention good results with infant torticollis, flat-head positioning, delayed gross motor milestones and genetic conditions.",
+  "notes": "Places search only. Goji absent (paediatric service not associated with Goji in Places results)."
+ },
+ {
+  "id": "paeds-torticollis",
+  "q": "baby torticollis physiotherapy singapore",
+  "prompt_sent": "baby torticollis physiotherapy singapore",
+  "engine": "claude-ai",
+  "variant": "sg-context",
+  "date": "2026-10-13",
+  "model": "Opus 5.5 (Medium)",
+  "searched": true,
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [
+   "KK Women's and Children's Hospital",
+   "Singapore General Hospital",
+   "National University Hospital",
+   "City Osteopathy & Physiotherapy",
+   "Kids Focus Physiotherapy",
+   "Prohealth In Touch Physiotherapy",
+   "KidzPhysio Singapore"
+  ],
+  "cited_sources": [
+   {
+    "url": "https://www.singhealth.com.sg/symptoms-treatments/torticollis-childhood-illnesses",
+    "owner": "SingHealth",
+    "type": "hospital"
+   },
+   {
+    "url": "https://thenewageparents.com/orthopaedic-conditions-in-babies-and-children-part-i/",
+    "owner": "The New Age Parents",
+    "type": "media"
+   },
+   {
+    "url": "https://www.etvbharat.com/amp/en/health/physiotherapy-manage-torticollis-newborn-babies-enn26072402861",
+    "owner": "ETV Bharat",
+    "type": "media"
+   },
+   {
+    "url": "https://www.sgh.com.sg/our-specialties/physiotherapy/paediatric-physiotherapy",
+    "owner": "Singapore General Hospital",
+    "type": "hospital"
+   },
+   {
+    "url": "https://honeykidsasia.com/physiotherapy-centres-in-singapore-for-kids/",
+    "owner": "HoneyKids Asia",
+    "type": "roundup"
+   },
+   {
+    "url": "https://www.littlestepsasia.com/singapore/health/medical-specialists/physiotherapists-for-kids",
+    "owner": "Little Steps Asia",
+    "type": "roundup"
+   },
+   {
+    "url": "https://research.regionh.dk/da/publications/benefit-of-physiotherapeutic-treatment-in-children-with-torticoll/",
+    "owner": "Region Hovedstaden (Denmark) research",
+    "type": "other"
+   }
+  ],
+  "answer_excerpt": "Infant torticollis (usually congenital muscular torticollis, from a tight neck muscle on one side) responds well to physiotherapy in most babies, and Singapore has both public and private options.",
+  "notes": "Web search. Hover captured most '+2' chip sources; one chip's popover may be incomplete. Goji absent."
+ },
+ {
+  "id": "paeds-ddh",
+  "q": "hip dysplasia baby physio singapore",
+  "prompt_sent": "hip dysplasia baby physio singapore",
+  "engine": "claude-ai",
+  "variant": "sg-context",
+  "date": "2026-10-13",
+  "model": "Opus 5.5 (Medium)",
+  "searched": true,
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [
+   "KK Women's and Children's Hospital",
+   "Khoo Teck Puat-National University Children's Medical Institute (NUH)",
+   "Mount Elizabeth Hospital"
+  ],
+  "cited_sources": [
+   {
+    "url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12917048/",
+    "owner": "NIH PMC",
+    "type": "other"
+   },
+   {
+    "url": "https://p-ortho.com/paediatric-orthopaedic-services/hip-dyplasia-treatment-children/",
+    "owner": "P-Ortho (paediatric orthopaedic clinic)",
+    "type": "clinic"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12425625",
+    "owner": "NIH PMC",
+    "type": "other"
+   },
+   {
+    "url": "https://www.mountelizabeth.com.sg/conditions-diseases/developmental-hip-dysplasia/diagnosis-treatment",
+    "owner": "Mount Elizabeth Hospitals",
+    "type": "hospital"
+   }
+  ],
+  "answer_excerpt": "In Singapore, a baby with hip dysplasia (DDH) is usually treated first by a paediatric orthopaedic surgeon, and physiotherapy supports that care. It is not a stand-alone treatment for an unstable or dislocated infant hip.",
+  "notes": "Web search. No private physio clinic named. Goji absent."
+ },
+ {
+  "id": "paeds-clubfoot",
+  "q": "clubfoot physiotherapy singapore",
+  "prompt_sent": "clubfoot physiotherapy singapore",
+  "engine": "claude-ai",
+  "variant": "sg-context",
+  "date": "2026-10-13",
+  "model": "Opus 5.5 (Medium)",
+  "searched": true,
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [
+   "KK Women's and Children's Hospital",
+   "National University Hospital",
+   "Mount Elizabeth Hospital",
+   "Gleneagles Hospital",
+   "Orchard Health Clinic"
+  ],
+  "cited_sources": [
+   {
+    "url": "https://www.kkh.com.sg/our-specialties/orthopaedic-surgery",
+    "owner": "KK Women's and Children's Hospital",
+    "type": "hospital"
+   },
+   {
+    "url": "https://www.kkh.com.sg/Services/Children/OrthopaedicSurgery/Pages/Home.aspx",
+    "owner": "KK Women's and Children's Hospital",
+    "type": "hospital"
+   },
+   {
+    "url": "https://www.singhealthdukenus.com.sg/conditions-treatments/clubfoot-child/treatment",
+    "owner": "SingHealth Duke-NUS",
+    "type": "hospital"
+   },
+   {
+    "url": "https://www.kkh.com.sg/news/defining-med/new-musculoskeletal-centre-at-kkh-provides-one-stop-care-for-children-with-orthopaedic-and-spine-conditions",
+    "owner": "KK Women's and Children's Hospital",
+    "type": "hospital"
+   },
+   {
+    "url": "https://www.kkh.com.sg/patient-care/conditions-treatments/clubfoot-child/prevention",
+    "owner": "KK Women's and Children's Hospital",
+    "type": "hospital"
+   },
+   {
+    "url": "https://www.nuhs.edu.sg/patient-care/find-a-condition/clubfeet",
+    "owner": "NUHS",
+    "type": "hospital"
+   },
+   {
+    "url": "https://honeykidsasia.com/physiotherapy-centres-in-singapore-for-kids/",
+    "owner": "HoneyKids Asia",
+    "type": "roundup"
+   },
+   {
+    "url": "https://avesis.lokmanhekim.edu.tr/yayin/154c9d45-fbf2-49da-a2e7-801ab7ce8401/short-term-results-of-intensive-physiotherapy-in-clubfoot-deformity-treated-with-the-ponseti-method",
+    "owner": "Lokman Hekim University (research)",
+    "type": "other"
+   },
+   {
+    "url": "https://avesis.iuc.edu.tr/yayin/15a4c76a-1f55-4378-9cf2-85654a95d9be/the-effectiveness-of-three-phase-physiotherapy-program-in-children-with-clubfoot-after-ponseti-treatment",
+    "owner": "Istanbul University-Cerrahpasa (research)",
+    "type": "other"
+   }
+  ],
+  "answer_excerpt": "In Singapore, clubfoot (congenital talipes equinovarus, CTEV) care is mainly run through the public paediatric orthopaedic departments. Physiotherapy is part of the team there, not a separate standalone service.",
+  "notes": "Web search; KKH dominates (hover captured '+4' chip). Goji absent."
+ },
+ {
+  "id": "msk-back",
+  "q": "back pain physio singapore",
+  "prompt_sent": "back pain physio singapore",
+  "engine": "claude-ai",
+  "variant": "sg-context",
+  "date": "2026-10-13",
+  "model": "Opus 5.5 (Medium)",
+  "searched": true,
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [
+   "The Rehab Lab Plus",
+   "Core Concepts Physiotherapy",
+   "PhysioDass Spine & Sports Rehab",
+   "Heal360 Physioclinic",
+   "Orchard Health Clinic"
+  ],
+  "cited_sources": [],
+  "place_cards": [
+   "The Rehab Lab Plus",
+   "Core Concepts Physiotherapy Raffles Place",
+   "Core Concepts Physiotherapy Novena Square",
+   "Heal360 Physioclinic - Tanjong Pagar",
+   "PhysioDass Spine & Sports Rehab",
+   "Orchard Health Clinic"
+  ],
+  "answer_excerpt": "Here are some well-reviewed physio clinics in Singapore with a good track record for back pain. The Rehab Lab Plus (Tessensohn Rd, near Farrer Park/Boon Keng) has many reviews that mention lower back recovery specifically...",
+  "notes": "Places search only; ranking driven by review volume (500-1,600 reviews). Goji absent."
+ },
+ {
+  "id": "msk-fracture",
+  "q": "physiotherapy after fracture singapore",
+  "prompt_sent": "physiotherapy after fracture singapore",
+  "engine": "claude-ai",
+  "variant": "sg-context",
+  "date": "2026-10-13",
+  "model": "Opus 5.5 (Medium)",
+  "searched": true,
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [
+   "Singapore General Hospital",
+   "Khoo Teck Puat Hospital",
+   "Tan Tock Seng Hospital"
+  ],
+  "cited_sources": [
+   {
+    "url": "https://dollarsandsense.sg/how-much-does-seeing-a-physiotherapist-cost/",
+    "owner": "DollarsAndSense",
+    "type": "media"
+   },
+   {
+    "url": "https://www.sgh.com.sg/news/patient-care/what-is-contributing-to-singapores-physiotherapy-upswing",
+    "owner": "Singapore General Hospital",
+    "type": "hospital"
+   },
+   {
+    "url": "https://physioandsole.com.sg/blog/physio-singapore/",
+    "owner": "Physio & Sole",
+    "type": "clinic"
+   },
+   {
+    "url": "https://www.whatclinic.com/physiotherapy/singapore/central-singapore/marine-parade/post-op-rehabilitation",
+    "owner": "WhatClinic",
+    "type": "directory"
+   },
+   {
+    "url": "https://www.aic.sg/care-services/community-rehabilitation",
+    "owner": "Agency for Integrated Care",
+    "type": "government"
+   },
+   {
+    "url": "https://moh.gov.sg/newsroom/speech-by-mr-gan-kim-yong-at-the-singapore-international-physiotherapy-congress-2014-raffles-city-convention-centre-3-may-2014",
+    "owner": "Ministry of Health Singapore",
+    "type": "government"
+   }
+  ],
+  "answer_excerpt": "Here's an overview of your options for physiotherapy after a fracture in Singapore. Public hospitals (cheapest if you're a citizen or PR). You can get physio at public hospitals such as Singapore General Hospital (SGH), Khoo Teck Puat Hospital (KTPH) and Tan Tock Seng Hospital (TTSH)...",
+  "notes": "Web search focused on cost/subsidy; private clinics only generically ('$120 to $200+'). No private clinic named. Goji absent."
+ },
+ {
+  "id": "holistic-pilates",
+  "q": "clinical pilates with physiotherapist singapore",
+  "prompt_sent": "clinical pilates with physiotherapist singapore",
+  "engine": "claude-ai",
+  "variant": "sg-context",
+  "date": "2026-10-13",
+  "model": "Opus 5.5 (Medium)",
+  "searched": true,
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [
+   "Focus Movement",
+   "Physio Down Under",
+   "Core Fitness",
+   "Singapore Physio and Pilates",
+   "Posture Plus",
+   "The Physio Studio Singapore",
+   "Clinical Pilates Family Physiotherapy"
+  ],
+  "cited_sources": [],
+  "place_cards": [
+   "Focus Movement (RB Capital)",
+   "Physio Down Under",
+   "Core Fitness | Physiotherapy & Private Pilates",
+   "Singapore Physio and Pilates CBD",
+   "Posture Plus",
+   "The Physio Studio Singapore",
+   "Clinical Pilates Family Physiotherapy"
+  ],
+  "answer_excerpt": "Here are some well-reviewed spots in Singapore where clinical pilates is run by or alongside physiotherapists. Most are clustered around the CBD, Orchard and Somerset. Focus Movement (Malacca St, CBD) is the biggest and most established option...",
+  "notes": "Places search only; results clustered CBD/Orchard. Goji absent."
+ },
+ {
+  "id": "gen-first-visit",
+  "q": "what happens at a first physiotherapy appointment",
+  "prompt_sent": "I'm in Singapore. what happens at a first physiotherapy appointment",
+  "engine": "claude-ai",
+  "variant": "sg-context",
+  "date": "2026-10-13",
+  "model": "Opus 5.5 (Medium)",
+  "searched": false,
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [],
+  "cited_sources": [],
+  "place_cards": [],
+  "answer_excerpt": "A first physiotherapy appointment in Singapore is mostly an assessment session, usually lasting around 45 to 60 minutes, with some treatment if time allows. Before you go: If you're going to a private clinic, you can usually book directly without a doctor's referral.",
+  "notes": "No search; generic. Claims private first visits 'roughly $100 to $200 or more'. Thinking label ('without using em dashes') suggests account-level style preferences still apply in incognito."
+ },
+ {
+  "id": "gen-cost",
+  "q": "how much does physiotherapy cost in singapore",
+  "prompt_sent": "how much does physiotherapy cost in singapore",
+  "engine": "claude-ai",
+  "variant": "sg-context",
+  "date": "2026-10-13",
+  "model": "Opus 5.5 (Medium)",
+  "searched": true,
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [
+   "Core Concepts",
+   "Edge Healthcare",
+   "heal360",
+   "Physio & Sole",
+   "Apex Sports Clinic",
+   "NTUC Health"
+  ],
+  "cited_sources": [
+   {
+    "url": "https://www.misslobang.com/zh/article/best-physiotherapy-clinics-singapore-2026",
+    "owner": "Miss Lobang",
+    "type": "roundup"
+   },
+   {
+    "url": "https://www.misslobang.com/article/best-physiotherapy-clinics-singapore-2026",
+    "owner": "Miss Lobang",
+    "type": "roundup"
+   },
+   {
+    "url": "https://expatliving.sg/physiotheraphy-insurance-plans-pacific-prime/",
+    "owner": "Expat Living",
+    "type": "media"
+   }
+  ],
+  "answer_excerpt": "In Singapore, a private physiotherapy session typically costs around S$180 to S$215, while subsidised community care can be much cheaper depending on your household income. Private clinics. A comparison of published fees (checked August 2026) found that most private prices fall in a narrow band...",
+  "notes": "Web search; answer built from one Miss Lobang 2026 price roundup (EN + ZH) that lists 9 clinics; Goji not in it even though Goji publishes prices. '+2' chips only partially resolved on hover."
+ },
+ {
+  "id": "gen-referral",
+  "q": "do i need a doctor's referral to see a physiotherapist in singapore",
+  "prompt_sent": "do i need a doctor's referral to see a physiotherapist in singapore",
+  "engine": "claude-ai",
+  "variant": "sg-context",
+  "date": "2026-10-13",
+  "model": "Opus 5.5 (Medium)",
+  "searched": true,
+  "goji_named": false,
+  "goji_cited_url": null,
+  "goji_position": null,
+  "providers_named": [
+   "NTUC Health"
+  ],
+  "cited_sources": [
+   {
+    "url": "https://ask.gov.sg/sgh-ahpedia/questions/cmeqy6tpy00hzf2j1moutd9tk",
+    "owner": "Ask.gov.sg (SGH)",
+    "type": "government"
+   },
+   {
+    "url": "https://www.misslobang.com/article/best-physiotherapy-clinics-singapore-2026",
+    "owner": "Miss Lobang",
+    "type": "roundup"
+   },
+   {
+    "url": "https://ntuchealth.sg/elderly-care/resources/health-and-wellness/physiotherapy-in-singapore-5-misconceptions",
+    "owner": "NTUC Health",
+    "type": "clinic"
+   }
+  ],
+  "answer_excerpt": "No, not for a private clinic. In Singapore, you can directly access private physiotherapy services without a referral. However, for subsidised treatment at public hospitals, a doctor's referral would be required.",
+  "notes": "Web search. No private clinic named."
+ },
+ {
+  "id": "brand-goji",
+  "q": "goji physio",
+  "prompt_sent": "I'm in Singapore. goji physio",
+  "engine": "claude-ai",
+  "variant": "sg-context",
+  "date": "2026-10-13",
+  "model": "Opus 5.5 (Medium)",
+  "searched": true,
+  "goji_named": true,
+  "goji_cited_url": null,
+  "goji_position": 1,
+  "providers_named": [
+   "Goji Women's and Family Physiotherapy"
+  ],
+  "cited_sources": [],
+  "place_cards": [
+   "Goji Women's and Family Physiotherapy"
+  ],
+  "answer_excerpt": "That's Goji Women's and Family Physiotherapy at 1 Lentor Central, #01-13 Lentor Modern, Singapore 788887. It's open Monday to Saturday, 8am to 8pm, and closed Sundays. You can call them at +65 8377 0401 or book through gojiphysio.com. It has a 5.0 rating from 21 reviews.",
+  "notes": "Places search only (GBP data). 'closed Sundays' conflicts with site (Sun/PH by appointment). gojiphysio.com mentioned in text but not a cited link."
+ },
+ {
+  "id": "brand-formal",
+  "q": "goji women's and family physiotherapy",
+  "prompt_sent": "I'm in Singapore. goji women's and family physiotherapy",
+  "engine": "claude-ai",
+  "variant": "sg-context",
+  "date": "2026-10-13",
+  "model": "Opus 5.5 (Medium)",
+  "searched": true,
+  "goji_named": true,
+  "goji_cited_url": null,
+  "goji_position": 1,
+  "providers_named": [
+   "Goji Women's and Family Physiotherapy"
+  ],
+  "cited_sources": [],
+  "place_cards": [
+   "Goji Women's and Family Physiotherapy"
+  ],
+  "answer_excerpt": "Goji Women's and Family Physiotherapy is at 1 Lentor Central, #01-13 Lentor Modern, Singapore 788887, a short walk from Lentor MRT on the Thomson-East Coast Line. Hours: Monday to Saturday, 8am to 8pm. Closed Sundays. Phone: +65 8377 0401. Website: gojiphysio.com",
+  "notes": "Places search only. 'Closed Sundays' conflicts with site (Sun/PH by appointment). Services described only from Google reviews."
+ },
+ {
+  "id": "brand-what",
+  "q": "what is goji physio singapore and what do they offer",
+  "prompt_sent": "what is goji physio singapore and what do they offer",
+  "engine": "claude-ai",
+  "variant": "sg-context",
+  "date": "2026-10-13",
+  "model": "Opus 5.5 (Medium)",
+  "searched": true,
+  "goji_named": true,
+  "goji_cited_url": "https://imginn.com/gojiphysio/",
+  "goji_position": 1,
+  "providers_named": [
+   "Goji Physio",
+   "The O&G Specialist Clinic"
+  ],
+  "cited_sources": [
+   {
+    "url": "https://imginn.com/gojiphysio/",
+    "owner": "Imginn (Instagram mirror of @gojiphysio)",
+    "type": "other"
+   },
+   {
+    "url": "https://sg.linkedin.com/in/ashton-wu",
+    "owner": "LinkedIn (Ashton Wu profile)",
+    "type": "other"
+   }
+  ],
+  "answer_excerpt": "Goji Physio is a fairly new women's and family physiotherapy clinic in Lentor, in the Central North part of Singapore. It's located at Lentor Modern #01-13, and opened on 4 May (this year, based on the timing of their posts), with a grand opening celebration on 6 June.",
+  "notes": "Web search; gojiphysio.com NOT cited, answer built from an Instagram scraper (imginn) and a LinkedIn profile. Wrong: 'I couldn't find details on pricing or session formats in what's publicly indexed. Their Instagram (@gojiphysio) has a booking link' (site publishes prices). Home visits omitted."
+ }
+]
