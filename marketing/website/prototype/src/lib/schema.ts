@@ -7,15 +7,28 @@
  */
 import { SITE } from "./site.ts";
 
+/** Stable node id for the clinic, so page schema (Service provider, Person
+ *  worksFor, page publisher) joins to the one site-wide entity below. */
+export function clinicId(origin: URL) {
+  return new URL("/#clinic", origin).href;
+}
+
+/** Reference to the clinic node, for use inside page-level schema. */
+export function clinicRef(origin: URL) {
+  return { "@id": clinicId(origin) };
+}
+
 /** MedicalClinic + LocalBusiness for local SEO (NAP from SITE). */
 export function businessSchema(origin: URL) {
   return {
     "@context": "https://schema.org",
     "@type": ["MedicalClinic", "LocalBusiness"],
+    "@id": clinicId(origin),
     name: SITE.fullName,
     alternateName: [SITE.name, "Goji Physio"],
     url: origin.href,
     image: new URL("/og-image.jpg", origin).href,
+    logo: new URL("/brand/logo_main_transparent.png", origin).href,
     email: SITE.email,
     telephone: SITE.phoneE164,
     priceRange: "$$",
@@ -27,6 +40,9 @@ export function businessSchema(origin: URL) {
       addressCountry: "SG",
     },
     hasMap: SITE.googleMaps,
+    // Place pin of the clinic's Google Maps listing (SITE.googleMaps resolves to
+    // .../!3d1.3858436!4d103.8350854), not the map viewport centre.
+    geo: { "@type": "GeoCoordinates", latitude: 1.3858436, longitude: 103.8350854 },
     areaServed: [
       { "@type": "Place", name: "Lentor, Singapore" },
       { "@type": "Place", name: "Ang Mo Kio, Singapore" },

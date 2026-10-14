@@ -4,6 +4,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import Section from "../../components/Section.astro";
 import Button from "../../components/Button.astro";
 import { extractFaqs, faqSchema } from "../../lib/faq.ts";
+import { clinicRef } from "../../lib/schema.ts";
 
 export async function getStaticPaths() {
   const conditions = await getCollection("conditions", ({ data }) => !data.draft);
@@ -37,6 +38,7 @@ const conditionSchema: Record<string, unknown>[] = [
     url: pageURL,
     about: { "@type": "MedicalCondition", name: cardTitle ?? title },
     audience: { "@type": "MedicalAudience", audienceType: "Patient" },
+    publisher: clinicRef(origin),
     ...(reviewer && reviewerURL
       ? {
           reviewedBy: {

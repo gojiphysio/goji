@@ -16,6 +16,7 @@ import Section from "../../components/Section.astro";
 import Button from "../../components/Button.astro";
 import { formatDate, isoDate } from "../../lib/dates.ts";
 import { SITE } from "../../lib/site.ts";
+import { clinicId } from "../../lib/schema.ts";
 
 const entries = (await getCollection("press", ({ data }) => !data.draft)).sort(
   (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
@@ -42,6 +43,7 @@ const schema = [
     description: "Media coverage of Goji Women's and Family Physiotherapy.",
     url: pageURL,
     about: {
+      "@id": clinicId(origin),
       "@type": "Organization",
       name: SITE.fullName,
       url: origin.href,
