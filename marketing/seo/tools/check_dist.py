@@ -30,11 +30,11 @@ LEVEL = {
     "canonical": "ERROR",
     "schema_required": "ERROR",
     "llms_dead_url": "ERROR",
-    "meta_description": "WARN",
-    "h1_count": "WARN",
+    "meta_description": "ERROR",
+    "h1_count": "ERROR",
     "schema_recommended": "WARN",
-    "llms_missing_page": "WARN",
-    "img_alt": "WARN",
+    "llms_missing_page": "ERROR",
+    "img_alt": "ERROR",
     "title_length": "WARN",
 }
 
@@ -132,6 +132,8 @@ def main():
 
     sitemap = set()
     for sm in dist.glob("sitemap-*.xml"):
+        if sm.name == "sitemap-index.xml":  # lists sitemaps, not pages
+            continue
         sitemap.update(urlparse(u).path for u in re.findall(r"<loc>([^<]+)</loc>", sm.read_text()))
     sitemap.discard("")
 

@@ -10,6 +10,7 @@ reviewer:
 ctaSlug: "web-wa"
 order: 6
 draft: false
+relatedServices: ["paediatric-physiotherapy"]
 ---
 
 Bladder and bowel difficulties in children - including bedwetting, daytime wetting, soiling, and constipation - are common, often undertreated, and consistently under-discussed. Many families wait years before seeking help, often because they have been told the child will "grow out of it." While many children do improve with time, physiotherapy significantly accelerates that progress and addresses the underlying bladder and bowel coordination that drives these symptoms. These are real, physical conditions - not behavioural problems.

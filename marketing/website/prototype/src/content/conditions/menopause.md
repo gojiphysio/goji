@@ -10,6 +10,7 @@ reviewer:
 ctaSlug: "web-wa"
 order: 11
 draft: false
+relatedServices: ["pelvic-floor-physiotherapy"]
 ---
 
 Perimenopause and menopause bring significant changes to the musculoskeletal system, pelvic floor, and bone density - changes that are often attributed to ageing rather than recognised as hormone-driven and, in many cases, addressable. Physiotherapy at this life stage focuses on building and maintaining the physical reserves - bone density, muscle strength, pelvic floor function, and joint health - that protect quality of life in the decades ahead.

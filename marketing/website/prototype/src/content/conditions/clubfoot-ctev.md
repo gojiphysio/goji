@@ -10,6 +10,7 @@ reviewer:
 ctaSlug: "web-wa"
 order: 5
 draft: false
+relatedServices: ["paediatric-physiotherapy"]
 ---
 
 Congenital talipes equinovarus (CTEV), commonly known as clubfoot, is a foot deformity present at birth in which the foot is turned inward and downward. It occurs in approximately 1-2 per 1,000 live births and can affect one or both feet. The management of CTEV depends critically on whether it is structural or postural - and this distinction determines the role of physiotherapy in your child's care.

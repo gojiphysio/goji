@@ -10,6 +10,7 @@ reviewer:
 ctaSlug: "web-wa"
 order: 8
 draft: false
+relatedServices: ["paediatric-physiotherapy"]
 ---
 
 A fracture that has healed radiologically is not a fracture that has fully recovered. After cast removal or surgical fixation, the affected limb is typically stiff, weak, and mechanically de-conditioned - sometimes significantly so. Physiotherapy after a fracture in a child or adolescent restores range of motion, rebuilds strength and coordination, and gets them back to the activities they care about in a structured and safe way.

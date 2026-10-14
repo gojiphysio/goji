@@ -10,6 +10,7 @@ reviewer:
 ctaSlug: "web-wa"
 order: 4
 draft: false
+relatedServices: ["postpartum-physiotherapy"]
 ---
 
 Perineal tears and episiotomies are common outcomes of vaginal birth. Around 9 in 10 first-time mothers experience some degree of perineal trauma. Most tears are minor and heal well without intervention. But when healing is incomplete, scar tissue becomes restrictive or sensitive, or a more significant tear has occurred, physiotherapy plays an important role in recovery - both physically and in processing a difficult birth experience.

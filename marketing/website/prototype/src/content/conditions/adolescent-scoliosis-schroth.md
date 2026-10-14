@@ -10,6 +10,7 @@ reviewer:
 ctaSlug: "web-wa"
 order: 9
 draft: false
+relatedServices: ["schroth-scoliosis-children"]
 ---
 
 Adolescent idiopathic scoliosis (AIS) is a three-dimensional curvature of the spine that develops during the rapid growth phase of adolescence - typically between 10 and 16 years of age. "Idiopathic" means the cause is not known. AIS affects 2-3% of adolescents, with significant curves more common in girls. Schroth therapy - a physiotherapeutic scoliosis-specific exercise (PSSE) approach - is the most evidence-supported form of physiotherapy for AIS and is part of the international standard of care alongside bracing and surgical monitoring.

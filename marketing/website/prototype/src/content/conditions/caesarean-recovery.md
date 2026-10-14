@@ -10,6 +10,7 @@ reviewer:
 ctaSlug: "web-wa"
 order: 3
 draft: false
+relatedServices: ["postpartum-physiotherapy"]
 ---
 
 A Caesarean section is a major abdominal operation - seven layers of tissue are incised and sutured. Recovery involves not just the skin scar but the healing of the uterus, bladder reflection, fascial layers, and abdominal muscles. Physiotherapy supports that process: from early mobilisation and pain management to scar tissue work and a safe return to exercise.

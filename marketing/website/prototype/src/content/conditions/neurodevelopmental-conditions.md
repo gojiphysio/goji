@@ -10,6 +10,7 @@ reviewer:
 ctaSlug: "web-wa"
 order: 2
 draft: false
+relatedServices: ["paediatric-physiotherapy"]
 ---
 
 Neurodevelopmental conditions are a group of conditions that affect how the brain develops and how it communicates with the rest of the body. They include cerebral palsy, Down syndrome, autism spectrum disorder (with motor coordination difficulties), hypotonic conditions, and others. Physiotherapy does not change the underlying diagnosis - but it meaningfully improves a child's physical function, independence, and quality of life by targeting the musculoskeletal and motor consequences of the condition.
