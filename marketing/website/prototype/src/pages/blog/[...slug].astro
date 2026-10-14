@@ -13,7 +13,7 @@ import Section from "../../components/Section.astro";
 import Button from "../../components/Button.astro";
 import { extractFaqs, faqSchema } from "../../lib/faq.ts";
 import { formatDate, isoDate } from "../../lib/dates.ts";
-import { SITE } from "../../lib/site.ts";
+import { clinicRef } from "../../lib/schema.ts";
 
 export async function getStaticPaths() {
   const posts = await getCollection("blog", ({ data }) => !data.draft);
@@ -88,11 +88,7 @@ const postSchema: Record<string, unknown>[] = [
           },
         }
       : {}),
-    publisher: {
-      "@type": "Organization",
-      name: SITE.fullName,
-      url: origin.href,
-    },
+    publisher: clinicRef(origin),
     ...(heroImage ? { image: new URL(heroImage, origin).href } : {}),
   },
   {

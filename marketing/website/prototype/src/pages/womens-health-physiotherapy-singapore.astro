@@ -20,6 +20,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import Section from "../components/Section.astro";
 import Button from "../components/Button.astro";
 import { SITE } from "../lib/site.ts";
+import { clinicRef } from "../lib/schema.ts";
 
 const title = "Women's Health Physiotherapy Singapore | Goji Physio";
 const description =
@@ -146,7 +147,7 @@ const schema = [
     url: pageURL,
     about: { "@type": "MedicalSpecialty", name: "Physiotherapy" },
     audience: { "@type": "PeopleAudience", suggestedGender: "female" },
-    provider: { "@type": "MedicalClinic", name: SITE.fullName, url: origin.href },
+    provider: clinicRef(origin),
   },
   {
     "@context": "https://schema.org",

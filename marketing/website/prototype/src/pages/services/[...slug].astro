@@ -3,7 +3,7 @@ import { getCollection } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Section from "../../components/Section.astro";
 import Button from "../../components/Button.astro";
-import { SITE } from "../../lib/site.ts";
+import { clinicRef } from "../../lib/schema.ts";
 
 export async function getStaticPaths() {
   const services = await getCollection("services", ({ data }) => !data.draft);
@@ -65,12 +65,7 @@ const serviceSchema: Record<string, unknown> = {
   description,
   url: pageURL,
   category,
-  provider: {
-    "@type": ["MedicalClinic", "LocalBusiness"],
-    name: SITE.fullName,
-    url: origin.href,
-    telephone: SITE.phoneE164,
-  },
+  provider: clinicRef(origin),
   areaServed: { "@type": "Place", name: "Singapore" },
   offers: {
     "@type": "Offer",
