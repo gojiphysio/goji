@@ -1,0 +1,63 @@
+{
+  "_doc": "Canonical AEO/SEO query set. Every engine run reads this file and writes results to seo/audits/<date>/aeo-<engine>.json so runs compare. Add queries, never silently rename one (it breaks the trend). target = the page that should own the answer.",
+  "version": 1,
+  "created": "2026-10-12",
+  "location": {
+    "_doc": "Engines whose location comes from IP (ChatGPT, claude.ai) run variant 'sg-context' unless the machine's IP is in SG: prefix the query with sg_context_prefix when it contains none of sg_place_terms. When the IP is in SG, also run variant 'sg-ip' (query verbatim). Google runs verbatim with gl=sg&hl=en&pws=0&uule=w+CAIQICIJU2luZ2Fwb3Jl. Always record the variant.",
+    "sg_context_prefix": "I'm in Singapore. ",
+    "sg_place_terms": ["singapore", "lentor", "ang mo kio", "upper thomson", "katong"]
+  },
+  "queries": [
+    {"id": "local-lentor", "q": "physiotherapy lentor", "cluster": "local", "target": "/physiotherapy-lentor"},
+    {"id": "local-lentor-mrt", "q": "physio near lentor mrt", "cluster": "local", "target": "/physiotherapy-lentor"},
+    {"id": "local-amk", "q": "physio ang mo kio", "cluster": "local", "target": "/physiotherapy-lentor"},
+    {"id": "local-thomson", "q": "physiotherapy upper thomson", "cluster": "local", "target": "/physiotherapy-lentor"},
+    {"id": "local-wh-lentor", "q": "women's health physio lentor", "cluster": "local", "target": "/physiotherapy-lentor"},
+    {"id": "local-wh-katong", "q": "women's health physio katong", "cluster": "local-tracking", "target": null},
+
+    {"id": "wedge-womens-physio", "q": "women's physio singapore", "cluster": "wedge", "target": "/womens-health-physiotherapy-singapore"},
+    {"id": "wedge-wh-physio", "q": "women's health physiotherapist singapore", "cluster": "wedge", "target": "/womens-health-physiotherapy-singapore"},
+    {"id": "wedge-pf", "q": "pelvic floor physiotherapy singapore", "cluster": "wedge", "target": "/services/pelvic-floor-physiotherapy"},
+    {"id": "wedge-pf-near-me", "q": "pelvic floor physio near me singapore", "cluster": "wedge", "target": "/services/pelvic-floor-physiotherapy"},
+    {"id": "wedge-postnatal", "q": "postnatal physio singapore", "cluster": "wedge", "target": "/services/postpartum-physiotherapy"},
+    {"id": "wedge-postnatal-best", "q": "best postnatal physio in singapore", "cluster": "wedge", "target": "/services/postpartum-physiotherapy"},
+    {"id": "wedge-prenatal", "q": "prenatal physiotherapy singapore", "cluster": "wedge", "target": "/services/prenatal-physiotherapy"},
+    {"id": "wedge-pregnancy", "q": "physio during pregnancy singapore", "cluster": "wedge", "target": "/services/prenatal-physiotherapy"},
+    {"id": "wedge-mummy-baby", "q": "mummy and baby assessment singapore", "cluster": "wedge", "target": "/services/mummy-baby-assessment"},
+    {"id": "wedge-home-visit", "q": "postnatal physio home visit singapore", "cluster": "wedge", "target": "/services/postpartum-physiotherapy"},
+    {"id": "wedge-postnatal-pilates", "q": "postnatal pilates singapore", "cluster": "wedge", "target": "/services/clinical-pilates"},
+
+    {"id": "cond-diastasis", "q": "diastasis recti physiotherapy singapore", "cluster": "condition", "target": "/conditions/diastasis-recti"},
+    {"id": "cond-diastasis-how", "q": "how to fix abdominal separation after pregnancy", "cluster": "condition-question", "target": "/conditions/diastasis-recti"},
+    {"id": "cond-leaking", "q": "is leaking after birth normal", "cluster": "condition-question", "target": "/conditions/urinary-incontinence"},
+    {"id": "cond-incontinence", "q": "urinary incontinence physio singapore", "cluster": "condition", "target": "/conditions/urinary-incontinence"},
+    {"id": "cond-prolapse", "q": "pelvic organ prolapse physiotherapy singapore", "cluster": "condition", "target": "/conditions/pelvic-organ-prolapse"},
+    {"id": "cond-heaviness", "q": "feeling of heaviness down there after giving birth", "cluster": "condition-question", "target": "/conditions/pelvic-organ-prolapse"},
+    {"id": "cond-csection", "q": "c-section recovery physiotherapy singapore", "cluster": "condition", "target": "/conditions/caesarean-recovery"},
+    {"id": "cond-pgp", "q": "pelvic girdle pain in pregnancy physio", "cluster": "condition", "target": "/conditions/pelvic-girdle-pain"},
+    {"id": "cond-perineal", "q": "perineal tear recovery physio singapore", "cluster": "condition", "target": "/conditions/perineal-tear"},
+    {"id": "cond-mastitis", "q": "physiotherapy for blocked milk ducts singapore", "cluster": "condition", "target": "/conditions/blocked-ducts-mastitis"},
+    {"id": "cond-pelvic-pain", "q": "pelvic pain physiotherapy singapore", "cluster": "condition", "target": "/conditions/pelvic-pain"},
+    {"id": "cond-menopause", "q": "menopause physiotherapy singapore", "cluster": "condition", "target": "/conditions/menopause"},
+    {"id": "cond-run-after-birth", "q": "when can i start running after giving birth", "cluster": "condition-question", "target": "/services/postpartum-physiotherapy"},
+
+    {"id": "paeds-schroth", "q": "schroth therapy singapore", "cluster": "scoliosis", "target": "/services/schroth-scoliosis-children"},
+    {"id": "paeds-scoliosis-child", "q": "scoliosis physiotherapy for child singapore", "cluster": "scoliosis", "target": "/conditions/adolescent-scoliosis-schroth"},
+    {"id": "paeds-physio", "q": "paediatric physiotherapy singapore", "cluster": "paeds", "target": "/services/paediatric-physiotherapy"},
+    {"id": "paeds-torticollis", "q": "baby torticollis physiotherapy singapore", "cluster": "paeds", "target": "/conditions/congenital-torticollis"},
+    {"id": "paeds-ddh", "q": "hip dysplasia baby physio singapore", "cluster": "paeds", "target": "/conditions/hip-dysplasia-ddh"},
+    {"id": "paeds-clubfoot", "q": "clubfoot physiotherapy singapore", "cluster": "paeds", "target": "/conditions/clubfoot-ctev"},
+
+    {"id": "msk-back", "q": "back pain physio singapore", "cluster": "msk", "target": "/services/musculoskeletal-physiotherapy"},
+    {"id": "msk-fracture", "q": "physiotherapy after fracture singapore", "cluster": "msk", "target": "/conditions/post-fracture-rehab"},
+    {"id": "holistic-pilates", "q": "clinical pilates with physiotherapist singapore", "cluster": "holistic", "target": "/services/clinical-pilates"},
+
+    {"id": "gen-first-visit", "q": "what happens at a first physiotherapy appointment", "cluster": "general-question", "target": null},
+    {"id": "gen-cost", "q": "how much does physiotherapy cost in singapore", "cluster": "general-question", "target": null},
+    {"id": "gen-referral", "q": "do i need a doctor's referral to see a physiotherapist in singapore", "cluster": "general-question", "target": null},
+
+    {"id": "brand-goji", "q": "goji physio", "cluster": "brand", "target": "/"},
+    {"id": "brand-formal", "q": "goji women's and family physiotherapy", "cluster": "brand", "target": "/"},
+    {"id": "brand-what", "q": "what is goji physio singapore and what do they offer", "cluster": "brand", "target": "/"}
+  ]
+}

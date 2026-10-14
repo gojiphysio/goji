@@ -79,6 +79,9 @@ so a token change reflows everything (styleguide is the QA surface).
   emit enriched Person; blog posts emit BlogPosting (author + optional
   reviewedBy Person, both linking to `/team/<slug>`) + BreadcrumbList +
   FAQPage. New page types define their schema before merging.
+- **Site-wide JSON-LD lives in `src/lib/schema.ts`**, not in `BaseLayout`, so
+  the SEO loop can improve it as a tier A change without touching the layout
+  (analytics beacon, tier C). Tiers: `../../seo/AGENTS.md`.
 - **Press pages never claim authorship.** A `/press/<slug>` page is a `WebPage`
   whose `citation` is the outlet's `NewsArticle` (their headline, their URL,
   their publisher); the index adds `subjectOf` against the clinic

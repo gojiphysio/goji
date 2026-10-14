@@ -1,0 +1,51 @@
+=== curl -sIL http://gojiphysio.com
+HTTP/1.1 301 Moved Permanently
+Location: http://www.gojiphysio.com
+Server: Squarespace
+HTTP/1.1 301 Moved Permanently
+Location: https://www.gojiphysio.com/
+Server: cloudflare
+HTTP/2 200 
+server: cloudflare
+=== curl -sIL https://gojiphysio.com
+HTTP/2 301 
+location: http://www.gojiphysio.com
+server: Squarespace
+HTTP/1.1 301 Moved Permanently
+Location: https://www.gojiphysio.com/
+Server: cloudflare
+HTTP/2 200 
+server: cloudflare
+=== curl -sIL http://www.gojiphysio.com
+HTTP/1.1 301 Moved Permanently
+Location: https://www.gojiphysio.com/
+Server: cloudflare
+HTTP/2 200 
+server: cloudflare
+=== curl -sIL https://www.gojiphysio.com
+HTTP/2 200 
+server: cloudflare
+=== curl -sIL https://gojiphysio.com/book
+HTTP/2 301 
+location: http://www.gojiphysio.com/book
+server: Squarespace
+HTTP/1.1 301 Moved Permanently
+Location: https://www.gojiphysio.com/book
+Server: cloudflare
+HTTP/2 308 
+location: /book/
+server: cloudflare
+HTTP/2 200 
+server: cloudflare
+=== curl -sIL http://gojiphysio.com/services/pelvic-floor-physiotherapy
+HTTP/1.1 301 Moved Permanently
+Location: http://www.gojiphysio.com/services/pelvic-floor-physiotherapy
+Server: Squarespace
+HTTP/1.1 301 Moved Permanently
+Location: https://www.gojiphysio.com/services/pelvic-floor-physiotherapy
+Server: cloudflare
+HTTP/2 308 
+location: /services/pelvic-floor-physiotherapy/
+server: cloudflare
+HTTP/2 200 
+server: cloudflare
