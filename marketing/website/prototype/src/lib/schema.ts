@@ -40,6 +40,9 @@ export function businessSchema(origin: URL) {
       addressCountry: "SG",
     },
     hasMap: SITE.googleMaps,
+    // Place pin of the clinic's Google Maps listing (SITE.googleMaps resolves to
+    // .../!3d1.3858436!4d103.8350854), not the map viewport centre.
+    geo: { "@type": "GeoCoordinates", latitude: 1.3858436, longitude: 103.8350854 },
     areaServed: [
       { "@type": "Place", name: "Lentor, Singapore" },
       { "@type": "Place", name: "Ang Mo Kio, Singapore" },
