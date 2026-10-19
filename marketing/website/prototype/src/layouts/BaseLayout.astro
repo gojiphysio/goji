@@ -60,11 +60,11 @@ const ogImage = new URL("/og-image.jpg", origin);
 const isHome = Astro.url.pathname === "/";
 const nav = [
   { href: isHome ? "#about" : "/#about", label: "About" },
-  { href: "/services", label: "Services" },
-  { href: "/conditions", label: "Conditions" },
-  { href: "/media", label: "Media" },
+  { href: "/services/", label: "Services" },
+  { href: "/conditions/", label: "Conditions" },
+  { href: "/media/", label: "Media" },
   { href: isHome ? "#team" : "/#team", label: "Team" },
-  { href: "/getting-here", label: "Find us" },
+  { href: "/getting-here/", label: "Find us" },
 ];
 
 // GA4 (website tracking). Inert until PUBLIC_GA4_ID is set in the Cloudflare
@@ -348,7 +348,7 @@ const GADS_BOOKING_LABEL = import.meta.env.PUBLIC_GADS_BOOKING_LABEL;
                 </svg>
                 <span class="header-wa__text">WhatsApp</span>
               </a>
-              <Button href="/book" variant="primary">Book</Button>
+              <Button href="/book/" variant="primary">Book</Button>
               <details class="mobile-menu">
                 <summary class="nav-toggle" aria-label="Menu">
                   <svg class="nav-toggle__open" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
@@ -392,11 +392,11 @@ const GADS_BOOKING_LABEL = import.meta.env.PUBLIC_GADS_BOOKING_LABEL;
                   @gojiphysio ↗
                 </a>
               </p>
-              <p><a href="/physiotherapy-lentor">Physiotherapy in Lentor</a></p>
+              <p><a href="/physiotherapy-lentor/">Physiotherapy in Lentor</a></p>
             </div>
           </div>
           <div class="container site-footer__copyright">
-            <p>&copy; {new Date().getFullYear()} Goji Health. All rights reserved. &middot; <a href="/privacy">Privacy</a></p>
+            <p>&copy; {new Date().getFullYear()} Goji Health. All rights reserved. &middot; <a href="/privacy/">Privacy</a></p>
           </div>
         </footer>
       )
