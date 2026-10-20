@@ -39,6 +39,8 @@ BOTS = {
     "Claude-SearchBot": "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; Claude-SearchBot/1.0; +https://www.anthropic.com)",
     "Googlebot": "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
     "Bingbot": "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm)",
+    "meta-externalagent": "meta-externalagent/1.1 (+https://developers.facebook.com/docs/sharing/webmasters/crawler)",
+    "meta-webindexer": "meta-webindexer/1.1 (+https://developers.facebook.com/docs/sharing/webmasters/crawler)",
 }
 BOT_PAGES = ["/", "/services/pelvic-floor-physiotherapy/", "/conditions/diastasis-recti/", "/llms.txt"]
 PSI_PAGES = ["/", "/womens-health-physiotherapy-singapore/", "/services/pelvic-floor-physiotherapy/",
@@ -97,6 +99,7 @@ def main():
     if not urls:
         add("ERROR", "sitemap", "/sitemap-index.xml", "no URLs found")
     internal = set()
+    external = {}  # url -> first page linking to it
     for u in urls:
         status, final, hops, body = get(u)
         time.sleep(0.3)
@@ -114,6 +117,8 @@ def main():
             p = urllib.parse.urlparse(urllib.parse.urljoin(u, href))
             if p.netloc == "www.gojiphysio.com" and not p.path.startswith("/pagefind"):
                 internal.add(p.path)
+            elif p.scheme in ("http", "https") and p.netloc:
+                external.setdefault(p.geturl(), u)
 
     # Internal link targets
     redirected = 0
@@ -125,9 +130,21 @@ def main():
             add("ERROR", "internal_link", path, f"{status}")
         elif hops:
             redirected += 1
-    if redirected:
-        add("WARN", "internal_link_redirects", f"{redirected} targets",
+    if redirected:  # ratcheted to ERROR on 2026-10-20 once the site had none
+        add("ERROR", "internal_link_redirects", f"{redirected} targets",
             "internal links that redirect before 200 (usually missing trailing slash)")
+
+    # Outbound links. Tracked CTAs (go.gojiphysio.com) must redirect; other
+    # sites only count as broken on 404/410/5xx, since social sites refuse bots.
+    for url, src in sorted(external.items()):
+        status, final, hops, _ = get(url, max_hops=0 if "go.gojiphysio.com" in url else 5)
+        time.sleep(0.2)
+        data["links"][url] = {"status": status, "from": src}
+        if "go.gojiphysio.com" in url:
+            if not hops:  # max_hops=0: a working slug records one redirect hop
+                add("ERROR", "tracked_cta", url, f"{status} (expected a redirect) on {src}")
+        elif status in (404, 410) or (isinstance(status, int) and status >= 500):
+            add("WARN", "external_link_broken", url, f"{status} on {src}")
 
     # Crawlers
     rp = urllib.robotparser.RobotFileParser()

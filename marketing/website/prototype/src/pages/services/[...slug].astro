@@ -42,8 +42,8 @@ const clinicianLinks = clinicians.map((name) => ({
 // for physiotherapy, the compulsory sub-type (so the right clinicians' calendars
 // open). See src/lib/physioCategories.ts and BookingForm.astro.
 const bookHref = bookingFocus
-  ? `/book?service=${bookingService}&focus=${bookingFocus}`
-  : `/book?service=${bookingService}`;
+  ? `/book/?service=${bookingService}&focus=${bookingFocus}`
+  : `/book/?service=${bookingService}`;
 
 const priceLabel =
   priceHome && priceHome !== priceClinic

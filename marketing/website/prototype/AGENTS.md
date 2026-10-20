@@ -113,6 +113,12 @@ so a token change reflows everything (styleguide is the QA surface).
   across Singapore" — no neighbourhood pages implying a clinic elsewhere.
 - **Update `public/llms.txt` in the same PR** as any page/service/price/team
   change — it is the canonical machine brief for AI answer engines.
+- **Prices carry an "as of" month** (`SITE.pricesAsOf`, shown on `/services`,
+  the hub and in `llms.txt`). Bump it in the same PR as any price change or
+  re-confirmation; `check_dist.py` fails if `llms.txt` disagrees with the site.
+- **Every image gets descriptive alt text** (what a sighted visitor sees, as a
+  sentence), and key facts live in static HTML, never injected by script:
+  answer engines and agents read the accessibility tree and raw HTML.
 - **Ad final URLs are direct site URLs, never `go.gojiphysio.com` links**
   (Google disallows redirector final URLs); on-page CTAs stay go-links.
 
