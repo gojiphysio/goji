@@ -49,14 +49,27 @@ wait for clinical review. When unsure, it is tier B.
   query, same fields every run.
 - Engines and modes (no memory, no personalisation, or the owner's own Goji
   work biases the answers):
-  - **ChatGPT**: logged-in Temporary Chat, header set to **Unpersonalized**,
-    Web search on. `?q=` does not auto-send; press Enter.
-  - **Claude**: claude.ai **Incognito** chat with web search.
-  - **Google**: logged out, `&gl=sg&hl=en&pws=0&uule=w+CAIQICIJU2luZ2Fwb3Jl`.
-    CAPTCHAs arrive after ~35 rapid queries: pace 10s+, finish next day if hit.
+  - **ChatGPT**: logged-in Temporary Chat with the Web search chip, and the
+    owner's memory/chat-history referencing switched off in Settings (the
+    in-chat "Unpersonalized" toggle was removed in Oct 2026). `?q=` does not
+    auto-send when logged in; press Enter. **Logged out it auto-sends**, so
+    check for a "Log in" button first. Check the chip on every send; broken
+    loads drop it. Chat does not consume the weekly "usage remaining" quota
+    (verified 2026-10-20: 5% before and after 45 queries); still stop if it
+    falls, so the owner keeps their quota.
+  - **Claude**: claude.ai **Incognito** chat with web search, a new chat per
+    query.
+  - **Google**: logged out, `&gl=sg&hl=en&pws=0&uule=w+CAIQICIJU2luZ2Fwb3Jl`,
+    from the normal (non-VPN) IP. CAPTCHAs arrive after ~35 rapid queries:
+    pace 15s+, finish next day if hit. A VPN IP is challenged on query 1.
+  - A login expired? The owner signs in; agents never do. Google SSO fails on
+    a VPN IP, so sign in off the VPN, then reconnect (sessions survive).
 - Location: ChatGPT/Claude infer it from IP. When the machine is not in SG,
   run variant `sg-context` (prefix rule in `aeo-queries.json`); when it is,
-  also run `sg-ip`. Never mix the two series in one trend line.
+  also run `sg-ip`. Never mix the two series in one trend line. A Singapore
+  IP comes from the owner's NordVPN (Singapore server, connected by hand)
+  with **Tailscale off**: the two VPNs fight over DNS/routes and NordVPN
+  passes no traffic while Tailscale is up.
 
 ## Monthly loop (local scheduled task on the owner's Mac)
 

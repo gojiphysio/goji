@@ -75,3 +75,47 @@ draft already in review); publish the three blog drafts.
 pitch Little Steps / Expat Living / Sassy Mama roundups; find and replace the
 raw `wa.me` link (Instagram bio / GBP) with `go.gojiphysio.com/ig-wa` / `gbp-wa`;
 Bing Places; apex redirect hop (DNS, accepted in July).
+
+## Follow-up, 2026-10-19/20: real-Singapore IP + Google Business Profile check
+
+New series `sg-ip` (verbatim queries from a NordVPN Singapore IP, memory off),
+plus the 10 Google queries the CAPTCHA blocked and a recheck of the 26 Google
+queries that showed a Maps pack. Chris updated the Business Profile ~15 Oct.
+Files: `aeo-chatgpt-sg-ip.json`, `aeo-claude-ai-sg-ip.json`,
+`aeo-google-2026-10-19.json`.
+
+| Engine | sg-context (12 Oct) | sg-ip (20 Oct) | Cited via gojiphysio.com |
+|---|---|---|---|
+| ChatGPT | 20/45 | 17/45 | 13 (2nd most-cited domain after KKH) |
+| Claude | 14/45 | 13/45 | 0 |
+
+By cluster (named, sg-context → sg-ip): ChatGPT wedge 8→4, conditions 3→5;
+Claude wedge 3→5, conditions 3→2, paeds 1→0. Brand and local unchanged.
+Different method, so this is a second series, not a trend.
+
+**Google (US IP + uule Singapore, same method as 12 Oct):**
+- Brand queries (first measurement): Goji #1 organic on all 3; "what is goji
+  physio" gets an AI Overview built entirely from gojiphysio.com, with correct prices.
+- Maps pack, 26 queries: none improved; Goji dropped on 9 (e.g. women's physio
+  1→3, women's health physio 1→out, home visit 1→out, pelvic pain 1→out) and
+  held #1 only on Lentor MRT. AI Overview mentions 7→2. Embrace now leads most
+  women's-health packs; Calyx and Spine and Pelvis Clinic newly appear.
+- One week after a profile edit is too soon to call. Packs move day to day, and
+  large profile edits can briefly dip rankings while Google re-reviews them.
+  Recheck in the November run before acting on it.
+- Profile as Google shows it: 5.0 from 24 reviews, category "Physical therapy
+  clinic", new "Identifies as women-owned" attribute.
+
+**Framing:** Claude now groups Goji with "dedicated women's health clinics"
+(diastasis, incontinence) and dropped last week's "also handles general and
+sports cases" caveat, but still describes it by location ("best if you're in
+the north") and never credits home visits, Mummy & Baby or paediatrics. On
+brand queries Claude still builds from an Instagram mirror and a staff
+LinkedIn ("couldn't find pricing… book via Instagram"), although Brave ranks
+gojiphysio.com #1 for "goji physio". No wrong facts about Goji from ChatGPT.
+
+**Implications:**
+- Keep up non-incentivised review asks (24 reviews today); next run, record competitors' review counts to see whether volume explains the pack order.
+- Put the website and tracked WhatsApp link first in the Instagram bio and on LinkedIn: that is what Claude reads for brand questions.
+- Check the Business Profile's primary/secondary categories against Embrace's and Calyx's.
+- The roundup outreach in the ops doc matters more than before: Google's AI Overviews now build "top clinics" lists from Homage, Sassy Mama and Singapore Motherhood.
