@@ -68,9 +68,10 @@ const tickerItems = [
   "Home visits available",
 ];
 
-// Condition lists mirror the clinic-vetted old-site copy. Women's Health items
-// link through to the real condition pages under /conditions where one exists;
-// everything else is plain text (no dedicated page yet).
+// Condition lists mirror the clinic-vetted old-site copy. Items link through to
+// the real condition pages under /conditions where one exists; the few without
+// a dedicated page yet are plain text. Group names must match the `category`
+// enum in src/content/config.ts and the `categories` array on /conditions.
 const careAreas = [
   {
     title: "Women's Health",
@@ -108,34 +109,37 @@ const careAreas = [
   },
   {
     title: "Musculoskeletal & Sports",
+    guideHref: "/conditions",
     points: [
-      "Injuries",
-      "Persistent or recurrent pain",
-      "Adult scoliosis",
-      "Sports rehabilitation and performance",
-      "Post-operation recovery and rehabilitation",
-      "Functional movement assessment",
-      "Dry needling",
+      { text: "Injuries", href: "/conditions/musculoskeletal-pain-and-injuries" },
+      { text: "Persistent or recurrent pain", href: "/conditions/persistent-pain" },
+      { text: "Adult scoliosis", href: "/conditions/adult-scoliosis" },
+      { text: "Sports rehabilitation and performance", href: "/conditions/sports-rehabilitation" },
+      { text: "Post-operation recovery and rehabilitation", href: "/conditions/post-surgery-rehabilitation" },
+      { text: "Functional movement assessment", href: "/conditions/functional-movement-assessment" },
+      { text: "Dry needling", href: "/conditions/dry-needling" },
     ],
   },
   {
     title: "Vestibular Rehabilitation",
+    guideHref: "/conditions",
     points: [
-      "Vertigo",
-      "Dizziness",
-      "Balance difficulties",
-      "Benign paroxysmal positional vertigo (BPPV)",
-      "Fall prevention and age-related instability",
+      { text: "Vertigo", href: "/conditions/vertigo" },
+      { text: "Dizziness", href: "/conditions/dizziness" },
+      { text: "Balance difficulties", href: "/conditions/balance-problems" },
+      { text: "Benign paroxysmal positional vertigo (BPPV)", href: "/conditions/bppv" },
+      { text: "Fall prevention and age-related instability", href: "/conditions/fall-prevention" },
     ],
   },
   {
     title: "Lymphatic Health",
+    guideHref: "/conditions",
     points: [
-      "Lymphoedema",
-      "Swelling management",
-      "Lipedema",
-      "Breast cancer post-op rehabilitation",
-      "Chronic venous insufficiency (CVI)",
+      { text: "Lymphoedema", href: "/conditions/lymphoedema" },
+      { text: "Swelling management", href: "/conditions/swelling-management" },
+      { text: "Lipoedema", href: "/conditions/lipoedema" },
+      { text: "Breast cancer post-op rehabilitation", href: "/conditions/breast-cancer-rehabilitation" },
+      { text: "Chronic venous insufficiency (CVI)", href: "/conditions/chronic-venous-insufficiency" },
     ],
   },
 ];

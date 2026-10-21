@@ -4,6 +4,11 @@ const conditions = defineCollection({
   type: "content",
   schema: z.object({
     title: z.string(),
+    /** Overrides only the <title> tag (same contract as `services.seoTitle`),
+     *  so a page can target the national query ("... Singapore") without
+     *  the geo leaking into the H1, breadcrumbs or schema `name`. The site
+     *  appends " | Goji Physiotherapy", so keep this to about 40 characters. */
+    seoTitle: z.string().optional(),
     description: z.string(),
     /** Short heading shown on the index card */
     cardTitle: z.string().optional(),
@@ -11,10 +16,10 @@ const conditions = defineCollection({
     cardLead: z.string(),
     category: z.enum([
       "Women's Health",
-      "Musculoskeletal & Sports",
       "Paediatrics",
-      "Vestibular",
-      "Lymphatic & Oncology",
+      "Musculoskeletal & Sports",
+      "Vestibular Rehabilitation",
+      "Lymphatic Health",
     ]),
     /** WhatsApp CTA slug — use "web-wa" until condition-specific slugs are wired in app.py */
     ctaSlug: z.string().default("web-wa"),
