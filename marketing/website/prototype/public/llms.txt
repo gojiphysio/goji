@@ -50,6 +50,8 @@
 
 ## Conditions we treat
 
+Women's health:
+
 - Prenatal care and birth preparation: https://www.gojiphysio.com/conditions/prenatal-care
 - Pelvic girdle pain: https://www.gojiphysio.com/conditions/pelvic-girdle-pain
 - Diastasis recti: https://www.gojiphysio.com/conditions/diastasis-recti
@@ -61,6 +63,44 @@
 - Urinary incontinence: https://www.gojiphysio.com/conditions/urinary-incontinence
 - Bowel dysfunction: https://www.gojiphysio.com/conditions/bowel-dysfunction
 - Menopause, osteopenia & osteoporosis: https://www.gojiphysio.com/conditions/menopause
+
+Paediatrics:
+
+- Developmental concerns and early intervention: https://www.gojiphysio.com/conditions/developmental-concerns
+- Neurodevelopmental conditions: https://www.gojiphysio.com/conditions/neurodevelopmental-conditions
+- Congenital torticollis: https://www.gojiphysio.com/conditions/congenital-torticollis
+- Hip dysplasia (DDH): https://www.gojiphysio.com/conditions/hip-dysplasia-ddh
+- Clubfoot (CTEV): https://www.gojiphysio.com/conditions/clubfoot-ctev
+- Paediatric pelvic health: https://www.gojiphysio.com/conditions/paediatric-pelvic-health
+- Paediatric sports injuries: https://www.gojiphysio.com/conditions/paediatric-sports-injuries
+- Post-fracture rehabilitation: https://www.gojiphysio.com/conditions/post-fracture-rehab
+- Adolescent scoliosis (Schroth): https://www.gojiphysio.com/conditions/adolescent-scoliosis-schroth
+
+Musculoskeletal & sports:
+
+- Musculoskeletal pain and injuries: https://www.gojiphysio.com/conditions/musculoskeletal-pain-and-injuries
+- Persistent and recurrent pain, arthritis: https://www.gojiphysio.com/conditions/persistent-pain
+- Adult scoliosis: https://www.gojiphysio.com/conditions/adult-scoliosis
+- Sports rehabilitation and performance: https://www.gojiphysio.com/conditions/sports-rehabilitation
+- Post-operative recovery and rehabilitation: https://www.gojiphysio.com/conditions/post-surgery-rehabilitation
+- Functional movement assessment: https://www.gojiphysio.com/conditions/functional-movement-assessment
+- Dry needling (Cheryl Long only): https://www.gojiphysio.com/conditions/dry-needling
+
+Vestibular rehabilitation:
+
+- Vertigo: https://www.gojiphysio.com/conditions/vertigo
+- Dizziness: https://www.gojiphysio.com/conditions/dizziness
+- Balance difficulties: https://www.gojiphysio.com/conditions/balance-problems
+- Benign paroxysmal positional vertigo (BPPV): https://www.gojiphysio.com/conditions/bppv
+- Fall prevention and age-related instability: https://www.gojiphysio.com/conditions/fall-prevention
+
+Lymphatic health:
+
+- Lymphoedema: https://www.gojiphysio.com/conditions/lymphoedema
+- Swelling management: https://www.gojiphysio.com/conditions/swelling-management
+- Lipoedema: https://www.gojiphysio.com/conditions/lipoedema
+- Breast cancer post-operative rehabilitation: https://www.gojiphysio.com/conditions/breast-cancer-rehabilitation
+- Chronic venous insufficiency (CVI): https://www.gojiphysio.com/conditions/chronic-venous-insufficiency
 
 ## Location pages
 
