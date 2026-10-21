@@ -2,7 +2,7 @@
 title: "Breast Cancer Post-Operative Rehabilitation"
 seoTitle: "Breast Cancer Rehab Physio Singapore"
 description: "Recovering after breast cancer surgery? Goji's physiotherapists support shoulder movement, scar, cording and swelling care in Lentor, Singapore."
-cardTitle: "Breast Cancer Post-Op Rehabilitation"
+cardTitle: "Breast Cancer Post-Operative Rehabilitation"
 cardLead: "Gentle, staged rehabilitation after breast cancer surgery for shoulder movement, scar tissue, cording and swelling, alongside your oncology team."
 category: "Lymphatic Health"
 reviewer:
@@ -19,12 +19,12 @@ Recovery after breast cancer surgery involves more than the surgical site healin
 
 Common challenges physiotherapy can help with include:
 
-- **Reduced shoulder movement and strength** on the treated side
-- **Scar tissue tightness** and changes in the chest, axilla (armpit), or reconstruction site
-- **Axillary web syndrome (cording):** tight, cord-like structures under the arm that limit movement
-- **Lymphoedema risk or early swelling** following lymph node surgery or radiotherapy
-- **Postural changes, deconditioning, and fatigue** through treatment
-- **Reduced confidence** in moving and using the arm
+- Reduced shoulder movement and strength on the treated side
+- Scar tissue tightness and changes in the chest, axilla (armpit), or reconstruction site
+- Axillary web syndrome (cording): tight, cord-like structures under the arm that limit movement
+- Lymphoedema risk or early swelling following lymph node surgery or radiotherapy
+- Postural changes, deconditioning, and fatigue through treatment
+- Reduced confidence in moving and using the arm
 
 Everyone's recovery is different, depending on the surgery, treatment, and individual factors - so rehabilitation is tailored to you and your stage.
 
@@ -32,10 +32,10 @@ Everyone's recovery is different, depending on the surgery, treatment, and indiv
 
 Your physiotherapist will discuss your surgery, treatment plan, and any precautions from your surgical or oncology team, then assess the affected areas. This may include:
 
-- **Shoulder and arm assessment:** range of movement, strength, and function
-- **Scar and tissue assessment:** checking scar mobility and any cording
-- **Swelling and lymphatic check:** monitoring for and managing early signs of swelling
-- **Function and goals:** how symptoms affect daily activities and what you want to return to
+- Shoulder and arm assessment: range of movement, strength, and function
+- Scar and tissue assessment: checking scar mobility and any cording
+- Swelling and lymphatic check: monitoring for and managing early signs of swelling
+- Function and goals: how symptoms affect daily activities and what you want to return to
 
 You will leave with an explanation of your presentation and a gentle, staged rehabilitation plan appropriate to your recovery.
 
@@ -65,9 +65,3 @@ Appropriate, guided exercise is often beneficial during and after treatment, but
 
 Often not. Shoulder stiffness, scar tightness, cording, or swelling can frequently be helped even some time after surgery. An assessment can clarify what may still improve.
 
-## Related pages
-
-- [Lymphoedema](/conditions/lymphoedema)
-- [Swelling Management](/conditions/swelling-management)
-- [Post-Operative Recovery and Rehabilitation](/conditions/post-surgery-rehabilitation)
-- [Chronic Venous Insufficiency (CVI)](/conditions/chronic-venous-insufficiency)

@@ -112,9 +112,12 @@ so a token change reflows everything (styleguide is the QA surface).
   Women's Health, Paediatrics, Musculoskeletal & Sports, Vestibular
   Rehabilitation, Lymphatic Health (names match the Drive folders). Reviewers:
   Cheryl Long for Musculoskeletal & Sports, Claire Ng for Vestibular and
-  Lymphatic. Dry needling and adult scoliosis are Cheryl-only services. End
-  each page with a `## Related pages` list (after the FAQ; the parser stops at
-  the next `##`) linking its siblings, and add new pages to `public/llms.txt`.
+  Lymphatic. Dry needling and adult scoliosis are Cheryl-only services.
+- **Condition body format** (all 37 pages follow it): intro paragraph with no
+  H1, `##` sections, `H3` only for the FAQ, plain `- Label: text` bullets, no
+  bold, no inline links and no "Related pages" section (strip the source doc's
+  internal-links line). `cardTitle` is the page H1, so keep it equal to the doc
+  title unless a shorter heading is intended. Add new pages to `public/llms.txt`.
 - **`/womens-health-physiotherapy-singapore` is the women's-health hub.** It
   owns the broad national query; the four women's-health service pages own
   their own keyword and each links back up to it. Adding a women's-health

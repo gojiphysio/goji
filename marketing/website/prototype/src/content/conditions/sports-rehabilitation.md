@@ -9,9 +9,9 @@ reviewer:
   name: "Cheryl Long"
   slug: "cheryl-long"
 ctaSlug: "web-wa"
-relatedServices: ["musculoskeletal-physiotherapy"]
 order: 4
 draft: false
+relatedServices: ["musculoskeletal-physiotherapy"]
 ---
 
 Sports rehabilitation bridges the gap between an injury settling and you returning fully to training and competition - safely, confidently, and ideally more robust than before. It is also for active people who are not injured but want to move better, reduce their risk of injury, or improve how they perform. Physiotherapy assessment at Goji Physio in Lentor, Singapore identifies the physical qualities your sport demands and builds a progressive programme to meet them.
@@ -32,10 +32,10 @@ You do not need to be elite or injured to benefit - the same principles apply wh
 
 Your physiotherapist will discuss your sport, training history, injury background, and goals, then assess the qualities relevant to your activity. This may include:
 
-- **Strength and power testing:** identifying imbalances or deficits between sides or muscle groups
-- **Movement screening:** how you squat, hinge, land, change direction, or perform sport-specific tasks
-- **Mobility and control:** joint range and how well you control movement under load
-- **Load and capacity review:** how your current training compares with the demands of your sport
+- Strength and power testing: identifying imbalances or deficits between sides or muscle groups
+- Movement screening: how you squat, hinge, land, change direction, or perform sport-specific tasks
+- Mobility and control: joint range and how well you control movement under load
+- Load and capacity review: how your current training compares with the demands of your sport
 
 You will leave with a clear picture of where you are and a structured programme that progresses your capacity toward the specific demands of your sport.
 
@@ -73,9 +73,3 @@ Sports rehabilitation is led by a physiotherapist with clinical assessment skill
 
 This depends on the injury, your sport, and your starting point. Your physiotherapist will set staged milestones so you always know what you are working toward and how you are progressing.
 
-## Related pages
-
-- [Musculoskeletal Pain and Injuries](/conditions/musculoskeletal-pain-and-injuries)
-- [Functional Movement Assessment](/conditions/functional-movement-assessment)
-- [Post-Operative Recovery and Rehabilitation](/conditions/post-surgery-rehabilitation)
-- [Persistent and Recurrent Pain](/conditions/persistent-pain)

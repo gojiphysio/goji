@@ -19,11 +19,11 @@ Lymphoedema is a long-term swelling that develops when the lymphatic system - th
 
 Lymphoedema arises when the lymphatic system is overloaded or damaged. Common contexts include:
 
-- **Cancer treatment:** surgery involving lymph nodes, or radiotherapy - for example after breast cancer treatment
-- **Surgery or injury** affecting lymph drainage
-- **Infection** or inflammation damaging lymphatic vessels
-- **Primary lymphoedema:** a lymphatic system that developed with reduced capacity
-- **Chronic venous problems** contributing to a mixed picture
+- Cancer treatment: surgery involving lymph nodes, or radiotherapy - for example after breast cancer treatment
+- Surgery or injury affecting lymph drainage
+- Infection or inflammation damaging lymphatic vessels
+- Primary lymphoedema: a lymphatic system that developed with reduced capacity
+- Chronic venous problems contributing to a mixed picture
 
 Recognising and managing lymphoedema early tends to make ongoing management easier.
 
@@ -43,10 +43,10 @@ Sudden increases in swelling, redness, warmth, or pain can indicate infection (s
 
 Your physiotherapist will take a history - including any relevant surgery or treatment - and assess the affected area. This may include:
 
-- **Swelling assessment:** measuring and comparing limb size and noting skin condition
-- **Skin and tissue check:** looking at skin integrity and tissue texture
-- **Movement and function:** how the swelling affects your range and daily activities
-- **Risk and self-care review:** understanding your triggers and skin-care needs
+- Swelling assessment: measuring and comparing limb size and noting skin condition
+- Skin and tissue check: looking at skin integrity and tissue texture
+- Movement and function: how the swelling affects your range and daily activities
+- Risk and self-care review: understanding your triggers and skin-care needs
 
 You will leave with an explanation of your presentation and an individualised management plan.
 
@@ -54,10 +54,10 @@ You will leave with an explanation of your presentation and an individualised ma
 
 Lymphoedema is typically managed with an approach often called complete decongestive therapy, which may combine:
 
-- **Manual lymphatic drainage:** a gentle, specialised massage technique to encourage fluid movement
-- **Compression:** bandaging or garments to reduce and control swelling
-- **Exercise and movement:** to support lymphatic flow and function
-- **Skin care and self-management:** to protect the skin and reduce infection risk
+- Manual lymphatic drainage: a gentle, specialised massage technique to encourage fluid movement
+- Compression: bandaging or garments to reduce and control swelling
+- Exercise and movement: to support lymphatic flow and function
+- Skin care and self-management: to protect the skin and reduce infection risk
 
 The emphasis is on effective long-term management and self-care, tailored to you and coordinated with your wider medical team.
 
@@ -83,9 +83,3 @@ Appropriate, graded exercise generally supports lymphatic function rather than w
 
 Good skin care, prompt attention to cuts or breaks, and recognising early signs of infection are important. Your physiotherapist will give you practical self-care guidance as part of your plan.
 
-## Related pages
-
-- [Swelling Management](/conditions/swelling-management)
-- [Lipoedema](/conditions/lipoedema)
-- [Breast Cancer Post-Operative Rehabilitation](/conditions/breast-cancer-rehabilitation)
-- [Chronic Venous Insufficiency (CVI)](/conditions/chronic-venous-insufficiency)

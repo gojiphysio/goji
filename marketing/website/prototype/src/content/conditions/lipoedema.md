@@ -19,11 +19,11 @@ Lipoedema (also spelled lipedema) is a long-term condition involving an abnormal
 
 Lipoedema has a recognisable pattern that helps distinguish it from other conditions:
 
-- **Symmetrical distribution:** typically affecting both legs (and sometimes arms) fairly evenly
-- **Sparing of the feet and hands:** the feet and hands are typically unaffected by the abnormal fat accumulation, often creating a distinct "cuff" at the ankles or wrists. Swelling of the feet or hands may occur if lymphoedema develops alongside lipoedema.
-- **Tenderness and easy bruising:** the affected tissue is often painful to pressure
-- **Disproportion:** the lower body may be noticeably larger than the upper body
-- **Limited response to dieting:** the affected fat tends to persist despite weight loss
+- Symmetrical distribution: typically affecting both legs (and sometimes arms) fairly evenly
+- Sparing of the feet and hands: the feet and hands are typically unaffected by the abnormal fat accumulation, often creating a distinct "cuff" at the ankles or wrists. Swelling of the feet or hands may occur if lymphoedema develops alongside lipoedema.
+- Tenderness and easy bruising: the affected tissue is often painful to pressure
+- Disproportion: the lower body may be noticeably larger than the upper body
+- Limited response to dieting: the affected fat tends to persist despite weight loss
 
 Over time, lipoedema can sometimes coexist with lymphatic changes, which is one reason assessment matters.
 
@@ -40,10 +40,10 @@ People with lipoedema often describe:
 
 Your physiotherapist will take a history of your symptoms and how they have developed, then assess the affected areas. This may include:
 
-- **Pattern and tissue assessment:** noting distribution, tenderness, and tissue characteristics
-- **Swelling check:** distinguishing lipoedema from, or alongside, lymphatic swelling
-- **Movement and function:** how symptoms affect your mobility and daily life
-- **Self-management review:** understanding your goals and current care
+- Pattern and tissue assessment: noting distribution, tenderness, and tissue characteristics
+- Swelling check: distinguishing lipoedema from, or alongside, lymphatic swelling
+- Movement and function: how symptoms affect your mobility and daily life
+- Self-management review: understanding your goals and current care
 
 You will leave with an explanation of your presentation and a personalised, conservative management plan.
 
@@ -51,10 +51,10 @@ You will leave with an explanation of your presentation and a personalised, cons
 
 Lipoedema management is conservative and focused on comfort, function, and slowing progression rather than cure. It may include:
 
-- **Compression garments:** to support the tissue and manage any accompanying swelling
-- **Manual lymphatic drainage:** where there is a lymphatic component
-- **Exercise and movement:** low-impact activity to support mobility, circulation, and general health
-- **Education and self-care:** understanding the condition and strategies for daily comfort
+- Compression garments: to support the tissue and manage any accompanying swelling
+- Manual lymphatic drainage: where there is a lymphatic component
+- Exercise and movement: low-impact activity to support mobility, circulation, and general health
+- Education and self-care: understanding the condition and strategies for daily comfort
 
 Physiotherapy works alongside your medical team, and for some people specialist medical input is also part of the picture.
 
@@ -80,9 +80,3 @@ Yes. Physiotherapy can help manage pain, tenderness, swelling and mobility throu
 
 Yes. Exercise can improve muscle strength, build and maintain muscle mass, support circulation and mobility, and enhance overall quality of life. A combination of aerobic activities (e.g. walking, cycling or swimming) and progressive strength training is encouraged. While exercise cannot reliably eliminate lipoedema-related fat tissue, your physiotherapist can tailor a programme to your symptoms, abilities and goals.
 
-## Related pages
-
-- [Lymphoedema](/conditions/lymphoedema)
-- [Swelling Management](/conditions/swelling-management)
-- [Chronic Venous Insufficiency (CVI)](/conditions/chronic-venous-insufficiency)
-- [Breast Cancer Post-Operative Rehabilitation](/conditions/breast-cancer-rehabilitation)

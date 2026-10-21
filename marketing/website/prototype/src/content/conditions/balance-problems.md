@@ -19,11 +19,11 @@ Good balance relies on three systems working together: the inner ear (vestibular
 
 Balance problems can stem from one or several factors, including:
 
-- **Vestibular (inner-ear) conditions:** such as BPPV, vestibular neuritis, or vestibular hypofunction
-- **Reduced strength and sensation:** weakness in the legs or reduced proprioception, common with age or inactivity
-- **Vision changes:** which reduce the visual input balance relies on
-- **Neurological conditions and general health:** affecting how the brain integrates balance information
-- **Deconditioning:** after illness, surgery, or a period of reduced activity
+- Vestibular (inner-ear) conditions: such as BPPV, vestibular neuritis, or vestibular hypofunction
+- Reduced strength and sensation: weakness in the legs or reduced proprioception, common with age or inactivity
+- Vision changes: which reduce the visual input balance relies on
+- Neurological conditions and general health: affecting how the brain integrates balance information
+- Deconditioning: after illness, surgery, or a period of reduced activity
 
 Because balance depends on multiple systems, assessment focuses on identifying which are involved so the programme can target them specifically.
 
@@ -46,10 +46,10 @@ Any new balance loss with weakness, numbness, speech changes, or a sudden severe
 
 Your physiotherapist will take a history of your symptoms, general health, and activities, then assess the systems that contribute to balance. This may include:
 
-- **Balance testing:** static and dynamic balance in different conditions (eyes open/closed, firm/soft surfaces)
-- **Strength and mobility:** particularly of the legs and trunk
-- **Vestibular and gaze assessment:** how the inner ear and eyes support stability
-- **Gait analysis:** how you walk and turn, and where steadiness reduces
+- Balance testing: static and dynamic balance in different conditions (eyes open/closed, firm/soft surfaces)
+- Strength and mobility: particularly of the legs and trunk
+- Vestibular and gaze assessment: how the inner ear and eyes support stability
+- Gait analysis: how you walk and turn, and where steadiness reduces
 
 You will leave with an explanation of what is affecting your balance and a personalised programme to address the contributing factors.
 
@@ -79,9 +79,3 @@ No. The inner ear is one contributor, but strength, sensation, vision, and gener
 
 This varies with the cause and your starting point. Your physiotherapist will set clear goals and adjust your programme as your balance improves.
 
-## Related pages
-
-- [Fall Prevention and Age-Related Instability](/conditions/fall-prevention)
-- [Vertigo](/conditions/vertigo)
-- [Dizziness](/conditions/dizziness)
-- [Benign Paroxysmal Positional Vertigo (BPPV)](/conditions/bppv)

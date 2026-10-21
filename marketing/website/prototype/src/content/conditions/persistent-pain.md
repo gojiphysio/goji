@@ -45,10 +45,10 @@ Yes. Osteoarthritis, the wear-related change that commonly affects the knees, hi
 
 Your physiotherapist will take a detailed history of your pain - how it started, how it behaves, what makes it better or worse, and how it affects your daily life and sleep. This is followed by an assessment that may include:
 
-- **Movement and strength testing:** identifying where movement is limited, guarded, or deconditioned
-- **Load tolerance:** understanding how much activity you can currently manage and how symptoms respond
-- **Contributing factors:** reviewing sleep, stress, activity patterns, and past episodes
-- **Goal setting:** clarifying the activities you want to return to
+- Movement and strength testing: identifying where movement is limited, guarded, or deconditioned
+- Load tolerance: understanding how much activity you can currently manage and how symptoms respond
+- Contributing factors: reviewing sleep, stress, activity patterns, and past episodes
+- Goal setting: clarifying the activities you want to return to
 
 You will leave with an explanation of what is contributing to your pain and a graded plan that rebuilds capacity and confidence step by step.
 
@@ -82,9 +82,3 @@ This varies from person to person and depends on how long the pain has been pres
 
 Yes. Recurring flare-ups usually point to an underlying gap in strength, control, or load management. Addressing that directly can reduce how often and how severely symptoms return.
 
-## Related pages
-
-- [Musculoskeletal Pain and Injuries](/conditions/musculoskeletal-pain-and-injuries)
-- [Functional Movement Assessment](/conditions/functional-movement-assessment)
-- [Sports Rehabilitation and Performance](/conditions/sports-rehabilitation)
-- [Dry Needling](/conditions/dry-needling)

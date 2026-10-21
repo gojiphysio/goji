@@ -32,10 +32,10 @@ You do not need to be in pain or injured to benefit - the assessment is just as 
 
 Your physiotherapist will discuss your activity, history, and goals, then guide you through a series of movements and tests, which may include:
 
-- **Fundamental movement patterns:** squat, hinge, lunge, push, pull, and rotation
-- **Mobility and flexibility:** joint range at the ankles, hips, spine, and shoulders
-- **Strength and control:** how well you stabilise and control movement, including single-leg tasks and balance
-- **Task-specific movements:** patterns relevant to your sport, work, or daily demands
+- Fundamental movement patterns: squat, hinge, lunge, push, pull, and rotation
+- Mobility and flexibility: joint range at the ankles, hips, spine, and shoulders
+- Strength and control: how well you stabilise and control movement, including single-leg tasks and balance
+- Task-specific movements: patterns relevant to your sport, work, or daily demands
 
 You will leave with an explanation of what the assessment found and a targeted programme of mobility, strength, and control work suited to your priorities.
 
@@ -69,9 +69,3 @@ It is typically a focused session that allows time to move through the relevant 
 
 Wear comfortable clothing you can move in. Otherwise, simply come ready to move through a range of everyday and sport-relevant patterns.
 
-## Related pages
-
-- [Sports Rehabilitation and Performance](/conditions/sports-rehabilitation)
-- [Musculoskeletal Pain and Injuries](/conditions/musculoskeletal-pain-and-injuries)
-- [Persistent and Recurrent Pain](/conditions/persistent-pain)
-- [Post-Operative Recovery and Rehabilitation](/conditions/post-surgery-rehabilitation)

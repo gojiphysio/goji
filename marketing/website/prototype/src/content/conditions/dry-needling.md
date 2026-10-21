@@ -9,9 +9,9 @@ reviewer:
   name: "Cheryl Long"
   slug: "cheryl-long"
 ctaSlug: "web-wa"
-relatedServices: ["musculoskeletal-physiotherapy"]
 order: 7
 draft: false
+relatedServices: ["musculoskeletal-physiotherapy"]
 ---
 
 Dry needling is a technique in which a thin, sterile, single-use needle is inserted into a muscle or nearby tissue - often at a tight, tender band known as a trigger point - to help ease muscle tension and pain. "Dry" simply means nothing is injected. At Goji Physio in Lentor, Singapore, dry needling is offered by Cheryl Long as one tool within a broader treatment plan, alongside exercise, movement retraining, and education - not as a standalone cure.
@@ -72,9 +72,3 @@ Not always. Certain conditions, medications, or circumstances mean dry needling 
 
 Dry needling can help ease muscle tension and pain, but it works best alongside exercise and movement retraining that address why the tension developed. It is one part of the plan, not a substitute for the rest of it.
 
-## Related pages
-
-- [Persistent and Recurrent Pain](/conditions/persistent-pain)
-- [Musculoskeletal Pain and Injuries](/conditions/musculoskeletal-pain-and-injuries)
-- [Sports Rehabilitation and Performance](/conditions/sports-rehabilitation)
-- [Functional Movement Assessment](/conditions/functional-movement-assessment)

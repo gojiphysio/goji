@@ -2,7 +2,7 @@
 title: "Fall Prevention and Age-Related Instability"
 seoTitle: "Fall Prevention Physio Singapore"
 description: "Worried about falls or feeling less steady with age? Goji's physiotherapists assess falls risk and build strength and balance plans in Lentor, Singapore."
-cardTitle: "Fall Prevention"
+cardTitle: "Fall Prevention and Age-Related Instability"
 cardLead: "Strength and balance programmes that address your personal falls risk, so you can stay active, independent and confident on your feet."
 category: "Vestibular Rehabilitation"
 reviewer:
@@ -19,12 +19,12 @@ Feeling less steady as we age is common, but falls are not an inevitable part of
 
 Falls usually result from several factors adding up, including:
 
-- **Reduced leg and trunk strength** and slower reactions
-- **Balance and inner-ear (vestibular) changes** affecting steadiness
-- **Reduced sensation or proprioception** in the feet and legs
-- **Vision changes** and poor lighting or hazards at home
-- **Medications** that can cause dizziness or drowsiness
-- **Fear of falling**, which can lead to less activity and, in turn, further loss of strength and confidence
+- Reduced leg and trunk strength and slower reactions
+- Balance and inner-ear (vestibular) changes affecting steadiness
+- Reduced sensation or proprioception in the feet and legs
+- Vision changes and poor lighting or hazards at home
+- Medications that can cause dizziness or drowsiness
+- Fear of falling, which can lead to less activity and, in turn, further loss of strength and confidence
 
 Because the causes stack up, addressing several factors together tends to be more effective than focusing on any single one.
 
@@ -42,10 +42,10 @@ Consider an assessment if you or a loved one:
 
 Your physiotherapist will discuss your health, activity, any falls history, and your goals, then carry out an assessment that may include:
 
-- **Strength and mobility testing:** particularly the legs and trunk
-- **Balance and gait assessment:** static and moving balance, walking, turning, and getting up from a chair
-- **Vestibular screening:** checking whether the inner ear is contributing
-- **Practical review:** discussing footwear, home hazards, and confidence
+- Strength and mobility testing: particularly the legs and trunk
+- Balance and gait assessment: static and moving balance, walking, turning, and getting up from a chair
+- Vestibular screening: checking whether the inner ear is contributing
+- Practical review: discussing footwear, home hazards, and confidence
 
 You will leave with a clear picture of your personal risk factors and a tailored programme to build strength, balance, and confidence.
 
@@ -75,9 +75,3 @@ Yes. Alongside exercises, your physiotherapist can discuss practical measures su
 
 While age-related instability is common in later life, anyone experiencing unsteadiness or a higher falls risk - for example after illness or a period of inactivity - can benefit from assessment.
 
-## Related pages
-
-- [Balance Difficulties](/conditions/balance-problems)
-- [Vertigo](/conditions/vertigo)
-- [Dizziness](/conditions/dizziness)
-- [Benign Paroxysmal Positional Vertigo (BPPV)](/conditions/bppv)

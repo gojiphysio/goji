@@ -19,10 +19,10 @@ Vertigo is the sensation that you or the world around you is spinning or moving 
 
 Vertigo commonly arises from the inner ear's balance system. Frequent causes include:
 
-- **Benign paroxysmal positional vertigo (BPPV):** brief spinning triggered by head movements, caused by displaced inner-ear crystals
-- **Vestibular neuritis or labyrinthitis:** vertigo following inflammation of the balance nerve, often after a viral illness
-- **Vestibular hypofunction:** reduced function of the inner ear's balance system, which may cause unsteadiness, blurred vision during head movements, and difficulty maintaining balance
-- **Ménière's-type conditions:** episodes of vertigo with hearing changes or fullness in the ear
+- Benign paroxysmal positional vertigo (BPPV): brief spinning triggered by head movements, caused by displaced inner-ear crystals
+- Vestibular neuritis or labyrinthitis: vertigo following inflammation of the balance nerve, often after a viral illness
+- Vestibular hypofunction: reduced function of the inner ear's balance system, which may cause unsteadiness, blurred vision during head movements, and difficulty maintaining balance
+- Ménière's-type conditions: episodes of vertigo with hearing changes or fullness in the ear
 
 Not all dizziness is vertigo, and not all vertigo comes from the inner ear. Careful assessment is important to point treatment in the right direction.
 
@@ -34,10 +34,10 @@ It is worth having vertigo assessed when it is recurrent, persistent, or interfe
 
 Your physiotherapist will take a detailed history of your symptoms - what triggers them, how long they last, and how they affect you - followed by a vestibular assessment that may include:
 
-- **Positional testing:** specific head and body movements to reproduce and identify certain types of vertigo, such as BPPV
-- **Eye-movement and gaze assessment:** how your eyes and inner ear coordinate to keep vision stable
-- **Balance and gait testing:** how steady you are standing and walking
-- **Screening:** checking for features that would prompt onward medical referral
+- Positional testing: specific head and body movements to reproduce and identify certain types of vertigo, such as BPPV
+- Eye-movement and gaze assessment: how your eyes and inner ear coordinate to keep vision stable
+- Balance and gait testing: how steady you are standing and walking
+- Screening: checking for features that would prompt onward medical referral
 
 You will leave with an explanation of what is likely causing your vertigo and, where appropriate, treatment or an individualised exercise programme.
 
@@ -71,9 +71,3 @@ Often not, but it depends on your symptoms. Your physiotherapist screens for fea
 
 We recommend having a light meal at least 1 hour before your session. If you have prescribed medication to manage dizziness or nausea, take it as directed by your healthcare provider, especially if you are experiencing symptoms. Some assessment and treatment techniques may temporarily trigger dizziness or nausea, so these precautions can help you feel more comfortable and reduce the risk of vomiting during your session.
 
-## Related pages
-
-- [Benign Paroxysmal Positional Vertigo (BPPV)](/conditions/bppv)
-- [Dizziness](/conditions/dizziness)
-- [Balance Difficulties](/conditions/balance-problems)
-- [Fall Prevention and Age-Related Instability](/conditions/fall-prevention)

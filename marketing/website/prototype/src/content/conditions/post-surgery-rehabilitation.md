@@ -2,7 +2,7 @@
 title: "Post-Operative Recovery and Rehabilitation"
 seoTitle: "Post-Surgery Physio & Rehab Singapore"
 description: "Recovering from knee or hip replacement, ACL or spine surgery? Goji's physiotherapists guide staged post-surgery rehab in Lentor, Singapore. AHPC-registered."
-cardTitle: "Post-Operative Recovery"
+cardTitle: "Post-Operative Recovery and Rehabilitation"
 cardLead: "Staged rehabilitation after joint replacement, ligament repair, spinal or other orthopaedic surgery, built around your surgeon's protocol."
 category: "Musculoskeletal & Sports"
 reviewer:
@@ -24,7 +24,7 @@ Physiotherapists commonly support recovery after:
 - Arthroscopic and keyhole procedures (knee, shoulder, hip), including meniscus repair
 - Spinal surgery
 - Fracture fixation and orthopaedic trauma surgery
-- Abdominal or pelvic surgery, where movement and core function are affected (for caesarean birth, see [Caesarean Recovery and Scar Management](/conditions/caesarean-recovery))
+- Abdominal or pelvic surgery, where movement and core function are affected (for caesarean birth, see Caesarean Recovery and Scar Management)
 
 Each procedure has its own healing timeline and precautions, so rehabilitation is always tailored to your specific operation and surgeon's guidance.
 
@@ -36,10 +36,10 @@ Rehabilitation after a knee or hip replacement usually starts soon after surgery
 
 Your physiotherapist will review your operation, any surgeon's protocol or precautions, your current stage of healing, and your goals. Assessment and treatment may include:
 
-- **Range of movement:** safely restoring joint mobility within any post-surgical limits
-- **Strength and control:** progressively rebuilding the muscles affected by surgery and reduced activity
-- **Swelling and pain management:** strategies to keep you comfortable and moving
-- **Functional progression:** walking, stairs, and the daily or sporting tasks you are working toward
+- Range of movement: safely restoring joint mobility within any post-surgical limits
+- Strength and control: progressively rebuilding the muscles affected by surgery and reduced activity
+- Swelling and pain management: strategies to keep you comfortable and moving
+- Functional progression: walking, stairs, and the daily or sporting tasks you are working toward
 
 You will leave with a clear, staged programme that matches your recovery phase and progresses as your tissues heal.
 
@@ -77,10 +77,3 @@ Timelines vary widely by procedure - some recoveries take weeks, others many mon
 
 It is often still worthwhile. Lingering stiffness, weakness, or loss of confidence after surgery can usually be assessed and addressed with a targeted programme, even months later.
 
-## Related pages
-
-- [Musculoskeletal Pain and Injuries](/conditions/musculoskeletal-pain-and-injuries)
-- [Sports Rehabilitation and Performance](/conditions/sports-rehabilitation)
-- [Functional Movement Assessment](/conditions/functional-movement-assessment)
-- [Persistent and Recurrent Pain](/conditions/persistent-pain)
-- [Caesarean Recovery and Scar Management](/conditions/caesarean-recovery)

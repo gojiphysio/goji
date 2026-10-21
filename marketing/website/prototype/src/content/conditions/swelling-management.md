@@ -19,11 +19,11 @@ Swelling (oedema) is a build-up of fluid in the body's tissues, most often notic
 
 Swelling has many possible causes, including:
 
-- **Post-surgical or post-injury swelling:** a normal part of healing that sometimes lingers or needs support
-- **Lymphatic causes:** such as lymphoedema, when lymph drainage is reduced
-- **Venous causes:** such as chronic venous insufficiency, when leg veins struggle to return blood
-- **Prolonged immobility** or reduced activity
-- **Other medical conditions** affecting the heart, kidneys, or circulation
+- Post-surgical or post-injury swelling: a normal part of healing that sometimes lingers or needs support
+- Lymphatic causes: such as lymphoedema, when lymph drainage is reduced
+- Venous causes: such as chronic venous insufficiency, when leg veins struggle to return blood
+- Prolonged immobility or reduced activity
+- Other medical conditions affecting the heart, kidneys, or circulation
 
 Some causes of swelling need medical investigation, so assessment focuses on identifying what is driving it and whether onward referral is needed.
 
@@ -35,10 +35,10 @@ It is worth seeking assessment when swelling is persistent, uncomfortable, or li
 
 Your physiotherapist will take a history of your swelling, general health, and any recent surgery or injury, then assess the affected area. This may include:
 
-- **Swelling assessment:** measuring and comparing the affected area and noting how it changes
-- **Skin and tissue check:** looking at skin condition and tissue texture
-- **Movement and function:** how the swelling affects your range and activity
-- **Screening:** identifying any features that require medical review
+- Swelling assessment: measuring and comparing the affected area and noting how it changes
+- Skin and tissue check: looking at skin condition and tissue texture
+- Movement and function: how the swelling affects your range and activity
+- Screening: identifying any features that require medical review
 
 You will leave with an explanation of what is likely contributing to your swelling and a management plan suited to the cause.
 
@@ -46,10 +46,10 @@ You will leave with an explanation of what is likely contributing to your swelli
 
 Depending on the cause, physiotherapy management may combine:
 
-- **Manual lymphatic drainage:** a gentle technique to encourage fluid movement, where appropriate
-- **Compression:** bandaging or garments to reduce and control swelling
-- **Exercise and movement:** to support circulation and lymphatic flow
-- **Elevation and self-management advice:** practical strategies to use day to day
+- Manual lymphatic drainage: a gentle technique to encourage fluid movement, where appropriate
+- Compression: bandaging or garments to reduce and control swelling
+- Exercise and movement: to support circulation and lymphatic flow
+- Elevation and self-management advice: practical strategies to use day to day
 
 Where swelling stems from a condition that needs medical treatment, physiotherapy works alongside your doctor's care rather than replacing it.
 
@@ -75,9 +75,3 @@ Sudden, painful, hot, or red swelling - especially in one leg - or swelling with
 
 Yes. Swelling after surgery is common and usually settles, but where it lingers or limits recovery, physiotherapy techniques and guidance can help manage it and support your rehabilitation.
 
-## Related pages
-
-- [Lymphoedema](/conditions/lymphoedema)
-- [Chronic Venous Insufficiency (CVI)](/conditions/chronic-venous-insufficiency)
-- [Lipoedema](/conditions/lipoedema)
-- [Breast Cancer Post-Operative Rehabilitation](/conditions/breast-cancer-rehabilitation)

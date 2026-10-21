@@ -9,9 +9,9 @@ reviewer:
   name: "Cheryl Long"
   slug: "cheryl-long"
 ctaSlug: "web-wa"
-relatedServices: ["schroth-scoliosis-adults"]
 order: 3
 draft: false
+relatedServices: ["schroth-scoliosis-adults"]
 ---
 
 Scoliosis is a sideways curvature of the spine with an element of rotation. In adults it may be a curve that has been present since adolescence, or one that develops later as the spine's discs and joints change with age (degenerative scoliosis). Many adults with scoliosis live comfortably, while others experience pain, stiffness, or concerns about posture and progression. Physiotherapy assessment at Goji Physio in Lentor, Singapore clarifies how your curve affects you and guides a targeted, exercise-based plan to manage symptoms and support spinal function.
@@ -20,8 +20,8 @@ Scoliosis is a sideways curvature of the spine with an element of rotation. In a
 
 Adult scoliosis generally falls into two broad groups:
 
-- **Adult idiopathic scoliosis:** a curve that began in adolescence and has continued into adulthood
-- **Degenerative (de novo) scoliosis:** a curve that develops later in life as the discs and facet joints wear, more common with age
+- Adult idiopathic scoliosis: a curve that began in adolescence and has continued into adulthood
+- Degenerative (de novo) scoliosis: a curve that develops later in life as the discs and facet joints wear, more common with age
 
 Factors such as bone density, muscle strength, and overall activity levels can influence symptoms. Importantly, the size of a curve does not reliably predict how much pain or difficulty a person experiences - which is why individual assessment matters.
 
@@ -41,12 +41,12 @@ Any new or progressive lower limb weakness, numbness, or changes in bladder or b
 
 Your physiotherapist will take a history of your curve, symptoms, and daily demands, followed by a physical assessment that may include:
 
-- **Postural and curve assessment:** observing the curve and how your trunk and pelvis align
-- **Movement and flexibility testing:** how your spine and surrounding regions move
-- **Strength and control:** assessing the muscles that support the trunk
-- **Functional review:** how the curve affects standing, walking, and the activities important to you
+- Postural and curve assessment: observing the curve and how your trunk and pelvis align
+- Movement and flexibility testing: how your spine and surrounding regions move
+- Strength and control: assessing the muscles that support the trunk
+- Functional review: how the curve affects standing, walking, and the activities important to you
 
-Our clinicians are experienced in scoliosis-specific exercise approaches, including the **Schroth method (Physiotherapy Scoliosis Specific Exercises)** - a system of curve-specific exercises, breathing, and postural training. You will leave with a clear picture of your presentation and a personalised programme.
+Our clinicians are experienced in scoliosis-specific exercise approaches, including the Schroth method (Physiotherapy Scoliosis Specific Exercises) - a system of curve-specific exercises, breathing, and postural training. You will leave with a clear picture of your presentation and a personalised programme.
 
 ## How is adult scoliosis managed?
 
@@ -78,9 +78,3 @@ Yes - staying active is important. Exercise is generally beneficial, and a physi
 
 Most adults with scoliosis are managed conservatively and do not need surgery. Specialist referral is considered for large or progressing curves, significant nerve symptoms, or pain that is not responding - and your physiotherapist can help coordinate this.
 
-## Related pages
-
-- [Adolescent Scoliosis (Schroth)](/conditions/adolescent-scoliosis-schroth)
-- [Persistent and Recurrent Pain](/conditions/persistent-pain)
-- [Functional Movement Assessment](/conditions/functional-movement-assessment)
-- [Post-Operative Recovery and Rehabilitation](/conditions/post-surgery-rehabilitation)

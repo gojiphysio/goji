@@ -9,9 +9,9 @@ reviewer:
   name: "Cheryl Long"
   slug: "cheryl-long"
 ctaSlug: "web-wa"
-relatedServices: ["musculoskeletal-physiotherapy"]
 order: 1
 draft: false
+relatedServices: ["musculoskeletal-physiotherapy"]
 ---
 
 A musculoskeletal injury is any damage or irritation to the muscles, tendons, ligaments, joints, or bones that affects how you move. It might be a sudden event - rolling an ankle, straining a hamstring, tweaking your back lifting - or something that builds gradually with training load, desk work, or repetitive tasks. At Goji Physio in Lentor, Singapore, physiotherapy assessment identifies which structures are involved, why the problem developed, and what your body needs to recover and return to the activities that matter to you.
@@ -20,11 +20,11 @@ A musculoskeletal injury is any damage or irritation to the muscles, tendons, li
 
 Physiotherapists assess and rehabilitate a wide range of musculoskeletal presentations, including:
 
-- **Acute injuries:** ankle sprains, muscle strains (hamstring, lower back, knee, calf, groin, etc), ligament injuries, and joint sprains
-- **Overuse and load-related injuries:** tendon pain (Achilles, patellar, rotator cuff, tennis/golfer's elbow), shin pain, and stress-related bone injuries
-- **Joint and back pain:** neck and lower back pain, shoulder pain, knee and hip pain, and arthritis-related joint pain
-- **Work and posture-related pain:** desk-related aches in the neck, shoulders, and back, and repetitive strain
-- **Return-to-sport concerns:** lingering symptoms, loss of confidence, or reduced performance after an injury
+- Acute injuries: ankle sprains, muscle strains (hamstring, lower back, knee, calf, groin, etc), ligament injuries, and joint sprains
+- Overuse and load-related injuries: tendon pain (Achilles, patellar, rotator cuff, tennis/golfer's elbow), shin pain, and stress-related bone injuries
+- Joint and back pain: neck and lower back pain, shoulder pain, knee and hip pain, and arthritis-related joint pain
+- Work and posture-related pain: desk-related aches in the neck, shoulders, and back, and repetitive strain
+- Return-to-sport concerns: lingering symptoms, loss of confidence, or reduced performance after an injury
 
 The same injury can behave very differently from person to person, which is why assessment focuses on your specific presentation rather than the label alone.
 
@@ -32,25 +32,11 @@ The same injury can behave very differently from person to person, which is why 
 
 Pain is not always felt where the problem sits, so your physiotherapist looks at the whole movement picture. Common areas include:
 
-### Back and neck pain
-
-Lower back pain, mid-back stiffness, neck pain, and tension-type headaches linked to the neck. This includes sciatica (pain travelling into the buttock or leg) and slipped or herniated disc symptoms, which are often managed with education, graded movement, and progressive strengthening.
-
-### Shoulder pain
-
-Rotator cuff problems, shoulder impingement, and frozen shoulder, which often show up as difficulty reaching overhead, dressing, or sleeping on the affected side.
-
-### Elbow, wrist, and hand pain
-
-Tennis elbow and golfer's elbow, wrist and thumb pain, and hand symptoms such as numbness or tingling. Wrist pain linked to new parenthood is covered in [Pelvic Girdle Pain and Mummy's Wrist](/conditions/pelvic-girdle-pain).
-
-### Hip and knee pain
-
-Hip pain, including pain around the outer hip and buttock, and knee pain such as runner's knee, patellar tendon pain, and meniscus or ligament injuries. Joint pain from osteoarthritis often shows up as stiffness or pain on stairs.
-
-### Foot and ankle pain
-
-Ankle sprains and recurring ankle instability, Achilles tendon pain, plantar fasciitis, and heel or foot pain with walking or running.
+- Back and neck pain: Lower back pain, mid-back stiffness, neck pain, and tension-type headaches linked to the neck. This includes sciatica (pain travelling into the buttock or leg) and slipped or herniated disc symptoms, which are often managed with education, graded movement, and progressive strengthening.
+- Shoulder pain: Rotator cuff problems, shoulder impingement, and frozen shoulder, which often show up as difficulty reaching overhead, dressing, or sleeping on the affected side.
+- Elbow, wrist, and hand pain: Tennis elbow and golfer's elbow, wrist and thumb pain, and hand symptoms such as numbness or tingling. Wrist pain linked to new parenthood is covered in Pelvic Girdle Pain and Mummy's Wrist.
+- Hip and knee pain: Hip pain, including pain around the outer hip and buttock, and knee pain such as runner's knee, patellar tendon pain, and meniscus or ligament injuries. Joint pain from osteoarthritis often shows up as stiffness or pain on stairs.
+- Foot and ankle pain: Ankle sprains and recurring ankle instability, Achilles tendon pain, plantar fasciitis, and heel or foot pain with walking or running.
 
 ## What are the signs you should have a pain or injury assessed?
 
@@ -68,10 +54,10 @@ If you experience severe pain, obvious deformity, numbness, or an inability to m
 
 Your physiotherapist will take a history of how the injury happened, your symptoms, and your goals. This is followed by a physical assessment, which may include:
 
-- **Movement and strength testing:** identifying which movements provoke symptoms and where strength or control is reduced
-- **Joint and tissue assessment:** examining the injured area and the surrounding structures that share the load
-- **Functional testing:** looking at how you walk, squat, hop, or perform the tasks relevant to your sport or work
-- **Load and training review:** understanding what changed before the injury appeared
+- Movement and strength testing: identifying which movements provoke symptoms and where strength or control is reduced
+- Joint and tissue assessment: examining the injured area and the surrounding structures that share the load
+- Functional testing: looking at how you walk, squat, hop, or perform the tasks relevant to your sport or work
+- Load and training review: understanding what changed before the injury appeared
 
 You will leave with an explanation of what is going on and a structured, progressive rehabilitation plan - built around your stage of recovery and where you want to get back to.
 
@@ -109,11 +95,3 @@ Return is guided by how the tissue is tolerating load, your strength and control
 
 Yes. Injuries that keep coming back often point to an underlying issue with strength, control, or training load that has not been fully addressed. An assessment can identify what is driving the recurrence and target it directly.
 
-## Related pages
-
-- [Sports Rehabilitation and Performance](/conditions/sports-rehabilitation)
-- [Post-Operative Recovery and Rehabilitation](/conditions/post-surgery-rehabilitation)
-- [Persistent and Recurrent Pain](/conditions/persistent-pain)
-- [Functional Movement Assessment](/conditions/functional-movement-assessment)
-- [Dry Needling](/conditions/dry-needling)
-- [Pelvic Girdle Pain and Mummy's Wrist](/conditions/pelvic-girdle-pain)

@@ -2,7 +2,7 @@
 title: "Benign Paroxysmal Positional Vertigo (BPPV)"
 seoTitle: "BPPV Vertigo Physio Singapore"
 description: "Brief spinning when you roll over or look up? Goji's physiotherapists assess and treat BPPV with repositioning manoeuvres in Lentor, Singapore. AHPC-registered."
-cardTitle: "BPPV"
+cardTitle: "Benign Paroxysmal Positional Vertigo (BPPV)"
 cardLead: "Brief spinning triggered by rolling over, lying down or looking up, confirmed with positional tests and treated with repositioning manoeuvres."
 category: "Vestibular Rehabilitation"
 reviewer:
@@ -30,15 +30,15 @@ BPPV does not cause hearing loss, ringing in the ears, headache, or neurological
 
 Your physiotherapist will take a history of your symptoms and triggers, then carry out tests to confirm BPPV and identify which ear and canal are involved. This typically includes:
 
-- **Screening:** ruling out features that suggest a cause other than BPPV
-- **Positional tests:** guided head-and-body movements (such as the Dix-Hallpike test) that briefly reproduce your vertigo while your physiotherapist observes your eye movements
-- **Identifying the affected canal:** determining which inner-ear canal the crystals are in, so treatment can be targeted
+- Screening: ruling out features that suggest a cause other than BPPV
+- Positional tests: guided head-and-body movements (such as the Dix-Hallpike test) that briefly reproduce your vertigo while your physiotherapist observes your eye movements
+- Identifying the affected canal: determining which inner-ear canal the crystals are in, so treatment can be targeted
 
 Because testing deliberately provokes brief vertigo, your physiotherapist will explain what to expect and support you throughout.
 
 ## How is BPPV treated?
 
-BPPV is usually treated with **canalith repositioning manoeuvres** - a specific sequence of head and body movements (such as the Epley manoeuvre) that guide the displaced crystals back to where they belong. Some people need only one treatment and others need several. Your physiotherapist will re-test to check the response and may give you follow-up advice or exercises.
+BPPV is usually treated with canalith repositioning manoeuvres - a specific sequence of head and body movements (such as the Epley manoeuvre) that guide the displaced crystals back to where they belong. Some people need only one treatment and others need several. Your physiotherapist will re-test to check the response and may give you follow-up advice or exercises.
 
 ## Frequently asked questions
 
@@ -66,9 +66,3 @@ A period of mild unsteadiness after successful treatment is common as the balanc
 
 We recommend having a light meal at least 1 hour before your session. If you have prescribed medication to manage dizziness or nausea, take it as directed by your healthcare provider, especially if you are experiencing symptoms. Some assessment and treatment techniques may temporarily trigger dizziness or nausea, so these precautions can help you feel more comfortable and reduce the risk of vomiting during your session.
 
-## Related pages
-
-- [Vertigo](/conditions/vertigo)
-- [Dizziness](/conditions/dizziness)
-- [Balance Difficulties](/conditions/balance-problems)
-- [Fall Prevention and Age-Related Instability](/conditions/fall-prevention)

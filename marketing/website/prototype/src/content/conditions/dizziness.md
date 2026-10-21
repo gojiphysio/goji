@@ -19,10 +19,10 @@ draft: false
 
 Dizziness has many possible contributors, including:
 
-- **Inner-ear (vestibular) conditions:** such as BPPV, vestibular neuritis, or vestibular hypofunction
-- **Balance-system deconditioning:** after illness, injury, or a period of reduced activity
-- **Persistent postural-perceptual dizziness (PPPD):** ongoing unsteadiness and sensitivity to movement, often after an initial trigger
-- **Other medical factors:** blood pressure changes, medications, dehydration, anxiety, low blood sugar, or general health issues
+- Inner-ear (vestibular) conditions: such as BPPV, vestibular neuritis, or vestibular hypofunction
+- Balance-system deconditioning: after illness, injury, or a period of reduced activity
+- Persistent postural-perceptual dizziness (PPPD): ongoing unsteadiness and sensitivity to movement, often after an initial trigger
+- Other medical factors: blood pressure changes, medications, dehydration, anxiety, low blood sugar, or general health issues
 
 Because the causes overlap, careful assessment is important to guide the right treatment and to identify anything that needs medical review.
 
@@ -34,10 +34,10 @@ It is worth seeking assessment when dizziness is persistent, recurrent, or affec
 
 Your physiotherapist will take a careful history - describing your dizziness, its triggers, duration, and impact - then carry out an assessment that may include:
 
-- **Vestibular and eye-movement testing:** how your inner ear and eyes coordinate to stabilise vision and balance
-- **Positional testing:** to identify movement-triggered causes such as BPPV
-- **Balance and gait assessment:** how steady you are when standing and walking
-- **Screening:** checking for features that suggest a cause needing medical referral
+- Vestibular and eye-movement testing: how your inner ear and eyes coordinate to stabilise vision and balance
+- Positional testing: to identify movement-triggered causes such as BPPV
+- Balance and gait assessment: how steady you are when standing and walking
+- Screening: checking for features that suggest a cause needing medical referral
 
 You will leave with an explanation of the likely contributors to your dizziness and, where appropriate, a tailored rehabilitation plan.
 
@@ -67,9 +67,3 @@ Some vestibular exercises briefly provoke symptoms as part of helping the brain 
 
 Yes - dizziness and anxiety can influence each other, and this is common and understandable. Vestibular rehabilitation, education, and coordinated care can all help address this cycle.
 
-## Related pages
-
-- [Vertigo](/conditions/vertigo)
-- [Benign Paroxysmal Positional Vertigo (BPPV)](/conditions/bppv)
-- [Balance Difficulties](/conditions/balance-problems)
-- [Fall Prevention and Age-Related Instability](/conditions/fall-prevention)

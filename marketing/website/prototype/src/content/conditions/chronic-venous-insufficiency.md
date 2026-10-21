@@ -19,11 +19,11 @@ Chronic venous insufficiency (CVI) develops when the veins in the legs struggle 
 
 CVI develops when the leg veins and their valves cannot keep blood moving upward effectively. Contributing factors include:
 
-- **Weakened or damaged vein valves**, allowing blood to flow backward and pool
-- **Prolonged standing or sitting**, and reduced calf-muscle activity
-- **Reduced mobility, higher body weight, and age**
-- **Varicose veins** as part of the same picture
-- **Previous deep vein thrombosis (DVT)**
+- Weakened or damaged vein valves, allowing blood to flow backward and pool
+- Prolonged standing or sitting, and reduced calf-muscle activity
+- Reduced mobility, higher body weight, and age
+- Varicose veins as part of the same picture
+- Previous deep vein thrombosis (DVT)
 
 The calf muscles act as a pump that helps push blood back up the legs, which is one reason movement and exercise are central to management.
 
@@ -43,10 +43,10 @@ Any leg wound that is not healing, or sudden painful swelling in one leg, should
 
 Your physiotherapist will take a detailed history of your symptoms, medical history, and activity levels, followed by a comprehensive lymphoedema assessment. Your first session will include:
 
-- **Detailed leg measurements:** measuring both legs at multiple points to establish a baseline and assess the extent and distribution of swelling.
-- **Swelling and skin assessment:** evaluating swelling patterns, skin condition, and tissue changes.
-- **Functional assessment:** assessing mobility and calf-muscle pump function.
-- **Individualised treatment plan:** developing a personalised management plan based on your assessment findings and goals.
+- Detailed leg measurements: measuring both legs at multiple points to establish a baseline and assess the extent and distribution of swelling.
+- Swelling and skin assessment: evaluating swelling patterns, skin condition, and tissue changes.
+- Functional assessment: assessing mobility and calf-muscle pump function.
+- Individualised treatment plan: developing a personalised management plan based on your assessment findings and goals.
 
 From your second session onwards, treatment may include manual lymphatic drainage (MLD), compression bandaging, and advice on ongoing lymphoedema management, as appropriate.
 
@@ -54,10 +54,10 @@ From your second session onwards, treatment may include manual lymphatic drainag
 
 Chronic venous insufficiency (CVI) is generally managed through long-term strategies to improve circulation, control swelling, and protect skin health. Physiotherapy supports management through:
 
-- **Compression therapy:** compression stockings or bandaging help reduce swelling and support venous and lymphatic return. The appropriate level of compression should be assessed individually.
-- **Movement and exercise:** walking, ankle movements, and calf-strengthening exercises activate the calf-muscle pump to support blood and fluid return.
-- **Skin care:** regular moisturising, skin inspection, and prompt attention to wounds or signs of infection help protect skin integrity and reduce complications.
-- **Manual lymphatic drainage (MLD):** a specialised, gentle hands-on technique that may help manage swelling when appropriate, particularly when lymphatic dysfunction is also present.
+- Compression therapy: compression stockings or bandaging help reduce swelling and support venous and lymphatic return. The appropriate level of compression should be assessed individually.
+- Movement and exercise: walking, ankle movements, and calf-strengthening exercises activate the calf-muscle pump to support blood and fluid return.
+- Skin care: regular moisturising, skin inspection, and prompt attention to wounds or signs of infection help protect skin integrity and reduce complications.
+- Manual lymphatic drainage (MLD): a specialised, gentle hands-on technique that may help manage swelling when appropriate, particularly when lymphatic dysfunction is also present.
 
 Additional strategies include activity modification and education on long-term self-management.
 
@@ -85,9 +85,3 @@ Varicose veins can be part of CVI and share underlying causes, but not everyone 
 
 Seek prompt medical care for a non-healing leg wound, signs of skin infection, or sudden painful swelling in one leg. Your physiotherapist will also refer you on if assessment suggests it is needed.
 
-## Related pages
-
-- [Swelling Management](/conditions/swelling-management)
-- [Lymphoedema](/conditions/lymphoedema)
-- [Lipoedema](/conditions/lipoedema)
-- [Breast Cancer Post-Operative Rehabilitation](/conditions/breast-cancer-rehabilitation)
