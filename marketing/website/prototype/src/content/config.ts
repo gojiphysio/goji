@@ -28,6 +28,10 @@ const conditions = defineCollection({
     reviewer: z
       .object({ name: z.string(), slug: z.string() })
       .optional(),
+    /** Service slugs that treat this condition, rendered as a "Related
+     *  appointments" block and emitted as MedicalWebPage relatedLink. Link only
+     *  services whose page already covers the condition. */
+    relatedServices: z.array(z.string()).default([]),
     /** Optional ordering within category on the index page */
     order: z.number().optional(),
     draft: z.boolean().default(false),

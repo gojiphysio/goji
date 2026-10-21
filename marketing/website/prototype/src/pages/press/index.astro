@@ -16,6 +16,7 @@ import Section from "../../components/Section.astro";
 import Button from "../../components/Button.astro";
 import { formatDate, isoDate } from "../../lib/dates.ts";
 import { SITE } from "../../lib/site.ts";
+import { clinicId } from "../../lib/schema.ts";
 
 const entries = (await getCollection("press", ({ data }) => !data.draft)).sort(
   (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
@@ -30,7 +31,7 @@ entries.forEach((e) => {
 const outlets = [...new Set(entries.map((e) => e.data.outlet))];
 
 const origin = Astro.site ?? new URL(Astro.url.origin);
-const pageURL = new URL("/press", origin).href;
+const pageURL = new URL("/press/", origin).href;
 
 // The clinic Organization is the subject of these articles. `subjectOf` is the
 // honest way to state that: we are written about, we are not the publisher.
@@ -42,6 +43,7 @@ const schema = [
     description: "Media coverage of Goji Women's and Family Physiotherapy.",
     url: pageURL,
     about: {
+      "@id": clinicId(origin),
       "@type": "Organization",
       name: SITE.fullName,
       url: origin.href,
@@ -67,7 +69,7 @@ const schema = [
     "@type": "BreadcrumbList",
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "Home", item: origin.href },
-      { "@type": "ListItem", position: 2, name: "Media", item: new URL("/media", origin).href },
+      { "@type": "ListItem", position: 2, name: "Media", item: new URL("/media/", origin).href },
       { "@type": "ListItem", position: 3, name: "Press", item: pageURL },
     ],
   },
@@ -82,7 +84,7 @@ const schema = [
 >
   <section class="press-hero">
     <div class="container">
-      <a href="/media" class="press-hero__back">
+      <a href="/media/" class="press-hero__back">
         <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M10 3L5 8l5 5"></path>
         </svg>
@@ -130,7 +132,7 @@ const schema = [
         <ul class="press-list">
           {entries.map((entry) => (
             <li>
-              <a href={`/press/${entry.slug}`} class="press-card">
+              <a href={`/press/${entry.slug}/`} class="press-card">
                 <p class="press-card__meta">
                   <span class="press-card__outlet">{entry.data.outlet}</span>
                   <time datetime={isoDate(entry.data.pubDate)}>

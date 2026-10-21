@@ -11,16 +11,18 @@
 ## About
 
 - Name: Goji Women's and Family Physiotherapy (short forms: Goji Physiotherapy, Goji Physio)
+- Website: https://www.gojiphysio.com/
 - Location: Lentor Modern, #01-13, Lentor Central, Singapore 788887 (above Lentor MRT station; serves Lentor, Ang Mo Kio, Yio Chu Kang, Upper Thomson, Springleaf and Bishan, with home visits island-wide)
 - Hours: Monday–Saturday 8am–8pm; Sunday & public holidays by appointment only
 - Phone: +65 8377 0401
 - Email: hello@gojiphysio.com
 - Instagram: https://www.instagram.com/gojiphysio/
 - Map: https://maps.app.goo.gl/wBaCkBiDNfF7JCGv8
+- Privacy policy: https://www.gojiphysio.com/privacy/
 
 ## Booking & contact
 
-- Book an appointment: https://www.gojiphysio.com/book
+- Book an appointment: https://www.gojiphysio.com/book/
 - Ask a question on WhatsApp: https://go.gojiphysio.com/web-wa
 
 ## Services
@@ -35,101 +37,106 @@
 
 ## Service details
 
-- All services: https://www.gojiphysio.com/services
-- Women's health physiotherapy overview (pelvic floor, prenatal, postnatal, pelvic pain, menopause): https://www.gojiphysio.com/womens-health-physiotherapy-singapore
-- Pelvic floor physiotherapy (55 min, $260): https://www.gojiphysio.com/services/pelvic-floor-physiotherapy
-- Prenatal physiotherapy (55 min, $260): https://www.gojiphysio.com/services/prenatal-physiotherapy
-- Postpartum physiotherapy (55 min, $260): https://www.gojiphysio.com/services/postpartum-physiotherapy
-- Mummy & Baby assessment (85 min, $330): https://www.gojiphysio.com/services/mummy-baby-assessment
-- Schroth therapy for scoliosis in children (55 min, $260): https://www.gojiphysio.com/services/schroth-scoliosis-children
-- Schroth therapy for scoliosis in adults (55 min, $260): https://www.gojiphysio.com/services/schroth-scoliosis-adults
-- Musculoskeletal & sports physiotherapy (55 min, $260): https://www.gojiphysio.com/services/musculoskeletal-physiotherapy
-- Paediatric physiotherapy (55 min, $260): https://www.gojiphysio.com/services/paediatric-physiotherapy
-- Clinical Pilates (55 min, $180 in-clinic): https://www.gojiphysio.com/services/clinical-pilates
-- Strength & Conditioning (55 min, $180 in-clinic): https://www.gojiphysio.com/services/strength-conditioning
+- All services: https://www.gojiphysio.com/services/
+- Women's health physiotherapy overview (pelvic floor, prenatal, postnatal, pelvic pain, menopause): https://www.gojiphysio.com/womens-health-physiotherapy-singapore/
+- Pelvic floor physiotherapy (55 min, $260): https://www.gojiphysio.com/services/pelvic-floor-physiotherapy/
+- Prenatal physiotherapy (55 min, $260): https://www.gojiphysio.com/services/prenatal-physiotherapy/
+- Postpartum physiotherapy (55 min, $260): https://www.gojiphysio.com/services/postpartum-physiotherapy/
+- Mummy & Baby assessment (85 min, $330): https://www.gojiphysio.com/services/mummy-baby-assessment/
+- Schroth therapy for scoliosis in children (55 min, $260): https://www.gojiphysio.com/services/schroth-scoliosis-children/
+- Schroth therapy for scoliosis in adults (55 min, $260): https://www.gojiphysio.com/services/schroth-scoliosis-adults/
+- Musculoskeletal & sports physiotherapy (55 min, $260): https://www.gojiphysio.com/services/musculoskeletal-physiotherapy/
+- Paediatric physiotherapy (55 min, $260): https://www.gojiphysio.com/services/paediatric-physiotherapy/
+- Clinical Pilates (55 min, $180 in-clinic): https://www.gojiphysio.com/services/clinical-pilates/
+- Strength & Conditioning (55 min, $180 in-clinic): https://www.gojiphysio.com/services/strength-conditioning/
+- Postpartum pathway (how a typical return to movement after birth can unfold: a postpartum physiotherapy assessment, a weekly strength and reformer Pilates block, and a final review): https://www.gojiphysio.com/pathways/postpartum/
 
 ## Conditions we treat
 
-Women's health:
+All conditions: https://www.gojiphysio.com/conditions/
 
-- Prenatal care and birth preparation: https://www.gojiphysio.com/conditions/prenatal-care
-- Pelvic girdle pain: https://www.gojiphysio.com/conditions/pelvic-girdle-pain
-- Diastasis recti: https://www.gojiphysio.com/conditions/diastasis-recti
-- Caesarean recovery and scar management: https://www.gojiphysio.com/conditions/caesarean-recovery
-- Perineal tear and birth trauma: https://www.gojiphysio.com/conditions/perineal-tear
-- Blocked ducts and mastitis: https://www.gojiphysio.com/conditions/blocked-ducts-mastitis
-- Pelvic organ prolapse: https://www.gojiphysio.com/conditions/pelvic-organ-prolapse
-- Pelvic pain and dyspareunia: https://www.gojiphysio.com/conditions/pelvic-pain
-- Urinary incontinence: https://www.gojiphysio.com/conditions/urinary-incontinence
-- Bowel dysfunction: https://www.gojiphysio.com/conditions/bowel-dysfunction
-- Menopause, osteopenia & osteoporosis: https://www.gojiphysio.com/conditions/menopause
+### Women's health
 
-Paediatrics:
+- Prenatal care and birth preparation: https://www.gojiphysio.com/conditions/prenatal-care/
+- Pelvic girdle pain: https://www.gojiphysio.com/conditions/pelvic-girdle-pain/
+- Diastasis recti: https://www.gojiphysio.com/conditions/diastasis-recti/
+- Caesarean recovery and scar management: https://www.gojiphysio.com/conditions/caesarean-recovery/
+- Perineal tear and birth trauma: https://www.gojiphysio.com/conditions/perineal-tear/
+- Blocked ducts and mastitis: https://www.gojiphysio.com/conditions/blocked-ducts-mastitis/
+- Pelvic organ prolapse: https://www.gojiphysio.com/conditions/pelvic-organ-prolapse/
+- Pelvic pain and dyspareunia: https://www.gojiphysio.com/conditions/pelvic-pain/
+- Urinary incontinence: https://www.gojiphysio.com/conditions/urinary-incontinence/
+- Bowel dysfunction: https://www.gojiphysio.com/conditions/bowel-dysfunction/
+- Menopause, osteopenia & osteoporosis: https://www.gojiphysio.com/conditions/menopause/
 
-- Developmental concerns and early intervention: https://www.gojiphysio.com/conditions/developmental-concerns
-- Neurodevelopmental conditions: https://www.gojiphysio.com/conditions/neurodevelopmental-conditions
-- Congenital torticollis: https://www.gojiphysio.com/conditions/congenital-torticollis
-- Hip dysplasia (DDH): https://www.gojiphysio.com/conditions/hip-dysplasia-ddh
-- Clubfoot (CTEV): https://www.gojiphysio.com/conditions/clubfoot-ctev
-- Paediatric pelvic health: https://www.gojiphysio.com/conditions/paediatric-pelvic-health
-- Paediatric sports injuries: https://www.gojiphysio.com/conditions/paediatric-sports-injuries
-- Post-fracture rehabilitation: https://www.gojiphysio.com/conditions/post-fracture-rehab
-- Adolescent scoliosis (Schroth): https://www.gojiphysio.com/conditions/adolescent-scoliosis-schroth
+### Paediatrics
 
-Musculoskeletal & sports:
+- Adolescent scoliosis and Schroth therapy (a scoliosis-specific exercise approach for adolescent idiopathic scoliosis, used alongside monitoring and bracing): https://www.gojiphysio.com/conditions/adolescent-scoliosis-schroth/
+- Clubfoot (CTEV) (physiotherapy for postural CTEV, and support alongside the Ponseti pathway for structural CTEV): https://www.gojiphysio.com/conditions/clubfoot-ctev/
+- Congenital torticollis (for babies whose head tilts to one side or who cannot turn their neck fully): https://www.gojiphysio.com/conditions/congenital-torticollis/
+- Developmental concerns and early intervention (for children not meeting expected gross motor milestones): https://www.gojiphysio.com/conditions/developmental-concerns/
+- Hip dysplasia (DDH) (physiotherapy before, during and after harness or surgical treatment): https://www.gojiphysio.com/conditions/hip-dysplasia-ddh/
+- Neurodevelopmental conditions (physical function and independence for children with cerebral palsy, Down syndrome, autism and related conditions): https://www.gojiphysio.com/conditions/neurodevelopmental-conditions/
+- Paediatric pelvic health (bedwetting, daytime wetting, soiling and constipation in children): https://www.gojiphysio.com/conditions/paediatric-pelvic-health/
+- Paediatric sports injuries (assessment and rehabilitation for children and adolescents, with growing bones in mind): https://www.gojiphysio.com/conditions/paediatric-sports-injuries/
+- Post-fracture rehabilitation (range of motion, strength and confidence after cast removal or surgery): https://www.gojiphysio.com/conditions/post-fracture-rehab/
 
-- Musculoskeletal pain and injuries: https://www.gojiphysio.com/conditions/musculoskeletal-pain-and-injuries
-- Persistent and recurrent pain, arthritis: https://www.gojiphysio.com/conditions/persistent-pain
-- Adult scoliosis: https://www.gojiphysio.com/conditions/adult-scoliosis
-- Sports rehabilitation and performance: https://www.gojiphysio.com/conditions/sports-rehabilitation
-- Post-operative recovery and rehabilitation: https://www.gojiphysio.com/conditions/post-surgery-rehabilitation
-- Functional movement assessment: https://www.gojiphysio.com/conditions/functional-movement-assessment
-- Dry needling (Cheryl Long only): https://www.gojiphysio.com/conditions/dry-needling
+### Musculoskeletal & sports
 
-Vestibular rehabilitation:
+- Musculoskeletal pain and injuries (back, neck, shoulder, knee and other joint pain, sprains, strains and overuse injuries): https://www.gojiphysio.com/conditions/musculoskeletal-pain-and-injuries/
+- Persistent and recurrent pain (including arthritis-related joint pain): https://www.gojiphysio.com/conditions/persistent-pain/
+- Adult scoliosis (Schroth-based exercise and pain management, with Cheryl Long): https://www.gojiphysio.com/conditions/adult-scoliosis/
+- Sports rehabilitation and performance (staged return to sport and injury-risk work): https://www.gojiphysio.com/conditions/sports-rehabilitation/
+- Post-operative recovery and rehabilitation (joint replacement, ligament repair, spinal and orthopaedic surgery): https://www.gojiphysio.com/conditions/post-surgery-rehabilitation/
+- Functional movement assessment (how you squat, hinge, reach and balance, with a prioritised exercise plan): https://www.gojiphysio.com/conditions/functional-movement-assessment/
+- Dry needling (only available in sessions with Cheryl Long): https://www.gojiphysio.com/conditions/dry-needling/
 
-- Vertigo: https://www.gojiphysio.com/conditions/vertigo
-- Dizziness: https://www.gojiphysio.com/conditions/dizziness
-- Balance difficulties: https://www.gojiphysio.com/conditions/balance-problems
-- Benign paroxysmal positional vertigo (BPPV): https://www.gojiphysio.com/conditions/bppv
-- Fall prevention and age-related instability: https://www.gojiphysio.com/conditions/fall-prevention
+### Vestibular rehabilitation
 
-Lymphatic health:
+- Vertigo (room-spinning sensations, assessed for cause): https://www.gojiphysio.com/conditions/vertigo/
+- Dizziness (lightheadedness, swaying and ongoing unsteadiness): https://www.gojiphysio.com/conditions/dizziness/
+- Balance difficulties (unsteadiness, near-falls and loss of confidence on your feet): https://www.gojiphysio.com/conditions/balance-problems/
+- Benign paroxysmal positional vertigo, BPPV (positional tests and repositioning manoeuvres): https://www.gojiphysio.com/conditions/bppv/
+- Fall prevention and age-related instability (strength and balance programmes): https://www.gojiphysio.com/conditions/fall-prevention/
 
-- Lymphoedema: https://www.gojiphysio.com/conditions/lymphoedema
-- Swelling management: https://www.gojiphysio.com/conditions/swelling-management
-- Lipoedema: https://www.gojiphysio.com/conditions/lipoedema
-- Breast cancer post-operative rehabilitation: https://www.gojiphysio.com/conditions/breast-cancer-rehabilitation
-- Chronic venous insufficiency (CVI): https://www.gojiphysio.com/conditions/chronic-venous-insufficiency
+### Lymphatic health
+
+- Lymphoedema (manual lymphatic drainage, compression, exercise and skin care): https://www.gojiphysio.com/conditions/lymphoedema/
+- Swelling management (persistent or post-surgical swelling, matched to the cause): https://www.gojiphysio.com/conditions/swelling-management/
+- Lipoedema (conservative management focused on comfort, mobility and quality of life): https://www.gojiphysio.com/conditions/lipoedema/
+- Breast cancer post-operative rehabilitation (shoulder movement, scar, cording and swelling): https://www.gojiphysio.com/conditions/breast-cancer-rehabilitation/
+- Chronic venous insufficiency, CVI (compression, calf-pump exercise and skin care alongside medical care): https://www.gojiphysio.com/conditions/chronic-venous-insufficiency/
 
 ## Location pages
 
-- Physiotherapy in Lentor: https://www.gojiphysio.com/physiotherapy-lentor
+- Physiotherapy in Lentor: https://www.gojiphysio.com/physiotherapy-lentor/
+- Getting here (directions by MRT, by car with basement parking, or by taxi, with video guides): https://www.gojiphysio.com/getting-here/
 
 ## Media
 
-Articles we write, and coverage written about us: https://www.gojiphysio.com/media
+Articles we write, and coverage written about us: https://www.gojiphysio.com/media/
 
 ## Blog
 
 Plain-language physiotherapy education written by our clinicians. Index:
-https://www.gojiphysio.com/blog (feed: https://www.gojiphysio.com/rss.xml)
+https://www.gojiphysio.com/blog/ (feed: https://www.gojiphysio.com/rss.xml)
 
 No articles are published yet. The first ones are in clinical review and this
 section will be updated when they go live.
 
 ## Press
 
-Third-party media coverage. Index: https://www.gojiphysio.com/press
+Third-party media coverage. Index: https://www.gojiphysio.com/press/
 
-- Lianhe Zaobao (21 July 2026) interviewed Clinical Director Cheryl Long about pelvic floor, postpartum and menopausal symptoms women are often told to accept. Our summary: https://www.gojiphysio.com/press/zaobao-womens-hidden-pain — original article (in Chinese): https://www.zaobao.com.sg/news/singapore/story20260721-9394054
+- Lianhe Zaobao (21 July 2026) interviewed Clinical Director Cheryl Long about pelvic floor, postpartum and menopausal symptoms women are often told to accept. Our summary: https://www.gojiphysio.com/press/zaobao-womens-hidden-pain/ — original article (in Chinese): https://www.zaobao.com.sg/news/singapore/story20260721-9394054
 
 ## Site search
 
-- https://www.gojiphysio.com/search (full-text search across services, conditions, articles, press and clinician pages)
+- https://www.gojiphysio.com/search/ (full-text search across services, conditions, articles, press and clinician pages)
+- Sitemap (every page): https://www.gojiphysio.com/sitemap-0.xml
 
 ## Team
 
-- Cheryl Long — Clinical Director: https://www.gojiphysio.com/team/cheryl-long
-- Claire Ng — Senior Physiotherapist: https://www.gojiphysio.com/team/claire-ng
-- Kristy Ng — Senior Physiotherapist: https://www.gojiphysio.com/team/kristy-ng
+- Cheryl Long — Clinical Director: https://www.gojiphysio.com/team/cheryl-long/
+- Claire Ng — Senior Physiotherapist: https://www.gojiphysio.com/team/claire-ng/
+- Kristy Ng — Senior Physiotherapist: https://www.gojiphysio.com/team/kristy-ng/

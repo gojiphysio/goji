@@ -3,7 +3,7 @@ import { getCollection } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Section from "../../components/Section.astro";
 import Button from "../../components/Button.astro";
-import { SITE } from "../../lib/site.ts";
+import { clinicRef } from "../../lib/schema.ts";
 
 export async function getStaticPaths() {
   const services = await getCollection("services", ({ data }) => !data.draft);
@@ -65,12 +65,7 @@ const serviceSchema: Record<string, unknown> = {
   description,
   url: pageURL,
   category,
-  provider: {
-    "@type": ["MedicalClinic", "LocalBusiness"],
-    name: SITE.fullName,
-    url: origin.href,
-    telephone: SITE.phoneE164,
-  },
+  provider: clinicRef(origin),
   areaServed: { "@type": "Place", name: "Singapore" },
   offers: {
     "@type": "Offer",
@@ -86,7 +81,7 @@ const breadcrumbSchema = {
   "@type": "BreadcrumbList",
   itemListElement: [
     { "@type": "ListItem", position: 1, name: "Home", item: origin.href },
-    { "@type": "ListItem", position: 2, name: "Services", item: new URL("/services", origin).href },
+    { "@type": "ListItem", position: 2, name: "Services", item: new URL("/services/", origin).href },
     { "@type": "ListItem", position: 3, name: cardTitle ?? title, item: pageURL },
   ],
 };
@@ -110,7 +105,7 @@ if (faqs?.length) {
   <section class="svc-hero">
     <div class="container svc-hero__grid">
       <div class="svc-hero__text">
-        <a href="/services" class="svc-hero__back">
+        <a href="/services/" class="svc-hero__back">
           <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M10 3L5 8l5 5"/>
           </svg>
@@ -150,7 +145,7 @@ if (faqs?.length) {
             {clinicianLinks.map((c, i) => (
               <Fragment>
                 {i > 0 && <span aria-hidden="true">, </span>}
-                {c.slug ? <a href={`/team/${c.slug}`}>{c.name}</a> : <span>{c.name}</span>}
+                {c.slug ? <a href={`/team/${c.slug}/`}>{c.name}</a> : <span>{c.name}</span>}
               </Fragment>
             ))}
           </dd>

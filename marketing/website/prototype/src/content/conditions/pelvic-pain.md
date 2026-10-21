@@ -1,6 +1,6 @@
 ---
 title: "Pelvic Pain and Dyspareunia"
-description: "Pelvic pain and dyspareunia (pain with intercourse) are real, physical conditions that are frequently under-investigated and under-treated. Physiotherapy addresses the musculoskeletal and neuromuscular drivers of pelvic pain, and is often a central part of the management pathway."
+description: "Pelvic pain and dyspareunia (pain with intercourse) are real, physical conditions that are often under-treated. Physiotherapy addresses their physical drivers."
 cardTitle: "Pelvic Pain and Dyspareunia"
 cardLead: "Pelvic pain and dyspareunia (pain with intercourse) are real, physical conditions that are frequently under-investigated and under-treated."
 category: "Women's Health"
@@ -10,6 +10,7 @@ reviewer:
 ctaSlug: "web-wa"
 order: 7
 draft: false
+relatedServices: ["pelvic-floor-physiotherapy"]
 ---
 
 Pelvic pain - pain felt in the lower abdomen, pelvis, or perineum - affects a significant number of women and is frequently under-investigated and under-treated. Dyspareunia (pain with intercourse) is among its most common presentations. Both are real, physical conditions. Physiotherapy addresses the musculoskeletal and neuromuscular drivers of pelvic pain, and is often a central part of the management pathway alongside medical assessment.

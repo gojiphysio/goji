@@ -4,6 +4,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import Section from "../../components/Section.astro";
 import Button from "../../components/Button.astro";
 import { extractFaqs, faqSchema } from "../../lib/faq.ts";
+import { clinicRef } from "../../lib/schema.ts";
 
 export async function getStaticPaths() {
   const conditions = await getCollection("conditions", ({ data }) => !data.draft);
@@ -12,13 +13,26 @@ export async function getStaticPaths() {
 
 const { entry } = Astro.props;
 const { Content } = await entry.render();
-const { title, seoTitle, description, cardTitle, category, ctaSlug, reviewer } = entry.data;
+const { title, seoTitle, description, cardTitle, category, ctaSlug, reviewer, relatedServices } = entry.data;
 
 const origin = Astro.site ?? new URL(Astro.url.origin);
 const pageURL = new URL(Astro.url.pathname, origin).href;
 const reviewerURL = reviewer
-  ? new URL(`/team/${reviewer.slug}`, origin).href
+  ? new URL(`/team/${reviewer.slug}/`, origin).href
   : undefined;
+
+// Resolve related service slugs to live entries so a typo or a drafted
+// service drops the link rather than 404ing (same idiom as the blog template).
+const services = (
+  await Promise.all(
+    relatedServices.map(async (slug) => {
+      const e = await getEntry("services", slug);
+      return e && !e.data.draft
+        ? { href: `/services/${e.slug}/`, label: e.data.cardTitle ?? e.data.title }
+        : null;
+    }),
+  )
+).filter((x): x is { href: string; label: string } => x !== null);
 
 // FAQPage JSON-LD is extracted from the body's "## Frequently asked questions"
 // section (### question + answer paragraphs) so the visible copy stays the
@@ -37,6 +51,10 @@ const conditionSchema: Record<string, unknown>[] = [
     url: pageURL,
     about: { "@type": "MedicalCondition", name: cardTitle ?? title },
     audience: { "@type": "MedicalAudience", audienceType: "Patient" },
+    publisher: clinicRef(origin),
+    ...(services.length
+      ? { relatedLink: services.map((x) => new URL(x.href, origin).href) }
+      : {}),
     ...(reviewer && reviewerURL
       ? {
           reviewedBy: {
@@ -52,7 +70,7 @@ const conditionSchema: Record<string, unknown>[] = [
     "@type": "BreadcrumbList",
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "Home", item: origin.href },
-      { "@type": "ListItem", position: 2, name: "Conditions", item: new URL("/conditions", origin).href },
+      { "@type": "ListItem", position: 2, name: "Conditions", item: new URL("/conditions/", origin).href },
       { "@type": "ListItem", position: 3, name: cardTitle ?? title, item: pageURL },
     ],
   },
@@ -65,7 +83,7 @@ if (conditionFaqSchema) conditionSchema.push(conditionFaqSchema);
   {/* Page header */}
   <section class="cond-header">
     <div class="container cond-header__inner">
-      <a href="/conditions" class="cond-header__back">
+      <a href="/conditions/" class="cond-header__back">
         <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M10 3L5 8l5 5"/>
         </svg>
@@ -75,7 +93,7 @@ if (conditionFaqSchema) conditionSchema.push(conditionFaqSchema);
       {reviewer && (
         <p class="cond-header__review">
           Reviewed by{" "}
-          <a href={`/team/${reviewer.slug}`}>{reviewer.name}</a>, AHPC-registered physiotherapist
+          <a href={`/team/${reviewer.slug}/`}>{reviewer.name}</a>, AHPC-registered physiotherapist
         </p>
       )}
     </div>
@@ -85,6 +103,16 @@ if (conditionFaqSchema) conditionSchema.push(conditionFaqSchema);
   <Section tone="surface">
     <div class="cond-body container--narrow">
       <Content />
+      {services.length > 0 && (
+        <aside class="cond-related">
+          <h2>Related appointments</h2>
+          <ul>
+            {services.map((x) => (
+              <li><a href={x.href}>{x.label}</a></li>
+            ))}
+          </ul>
+        </aside>
+      )}
     </div>
   </Section>
 
@@ -137,6 +165,19 @@ if (conditionFaqSchema) conditionSchema.push(conditionFaqSchema);
   .cond-header__review a:hover { text-decoration: underline; }
 
   /* Prose content */
+  .cond-related {
+    margin-top: var(--space-8);
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--rule);
+  }
+  .cond-related h2 { margin-bottom: var(--space-3); }
+  .cond-related ul {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding-left: 1.25rem;
+  }
+
   .cond-body {
     /* The container--narrow class sets max-width: 760px */
   }

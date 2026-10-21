@@ -1,6 +1,6 @@
 ---
-title: "Adolescent Idiopathic Scoliosis and Schroth Therapy"
-description: "Schroth therapy is an evidence-based physiotherapy approach for adolescent scoliosis. Goji's physiotherapists offer Schroth-based scoliosis rehabilitation at Lentor, Singapore."
+title: "Adolescent Scoliosis and Schroth Therapy"
+description: "Schroth therapy is an evidence-based physiotherapy approach for adolescent scoliosis, offered by Goji's physiotherapists at Lentor, Singapore."
 cardTitle: "Adolescent Scoliosis (Schroth)"
 cardLead: "Schroth therapy is a scoliosis-specific exercise approach for adolescent idiopathic scoliosis, used alongside monitoring and bracing."
 category: "Paediatrics"
@@ -10,6 +10,7 @@ reviewer:
 ctaSlug: "web-wa"
 order: 9
 draft: false
+relatedServices: ["schroth-scoliosis-children"]
 ---
 
 Adolescent idiopathic scoliosis (AIS) is a three-dimensional curvature of the spine that develops during the rapid growth phase of adolescence - typically between 10 and 16 years of age. "Idiopathic" means the cause is not known. AIS affects 2-3% of adolescents, with significant curves more common in girls. Schroth therapy - a physiotherapeutic scoliosis-specific exercise (PSSE) approach - is the most evidence-supported form of physiotherapy for AIS and is part of the international standard of care alongside bracing and surgical monitoring.

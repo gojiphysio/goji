@@ -5,6 +5,7 @@ import Button from "../../components/Button.astro";
 import LogoLockup from "../../components/LogoLockup.astro";
 import ImageTextSplit from "../../components/ImageTextSplit.astro";
 import { SITE } from "../../lib/site.ts";
+import { clinicRef } from "../../lib/schema.ts";
 
 export async function getStaticPaths() {
   const entries = await getCollection("team", ({ data }) => !data.draft);
@@ -51,12 +52,7 @@ const teamSchema = [
     },
     knowsAbout: d.specialties.map((s) => s.title),
     sameAs: [SITE.instagram],
-    worksFor: {
-      "@type": "MedicalClinic",
-      name: SITE.fullName,
-      alternateName: [SITE.name, "Goji Physio"],
-      url: origin.href,
-    },
+    worksFor: clinicRef(origin),
   },
   {
     "@context": "https://schema.org",

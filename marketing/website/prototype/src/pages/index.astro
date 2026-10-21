@@ -13,11 +13,11 @@ import { services } from "../lib/services.ts";
 // Service cards that have a matching explanatory page under /services link to it.
 // Physiotherapy spans several sub-types, so it points at the index.
 const serviceLearnMore: Record<string, string> = {
-  physiotherapy: "/services",
-  "paediatric-physiotherapy": "/services",
-  "mummy-baby": "/services/mummy-baby-assessment",
-  "clinical-pilates": "/services/clinical-pilates",
-  "strength-conditioning": "/services/strength-conditioning",
+  physiotherapy: "/services/",
+  "paediatric-physiotherapy": "/services/",
+  "mummy-baby": "/services/mummy-baby-assessment/",
+  "clinical-pilates": "/services/clinical-pilates/",
+  "strength-conditioning": "/services/strength-conditioning/",
 };
 
 // FAQ — single source for both the on-page accordion and the FAQPage JSON-LD
@@ -75,36 +75,36 @@ const tickerItems = [
 const careAreas = [
   {
     title: "Women's Health",
-    guideHref: "/conditions",
+    guideHref: "/conditions/",
     points: [
-      { text: "Prenatal care and birth preparation", href: "/conditions/prenatal-care" },
-      { text: "Antenatal and postnatal musculoskeletal concerns (pelvic girdle pain and mummy's wrist)", href: "/conditions/pelvic-girdle-pain" },
+      { text: "Prenatal care and birth preparation", href: "/conditions/prenatal-care/" },
+      { text: "Antenatal and postnatal musculoskeletal concerns (pelvic girdle pain and mummy's wrist)", href: "/conditions/pelvic-girdle-pain/" },
       "Postpartum recovery and return to sport",
-      { text: "Diastasis recti", href: "/conditions/diastasis-recti" },
-      { text: "Caesarean recovery and scar management", href: "/conditions/caesarean-recovery" },
-      { text: "Perineal tear, scar, and birth trauma", href: "/conditions/perineal-tear" },
-      { text: "Blocked ducts and mastitis", href: "/conditions/blocked-ducts-mastitis" },
+      { text: "Diastasis recti", href: "/conditions/diastasis-recti/" },
+      { text: "Caesarean recovery and scar management", href: "/conditions/caesarean-recovery/" },
+      { text: "Perineal tear, scar, and birth trauma", href: "/conditions/perineal-tear/" },
+      { text: "Blocked ducts and mastitis", href: "/conditions/blocked-ducts-mastitis/" },
       "Pelvic floor dysfunction",
-      { text: "Pelvic organ prolapse (POP)", href: "/conditions/pelvic-organ-prolapse" },
-      { text: "Pelvic pain and dyspareunia", href: "/conditions/pelvic-pain" },
-      { text: "Osteopenia / osteoporosis and fragility fractures management", href: "/conditions/menopause" },
-      { text: "Urinary incontinence", href: "/conditions/urinary-incontinence" },
-      { text: "Bowel dysfunction and constipation", href: "/conditions/bowel-dysfunction" },
+      { text: "Pelvic organ prolapse (POP)", href: "/conditions/pelvic-organ-prolapse/" },
+      { text: "Pelvic pain and dyspareunia", href: "/conditions/pelvic-pain/" },
+      { text: "Osteopenia / osteoporosis and fragility fractures management", href: "/conditions/menopause/" },
+      { text: "Urinary incontinence", href: "/conditions/urinary-incontinence/" },
+      { text: "Bowel dysfunction and constipation", href: "/conditions/bowel-dysfunction/" },
     ],
   },
   {
     title: "Paediatrics",
-    guideHref: "/conditions",
+    guideHref: "/conditions/",
     points: [
-      { text: "Congenital torticollis", href: "/conditions/congenital-torticollis" },
-      { text: "Postural / structural congenital talipes equinovarus (CTEV)", href: "/conditions/clubfoot-ctev" },
-      { text: "Developmental dysplasia of the hip (DDH)", href: "/conditions/hip-dysplasia-ddh" },
-      { text: "Developmental concerns and early intervention", href: "/conditions/developmental-concerns" },
-      { text: "Neurodevelopmental conditions", href: "/conditions/neurodevelopmental-conditions" },
-      { text: "Adolescent idiopathic scoliosis and Schroth therapy", href: "/conditions/adolescent-scoliosis-schroth" },
-      { text: "Paediatric pelvic health (bedwetting, soiling, and constipation)", href: "/conditions/paediatric-pelvic-health" },
-      { text: "Musculoskeletal and sports injury", href: "/conditions/paediatric-sports-injuries" },
-      { text: "Post-fracture rehabilitation", href: "/conditions/post-fracture-rehab" },
+      { text: "Congenital torticollis", href: "/conditions/congenital-torticollis/" },
+      { text: "Postural / structural congenital talipes equinovarus (CTEV)", href: "/conditions/clubfoot-ctev/" },
+      { text: "Developmental dysplasia of the hip (DDH)", href: "/conditions/hip-dysplasia-ddh/" },
+      { text: "Developmental concerns and early intervention", href: "/conditions/developmental-concerns/" },
+      { text: "Neurodevelopmental conditions", href: "/conditions/neurodevelopmental-conditions/" },
+      { text: "Adolescent idiopathic scoliosis and Schroth therapy", href: "/conditions/adolescent-scoliosis-schroth/" },
+      { text: "Paediatric pelvic health (bedwetting, soiling, and constipation)", href: "/conditions/paediatric-pelvic-health/" },
+      { text: "Musculoskeletal and sports injury", href: "/conditions/paediatric-sports-injuries/" },
+      { text: "Post-fracture rehabilitation", href: "/conditions/post-fracture-rehab/" },
     ],
   },
   {
@@ -203,7 +203,7 @@ const reviews = [
 
 <BaseLayout
   title="Women's & Family Physiotherapy in Lentor | Goji Physio"
-  description="Expert women's and family physiotherapy at Lentor Modern, Singapore. Pelvic health, pregnancy and postpartum care, paediatrics, and everyday strength — one minute from Lentor MRT."
+  description="Women's & family physiotherapy at Lentor Modern, Singapore: pelvic health, pregnancy and postpartum care, paediatrics and strength. One minute from Lentor MRT."
   schema={faqSchema}
 >
   {/* ---- Hero (copy left, clinic photos right) ---- */}
@@ -211,14 +211,14 @@ const reviews = [
     <div class="container hero__inner">
       <div class="hero__text">
         <p class="hero__tagline">{SITE.tagline}</p>
-        <p class="hero__sub">Women's and Family Physiotherapy in Lentor, Singapore</p>
+        <h1 class="hero__sub">Women's and Family Physiotherapy in Lentor, Singapore</h1>
         <p class="hero__lead">
           Expert care for pelvic health, pregnancy and postpartum recovery,
           paediatrics and everyday strength.
         </p>
         <div class="hero__actions">
           <Button slug="web-wa" variant="whatsapp" size="lg">WhatsApp us</Button>
-          <Button href="/book" variant="primary" size="lg">Book now</Button>
+          <Button href="/book/" variant="primary" size="lg">Book now</Button>
         </div>
       </div>
       <div class="hero__media">
@@ -302,7 +302,7 @@ const reviews = [
                 )}
                 <p class="service-card__lead">{s.lead}</p>
                 <div class="service-card__cta">
-                  <Button href="/book" variant="secondary" class="service-card__book">Book {s.title}</Button>
+                  <Button href="/book/" variant="secondary" class="service-card__book">Book {s.title}</Button>
                   {serviceLearnMore[s.id] && (
                     <a href={serviceLearnMore[s.id]} class="service-card__learn">
                       Learn more
@@ -415,7 +415,7 @@ const reviews = [
         {
           team.map((t) => (
             <div class="team-slide">
-              <PractitionerCard name={t.name} role={t.role} interests={t.interests} image={`/photos/team/${t.slug}.webp`} href={`/team/${t.slug}`} />
+              <PractitionerCard name={t.name} role={t.role} interests={t.interests} image={`/photos/team/${t.slug}.webp`} href={`/team/${t.slug}/`} />
             </div>
           ))
         }
@@ -640,6 +640,11 @@ const reviews = [
     margin-top: 0;
     margin-bottom: var(--space-4);
     max-width: 30ch;
+    /* It is the page h1 (keyword line); undo the base h1 type so it looks
+       like the body-size subline it was. */
+    line-height: var(--lh-body);
+    letter-spacing: normal;
+    text-wrap: wrap;
   }
   /* ======================================================
      Trust marquee — full-width, scrolls right to left

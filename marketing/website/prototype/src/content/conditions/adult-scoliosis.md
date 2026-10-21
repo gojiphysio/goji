@@ -9,6 +9,7 @@ reviewer:
   name: "Cheryl Long"
   slug: "cheryl-long"
 ctaSlug: "web-wa"
+relatedServices: ["schroth-scoliosis-adults"]
 order: 3
 draft: false
 ---

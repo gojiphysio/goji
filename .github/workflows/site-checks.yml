@@ -1,0 +1,53 @@
+name: Site checks
+
+# SEO/AEO checks for the public website (marketing/seo/AGENTS.md).
+#  - On PRs touching the site: build it and run the static checks over dist/
+#    (broken internal links, required JSON-LD, canonicals, llms.txt drift...).
+#  - Weekly (Mon 09:00 SGT) and on demand: audit the live site (status codes,
+#    crawler access, robots, redirects, Core Web Vitals when PSI_API_KEY is
+#    set). A failed run emails the repo owner; the report is the job summary.
+
+on:
+  pull_request:
+    paths:
+      - "marketing/website/prototype/**"
+      - "marketing/seo/**"
+      - ".github/workflows/site-checks.yml"
+  schedule:
+    - cron: "0 1 * * 1"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  dist:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: marketing/website/prototype/.nvmrc
+          cache: npm
+          cache-dependency-path: marketing/website/prototype/package-lock.json
+      - name: Build
+        working-directory: marketing/website/prototype
+        run: npm ci && npm run build
+      - name: Static checks
+        run: python3 marketing/seo/tools/check_dist.py
+
+  live:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Live audit
+        env:
+          PSI_API_KEY: ${{ secrets.PSI_API_KEY }}
+        run: python3 marketing/seo/tools/live_audit.py --out live-audit
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: live-audit
+          path: live-audit/
