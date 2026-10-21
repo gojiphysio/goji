@@ -45,7 +45,7 @@ A good programme is staged. Early on, the focus is on restoring strength, mobili
 
 ## Can physiotherapy help prevent injuries?
 
-Injury risk can never be eliminated, but it can often be reduced. Building strength, improving movement quality, and managing training load sensibly are well-established ways to make the body more resilient. A physiotherapist can help you identify and address the factors most relevant to you and your sport.
+Injury risk can never be eliminated, but it can often be reduced. Building strength, improving movement quality, and managing training load sensibly are evidence-supported ways to help the body cope with load. A physiotherapist can help you identify and address the factors most relevant to you and your sport.
 
 ## Frequently asked questions
 

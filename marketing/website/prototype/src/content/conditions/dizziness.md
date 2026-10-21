@@ -53,7 +53,7 @@ No. Vertigo is a specific spinning sensation and is one type of dizziness. Dizzi
 
 ### Can physiotherapy help ongoing dizziness?
 
-When the balance system or movement sensitivity is involved, vestibular rehabilitation can be very helpful. Your physiotherapist will assess whether your dizziness is likely to respond and design a suitable programme.
+When the balance system or movement sensitivity is involved, vestibular rehabilitation can be helpful. Your physiotherapist will assess whether your dizziness is likely to respond and design a suitable programme.
 
 ### Why do I feel dizzy but my scans are normal?
 

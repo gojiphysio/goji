@@ -69,7 +69,7 @@ Yes. Balance is trainable. Progressive, specific exercises can improve steadines
 
 ### I'm afraid of falling - will exercises be safe?
 
-Your programme is graded to your current ability and carried out with appropriate support and safety in mind. Building strength and balance is one of the best ways to reduce both falls and the fear of falling.
+Your programme is graded to your current ability and carried out with appropriate support and safety in mind. Building strength and balance is a core part of reducing both falls and the fear of falling.
 
 ### Do balance problems always come from the inner ear?
 

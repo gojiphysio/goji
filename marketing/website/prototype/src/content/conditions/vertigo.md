@@ -53,7 +53,7 @@ Not exactly. Vertigo is a specific spinning or moving sensation, while "dizzines
 
 ### Can physiotherapy really help vertigo?
 
-For many inner-ear causes, yes. Repositioning manoeuvres for BPPV and vestibular rehabilitation exercises for other conditions are well-established physiotherapy approaches. Your physiotherapist will assess whether your vertigo is likely to respond.
+For many inner-ear causes, yes. Repositioning manoeuvres for BPPV and vestibular rehabilitation exercises for other conditions are recommended in clinical practice guidelines for vestibular conditions. Your physiotherapist will assess whether your vertigo is likely to respond.
 
 ### How long does vertigo last?
 

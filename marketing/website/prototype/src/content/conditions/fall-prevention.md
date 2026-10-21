@@ -51,7 +51,7 @@ You will leave with a clear picture of your personal risk factors and a tailored
 
 ## How does physiotherapy reduce falls risk?
 
-The most effective fall-prevention programmes combine progressive strength training with challenging, individualised balance exercises, alongside practical advice on home safety and activity. Building capacity and confidence in this way is well-established as a way to reduce falls risk and support independence. Your physiotherapist will grade the exercises to keep you safely challenged.
+The most effective fall-prevention programmes combine progressive strength training with challenging, individualised balance exercises, alongside practical advice on home safety and activity. Research supports combining strength and balance training to reduce falls risk, and building confidence helps you stay independent. Your physiotherapist will grade the exercises to keep you safely challenged.
 
 ## Frequently asked questions
 
@@ -61,7 +61,7 @@ No. While risk can increase with age, falls are often preventable. Strength and 
 
 ### Will the exercises be safe if I'm already unsteady?
 
-Yes - programmes are graded to your current ability, with appropriate support and safety measures. Building strength and balance is one of the best ways to become steadier.
+Yes - programmes are graded to your current ability, with appropriate support and safety measures. Building strength and balance is a core part of becoming steadier.
 
 ### I've become afraid of falling - can that be helped?
 

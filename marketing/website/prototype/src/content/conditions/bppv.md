@@ -38,7 +38,7 @@ Because testing deliberately provokes brief vertigo, your physiotherapist will e
 
 ## How is BPPV treated?
 
-BPPV is usually treated with **canalith repositioning manoeuvres** - a specific sequence of head and body movements (such as the Epley manoeuvre) that guide the displaced crystals back to where they belong. Many people improve significantly after one or a few sessions. Your physiotherapist may also give you follow-up advice or exercises, and will re-test to check the response.
+BPPV is usually treated with **canalith repositioning manoeuvres** - a specific sequence of head and body movements (such as the Epley manoeuvre) that guide the displaced crystals back to where they belong. Some people need only one treatment and others need several. Your physiotherapist will re-test to check the response and may give you follow-up advice or exercises.
 
 ## Frequently asked questions
 
@@ -48,7 +48,7 @@ BPPV itself is not dangerous - "benign" reflects this. It can be distressing and
 
 ### How quickly does treatment work?
 
-Many people notice substantial improvement after one or a few repositioning treatments. Some experience residual unsteadiness for a short period afterward, which usually settles.
+This varies from person to person. Some people need one repositioning treatment and others need several, and your physiotherapist will re-test to check the response. Some experience residual unsteadiness for a short period afterward, which usually settles.
 
 ### Can BPPV come back?
 
