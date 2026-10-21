@@ -12,7 +12,7 @@ export async function getStaticPaths() {
 
 const { entry } = Astro.props;
 const { Content } = await entry.render();
-const { title, description, cardTitle, category, ctaSlug, reviewer } = entry.data;
+const { title, seoTitle, description, cardTitle, category, ctaSlug, reviewer } = entry.data;
 
 const origin = Astro.site ?? new URL(Astro.url.origin);
 const pageURL = new URL(Astro.url.pathname, origin).href;
@@ -61,7 +61,7 @@ const conditionFaqSchema = faqSchema(faqs);
 if (conditionFaqSchema) conditionSchema.push(conditionFaqSchema);
 ---
 
-<BaseLayout title={`${title} | Goji Physiotherapy`} description={description} schema={conditionSchema} searchType="Condition">
+<BaseLayout title={`${seoTitle ?? title} | Goji Physiotherapy`} description={description} schema={conditionSchema} searchType="Condition">
   {/* Page header */}
   <section class="cond-header">
     <div class="container cond-header__inner">
