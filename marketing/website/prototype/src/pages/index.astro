@@ -166,6 +166,14 @@ const team = [
       "Pelvic health, pre & postnatal care, women's rehabilitation, sports, paediatric physiotherapy including neuro cases.",
     slug: "kristy-ng",
   },
+  // No bio page yet: leave `slug` off so the card shows no "View profile" link.
+  {
+    name: "Camille Tan",
+    role: "Pilates Instructor",
+    interests:
+      "STOTT PILATES® certified mat and reformer instruction, core strength and stability, mobility and flexibility, body awareness, mindful movement, posture and alignment.",
+    photo: "/photos/team/camille-tan.webp",
+  },
 ];
 
 // COMPLIANCE NOTE: Outcome/superlative phrases trimmed per SG healthcare ad rules.
@@ -408,22 +416,22 @@ const reviews = [
   {/* ---- Team carousel ---- */}
   <Section tone="surface" id="team">
     <header class="section-head">
-      <h2>Clinicians who get it</h2>
+      <h2>Practitioners who get it</h2>
     </header>
     <div class="team-wrap">
-      <div class="team-track" id="teamTrack">
+      <div class="team-track" id="teamTrack" style={`--team-count:${team.length}`}>
         {
           team.map((t) => (
             <div class="team-slide">
-              <PractitionerCard name={t.name} role={t.role} interests={t.interests} image={`/photos/team/${t.slug}.webp`} href={`/team/${t.slug}/`} />
+              <PractitionerCard name={t.name} role={t.role} interests={t.interests} image={t.photo ?? `/photos/team/${t.slug}.webp`} href={t.slug ? `/team/${t.slug}/` : undefined} />
             </div>
           ))
         }
       </div>
-      <button class="carousel-btn carousel-btn--prev" id="teamPrev" aria-label="Previous clinician" disabled>
+      <button class="carousel-btn carousel-btn--prev" id="teamPrev" aria-label="Previous practitioner" disabled>
         <Icon name="tabler:chevron-left" size={22} />
       </button>
-      <button class="carousel-btn carousel-btn--next" id="teamNext" aria-label="Next clinician">
+      <button class="carousel-btn carousel-btn--next" id="teamNext" aria-label="Next practitioner">
         <Icon name="tabler:chevron-right" size={22} />
       </button>
     </div>
@@ -1154,17 +1162,21 @@ const reviews = [
   }
   .team-dot--active { background: var(--color-primary); }
 
-  /* Desktop: static 3-column grid, no carousel chrome */
+  /* Desktop: static grid, no carousel chrome. Two columns on tablets so four
+     cards read as a 2x2 rather than a wrapped 3+1; one column per person from 1024px. */
   @media (min-width: 720px) {
     .team-track {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(2, 1fr);
       overflow: visible;
       scroll-snap-type: none;
     }
     .team-slide { flex: none; }
     .carousel-btn,
     .team-dots { display: none; }
+  }
+  @media (min-width: 1024px) {
+    .team-track { grid-template-columns: repeat(var(--team-count, 3), 1fr); }
   }
 
   /* ======================================================
