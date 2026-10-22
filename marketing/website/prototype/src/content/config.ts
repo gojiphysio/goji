@@ -101,15 +101,33 @@ const team = defineCollection({
     /** Substring of `tagline` to underline in the hero. Ignored if it doesn't match. */
     taglineHighlight: z.string().optional(),
     photo: z.string().optional(),
+    /** Overrides the default "Portrait of <name>" hero alt text. */
+    photoAlt: z.string().optional(),
+    /** Overrides only the <title> tag (default: "<name> — <role> | Goji Health"). */
+    seoTitle: z.string().optional(),
+    /** Overrides the default "Patients see <first name> for" heading. */
+    specialtiesHeading: z.string().optional(),
     specialties: z.array(z.object({
       title: z.string(),
       description: z.string(),
     })),
     approach: z.string(),
-    education: z.array(z.string()),
-    experience: z.array(z.string()),
-    training: z.array(z.string()),
-    languages: z.array(z.string()),
+    /** When set, the approach block is an editorial paragraph under this
+     *  heading rather than a pull-quote. */
+    approachHeading: z.string().optional(),
+    /** Credential columns render only when non-empty, so non-clinical team
+     *  members (e.g. instructors) can show `certifications` / `teachingApproach`
+     *  instead of Education / Clinical experience / Training / Languages. */
+    education: z.array(z.string()).default([]),
+    experience: z.array(z.string()).default([]),
+    training: z.array(z.string()).default([]),
+    certifications: z.array(z.string()).default([]),
+    teachingApproach: z.array(z.string()).default([]),
+    languages: z.array(z.string()).default([]),
+    /** Closing CTA overrides (default: "Book an appointment with <first name>"). */
+    ctaHeading: z.string().optional(),
+    ctaText: z.string().optional(),
+    ctaBookLabel: z.string().optional(),
     personalNote: z.string().optional(),
     /** Candid photo beside the personal note; degrades to a placeholder if unset. */
     personalPhoto: z.string().optional(),
