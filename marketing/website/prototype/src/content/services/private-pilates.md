@@ -4,16 +4,15 @@ metaTitle: "Private Pilates in Singapore | Goji Physio"
 description: "Discover private 1:1 and 2:1 Pilates at Goji in Lentor. STOTT PILATES® certified instruction tailored to your strength, flexibility and fitness goals."
 cardTitle: "Private Pilates"
 cardLead: "A personalised Pilates experience led by a STOTT PILATES® certified instructor, designed to build strength, improve flexibility and help you move with confidence."
-heroImage: "/photos/services/clinical-pilates.webp"
-heroAlt: "Two clients on reformers being guided through a Pilates session at Goji."
+heroImage: "/photos/services/private-pilates.webp"
+heroAlt: "A Pilates instructor guiding a client through a reformer lunge during a Private Pilates session at Goji."
 category: "Holistic Care"
 durationMin: 55
 priceClinic: 160
-priceFrom: true
 clinicians: ["Camille Tan"]
 bookingService: "private-pilates"
 closingCopy: "Ready to get started? Book a session with our STOTT PILATES® certified instructor, or speak to our team to find the right Pilates experience for you."
-order: 2
+order: 3
 draft: false
 ---
 

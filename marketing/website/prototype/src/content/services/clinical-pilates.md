@@ -9,11 +9,10 @@ heroAlt: "A Goji physiotherapist guiding two clients through a reformer Clinical
 category: "Holistic Care"
 durationMin: 55
 priceClinic: 180
-priceFrom: true
 clinicians: ["Cheryl Long", "Claire Ng"]
 bookingService: "clinical-pilates"
 closingCopy: "Ready to build strength and move with greater confidence? Book a session with our AHPC-registered physiotherapists, or speak to our team to find out whether Clinical Pilates is right for you."
-order: 1
+order: 2
 draft: false
 ---
 

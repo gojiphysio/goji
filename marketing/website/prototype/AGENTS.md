@@ -127,7 +127,7 @@ so a token change reflows everything (styleguide is the QA surface).
   reachable from `/services` and from every child page, so don't let those
   links rot or it becomes an orphan.
 - **Service frontmatter escape hatches.** `metaTitle` is a verbatim `<title>`
-  (beats `seoTitle`); `priceFrom` renders "From $N"; `closingCopy` overrides the
+  (beats `seoTitle`); `closingCopy` overrides the
   closing "Book your ..." paragraph; `bookingService` is optional - omit it for a
   service with no Plato calendar and the Book CTA opens the general `/book` form.
   **Private Pilates** (instructor-led, not physio) is bookable: Plato
