@@ -19,10 +19,12 @@ MAX_ADVANCE_DAYS = 60  # bookings are capped at 60 days into the future
 # Plato "Space Requirement" (`code_Left`) = "Reformer needed", validated against
 # GET /appointment/codes on 2026-10-23. The studio has ONE reformer, shared by
 # Camille (Private Pilates) and Claire (Clinical Pilates / physio). Plato has no
-# resource model, so availability.py enforces it: a service with `needs_reformer`
-# is not offered while any calendar holds an appointment with this code.
+# resource model, so availability.py enforces it: the REFORMER_CLINICIANS are not
+# offered for ANY service (pilates, physio, S&C...) while any calendar holds an
+# appointment with this code, since any of their sessions could need the reformer.
 # (QWGT "Reformer 1/2 session" is deliberately not treated as blocking.)
 REFORMER_CODE = "YS06"
+REFORMER_CLINICIANS = frozenset({"camille-tan", "claire-ng"})
 
 # clinician_id -> Plato calendar `color` (the appointment calendar) + doctor code.
 # online_start / online_end (optional) clamp the online-bookable window when the
@@ -77,7 +79,6 @@ SERVICES: dict[str, dict] = {
         "online_calendar": "ne8sgkb",  # Cheryl + Claire
         "type_code": "2kV4",
         "space_code": REFORMER_CODE,
-        "needs_reformer": True,
         "duration_min": 60,
         "supports_home": False,
     },
@@ -86,7 +87,6 @@ SERVICES: dict[str, dict] = {
         "online_calendar": "vXKlwa7",  # Camille (pF9S)
         "type_code": "N1z9",  # Plato appointment type "Private Pilates"
         "space_code": REFORMER_CODE,
-        "needs_reformer": True,
         "duration_min": 60,  # same hourly booking as Clinical Pilates
         "supports_home": False,
     },
