@@ -11,6 +11,8 @@ changeable via the API). Home visits are Cheryl-only and padded with travel.
 """
 from __future__ import annotations
 
+from datetime import date
+
 SLOT_MINUTES = 30
 SATURDAY_SLOT_MINUTES = 60  # Saturdays: on-the-hour slots only (no :30 slots)
 HOME_TRAVEL_MINUTES = 30  # travel block before AND after a home visit
@@ -151,6 +153,14 @@ CLINICIAN_RESTRICTED_BLOCKS: dict[str, list[dict]] = {
     "kristy-ng": [
         {"day": "Wed", "starttime": "17:30", "endtime": "20:00"},
     ],
+}
+
+# First day a clinician can be booked online. Before it they are not offered for
+# any service (month shading, slots, and the create_booking re-check all go
+# through availability.py). Use for a new starter whose Plato calendar is already
+# live but who has not begun work yet; remove the entry once the date has passed.
+CLINICIAN_AVAILABLE_FROM: dict[str, date] = {
+    "camille-tan": date(2026, 11, 1),  # first week of work is in November
 }
 
 # Home visits: Cheryl only, typed "Home Visit" in Plato regardless of service.

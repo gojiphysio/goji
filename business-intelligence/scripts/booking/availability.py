@@ -23,6 +23,7 @@ from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
 
 from .config import (
+    CLINICIAN_AVAILABLE_FROM,
     CLINICIAN_RESTRICTED_BLOCKS,
     CLINICIANS,
     HOME_TRAVEL_MINUTES,
@@ -304,6 +305,10 @@ def _derive_day(
         if focus_allowed is not None and cid not in focus_allowed:
             continue
         if service_clinicians is not None and cid not in service_clinicians:
+            continue
+        if day < CLINICIAN_AVAILABLE_FROM.get(cid, date.min):
+            if _DIAG:
+                log.info(f"  {cid}: not yet started (available from {CLINICIAN_AVAILABLE_FROM[cid]})")
             continue
         if dow in (rule.get("restricted_days") or []):
             if _DIAG:
