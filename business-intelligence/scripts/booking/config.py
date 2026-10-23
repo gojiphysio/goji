@@ -32,8 +32,8 @@ CLINICIANS: dict[str, dict] = {
     "kristy-ng": {"name": "Kristy Ng", "calendar": "green", "doctor": "PKN",
                   "email": "kristy.ng@gojiphysio.com"},
     # Pilates Instructor (not a physio): Private Pilates only (SERVICE_CLINICIANS).
-    # No `email` yet, so no clinician CC on her booking heads-up until it is added.
-    "camille-tan": {"name": "Camille Tan", "calendar": "pF9S", "doctor": "ICT"},
+    "camille-tan": {"name": "Camille Tan", "calendar": "pF9S", "doctor": "ICT",
+                    "email": "movement.with.camille@gmail.com"},
 }
 
 # website service id -> Plato mapping.
@@ -73,13 +73,10 @@ SERVICES: dict[str, dict] = {
     },
     "private-pilates": {
         "title": "Private Pilates",
-        # OPEN: Plato has no onlineapptbooking calendar for Private Pilates yet
-        # (checked 2026-10-23), and availability is derived from that calendar's
-        # rules. Create one in Plato with a rule for Camille (book_calendar
-        # "pF9S"), put its id here and in the website's services.ts, then drop
-        # `bookingHidden` there. Until then no slots are offered.
-        "online_calendar": "",
+        "online_calendar": "vXKlwa7",  # Camille (pF9S)
         "type_code": "N1z9",  # Plato appointment type "Private Pilates"
+        # Plato "Space Requirement" (code_Left): "Reformer needed".
+        "space_code": "YS06",
         "duration_min": 60,  # same hourly booking as Clinical Pilates
         "supports_home": False,
     },

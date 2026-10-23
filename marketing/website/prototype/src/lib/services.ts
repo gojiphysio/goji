@@ -116,16 +116,10 @@ export const services: Service[] = [
     priceNote: "",
     supportsHome: false,
     durationMin: 55,
-    // The appointment type (N1z9) and Camille's calendar (pF9S, see clinicians.ts)
-    // exist in Plato, but there is no Private Pilates *online-booking* calendar
-    // yet, so no availability can be derived. Until one exists the service stays
-    // out of the booking form (bookingHidden) and its Book CTA opens the general
-    // /book form. Then: set platoCalendarId here and online_calendar in the
-    // booking service's config.py, drop bookingHidden, and add bookingService
-    // to the service page.
-    platoCalendarId: "",
+    // Camille's online-booking calendar (rule: pF9S, see clinicians.ts). Keep
+    // in sync with online_calendar in the booking service's config.py.
+    platoCalendarId: "vXKlwa7",
     platoTypeCode: "N1z9",
-    bookingHidden: true,
   },
   {
     id: "strength-conditioning",

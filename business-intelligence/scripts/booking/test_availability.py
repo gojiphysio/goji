@@ -436,13 +436,10 @@ if __name__ == "__main__":
     print("all passed")
 
 
-def test_private_pilates_offers_only_camille(monkeypatch):
-    # Private Pilates has no Plato online-booking calendar yet (online_calendar is
-    # blank), so give it a stand-in id to exercise the roster/mapping. Cheryl and
-    # Claire share the calendar here to prove the roster filter excludes them.
-    from booking.config import SERVICES
-    monkeypatch.setitem(SERVICES["private-pilates"], "online_calendar", "PRIV")
-    cfg = {"calendars": [{"id": "PRIV", "rules": [
+def test_private_pilates_offers_only_camille():
+    # Private Pilates calendar is vXKlwa7. Claire shares it here to prove the
+    # roster filter excludes non-instructors.
+    cfg = {"calendars": [{"id": "vXKlwa7", "rules": [
         {"name": "Camille Tan", "book_calendar": "pF9S", "starttime": "09:00",
          "endtime": "12:00", "min_days": 1, "max_days": 365,
          "restricted_days": [], "restricted_blocks": []},
@@ -453,11 +450,6 @@ def test_private_pilates_offers_only_camille(monkeypatch):
     out = derive_availability(StubPlato([], cfg), "private-pilates", WED, now=NOW)
     assert set(out) == {"camille-tan"}
     assert out["camille-tan"] == ["09:00", "09:30", "10:00", "10:30", "11:00"]
-
-
-def test_private_pilates_offers_nothing_until_calendar_exists():
-    # Blank online_calendar -> no rules -> no slots (and no crash).
-    assert derive_availability(StubPlato([], CFG), "private-pilates", WED, now=NOW) == {}
 
 
 def test_camille_is_not_offered_in_other_services():

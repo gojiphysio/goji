@@ -327,6 +327,7 @@ def _create_appointments(plato, svc, cid, day, time_, home, name, phone, email,
                 "endtime": _dt(day, time_, dur),
                 "color": color, "doctor": doctor,
                 "code_Bottom": svc["type_code"],
+                **({"code_Left": svc["space_code"]} if svc.get("space_code") else {}),
                 "email": email, "handphone": phone, "connect": True,
             })
             created.append(visit_id)

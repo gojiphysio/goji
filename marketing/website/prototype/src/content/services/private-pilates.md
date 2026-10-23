@@ -11,6 +11,7 @@ durationMin: 55
 priceClinic: 160
 priceFrom: true
 clinicians: ["Camille Tan"]
+bookingService: "private-pilates"
 closingCopy: "Ready to get started? Book a session with our STOTT PILATES® certified instructor, or speak to our team to find the right Pilates experience for you."
 order: 2
 draft: false
