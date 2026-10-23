@@ -69,8 +69,6 @@ const services = defineCollection({
     /** Facts header (from the source doc's Duration / Options / Physios lines). */
     durationMin: z.number(),
     priceClinic: z.number(),
-    /** Show the price as "From $N" in the facts strip. */
-    priceFrom: z.boolean().optional(),
     priceHome: z.number().optional(),
     /** Clinician display names for the "Seen by" line. */
     clinicians: z.array(z.string()),

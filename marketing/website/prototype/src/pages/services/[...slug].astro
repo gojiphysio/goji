@@ -24,7 +24,6 @@ const {
   category,
   durationMin,
   priceClinic,
-  priceFrom,
   priceHome,
   clinicians,
   bookingService,
@@ -53,7 +52,7 @@ const bookHref = !bookingService
 const priceLabel =
   priceHome && priceHome !== priceClinic
     ? `In-clinic $${priceClinic} · Home visit $${priceHome}`
-    : `${priceFrom ? "From " : ""}$${priceClinic}`;
+    : `$${priceClinic}`;
 
 const origin = Astro.site ?? new URL(Astro.url.origin);
 const pageURL = new URL(Astro.url.pathname, origin).href;
