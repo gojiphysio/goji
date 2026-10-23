@@ -34,6 +34,7 @@ export type ServiceId =
   | "physiotherapy"
   | "mummy-baby"
   | "clinical-pilates"
+  | "private-pilates"
   | "strength-conditioning";
 
 export interface Service {
@@ -49,8 +50,10 @@ export interface Service {
   platoCalendarId: string;
   /**
    * Plato "Appointment Type" code (the `code_Bottom` field on POST /appointment).
-   * Validated codes: Physiotherapy=hDWW, Pilates=2kV4, S&C=qLbH, Home Visit=sCla.
-   * (Confirmed/Unconfirmed live in `code_Left`: YS06 / C22K.)
+   * Validated codes: Physiotherapy=hDWW, Clinical Pilates=2kV4, S&C=qLbH, Home Visit=sCla,
+   * Private Pilates=N1z9 (GET /appointment/codes, 2026-10-23).
+   * (`code_Left` = Space Requirement: YS06 Reformer needed / QWGT Reformer 1/2 session;
+   * Confirmed/Unconfirmed live in `code_Right`: qK8x / dm1V.)
    * OPEN: Mummy & Baby has no Plato type — using Physiotherapy (hDWW) for now.
    * RULE (decided 2026-07-07): a HOME-VISIT booking is typed Home Visit (`sCla`)
    * regardless of service; the service name goes in the title/description. So the
@@ -89,19 +92,6 @@ export const services: Service[] = [
     bookingHidden: true,
   },
   {
-    id: "clinical-pilates",
-    icon: "tabler:yoga",
-    title: "Clinical Pilates",
-    lead: "Physiotherapist-led reformer Pilates for rehabilitation, movement retraining, strength, and a safe return to activity or sport.",
-    meta: ["55 min Initial consult", "1:1 or 2:1 reformer"],
-    price: "180",
-    priceNote: "",
-    supportsHome: false,
-    durationMin: 55,
-    platoCalendarId: "ne8sgkb",
-    platoTypeCode: "2kV4",
-  },
-  {
     id: "strength-conditioning",
     icon: "tabler:barbell",
     title: "Strength & Conditioning",
@@ -113,6 +103,34 @@ export const services: Service[] = [
     durationMin: 55,
     platoCalendarId: "XV1FDpu",
     platoTypeCode: "qLbH",
+  },
+  {
+    id: "clinical-pilates",
+    icon: "tabler:yoga",
+    title: "Clinical Pilates",
+    lead: "AHPC-registered physiotherapist-led Pilates, combining clinical expertise with personalised exercise for strength, mobility and movement confidence.",
+    meta: ["55 min", "1:1 or 2:1 reformer"],
+    price: "180",
+    priceNote: "",
+    supportsHome: false,
+    durationMin: 55,
+    platoCalendarId: "ne8sgkb",
+    platoTypeCode: "2kV4",
+  },
+  {
+    id: "private-pilates",
+    icon: "tabler:stretching-2",
+    title: "Private Pilates",
+    lead: "STOTT PILATES® certified instructor-led sessions tailored to your goals, helping you build strength, flexibility and body awareness.",
+    meta: ["55 min", "1:1 or 2:1 reformer"],
+    price: "160",
+    priceNote: "",
+    supportsHome: false,
+    durationMin: 55,
+    // Camille's online-booking calendar (rule: pF9S, see clinicians.ts). Keep
+    // in sync with online_calendar in the booking service's config.py.
+    platoCalendarId: "vXKlwa7",
+    platoTypeCode: "N1z9",
   },
   {
     id: "mummy-baby",

@@ -12,6 +12,7 @@ import logging
 import os
 import threading
 import time
+from collections import deque
 from datetime import datetime, timedelta
 
 import requests
@@ -22,12 +23,24 @@ log = logging.getLogger("booking.plato")
 _DIAG = os.environ.get("BOOKING_AVAILABILITY_DEBUG", "").lower() in ("1", "true", "yes")
 
 BASE = "https://clinic.platomedical.com/api"
-TIMEOUT_S = 30
+# A hung Plato read must fail fast: get() retries up to 4x and gunicorn kills the
+# worker at 60s, so 30s per attempt could turn one slow call into a dead request.
+TIMEOUT_S = 12
 # Plato throttles at 20 requests/min per API key. We pace ourselves to just
 # under that (see _RateLimiter) rather than discovering the cap via 429s: a 429
 # costs 7s of retry backoff and then surfaces as a 502 on the booking form.
-PLATO_RATE_PER_MIN = float(os.environ.get("PLATO_RATE_PER_MIN", "18"))
-PLATO_RATE_BURST = float(os.environ.get("PLATO_RATE_BURST", "12"))
+PLATO_RATE_PER_MIN = int(float(os.environ.get("PLATO_RATE_PER_MIN", "18")))
+# Of that budget, this many requests per minute are held back from bulk work
+# (paging a whole month for the calendar shading). A date click or a booking
+# write is interactive and must never queue behind a 25-page cosmetic crawl.
+PLATO_BULK_RESERVE = int(float(os.environ.get("PLATO_BULK_RESERVE", "5")))
+# How long one bulk (month) request may spend paging before it hands back what
+# it has and reports "still loading". Progress is kept (see appointments()), so
+# the caller retries and resumes instead of one request hanging for a minute.
+PLATO_BULK_BUDGET_S = float(os.environ.get("PLATO_BULK_BUDGET", "8"))
+# How long a half-paged month is worth resuming. Past this the pages are too old
+# to splice onto fresh ones, so we start the month over.
+PLATO_PARTIAL_TTL_S = float(os.environ.get("PLATO_PARTIAL_TTL", "180"))
 # How long a caller will wait for a token before giving up. Longer than a
 # couple of refills is worse than degrading — the visitor is staring at a
 # spinner on /book. Note `get()` spends this per retry attempt, so the worst
@@ -67,6 +80,11 @@ APPTS_TTL_S = float(os.environ.get("PLATO_APPTS_TTL", "20"))
 # Before this split, every summary variant (focus/clinician/home) missed the
 # 20s cache and re-paged the same month, which is what pinned us at the cap.
 APPTS_RANGE_TTL_S = float(os.environ.get("PLATO_APPTS_RANGE_TTL", "300"))
+# A day inside an already-cached range is answered from that range, with no
+# Plato call at all, as long as the range is this fresh. Deliberately much
+# shorter than APPTS_RANGE_TTL_S: the day list is what the visitor books from.
+# (create_booking always passes fresh=True and never takes this shortcut.)
+DAY_FROM_RANGE_MAX_AGE_S = float(os.environ.get("PLATO_DAY_FROM_RANGE_AGE", "90"))
 
 
 def _is_leave_title(title: str) -> bool:
@@ -79,6 +97,11 @@ def _is_leave_title(title: str) -> bool:
 
 class PlatoError(RuntimeError):
     pass
+
+
+class PlatoBusy(PlatoError):
+    """A bulk fetch ran out of its time budget before finishing. Not a failure:
+    the pages fetched so far are kept and the next call resumes from them."""
 
 
 def _normalise_booking_config(payload):
@@ -109,40 +132,48 @@ def _normalise_booking_config(payload):
 
 
 class _RateLimiter:
-    """Token bucket that paces our own calls under Plato's 20 req/min cap.
+    """Sliding-window limiter that keeps us under Plato's 20 req/min cap.
 
     Plato throttles per API key, so the budget is clinic-wide — every
     availability lookup, month summary and booking write draws on the same
-    bucket. The service runs `--max-instances=1` (deploy-booking.yml), which is
-    what makes a single in-process bucket authoritative, the same reason the
+    window. The service runs `--max-instances=1` (deploy-booking.yml), which is
+    what makes a single in-process limiter authoritative, the same reason the
     per-clinician booking locks live in-process. Raise max-instances and this
     needs a shared store, exactly like those locks.
 
-    Starts full, so a burst (paging a month of appointments) goes straight
-    through and only the tail waits. Waiting ~3s for a token beats a 429, which
-    costs 7s of backoff and still ends as a 502 on the form.
+    A sliding window, not a token bucket: a bucket with a burst of B refilling at
+    R/min lets B + R requests through in the first minute, which is *over* the
+    cap whenever B + R > 20. That is how a cold month view (25 pages) used to
+    draw a 429 on itself, trip the cooldown, and take every date click down with
+    it. Here no 60s window ever holds more than `limit` requests.
+
+    `bulk` callers (paging a month for calendar shading) may only use
+    `limit - reserve` of the window, so the last `reserve` slots are always free
+    for interactive calls — a date click or a booking write.
     """
 
-    def __init__(self, rate_per_min: float, burst: float):
-        self._interval = 60.0 / rate_per_min if rate_per_min > 0 else 0.0
-        self._burst = max(1.0, burst)
-        self._tokens = self._burst
-        self._updated = time.monotonic()
+    WINDOW_S = 60.0
+
+    def __init__(self, limit_per_min: float, bulk_reserve: float = 0):
+        self._limit = int(limit_per_min) if limit_per_min and limit_per_min > 0 else 0
+        self._reserve = max(0, min(int(bulk_reserve), self._limit - 1))
+        self._stamps: deque[float] = deque()
         self._penalty_until = 0.0
         self._lock = threading.Lock()
 
-    def acquire(self, max_wait_s: float) -> None:
-        """Consume one token, sleeping until one is free. Raises PlatoError if
-        the wait would exceed `max_wait_s` — the caller degrades to "no slots"
-        rather than holding the request open.
+    def acquire(self, max_wait_s: float, bulk: bool = False) -> None:
+        """Take one slot in the window, sleeping until one is free. Raises
+        PlatoError if the wait would exceed `max_wait_s` — the caller degrades
+        to "no slots" rather than holding the request open.
 
         During a cooldown (see `penalise`) the wait is by definition longer than
-        a token refill, so callers give up immediately instead of queueing. That
+        a slot refill, so callers give up immediately instead of queueing. That
         is the point: while Plato is throttling us, the cheapest thing we can do
         is stop calling it at all and let its window reset.
         """
-        if not self._interval:
+        if not self._limit:
             return
+        cap = self._limit - (self._reserve if bulk else 0)
         deadline = time.monotonic() + max_wait_s
         while True:
             with self._lock:
@@ -151,18 +182,14 @@ class _RateLimiter:
                     wait = self._penalty_until - now
                     reason = "cooling down after a 429"
                 else:
-                    # Defensive clamp. Nothing sets _updated into the future
-                    # today, but if anything ever does, a negative elapsed would
-                    # silently *remove* tokens and never recover.
-                    elapsed = max(0.0, now - self._updated)
-                    self._tokens = min(self._burst,
-                                       self._tokens + elapsed / self._interval)
-                    self._updated = now
-                    if self._tokens >= 1.0:
-                        self._tokens -= 1.0
+                    while self._stamps and now - self._stamps[0] >= self.WINDOW_S:
+                        self._stamps.popleft()
+                    if len(self._stamps) < cap:
+                        self._stamps.append(now)
                         return
-                    wait = (1.0 - self._tokens) * self._interval
-                    reason = f"budget exhausted at {60.0 / self._interval:.0f} req/min"
+                    # Free once enough of the oldest requests age out of the window.
+                    wait = self._stamps[len(self._stamps) - cap] + self.WINDOW_S - now
+                    reason = f"budget exhausted at {self._limit} req/min"
             if now + wait > deadline:
                 raise PlatoError(
                     f"Plato rate limit — {reason}; would need {wait:.0f}s, "
@@ -170,22 +197,20 @@ class _RateLimiter:
             time.sleep(min(wait, max(0.0, deadline - now)))
 
     def penalise(self, cooldown_s: float) -> None:
-        """Plato returned 429: drain the bucket and hold every caller off for
-        `cooldown_s`, not just the one that got throttled.
+        """Plato returned 429: hold every caller off for `cooldown_s`, not just
+        the one that got throttled.
 
         This is the circuit breaker. Retrying into a 429 is what keeps the
         budget pinned — each failing request costs four Plato calls, so a burst
         of visitors during a throttle keeps us throttled indefinitely.
         """
         with self._lock:
-            now = time.monotonic()
-            self._tokens = 0.0
-            self._updated = now
-            self._penalty_until = max(self._penalty_until, now + cooldown_s)
+            self._penalty_until = max(self._penalty_until,
+                                      time.monotonic() + cooldown_s)
 
 
-# One bucket for the whole process — see _RateLimiter on why that is enough.
-_limiter = _RateLimiter(PLATO_RATE_PER_MIN, PLATO_RATE_BURST)
+# One limiter for the whole process — see _RateLimiter on why that is enough.
+_limiter = _RateLimiter(PLATO_RATE_PER_MIN, PLATO_BULK_RESERVE)
 
 
 class PlatoClient:
@@ -204,20 +229,30 @@ class PlatoClient:
         self._cfg_cache: dict | None = None
         self._cfg_ts = 0.0
         self._appts_cache: dict[tuple[str, str], tuple[float, list[dict]]] = {}
+        # Half-paged bulk fetches: key -> (started_at, next_page, rows so far).
+        self._partial: dict[tuple[str, str], tuple[float, int, list[dict]]] = {}
+        self._key_locks: dict[tuple[str, str], threading.Lock] = {}
+        self._key_locks_guard = threading.Lock()
 
     def _url(self, path: str) -> str:
         return f"{BASE}/{self.db}/{path.lstrip('/')}"
 
-    def get(self, path: str, params: dict | None = None, _retries: int = 3):
+    def get(self, path: str, params: dict | None = None, _retries: int = 3,
+            bulk: bool = False, max_wait_s: float | None = None):
         """GET with exponential backoff on 429/5xx (Plato caps at 20 req/min).
 
         Backoff is capped low (<=8s/step) because this sits on the interactive
         availability path — a long 60s backoff made the booking form hang for
         minutes when a burst of date changes tripped the rate limit. The frontend
-        debounces + the per-day appointment cache keep the request rate down."""
+        debounces + the per-day appointment cache keep the request rate down.
+
+        `bulk` marks background-ish work that may only use the non-reserved part
+        of the rate budget (see _RateLimiter); `max_wait_s` overrides how long it
+        may queue for a slot."""
         delay = 1.0
+        wait_s = PLATO_RATE_MAX_WAIT_S if max_wait_s is None else max_wait_s
         for attempt in range(_retries + 1):
-            _limiter.acquire(PLATO_RATE_MAX_WAIT_S)
+            _limiter.acquire(wait_s, bulk=bulk)
             r = self.s.get(self._url(path), params=params, timeout=self.timeout)
             if r.status_code == 429:
                 # Tell the whole process to stand down, then let the retry (if
@@ -262,23 +297,112 @@ class PlatoClient:
         return r.json()
 
     # --- domain helpers ---
-    def appointments(self, start_date: str, end_date: str) -> list[dict]:
+    def appointments(self, start_date: str, end_date: str,
+                     fresh: bool = False) -> list[dict]:
         """Every appointment with starttime in [start_date, end_date] (YYYY-MM-DD),
-        across all pages. Cached per range for APPTS_TTL_S (the availability hot
-        path re-reads the same day repeatedly). Includes regular appointments and
-        leave/unavailable entries."""
-        key = (start_date, end_date)
-        # A single day feeds the slot list a visitor is about to book against,
-        # so it stays short-lived; a multi-day range only feeds calendar
-        # shading and is the expensive one to re-page. See APPTS_RANGE_TTL_S.
-        ttl = APPTS_TTL_S if start_date == end_date else APPTS_RANGE_TTL_S
-        now = time.monotonic()
-        hit = self._appts_cache.get(key)
-        if hit and now - hit[0] < ttl:
-            return hit[1]
-        rows = self.get_all("appointment",
-                            {"start_date": start_date, "end_date": end_date})
+        across all pages. Includes regular appointments and leave/unavailable
+        entries.
 
+        Cached per range (APPTS_TTL_S for a day, APPTS_RANGE_TTL_S for a range).
+        Three things keep the hot path off Plato's 20 req/min budget:
+
+        * **A day is answered from a cached range** when one covers it and is
+          under DAY_FROM_RANGE_MAX_AGE_S old — the calendar shading has usually
+          just paged the month, so the date click costs zero requests.
+        * **A multi-day range is paged in bulk mode**: it can't starve date
+          clicks (reserved budget), and it stops after PLATO_BULK_BUDGET_S with
+          the pages so far kept, raising PlatoBusy; the next call resumes.
+        * **A failed refresh serves the last copy** rather than an error.
+
+        `fresh=True` is for the booking re-check under the clinician lock: it
+        skips the range shortcut and never serves stale. Writing a booking off a
+        90-second-old read would defeat the lock.
+        """
+        key = (start_date, end_date)
+        single = start_date == end_date
+        ttl = APPTS_TTL_S if single else APPTS_RANGE_TTL_S
+        hit = self._appts_cache.get(key)
+        if hit and time.monotonic() - hit[0] < ttl:
+            return hit[1]
+        if single and not fresh:
+            covered = self._day_from_range(start_date)
+            if covered is not None:
+                return covered
+
+        with self._key_lock(key):
+            # Another thread may have finished this very fetch while we queued.
+            hit = self._appts_cache.get(key)
+            if hit and time.monotonic() - hit[0] < ttl:
+                return hit[1]
+            try:
+                rows = self._fetch_appointments(key, bulk=not single)
+            except Exception as e:
+                if hit and not fresh:
+                    log.warning("Plato appointments refresh failed (%s) — serving the "
+                                "last copy, %.0fs old", e, time.monotonic() - hit[0])
+                    return hit[1]
+                raise
+            self._appts_cache[key] = (time.monotonic(), rows)
+            return rows
+
+    def _key_lock(self, key: tuple[str, str]) -> threading.Lock:
+        """One lock per range, so concurrent identical fetches (two visitors, or
+        the summary and the deep healthcheck) share one crawl, not run two."""
+        with self._key_locks_guard:
+            return self._key_locks.setdefault(key, threading.Lock())
+
+    def _day_from_range(self, day: str) -> list[dict] | None:
+        """The rows `appointments(day, day)` would return, taken from a fresh
+        cached range that covers `day` — or None if there isn't one. Same rule
+        Plato applies to a day query: starttime falls on that day."""
+        now = time.monotonic()
+        for (s, e), (ts, rows) in list(self._appts_cache.items()):
+            if s != e and s <= day <= e and now - ts < DAY_FROM_RANGE_MAX_AGE_S:
+                return [r for r in rows if str(r.get("starttime", ""))[:10] == day]
+        return None
+
+    def _fetch_appointments(self, key: tuple[str, str], bulk: bool) -> list[dict]:
+        start_date, end_date = key
+        params = {"start_date": start_date, "end_date": end_date}
+        if not bulk:
+            rows = self.get_all("appointment", params)
+        else:
+            rows = self._page_in_bulk(key, params)
+        self._tidy_appointments(rows)
+        return rows
+
+    def _page_in_bulk(self, key: tuple[str, str], params: dict) -> list[dict]:
+        """Page a long range using only the bulk share of the rate budget, for at
+        most PLATO_BULK_BUDGET_S. Progress survives a PlatoBusy: the next call
+        picks up at the next page, so a month Plato can only serve in ~2 minutes
+        still completes, as a few short requests instead of one that hangs."""
+        started = time.monotonic()
+        began, page, rows = self._partial.get(key, (started, 1, []))
+        if started - began > PLATO_PARTIAL_TTL_S:
+            began, page, rows = started, 1, []
+        while True:
+            spent = time.monotonic() - started
+            if spent >= PLATO_BULK_BUDGET_S and page > 1:
+                raise PlatoBusy(f"month still loading ({len(rows)} rows, page {page})")
+            try:
+                batch = self.get("appointment", {**params, "current_page": page},
+                                 bulk=True,
+                                 max_wait_s=max(0.0, PLATO_BULK_BUDGET_S - spent))
+            except PlatoError as e:  # out of budget, or cooling down after a 429
+                raise PlatoBusy(str(e)) from e
+            got = batch if isinstance(batch, list) else batch.get("data", [])
+            if not got:
+                break
+            rows.extend(got)
+            page += 1
+            self._partial[key] = (began, page, rows)  # keep progress across a timeout
+            if len(got) < 20:  # last (partial) page
+                break
+        self._partial.pop(key, None)
+        return rows
+
+    @staticmethod
+    def _tidy_appointments(rows: list[dict]) -> None:
         # Mark leave/vacation appointments by title pattern, and ensure all appointments
         # have proper ISO datetime strings (not just dates). Holiday blocks are regular
         # appointments on the clinician's own calendar, identified by title (from real
@@ -311,9 +435,6 @@ class PlatoClient:
                     appointment["endtime"] = end_dt.isoformat()
                 except (ValueError, TypeError):
                     appointment["endtime"] = f"{endtime}T23:59:59"
-
-        self._appts_cache[key] = (now, rows)
-        return rows
 
     def _serve_stale_config(self, now: float) -> dict:
         """Hand back the last good config and hold off re-fetching for
@@ -376,9 +497,11 @@ class PlatoClient:
         (Plato allows overlaps) — guard at the call site."""
         r = self.post("appointment", payload)
         self._appts_cache.clear()  # a write changes availability — never re-read stale
+        self._partial.clear()
         return r
 
     def delete_appointment(self, appointment_id: str) -> dict:
         r = self.delete(f"appointment/{appointment_id}")
         self._appts_cache.clear()
+        self._partial.clear()
         return r

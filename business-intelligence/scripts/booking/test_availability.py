@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from datetime import date, datetime
 
+from booking import availability
 from booking.availability import derive_availability, derive_available_days
 
 
@@ -11,7 +12,7 @@ class StubPlato:
         self._a, self._c = appts, cfg
         self.appointment_fetches = 0
 
-    def appointments(self, start, end):
+    def appointments(self, start, end, fresh=False):
         self.appointment_fetches += 1
         return self._a
 
@@ -428,9 +429,149 @@ def test_kristy_wednesday_block_5_30_to_8_00pm():
     assert out["kristy-ng"] == expected_slots
 
 
+# --- shared reformer: Camille (Private Pilates) <-> Claire (Clinical Pilates) ---
+
+def _pilates_cfg(calendar_id, name, color):
+    return {"calendars": [{"id": calendar_id, "rules": [
+        {"name": name, "book_calendar": color, "starttime": "09:00",
+         "endtime": "13:00", "min_days": 1, "max_days": 365,
+         "restricted_days": [], "restricted_blocks": []},
+    ]}]}
+
+
+PRIVATE_CFG = _pilates_cfg("vXKlwa7", "Camille Tan", "pF9S")
+CLINICAL_CFG = _pilates_cfg("ne8sgkb", "Claire Ng", "6hpO")
+
+
+def _reformer_appt(color, start, end, code="YS06"):
+    return {"color": color, "starttime": f"2026-07-15 {start}:00",
+            "endtime": f"2026-07-15 {end}:00", "code_Left": code}
+
+
+def test_claire_reformer_booking_blocks_camille_private_pilates():
+    appts = [_reformer_appt("6hpO", "10:00", "11:00", "YS06")]
+    out = derive_availability(StubPlato(appts, PRIVATE_CFG), "private-pilates", WED, now=NOW)
+    # 10:00-11:00 reformer in use removes 09:30/10:00/10:30; Camille's own calendar is empty.
+    assert out["camille-tan"] == ["09:00", "11:00", "11:30", "12:00"]
+
+
+def test_claire_physio_without_reformer_does_not_block_camille():
+    appts = [_reformer_appt("6hpO", "10:00", "11:00", "")]
+    out = derive_availability(StubPlato(appts, PRIVATE_CFG), "private-pilates", WED, now=NOW)
+    assert out["camille-tan"] == ["09:00", "09:30", "10:00", "10:30", "11:00", "11:30", "12:00"]
+
+
+def test_half_session_reformer_code_does_not_block():
+    appts = [_reformer_appt("6hpO", "10:00", "11:00", "QWGT")]
+    out = derive_availability(StubPlato(appts, PRIVATE_CFG), "private-pilates", WED, now=NOW)
+    assert "10:00" in out["camille-tan"]
+
+
+def test_camille_reformer_booking_blocks_claire_clinical_pilates():
+    appts = [_reformer_appt("pF9S", "10:00", "11:00")]
+    out = derive_availability(StubPlato(appts, CLINICAL_CFG), "clinical-pilates", WED, now=NOW)
+    assert out["claire-ng"] == ["09:00", "11:00", "11:30", "12:00"]
+
+
+def test_reformer_booking_blocks_claire_physiotherapy_too():
+    # Any of Claire's sessions could need the reformer, so physio slots are held
+    # back while Camille has it, not just pilates.
+    cfg = {"calendars": [{"id": "dDIjWJp", "rules": [
+        {"name": "Claire Ng", "book_calendar": "6hpO", "starttime": "09:00",
+         "endtime": "12:00", "min_days": 1, "max_days": 365,
+         "restricted_days": [], "restricted_blocks": []},
+    ]}]}
+    appts = [_reformer_appt("pF9S", "10:00", "11:00")]
+    out = derive_availability(StubPlato(appts, cfg), "physiotherapy", WED, now=NOW)
+    assert out["claire-ng"] == ["09:00", "11:00"]
+
+
+def test_reformer_booking_does_not_block_other_clinicians():
+    # Cheryl never uses the reformer: her physio slots stay open.
+    appts = [_reformer_appt("6hpO", "10:00", "11:00")]
+    out = derive_availability(StubPlato(appts, CFG), "physiotherapy", WED, now=NOW)
+    assert out["cheryl-long"] == ["09:00", "09:30", "10:00", "10:30", "11:00"]
+
+
+def test_reformer_booking_back_to_back_is_not_a_conflict():
+    appts = [_reformer_appt("6hpO", "10:00", "11:00")]
+    out = derive_availability(StubPlato(appts, PRIVATE_CFG), "private-pilates", WED, now=NOW)
+    assert "09:00" in out["camille-tan"] and "11:00" in out["camille-tan"]
+
+
+def test_available_days_respects_reformer_conflict():
+    # Reformer in use for the whole window -> Camille has no slots that day.
+    appts = [_reformer_appt("6hpO", "09:00", "13:00")]
+    days = derive_available_days(StubPlato(appts, PRIVATE_CFG), "private-pilates",
+                                 WED, WED, now=NOW)
+    assert days == []
+
+
 if __name__ == "__main__":
     for name, fn in sorted(globals().items()):
         if name.startswith("test_") and callable(fn):
             fn()
             print(f"ok  {name}")
     print("all passed")
+
+
+def test_private_pilates_offers_only_camille():
+    # Private Pilates calendar is vXKlwa7. Claire shares it here to prove the
+    # roster filter excludes non-instructors.
+    cfg = {"calendars": [{"id": "vXKlwa7", "rules": [
+        {"name": "Camille Tan", "book_calendar": "pF9S", "starttime": "09:00",
+         "endtime": "12:00", "min_days": 1, "max_days": 365,
+         "restricted_days": [], "restricted_blocks": []},
+        {"name": "Claire Ng", "book_calendar": "6hpO", "starttime": "09:00",
+         "endtime": "12:00", "min_days": 1, "max_days": 365,
+         "restricted_days": [], "restricted_blocks": []},
+    ]}]}
+    out = derive_availability(StubPlato([], cfg), "private-pilates", WED, now=NOW)
+    assert set(out) == {"camille-tan"}
+    assert out["camille-tan"] == ["09:00", "09:30", "10:00", "10:30", "11:00"]
+
+
+def test_camille_is_not_offered_in_other_services():
+    cfg = {"calendars": [{"id": "ne8sgkb", "rules": [
+        {"name": "Camille Tan", "book_calendar": "pF9S", "starttime": "09:00",
+         "endtime": "12:00", "min_days": 1, "max_days": 365,
+         "restricted_days": [], "restricted_blocks": []},
+    ]}]}
+    out = derive_availability(StubPlato([], cfg), "clinical-pilates", WED, now=NOW)
+    assert out == {}
+
+
+# --- CLINICIAN_AVAILABLE_FROM: a new starter is not bookable before their start date ---
+
+def _camille_cfg():
+    return {"calendars": [{"id": "vXKlwa7", "rules": [
+        {"name": "Camille Tan", "book_calendar": "pF9S", "starttime": "09:00",
+         "endtime": "11:00", "min_days": 1, "max_days": 365,
+         "restricted_days": [], "restricted_blocks": []},
+    ]}]}
+
+
+def test_clinician_not_offered_before_start_date(monkeypatch):
+    monkeypatch.setattr(availability, "CLINICIAN_AVAILABLE_FROM", {"camille-tan": date(2026, 7, 16)})
+    out = derive_availability(StubPlato([], _camille_cfg()), "private-pilates", WED, now=NOW)
+    assert out == {}
+
+
+def test_clinician_offered_from_start_date(monkeypatch):
+    monkeypatch.setattr(availability, "CLINICIAN_AVAILABLE_FROM", {"camille-tan": date(2026, 7, 16)})
+    out = derive_availability(StubPlato([], _camille_cfg()), "private-pilates",
+                              date(2026, 7, 16), now=NOW)
+    assert out["camille-tan"] == ["09:00", "09:30", "10:00"]
+
+
+def test_start_date_only_hides_that_clinician(monkeypatch):
+    monkeypatch.setattr(availability, "CLINICIAN_AVAILABLE_FROM", {"claire-ng": date(2026, 8, 1)})
+    out = derive_availability(StubPlato([], CFG_ALL), "physiotherapy", WED, now=NOW)
+    assert set(out) == {"cheryl-long", "kristy-ng"}
+
+
+def test_month_shading_skips_days_before_start_date(monkeypatch):
+    monkeypatch.setattr(availability, "CLINICIAN_AVAILABLE_FROM", {"camille-tan": date(2026, 7, 16)})
+    days = derive_available_days(StubPlato([], _camille_cfg()), "private-pilates",
+                                 date(2026, 7, 13), date(2026, 7, 17), now=NOW)
+    assert days == ["2026-07-16", "2026-07-17"]

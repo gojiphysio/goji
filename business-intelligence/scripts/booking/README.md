@@ -35,9 +35,10 @@ Runbook for what to do when it fires: `DIAGNOSIS.md`.
 
 ## Plato's rate limit — the thing that keeps breaking us
 Plato caps at **20 requests/min per API key**, clinic-wide across availability,
-summaries and booking writes. `plato.py` paces itself with a token bucket
-(`PLATO_RATE_PER_MIN`, default 18, burst 20) instead of discovering the cap via
-429s — one 429 costs 7s of retry backoff and still surfaces as a 502 on the form.
+summaries and booking writes. `plato.py` paces itself with a sliding window
+(`PLATO_RATE_PER_MIN`, default 18 — never more in any 60s) instead of discovering
+the cap via 429s — one 429 costs 7s of retry backoff and still surfaces as a 502
+on the form.
 Three rules follow from that budget:
 - **Never hand a Plato response straight to code that assumes a shape, and never
   cache one you haven't validated.** On 2026-09-01 Plato changed
@@ -50,8 +51,14 @@ Three rules follow from that budget:
   appointments are paginated. Failing after the crawl wastes the budget on a
   request that was never going to succeed.
 - **Range fetches cache far longer than single days** (`PLATO_APPTS_RANGE_TTL`,
-  5 min vs 20s). A month is 10+ pages; without this, every focus/clinician
+  5 min vs 20s). A month is ~25 pages; without this, every focus/clinician
   variant of the same month re-pages it.
+- **Month paging is bulk work, and interactive calls come first.** It may only use
+  the window minus `PLATO_BULK_RESERVE`, is time-boxed (`PLATO_BULK_BUDGET`) and
+  resumable (`503 loading`, the browser retries), so a date click never waits on
+  it. A day inside a fresh cached month needs no Plato call at all, but the
+  booking re-check always passes `fresh=True`. Any new caller that *writes* off a
+  read must do the same.
 - **`--max-instances=1` is load-bearing** for the limiter, not just the booking
   locks. Raising it multiplies our request rate by the instance count.
 
@@ -69,7 +76,19 @@ Rules layered on top (`config.py`):
 - **Booking window capped at `MAX_ADVANCE_DAYS` (60 days)** — enforced both in
   availability and as an explicit `too_far` guard in `create_booking`; the site
   calendar can't select past it either.
+- `CLINICIAN_AVAILABLE_FROM` (`config.py`): a clinician is not offered for any
+  service before their start date — for a new starter whose Plato calendar is
+  live early (Camille: 2026-11-01). Delete the entry once the date has passed.
 - Home visits: **Cheryl only**, ±30-min travel padding.
+- **One shared reformer** (Camille's Private Pilates, Claire's Clinical Pilates).
+  Plato has no resource model, so while any appointment, on any calendar, carries
+  Space Requirement `code_Left` = `REFORMER_CODE` (`YS06`, "Reformer needed";
+  collected under `REFORMER_KEY` in `availability.py`), the `REFORMER_CLINICIANS`
+  (Camille, Claire) are not offered online for **any** service (pilates, physio,
+  S&C): any of their sessions could need it. Cheryl and Kristy are unaffected.
+  Online Clinical/Private Pilates bookings are stamped with the tag so they block
+  the other. Bookings made straight in Plato are not checked on entry but do
+  block online slots once tagged. `QWGT` ("Reformer 1/2 session") is ignored.
 
 ## How booking works (`booking.py`)
 Plato does **not** reject conflicts, so `create_booking` re-derives availability

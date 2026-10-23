@@ -11,10 +11,22 @@ changeable via the API). Home visits are Cheryl-only and padded with travel.
 """
 from __future__ import annotations
 
+from datetime import date
+
 SLOT_MINUTES = 30
 SATURDAY_SLOT_MINUTES = 60  # Saturdays: on-the-hour slots only (no :30 slots)
 HOME_TRAVEL_MINUTES = 30  # travel block before AND after a home visit
 MAX_ADVANCE_DAYS = 60  # bookings are capped at 60 days into the future
+
+# Plato "Space Requirement" (`code_Left`) = "Reformer needed", validated against
+# GET /appointment/codes on 2026-10-23. The studio has ONE reformer, shared by
+# Camille (Private Pilates) and Claire (Clinical Pilates / physio). Plato has no
+# resource model, so availability.py enforces it: the REFORMER_CLINICIANS are not
+# offered for ANY service (pilates, physio, S&C...) while any calendar holds an
+# appointment with this code, since any of their sessions could need the reformer.
+# (QWGT "Reformer 1/2 session" is deliberately not treated as blocking.)
+REFORMER_CODE = "YS06"
+REFORMER_CLINICIANS = frozenset({"camille-tan", "claire-ng"})
 
 # clinician_id -> Plato calendar `color` (the appointment calendar) + doctor code.
 # online_start / online_end (optional) clamp the online-bookable window when the
@@ -31,6 +43,9 @@ CLINICIANS: dict[str, dict] = {
                   "email": "claire.ng@gojiphysio.com"},
     "kristy-ng": {"name": "Kristy Ng", "calendar": "green", "doctor": "PKN",
                   "email": "kristy.ng@gojiphysio.com"},
+    # Pilates Instructor (not a physio): Private Pilates only (SERVICE_CLINICIANS).
+    "camille-tan": {"name": "Camille Tan", "calendar": "pF9S", "doctor": "ICT",
+                    "email": "movement.with.camille@gmail.com"},
 }
 
 # website service id -> Plato mapping.
@@ -65,7 +80,16 @@ SERVICES: dict[str, dict] = {
         "title": "Clinical Pilates",
         "online_calendar": "ne8sgkb",  # Cheryl + Claire
         "type_code": "2kV4",
+        "space_code": REFORMER_CODE,
         "duration_min": 60,
+        "supports_home": False,
+    },
+    "private-pilates": {
+        "title": "Private Pilates",
+        "online_calendar": "vXKlwa7",  # Camille (pF9S)
+        "type_code": "N1z9",  # Plato appointment type "Private Pilates"
+        "space_code": REFORMER_CODE,
+        "duration_min": 60,  # same hourly booking as Clinical Pilates
         "supports_home": False,
     },
     "strength-conditioning": {
@@ -118,6 +142,7 @@ FIRST_AVAILABLE_PRIORITY: list[str] = ["kristy-ng", "claire-ng", "cheryl-long"]
 # a clinician from one service while keeping them in others).
 SERVICE_CLINICIANS: dict[str, list[str] | None] = {
     "clinical-pilates": ["claire-ng"],  # Cheryl Long removed from Clinical Pilates
+    "private-pilates": ["camille-tan"],  # instructor-led; physios are not rostered
 }
 
 # Clinician restricted blocks: hard-coded time blocks that override Plato's
@@ -128,6 +153,14 @@ CLINICIAN_RESTRICTED_BLOCKS: dict[str, list[dict]] = {
     "kristy-ng": [
         {"day": "Wed", "starttime": "17:30", "endtime": "20:00"},
     ],
+}
+
+# First day a clinician can be booked online. Before it they are not offered for
+# any service (month shading, slots, and the create_booking re-check all go
+# through availability.py). Use for a new starter whose Plato calendar is already
+# live but who has not begun work yet; remove the entry once the date has passed.
+CLINICIAN_AVAILABLE_FROM: dict[str, date] = {
+    "camille-tan": date(2026, 11, 1),  # first week of work is in November
 }
 
 # Home visits: Cheryl only, typed "Home Visit" in Plato regardless of service.

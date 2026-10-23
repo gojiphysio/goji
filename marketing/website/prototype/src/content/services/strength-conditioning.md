@@ -10,7 +10,7 @@ durationMin: 55
 priceClinic: 180
 clinicians: ["Kristy Ng", "Claire Ng"]
 bookingService: "strength-conditioning"
-order: 2
+order: 1
 draft: false
 ---
 

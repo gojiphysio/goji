@@ -216,7 +216,8 @@ def create_booking(plato, draft: dict, *, now: datetime | None = None) -> dict:
         # First available: restrict auto-assignment to the sub-type's clinicians
         # (e.g. a scoliosis booking must never land on someone who isn't Cheryl).
         avail = derive_availability(plato, service_id, day,
-                                    focus=focus_id or None, variant=variant or None, home=home, now=now)
+                                    focus=focus_id or None, variant=variant or None, home=home, now=now,
+                                    fresh=True)
         candidates = [cid for cid, slots in avail.items() if time_ in slots]
         _require(candidates, "That time is no longer available.", "slot_taken")
         # Walk the clinic's preferred order (Kristy -> Claire -> Cheryl) so a
@@ -230,7 +231,8 @@ def create_booking(plato, draft: dict, *, now: datetime | None = None) -> dict:
     for cid in candidates:
         with _lock_for(cid):
             avail = derive_availability(plato, service_id, day,
-                                       clinician_id=cid, variant=variant or None, home=home, now=now)
+                                       clinician_id=cid, variant=variant or None, home=home, now=now,
+                                       fresh=True)
             if time_ not in avail.get(cid, []):
                 last_err = BookingError("That time is no longer available.", "slot_taken")
                 continue
@@ -327,6 +329,7 @@ def _create_appointments(plato, svc, cid, day, time_, home, name, phone, email,
                 "endtime": _dt(day, time_, dur),
                 "color": color, "doctor": doctor,
                 "code_Bottom": svc["type_code"],
+                **({"code_Left": svc["space_code"]} if svc.get("space_code") else {}),
                 "email": email, "handphone": phone, "connect": True,
             })
             created.append(visit_id)

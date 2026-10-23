@@ -1,8 +1,9 @@
 """Unit tests for create_booking (stub Plato — no network, no writes to Plato)."""
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import date, datetime
 
+from booking import availability
 from booking.booking import BookingError, create_booking
 
 DAY = "2026-07-15"          # a future Wednesday
@@ -28,8 +29,10 @@ class StubPlato:
         self.deleted: list[str] = []
         self._n = 0
         self.fail_on_create = fail_on_create
+        self.fresh_reads: list[bool] = []
 
-    def appointments(self, start, end):
+    def appointments(self, start, end, fresh=False):
+        self.fresh_reads.append(fresh)
         return self.appts
 
     def online_booking_config(self):
@@ -297,3 +300,124 @@ if __name__ == "__main__":
             fn()
             print(f"ok  {name}")
     print("all passed")
+
+
+def test_private_pilates_books_camille_with_private_pilates_type():
+    cfg = {"calendars": [{"id": "vXKlwa7", "rules": [
+        {"name": "Camille Tan", "book_calendar": "pF9S", "starttime": "09:00",
+         "endtime": "17:00", "restricted_days": [], "restricted_blocks": []},
+    ]}]}
+
+    class StubPlatoPP(StubPlato):
+        def online_booking_config(self):
+            return cfg
+
+    p = StubPlatoPP()
+    res = create_booking(p, {"service": "private-pilates", "date": DAY,
+                             "time": "10:00", "format": "clinic",
+                             "name": "Jane Tan", "phone": "+65 9123 4567",
+                             "email": "jane@example.com",
+                             "clinician_id": ""}, now=NOW)
+    assert res["ok"] and res["clinician_id"] == "camille-tan"
+    payload = p.created[0][0]
+    assert payload["color"] == "pF9S" and payload["doctor"] == "ICT"
+    assert payload["code_Bottom"] == "N1z9"        # Appointment Type = Private Pilates
+    assert payload["code_Left"] == "YS06"          # Space Requirement = Reformer needed
+    assert "Private Pilates" in payload["description"]
+
+
+def test_booking_physio_cannot_be_chosen_for_private_pilates():
+    p = StubPlato()
+    try:
+        create_booking(p, {"service": "private-pilates", "date": DAY,
+                           "time": "10:00", "format": "clinic",
+                           "name": "Jane Tan", "phone": "+65 9123 4567",
+                           "email": "jane@example.com",
+                           "clinician_id": "claire-ng"}, now=NOW)
+        assert False, "expected BookingError"
+    except BookingError:
+        pass
+    assert p.created == []
+
+
+def test_non_private_pilates_bookings_send_no_space_requirement():
+    p = StubPlato()
+    create_booking(p, {**BASE, "clinician_id": "cheryl-long"}, now=NOW)
+    assert "code_Left" not in p.created[0][0]
+
+
+def test_clinical_pilates_booking_stamps_reformer_needed():
+    cfg = {"calendars": [{"id": "ne8sgkb", "rules": [
+        {"name": "Claire Ng", "book_calendar": "6hpO", "starttime": "09:00",
+         "endtime": "17:00", "restricted_days": [], "restricted_blocks": []},
+    ]}]}
+
+    class StubPlatoCP(StubPlato):
+        def online_booking_config(self):
+            return cfg
+
+    p = StubPlatoCP()
+    res = create_booking(p, {**BASE, "service": "clinical-pilates",
+                             "clinician_id": "claire-ng"}, now=NOW)
+    assert res["ok"]
+    assert p.created[0][0]["code_Left"] == "YS06"
+
+
+def test_private_pilates_refused_while_claire_has_the_reformer():
+    cfg = {"calendars": [{"id": "vXKlwa7", "rules": [
+        {"name": "Camille Tan", "book_calendar": "pF9S", "starttime": "09:00",
+         "endtime": "17:00", "restricted_days": [], "restricted_blocks": []},
+    ]}]}
+
+    class StubPlatoPP(StubPlato):
+        def online_booking_config(self):
+            return cfg
+
+    # Claire (6hpO) holds the reformer 10:00-11:00; Camille's calendar is empty.
+    p = StubPlatoPP([{"color": "6hpO", "starttime": "2026-07-15 10:00:00",
+                      "endtime": "2026-07-15 11:00:00", "code_Left": "YS06"}])
+    try:
+        create_booking(p, {"service": "private-pilates", "date": DAY,
+                           "time": "10:00", "format": "clinic",
+                           "name": "Jane Tan", "phone": "+65 9123 4567",
+                           "email": "jane@example.com", "clinician_id": ""}, now=NOW)
+        assert False, "expected BookingError"
+    except BookingError as e:
+        assert e.code == "slot_taken"
+    assert p.created == []
+
+
+def test_booking_rechecks_read_fresh_appointments():
+    """The availability the visitor saw may have come from a cached month; the
+    re-check under the clinician lock is what stops a double-booking, so it must
+    never be answered from that cache."""
+    p = StubPlato()
+    create_booking(p, {**BASE, "clinician_id": "cheryl-long"}, now=NOW)
+    assert p.fresh_reads and all(p.fresh_reads)
+
+    p = StubPlato()
+    create_booking(p, {k: v for k, v in BASE.items() if k != "clinician_id"}, now=NOW)
+    assert p.fresh_reads and all(p.fresh_reads)  # first-available path too
+
+
+def test_booking_rejected_before_clinician_start_date(monkeypatch):
+    monkeypatch.setattr(availability, "CLINICIAN_AVAILABLE_FROM", {"camille-tan": date(2026, 7, 16)})
+    cfg = {"calendars": [{"id": "vXKlwa7", "rules": [
+        {"name": "Camille Tan", "book_calendar": "pF9S", "starttime": "09:00",
+         "endtime": "17:00", "restricted_days": [], "restricted_blocks": []},
+    ]}]}
+
+    class StubPlatoPP(StubPlato):
+        def online_booking_config(self):
+            return cfg
+
+    p = StubPlatoPP()
+    try:
+        create_booking(p, {"service": "private-pilates", "date": DAY,
+                           "time": "10:00", "format": "clinic",
+                           "name": "Jane Tan", "phone": "+65 9123 4567",
+                           "email": "jane@example.com", "clinician_id": ""}, now=NOW)
+        assert False, "expected BookingError"
+    except BookingError as e:
+        assert e.code == "slot_taken"
+    assert p.created == []

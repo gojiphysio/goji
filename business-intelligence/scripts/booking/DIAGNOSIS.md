@@ -41,10 +41,15 @@ is in the log — you should not need to reproduce it.
 ### Plato's 20 req/min cap (`429 Client Error: Too Many Requests`)
 
 Plato throttles per API key, so every availability lookup, month summary and
-booking write shares one clinic-wide budget. `plato.py` now paces itself with a
-token bucket (`_RateLimiter`, 18/min with a burst of 20) rather than discovering
-the cap via 429s — a 429 costs 7s of retry backoff and still ends as a 502 on the
-form.
+booking write shares one clinic-wide budget. `plato.py` paces itself with a
+**sliding window** (`_RateLimiter`, `PLATO_RATE_PER_MIN`, default 18): no 60s
+window ever holds more than that many requests. (It used to be a token bucket
+with a burst of 12 refilling at 18/min, which lets ~30 requests through in the
+first minute — over the cap — so a long month fetch drew a 429 on itself.)
+Paging a month is *bulk* work and may only use `limit - PLATO_BULK_RESERVE` of
+the window (default 5 held back), so a date click or a booking write never queues
+behind it. A 429 costs 7s of retry backoff and still ends as a 502 on the form,
+so we avoid discovering the cap that way.
 
 A 429 also **trips a process-wide circuit breaker** (`_RateLimiter.penalise`,
 `PLATO_429_COOLDOWN`, 20s): every caller stands down, rather than each failing
@@ -60,9 +65,36 @@ In the logs:
   just raise `PLATO_RATE_PER_MIN`.
 
 The usual culprit is the month summary: it pages a whole month of appointments
-(20 rows/page, 10+ pages for a busy month — half the minute's budget in one
-request). `PLATO_APPTS_RANGE_TTL` (5 min) is what keeps every focus/clinician
-variant of the same month from re-paging it.
+(20 rows/page; a full month is ~25-30 pages, more than a whole minute's budget).
+`PLATO_APPTS_RANGE_TTL` (5 min) is what keeps every focus/clinician variant of
+the same month from re-paging it.
+
+### A slow or failing month view (`503 {"error":"loading"}`)
+
+Since 2026-10-23 a month is paged **resumably**: each `/api/availability-summary`
+request spends at most `PLATO_BULK_BUDGET` (8s) paging, keeps the pages it got
+(`PlatoClient._partial`, dropped after `PLATO_PARTIAL_TTL`, 180s) and answers
+`503 loading`; the browser asks again every few seconds and the next request
+resumes. A cold full month therefore takes a couple of minutes of Plato budget
+to shade — by design, since that is what the budget allows. The date click does
+not wait for it:
+
+* A day inside a cached month (fresher than `PLATO_DAY_FROM_RANGE_AGE`, 90s) is
+  answered from it with **no Plato call**.
+* `create_booking` always reads fresh (`fresh=True`); it never uses that
+  shortcut or a stale copy.
+* If a refresh fails, the last copy is served (day lists up to
+  `AVAIL_STALE_MAX`, 30 min; month shading at any age) instead of a 502.
+
+In the logs, `availability summary still loading` at INFO is normal progress, not
+a fault. `/healthcheck/deep` reports `{"ok": true, "busy": true}` (200) when its
+own range is part-paged, rather than paging you over a busy minute.
+
+**What would make cold months cheap.** Plato documents a `modified_since`
+parameter: keep the cached month and re-fetch only changed rows (1 page, not 25).
+Not done yet — deletions may not show up as modifications, so it needs a periodic
+full refresh and testing against the real API first. And `--min-instances=0`
+means every cold start also loses these caches; see the 2026-10-23 incident entry.
 
 ### A poisoned config cache (`'list' object has no attribute 'get'`)
 
@@ -104,6 +136,32 @@ cd business-intelligence/scripts && python3 -m pytest booking/ -q
 ---
 
 # Incident log
+
+## 2026-10-23 — "We couldn't load times just now" on later months; slow loads
+
+**Symptom.** Picking a date in the *next* month (e.g. Nov 7 from an Oct session)
+often showed the error; times took 5-9s when they did load; the month summary
+took 5-43s or 502'd. Same-month dates were fast.
+
+**Evidence** (Cloud Run request logs + warnings, 3 days). Cached lookups ~2ms; a
+cold single day ~160ms (one Plato page); the current month's remainder ~1.2s;
+the full next month 5-43s or `502`. Every logged failure was Plato rate limiting
+(28 x `cooling down after a 429`, 3 x `budget exhausted`).
+
+**Root cause.** A full month is ~25 pages and the limiter allowed ~30 requests in
+its first minute against Plato's cap of 20, so the month fetch drew a 429 on
+itself, tripped the 20s cooldown, and every date click behind it failed fast
+(`502` at ~0.003s) or starved waiting for tokens (`502` at 7-9s).
+
+**Fix.** Sliding-window limiter + reserve for interactive calls; resumable,
+time-boxed month paging; days answered from a cached month; stale-on-error;
+single-flight per range; 12s Plato read timeout (was 30s); the browser retries
+shading and the times fetch. Covered in `test_plato_client.py`,
+`test_availability_endpoints.py`, `test_booking.py`.
+
+**Still open.** `--min-instances=0`: a cold start loses every cache, so the first
+visitor after a quiet spell pays for the month again. `--min-instances=1` (small
+standing cost) plus the `modified_since` idea above would remove most of it.
 
 ## 2026-09-01 — Plato changed a response shape; /book down for ~9 hours
 

@@ -126,6 +126,17 @@ so a token change reflows everything (styleguide is the QA surface).
   deliberately **not** in the primary nav (kept short for phones) — it is
   reachable from `/services` and from every child page, so don't let those
   links rot or it becomes an orphan.
+- **Service frontmatter escape hatches.** `metaTitle` is a verbatim `<title>`
+  (beats `seoTitle`); `closingCopy` overrides the
+  closing "Book your ..." paragraph; `bookingService` is optional - omit it for a
+  service with no Plato calendar and the Book CTA opens the general `/book` form.
+  **Private Pilates** (instructor-led, not physio) is bookable: Plato
+  online-booking calendar `vXKlwa7` (rule: Camille, `pF9S`/`ICT`), type `N1z9`,
+  and every booking is stamped Space Requirement "Reformer needed" (`code_Left`
+  `YS06`, `space_code` in the booking `config.py`). Clinical and Private Pilates
+  must stay distinct: AHPC-registered physiotherapist-led vs STOTT PILATES®
+  certified instructor-led, and Private package credits are never described as
+  interchangeable with Clinical/S&C.
 - **Only claim a physical presence at Lentor.** Wider reach is "home visits
   across Singapore" — no neighbourhood pages implying a clinic elsewhere.
 - **Update `public/llms.txt` in the same PR** as any page/service/price/team

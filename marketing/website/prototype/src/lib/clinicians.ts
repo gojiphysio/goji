@@ -14,6 +14,8 @@
  * - Mummy & Baby  -> Paediatric calendar:     Cheryl, Kristy.
  * - Clinical Pilates -> Pilates 1:1 calendar: Claire (Cheryl removed).
  * - Strength & Conditioning -> S&C calendar:  Kristy, Claire.
+ * - Private Pilates -> Private Pilates calendar (vXKlwa7): Camille (Pilates
+ *   Instructor) only.
  * calendarId is the Plato booking calendar `color` used when creating the
  * appointment; doctorCode is the Plato doctor code. Keep this in sync with
  * Plato — do not hand-edit coverage without checking onlineapptbooking/list.
@@ -55,6 +57,14 @@ export const clinicians: Clinician[] = [
     services: ["physiotherapy", "mummy-baby", "strength-conditioning"],
     calendarId: "green",
     doctorCode: "PKN",
+  },
+  {
+    id: "camille-tan",
+    name: "Camille Tan",
+    role: "Pilates Instructor",
+    services: ["private-pilates"],
+    calendarId: "pF9S",
+    doctorCode: "ICT",
   },
 ];
 

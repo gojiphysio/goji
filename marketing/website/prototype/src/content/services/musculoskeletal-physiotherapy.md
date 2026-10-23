@@ -4,7 +4,7 @@ description: "Musculoskeletal physiotherapy in Singapore for back, neck, shoulde
 cardTitle: "MSK & Sports Physiotherapy"
 cardLead: "Assessment and treatment for back, neck, shoulder, joint and sports injuries - with a clear, personalised plan to get you moving well again."
 heroImage: "/photos/services/musculoskeletal-physiotherapy.webp"
-heroAlt: "A Goji physiotherapist taping a client's foot during a musculoskeletal physiotherapy session."
+heroAlt: "A Goji physiotherapist guiding a client through a leg exercise on a bench in the clinic gym during a musculoskeletal physiotherapy session."
 category: "Musculoskeletal Physiotherapy"
 durationMin: 55
 priceClinic: 260
