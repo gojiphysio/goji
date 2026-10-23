@@ -3,6 +3,7 @@ import { getCollection } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Section from "../../components/Section.astro";
 import Button from "../../components/Button.astro";
+import { SITE } from "../../lib/site.ts";
 
 const allServices = await getCollection("services", ({ data }) => !data.draft);
 allServices.sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99));
@@ -58,7 +59,7 @@ const displayDuration = (service: any) => {
         These pages explain what each appointment involves, who it is for, and what
         you will leave with, so you can book with confidence. Not sure which fits?
         <a href="https://go.gojiphysio.com/web-wa" target="_blank" rel="noopener">Message us</a>
-        and we will help you choose.
+        and we will help you choose. Prices as of {SITE.pricesAsOf}.
       </p>
     </div>
   </section>

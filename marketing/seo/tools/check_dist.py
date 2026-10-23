@@ -30,6 +30,7 @@ LEVEL = {
     "canonical": "ERROR",
     "schema_required": "ERROR",
     "llms_dead_url": "ERROR",
+    "prices_as_of": "ERROR",
     "meta_description": "ERROR",
     "h1_count": "ERROR",
     "schema_recommended": "WARN",
@@ -202,6 +203,13 @@ def main():
     llms = dist / "llms.txt"
     if llms.exists():
         text = llms.read_text()
+        # Dated prices must agree between the site (SITE.pricesAsOf) and llms.txt.
+        svc = dist / "services" / "index.html"
+        site_m = re.search(r"Prices as of ([A-Z][a-z]+ \d{4})", svc.read_text()) if svc.exists() else None
+        llms_m = re.search(r"as of ([A-Z][a-z]+ \d{4})", text)
+        if site_m and (not llms_m or llms_m.group(1) != site_m.group(1)):
+            add("prices_as_of", "/llms.txt", f"site says prices as of {site_m.group(1)}, "
+                f"llms.txt says {llms_m.group(1) if llms_m else 'nothing'}")
         listed = {urlparse(u).path for u in re.findall(r"https://www\.gojiphysio\.com[^\s)>\]]*", text)}
         for p in sorted(listed):
             if not resolves(p, dist, redirects):

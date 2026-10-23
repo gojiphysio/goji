@@ -230,18 +230,17 @@ const reviews = [
         </div>
       </div>
       <div class="hero__media">
-        <div class="hero-shots" role="img" aria-label="Inside the Goji clinic at Lentor Modern">
+        <div class="hero-shots">
           {[
-            { src: "/photos/space/reception-warm.webp" },
-            { src: "/photos/services/clinical-pilates.webp" },
-            { src: "/photos/services/prenatal-physiotherapy.webp" },
-            { src: "/photos/space/strength-conditioning.webp" },
+            { src: "/photos/space/reception-warm.webp", alt: "Goji reception at Lentor Modern: a red oval table and cushioned wooden stools beneath the Goji Women's and Family Physiotherapy sign" },
+            { src: "/photos/services/clinical-pilates.webp", alt: "A Goji physiotherapist guiding two clients through a reformer Clinical Pilates session" },
+            { src: "/photos/services/prenatal-physiotherapy.webp", alt: "A pregnant woman working with a Goji physiotherapist during a prenatal assessment" },
+            { src: "/photos/space/strength-conditioning.webp", alt: "A Goji physiotherapist guiding a man through a mobility stretch on a mat beside a foam roller" },
           ].map((img) => (
             <img
               src={img.src}
               class="hero-shot"
-              alt=""
-              aria-hidden="true"
+              alt={img.alt}
               loading="eager"
               decoding="async"
             />
@@ -270,8 +269,15 @@ const reviews = [
   {/* ---- About (text-only, no photo placeholder) ---- */}
   <section class="about-sec" id="about">
     <div class="container about-sec__inner">
-      <h2>A clinic women can trust through it all</h2>
+      <h2>What is Goji Physio?</h2>
       <div class="about-sec__body">
+        <p>
+          Goji Women's and Family Physiotherapy (Goji Physio) is a physiotherapy
+          clinic at Lentor Modern, Singapore, one minute from Lentor MRT. Our
+          female, AHPC-registered physiotherapists care for women through
+          pelvic floor concerns, pregnancy and postpartum recovery, and for
+          children from infancy to 18, in the clinic or at home across Singapore.
+        </p>
         <p>
           Women make careful decisions about their bodies, especially during
           pregnancy, recovery, and caring for their children. Finding the right

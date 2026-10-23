@@ -46,8 +46,8 @@ const clinicianLinks = clinicians.map((name) => ({
 const bookHref = !bookingService
   ? "/book/"
   : bookingFocus
-    ? `/book?service=${bookingService}&focus=${bookingFocus}`
-    : `/book?service=${bookingService}`;
+    ? `/book/?service=${bookingService}&focus=${bookingFocus}`
+    : `/book/?service=${bookingService}`;
 
 const priceLabel =
   priceHome && priceHome !== priceClinic
