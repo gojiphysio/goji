@@ -29,6 +29,7 @@ from .config import (
     HOME_VISIT_CLINICIAN,
     MAX_ADVANCE_DAYS,
     PHYSIO_FOCUS_CLINICIANS,
+    REFORMER_CODE,
     SATURDAY_SLOT_MINUTES,
     SERVICE_CLINICIANS,
     SERVICES,
@@ -38,6 +39,11 @@ from .config import (
 
 SGT = ZoneInfo("Asia/Singapore")
 _DOW = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]  # python weekday() order
+
+# Pseudo-calendar key in the `booked` map holding every appointment, on any
+# calendar, that occupies the studio's single reformer (Space Requirement =
+# Reformer needed). Applied only to services flagged `needs_reformer`.
+REFORMER_KEY = "-reformer-"
 
 log = logging.getLogger("booking.availability")
 _DIAG = os.environ.get("BOOKING_AVAILABILITY_DEBUG", "").lower() in ("1", "true", "yes")
@@ -82,7 +88,9 @@ def _calendar_color_for_appointment(a: dict) -> str:
 
 def _booked_by_calendar(appointments: list[dict]) -> dict[str, list[tuple[datetime, datetime]]]:
     """Group appointment (start, end) ranges by calendar `color`. `-all-` entries
-    (e.g. a clinic-wide meeting) block every clinician.
+    (e.g. a clinic-wide meeting) block every clinician. Appointments tagged
+    "Reformer needed" are also collected under REFORMER_KEY, whichever calendar
+    they sit on, so the shared reformer can be deconflicted across clinicians.
 
     Includes multi-day blocks that may span across days, ensuring recurring
     appointments block all occurrences consistently."""
@@ -118,6 +126,8 @@ def _booked_by_calendar(appointments: list[dict]) -> dict[str, list[tuple[dateti
                 log.debug(f"  Multi-day appointment: {a.get('title', '?')} ({s.isoformat()} to {e.isoformat()})")
 
         booked.setdefault(color, []).append((s, e))
+        if a.get("code_Left") == REFORMER_CODE:
+            booked.setdefault(REFORMER_KEY, []).append((s, e))
 
     if _DIAG and (skipped or unmapped or multiday):
         log.info(f"  _booked_by_calendar: {len(appointments)} appointments, "
@@ -270,6 +280,9 @@ def _derive_day(
 
     # Clinic-wide `-all-` blocks apply on top of each clinician's own bookings.
     clinic_wide = booked.get("-all-", [])
+    # One shared reformer: a reformer service is also blocked by anyone's
+    # reformer-needed appointment (e.g. Claire's blocks Camille's, and back).
+    reformer_busy = booked.get(REFORMER_KEY, []) if svc.get("needs_reformer") else []
 
     out: dict[str, list[str]] = {}
 
@@ -332,7 +345,7 @@ def _derive_day(
             for b in hard_blocks
             if b.get("day") == dow
         ])
-        taken = booked.get(color, []) + clinic_wide
+        taken = booked.get(color, []) + clinic_wide + reformer_busy
 
         if _DIAG:
             win_start_str = win_start.strftime('%H:%M')

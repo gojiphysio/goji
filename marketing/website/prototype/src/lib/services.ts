@@ -52,7 +52,8 @@ export interface Service {
    * Plato "Appointment Type" code (the `code_Bottom` field on POST /appointment).
    * Validated codes: Physiotherapy=hDWW, Clinical Pilates=2kV4, S&C=qLbH, Home Visit=sCla,
    * Private Pilates=N1z9 (GET /appointment/codes, 2026-10-23).
-   * (Confirmed/Unconfirmed live in `code_Left`: YS06 / C22K.)
+   * (`code_Left` = Space Requirement: YS06 Reformer needed / QWGT Reformer 1/2 session;
+   * Confirmed/Unconfirmed live in `code_Right`: qK8x / dm1V.)
    * OPEN: Mummy & Baby has no Plato type — using Physiotherapy (hDWW) for now.
    * RULE (decided 2026-07-07): a HOME-VISIT booking is typed Home Visit (`sCla`)
    * regardless of service; the service name goes in the title/description. So the

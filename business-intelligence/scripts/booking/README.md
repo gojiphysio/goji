@@ -70,6 +70,15 @@ Rules layered on top (`config.py`):
   availability and as an explicit `too_far` guard in `create_booking`; the site
   calendar can't select past it either.
 - Home visits: **Cheryl only**, ±30-min travel padding.
+- **One shared reformer** (Camille's Private Pilates, Claire's Clinical Pilates).
+  Plato has no resource model, so services flagged `needs_reformer` are also
+  blocked by any appointment, on any calendar, carrying Space Requirement
+  `code_Left` = `REFORMER_CODE` (`YS06`, "Reformer needed"; `REFORMER_KEY` in
+  `availability.py`). Works both ways, and online Clinical/Private Pilates
+  bookings are stamped with it so they block the other. Physio slots are
+  unaffected unless booked in Plato with the tag. Bookings made straight in
+  Plato are not checked but do block online slots once tagged. `QWGT`
+  ("Reformer 1/2 session") is ignored.
 
 ## How booking works (`booking.py`)
 Plato does **not** reject conflicts, so `create_booking` re-derives availability
