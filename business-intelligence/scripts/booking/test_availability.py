@@ -428,6 +428,76 @@ def test_kristy_wednesday_block_5_30_to_8_00pm():
     assert out["kristy-ng"] == expected_slots
 
 
+# --- shared reformer: Camille (Private Pilates) <-> Claire (Clinical Pilates) ---
+
+def _pilates_cfg(calendar_id, name, color):
+    return {"calendars": [{"id": calendar_id, "rules": [
+        {"name": name, "book_calendar": color, "starttime": "09:00",
+         "endtime": "13:00", "min_days": 1, "max_days": 365,
+         "restricted_days": [], "restricted_blocks": []},
+    ]}]}
+
+
+PRIVATE_CFG = _pilates_cfg("vXKlwa7", "Camille Tan", "pF9S")
+CLINICAL_CFG = _pilates_cfg("ne8sgkb", "Claire Ng", "6hpO")
+
+
+def _reformer_appt(color, start, end, code="YS06"):
+    return {"color": color, "starttime": f"2026-07-15 {start}:00",
+            "endtime": f"2026-07-15 {end}:00", "code_Left": code}
+
+
+def test_claire_reformer_booking_blocks_camille_private_pilates():
+    appts = [_reformer_appt("6hpO", "10:00", "11:00", "YS06")]
+    out = derive_availability(StubPlato(appts, PRIVATE_CFG), "private-pilates", WED, now=NOW)
+    # 10:00-11:00 reformer in use removes 09:30/10:00/10:30; Camille's own calendar is empty.
+    assert out["camille-tan"] == ["09:00", "11:00", "11:30", "12:00"]
+
+
+def test_claire_physio_without_reformer_does_not_block_camille():
+    appts = [_reformer_appt("6hpO", "10:00", "11:00", "")]
+    out = derive_availability(StubPlato(appts, PRIVATE_CFG), "private-pilates", WED, now=NOW)
+    assert out["camille-tan"] == ["09:00", "09:30", "10:00", "10:30", "11:00", "11:30", "12:00"]
+
+
+def test_half_session_reformer_code_does_not_block():
+    appts = [_reformer_appt("6hpO", "10:00", "11:00", "QWGT")]
+    out = derive_availability(StubPlato(appts, PRIVATE_CFG), "private-pilates", WED, now=NOW)
+    assert "10:00" in out["camille-tan"]
+
+
+def test_camille_reformer_booking_blocks_claire_clinical_pilates():
+    appts = [_reformer_appt("pF9S", "10:00", "11:00")]
+    out = derive_availability(StubPlato(appts, CLINICAL_CFG), "clinical-pilates", WED, now=NOW)
+    assert out["claire-ng"] == ["09:00", "11:00", "11:30", "12:00"]
+
+
+def test_reformer_booking_does_not_block_claire_physiotherapy():
+    # Physio doesn't use the reformer, so Camille's session leaves Claire's physio slots open.
+    cfg = {"calendars": [{"id": "dDIjWJp", "rules": [
+        {"name": "Claire Ng", "book_calendar": "6hpO", "starttime": "09:00",
+         "endtime": "12:00", "min_days": 1, "max_days": 365,
+         "restricted_days": [], "restricted_blocks": []},
+    ]}]}
+    appts = [_reformer_appt("pF9S", "10:00", "11:00")]
+    out = derive_availability(StubPlato(appts, cfg), "physiotherapy", WED, now=NOW)
+    assert out["claire-ng"] == ["09:00", "09:30", "10:00", "10:30", "11:00"]
+
+
+def test_reformer_booking_back_to_back_is_not_a_conflict():
+    appts = [_reformer_appt("6hpO", "10:00", "11:00")]
+    out = derive_availability(StubPlato(appts, PRIVATE_CFG), "private-pilates", WED, now=NOW)
+    assert "09:00" in out["camille-tan"] and "11:00" in out["camille-tan"]
+
+
+def test_available_days_respects_reformer_conflict():
+    # Reformer in use for the whole window -> Camille has no slots that day.
+    appts = [_reformer_appt("6hpO", "09:00", "13:00")]
+    days = derive_available_days(StubPlato(appts, PRIVATE_CFG), "private-pilates",
+                                 WED, WED, now=NOW)
+    assert days == []
+
+
 if __name__ == "__main__":
     for name, fn in sorted(globals().items()):
         if name.startswith("test_") and callable(fn):

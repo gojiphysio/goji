@@ -341,3 +341,44 @@ def test_non_private_pilates_bookings_send_no_space_requirement():
     p = StubPlato()
     create_booking(p, {**BASE, "clinician_id": "cheryl-long"}, now=NOW)
     assert "code_Left" not in p.created[0][0]
+
+
+def test_clinical_pilates_booking_stamps_reformer_needed():
+    cfg = {"calendars": [{"id": "ne8sgkb", "rules": [
+        {"name": "Claire Ng", "book_calendar": "6hpO", "starttime": "09:00",
+         "endtime": "17:00", "restricted_days": [], "restricted_blocks": []},
+    ]}]}
+
+    class StubPlatoCP(StubPlato):
+        def online_booking_config(self):
+            return cfg
+
+    p = StubPlatoCP()
+    res = create_booking(p, {**BASE, "service": "clinical-pilates",
+                             "clinician_id": "claire-ng"}, now=NOW)
+    assert res["ok"]
+    assert p.created[0][0]["code_Left"] == "YS06"
+
+
+def test_private_pilates_refused_while_claire_has_the_reformer():
+    cfg = {"calendars": [{"id": "vXKlwa7", "rules": [
+        {"name": "Camille Tan", "book_calendar": "pF9S", "starttime": "09:00",
+         "endtime": "17:00", "restricted_days": [], "restricted_blocks": []},
+    ]}]}
+
+    class StubPlatoPP(StubPlato):
+        def online_booking_config(self):
+            return cfg
+
+    # Claire (6hpO) holds the reformer 10:00-11:00; Camille's calendar is empty.
+    p = StubPlatoPP([{"color": "6hpO", "starttime": "2026-07-15 10:00:00",
+                      "endtime": "2026-07-15 11:00:00", "code_Left": "YS06"}])
+    try:
+        create_booking(p, {"service": "private-pilates", "date": DAY,
+                           "time": "10:00", "format": "clinic",
+                           "name": "Jane Tan", "phone": "+65 9123 4567",
+                           "email": "jane@example.com", "clinician_id": ""}, now=NOW)
+        assert False, "expected BookingError"
+    except BookingError as e:
+        assert e.code == "slot_taken"
+    assert p.created == []

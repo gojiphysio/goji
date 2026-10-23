@@ -176,7 +176,7 @@ SELECT
 FROM fct_appointment a
 JOIN dim_patient_pii p USING (patient_id)
 JOIN dim_clinician c ON c.calendar_color = a.color
-WHERE a.code_Left = 'C22K'         -- Unconfirmed
+WHERE a.code_Right = 'dm1V'        -- Unconfirmed
   AND a.starttime >= CURRENT_TIMESTAMP()
   AND a.starttime <= CURRENT_TIMESTAMP() + INTERVAL 7 DAY
 ORDER BY a.starttime ASC;
@@ -192,8 +192,10 @@ ORDER BY a.starttime ASC;
 
 | Field | Value | Meaning |
 |---|---|---|
-| `code_Left` | `YS06` | Confirmed |
-| `code_Left` | `C22K` | Unconfirmed |
+| `code_Left` | `YS06` | Space Requirement: Reformer needed |
+| `code_Left` | `QWGT` | Space Requirement: Reformer 1/2 session |
+| `code_Right` | `qK8x` | Confirmed |
+| `code_Right` | `dm1V` | Unconfirmed |
 | `code_Bottom` | `qLbH` | S&C |
 | `code_Bottom` | `2kV4` | Pilates |
 | `code_Bottom` | `hDWW` | Physiotherapy |
