@@ -8,7 +8,7 @@ heroAlt: "An adult practising Schroth Method scoliosis exercises with a Goji phy
 category: "Musculoskeletal Physiotherapy"
 durationMin: 55
 priceClinic: 260
-priceHome: 330
+priceHome: 380
 clinicians: ["Cheryl Long"]
 bookingService: "physiotherapy"
 bookingFocus: "scoliosis"

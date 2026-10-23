@@ -9,7 +9,7 @@ heroAlt: "A Goji physiotherapist guiding a mother through a postpartum recovery 
 category: "Women's Health Physiotherapy"
 durationMin: 55
 priceClinic: 260
-priceHome: 330
+priceHome: 380
 clinicians: ["Kristy Ng", "Claire Ng", "Cheryl Long"]
 bookingService: "physiotherapy"
 bookingFocus: "womens-health"

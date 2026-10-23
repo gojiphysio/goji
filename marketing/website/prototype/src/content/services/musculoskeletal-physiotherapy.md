@@ -8,7 +8,7 @@ heroAlt: "A Goji physiotherapist taping a client's foot during a musculoskeletal
 category: "Musculoskeletal Physiotherapy"
 durationMin: 55
 priceClinic: 260
-priceHome: 330
+priceHome: 380
 clinicians: ["Kristy Ng", "Claire Ng", "Cheryl Long"]
 bookingService: "physiotherapy"
 bookingFocus: "general"
