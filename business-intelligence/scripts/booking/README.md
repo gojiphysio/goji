@@ -76,6 +76,9 @@ Rules layered on top (`config.py`):
 - **Booking window capped at `MAX_ADVANCE_DAYS` (60 days)** — enforced both in
   availability and as an explicit `too_far` guard in `create_booking`; the site
   calendar can't select past it either.
+- `CLINICIAN_AVAILABLE_FROM` (`config.py`): a clinician is not offered for any
+  service before their start date — for a new starter whose Plato calendar is
+  live early (Camille: 2026-11-01). Delete the entry once the date has passed.
 - Home visits: **Cheryl only**, ±30-min travel padding.
 - **One shared reformer** (Camille's Private Pilates, Claire's Clinical Pilates).
   Plato has no resource model, so while any appointment, on any calendar, carries

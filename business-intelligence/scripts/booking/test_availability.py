@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from datetime import date, datetime
 
+from booking import availability
 from booking.availability import derive_availability, derive_available_days
 
 
@@ -538,3 +539,39 @@ def test_camille_is_not_offered_in_other_services():
     ]}]}
     out = derive_availability(StubPlato([], cfg), "clinical-pilates", WED, now=NOW)
     assert out == {}
+
+
+# --- CLINICIAN_AVAILABLE_FROM: a new starter is not bookable before their start date ---
+
+def _camille_cfg():
+    return {"calendars": [{"id": "vXKlwa7", "rules": [
+        {"name": "Camille Tan", "book_calendar": "pF9S", "starttime": "09:00",
+         "endtime": "11:00", "min_days": 1, "max_days": 365,
+         "restricted_days": [], "restricted_blocks": []},
+    ]}]}
+
+
+def test_clinician_not_offered_before_start_date(monkeypatch):
+    monkeypatch.setattr(availability, "CLINICIAN_AVAILABLE_FROM", {"camille-tan": date(2026, 7, 16)})
+    out = derive_availability(StubPlato([], _camille_cfg()), "private-pilates", WED, now=NOW)
+    assert out == {}
+
+
+def test_clinician_offered_from_start_date(monkeypatch):
+    monkeypatch.setattr(availability, "CLINICIAN_AVAILABLE_FROM", {"camille-tan": date(2026, 7, 16)})
+    out = derive_availability(StubPlato([], _camille_cfg()), "private-pilates",
+                              date(2026, 7, 16), now=NOW)
+    assert out["camille-tan"] == ["09:00", "09:30", "10:00"]
+
+
+def test_start_date_only_hides_that_clinician(monkeypatch):
+    monkeypatch.setattr(availability, "CLINICIAN_AVAILABLE_FROM", {"claire-ng": date(2026, 8, 1)})
+    out = derive_availability(StubPlato([], CFG_ALL), "physiotherapy", WED, now=NOW)
+    assert set(out) == {"cheryl-long", "kristy-ng"}
+
+
+def test_month_shading_skips_days_before_start_date(monkeypatch):
+    monkeypatch.setattr(availability, "CLINICIAN_AVAILABLE_FROM", {"camille-tan": date(2026, 7, 16)})
+    days = derive_available_days(StubPlato([], _camille_cfg()), "private-pilates",
+                                 date(2026, 7, 13), date(2026, 7, 17), now=NOW)
+    assert days == ["2026-07-16", "2026-07-17"]

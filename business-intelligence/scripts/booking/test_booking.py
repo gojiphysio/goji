@@ -1,8 +1,9 @@
 """Unit tests for create_booking (stub Plato — no network, no writes to Plato)."""
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import date, datetime
 
+from booking import availability
 from booking.booking import BookingError, create_booking
 
 DAY = "2026-07-15"          # a future Wednesday
@@ -397,3 +398,26 @@ def test_booking_rechecks_read_fresh_appointments():
     p = StubPlato()
     create_booking(p, {k: v for k, v in BASE.items() if k != "clinician_id"}, now=NOW)
     assert p.fresh_reads and all(p.fresh_reads)  # first-available path too
+
+
+def test_booking_rejected_before_clinician_start_date(monkeypatch):
+    monkeypatch.setattr(availability, "CLINICIAN_AVAILABLE_FROM", {"camille-tan": date(2026, 7, 16)})
+    cfg = {"calendars": [{"id": "vXKlwa7", "rules": [
+        {"name": "Camille Tan", "book_calendar": "pF9S", "starttime": "09:00",
+         "endtime": "17:00", "restricted_days": [], "restricted_blocks": []},
+    ]}]}
+
+    class StubPlatoPP(StubPlato):
+        def online_booking_config(self):
+            return cfg
+
+    p = StubPlatoPP()
+    try:
+        create_booking(p, {"service": "private-pilates", "date": DAY,
+                           "time": "10:00", "format": "clinic",
+                           "name": "Jane Tan", "phone": "+65 9123 4567",
+                           "email": "jane@example.com", "clinician_id": ""}, now=NOW)
+        assert False, "expected BookingError"
+    except BookingError as e:
+        assert e.code == "slot_taken"
+    assert p.created == []
