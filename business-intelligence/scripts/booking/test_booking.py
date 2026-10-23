@@ -297,3 +297,43 @@ if __name__ == "__main__":
             fn()
             print(f"ok  {name}")
     print("all passed")
+
+
+def test_private_pilates_books_camille_with_private_pilates_type(monkeypatch):
+    # Stand-in online calendar id (the real one does not exist in Plato yet).
+    from booking.config import SERVICES
+    monkeypatch.setitem(SERVICES["private-pilates"], "online_calendar", "PRIV")
+    cfg = {"calendars": [{"id": "PRIV", "rules": [
+        {"name": "Camille Tan", "book_calendar": "pF9S", "starttime": "09:00",
+         "endtime": "17:00", "restricted_days": [], "restricted_blocks": []},
+    ]}]}
+
+    class StubPlatoPP(StubPlato):
+        def online_booking_config(self):
+            return cfg
+
+    p = StubPlatoPP()
+    res = create_booking(p, {"service": "private-pilates", "date": DAY,
+                             "time": "10:00", "format": "clinic",
+                             "name": "Jane Tan", "phone": "+65 9123 4567",
+                             "email": "jane@example.com",
+                             "clinician_id": ""}, now=NOW)
+    assert res["ok"] and res["clinician_id"] == "camille-tan"
+    payload = p.created[0][0]
+    assert payload["color"] == "pF9S" and payload["doctor"] == "ICT"
+    assert payload["code_Bottom"] == "N1z9"
+    assert "Private Pilates" in payload["description"]
+
+
+def test_booking_physio_cannot_be_chosen_for_private_pilates():
+    p = StubPlato()
+    try:
+        create_booking(p, {"service": "private-pilates", "date": DAY,
+                           "time": "10:00", "format": "clinic",
+                           "name": "Jane Tan", "phone": "+65 9123 4567",
+                           "email": "jane@example.com",
+                           "clinician_id": "claire-ng"}, now=NOW)
+        assert False, "expected BookingError"
+    except BookingError:
+        pass
+    assert p.created == []

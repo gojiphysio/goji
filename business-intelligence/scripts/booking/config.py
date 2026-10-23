@@ -31,6 +31,9 @@ CLINICIANS: dict[str, dict] = {
                   "email": "claire.ng@gojiphysio.com"},
     "kristy-ng": {"name": "Kristy Ng", "calendar": "green", "doctor": "PKN",
                   "email": "kristy.ng@gojiphysio.com"},
+    # Pilates Instructor (not a physio): Private Pilates only (SERVICE_CLINICIANS).
+    # No `email` yet, so no clinician CC on her booking heads-up until it is added.
+    "camille-tan": {"name": "Camille Tan", "calendar": "pF9S", "doctor": "ICT"},
 }
 
 # website service id -> Plato mapping.
@@ -66,6 +69,18 @@ SERVICES: dict[str, dict] = {
         "online_calendar": "ne8sgkb",  # Cheryl + Claire
         "type_code": "2kV4",
         "duration_min": 60,
+        "supports_home": False,
+    },
+    "private-pilates": {
+        "title": "Private Pilates",
+        # OPEN: Plato has no onlineapptbooking calendar for Private Pilates yet
+        # (checked 2026-10-23), and availability is derived from that calendar's
+        # rules. Create one in Plato with a rule for Camille (book_calendar
+        # "pF9S"), put its id here and in the website's services.ts, then drop
+        # `bookingHidden` there. Until then no slots are offered.
+        "online_calendar": "",
+        "type_code": "N1z9",  # Plato appointment type "Private Pilates"
+        "duration_min": 60,  # same hourly booking as Clinical Pilates
         "supports_home": False,
     },
     "strength-conditioning": {
@@ -118,6 +133,7 @@ FIRST_AVAILABLE_PRIORITY: list[str] = ["kristy-ng", "claire-ng", "cheryl-long"]
 # a clinician from one service while keeping them in others).
 SERVICE_CLINICIANS: dict[str, list[str] | None] = {
     "clinical-pilates": ["claire-ng"],  # Cheryl Long removed from Clinical Pilates
+    "private-pilates": ["camille-tan"],  # instructor-led; physios are not rostered
 }
 
 # Clinician restricted blocks: hard-coded time blocks that override Plato's
