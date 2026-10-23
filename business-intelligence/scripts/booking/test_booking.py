@@ -28,8 +28,10 @@ class StubPlato:
         self.deleted: list[str] = []
         self._n = 0
         self.fail_on_create = fail_on_create
+        self.fresh_reads: list[bool] = []
 
-    def appointments(self, start, end):
+    def appointments(self, start, end, fresh=False):
+        self.fresh_reads.append(fresh)
         return self.appts
 
     def online_booking_config(self):
@@ -382,3 +384,16 @@ def test_private_pilates_refused_while_claire_has_the_reformer():
     except BookingError as e:
         assert e.code == "slot_taken"
     assert p.created == []
+
+
+def test_booking_rechecks_read_fresh_appointments():
+    """The availability the visitor saw may have come from a cached month; the
+    re-check under the clinician lock is what stops a double-booking, so it must
+    never be answered from that cache."""
+    p = StubPlato()
+    create_booking(p, {**BASE, "clinician_id": "cheryl-long"}, now=NOW)
+    assert p.fresh_reads and all(p.fresh_reads)
+
+    p = StubPlato()
+    create_booking(p, {k: v for k, v in BASE.items() if k != "clinician_id"}, now=NOW)
+    assert p.fresh_reads and all(p.fresh_reads)  # first-available path too

@@ -1509,6 +1509,8 @@ const steps = [
 
       let view = new Date(minDate.getFullYear(), minDate.getMonth(), 1);
       let shadeSeq = 0; // only the latest summary response may shade the grid
+      const SHADE_MAX_RETRIES = 12;
+      const shadeRetries = new Map<string, number>(); // month -> retries so far
 
       // Month summaries, keyed by the selection that shapes availability + the
       // month. Keys are immutable, so a service/clinician/format change simply
@@ -1549,6 +1551,17 @@ const steps = [
         try {
           days = await source;
         } catch {
+          // A cold month is paged across several backend requests (Plato only
+          // allows 20 req/min), so "still loading" is normal: ask again shortly
+          // and the backend resumes where it stopped. Shading is cosmetic, so
+          // this gives up quietly; the per-day fetch stays the source of truth.
+          const tries = shadeRetries.get(shownMonth) ?? 0;
+          if (tries < SHADE_MAX_RETRIES) {
+            shadeRetries.set(shownMonth, tries + 1);
+            setTimeout(() => {
+              if (monthOf(view) === shownMonth) applyShading();
+            }, Math.min(3000 + tries * 1000, 8000));
+          }
           return;
         }
         if (mySeq !== shadeSeq || monthOf(view) !== shownMonth) return;
@@ -1705,17 +1718,28 @@ const steps = [
       // key-equality check let both responses render and duplicated the slots.
       const mySeq = ++availSeq;
       showSlotsLoading();
-      let times: string[];
-      try {
-        times = await bookingApi.getAvailability({
-          service: d.service,
-          focus: d.physioFocus ?? undefined,
-          variant: d.variant ?? undefined,
-          clinicianId: d.clinicianId,
-          date: d.date,
-          home: d.format === "home",
-        });
-      } catch {
+      // One quiet retry: a failure here is usually Plato's rate limit, which has
+      // cleared a couple of seconds later. The skeleton stays up meanwhile.
+      let times: string[] | null = null;
+      for (let attempt = 0; attempt < 2 && times === null; attempt++) {
+        if (attempt > 0) {
+          await new Promise((resolve) => setTimeout(resolve, 2500));
+          if (mySeq !== availSeq) return;
+        }
+        try {
+          times = await bookingApi.getAvailability({
+            service: d.service,
+            focus: d.physioFocus ?? undefined,
+            variant: d.variant ?? undefined,
+            clinicianId: d.clinicianId,
+            date: d.date,
+            home: d.format === "home",
+          });
+        } catch {
+          /* retried once above; reported below if it still fails */
+        }
+      }
+      if (times === null) {
         if (mySeq !== availSeq) return;
         bookingApi.track("availability_error", d.date);
         chips.innerHTML = "";

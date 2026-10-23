@@ -25,7 +25,7 @@ from flask import Flask, jsonify, request
 from .availability import SGT, derive_availability, derive_available_days
 from .booking import BookingError, create_booking
 from .config import CLINICIANS, MAX_ADVANCE_DAYS, SERVICES
-from .plato import PlatoClient
+from .plato import PlatoBusy, PlatoClient
 from . import mailer
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
@@ -65,6 +65,11 @@ _init_lock = threading.Lock()
 AVAIL_TTL_S = float(os.environ.get("AVAIL_CACHE_TTL", "45"))
 _avail_cache: dict[tuple, tuple[float, dict]] = {}
 _avail_cache_lock = threading.Lock()
+# If Plato fails on a cache miss, an older answer beats an error screen: a day's
+# slots up to this old are served (the submit re-checks fresh, so the worst case
+# is "that time is no longer available"). Month shading has no such cap — it
+# only paints the calendar.
+AVAIL_STALE_MAX_S = float(os.environ.get("AVAIL_STALE_MAX", "1800"))
 
 # Month-summary cache (which dates have ANY slot — the calendar shading on the
 # website). Cached longer than per-day availability: it only paints the
@@ -157,6 +162,14 @@ def healthcheck_deep():
     started = time.monotonic()
     try:
         days = derive_available_days(plato(), DEEP_SERVICE, start, end)
+    except PlatoBusy as e:
+        # Plato's request budget is spent, not broken: the range is part-paged.
+        # Paging an outage's worth of alerts out of a busy minute helps nobody;
+        # real breakage (auth, shape, derivation) still raises something else.
+        log.info("deep healthcheck: Plato busy (%s)", e)
+        payload = {"ok": True, "busy": True, "service": DEEP_SERVICE,
+                   "window": [start.isoformat(), end.isoformat()], "detail": str(e)}
+        status = 200
     except Exception as e:
         log.error("deep healthcheck failed (%s %s..%s): %s",
                   DEEP_SERVICE, start, end, e, exc_info=True)
@@ -207,7 +220,13 @@ def availability():
     try:
         avail = derive_availability(plato(), service, day,
                                     clinician_id=clinician, focus=focus, variant=variant, home=home)
-    except Exception as e:  # Plato hiccup — degrade to no slots, don't 500 loudly
+    except Exception as e:  # Plato hiccup — serve the last answer if we have one
+        with _avail_cache_lock:
+            stale = _avail_cache.get(cache_key)
+        if stale and nowm - stale[0] < AVAIL_STALE_MAX_S:
+            log.warning("availability failed (%s %s): %s — serving a %.0fs-old answer",
+                        service, day, e, nowm - stale[0])
+            return jsonify(stale[1])
         log.warning("availability failed (%s %s): %s", service, day, e, exc_info=True)
         return jsonify({"error": "unavailable", "times": []}), 502
     times = sorted({t for slots in avail.values() for t in slots})
@@ -271,7 +290,24 @@ def availability_summary():
     try:
         days = derive_available_days(plato(), service, start, end,
                                      clinician_id=clinician, focus=focus, variant=variant, home=home)
+    except PlatoBusy as e:
+        # Not a failure: the month is only part-paged because Plato's request
+        # budget is 20/min and a month is ~25 pages. Progress is kept, so the
+        # browser retrying in a few seconds resumes it. Serve the last shading
+        # we had if there is one.
+        with _avail_cache_lock:
+            stale = _summary_cache.get(cache_key)
+        if stale:
+            return jsonify(stale[1])
+        log.info("availability summary still loading (%s %s): %s", service, month_s, e)
+        return jsonify({"error": "loading", "available": []}), 503
     except Exception as e:  # Plato hiccup — the calendar degrades to unshaded
+        with _avail_cache_lock:
+            stale = _summary_cache.get(cache_key)
+        if stale:
+            log.warning("availability summary failed (%s %s): %s — serving a %.0fs-old answer",
+                        service, month_s, e, nowm - stale[0])
+            return jsonify(stale[1])
         log.warning("availability summary failed (%s %s): %s", service, month_s, e,
                     exc_info=True)
         return jsonify({"error": "unavailable", "available": []}), 502

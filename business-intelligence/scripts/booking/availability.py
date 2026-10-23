@@ -147,6 +147,7 @@ def derive_availability(
     variant: str | None = None,
     home: bool = False,
     now: datetime | None = None,
+    fresh: bool = False,
 ) -> dict[str, list[str]]:
     """Return {clinician_id: ["HH:MM", ...]} of free 30-min starts for `day`.
 
@@ -155,14 +156,15 @@ def derive_availability(
     `variant` specifies a duration variant (e.g. "30min" for paediatric physio);
     `home` restricts to the home-visit clinician and pads each slot with travel
     time on both sides. `now` (naive SGT) is injectable for testing; defaults to
-    the current SGT time.
+    the current SGT time. `fresh` reads the day straight from Plato instead of
+    from a recently cached month; the booking re-check sets it.
     """
     # Config first: it is one cached call, while the appointments fetch is
     # paginated and expensive. If Plato is broken we want to find out before
     # spending the request budget, not after — during the 2026-09-01 outage
     # every doomed request crawled a full day of appointments first.
     cfg = plato.online_booking_config()
-    raw_appts = plato.appointments(day.isoformat(), day.isoformat())
+    raw_appts = plato.appointments(day.isoformat(), day.isoformat(), fresh=fresh)
     booked = _booked_by_calendar(raw_appts)
     return _derive_day(cfg, booked, service_id, day, clinician_id=clinician_id,
                        focus=focus, variant=variant, home=home, now=now, _raw_appointments=raw_appts if _DIAG else None)

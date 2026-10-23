@@ -9,6 +9,7 @@ from __future__ import annotations
 import pytest
 
 from booking import app as app_mod
+from booking.plato import PlatoBusy
 
 
 @pytest.fixture
@@ -91,3 +92,12 @@ def test_deep_caches_failures_too(client, monkeypatch):
     for _ in range(5):
         assert client.get("/healthcheck/deep").status_code == 503
     assert len(calls) == 1
+
+
+def test_deep_stays_green_when_plato_is_merely_busy(client, monkeypatch):
+    """A part-paged range means the request budget is spent, not that booking is
+    broken. Paging on it would train everyone to ignore the alert."""
+    _stub_days(monkeypatch, PlatoBusy("month still loading"))
+    r = client.get("/healthcheck/deep")
+    assert r.status_code == 200
+    assert r.get_json()["busy"] is True

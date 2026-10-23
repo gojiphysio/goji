@@ -11,7 +11,7 @@ class StubPlato:
         self._a, self._c = appts, cfg
         self.appointment_fetches = 0
 
-    def appointments(self, start, end):
+    def appointments(self, start, end, fresh=False):
         self.appointment_fetches += 1
         return self._a
 
