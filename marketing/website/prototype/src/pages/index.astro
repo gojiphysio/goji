@@ -301,12 +301,10 @@ const reviews = [
                 </span>
                 <h3 class="service-card__name">{s.title}</h3>
                 <p class="service-card__meta">{s.meta.join(" · ")}</p>
-                {s.price && (
-                  <p class="service-card__price">
-                    <strong>${s.price}</strong>
-                    {s.priceNote && <span class="service-card__price-note">{s.priceNote}</span>}
-                  </p>
-                )}
+                <p class="service-card__price">
+                  {s.price && <strong>${s.price}</strong>}
+                  {s.price && s.priceNote && <span class="service-card__price-note">{s.priceNote}</span>}
+                </p>
                 <p class="service-card__lead">{s.lead}</p>
                 <div class="service-card__cta">
                   <Button href="/book/" variant="secondary" class="service-card__book">Book {s.title}</Button>
@@ -560,7 +558,7 @@ const reviews = [
     const slideWidth = () => {
       const slide = track.firstElementChild as HTMLElement | null;
       return slide
-        ? slide.offsetWidth + parseInt(getComputedStyle(track).gap || "0")
+        ? slide.offsetWidth + parseInt(getComputedStyle(track).columnGap || "0")
         : 0;
     };
 
@@ -773,8 +771,10 @@ const reviews = [
   /* Service cards carousel (3-up on desktop, swipe on mobile) */
   .service-wrap { position: relative; }
   .service-track {
-    display: flex;
-    gap: var(--space-5);
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 100%;
+    gap: 0 var(--space-5);
     overflow-x: auto;
     scroll-snap-type: x mandatory;
     scroll-behavior: smooth;
@@ -783,22 +783,26 @@ const reviews = [
     padding-bottom: var(--space-2);
   }
   .service-track::-webkit-scrollbar { display: none; }
+  /* Each card spans six rows (icon, name, meta, price, lead, cta) and inherits
+     the track's row sizing via subgrid, so every row lines up across cards
+     whatever the length of a price note or description. Keep the child count
+     at six (the price row always renders) or the rows drift apart. */
   .service-card {
-    flex: 0 0 100%;
     scroll-snap-align: start;
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
+    display: grid;
+    grid-row: span 6;
+    grid-template-rows: subgrid;
+    row-gap: var(--space-2);
     background: var(--bg-content);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
     padding: var(--space-5);
   }
   @media (min-width: 640px) {
-    .service-card { flex: 0 0 calc(50% - var(--space-4)); }
+    .service-track { grid-auto-columns: calc(50% - var(--space-4)); }
   }
   @media (min-width: 960px) {
-    .service-card { flex: 0 0 calc(33.333% - var(--space-4)); }
+    .service-track { grid-auto-columns: calc(33.333% - var(--space-4)); }
   }
   .service-card__icon {
     width: 40px;
