@@ -131,9 +131,11 @@ so a token change reflows everything (styleguide is the QA surface).
   closing "Book your ..." paragraph; `bookingService` is optional - omit it for a
   service with no Plato calendar and the Book CTA opens the general `/book` form.
   **Private Pilates** (instructor-led, not physio) is in that state: it has a
-  `services.ts` entry with `bookingHidden: true` and blank Plato ids. Map a
-  calendar + type code there, then add `bookingService`, before it can be
-  booked directly. Clinical and Private Pilates must stay distinct: AHPC-registered
+  `services.ts` entry with `bookingHidden: true`. Its Plato type (`N1z9`) and
+  Camille's calendar/doctor (`pF9S`/`ICT`) are mapped, but Plato has no
+  Private Pilates *online-booking* calendar yet, so no availability exists.
+  Once one is created: set its id in `services.ts` and the booking service's
+  `config.py`, drop `bookingHidden`, add `bookingService`. Clinical and Private Pilates must stay distinct: AHPC-registered
   physiotherapist-led vs STOTT PILATES® certified instructor-led, and Private
   package credits are never described as interchangeable with Clinical/S&C.
 - **Only claim a physical presence at Lentor.** Wider reach is "home visits

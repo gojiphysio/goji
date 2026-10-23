@@ -52,7 +52,8 @@ export interface Service {
   platoCalendarId: string;
   /**
    * Plato "Appointment Type" code (the `code_Bottom` field on POST /appointment).
-   * Validated codes: Physiotherapy=hDWW, Pilates=2kV4, S&C=qLbH, Home Visit=sCla.
+   * Validated codes: Physiotherapy=hDWW, Clinical Pilates=2kV4, S&C=qLbH, Home Visit=sCla,
+   * Private Pilates=N1z9 (GET /appointment/codes, 2026-10-23).
    * (Confirmed/Unconfirmed live in `code_Left`: YS06 / C22K.)
    * OPEN: Mummy & Baby has no Plato type — using Physiotherapy (hDWW) for now.
    * RULE (decided 2026-07-07): a HOME-VISIT booking is typed Home Visit (`sCla`)
@@ -115,11 +116,15 @@ export const services: Service[] = [
     priceNote: "",
     supportsHome: false,
     durationMin: 55,
-    // No Plato calendar / appointment type exists for Private Pilates yet, so it
-    // stays out of the booking form (bookingHidden) and its Book CTA opens the
-    // general /book form. Fill these in and drop bookingHidden once mapped.
+    // The appointment type (N1z9) and Camille's calendar (pF9S, see clinicians.ts)
+    // exist in Plato, but there is no Private Pilates *online-booking* calendar
+    // yet, so no availability can be derived. Until one exists the service stays
+    // out of the booking form (bookingHidden) and its Book CTA opens the general
+    // /book form. Then: set platoCalendarId here and online_calendar in the
+    // booking service's config.py, drop bookingHidden, and add bookingService
+    // to the service page.
     platoCalendarId: "",
-    platoTypeCode: "",
+    platoTypeCode: "N1z9",
     bookingHidden: true,
   },
   {
