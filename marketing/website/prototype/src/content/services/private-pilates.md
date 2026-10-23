@@ -1,7 +1,7 @@
 ---
 title: "Private Pilates"
 metaTitle: "Private Pilates in Singapore | Goji Physio"
-description: "Discover private 1:1 and 2:1 Pilates at Goji in Lentor. STOTT PILATES® certified instruction tailored to your strength, flexibility and fitness goals."
+description: "Private 1:1 and 2:1 Pilates at Goji, Lentor: 55-minute sessions with a STOTT PILATES® certified instructor, tailored to your strength and fitness goals."
 cardTitle: "Private Pilates"
 cardLead: "A personalised Pilates experience led by a STOTT PILATES® certified instructor, designed to build strength, improve flexibility and help you move with confidence."
 heroImage: "/photos/services/private-pilates.webp"
@@ -13,6 +13,19 @@ clinicians: ["Camille Tan"]
 bookingService: "private-pilates"
 closingCopy: "Ready to get started? Book a session with our STOTT PILATES® certified instructor, or speak to our team to find the right Pilates experience for you."
 order: 3
+faqs:
+  - q: "What is Private Pilates?"
+    a: "Private Pilates at Goji is a 55-minute Pilates session in a private 1:1 or 2:1 setting at our Lentor clinic, led by a STOTT PILATES® certified instructor. Sessions use reformer or mat-based exercises tailored to your abilities and goals, focusing on strength, flexibility, balance and body awareness."
+  - q: "Do I need Pilates experience?"
+    a: "No. Private Pilates suits beginners and experienced individuals who are ready to exercise. Each session is tailored to your abilities and experience, with modifications and progressions as you improve."
+  - q: "What is the difference between Private Pilates and Clinical Pilates?"
+    a: "Private Pilates is led by a STOTT PILATES® certified instructor and focuses on strength, flexibility, body awareness and movement confidence. Clinical Pilates is led by an AHPC-registered physiotherapist, for people who prefer exercise guided by clinical knowledge, for example when returning to activity after rehabilitation. Neither replaces physiotherapy assessment or treatment."
+  - q: "Can I do Private Pilates with a friend?"
+    a: "Yes. Choose a private 2:1 session to exercise alongside a friend, partner or family member, or a 1:1 session for individual attention."
+  - q: "How much does Private Pilates cost?"
+    a: "A 55-minute Private Pilates session is $160 at the clinic. Sessions are available as a single session or in 5-session and 10-session packages; contact us for package prices."
+  - q: "Can I do Private Pilates if I have an injury?"
+    a: "Private Pilates is an exercise service and does not include physiotherapy assessment, diagnosis or treatment. If you have an injury or medical concern that needs assessment or treatment, a physiotherapy consultation may be recommended first. If new pain comes up, your instructor may modify or pause the session and recommend a physiotherapy assessment."
 draft: false
 ---
 

@@ -162,6 +162,19 @@ if (faqs?.length) {
   <Section tone="surface">
     <div class="svc-body container--narrow">
       <Content />
+      {faqs?.length ? (
+        <section class="svc-faqs" aria-labelledby="svc-faqs-heading">
+          {/* Visible twin of the FAQPage JSON-LD above: structured data must
+              match on-page content, so the two always render from `faqs`. */}
+          <h2 id="svc-faqs-heading">Frequently asked questions</h2>
+          {faqs.map((f) => (
+            <details class="svc-faq">
+              <summary>{f.q}</summary>
+              <p>{f.a}</p>
+            </details>
+          ))}
+        </section>
+      ) : null}
     </div>
   </Section>
 
@@ -310,6 +323,20 @@ if (faqs?.length) {
     margin-bottom: var(--space-3);
   }
   .svc-body :global(h2:first-child) { margin-top: 0; }
+  .svc-faq {
+    border-top: 1px solid var(--color-border);
+    padding-block: var(--space-3);
+  }
+  .svc-faq:last-of-type { border-bottom: 1px solid var(--color-border); }
+  .svc-faq summary {
+    cursor: pointer;
+    font-weight: var(--weight-semibold);
+    color: var(--text-default);
+  }
+  .svc-faq p {
+    margin-top: var(--space-3);
+    margin-bottom: var(--space-2);
+  }
   .svc-body :global(h3) {
     margin-top: var(--space-5);
     margin-bottom: var(--space-2);

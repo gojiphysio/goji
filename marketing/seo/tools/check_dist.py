@@ -10,6 +10,7 @@ never regress. See ../AGENTS.md.
 Usage: python3 check_dist.py [--dist PATH] [--json OUT]
 """
 import argparse
+import html
 import json
 import os
 import re
@@ -31,6 +32,7 @@ LEVEL = {
     "schema_required": "ERROR",
     "llms_dead_url": "ERROR",
     "prices_as_of": "ERROR",
+    "faq_not_visible": "ERROR",
     "meta_description": "ERROR",
     "h1_count": "ERROR",
     "schema_recommended": "WARN",
@@ -148,8 +150,9 @@ def main():
         if any(s in rel for s in SKIP):
             continue
         path = url_path(f, dist)
+        page_html = f.read_text(errors="replace")
         pg = Page()
-        pg.feed(f.read_text(errors="replace"))
+        pg.feed(page_html)
         noindex = "noindex" in pg.robots.lower()
         if noindex and path in sitemap:
             add("sitemap_noindex", path, "noindexed page is listed in the sitemap")
@@ -186,6 +189,20 @@ def main():
             seen.add(u.path)
             if not resolves(u.path, dist, redirects):
                 add("broken_internal_link", path, f"links to {u.path} which is not in the build")
+
+        # FAQPage JSON-LD must mirror visible content (Google's structured-data
+        # rules); every question has to appear in the page text outside scripts.
+        visible = html.unescape(re.sub(r"<script\b.*?</script>|<[^>]+>", " ", page_html, flags=re.S))
+        # Markdown curls quotes on the page; JSON-LD keeps them straight.
+        straight = str.maketrans({"\u201c": '"', "\u201d": '"', "\u2018": "'", "\u2019": "'"})
+        visible = " ".join(visible.translate(straight).split())
+        for b in blocks:
+            for item in b if isinstance(b, list) else [b]:
+                if isinstance(item, dict) and item.get("@type") == "FAQPage":
+                    for q in item.get("mainEntity", []):
+                        name = " ".join(str(q.get("name", "")).translate(straight).split())
+                        if name and name not in visible:
+                            add("faq_not_visible", path, f"FAQ in JSON-LD but not on the page: {name[:70]}")
 
         section = path.strip("/").split("/")[0] if path.count("/") > 2 else None
         if section in SCHEMA:
