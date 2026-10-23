@@ -17,6 +17,7 @@ const serviceLearnMore: Record<string, string> = {
   "paediatric-physiotherapy": "/services/",
   "mummy-baby": "/services/mummy-baby-assessment/",
   "clinical-pilates": "/services/clinical-pilates/",
+  "private-pilates": "/services/private-pilates/",
   "strength-conditioning": "/services/strength-conditioning/",
 };
 
@@ -302,7 +303,7 @@ const reviews = [
                 <h3 class="service-card__name">{s.title}</h3>
                 <p class="service-card__meta">{s.meta.join(" · ")}</p>
                 <p class="service-card__price">
-                  {s.price && <strong>${s.price}</strong>}
+                  {s.price && <strong>{s.pricePrefix}${s.price}</strong>}
                   {s.price && s.priceNote && <span class="service-card__price-note">{s.priceNote}</span>}
                 </p>
                 <p class="service-card__lead">{s.lead}</p>

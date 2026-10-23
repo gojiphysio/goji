@@ -46,6 +46,9 @@ const services = defineCollection({
      *  query ("… Singapore") without that wording leaking into the H1,
      *  breadcrumbs or schema `name`, which all read from `title`/`cardTitle`. */
     seoTitle: z.string().optional(),
+    /** Full `<title>`, used verbatim (no " | Goji Physiotherapy" suffix). Wins
+     *  over `seoTitle`. */
+    metaTitle: z.string().optional(),
     /** Meta description (SEO) — also the default OG/description. */
     description: z.string(),
     /** Short heading shown on the index card (defaults to title). */
@@ -66,22 +69,27 @@ const services = defineCollection({
     /** Facts header (from the source doc's Duration / Options / Physios lines). */
     durationMin: z.number(),
     priceClinic: z.number(),
+    /** Show the price as "From $N" in the facts strip. */
+    priceFrom: z.boolean().optional(),
     priceHome: z.number().optional(),
     /** Clinician display names for the "Seen by" line. */
     clinicians: z.array(z.string()),
-    /** Which existing booking option this page preselects. */
+    /** Which existing booking option this page preselects. Omit when the service
+     *  has no booking calendar yet: the Book CTA then opens the general /book form. */
     bookingService: z.enum([
       "physiotherapy",
       "mummy-baby",
       "clinical-pilates",
       "strength-conditioning",
-    ]),
+    ]).optional(),
     /** Physio sub-type to preselect on the booking form (omit for mummy-baby). */
     bookingFocus: z
       .enum(["general", "womens-health", "paediatrics", "scoliosis", "others"])
       .optional(),
     /** Optional structured Q&A → FAQPage JSON-LD (progressive; add later). */
     faqs: z.array(z.object({ q: z.string(), a: z.string() })).optional(),
+    /** Closing "Book your ..." block copy; defaults to the physiotherapist-matching line. */
+    closingCopy: z.string().optional(),
     /** Ordering within a category on the index page. */
     order: z.number().optional(),
     draft: z.boolean().default(false),

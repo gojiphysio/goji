@@ -34,6 +34,7 @@ export type ServiceId =
   | "physiotherapy"
   | "mummy-baby"
   | "clinical-pilates"
+  | "private-pilates"
   | "strength-conditioning";
 
 export interface Service {
@@ -43,6 +44,8 @@ export interface Service {
   lead: string;
   meta: string[];
   price: string;
+  /** Rendered before the price on the homepage card (e.g. "From "). */
+  pricePrefix?: string;
   priceNote: string;
   supportsHome: boolean;
   durationMin: number;
@@ -92,14 +95,32 @@ export const services: Service[] = [
     id: "clinical-pilates",
     icon: "tabler:yoga",
     title: "Clinical Pilates",
-    lead: "Physiotherapist-led reformer Pilates for rehabilitation, movement retraining, strength, and a safe return to activity or sport.",
-    meta: ["55 min Initial consult", "1:1 or 2:1 reformer"],
+    lead: "AHPC-registered physiotherapist-led Pilates, combining clinical expertise with personalised exercise for strength, mobility and movement confidence.",
+    meta: ["55 min", "1:1 or 2:1 reformer"],
     price: "180",
     priceNote: "",
     supportsHome: false,
     durationMin: 55,
     platoCalendarId: "ne8sgkb",
     platoTypeCode: "2kV4",
+  },
+  {
+    id: "private-pilates",
+    icon: "tabler:stretching-2",
+    title: "Private Pilates",
+    lead: "STOTT PILATES® certified instructor-led sessions tailored to your goals, helping you build strength, flexibility and body awareness.",
+    meta: ["55 min", "1:1 or 2:1 reformer"],
+    price: "160",
+    pricePrefix: "From ",
+    priceNote: "",
+    supportsHome: false,
+    durationMin: 55,
+    // No Plato calendar / appointment type exists for Private Pilates yet, so it
+    // stays out of the booking form (bookingHidden) and its Book CTA opens the
+    // general /book form. Fill these in and drop bookingHidden once mapped.
+    platoCalendarId: "",
+    platoTypeCode: "",
+    bookingHidden: true,
   },
   {
     id: "strength-conditioning",
