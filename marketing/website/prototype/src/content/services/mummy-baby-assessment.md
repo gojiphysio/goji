@@ -9,7 +9,7 @@ heroAlt: "A mother and baby with a Goji physiotherapist during a combined Mummy 
 category: "Women's Health Physiotherapy"
 durationMin: 85
 priceClinic: 330
-priceHome: 380
+priceHome: 450
 clinicians: ["Kristy Ng", "Cheryl Long"]
 bookingService: "mummy-baby"
 faqs:

@@ -8,7 +8,7 @@ heroAlt: "A parent and baby during tummy time at a Goji paediatric physiotherapy
 category: "Paediatric Physiotherapy (0-18Y)"
 durationMin: 55
 priceClinic: 260
-priceHome: 330
+priceHome: 380
 clinicians: ["Cheryl Long", "Kristy Ng"]
 bookingService: "physiotherapy"
 bookingFocus: "paediatrics"

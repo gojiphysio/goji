@@ -83,6 +83,32 @@ All conditions: https://www.gojiphysio.com/conditions/
 - Paediatric sports injuries (assessment and rehabilitation for children and adolescents, with growing bones in mind): https://www.gojiphysio.com/conditions/paediatric-sports-injuries/
 - Post-fracture rehabilitation (range of motion, strength and confidence after cast removal or surgery): https://www.gojiphysio.com/conditions/post-fracture-rehab/
 
+### Musculoskeletal & sports
+
+- Musculoskeletal pain and injuries (back, neck, shoulder, knee and other joint pain, sprains, strains and overuse injuries): https://www.gojiphysio.com/conditions/musculoskeletal-pain-and-injuries/
+- Persistent and recurrent pain (including arthritis-related joint pain): https://www.gojiphysio.com/conditions/persistent-pain/
+- Adult scoliosis (Schroth-based exercise and pain management, with Cheryl Long): https://www.gojiphysio.com/conditions/adult-scoliosis/
+- Sports rehabilitation and performance (staged return to sport and injury-risk work): https://www.gojiphysio.com/conditions/sports-rehabilitation/
+- Post-operative recovery and rehabilitation (joint replacement, ligament repair, spinal and orthopaedic surgery): https://www.gojiphysio.com/conditions/post-surgery-rehabilitation/
+- Functional movement assessment (how you squat, hinge, reach and balance, with a prioritised exercise plan): https://www.gojiphysio.com/conditions/functional-movement-assessment/
+- Dry needling (only available in sessions with Cheryl Long): https://www.gojiphysio.com/conditions/dry-needling/
+
+### Vestibular rehabilitation
+
+- Vertigo (room-spinning sensations, assessed for cause): https://www.gojiphysio.com/conditions/vertigo/
+- Dizziness (lightheadedness, swaying and ongoing unsteadiness): https://www.gojiphysio.com/conditions/dizziness/
+- Balance difficulties (unsteadiness, near-falls and loss of confidence on your feet): https://www.gojiphysio.com/conditions/balance-problems/
+- Benign paroxysmal positional vertigo, BPPV (positional tests and repositioning manoeuvres): https://www.gojiphysio.com/conditions/bppv/
+- Fall prevention and age-related instability (strength and balance programmes): https://www.gojiphysio.com/conditions/fall-prevention/
+
+### Lymphatic health
+
+- Lymphoedema (manual lymphatic drainage, compression, exercise and skin care): https://www.gojiphysio.com/conditions/lymphoedema/
+- Swelling management (persistent or post-surgical swelling, matched to the cause): https://www.gojiphysio.com/conditions/swelling-management/
+- Lipoedema (conservative management focused on comfort, mobility and quality of life): https://www.gojiphysio.com/conditions/lipoedema/
+- Breast cancer post-operative rehabilitation (shoulder movement, scar, cording and swelling): https://www.gojiphysio.com/conditions/breast-cancer-rehabilitation/
+- Chronic venous insufficiency, CVI (compression, calf-pump exercise and skin care alongside medical care): https://www.gojiphysio.com/conditions/chronic-venous-insufficiency/
+
 ## Location pages
 
 - Physiotherapy in Lentor: https://www.gojiphysio.com/physiotherapy-lentor/
@@ -116,3 +142,4 @@ Third-party media coverage. Index: https://www.gojiphysio.com/press/
 - Cheryl Long — Clinical Director: https://www.gojiphysio.com/team/cheryl-long/
 - Claire Ng — Senior Physiotherapist: https://www.gojiphysio.com/team/claire-ng/
 - Kristy Ng — Senior Physiotherapist: https://www.gojiphysio.com/team/kristy-ng/
+- Camille Tan — Pilates Instructor: https://www.gojiphysio.com/team/camille-tan/
