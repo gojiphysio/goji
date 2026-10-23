@@ -2,7 +2,7 @@
 title: "Pelvic Organ Prolapse"
 description: "Pelvic organ prolapse affects about 1 in 3 women who have given birth. Most can achieve meaningful improvement with physiotherapy, especially if managed early."
 cardTitle: "Pelvic Organ Prolapse"
-cardLead: "Pelvic organ prolapse (POP) affects approximately 1 in 3 women who have given birth, though many are unaware they have it."
+cardLead: "Pelvic organ prolapse (POP) affects approximately 1 in 3 women who have given birth."
 category: "Women's Health"
 reviewer:
   name: "Cheryl Long"
