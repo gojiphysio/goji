@@ -13,7 +13,7 @@ priceFrom: true
 clinicians: ["Cheryl Long", "Claire Ng"]
 bookingService: "clinical-pilates"
 closingCopy: "Ready to build strength and move with greater confidence? Book a session with our AHPC-registered physiotherapists, or speak to our team to find out whether Clinical Pilates is right for you."
-order: 1
+order: 2
 draft: false
 ---
 

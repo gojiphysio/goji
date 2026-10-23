@@ -44,8 +44,6 @@ export interface Service {
   lead: string;
   meta: string[];
   price: string;
-  /** Rendered before the price on the homepage card (e.g. "From "). */
-  pricePrefix?: string;
   priceNote: string;
   supportsHome: boolean;
   durationMin: number;
@@ -93,6 +91,19 @@ export const services: Service[] = [
     bookingHidden: true,
   },
   {
+    id: "strength-conditioning",
+    icon: "tabler:barbell",
+    title: "Strength & Conditioning",
+    lead: "Build strength and resilience through tailored exercise, with guidance from professionals to sustain your momentum.",
+    meta: ["55 min Initial consult", "1:1 or 2:1 sessions"],
+    price: "180",
+    priceNote: "",
+    supportsHome: false,
+    durationMin: 55,
+    platoCalendarId: "XV1FDpu",
+    platoTypeCode: "qLbH",
+  },
+  {
     id: "clinical-pilates",
     icon: "tabler:yoga",
     title: "Clinical Pilates",
@@ -112,7 +123,6 @@ export const services: Service[] = [
     lead: "STOTT PILATES® certified instructor-led sessions tailored to your goals, helping you build strength, flexibility and body awareness.",
     meta: ["55 min", "1:1 or 2:1 reformer"],
     price: "160",
-    pricePrefix: "From ",
     priceNote: "",
     supportsHome: false,
     durationMin: 55,
@@ -120,19 +130,6 @@ export const services: Service[] = [
     // in sync with online_calendar in the booking service's config.py.
     platoCalendarId: "vXKlwa7",
     platoTypeCode: "N1z9",
-  },
-  {
-    id: "strength-conditioning",
-    icon: "tabler:barbell",
-    title: "Strength & Conditioning",
-    lead: "Build strength and resilience through tailored exercise, with guidance from professionals to sustain your momentum.",
-    meta: ["55 min Initial consult", "1:1 or 2:1 sessions"],
-    price: "180",
-    priceNote: "",
-    supportsHome: false,
-    durationMin: 55,
-    platoCalendarId: "XV1FDpu",
-    platoTypeCode: "qLbH",
   },
   {
     id: "mummy-baby",
