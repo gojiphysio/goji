@@ -15,6 +15,7 @@ const { Content } = await entry.render();
 const {
   title,
   seoTitle,
+  metaTitle,
   description,
   cardTitle,
   cardLead,
@@ -23,11 +24,13 @@ const {
   category,
   durationMin,
   priceClinic,
+  priceFrom,
   priceHome,
   clinicians,
   bookingService,
   bookingFocus,
   faqs,
+  closingCopy,
 } = entry.data;
 
 // Link each clinician to their team page where one exists (matched by name).
@@ -41,14 +44,16 @@ const clinicianLinks = clinicians.map((name) => ({
 // Book CTA deep-links into the booking form: preselects the existing option and,
 // for physiotherapy, the compulsory sub-type (so the right clinicians' calendars
 // open). See src/lib/physioCategories.ts and BookingForm.astro.
-const bookHref = bookingFocus
-  ? `/book?service=${bookingService}&focus=${bookingFocus}`
-  : `/book?service=${bookingService}`;
+const bookHref = !bookingService
+  ? "/book"
+  : bookingFocus
+    ? `/book?service=${bookingService}&focus=${bookingFocus}`
+    : `/book?service=${bookingService}`;
 
 const priceLabel =
   priceHome && priceHome !== priceClinic
     ? `In-clinic $${priceClinic} · Home visit $${priceHome}`
-    : `$${priceClinic}`;
+    : `${priceFrom ? "From " : ""}$${priceClinic}`;
 
 const origin = Astro.site ?? new URL(Astro.url.origin);
 const pageURL = new URL(Astro.url.pathname, origin).href;
@@ -105,7 +110,7 @@ if (faqs?.length) {
 }
 ---
 
-<BaseLayout title={`${seoTitle ?? title} | Goji Physiotherapy`} description={description} schema={schema} searchType="Service">
+<BaseLayout title={metaTitle ?? `${seoTitle ?? title} | Goji Physiotherapy`} description={description} schema={schema} searchType="Service">
   {/* Hero: text + image */}
   <section class="svc-hero">
     <div class="container svc-hero__grid">
@@ -171,7 +176,7 @@ if (faqs?.length) {
     <div class="svc-cta">
       <div>
         <h2>Book your {cardTitle ?? title}</h2>
-        <p>We'll take a few details and match you with the right physiotherapist. Prefer to talk it through first? Message us on WhatsApp.</p>
+        <p>{closingCopy ?? "We'll take a few details and match you with the right physiotherapist. Prefer to talk it through first? Message us on WhatsApp."}</p>
       </div>
       <div class="svc-cta__btns">
         <Button href={bookHref} variant="primary" size="lg">Book an appointment</Button>
