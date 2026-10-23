@@ -9,7 +9,7 @@ heroAlt: "A Goji physiotherapist showing a pelvic model to a client during a pel
 category: "Women's Health Physiotherapy"
 durationMin: 55
 priceClinic: 260
-priceHome: 330
+priceHome: 380
 clinicians: ["Cheryl Long", "Claire Ng", "Kristy Ng"]
 bookingService: "physiotherapy"
 bookingFocus: "womens-health"

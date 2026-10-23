@@ -9,7 +9,7 @@ heroAlt: "A pregnant woman working with a Goji physiotherapist during a prenatal
 category: "Women's Health Physiotherapy"
 durationMin: 55
 priceClinic: 260
-priceHome: 330
+priceHome: 380
 clinicians: ["Kristy Ng", "Claire Ng", "Cheryl Long"]
 bookingService: "physiotherapy"
 bookingFocus: "womens-health"

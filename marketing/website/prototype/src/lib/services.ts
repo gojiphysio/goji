@@ -27,7 +27,7 @@ export interface DurationVariant {
  *   dedicated Plato calendar yet — mapped to Paediatric (Cheryl + Kristy); a
  *   dedicated 85-min calendar should be created in Plato (its interval is 60m).
  *   NOTE: duration/age/price were reconciled to the clinic's service doc on
- *   2026-07-13 (85 min, babies 0–12 months, in-clinic $330 / home $380);
+ *   2026-07-13 (85 min, babies 0–12 months, in-clinic $330 / home $450);
  *   confirm the 85-min Plato calendar exists before launch.
  */
 export type ServiceId =
@@ -68,7 +68,7 @@ export const services: Service[] = [
     lead: "Assessment and treatment for pain, injury, pelvic health, women's health, paediatric, vestibular, and lymphatic concerns.",
     meta: ["55 min Initial consult", "In-clinic & home visits"],
     price: "260",
-    priceNote: "Home visits $330",
+    priceNote: "Home visits $380",
     supportsHome: true,
     durationMin: 55,
     platoCalendarId: "dDIjWJp",
@@ -121,7 +121,7 @@ export const services: Service[] = [
     lead: "A joint assessment for postpartum mothers (suitable after both vaginal and Caesarean birth) and babies aged 0 to 12 months, supporting physical screening, developmental concerns, and early intervention therapy.",
     meta: ["85 min Initial consult", "In-clinic & home visits"],
     price: "330",
-    priceNote: "Home visits $380",
+    priceNote: "Home visits $450",
     supportsHome: true,
     durationMin: 85,
     platoCalendarId: "z1xE8rP",

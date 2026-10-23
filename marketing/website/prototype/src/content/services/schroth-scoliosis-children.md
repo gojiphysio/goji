@@ -8,7 +8,7 @@ heroAlt: "A Goji physiotherapist assessing a child's spine and posture at the wa
 category: "Paediatric Physiotherapy (0-18Y)"
 durationMin: 55
 priceClinic: 260
-priceHome: 330
+priceHome: 380
 clinicians: ["Cheryl Long"]
 bookingService: "physiotherapy"
 bookingFocus: "scoliosis"
