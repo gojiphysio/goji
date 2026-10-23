@@ -31,6 +31,9 @@ CLINICIANS: dict[str, dict] = {
                   "email": "claire.ng@gojiphysio.com"},
     "kristy-ng": {"name": "Kristy Ng", "calendar": "green", "doctor": "PKN",
                   "email": "kristy.ng@gojiphysio.com"},
+    # Pilates Instructor (not a physio): Private Pilates only (SERVICE_CLINICIANS).
+    "camille-tan": {"name": "Camille Tan", "calendar": "pF9S", "doctor": "ICT",
+                    "email": "movement.with.camille@gmail.com"},
 }
 
 # website service id -> Plato mapping.
@@ -66,6 +69,15 @@ SERVICES: dict[str, dict] = {
         "online_calendar": "ne8sgkb",  # Cheryl + Claire
         "type_code": "2kV4",
         "duration_min": 60,
+        "supports_home": False,
+    },
+    "private-pilates": {
+        "title": "Private Pilates",
+        "online_calendar": "vXKlwa7",  # Camille (pF9S)
+        "type_code": "N1z9",  # Plato appointment type "Private Pilates"
+        # Plato "Space Requirement" (code_Left): "Reformer needed".
+        "space_code": "YS06",
+        "duration_min": 60,  # same hourly booking as Clinical Pilates
         "supports_home": False,
     },
     "strength-conditioning": {
@@ -118,6 +130,7 @@ FIRST_AVAILABLE_PRIORITY: list[str] = ["kristy-ng", "claire-ng", "cheryl-long"]
 # a clinician from one service while keeping them in others).
 SERVICE_CLINICIANS: dict[str, list[str] | None] = {
     "clinical-pilates": ["claire-ng"],  # Cheryl Long removed from Clinical Pilates
+    "private-pilates": ["camille-tan"],  # instructor-led; physios are not rostered
 }
 
 # Clinician restricted blocks: hard-coded time blocks that override Plato's

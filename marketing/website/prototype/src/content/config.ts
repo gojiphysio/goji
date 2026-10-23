@@ -80,6 +80,7 @@ const services = defineCollection({
       "physiotherapy",
       "mummy-baby",
       "clinical-pilates",
+      "private-pilates",
       "strength-conditioning",
     ]).optional(),
     /** Physio sub-type to preselect on the booking form (omit for mummy-baby). */

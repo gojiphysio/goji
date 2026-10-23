@@ -434,3 +434,29 @@ if __name__ == "__main__":
             fn()
             print(f"ok  {name}")
     print("all passed")
+
+
+def test_private_pilates_offers_only_camille():
+    # Private Pilates calendar is vXKlwa7. Claire shares it here to prove the
+    # roster filter excludes non-instructors.
+    cfg = {"calendars": [{"id": "vXKlwa7", "rules": [
+        {"name": "Camille Tan", "book_calendar": "pF9S", "starttime": "09:00",
+         "endtime": "12:00", "min_days": 1, "max_days": 365,
+         "restricted_days": [], "restricted_blocks": []},
+        {"name": "Claire Ng", "book_calendar": "6hpO", "starttime": "09:00",
+         "endtime": "12:00", "min_days": 1, "max_days": 365,
+         "restricted_days": [], "restricted_blocks": []},
+    ]}]}
+    out = derive_availability(StubPlato([], cfg), "private-pilates", WED, now=NOW)
+    assert set(out) == {"camille-tan"}
+    assert out["camille-tan"] == ["09:00", "09:30", "10:00", "10:30", "11:00"]
+
+
+def test_camille_is_not_offered_in_other_services():
+    cfg = {"calendars": [{"id": "ne8sgkb", "rules": [
+        {"name": "Camille Tan", "book_calendar": "pF9S", "starttime": "09:00",
+         "endtime": "12:00", "min_days": 1, "max_days": 365,
+         "restricted_days": [], "restricted_blocks": []},
+    ]}]}
+    out = derive_availability(StubPlato([], cfg), "clinical-pilates", WED, now=NOW)
+    assert out == {}

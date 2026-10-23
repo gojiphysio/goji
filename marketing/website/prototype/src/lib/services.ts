@@ -52,7 +52,8 @@ export interface Service {
   platoCalendarId: string;
   /**
    * Plato "Appointment Type" code (the `code_Bottom` field on POST /appointment).
-   * Validated codes: Physiotherapy=hDWW, Pilates=2kV4, S&C=qLbH, Home Visit=sCla.
+   * Validated codes: Physiotherapy=hDWW, Clinical Pilates=2kV4, S&C=qLbH, Home Visit=sCla,
+   * Private Pilates=N1z9 (GET /appointment/codes, 2026-10-23).
    * (Confirmed/Unconfirmed live in `code_Left`: YS06 / C22K.)
    * OPEN: Mummy & Baby has no Plato type — using Physiotherapy (hDWW) for now.
    * RULE (decided 2026-07-07): a HOME-VISIT booking is typed Home Visit (`sCla`)
@@ -115,12 +116,10 @@ export const services: Service[] = [
     priceNote: "",
     supportsHome: false,
     durationMin: 55,
-    // No Plato calendar / appointment type exists for Private Pilates yet, so it
-    // stays out of the booking form (bookingHidden) and its Book CTA opens the
-    // general /book form. Fill these in and drop bookingHidden once mapped.
-    platoCalendarId: "",
-    platoTypeCode: "",
-    bookingHidden: true,
+    // Camille's online-booking calendar (rule: pF9S, see clinicians.ts). Keep
+    // in sync with online_calendar in the booking service's config.py.
+    platoCalendarId: "vXKlwa7",
+    platoTypeCode: "N1z9",
   },
   {
     id: "strength-conditioning",
