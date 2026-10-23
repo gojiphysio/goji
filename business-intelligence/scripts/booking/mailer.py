@@ -17,6 +17,7 @@ import logging
 import os
 import smtplib
 import ssl
+from html import escape
 from datetime import date, datetime
 from email.message import EmailMessage
 from email.utils import formataddr
@@ -49,14 +50,41 @@ def _row(label: str, value) -> str:
     return f"{label + ':':<19}{value}"
 
 
-def _clinician_lines(result: dict) -> list[str]:
-    """Two clear lines: what the customer selected vs. who they were matched to.
+def _clinician_pairs(result: dict) -> list[tuple[str, str]]:
+    """Two clear rows: what the customer selected vs. who they were matched to.
     Both are shown even when identical (an explicit clinician was requested)."""
     return [
-        _row("Your selection", result.get("clinician_requested")
-             or result.get("clinician_name")),
-        _row("Clinician matched", result["clinician_name"]),
+        ("Your selection", result.get("clinician_requested")
+         or result.get("clinician_name")),
+        ("Clinician matched", result["clinician_name"]),
     ]
+
+
+def _clinician_lines(result: dict) -> list[str]:
+    return [_row(label, value) for label, value in _clinician_pairs(result)]
+
+
+def _html_body(greeting: str, intro: str, details: list[tuple[str, str]],
+               wa_intro: str, signoff: list[str]) -> str:
+    """HTML twin of the plain-text confirmation. The details sit in a table so the
+    values line up in any client (space-padding only aligns in a monospace font)."""
+    rows = "".join(
+        f'<tr><td style="padding:2px 16px 2px 0;vertical-align:top;white-space:nowrap">'
+        f'{escape(label)}</td><td style="padding:2px 0;vertical-align:top">'
+        f'{escape(str(value))}</td></tr>'
+        for label, value in details)
+    wa = escape(WHATSAPP_LINK)
+    maps = escape(MAPS_LINK)
+    sign = "<br>".join(escape(line) for line in signoff)
+    return (
+        '<div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;'
+        'line-height:1.5;color:#222">'
+        f"<p>{escape(greeting)}</p><p>{escape(intro)}</p>"
+        f'<table role="presentation" cellspacing="0" cellpadding="0" '
+        f'style="border-collapse:collapse;font-size:14px">{rows}</table>'
+        f'<p>{escape(wa_intro)}<br><a href="{wa}">{wa}</a></p>'
+        f"<p>See you soon,<br>{sign}<br>"
+        f'Find us on Google Maps: <a href="{maps}">{maps}</a></p></div>')
 
 
 def _fmt_when(date_str: str, time_str: str) -> str:
@@ -116,7 +144,7 @@ def send_admin_booking_email(result: dict, draft: dict) -> None:
 
 
 def send_customer_booking_email(result: dict, draft: dict) -> None:
-    """Confirmation to the person who booked. Best-effort; on-brand plain text."""
+    """Confirmation to the person who booked. Best-effort; HTML (aligned table) with a plain-text fallback."""
     to = (draft.get("email") or "").strip()
     if not SMTP_PASS:
         log.info("SMTP not configured (no GMAIL_APP_PASSWORD); skipping customer email")
@@ -133,38 +161,41 @@ def send_customer_booking_email(result: dict, draft: dict) -> None:
         msg["From"] = formataddr((FROM_NAME, SMTP_USER))
         msg["To"] = to
         msg["Reply-To"] = SMTP_USER
-        lines = [
-            f"Hi {name},",
-            "",
-            "Thanks for booking with Goji Physiotherapy. We've received your "
-            "request and here are the details:",
-            "",
-            _row("Service", result['service']),
-        ]
+        greeting = f"Hi {name},"
+        intro = ("Thanks for booking with Goji Physiotherapy. We've received your "
+                 "request and here are the details:")
+        wa_intro = ("Need to change or cancel? Just message us on WhatsApp and we'll "
+                    "take care of it - that's where we handle all changes and "
+                    "cancellations:")
+        signoff = ["The Goji Physiotherapy team",
+                   "Lentor Modern, #01-13, Lentor Central, Singapore 788887"]
+        details = [("Service", result['service'])]
         if result.get("physio_focus"):
-            lines.append(_row("Type", result['physio_focus']))
-        lines += [
-            _row("When", f"{when} (Singapore time)"),
-            _row("Where", where),
-            *_clinician_lines(result),
+            details.append(("Type", result['physio_focus']))
+        details += [
+            ("When", f"{when} (Singapore time)"),
+            ("Where", where),
+            *_clinician_pairs(result),
         ]
         if result.get("home") and draft.get("address"):
-            lines.append(_row("Address", draft.get('address')))
+            details.append(("Address", draft.get('address')))
         if (draft.get("notes") or "").strip():
-            lines.append(_row("Remarks", draft.get('notes').strip()))
-        lines += [
-            _row("Reference", result['reference']),
+            details.append(("Remarks", draft.get('notes').strip()))
+        details.append(("Reference", result['reference']))
+        lines = [
+            greeting, "", intro, "",
+            *(_row(label, value) for label, value in details),
             "",
-            "Need to change or cancel? Just message us on WhatsApp and we'll take "
-            f"care of it - that's where we handle all changes and cancellations:",
+            wa_intro,
             f"  {WHATSAPP_LINK}",
             "",
             "See you soon,",
-            "The Goji Physiotherapy team",
-            "Lentor Modern, #01-13, Lentor Central, Singapore 788887",
+            *signoff,
             f"Find us on Google Maps: {MAPS_LINK}",
         ]
         msg.set_content("\n".join(lines))
+        msg.add_alternative(
+            _html_body(greeting, intro, details, wa_intro, signoff), subtype="html")
         _send(msg, "customer booking", result.get("reference"))
     except Exception as e:
         log.warning("customer booking email failed: %s", e)
