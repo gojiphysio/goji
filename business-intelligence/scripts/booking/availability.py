@@ -29,6 +29,7 @@ from .config import (
     HOME_VISIT_CLINICIAN,
     MAX_ADVANCE_DAYS,
     PHYSIO_FOCUS_CLINICIANS,
+    REFORMER_CLINICIANS,
     REFORMER_CODE,
     SATURDAY_SLOT_MINUTES,
     SERVICE_CLINICIANS,
@@ -42,7 +43,7 @@ _DOW = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]  # python weekday() ord
 
 # Pseudo-calendar key in the `booked` map holding every appointment, on any
 # calendar, that occupies the studio's single reformer (Space Requirement =
-# Reformer needed). Applied only to services flagged `needs_reformer`.
+# Reformer needed). Applied to every service offered by REFORMER_CLINICIANS.
 REFORMER_KEY = "-reformer-"
 
 log = logging.getLogger("booking.availability")
@@ -280,9 +281,10 @@ def _derive_day(
 
     # Clinic-wide `-all-` blocks apply on top of each clinician's own bookings.
     clinic_wide = booked.get("-all-", [])
-    # One shared reformer: a reformer service is also blocked by anyone's
-    # reformer-needed appointment (e.g. Claire's blocks Camille's, and back).
-    reformer_busy = booked.get(REFORMER_KEY, []) if svc.get("needs_reformer") else []
+    # One shared reformer: Camille and Claire are blocked, for any service, while
+    # anyone holds a reformer-needed appointment (e.g. Claire's blocks Camille's,
+    # and back). Other clinicians never use the reformer, so are unaffected.
+    reformer_busy = booked.get(REFORMER_KEY, [])
 
     out: dict[str, list[str]] = {}
 
@@ -345,7 +347,9 @@ def _derive_day(
             for b in hard_blocks
             if b.get("day") == dow
         ])
-        taken = booked.get(color, []) + clinic_wide + reformer_busy
+        taken = booked.get(color, []) + clinic_wide
+        if cid in REFORMER_CLINICIANS:
+            taken = taken + reformer_busy
 
         if _DIAG:
             win_start_str = win_start.strftime('%H:%M')

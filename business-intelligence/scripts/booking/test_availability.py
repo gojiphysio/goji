@@ -472,8 +472,9 @@ def test_camille_reformer_booking_blocks_claire_clinical_pilates():
     assert out["claire-ng"] == ["09:00", "11:00", "11:30", "12:00"]
 
 
-def test_reformer_booking_does_not_block_claire_physiotherapy():
-    # Physio doesn't use the reformer, so Camille's session leaves Claire's physio slots open.
+def test_reformer_booking_blocks_claire_physiotherapy_too():
+    # Any of Claire's sessions could need the reformer, so physio slots are held
+    # back while Camille has it, not just pilates.
     cfg = {"calendars": [{"id": "dDIjWJp", "rules": [
         {"name": "Claire Ng", "book_calendar": "6hpO", "starttime": "09:00",
          "endtime": "12:00", "min_days": 1, "max_days": 365,
@@ -481,7 +482,14 @@ def test_reformer_booking_does_not_block_claire_physiotherapy():
     ]}]}
     appts = [_reformer_appt("pF9S", "10:00", "11:00")]
     out = derive_availability(StubPlato(appts, cfg), "physiotherapy", WED, now=NOW)
-    assert out["claire-ng"] == ["09:00", "09:30", "10:00", "10:30", "11:00"]
+    assert out["claire-ng"] == ["09:00", "11:00"]
+
+
+def test_reformer_booking_does_not_block_other_clinicians():
+    # Cheryl never uses the reformer: her physio slots stay open.
+    appts = [_reformer_appt("6hpO", "10:00", "11:00")]
+    out = derive_availability(StubPlato(appts, CFG), "physiotherapy", WED, now=NOW)
+    assert out["cheryl-long"] == ["09:00", "09:30", "10:00", "10:30", "11:00"]
 
 
 def test_reformer_booking_back_to_back_is_not_a_conflict():
