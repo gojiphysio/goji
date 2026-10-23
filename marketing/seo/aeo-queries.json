@@ -51,6 +51,8 @@
     {"id": "msk-back", "q": "back pain physio singapore", "cluster": "msk", "target": "/services/musculoskeletal-physiotherapy"},
     {"id": "msk-fracture", "q": "physiotherapy after fracture singapore", "cluster": "msk", "target": "/conditions/post-fracture-rehab"},
     {"id": "holistic-pilates", "q": "clinical pilates with physiotherapist singapore", "cluster": "holistic", "target": "/services/clinical-pilates"},
+    {"id": "holistic-private-pilates", "q": "private pilates lentor", "cluster": "holistic", "target": "/services/private-pilates"},
+    {"id": "holistic-private-reformer", "q": "private reformer pilates singapore", "cluster": "holistic", "target": "/services/private-pilates"},
 
     {"id": "gen-first-visit", "q": "what happens at a first physiotherapy appointment", "cluster": "general-question", "target": null},
     {"id": "gen-cost", "q": "how much does physiotherapy cost in singapore", "cluster": "general-question", "target": null},
