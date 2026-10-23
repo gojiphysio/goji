@@ -18,7 +18,7 @@ import { SITE } from "../lib/site.ts";
 
 const title = "Getting Here | Goji Physiotherapy at Lentor MRT";
 const description =
-  "How to find Goji Physiotherapy at Lentor Modern - by MRT, by car with basement parking, or by taxi. Step-by-step directions and short video guides for each route.";
+  "How to find Goji Physiotherapy at Lentor Modern - by MRT, by car with basement parking, or by taxi. Step-by-step directions and video guides for each route.";
 
 // Quick facts for the hero at-a-glance strip.
 const glance = [
@@ -39,7 +39,7 @@ const breadcrumbSchema = {
   "@type": "BreadcrumbList",
   itemListElement: [
     { "@type": "ListItem", position: 1, name: "Home", item: new URL("/", origin).href },
-    { "@type": "ListItem", position: 2, name: "Getting here", item: new URL("/getting-here", origin).href },
+    { "@type": "ListItem", position: 2, name: "Getting here", item: new URL("/getting-here/", origin).href },
   ],
 };
 ---
@@ -351,7 +351,7 @@ const breadcrumbSchema = {
       </p>
       <div class="gh-closing__cta">
         <Button slug="web-wa" variant="whatsapp" size="lg">Message us on WhatsApp</Button>
-        <Button href="/book" variant="primary" size="lg" class="gh-btn-light">Book an appointment</Button>
+        <Button href="/book/" variant="primary" size="lg" class="gh-btn-light">Book an appointment</Button>
       </div>
     </div>
   </Section>

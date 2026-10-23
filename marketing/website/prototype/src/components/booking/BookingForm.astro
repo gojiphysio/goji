@@ -105,7 +105,7 @@ const steps = [
 
       <div class="booking__address" data-address hidden>
         <p class="booking__disclaimer">
-          Home visits include a $70 travel surcharge on top of the session fee.
+          Home visits include a $120 travel surcharge on top of the session fee.
         </p>
         <div class="booking__addr-grid">
           <FormField id="addr-block" name="addr-block" label="Block / house number" required={true} autocomplete="address-line1" placeholder="e.g. 123B" />
@@ -2000,7 +2000,7 @@ const steps = [
         : "";
       const rows: [string, string][] = [
         ["Service", svc?.title ?? ""],
-        ["Where", d.format === "home" ? "Home visit (+$70 travel)" : "In-clinic"],
+        ["Where", d.format === "home" ? "Home visit (+$120 travel)" : "In-clinic"],
       ];
       if (d.format === "home" && d.address) rows.push(["Address", d.address]);
       rows.push(["When", `${dateLabel} · ${fmtTime(d.time)}`]);

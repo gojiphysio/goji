@@ -1,6 +1,6 @@
 ---
 title: "Bowel Dysfunction and Constipation"
-description: "Bowel dysfunction - including constipation, straining, incomplete evacuation, and accidental bowel leakage - is more common in women than is often recognised, and its connection to the pelvic floor is frequently missed. Physiotherapy addresses the neuromuscular and structural contributors to bowel dysfunction."
+description: "Constipation, straining and bowel leakage are more common in women than often recognised. Physiotherapy addresses their pelvic floor contributors."
 cardTitle: "Bowel Dysfunction and Constipation"
 cardLead: "Bowel dysfunction - including constipation, straining, incomplete evacuation, and accidental bowel leakage - is more common in women than is often recognised..."
 category: "Women's Health"
@@ -10,6 +10,7 @@ reviewer:
 ctaSlug: "web-wa"
 order: 9
 draft: false
+relatedServices: ["pelvic-floor-physiotherapy"]
 ---
 
 Bowel dysfunction - including constipation, straining, incomplete evacuation, urgency, and accidental bowel leakage - is more common in women than is often recognised, and its connection to the pelvic floor is frequently missed. The pelvic floor is directly involved in both the storage and evacuation of stool. When pelvic floor coordination is disrupted - whether by pregnancy, birth, surgery, or chronic straining habits - bowel function suffers. Physiotherapy addresses these neuromuscular and structural contributors.

@@ -14,6 +14,7 @@ import LogoLockup from "../components/LogoLockup.astro";
 import Button from "../components/Button.astro";
 import SearchDialog from "../components/SearchDialog.astro";
 import { SITE } from "../lib/site.ts";
+import { businessSchema } from "../lib/schema.ts";
 import type { SearchType } from "../lib/search.ts";
 
 interface Props {
@@ -55,68 +56,15 @@ const origin = Astro.site ?? new URL(Astro.url.origin);
 const canonicalURL = new URL(Astro.url.pathname, origin);
 const ogImage = new URL("/og-image.jpg", origin);
 
-// LocalBusiness structured data for local SEO (NAP from SITE).
-const businessSchema = {
-  "@context": "https://schema.org",
-  "@type": ["MedicalClinic", "LocalBusiness"],
-  name: SITE.fullName,
-  alternateName: [SITE.name, "Goji Physio"],
-  url: origin.href,
-  image: ogImage.href,
-  email: SITE.email,
-  telephone: SITE.phoneE164,
-  priceRange: "$$",
-  address: {
-    "@type": "PostalAddress",
-    streetAddress: SITE.address.line1,
-    addressLocality: "Singapore",
-    postalCode: "788887",
-    addressCountry: "SG",
-  },
-  hasMap: SITE.googleMaps,
-  areaServed: [
-    { "@type": "Place", name: "Lentor, Singapore" },
-    { "@type": "Place", name: "Ang Mo Kio, Singapore" },
-    { "@type": "Place", name: "Yio Chu Kang, Singapore" },
-    { "@type": "Place", name: "Upper Thomson, Singapore" },
-    { "@type": "Place", name: "Springleaf, Singapore" },
-    { "@type": "Place", name: "Bishan, Singapore" },
-    { "@type": "Place", name: "Singapore" },
-  ],
-  medicalSpecialty: "Physiotherapy",
-  openingHoursSpecification: [
-    {
-      "@type": "OpeningHoursSpecification",
-      dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
-      opens: "08:00",
-      closes: "20:00",
-    },
-  ],
-  availableService: [
-    "Physiotherapy",
-    "Women's Health Physiotherapy",
-    "Pelvic Floor Physiotherapy",
-    "Pregnancy Physiotherapy",
-    "Postnatal Physiotherapy",
-    "Home Visit Physiotherapy",
-    "Mummy & Baby Assessment",
-    "Paediatric Physiotherapy",
-    "Clinical Pilates",
-    "Strength & Conditioning",
-    "Lymphoedema Physiotherapy",
-    "Vestibular Rehabilitation",
-  ].map((name) => ({ "@type": "MedicalTherapy", name })),
-  sameAs: [SITE.instagram, SITE.googleMaps],
-};
 
 const isHome = Astro.url.pathname === "/";
 const nav = [
   { href: isHome ? "#about" : "/#about", label: "About" },
-  { href: "/services", label: "Services" },
-  { href: "/conditions", label: "Conditions" },
-  { href: "/media", label: "Media" },
+  { href: "/services/", label: "Services" },
+  { href: "/conditions/", label: "Conditions" },
+  { href: "/media/", label: "Media" },
   { href: isHome ? "#team" : "/#team", label: "Team" },
-  { href: "/getting-here", label: "Find us" },
+  { href: "/getting-here/", label: "Find us" },
 ];
 
 // GA4 (website tracking). Inert until PUBLIC_GA4_ID is set in the Cloudflare
@@ -167,7 +115,7 @@ const GADS_BOOKING_LABEL = import.meta.env.PUBLIC_GADS_BOOKING_LABEL;
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage.href} />
 
-    {!bare && <script type="application/ld+json" set:html={JSON.stringify(businessSchema)} />}
+    {!bare && <script type="application/ld+json" set:html={JSON.stringify(businessSchema(origin))} />}
     {extraSchemas.map((s) => (
       <script type="application/ld+json" set:html={JSON.stringify(s)} />
     ))}
@@ -400,7 +348,7 @@ const GADS_BOOKING_LABEL = import.meta.env.PUBLIC_GADS_BOOKING_LABEL;
                 </svg>
                 <span class="header-wa__text">WhatsApp</span>
               </a>
-              <Button href="/book" variant="primary">Book</Button>
+              <Button href="/book/" variant="primary">Book</Button>
               <details class="mobile-menu">
                 <summary class="nav-toggle" aria-label="Menu">
                   <svg class="nav-toggle__open" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
@@ -444,11 +392,11 @@ const GADS_BOOKING_LABEL = import.meta.env.PUBLIC_GADS_BOOKING_LABEL;
                   @gojiphysio ↗
                 </a>
               </p>
-              <p><a href="/physiotherapy-lentor">Physiotherapy in Lentor</a></p>
+              <p><a href="/physiotherapy-lentor/">Physiotherapy in Lentor</a></p>
             </div>
           </div>
           <div class="container site-footer__copyright">
-            <p>&copy; {new Date().getFullYear()} Goji Health. All rights reserved. &middot; <a href="/privacy">Privacy</a></p>
+            <p>&copy; {new Date().getFullYear()} Goji Health. All rights reserved. &middot; <a href="/privacy/">Privacy</a></p>
           </div>
         </footer>
       )

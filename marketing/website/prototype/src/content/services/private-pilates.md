@@ -72,7 +72,7 @@ Clinical Pilates, on the other hand, is led by an AHPC-registered physiotherapis
 
 Neither service replaces physiotherapy assessment or treatment. If you're unsure which is right for you, our team can help you choose.
 
-[Explore Clinical Pilates →](/services/clinical-pilates)
+[Explore Clinical Pilates →](/services/clinical-pilates/)
 
 ## Packages
 

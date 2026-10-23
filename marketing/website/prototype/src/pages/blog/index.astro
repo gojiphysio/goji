@@ -28,14 +28,14 @@ const hasPosts = posts.length > 0;
 const [featured, ...rest] = posts;
 
 const origin = Astro.site ?? new URL(Astro.url.origin);
-const pageURL = new URL("/blog", origin).href;
+const pageURL = new URL("/blog/", origin).href;
 
 const breadcrumb = {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
   itemListElement: [
     { "@type": "ListItem", position: 1, name: "Home", item: origin.href },
-    { "@type": "ListItem", position: 2, name: "Media", item: new URL("/media", origin).href },
+    { "@type": "ListItem", position: 2, name: "Media", item: new URL("/media/", origin).href },
     { "@type": "ListItem", position: 3, name: "Blog", item: pageURL },
   ],
 };
@@ -55,7 +55,7 @@ const schema = hasPosts
           "@type": "BlogPosting",
           headline: post.data.title,
           description: post.data.description,
-          url: new URL(`/blog/${post.slug}`, origin).href,
+          url: new URL(`/blog/${post.slug}/`, origin).href,
           datePublished: isoDate(post.data.pubDate),
           author: { "@type": "Person", name: post.data.author.name },
         })),
@@ -75,7 +75,7 @@ const schema = hasPosts
 >
   <section class="blog-hero">
     <div class="container">
-      <a href="/media" class="blog-hero__back">
+      <a href="/media/" class="blog-hero__back">
         <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M10 3L5 8l5 5"></path>
         </svg>
@@ -87,7 +87,7 @@ const schema = hasPosts
         the physiotherapists who answer them. Nothing here replaces an
         assessment, but it should help you work out what is going on and what to
         ask for. You can also read the
-        <a href="/press">press coverage</a> of our work.
+        <a href="/press/">press coverage</a> of our work.
       </p>
     </div>
   </section>
@@ -106,8 +106,8 @@ const schema = hasPosts
               involves.
             </p>
             <div class="blog-soon__links">
-              <Button href="/conditions" variant="primary">Conditions we treat</Button>
-              <Button href="/services" variant="secondary">Our services</Button>
+              <Button href="/conditions/" variant="primary">Conditions we treat</Button>
+              <Button href="/services/" variant="secondary">Our services</Button>
             </div>
             <p class="blog-soon__note">
               Have a question you would like us to write about? Tell us and we
@@ -125,7 +125,7 @@ const schema = hasPosts
   {
     featured && (
       <Section tone="surface">
-        <a href={`/blog/${featured.slug}`} class="blog-feature">
+        <a href={`/blog/${featured.slug}/`} class="blog-feature">
           {featured.data.heroImage && (
             <div class="blog-feature__media">
               <img
@@ -159,7 +159,7 @@ const schema = hasPosts
         <h2 class="blog-section-title">More from the clinic</h2>
         <div class="blog-grid">
           {rest.map((post) => (
-            <a href={`/blog/${post.slug}`} class="blog-card">
+            <a href={`/blog/${post.slug}/`} class="blog-card">
               <p class="blog-meta">
                 <span class="blog-badge">{post.data.category}</span>
                 <time datetime={isoDate(post.data.pubDate)}>

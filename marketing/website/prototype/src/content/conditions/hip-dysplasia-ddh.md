@@ -1,6 +1,6 @@
 ---
 title: "Developmental Dysplasia of the Hip (DDH)"
-description: "Physiotherapy for DDH - before, during, and after harness or surgical treatment. Supporting hip development and gross motor progress in infants and children in Singapore."
+description: "Physiotherapy for DDH before, during and after harness or surgical treatment, supporting hip development and gross motor progress in infants and children."
 cardTitle: "Hip Dysplasia (DDH)"
 cardLead: "Physiotherapy that supports hip development and gross motor progress before, during, and after harness or surgical treatment for DDH."
 category: "Paediatrics"
@@ -10,6 +10,7 @@ reviewer:
 ctaSlug: "web-wa"
 order: 4
 draft: false
+relatedServices: ["paediatric-physiotherapy"]
 ---
 
 Developmental dysplasia of the hip (DDH) is a spectrum of conditions in which the hip joint - specifically the relationship between the femoral head (ball) and the acetabulum (socket) - does not develop normally. It ranges from mild acetabular shallowness to complete dislocation. DDH is typically identified through newborn screening and hip ultrasound. Physiotherapy supports the medical management of DDH - and plays a particularly important role in the periods before, during, and after harness wear or surgical treatment.

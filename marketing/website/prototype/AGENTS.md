@@ -79,6 +79,9 @@ so a token change reflows everything (styleguide is the QA surface).
   emit enriched Person; blog posts emit BlogPosting (author + optional
   reviewedBy Person, both linking to `/team/<slug>`) + BreadcrumbList +
   FAQPage. New page types define their schema before merging.
+- **Site-wide JSON-LD lives in `src/lib/schema.ts`**, not in `BaseLayout`, so
+  the SEO loop can improve it as a tier A change without touching the layout
+  (analytics beacon, tier C). Tiers: `../../seo/AGENTS.md`.
 - **Press pages never claim authorship.** A `/press/<slug>` page is a `WebPage`
   whose `citation` is the outlet's `NewsArticle` (their headline, their URL,
   their publisher); the index adds `subjectOf` against the clinic
@@ -94,10 +97,27 @@ so a token change reflows everything (styleguide is the QA surface).
   frontmatter; the template renders "Reviewed by <name>" linking to
   `/team/<slug>` and emits `reviewedBy` in the MedicalWebPage JSON-LD.
 - **Meta descriptions ≤160 chars.**
-- **`seoTitle` (services) overrides only the `<title>`.** Use it to target the
-  national query ("Pelvic Floor Physiotherapy Singapore") without "Singapore"
-  leaking into the H1, breadcrumbs or schema `name`, which read from
-  `title`/`cardTitle`. Don't stuff the geo into `title` itself.
+- **`seoTitle` (services and conditions) overrides only the `<title>`.** Use it
+  to target the national query ("Pelvic Floor Physiotherapy Singapore") without
+  "Singapore" leaking into the H1, breadcrumbs or schema `name`, which read from
+  `title`/`cardTitle`. Don't stuff the geo into `title` itself. The template
+  appends " | Goji Physiotherapy" (20 chars), so keep `seoTitle` to about 40
+  characters to stay under the ~60 a SERP shows.
+- **Condition file slugs don't carry `-singapore`.** The route is
+  `/conditions/<slug>`; the geo goes in `seoTitle` and the meta description.
+- **Condition groups live in three places - keep them in sync.** The
+  `category` enum in `src/content/config.ts`, the `categories` array in
+  `src/pages/conditions/index.astro` (an enum value missing there never
+  renders), and the `careAreas` titles on the homepage. Current groups:
+  Women's Health, Paediatrics, Musculoskeletal & Sports, Vestibular
+  Rehabilitation, Lymphatic Health (names match the Drive folders). Reviewers:
+  Cheryl Long for Musculoskeletal & Sports, Claire Ng for Vestibular and
+  Lymphatic. Dry needling and adult scoliosis are Cheryl-only services.
+- **Condition body format** (all 37 pages follow it): intro paragraph with no
+  H1, `##` sections, `H3` only for the FAQ, plain `- Label: text` bullets, no
+  bold, no inline links and no "Related pages" section (strip the source doc's
+  internal-links line). `cardTitle` is the page H1, so keep it equal to the doc
+  title unless a shorter heading is intended. Add new pages to `public/llms.txt`.
 - **`/womens-health-physiotherapy-singapore` is the women's-health hub.** It
   owns the broad national query; the four women's-health service pages own
   their own keyword and each links back up to it. Adding a women's-health

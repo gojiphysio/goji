@@ -8,7 +8,7 @@ import LogoLockup from "./LogoLockup.astro";
 interface Props {
   name: string;
   role: string;
-  interests: string;
+  interests?: string;
   image?: string;
   href?: string;
 }
@@ -40,7 +40,7 @@ const { name, role, interests, image, href } = Astro.props;
   <div class="prac__body">
     <h3 class="prac__name">{name}</h3>
     <p class="prac__role">{role}</p>
-    <p class="prac__interests">{interests}</p>
+    {interests && <p class="prac__interests">{interests}</p>}
     {href && <a href={href} class="prac__cta">View profile &rarr;</a>}
   </div>
 </article>

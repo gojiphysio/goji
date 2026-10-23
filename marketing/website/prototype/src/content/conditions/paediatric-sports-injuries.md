@@ -1,6 +1,6 @@
 ---
-title: "Paediatric Musculoskeletal and Sports Injuries"
-description: "Growing bodies need careful management after sports injuries. Goji's physiotherapists treat children's musculoskeletal and sports injuries at Lentor, Singapore. AHPC-registered."
+title: "Paediatric Musculoskeletal & Sports Injuries"
+description: "Growing bodies need careful management after sports injuries. Goji's physiotherapists treat children's musculoskeletal and sports injuries at Lentor, Singapore."
 cardTitle: "Paediatric Sports Injuries"
 cardLead: "Assessment and rehabilitation for children's and adolescents' sports injuries, managed with an understanding of growing bones and open growth plates."
 category: "Paediatrics"
@@ -10,6 +10,7 @@ reviewer:
 ctaSlug: "web-wa"
 order: 7
 draft: false
+relatedServices: ["paediatric-physiotherapy"]
 ---
 
 Growing bodies are not simply smaller adult bodies. Children and adolescents have open growth plates, rapidly changing bone density, and different injury patterns from adults. A sports injury in a child or teenager needs to be assessed and managed with an understanding of these differences - not simply treated with the adult protocol for the same injury. Goji's physiotherapists are trained in paediatric and adolescent musculoskeletal presentations and provide evidence-based assessment and rehabilitation for children from primary school age through to age 18.

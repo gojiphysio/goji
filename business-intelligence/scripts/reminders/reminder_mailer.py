@@ -40,6 +40,12 @@ FROM_NAME = os.environ.get("REMINDER_FROM_NAME", "Goji Physiotherapy")
 SUBJECT    = os.environ.get("REMINDER_SUBJECT", "Goji Appointment Reminder")
 # Where the "couldn't reach these people" digest goes.
 ADMIN_TO   = os.environ.get("REMINDER_ADMIN_EMAIL", "hello@gojiphysio.com")
+# TEST MODE. When set, every patient reminder is rendered exactly as the patient
+# would receive it but delivered HERE instead — a real end-to-end send (real
+# names, times, grouping, SMTP) that reaches no patient. Unset in normal
+# operation; when set it overrides the recipient unconditionally, so there is no
+# path where a patient is mailed while this has a value.
+OVERRIDE_TO = os.environ.get("REMINDER_OVERRIDE_TO", "").strip()
 
 # Tracked WhatsApp CTA. Repo rule: every outbound customer CTA routes through the
 # go.gojiphysio.com redirector so the click is logged and attributable — never a
@@ -165,7 +171,13 @@ def render_digest_body(sent: list[dict], skipped: list[dict],
     front desk still needs to reach on WhatsApp. Without this the gap would be
     invisible outside Cloud Run logs.
     """
-    head = "DRY RUN — no patient emails were sent." if dry_run else ""
+    if dry_run:
+        head = "DRY RUN — no patient emails were sent."
+    elif OVERRIDE_TO:
+        head = (f"TEST MODE — {OVERRIDE_TO} received every reminder. "
+                "No patient was emailed.")
+    else:
+        head = ""
     verb = "Would have sent" if dry_run else "Sent"
     lines = [head, ""] if head else []
     lines += [
@@ -209,11 +221,22 @@ def _send(msg: EmailMessage, what: str, ref: str | None) -> None:
 def send_reminder(to: str, name: str | None, date_str: str, times: list[str],
                   *, has_clinic: bool, has_home_visit: bool,
                   ref: str | None = None) -> None:
-    """Send one patient reminder. Raises on failure so the caller can ledger it."""
+    """Send one patient reminder. Raises on failure so the caller can ledger it.
+
+    With REMINDER_OVERRIDE_TO set, the body is byte-identical to the patient's
+    but the message goes to the override address, with the intended recipient in
+    the subject so the clinic can check each one landed on the right person.
+    """
     msg = EmailMessage()
-    msg["Subject"] = SUBJECT
+    if OVERRIDE_TO:
+        # Belt and braces: the recipient is replaced here, at the point of send,
+        # so no caller can route around it.
+        msg["Subject"] = f"[TEST -> {to}] {SUBJECT}"
+        msg["To"] = OVERRIDE_TO
+    else:
+        msg["Subject"] = SUBJECT
+        msg["To"] = to
     msg["From"] = formataddr((FROM_NAME, SMTP_USER))
-    msg["To"] = to
     msg["Reply-To"] = SMTP_USER
     msg.set_content(render_reminder_body(
         name, date_str, times,
@@ -226,7 +249,7 @@ def send_digest(sent: list[dict], skipped: list[dict], failed: list[dict],
     """Send the ops digest to the clinic. Best-effort — never fails the run."""
     try:
         msg = EmailMessage()
-        prefix = "[DRY RUN] " if dry_run else ""
+        prefix = "[DRY RUN] " if dry_run else ("[TEST] " if OVERRIDE_TO else "")
         msg["Subject"] = (f"{prefix}Appointment reminders — {_fmt_day(target_date)} "
                           f"({len(sent)} sent, {len(skipped)} unreachable)")
         msg["From"] = formataddr((FROM_NAME, SMTP_USER))

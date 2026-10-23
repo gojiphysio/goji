@@ -23,6 +23,8 @@ tab, honour these:
   We own **both brand names**: "Goji Women's and Family Physiotherapy"
   (canonical/structured) and "Goji Physio" (shorthand) — naming rules in the
   review doc §2.
+- **The SEO/AEO loop** (scheduled audit, approval tiers, AEO measurement
+  protocol, what an agent may self-merge) is governed by `seo/AGENTS.md`.
 - **Compliance is a hard constraint.** `strategy/03-compliance-guardrails.md`
   (Singapore healthcare-advertising rules) governs all copy and claims — check it
   before writing any patient-facing or ad content.

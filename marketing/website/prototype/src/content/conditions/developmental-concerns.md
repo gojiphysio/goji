@@ -1,6 +1,6 @@
 ---
-title: "Developmental Concerns and Early Intervention"
-description: "Is your child not meeting motor milestones? Goji's physiotherapists support early intervention for gross motor delays, hypotonia, and developmental concerns in Singapore."
+title: "Developmental Concerns: Early Intervention"
+description: "Is your child not meeting motor milestones? Goji's physiotherapists support early intervention for gross motor delays, hypotonia and developmental concerns."
 cardTitle: "Developmental Concerns"
 cardLead: "Early physiotherapy for children who are not meeting expected gross motor milestones, or who are moving differently from their peers."
 category: "Paediatrics"
@@ -10,6 +10,7 @@ reviewer:
 ctaSlug: "web-wa"
 order: 1
 draft: false
+relatedServices: ["paediatric-physiotherapy"]
 ---
 
 Developmental physiotherapy focuses on children who are not meeting expected gross motor milestones - sitting, crawling, standing, and walking - or who are moving differently from their peers in ways that may affect their long-term development. Early intervention is the most effective approach: the brain and musculoskeletal system are most responsive to therapy-driven change in the first years of life.

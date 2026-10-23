@@ -1,0 +1,4066 @@
+[
+ {
+  "id": "local-lentor",
+  "q": "physiotherapy lentor",
+  "engine": "google",
+  "date": "2026-10-12",
+  "aio_present": true,
+  "goji_in_aio": true,
+  "aio_cited_sources": [
+   {
+    "url": "https://www.gojiphysio.com/physiotherapy-lentor/",
+    "owner": "Goji Physio"
+   },
+   {
+    "url": "https://www.gojiphysio.com/",
+    "owner": "Goji Physio"
+   },
+   {
+    "url": "https://www.gojiphysio.com/services/",
+    "owner": "Goji Physio"
+   },
+   {
+    "url": "https://www.gojiphysio.com/getting-here/",
+    "owner": "Goji Physio"
+   },
+   {
+    "url": "https://www.instagram.com/gojiphysio/",
+    "owner": "Goji Physio (Instagram)"
+   },
+   {
+    "url": "https://bison-goby-mrsl.squarespace.com/",
+    "owner": "unknown Squarespace site"
+   },
+   {
+    "url": "https://www.gojiphysio.com/book/",
+    "owner": "Goji Physio"
+   },
+   {
+    "url": "https://www.gojiphysio.com/conditions/",
+    "owner": "Goji Physio"
+   },
+   {
+    "url": "https://www.physiomatters.com.sg/",
+    "owner": "Physio Matters"
+   }
+  ],
+  "aio_providers_named": [
+   "Goji Women's and Family Physiotherapy"
+  ],
+  "local_pack_present": false,
+  "goji_in_local_pack": false,
+  "local_pack": [],
+  "organic_top10": [
+   {
+    "pos": 1,
+    "url": "https://www.gojiphysio.com/",
+    "owner": "Goji Physio",
+    "type": "clinic"
+   },
+   {
+    "pos": 2,
+    "url": "https://www.gojiphysio.com/physiotherapy-lentor/",
+    "owner": "Goji Physio",
+    "type": "clinic"
+   },
+   {
+    "pos": 3,
+    "url": "https://www.instagram.com/gojiphysio/",
+    "owner": "Goji Physio (Instagram)",
+    "type": "other"
+   },
+   {
+    "pos": 4,
+    "url": "https://www.facebook.com/lentormodernmall/posts/goji-womens-family-physiotherapy-is-now-open-at-lentor-modern-mall-offering-phys/122179273532752387/",
+    "owner": "Lentor Modern mall (Facebook)",
+    "type": "media"
+   },
+   {
+    "pos": 5,
+    "url": "https://www.gojiphysio.com/getting-here/",
+    "owner": "Goji Physio",
+    "type": "clinic"
+   },
+   {
+    "pos": 6,
+    "url": "https://sg.linkedin.com/in/nanthinii-yegambaram-641950130",
+    "owner": "LinkedIn profile (Lentor Health physio)",
+    "type": "other"
+   },
+   {
+    "pos": 7,
+    "url": "https://luma.com/calendar/cal-yYoLqcpyQaLwxl2",
+    "owner": "Goji Physio (Luma)",
+    "type": "other"
+   },
+   {
+    "pos": 8,
+    "url": "https://lentorhealth.com/home-care/",
+    "owner": "Lentor Health",
+    "type": "other"
+   },
+   {
+    "pos": 9,
+    "url": "https://www.optimove.sg/",
+    "owner": "OptiMove Physio",
+    "type": "clinic"
+   }
+  ],
+  "goji_organic_pos": 1,
+  "winning_format": "single-clinic AIO entity summary + GBP knowledge panel",
+  "notes": "Goji owns the SERP: AIO is entirely about Goji (address, hours, prices); Goji GBP knowledge panel; no multi-business local pack. First load showed only the knowledge panel, AIO appeared on reload."
+ },
+ {
+  "id": "local-lentor-mrt",
+  "q": "physio near lentor mrt",
+  "engine": "google",
+  "date": "2026-10-12",
+  "aio_present": true,
+  "goji_in_aio": true,
+  "aio_cited_sources": [
+   {
+    "url": "https://www.gojiphysio.com/physiotherapy-lentor/",
+    "owner": "Goji Physio"
+   },
+   {
+    "url": "https://maps.app.goo.gl/wBaCkBiDNfF7JCGv8",
+    "owner": "Goji Physio (Google Maps/GBP)"
+   },
+   {
+    "url": "https://www.gojiphysio.com/",
+    "owner": "Goji Physio"
+   }
+  ],
+  "aio_providers_named": [
+   "Goji Women's and Family Physiotherapy"
+  ],
+  "local_pack_present": true,
+  "goji_in_local_pack": true,
+  "local_pack": [
+   "Goji Women's and Family Physiotherapy",
+   "Elevate Physiotherapy (Serangoon)",
+   "Heartland Rehab @ Woodleigh"
+  ],
+  "organic_top10": [
+   {
+    "pos": 1,
+    "url": "https://www.gojiphysio.com/physiotherapy-lentor/",
+    "owner": "Goji Physio",
+    "type": "clinic"
+   },
+   {
+    "pos": 2,
+    "url": "https://www.gojiphysio.com/",
+    "owner": "Goji Physio",
+    "type": "clinic"
+   },
+   {
+    "pos": 3,
+    "url": "https://www.gojiphysio.com/getting-here/",
+    "owner": "Goji Physio",
+    "type": "clinic"
+   },
+   {
+    "pos": 4,
+    "url": "https://www.facebook.com/lentormodernmall/posts/goji-womens-family-physiotherapy-is-now-open-at-lentor-modern-mall-offering-phys/122179273532752387/",
+    "owner": "Lentor Modern mall (Facebook)",
+    "type": "media"
+   },
+   {
+    "pos": 5,
+    "url": "https://physiocircle.sg/book/",
+    "owner": "Physio Circle",
+    "type": "clinic"
+   },
+   {
+    "pos": 6,
+    "url": "https://maps.app.goo.gl/wBaCkBiDNfF7JCGv8",
+    "owner": "Goji Physio (Google Maps/GBP)",
+    "type": "directory"
+   },
+   {
+    "pos": 7,
+    "url": "https://healingtouchspa.com/",
+    "owner": "Healing Touch Spa",
+    "type": "other"
+   },
+   {
+    "pos": 8,
+    "url": "https://www.thrivehealthcare.com.sg/",
+    "owner": "Thrive Healthcare",
+    "type": "clinic"
+   }
+  ],
+  "goji_organic_pos": 1,
+  "winning_format": "local pack + single-clinic AIO",
+  "notes": "Goji #1 in AIO, local pack and organic; also a Goji YouTube Short (directions from MRT) in the Videos block."
+ },
+ {
+  "id": "local-amk",
+  "q": "physio ang mo kio",
+  "engine": "google",
+  "date": "2026-10-12",
+  "aio_present": false,
+  "goji_in_aio": false,
+  "aio_cited_sources": [],
+  "aio_providers_named": [],
+  "local_pack_present": true,
+  "goji_in_local_pack": true,
+  "local_pack": [
+   "BMJ Physiotherapy (Ang Mo Kio)",
+   "Refresh Physiocare @ AMK",
+   "Goji Women's and Family Physiotherapy"
+  ],
+  "organic_top10": [
+   {
+    "pos": 1,
+    "url": "https://bmjtherapy.com/ang-mo-kio/",
+    "owner": "BMJ Physiotherapy",
+    "type": "clinic"
+   },
+   {
+    "pos": 2,
+    "url": "https://www.refreshphysiocare.com.sg/post/pain-management-ang-mo-kio",
+    "owner": "Refresh Physiocare",
+    "type": "clinic"
+   },
+   {
+    "pos": 3,
+    "url": "https://www.touch.org.sg/get-assistance/seniors/community-musculoskeletal-clinic.html",
+    "owner": "TOUCH Community Services",
+    "type": "clinic"
+   },
+   {
+    "pos": 4,
+    "url": "https://ntuchealth.sg/physiotherapy-and-rehabilitation/services/physiotherapy",
+    "owner": "NTUC Health",
+    "type": "clinic"
+   },
+   {
+    "pos": 5,
+    "url": "https://m.yelp.com/search?cflt=physicaltherapy&find_loc=Ang+Mo+Kio",
+    "owner": "Yelp",
+    "type": "directory"
+   },
+   {
+    "pos": 6,
+    "url": "https://www.clinicgeek.com/ang-mo-kio/physiotherapy",
+    "owner": "Clinic Geek",
+    "type": "directory"
+   },
+   {
+    "pos": 7,
+    "url": "https://www.refreshphysiocare.com.sg/",
+    "owner": "Refresh Physiocare",
+    "type": "clinic"
+   },
+   {
+    "pos": 8,
+    "url": "https://www.nhghealth.com.sg/find-care/Service/nhg-polyclinics-physiotherapy",
+    "owner": "NHG Health (polyclinics)",
+    "type": "government"
+   },
+   {
+    "pos": 9,
+    "url": "https://www.instagram.com/p/CcxNQVNF7F4/",
+    "owner": "BMJ Physiotherapy (Instagram)",
+    "type": "other"
+   }
+  ],
+  "goji_organic_pos": null,
+  "winning_format": "local pack + location landing pages",
+  "notes": "Goji 3rd of 3 organic pack slots (plus 1 sponsored: The Rehab Lab Plus); Google auto-expanded to 'physiotherapy ang mo kio'. No AIO."
+ },
+ {
+  "id": "local-thomson",
+  "q": "physiotherapy upper thomson",
+  "engine": "google",
+  "date": "2026-10-12",
+  "aio_present": false,
+  "goji_in_aio": false,
+  "aio_cited_sources": [],
+  "aio_providers_named": [],
+  "local_pack_present": true,
+  "goji_in_local_pack": false,
+  "local_pack": [
+   "ProRehab Physiotherapy Upper Thomson",
+   "The Physiotherapy Department (The Physio Dept.)",
+   "Chiropractic First - Upper Thomson Clinic"
+  ],
+  "organic_top10": [
+   {
+    "pos": 1,
+    "url": "https://www.thephysiodept.com/",
+    "owner": "The Physiotherapy Department",
+    "type": "clinic"
+   },
+   {
+    "pos": 2,
+    "url": "https://www.prorehab.sg/",
+    "owner": "ProRehab Physiotherapy",
+    "type": "clinic"
+   },
+   {
+    "pos": 3,
+    "url": "https://www.drpanda.one/physiotherapy",
+    "owner": "Dr Panda (Bishan)",
+    "type": "clinic"
+   },
+   {
+    "pos": 4,
+    "url": "https://www.prorehab.sg/physiotherapy",
+    "owner": "ProRehab Physiotherapy",
+    "type": "clinic"
+   },
+   {
+    "pos": 5,
+    "url": "https://www.osteopathyclinic.sg/",
+    "owner": "The Osteopathy Clinic",
+    "type": "clinic"
+   },
+   {
+    "pos": 6,
+    "url": "https://www.thephysiodept.com/faq",
+    "owner": "The Physiotherapy Department",
+    "type": "clinic"
+   },
+   {
+    "pos": 7,
+    "url": "https://www.instagram.com/thephysiodept/",
+    "owner": "The Physiotherapy Department (Instagram)",
+    "type": "other"
+   },
+   {
+    "pos": 8,
+    "url": "https://harmonyhealthclinicandsurgery.com/",
+    "owner": "Harmony Health Clinic & Surgery",
+    "type": "clinic"
+   },
+   {
+    "pos": 9,
+    "url": "https://www.gojiphysio.com/physiotherapy-lentor/",
+    "owner": "Goji Physio",
+    "type": "clinic"
+   }
+  ],
+  "goji_organic_pos": 9,
+  "winning_format": "local pack + clinic homepages in Upper Thomson",
+  "notes": "No AIO. Goji's Lentor page ranks #9 organic; not in pack (1 sponsored: The Rehab Lab Plus)."
+ },
+ {
+  "id": "local-wh-lentor",
+  "q": "women's health physio lentor",
+  "engine": "google",
+  "date": "2026-10-12",
+  "aio_present": true,
+  "goji_in_aio": true,
+  "aio_cited_sources": [
+   {
+    "url": "https://www.gojiphysio.com/physiotherapy-lentor/",
+    "owner": "Goji Physio"
+   },
+   {
+    "url": "https://www.gojiphysio.com/",
+    "owner": "Goji Physio"
+   },
+   {
+    "url": "https://www.gojiphysio.com/services/",
+    "owner": "Goji Physio"
+   },
+   {
+    "url": "https://www.gojiphysio.com/team/cheryl-long/",
+    "owner": "Goji Physio"
+   },
+   {
+    "url": "https://www.gojiphysio.com/services/mummy-baby-assessment/",
+    "owner": "Goji Physio"
+   },
+   {
+    "url": "https://www.gojiphysio.com/team/claire-ng/",
+    "owner": "Goji Physio"
+   },
+   {
+    "url": "https://www.gojiphysio.com/conditions/",
+    "owner": "Goji Physio"
+   }
+  ],
+  "aio_providers_named": [
+   "Goji Women's and Family Physiotherapy"
+  ],
+  "local_pack_present": false,
+  "goji_in_local_pack": false,
+  "local_pack": [],
+  "organic_top10": [
+   {
+    "pos": 1,
+    "url": "https://www.gojiphysio.com/",
+    "owner": "Goji Physio",
+    "type": "clinic"
+   },
+   {
+    "pos": 2,
+    "url": "https://www.gojiphysio.com/physiotherapy-lentor/",
+    "owner": "Goji Physio",
+    "type": "clinic"
+   },
+   {
+    "pos": 3,
+    "url": "https://www.instagram.com/gojiphysio/",
+    "owner": "Goji Physio (Instagram)",
+    "type": "other"
+   },
+   {
+    "pos": 4,
+    "url": "https://www.facebook.com/lentormodernmall/posts/goji-womens-family-physiotherapy-is-now-open-at-lentor-modern-mall-offering-phys/122179273532752387/",
+    "owner": "Lentor Modern mall (Facebook)",
+    "type": "media"
+   },
+   {
+    "pos": 5,
+    "url": "https://www.gojiphysio.com/services/",
+    "owner": "Goji Physio",
+    "type": "clinic"
+   },
+   {
+    "pos": 6,
+    "url": "https://www.instagram.com/reel/DYm_DntDXyo/",
+    "owner": "Goji Physio (Instagram)",
+    "type": "other"
+   },
+   {
+    "pos": 7,
+    "url": "https://www.instagram.com/p/DX56Kv-mA-2/",
+    "owner": "Goji Physio (Instagram)",
+    "type": "other"
+   },
+   {
+    "pos": 8,
+    "url": "https://www.gojiphysio.com/team/cheryl-long/",
+    "owner": "Goji Physio",
+    "type": "clinic"
+   },
+   {
+    "pos": 9,
+    "url": "https://www.lentormodern.com.sg/shops/",
+    "owner": "Lentor Modern mall",
+    "type": "directory"
+   }
+  ],
+  "goji_organic_pos": 1,
+  "winning_format": "single-clinic AIO entity summary + GBP knowledge panel",
+  "notes": "Goji owns the whole page: AIO (team, prices, conditions all from gojiphysio.com), knowledge panel, 8 of 9 organic results Goji-owned."
+ },
+ {
+  "id": "local-wh-katong",
+  "q": "women's health physio katong",
+  "engine": "google",
+  "date": "2026-10-12",
+  "aio_present": false,
+  "goji_in_aio": false,
+  "aio_cited_sources": [],
+  "aio_providers_named": [],
+  "local_pack_present": true,
+  "goji_in_local_pack": true,
+  "local_pack": [
+   "Embrace Physiotherapy- Singapore's dedicated women's physiotherapy clinic.",
+   "Women And Children Centre by PSC",
+   "Goji Women's and Family Physiotherapy"
+  ],
+  "organic_top10": [
+   {
+    "pos": 1,
+    "url": "https://www.embracephysio.sg/",
+    "owner": "Embrace Physiotherapy",
+    "type": "clinic"
+   },
+   {
+    "pos": 2,
+    "url": "https://pscwomenandchildren.sg/",
+    "owner": "Women & Children Centre by PSC",
+    "type": "clinic"
+   },
+   {
+    "pos": 3,
+    "url": "https://physiodownunder.sg/women-health",
+    "owner": "Physio Down Under",
+    "type": "clinic"
+   },
+   {
+    "pos": 4,
+    "url": "https://physioandsole.com.sg/locations/east-gate-katong/",
+    "owner": "Physio and Sole",
+    "type": "clinic"
+   },
+   {
+    "pos": 5,
+    "url": "https://milestonephysiotherapy.com/",
+    "owner": "Milestone Physiotherapy",
+    "type": "clinic"
+   },
+   {
+    "pos": 6,
+    "url": "https://pscwomenandchildren.sg/womens-health-physiotherapy-services/",
+    "owner": "Women & Children Centre by PSC",
+    "type": "clinic"
+   },
+   {
+    "pos": 7,
+    "url": "https://physiodownunder.sg/",
+    "owner": "Physio Down Under",
+    "type": "clinic"
+   },
+   {
+    "pos": 8,
+    "url": "https://www.healthcare.com.sg/item/women-and-children-centre-by-psc-east-gate-katong/",
+    "owner": "healthcare.com.sg",
+    "type": "directory"
+   },
+   {
+    "pos": 9,
+    "url": "https://www.physiomatters.com.sg/",
+    "owner": "Physio Matters",
+    "type": "clinic"
+   }
+  ],
+  "goji_organic_pos": null,
+  "winning_format": "local pack + women's-health clinic homepages",
+  "notes": "No AIO. Goji appears 3rd in the local pack despite being far from Katong (category relevance); not in organic."
+ },
+ {
+  "id": "wedge-womens-physio",
+  "q": "women's physio singapore",
+  "engine": "google",
+  "date": "2026-10-12",
+  "aio_present": true,
+  "goji_in_aio": true,
+  "aio_cited_sources": [
+   {
+    "url": "https://www.embracephysio.sg/our-team/",
+    "owner": "Embrace Physiotherapy"
+   },
+   {
+    "url": "https://www.embracephysio.sg/",
+    "owner": "Embrace Physiotherapy"
+   },
+   {
+    "url": "https://www.physiomatters.com.sg/",
+    "owner": "Physio Matters"
+   },
+   {
+    "url": "https://www.physiomatters.com.sg/pelvic-floor-therapy-singapore",
+    "owner": "Physio Matters"
+   },
+   {
+    "url": "https://calyx.sg/",
+    "owner": "Calyx Women's Health Physiotherapy"
+   },
+   {
+    "url": "https://www.singaporephysio.com/services/womens-health/",
+    "owner": "Singapore Physio"
+   },
+   {
+    "url": "https://physiovitae.sg/physiotherapy-cost-singapore-2026/",
+    "owner": "Physio Vitae"
+   },
+   {
+    "url": "https://www.embracephysio.sg/services/womens-health-physiotherapy-singapore/",
+    "owner": "Embrace Physiotherapy"
+   },
+   {
+    "url": "https://www.homage.sg/resources/physiotherapy-clinics-women-singapore/",
+    "owner": "Homage (roundup)"
+   },
+   {
+    "url": "https://physioasia.com/services/womens-health-physiotherapy/",
+    "owner": "Physio Asia"
+   },
+   {
+    "url": "https://www.edgehealthcare.com.sg/womans-health/",
+    "owner": "Edge Healthcare"
+   },
+   {
+    "url": "https://www.physiomatters.com.sg/danielle-barratt",
+    "owner": "Physio Matters"
+   },
+   {
+    "url": "https://spineandpelvisclinic.com/services/womens-health-physiotherapy/",
+    "owner": "Spine and Pelvis Clinic"
+   }
+  ],
+  "aio_providers_named": [
+   "Embrace Physiotherapy",
+   "Physio Down Under",
+   "Goji Women's and Family Physiotherapy",
+   "PhysioMatters",
+   "Calyx Women's Health Physiotherapy"
+  ],
+  "local_pack_present": true,
+  "goji_in_local_pack": true,
+  "local_pack": [
+   "Goji Women's and Family Physiotherapy",
+   "Embrace Physiotherapy",
+   "Physio Down Under"
+  ],
+  "organic_top10": [
+   {
+    "pos": 1,
+    "url": "https://www.embracephysio.sg/",
+    "owner": "Embrace Physiotherapy",
+    "type": "clinic"
+   },
+   {
+    "pos": 2,
+    "url": "https://www.homage.sg/resources/physiotherapy-clinics-women-singapore/",
+    "owner": "Homage",
+    "type": "roundup"
+   },
+   {
+    "pos": 3,
+    "url": "https://pscwomenandchildren.sg/womens-health-physiotherapy-services/",
+    "owner": "Women & Children Centre by PSC",
+    "type": "clinic"
+   },
+   {
+    "pos": 4,
+    "url": "https://physiodownunder.sg/",
+    "owner": "Physio Down Under",
+    "type": "clinic"
+   },
+   {
+    "pos": 5,
+    "url": "https://www.physiomatters.com.sg/",
+    "owner": "Physio Matters",
+    "type": "clinic"
+   },
+   {
+    "pos": 6,
+    "url": "https://www.kkh.com.sg/our-specialties/allied-health-specialties/physiotherapy",
+    "owner": "KK Women's and Children's Hospital",
+    "type": "hospital"
+   },
+   {
+    "pos": 7,
+    "url": "https://www.edgehealthcare.com.sg/womans-health/",
+    "owner": "Edge Healthcare",
+    "type": "clinic"
+   },
+   {
+    "pos": 8,
+    "url": "https://calyx.sg/",
+    "owner": "Calyx Women's Health Physiotherapy",
+    "type": "clinic"
+   },
+   {
+    "pos": 9,
+    "url": "https://physioactive.sg/womens-health-and-physio/",
+    "owner": "PhysioActive",
+    "type": "clinic"
+   }
+  ],
+  "goji_organic_pos": null,
+  "winning_format": "AIO clinic list (GBP entity cards) + local pack",
+  "notes": "Goji #1 in local pack and named 3rd of 5 in AIO clinic list via its GBP entity, but no gojiphysio.com URL cited; not in organic top 9. 1 sponsored pack slot (The Rehab Lab Plus)."
+ },
+ {
+  "id": "wedge-wh-physio",
+  "q": "women's health physiotherapist singapore",
+  "engine": "google",
+  "date": "2026-10-12",
+  "aio_present": true,
+  "goji_in_aio": true,
+  "aio_cited_sources": [
+   {
+    "url": "https://www.sassymamasg.com/experts-top-pelvic-floor-experts-postnatal-physiotherapists-pregnancy-singapore/",
+    "owner": "Sassy Mama (roundup)"
+   },
+   {
+    "url": "https://www.physiomatters.com.sg/",
+    "owner": "Physio Matters"
+   },
+   {
+    "url": "https://pscwomenandchildren.sg/womens-health-physiotherapy-services/womens-health-physiotherapy-pelvic-floor-rehabilitation/",
+    "owner": "Women & Children Centre by PSC"
+   },
+   {
+    "url": "https://www.edgehealthcare.com.sg/womans-health/",
+    "owner": "Edge Healthcare"
+   },
+   {
+    "url": "https://www.embracephysio.sg/services/womens-health-physiotherapy-singapore/",
+    "owner": "Embrace Physiotherapy"
+   },
+   {
+    "url": "https://www.embracephysio.sg/",
+    "owner": "Embrace Physiotherapy"
+   },
+   {
+    "url": "https://www.physiomatters.com.sg/pelvic-floor-therapy-singapore",
+    "owner": "Physio Matters"
+   },
+   {
+    "url": "https://calyx.sg/",
+    "owner": "Calyx Women's Health Physiotherapy"
+   },
+   {
+    "url": "https://orchardhealthclinic.com/women-health-physiotherapy/",
+    "owner": "Orchard Health Clinic"
+   },
+   {
+    "url": "https://physiofocus.com.sg/services/womens-health/",
+    "owner": "Physio Focus"
+   }
+  ],
+  "aio_providers_named": [
+   "Embrace Physiotherapy",
+   "Physio Down Under",
+   "Goji Women's and Family Physiotherapy",
+   "Calyx Women's Health Physiotherapy",
+   "PhysioMatters"
+  ],
+  "local_pack_present": true,
+  "goji_in_local_pack": true,
+  "local_pack": [
+   "Goji Women's and Family Physiotherapy",
+   "Embrace Physiotherapy",
+   "Physio Down Under"
+  ],
+  "organic_top10": [
+   {
+    "pos": 1,
+    "url": "https://www.homage.sg/resources/physiotherapy-clinics-women-singapore/",
+    "owner": "Homage",
+    "type": "roundup"
+   },
+   {
+    "pos": 2,
+    "url": "https://pscwomenandchildren.sg/womens-health-physiotherapy-services/",
+    "owner": "Women & Children Centre by PSC",
+    "type": "clinic"
+   },
+   {
+    "pos": 3,
+    "url": "https://physiodownunder.sg/",
+    "owner": "Physio Down Under",
+    "type": "clinic"
+   },
+   {
+    "pos": 4,
+    "url": "https://www.edgehealthcare.com.sg/womans-health/",
+    "owner": "Edge Healthcare",
+    "type": "clinic"
+   },
+   {
+    "pos": 5,
+    "url": "https://www.physiomatters.com.sg/",
+    "owner": "Physio Matters",
+    "type": "clinic"
+   },
+   {
+    "pos": 6,
+    "url": "https://pscwomenandchildren.sg/womens-health-physiotherapy-services/womens-health-physiotherapy-pelvic-floor-rehabilitation/",
+    "owner": "Women & Children Centre by PSC",
+    "type": "clinic"
+   },
+   {
+    "pos": 7,
+    "url": "https://www.embracephysio.sg/",
+    "owner": "Embrace Physiotherapy",
+    "type": "clinic"
+   },
+   {
+    "pos": 8,
+    "url": "https://www.sassymamasg.com/experts-top-pelvic-floor-experts-postnatal-physiotherapists-pregnancy-singapore/",
+    "owner": "Sassy Mama",
+    "type": "roundup"
+   },
+   {
+    "pos": 9,
+    "url": "https://physioactive.sg/womens-health-and-physio/",
+    "owner": "PhysioActive",
+    "type": "clinic"
+   }
+  ],
+  "goji_organic_pos": null,
+  "winning_format": "AIO clinic list (GBP entity cards) + local pack",
+  "notes": "Goji #1 in local pack and named 3rd of 5 in AIO list (GBP card, 5.0/21 reviews) but not cited by URL; not in organic."
+ },
+ {
+  "id": "wedge-pf",
+  "q": "pelvic floor physiotherapy singapore",
+  "engine": "google",
+  "date": "2026-10-12",
+  "aio_present": true,
+  "goji_in_aio": false,
+  "aio_cited_sources": [
+   {
+    "url": "https://pscwomenandchildren.sg/womens-health-physiotherapy-services/womens-health-physiotherapy-pelvic-floor-rehabilitation/",
+    "owner": "Women & Children Centre by PSC"
+   },
+   {
+    "url": "https://www.physiomatters.com.sg/pelvic-floor-therapy-singapore",
+    "owner": "Physio Matters"
+   },
+   {
+    "url": "https://www.embracephysio.sg/services/womens-health-physiotherapy-singapore/",
+    "owner": "Embrace Physiotherapy"
+   },
+   {
+    "url": "https://aareurology.sg/conditions/pelvic-floor-dysfunction/",
+    "owner": "AARE Urocare"
+   },
+   {
+    "url": "https://physioasia.com/pelvis-hip-womens-health/",
+    "owner": "Physio Asia"
+   },
+   {
+    "url": "https://www.sgh.com.sg/our-specialties/pelvic-floor-disorder",
+    "owner": "Singapore General Hospital"
+   },
+   {
+    "url": "https://physiodownunder.sg/",
+    "owner": "Physio Down Under"
+   },
+   {
+    "url": "https://www.singhealth.com.sg/tests-procedures/physiotherapy-for-pelvic-organ-prolapse-female-urinary-disorders",
+    "owner": "SingHealth"
+   },
+   {
+    "url": "https://orchardhealthclinic.com/pelvic-floor-treatment-for-prenatal-and-postnatal/",
+    "owner": "Orchard Health Clinic"
+   },
+   {
+    "url": "https://physiodownunder.sg/men-health",
+    "owner": "Physio Down Under"
+   },
+   {
+    "url": "https://www.singhealth.com.sg/tests-procedures/physiotherapy-for-stress-urinary-incontinence-female-urinary-disorders",
+    "owner": "SingHealth"
+   }
+  ],
+  "aio_providers_named": [
+   "Physio Down Under",
+   "Embrace Physiotherapy",
+   "PhysioMatters",
+   "SingHealth Duke-NUS Pelvic Floor Disorders Centre / SGH"
+  ],
+  "local_pack_present": true,
+  "goji_in_local_pack": false,
+  "local_pack": [
+   "Physio Down Under",
+   "Reverseme Pelvis Care, Thomson Plaza",
+   "Embrace Physiotherapy"
+  ],
+  "organic_top10": [
+   {
+    "pos": 1,
+    "url": "https://pscwomenandchildren.sg/womens-health-physiotherapy-services/womens-health-physiotherapy-pelvic-floor-rehabilitation/",
+    "owner": "Women & Children Centre by PSC",
+    "type": "clinic"
+   },
+   {
+    "pos": 2,
+    "url": "https://www.physiomatters.com.sg/pelvic-floor-therapy-singapore",
+    "owner": "Physio Matters",
+    "type": "clinic"
+   },
+   {
+    "pos": 3,
+    "url": "https://www.sgh.com.sg/our-specialties/pelvic-floor-disorder",
+    "owner": "Singapore General Hospital",
+    "type": "hospital"
+   },
+   {
+    "pos": 4,
+    "url": "https://www.sassymamasg.com/experts-top-pelvic-floor-experts-postnatal-physiotherapists-pregnancy-singapore/",
+    "owner": "Sassy Mama",
+    "type": "roundup"
+   },
+   {
+    "pos": 5,
+    "url": "https://phoenixrehabgroup.com/your-concise-guide-to-pelvic-floor-physiotherapy/",
+    "owner": "Phoenix Rehab Group",
+    "type": "clinic"
+   },
+   {
+    "pos": 6,
+    "url": "https://aareurology.sg/conditions/pelvic-floor-dysfunction/",
+    "owner": "AARE Urocare",
+    "type": "clinic"
+   },
+   {
+    "pos": 7,
+    "url": "https://www.singhealth.com.sg/tests-procedures/physiotherapy-for-pelvic-organ-prolapse-female-urinary-disorders",
+    "owner": "SingHealth",
+    "type": "hospital"
+   },
+   {
+    "pos": 8,
+    "url": "https://physiodownunder.sg/",
+    "owner": "Physio Down Under",
+    "type": "clinic"
+   },
+   {
+    "pos": 9,
+    "url": "https://milestonephysiotherapy.com/womens-health-pelvic-floor",
+    "owner": "Milestone Physiotherapy",
+    "type": "clinic"
+   }
+  ],
+  "goji_organic_pos": null,
+  "winning_format": "AIO clinic list + dedicated pelvic-floor service pages",
+  "notes": "Goji absent everywhere. Pack: Physio Down Under, Reverseme, Embrace (+ ad: Prologue Centre for Women's Wellness)."
+ },
+ {
+  "id": "wedge-pf-near-me",
+  "q": "pelvic floor physio near me singapore",
+  "engine": "google",
+  "date": "2026-10-12",
+  "aio_present": false,
+  "goji_in_aio": false,
+  "aio_cited_sources": [],
+  "aio_providers_named": [],
+  "local_pack_present": true,
+  "goji_in_local_pack": false,
+  "local_pack": [
+   "Physio Down Under",
+   "Embrace Physiotherapy",
+   "Reverseme Pelvis Care, Thomson Plaza"
+  ],
+  "organic_top10": [
+   {
+    "pos": 1,
+    "url": "https://www.physiomatters.com.sg/pelvic-floor-therapy-singapore",
+    "owner": "Physio Matters",
+    "type": "clinic"
+   },
+   {
+    "pos": 2,
+    "url": "https://www.sassymamasg.com/experts-top-pelvic-floor-experts-postnatal-physiotherapists-pregnancy-singapore/",
+    "owner": "Sassy Mama",
+    "type": "roundup"
+   },
+   {
+    "pos": 3,
+    "url": "https://pscwomenandchildren.sg/womens-health-physiotherapy-services/womens-health-physiotherapy-pelvic-floor-rehabilitation/",
+    "owner": "Women & Children Centre by PSC",
+    "type": "clinic"
+   },
+   {
+    "pos": 4,
+    "url": "https://physiodownunder.sg/",
+    "owner": "Physio Down Under",
+    "type": "clinic"
+   },
+   {
+    "pos": 5,
+    "url": "https://www.sgh.com.sg/our-specialties/pelvic-floor-disorder",
+    "owner": "Singapore General Hospital",
+    "type": "hospital"
+   },
+   {
+    "pos": 6,
+    "url": "https://phoenixrehabgroup.com/your-concise-guide-to-pelvic-floor-physiotherapy/",
+    "owner": "Phoenix Rehab Group",
+    "type": "clinic"
+   },
+   {
+    "pos": 7,
+    "url": "https://physioactive.sg/womens-health-and-physio/",
+    "owner": "PhysioActive",
+    "type": "clinic"
+   },
+   {
+    "pos": 8,
+    "url": "https://www.embracephysio.sg/",
+    "owner": "Embrace Physiotherapy",
+    "type": "clinic"
+   },
+   {
+    "pos": 9,
+    "url": "https://orchardhealthclinic.com/pelvic-floor-treatment-for-prenatal-and-postnatal/",
+    "owner": "Orchard Health Clinic",
+    "type": "clinic"
+   }
+  ],
+  "goji_organic_pos": null,
+  "winning_format": "local pack + pelvic-floor service pages",
+  "notes": "No AIO. Goji absent from pack and organic."
+ },
+ {
+  "id": "wedge-postnatal",
+  "q": "postnatal physio singapore",
+  "engine": "google",
+  "date": "2026-10-12",
+  "aio_present": true,
+  "goji_in_aio": false,
+  "aio_cited_sources": [
+   {
+    "url": "https://orchardhealthclinic.com/postnatal-physiotherapy/",
+    "owner": "Orchard Health Clinic"
+   },
+   {
+    "url": "https://physioactive.sg/womens-health-and-physio/",
+    "owner": "PhysioActive"
+   },
+   {
+    "url": "https://rapidphysiocare.com/antenatal-postnatal-care/",
+    "owner": "Rapid Physiocare"
+   },
+   {
+    "url": "https://cityosteophysio.com/womens-health-postnatal-specialists-singapore",
+    "owner": "City Osteopathy & Physiotherapy"
+   },
+   {
+    "url": "https://pscwomenandchildren.sg/womens-health-physiotherapy-services/womens-health-physiotherapy-pre-postnatal-physiotherapy-in-singapore/",
+    "owner": "Women & Children Centre by PSC"
+   },
+   {
+    "url": "https://www.embracephysio.sg/services/pre-postnatal-physiotherapy/",
+    "owner": "Embrace Physiotherapy"
+   },
+   {
+    "url": "https://www.physiomatters.com.sg/prenatal-and-postnatal-physiotherapy",
+    "owner": "Physio Matters"
+   },
+   {
+    "url": "https://physiodownunder.sg/postnatal-reformer",
+    "owner": "Physio Down Under"
+   },
+   {
+    "url": "https://physiodownunder.sg/",
+    "owner": "Physio Down Under"
+   },
+   {
+    "url": "https://orchardhealthclinic.com/prenatal-physiotherapy/",
+    "owner": "Orchard Health Clinic"
+   },
+   {
+    "url": "https://www.physiomatters.com.sg/post/postpartum-recovery-7-signs-to-visit-a-women-s-physiotherapist-clinic-in-singapore",
+    "owner": "Physio Matters"
+   },
+   {
+    "url": "https://optimove.sg/pregnancy-prenatal-postnatal/",
+    "owner": "OptiMove Physio"
+   },
+   {
+    "url": "https://www.edgehealthcare.com.sg/postnatal-pilates/",
+    "owner": "Edge Healthcare"
+   },
+   {
+    "url": "https://www.embracephysio.sg/services/classes/",
+    "owner": "Embrace Physiotherapy"
+   }
+  ],
+  "aio_providers_named": [
+   "Embrace Physiotherapy",
+   "City Osteopathy & Physiotherapy",
+   "Physio Down Under",
+   "Orchard Health Clinic",
+   "PhysioMatters"
+  ],
+  "local_pack_present": true,
+  "goji_in_local_pack": true,
+  "local_pack": [
+   "Goji Women's and Family Physiotherapy",
+   "Physio Down Under",
+   "Reverseme Pelvis Care, Thomson Plaza"
+  ],
+  "organic_top10": [
+   {
+    "pos": 1,
+    "url": "https://pscwomenandchildren.sg/womens-health-physiotherapy-services/womens-health-physiotherapy-pre-postnatal-physiotherapy-in-singapore/",
+    "owner": "Women & Children Centre by PSC",
+    "type": "clinic"
+   },
+   {
+    "pos": 2,
+    "url": "https://cityosteophysio.com/womens-health-postnatal-specialists-singapore",
+    "owner": "City Osteopathy & Physiotherapy",
+    "type": "clinic"
+   },
+   {
+    "pos": 3,
+    "url": "https://www.physiomatters.com.sg/prenatal-and-postnatal-physiotherapy",
+    "owner": "Physio Matters",
+    "type": "clinic"
+   },
+   {
+    "pos": 4,
+    "url": "https://orchardhealthclinic.com/postnatal-physiotherapy/",
+    "owner": "Orchard Health Clinic",
+    "type": "clinic"
+   },
+   {
+    "pos": 5,
+    "url": "https://rapidphysiocare.com/antenatal-postnatal-care/",
+    "owner": "Rapid Physiocare",
+    "type": "clinic"
+   },
+   {
+    "pos": 6,
+    "url": "https://activexphysio.com/conditions/prenatal-and-postnatal-pain",
+    "owner": "ActiveX Physio",
+    "type": "clinic"
+   },
+   {
+    "pos": 7,
+    "url": "https://www.kkh.com.sg/our-specialties/allied-health-specialties/physiotherapy",
+    "owner": "KK Women's and Children's Hospital",
+    "type": "hospital"
+   },
+   {
+    "pos": 8,
+    "url": "https://physioactive.sg/womens-health-and-physio/",
+    "owner": "PhysioActive",
+    "type": "clinic"
+   },
+   {
+    "pos": 9,
+    "url": "https://optimove.sg/pregnancy-prenatal-postnatal/",
+    "owner": "OptiMove Physio",
+    "type": "clinic"
+   }
+  ],
+  "goji_organic_pos": null,
+  "winning_format": "AIO explainer + clinic list (GBP cards) + dedicated postnatal service pages",
+  "notes": "Goji #1 in local pack but omitted from the AIO's 5-clinic list and not in organic."
+ },
+ {
+  "id": "wedge-postnatal-best",
+  "q": "best postnatal physio in singapore",
+  "engine": "google",
+  "date": "2026-10-12",
+  "aio_present": true,
+  "goji_in_aio": false,
+  "aio_cited_sources": [
+   {
+    "url": "https://www.sassymamasg.com/experts-top-pelvic-floor-experts-postnatal-physiotherapists-pregnancy-singapore/",
+    "owner": "Sassy Mama (roundup)"
+   },
+   {
+    "url": "https://physiodownunder.sg/",
+    "owner": "Physio Down Under"
+   },
+   {
+    "url": "https://orchardhealthclinic.com/prenatal-physiotherapy/",
+    "owner": "Orchard Health Clinic"
+   },
+   {
+    "url": "https://orchardhealthclinic.com/postnatal-physiotherapy/",
+    "owner": "Orchard Health Clinic"
+   },
+   {
+    "url": "https://cityosteophysio.com/womens-health-postnatal-specialists-singapore",
+    "owner": "City Osteopathy & Physiotherapy"
+   },
+   {
+    "url": "https://www.embracephysio.sg/",
+    "owner": "Embrace Physiotherapy"
+   },
+   {
+    "url": "https://www.physiomatters.com.sg/",
+    "owner": "Physio Matters"
+   },
+   {
+    "url": "https://physiodownunder.sg/postnatal-reformer",
+    "owner": "Physio Down Under"
+   },
+   {
+    "url": "https://www.physiomatters.com.sg/prenatal-and-postnatal-physiotherapy",
+    "owner": "Physio Matters"
+   },
+   {
+    "url": "https://www.physiotherapysgc.com/health2mama",
+    "owner": "Health2Mama (Physiotherapy SGC)"
+   },
+   {
+    "url": "https://www.embracephysio.sg/services/classes/mum-bub-classes/",
+    "owner": "Embrace Physiotherapy"
+   },
+   {
+    "url": "https://www.embracephysio.sg/services/pre-postnatal-physiotherapy/",
+    "owner": "Embrace Physiotherapy"
+   },
+   {
+    "url": "https://physiovitae.sg/physiotherapy-cost-singapore-2026/",
+    "owner": "Physio Vitae"
+   },
+   {
+    "url": "https://www.subiacowomenshealth.com.au/physiotherapy-treatment/postnatal-care/",
+    "owner": "Subiaco Women's Health (AU)"
+   }
+  ],
+  "aio_providers_named": [
+   "Embrace Physiotherapy",
+   "Physio Down Under",
+   "Health2Mama",
+   "PhysioMatters",
+   "City Osteopathy & Physiotherapy"
+  ],
+  "local_pack_present": true,
+  "goji_in_local_pack": false,
+  "local_pack": [
+   "The Rehab Lab Plus",
+   "Physio Down Under",
+   "Embrace Physiotherapy"
+  ],
+  "organic_top10": [
+   {
+    "pos": 1,
+    "url": "https://www.sassymamasg.com/experts-top-pelvic-floor-experts-postnatal-physiotherapists-pregnancy-singapore/",
+    "owner": "Sassy Mama",
+    "type": "roundup"
+   },
+   {
+    "pos": 2,
+    "url": "https://pscwomenandchildren.sg/womens-health-physiotherapy-services/womens-health-physiotherapy-pre-postnatal-physiotherapy-in-singapore/",
+    "owner": "Women & Children Centre by PSC",
+    "type": "clinic"
+   },
+   {
+    "pos": 3,
+    "url": "https://www.embracephysio.sg/",
+    "owner": "Embrace Physiotherapy",
+    "type": "clinic"
+   },
+   {
+    "pos": 4,
+    "url": "https://physiodownunder.sg/",
+    "owner": "Physio Down Under",
+    "type": "clinic"
+   },
+   {
+    "pos": 5,
+    "url": "https://www.physiomatters.com.sg/prenatal-and-postnatal-physiotherapy",
+    "owner": "Physio Matters",
+    "type": "clinic"
+   },
+   {
+    "pos": 6,
+    "url": "https://www.littlestepsasia.com/singapore/pregnancy/prenatal-and-postnatal-services/pregnancy-physiotherapy/",
+    "owner": "Little Steps Asia",
+    "type": "roundup"
+   },
+   {
+    "pos": 7,
+    "url": "https://rapidphysiocare.com/antenatal-postnatal-care/",
+    "owner": "Rapid Physiocare",
+    "type": "clinic"
+   },
+   {
+    "pos": 8,
+    "url": "https://www.edgehealthcare.com.sg/pre-and-post-operative-rehabilitation/",
+    "owner": "Edge Healthcare",
+    "type": "clinic"
+   },
+   {
+    "pos": 9,
+    "url": "https://orchardhealthclinic.com/postnatal-physiotherapy/",
+    "owner": "Orchard Health Clinic",
+    "type": "clinic"
+   }
+  ],
+  "goji_organic_pos": null,
+  "winning_format": "roundup listicle (Sassy Mama) feeding AIO clinic list",
+  "notes": "AIO list grounded on Sassy Mama roundup; named clinicians (Monica Donaldson, Danielle Barratt, Wan Hui) win. Goji absent from AIO, pack and organic."
+ },
+ {
+  "id": "wedge-prenatal",
+  "q": "prenatal physiotherapy singapore",
+  "engine": "google",
+  "date": "2026-10-12",
+  "aio_present": false,
+  "goji_in_aio": false,
+  "aio_cited_sources": [],
+  "aio_providers_named": [],
+  "local_pack_present": true,
+  "goji_in_local_pack": true,
+  "local_pack": [
+   "Goji Women's and Family Physiotherapy",
+   "Physio Down Under",
+   "Embrace Physiotherapy"
+  ],
+  "organic_top10": [
+   {
+    "pos": 1,
+    "url": "https://orchardhealthclinic.com/prenatal-physiotherapy/",
+    "owner": "Orchard Health Clinic",
+    "type": "clinic"
+   },
+   {
+    "pos": 2,
+    "url": "https://pscwomenandchildren.sg/womens-health-physiotherapy-services/womens-health-physiotherapy-pre-postnatal-physiotherapy-in-singapore/",
+    "owner": "Women & Children Centre by PSC",
+    "type": "clinic"
+   },
+   {
+    "pos": 3,
+    "url": "https://www.physiomatters.com.sg/prenatal-and-postnatal-physiotherapy",
+    "owner": "Physio Matters",
+    "type": "clinic"
+   },
+   {
+    "pos": 4,
+    "url": "https://activexphysio.com/conditions/prenatal-and-postnatal-pain",
+    "owner": "ActiveX Physio",
+    "type": "clinic"
+   },
+   {
+    "pos": 5,
+    "url": "https://www.edgehealthcare.com.sg/pre-and-post-operative-rehabilitation/",
+    "owner": "Edge Healthcare",
+    "type": "clinic"
+   },
+   {
+    "pos": 6,
+    "url": "https://physiodownunder.sg/",
+    "owner": "Physio Down Under",
+    "type": "clinic"
+   },
+   {
+    "pos": 7,
+    "url": "https://rapidphysiocare.com/antenatal-postnatal-care/",
+    "owner": "Rapid Physiocare",
+    "type": "clinic"
+   },
+   {
+    "pos": 8,
+    "url": "https://optimove.sg/pregnancy-prenatal-postnatal/",
+    "owner": "OptiMove Physio",
+    "type": "clinic"
+   },
+   {
+    "pos": 9,
+    "url": "https://www.hellophysio.sg/prenatal-pilates/",
+    "owner": "Hello Physio",
+    "type": "clinic"
+   }
+  ],
+  "goji_organic_pos": null,
+  "winning_format": "local pack + dedicated prenatal service pages",
+  "notes": "No AIO. Goji #1 in local pack; not in organic."
+ },
+ {
+  "id": "wedge-pregnancy",
+  "q": "physio during pregnancy singapore",
+  "engine": "google",
+  "date": "2026-10-12",
+  "aio_present": true,
+  "goji_in_aio": false,
+  "aio_cited_sources": [
+   {
+    "url": "https://pscwomenandchildren.sg/womens-health-physiotherapy-services/womens-health-physiotherapy-pre-postnatal-physiotherapy-in-singapore/",
+    "owner": "Women & Children Centre by PSC"
+   },
+   {
+    "url": "https://www.physiomatters.com.sg/prenatal-and-postnatal-physiotherapy",
+    "owner": "Physio Matters"
+   },
+   {
+    "url": "https://orchardhealthclinic.com/prenatal-physiotherapy/",
+    "owner": "Orchard Health Clinic"
+   },
+   {
+    "url": "https://physiodownunder.sg/",
+    "owner": "Physio Down Under"
+   },
+   {
+    "url": "https://www.kkh.com.sg/our-specialties/allied-health-specialties/physiotherapy",
+    "owner": "KK Women's and Children's Hospital"
+   },
+   {
+    "url": "https://www.hellophysio.sg/prenatal-pilates/",
+    "owner": "Hello Physio"
+   },
+   {
+    "url": "https://cityosteophysio.com/womens-health-prenatal-specialists-singapore",
+    "owner": "City Osteopathy & Physiotherapy"
+   },
+   {
+    "url": "https://www.physiotherapysgc.com/womens-health/pregnancy-physiotherapy",
+    "owner": "Physiotherapy SGC"
+   },
+   {
+    "url": "https://optimove.sg/pregnancy-prenatal-postnatal/",
+    "owner": "OptiMove Physio"
+   },
+   {
+    "url": "https://www.hellophysio.sg/pelvic-health-physiotherapy/",
+    "owner": "Hello Physio"
+   }
+  ],
+  "aio_providers_named": [
+   "Physio Down Under",
+   "PhysioMatters",
+   "The Women & Children Centre",
+   "Orchard Health Clinic",
+   "KK Women's and Children's Hospital"
+  ],
+  "local_pack_present": true,
+  "goji_in_local_pack": true,
+  "local_pack": [
+   "Goji Women's and Family Physiotherapy",
+   "Physio Down Under",
+   "Embrace Physiotherapy"
+  ],
+  "organic_top10": [
+   {
+    "pos": 1,
+    "url": "https://pscwomenandchildren.sg/womens-health-physiotherapy-services/womens-health-physiotherapy-pre-postnatal-physiotherapy-in-singapore/",
+    "owner": "Women & Children Centre by PSC",
+    "type": "clinic"
+   },
+   {
+    "pos": 2,
+    "url": "https://orchardhealthclinic.com/prenatal-physiotherapy/",
+    "owner": "Orchard Health Clinic",
+    "type": "clinic"
+   },
+   {
+    "pos": 3,
+    "url": "https://rapidphysiocare.com/antenatal-postnatal-care/",
+    "owner": "Rapid Physiocare",
+    "type": "clinic"
+   },
+   {
+    "pos": 4,
+    "url": "https://www.physiomatters.com.sg/prenatal-and-postnatal-physiotherapy",
+    "owner": "Physio Matters",
+    "type": "clinic"
+   },
+   {
+    "pos": 5,
+    "url": "https://www.kkh.com.sg/our-specialties/allied-health-specialties/physiotherapy",
+    "owner": "KK Women's and Children's Hospital",
+    "type": "hospital"
+   },
+   {
+    "pos": 6,
+    "url": "https://activexphysio.com/conditions/prenatal-and-postnatal-pain",
+    "owner": "ActiveX Physio",
+    "type": "clinic"
+   },
+   {
+    "pos": 7,
+    "url": "https://pscwomenandchildren.sg/blog/physiotherapy-during-pregnancy/",
+    "owner": "Women & Children Centre by PSC",
+    "type": "clinic"
+   },
+   {
+    "pos": 8,
+    "url": "https://www.riverphysio.sg/womens-health/",
+    "owner": "River Physio",
+    "type": "clinic"
+   },
+   {
+    "pos": 9,
+    "url": "https://physiodownunder.sg/",
+    "owner": "Physio Down Under",
+    "type": "clinic"
+   }
+  ],
+  "goji_organic_pos": null,
+  "winning_format": "AIO explainer + 5-clinic list from service pages",
+  "notes": "Goji #1 in local pack but not in AIO list or organic."
+ },
+ {
+  "id": "wedge-mummy-baby",
+  "q": "mummy and baby assessment singapore",
+  "engine": "google",
+  "date": "2026-10-12",
+  "aio_present": true,
+  "goji_in_aio": true,
+  "aio_cited_sources": [
+   {
+    "url": "https://www.gojiphysio.com/services/mummy-baby-assessment/",
+    "owner": "Goji Physio"
+   },
+   {
+    "url": "https://calyx.sg/postpartum/treatment/assessment/",
+    "owner": "Calyx Women's Health Physiotherapy"
+   },
+   {
+    "url": "https://www.healthhub.sg/programmes/parent-hub/child-health-booklet",
+    "owner": "HealthHub (MOH)"
+   },
+   {
+    "url": "https://polyclinic.singhealth.com.sg/our-clinic-services/imcwh",
+    "owner": "SingHealth Polyclinics"
+   },
+   {
+    "url": "https://www.moh.gov.sg/others/resources-and-statistics/childhood-developmental-screening/",
+    "owner": "Ministry of Health"
+   },
+   {
+    "url": "https://www.gojiphysio.com/services/",
+    "owner": "Goji Physio"
+   },
+   {
+    "url": "https://www.motherandchild.com.sg/postnatal-care-singapore/baby-developmental-assessments",
+    "owner": "Mother and Child"
+   },
+   {
+    "url": "https://osler-health.com/pregnancy-postnatal-health",
+    "owner": "Osler Health"
+   },
+   {
+    "url": "https://www.nuh.com.sg/care-at-nuh/services/obstetrics-and-gynaecology/obstetrics",
+    "owner": "NUH"
+   },
+   {
+    "url": "https://togc.sg/our-obstetrics-services/",
+    "owner": "TOGC"
+   },
+   {
+    "url": "https://www.motherandchild.com.sg/postnatal-care-singapore",
+    "owner": "Mother and Child"
+   },
+   {
+    "url": "https://babystepsmedical.sg/childhood-developmental-screening/",
+    "owner": "Baby Steps Medical"
+   },
+   {
+    "url": "https://www.centralclinic.com.sg/child-development-assessment-and-screening-singapore",
+    "owner": "Central Clinic"
+   },
+   {
+    "url": "https://www.kkh.com.sg/our-specialties/child-development",
+    "owner": "KK Women's and Children's Hospital"
+   },
+   {
+    "url": "https://osler-health.com/news/infant-developmental-assessments-in-singapore",
+    "owner": "Osler Health"
+   }
+  ],
+  "aio_providers_named": [
+   "Goji Physiotherapy",
+   "Mother and Child",
+   "Osler Health",
+   "SingHealth Polyclinics (IMCWH)",
+   "KK Women's and Children's Hospital",
+   "NUH"
+  ],
+  "local_pack_present": false,
+  "goji_in_local_pack": false,
+  "local_pack": [],
+  "organic_top10": [
+   {
+    "pos": 1,
+    "url": "https://www.gojiphysio.com/services/mummy-baby-assessment/",
+    "owner": "Goji Physio",
+    "type": "clinic"
+   },
+   {
+    "pos": 2,
+    "url": "https://www.motherandchild.com.sg/postnatal-care-singapore/baby-developmental-assessments",
+    "owner": "Mother and Child",
+    "type": "clinic"
+   },
+   {
+    "pos": 3,
+    "url": "https://polyclinic.singhealth.com.sg/our-clinic-services/imcwh",
+    "owner": "SingHealth Polyclinics",
+    "type": "government"
+   },
+   {
+    "pos": 4,
+    "url": "https://www.kkh.com.sg/our-specialties/child-development/psychology-services",
+    "owner": "KK Women's and Children's Hospital",
+    "type": "hospital"
+   },
+   {
+    "pos": 5,
+    "url": "https://www.healthhub.sg/well-being-and-lifestyle/pregnancy-and-infant-health/pregnancy-tests-for-me-and-my-baby",
+    "owner": "HealthHub (MOH)",
+    "type": "government"
+   },
+   {
+    "pos": 6,
+    "url": "https://osler-health.com/news/infant-developmental-assessments-in-singapore",
+    "owner": "Osler Health",
+    "type": "clinic"
+   },
+   {
+    "pos": 7,
+    "url": "https://www.moh.gov.sg/others/resources-and-statistics/childhood-developmental-screening/",
+    "owner": "Ministry of Health",
+    "type": "government"
+   },
+   {
+    "pos": 8,
+    "url": "https://www.rafflesmedicalgroup.com/services/specialist-centres/women/services/maternity-services/antenatal-care/",
+    "owner": "Raffles Medical Group",
+    "type": "hospital"
+   },
+   {
+    "pos": 9,
+    "url": "https://drtammiquek.com/services/developmental-assessments",
+    "owner": "Dr Tammi Quek",
+    "type": "clinic"
+   }
+  ],
+  "goji_organic_pos": 1,
+  "winning_format": "dedicated named-service page (Goji owns the term)",
+  "notes": "Goji's service page is #1 organic and the first AIO citation; AIO names Goji with price range. A Goji knowledge panel also shows. No local pack."
+ },
+ {
+  "id": "wedge-home-visit",
+  "q": "postnatal physio home visit singapore",
+  "engine": "google",
+  "date": "2026-10-12",
+  "aio_present": true,
+  "goji_in_aio": false,
+  "aio_cited_sources": [
+   {
+    "url": "https://www.physiomatters.com.sg/prenatal-and-postnatal-physiotherapy",
+    "owner": "Physio Matters"
+   },
+   {
+    "url": "https://www.physiomatters.com.sg/our-physiotherapy-clinic-singapore",
+    "owner": "Physio Matters"
+   },
+   {
+    "url": "https://www.embracephysio.sg/services/pre-postnatal-physiotherapy/",
+    "owner": "Embrace Physiotherapy"
+   },
+   {
+    "url": "https://orchardhealthclinic.com/postnatal-physiotherapy/",
+    "owner": "Orchard Health Clinic"
+   },
+   {
+    "url": "https://www.benchmarkphysio.com/blog/effective-home-physiotherapy-services-in-singapore/",
+    "owner": "Benchmark Physio"
+   },
+   {
+    "url": "https://www.physiotherapysgc.com/health2mama",
+    "owner": "Health2Mama (Physiotherapy SGC)"
+   },
+   {
+    "url": "https://essentialphysio.sg/services/home-physiotherapy/",
+    "owner": "Essential Physiotherapy"
+   },
+   {
+    "url": "https://cityosteophysio.com/womens-health-postnatal-specialists-singapore",
+    "owner": "City Osteopathy & Physiotherapy"
+   }
+  ],
+  "aio_providers_named": [
+   "Physio Therapy Singapore Collective (Health2Mama)",
+   "PhysioMatters",
+   "Essential Physiotherapy"
+  ],
+  "local_pack_present": true,
+  "goji_in_local_pack": true,
+  "local_pack": [
+   "Goji Women's and Family Physiotherapy",
+   "Wellthy Living SG Home Physiotherapy",
+   "PhysioMatters Singapore Pte Ltd"
+  ],
+  "organic_top10": [
+   {
+    "pos": 1,
+    "url": "https://thehomephysio.sg/",
+    "owner": "The Home Physio",
+    "type": "clinic"
+   },
+   {
+    "pos": 2,
+    "url": "https://orchardhealthclinic.com/postnatal-physiotherapy/",
+    "owner": "Orchard Health Clinic",
+    "type": "clinic"
+   },
+   {
+    "pos": 3,
+    "url": "https://essentialphysio.sg/services/home-physiotherapy/",
+    "owner": "Essential Physiotherapy",
+    "type": "clinic"
+   },
+   {
+    "pos": 4,
+    "url": "https://www.physiotherapysgc.com/health2mama",
+    "owner": "Health2Mama (Physiotherapy SGC)",
+    "type": "clinic"
+   },
+   {
+    "pos": 5,
+    "url": "https://www.benchmarkphysio.com/blog/effective-home-physiotherapy-services-in-singapore/",
+    "owner": "Benchmark Physio",
+    "type": "clinic"
+   },
+   {
+    "pos": 6,
+    "url": "https://www.physiomatters.com.sg/physiotherapy-singapore-other-services",
+    "owner": "Physio Matters",
+    "type": "clinic"
+   },
+   {
+    "pos": 7,
+    "url": "https://pscwomenandchildren.sg/womens-health-physiotherapy-services/womens-health-physiotherapy-pre-postnatal-physiotherapy-in-singapore/",
+    "owner": "Women & Children Centre by PSC",
+    "type": "clinic"
+   },
+   {
+    "pos": 8,
+    "url": "https://www.riverphysio.sg/home-care/",
+    "owner": "River Physio",
+    "type": "clinic"
+   },
+   {
+    "pos": 9,
+    "url": "https://heartandlungphysio.com/home-therapy/",
+    "owner": "Heart and Lung Physio",
+    "type": "clinic"
+   }
+  ],
+  "goji_organic_pos": null,
+  "winning_format": "AIO provider list with explicit home-visit prices",
+  "notes": "Goji #1 in local pack but absent from AIO (which lists stated home-visit rates, e.g. PhysioMatters $360/60min) and organic."
+ },
+ {
+  "id": "wedge-postnatal-pilates",
+  "q": "postnatal pilates singapore",
+  "engine": "google",
+  "date": "2026-10-12",
+  "aio_present": true,
+  "goji_in_aio": false,
+  "aio_cited_sources": [
+   {
+    "url": "https://optionspilatesstudio.com/sg/pilates-articles-postnatal/",
+    "owner": "Options Pilates Studio"
+   },
+   {
+    "url": "https://www.breathepilates.com.sg/post-natal-pilates",
+    "owner": "Breathe Pilates"
+   },
+   {
+    "url": "https://inspiremumbaby.com/postnatal/pilates/",
+    "owner": "Inspire Mum & Baby"
+   },
+   {
+    "url": "https://singaporemotherhood.com/best-pilates-prenatal-postnatal-pregnancy-postpartum-singapore/",
+    "owner": "Singapore Motherhood (roundup)"
+   }
+  ],
+  "aio_providers_named": [
+   "Breathe Pilates",
+   "PhysioMatters",
+   "Inspire Mum & Baby",
+   "Off Duty Pilates",
+   "Mother & Child"
+  ],
+  "local_pack_present": true,
+  "goji_in_local_pack": false,
+  "local_pack": [
+   "BodyLove Pilates",
+   "Made To Move Studio",
+   "Pod Pilates Singapore"
+  ],
+  "organic_top10": [
+   {
+    "pos": 1,
+    "url": "https://www.breathepilates.com.sg/post-natal-pilates",
+    "owner": "Breathe Pilates",
+    "type": "other"
+   },
+   {
+    "pos": 2,
+    "url": "https://singaporemotherhood.com/best-pilates-prenatal-postnatal-pregnancy-postpartum-singapore/",
+    "owner": "Singapore Motherhood",
+    "type": "roundup"
+   },
+   {
+    "pos": 3,
+    "url": "https://physiodownunder.sg/postnatal-reformer",
+    "owner": "Physio Down Under",
+    "type": "clinic"
+   },
+   {
+    "pos": 4,
+    "url": "https://www.offdutypilates.com/group/prepostnatal",
+    "owner": "Off Duty Pilates",
+    "type": "other"
+   },
+   {
+    "pos": 5,
+    "url": "https://inspiremumbaby.com/postnatal/pilates/",
+    "owner": "Inspire Mum & Baby",
+    "type": "other"
+   },
+   {
+    "pos": 6,
+    "url": "https://sg.pilatique.com/pilates-for-postpartum-recovery-the-game-changer-for-new-moms/",
+    "owner": "Pilatique",
+    "type": "other"
+   },
+   {
+    "pos": 7,
+    "url": "https://www.physiomatters.com.sg/postnatal-pilates",
+    "owner": "Physio Matters",
+    "type": "clinic"
+   },
+   {
+    "pos": 8,
+    "url": "https://classpass.com/search/singapore/postnatal",
+    "owner": "ClassPass",
+    "type": "directory"
+   },
+   {
+    "pos": 9,
+    "url": "https://www.onepilates.sg/postnatal-pilates-class",
+    "owner": "One Pilates",
+    "type": "other"
+   }
+  ],
+  "goji_organic_pos": null,
+  "winning_format": "AIO studio list with prices + comparison table",
+  "notes": "Pilates studios dominate (type 'other' = studio). AIO includes a price comparison table. Goji absent everywhere."
+ },
+ {
+  "id": "cond-diastasis",
+  "q": "diastasis recti physiotherapy singapore",
+  "engine": "google",
+  "date": "2026-10-12",
+  "aio_present": true,
+  "goji_in_aio": false,
+  "aio_cited_sources": [
+   {
+    "url": "https://pscwomenandchildren.sg/womens-health-physiotherapy-services/womens-health-physiotherapy-post-natal-diastasis-recti/",
+    "owner": "Women & Children Centre by PSC"
+   },
+   {
+    "url": "https://www.physiomatters.com.sg/post/choosing-the-right-physiotherapist-for-diastasis-recti-treatment-in-singapore",
+    "owner": "Physio Matters"
+   },
+   {
+    "url": "https://www.physiotherapysgc.com/womens-health/diastasis-recti-correction",
+    "owner": "Physiotherapy SGC"
+   },
+   {
+    "url": "https://www.physiomatters.com.sg/diastasis-recti-treatment",
+    "owner": "Physio Matters"
+   },
+   {
+    "url": "https://www.embracephysio.sg/what-we-treat/diastasis-recti/",
+    "owner": "Embrace Physiotherapy"
+   }
+  ],
+  "aio_providers_named": [
+   "PhysioMatters",
+   "Embrace Physiotherapy",
+   "Physio Down Under",
+   "Orchard Health Clinic",
+   "Core Concepts Physiotherapy"
+  ],
+  "local_pack_present": true,
+  "goji_in_local_pack": false,
+  "local_pack": [
+   "PhysioMatters Singapore Pte Ltd",
+   "Physio Down Under",
+   "Embrace Physiotherapy"
+  ],
+  "organic_top10": [
+   {
+    "pos": 1,
+    "url": "https://www.physiomatters.com.sg/diastasis-recti-treatment",
+    "owner": "Physio Matters",
+    "type": "clinic"
+   },
+   {
+    "pos": 2,
+    "url": "https://pscwomenandchildren.sg/womens-health-physiotherapy-services/womens-health-physiotherapy-post-natal-diastasis-recti/",
+    "owner": "Women & Children Centre by PSC",
+    "type": "clinic"
+   },
+   {
+    "pos": 3,
+    "url": "https://www.physiomatters.com.sg/post/choosing-the-right-physiotherapist-for-diastasis-recti-treatment-in-singapore",
+    "owner": "Physio Matters",
+    "type": "clinic"
+   },
+   {
+    "pos": 4,
+    "url": "https://www.hellophysio.sg/diastasis-recti-postnatal-pilates-singapore/",
+    "owner": "Hello Physio",
+    "type": "clinic"
+   },
+   {
+    "pos": 5,
+    "url": "https://activexphysio.com/conditions/diastasis-recti",
+    "owner": "ActiveX Physio",
+    "type": "clinic"
+   },
+   {
+    "pos": 6,
+    "url": "https://www.coreconceptsphysio.sg/article/physiotherapy-for-diastasis-recti-treatment/",
+    "owner": "Core Concepts Physiotherapy",
+    "type": "clinic"
+   },
+   {
+    "pos": 7,
+    "url": "https://www.physioconnectionz.com.sg/diastasis-recti-singapore/",
+    "owner": "Physio Connectionz",
+    "type": "clinic"
+   },
+   {
+    "pos": 8,
+    "url": "https://www.physiotherapysgc.com/womens-health/diastasis-recti-correction",
+    "owner": "Physiotherapy SGC",
+    "type": "clinic"
+   },
+   {
+    "pos": 9,
+    "url": "https://www.facebook.com/kkh.sg/posts/1523166809855007/",
+    "owner": "KK Women's and Children's Hospital (Facebook)",
+    "type": "hospital"
+   }
+  ],
+  "goji_organic_pos": null,
+  "winning_format": "dedicated condition page + named method (DRAM curriculum, real-time ultrasound)",
+  "notes": "PhysioMatters wins AIO, pack and organic #1 with a condition page plus a 'choosing a physio' blog. Goji absent everywhere."
+ },
+ {
+  "id": "cond-diastasis-how",
+  "q": "how to fix abdominal separation after pregnancy",
+  "engine": "google",
+  "date": "2026-10-12",
+  "aio_present": true,
+  "goji_in_aio": false,
+  "aio_cited_sources": [
+   {
+    "url": "https://www.bswhealth.com/blog/diastasis-recti-how-to-heal-ab-separation-after-pregnancy",
+    "owner": "Baylor Scott & White Health (US)"
+   },
+   {
+    "url": "https://www.youtube.com/watch?v=qyhdvWQoRME",
+    "owner": "YouTube"
+   },
+   {
+    "url": "https://www.nhs.uk/baby/support-and-services/your-post-pregnancy-body/",
+    "owner": "NHS (UK)"
+   },
+   {
+    "url": "https://www.mountelizabeth.com.sg/health-plus/article/postpartum-belly-diastasis-recti",
+    "owner": "Mount Elizabeth Hospitals"
+   },
+   {
+    "url": "https://www.youtube.com/watch?v=vF7trKZX6Vk",
+    "owner": "YouTube"
+   },
+   {
+    "url": "https://health.osu.edu/health/ob-gyn/how-to-fix-diastasis-recti",
+    "owner": "Ohio State Health (US)"
+   },
+   {
+    "url": "https://beldholm.com.au/body-contouring-surgery-post-pregnancy/diastasis-recti-abdominal-muscle-separation-after-pregnancy/",
+    "owner": "Beldholm (AU surgeon)"
+   },
+   {
+    "url": "https://www.brianshafa.com/blog/at-what-point-should-i-consider-diastasis-recti-surgery/",
+    "owner": "Dr Brian Shafa (US surgeon)"
+   }
+  ],
+  "aio_providers_named": [],
+  "local_pack_present": false,
+  "goji_in_local_pack": false,
+  "local_pack": [],
+  "organic_top10": [
+   {
+    "pos": 1,
+    "url": "https://my.clevelandclinic.org/health/diseases/22346-diastasis-recti",
+    "owner": "Cleveland Clinic (US)",
+    "type": "hospital"
+   },
+   {
+    "pos": 2,
+    "url": "https://www.bswhealth.com/blog/diastasis-recti-how-to-heal-ab-separation-after-pregnancy",
+    "owner": "Baylor Scott & White Health (US)",
+    "type": "hospital"
+   },
+   {
+    "pos": 3,
+    "url": "https://www.mountelizabeth.com.sg/health-plus/article/postpartum-belly-diastasis-recti",
+    "owner": "Mount Elizabeth Hospitals",
+    "type": "hospital"
+   },
+   {
+    "pos": 4,
+    "url": "https://health.osu.edu/health/ob-gyn/how-to-fix-diastasis-recti",
+    "owner": "Ohio State Health (US)",
+    "type": "hospital"
+   },
+   {
+    "pos": 5,
+    "url": "https://www.coreconceptsphysio.sg/article/diastasis-recti-treatment-methods-what-works-for-me/",
+    "owner": "Core Concepts Physiotherapy",
+    "type": "clinic"
+   },
+   {
+    "pos": 6,
+    "url": "https://www.whattoexpect.com/first-year/your-health/diastasis-recti-exercises/",
+    "owner": "What to Expect",
+    "type": "media"
+   }
+  ],
+  "goji_organic_pos": null,
+  "winning_format": "step-by-step exercise how-to (do/avoid lists) + video",
+  "notes": "Global health-system content wins; only Mount Elizabeth and Core Concepts are SG. AIO cites a US hospital blog heavily. Only 6 blue links on page 1 (videos, forums, images take the rest)."
+ },
+ {
+  "id": "cond-leaking",
+  "q": "is leaking after birth normal",
+  "engine": "google",
+  "date": "2026-10-12",
+  "aio_present": true,
+  "goji_in_aio": false,
+  "aio_cited_sources": [
+   {
+    "url": "https://www.pregnancybirthbaby.org.au/womens-health/postnatal-health/bladder-weakness-after-birth",
+    "owner": "Pregnancy Birth and Baby (AU gov)"
+   },
+   {
+    "url": "https://medschool.cuanschutz.edu/womens-health/clinics/urogynecology/for-patients/pelvic-floor-health-conditions/incontinence-after-childbirth",
+    "owner": "CU Anschutz (US)"
+   },
+   {
+    "url": "https://dyerstclinic.com/postpartum-leaking-is-common-but-not-normal-how-cirencester-womens-physiotherapy-can-help/",
+    "owner": "Dyer Street Clinic (UK physio)"
+   },
+   {
+    "url": "https://www.nct.org.uk/information/labour-birth/recovery-birth/body-after-birth-incontinence-vagina-and-more",
+    "owner": "NCT (UK)"
+   },
+   {
+    "url": "https://my.clevelandclinic.org/health/body/22485-lochia",
+    "owner": "Cleveland Clinic (US)"
+   },
+   {
+    "url": "https://focusforlife.com.au/blog/is-leaking-after-birth-normal-when-it-should-stop-what-you-can-do/",
+    "owner": "Focus For Life (AU physio)"
+   },
+   {
+    "url": "https://timothylimclinic.com/know-more-about-leaking-urine-during-pregnancy-and-after-birth/",
+    "owner": "Timothy Lim Clinic (SG)"
+   },
+   {
+    "url": "https://www.anchorptnh.com/blog/postpartum-incontinence-how-long-does-it-last",
+    "owner": "Anchor PT (US)"
+   },
+   {
+    "url": "https://www.waterwipes.com/community/incontinence-care/postpartum-incontinence-what-new-parents-should-know",
+    "owner": "WaterWipes"
+   },
+   {
+    "url": "https://www.youtube.com/watch?v=hUFeklMw0A8",
+    "owner": "YouTube"
+   },
+   {
+    "url": "https://www.corefitness.com.sg/postpartum-urinary-incontinence/",
+    "owner": "Core Fitness (SG)"
+   },
+   {
+    "url": "https://www.facebook.com/PSGHospitalsCoimbatore/posts/1562725972536038/",
+    "owner": "PSG Hospitals (IN, Facebook)"
+   },
+   {
+    "url": "https://conradpearson.com/womens-health/bladder-leakage-after-childbirth-treatment/",
+    "owner": "Conrad Pearson (physio)"
+   }
+  ],
+  "aio_providers_named": [],
+  "local_pack_present": false,
+  "goji_in_local_pack": false,
+  "local_pack": [],
+  "organic_top10": [
+   {
+    "pos": 1,
+    "url": "https://www.pregnancybirthbaby.org.au/womens-health/postnatal-health/bladder-weakness-after-birth",
+    "owner": "Pregnancy Birth and Baby (AU gov)",
+    "type": "government"
+   },
+   {
+    "pos": 2,
+    "url": "https://pscwomenandchildren.sg/blog/the-risk-of-developing-postpartum-incontinence/",
+    "owner": "Women & Children Centre by PSC",
+    "type": "clinic"
+   },
+   {
+    "pos": 3,
+    "url": "https://timothylimclinic.com/know-more-about-leaking-urine-during-pregnancy-and-after-birth/",
+    "owner": "Timothy Lim Clinic",
+    "type": "clinic"
+   },
+   {
+    "pos": 4,
+    "url": "https://medschool.cuanschutz.edu/womens-health/clinics/urogynecology/for-patients/pelvic-floor-health-conditions/incontinence-after-childbirth",
+    "owner": "CU Anschutz (US)",
+    "type": "hospital"
+   },
+   {
+    "pos": 5,
+    "url": "https://aareurology.sg/media/postpartum-urinary-incontinence-is-it-normal-to-leak-urine-after-childbirth/",
+    "owner": "AARE Urocare",
+    "type": "clinic"
+   },
+   {
+    "pos": 6,
+    "url": "https://www.reddit.com/r/fitpregnancy/comments/1auysz1/is_leaking_urine_normal_after_having_a_baby/",
+    "owner": "Reddit",
+    "type": "forum"
+   },
+   {
+    "pos": 7,
+    "url": "https://www.waterwipes.com/community/incontinence-care/postpartum-incontinence-what-new-parents-should-know",
+    "owner": "WaterWipes",
+    "type": "other"
+   },
+   {
+    "pos": 8,
+    "url": "https://focusforlife.com.au/blog/is-leaking-after-birth-normal-when-it-should-stop-what-you-can-do/",
+    "owner": "Focus For Life (AU physio)",
+    "type": "clinic"
+   }
+  ],
+  "goji_organic_pos": null,
+  "winning_format": "direct yes/no answer page ('common but not normal') + timeline",
+  "notes": "AIO answers 'common but treatable', with a 6-week threshold to see a pelvic floor physio. Exact-match question titles rank (Focus For Life, AARE). Goji absent."
+ },
+ {
+  "id": "cond-incontinence",
+  "q": "urinary incontinence physio singapore",
+  "engine": "google",
+  "date": "2026-10-12",
+  "aio_present": true,
+  "goji_in_aio": false,
+  "aio_cited_sources": [
+   {
+    "url": "https://pscwomenandchildren.sg/blog/urine-incontinence-treatment-guide-singapore/",
+    "owner": "Women & Children Centre by PSC"
+   },
+   {
+    "url": "https://www.singhealth.com.sg/tests-procedures/physiotherapy-for-stress-urinary-incontinence-female-urinary-disorders",
+    "owner": "SingHealth"
+   },
+   {
+    "url": "https://rapidphysiocare.com/incontinence/",
+    "owner": "Rapid Physiocare"
+   },
+   {
+    "url": "https://www.physiomatters.com.sg/post/what-you-need-to-know-about-urinary-incontinence-in-singapore-causes-types-and-physiotherapy-trea",
+    "owner": "Physio Matters"
+   },
+   {
+    "url": "https://smgwomenshealth.sg/our-services/urogynaecology/urinary-incontinence/",
+    "owner": "SMG Women's Health"
+   },
+   {
+    "url": "https://www.physiomatters.com.sg/pelvic-floor-therapy-singapore",
+    "owner": "Physio Matters"
+   },
+   {
+    "url": "https://pscwomenandchildren.sg/blog/urine-incontinence-treatment-in-singapore-how-to-regain-bladder-control-without-surgery/",
+    "owner": "Women & Children Centre by PSC"
+   },
+   {
+    "url": "https://pscwomenandchildren.sg/womens-health-physiotherapy-services/womens-health-physiotherapy-pelvic-floor-rehabilitation/",
+    "owner": "Women & Children Centre by PSC"
+   },
+   {
+    "url": "https://www.physiomatters.com.sg/urinary-incontinence-treatment-singapore",
+    "owner": "Physio Matters"
+   },
+   {
+    "url": "https://physioactive.sg/urinary-incontinence-physiotherapy/",
+    "owner": "PhysioActive"
+   },
+   {
+    "url": "https://www.sgh.com.sg/our-specialties/pelvic-floor-disorder",
+    "owner": "Singapore General Hospital"
+   },
+   {
+    "url": "https://cityosteophysio.com/mens-pelvic-health-physiotherapy-singapore",
+    "owner": "City Osteopathy & Physiotherapy"
+   },
+   {
+    "url": "https://physiodownunder.sg/our-services",
+    "owner": "Physio Down Under"
+   },
+   {
+    "url": "https://www.embracephysio.sg/what-we-treat/bladder-and-bowel-control/",
+    "owner": "Embrace Physiotherapy"
+   }
+  ],
+  "aio_providers_named": [
+   "Physio Down Under",
+   "Embrace Physiotherapy",
+   "PhysioMatters",
+   "City Osteopathy and Physiotherapy",
+   "Singapore General Hospital Pelvic Floor Disorder Service"
+  ],
+  "local_pack_present": true,
+  "goji_in_local_pack": false,
+  "local_pack": [
+   "PhysioMatters Singapore Pte Ltd",
+   "Physio Down Under",
+   "Reverseme Pelvis Care, Thomson Plaza"
+  ],
+  "organic_top10": [
+   {
+    "pos": 1,
+    "url": "https://www.singhealth.com.sg/tests-procedures/physiotherapy-for-stress-urinary-incontinence-female-urinary-disorders",
+    "owner": "SingHealth",
+    "type": "hospital"
+   },
+   {
+    "pos": 2,
+    "url": "https://pscwomenandchildren.sg/blog/urine-incontinence-treatment-guide-singapore/",
+    "owner": "Women & Children Centre by PSC",
+    "type": "clinic"
+   },
+   {
+    "pos": 3,
+    "url": "https://www.sgh.com.sg/our-specialties/physiotherapy/pelvic-health",
+    "owner": "Singapore General Hospital",
+    "type": "hospital"
+   },
+   {
+    "pos": 4,
+    "url": "https://www.physiomatters.com.sg/pelvic-floor-therapy-singapore",
+    "owner": "Physio Matters",
+    "type": "clinic"
+   },
+   {
+    "pos": 5,
+    "url": "https://smgwomenshealth.sg/our-services/urogynaecology/urinary-incontinence/",
+    "owner": "SMG Women's Health",
+    "type": "clinic"
+   },
+   {
+    "pos": 6,
+    "url": "https://phoenixrehabgroup.com/your-concise-guide-to-pelvic-floor-physiotherapy/",
+    "owner": "Phoenix Rehab Group",
+    "type": "clinic"
+   },
+   {
+    "pos": 7,
+    "url": "https://www.rafflesmedicalgroup.com/services/specialist-centres/women/services/gynaecological-services/urinary-incontinence-in-women/",
+    "owner": "Raffles Medical Group",
+    "type": "hospital"
+   },
+   {
+    "pos": 8,
+    "url": "https://aareurology.sg/conditions/pelvic-floor-dysfunction/",
+    "owner": "AARE Urocare",
+    "type": "clinic"
+   },
+   {
+    "pos": 9,
+    "url": "https://pscwomenandchildren.sg/womens-health-physiotherapy-services/womens-health-physiotherapy-pelvic-floor-rehabilitation/",
+    "owner": "Women & Children Centre by PSC",
+    "type": "clinic"
+   }
+  ],
+  "goji_organic_pos": null,
+  "winning_format": "condition explainer (types + treatment) + clinic list; SG blog guides",
+  "notes": "PSC and PhysioMatters each have 3-4 cited URLs (service page + long-form blog guides). Goji absent."
+ },
+ {
+  "id": "cond-prolapse",
+  "q": "pelvic organ prolapse physiotherapy singapore",
+  "engine": "google",
+  "date": "2026-10-12",
+  "aio_present": true,
+  "goji_in_aio": false,
+  "aio_cited_sources": [
+   {
+    "url": "https://www.singhealth.com.sg/tests-procedures/physiotherapy-for-pelvic-organ-prolapse-female-urinary-disorders",
+    "owner": "SingHealth"
+   },
+   {
+    "url": "https://www.sgh.com.sg/our-specialties/pelvic-floor-disorder",
+    "owner": "Singapore General Hospital"
+   },
+   {
+    "url": "https://www.embracephysio.sg/services/womens-health-physiotherapy-singapore/",
+    "owner": "Embrace Physiotherapy"
+   },
+   {
+    "url": "https://physioactive.sg/pelvic-organ-prolapse/",
+    "owner": "PhysioActive"
+   },
+   {
+    "url": "https://pscwomenandchildren.sg/blog/how-a-pelvic-floor-therapist-can-change-your-pelvic-organ-prolapse/",
+    "owner": "Women & Children Centre by PSC"
+   },
+   {
+    "url": "https://www.embracephysio.sg/what-we-treat/pelvic-organ-prolapse/",
+    "owner": "Embrace Physiotherapy"
+   },
+   {
+    "url": "https://www.pelvicexercises.com.au/prolapse-exercise/",
+    "owner": "Pelvic Exercises (AU)"
+   },
+   {
+    "url": "https://pscwomenandchildren.sg/womens-health-physiotherapy-services/womens-health-physiotherapy-prolapse/",
+    "owner": "Women & Children Centre by PSC"
+   },
+   {
+    "url": "https://www.embracephysio.sg/",
+    "owner": "Embrace Physiotherapy"
+   },
+   {
+    "url": "https://physiodownunder.sg/",
+    "owner": "Physio Down Under"
+   },
+   {
+    "url": "https://orchardhealthclinic.com/pelvic-floor-treatment-for-prenatal-and-postnatal/",
+    "owner": "Orchard Health Clinic"
+   },
+   {
+    "url": "https://smgwomenshealth.sg/our-services/urogynaecology/pelvic-organ-prolapse/",
+    "owner": "SMG Women's Health"
+   },
+   {
+    "url": "https://physiodownunder.sg/women-health",
+    "owner": "Physio Down Under"
+   }
+  ],
+  "aio_providers_named": [
+   "Embrace Physiotherapy",
+   "PhysioMatters",
+   "Physio Down Under",
+   "Singapore General Hospital Pelvic Floor Disorders Service"
+  ],
+  "local_pack_present": true,
+  "goji_in_local_pack": false,
+  "local_pack": [
+   "Reverseme Pelvis Care, Thomson Plaza",
+   "Physio Down Under",
+   "Embrace Physiotherapy"
+  ],
+  "organic_top10": [
+   {
+    "pos": 1,
+    "url": "https://www.singhealth.com.sg/tests-procedures/physiotherapy-for-pelvic-organ-prolapse-female-urinary-disorders",
+    "owner": "SingHealth",
+    "type": "hospital"
+   },
+   {
+    "pos": 2,
+    "url": "https://pscwomenandchildren.sg/womens-health-physiotherapy-services/womens-health-physiotherapy-pelvic-floor-rehabilitation/",
+    "owner": "Women & Children Centre by PSC",
+    "type": "clinic"
+   },
+   {
+    "pos": 3,
+    "url": "https://www.sgh.com.sg/our-specialties/pelvic-floor-disorder",
+    "owner": "Singapore General Hospital",
+    "type": "hospital"
+   },
+   {
+    "pos": 4,
+    "url": "https://www.physiomatters.com.sg/pelvic-floor-therapy-singapore",
+    "owner": "Physio Matters",
+    "type": "clinic"
+   },
+   {
+    "pos": 5,
+    "url": "https://phoenixrehabgroup.com/your-concise-guide-to-pelvic-floor-physiotherapy/",
+    "owner": "Phoenix Rehab Group",
+    "type": "clinic"
+   },
+   {
+    "pos": 6,
+    "url": "https://aareurology.sg/conditions/pelvic-floor-dysfunction/",
+    "owner": "AARE Urocare",
+    "type": "clinic"
+   },
+   {
+    "pos": 7,
+    "url": "https://aogc.com.sg/blog/feeling-a-heavy-sensation-understanding-the-signs-of-pelvic-organ-prolapse/",
+    "owner": "Asian O&G Centre",
+    "type": "clinic"
+   },
+   {
+    "pos": 8,
+    "url": "https://pscwomenandchildren.sg/blog/how-a-pelvic-floor-therapist-can-change-your-pelvic-organ-prolapse/",
+    "owner": "Women & Children Centre by PSC",
+    "type": "clinic"
+   },
+   {
+    "pos": 9,
+    "url": "https://physiodownunder.sg/",
+    "owner": "Physio Down Under",
+    "type": "clinic"
+   }
+  ],
+  "goji_organic_pos": null,
+  "winning_format": "condition explainer + clinic list; hospital pages + dedicated prolapse pages",
+  "notes": "AIO had 'Show more'; expanded on reload (AIO regenerated, citations shifted slightly). Embrace and PSC have dedicated prolapse pages cited. Goji absent."
+ },
+ {
+  "id": "cond-heaviness",
+  "q": "feeling of heaviness down there after giving birth",
+  "engine": "google",
+  "date": "2026-10-12",
+  "aio_present": true,
+  "goji_in_aio": false,
+  "aio_cited_sources": [
+   {
+    "url": "https://www.whattoexpect.com/first-year/postpartum-health-and-care/pelvic-floor-recovery",
+    "owner": "What to Expect"
+   },
+   {
+    "url": "https://australianbirthstories.com/postpartum/prolapse-after-birth-understanding-the-causes-symptoms-and-treatment-options/",
+    "owner": "Australian Birth Stories"
+   },
+   {
+    "url": "https://www.mayoclinic.org/diseases-conditions/uterine-prolapse/symptoms-causes/syc-20353458",
+    "owner": "Mayo Clinic (US)"
+   },
+   {
+    "url": "https://mamastefit.com/prolapse-early-postpartum-maybe-not/",
+    "owner": "MamasteFit (US)"
+   },
+   {
+    "url": "https://www.physiochicago.com/blog/signs-of-weak-pelvic-floor-after-childbirth",
+    "owner": "Physio Chicago (US)"
+   },
+   {
+    "url": "https://www.wendywomensclinic.com.sg/blog/weak-pelvic-floor-after-childbirth.html",
+    "owner": "Wendy Women's Clinic (SG)"
+   },
+   {
+    "url": "https://www.instagram.com/reel/DOQ2ztpCplf/",
+    "owner": "Instagram"
+   },
+   {
+    "url": "https://www.kgoal.com/a/blog/pelvic-health/signs-of-weak-pelvic-floor-after-childbirth",
+    "owner": "kGoal"
+   },
+   {
+    "url": "https://thevagwhisperer.com/2022/02/08/the-4th-quarter-for-your-vagina/",
+    "owner": "The Vag Whisperer"
+   },
+   {
+    "url": "https://healthcare.utah.edu/healthfeed/2025/08/whats-normal-down-there-after-childbirth",
+    "owner": "University of Utah Health (US)"
+   },
+   {
+    "url": "https://www.baptisthealth.com/blog/mother-and-baby-care/the-pelvic-floor-after-childbirth",
+    "owner": "Baptist Health (US)"
+   },
+   {
+    "url": "https://www.youtube.com/shorts/kYnG7itrBVo",
+    "owner": "YouTube"
+   },
+   {
+    "url": "https://www.medstarhealth.org/blog/pelvic-care-after-childbirth",
+    "owner": "MedStar Health (US)"
+   },
+   {
+    "url": "https://www.youtube.com/watch?v=1ELlZj9l41w",
+    "owner": "YouTube"
+   },
+   {
+    "url": "https://www.expectingpelvichealth.com/blog-posts/understandingyourpostpartumpelvicfloor",
+    "owner": "Expecting Pelvic Health"
+   },
+   {
+    "url": "https://www.physiomatters.com.sg/post/pelvic-floor-changes-after-pregnancy-what-s-normal-and-what-needs-treatment",
+    "owner": "Physio Matters"
+   },
+   {
+    "url": "https://www.cvmus.com/blog/pelvic-pressure-postpartum-what-you-need-know",
+    "owner": "CVM (US)"
+   },
+   {
+    "url": "https://www.youtube.com/watch?v=O0ztDXsy3Hg",
+    "owner": "YouTube"
+   }
+  ],
+  "aio_providers_named": [],
+  "local_pack_present": false,
+  "goji_in_local_pack": false,
+  "local_pack": [],
+  "organic_top10": [
+   {
+    "pos": 1,
+    "url": "https://www.whattoexpect.com/first-year/postpartum-health-and-care/pelvic-floor-recovery",
+    "owner": "What to Expect",
+    "type": "media"
+   },
+   {
+    "pos": 2,
+    "url": "https://www.wendywomensclinic.com.sg/blog/weak-pelvic-floor-after-childbirth.html",
+    "owner": "Wendy Women's Clinic",
+    "type": "clinic"
+   },
+   {
+    "pos": 3,
+    "url": "https://www.reddit.com/r/beyondthebump/comments/1t0i8xm/how_long_is_it_normal_to_feel_heaviness_down/",
+    "owner": "Reddit",
+    "type": "forum"
+   },
+   {
+    "pos": 4,
+    "url": "https://healthcare.utah.edu/healthfeed/2025/08/whats-normal-down-there-after-childbirth",
+    "owner": "University of Utah Health (US)",
+    "type": "hospital"
+   },
+   {
+    "pos": 5,
+    "url": "https://www.northwestfamilyclinics.com/blog/blog-pelvic-floor-health-after-baby",
+    "owner": "Northwest Family Clinics (US)",
+    "type": "clinic"
+   },
+   {
+    "pos": 6,
+    "url": "https://www.kgoal.com/a/blog/pelvic-health/signs-of-weak-pelvic-floor-after-childbirth",
+    "owner": "kGoal",
+    "type": "other"
+   },
+   {
+    "pos": 7,
+    "url": "https://thevagwhisperer.com/2022/02/08/the-4th-quarter-for-your-vagina/",
+    "owner": "The Vag Whisperer",
+    "type": "other"
+   },
+   {
+    "pos": 8,
+    "url": "https://www.physiomatters.com.sg/post/pelvic-floor-changes-after-pregnancy-what-s-normal-and-what-needs-treatment",
+    "owner": "Physio Matters",
+    "type": "clinic"
+   }
+  ],
+  "goji_organic_pos": null,
+  "winning_format": "symptom explainer (causes + what to do), 18 sources incl. video",
+  "notes": "Symptom-language query: AIO synthesises 18 mostly US/AU sources; 'what's normal' blog posts win. Only SG sources: Wendy Women's Clinic, PhysioMatters blog. Goji absent."
+ },
+ {
+  "id": "cond-csection",
+  "q": "c-section recovery physiotherapy singapore",
+  "engine": "google",
+  "date": "2026-10-12",
+  "aio_present": true,
+  "goji_in_aio": true,
+  "aio_cited_sources": [
+   {
+    "url": "https://calyx.sg/postpartum/treatment/rehabilitation/",
+    "owner": "Calyx Women's Health Physiotherapy"
+   },
+   {
+    "url": "https://www.gojiphysio.com/conditions/caesarean-recovery/",
+    "owner": "Goji Physio"
+   },
+   {
+    "url": "https://optimove.sg/pregnancy-prenatal-postnatal/",
+    "owner": "OptiMove Physio"
+   },
+   {
+    "url": "https://www.reiwahealth.com/our-services/pelvic-floor-physiotherapy/",
+    "owner": "Reiwa Health"
+   },
+   {
+    "url": "https://www.physiomatters.com.sg/post/how-can-postnatal-physiotherapy-help-with-c-section-recovery",
+    "owner": "Physio Matters"
+   },
+   {
+    "url": "https://orchardhealthclinic.com/prenatal-physiotherapy/",
+    "owner": "Orchard Health Clinic"
+   },
+   {
+    "url": "https://www.embracephysio.sg/baby-bumps-to-burpees-returning-to-exercise-for-c-section-recovery/",
+    "owner": "Embrace Physiotherapy"
+   },
+   {
+    "url": "https://www.embracephysio.sg/services/pre-postnatal-physiotherapy/",
+    "owner": "Embrace Physiotherapy"
+   },
+   {
+    "url": "https://www.physiomatters.com.sg/post/pelvic-floor-recovery-through-pilates-a-guide-for-new-mothers-in-singapore",
+    "owner": "Physio Matters"
+   },
+   {
+    "url": "https://www.physiomatters.com.sg/prenatal-and-postnatal-physiotherapy",
+    "owner": "Physio Matters"
+   },
+   {
+    "url": "https://www.embracephysio.sg/",
+    "owner": "Embrace Physiotherapy"
+   },
+   {
+    "url": "https://www.embracephysio.sg/services/birth-prep/",
+    "owner": "Embrace Physiotherapy"
+   },
+   {
+    "url": "https://orchardhealthclinic.com/postnatal-physiotherapy/",
+    "owner": "Orchard Health Clinic"
+   },
+   {
+    "url": "https://www.physiomatters.com.sg/post/postnatal-physiotherapy-in-singapore-when-should-you-begin-after-giving-birth",
+    "owner": "Physio Matters"
+   },
+   {
+    "url": "https://www.instagram.com/reel/C6mcBIKyDX-/",
+    "owner": "Instagram"
+   }
+  ],
+  "aio_providers_named": [
+   "Embrace Physiotherapy",
+   "Calyx Women's Health Physiotherapy",
+   "Orchard Health Clinic",
+   "PhysioMatters",
+   "Reiwa Health"
+  ],
+  "local_pack_present": true,
+  "goji_in_local_pack": true,
+  "local_pack": [
+   "Goji Women's and Family Physiotherapy",
+   "PhysioMatters Singapore Pte Ltd",
+   "Physio Down Under"
+  ],
+  "organic_top10": [
+   {
+    "pos": 1,
+    "url": "https://calyx.sg/postpartum/treatment/rehabilitation/",
+    "owner": "Calyx Women's Health Physiotherapy",
+    "type": "clinic"
+   },
+   {
+    "pos": 2,
+    "url": "https://www.physiomatters.com.sg/post/how-can-postnatal-physiotherapy-help-with-c-section-recovery",
+    "owner": "Physio Matters",
+    "type": "clinic"
+   },
+   {
+    "pos": 3,
+    "url": "https://pscwomenandchildren.sg/womens-health-physiotherapy-services/womens-health-physiotherapy-pre-postnatal-physiotherapy-in-singapore/",
+    "owner": "Women & Children Centre by PSC",
+    "type": "clinic"
+   },
+   {
+    "pos": 4,
+    "url": "https://www.embracephysio.sg/services/pre-postnatal-physiotherapy/",
+    "owner": "Embrace Physiotherapy",
+    "type": "clinic"
+   },
+   {
+    "pos": 5,
+    "url": "https://www.gojiphysio.com/conditions/caesarean-recovery/",
+    "owner": "Goji Physio",
+    "type": "clinic"
+   },
+   {
+    "pos": 6,
+    "url": "https://www.corefitness.com.sg/postnatal-physiotherapy/",
+    "owner": "Core Fitness",
+    "type": "clinic"
+   },
+   {
+    "pos": 7,
+    "url": "https://optimove.sg/pregnancy-prenatal-postnatal/",
+    "owner": "OptiMove Physio",
+    "type": "clinic"
+   },
+   {
+    "pos": 8,
+    "url": "https://www.orchardhealthclinic.com/postnatal-physiotherapy/",
+    "owner": "Orchard Health Clinic",
+    "type": "clinic"
+   },
+   {
+    "pos": 9,
+    "url": "https://physiodownunder.sg/women-health",
+    "owner": "Physio Down Under",
+    "type": "clinic"
+   }
+  ],
+  "goji_organic_pos": 5,
+  "winning_format": "dedicated C-section rehab page + clinic list",
+  "notes": "Goji's /conditions/caesarean-recovery/ is cited for the scar-management claim (2nd source) and ranks #5 organic; Goji #1 in local pack; but Goji not in the AIO's 5-clinic list."
+ },
+ {
+  "id": "cond-pgp",
+  "q": "pelvic girdle pain in pregnancy physio",
+  "engine": "google",
+  "date": "2026-10-12",
+  "aio_present": true,
+  "goji_in_aio": false,
+  "aio_cited_sources": [
+   {
+    "url": "https://pscwomenandchildren.sg/blog/pregnancy-related-pelvic-girdle-pain/",
+    "owner": "Women & Children Centre by PSC"
+   },
+   {
+    "url": "https://cityosteophysio.com/blog/postpartum-exercise-for-pelvic-girdle-pain-finding-relief-and-restoring-pelvic-health/",
+    "owner": "City Osteopathy & Physiotherapy"
+   },
+   {
+    "url": "https://physioactive.sg/pelvic-girdle-pain-pgp/",
+    "owner": "PhysioActive"
+   },
+   {
+    "url": "https://www.physio-pedia.com/Pregnancy_Related_Pelvic_Pain",
+    "owner": "Physiopedia"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11921157/",
+    "owner": "NIH PMC"
+   },
+   {
+    "url": "https://www.youtube.com/watch?v=btiORb7zuJI",
+    "owner": "YouTube (Michelle Kenway)"
+   },
+   {
+    "url": "https://www.thewomens.org.au/images/uploads/fact-sheets/Pregnancy-related-pelvic-girdle-pain-210319.pdf",
+    "owner": "The Royal Women's Hospital (AU)"
+   },
+   {
+    "url": "https://www.youtube.com/watch?v=f2SdeakJPp4",
+    "owner": "YouTube"
+   },
+   {
+    "url": "https://www.rcog.org.uk/media/e2wouadz/pi-pelvic-girdle-pain-and-pregnancy.pdf",
+    "owner": "RCOG (UK)"
+   }
+  ],
+  "aio_providers_named": [
+   "PhysioActive"
+  ],
+  "local_pack_present": false,
+  "goji_in_local_pack": false,
+  "local_pack": [],
+  "organic_top10": [
+   {
+    "pos": 1,
+    "url": "https://www.physio-pedia.com/Pregnancy_Related_Pelvic_Pain",
+    "owner": "Physiopedia",
+    "type": "media"
+   },
+   {
+    "pos": 2,
+    "url": "https://pscwomenandchildren.sg/blog/pregnancy-related-pelvic-girdle-pain/",
+    "owner": "Women & Children Centre by PSC",
+    "type": "clinic"
+   },
+   {
+    "pos": 3,
+    "url": "https://www.nth.nhs.uk/resources/pregnancy-related-pelvic-girdle-pain-prpgp-2/",
+    "owner": "NHS North Tees (UK)",
+    "type": "hospital"
+   },
+   {
+    "pos": 4,
+    "url": "https://www.thewomens.org.au/images/uploads/fact-sheets/Pregnancy-related-pelvic-girdle-pain-210319.pdf",
+    "owner": "The Royal Women's Hospital (AU)",
+    "type": "hospital"
+   },
+   {
+    "pos": 5,
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11921157/",
+    "owner": "NIH PMC",
+    "type": "government"
+   },
+   {
+    "pos": 6,
+    "url": "https://www2.hse.ie/conditions/pelvic-girdle-pain-pregnancy/exercises/",
+    "owner": "HSE Ireland",
+    "type": "government"
+   },
+   {
+    "pos": 7,
+    "url": "https://cityosteophysio.com/blog/postpartum-exercise-for-pelvic-girdle-pain-finding-relief-and-restoring-pelvic-health/",
+    "owner": "City Osteopathy & Physiotherapy",
+    "type": "clinic"
+   },
+   {
+    "pos": 8,
+    "url": "https://duewest.co.nz/wp-content/uploads/2024/09/i-physio-advice-for-pelvic-pain-preg.pdf",
+    "owner": "Due West (NZ)",
+    "type": "clinic"
+   }
+  ],
+  "goji_organic_pos": null,
+  "winning_format": "explainer + daily movement tips (patient leaflet style)",
+  "notes": "No 'singapore' in query: hospital/NHS leaflets and Physiopedia rank; PSC blog is the top SG source. AIO names PhysioActive as a local PGP centre. Goji absent, no local pack."
+ },
+ {
+  "id": "cond-perineal",
+  "q": "perineal tear recovery physio singapore",
+  "engine": "google",
+  "date": "2026-10-12",
+  "aio_present": true,
+  "goji_in_aio": true,
+  "aio_cited_sources": [
+   {
+    "url": "https://www.embracephysio.sg/tears-of-a-bundle-of-joy-perineal-tear-and-episiotomy/",
+    "owner": "Embrace Physiotherapy"
+   },
+   {
+    "url": "https://www.embracephysio.sg/services/pre-postnatal-physiotherapy/",
+    "owner": "Embrace Physiotherapy"
+   },
+   {
+    "url": "https://www.physiomatters.com.sg/birth-prep-physiotherapy-singapore",
+    "owner": "Physio Matters"
+   },
+   {
+    "url": "https://www.gojiphysio.com/conditions/perineal-tear/",
+    "owner": "Goji Physio"
+   },
+   {
+    "url": "https://orchardhealthclinic.com/pelvic-floor-treatment-for-prenatal-and-postnatal/",
+    "owner": "Orchard Health Clinic"
+   },
+   {
+    "url": "https://www.embracephysio.sg/services/birth-prep/",
+    "owner": "Embrace Physiotherapy"
+   },
+   {
+    "url": "https://www.physiomatters.com.sg/prenatal-and-postnatal-physiotherapy",
+    "owner": "Physio Matters"
+   },
+   {
+    "url": "https://www.physiomatters.com.sg/pelvic-floor-therapy-singapore",
+    "owner": "Physio Matters"
+   },
+   {
+    "url": "https://www.embracephysio.sg/services/womens-health-physiotherapy-singapore/",
+    "owner": "Embrace Physiotherapy"
+   },
+   {
+    "url": "https://www.edgehealthcare.com.sg/womans-health/",
+    "owner": "Edge Healthcare"
+   },
+   {
+    "url": "https://www.reiwahealth.com/our-services/pelvic-floor-physiotherapy/",
+    "owner": "Reiwa Health"
+   },
+   {
+    "url": "https://orchardhealthclinic.com/prenatal-physiotherapy/",
+    "owner": "Orchard Health Clinic"
+   },
+   {
+    "url": "https://cityosteophysio.com/womens-health-postnatal-specialists-singapore",
+    "owner": "City Osteopathy & Physiotherapy"
+   }
+  ],
+  "aio_providers_named": [
+   "Embrace Physiotherapy",
+   "PhysioMatters Singapore",
+   "Goji Women's and Family Physiotherapy",
+   "City Osteopathy and Physiotherapy"
+  ],
+  "local_pack_present": true,
+  "goji_in_local_pack": true,
+  "local_pack": [
+   "The Rehab Lab Plus",
+   "PhysioMatters Singapore Pte Ltd",
+   "Goji Women's and Family Physiotherapy"
+  ],
+  "organic_top10": [
+   {
+    "pos": 1,
+    "url": "https://www.physiomatters.com.sg/prenatal-and-postnatal-physiotherapy",
+    "owner": "Physio Matters",
+    "type": "clinic"
+   },
+   {
+    "pos": 2,
+    "url": "https://orchardhealthclinic.com/pelvic-floor-treatment-for-prenatal-and-postnatal/",
+    "owner": "Orchard Health Clinic",
+    "type": "clinic"
+   },
+   {
+    "pos": 3,
+    "url": "https://www.embracephysio.sg/category/pregnancy-postnatal/",
+    "owner": "Embrace Physiotherapy",
+    "type": "clinic"
+   },
+   {
+    "pos": 4,
+    "url": "https://pscwomenandchildren.sg/womens-health-physiotherapy-services/womens-health-physiotherapy-pelvic-floor-rehabilitation/",
+    "owner": "Women & Children Centre by PSC",
+    "type": "clinic"
+   },
+   {
+    "pos": 5,
+    "url": "https://physiodownunder.sg/women-health",
+    "owner": "Physio Down Under",
+    "type": "clinic"
+   },
+   {
+    "pos": 6,
+    "url": "https://physioasia.com/womens-health-physiotherapy-singapore/",
+    "owner": "Physio Asia",
+    "type": "clinic"
+   },
+   {
+    "pos": 7,
+    "url": "https://www.reiwahealth.com/our-services/pelvic-floor-physiotherapy/",
+    "owner": "Reiwa Health",
+    "type": "clinic"
+   },
+   {
+    "pos": 8,
+    "url": "https://www.edgehealthcare.com.sg/womans-health/",
+    "owner": "Edge Healthcare",
+    "type": "clinic"
+   },
+   {
+    "pos": 9,
+    "url": "https://www.wendywomensclinic.com.sg/blog/weak-pelvic-floor-after-childbirth.html",
+    "owner": "Wendy Women's Clinic",
+    "type": "clinic"
+   }
+  ],
+  "goji_organic_pos": null,
+  "winning_format": "condition-specific blog (Embrace perineal tear article) + clinic list",
+  "notes": "Goji's /conditions/perineal-tear/ is cited for scar management AND Goji is named 3rd of 4 in the AIO clinic list; Goji 3rd in local pack; not in organic top 9."
+ },
+ {
+  "id": "cond-mastitis",
+  "q": "physiotherapy for blocked milk ducts singapore",
+  "engine": "google",
+  "date": "2026-10-12",
+  "aio_present": true,
+  "goji_in_aio": false,
+  "aio_cited_sources": [
+   {
+    "url": "https://pscwomenandchildren.sg/blog/blocked-milk-duct-mastitis-physiotherapy-singapore/",
+    "owner": "Women & Children Centre by PSC"
+   },
+   {
+    "url": "https://pushmarkham.com/lactation-physiotherapy-blocked-ducts/",
+    "owner": "PUSH Markham (CA)"
+   },
+   {
+    "url": "https://www.range.physio/condition/mastitis-and-blocked-ducts/",
+    "owner": "Range Physiotherapy (AU)"
+   },
+   {
+    "url": "https://www.physiomatters.com.sg/post/breast-swelling-and-engorgement-managing-discomfort-postpartum",
+    "owner": "Physio Matters"
+   },
+   {
+    "url": "https://www.edgehealthcare.com.sg/womans-health/",
+    "owner": "Edge Healthcare"
+   },
+   {
+    "url": "https://physioedgesg.com/",
+    "owner": "Physio Edge Singapore"
+   },
+   {
+    "url": "https://www.embracephysio.sg/what-we-treat/blocked-ducts-and-mastitis/",
+    "owner": "Embrace Physiotherapy"
+   },
+   {
+    "url": "https://physioasia.com/blocked-breast-ducts/",
+    "owner": "Physio Asia"
+   },
+   {
+    "url": "https://www.physiomatters.com.sg/prenatal-and-postnatal-physiotherapy",
+    "owner": "Physio Matters"
+   },
+   {
+    "url": "https://www.physiotherapysgc.com/blogs/make-the-1st-2-weeks-of-feeding-your-baby-easier",
+    "owner": "Physiotherapy SGC"
+   },
+   {
+    "url": "https://www.youtube.com/watch?v=jQXjmPn0H_Y",
+    "owner": "YouTube"
+   },
+   {
+    "url": "https://www.instagram.com/p/DNiBaJTSjfA/",
+    "owner": "Instagram"
+   },
+   {
+    "url": "https://www.theosteo.com.sg/article/Blocked_Milk_Ducts",
+    "owner": "The Osteo"
+   }
+  ],
+  "aio_providers_named": [
+   "Embrace Physiotherapy",
+   "PhysioMatters Singapore",
+   "Physio Therapy Singapore Collective",
+   "Physio Edge Singapore",
+   "Physio Down Under"
+  ],
+  "local_pack_present": true,
+  "goji_in_local_pack": false,
+  "local_pack": [
+   "PhysioMatters Singapore Pte Ltd",
+   "The Rehab Lab Plus",
+   "Physio Edge Singapore"
+  ],
+  "organic_top10": [
+   {
+    "pos": 1,
+    "url": "https://pscwomenandchildren.sg/blog/blocked-milk-duct-mastitis-physiotherapy-singapore/",
+    "owner": "Women & Children Centre by PSC",
+    "type": "clinic"
+   },
+   {
+    "pos": 2,
+    "url": "https://physioactive.sg/mastitis-and-blocked-milk-ducts/",
+    "owner": "PhysioActive",
+    "type": "clinic"
+   },
+   {
+    "pos": 3,
+    "url": "https://www.embracephysio.sg/services/lactation-physiotherapy/",
+    "owner": "Embrace Physiotherapy",
+    "type": "clinic"
+   },
+   {
+    "pos": 4,
+    "url": "https://physioasia.com/blocked-breast-ducts/",
+    "owner": "Physio Asia",
+    "type": "clinic"
+   },
+   {
+    "pos": 5,
+    "url": "https://physioedgesg.com/",
+    "owner": "Physio Edge Singapore",
+    "type": "clinic"
+   },
+   {
+    "pos": 6,
+    "url": "https://www.thomsonmedical.com/blog/lactation-massage-singapore",
+    "owner": "Thomson Medical",
+    "type": "hospital"
+   },
+   {
+    "pos": 7,
+    "url": "https://www.physiomatters.com.sg/post/breast-swelling-and-engorgement-managing-discomfort-postpartum",
+    "owner": "Physio Matters",
+    "type": "clinic"
+   },
+   {
+    "pos": 8,
+    "url": "https://www.physiotherapysgc.com/womens-health/lactation-relief",
+    "owner": "Physiotherapy SGC",
+    "type": "clinic"
+   },
+   {
+    "pos": 9,
+    "url": "https://pscwomenandchildren.sg/womens-health-physiotherapy-services/womens-health-physiotherapy-ultrasound-for-mastitis/",
+    "owner": "Women & Children Centre by PSC",
+    "type": "clinic"
+   }
+  ],
+  "goji_organic_pos": null,
+  "winning_format": "treatment explainer (ultrasound, MLD, taping) + clinic comparison table",
+  "notes": "AIO renders a clinic table (name / address / techniques). Goji absent everywhere."
+ },
+ {
+  "id": "cond-pelvic-pain",
+  "q": "pelvic pain physiotherapy singapore",
+  "engine": "google",
+  "date": "2026-10-12",
+  "aio_present": true,
+  "goji_in_aio": true,
+  "aio_cited_sources": [
+   {
+    "url": "https://pscwomenandchildren.sg/womens-health-physiotherapy-services/womens-health-physiotherapy-pelvic-floor-rehabilitation/",
+    "owner": "Women & Children Centre by PSC"
+   },
+   {
+    "url": "https://www.embracephysio.sg/services/womens-health-physiotherapy-singapore/",
+    "owner": "Embrace Physiotherapy"
+   },
+   {
+    "url": "https://www.physiomatters.com.sg/pelvic-floor-therapy-singapore",
+    "owner": "Physio Matters"
+   },
+   {
+    "url": "https://physioasia.com/pelvis-hip-womens-health/",
+    "owner": "Physio Asia"
+   },
+   {
+    "url": "https://physiodownunder.sg/",
+    "owner": "Physio Down Under"
+   },
+   {
+    "url": "https://www.embracephysio.sg/what-we-treat/",
+    "owner": "Embrace Physiotherapy"
+   },
+   {
+    "url": "https://phoenixrehabgroup.com/your-concise-guide-to-pelvic-floor-physiotherapy/",
+    "owner": "Phoenix Rehab Group"
+   },
+   {
+    "url": "https://www.singaporephysio.com/spc/",
+    "owner": "Singapore Physio (Spine and Pelvis Clinic)"
+   },
+   {
+    "url": "https://cityosteophysio.com/mens-pelvic-health-physiotherapy-singapore",
+    "owner": "City Osteopathy & Physiotherapy"
+   },
+   {
+    "url": "https://orchardhealthclinic.com/pelvic-floor-treatment-for-prenatal-and-postnatal/",
+    "owner": "Orchard Health Clinic"
+   },
+   {
+    "url": "https://physiodownunder.sg/men-health",
+    "owner": "Physio Down Under"
+   },
+   {
+    "url": "https://calyx.sg/trying-to-conceive-tcc/treatment/pelvic-girdle-pain/",
+    "owner": "Calyx Women's Health Physiotherapy"
+   },
+   {
+    "url": "https://spineandpelvisclinic.com/services/womens-health-physiotherapy/",
+    "owner": "Spine and Pelvis Clinic"
+   },
+   {
+    "url": "https://physioasia.com/services/womens-health-physiotherapy/",
+    "owner": "Physio Asia"
+   },
+   {
+    "url": "https://elevatephysio.com.sg/womens-health-and-physiotherapy-addressing-pelvic-floor-issues/",
+    "owner": "Elevate Physiotherapy"
+   }
+  ],
+  "aio_providers_named": [
+   "Embrace Physiotherapy",
+   "Physio Down Under",
+   "City Osteopathy and Physiotherapy",
+   "Spine and Pelvis Clinic",
+   "Goji Women's and Family Physiotherapy"
+  ],
+  "local_pack_present": true,
+  "goji_in_local_pack": true,
+  "local_pack": [
+   "Goji Women's and Family Physiotherapy",
+   "Reverseme Pelvis Care, Thomson Plaza",
+   "Physio Down Under"
+  ],
+  "organic_top10": [
+   {
+    "pos": 1,
+    "url": "https://pscwomenandchildren.sg/womens-health-physiotherapy-services/womens-health-physiotherapy-pelvic-floor-rehabilitation/",
+    "owner": "Women & Children Centre by PSC",
+    "type": "clinic"
+   },
+   {
+    "pos": 2,
+    "url": "https://www.physiomatters.com.sg/pelvic-floor-therapy-singapore",
+    "owner": "Physio Matters",
+    "type": "clinic"
+   },
+   {
+    "pos": 3,
+    "url": "https://www.sgh.com.sg/our-specialties/pelvic-floor-disorder",
+    "owner": "Singapore General Hospital",
+    "type": "hospital"
+   },
+   {
+    "pos": 4,
+    "url": "https://physiodownunder.sg/",
+    "owner": "Physio Down Under",
+    "type": "clinic"
+   },
+   {
+    "pos": 5,
+    "url": "https://www.singhealth.com.sg/tests-procedures/physiotherapy-for-pelvic-organ-prolapse-female-urinary-disorders",
+    "owner": "SingHealth",
+    "type": "hospital"
+   },
+   {
+    "pos": 6,
+    "url": "https://phoenixrehabgroup.com/your-concise-guide-to-pelvic-floor-physiotherapy/",
+    "owner": "Phoenix Rehab Group",
+    "type": "clinic"
+   },
+   {
+    "pos": 7,
+    "url": "https://aareurology.sg/conditions/pelvic-floor-dysfunction/",
+    "owner": "AARE Urocare",
+    "type": "clinic"
+   },
+   {
+    "pos": 8,
+    "url": "https://physioactive.sg/womens-health-and-physio/",
+    "owner": "PhysioActive",
+    "type": "clinic"
+   },
+   {
+    "pos": 9,
+    "url": "https://www.singaporephysio.com/spc/",
+    "owner": "Singapore Physio (Spine and Pelvis Clinic)",
+    "type": "clinic"
+   }
+  ],
+  "goji_organic_pos": null,
+  "winning_format": "explainer + 'where to go' clinic list (GBP cards)",
+  "notes": "Goji #1 in local pack; named 5th of 5 GBP cards in the expanded AIO (reload, AIO regenerated; first collapsed render showed no list and no Goji). No gojiphysio.com URL cited; not in organic."
+ },
+ {
+  "id": "cond-menopause",
+  "q": "menopause physiotherapy singapore",
+  "engine": "google",
+  "date": "2026-10-12",
+  "aio_present": true,
+  "goji_in_aio": false,
+  "aio_cited_sources": [
+   {
+    "url": "https://activexphysio.com/conditions/menopause-joint-and-tendon-pain",
+    "owner": "ActiveX Physio"
+   },
+   {
+    "url": "https://www.homage.sg/resources/physiotherapy-clinics-women-singapore/",
+    "owner": "Homage (roundup)"
+   },
+   {
+    "url": "https://www.edgehealthcare.com.sg/womans-health/",
+    "owner": "Edge Healthcare"
+   },
+   {
+    "url": "https://optimove.sg/menopause-management-physiotherapy/",
+    "owner": "OptiMove Physio"
+   },
+   {
+    "url": "https://www.physiomatters.com.sg/reformer-pilates-for-menopause",
+    "owner": "Physio Matters"
+   },
+   {
+    "url": "https://physiodownunder.sg/reformer-pilates-for-menopause",
+    "owner": "Physio Down Under"
+   },
+   {
+    "url": "https://www.embracephysio.sg/",
+    "owner": "Embrace Physiotherapy"
+   },
+   {
+    "url": "https://www.embracephysio.sg/breaking-the-silence-on-menopause-what-the-new-gsm-guidelines-mean-for-you/",
+    "owner": "Embrace Physiotherapy"
+   },
+   {
+    "url": "https://www.embracephysio.sg/what-we-treat/perimenopause-and-menopause/",
+    "owner": "Embrace Physiotherapy"
+   },
+   {
+    "url": "https://www.prohealthasia-sg.com/services/menopause",
+    "owner": "ProHealth Asia"
+   },
+   {
+    "url": "https://pscwomenandchildren.sg/womens-health-physiotherapy-services/",
+    "owner": "Women & Children Centre by PSC"
+   },
+   {
+    "url": "https://calyx.sg/",
+    "owner": "Calyx Women's Health Physiotherapy"
+   },
+   {
+    "url": "https://www.embracephysio.sg/services/womens-health-physiotherapy-singapore/",
+    "owner": "Embrace Physiotherapy"
+   },
+   {
+    "url": "https://www.kkh.com.sg/our-specialties/allied-health-specialties/physiotherapy",
+    "owner": "KK Women's and Children's Hospital"
+   },
+   {
+    "url": "https://www.youtube.com/watch?v=YtncPSm-r_Q",
+    "owner": "YouTube"
+   },
+   {
+    "url": "https://www.instagram.com/reel/DaPUqZdFakH/",
+    "owner": "Instagram"
+   }
+  ],
+  "aio_providers_named": [
+   "Embrace Physiotherapy",
+   "Physio Down Under",
+   "Calyx Women's Health Physiotherapy",
+   "PhysioMatters",
+   "Edge Healthcare"
+  ],
+  "local_pack_present": true,
+  "goji_in_local_pack": false,
+  "local_pack": [
+   "PhysioMatters Singapore Pte Ltd",
+   "Physio Down Under",
+   "Embrace Physiotherapy"
+  ],
+  "organic_top10": [
+   {
+    "pos": 1,
+    "url": "https://www.embracephysio.sg/what-we-treat/perimenopause-and-menopause/",
+    "owner": "Embrace Physiotherapy",
+    "type": "clinic"
+   },
+   {
+    "pos": 2,
+    "url": "https://pscwomenandchildren.sg/womens-health-physiotherapy-services/",
+    "owner": "Women & Children Centre by PSC",
+    "type": "clinic"
+   },
+   {
+    "pos": 3,
+    "url": "https://optimove.sg/menopause-management-physiotherapy/",
+    "owner": "OptiMove Physio",
+    "type": "clinic"
+   },
+   {
+    "pos": 4,
+    "url": "https://activexphysio.com/conditions/menopause-joint-and-tendon-pain",
+    "owner": "ActiveX Physio",
+    "type": "clinic"
+   },
+   {
+    "pos": 5,
+    "url": "https://www.edgehealthcare.com.sg/womans-health/",
+    "owner": "Edge Healthcare",
+    "type": "clinic"
+   },
+   {
+    "pos": 6,
+    "url": "https://www.physiomatters.com.sg/reformer-pilates-for-menopause",
+    "owner": "Physio Matters",
+    "type": "clinic"
+   },
+   {
+    "pos": 7,
+    "url": "https://www.physiotherapysgc.com/therapists/laura-o-byrne",
+    "owner": "Physiotherapy SGC",
+    "type": "clinic"
+   },
+   {
+    "pos": 8,
+    "url": "https://www.synergyphysio.com.sg/womens-health-physiotherapy-singapore/",
+    "owner": "Synergy Physio",
+    "type": "clinic"
+   },
+   {
+    "pos": 9,
+    "url": "https://www.prohealthasia-sg.com/services/menopause",
+    "owner": "ProHealth Asia",
+    "type": "clinic"
+   }
+  ],
+  "goji_organic_pos": null,
+  "winning_format": "dedicated menopause condition page + menopause Pilates program pages",
+  "notes": "Embrace's perimenopause page ranks #1; PhysioMatters and Physio Down Under each have a 'Reformer Pilates for Menopause' page. Goji absent."
+ },
+ {
+  "id": "cond-run-after-birth",
+  "q": "when can i start running after giving birth",
+  "engine": "google",
+  "date": "2026-10-12",
+  "aio_present": true,
+  "goji_in_aio": false,
+  "aio_cited_sources": [
+   {
+    "url": "https://www.reddit.com/r/fitpregnancy/comments/1f844mj/when_did_you_start_running_postpartum/",
+    "owner": "Reddit"
+   },
+   {
+    "url": "https://cornerstonephysio.com/resources/running-after-pregnancy/",
+    "owner": "Cornerstone Physiotherapy (CA)"
+   },
+   {
+    "url": "https://www.healthline.com/health/pregnancy/running-after-pregnancy",
+    "owner": "Healthline"
+   },
+   {
+    "url": "https://www.summahealth.org/blog/entries/2023/06/checklist-for-returning-to-running-postpartum",
+    "owner": "Summa Health (US)"
+   },
+   {
+    "url": "https://www.royalberkshire.nhs.uk/media/hkgjdyrp/physio-return-to-running-after-childbirth.pdf",
+    "owner": "NHS Royal Berkshire (UK)"
+   },
+   {
+    "url": "https://carriepagliano.com/when-can-a-mom-start-running-postpartum/",
+    "owner": "Carrie Pagliano (US physio)"
+   },
+   {
+    "url": "https://centredmums.com/running/when-can-i-run-after-giving-birth/",
+    "owner": "Centred Mums"
+   },
+   {
+    "url": "https://www.physioeffect.co.uk/resources/postnatal-running-guide",
+    "owner": "Physio Effect (UK)"
+   },
+   {
+    "url": "https://www.bumpandbeyondphysio.co.nz/post/running-after-birth-when-is-it-safe-to-start-again",
+    "owner": "Bump and Beyond Physio (NZ)"
+   },
+   {
+    "url": "https://www.physiomatters.com.sg/post/when-can-you-safely-return-to-running-after-pregnancy",
+    "owner": "Physio Matters"
+   },
+   {
+    "url": "https://www.youtube.com/watch?v=jHX8bsMdf3U",
+    "owner": "YouTube"
+   },
+   {
+    "url": "https://www.libertyphysio.co.nz/postnatal-return-to-running-when-can-i-start/",
+    "owner": "Liberty Physio (NZ)"
+   },
+   {
+    "url": "https://www.youtube.com/shorts/2NtPrBcfTAM",
+    "owner": "YouTube"
+   }
+  ],
+  "aio_providers_named": [],
+  "local_pack_present": false,
+  "goji_in_local_pack": false,
+  "local_pack": [],
+  "organic_top10": [
+   {
+    "pos": 1,
+    "url": "https://cornerstonephysio.com/resources/running-after-pregnancy/",
+    "owner": "Cornerstone Physiotherapy (CA)",
+    "type": "clinic"
+   },
+   {
+    "pos": 2,
+    "url": "https://www.reddit.com/r/fitpregnancy/comments/1f844mj/when_did_you_start_running_postpartum/",
+    "owner": "Reddit",
+    "type": "forum"
+   },
+   {
+    "pos": 3,
+    "url": "https://www.royalberkshire.nhs.uk/media/hkgjdyrp/physio-return-to-running-after-childbirth.pdf",
+    "owner": "NHS Royal Berkshire (UK)",
+    "type": "hospital"
+   },
+   {
+    "pos": 4,
+    "url": "https://www.physiomatters.com.sg/post/when-can-you-safely-return-to-running-after-pregnancy",
+    "owner": "Physio Matters",
+    "type": "clinic"
+   },
+   {
+    "pos": 5,
+    "url": "https://www.gleneagles.com.sg/health-plus/article/exercising-after-birth",
+    "owner": "Gleneagles Hospital",
+    "type": "hospital"
+   },
+   {
+    "pos": 6,
+    "url": "https://thevagwhisperer.com/2022/01/25/when-to-return-to-running-postpartum/",
+    "owner": "The Vag Whisperer",
+    "type": "other"
+   },
+   {
+    "pos": 7,
+    "url": "https://www.theoriginway.com/blog/postpartum-running-readiness",
+    "owner": "Origin",
+    "type": "clinic"
+   },
+   {
+    "pos": 8,
+    "url": "https://www.nhs.uk/baby/support-and-services/keeping-fit-and-healthy-with-a-baby/",
+    "owner": "NHS (UK)",
+    "type": "government"
+   }
+  ],
+  "goji_organic_pos": null,
+  "winning_format": "direct numeric answer ('12 weeks') + readiness checklist",
+  "notes": "AIO leads with a single number (12 weeks) cited to Reddit + physio guides; PhysioMatters is the only SG clinic cited/ranked. Goji absent."
+ },
+ {
+  "id": "paeds-schroth",
+  "q": "schroth therapy singapore",
+  "engine": "google",
+  "date": "2026-10-12",
+  "aio_present": true,
+  "goji_in_aio": false,
+  "aio_cited_sources": [
+   {
+    "url": "https://physioandsole.com.sg/blog/schroth-therapy-for-scoliosis/",
+    "owner": "Physio and Sole"
+   },
+   {
+    "url": "https://www.corefitness.com.sg/scoliosis-physiotherapy/",
+    "owner": "Core Fitness Physiotherapy & Pilates"
+   },
+   {
+    "url": "https://thebloomrehab.sg/our-services/scoliosis-postural-management/",
+    "owner": "The Bloom Rehab"
+   },
+   {
+    "url": "https://pscwomenandchildren.sg/paediatric-physiotherapy-services/paediatric-physiotherapy-schroth-for-scoliosis/",
+    "owner": "Women & Children Centre by PSC"
+   },
+   {
+    "url": "https://www.isstschrothmethod.com/country-state/singapore/",
+    "owner": "ISST Schroth (therapist directory)"
+   },
+   {
+    "url": "https://postureplus.sg/schroth-therapy/",
+    "owner": "Posture Plus"
+   },
+   {
+    "url": "https://www.corefitness.com.sg/scoliosis-treatment-in-singapore",
+    "owner": "Core Fitness Physiotherapy & Pilates"
+   },
+   {
+    "url": "https://cityosteophysio.com/scoliosis-specialists-singapore",
+    "owner": "City Osteopathy & Physiotherapy"
+   },
+   {
+    "url": "https://www.scoliocentre.sg/schroth-camp/",
+    "owner": "Scolio-Centre Singapore"
+   },
+   {
+    "url": "https://www.prohealthasia-sg.com/services/scoliosis-schroth-method",
+    "owner": "ProHealth Asia"
+   },
+   {
+    "url": "https://rapidphysiocare.com/scoliosis-treatment/",
+    "owner": "Rapid Physiocare"
+   },
+   {
+    "url": "https://www.scoliocentre.sg/",
+    "owner": "Scolio-Centre Singapore"
+   }
+  ],
+  "aio_providers_named": [
+   "Posture Plus",
+   "Scolio-Centre Singapore"
+  ],
+  "local_pack_present": true,
+  "goji_in_local_pack": false,
+  "local_pack": [
+   "The Bloom Rehab",
+   "Scolio-centre Singapore",
+   "ScolioLife - Scoliosis & Spine Correction Clinic"
+  ],
+  "organic_top10": [
+   {
+    "pos": 1,
+    "url": "https://postureplus.sg/schroth-therapy/",
+    "owner": "Posture Plus",
+    "type": "clinic"
+   },
+   {
+    "pos": 2,
+    "url": "https://www.corefitness.com.sg/scoliosis-physiotherapy/",
+    "owner": "Core Fitness Physiotherapy & Pilates",
+    "type": "clinic"
+   },
+   {
+    "pos": 3,
+    "url": "https://physioandsole.com.sg/blog/schroth-therapy-for-scoliosis/",
+    "owner": "Physio and Sole",
+    "type": "clinic"
+   },
+   {
+    "pos": 4,
+    "url": "https://pscwomenandchildren.sg/paediatric-physiotherapy-services/paediatric-physiotherapy-schroth-for-scoliosis/",
+    "owner": "Women & Children Centre by PSC",
+    "type": "clinic"
+   },
+   {
+    "pos": 5,
+    "url": "https://www.isstschrothmethod.com/country-state/singapore/",
+    "owner": "ISST Schroth",
+    "type": "directory"
+   },
+   {
+    "pos": 6,
+    "url": "https://physioclinic.sg/conditions-treated/postural-pain/scoliosis/schroth-treatment-method/",
+    "owner": "Physio Clinic SG",
+    "type": "clinic"
+   },
+   {
+    "pos": 7,
+    "url": "https://elevatephysio.com.sg/services/schroth-therapy/",
+    "owner": "Elevate Physiotherapy",
+    "type": "clinic"
+   },
+   {
+    "pos": 8,
+    "url": "https://scoliolife.com/en_SG",
+    "owner": "ScolioLife",
+    "type": "clinic"
+   },
+   {
+    "pos": 9,
+    "url": "https://www.instagram.com/scolio_centre_singapore/",
+    "owner": "Scolio-Centre Singapore (Instagram)",
+    "type": "other"
+   }
+  ],
+  "goji_organic_pos": null,
+  "winning_format": "dedicated Schroth page + certification (ISST/BSPTS) listing",
+  "notes": "AIO 'where to find' list favours certified-therapist claims (ISST directory is cited). Provider list captured partially (Posture Plus, Scolio-Centre first; AIO regenerated without the list on reload). Goji absent."
+ },
+ {
+  "id": "paeds-scoliosis-child",
+  "q": "scoliosis physiotherapy for child singapore",
+  "engine": "google",
+  "date": "2026-10-12",
+  "aio_present": true,
+  "goji_in_aio": false,
+  "aio_cited_sources": [
+   {
+    "url": "https://pscwomenandchildren.sg/paediatric-physiotherapy-services/paediatric-physiotherapy-schroth-for-scoliosis/",
+    "owner": "Women & Children Centre by PSC"
+   },
+   {
+    "url": "https://pscwomenandchildren.sg/blog/scoliosis-what-to-look-out-for-in-my-child/",
+    "owner": "Women & Children Centre by PSC"
+   },
+   {
+    "url": "https://physioactive.sg/whats-best-treatment-paediatric-scoliosis/",
+    "owner": "PhysioActive"
+   },
+   {
+    "url": "https://pscwomenandchildren.sg/our-clinicians/farha-nisha/",
+    "owner": "Women & Children Centre by PSC"
+   },
+   {
+    "url": "https://pscwomenandchildren.sg/blog/scoliosis-physiotherapy-treatment-a-practical-guide-for-parents-in-singapore/",
+    "owner": "Women & Children Centre by PSC"
+   },
+   {
+    "url": "https://www.kkh.com.sg/our-specialties/allied-health-specialties/physiotherapy",
+    "owner": "KK Women's and Children's Hospital"
+   },
+   {
+    "url": "https://pscwomenandchildren.sg/paediatric-physiotherapy-services/",
+    "owner": "Women & Children Centre by PSC"
+   },
+   {
+    "url": "https://physioandsole.com.sg/physiotherapy-conditions/scoliosis/",
+    "owner": "Physio and Sole"
+   },
+   {
+    "url": "https://physioandsole.com.sg/blog/schroth-therapy-for-scoliosis/",
+    "owner": "Physio and Sole"
+   }
+  ],
+  "aio_providers_named": [
+   "Women & Children Centre",
+   "The Bloom Rehab",
+   "KK Women's and Children's Hospital",
+   "Physio & Sole",
+   "City Osteopathy and Physiotherapy",
+   "ScolioLife"
+  ],
+  "local_pack_present": true,
+  "goji_in_local_pack": false,
+  "local_pack": [
+   "ScolioLife - Scoliosis & Spine Correction Clinic",
+   "The Bloom Rehab",
+   "All Well Scoliosis Centre - Singapore Chiropractic Clinic"
+  ],
+  "organic_top10": [
+   {
+    "pos": 1,
+    "url": "https://pscwomenandchildren.sg/paediatric-physiotherapy-services/paediatric-physiotherapy-schroth-for-scoliosis/",
+    "owner": "Women & Children Centre by PSC",
+    "type": "clinic"
+   },
+   {
+    "pos": 2,
+    "url": "https://pscwomenandchildren.sg/blog/scoliosis-physiotherapy-treatment-a-practical-guide-for-parents-in-singapore/",
+    "owner": "Women & Children Centre by PSC",
+    "type": "clinic"
+   },
+   {
+    "pos": 3,
+    "url": "https://www.corefitness.com.sg/scoliosis-physiotherapy/",
+    "owner": "Core Fitness Physiotherapy & Pilates",
+    "type": "clinic"
+   },
+   {
+    "pos": 4,
+    "url": "https://tops.com.sg/paediatric/paediatric-scoliosis/",
+    "owner": "TOPS (orthopaedic)",
+    "type": "clinic"
+   },
+   {
+    "pos": 5,
+    "url": "https://pscwomenandchildren.sg/paediatric-physiotherapy-services/paediatric-physiotherapy-scoliosis/",
+    "owner": "Women & Children Centre by PSC",
+    "type": "clinic"
+   },
+   {
+    "pos": 6,
+    "url": "https://kidzphysio.com/quick-child-teen-check-for-parents-spine-scoliosis/",
+    "owner": "Kidz Physio",
+    "type": "clinic"
+   },
+   {
+    "pos": 7,
+    "url": "https://www.kkh.com.sg/our-specialties/allied-health-specialties/physiotherapy",
+    "owner": "KK Women's and Children's Hospital",
+    "type": "hospital"
+   },
+   {
+    "pos": 8,
+    "url": "https://www.physiomatters.com.sg/babies-children-teens",
+    "owner": "Physio Matters",
+    "type": "clinic"
+   },
+   {
+    "pos": 9,
+    "url": "https://physioactive.sg/whats-best-treatment-paediatric-scoliosis/",
+    "owner": "PhysioActive",
+    "type": "clinic"
+   }
+  ],
+  "goji_organic_pos": null,
+  "winning_format": "service page + parent guide blog + named certified clinician page (PSC)",
+  "notes": "PSC dominates (5 of 9 AIO citations incl. a clinician bio; 3 organic slots). AIO expanded via Show more (regenerated). Goji absent."
+ },
+ {
+  "id": "paeds-physio",
+  "q": "paediatric physiotherapy singapore",
+  "engine": "google",
+  "date": "2026-10-12",
+  "aio_present": true,
+  "goji_in_aio": false,
+  "aio_cited_sources": [
+   {
+    "url": "https://orchardhealthclinic.com/treatment/paediatric-physiotherapy/",
+    "owner": "Orchard Health Clinic"
+   },
+   {
+    "url": "https://kidzphysio.com/",
+    "owner": "Kidz Physio"
+   },
+   {
+    "url": "https://kidsclinic.sg/paediatric-physiotherapy/",
+    "owner": "Kids Clinic"
+   },
+   {
+    "url": "https://cityosteophysio.com/highly-rated-paediatric-physiotherapists-in-singapore/",
+    "owner": "City Osteopathy & Physiotherapy"
+   },
+   {
+    "url": "https://happymovesphysio.sg/",
+    "owner": "Happy Moves Physiotherapy"
+   }
+  ],
+  "aio_providers_named": [
+   "Kids Focus Physiotherapy",
+   "Women And Children Centre by PSC",
+   "Happy Moves Physiotherapy",
+   "KK Women's and Children's Hospital",
+   "Kidzphysio Singapore",
+   "City Osteopathy & Physiotherapy"
+  ],
+  "local_pack_present": false,
+  "goji_in_local_pack": false,
+  "local_pack": [],
+  "organic_top10": [
+   {
+    "pos": 1,
+    "url": "https://www.sgh.com.sg/our-specialties/physiotherapy/paediatric-physiotherapy",
+    "owner": "Singapore General Hospital",
+    "type": "hospital"
+   },
+   {
+    "pos": 2,
+    "url": "https://www.hellophysio.sg/pediatric-physiotherapy/",
+    "owner": "Hello Physio",
+    "type": "clinic"
+   },
+   {
+    "pos": 3,
+    "url": "https://cityosteophysio.com/highly-rated-paediatric-physiotherapists-in-singapore/",
+    "owner": "City Osteopathy & Physiotherapy",
+    "type": "clinic"
+   },
+   {
+    "pos": 4,
+    "url": "https://honeykidsasia.com/physiotherapy-centres-in-singapore-for-kids/",
+    "owner": "HoneyKids Asia",
+    "type": "roundup"
+   },
+   {
+    "pos": 5,
+    "url": "https://happymovesphysio.sg/",
+    "owner": "Happy Moves Physiotherapy",
+    "type": "clinic"
+   },
+   {
+    "pos": 6,
+    "url": "https://www.kkh.com.sg/our-specialties/allied-health-specialties/physiotherapy",
+    "owner": "KK Women's and Children's Hospital",
+    "type": "hospital"
+   },
+   {
+    "pos": 7,
+    "url": "https://kidzphysio.com/",
+    "owner": "Kidz Physio",
+    "type": "clinic"
+   },
+   {
+    "pos": 8,
+    "url": "https://kaleidoscope.com.sg/paediatric-physiotherapy-introduction-process-and-benefits/",
+    "owner": "Kaleidoscope",
+    "type": "clinic"
+   },
+   {
+    "pos": 9,
+    "url": "https://pscwomenandchildren.sg/paediatric-physiotherapy-services/",
+    "owner": "Women & Children Centre by PSC",
+    "type": "clinic"
+   }
+  ],
+  "goji_organic_pos": null,
+  "winning_format": "AIO clinic list with founder names + paeds-only specialists",
+  "notes": "No local pack. AIO lists paeds specialists by founder (Sarah Wong, Dr Janell Lee) and format (home/school/pool). Goji absent."
+ },
+ {
+  "id": "paeds-torticollis",
+  "q": "baby torticollis physiotherapy singapore",
+  "engine": "google",
+  "date": "2026-10-12",
+  "aio_present": true,
+  "goji_in_aio": false,
+  "aio_cited_sources": [
+   {
+    "url": "https://pscwomenandchildren.sg/blog/does-my-baby-have-torticollis-a-parents-guide-to-understanding-spotting-and-treating-it-with-physiotherapy/",
+    "owner": "Women & Children Centre by PSC"
+   },
+   {
+    "url": "https://www.physiomatters.com.sg/post/wry-neck-torticollis-in-babies",
+    "owner": "Physio Matters"
+   },
+   {
+    "url": "https://orchardhealthclinic.com/torticollis/",
+    "owner": "Orchard Health Clinic"
+   },
+   {
+    "url": "https://www.orthopaedicsurgeon.com.sg/patients-education/childrens-orthopaedics/torticollis/",
+    "owner": "Singapore Sports & Orthopaedic Clinic"
+   },
+   {
+    "url": "https://optimove.sg/plagiocephaly/",
+    "owner": "OptiMove Physio"
+   },
+   {
+    "url": "https://www.kkh.com.sg/news/patient-care/singapore-s-first-plagiocentre-kkh-provides-specialist-treatment",
+    "owner": "KK Women's and Children's Hospital"
+   },
+   {
+    "url": "https://happymovesphysio.sg/",
+    "owner": "Happy Moves Physiotherapy"
+   },
+   {
+    "url": "https://www.sgh.com.sg/our-specialties/physiotherapy/paediatric-physiotherapy",
+    "owner": "Singapore General Hospital"
+   }
+  ],
+  "aio_providers_named": [],
+  "local_pack_present": true,
+  "goji_in_local_pack": false,
+  "local_pack": [
+   "The Rehab Lab Plus",
+   "Orchard Health Clinic",
+   "City Osteopathy & Physiotherapy @ Woodleigh"
+  ],
+  "organic_top10": [
+   {
+    "pos": 1,
+    "url": "https://orchardhealthclinic.com/torticollis/",
+    "owner": "Orchard Health Clinic",
+    "type": "clinic"
+   },
+   {
+    "pos": 2,
+    "url": "https://pscwomenandchildren.sg/blog/does-my-baby-have-torticollis-a-parents-guide-to-understanding-spotting-and-treating-it-with-physiotherapy/",
+    "owner": "Women & Children Centre by PSC",
+    "type": "clinic"
+   },
+   {
+    "pos": 3,
+    "url": "https://cityosteophysio.com/treating-torticollis-in-babies-singapore",
+    "owner": "City Osteopathy & Physiotherapy",
+    "type": "clinic"
+   },
+   {
+    "pos": 4,
+    "url": "https://www.benchmarkphysio.com/torticollis-plagiocephaly-physiotherapy/",
+    "owner": "Benchmark Physio",
+    "type": "clinic"
+   },
+   {
+    "pos": 5,
+    "url": "https://www.kkh.com.sg/news/patient-care/singapore-s-first-plagiocentre-kkh-provides-specialist-treatment",
+    "owner": "KK Women's and Children's Hospital",
+    "type": "hospital"
+   },
+   {
+    "pos": 6,
+    "url": "https://www.physiomatters.com.sg/post/wry-neck-torticollis-in-babies",
+    "owner": "Physio Matters",
+    "type": "clinic"
+   },
+   {
+    "pos": 7,
+    "url": "https://www.singhealth.com.sg/symptoms-treatments/torticollis-childhood-illnesses",
+    "owner": "SingHealth",
+    "type": "hospital"
+   },
+   {
+    "pos": 8,
+    "url": "https://www.orthopaedicsurgeon.com.sg/patients-education/childrens-orthopaedics/torticollis/",
+    "owner": "Singapore Sports & Orthopaedic Clinic",
+    "type": "clinic"
+   },
+   {
+    "pos": 9,
+    "url": "https://www.sgh.com.sg/our-specialties/physiotherapy/paediatric-physiotherapy",
+    "owner": "Singapore General Hospital",
+    "type": "hospital"
+   }
+  ],
+  "goji_organic_pos": null,
+  "winning_format": "parent-guide explainer with a stat (90-95% resolve in year 1)",
+  "notes": "AIO is explainer-only (signs, treatment); dedicated torticollis pages win organic. Goji absent."
+ },
+ {
+  "id": "paeds-ddh",
+  "q": "hip dysplasia baby physio singapore",
+  "engine": "google",
+  "date": "2026-10-12",
+  "aio_present": true,
+  "goji_in_aio": true,
+  "aio_cited_sources": [
+   {
+    "url": "https://boneisland.sg/developmental-dysplasia-of-the-hip-in-babies/",
+    "owner": "Bone Island Children's Clinic"
+   },
+   {
+    "url": "https://www.gojiphysio.com/",
+    "owner": "Goji Physio"
+   },
+   {
+    "url": "https://www.gojiphysio.com/services/mummy-baby-assessment/",
+    "owner": "Goji Physio"
+   },
+   {
+    "url": "https://www.sgh.com.sg/our-specialties/physiotherapy/paediatric-physiotherapy",
+    "owner": "Singapore General Hospital"
+   },
+   {
+    "url": "https://www.orthopaedicclinic.com.sg/dictionary/developmental-dysplasia-of-the-hip/",
+    "owner": "Orthopaedic Clinic SG"
+   },
+   {
+    "url": "https://www.youtube.com/watch?v=y1kMMsGBHIo",
+    "owner": "YouTube"
+   },
+   {
+    "url": "https://www.instagram.com/reel/DZOhZyiSM2e/",
+    "owner": "Instagram"
+   },
+   {
+    "url": "https://www.gojiphysio.com/conditions/",
+    "owner": "Goji Physio"
+   },
+   {
+    "url": "https://kidzphysio.com/",
+    "owner": "Kidz Physio"
+   },
+   {
+    "url": "https://kidzphysio.com/about-me/",
+    "owner": "Kidz Physio"
+   },
+   {
+    "url": "https://cityosteophysio.com/babies-and-children-specialists-singapore",
+    "owner": "City Osteopathy & Physiotherapy"
+   },
+   {
+    "url": "https://p-ortho.com/paediatric-orthopaedic-services/hip-dyplasia-treatment-children/",
+    "owner": "P-Ortho"
+   },
+   {
+    "url": "https://libertyorthopaedic.com/hip-dysplasia/",
+    "owner": "Liberty Orthopaedic"
+   },
+   {
+    "url": "https://www.kkh.com.sg/our-specialties/allied-health-specialties/physiotherapy",
+    "owner": "KK Women's and Children's Hospital"
+   },
+   {
+    "url": "https://cityosteophysio.com/babies-and-children-specialists-paediatric-osteopathy-physiotherapy",
+    "owner": "City Osteopathy & Physiotherapy"
+   }
+  ],
+  "aio_providers_named": [
+   "City Osteopathy & Physiotherapy",
+   "Goji Physiotherapy",
+   "Kids Focus Physiotherapy",
+   "Kidz Physio",
+   "KK Women's and Children's Hospital",
+   "Singapore General Hospital"
+  ],
+  "local_pack_present": true,
+  "goji_in_local_pack": false,
+  "local_pack": [
+   "Integrative Physio - Orchard",
+   "The Rehab Lab Plus",
+   "Orchard Health Clinic"
+  ],
+  "organic_top10": [
+   {
+    "pos": 1,
+    "url": "https://boneisland.sg/en/developmental-dysplasia-of-the-hip-in-babies/",
+    "owner": "Bone Island Children's Clinic",
+    "type": "clinic"
+   },
+   {
+    "pos": 2,
+    "url": "https://www.orthopaedicclinic.com.sg/dictionary/developmental-dysplasia-of-the-hip/",
+    "owner": "Orthopaedic Clinic SG",
+    "type": "clinic"
+   },
+   {
+    "pos": 3,
+    "url": "https://www.thephysiostudio.sg/paediatric-physiotherapy-singapore",
+    "owner": "The Physio Studio",
+    "type": "clinic"
+   },
+   {
+    "pos": 4,
+    "url": "https://p-ortho.com/paediatric-orthopaedic-services/hip-dyplasia-treatment-children/",
+    "owner": "P-Ortho",
+    "type": "clinic"
+   },
+   {
+    "pos": 5,
+    "url": "https://cityosteophysio.com/babies-and-children-specialists-singapore",
+    "owner": "City Osteopathy & Physiotherapy",
+    "type": "clinic"
+   },
+   {
+    "pos": 6,
+    "url": "https://www.sgh.com.sg/our-specialties/physiotherapy/paediatric-physiotherapy",
+    "owner": "Singapore General Hospital",
+    "type": "hospital"
+   },
+   {
+    "pos": 7,
+    "url": "https://kidsclinic.sg/paediatric-physiotherapy/",
+    "owner": "Kids Clinic",
+    "type": "clinic"
+   },
+   {
+    "pos": 8,
+    "url": "https://libertyorthopaedic.com/hip-dysplasia/",
+    "owner": "Liberty Orthopaedic",
+    "type": "clinic"
+   },
+   {
+    "pos": 9,
+    "url": "https://kidzphysio.com/about-me/",
+    "owner": "Kidz Physio",
+    "type": "clinic"
+   }
+  ],
+  "goji_organic_pos": null,
+  "winning_format": "AIO clinic guide with pricing per provider",
+  "notes": "Goji named 2nd of 6 in the expanded AIO with its DDH offer and prices ($160 paeds, $330/$380 Mummy & Baby); cited URLs are Goji homepage, /conditions/ and mummy-baby page, not the DDH page. Not in pack or organic."
+ }
+]

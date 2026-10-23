@@ -4,6 +4,11 @@ const conditions = defineCollection({
   type: "content",
   schema: z.object({
     title: z.string(),
+    /** Overrides only the <title> tag (same contract as `services.seoTitle`),
+     *  so a page can target the national query ("... Singapore") without
+     *  the geo leaking into the H1, breadcrumbs or schema `name`. The site
+     *  appends " | Goji Physiotherapy", so keep this to about 40 characters. */
+    seoTitle: z.string().optional(),
     description: z.string(),
     /** Short heading shown on the index card */
     cardTitle: z.string().optional(),
@@ -11,10 +16,10 @@ const conditions = defineCollection({
     cardLead: z.string(),
     category: z.enum([
       "Women's Health",
-      "Musculoskeletal & Sports",
       "Paediatrics",
-      "Vestibular",
-      "Lymphatic & Oncology",
+      "Musculoskeletal & Sports",
+      "Vestibular Rehabilitation",
+      "Lymphatic Health",
     ]),
     /** WhatsApp CTA slug — use "web-wa" until condition-specific slugs are wired in app.py */
     ctaSlug: z.string().default("web-wa"),
@@ -23,6 +28,10 @@ const conditions = defineCollection({
     reviewer: z
       .object({ name: z.string(), slug: z.string() })
       .optional(),
+    /** Service slugs that treat this condition, rendered as a "Related
+     *  appointments" block and emitted as MedicalWebPage relatedLink. Link only
+     *  services whose page already covers the condition. */
+    relatedServices: z.array(z.string()).default([]),
     /** Optional ordering within category on the index page */
     order: z.number().optional(),
     draft: z.boolean().default(false),
@@ -100,15 +109,33 @@ const team = defineCollection({
     /** Substring of `tagline` to underline in the hero. Ignored if it doesn't match. */
     taglineHighlight: z.string().optional(),
     photo: z.string().optional(),
+    /** Overrides the default "Portrait of <name>" hero alt text. */
+    photoAlt: z.string().optional(),
+    /** Overrides only the <title> tag (default: "<name> — <role> | Goji Health"). */
+    seoTitle: z.string().optional(),
+    /** Overrides the default "Patients see <first name> for" heading. */
+    specialtiesHeading: z.string().optional(),
     specialties: z.array(z.object({
       title: z.string(),
       description: z.string(),
     })),
     approach: z.string(),
-    education: z.array(z.string()),
-    experience: z.array(z.string()),
-    training: z.array(z.string()),
-    languages: z.array(z.string()),
+    /** When set, the approach block is an editorial paragraph under this
+     *  heading rather than a pull-quote. */
+    approachHeading: z.string().optional(),
+    /** Credential columns render only when non-empty, so non-clinical team
+     *  members (e.g. instructors) can show `certifications` / `teachingApproach`
+     *  instead of Education / Clinical experience / Training / Languages. */
+    education: z.array(z.string()).default([]),
+    experience: z.array(z.string()).default([]),
+    training: z.array(z.string()).default([]),
+    certifications: z.array(z.string()).default([]),
+    teachingApproach: z.array(z.string()).default([]),
+    languages: z.array(z.string()).default([]),
+    /** Closing CTA overrides (default: "Book an appointment with <first name>"). */
+    ctaHeading: z.string().optional(),
+    ctaText: z.string().optional(),
+    ctaBookLabel: z.string().optional(),
     personalNote: z.string().optional(),
     /** Candid photo beside the personal note; degrades to a placeholder if unset. */
     personalPhoto: z.string().optional(),

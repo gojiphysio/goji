@@ -9,7 +9,7 @@ heroAlt: "A Goji physiotherapist guiding a mother through a postpartum recovery 
 category: "Women's Health Physiotherapy"
 durationMin: 55
 priceClinic: 260
-priceHome: 330
+priceHome: 380
 clinicians: ["Kristy Ng", "Claire Ng", "Cheryl Long"]
 bookingService: "physiotherapy"
 bookingFocus: "womens-health"
@@ -105,5 +105,5 @@ Depending on your assessment and goals, we may recommend:
 ## Part of our women's health service
 
 Postpartum physiotherapy is one of four appointment types in our
-[women's health physiotherapy in Singapore](/womens-health-physiotherapy-singapore)
+[women's health physiotherapy in Singapore](/womens-health-physiotherapy-singapore/)
 service, alongside pelvic floor, prenatal and Mummy and Baby care.

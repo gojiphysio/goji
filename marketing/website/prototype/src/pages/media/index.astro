@@ -23,7 +23,7 @@ const press = (await getCollection("press", ({ data }) => !data.draft)).sort(
 const latestPress = press[0];
 
 const origin = Astro.site ?? new URL(Astro.url.origin);
-const pageURL = new URL("/media", origin).href;
+const pageURL = new URL("/media/", origin).href;
 
 const schema = [
   {
@@ -34,8 +34,8 @@ const schema = [
       "Articles from the Goji physiotherapy team, and media coverage of the clinic.",
     url: pageURL,
     hasPart: [
-      { "@type": "WebPage", name: "Blog", url: new URL("/blog", origin).href },
-      { "@type": "WebPage", name: "Press", url: new URL("/press", origin).href },
+      { "@type": "WebPage", name: "Blog", url: new URL("/blog/", origin).href },
+      { "@type": "WebPage", name: "Press", url: new URL("/press/", origin).href },
     ],
   },
   {
@@ -66,7 +66,7 @@ const schema = [
 
   <Section tone="surface">
     <div class="media-choices">
-      <a href="/blog" class="media-choice">
+      <a href="/blog/" class="media-choice">
         <span class="media-choice__icon" aria-hidden="true">
           <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
             <path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H13l5 5v9.5A1.5 1.5 0 0 1 16.5 20h-11A1.5 1.5 0 0 1 4 18.5z"></path>
@@ -85,7 +85,7 @@ const schema = [
         </span>
       </a>
 
-      <a href="/press" class="media-choice">
+      <a href="/press/" class="media-choice">
         <span class="media-choice__icon" aria-hidden="true">
           <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
             <path d="M4 6a1.5 1.5 0 0 1 1.5-1.5h10A1.5 1.5 0 0 1 17 6v12H6a2 2 0 0 1-2-2z"></path>
@@ -109,7 +109,7 @@ const schema = [
       latestPress && (
         <div class="media-latest">
           <p>Most recent:</p>
-          <a href={`/press/${latestPress.slug}`} class="media-latest__item">
+          <a href={`/press/${latestPress.slug}/`} class="media-latest__item">
             {latestPress.data.logo && (
               <img
                 src={`/press/${latestPress.data.logo}`}

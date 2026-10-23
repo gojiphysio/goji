@@ -73,7 +73,7 @@ Private Pilates, on the other hand, is led by a STOTT PILATES® certified instru
 
 Neither service replaces physiotherapy assessment or treatment. If you're unsure which is right for you, our team can help you choose.
 
-[Explore Private Pilates →](/services/private-pilates)
+[Explore Private Pilates →](/services/private-pilates/)
 
 ## Packages
 

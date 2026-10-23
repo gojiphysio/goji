@@ -29,6 +29,11 @@ FLOW
      had no email address and needs a WhatsApp instead.
 
 SAFETY
+  Two independent guards, and they compose:
+    DRY_RUN=true            -> nothing is sent to anyone but the digest.
+    REMINDER_OVERRIDE_TO=x  -> reminders are really sent, but every one goes to
+                               x. Use with DRY_RUN=false to prove the whole path
+                               end to end without mailing a patient.
   DRY_RUN=true renders and groups everything, sends NO patient email, writes
   'dry_run' ledger rows (a distinct status, so it never suppresses the real send)
   and still delivers the digest. This is how the job ships; flip the flag only
@@ -39,6 +44,10 @@ Env vars:
   BQ_PROJECT            BigQuery project            default: goji-bi
   BQ_DATASET            Marts dataset               default: marts
   DRY_RUN               'true' => send nothing      default: true
+  REMINDER_OVERRIDE_TO  test mode: send every patient reminder HERE instead of
+                        to the patient. Real end-to-end send, reaches nobody.
+                        Ledgered as 'test', so it never suppresses the real
+                        reminder. Unset in normal operation.
   GMAIL_APP_PASSWORD    SMTP app password           (required unless DRY_RUN)
   REMINDER_ADMIN_EMAIL  Digest recipient            default: hello@gojiphysio.com
   (see reminder_mailer.py for the SMTP_* / link overrides)
@@ -269,7 +278,11 @@ def main() -> int:
 
     # Read the date off the rows, never recompute it — see resolve_appt_date.
     day = resolve_appt_date(rows)
-    log.info("reminders for %s (dry_run=%s)", day, dry_run)
+    if mailer.OVERRIDE_TO:
+        log.warning("TEST MODE: every reminder goes to %s, no patient is mailed",
+                    mailer.OVERRIDE_TO)
+    log.info("reminders for %s (dry_run=%s, test_mode=%s)",
+             day, dry_run, bool(mailer.OVERRIDE_TO))
 
     groups, unreachable = group_by_recipient(rows)
     log.info("%d appointment(s) due; %d recipient group(s), %d unreachable",
@@ -300,7 +313,11 @@ def main() -> int:
                 has_clinic=g["has_clinic"], has_home_visit=g["has_home_visit"],
                 ref=ref)
             sent.append(summary)
-            ledger += [(i, "sent", None) for i in g["appointment_ids"]]
+            # TEST MODE writes 'test', never 'sent' — otherwise a test run would
+            # suppress the real reminder on the actual day, and these 8 patients
+            # would silently never hear from us. Only a genuine send is 'sent'.
+            ledger += [(i, "test" if mailer.OVERRIDE_TO else "sent", None)
+                       for i in g["appointment_ids"]]
         except Exception as e:
             # One bad address must not stop the rest of the list. 'failed' rows
             # aren't 'sent', so the next run retries them.

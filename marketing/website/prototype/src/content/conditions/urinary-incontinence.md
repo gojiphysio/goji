@@ -1,6 +1,6 @@
 ---
 title: "Urinary Incontinence"
-description: "Urinary incontinence is among the most common and most treatable conditions in women's health. Pelvic floor physiotherapy is the first-line treatment recommended by international guidelines - leaking when you cough, sneeze, or run is common, but it is not something you have to accept."
+description: "Urinary incontinence is common and treatable. Pelvic floor physiotherapy is the first-line treatment recommended by international guidelines for common forms."
 cardTitle: "Urinary Incontinence"
 cardLead: "Urinary incontinence is among the most common and most treatable conditions in women's health."
 category: "Women's Health"
@@ -10,6 +10,7 @@ reviewer:
 ctaSlug: "web-wa"
 order: 5
 draft: false
+relatedServices: ["pelvic-floor-physiotherapy"]
 ---
 
 Urinary incontinence - any unintentional leakage of urine - is among the most common and most treatable conditions in women's health. It affects women of all ages, not just those who have given birth. Yet many women do not seek treatment, assuming it is an inevitable consequence of childbirth or ageing. It is not. Pelvic floor physiotherapy is the first-line treatment recommended by international guidelines for the most common forms of urinary incontinence.

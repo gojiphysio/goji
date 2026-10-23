@@ -48,7 +48,7 @@ const displayDuration = (service: any) => {
 
 <BaseLayout
   title="Our Services | Goji Physiotherapy Singapore"
-  description="Physiotherapy services at Goji, Lentor MRT: prenatal and postpartum physio, Mummy & Baby assessments, and Schroth therapy for scoliosis in children and adults. In-clinic or home visits."
+  description="Physiotherapy at Goji, Lentor MRT: prenatal and postpartum physio, Mummy & Baby assessments, and Schroth therapy for scoliosis. In-clinic or home visits."
 >
   <section class="services-hero">
     <div class="container">
@@ -74,7 +74,7 @@ const displayDuration = (service: any) => {
             {cat === "Women's Health Physiotherapy" && (
               <p class="svc-hub-link">
                 New to this?{" "}
-                <a href="/womens-health-physiotherapy-singapore">
+                <a href="/womens-health-physiotherapy-singapore/">
                   Read the overview of women's health physiotherapy in Singapore
                 </a>{" "}
                 - what it covers, what happens at a first appointment, and how to
@@ -84,7 +84,7 @@ const displayDuration = (service: any) => {
           </div>
           <div class="svc-grid">
             {items.map((s) => (
-              <a href={`/services/${s.slug}`} class="svc-card">
+              <a href={`/services/${s.slug}/`} class="svc-card">
                 {s.data.heroImage && (
                   <div class="svc-card__media">
                     <img src={s.data.heroImage} alt={s.data.heroAlt ?? ""} width="480" height="300" loading="lazy" />

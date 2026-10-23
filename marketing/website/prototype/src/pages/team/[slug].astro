@@ -5,6 +5,7 @@ import Button from "../../components/Button.astro";
 import LogoLockup from "../../components/LogoLockup.astro";
 import ImageTextSplit from "../../components/ImageTextSplit.astro";
 import { SITE } from "../../lib/site.ts";
+import { clinicRef } from "../../lib/schema.ts";
 
 export async function getStaticPaths() {
   const entries = await getCollection("team", ({ data }) => !data.draft);
@@ -29,6 +30,18 @@ const taglineParts =
     ? [d.tagline.slice(0, hlAt), hl, d.tagline.slice(hlAt + hl.length)]
     : null;
 
+// Credential columns, in display order; empty lists are skipped so each bio shows
+// only what is verified. Grid width follows the column count (max four).
+const credBlocks = [
+  { heading: "Education", items: d.education },
+  { heading: "Clinical experience", items: d.experience },
+  { heading: "Specialist training", items: d.training },
+  { heading: "Certifications", items: d.certifications },
+  { heading: "Teaching approach", items: d.teachingApproach },
+  { heading: "Languages", items: d.languages },
+].filter((b) => b.items.length > 0);
+const ApproachTag = d.approachHeading ? "p" : "blockquote";
+
 const origin = Astro.site ?? new URL(Astro.url.origin);
 const pageURL = new URL(Astro.url.pathname, origin).href;
 // Person schema ties each physiotherapist to the clinic (E-E-A-T / author
@@ -42,7 +55,7 @@ const teamSchema = [
     description: d.tagline,
     image: d.photo ? new URL(d.photo, origin).href : undefined,
     url: pageURL,
-    knowsLanguage: d.languages,
+    knowsLanguage: d.languages.length ? d.languages : undefined,
     // E-E-A-T signals for answer engines: credentials and specialty topics
     // straight from the bio frontmatter, plus the clinic's public profiles.
     hasCredential: {
@@ -51,12 +64,7 @@ const teamSchema = [
     },
     knowsAbout: d.specialties.map((s) => s.title),
     sameAs: [SITE.instagram],
-    worksFor: {
-      "@type": "MedicalClinic",
-      name: SITE.fullName,
-      alternateName: [SITE.name, "Goji Physio"],
-      url: origin.href,
-    },
+    worksFor: clinicRef(origin),
   },
   {
     "@context": "https://schema.org",
@@ -71,7 +79,7 @@ const teamSchema = [
 ---
 
 <BaseLayout
-  title={`${d.name} — ${d.role} | Goji Health`}
+  title={d.seoTitle ?? `${d.name} — ${d.role} | Goji Health`}
   description={d.metaDescription ?? d.tagline}
   schema={teamSchema}
   searchType="Team"
@@ -81,7 +89,7 @@ const teamSchema = [
     <div class="container bio-hero__inner">
       <div class="bio-hero__photo">
         {d.photo ? (
-          <img src={d.photo} alt={`Portrait of ${d.name}`} class="bio-hero__img" loading="eager" decoding="async" />
+          <img src={d.photo} alt={d.photoAlt ?? `Portrait of ${d.name}`} class="bio-hero__img" loading="eager" decoding="async" />
         ) : (
           <div class="bio-hero__placeholder" role="img" aria-label={`Portrait of ${d.name} (photo coming soon)`}>
             <LogoLockup variant="mark" height={52} />
@@ -113,7 +121,7 @@ const teamSchema = [
   {/* ---- Patients see [name] for ---- */}
   <section class="bio-specialties">
     <div class="container">
-      <h2 class="bio-specialties__heading">Patients see {firstName} for</h2>
+      <h2 class="bio-specialties__heading">{d.specialtiesHeading ?? `Patients see ${firstName} for`}</h2>
       <div class="specialty-grid">
         {d.specialties.map((s) => (
           <div class="specialty-card">
@@ -137,37 +145,22 @@ const teamSchema = [
   {/* ---- Approach ---- */}
   <section class="bio-approach">
     <div class="container bio-approach__inner">
-      <blockquote class="bio-approach__quote">{d.approach}</blockquote>
+      {d.approachHeading && <h2 class="eyebrow">{d.approachHeading}</h2>}
+      <ApproachTag class="bio-approach__quote">{d.approach}</ApproachTag>
     </div>
   </section>
 
   {/* ---- Credentials ---- */}
   <section class="bio-creds">
-    <div class="container bio-creds__inner">
-      <div class="cred-block">
-        <h3 class="cred-block__heading">Education</h3>
-        <ul class="cred-list">
-          {d.education.map((item) => <li>{item}</li>)}
-        </ul>
-      </div>
-      <div class="cred-block">
-        <h3 class="cred-block__heading">Clinical experience</h3>
-        <ul class="cred-list">
-          {d.experience.map((item) => <li>{item}</li>)}
-        </ul>
-      </div>
-      <div class="cred-block">
-        <h3 class="cred-block__heading">Specialist training</h3>
-        <ul class="cred-list">
-          {d.training.map((item) => <li>{item}</li>)}
-        </ul>
-      </div>
-      <div class="cred-block">
-        <h3 class="cred-block__heading">Languages</h3>
-        <ul class="cred-list">
-          {d.languages.map((item) => <li>{item}</li>)}
-        </ul>
-      </div>
+    <div class="container bio-creds__inner" style={`--cred-count:${Math.min(credBlocks.length, 4)}`}>
+      {credBlocks.map((b) => (
+        <div class="cred-block">
+          <h3 class="cred-block__heading">{b.heading}</h3>
+          <ul class="cred-list">
+            {b.items.map((item) => <li>{item}</li>)}
+          </ul>
+        </div>
+      ))}
     </div>
   </section>
 
@@ -186,10 +179,10 @@ const teamSchema = [
   {/* ---- CTA strip ---- */}
   <section class="bio-cta">
     <div class="container bio-cta__inner">
-      <h2>Book an appointment with {firstName}</h2>
-      <p>Ready to get started? Book online or reach out on WhatsApp — we'll talk through what's going on before your first session.</p>
+      <h2>{d.ctaHeading ?? `Book an appointment with ${firstName}`}</h2>
+      <p>{d.ctaText ?? "Ready to get started? Book online or reach out on WhatsApp — we'll talk through what's going on before your first session."}</p>
       <div class="bio-cta__actions">
-        <Button slug="web-book" variant="primary" size="lg">Book an appointment</Button>
+        <Button slug="web-book" variant="primary" size="lg">{d.ctaBookLabel ?? "Book an appointment"}</Button>
         <Button slug="web-wa" variant="whatsapp" size="lg">Ask us on WhatsApp</Button>
       </div>
     </div>
@@ -362,7 +355,7 @@ const teamSchema = [
     .bio-creds__inner { grid-template-columns: repeat(2, 1fr); }
   }
   @media (min-width: 1000px) {
-    .bio-creds__inner { grid-template-columns: repeat(4, 1fr); }
+    .bio-creds__inner { grid-template-columns: repeat(var(--cred-count, 4), 1fr); }
   }
   .cred-block__heading {
     font-size: var(--fs-body);
