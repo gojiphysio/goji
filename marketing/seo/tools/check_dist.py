@@ -27,6 +27,7 @@ ORIGIN = "https://www.gojiphysio.com"
 LEVEL = {
     "jsonld_invalid": "ERROR",
     "broken_internal_link": "ERROR",
+    "internal_link_slash": "ERROR",
     "sitemap_noindex": "ERROR",
     "canonical": "ERROR",
     "schema_required": "ERROR",
@@ -106,6 +107,15 @@ def resolves(path: str, dist: Path, redirects: set) -> bool:
         return True
     p = dist / path.lstrip("/")
     return p.is_file() or (p / "index.html").is_file() or p.with_suffix(".html").is_file()
+
+
+def needs_slash(path: str, dist: Path) -> bool:
+    # Cloudflare Pages 308s /foo to /foo/ when foo/index.html is the page.
+    path = path.split("#")[0].split("?")[0]
+    if not path or path.endswith("/"):
+        return False
+    p = dist / path.lstrip("/")
+    return not p.is_file() and (p / "index.html").is_file()
 
 
 def types_of(blocks):
@@ -189,6 +199,8 @@ def main():
             seen.add(u.path)
             if not resolves(u.path, dist, redirects):
                 add("broken_internal_link", path, f"links to {u.path} which is not in the build")
+            elif needs_slash(u.path, dist):
+                add("internal_link_slash", path, f"links to {u.path}, which redirects to {u.path}/")
 
         # FAQPage JSON-LD must mirror visible content (Google's structured-data
         # rules); every question has to appear in the page text outside scripts.
