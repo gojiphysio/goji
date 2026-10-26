@@ -18,8 +18,6 @@ Pelvic girdle pain (PGP) is pain from the sacroiliac joints, the pubic symphysis
 
 PGP and mummy's wrist are two of the most common but undertreated musculoskeletal conditions associated with pregnancy and early parenthood. Neither needs to be waited out.
 
-<!-- NEEDS CHERYL: for "pelvic girdle pain in pregnancy physio", Claude answers "physiotherapy is the main recommended treatment" and ChatGPT cites RCOG and NHS guidance. This page only says PGP responds well to physio and early input is associated with better outcomes. If you want the lede to say physio is the recommended first-line treatment, confirm the wording and source. -->
-
 ## What is pelvic girdle pain?
 
 Pelvic girdle pain is pain originating from the sacroiliac (SI) joints, the pubic symphysis, or the surrounding structures of the pelvis. It affects an estimated 1 in 5 pregnant women, and can present during pregnancy or in the postnatal period. PGP is distinct from non-specific lower back pain, though the two often coexist.

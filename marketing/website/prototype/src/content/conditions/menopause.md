@@ -18,8 +18,6 @@ Perimenopause and menopause bring hormone-driven changes to the pelvic floor, bo
 
 These changes are often attributed to ageing rather than recognised as hormone-driven and, in many cases, addressable. Physiotherapy at this life stage focuses on building and maintaining the physical reserves - bone density, muscle strength, pelvic floor function, and joint health - that protect quality of life in the decades ahead.
 
-<!-- NEEDS CHERYL: if menopause clients can continue their programme in Goji's Strength & Conditioning or Clinical Pilates sessions, say so here; the repo does not currently link those services to menopause care. -->
-
 ## What changes during perimenopause and menopause?
 
 Oestrogen has wide-ranging effects on the musculoskeletal system. As levels decline during perimenopause (the transition phase, which begins several years before periods stop) and menopause (defined as 12 consecutive months without a period), women may notice:
