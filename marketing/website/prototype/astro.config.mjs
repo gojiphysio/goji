@@ -21,15 +21,21 @@ const blogHasPosts =
 // route template; everything else maps to src/pages/<path>.astro or
 // <path>/index.astro. Shared layout/template edits don't bump it on purpose:
 // lastmod should mean "this page's content changed". On a shallow clone every
-// file would carry the same commit date, which is worse than no date, so
-// lastmod is dropped there.
+// file would carry the same commit date, which is worse than no date.
+// Cloudflare Pages clones shallow, so the build first tries to fetch the full
+// history and drops lastmod only if that fails.
+const isShallow = () =>
+  execFileSync("git", ["rev-parse", "--is-shallow-repository"], {
+    encoding: "utf8",
+  }).trim() !== "false";
 const shallow = (() => {
   try {
-    return (
-      execFileSync("git", ["rev-parse", "--is-shallow-repository"], {
-        encoding: "utf8",
-      }).trim() !== "false"
-    );
+    if (!isShallow()) return false;
+    execFileSync("git", ["fetch", "--unshallow", "--quiet"], {
+      stdio: "ignore",
+      timeout: 120_000,
+    });
+    return isShallow();
   } catch {
     return true;
   }
