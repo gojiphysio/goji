@@ -18,8 +18,6 @@ Pelvic pain is pain felt in the lower abdomen, pelvis, or perineum, and dyspareu
 
 Pelvic pain affects a significant number of women and is frequently under-investigated and under-treated. Both pelvic pain and dyspareunia are real, physical conditions.
 
-<!-- NEEDS CHERYL: ChatGPT's answer to "pelvic pain physiotherapy singapore" lists endometriosis-related discomfort among what pelvic physio helps with. The page only says endometriosis needs specialist review alongside physio. If Goji wants to say it sees women with endometriosis-related pelvic pain, confirm the wording for this lede. -->
-
 ## What causes chronic pelvic pain?
 
 Pelvic pain has many possible contributors, and in most cases, several factors are present simultaneously. Common drivers include:
