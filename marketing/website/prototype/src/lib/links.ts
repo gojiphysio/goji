@@ -21,8 +21,9 @@ const REDIRECT_BASE = "https://go.gojiphysio.com";
 
 /** Slugs the redirector serves today. Keep in sync with app.py `LINK_SLUGS`.
  * `web-99-wa` is the 9.9 Pilates / S&C promo CTA — a campaign slug, so drop it
- * from this union (and from `LINK_SLUGS`) when the offer ends. */
-export type CtaSlug = "web-wa" | "web-book" | "web-99-wa";
+ * from this union (and from `LINK_SLUGS`) when the offer ends. `bio-*` are the
+ * Instagram link-in-bio CTAs, used only on /links (which replaces bio.site). */
+export type CtaSlug = "web-wa" | "web-book" | "web-99-wa" | "bio-wa" | "bio-book";
 
 /** Resolve a slug to its tracked redirect URL. */
 export function cta(slug: CtaSlug): string {

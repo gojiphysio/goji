@@ -1,0 +1,389 @@
+---
+/**
+ * /links — the Instagram link-in-bio page (replaces bio.site/gojiphysio).
+ *
+ * Hosting it on our own domain means the profile's one link points at
+ * gojiphysio.com, which is what ties the account to the site for search and
+ * AI answer engines, and every CTA goes through the tracked redirector.
+ * The CTAs use the `bio-*` slugs, so the dashboard's Instagram → link-in-bio
+ * funnel keeps counting them. Everything else links to our own pages.
+ *
+ * `bare` drops the site header/footer (a link-in-bio page is a menu, not a
+ * page to browse); noindex + out of search and the sitemap, because it would
+ * only compete with the homepage for brand queries.
+ *
+ * Images are dedicated thumbnails in public/photos/links/ (WebP, sized for a
+ * 2x phone screen, ~85 KB for the whole page), cropped from the service and
+ * space photos. Re-crop from the originals if those photos change.
+ *
+ * Events: add an entry to `events` while one is open for sign-up, and remove
+ * it when it's over. The section hides itself when the list is empty.
+ */
+import { Icon } from "astro-icon/components";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import LogoLockup from "../components/LogoLockup.astro";
+import Button from "../components/Button.astro";
+import { SITE } from "../lib/site.ts";
+
+const services = [
+  { label: "Pregnancy physiotherapy", note: "Before birth", href: "/services/prenatal-physiotherapy/", img: "prenatal-physiotherapy", alt: "A physiotherapist guiding a pregnant client through an exercise" },
+  { label: "Postpartum physiotherapy", note: "Recovery after birth", href: "/services/postpartum-physiotherapy/", img: "postpartum-physiotherapy", alt: "A postpartum physiotherapy session at Goji" },
+  { label: "Mummy & Baby assessment", note: "Mum and baby together", href: "/services/mummy-baby-assessment/", img: "mummy-baby-assessment", alt: "A mother and baby during a Mummy & Baby assessment" },
+  { label: "Pelvic floor physiotherapy", note: "Women's pelvic health", href: "/services/pelvic-floor-physiotherapy/", img: "pelvic-floor-physiotherapy", alt: "A pelvic floor physiotherapy session at Goji" },
+  { label: "Paediatric physiotherapy", note: "Infancy to 18", href: "/services/paediatric-physiotherapy/", img: "paediatric-physiotherapy", alt: "A physiotherapist working with a young child" },
+  { label: "MSK & sports", note: "Pain and injuries", href: "/services/musculoskeletal-physiotherapy/", img: "musculoskeletal-physiotherapy", alt: "A physiotherapist treating a client's injury" },
+  { label: "Clinical Pilates", note: "Physiotherapist-led", href: "/services/clinical-pilates/", img: "clinical-pilates", alt: "A Clinical Pilates session on the reformer" },
+  { label: "Private Pilates", note: "Instructor-led", href: "/services/private-pilates/", img: "private-pilates", alt: "A Private Pilates session on the reformer" },
+];
+
+const more = [
+  { label: "All services and prices", note: `Prices as of ${SITE.pricesAsOf}`, href: "/services/", img: "services", alt: "A physiotherapy session in Goji's strength and conditioning space" },
+  { label: "Getting here", note: "1 minute from Lentor MRT, Exit 1", href: "/getting-here/", img: "getting-here", alt: "Signage at Lentor MRT pointing to Exit 1" },
+  { label: "Meet the team", note: "AHPC-registered physiotherapists", href: "/#team", img: "team", alt: "Cheryl Long, Clinical Director" },
+  { label: "In the news", note: "Cheryl in Lianhe Zaobao", href: "/press/zaobao-womens-hidden-pain/", icon: "tabler:news" },
+];
+
+/** Open events only: { label, note, href }. Empty = section hidden. */
+const events: { label: string; note: string; href: string }[] = [];
+
+const thumb = (name: string) => `/photos/links/${name}.webp`;
+---
+
+<BaseLayout
+  title="Links | Goji Physiotherapy"
+  description="WhatsApp us, book online, or find a service at Goji Women's and Family Physiotherapy, Lentor Modern, Singapore."
+  bare
+  noindex
+  searchable={false}
+>
+  <div class="links">
+    <header class="links__head">
+      <div class="links__hero">
+        <img
+          src={thumb("hero")}
+          width="720"
+          height="405"
+          alt="The reception at Goji, with a red table and warm wood shelving"
+          fetchpriority="high"
+        />
+      </div>
+      <a href="/" class="links__badge" aria-label="Goji home">
+        <LogoLockup variant="main" height={30} />
+      </a>
+      <h1 class="links__name">{SITE.fullName}</h1>
+      <p class="links__tagline">Physiotherapy for women, children and families at Lentor Modern, Singapore.</p>
+      <ul class="links__chips" aria-label="Clinic details">
+        <li><Icon name="subway" /> 1 min from Lentor MRT</li>
+        <li><Icon name="tabler:clock" /> Mon to Sat, 8am to 8pm</li>
+        <li><Icon name="tabler:home" /> Home visits</li>
+      </ul>
+    </header>
+
+    <div class="links__ctas">
+      <Button slug="bio-wa" variant="whatsapp" size="lg">Message us on WhatsApp</Button>
+      <Button slug="bio-book" variant="primary" size="lg">Book an appointment</Button>
+    </div>
+
+    {
+      events.length > 0 && (
+        <section class="links__section" aria-labelledby="links-events">
+          <h2 id="links-events">Upcoming events</h2>
+          <ul class="links__rows">
+            {events.map((e) => (
+              <li>
+                <a class="links__row" href={e.href}>
+                  <span class="links__rowicon"><Icon name="tabler:calendar-event" /></span>
+                  <span class="links__rowtext"><strong>{e.label}</strong><span>{e.note}</span></span>
+                  <Icon name="tabler:chevron-right" class="links__chev" />
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+
+    <section class="links__section" aria-labelledby="links-services">
+      <div class="links__sectionhead">
+        <h2 id="links-services">Find your care</h2>
+        <a href="/womens-health-physiotherapy-singapore/">Women's health <Icon name="tabler:arrow-right" /></a>
+      </div>
+      <ul class="links__grid">
+        {services.map((s) => (
+          <li>
+            <a class="links__tile" href={s.href}>
+              <img src={thumb(s.img)} width="360" height="270" alt={s.alt} loading="lazy" decoding="async" />
+              <span class="links__tiletext">
+                <strong>{s.label}</strong>
+                <span>{s.note}</span>
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <section class="links__section" aria-labelledby="links-more">
+      <h2 id="links-more">Before you visit</h2>
+      <ul class="links__rows">
+        {more.map((m) => (
+          <li>
+            <a class="links__row" href={m.href}>
+              {m.img ? (
+                <img class="links__rowimg" src={thumb(m.img)} width="56" height="56" alt={m.alt} loading="lazy" decoding="async" />
+              ) : (
+                <span class="links__rowicon"><Icon name={m.icon} /></span>
+              )}
+              <span class="links__rowtext"><strong>{m.label}</strong><span>{m.note}</span></span>
+              <Icon name="tabler:chevron-right" class="links__chev" />
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <footer class="links__foot">
+      <p>{SITE.address.line1}, {SITE.address.line2}</p>
+      <p>{SITE.phone} · <a href={`mailto:${SITE.email}`}>{SITE.email}</a></p>
+      <p><a href="/">www.gojiphysio.com</a></p>
+    </footer>
+  </div>
+</BaseLayout>
+
+<style>
+  .links {
+    max-width: 30rem;
+    margin: 0 auto;
+    padding: var(--space-4) var(--space-4) var(--space-7);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+  }
+
+  /* Header: photo banner, logo badge overlapping its bottom edge. */
+  .links__head {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .links__hero {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+  }
+  .links__hero img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .links__badge {
+    margin-top: -2rem;
+    padding: var(--space-3) var(--space-4);
+    background: var(--bg-content);
+    border-radius: var(--radius-pill);
+    box-shadow: var(--shadow-sm);
+    display: inline-flex;
+    position: relative;
+  }
+  .links__name {
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    line-height: var(--lh-tight);
+    margin: var(--space-4) 0 var(--space-2);
+  }
+  .links__tagline {
+    color: var(--text-muted);
+    margin: 0;
+    max-width: 24rem;
+  }
+  .links__chips {
+    list-style: none;
+    padding: 0;
+    margin: var(--space-4) 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-2);
+  }
+  /* Facts, not buttons: no white fill or shadow (see AGENTS.md). */
+  .links__chips li {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35em;
+    font-size: 0.85rem;
+    color: var(--text-default);
+    padding: 0.3em 0.75em;
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-pill);
+  }
+  .links__chips :global(svg) {
+    width: 1em;
+    height: 1em;
+    color: var(--berry);
+  }
+
+  .links__ctas {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+  .links__ctas :global(.btn) {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .links__section h2 {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    margin: 0 0 var(--space-3);
+  }
+  .links__sectionhead {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-3);
+  }
+  .links__sectionhead a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25em;
+    font-size: 0.9rem;
+    font-weight: var(--weight-semibold);
+    color: var(--berry);
+    text-decoration: none;
+  }
+  .links__sectionhead :global(svg) {
+    width: 1em;
+    height: 1em;
+  }
+
+  /* Service tiles: photo on top, label below. Linked, so they wear the
+     interactive recipe (white fill + border + shadow). */
+  .links__grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-3);
+  }
+  .links__tile {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: var(--bg-content);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    color: var(--text-default);
+    text-decoration: none;
+    transition: transform 0.15s ease, border-color 0.15s ease;
+  }
+  .links__tile img {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    height: auto;
+    object-fit: cover;
+    display: block;
+    background: var(--bg-page);
+  }
+  .links__tiletext {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15em;
+    padding: var(--space-3);
+  }
+  .links__tiletext strong {
+    font-size: 0.92rem;
+    line-height: 1.25;
+  }
+  .links__tiletext span,
+  .links__rowtext span {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+
+  /* Rows: small thumbnail or icon, text, chevron. */
+  .links__rows {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+  .links__row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-2);
+    padding-right: var(--space-3);
+    background: var(--bg-content);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    color: var(--text-default);
+    text-decoration: none;
+    transition: border-color 0.15s ease;
+  }
+  .links__rowimg,
+  .links__rowicon {
+    width: 56px;
+    height: 56px;
+    flex: none;
+    border-radius: var(--radius-sm);
+    object-fit: cover;
+  }
+  .links__rowicon {
+    display: grid;
+    place-items: center;
+    background: var(--bg-page);
+    color: var(--berry);
+  }
+  .links__rowicon :global(svg) {
+    width: 26px;
+    height: 26px;
+  }
+  .links__rowtext {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1em;
+    flex: 1;
+    min-width: 0;
+  }
+  .links__rowtext strong {
+    font-size: 0.95rem;
+  }
+  .links__row :global(.links__chev) {
+    width: 18px;
+    height: 18px;
+    flex: none;
+    color: var(--text-muted);
+  }
+
+  .links__tile:hover,
+  .links__tile:focus-visible,
+  .links__row:hover,
+  .links__row:focus-visible {
+    border-color: var(--berry);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .links__tile:active {
+      transform: scale(0.98);
+    }
+  }
+
+  .links__foot {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+  }
+  .links__foot p {
+    margin: 0 0 var(--space-2);
+  }
+</style>
