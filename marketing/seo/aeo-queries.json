@@ -54,9 +54,9 @@
     {"id": "holistic-private-pilates", "q": "private pilates lentor", "cluster": "holistic", "target": "/services/private-pilates"},
     {"id": "holistic-private-reformer", "q": "private reformer pilates singapore", "cluster": "holistic", "target": "/services/private-pilates"},
 
-    {"id": "gen-first-visit", "q": "what happens at a first physiotherapy appointment", "cluster": "general-question", "target": null},
-    {"id": "gen-cost", "q": "how much does physiotherapy cost in singapore", "cluster": "general-question", "target": null},
-    {"id": "gen-referral", "q": "do i need a doctor's referral to see a physiotherapist in singapore", "cluster": "general-question", "target": null},
+    {"id": "gen-first-visit", "q": "what happens at a first physiotherapy appointment", "cluster": "general-question", "target": "/services/"},
+    {"id": "gen-cost", "q": "how much does physiotherapy cost in singapore", "cluster": "general-question", "target": "/services/"},
+    {"id": "gen-referral", "q": "do i need a doctor's referral to see a physiotherapist in singapore", "cluster": "general-question", "target": "/services/"},
 
     {"id": "brand-goji", "q": "goji physio", "cluster": "brand", "target": "/"},
     {"id": "brand-formal", "q": "goji women's and family physiotherapy", "cluster": "brand", "target": "/"},
