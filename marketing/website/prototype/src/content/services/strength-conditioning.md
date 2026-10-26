@@ -10,6 +10,19 @@ durationMin: 55
 priceClinic: 180
 clinicians: ["Kristy Ng", "Claire Ng"]
 bookingService: "strength-conditioning"
+faqs:
+  - q: "What is Strength & Conditioning at Goji?"
+    a: "It is a 55-minute coach-guided training session at our Lentor clinic, in a 1:1 or 2:1 setting, adapted to your current ability, training experience and goals. A session may include strength training for the upper body, lower body, back and core, balance and movement-control exercises, and coaching on technique and breathing."
+  - q: "Who is Strength & Conditioning for?"
+    a: "It suits people who are medically well and ready to exercise without needing assessment or treatment for an injury. That includes building strength and general fitness, returning to regular exercise after completing rehabilitation, and preparing for running or sport."
+  - q: "Can I do Strength & Conditioning if I have an injury?"
+    a: "Strength & Conditioning does not include physiotherapy assessment, diagnosis or treatment for a new or unresolved injury, and is not a substitute for a physiotherapy consultation. If you develop new pain during training, your coach may modify or stop the session and recommend a separate physiotherapy assessment."
+  - q: "Can I train during pregnancy or after giving birth?"
+    a: "Strength & Conditioning may be suitable if you want to maintain strength during pregnancy or after childbirth, where appropriate."
+  - q: "How is Strength & Conditioning different from Clinical Pilates?"
+    a: "Strength & Conditioning is coach-guided strength training, including resistance exercises for the upper body, lower body, back and core. Clinical Pilates is reformer or mat-based Pilates led by an AHPC-registered physiotherapist. Packages can be used across both, so your programme can adapt as your goals change."
+  - q: "How much does Strength & Conditioning cost?"
+    a: "A 55-minute session is $180 at the clinic. Sessions are available as a single session or in 5-session and 10-session packs, which can be used across Strength & Conditioning and Clinical Pilates; contact us for package prices."
 order: 1
 draft: false
 ---

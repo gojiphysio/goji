@@ -12,6 +12,19 @@ priceHome: 380
 clinicians: ["Kristy Ng", "Claire Ng", "Cheryl Long"]
 bookingService: "physiotherapy"
 bookingFocus: "general"
+faqs:
+  - q: "What does musculoskeletal physiotherapy help with?"
+    a: "It is assessment and treatment for musculoskeletal pain and injuries, including back, neck and shoulder pain, hip, knee, ankle and foot pain, elbow, wrist and hand pain, muscle strains, ligament sprains, tendon problems, and sports and overuse injuries. It also covers rehabilitation after surgery or a fracture."
+  - q: "What happens at the first appointment?"
+    a: "Your physiotherapist will discuss your medical history, symptoms, activity levels and goals, then carry out a physical assessment tailored to your concerns. Treatment may begin in the same session and may include manual therapy, exercise and rehabilitation, and guidance on activity and returning to work, exercise or sport."
+  - q: "How much does a session cost, and do you offer home visits?"
+    a: "A 55-minute session is $260 at our Lentor clinic, or $380 as a home visit."
+  - q: "Do you offer dry needling?"
+    a: "Yes, dry needling is one of the treatments that may be used, but it is only available in sessions with Cheryl Long."
+  - q: "Do I need a scan before starting physiotherapy?"
+    a: "Often not. Many musculoskeletal injuries can be assessed and managed based on clinical examination, and your physiotherapist will advise if a referral for a scan or medical review is appropriate."
+  - q: "Do I need a doctor's referral, and can I claim insurance?"
+    a: "No referral is needed - you can book directly. We do not offer direct billing: most patients pay first and claim from their insurer afterwards, depending on their policy's physiotherapy coverage."
 order: 3
 draft: false
 ---

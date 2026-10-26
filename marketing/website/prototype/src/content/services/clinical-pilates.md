@@ -12,6 +12,19 @@ priceClinic: 180
 clinicians: ["Cheryl Long", "Claire Ng"]
 bookingService: "clinical-pilates"
 closingCopy: "Ready to build strength and move with greater confidence? Book a session with our AHPC-registered physiotherapists, or speak to our team to find out whether Clinical Pilates is right for you."
+faqs:
+  - q: "What is Clinical Pilates?"
+    a: "Clinical Pilates at Goji is a 55-minute Pilates session led by an AHPC-registered physiotherapist, in a private 1:1 or 2:1 setting at our Lentor clinic. Sessions use reformer or mat-based exercises adapted to your physical needs and goals, focusing on strength, mobility, balance and movement control."
+  - q: "What is the difference between Clinical Pilates and Private Pilates?"
+    a: "Clinical Pilates is led by an AHPC-registered physiotherapist, for people who prefer exercise guided by clinical knowledge, for example when returning to activity after rehabilitation or exercising with specific physical considerations. Private Pilates is led by a STOTT PILATES® certified instructor and focuses on strength, flexibility, body awareness and movement confidence. Neither replaces physiotherapy assessment or treatment."
+  - q: "Is Clinical Pilates the same as a physiotherapy appointment?"
+    a: "No. Clinical Pilates is an exercise service led by an AHPC-registered physiotherapist, not a physiotherapy consultation. Sessions do not include formal assessment or diagnosis, treatment of new or unresolved injuries, hands-on treatment or medical advice."
+  - q: "Can I do Clinical Pilates if I have an injury or pain?"
+    a: "Clinical Pilates is intended for people who are medically ready to exercise. If you have a new or unresolved injury, pain or other symptoms that need assessment, a physiotherapy consultation may be recommended first. If new pain comes up during a session, your physiotherapist may modify or pause it and recommend a separate physiotherapy assessment."
+  - q: "Can I do Clinical Pilates during pregnancy or after giving birth?"
+    a: "Clinical Pilates may be suitable if you want to stay active during pregnancy or after childbirth, where appropriate. As with every session, it is intended for people who are medically ready to exercise."
+  - q: "How much does Clinical Pilates cost?"
+    a: "A 55-minute Clinical Pilates session is $180 at the clinic. Sessions are available as a single session or in 5-session and 10-session packages, which can be used across Clinical Pilates and Strength & Conditioning; contact us for package prices."
 order: 2
 draft: false
 ---
