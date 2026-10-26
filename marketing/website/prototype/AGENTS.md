@@ -27,7 +27,9 @@ so a token change reflows everything (styleguide is the QA surface).
   that exist in `LINK_SLUGS` (`business-intelligence/scripts/dashboard/app.py`)
   are exposed today: `web-wa`, `web-book` (the Book CTA points at our own `/book`
   form via `web-book`, not Plato), plus the campaign slug `web-99-wa` (9.9
-  Pilates / S&C promo - drop it from `CtaSlug` when the offer ends). A new CTA
+  Pilates / S&C promo - drop it from `CtaSlug` when the offer ends), and
+  `bio-wa` / `bio-book`, used only on `/links` (the Instagram link-in-bio page that
+  replaced bio.site; the dashboard shows these as "Link in bio"). A new CTA
   needs its slug added there first.
 - **Booking funnel stages are allowlisted server-side.** A new
   `bookingApi.track()` stage must be added to `VALID_STAGES` in

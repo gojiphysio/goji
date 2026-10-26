@@ -123,7 +123,7 @@ def parse_promo_sku(item_given_id: str) -> tuple[str, int] | None:
 
 # --- Click-to-WhatsApp / booking tracking ---------------------------------
 # WhatsApp is the primary CTA (customers message before booking), but socials
-# (bio.site/gojiphysio) also link straight to our /book form, so we track both. Every
+# (gojiphysio.com/links, which replaced bio.site in Oct 2026) also link straight to our /book form, so we track both. Every
 # outbound CTA routes through the public GET /r/<slug> route (and the public
 # go.gojiphysio.com/<slug>), which logs the click and 302-redirects to the slug's
 # destination. WhatsApp slugs carry a channel-specific prefilled message.
@@ -166,7 +166,7 @@ LINK_SLUGS: dict[str, dict] = {
     #                only so old published links redirect somewhere real).
     # --- WhatsApp ---
     "web-wa": {"kind": "whatsapp", "label": "Web",      "text": "Hi Goji! I have a question about physio (via your website)."},
-    "bio-wa": {"kind": "whatsapp", "label": "bio.site", "text": "Hi Goji! I found you via your Instagram/socials and have a question about physio."},
+    "bio-wa": {"kind": "whatsapp", "label": "Link in bio", "text": "Hi Goji! I found you via your Instagram/socials and have a question about physio."},
     "gbp-wa": {"kind": "whatsapp", "label": "Google",   "text": "Hi Goji! I found you on Google and have a question about physio."},
     "ads-wa": {"kind": "whatsapp", "label": "Ads",      "text": "Hi Goji! I saw your ad and have a question about physio."},
     "qr-wa":  {"kind": "whatsapp", "label": "QR",       "text": "Hi Goji! I scanned your QR code and have a question about physio."},
@@ -179,7 +179,7 @@ LINK_SLUGS: dict[str, dict] = {
     "wa":     {"kind": "whatsapp", "label": "Social",   "text": "Hi Goji! I have a question about physio."},  # generic fallback
     # --- Website /book form (current booking CTA) ---
     "web-book": {"kind": "book", "label": "Web"},
-    "bio-book": {"kind": "book", "label": "bio.site"},
+    "bio-book": {"kind": "book", "label": "Link in bio"},
     "gbp-book": {"kind": "book", "label": "Google"},
     "ads-book": {"kind": "book", "label": "Ads"},
     "qr-book":  {"kind": "book", "label": "QR"},
@@ -187,7 +187,7 @@ LINK_SLUGS: dict[str, dict] = {
     # --- Legacy Plato-booking slugs (retired; alias to the native /book form
     #     below so old published links never dead-end) ---
     "web-plato": {"kind": "book", "label": "Web"},
-    "bio-plato": {"kind": "book", "label": "bio.site"},
+    "bio-plato": {"kind": "book", "label": "Link in bio"},
     "gbp-plato": {"kind": "book", "label": "Google"},
     "ads-plato": {"kind": "book", "label": "Ads"},
     "qr-plato":  {"kind": "book", "label": "QR"},
@@ -198,7 +198,7 @@ LINK_SLUGS: dict[str, dict] = {
     # whole campaign can be deleted in one edit without touching the evergreen
     # slugs above (published links then fall back to the site, never dead-end).
     "web-99-wa": {"kind": "whatsapp", "label": "Web",      "text": PROMO_99_TEXT},
-    "bio-99-wa": {"kind": "whatsapp", "label": "bio.site", "text": PROMO_99_TEXT},
+    "bio-99-wa": {"kind": "whatsapp", "label": "Link in bio", "text": PROMO_99_TEXT},
     "gbp-99-wa": {"kind": "whatsapp", "label": "Google",   "text": PROMO_99_TEXT},
     "ads-99-wa": {"kind": "whatsapp", "label": "Ads",      "text": PROMO_99_TEXT},
     "qr-99-wa":  {"kind": "whatsapp", "label": "QR",       "text": PROMO_99_TEXT},
@@ -1957,12 +1957,13 @@ CASE
   WHEN landing_path LIKE '/services%'   THEN 'Services'
   WHEN landing_path LIKE '/team%'       THEN 'Team'
   WHEN landing_path LIKE '/blog%'       THEN 'Blog'
+  WHEN landing_path LIKE '/links%'      THEN 'Link in bio'
   ELSE 'Other'
 END
 """
 
 # Display order for the per-page bars (buckets not present are simply skipped).
-WEB_PAGE_ORDER = ["Home", "Booking", "Conditions", "Services", "Team", "Blog", "Other"]
+WEB_PAGE_ORDER = ["Home", "Booking", "Conditions", "Services", "Team", "Blog", "Link in bio", "Other"]
 
 
 def fetch_web_pages(start: date, end: date) -> list[dict]:
@@ -2050,8 +2051,8 @@ FROM bf, wa
 
 
 # Funnel-path source label per link slug prefix (slug = "<source>-<cta>", see
-# LINK_SLUGS). `bio` is handled specially: bio.site is the Instagram link-in-bio
-# page, so bio-* taps flow Instagram -> bio.site -> CTA. `web` is the owned
+# LINK_SLUGS). `bio` is handled specially: /links is the Instagram link-in-bio
+# page, so bio-* taps flow Instagram -> Link in bio -> CTA. `web` is the owned
 # Website surface (fed by discovery channels from the landing beacon), not a
 # discovery source itself. A generic slug with no prefix ('wa'/'book') is "Other".
 FUNNEL_SOURCE = {"gbp": "Google", "ads": "Ads", "qr": "QR", "ig": "Instagram"}
@@ -2075,7 +2076,7 @@ def _build_funnel_paths(link_clicks: dict, kpis: dict, lead_wins: dict,
 
         Discovery ─▶ Owned surface ─▶ CTA / intent ─▶ Outcome
         (how they arrive)  (Website,     (WhatsApp,      (Booked)
-                            bio.site)     Native booking)
+                            Link in bio)  Native booking)
 
     Data, joined across the three first-party event streams (each edge is its own
     honest measure; units shift across columns — sessions → taps → bookings —
@@ -2085,8 +2086,8 @@ def _build_funnel_paths(link_clicks: dict, kpis: dict, lead_wins: dict,
         catch-all for untagged external referrers — see `referral_domains`
         (from `fetch_referral_domains`) for what's actually in it.
       - Surface → CTA: go-link taps (`link_clicks`, marts.link_click_events),
-        slug = "<source>-<cta>". web-* sit under Website; bio-* under bio.site
-        (plus an Instagram → bio.site edge); gbp-/ads-/qr-/ig-* bypass our site,
+        slug = "<source>-<cta>". web-* sit under Website; bio-* under Link in bio
+        (plus an Instagram → Link in bio edge); gbp-/ads-/qr-/ig-* bypass our site,
         so they run Discovery → CTA directly. Retired Plato-booking slugs
         (`*-plato`) merge into "Native booking" — they redirect to the same
         /book form now, so there's a single trackable booking CTA.
@@ -2133,14 +2134,14 @@ def _build_funnel_paths(link_clicks: dict, kpis: dict, lead_wins: dict,
             elif prefix == "web":
                 add("Website", cta, n)
             elif prefix == "bio":
-                add("bio.site", cta, n)
+                add("Link in bio", cta, n)
                 bio_total += n
             elif prefix == "ig":
                 add("Instagram", cta, n)          # direct IG tap (story/post)
             else:
                 add(FUNNEL_SOURCE.get(prefix, "Other"), cta, n)  # gbp/ads/qr bypass the site
     if bio_total:
-        add("Instagram", "bio.site", bio_total)
+        add("Instagram", "Link in bio", bio_total)
 
     wa_taps   = sum(wa.values())
     book_taps = sum(bk.values())  # native /book taps, incl. retired plato-slug clicks

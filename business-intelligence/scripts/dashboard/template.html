@@ -1809,7 +1809,7 @@
     <!-- 3. Acquisition funnel · by path (Discovery → Surface → CTA → Booked) -->
     <section class="q">
       <h2>Acquisition funnel · by path <span class="badge live">Live</span></h2>
-      <div class="subtitle">How people reach a booking: <strong>where they arrive from</strong> &rarr; the <strong>surface</strong> they land on (our website or the bio.site link-in-bio) &rarr; the <strong>CTA</strong> they tap &rarr; whether they <strong>booked</strong>. The website is a surface here, fed by discovery channels &mdash; not the top of the funnel. Thicker bands mean more people; one-off referrers fold into “Other” to keep it readable.</div>
+      <div class="subtitle">How people reach a booking: <strong>where they arrive from</strong> &rarr; the <strong>surface</strong> they land on (our website or the /links link-in-bio page) &rarr; the <strong>CTA</strong> they tap &rarr; whether they <strong>booked</strong>. The website is a surface here, fed by discovery channels &mdash; not the top of the funnel. Thicker bands mean more people; one-off referrers fold into “Other” to keep it readable.</div>
       <div class="chart-wrap tall"><canvas id="mktFunnelChart"></canvas></div>
       <div class="funnel-legend" id="mkt_funnel_legend"></div>
     </section>
@@ -1994,11 +1994,11 @@
     // Pretty channel labels for tracked-link slugs (must match LINK_SLUGS in app.py).
     // Covers both WhatsApp and booking slugs; used by both per-channel splits.
     const SLUG_LABELS = {
-      'web-wa':'Web', 'bio-wa':'bio.site', 'gbp-wa':'Google', 'ads-wa':'Ads', 'qr-wa':'QR', 'ig-wa':'IG', 'wa':'Social',
-      'web-plato':'Web', 'bio-plato':'bio.site', 'gbp-plato':'Google', 'ads-plato':'Ads', 'qr-plato':'QR', 'plato':'Social',
+      'web-wa':'Web', 'bio-wa':'Link in bio', 'gbp-wa':'Google', 'ads-wa':'Ads', 'qr-wa':'QR', 'ig-wa':'IG', 'wa':'Social',
+      'web-plato':'Web', 'bio-plato':'Link in bio', 'gbp-plato':'Google', 'ads-plato':'Ads', 'qr-plato':'QR', 'plato':'Social',
       // 9.9 promo campaign — labelled separately so campaign taps read as their
       // own line in the split rather than merging into the evergreen channel.
-      'web-99-wa':'Web · 9.9', 'bio-99-wa':'bio.site · 9.9', 'gbp-99-wa':'Google · 9.9',
+      'web-99-wa':'Web · 9.9', 'bio-99-wa':'Link in bio · 9.9', 'gbp-99-wa':'Google · 9.9',
       'ads-99-wa':'Ads · 9.9', 'qr-99-wa':'QR · 9.9', 'ig-99-wa':'IG · 9.9', '99-wa':'Social · 9.9',
     };
 
@@ -3221,7 +3221,7 @@
     }
 
     // Acquisition funnel (by path): a 4-column Sankey built from r.funnel_paths.
-    //   Discovery (how they arrive) -> Owned surface (Website / bio.site)
+    //   Discovery (how they arrive) -> Owned surface (Website / Link in bio)
     //     -> CTA (WhatsApp / Native booking) -> Booked.
     // Web is now the SURFACE, fed by discovery channels (from the landing
     // beacon), not the top of funnel. Each edge is its own honest measure: the
@@ -3234,7 +3234,7 @@
       'Google Ads': 0, 'Meta Ads': 0, 'Instagram': 0, 'Google': 0, 'Ads': 0,
       'QR': 0, 'Direct': 0, 'Referral': 0, 'Other': 0,
       // col 1 — owned surface
-      'Website': 1, 'bio.site': 1,
+      'Website': 1, 'Link in bio': 1,
       // col 2 — CTA / intent
       'WhatsApp': 2, 'Native booking': 2,
       // col 3 — outcome
@@ -3244,19 +3244,19 @@
       'Google Ads': GOLD, 'Meta Ads': '#a05195', 'Instagram': '#9c6c2e',
       'Google': COBALT, 'Ads': '#caa24a', 'QR': SAGE, 'Direct': NEUTRAL,
       'Referral': '#8a8378', 'Other': '#b0a89c',
-      'Website': '#9a8f7d', 'bio.site': '#c6a36b',
+      'Website': '#9a8f7d', 'Link in bio': '#c6a36b',
       'WhatsApp': '#2f8f8f', 'Native booking': '#b9791b',
       'Booked': GREEN,
     };
     const FUNNEL_PRIORITY = {
       'Google Ads': 0, 'Meta Ads': 1, 'Instagram': 2, 'Google': 3, 'Ads': 4,
       'QR': 5, 'Direct': 6, 'Referral': 7, 'Other': 8,
-      'Website': 0, 'bio.site': 1,
+      'Website': 0, 'Link in bio': 1,
       'Native booking': 0, 'WhatsApp': 1,
       'Booked': 0,
     };
     const FUNNEL_DISCOVERY_NODES = ['Google Ads', 'Meta Ads', 'Instagram', 'Google', 'Ads', 'QR', 'Direct', 'Referral', 'Other'];
-    const FUNNEL_SURFACE_NODES = ['Website', 'bio.site'];
+    const FUNNEL_SURFACE_NODES = ['Website', 'Link in bio'];
     const FUNNEL_CTA_NODES = ['WhatsApp', 'Native booking'];
     // "Referral" is a catch-all for untagged external referrers (fetch_web_channels
     // in app.py) — de-blackboxed here with a native hover tooltip listing the

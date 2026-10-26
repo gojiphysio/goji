@@ -355,7 +355,7 @@ Founder dashboard — four pages, all live from BQ:
 
 Every customer CTA routes through a public redirector that logs the click then
 302s to its destination — **WhatsApp** (the primary CTA) or **Plato booking**
-(socials like `bio.site/gojiphysio` offer both). It runs as its **own** Cloud Run
+(the Instagram link-in-bio page `gojiphysio.com/links` offers both). It runs as its **own** Cloud Run
 service `goji-links` (`APP_MODE=links`) on `go.gojiphysio.com` — a short, on-brand
 domain that serves *only* the redirects, keeping the internal
 `dashboard.gojiphysio.com` tool out of public view. Each hit logs a row to
@@ -397,7 +397,7 @@ own `/book` form** (`-book`), not Plato. Publish each as
 | Where | WhatsApp button | Book button |
 |---|---|---|
 | Website (www.gojiphysio.com) | `…/web-wa` | `…/web-book` |
-| `bio.site/gojiphysio` (IG/socials hub) | `…/bio-wa` | `…/bio-book` |
+| `gojiphysio.com/links` (Instagram link in bio; replaced bio.site Oct 2026) | `…/bio-wa` | `…/bio-book` |
 | Google Business Profile (later) | `…/gbp-wa` | `…/gbp-book` |
 | Paid ads (later) | `…/ads-wa` | `…/ads-book` |
 | QR codes (print / events / in-person) | `…/qr-wa` | `…/qr-book` |
@@ -418,10 +418,10 @@ then fall back to the site rather than dead-ending. **A customer volunteering
 contact details in that message is an inbound enquiry, not marketing consent** —
 record consent in Front Desk → Contactability before any outbound send. The retired `…/*-plato` slugs still resolve — they now alias
 to the same `/book` form (`SITE_BOOKING_URL`) so previously-published booking
-links never dead-end, but new surfaces should use `…/*-book`. **bio.site mailing-list button:** point it straight at the
-signup page (untracked — nurture, not a primary CTA). **Instagram native
+links never dead-end, but new surfaces should use `…/*-book`. **Instagram native
 WhatsApp/email action buttons can't be wrapped** (not custom URLs); keep the IG
-bio link pointing at bio.site so those clicks are tracked. Edit wording, change a
+bio link pointing at `https://www.gojiphysio.com/links` so those clicks are tracked
+(its WhatsApp/Book buttons use `bio-wa`/`bio-book`). Edit wording, change a
 slug's destination, or add a channel in `LINK_SLUGS` in `app.py`. The Marketing
 tab shows **Click-to-WhatsApp** and **Booking-link clicks** live, each split by
 channel.

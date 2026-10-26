@@ -76,8 +76,8 @@ fi
 echo
 echo "============================================================"
 echo " Done — public links live at:"
-echo "   https://${DOMAIN}/wa     (WhatsApp — social/bio.site button)"
-echo "   https://${DOMAIN}/book   (Plato booking — social/bio.site button)"
+echo "   https://${DOMAIN}/wa     (WhatsApp — generic social button)"
+echo "   https://${DOMAIN}/book   (booking — generic social button)"
 echo "   https://${DOMAIN}/ig  /web  /gbp  /ads  /email  /qr   (WhatsApp)"
 echo " Each logs a click then opens WhatsApp or Plato booking. Slugs/messages"
 echo " live in LINK_SLUGS in app.py."
