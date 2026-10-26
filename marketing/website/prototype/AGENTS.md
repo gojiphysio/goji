@@ -20,6 +20,22 @@ bigger), edit tokens — do **not** hardcode hex/px in components. Components
 reference *role* aliases (`--bg-page`, `--cta-bg`, `--berry`), not raw values,
 so a token change reflows everything (styleguide is the QA surface).
 
+## The watercolour look (Goji design system)
+- Source of truth is the Goji design system artifact
+  (https://claude.ai/artifact/GGKPrziiY9GdwFqYLbW51t); `tokens.css` mirrors its
+  tokens. Display face is Fraunces with `--font-display-axes` (soft serifs, never
+  bold or italic); body is Plus Jakarta Sans.
+- **No arches or round-topped frames** (they read as a tombstone in Asian
+  culture). Photos use the petal frame (`components/watercolor/PetalPhoto.astro`).
+- **No WhatsApp green**, not even on the glyph; WhatsApp CTAs are brand red
+  (`Button variant="whatsapp"`) and the glyph takes the label colour.
+- Motion is the procedural watercolour engine in `src/scripts/goji-watercolor.js`
+  (vendored from the design system; re-copy, don't edit). `BaseLayout` runs
+  `Goji.enhance()` on every page: use `components/watercolor/Bloom.astro`,
+  `PaintedWord.astro`, `PetalPhoto paint`, `.gj-reveal`, `data-gj-wash`.
+  Never put a reveal or a paint-in veil on above-the-fold content (LCP), and
+  never let motion gate content or scrolling.
+
 ## Hard rules (inherited from repo + marketing AGENTS.md)
 - **Every CTA is a tracked link.** Route through `go.gojiphysio.com/<slug>` via
   the `cta()` helper / Button `slug` prop (`src/lib/links.ts`). Never publish a

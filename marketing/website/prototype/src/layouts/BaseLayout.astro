@@ -3,12 +3,14 @@
  * BaseLayout — document shell: <head>, fonts, tokens, skip link, site header
  * and footer. Pass `bare` to drop the header/footer (used by the styleguide).
  */
-import "@fontsource-variable/inter";
+import "@fontsource-variable/fraunces/soft.css";
 import "@fontsource/plus-jakarta-sans/400.css";
+import "@fontsource/plus-jakarta-sans/500.css";
 import "@fontsource/plus-jakarta-sans/600.css";
 import "@fontsource/plus-jakarta-sans/700.css";
 import "../styles/tokens.css";
 import "../styles/base.css";
+import "../styles/watercolor.css";
 
 import LogoLockup from "../components/LogoLockup.astro";
 import Button from "../components/Button.astro";
@@ -101,7 +103,7 @@ const GADS_BOOKING_LABEL = import.meta.env.PUBLIC_GADS_BOOKING_LABEL;
     <link rel="canonical" href={canonicalURL.href} />
     {noindex && <meta name="robots" content="noindex" />}
     <link rel="icon" type="image/png" href="/brand/logo_mark_transparent.png" />
-    <meta name="theme-color" content="#91171d" />
+    <meta name="theme-color" content="#f7f2e0" />
 
     {/* Open Graph / Twitter */}
     <meta property="og:type" content="website" />
@@ -348,7 +350,7 @@ const GADS_BOOKING_LABEL = import.meta.env.PUBLIC_GADS_BOOKING_LABEL;
         <header class="site-header">
           <div class="container site-header__inner">
             <a href="/" class="site-header__logo" aria-label="Goji home">
-              <LogoLockup variant="light" height={34} />
+              <LogoLockup variant="main" height={52} />
             </a>
             <nav class="site-nav" aria-label="Primary">
               {nav.map((item) => (
@@ -374,7 +376,7 @@ const GADS_BOOKING_LABEL = import.meta.env.PUBLIC_GADS_BOOKING_LABEL;
                 </svg>
                 <span class="header-wa__text">WhatsApp</span>
               </a>
-              <Button href="/book/" variant="primary">Book</Button>
+              <Button href="/book/" variant="secondary" class="header-book">Book</Button>
               <details class="mobile-menu">
                 <summary class="nav-toggle" aria-label="Menu">
                   <svg class="nav-toggle__open" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
@@ -407,7 +409,7 @@ const GADS_BOOKING_LABEL = import.meta.env.PUBLIC_GADS_BOOKING_LABEL;
         <footer class="site-footer">
           <div class="container site-footer__inner">
             <div class="site-footer__brand">
-              <LogoLockup variant="light" height={30} />
+              <LogoLockup variant="light" height={56} class="site-footer__logo" />
               <p class="site-footer__tagline">{SITE.tagline}</p>
             </div>
             <div class="site-footer__meta">
@@ -446,36 +448,52 @@ const GADS_BOOKING_LABEL = import.meta.env.PUBLIC_GADS_BOOKING_LABEL;
         color: var(--color-linen);
       }
 
+      /* Frosted linen, picking up a hairline once the page scrolls under it. */
       .site-header {
         position: sticky;
         top: 0;
         z-index: 50;
-        background-color: var(--color-ink);
-        border-bottom: 1px solid color-mix(in srgb, var(--color-linen) 15%, transparent);
+        background-color: color-mix(in srgb, var(--bg-page) 84%, transparent);
+        -webkit-backdrop-filter: saturate(1.2) blur(14px);
+        backdrop-filter: saturate(1.2) blur(14px);
+        border-bottom: 1px solid var(--rule);
       }
+      .site-header__logo :global(.logo) { margin-inline: -8px; }
       .site-header__inner {
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: var(--space-5);
-        min-height: 68px;
+        min-height: 72px;
       }
       .site-nav {
         display: none;
         gap: var(--space-5);
       }
       .site-nav a {
-        font-family: var(--font-display);
-        color: color-mix(in srgb, var(--color-linen) 75%, transparent);
+        position: relative;
+        font-family: var(--font-body);
+        color: var(--text-default);
         text-decoration: none;
         font-size: var(--fs-small);
         font-weight: var(--weight-medium);
-        letter-spacing: -0.01em;
-        transition: color var(--dur) var(--ease);
+        padding-block: 6px;
       }
-      .site-nav a:hover {
-        color: var(--color-linen);
+      /* a deep-red underline draws in from the left */
+      .site-nav a::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 1.5px;
+        background: var(--color-primary);
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 400ms var(--ease);
       }
+      .site-nav a:hover { color: var(--text-default); }
+      .site-nav a:hover::after { transform: scaleX(1); }
       @media (min-width: 880px) {
         .site-nav {
           display: flex;
@@ -483,11 +501,12 @@ const GADS_BOOKING_LABEL = import.meta.env.PUBLIC_GADS_BOOKING_LABEL;
       }
 
       .site-footer {
-        background-color: var(--color-ink);
+        background-color: var(--bg-closing);
         color: var(--color-linen);
         padding-top: var(--space-8);
-        border-top: 1px solid color-mix(in srgb, var(--color-linen) 15%, transparent);
       }
+      .site-footer :focus-visible { outline-color: var(--color-linen); }
+      .site-footer__brand :global(.site-footer__logo) { margin: -14px -10px -10px; }
       .site-footer__inner {
         display: flex;
         flex-wrap: wrap;
@@ -533,14 +552,17 @@ const GADS_BOOKING_LABEL = import.meta.env.PUBLIC_GADS_BOOKING_LABEL;
         align-items: center;
         gap: var(--space-2);
       }
+      /* WhatsApp is the primary action: brand red, glyph in the label colour
+         (never WhatsApp green - it clashes with burgundy). */
       .header-wa {
         display: inline-flex;
         align-items: center;
-        gap: 0.4rem;
-        padding: 0.7rem 1rem;
+        gap: 0.45rem;
+        min-height: 44px;
+        padding: 0 1.1rem;
         border-radius: var(--radius-pill);
-        background: var(--color-whatsapp);
-        color: #ffffff;
+        background: var(--cta-bg);
+        color: var(--cta-text);
         text-decoration: none;
         font-family: var(--font-body);
         font-weight: var(--weight-semibold);
@@ -550,9 +572,13 @@ const GADS_BOOKING_LABEL = import.meta.env.PUBLIC_GADS_BOOKING_LABEL;
         transition: background var(--dur) var(--ease), transform var(--dur) var(--ease);
       }
       .header-wa:hover {
-        background: var(--color-whatsapp-hover);
-        color: #ffffff;
-        transform: translateY(-1px);
+        background: var(--cta-bg-hover);
+        color: var(--cta-text);
+      }
+      /* Book stays in the header from tablet up; on a phone WhatsApp leads. */
+      .site-header__cta :global(.header-book) { display: none; }
+      @media (min-width: 640px) {
+        .site-header__cta :global(.header-book) { display: inline-flex; }
       }
       /* Search trigger. Present at every width - on a phone it is the fastest
          route to a condition or service, ahead of the hamburger. */
@@ -568,17 +594,13 @@ const GADS_BOOKING_LABEL = import.meta.env.PUBLIC_GADS_BOOKING_LABEL;
         border: none;
         border-radius: var(--radius-sm);
         background: transparent;
-        color: var(--color-linen);
+        color: var(--text-default);
         cursor: pointer;
         -webkit-tap-highlight-color: transparent;
         transition: background var(--dur) var(--ease);
       }
       .nav-search:hover {
-        background: color-mix(in srgb, var(--color-linen) 12%, transparent);
-      }
-      .nav-search:focus-visible {
-        outline: 2px solid var(--color-linen);
-        outline-offset: 2px;
+        background: var(--color-linen-deep);
       }
 
       .header-wa__icon { flex: none; display: block; }
@@ -601,18 +623,14 @@ const GADS_BOOKING_LABEL = import.meta.env.PUBLIC_GADS_BOOKING_LABEL;
         width: 2.75rem;
         height: 2.75rem;
         border-radius: var(--radius-sm);
-        color: var(--color-linen);
+        color: var(--text-default);
         cursor: pointer;
         list-style: none;
         -webkit-tap-highlight-color: transparent;
       }
       .nav-toggle::-webkit-details-marker { display: none; }
       .nav-toggle:hover {
-        background: color-mix(in srgb, var(--color-linen) 12%, transparent);
-      }
-      .nav-toggle:focus-visible {
-        outline: 2px solid var(--color-linen);
-        outline-offset: 2px;
+        background: var(--color-linen-deep);
       }
       .nav-toggle__close { display: none; }
       .mobile-menu[open] .nav-toggle__open { display: none; }
@@ -625,29 +643,37 @@ const GADS_BOOKING_LABEL = import.meta.env.PUBLIC_GADS_BOOKING_LABEL;
         left: 0;
         right: 0;
         flex-direction: column;
-        background: var(--color-ink);
-        border-bottom: 1px solid color-mix(in srgb, var(--color-linen) 15%, transparent);
-        padding: var(--space-2) var(--space-4) var(--space-4);
+        background: var(--bg-page);
+        border-bottom: 1px solid var(--rule);
+        padding: var(--space-2) var(--gutter) var(--space-5);
         box-shadow: var(--shadow-md);
       }
       .mobile-menu[open] .site-nav-mobile { display: flex; }
       .site-nav-mobile a {
         font-family: var(--font-display);
-        color: color-mix(in srgb, var(--color-linen) 85%, transparent);
+        font-variation-settings: var(--font-display-axes);
+        color: var(--text-default);
         text-decoration: none;
-        font-size: var(--fs-base);
-        font-weight: var(--weight-medium);
-        padding: var(--space-3) var(--space-2);
-        border-bottom: 1px solid color-mix(in srgb, var(--color-linen) 10%, transparent);
+        font-size: 1.5rem;
+        font-weight: var(--weight-display);
+        padding: var(--space-3) 0;
+        border-bottom: 1px solid var(--rule);
       }
       .site-nav-mobile a:last-child { border-bottom: none; }
-      .site-nav-mobile a:hover { color: var(--color-linen); }
+      .site-nav-mobile a:hover { color: var(--text-accent); }
 
       /* Desktop: hide the hamburger; the inline nav takes over. */
       @media (min-width: 880px) {
         .mobile-menu { display: none; }
       }
     </style>
+
+    <script>
+      // Watercolour engine: paints data-gj-bloom / data-gj-wash / data-gj-veil
+      // elements and reveals .gj-reveal / .gj-mark as they scroll into view.
+      import "../scripts/goji-watercolor.js";
+      (window as unknown as { Goji: { enhance: () => void } }).Goji.enhance();
+    </script>
 
     <script>
       // Close the mobile menu on link tap (for same-page anchors), Escape, or

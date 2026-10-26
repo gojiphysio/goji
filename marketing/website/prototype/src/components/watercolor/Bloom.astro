@@ -1,0 +1,23 @@
+---
+/**
+ * Bloom — a procedural watercolour painting (Goji design system WatercolorBloom).
+ * Paints once when it scrolls into view, then rests; reduced motion shows the
+ * finished painting. `preset`: ripen (flower to berry), berry, flower, sprig.
+ * Decorative unless `label` is given.
+ */
+interface Props {
+  preset?: "ripen" | "berry" | "flower" | "sprig";
+  seed?: number;
+  label?: string;
+  class?: string;
+}
+const { preset = "ripen", seed = 3, label, class: className } = Astro.props;
+---
+
+<div
+  class:list={["gj-wc gj-wc--multiply gj-wc-bloom", className]}
+  data-gj-bloom={preset}
+  data-seed={seed}
+  {...label ? { role: "img", "aria-label": label } : { "aria-hidden": "true" }}
+>
+</div>

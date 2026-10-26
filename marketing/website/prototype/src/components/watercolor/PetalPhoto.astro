@@ -1,0 +1,28 @@
+---
+/**
+ * PetalPhoto — a photo in the petal frame (two opposite corners swept like a
+ * leaf; never an arch). `paint` dissolves a blush veil through spreading washes
+ * as the photo scrolls in; leave it off for above-the-fold (LCP) images.
+ */
+interface Props {
+  src: string;
+  alt: string;
+  flip?: boolean;
+  paint?: boolean;
+  priority?: boolean;
+  position?: string;
+  class?: string;
+}
+const { src, alt, flip = false, paint = false, priority = false, position = "50% 50%", class: className } = Astro.props;
+---
+
+<div class:list={["gj-frame gj-frame--petal", flip && "gj-frame--flip", className]} {...paint ? { "data-gj-veil": "" } : {}}>
+  <img
+    src={src}
+    alt={alt}
+    style={`object-position:${position}`}
+    loading={priority ? "eager" : "lazy"}
+    decoding="async"
+    {...priority ? { fetchpriority: "high" } : {}}
+  />
+</div>

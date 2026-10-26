@@ -3,63 +3,95 @@
    Everything visual reads from these custom properties. To retheme the whole
    site (warmer/cooler, tighter/looser, sharper/softer), edit values HERE and
    every page reflows. Components reference role aliases, not raw hex.
-   Source of truth: marketing/design-system/design-system-brief.md
+   Source of truth: the Goji design system (watercolour direction),
+   https://claude.ai/artifact/GGKPrziiY9GdwFqYLbW51t — tokens.json there.
    ========================================================================== */
 
 :root {
-  /* ---- Brand palette (the five official colors) ---- */
-  --color-primary: #91171d; /* Deep Red   — accent / CTA only; full-bleed only on closing/quote surfaces */
+  /* ---- Brand palette (the five official colors, unchanged) ---- */
+  --color-primary: #91171d; /* Deep Red   — accent / CTA only */
   --color-ink: #3c1e1f;     /* Earth Brown — primary text */
   --color-linen: #f7f2e0;   /* Linen White — primary warm background */
-  --color-accent: #176591;  /* Midnight Blue — sparing accent / signal moments */
-  --color-surface: #ffffff; /* White — content background */
+  --color-accent: #176591;  /* Midnight Blue — focus ring and in-article links only */
+  --color-surface: #ffffff; /* White — interactive surfaces (inputs, linked cards) */
 
-  /* Tints/shades derived from the palette (kept minimal, on-brand) */
+  /* Tints/shades derived from the palette */
   --color-primary-deep: #6f1116;  /* hover/active for primary CTA */
-  --color-ink-soft: #6b504f;      /* secondary text on light */
-  --color-linen-deep: #efe7cf;    /* hairlines / subtle fills on linen */
-  --color-border: #e4dcc4;        /* default border on warm surfaces */
-  --color-border-strong: #d6cbac;
-  --color-whatsapp: #25d366;      /* WhatsApp brand green — WhatsApp CTAs only */
-  --color-whatsapp-hover: #1fb457;
+  --color-ink-soft: #6b504f;      /* secondary text on light (6.5:1 on linen) */
+  --color-linen-deep: #efe7cf;    /* sunk fills */
+  --color-paper: #fbf8ef;         /* raised, non-interactive panels */
+  --color-burgundy: #5e1016;      /* the one dark surface: closing, quote, footer */
+  --color-border: #e4dcc4;        /* hairlines */
+  --color-border-strong: #988670; /* control borders (3.1:1 on linen) */
+  /* WhatsApp green is retired: it clashes with burgundy. Kept as aliases so
+     older styles resolve to the brand red instead of breaking. */
+  --color-whatsapp: var(--color-primary);
+  --color-whatsapp-hover: var(--color-primary-deep);
+
+  /* ---- Watercolour pigments (decorative only; never text or UI state).
+     The watercolour engine (src/scripts/goji-watercolor.js) paints with these
+     exact names. ---- */
+  --deep-red: var(--color-primary);
+  --burgundy: var(--color-burgundy);
+  --linen: var(--color-linen);
+  --goji: #c8372d;
+  --blush: #f1dcd2;
+  --clay: #d69a8a;
+  --lilac: #b7a3d0;
+  --sage: #7f9168;
+  --ochre: #d4a64a;
 
   /* ---- Semantic color roles (components use THESE) ---- */
   --bg-page: var(--color-linen);
   --bg-content: var(--color-surface);
-  --bg-closing: var(--color-primary); /* the only sanctioned full-bleed Deep Red surface */
+  --bg-raised: var(--color-paper);
+  --bg-closing: var(--color-burgundy); /* the only sanctioned full-bleed dark surface */
   --text-default: var(--color-ink);
   --text-muted: var(--color-ink-soft);
   --text-on-dark: var(--color-linen);
+  --text-on-dark-soft: #e3cfc4;
+  --text-accent: var(--color-primary);
   --cta-bg: var(--color-primary);
   --cta-bg-hover: var(--color-primary-deep);
   --cta-text: var(--color-linen);
   --berry: var(--color-primary); /* the signature berry dot */
   --rule: var(--color-border);
+  --focus-ring: var(--color-accent);
 
   /* ---- Typography ---- */
-  --font-display: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-body: "Inter Variable", "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* Display: Fraunces with the soft axis full on, so the serifs echo the
+     rounded wedges of the GOJI wordmark. Never bold, never italic. */
+  --font-display: "Fraunces Variable", "Iowan Old Style", Georgia, serif;
+  --font-display-axes: "SOFT" 100, "WONK" 0;
+  --font-body: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
 
+  --weight-light: 300;
+  --weight-display: 350;
   --weight-regular: 400;
   --weight-medium: 500;
   --weight-semibold: 600;
   --weight-bold: 700;
 
-  /* Fluid type scale (clamp honours the brief's ranges) */
-  --fs-display: clamp(2.75rem, 1.6rem + 4.5vw, 4.5rem); /* 44 -> 72 */
-  --fs-h1: clamp(2rem, 1.6rem + 1.8vw, 2.5rem);       /* 32 -> 40 */
-  --fs-h2: clamp(1.5rem, 1.3rem + 0.9vw, 1.75rem);    /* 24 -> 28 */
-  --fs-h3: clamp(1.25rem, 1.15rem + 0.45vw, 1.375rem);/* 20 -> 22 */
-  --fs-body: clamp(0.875rem, 0.85rem + 0.13vw, 0.9375rem); /* 14 -> 15 */
-  --fs-small: 0.8125rem;                                    /* 13 */
-  --fs-caption: 0.75rem;                                    /* 12 */
+  /* Fluid type scale */
+  --fs-display-xl: clamp(3.25rem, 1.6rem + 6vw, 6.5rem);  /* 52 -> 104, homepage hero only */
+  --fs-display: clamp(2.75rem, 1.7rem + 4vw, 4.5rem);     /* 44 -> 72 */
+  --fs-h1: clamp(2.25rem, 1.8rem + 2vw, 3.25rem);         /* 36 -> 52 */
+  --fs-h2: clamp(1.875rem, 1.5rem + 1.4vw, 2.5rem);       /* 30 -> 40 */
+  --fs-h3: clamp(1.375rem, 1.25rem + 0.5vw, 1.625rem);    /* 22 -> 26 */
+  --fs-lead: clamp(1.125rem, 1rem + 0.4vw, 1.25rem);      /* 18 -> 20 */
+  --fs-body: clamp(1rem, 0.96rem + 0.15vw, 1.0625rem);    /* 16 -> 17 */
+  --fs-base: var(--fs-body);
+  --fs-small: 0.9375rem;                                  /* 15 */
+  --fs-caption: 0.8125rem;                                /* 13 */
+  --fs-eyebrow: 0.75rem;                                  /* 12 */
 
-  --lh-tight: 1.13;
-  --lh-snug: 1.3;
-  --lh-body: 1.55; /* generous, within the brief's 1.4–1.6 */
+  --lh-tight: 1.06;
+  --lh-snug: 1.25;
+  --lh-body: 1.65;
 
-  --tracking-tight: -0.025em;
-  --tracking-label: 0.08em; /* uppercase eyebrow labels */
+  --tracking-tight: -0.015em;
+  --tracking-display: -0.025em;
+  --tracking-label: 0.16em; /* uppercase eyebrow labels */
 
   /* ---- Spacing (8px base scale) ---- */
   --space-1: 0.25rem;
@@ -72,25 +104,29 @@
   --space-8: 4rem;
   --space-9: 6rem;
   --space-10: 8rem;
+  --space-11: 11rem;
 
   /* ---- Radius ---- */
-  --radius-sm: 6px;
-  --radius-md: 12px;
-  --radius-lg: 20px;
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 28px;
+  --radius-petal: 160px; /* the petal photo frame's two swept corners. Never arches. */
   --radius-pill: 999px;
 
-  /* ---- Shadow (subtle — premium, not flashy) ---- */
-  --shadow-sm: 0 1px 2px rgba(60, 30, 31, 0.04), 0 1px 3px rgba(60, 30, 31, 0.06);
-  --shadow-md: 0 4px 12px rgba(60, 30, 31, 0.06), 0 2px 4px rgba(60, 30, 31, 0.04);
-  --shadow-lg: 0 18px 40px rgba(60, 30, 31, 0.10);
+  /* ---- Shadow (warm and low) ---- */
+  --shadow-sm: 0 1px 2px rgba(60, 30, 31, 0.05), 0 2px 6px rgba(60, 30, 31, 0.05);
+  --shadow-md: 0 12px 32px -12px rgba(94, 16, 22, 0.18);
+  --shadow-lg: 0 40px 80px -32px rgba(94, 16, 22, 0.28);
 
   /* ---- Layout ---- */
-  --container-max: 1180px;
+  --container-max: 1240px;
   --container-narrow: 760px;
-  --gutter: clamp(1.25rem, 0.8rem + 2vw, 2.5rem);
-  --section-y: clamp(2.75rem, 1.8rem + 3.2vw, 5rem);
+  --gutter: clamp(1rem, 0.5rem + 2.5vw, 2.5rem);
+  --section-y: clamp(4rem, 2rem + 6vw, 8rem);
 
   /* ---- Motion ---- */
-  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
   --dur: 180ms;
+  --dur-calm: 700ms;
 }

@@ -1,0 +1,38 @@
+/* ==========================================================================
+   Watercolour layer: the hooks the engine (src/scripts/goji-watercolor.js)
+   mounts into, mirrored from the Goji design system's bundle.css.
+   ========================================================================== */
+
+.gj-wc { display: block; pointer-events: none; }
+.gj-wc canvas { display: block; width: 100%; height: 100%; }
+.gj-wc--multiply canvas { mix-blend-mode: multiply; }
+.gj-wc-bloom { position: relative; aspect-ratio: 1; }
+.gj-wc-wash { position: absolute; inset: 0; z-index: 0; overflow: hidden; }
+.gj-washed { position: relative; isolation: isolate; }
+.gj-washed > :not(.gj-wc-wash) { position: relative; z-index: 1; }
+
+/* Painted underline under one word of a heading */
+.gj-mark { position: relative; white-space: nowrap; isolation: isolate; }
+.gj-mark__svg { position: absolute; left: -0.06em; right: -0.06em; bottom: 0.1em; width: calc(100% + 0.12em); height: 0.36em; z-index: -1; overflow: visible; pointer-events: none; mix-blend-mode: multiply; }
+.gj-mark__svg path { fill: none; stroke: var(--goji); stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset 1100ms var(--ease); }
+.gj-mark__svg .gj-mark__bleed { stroke-opacity: .16; transition-duration: 1500ms; }
+.gj-mark__svg .gj-mark__core { stroke-opacity: .34; transition-delay: 120ms; }
+.gj-mark.is-in .gj-mark__svg path { stroke-dashoffset: 0; }
+
+/* Photo frames. The petal is the signature shape (never an arch). */
+.gj-frame { position: relative; overflow: hidden; background: var(--blush); }
+.gj-frame > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+.gj-frame--petal { border-radius: var(--radius-petal) var(--radius-md) var(--radius-petal) var(--radius-md); }
+.gj-frame--petal.gj-frame--flip { border-radius: var(--radius-md) var(--radius-petal) var(--radius-md) var(--radius-petal); }
+.gj-frame--soft { border-radius: var(--radius-lg); }
+.gj-frame canvas.gj-veil { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+
+/* Scroll reveal: hidden only once the engine has marked the page (.gj-js),
+   so content stays visible if the script never runs. */
+.gj-js .gj-reveal { opacity: 0; transform: translateY(18px); filter: blur(6px); transition: opacity var(--dur-calm) var(--ease), transform var(--dur-calm) var(--ease), filter var(--dur-calm) var(--ease); transition-delay: calc(var(--i, 0) * 90ms); }
+.gj-js .gj-reveal.is-in { opacity: 1; transform: none; filter: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .gj-js .gj-reveal { transform: none; filter: none; transition: opacity 300ms linear; }
+  .gj-mark__svg path { transition: none; stroke-dashoffset: 0; }
+}
