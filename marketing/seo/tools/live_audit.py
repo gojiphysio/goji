@@ -163,6 +163,10 @@ def main():
     # Hosts (informational)
     for h in ("https://gojiphysio.com/", "http://www.gojiphysio.com/"):
         status, final, hops, _ = get(h)
+        # The apex forward sends `Location: https://www.gojiphysio.com` with no
+        # path, which browsers treat as "/". Compare it as such.
+        if final and not urllib.parse.urlsplit(final).path:
+            final += "/"
         data.setdefault("hosts", {})[h] = {"status": status, "final": final, "hops": hops}
         if status != 200 or final != BASE + "/":
             add("ERROR", "host", h, f"{status} -> {final}")
