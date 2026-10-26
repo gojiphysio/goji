@@ -12,6 +12,19 @@ priceHome: 380
 clinicians: ["Cheryl Long", "Kristy Ng"]
 bookingService: "physiotherapy"
 bookingFocus: "paediatrics"
+faqs:
+  - q: "What ages do you see?"
+    a: "We see children from birth to 18 years, for movement, pain, injury and developmental concerns."
+  - q: "Do you see babies with a head tilt, flat spot or delayed milestones?"
+    a: "Yes. We assess and manage head-turning preference and flat spots (torticollis and plagiocephaly), and delays in gross motor milestones such as head control, tummy time, sitting, crawling and walking."
+  - q: "What happens during my child's appointment?"
+    a: "Your physiotherapist will discuss your child's medical and developmental history, current concerns, daily activities and goals, then assess them through play, age-appropriate movement tasks and milestone checks. Parents or caregivers are involved throughout, and findings are explained clearly with time for questions."
+  - q: "How long is a session?"
+    a: "We offer 30-minute, 45-minute and 55-minute sessions. For children aged 0-2 years, a 30-minute session may be a good fit; 45 minutes suits many school-age children; the full 55-minute appointment works best for comprehensive assessments."
+  - q: "How much does paediatric physiotherapy cost, and can you come to our home?"
+    a: "A 55-minute session is $260 at our Lentor clinic, or $380 as a home visit. Shorter sessions start from $160."
+  - q: "Do I need a doctor's referral?"
+    a: "No referral is needed - you can book directly. If your child's assessment suggests input from another healthcare professional would help, we will let you know."
 order: 1
 draft: false
 ---
