@@ -37,6 +37,8 @@ const files: Record<NonNullable<Props["variant"]>, string> = {
 <style>
   .logo {
     width: auto;
+    /* fixed height: never let a flex parent squeeze the width */
+    max-width: none;
     /* clear-space guard */
     margin: 0;
   }

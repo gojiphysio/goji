@@ -3,7 +3,7 @@
  * BaseLayout — document shell: <head>, fonts, tokens, skip link, site header
  * and footer. Pass `bare` to drop the header/footer (used by the styleguide).
  */
-import "@fontsource-variable/fraunces/soft.css";
+import "@fontsource-variable/inter";
 import "@fontsource/plus-jakarta-sans/400.css";
 import "@fontsource/plus-jakarta-sans/500.css";
 import "@fontsource/plus-jakarta-sans/600.css";
@@ -458,6 +458,7 @@ const GADS_BOOKING_LABEL = import.meta.env.PUBLIC_GADS_BOOKING_LABEL;
         backdrop-filter: saturate(1.2) blur(14px);
         border-bottom: 1px solid var(--rule);
       }
+      .site-header__logo { flex: none; display: block; }
       .site-header__logo :global(.logo) { margin-inline: -8px; }
       .site-header__inner {
         display: flex;

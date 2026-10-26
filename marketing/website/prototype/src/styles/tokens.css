@@ -59,14 +59,14 @@
   --focus-ring: var(--color-accent);
 
   /* ---- Typography ---- */
-  /* Display: Fraunces with the soft axis full on, so the serifs echo the
-     rounded wedges of the GOJI wordmark. Never bold, never italic. */
-  --font-display: "Fraunces Variable", "Iowan Old Style", Georgia, serif;
-  --font-display-axes: "SOFT" 100, "WONK" 0;
-  --font-body: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* The brand's own pair (Brand Guidelines): Plus Jakarta Sans SemiBold for
+     display, Inter for body. Never italic. */
+  --font-display: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display-axes: normal;
+  --font-body: "Inter Variable", "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
 
   --weight-light: 300;
-  --weight-display: 350;
+  --weight-display: 600;
   --weight-regular: 400;
   --weight-medium: 500;
   --weight-semibold: 600;
@@ -85,12 +85,12 @@
   --fs-caption: 0.8125rem;                                /* 13 */
   --fs-eyebrow: 0.75rem;                                  /* 12 */
 
-  --lh-tight: 1.06;
+  --lh-tight: 1.1;
   --lh-snug: 1.25;
   --lh-body: 1.65;
 
-  --tracking-tight: -0.015em;
-  --tracking-display: -0.025em;
+  --tracking-tight: -0.02em;
+  --tracking-display: -0.035em;
   --tracking-label: 0.16em; /* uppercase eyebrow labels */
 
   /* ---- Spacing (8px base scale) ---- */
@@ -121,7 +121,7 @@
   /* ---- Layout ---- */
   --container-max: 1240px;
   --container-narrow: 760px;
-  --gutter: clamp(1rem, 0.5rem + 2.5vw, 2.5rem);
+  --gutter: clamp(1.5rem, 1rem + 2vw, 2.5rem);
   --section-y: clamp(4rem, 2rem + 6vw, 8rem);
 
   /* ---- Motion ---- */

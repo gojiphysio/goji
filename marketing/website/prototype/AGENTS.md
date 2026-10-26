@@ -23,8 +23,8 @@ so a token change reflows everything (styleguide is the QA surface).
 ## The watercolour look (Goji design system)
 - Source of truth is the Goji design system artifact
   (https://claude.ai/artifact/GGKPrziiY9GdwFqYLbW51t); `tokens.css` mirrors its
-  tokens. Display face is Fraunces with `--font-display-axes` (soft serifs, never
-  bold or italic); body is Plus Jakarta Sans.
+  tokens, except type: the site keeps the brand pair (Plus Jakarta Sans SemiBold
+  display, Inter body), never italic. No uppercase eyebrow labels on the home page.
 - **No arches or round-topped frames** (they read as a tombstone in Asian
   culture). Photos use the petal frame (`components/watercolor/PetalPhoto.astro`).
 - **No WhatsApp green**, not even on the glyph; WhatsApp CTAs are brand red
