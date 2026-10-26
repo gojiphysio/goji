@@ -9,7 +9,7 @@ record of what's live.
 
 | Listing | Why it matters | Sign in with | Status |
 |---|---|---|---|
-| Bing Places | Bing's index feeds ChatGPT search and Copilot | hello@gojiphysio.com (Google) | not started |
+| Bing Places | Bing's index feeds ChatGPT search and Copilot | hello@gojiphysio.com (Google) | **live, synced from GBP (26 Oct 2026)** |
 | Apple Business Connect | Apple Maps, Siri, Spotlight | Apple ID for the business | not started |
 | Wikidata item | Entity graph used by Google's Knowledge Graph and AI engines | a Wikidata account (declare the affiliation) | not started |
 | Singapore Physiotherapy Association "find a physio" | Trusted directory, cited for "physio near me" | SPA membership | check eligibility |
