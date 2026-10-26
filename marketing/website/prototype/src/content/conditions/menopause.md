@@ -1,6 +1,7 @@
 ---
 title: "Perimenopause, Menopause, and Bone Health"
-description: "Perimenopause and menopause change the musculoskeletal system, pelvic floor and bone density. Physiotherapy focuses on building physical reserves."
+seoTitle: "Menopause Physiotherapy Singapore"
+description: "Menopause physiotherapy for pelvic floor symptoms, joint pain, muscle strength and bone health. A programme built around you at Goji in Lentor, Singapore."
 cardTitle: "Perimenopause, Menopause, and Bone Health"
 cardLead: "Perimenopause and menopause bring significant changes to the musculoskeletal system, pelvic floor, and bone density - changes that are often attributed to ag..."
 category: "Women's Health"
@@ -13,7 +14,11 @@ draft: false
 relatedServices: ["pelvic-floor-physiotherapy"]
 ---
 
-Perimenopause and menopause bring significant changes to the musculoskeletal system, pelvic floor, and bone density - changes that are often attributed to ageing rather than recognised as hormone-driven and, in many cases, addressable. Physiotherapy at this life stage focuses on building and maintaining the physical reserves - bone density, muscle strength, pelvic floor function, and joint health - that protect quality of life in the decades ahead.
+Perimenopause and menopause bring hormone-driven changes to the pelvic floor, bone density, muscle strength and joints, and physiotherapy can help with the physical side: bladder leakage and other pelvic floor symptoms, joint pain and stiffness, and the resistance, impact and balance exercise that supports bone health and reduces falls risk. At Goji Women's and Family Physiotherapy at Lentor Modern, Singapore, our AHPC-registered physiotherapists start with a broad assessment of where you are in the transition and what you want to maintain or improve, then design a programme specific to you.
+
+These changes are often attributed to ageing rather than recognised as hormone-driven and, in many cases, addressable. Physiotherapy at this life stage focuses on building and maintaining the physical reserves - bone density, muscle strength, pelvic floor function, and joint health - that protect quality of life in the decades ahead.
+
+<!-- NEEDS CHERYL: if menopause clients can continue their programme in Goji's Strength & Conditioning or Clinical Pilates sessions, say so here; the repo does not currently link those services to menopause care. -->
 
 ## What changes during perimenopause and menopause?
 

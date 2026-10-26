@@ -1,6 +1,7 @@
 ---
 title: "Urinary Incontinence"
-description: "Urinary incontinence is common and treatable. Pelvic floor physiotherapy is the first-line treatment recommended by international guidelines for common forms."
+seoTitle: "Urinary Incontinence Physio Singapore"
+description: "Pelvic floor physiotherapy is the first-line treatment for common forms of urinary incontinence. Assessment and a plan at Goji in Lentor, Singapore."
 cardTitle: "Urinary Incontinence"
 cardLead: "Urinary incontinence is among the most common and most treatable conditions in women's health."
 category: "Women's Health"
@@ -13,7 +14,11 @@ draft: false
 relatedServices: ["pelvic-floor-physiotherapy"]
 ---
 
-Urinary incontinence - any unintentional leakage of urine - is among the most common and most treatable conditions in women's health. It affects women of all ages, not just those who have given birth. Yet many women do not seek treatment, assuming it is an inevitable consequence of childbirth or ageing. It is not. Pelvic floor physiotherapy is the first-line treatment recommended by international guidelines for the most common forms of urinary incontinence.
+Urinary incontinence is any unintentional leakage of urine, and pelvic floor physiotherapy is the first-line treatment recommended by international guidelines for its most common forms. At Goji Women's and Family Physiotherapy at Lentor Modern, Singapore, our AHPC-registered physiotherapists work out which type of leakage you have, assess what your pelvic floor is doing, and give you a programme designed for it. You can book directly; no doctor's referral is needed.
+
+Incontinence is among the most common and most treatable conditions in women's health. It affects women of all ages, not just those who have given birth. Yet many women do not seek treatment, assuming it is an inevitable consequence of childbirth or ageing. It is not.
+
+<!-- NEEDS CHERYL: Google's AI Overview for "is leaking after birth normal" is a "common but not normal" explainer. If you want that framing in this lede, confirm the wording; the existing section below says leaking in weeks 1-6 is common and persisting beyond 3 months warrants assessment. -->
 
 ## What are the different types of urinary incontinence?
 

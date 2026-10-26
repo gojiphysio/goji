@@ -1,6 +1,7 @@
 ---
 title: "Pelvic Girdle Pain and Mummy's Wrist"
-description: "Pelvic girdle pain and de Quervain's tenosynovitis (mummy's wrist) are common but undertreated in pregnancy and early parenthood. Both respond well to physio."
+seoTitle: "Pelvic Girdle Pain Physio Singapore"
+description: "Pelvic girdle pain in pregnancy and mummy's wrist both respond well to physiotherapy. Assessment and a plan for your stage at Goji in Lentor, Singapore."
 cardTitle: "Pelvic Girdle Pain and Mummy's Wrist"
 cardLead: "Pelvic girdle pain (PGP) and de Quervain's tenosynovitis - colloquially called \"mummy's wrist\" - are two of the most common but undertreated musculoskeletal..."
 category: "Women's Health"
@@ -13,7 +14,11 @@ draft: false
 relatedServices: ["prenatal-physiotherapy", "postpartum-physiotherapy"]
 ---
 
-Pelvic girdle pain (PGP) and de Quervain's tenosynovitis - colloquially called "mummy's wrist" - are two of the most common but undertreated musculoskeletal conditions associated with pregnancy and early parenthood. Both respond well to physiotherapy. Neither needs to be waited out.
+Pelvic girdle pain (PGP) is pain from the sacroiliac joints, the pubic symphysis, or the structures around the pelvis, felt at the pubic bone, the tailbone, or the lower back and buttock, during pregnancy or after birth. It responds well to physiotherapy, as does de Quervain's tenosynovitis - colloquially called "mummy's wrist" - which causes pain at the base of the thumb and wrist. At Goji Women's and Family Physiotherapy at Lentor Modern, Singapore, our AHPC-registered physiotherapists find which structures are involved, give you a plan to manage pain in the short term, and a progressive programme that fits your stage of pregnancy or the postnatal period.
+
+PGP and mummy's wrist are two of the most common but undertreated musculoskeletal conditions associated with pregnancy and early parenthood. Neither needs to be waited out.
+
+<!-- NEEDS CHERYL: for "pelvic girdle pain in pregnancy physio", Claude answers "physiotherapy is the main recommended treatment" and ChatGPT cites RCOG and NHS guidance. This page only says PGP responds well to physio and early input is associated with better outcomes. If you want the lede to say physio is the recommended first-line treatment, confirm the wording and source. -->
 
 ## What is pelvic girdle pain?
 
