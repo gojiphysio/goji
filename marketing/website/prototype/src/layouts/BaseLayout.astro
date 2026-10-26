@@ -280,7 +280,6 @@ const GADS_BOOKING_LABEL = import.meta.env.PUBLIC_GADS_BOOKING_LABEL;
     {
       GA4_ID && (
         <Fragment>
-          <script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${GA4_ID}`} />
           <script is:inline define:vars={{ GA4_ID }}>
             window.dataLayer = window.dataLayer || [];
             function gtag() {
@@ -288,6 +287,20 @@ const GADS_BOOKING_LABEL = import.meta.env.PUBLIC_GADS_BOOKING_LABEL;
             }
             gtag("js", new Date());
             gtag("config", GA4_ID);
+            // Fetch the gtag library only after the page has loaded, so its
+            // ~190 KB doesn't compete with first paint (mobile LCP). Calls made
+            // before then queue in dataLayer and are sent once it arrives; gclid
+            // is read from the URL whenever it runs.
+            (function (id) {
+              function load() {
+                var s = document.createElement("script");
+                s.async = true;
+                s.src = "https://www.googletagmanager.com/gtag/js?id=" + id;
+                document.head.appendChild(s);
+              }
+              if (document.readyState === "complete") load();
+              else window.addEventListener("load", load, { once: true });
+            })(GA4_ID);
           </script>
         </Fragment>
       )
@@ -299,7 +312,6 @@ const GADS_BOOKING_LABEL = import.meta.env.PUBLIC_GADS_BOOKING_LABEL;
     {
       GADS_ID && (
         <Fragment>
-          <script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${GADS_ID}`} />
           <script is:inline define:vars={{ GADS_ID, GADS_BOOKING_LABEL }}>
             window.dataLayer = window.dataLayer || [];
             function gtag() {
@@ -309,6 +321,20 @@ const GADS_BOOKING_LABEL = import.meta.env.PUBLIC_GADS_BOOKING_LABEL;
             gtag("js", new Date());
             gtag("config", GADS_ID);
             if (GADS_BOOKING_LABEL) window.__gojiBookingConversion = GADS_ID + "/" + GADS_BOOKING_LABEL;
+            // Fetch the gtag library only after the page has loaded, so its
+            // ~190 KB doesn't compete with first paint (mobile LCP). Calls made
+            // before then queue in dataLayer and are sent once it arrives; gclid
+            // is read from the URL whenever it runs.
+            (function (id) {
+              function load() {
+                var s = document.createElement("script");
+                s.async = true;
+                s.src = "https://www.googletagmanager.com/gtag/js?id=" + id;
+                document.head.appendChild(s);
+              }
+              if (document.readyState === "complete") load();
+              else window.addEventListener("load", load, { once: true });
+            })(GADS_ID);
           </script>
         </Fragment>
       )
