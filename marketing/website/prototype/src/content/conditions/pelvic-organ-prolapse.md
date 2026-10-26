@@ -1,6 +1,7 @@
 ---
 title: "Pelvic Organ Prolapse"
-description: "Pelvic organ prolapse affects about 1 in 3 women who have given birth. Most can achieve meaningful improvement with physiotherapy, especially if managed early."
+seoTitle: "Pelvic Organ Prolapse Physio Singapore"
+description: "Supervised pelvic floor training is the first-line treatment for prolapse symptoms. Assessment and a plan at Goji in Lentor, Singapore."
 cardTitle: "Pelvic Organ Prolapse"
 cardLead: "Pelvic organ prolapse (POP) affects approximately 1 in 3 women who have given birth, though many are unaware they have it."
 category: "Women's Health"
@@ -13,7 +14,9 @@ draft: false
 relatedServices: ["pelvic-floor-physiotherapy"]
 ---
 
-Pelvic organ prolapse (POP) occurs when one or more of the pelvic organs - the bladder, uterus, or rectum - descend from their normal position. It affects approximately 1 in 3 women who have given birth, though many women are not aware they have it. The large majority of women with POP can achieve meaningful improvement with physiotherapy, particularly when it is identified and managed early.
+Pelvic organ prolapse (POP) is when one or more of the pelvic organs - the bladder, uterus, or rectum - descend from their normal position, often felt as heaviness, pressure or dragging in the pelvis or vagina, or a bulge at the vaginal opening. International guidelines support pelvic floor muscle training supervised by a physiotherapist as the first-line treatment for symptomatic prolapse, ahead of surgery. At Goji Women's and Family Physiotherapy at Lentor Modern, Singapore, our AHPC-registered physiotherapists assess your pelvic floor, map which activities bring on your symptoms, and build a plan to reduce them.
+
+Prolapse affects approximately 1 in 3 women who have given birth, though many women are not aware they have it. The large majority of women with POP can achieve meaningful improvement with physiotherapy, particularly when it is identified and managed early.
 
 ## What causes pelvic organ prolapse?
 

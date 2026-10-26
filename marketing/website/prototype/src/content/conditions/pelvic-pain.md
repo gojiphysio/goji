@@ -1,6 +1,7 @@
 ---
 title: "Pelvic Pain and Dyspareunia"
-description: "Pelvic pain and dyspareunia (pain with intercourse) are real, physical conditions that are often under-treated. Physiotherapy addresses their physical drivers."
+seoTitle: "Pelvic Pain Physiotherapy Singapore"
+description: "Physiotherapy for pelvic pain and pain with intercourse (dyspareunia) addresses their physical drivers. Assessment at Goji in Lentor, Singapore."
 cardTitle: "Pelvic Pain and Dyspareunia"
 cardLead: "Pelvic pain and dyspareunia (pain with intercourse) are real, physical conditions that are frequently under-investigated and under-treated."
 category: "Women's Health"
@@ -13,7 +14,11 @@ draft: false
 relatedServices: ["pelvic-floor-physiotherapy"]
 ---
 
-Pelvic pain - pain felt in the lower abdomen, pelvis, or perineum - affects a significant number of women and is frequently under-investigated and under-treated. Dyspareunia (pain with intercourse) is among its most common presentations. Both are real, physical conditions. Physiotherapy addresses the musculoskeletal and neuromuscular drivers of pelvic pain, and is often a central part of the management pathway alongside medical assessment.
+Pelvic pain is pain felt in the lower abdomen, pelvis, or perineum, and dyspareunia (pain with intercourse) is among its most common presentations. Physiotherapy addresses the musculoskeletal and neuromuscular drivers of both - such as pelvic floor overactivity, scar sensitivity, and pain referred from the back, hip or tailbone - and is often a central part of the management pathway alongside medical assessment. At Goji Women's and Family Physiotherapy at Lentor Modern, Singapore, your first session is largely conversational, a physical assessment happens when you are ready, and an internal examination is always optional. Our physiotherapists are all female.
+
+Pelvic pain affects a significant number of women and is frequently under-investigated and under-treated. Both pelvic pain and dyspareunia are real, physical conditions.
+
+<!-- NEEDS CHERYL: ChatGPT's answer to "pelvic pain physiotherapy singapore" lists endometriosis-related discomfort among what pelvic physio helps with. The page only says endometriosis needs specialist review alongside physio. If Goji wants to say it sees women with endometriosis-related pelvic pain, confirm the wording for this lede. -->
 
 ## What causes chronic pelvic pain?
 
