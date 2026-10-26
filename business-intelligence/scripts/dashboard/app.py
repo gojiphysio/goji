@@ -1887,20 +1887,39 @@ def fetch_web_channels(start: date, end: date) -> dict:
     A session (distinct session_id) is one landing. Degrades to {} until the
     beacon is deployed and PUBLIC_BOOKING_API is set, so the funnel just omits the
     discovery→Website edges rather than breaking.
+
+    Sessions that LAND on /links (the Instagram link-in-bio page) are split out
+    under the "Link in bio" surface instead of "Website": returns
+    {"website": {channel: n}, "links": {channel: n}}. Without the split an
+    Instagram visitor to /links was counted twice — once as an Instagram →
+    Website landing and again on the Instagram → Link in bio tap edge.
     """
     try:
         rows = _query(f"""
+WITH links_sessions AS (
+  SELECT DISTINCT session_id
+  FROM `{PROJECT}.marts.web_session_events`
+  WHERE DATE(occurred_at) BETWEEN '{start}' AND '{end}'
+    AND event_type = 'session_start' AND landing_path LIKE '/links%'
+)
 SELECT
   {_WEB_CHANNEL_CASE_SQL} AS channel,
+  session_id IN (SELECT session_id FROM links_sessions) AS on_links,
   COUNT(DISTINCT session_id) AS sessions
 FROM `{PROJECT}.marts.web_session_events`
 WHERE DATE(occurred_at) BETWEEN '{start}' AND '{end}'
-GROUP BY channel
+GROUP BY channel, on_links
 """)
     except Exception as e:
         log.warning("web_session_events unavailable (run deploy_all.sh?): %s", e)
-        return {}
-    return {r["channel"]: _to_int(r["sessions"]) for r in rows if r["channel"]}
+        return {"website": {}, "links": {}}
+    out: dict = {"website": {}, "links": {}}
+    for r in rows:
+        if not r["channel"]:
+            continue
+        bucket = out["links"] if r["on_links"] else out["website"]
+        bucket[r["channel"]] = bucket.get(r["channel"], 0) + _to_int(r["sessions"])
+    return out
 
 
 REFERRAL_DOMAIN_TOP_N = 5
@@ -2113,15 +2132,21 @@ def _build_funnel_paths(link_clicks: dict, kpis: dict, lead_wins: dict,
     # Sankey stays readable — the granular per-page/per-domain story lives in the
     # separate on-site-path viz and the Referral hover, not in a forest of
     # hairline bands. "Direct" is never folded (it's a meaningful arrival mode).
-    web_ch = dict(web_channels or {})
-    folded = 0
-    for channel, n in web_ch.items():
-        if channel != "Direct" and n < FUNNEL_DISCOVERY_MIN:
-            folded += n
-        else:
-            add(channel, "Website", n)
-    if folded:
-        add("Other", "Website", folded)
+    # web_channels is {"website": {...}, "links": {...}} (fetch_web_channels);
+    # a flat {channel: n} is still accepted as all-Website.
+    wc = web_channels or {}
+    split = isinstance(wc.get("website"), dict) or isinstance(wc.get("links"), dict)
+    web_ch = dict(wc.get("website") or {}) if split else dict(wc)
+    links_ch = dict(wc.get("links") or {}) if split else {}
+    for surface, by_channel in (("Website", web_ch), ("Link in bio", links_ch)):
+        folded = 0
+        for channel, n in by_channel.items():
+            if channel != "Direct" and n < FUNNEL_DISCOVERY_MIN:
+                folded += n
+            else:
+                add(channel, surface, n)
+        if folded:
+            add("Other", surface, folded)
 
     # 2) Surface → CTA (taps). Suffix = CTA; prefix = surface/source.
     bio_total = 0
@@ -2140,7 +2165,10 @@ def _build_funnel_paths(link_clicks: dict, kpis: dict, lead_wins: dict,
                 add("Instagram", cta, n)          # direct IG tap (story/post)
             else:
                 add(FUNNEL_SOURCE.get(prefix, "Other"), cta, n)  # gbp/ads/qr bypass the site
-    if bio_total:
+    # Arrivals on Link in bio come from the beacon's /links landings. Only when
+    # there are none (ranges before /links replaced bio.site in Oct 2026, whose
+    # taps happened on bio.site) fall back to inferring them from the taps.
+    if bio_total and not links_ch:
         add("Instagram", "Link in bio", bio_total)
 
     wa_taps   = sum(wa.values())
@@ -2160,7 +2188,7 @@ def _build_funnel_paths(link_clicks: dict, kpis: dict, lead_wins: dict,
         "book_taps":        book_taps,
         "booked_native":    booked_native,
         "booked_wa":        booked_wa,
-        "sessions":         sum((web_channels or {}).values()),
+        "sessions":         sum(web_ch.values()) + sum(links_ch.values()),
         # De-blackboxes the "Referral" node — top domains, rendered as a hover
         # tooltip on its legend swatch (see renderFunnelSankey in template.html).
         "referral_domains": referral_domains or {},

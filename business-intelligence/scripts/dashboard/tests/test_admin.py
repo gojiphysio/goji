@@ -294,6 +294,28 @@ def test_lead_stage_and_channel_vocab():
 # end-to-end per DEPLOY.md). The pure builder that turns those slug counts into
 # Source -> Link in bio -> CTA flows is unit-tested here.
 
+def test_build_funnel_paths_links_landings_route_to_link_in_bio():
+    # /links landings (split out by fetch_web_channels) arrive on the Link in bio
+    # surface, not Website, and replace the tap-inferred Instagram edge, so an
+    # Instagram visitor to /links isn't counted on two edges.
+    link_clicks = {"wa_by_slug": {"bio-wa": 9, "web-wa": 4}, "book_by_slug": {"bio-book": 3}}
+    web_channels = {"website": {"Instagram": 20, "Direct": 10},
+                    "links":   {"Instagram": 40, "Direct": 1}}
+    f = app._build_funnel_paths(link_clicks, {}, {}, web_channels, {})
+    flows = {(d["from"], d["to"]): d["flow"] for d in f["flows"]}
+    assert flows[("Instagram", "Website")] == 20
+    assert flows[("Instagram", "Link in bio")] == 40      # landings, not 12 taps
+    assert flows[("Direct", "Link in bio")] == 1          # Direct is never folded
+    assert flows[("Link in bio", "WhatsApp")] == 9
+    assert flows[("Link in bio", "Native booking")] == 3
+    assert f["sessions"] == 71
+
+    # No /links landings in range (bio.site era): fall back to the tap-inferred edge.
+    old = app._build_funnel_paths(link_clicks, {}, {}, {"website": {"Direct": 5}, "links": {}}, {})
+    old_flows = {(d["from"], d["to"]): d["flow"] for d in old["flows"]}
+    assert old_flows[("Instagram", "Link in bio")] == 12
+
+
 def test_build_funnel_paths_discovery_surface_cta_booked():
     link_clicks = {
         "wa_by_slug":   {"ig-wa": 50, "bio-wa": 60, "web-wa": 40, "gbp-wa": 30, "wa": 5},
