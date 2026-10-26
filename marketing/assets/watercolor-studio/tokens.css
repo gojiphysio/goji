@@ -1,0 +1,71 @@
+/* Goji colour tokens, compiled from the design system's tokens.json
+   (https://claude.ai/artifact/GGKPrziiY9GdwFqYLbW51t). The watercolour engine reads its
+   pigments from these, so re-copy this file when the palette changes. */
+:root, [data-theme="light"] {
+  --deep-red: #91171d;
+  --earth-brown: #3c1e1f;
+  --linen: #f7f2e0;
+  --midnight: #176591;
+  --white: #ffffff;
+  --burgundy: #5e1016;
+  --goji: #c8372d;
+  --blush: #f1dcd2;
+  --clay: #d69a8a;
+  --lilac: #b7a3d0;
+  --sage: #7f9168;
+  --ochre: #d4a64a;
+  --paper: #fbf8ef;
+  --linen-deep: #efe7cf;
+  --rule: #e4dcc4;
+  --rule-strong: #988670;
+  --ink-soft: #6b504f;
+  --on-dark: #f7f2e0;
+  --on-dark-soft: #e3cfc4;
+  --bg-page: var(--linen);
+  --bg-raised: var(--paper);
+  --bg-interactive: var(--white);
+  --bg-closing: var(--burgundy);
+  --text-default: var(--earth-brown);
+  --text-muted: var(--ink-soft);
+  --text-accent: var(--deep-red);
+  --cta-bg: #91171d;
+  --cta-bg-hover: #6f1116;
+  --cta-text: #f7f2e0;
+  --focus-ring: #176591;
+}
+[data-theme="dark"] {
+  --deep-red: #e0645a;
+  --earth-brown: #f7f2e0;
+  --linen: #1c0e0f;
+  --midnight: #7fb8d8;
+  --white: #2a1617;
+  --burgundy: #3a1215;
+  --goji: #e0645a;
+  --blush: #3d2223;
+  --clay: #8a4a42;
+  --lilac: #7d6a99;
+  --sage: #93a67b;
+  --ochre: #d4a64a;
+  --paper: #241315;
+  --linen-deep: #2e1a1b;
+  --rule: #3d2729;
+  --rule-strong: #7a5e60;
+  --ink-soft: #cdbfb0;
+  --on-dark: #f7f2e0;
+  --on-dark-soft: #d9c3b8;
+  --bg-page: var(--linen);
+  --bg-raised: var(--paper);
+  --bg-interactive: var(--white);
+  --bg-closing: var(--burgundy);
+  --text-default: var(--earth-brown);
+  --text-muted: var(--ink-soft);
+  --text-accent: var(--deep-red);
+  --cta-bg: #db5a4e;
+  --cta-bg-hover: #e8796e;
+  --cta-text: #1c0e0f;
+  --focus-ring: #7fb8d8;
+}
+:root {
+  --font-display: "Fraunces", "Iowan Old Style", Georgia, serif;
+  --font-sans: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+}

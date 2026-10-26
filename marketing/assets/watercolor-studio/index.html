@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Goji watercolour studio</title>
+<!-- SOFT and WONK are pinned (100, 0) because canvas text cannot set variation axes. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,300..600,100,0&family=Plus+Jakarta+Sans:wght@400..700&display=swap">
+<link rel="stylesheet" href="tokens.css">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 15px/22px "Plus Jakarta Sans", system-ui, sans-serif; color: var(--earth-brown); background: var(--linen); }
+  .app { display: grid; grid-template-columns: 320px 1fr; min-height: 100vh; }
+  aside { padding: 28px 24px; border-right: 1px solid var(--rule); background: var(--paper); display: grid; gap: 18px; align-content: start; }
+  h1 { margin: 0 0 4px; font: 350 28px/1.1 Fraunces, serif; font-variation-settings: "SOFT" 100, "WONK" 0; }
+  .hint { margin: 0; font-size: 13px; line-height: 19px; color: var(--ink-soft); }
+  label { display: grid; gap: 6px; font-weight: 600; font-size: 13px; }
+  select, input[type=text], input[type=number] { font: 400 15px/20px inherit; font-family: inherit; padding: 10px 12px; border-radius: 8px; border: 1.5px solid var(--rule-strong); background: #fff; color: var(--earth-brown); width: 100%; }
+  .row { display: flex; gap: 8px; align-items: end; }
+  .check { display: flex; gap: 8px; align-items: center; font-weight: 500; }
+  button { font: 600 14px/20px inherit; font-family: inherit; min-height: 44px; padding: 0 18px; border-radius: 999px; border: 1.5px solid var(--rule-strong); background: transparent; color: var(--earth-brown); cursor: pointer; }
+  button.primary { background: var(--deep-red); color: var(--linen); border-color: transparent; }
+  button:disabled { opacity: .5; cursor: default; }
+  :focus-visible { outline: 2px solid var(--midnight); outline-offset: 3px; }
+  .actions { display: grid; gap: 8px; }
+  #status { min-height: 20px; font-size: 13px; color: var(--ink-soft); }
+  main { position: sticky; top: 0; height: 100vh; display: grid; place-items: center; padding: 32px; overflow: hidden; }
+  .frame { position: relative; box-shadow: 0 30px 60px -30px rgba(94, 16, 22, .35); }
+  #out, #overlay { display: block; position: absolute; inset: 0; width: 100%; height: 100%; }
+  #overlay { pointer-events: none; }
+  /* the engine paints into these at export resolution; only the composite canvas is shown */
+  #work { position: fixed; left: 0; top: 0; opacity: 0; pointer-events: none; }
+  #work > div { position: absolute; left: 0; top: 0; }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside>
+    <div>
+      <h1>Watercolour studio</h1>
+      <p class="hint">Paint a Goji bloom and export it for Instagram, Stories, Reels and Google Business Profile.</p>
+    </div>
+    <label>Format
+      <select id="format">
+        <option value="1080x1920">Reel or Story 9:16 (1080 x 1920)</option>
+        <option value="1080x1350">Feed portrait 4:5 (1080 x 1350)</option>
+        <option value="1080x1080">Square 1:1 (1080 x 1080)</option>
+        <option value="1200x1200">Google Business Profile (1200 x 1200)</option>
+        <option value="1920x1080">Landscape 16:9 (1920 x 1080)</option>
+      </select>
+    </label>
+    <label>Painting
+      <select id="scene">
+        <option value="ripen">Ripen: flower to berry</option>
+        <option value="berry">Goji berry</option>
+        <option value="flower">Goji flower</option>
+        <option value="sprig">Sprig of berries</option>
+        <option value="breathe">Breathing bloom (two breaths)</option>
+      </select>
+    </label>
+    <label>Paper
+      <select id="paper">
+        <option value="linen">Linen</option>
+        <option value="blush">Blush</option>
+        <option value="burgundy">Burgundy</option>
+      </select>
+    </label>
+    <div class="row">
+      <label style="flex:1">Seed <input id="seed" type="number" value="3" min="1" max="9999"></label>
+      <button id="shuffle" type="button" title="New variation">Shuffle</button>
+    </div>
+    <label class="check"><input id="wash" type="checkbox" checked> Background wash</label>
+    <label>Headline <input id="headline" type="text" value="Care that grows with you." maxlength="80"></label>
+    <label>Second line <input id="subline" type="text" value="Women's and family physiotherapy at Lentor" maxlength="90"></label>
+    <label class="check"><input id="logo" type="checkbox" checked> Logo</label>
+    <label class="check"><input id="safe" type="checkbox" checked> Show safe zones (not exported)</label>
+    <div class="actions">
+      <button id="play" type="button">Play preview</button>
+      <button id="record" class="primary" type="button">Record video</button>
+      <button id="png" type="button">Save still (PNG)</button>
+    </div>
+    <p id="status" role="status"></p>
+    <p class="hint">Copy follows the compliance guardrails: no outcome or time promises, no superlatives, no testimonials. Post links go through go.gojiphysio.com.</p>
+  </aside>
+  <main>
+    <div class="frame" id="frame">
+      <canvas id="out"></canvas>
+      <canvas id="overlay"></canvas>
+    </div>
+  </main>
+</div>
+<div id="work" aria-hidden="true"></div>
+
+<script src="brand-logos.js"></script>
+<script src="goji-watercolor.js"></script>
+<script>
+(function () {
+  "use strict";
+  var $ = function (id) { return document.getElementById(id); };
+  var out = $("out"), octx = out.getContext("2d"), overlay = $("overlay"), work = $("work"), frameEl = $("frame");
+  var W = 1080, H = 1920, painting = null, wash = null, breath = null, paintBox = null, washBox = null;
+  var t0 = 0, total = 0, raf = 0, recording = false, paintDur = 0;
+  var logos = {};
+  ["main", "light"].forEach(function (k) { var i = new Image(); i.src = window.GOJI_LOGOS[k]; logos[k] = i; });
+
+  var PAPER = { linen: "--linen", blush: "--blush", burgundy: "--burgundy" };
+  function cssVar(el, name) { return getComputedStyle(el).getPropertyValue(name).trim(); }
+  function dark() { return $("paper").value === "burgundy"; }
+
+  /* ---- layout of one frame ---- */
+  function layout() {
+    var portrait = H > W * 1.4, land = W > H;
+    var safeTop = portrait ? 220 : Math.round(H * 0.06), safeBottom = portrait ? 340 : Math.round(H * 0.06);
+    var hasText = $("headline").value.trim() || $("subline").value.trim();
+    var avail = H - safeTop - safeBottom;
+    var box = Math.round(land ? H * 0.8 : Math.min(W * (portrait ? 1 : 0.78), avail * (hasText ? 0.74 : 0.95)));
+    var bx = land && hasText ? Math.round(W * 0.04) : Math.round((W - box) / 2);
+    var by = land ? Math.round((H - box) / 2) : Math.round(hasText ? safeTop - box * 0.04 : safeTop + (avail - box) / 2);
+    return { box: box, bx: bx, by: by, safeTop: safeTop, safeBottom: safeBottom, portrait: portrait, land: land };
+  }
+
+  /* ---- build the engine paintings at export size ---- */
+  function build() {
+    var f = $("format").value.split("x"); W = +f[0]; H = +f[1];
+    out.width = W; out.height = H; overlay.width = W; overlay.height = H;
+    fitFrame();
+    if (painting) painting.destroy(); if (wash) wash.destroy(); if (breath) breath.destroy();
+    painting = wash = breath = null;
+    work.innerHTML = "";
+    /* light pigments on every paper: on burgundy they glow, the Evening ones turn muddy */
+    var L = layout(), seed = +$("seed").value || 1;
+    paintBox = document.createElement("div");
+    paintBox.style.width = paintBox.style.height = L.box + "px";
+    work.appendChild(paintBox);
+    if ($("wash").checked) {
+      washBox = document.createElement("div");
+      washBox.style.width = W + "px"; washBox.style.height = H + "px";
+      work.appendChild(washBox);
+      wash = Goji.paint(washBox, { preset: dark() ? "dusk" : "dawn", seed: seed + 2, manual: true, immediate: true, dpr: 1, breathe: false });
+    }
+    if ($("scene").value === "breathe") {
+      breath = Goji.breathe(paintBox, { cycles: 2, seed: seed, dpr: 1 });
+      paintDur = breath.cycleMs * 2;
+    } else {
+      painting = Goji.paint(paintBox, { preset: $("scene").value, seed: seed, manual: true, immediate: true, dpr: 1, breathe: false });
+      paintDur = painting.duration;
+    }
+    total = 500 + paintDur + 2600;
+    drawOverlay();
+  }
+
+  function fitFrame() {
+    var main = frameEl.parentNode, maxW = main.clientWidth - 64, maxH = main.clientHeight - 64;
+    var k = Math.min(maxW / W, maxH / H, 1);
+    frameEl.style.width = Math.round(W * k) + "px"; frameEl.style.height = Math.round(H * k) + "px";
+  }
+
+  function drawOverlay() {
+    var c = overlay.getContext("2d");
+    c.clearRect(0, 0, W, H);
+    if (!$("safe").checked) return;
+    var L = layout();
+    c.fillStyle = "rgba(23, 101, 145, 0.06)";
+    c.fillRect(0, 0, W, L.safeTop); c.fillRect(0, H - L.safeBottom, W, L.safeBottom);
+    c.strokeStyle = "rgba(23, 101, 145, 0.5)"; c.setLineDash([12, 10]); c.lineWidth = 2;
+    c.strokeRect(1, L.safeTop, W - 2, H - L.safeTop - L.safeBottom);
+  }
+
+  /* ---- text: Fraunces headline, Jakarta second line, centred and wrapped ---- */
+  function wrap(text, font, maxW) {
+    octx.font = font;
+    var words = text.split(/\s+/), lines = [], line = "";
+    words.forEach(function (w) {
+      var test = line ? line + " " + w : w;
+      if (octx.measureText(test).width > maxW && line) { lines.push(line); line = w; } else line = test;
+    });
+    if (line) lines.push(line);
+    return lines;
+  }
+  function ease(t) { t = Math.max(0, Math.min(1, t)); return 1 - Math.pow(1 - t, 3); }
+
+  function compose(t) {
+    var L = layout(), ink = dark() ? cssVar(work, "--on-dark") : cssVar(work, "--earth-brown");
+    octx.setTransform(1, 0, 0, 1, 0, 0);
+    octx.globalAlpha = 1; octx.globalCompositeOperation = "source-over";
+    octx.fillStyle = cssVar(work, PAPER[$("paper").value]);
+    octx.fillRect(0, 0, W, H);
+    var blend = dark() ? "source-over" : "multiply";
+    if (wash) { octx.globalCompositeOperation = blend; octx.drawImage(wash.canvas, 0, 0, W, H); }
+    var pc = painting ? painting.canvas : breath.canvas;
+    octx.globalCompositeOperation = blend;
+    octx.drawImage(pc, L.bx, L.by, L.box, L.box);
+    octx.globalCompositeOperation = "source-over";
+
+    /* words arrive once the painting has mostly bloomed */
+    var textAt = 500 + paintDur * (breath ? 0.05 : 0.55);
+    var head = $("headline").value.trim(), sub = $("subline").value.trim();
+    var size = Math.round((L.land ? H * 0.085 : W * 0.075)), subSize = Math.round(size * 0.42);
+    var maxW = L.land ? W - L.bx - L.box - W * 0.1 : W * 0.8;
+    var cx = L.land ? L.bx + L.box + W * 0.05 : W / 2;
+    var y = L.land ? H * 0.38 : L.by + L.box * 0.95 + size * 0.6;
+    octx.textAlign = L.land ? "left" : "center"; octx.textBaseline = "alphabetic"; octx.fillStyle = ink;
+    if (head) {
+      var hf = "300 " + size + "px Fraunces";
+      var a = ease((t - textAt) / 900);
+      octx.globalAlpha = a;
+      wrap(head, hf, maxW).forEach(function (ln, i) { octx.font = hf; octx.fillText(ln, cx, y + i * size * 1.06 + (1 - a) * 18); });
+      y += wrap(head, hf, maxW).length * size * 1.06 + subSize * 0.6;
+    }
+    if (sub) {
+      var sf = "500 " + subSize + "px 'Plus Jakarta Sans'";
+      var b = ease((t - textAt - 350) / 900);
+      octx.globalAlpha = b * 0.85;
+      wrap(sub, sf, maxW).forEach(function (ln, i) { octx.font = sf; octx.fillText(ln, cx, y + i * subSize * 1.4 + (1 - b) * 14); });
+    }
+    if ($("logo").checked) {
+      var img = logos[dark() ? "light" : "main"], lw = Math.round((L.land ? W * 0.16 : W * 0.34)), lh = lw * img.naturalHeight / (img.naturalWidth || 1);
+      octx.globalAlpha = ease((t - textAt - 700) / 900);
+      var lx = L.land ? cx - lw * 0.1 : (W - lw) / 2, ly = L.land ? H - lh - H * 0.06 : H - L.safeBottom - lh + lh * 0.1;
+      if (img.complete && img.naturalWidth) octx.drawImage(img, lx, ly, lw, lh);
+    }
+    octx.globalAlpha = 1;
+  }
+
+  /* ---- playback ---- */
+  function start(onDone) {
+    cancelAnimationFrame(raf);
+    if (wash) wash.replay();
+    setTimeout(function () { if (painting) painting.replay(); if (breath) { breath.reset(); breath.start(); } }, 500);
+    t0 = performance.now();
+    (function loop(now) {
+      var t = now - t0;
+      compose(t);
+      if (t < total) raf = requestAnimationFrame(loop);
+      else if (onDone) onDone();
+    })(t0);
+  }
+  function still() {
+    if (wash) wash.finish();
+    if (painting) painting.finish();
+    if (breath) breath.reset();
+    compose(1e9);
+  }
+
+  function pickType() {
+    var types = ["video/mp4;codecs=avc1.640028", "video/mp4;codecs=avc1.42E01E", "video/mp4", "video/webm;codecs=vp9", "video/webm"];
+    for (var i = 0; i < types.length; i++) if (window.MediaRecorder && MediaRecorder.isTypeSupported(types[i])) return types[i];
+    return "";
+  }
+  function fileName(ext) { return "goji-" + $("scene").value + "-" + W + "x" + H + "-seed" + $("seed").value + "." + ext; }
+  function download(blob, name) {
+    var a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000);
+  }
+  function busy(on, msg) {
+    ["play", "record", "png", "format", "scene", "paper", "seed", "shuffle"].forEach(function (id) { $(id).disabled = on; });
+    $("status").textContent = msg || "";
+  }
+
+  $("play").onclick = function () { build(); start(); };
+  $("record").onclick = function () {
+    var type = pickType();
+    if (!type) { $("status").textContent = "This browser can't record canvas video. Use Chrome or Safari."; return; }
+    build();
+    var rec = new MediaRecorder(out.captureStream(30), { mimeType: type, videoBitsPerSecond: 16e6 }), chunks = [];
+    rec.ondataavailable = function (e) { if (e.data.size) chunks.push(e.data); };
+    rec.onstop = function () {
+      var ext = type.indexOf("mp4") >= 0 ? "mp4" : "webm";
+      download(new Blob(chunks, { type: type.split(";")[0] }), fileName(ext));
+      busy(false, "Saved " + fileName(ext) + (ext === "webm" ? ". Instagram needs MP4: record in a browser with MP4 support or convert it." : "."));
+    };
+    busy(true, "Recording " + Math.round(total / 1000) + "s. Keep this tab in front.");
+    rec.start(250);
+    start(function () { setTimeout(function () { rec.stop(); }, 120); });
+  };
+  $("png").onclick = function () {
+    build(); still();
+    out.toBlob(function (b) { download(b, fileName("png")); $("status").textContent = "Saved " + fileName("png") + "."; }, "image/png");
+  };
+  $("shuffle").onclick = function () { $("seed").value = 1 + Math.floor(Math.random() * 9998); build(); still(); };
+  ["format", "scene", "paper", "seed", "wash", "headline", "subline", "logo"].forEach(function (id) {
+    $(id).addEventListener("change", function () { build(); still(); });
+  });
+  $("safe").addEventListener("change", drawOverlay);
+  window.addEventListener("resize", fitFrame);
+
+  (document.fonts ? Promise.all([document.fonts.load("300 80px Fraunces"), document.fonts.load("500 32px 'Plus Jakarta Sans'")]) : Promise.resolve())
+    .catch(function () {}).then(function () { build(); start(); });
+})();
+</script>
+</body>
+</html>
