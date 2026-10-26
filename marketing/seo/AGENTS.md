@@ -64,6 +64,19 @@ wait for clinical review. When unsure, it is tier B.
     pace 15s+, finish next day if hit. A VPN IP is challenged on query 1.
   - A login expired? The owner signs in; agents never do. Google SSO fails on
     a VPN IP, so sign in off the VPN, then reconnect (sessions survive).
+  - **Signing in to ChatGPT/Claude with Google signs the browser pane into
+    Google**, which breaks the logged-out Google run (seen 2026-10-26). Run
+    Google in gstack's headed browser instead (`$B connect`: a separate,
+    signed-out Chromium profile). Headless gstack gets Google's "unusual
+    traffic" page on query 1. When two agents share that browser, pin each
+    to its own tab with `BROWSE_TAB=<n>` on every command; `newtab` steals
+    the active tab.
+  - Check ChatGPT's Settings → Personalization before every run: Memory,
+    "Reference record history" and "Connector search" all off. Memory came
+    back on between runs once (2026-10-26). If it's on and the owner isn't
+    around, run **logged out** as a separate series
+    (`aeo-chatgpt-sg-ip-loggedout.json`), never mixed with the logged-in
+    trend.
 - Location: ChatGPT/Claude infer it from IP. When the machine is not in SG,
   run variant `sg-context` (prefix rule in `aeo-queries.json`); when it is,
   also run `sg-ip`. Never mix the two series in one trend line. A Singapore
