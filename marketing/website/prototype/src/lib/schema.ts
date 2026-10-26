@@ -75,6 +75,6 @@ export function businessSchema(origin: URL) {
       "Lymphoedema Physiotherapy",
       "Vestibular Rehabilitation",
     ].map((name) => ({ "@type": "MedicalTherapy", name })),
-    sameAs: [SITE.instagram, SITE.googleMaps],
+    sameAs: [SITE.instagram, SITE.googleMaps, SITE.wikidata],
   };
 }

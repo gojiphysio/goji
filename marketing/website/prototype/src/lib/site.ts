@@ -22,6 +22,7 @@ export const SITE = {
   phoneE164: "+6583770401",
   instagram: "https://www.instagram.com/gojiphysio/",
   googleMaps: "https://maps.app.goo.gl/wBaCkBiDNfF7JCGv8",
+  wikidata: "https://www.wikidata.org/wiki/Q141874843",
   // Keyless embeddable map (the goo.gl short link above will not render in an
   // iframe). Centres on the clinic by name + address; no Maps API key needed.
   googleMapsEmbed:
