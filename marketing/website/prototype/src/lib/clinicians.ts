@@ -37,7 +37,7 @@ export const clinicians: Clinician[] = [
   {
     id: "cheryl-long",
     name: "Cheryl Long",
-    role: "Senior Physiotherapist",
+    role: "Clinical Director",
     services: ["physiotherapy", "mummy-baby"],
     calendarId: "blue",
     doctorCode: "PCL",
