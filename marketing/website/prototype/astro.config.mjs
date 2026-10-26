@@ -1,4 +1,5 @@
 // @ts-check
+import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import { defineConfig } from "astro/config";
 import icon from "astro-icon";
@@ -13,6 +14,50 @@ const BLOG_DIR = new URL("./src/content/blog/", import.meta.url);
 const blogHasPosts =
   fs.existsSync(BLOG_DIR) &&
   fs.readdirSync(BLOG_DIR).some((f) => f.endsWith(".md"));
+
+// <lastmod> for the sitemap (Bing, which feeds ChatGPT search, uses it): the
+// last commit date of the file that holds the page's content. A content
+// collection entry (conditions, services, team, press, blog) wins over its
+// route template; everything else maps to src/pages/<path>.astro or
+// <path>/index.astro. Shared layout/template edits don't bump it on purpose:
+// lastmod should mean "this page's content changed". On a shallow clone every
+// file would carry the same commit date, which is worse than no date, so
+// lastmod is dropped there.
+const shallow = (() => {
+  try {
+    return (
+      execFileSync("git", ["rev-parse", "--is-shallow-repository"], {
+        encoding: "utf8",
+      }).trim() !== "false"
+    );
+  } catch {
+    return true;
+  }
+})();
+
+function lastmodFor(url) {
+  if (shallow) return undefined;
+  const route = new URL(url).pathname.replace(/^\/|\/$/g, "");
+  const [section, slug] = route.split("/");
+  const candidates = [
+    ...(slug ? [`src/content/${section}/${slug}.md`] : []),
+    `src/pages/${route || "index"}.astro`,
+    `src/pages/${route}/index.astro`,
+  ];
+  const file = candidates.find((f) =>
+    fs.existsSync(new URL(`./${f}`, import.meta.url)),
+  );
+  if (!file) return undefined;
+  try {
+    const iso = execFileSync("git", ["log", "-1", "--format=%cI", "--", file], {
+      cwd: new URL(".", import.meta.url),
+      encoding: "utf8",
+    }).trim();
+    return iso || undefined;
+  } catch {
+    return undefined;
+  }
+}
 
 // Static output (the default). Cloudflare Pages serves the contents of `dist/`.
 // When SSR / Pages Functions are needed later (e.g. the enquiry-form handler),
@@ -30,6 +75,10 @@ export default defineConfig({
         !page.includes("/styleguide") &&
         !page.includes("/search") &&
         (blogHasPosts || !page.includes("/blog")),
+      serialize: (item) => {
+        const lastmod = lastmodFor(item.url);
+        return lastmod ? { ...item, lastmod } : item;
+      },
     }),
   ],
 });
