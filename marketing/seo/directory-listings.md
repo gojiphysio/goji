@@ -11,7 +11,7 @@ record of what's live.
 |---|---|---|---|
 | Bing Places | Bing's index feeds ChatGPT search and Copilot | hello@gojiphysio.com (Google) | **live, synced from GBP (26 Oct 2026)** |
 | Apple Business Connect | Apple Maps, Siri, Spotlight | Apple ID for the business | not started |
-| Wikidata item | Entity graph used by Google's Knowledge Graph and AI engines | a Wikidata account (declare the affiliation) | not started |
+| Wikidata item | Entity graph used by Google's Knowledge Graph and AI engines | a Wikidata account (declare the affiliation) | live: [Q141874843](https://www.wikidata.org/wiki/Q141874843), in `sameAs` |
 | Singapore Physiotherapy Association "find a physio" | Trusted directory, cited for "physio near me" | SPA membership | check eligibility |
 
 ## Shared values
@@ -53,7 +53,11 @@ with Goji (Wikidata's conflict-of-interest norm). The Lianhe Zaobao feature is
 the independent reference that makes the item notable.
 
 Paste into QuickStatements (quickstatements.toolforge.org → New batch, V1),
-or add the statements by hand on wikidata.org:
+or add the statements by hand on wikidata.org. A brand-new account can't use
+QuickStatements until it is autoconfirmed (4 days and 50 edits), so for the
+first item, add the statements by hand. In the property box, type the P-number
+(for example `P6375`), not the name, or the suggester can pick a near miss such
+as "located on street".
 
 ```
 CREATE
@@ -76,5 +80,8 @@ IDs checked 26 Oct 2026: Q1774898 medical clinic, Q186005 physiotherapy
 P17 country, P6375 street address, P281 postal code, P625 coordinates, P856
 official website, P2003 Instagram username, S854 reference URL.
 
-After it's live, add the item's URL to `sameAs` in `src/lib/schema.ts`
-(tier A) so the site and the graph point at each other.
+Live since 26 Oct 2026 as
+[Q141874843](https://www.wikidata.org/wiki/Q141874843), with all of the
+statements above. `SITE.wikidata` is in the Organization `sameAs`
+(`src/lib/schema.ts`), so the site and the graph point at each other. Still
+to do: declare the affiliation on the Gojiphysio user page.
