@@ -28,5 +28,6 @@ tab, honour these:
 - **Compliance is a hard constraint.** `strategy/03-compliance-guardrails.md`
   (Singapore healthcare-advertising rules) governs all copy and claims — check it
   before writing any patient-facing or ad content.
+- **Watercolour social clips** (Reels, Stories, feed, GBP) are made in `assets/watercolor-studio/` (open `index.html`; exports MP4/PNG). Its engine is a copy of the Goji design system bundle: re-copy it when the system changes rather than editing it here.
 - The Marketing tab's WIP cards are the **seams** for live integrations; see
   `../business-intelligence/scripts/dashboard/AGENTS.md`.
