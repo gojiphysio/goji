@@ -18,8 +18,6 @@ Urinary incontinence is any unintentional leakage of urine, and pelvic floor phy
 
 Incontinence is among the most common and most treatable conditions in women's health. It affects women of all ages, not just those who have given birth. Yet many women do not seek treatment, assuming it is an inevitable consequence of childbirth or ageing. It is not.
 
-<!-- NEEDS CHERYL: Google's AI Overview for "is leaking after birth normal" is a "common but not normal" explainer. If you want that framing in this lede, confirm the wording; the existing section below says leaking in weeks 1-6 is common and persisting beyond 3 months warrants assessment. -->
-
 ## What are the different types of urinary incontinence?
 
 The most clinically relevant types for women are:
