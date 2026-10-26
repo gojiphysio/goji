@@ -72,6 +72,9 @@ export default defineConfig({
   // Set to the production origin when we cut over from Squarespace.
   site: "https://www.gojiphysio.com",
   output: "static",
+  // Our CSS is small (~18 KB across all bundles), so inline it rather than
+  // make the first paint wait on separate stylesheet requests (mobile LCP).
+  build: { inlineStylesheets: "always" },
   integrations: [
     icon(),
     // Generates /sitemap-index.xml; keep the internal styleguide and the
