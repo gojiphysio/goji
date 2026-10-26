@@ -1,0 +1,178 @@
+---
+/**
+ * /links — the Instagram link-in-bio page (replaces bio.site/gojiphysio).
+ *
+ * Hosting it on our own domain means the profile's one link points at
+ * gojiphysio.com, which is what ties the account to the site for search and
+ * AI answer engines, and every CTA goes through the tracked redirector.
+ * The CTAs use the `bio-*` slugs, so the dashboard's Instagram → link-in-bio
+ * funnel keeps counting them. Everything else links to our own pages.
+ *
+ * `bare` drops the site header/footer (a link-in-bio page is a menu, not a
+ * page to browse); noindex + out of search and the sitemap, because it would
+ * only compete with the homepage for brand queries.
+ *
+ * Events: add an entry to `events` while one is open for sign-up, and remove
+ * it when it's over. The section hides itself when the list is empty.
+ */
+import BaseLayout from "../layouts/BaseLayout.astro";
+import LogoLockup from "../components/LogoLockup.astro";
+import Button from "../components/Button.astro";
+import { SITE } from "../lib/site.ts";
+
+const services = [
+  { label: "Women's health physiotherapy", href: "/womens-health-physiotherapy-singapore/" },
+  { label: "Pregnancy physiotherapy", href: "/services/prenatal-physiotherapy/" },
+  { label: "Postpartum physiotherapy", href: "/services/postpartum-physiotherapy/" },
+  { label: "Mummy & Baby assessment", href: "/services/mummy-baby-assessment/" },
+  { label: "Pelvic floor physiotherapy", href: "/services/pelvic-floor-physiotherapy/" },
+  { label: "Paediatric physiotherapy", href: "/services/paediatric-physiotherapy/" },
+  { label: "Clinical Pilates", href: "/services/clinical-pilates/" },
+  { label: "Private Pilates", href: "/services/private-pilates/" },
+];
+
+const more = [
+  { label: "All services and prices", href: "/services/" },
+  { label: "Getting here (1 minute from Lentor MRT)", href: "/getting-here/" },
+  { label: "In the news: Cheryl in Lianhe Zaobao", href: "/press/zaobao-womens-hidden-pain/" },
+  { label: "Meet the team", href: "/#team" },
+];
+
+/** Open events only: { label, href }. Empty = section hidden. */
+const events: { label: string; href: string }[] = [];
+---
+
+<BaseLayout
+  title="Links | Goji Physiotherapy"
+  description="WhatsApp us, book online, or find a service at Goji Women's and Family Physiotherapy, Lentor Modern, Singapore."
+  bare
+  noindex
+  searchable={false}
+>
+  <div class="links">
+    <header class="links__head">
+      <a href="/" aria-label="Goji home"><LogoLockup variant="main" height={48} /></a>
+      <h1 class="links__name">{SITE.fullName}</h1>
+      <p class="links__where">{SITE.address.line1}, Lentor Central, Singapore</p>
+    </header>
+
+    <div class="links__ctas">
+      <Button slug="bio-wa" variant="whatsapp" size="lg">Message us on WhatsApp</Button>
+      <Button slug="bio-book" variant="primary" size="lg">Book an appointment</Button>
+    </div>
+
+    {
+      events.length > 0 && (
+        <section class="links__group" aria-labelledby="links-events">
+          <h2 id="links-events">Upcoming events</h2>
+          <ul>
+            {events.map((e) => (
+              <li><a class="links__item" href={e.href}>{e.label}</a></li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+
+    <section class="links__group" aria-labelledby="links-services">
+      <h2 id="links-services">Our services</h2>
+      <ul>
+        {services.map((s) => (
+          <li><a class="links__item" href={s.href}>{s.label}</a></li>
+        ))}
+      </ul>
+    </section>
+
+    <section class="links__group" aria-labelledby="links-more">
+      <h2 id="links-more">More</h2>
+      <ul>
+        {more.map((s) => (
+          <li><a class="links__item" href={s.href}>{s.label}</a></li>
+        ))}
+      </ul>
+    </section>
+
+    <footer class="links__foot">
+      <p>{SITE.hours.map((h) => `${h.days}: ${h.time}`).join(" · ")}</p>
+      <p>{SITE.phone} · <a href={`mailto:${SITE.email}`}>{SITE.email}</a></p>
+      <p><a href="/">www.gojiphysio.com</a></p>
+    </footer>
+  </div>
+</BaseLayout>
+
+<style>
+  .links {
+    max-width: 30rem;
+    margin: 0 auto;
+    padding: var(--space-6) var(--space-4) var(--space-7);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+  }
+  .links__head {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-3);
+  }
+  .links__name {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    line-height: var(--lh-tight);
+    margin: 0;
+  }
+  .links__where {
+    color: var(--text-muted);
+    margin: 0;
+  }
+  .links__ctas {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+  .links__ctas :global(.btn) {
+    width: 100%;
+    justify-content: center;
+  }
+  .links__group h2 {
+    font-size: 0.85rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin: 0 0 var(--space-3);
+  }
+  .links__group ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+  /* Linked rows wear the interactive recipe (white fill + border + shadow),
+     per the site's "tappable vs static" rule. */
+  .links__item {
+    display: block;
+    padding: var(--space-3) var(--space-4);
+    background: var(--bg-content);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    color: var(--text-default);
+    text-decoration: none;
+    font-weight: var(--weight-semibold);
+  }
+  .links__item:hover,
+  .links__item:focus-visible {
+    border-color: var(--berry);
+  }
+  .links__foot {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+  }
+  .links__foot p {
+    margin: 0 0 var(--space-2);
+  }
+</style>
