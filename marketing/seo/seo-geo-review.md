@@ -156,7 +156,9 @@ condition/service page that owns the cluster)**
 | Keyword / prompt | Target page | Status |
 |---|---|---|
 | is leaking after birth normal, leaking when I sneeze postpartum | /blog/is-leaking-after-birth-normal (supports /conditions/urinary-incontinence) | Drafted, in clinical review |
-| what happens at a physio appointment, first physiotherapy visit singapore | /blog/what-happens-at-your-first-physiotherapy-visit | Drafted, in clinical review |
+| what happens at a physio appointment, first physiotherapy visit singapore | /blog/what-happens-at-your-first-physiotherapy-visit | Drafted, in clinical review; short interim answer in the /services FAQ, which links to the post once it ships |
+| how much does physiotherapy cost in singapore | /services/#faq (FAQ; prices live on /services) | Drafted, in clinical review (PR seo/general-questions) |
+| do i need a doctor's referral to see a physiotherapist in singapore | /services/#faq (FAQ) | Drafted, in clinical review (PR seo/general-questions) |
 | when can I run after birth, returning to exercise postpartum | /blog/returning-to-exercise-after-birth (supports /services/postpartum-physiotherapy) | Drafted, in clinical review |
 | goji physio zaobao, goji physio news | /press | **Live** |
 

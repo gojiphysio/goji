@@ -45,11 +45,45 @@ const displayDuration = (service: any) => {
   }
   return `${service.data.durationMin} min`;
 };
+
+/**
+ * General "before you book" questions (aeo-queries.json cluster
+ * general-question). Answer first in plain terms, then Goji's specifics.
+ * Goji facts here only restate copy already published elsewhere on the site
+ * (homepage FAQ, women's health hub, service FAQs); prices must match the
+ * services collection and llms.txt. Rendered visibly below and emitted as
+ * FAQPage JSON-LD from the same array, so the two cannot drift.
+ */
+const faqs = [
+  {
+    q: "What happens at a first physiotherapy appointment?",
+    a: "A first physiotherapy appointment is mostly an assessment. It starts with a conversation about your history, your current concerns and your goals, followed by a physical assessment. Your physiotherapist then walks you through what they found and you leave with a plan for what comes next. At Goji, a first physiotherapy session is 55 minutes, and the Mummy and Baby assessment is 85 minutes. Wear comfortable clothing you can move in, such as activewear, loose shorts or leggings. For pelvic floor concerns an internal examination may be offered, but it is always optional and only carried out with your informed consent.",
+  },
+  {
+    q: "How much does physiotherapy cost in Singapore?",
+    a: `Physiotherapy fees in Singapore vary with the provider, the setting (a private clinic, a polyclinic or public hospital, or a home visit) and the length of the appointment, so check the per-session price before you book. At Goji, a 55-minute physiotherapy session is $260 at the clinic or $380 as a home visit. The 85-minute Mummy and Baby assessment is $330 at the clinic or $450 as a home visit. Prices are as of ${SITE.pricesAsOf}. We do not do direct billing: most patients pay first and claim from their insurer afterwards, depending on their policy's physiotherapy coverage.`,
+  },
+  {
+    q: "Do I need a doctor's referral to see a physiotherapist in Singapore?",
+    a: "Not for private physiotherapy. In Singapore you can book a private physiotherapist directly, without a doctor's referral. Subsidised physiotherapy at a polyclinic or public hospital generally needs a referral from a doctor. No referral is needed for our women's health appointments: you can book directly with us, and if your assessment suggests input from a doctor would help, we will say so and can work alongside them. Some insurance providers require a referral letter from a doctor before they reimburse physiotherapy, so check with your insurer before your first visit if you plan to claim.",
+  },
+];
+
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: faqs.map((f) => ({
+    "@type": "Question",
+    name: f.q,
+    acceptedAnswer: { "@type": "Answer", text: f.a },
+  })),
+};
 ---
 
 <BaseLayout
   title="Our Services | Goji Physiotherapy Singapore"
   description="Physiotherapy at Goji, Lentor MRT: prenatal and postpartum physio, Mummy & Baby assessments, and Schroth therapy for scoliosis. In-clinic or home visits."
+  schema={schema}
 >
   <section class="services-hero">
     <div class="container">
@@ -106,6 +140,21 @@ const displayDuration = (service: any) => {
       );
     })
   }
+
+  <Section tone="surface" id="faq">
+    <!-- NEEDS CHERYL: confirm no referral is needed for every Goji appointment (MSK, paediatric, Schroth), not only women's health; if yes, the referral answer can say "any of our appointments". -->
+    <!-- NEEDS CHERYL: a typical Singapore price range was left out of the cost answer (no MOH/HealthHub/AHPC source found). Add one only with a primary source. -->
+    <!-- NEEDS CHERYL: when /blog/what-happens-at-your-first-physiotherapy-visit/ is approved and published, link the first-appointment answer to it. -->
+    <div class="svc-faq-wrap">
+      <h2>Frequently asked questions</h2>
+      {faqs.map((f) => (
+        <details class="svc-faq">
+          <summary>{f.q}</summary>
+          <p>{f.a}</p>
+        </details>
+      ))}
+    </div>
+  </Section>
 
   <Section tone="linen" id="contact-cta">
     <div class="contact-strip">
@@ -224,6 +273,28 @@ const displayDuration = (service: any) => {
     text-transform: uppercase;
     color: var(--color-primary);
     margin-top: var(--space-2);
+  }
+
+  .svc-faq-wrap {
+    max-width: 68ch;
+  }
+  .svc-faq-wrap h2 {
+    margin-bottom: var(--space-4);
+  }
+  .svc-faq {
+    border-top: 1px solid var(--color-border);
+    padding-block: var(--space-3);
+  }
+  .svc-faq:last-of-type { border-bottom: 1px solid var(--color-border); }
+  .svc-faq summary {
+    cursor: pointer;
+    font-weight: var(--weight-semibold);
+    color: var(--text-default);
+  }
+  .svc-faq p {
+    margin-top: var(--space-3);
+    margin-bottom: var(--space-2);
+    line-height: var(--lh-body);
   }
 
   .contact-strip {
