@@ -97,6 +97,8 @@ so a token change reflows everything (styleguide is the QA surface).
   frontmatter; the template renders "Reviewed by <name>" linking to
   `/team/<slug>` and emits `reviewedBy` in the MedicalWebPage JSON-LD.
 - **Meta descriptions ≤160 chars.**
+- **Internal page links end in `/`** (`/conditions/vertigo/`). Cloudflare
+  Pages 308s the bare form; `check_dist.py` fails the PR on it.
 - **`seoTitle` (services and conditions) overrides only the `<title>`.** Use it
   to target the national query ("Pelvic Floor Physiotherapy Singapore") without
   "Singapore" leaking into the H1, breadcrumbs or schema `name`, which read from
