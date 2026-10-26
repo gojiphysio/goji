@@ -208,7 +208,7 @@ See `DEPLOY.md`.
   columns): **Discovery → Website** = landings by channel from the beacon
   (`fetch_web_channels` / `web_session_events`, classified by utm/gclid/referer);
   **Surface → CTA** = go-link taps (`link_click_events` slug splits; `web-*` under
-  Website, `bio-*` under bio.site + an Instagram→bio.site edge, `gbp/ads/qr/ig`
+  Website, `bio-*` under Link in bio (/links) + an Instagram→Link in bio edge, `gbp/ads/qr/ig`
   bypass the site straight to a CTA); **CTA → Booked** = confirmed native bookings
   (`booking_funnel.booked`) and won WhatsApp leads (`lead_wins`). The click-id
   passthrough (`/r/<slug>?cid=` for `-book` slugs → beacon `go_click_id`) closes

@@ -292,7 +292,7 @@ def test_lead_stage_and_channel_vocab():
 # --- Acquisition-funnel Sankey paths (_build_funnel_paths, pure) -------------
 # The per-slug click counts come from marts.link_click_events (exercised
 # end-to-end per DEPLOY.md). The pure builder that turns those slug counts into
-# Source -> bio.site -> CTA flows is unit-tested here.
+# Source -> Link in bio -> CTA flows is unit-tested here.
 
 def test_build_funnel_paths_discovery_surface_cta_booked():
     link_clicks = {
@@ -312,14 +312,14 @@ def test_build_funnel_paths_discovery_surface_cta_booked():
     # Discovery -> Website (arrival), from the landing beacon (sessions).
     assert flows[("Google Ads", "Website")] == 100
     assert flows[("Direct", "Website")] == 55
-    # web-* taps sit under the Website surface; bio-* under bio.site + IG hop.
+    # web-* taps sit under the Website surface; bio-* under Link in bio + IG hop.
     # web-plato (9) merges into the same "Native booking" CTA as web-book (24).
     assert flows[("Website", "WhatsApp")] == 40
     assert flows[("Website", "Native booking")] == 33
     assert ("Website", "Plato booking") not in flows
-    assert flows[("Instagram", "bio.site")] == 80        # bio-wa 60 + bio-book 20
-    assert flows[("bio.site", "WhatsApp")] == 60
-    assert flows[("bio.site", "Native booking")] == 20
+    assert flows[("Instagram", "Link in bio")] == 80        # bio-wa 60 + bio-book 20
+    assert flows[("Link in bio", "WhatsApp")] == 60
+    assert flows[("Link in bio", "Native booking")] == 20
     # ig-* is a direct Instagram tap; gbp/ads bypass the site straight to a CTA.
     assert flows[("Instagram", "WhatsApp")] == 50
     assert flows[("Google", "WhatsApp")] == 30           # gbp -> Google
