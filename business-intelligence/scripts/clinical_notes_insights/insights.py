@@ -265,6 +265,30 @@ PAIN = {
     "pelvic girdle": re.compile(r"\b(?:PGP|pelvic girdle|SIJ|sacroiliac|pubic symphysis|symphysis pubis|SPD|coccyx|tailbone)\b", I),
     "shoulder": re.compile(r"\bshoulders?\b", I),
 }
+# Case-note templates name body parts in every exam ("shoulder flexion full"),
+# so a body part counts only with a pain word on the same line, close by.
+# Shorthand that already means pain counts on its own.
+PAIN_WORD = re.compile(r"\b(?:pain\w*|ache\w*|aching|sore\w*|tender\w*|stiff\w*|injur\w*|strain\w*|sprain\w*|hurt\w*|discomfort|niggl\w*|c/o)\b", I)
+PAIN_NEAR = 40
+PAIN_SHORTHAND = re.compile(r"^(?:LBP|PGP|SPD|de ?quervain'?s?)$", I)
+
+
+def painful(pattern: re.Pattern, text: str) -> bool:
+    """Body part mentioned with pain nearby (same line), and not negated."""
+    for m in pattern.finditer(text):
+        before = text[max(0, m.start() - 30):m.start()]
+        after = text[m.end():m.end() + 12]
+        if NEG_BEFORE.search(before) or NEG_AFTER.search(after):
+            continue
+        if PAIN_SHORTHAND.match(m.group(0)):
+            return True
+        lo = text.rfind("\n", 0, m.start()) + 1
+        hi = text.find("\n", m.end())
+        hi = len(text) if hi == -1 else hi
+        near = text[max(lo, m.start() - PAIN_NEAR):min(hi, m.end() + PAIN_NEAR)]
+        if PAIN_WORD.search(near):
+            return True
+    return False
 
 GOAL_INTRO = re.compile(r"\b(?:goals?|aims?|wants? to|would like to|hopes? to)\b\s*[:\-]?", I)
 GOAL_WINDOW = 200
@@ -362,7 +386,8 @@ def derive(notes: list[tuple[str, str]]) -> dict[str, set[str]]:
     out["birth type mentioned"] = {k for k, p in BIRTH.items() if p.search(every)}
     out["leaking/urgency reported"] = {"yes"} if affirmed(LEAKING, every, LEAK_NOT_BLADDER) else set()
     out["diastasis measured"] = {"yes"} if any(p.search(every) for p in DIASTASIS) else set()
-    out["pain location"] = {k for k, p in PAIN.items() if affirmed(p, every)}
+    # First note only: what they came in with, not every region treated since.
+    out["pain location"] = {k for k, p in PAIN.items() if painful(p, first)}
     out["goal recorded"] = {"yes"} if goals else set()
     out["main goal"] = {k for k, p in GOALS.items() if p.search(goals)}
     out["active-ageing goal"] = {k for k, p in AGEING_GOALS.items() if p.search(goals)}

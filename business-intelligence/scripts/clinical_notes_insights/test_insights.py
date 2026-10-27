@@ -68,6 +68,13 @@ def test_pain_locations_with_negation():
     assert f["pain location"] == {"wrist/thumb", "back"}
 
 
+def test_pain_needs_a_pain_word_and_first_note():
+    assert labels("Shoulder flexion full ROM\nNeck: NAD")["pain location"] == set()
+    assert labels("C/O R shoulder pain x2/12")["pain location"] == {"shoulder"}
+    assert labels("Neck\nPain score 3/10")["pain location"] == set()  # different line
+    assert labels("Initial: LBP", "now neck sore")["pain location"] == {"back"}
+
+
 def test_goals_read_only_after_goal_intro():
     f = labels("Runs 5km weekly before pregnancy. Goals: lift baby without pain, return to gym")
     assert f["main goal"] == {"lifting/carrying baby", "exercise/sport"}
