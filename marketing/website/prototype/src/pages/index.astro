@@ -227,7 +227,7 @@ const reviews = [
         </p>
         <div class="hero__actions">
           <Button slug="web-wa" variant="whatsapp" size="lg">WhatsApp us</Button>
-          <Button href="/book/" variant="secondary" size="lg">Book now</Button>
+          <Button href="/book/" variant="secondary" size="lg" class="hero__book">Book now</Button>
         </div>
         <ul class="hero__trust" aria-label="Why families choose Goji">
           {tickerItems.map((item) => <li>{item}</li>)}
@@ -562,6 +562,9 @@ const reviews = [
   }
   .hero__lead { font-size: var(--fs-body); max-width: 34em; margin: 0; }
   .hero__actions { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-2); }
+  /* Inverse of the WhatsApp button: white fill, Goji red text and outline. */
+  .hero__actions :global(.hero__book) { background-color: var(--color-surface); color: var(--cta-bg); border-color: var(--cta-bg); }
+  .hero__actions :global(.hero__book:hover) { background-color: var(--color-surface); color: var(--cta-bg-hover); border-color: var(--cta-bg-hover); box-shadow: var(--shadow-sm); }
   .hero__trust { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-5); margin-top: var(--space-2); }
   .hero__trust li { display: inline-flex; align-items: center; gap: 8px; font-size: var(--fs-caption); color: var(--text-muted); }
   /* a small watercolour goji berry with its sage calyx */
