@@ -12,6 +12,9 @@ category: "Active Ageing & Family"
 tags: ["osteoporosis", "osteopenia", "bone health", "strength training", "falls", "events"]
 relatedConditions: ["menopause", "fall-prevention", "balance-problems"]
 relatedServices: ["musculoskeletal-physiotherapy"]
+heroImage: "/photos/services/schroth-scoliosis-adults.webp"
+heroAlt: "A Goji physiotherapist guiding a woman through an upright posture exercise at the wall bars."
+ogImage: "/og/blog/exercise-for-osteoporosis.jpg"
 ctaSlug: "web-wa"
 draft: false
 ---

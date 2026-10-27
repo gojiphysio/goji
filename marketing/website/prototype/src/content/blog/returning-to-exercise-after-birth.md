@@ -12,6 +12,9 @@ author:
   slug: "cheryl-long"
 relatedConditions: ["diastasis-recti", "pelvic-girdle-pain"]
 relatedServices: ["postpartum-physiotherapy", "clinical-pilates"]
+heroImage: "/photos/services/strength-conditioning.webp"
+heroAlt: "A woman lifting a kettlebell from the floor during a strength session at Goji."
+ogImage: "/og/blog/returning-to-exercise-after-birth.jpg"
 ctaSlug: "web-wa"
 draft: false
 ---

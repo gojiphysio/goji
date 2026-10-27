@@ -12,6 +12,9 @@ category: "Clinic News"
 tags: ["clinic news", "events", "Lentor"]
 relatedConditions: []
 relatedServices: ["postpartum-physiotherapy", "paediatric-physiotherapy"]
+heroImage: "/photos/directions/exterior-frontage.webp"
+heroAlt: "The Goji Physiotherapy shopfront at Lentor Modern with congratulatory flower stands outside on opening day."
+ogImage: "/og/blog/goji-grand-opening-lentor-modern.jpg"
 ctaSlug: "web-wa"
 draft: false
 ---
@@ -23,6 +26,8 @@ Goji Women's and Family Physiotherapy is open at Lentor Modern, #01-13, next to 
 "Goji Physio: Grand Opening" was a celebration for the people who helped us get here. We invited professional partners, peers, family, friends and members of the community, including entrepreneurs, doctors, physiotherapists and industry partners, to meet the team and see the clinic for themselves. Families were welcome, and there were light refreshments.
 
 Thank you to everyone who came, and to everyone who could not make it but sent good wishes.
+
+![The Goji reception: a round red table with chairs, flowers in a vase, and wooden shelving lit from within.](/photos/space/reception-warm.webp)
 
 ## What does Goji offer?
 

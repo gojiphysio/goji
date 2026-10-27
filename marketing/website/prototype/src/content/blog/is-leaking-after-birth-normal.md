@@ -12,6 +12,9 @@ author:
   slug: "cheryl-long"
 relatedConditions: ["urinary-incontinence", "pelvic-organ-prolapse"]
 relatedServices: ["pelvic-floor-physiotherapy", "postpartum-physiotherapy"]
+heroImage: "/photos/services/pelvic-floor-physiotherapy.webp"
+heroAlt: "A Goji physiotherapist showing a pelvic model to a client to explain how the pelvic floor works."
+ogImage: "/og/blog/is-leaking-after-birth-normal.jpg"
 ctaSlug: "web-wa"
 draft: false
 ---

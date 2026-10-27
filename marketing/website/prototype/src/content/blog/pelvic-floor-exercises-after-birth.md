@@ -12,6 +12,9 @@ category: "Pelvic & Perinatal Health"
 tags: ["postnatal", "pelvic floor", "exercise"]
 relatedConditions: ["urinary-incontinence", "pelvic-organ-prolapse"]
 relatedServices: ["pelvic-floor-physiotherapy", "postpartum-physiotherapy"]
+heroImage: "/photos/services/postpartum-physiotherapy.webp"
+heroAlt: "A Goji physiotherapist guiding a mother lying on an exercise mat through a postpartum recovery exercise."
+ogImage: "/og/blog/pelvic-floor-exercises-after-birth.jpg"
 ctaSlug: "web-wa"
 draft: false
 ---

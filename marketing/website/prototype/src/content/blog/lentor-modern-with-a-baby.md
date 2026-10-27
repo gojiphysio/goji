@@ -11,6 +11,9 @@ author:
 category: "Active Ageing & Family"
 tags: ["lentor", "family", "babies", "toddlers", "local guide"]
 relatedServices: ["mummy-baby-assessment", "paediatric-physiotherapy"]
+heroImage: "/photos/space/reception.webp"
+heroAlt: "The Goji reception at Lentor Modern: a round table with flowers, open shelving and the GOJI sign on the wall."
+ogImage: "/og/blog/lentor-modern-with-a-baby.jpg"
 ctaSlug: "web-wa"
 draft: false
 ---
@@ -27,6 +30,8 @@ Everything below was checked against the developer's announcement, NParks and NL
 - Drop-off: the Lentor Drive pick-up point beside Lentor MRT Exit 1 is linked to the ground-floor shops by a fully sheltered walkway, and there is a second main drop-off point for the mall.
 - Nursing or baby-care room: not confirmed by an official source at the time of writing. Ask a staff member at the mall for the nearest one.
 - Baby supplies: the mall directory published at opening lists a Guardian pharmacy and a Cold Storage Fresh supermarket on Level 1.
+
+![Site plan of Lentor Modern Level 1 showing Goji, the Lentor MRT exit, the taxi stands, Cold Storage and the car park lift lobbies.](/photos/directions/lentor-modern-level-1.webp)
 
 ## Which parks are near Lentor with a baby or toddler?
 

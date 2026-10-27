@@ -11,6 +11,9 @@ author:
   name: "Cheryl Long"
   slug: "cheryl-long"
 relatedServices: ["musculoskeletal-physiotherapy", "pelvic-floor-physiotherapy"]
+heroImage: "/photos/services/musculoskeletal-physiotherapy.webp"
+heroAlt: "A Goji physiotherapist guiding a client through a leg exercise on a bench in the clinic gym."
+ogImage: "/og/blog/what-happens-at-your-first-physiotherapy-visit.jpg"
 ctaSlug: "web-wa"
 draft: false
 ---

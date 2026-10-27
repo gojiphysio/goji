@@ -12,6 +12,9 @@ category: "Pelvic & Perinatal Health"
 tags: ["diastasis recti", "postnatal", "abdominoplasty", "events"]
 relatedConditions: ["diastasis-recti"]
 relatedServices: ["postpartum-physiotherapy"]
+heroImage: "/photos/services/clinical-pilates.webp"
+heroAlt: "A Goji physiotherapist guiding two clients through core and arm work on Pilates reformers."
+ogImage: "/og/blog/diastasis-recti-physio-or-surgery.jpg"
 ctaSlug: "web-wa"
 draft: false
 ---

@@ -12,6 +12,9 @@ category: "Pelvic & Perinatal Health"
 tags: ["prenatal", "antenatal classes", "prenatal yoga", "prenatal pilates", "birth preparation"]
 relatedConditions: ["prenatal-care"]
 relatedServices: ["prenatal-physiotherapy"]
+heroImage: "/photos/services/private-pilates.webp"
+heroAlt: "A Pilates instructor guiding a client through a reformer lunge at Goji."
+ogImage: "/og/blog/prenatal-classes-singapore.jpg"
 ctaSlug: "web-wa"
 draft: false
 ---

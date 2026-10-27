@@ -12,6 +12,9 @@ category: "Pelvic & Perinatal Health"
 tags: ["pre-pregnancy", "pelvic floor", "strength training", "events"]
 relatedConditions: ["prenatal-care", "pelvic-girdle-pain"]
 relatedServices: ["prenatal-physiotherapy"]
+heroImage: "/photos/services/prenatal-physiotherapy.webp"
+heroAlt: "A pregnant woman doing a seated side stretch with a Goji physiotherapist supporting her."
+ogImage: "/og/blog/preparing-your-body-for-pregnancy.jpg"
 ctaSlug: "web-wa"
 draft: false
 ---
