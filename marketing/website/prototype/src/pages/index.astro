@@ -562,7 +562,8 @@ const reviews = [
   .hero__actions { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-2); }
   .hero__trust { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-5); margin-top: var(--space-2); }
   .hero__trust li { display: inline-flex; align-items: center; gap: 8px; font-size: var(--fs-caption); color: var(--text-muted); }
-  .hero__trust li::before { content: ""; width: 6px; height: 8px; border-radius: 50% 50% 50% 50% / 58% 58% 42% 42%; background: var(--berry); }
+  /* a small watercolour goji berry with its sage calyx */
+  .hero__trust li::before { content: ""; flex: none; width: 15px; height: 20px; margin-top: -4px; background: url("/brand/goji-berry-bullet.svg") center / contain no-repeat; }
   .hero__media { position: relative; padding: 0 0 8% 10%; }
   .hero__media :global(.hero__photo) { aspect-ratio: 4 / 5; box-shadow: var(--shadow-lg); }
   .hero__media :global(.hero__bloom) { position: absolute; left: -6%; bottom: -6%; width: 50%; }
