@@ -51,6 +51,9 @@ so a token change reflows everything (styleguide is the QA surface).
   `bookingApi.track()` stage must be added to `VALID_STAGES` in
   `business-intelligence/scripts/booking/app.py` (and the `FunnelStage` type in
   `src/lib/booking.ts`) in the same PR, or the backend silently drops it.
+  `service_selected` with `detail = "deep_link"` means step 1 was skipped (a
+  service page's `/book/?service=…` link already filled it), so count those
+  apart when reading step-1 drop-off.
 - **The landing beacon sends three event types**, all to `/api/web-event`:
   `session_start` / `page_view` on arrival, and `page_engagement` once per page
   load on first hide (`visibilitychange` → hidden, or `pagehide`), carrying
