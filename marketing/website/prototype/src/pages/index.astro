@@ -1,11 +1,9 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import Section from "../components/Section.astro";
 import Button from "../components/Button.astro";
-import PractitionerCard from "../components/PractitionerCard.astro";
-import QuoteSurface from "../components/QuoteSurface.astro";
-import ContactBlock from "../components/ContactBlock.astro";
-import BloomFlipbook from "../components/BloomFlipbook.astro";
+import Bloom from "../components/watercolor/Bloom.astro";
+import PaintedWord from "../components/watercolor/PaintedWord.astro";
+import PetalPhoto from "../components/watercolor/PetalPhoto.astro";
 import { Icon } from "astro-icon/components";
 import { SITE } from "../lib/site.ts";
 import { services } from "../lib/services.ts";
@@ -60,12 +58,10 @@ const faqSchema = {
   })),
 };
 
-// Trust marquee items, repeated in the loop so the track always exceeds the
-// viewport width (prevents a blank gap in the scroll).
+// Trust line under the hero CTAs, each led by the berry dot.
 const tickerItems = [
   "1 min from Lentor MRT",
   "AHPC-registered physiotherapists",
-  "5.0 on Google",
   "Home visits available",
 ];
 
@@ -214,64 +210,45 @@ const reviews = [
   description="Women's & family physiotherapy at Lentor Modern, Singapore: pelvic health, pregnancy and postpartum care, paediatrics and strength. One minute from Lentor MRT."
   schema={faqSchema}
 >
-  {/* ---- Hero (copy left, clinic photos right) ---- */}
-  <section class="hero">
+  {/* ---- Hero: copy left, petal photo + ripening bloom right, dawn wash behind.
+       Everything here is visible on first paint; only the paint moves. ---- */}
+  <section class="hero gj-washed">
+    <div class="gj-wc gj-wc--multiply gj-wc-wash" data-gj-wash="dawn" data-seed="5" aria-hidden="true"></div>
     <div class="container hero__inner">
       <div class="hero__text">
-        <p class="hero__tagline">{SITE.tagline}</p>
-        <h1 class="hero__sub">Women's and Family Physiotherapy in Lentor, Singapore</h1>
+        <p class="hero__tagline">Care that <PaintedWord>grows</PaintedWord> with you.</p>
+        <h1 class="hero__h1">Women's and Family Physiotherapy in Lentor, Singapore</h1>
         <p class="hero__lead">
           Expert care for pelvic health, pregnancy and postpartum recovery,
           paediatrics and everyday strength.
         </p>
         <div class="hero__actions">
           <Button slug="web-wa" variant="whatsapp" size="lg">WhatsApp us</Button>
-          <Button href="/book/" variant="primary" size="lg">Book now</Button>
+          <Button href="/book/" variant="secondary" size="lg">Book now</Button>
         </div>
+        <ul class="hero__trust" aria-label="Why families choose Goji">
+          {tickerItems.map((item) => <li>{item}</li>)}
+        </ul>
       </div>
       <div class="hero__media">
-        <div class="hero-shots">
-          {[
-            { src: "/photos/space/reception-warm.webp", alt: "Goji reception at Lentor Modern: a red oval table and cushioned wooden stools beneath the Goji Women's and Family Physiotherapy sign" },
-            { src: "/photos/services/clinical-pilates.webp", alt: "A Goji physiotherapist guiding two clients through a reformer Clinical Pilates session" },
-            { src: "/photos/services/prenatal-physiotherapy.webp", alt: "A pregnant woman working with a Goji physiotherapist during a prenatal assessment" },
-            { src: "/photos/space/strength-conditioning.webp", alt: "A Goji physiotherapist guiding a man through a mobility stretch on a mat beside a foam roller" },
-          ].map((img, i) => (
-            <img
-              src={img.src}
-              class="hero-shot"
-              alt={img.alt}
-              loading="eager"
-              decoding="async"
-              fetchpriority={i === 0 ? "high" : "low"}
-            />
-          ))}
-        </div>
+        <PetalPhoto
+          src="/photos/services/prenatal-physiotherapy-warm.webp"
+          alt="A Goji physiotherapist guiding a pregnant woman through an assisted side stretch on a mat"
+          flip
+          priority
+          position="50% 30%"
+          class="hero__photo"
+        />
+        <Bloom preset="ripen" class="hero__bloom" label="A watercolour goji flower opening and ripening into a red berry" />
       </div>
     </div>
   </section>
 
-  {/* ---- Trust marquee (full-width, scrolls right to left) ---- */}
-  <section class="ticker" aria-label="Why families choose Goji">
-    <div class="ticker__track">
-      {[0, 1].map((dup) => (
-        <ul class="ticker__group" aria-hidden={dup === 1 ? "true" : undefined}>
-          {[0, 1, 2].flatMap(() => tickerItems).map((item) => (
-            <li class="ticker__item">
-              <span class="ticker__dot" aria-hidden="true"></span>
-              {item}
-            </li>
-          ))}
-        </ul>
-      ))}
-    </div>
-  </section>
-
-  {/* ---- About (text-only, no photo placeholder) ---- */}
-  <section class="about-sec" id="about">
-    <div class="container about-sec__inner">
-      <h2>What is Goji Physio?</h2>
-      <div class="about-sec__body">
+  {/* ---- About ---- */}
+  <section class="about" id="about">
+    <div class="container about__inner">
+      <div class="about__text gj-reveal">
+        <h2>What is Goji Physio?</h2>
         <p>
           Goji Women's and Family Physiotherapy (Goji Physio) is a physiotherapy
           clinic at Lentor Modern, Singapore, one minute from Lentor MRT. Our
@@ -290,168 +267,152 @@ const reviews = [
           your children and family too.
         </p>
       </div>
+      <div class="about__media">
+        <PetalPhoto
+          src="/photos/space/reception-warm.webp"
+          alt="Goji reception at Lentor Modern: a red oval table and cushioned wooden stools beneath the Goji Women's and Family Physiotherapy sign"
+          paint
+          class="about__photo"
+        />
+        <Bloom preset="sprig" seed={4} class="about__bloom" />
+      </div>
     </div>
   </section>
 
-  {/* ---- Services (cards with pricing + Tabler icons) ---- */}
-  <section class="services-sec" id="services">
+  {/* ---- Services: white (tappable) cards; a snap-scroll row on phones ---- */}
+  <section class="services" id="services">
     <div class="container">
-      <header class="section-head">
+      <header class="sec-head gj-reveal">
         <h2>Care for the whole family, under one roof</h2>
       </header>
-      <div class="service-wrap">
-        <div class="service-track" id="serviceTrack">
-          {
-            services.map((s) => (
-              <article class="service-card">
-                <span class="service-card__icon" aria-hidden="true">
-                  <Icon name={s.icon} size={22} />
-                </span>
-                <h3 class="service-card__name">{s.title}</h3>
-                <p class="service-card__meta">{s.meta.join(" · ")}</p>
-                <p class="service-card__price">
-                  {s.price && <strong>${s.price}</strong>}
-                  {s.price && s.priceNote && <span class="service-card__price-note">{s.priceNote}</span>}
-                </p>
-                <p class="service-card__lead">{s.lead}</p>
-                <div class="service-card__cta">
-                  <Button href="/book/" variant="secondary" class="service-card__book">Book {s.title}</Button>
-                  {serviceLearnMore[s.id] && (
-                    <a href={serviceLearnMore[s.id]} class="service-card__learn">
-                      Learn more
-                      <Icon name="tabler:arrow-right" size={16} />
-                    </a>
-                  )}
-                </div>
-              </article>
-            ))
-          }
-        </div>
-        <button class="reviews-btn reviews-btn--prev" id="servicePrev" aria-label="Previous services" disabled>
-          <Icon name="tabler:chevron-left" size={22} />
-        </button>
-        <button class="reviews-btn reviews-btn--next" id="serviceNext" aria-label="More services">
-          <Icon name="tabler:chevron-right" size={22} />
-        </button>
-      </div>
-      <div class="track-dots" id="serviceDots" aria-hidden="true">
-        {services.map((_, i) => <span class:list={["track-dot", { "track-dot--active": i === 0 }]} />)}
+      <div class="service-grid">
+        {
+          services.map((s, i) => (
+            <article class="service-card gj-reveal" style={`--i:${i % 3}`}>
+              <span class="service-card__icon" aria-hidden="true">
+                <Icon name={s.icon} size={22} />
+              </span>
+              <h3 class="service-card__name">{s.title}</h3>
+              <p class="service-card__meta">{s.meta.join(" · ")}</p>
+              <p class="service-card__price">
+                {s.price && <strong>${s.price}</strong>}
+              </p>
+              <p class="service-card__lead">{s.lead}</p>
+              <div class="service-card__cta">
+                <Button href="/book/" variant="secondary" class="service-card__book">Book {s.title}</Button>
+                {serviceLearnMore[s.id] && (
+                  <a href={serviceLearnMore[s.id]} class="service-card__learn">
+                    Learn more
+                    <Icon name="tabler:arrow-up-right" size={16} />
+                  </a>
+                )}
+              </div>
+            </article>
+          ))
+        }
       </div>
     </div>
   </section>
 
-  {/* ---- Areas of care (accordion, berry icon per row, linked conditions) ---- */}
-  <section class="care-sec" id="care">
-    <div class="container">
-      <div class="sec-two-col">
-      <header class="section-head">
+  {/* ---- Conditions we treat (accordion) ---- */}
+  <section class="care" id="care">
+    <div class="container care__inner">
+      <header class="sec-head care__head gj-reveal">
         <h2>Conditions we treat</h2>
-        <p class="section-head__sub">
+        <p class="sec-head__lead">
           Care tailored to the individual, their stage of life, and what matters
           to them.
         </p>
+        <a href="/conditions/" class="care__all">View all conditions</a>
       </header>
       <div class="accordion">
         {
           careAreas.map((c) => (
             <details class="accordion__item">
-              <summary class="accordion__trigger accordion__trigger--care">
-                <span class="care-berry" aria-hidden="true"></span>
+              <summary class="accordion__trigger">
                 <span class="accordion__name">{c.title}</span>
                 <span class="accordion__toggle" aria-hidden="true" />
               </summary>
               <div class="accordion__body">
-                <div class="accordion__body-inner">
-                  <ul class="care-list">
-                    {c.points.map((p) =>
-                      typeof p === "string" ? (
-                        <li>{p}</li>
-                      ) : (
-                        <li>
-                          <a href={p.href} class="care-list__link">
-                            {p.text}
-                            <span class="care-list__arrow" aria-hidden="true">→</span>
-                            <span class="visually-hidden"> — read more</span>
-                          </a>
-                        </li>
-                      ),
-                    )}
-                  </ul>
-                  {c.guideHref && (
-                    <a href={c.guideHref} class="care-link">
-                      View all conditions
-                    </a>
+                <ul class="care-list">
+                  {c.points.map((p) =>
+                    typeof p === "string" ? (
+                      <li>{p}</li>
+                    ) : (
+                      <li>
+                        <a href={p.href} class="care-list__link">
+                          {p.text}
+                          <span class="visually-hidden"> — read more</span>
+                        </a>
+                      </li>
+                    ),
                   )}
-                </div>
+                </ul>
               </div>
             </details>
           ))
         }
       </div>
-      </div>
     </div>
   </section>
 
-  {/* ---- Stats: 4 items (2×2 on mobile, 4-col on desktop) ---- */}
-  <section class="stats-strip">
-    <div class="container stats-strip__inner">
-      <div class="stat-item">
-        <span class="stat-item__value">1 min</span>
-        <span class="stat-item__label">walk from Lentor MRT</span>
-        <span class="stat-item__caption">Ground floor, stroller-friendly</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-item__value">3</span>
-        <span class="stat-item__label">specialist physios</span>
-        <span class="stat-item__caption">AHPC-registered clinicians</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-item__value">20+</span>
-        <span class="stat-item__label">years combined experience</span>
-        <span class="stat-item__caption">Across pelvic health, sports, and paediatrics</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-item__value">1000+</span>
-        <span class="stat-item__label">patients collectively served</span>
-        <span class="stat-item__caption">And growing</span>
-      </div>
+  {/* ---- Stats: facts on the ground with hairlines, never card-shaped ---- */}
+  <section class="stats" aria-label="Goji at a glance">
+    <div class="container">
+      <dl class="stats__grid">
+        {[
+          { value: "1 min", label: "walk from Lentor MRT", caption: "Ground floor, stroller-friendly" },
+          { value: "3", label: "specialist physios", caption: "AHPC-registered clinicians" },
+          { value: "20+", label: "years combined experience", caption: "Across pelvic health, sports, and paediatrics" },
+          { value: "1000+", label: "patients collectively served", caption: "And growing" },
+        ].map((st, i) => (
+          <div class="stat gj-reveal" style={`--i:${i}`}>
+            <dt class="stat__label">{st.label}</dt>
+            <dd class="stat__value">{st.value}</dd>
+            <dd class="stat__caption">{st.caption}</dd>
+          </div>
+        ))}
+      </dl>
     </div>
   </section>
 
-  {/* ---- Team carousel ---- */}
-  <Section tone="surface" id="team">
-    <header class="section-head">
-      <h2>Practitioners who get it</h2>
-    </header>
-    <div class="team-wrap">
-      <div class="team-track" id="teamTrack" style={`--team-count:${team.length}`}>
+  {/* ---- Team ---- */}
+  <section class="team" id="team">
+    <div class="container">
+      <header class="sec-head gj-reveal">
+        <h2>Practitioners who get it</h2>
+      </header>
+      <div class="team-grid">
         {
-          team.map((t) => (
-            <div class="team-slide">
-              <PractitionerCard name={t.name} role={t.role} interests={t.interests} image={t.slug ? `/photos/team/card/${t.slug}.webp` : t.photo} href={t.slug ? `/team/${t.slug}/` : undefined} />
-            </div>
+          team.map((t, i) => (
+            <a href={`/team/${t.slug}/`} class="person">
+              <PetalPhoto
+                src={`/photos/team/${t.slug}.webp`}
+                alt={`${t.name}, ${t.role} at Goji Physiotherapy`}
+                paint
+                flip={i % 2 === 1}
+                position="50% 28%"
+                class="person__photo"
+              />
+              <span class="person__role">{t.role}</span>
+              <h3 class="person__name">{t.name}</h3>
+              <p class="person__interests">{t.interests}</p>
+            </a>
           ))
         }
       </div>
-      <button class="carousel-btn carousel-btn--prev" id="teamPrev" aria-label="Previous practitioner" disabled>
-        <Icon name="tabler:chevron-left" size={22} />
-      </button>
-      <button class="carousel-btn carousel-btn--next" id="teamNext" aria-label="Next practitioner">
-        <Icon name="tabler:chevron-right" size={22} />
-      </button>
     </div>
-    <div class="team-dots" id="teamDots" aria-hidden="true">
-      {team.map((_, i) => <span class:list={["team-dot", { "team-dot--active": i === 0 }]} />)}
-    </div>
-  </Section>
+  </section>
 
-  {/* ---- For every stage of growth (brand bloom) ---- */}
-  <section class="space-sec">
-    <div class="container space-sec__inner">
-      <div class="space-sec__image">
-        <BloomFlipbook />
+  {/* ---- For every stage of growth: bud, flower, ripe berry ---- */}
+  <section class="growth gj-washed">
+    <div class="container growth__inner">
+      <div class="growth__stages" role="img" aria-label="Watercolour paintings of a goji plant at three stages: a lilac bud, an open flower, and a ripe red berry">
+        <div class="gj-wc gj-wc--multiply gj-wc-bloom" data-gj-bloom="node-bud" data-seed="7" aria-hidden="true"></div>
+        <div class="gj-wc gj-wc--multiply gj-wc-bloom" data-gj-bloom="node-flower" data-seed="8" data-delay="900" aria-hidden="true"></div>
+        <div class="gj-wc gj-wc--multiply gj-wc-bloom" data-gj-bloom="node-berry" data-seed="9" data-delay="1900" aria-hidden="true"></div>
       </div>
-      <div class="space-sec__text">
+      <div class="growth__text gj-reveal">
         <h2>For every stage of growth</h2>
         <p>
           Goji takes its name from a berry that ripens in its own time. Bodies are
@@ -468,1027 +429,426 @@ const reviews = [
   </section>
 
   {/* ---- Google Reviews carousel ---- */}
-  <section class="reviews-sec">
+  <section class="reviews">
     <div class="container">
-      <div class="reviews-header">
-        <h2 class="reviews-title">The Goji community</h2>
-        <div class="reviews-rating">
-          <span class="reviews-stars" aria-hidden="true">★★★★★</span>
-          <span class="reviews-score">5.0</span>
-          <a
-            href="https://maps.app.goo.gl/wBaCkBiDNfF7JCGv8"
-            class="reviews-source"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            See all on Google
-          </a>
+      <div class="reviews__head">
+        <header class="sec-head gj-reveal">
+          <h2>The Goji community</h2>
+        </header>
+        <div class="reviews__rating">
+          <a href="https://maps.app.goo.gl/wBaCkBiDNfF7JCGv8" target="_blank" rel="noopener noreferrer">See all reviews on Google</a>
         </div>
       </div>
-      <div class="reviews-wrap">
-        <div class="reviews-track" id="reviewsTrack">
+      <div class="reviews__wrap">
+        <div class="reviews__track" id="reviewsTrack">
           {reviews.map((r) => (
-            <blockquote class="review-card">
-              <div class="review-card__stars" aria-label="5 stars">★★★★★</div>
-              <p class="review-card__text">{r.text}</p>
-              <footer class="review-card__footer">
-                <span class="review-card__name">{r.name}</span>
-              </footer>
+            <blockquote class="review">
+              <div class="review__stars" aria-label="5 stars">★★★★★</div>
+              <p class="review__text">{r.text}</p>
+              <footer class="review__name">{r.name}</footer>
             </blockquote>
           ))}
         </div>
-        <button class="reviews-btn reviews-btn--prev" id="reviewsPrev" aria-label="Previous review" disabled>
-          <Icon name="tabler:chevron-left" size={22} />
-        </button>
-        <button class="reviews-btn reviews-btn--next" id="reviewsNext" aria-label="Next review">
-          <Icon name="tabler:chevron-right" size={22} />
-        </button>
+        <div class="reviews__nav">
+          <button class="round-btn" id="reviewsPrev" aria-label="Previous review" disabled>
+            <Icon name="tabler:arrow-left" size={20} />
+          </button>
+          <button class="round-btn" id="reviewsNext" aria-label="Next review">
+            <Icon name="tabler:arrow-right" size={20} />
+          </button>
+        </div>
       </div>
-      <div class="track-dots" id="reviewsDots" aria-hidden="true">
-        {reviews.map((_, i) => <span class:list={["track-dot", { "track-dot--active": i === 0 }]} />)}
-      </div>
-      <p class="reviews-disclaimer">All reviews sourced from <a href="https://maps.app.goo.gl/wBaCkBiDNfF7JCGv8" target="_blank" rel="noopener noreferrer">Google Maps</a>. Individual experiences may vary.</p>
+      <p class="reviews__disclaimer">All reviews sourced from <a href="https://maps.app.goo.gl/wBaCkBiDNfF7JCGv8" target="_blank" rel="noopener noreferrer">Google Maps</a>. Individual experiences may vary.</p>
     </div>
   </section>
 
   {/* ---- FAQ ---- */}
-  <Section tone="linen" id="faq">
-    <div class="sec-two-col">
-    <header class="section-head">
-      <h2>Frequently asked questions</h2>
-    </header>
-    <div class="faq-list">
-      {faqs.map((item) => (
-        <details class="faq-item">
-          <summary class="faq-q">
-            {item.q}
-            <span class="faq-toggle" aria-hidden="true" />
-          </summary>
-          <div class="faq-a">
-            <p>{item.a}</p>
-          </div>
-        </details>
-      ))}
+  <section class="faq" id="faq">
+    <div class="container faq__inner">
+      <header class="sec-head gj-reveal">
+        <h2>Frequently asked questions</h2>
+      </header>
+      <div class="faq__list">
+        {faqs.map((item) => (
+          <details class="faq__item">
+            <summary class="faq__q">
+              {item.q}
+              <span class="accordion__toggle" aria-hidden="true" />
+            </summary>
+            <div class="faq__a">
+              <p>{item.a}</p>
+            </div>
+          </details>
+        ))}
+      </div>
     </div>
+  </section>
+
+  {/* ---- Closing promise: the page's one burgundy surface ---- */}
+  <section class="promise-sec">
+    <div class="container">
+      <figure class="promise gj-washed">
+        <div class="gj-wc gj-wc-wash" data-gj-wash="dusk" data-seed="9" aria-hidden="true"></div>
+        <img class="promise__logo" src="/brand/logo_light_transparent.webp" alt="Goji" width="343" height="168" loading="lazy" />
+        <blockquote class="promise__text">{SITE.promise}</blockquote>
+        <figcaption class="promise__by">The Goji promise</figcaption>
+        <div class="promise__actions" data-search-ignore>
+          <Button slug="web-wa" variant="light" size="lg">WhatsApp us</Button>
+          <Button href="/book/" variant="secondary" size="lg" class="promise__book">Book an appointment</Button>
+        </div>
+      </figure>
     </div>
-  </Section>
+  </section>
 
-  {/* ---- Closing promise ---- */}
-  <Section tone="closing">
-    <QuoteSurface />
-  </Section>
-
-  {/* ---- Contact ---- */}
-  <Section tone="linen" id="contact">
-    <ContactBlock />
-  </Section>
 </BaseLayout>
 
 <script>
-  // One carousel behaviour for all three horizontal scrollers: arrow buttons
-  // scroll by a slide, dots (mobile) track the active slide, and both reflect
-  // scroll position (arrows disable at the ends).
-  function initCarousel(
-    trackId: string,
-    prevId: string,
-    nextId: string,
-    dotSelector: string | null,
-    activeClass = "track-dot--active",
-  ) {
-    const track = document.getElementById(trackId) as HTMLElement | null;
-    const prev = document.getElementById(prevId) as HTMLButtonElement | null;
-    const next = document.getElementById(nextId) as HTMLButtonElement | null;
-    if (!track || !prev || !next) return;
-    const dots = dotSelector
-      ? Array.from(document.querySelectorAll(dotSelector))
-      : [];
-
-    const slideWidth = () => {
-      const slide = track.firstElementChild as HTMLElement | null;
-      return slide
-        ? slide.offsetWidth + parseInt(getComputedStyle(track).columnGap || "0")
-        : 0;
+  // Reviews: arrow buttons scroll by one card and disable at either end.
+  const track = document.getElementById("reviewsTrack");
+  const prev = document.getElementById("reviewsPrev") as HTMLButtonElement | null;
+  const next = document.getElementById("reviewsNext") as HTMLButtonElement | null;
+  if (track && prev && next) {
+    const step = () => {
+      const card = track.firstElementChild as HTMLElement | null;
+      return card ? card.offsetWidth + parseInt(getComputedStyle(track).columnGap || "0") : 0;
     };
-
     const update = () => {
-      const maxScroll = track.scrollWidth - track.clientWidth;
+      const max = track.scrollWidth - track.clientWidth;
       prev.disabled = track.scrollLeft <= 1;
-      next.disabled = track.scrollLeft >= maxScroll - 1;
-      if (dots.length) {
-        const sw = slideWidth();
-        const idx = sw > 0 ? Math.round(track.scrollLeft / sw) : 0;
-        dots.forEach((d, i) => d.classList.toggle(activeClass, i === idx));
-      }
+      next.disabled = track.scrollLeft >= max - 1;
     };
-
-    prev.addEventListener("click", () =>
-      track.scrollBy({ left: -slideWidth(), behavior: "smooth" }),
-    );
-    next.addEventListener("click", () =>
-      track.scrollBy({ left: slideWidth(), behavior: "smooth" }),
-    );
+    prev.addEventListener("click", () => track.scrollBy({ left: -step(), behavior: "smooth" }));
+    next.addEventListener("click", () => track.scrollBy({ left: step(), behavior: "smooth" }));
     track.addEventListener("scroll", update, { passive: true });
     window.addEventListener("resize", update);
     update();
   }
-
-  initCarousel("teamTrack", "teamPrev", "teamNext", ".team-dot", "team-dot--active");
-  initCarousel("serviceTrack", "servicePrev", "serviceNext", "#serviceDots .track-dot");
-  initCarousel("reviewsTrack", "reviewsPrev", "reviewsNext", "#reviewsDots .track-dot");
 </script>
 
 <style>
+  section { scroll-margin-top: 88px; }
+  .sec-head { display: grid; gap: var(--space-4); max-width: 44rem; }
+  .sec-head h2 { margin: 0; }
+  .sec-head__lead { font-size: var(--fs-body); color: var(--text-muted); max-width: 34em; }
+
   /* ======================================================
      Hero
      ====================================================== */
   .hero {
-    background: var(--bg-page);
-    display: flex;
-    align-items: center;
-    /* Sized to its content so the trust ticker sits within the first screen. */
-    padding-block: var(--space-6);
+    padding-block: clamp(2.5rem, 1rem + 5vw, 6rem) clamp(4rem, 2rem + 6vw, 8rem);
   }
   .hero__inner {
     display: grid;
-    gap: var(--space-7);
-    width: 100%;
+    gap: clamp(3rem, 2rem + 4vw, 4.5rem);
     align-items: center;
   }
-  @media (min-width: 820px) {
-    .hero__inner {
-      grid-template-columns: 0.85fr 1.15fr;
-      gap: var(--space-9);
-    }
-  }
-
+  .hero__text { display: grid; gap: var(--space-4); align-content: center; }
+  .hero__tagline { margin-bottom: var(--space-2) !important; }
+  .hero__h1 { font-family: var(--font-body); font-size: var(--fs-body); line-height: 1.45; font-weight: var(--weight-semibold); letter-spacing: 0; margin: 0; }
+  .hero__lead { color: var(--text-muted); }
   .hero__tagline {
     font-family: var(--font-display);
+    font-variation-settings: var(--font-display-axes);
+    /* sized so "Care that grows" holds one line beside the photo */
     font-size: clamp(2.25rem, 1.7rem + 2.2vw, 3.25rem);
-    font-weight: var(--weight-semibold);
-    color: var(--text-default);
+    font-weight: var(--weight-display);
     line-height: var(--lh-tight);
-    letter-spacing: var(--tracking-tight);
-    max-width: 15ch;
-    margin-bottom: var(--space-4);
-    text-wrap: balance;
-  }
-  .hero__lead {
-    font-family: var(--font-body);
-    font-size: var(--fs-body);
-    color: var(--text-muted);
-    max-width: 46ch;
-    margin-bottom: var(--space-6);
-    line-height: var(--lh-body);
-  }
-  .hero__actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-3);
-  }
-  .hero__sub {
-    font-family: var(--font-display);
-    font-size: var(--fs-body);
-    font-weight: var(--weight-medium);
-    color: var(--color-primary);
-    margin-top: 0;
-    margin-bottom: var(--space-4);
-    max-width: 30ch;
-    /* It is the page h1 (keyword line); undo the base h1 type so it looks
-       like the body-size subline it was. */
-    line-height: var(--lh-body);
-    letter-spacing: normal;
-    text-wrap: wrap;
-  }
-  /* ======================================================
-     Trust marquee — full-width, scrolls right to left
-     ====================================================== */
-  .ticker {
-    background: var(--color-linen-deep);
-    border-block: 1px solid var(--rule);
-    overflow: hidden;
-  }
-  .ticker__track {
-    display: flex;
-    width: max-content;
-    animation: ticker-scroll 34s linear infinite;
-  }
-  .ticker__group {
-    display: flex;
-    align-items: center;
-    gap: var(--space-6);
-    list-style: none;
-    margin: 0;
-    padding: var(--space-3) 0 var(--space-3) var(--space-6);
-  }
-  .ticker__item {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-3);
-    white-space: nowrap;
-    font-family: var(--font-display);
-    font-size: var(--fs-small);
-    font-weight: var(--weight-medium);
+    letter-spacing: var(--tracking-display);
     color: var(--text-default);
+    text-wrap: balance;
+    margin: 0;
   }
-  .ticker__dot {
-    width: 6px;
-    height: 11px;
-    border-radius: 50%;
-    background: var(--color-primary);
-    transform: rotate(45deg);
-    flex: none;
-  }
-  @keyframes ticker-scroll {
-    from { transform: translateX(0); }
-    to { transform: translateX(-50%); }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .ticker__track { animation: none; flex-wrap: wrap; }
-    .ticker__group:nth-child(2) { display: none; }
-  }
-
-  /* Hero clinic-photo crossfade (4 frames, 28s loop) */
-  .hero-shots {
-    position: relative;
-    width: 100%;
-    aspect-ratio: 4 / 3;
-    border-radius: var(--radius-md);
-    overflow: hidden;
-    background: color-mix(in srgb, var(--color-linen-deep) 70%, var(--bg-page));
-    box-shadow: var(--shadow-md);
-  }
-  .hero-shot {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    opacity: 0;
-    animation: hero-fade 28s infinite;
-  }
-  /* Start the first frame already faded in (skip its 0.7s fade): an image at
-     opacity 0 doesn't count as painted, so the fade delayed mobile LCP. */
-  .hero-shot:nth-child(1) { animation-delay: -0.7s; }
-  .hero-shot:nth-child(2) { animation-delay: 7s; }
-  .hero-shot:nth-child(3) { animation-delay: 14s; }
-  .hero-shot:nth-child(4) { animation-delay: 21s; }
-  @keyframes hero-fade {
-    0%    { opacity: 0; }
-    2.5%  { opacity: 1; }
-    22.5% { opacity: 1; }
-    27.5% { opacity: 0; }
-    100%  { opacity: 0; }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .hero-shot { animation: none; }
-    .hero-shot:nth-child(1) { opacity: 1; }
+  .hero__lead { font-size: var(--fs-body); max-width: 34em; margin: 0; }
+  .hero__actions { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-2); }
+  .hero__trust { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-5); margin-top: var(--space-2); }
+  .hero__trust li { display: inline-flex; align-items: center; gap: 8px; font-size: var(--fs-caption); color: var(--text-muted); }
+  /* a small watercolour goji berry with its sage calyx */
+  .hero__trust li::before { content: ""; flex: none; width: 15px; height: 20px; margin-top: -4px; background: url("/brand/goji-berry-bullet.svg") center / contain no-repeat; }
+  .hero__media { position: relative; padding: 0 0 8% 10%; }
+  .hero__media :global(.hero__photo) { aspect-ratio: 4 / 5; box-shadow: var(--shadow-lg); }
+  .hero__media :global(.hero__bloom) { position: absolute; left: -6%; bottom: -6%; width: 50%; }
+  @media (min-width: 900px) {
+    .hero__inner { grid-template-columns: 1.15fr 1fr; gap: clamp(3rem, 6vw, 6rem); }
+    .hero__media :global(.hero__bloom) { left: -24%; bottom: -4%; }
   }
 
   /* ======================================================
-     About — text only
+     About: petal photo + sprig, text
      ====================================================== */
-  .about-sec {
-    background: var(--bg-content);
-    padding-block: var(--section-y);
+  .about { padding-block: var(--section-y); }
+  .about__inner { display: grid; gap: clamp(3rem, 6vw, 6rem); align-items: center; }
+  .about__media { position: relative; max-width: 520px; }
+  .about__media :global(.about__photo) { aspect-ratio: 4 / 5; }
+  .about__media :global(.about__bloom) { position: absolute; width: 46%; right: -4%; top: -15%; }
+  .about__text { display: grid; gap: var(--space-4); }
+  .about__text h2 { margin-bottom: var(--space-2); }
+  .about__text p + p { margin-top: 0; }
+  .about__text p { max-width: 36em; }
+  @media (min-width: 900px) {
+    .about__inner { grid-template-columns: 6fr 5fr; }
+    .about__media { justify-self: end; width: 100%; }
+    .about__media :global(.about__bloom) { width: 46%; right: auto; left: -12%; top: -16%; }
   }
-  .about-sec__inner {
-    max-width: var(--container-narrow);
-  }
-  .about-sec__inner h2 { margin: var(--space-2) 0 var(--space-5); }
-  .about-sec__body {
-    display: grid;
-    gap: var(--space-4);
-  }
-  @media (min-width: 640px) {
-    .about-sec__body {
-      grid-template-columns: 1fr 1fr;
-      gap: var(--space-6);
-    }
-    /* Side by side: cancel the stacked p + p top margin so both
-       columns start at the same height. */
-    .about-sec__body p + p { margin-top: 0; }
-  }
-  .about-sec__inner p { color: var(--text-muted); }
 
   /* ======================================================
-     Services section
+     Services
      ====================================================== */
-  .services-sec {
-    background: var(--bg-page);
-    padding-block: var(--section-y);
-  }
-
-  /* Service cards carousel (3-up on desktop, swipe on mobile) */
-  .service-wrap { position: relative; }
-  .service-track {
+  .services { padding-block: var(--section-y); background: var(--bg-raised); border-block: 1px solid var(--rule); }
+  .service-grid {
+    margin-top: var(--space-7);
     display: grid;
     grid-auto-flow: column;
-    grid-auto-columns: 100%;
-    gap: 0 var(--space-5);
+    grid-auto-columns: min(84%, 340px);
+    gap: var(--space-4);
     overflow-x: auto;
     scroll-snap-type: x mandatory;
-    scroll-behavior: smooth;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    padding-bottom: var(--space-2);
+    padding-bottom: var(--space-4);
+    margin-inline: calc(var(--gutter) * -1);
+    padding-inline: var(--gutter);
+    scroll-padding-inline: var(--gutter);
+    scrollbar-width: thin;
   }
-  .service-track::-webkit-scrollbar { display: none; }
-  /* Each card spans six rows (icon, name, meta, price, lead, cta) and inherits
-     the track's row sizing via subgrid, so every row lines up across cards
-     whatever the length of a price note or description. Keep the child count
-     at six (the price row always renders) or the rows drift apart. */
+  @media (min-width: 900px) {
+    .service-grid {
+      grid-auto-flow: row;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: none;
+      grid-auto-rows: auto;
+      overflow: visible;
+      margin-inline: 0;
+      padding-inline: 0;
+      column-gap: var(--space-5);
+    }
+    .service-card { margin-bottom: var(--space-5); }
+  }
+  /* Six shared rows (icon, name, meta, price, description, actions): each card
+     is a subgrid, so the same part starts at the same height in every card. */
+  .service-grid { grid-template-rows: repeat(6, auto); row-gap: 0; }
   .service-card {
     scroll-snap-align: start;
-    display: grid;
     grid-row: span 6;
+    display: grid;
     grid-template-rows: subgrid;
-    row-gap: var(--space-2);
+    row-gap: var(--space-3);
+    align-content: start;
+    padding: var(--space-6) var(--space-5);
     background: var(--bg-content);
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--rule);
     border-radius: var(--radius-md);
-    padding: var(--space-5);
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow 320ms var(--ease), transform 320ms var(--ease);
   }
-  @media (min-width: 640px) {
-    .service-track { grid-auto-columns: calc(50% - var(--space-4)); }
-  }
-  @media (min-width: 960px) {
-    .service-track { grid-auto-columns: calc(33.333% - var(--space-4)); }
-  }
+  .service-card:hover { box-shadow: var(--shadow-md); }
   .service-card__icon {
-    width: 40px;
-    height: 40px;
-    border-radius: var(--radius-sm);
-    background: color-mix(in srgb, var(--color-primary) 9%, transparent);
-    color: var(--color-primary);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: var(--space-1);
+    width: 48px; height: 48px; border-radius: 50%;
+    display: grid; place-items: center;
+    background: var(--blush); color: var(--color-primary);
+    margin-bottom: var(--space-2);
   }
-  .service-card__icon [data-icon] { display: block; }
-  .service-card__name {
-    font-family: var(--font-display);
-    font-size: var(--fs-body);
-    font-weight: var(--weight-semibold);
-    color: var(--text-default);
-  }
-  .service-card__meta {
-    font-size: var(--fs-caption);
-    color: var(--text-muted);
-  }
-  .service-card__lead {
-    font-size: var(--fs-small);
-    color: var(--text-muted);
-    line-height: var(--lh-body);
-  }
-  .service-card__price {
-    font-size: var(--fs-small);
-    color: var(--text-default);
-  }
+  .service-card__name { font-size: 1.125rem; margin: 0; }
+  .service-card__meta { font-size: var(--fs-caption); color: var(--text-muted); margin: 0; }
+  .service-card__price { display: flex; align-items: baseline; gap: var(--space-3); margin: 0; }
   .service-card__price strong {
-    font-family: var(--font-display);
-    font-size: var(--fs-h3, 1.0625rem);
-    font-weight: var(--weight-bold);
-    color: var(--text-default);
+    font-family: var(--font-display); font-variation-settings: var(--font-display-axes);
+    font-size: var(--fs-h3); font-weight: var(--weight-bold); letter-spacing: -0.01em; line-height: 1; color: var(--text-accent);
   }
-  .service-card__price-note {
-    display: block;
-    font-size: var(--fs-caption);
-    color: var(--text-muted);
-    margin-top: 2px;
-  }
-  .service-card__cta {
-    margin-top: auto;
-    padding-top: var(--space-4);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--space-3);
-  }
-  .service-card__cta :global(.service-card__book) {
-    width: 100%;
-    justify-content: center;
-  }
+  .service-card__lead { font-size: var(--fs-small); line-height: 1.6; margin: 0; }
+  .service-card__cta { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-4); margin-top: var(--space-3); align-self: end; }
   .service-card__learn {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-1);
-    font-size: var(--fs-small);
-    font-weight: var(--weight-semibold);
-    color: var(--color-primary);
-    text-decoration: none;
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: var(--fs-small); font-weight: var(--weight-semibold);
+    color: var(--text-accent); text-decoration: none;
   }
-  .service-card__learn [data-icon] {
-    transition: transform var(--dur) var(--ease);
-  }
-  .service-card__learn:hover {
-    text-decoration: underline;
-    text-underline-offset: 0.2em;
-  }
-  .service-card__learn:hover [data-icon] {
-    transform: translateX(3px);
-  }
-
+  .service-card__learn :global(svg) { transition: transform var(--dur) var(--ease); }
+  .service-card__learn:hover :global(svg) { transform: translate(2px, -2px); }
 
   /* ======================================================
-     Care section
+     Conditions accordion
      ====================================================== */
-  .care-sec {
-    background: var(--bg-content);
-    padding-block: var(--section-y);
+  .care { padding-block: var(--section-y); }
+  .care__inner { display: grid; gap: var(--space-7); }
+  .care__all { font-size: var(--fs-small); font-weight: var(--weight-semibold); color: var(--text-accent); }
+  @media (min-width: 900px) {
+    .care__inner { grid-template-columns: 4fr 7fr; gap: var(--space-9); align-items: start; }
+    .care__head { position: sticky; top: 120px; }
   }
-
-  /* ======================================================
-     Shared accordion
-     ====================================================== */
   .accordion { border-top: 1px solid var(--rule); }
   .accordion__item { border-bottom: 1px solid var(--rule); }
-
   .accordion__trigger {
-    display: flex;
-    align-items: center;
-    gap: var(--space-4);
-    padding-block: var(--space-4);
-    cursor: pointer;
-    list-style: none;
-    user-select: none;
+    display: flex; align-items: center; gap: var(--space-4);
+    padding: var(--space-5) 0; cursor: pointer; list-style: none;
   }
   .accordion__trigger::-webkit-details-marker { display: none; }
-
-  .accordion__icon-wrap {
-    flex-shrink: 0;
-    width: 32px;
-    height: 32px;
-    border-radius: var(--radius-sm);
-    background: color-mix(in srgb, var(--color-primary) 9%, transparent);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--color-primary);
-  }
-  .accordion__icon-wrap [data-icon] { display: block; }
-
-  .accordion__info {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    flex: 1;
-    min-width: 0;
-  }
   .accordion__name {
-    font-family: var(--font-display);
-    font-weight: var(--weight-semibold);
-    font-size: var(--fs-body);
-    color: var(--text-default);
+    flex: 1;
+    font-family: var(--font-display); font-variation-settings: var(--font-display-axes);
+    font-size: 1rem; font-weight: var(--weight-display); letter-spacing: -0.01em; line-height: 1.3;
   }
-  .accordion__trigger--care .accordion__name { flex: 1; }
-
-  .accordion__meta {
-    font-family: var(--font-body);
-    font-size: var(--fs-caption);
-    color: var(--text-muted);
-  }
-
-  /* + / × toggle */
+  .accordion__count { font-size: var(--fs-caption); color: var(--text-muted); }
   .accordion__toggle {
-    flex-shrink: 0;
-    width: 20px;
-    height: 20px;
-    position: relative;
-    margin-left: auto;
+    position: relative; flex: none; width: 36px; height: 36px; border-radius: 50%;
+    border: 1.5px solid var(--color-border-strong);
+    transition: background var(--dur) var(--ease), transform 400ms var(--ease);
   }
-  .accordion__toggle::before,
-  .accordion__toggle::after {
-    content: "";
-    position: absolute;
-    background: var(--color-primary);
-    border-radius: 2px;
-    transition: transform var(--dur) var(--ease);
+  .accordion__toggle::before, .accordion__toggle::after {
+    content: ""; position: absolute; left: 50%; top: 50%; width: 12px; height: 1.5px;
+    background: var(--text-default); transform: translate(-50%, -50%);
   }
-  .accordion__toggle::before {
-    width: 14px; height: 1.5px;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-  }
-  .accordion__toggle::after {
-    width: 1.5px; height: 14px;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-  }
-  details[open] .accordion__toggle::after {
-    transform: translate(-50%, -50%) rotate(90deg);
-  }
-
-  .accordion__body {
-    display: grid;
-    grid-template-rows: 0fr;
-    transition: grid-template-rows 0.28s var(--ease);
-    overflow: hidden;
-  }
-  details[open] .accordion__body { grid-template-rows: 1fr; }
-  .accordion__body-inner {
-    overflow: hidden;
-    padding-bottom: var(--space-5);
-  }
-  .accordion__body-inner p {
-    font-family: var(--font-body);
-    font-size: var(--fs-small);
-    color: var(--text-muted);
-    line-height: var(--lh-body);
-    max-width: 64ch;
-  }
-
-  /* ---- Care area rows ---- */
-  /* Stylized berry oval, tilted 45deg right (matches the marquee marker) */
-  .care-berry {
-    display: inline-block;
-    width: 14px;
-    height: 24px;
-    border-radius: 50%;
-    background: var(--color-primary);
-    transform: rotate(45deg);
-    flex-shrink: 0;
-  }
-
-  /* Conditions list — indented, no extra bullet icon */
-  .care-list {
-    list-style: none;
-    padding: 0;
-    margin: 0 0 var(--space-3) var(--space-5);
-  }
-  .care-list li {
-    display: flex;
-    align-items: baseline;
-    gap: 0.5em;
-    font-family: var(--font-body);
-    font-size: var(--fs-small);
-    color: var(--text-muted);
-    padding-block: var(--space-1);
-    line-height: var(--lh-body);
-  }
-  /* Dash as a fixed marker (flex item) so every row's text starts at the
-     same column — and wrapped lines hang-indent under the text, not the dash.
-     Flex also drops the stray whitespace node Astro emits before linked items,
-     which otherwise nudged linked rows a few px right of plain-text rows. */
-  .care-list li::before {
-    content: "–";
-    color: var(--color-primary);
-    font-weight: var(--weight-semibold);
-    flex-shrink: 0;
-  }
-  .care-list a {
-    color: inherit;
-    text-decoration: none;
-    text-decoration-thickness: 1px;
-    text-underline-offset: 0.2em;
-    transition: color var(--dur);
-  }
-  /* Linked condition items: text + a small "read more" arrow that trails
-     the last word inline (so it stays put when the text wraps). */
-  .care-list__link:hover { color: var(--color-primary); }
-  .care-list__arrow {
-    color: var(--color-primary);
-    font-size: 0.85em;
-    margin-left: 0.3em;
-    display: inline-block;
-    transition: transform var(--dur) var(--ease);
-  }
-  .care-list__link:hover .care-list__arrow { transform: translateX(3px); }
-
-  .care-link {
-    font-family: var(--font-body);
-    font-size: var(--fs-small);
-    font-weight: var(--weight-medium);
-    color: var(--color-primary);
-    text-decoration-thickness: 1px;
-    text-underline-offset: 0.2em;
-    margin-left: var(--space-5);
-  }
-  .care-link::after { content: " \2192"; }
+  .accordion__toggle::after { transform: translate(-50%, -50%) rotate(90deg); transition: transform 400ms var(--ease); }
+  details[open] > summary .accordion__toggle { background: var(--color-linen-deep); }
+  details[open] > summary .accordion__toggle::after { transform: translate(-50%, -50%) rotate(0deg); }
+  summary:hover .accordion__toggle { border-color: var(--text-default); }
+  .accordion__body { padding: 0 0 var(--space-6); }
+  .care-list { list-style: none; padding: 0; display: grid; gap: var(--space-2) var(--space-6); }
+  @media (min-width: 640px) { .care-list { grid-template-columns: 1fr 1fr; } }
+  .care-list li { position: relative; padding-left: 20px; font-size: var(--fs-small); line-height: 1.55; }
+  .care-list li::before { content: ""; position: absolute; left: 2px; top: 0.55em; width: 7px; height: 9px; border-radius: 50% 50% 50% 50% / 58% 58% 42% 42%; background: var(--berry); }
+  .care-list__link { color: var(--text-default); text-decoration-color: var(--color-border-strong); }
+  .care-list__link:hover { color: var(--text-accent); text-decoration-color: currentColor; }
 
   /* ======================================================
-     Stats strip — 4 items, 2×2 on mobile, 4-col on desktop
+     Stats
      ====================================================== */
-  .stats-strip {
-    background: var(--bg-page);
-    border-top: 1px solid var(--rule);
-    border-bottom: 1px solid var(--rule);
-    padding-block: var(--space-7);
+  .stats { padding-block: 0 var(--section-y); }
+  .stats__grid { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--rule); margin: 0; }
+  .stat { display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-6) var(--space-4) var(--space-6) 0; border-bottom: 1px solid var(--rule); }
+  .stat:nth-child(odd) { border-right: 1px solid var(--rule); }
+  .stat:nth-child(even) { padding-left: var(--space-5); }
+  .stat__value {
+    order: -1; margin: 0;
+    font-family: var(--font-display); font-variation-settings: var(--font-display-axes);
+    font-size: clamp(1.75rem, 1.3rem + 1.8vw, 2.5rem); font-weight: var(--weight-bold); line-height: 1;
+    letter-spacing: -0.035em; color: var(--text-accent);
   }
-  .stats-strip__inner {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--space-6) var(--space-4);
-    text-align: center;
-  }
-  @media (min-width: 640px) {
-    .stats-strip__inner {
-      grid-template-columns: repeat(4, 1fr);
-    }
-  }
-  .stat-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--space-1);
-  }
-  .stat-item__value {
-    font-family: var(--font-display);
-    font-weight: var(--weight-bold);
-    font-size: clamp(1.75rem, 1.3rem + 1.8vw, 2.5rem);
-    color: var(--color-primary);
-    line-height: 1;
-    letter-spacing: var(--tracking-tight);
-    font-variant-numeric: tabular-nums;
-  }
-  .stat-item__label {
-    font-family: var(--font-display);
-    font-weight: var(--weight-semibold);
-    font-size: var(--fs-small);
-    color: var(--text-default);
-  }
-  .stat-item__caption {
-    font-family: var(--font-body);
-    font-size: var(--fs-caption);
-    color: var(--text-muted);
+  .stat__label { font-size: var(--fs-small); font-weight: var(--weight-semibold); }
+  .stat__caption { margin: 0; font-size: var(--fs-caption); color: var(--text-muted); }
+  @media (min-width: 900px) {
+    .stats__grid { grid-template-columns: repeat(4, 1fr); border-bottom: 1px solid var(--rule); }
+    .stat, .stat:nth-child(odd), .stat:nth-child(even) { padding: var(--space-7) var(--space-6); border-bottom: 0; border-right: 1px solid var(--rule); }
+    .stat:first-child { padding-left: 0; }
+    .stat:last-child { border-right: 0; }
   }
 
   /* ======================================================
-     Team carousel
+     Team
      ====================================================== */
-  .team-wrap {
-    position: relative;
-  }
-  .team-track {
-    display: flex;
+  .team { padding-block: 0 var(--section-y); }
+  .team-grid {
+    margin-top: var(--space-7);
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: min(72%, 280px);
     gap: var(--space-5);
     overflow-x: auto;
     scroll-snap-type: x mandatory;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    padding-bottom: var(--space-1);
+    margin-inline: calc(var(--gutter) * -1);
+    padding: 0 var(--gutter) var(--space-4);
+    scroll-padding-inline: var(--gutter);
+    scrollbar-width: thin;
   }
-  .team-track::-webkit-scrollbar { display: none; }
-  .team-slide {
-    flex: 0 0 100%;
-    scroll-snap-align: center;
+  @media (min-width: 900px) {
+    .team-grid { grid-auto-flow: row; grid-template-columns: repeat(4, 1fr); overflow: visible; margin-inline: 0; padding-inline: 0; }
   }
+  .person { scroll-snap-align: start; display: flex; flex-direction: column; gap: var(--space-2); color: var(--text-default); text-decoration: none; }
+  .person :global(.person__photo) { aspect-ratio: 4 / 5; margin-bottom: var(--space-3); }
+  .person :global(.person__photo img) { transition: transform 1100ms var(--ease); }
+  .person:hover :global(.person__photo img) { transform: scale(1.035); }
+  .person__role { font-size: var(--fs-small); font-weight: var(--weight-semibold); color: var(--text-accent); }
+  .person__name { font-size: 1.125rem; margin: 0; }
+  .person:hover .person__name { color: var(--text-accent); }
+  .person__interests { font-size: var(--fs-caption); line-height: 1.6; color: var(--text-muted); margin-top: var(--space-2); padding-top: var(--space-3); border-top: 1px solid var(--rule); }
 
-  /* Translucent circular arrows, overlaid on the slides (mobile only) */
-  .carousel-btn {
-    position: absolute;
-    top: 38%;
-    transform: translateY(-50%);
-    z-index: 2;
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    border: none;
-    background: color-mix(in srgb, var(--color-ink) 55%, transparent);
-    backdrop-filter: blur(3px);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #fff;
-    transition: background var(--dur) var(--ease), opacity var(--dur) var(--ease);
-  }
-  .carousel-btn--prev { left: var(--space-3); }
-  .carousel-btn--next { right: var(--space-3); }
-  .carousel-btn:hover:not(:disabled) {
-    background: color-mix(in srgb, var(--color-primary) 80%, transparent);
-  }
-  .carousel-btn:disabled { opacity: 0; pointer-events: none; }
-
-  .team-dots {
-    display: flex;
-    gap: var(--space-2);
-    justify-content: center;
-    margin-top: var(--space-5);
-  }
-  .team-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--color-border-strong);
-    transition: background var(--dur);
-  }
-  .team-dot--active { background: var(--color-primary); }
-
-  /* Desktop: static grid, no carousel chrome. Two columns on tablets so four
-     cards read as a 2x2 rather than a wrapped 3+1; one column per person from 1024px. */
-  @media (min-width: 720px) {
-    .team-track {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      overflow: visible;
-      scroll-snap-type: none;
-    }
-    .team-slide { flex: none; }
-    .carousel-btn,
-    .team-dots { display: none; }
-  }
-  @media (min-width: 1024px) {
-    .team-track { grid-template-columns: repeat(var(--team-count, 3), 1fr); }
+  /* ======================================================
+     Every stage of growth
+     ====================================================== */
+  .growth { padding-block: var(--section-y); background: var(--blush); }
+  .growth__inner { display: grid; gap: var(--space-7); align-items: center; }
+  .growth__stages { display: grid; grid-template-columns: repeat(3, 1fr); align-items: end; max-width: 620px; }
+  /* each painting fills only the middle of its square, so let them overlap */
+  .growth__stages > * { width: 140%; margin-inline: -20%; }
+  .growth__stages > :nth-child(2) { transform: translateY(-12%); }
+  .growth__text { display: grid; gap: var(--space-4); }
+  .growth__text p + p { margin-top: 0; }
+  .growth__text p { max-width: 34em; }
+  @media (min-width: 900px) {
+    .growth__inner { grid-template-columns: 1fr 1fr; gap: var(--space-9); }
+    .growth__stages > * { width: 165%; margin-inline: -32.5%; }
   }
 
   /* ======================================================
-     Clinic space
+     Reviews
      ====================================================== */
-  .space-sec {
-    background: var(--bg-page);
-    padding-block: var(--section-y);
+  .reviews { padding-block: var(--section-y); }
+  .reviews__head { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: var(--space-5); }
+  .reviews__rating { display: flex; align-items: center; gap: var(--space-3); font-size: var(--fs-small); }
+  .reviews__rating a { color: var(--text-default); }
+  .reviews__wrap { margin-top: var(--space-7); }
+  .reviews__track {
+    display: grid; grid-auto-flow: column; grid-auto-columns: min(86%, 420px); gap: var(--space-5);
+    overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none;
+    margin-inline: calc(var(--gutter) * -1); padding-inline: var(--gutter); scroll-padding-inline: var(--gutter);
   }
-  .space-sec__inner {
-    display: grid;
-    gap: var(--space-6);
-    align-items: center;
+  .reviews__track::-webkit-scrollbar { display: none; }
+  .review {
+    scroll-snap-align: start; margin: 0; display: flex; flex-direction: column; gap: var(--space-4);
+    padding: var(--space-6); background: var(--bg-raised); border: 1px solid var(--rule); border-radius: var(--radius-md);
   }
-  @media (min-width: 720px) {
-    .space-sec__inner {
-      grid-template-columns: 5fr 6fr;
-      gap: var(--space-8);
-    }
+  .review__stars { color: var(--text-accent); font-size: var(--fs-caption); letter-spacing: 2px; }
+  .review__text {
+    flex: 1; margin: 0;
+    font-family: var(--font-body);
+    font-size: var(--fs-body); line-height: 1.65; font-weight: var(--weight-regular);
   }
-  .space-sec__text h2 { margin: 0 0 var(--space-4); }
-  .space-sec__text p { color: var(--text-muted); }
-  .space-sec__text p + p { margin-top: var(--space-4); }
+  .review__name { font-size: var(--fs-caption); font-weight: var(--weight-semibold); color: var(--text-muted); }
+  .reviews__nav { display: flex; gap: var(--space-3); justify-content: flex-end; margin-top: var(--space-5); }
+  .round-btn {
+    width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center;
+    border: 1.5px solid var(--color-border-strong); background: transparent; color: var(--text-default); cursor: pointer;
+    transition: background var(--dur) var(--ease), border-color var(--dur) var(--ease);
+  }
+  .round-btn:hover:not(:disabled) { background: var(--color-linen-deep); border-color: var(--text-default); }
+  .round-btn:disabled { opacity: 0.35; cursor: default; }
+  .reviews__disclaimer { margin-top: var(--space-5); font-size: var(--fs-caption); color: var(--text-muted); }
+  .reviews__disclaimer a { color: inherit; }
 
   /* ======================================================
      FAQ
      ====================================================== */
-  .faq-list {
-    margin-top: var(--space-7);
-    display: flex;
-    flex-direction: column;
-    border-top: 1px solid var(--rule);
+  .faq { padding-block: 0 var(--section-y); }
+  .faq__inner { display: grid; gap: var(--space-7); }
+  @media (min-width: 900px) { .faq__inner { grid-template-columns: 4fr 7fr; gap: var(--space-9); align-items: start; } }
+  .faq__list { border-top: 1px solid var(--rule); }
+  .faq__item { border-bottom: 1px solid var(--rule); }
+  .faq__q {
+    display: flex; align-items: center; justify-content: space-between; gap: var(--space-5);
+    padding: var(--space-5) 0; cursor: pointer; list-style: none;
+    font-family: var(--font-display); font-variation-settings: var(--font-display-axes);
+    font-size: var(--fs-body); font-weight: var(--weight-display); letter-spacing: -0.005em; line-height: 1.4;
   }
-  .faq-item {
-    border-bottom: 1px solid var(--rule);
-  }
-  .faq-q {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-5);
-    padding-block: var(--space-5);
-    font-family: var(--font-display);
-    font-size: var(--fs-body);
-    font-weight: var(--weight-semibold);
-    color: var(--text-default);
-    cursor: pointer;
-    list-style: none;
-    user-select: none;
-  }
-  .faq-q::-webkit-details-marker { display: none; }
-  .faq-toggle {
-    flex-shrink: 0;
-    width: 20px;
-    height: 20px;
-    position: relative;
-  }
-  .faq-toggle::before,
-  .faq-toggle::after {
-    content: "";
-    position: absolute;
-    background: var(--color-primary);
-    border-radius: 2px;
-    transition: transform 0.25s var(--ease);
-  }
-  .faq-toggle::before { width: 14px; height: 1.5px; top: 50%; left: 50%; transform: translate(-50%, -50%); }
-  .faq-toggle::after  { width: 1.5px; height: 14px; top: 50%; left: 50%; transform: translate(-50%, -50%); }
-  details[open] .faq-toggle::after { transform: translate(-50%, -50%) rotate(90deg); }
-  .faq-a {
-    overflow: hidden;
-    padding-bottom: var(--space-5);
-  }
-  .faq-a p {
-    font-size: var(--fs-small);
-    color: var(--text-muted);
-    line-height: var(--lh-body);
-    max-width: 68ch;
-  }
+  .faq__q::-webkit-details-marker { display: none; }
+  .faq__a { padding: 0 var(--space-8) var(--space-5) 0; }
+  .faq__a p { max-width: 38em; }
 
   /* ======================================================
-     Shared helpers
+     Promise (burgundy) + contact
      ====================================================== */
-  .img-ph {
-    width: 100%;
-    background: color-mix(in srgb, var(--color-linen-deep) 70%, var(--bg-page));
-    border: 1.5px dashed var(--color-border-strong);
-    border-radius: var(--radius-md);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  .promise-sec { padding-block: 0 var(--section-y); }
+  .promise {
+    margin: 0; overflow: hidden; border-radius: var(--radius-lg);
+    background: var(--bg-closing); color: var(--text-on-dark);
+    padding: clamp(3.5rem, 2rem + 6vw, 7.5rem) clamp(1.5rem, 1rem + 5vw, 6rem);
+    display: grid; gap: var(--space-6); justify-items: start;
   }
-  .img-ph span {
-    font-family: var(--font-body);
-    font-size: var(--fs-caption);
-    color: var(--text-muted);
-    text-align: center;
-    padding: var(--space-5);
+  .promise__logo { height: 84px; width: auto; max-width: none; margin: -22px -16px -26px; }
+  .promise__text {
+    margin: 0; max-width: 22em;
+    font-family: var(--font-display); font-variation-settings: var(--font-display-axes);
+    font-size: clamp(1.375rem, 1.1rem + 1.2vw, 1.875rem); line-height: 1.3; font-weight: var(--weight-medium); letter-spacing: -0.02em;
   }
-
-  .section-head { max-width: 56ch; margin-bottom: var(--space-7); }
-  .section-head h2 { margin-top: var(--space-2); }
-  .section-head__sub { margin-top: var(--space-3); color: var(--text-muted); }
-
-  /* Two-column section layout (header left, accordion right) */
-  .sec-two-col {
-    display: grid;
-    gap: var(--space-6) var(--space-8);
-    grid-template-columns: 1fr;
-  }
-  /* Grid gap handles all spacing — remove header bottom margin */
-  .sec-two-col .section-head { margin-bottom: 0; }
-  .sec-two-col .faq-list { margin-top: 0; }
-  @media (min-width: 720px) {
-    .sec-two-col {
-      grid-template-columns: 1fr 1.6fr;
-      align-items: start;
-      gap: 0 var(--space-10);
-    }
-    .sec-two-col .section-head {
-      position: sticky;
-      top: calc(68px + var(--space-6));
-    }
-  }
-
-  .grid { display: grid; gap: var(--space-5); }
-  .grid--3 { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
-  @media (min-width: 900px) {
-    .grid--3 { grid-template-columns: repeat(3, 1fr); }
-  }
-
-  /* ======================================================
-     Google Reviews carousel
-     ====================================================== */
-  .reviews-sec {
-    background: var(--bg-content);
-    padding-block: var(--section-y);
-    border-top: 1px solid var(--rule);
-  }
-  .reviews-header {
-    margin-bottom: var(--space-6);
-  }
-  .reviews-title {
-    margin: var(--space-2) 0 var(--space-5);
-  }
-  .reviews-header .reviews-rating {
-    /* sits below the title on all sizes */
-  }
-  .reviews-rating {
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
-  }
-  .reviews-stars {
-    color: #f5a623;
-    font-size: 1.2rem;
-    letter-spacing: 0.05em;
-  }
-  .reviews-score {
-    font-family: var(--font-display);
-    font-size: var(--fs-h2);
-    font-weight: var(--weight-bold);
-    color: var(--text-default);
-    line-height: 1;
-  }
-  .reviews-source {
-    font-family: var(--font-body);
-    font-size: var(--fs-small);
-    color: var(--text-muted);
-    text-decoration: underline;
-    text-underline-offset: 0.2em;
-  }
-
-  /* --- Carousel track --- */
-  .reviews-wrap {
-    position: relative;
-  }
-  .reviews-track {
-    display: flex;
-    gap: var(--space-5);
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    scroll-behavior: smooth;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    padding-bottom: var(--space-2);
-  }
-  .reviews-track::-webkit-scrollbar { display: none; }
-
-  .review-card {
-    flex: 0 0 calc(100% - var(--space-5));
-    scroll-snap-align: start;
-    background: var(--bg-page);
-    border-radius: var(--radius-md);
-    padding: var(--space-5);
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-3);
-    border: 1px solid var(--color-border);
-  }
-  @media (min-width: 640px) {
-    .review-card { flex: 0 0 calc(50% - var(--space-4)); }
-  }
-  @media (min-width: 960px) {
-    .review-card { flex: 0 0 calc(33.333% - var(--space-4)); }
-  }
-
-  .review-card__stars {
-    color: #f5a623;
-    font-size: 0.9rem;
-    letter-spacing: 0.05em;
-  }
-  .review-card__text {
-    font-family: var(--font-body);
-    font-size: var(--fs-small);
-    color: var(--text-muted);
-    line-height: var(--lh-body);
-    flex: 1;
-  }
-  .review-card__footer {
-    padding-top: var(--space-3);
-    border-top: 1px solid var(--rule);
-    margin-top: auto;
-  }
-  .review-card__name {
-    font-family: var(--font-display);
-    font-size: var(--fs-small);
-    font-weight: var(--weight-semibold);
-    color: var(--text-default);
-  }
-
-  /* --- Arrow buttons (shared by services + reviews) ---
-     Mobile: translucent, overlaid on the track edges (matches the team
-     carousel). Desktop (>=640px): solid, parked just outside the track. */
-  .reviews-btn {
-    display: flex;
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    border: none;
-    background: color-mix(in srgb, var(--color-ink) 55%, transparent);
-    backdrop-filter: blur(3px);
-    color: #fff;
-    cursor: pointer;
-    align-items: center;
-    justify-content: center;
-    z-index: 2;
-    transition: background var(--dur) var(--ease), opacity var(--dur) var(--ease);
-  }
-  .reviews-btn--prev { left: var(--space-3); }
-  .reviews-btn--next { right: var(--space-3); }
-  .reviews-btn:hover:not(:disabled) {
-    background: color-mix(in srgb, var(--color-primary) 80%, transparent);
-  }
-  .reviews-btn:disabled { opacity: 0; pointer-events: none; }
-  @media (min-width: 640px) {
-    .reviews-btn {
-      background: color-mix(in srgb, var(--color-ink) 80%, transparent);
-      backdrop-filter: none;
-      color: var(--color-linen);
-    }
-    .reviews-btn:hover:not(:disabled) { background: var(--color-ink); }
-    .reviews-btn:disabled { opacity: 0.3; pointer-events: auto; }
-    .reviews-btn--prev { left: calc(-1 * var(--space-7)); }
-    .reviews-btn--next { right: calc(-1 * var(--space-7)); }
-  }
-
-  /* Carousel dots (mobile only) — shared by services + reviews */
-  .track-dots {
-    display: flex;
-    gap: var(--space-2);
-    justify-content: center;
-    margin-top: var(--space-5);
-  }
-  .track-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--color-border-strong);
-    transition: background var(--dur);
-  }
-  .track-dot--active { background: var(--color-primary); }
-  @media (min-width: 640px) {
-    .track-dots { display: none; }
-  }
-
-  /* --- Disclaimer --- */
-  .reviews-disclaimer {
-    margin-top: var(--space-5);
-    font-size: var(--fs-caption);
-    color: var(--text-muted);
-    text-align: center;
-  }
-  .reviews-disclaimer a {
-    color: inherit;
-    text-decoration: underline;
-    text-underline-offset: 0.2em;
-  }
+  .promise__text::before { content: "\201C"; display: block; font-size: 2.2em; line-height: 0.6; height: 0.42em; color: var(--clay); }
+  .promise__by { font-size: var(--fs-small); color: var(--text-on-dark-soft); }
+  .promise__actions { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+  .promise :global(.promise__book) { color: var(--text-on-dark); border-color: color-mix(in srgb, var(--color-linen) 50%, transparent); }
+  .promise :global(.promise__book:hover) { background: color-mix(in srgb, var(--color-linen) 10%, transparent); color: var(--text-on-dark); border-color: var(--color-linen); }
+  .promise :focus-visible { outline-color: var(--color-linen); }
 </style>

@@ -765,7 +765,7 @@
   /* ---------- Non-React pages (Astro): <div data-gj-bloom="ripen">, data-gj-wash, data-gj-veil, data-gj-reveal, .gj-mark ---------- */
   function enhance(root) {
     root = root || D;
-    root.querySelectorAll("[data-gj-bloom]").forEach(function (el) { paint(el, { preset: el.getAttribute("data-gj-bloom") || "ripen", seed: +el.getAttribute("data-seed") || 3, loop: el.hasAttribute("data-loop") }); });
+    root.querySelectorAll("[data-gj-bloom]").forEach(function (el) { paint(el, { preset: el.getAttribute("data-gj-bloom") || "ripen", seed: +el.getAttribute("data-seed") || 3, loop: el.hasAttribute("data-loop"), delay: +el.getAttribute("data-delay") || 0 }); });
     root.querySelectorAll("[data-gj-wash]").forEach(function (el) { paint(el, { preset: el.getAttribute("data-gj-wash") || "dawn", seed: +el.getAttribute("data-seed") || 5 }); });
     root.querySelectorAll("[data-gj-veil]").forEach(function (el) { veil(el); });
     root.querySelectorAll("[data-gj-reveal], .gj-reveal, .gj-mark").forEach(function (el) { onVisible(el, function () { el.classList.add("is-in"); }, 0.15); });

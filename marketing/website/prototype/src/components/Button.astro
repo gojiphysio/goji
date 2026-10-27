@@ -3,8 +3,10 @@
  * Button / CTA.
  * - Pass `slug` (a tracked CtaSlug) so the link routes through the
  *   go.gojiphysio.com redirector, OR pass a plain `href` for in-page anchors.
- * - variants: primary (Deep Red fill), secondary (outline Earth Brown), ghost,
- *   whatsapp (WhatsApp-green fill with the WhatsApp glyph — for web-wa CTAs).
+ * - variants: primary (Deep Red fill), secondary (outline), ghost (underlined
+ *   text link), whatsapp (the primary look plus the WhatsApp glyph, for web-wa
+ *   CTAs; never WhatsApp green, which clashes with burgundy), light (linen fill
+ *   for burgundy surfaces).
  * - `berry` prepends the signature berry dot (ignored on the whatsapp variant,
  *   which shows the WhatsApp icon instead).
  */
@@ -13,7 +15,7 @@ import { cta, type CtaSlug } from "../lib/links.ts";
 interface Props {
   slug?: CtaSlug;
   href?: string;
-  variant?: "primary" | "secondary" | "ghost" | "whatsapp";
+  variant?: "primary" | "secondary" | "ghost" | "whatsapp" | "light";
   size?: "md" | "lg";
   berry?: boolean;
   class?: string;
@@ -51,36 +53,43 @@ const isWhatsApp = variant === "whatsapp";
   .btn {
     display: inline-flex;
     align-items: center;
-    gap: var(--space-2);
+    justify-content: center;
+    gap: 10px;
     font-family: var(--font-body);
     font-weight: var(--weight-semibold);
-    line-height: 1;
+    letter-spacing: 0.01em;
+    line-height: 1.2;
     text-decoration: none;
     border-radius: var(--radius-pill);
     border: 1.5px solid transparent;
     cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
     transition: background-color var(--dur) var(--ease),
       color var(--dur) var(--ease), border-color var(--dur) var(--ease),
       transform var(--dur) var(--ease);
   }
-  .btn:hover {
-    transform: translateY(-1px);
+  .btn:active {
+    transform: scale(0.98);
   }
 
   .btn--md {
     font-size: var(--fs-small);
-    padding: 0.7rem 1.25rem;
+    min-height: 44px;
+    padding: 0 1.25rem;
   }
   .btn--lg {
     font-size: var(--fs-body);
-    padding: 0.9rem 1.65rem;
+    min-height: 52px;
+    padding: 0 1.65rem;
   }
 
-  .btn--primary {
+  .btn--primary,
+  .btn--whatsapp {
     background-color: var(--cta-bg);
     color: var(--cta-text);
   }
-  .btn--primary:hover {
+  .btn--primary:hover,
+  .btn--whatsapp:hover {
     background-color: var(--cta-bg-hover);
     color: var(--cta-text);
   }
@@ -88,30 +97,37 @@ const isWhatsApp = variant === "whatsapp";
   .btn--secondary {
     background-color: transparent;
     color: var(--text-default);
-    border-color: var(--color-ink);
+    border-color: var(--color-border-strong);
   }
   .btn--secondary:hover {
-    background-color: var(--color-ink);
-    color: var(--color-linen);
+    background-color: var(--color-linen-deep);
+    border-color: var(--text-default);
+    color: var(--text-default);
   }
 
   .btn--ghost {
     background-color: transparent;
-    color: var(--color-primary);
-    padding-inline: 0.25rem;
+    color: var(--text-default);
+    padding-inline: 2px;
+    border-radius: 0;
+    background-image: linear-gradient(currentColor, currentColor);
+    background-size: 100% 1px;
+    background-position: 0 calc(100% - 10px);
+    background-repeat: no-repeat;
   }
   .btn--ghost:hover {
-    color: var(--color-primary-deep);
+    color: var(--text-accent);
   }
 
-  .btn--whatsapp {
-    background-color: var(--color-whatsapp);
-    color: #ffffff;
+  .btn--light {
+    background-color: var(--color-linen);
+    color: var(--color-burgundy);
   }
-  .btn--whatsapp:hover {
-    background-color: var(--color-whatsapp-hover);
-    color: #ffffff;
+  .btn--light:hover {
+    background-color: #ffffff;
+    color: var(--color-burgundy);
   }
+
   .btn__wa-icon {
     width: 1.15em;
     height: 1.15em;
@@ -120,13 +136,12 @@ const isWhatsApp = variant === "whatsapp";
   }
 
   .btn__berry {
-    width: 0.6em;
-    height: 0.6em;
-    border-radius: 50%;
+    width: 7px;
+    height: 9px;
+    border-radius: 50% 50% 50% 50% / 58% 58% 42% 42%;
     background-color: currentColor;
     flex: none;
   }
-  /* On the filled primary the dot reads better in linen than the text colour. */
   .btn--primary .btn__berry {
     background-color: var(--color-linen);
   }

@@ -1,0 +1,13 @@
+---
+/**
+ * PaintedWord — a watercolour brushstroke painted under one word of a heading
+ * as it scrolls into view. One per heading, at most one per screen.
+ */
+interface Props {
+  seed?: number;
+}
+const { seed = 4 } = Astro.props;
+const id = `gjm-${Math.random().toString(36).slice(2, 8)}`;
+---
+
+<span class="gj-mark"><slot /><svg class="gj-mark__svg" viewBox="0 0 200 20" preserveAspectRatio="none" aria-hidden="true" focusable="false"><defs><filter id={id} x="-5%" y="-80%" width="110%" height="260%"><feTurbulence type="fractalNoise" baseFrequency="0.05 0.35" numOctaves="2" seed={seed} /><feDisplacementMap in="SourceGraphic" scale="5" /><feGaussianBlur stdDeviation="0.35" /></filter></defs><path class="gj-mark__bleed" d="M3 12.5 C 50 7.5, 120 15, 197 9" stroke-width="15" pathLength="1" filter={`url(#${id})`} /><path class="gj-mark__core" d="M6 13 C 60 9.5, 130 14, 194 10.5" stroke-width="11" pathLength="1" filter={`url(#${id})`} /></svg></span>
