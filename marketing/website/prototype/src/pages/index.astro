@@ -547,7 +547,7 @@ const reviews = [
   }
   .hero__text { display: grid; gap: var(--space-4); align-content: center; }
   .hero__tagline { margin-bottom: var(--space-2) !important; }
-  .hero__h1 { font-family: var(--font-body); font-size: var(--fs-body); line-height: 1.45; font-weight: var(--weight-semibold); letter-spacing: 0; margin: 0; }
+  .hero__h1 { font-family: var(--font-display); font-variation-settings: var(--font-display-axes); font-size: var(--fs-body); line-height: 1.45; font-weight: var(--weight-semibold); letter-spacing: 0; margin: 0; }
   .hero__lead { color: var(--text-muted); }
   .hero__tagline {
     font-family: var(--font-display);
@@ -611,8 +611,9 @@ const reviews = [
     margin-inline: calc(var(--gutter) * -1);
     padding-inline: var(--gutter);
     scroll-padding-inline: var(--gutter);
-    scrollbar-width: thin;
+    scrollbar-width: none;
   }
+  .service-grid::-webkit-scrollbar { display: none; }
   @media (min-width: 900px) {
     .service-grid {
       grid-auto-flow: row;
@@ -654,7 +655,7 @@ const reviews = [
   .service-card__meta { font-size: var(--fs-caption); color: var(--text-muted); margin: 0; }
   .service-card__price { display: flex; align-items: baseline; gap: var(--space-3); margin: 0; }
   .service-card__price strong {
-    font-family: var(--font-display); font-variation-settings: var(--font-display-axes);
+    font-family: var(--font-body); font-variation-settings: var(--font-body-axes);
     font-size: var(--fs-h3); font-weight: var(--weight-bold); letter-spacing: -0.01em; line-height: 1; color: var(--text-accent);
   }
   .service-card__lead { font-size: var(--fs-small); line-height: 1.6; margin: 0; }
@@ -751,8 +752,9 @@ const reviews = [
     margin-inline: calc(var(--gutter) * -1);
     padding: 0 var(--gutter) var(--space-4);
     scroll-padding-inline: var(--gutter);
-    scrollbar-width: thin;
+    scrollbar-width: none;
   }
+  .team-grid::-webkit-scrollbar { display: none; }
   @media (min-width: 900px) {
     .team-grid { grid-auto-flow: row; grid-template-columns: repeat(4, 1fr); overflow: visible; margin-inline: 0; padding-inline: 0; }
   }
@@ -849,7 +851,7 @@ const reviews = [
   .promise__logo { height: 84px; width: auto; max-width: none; margin: -22px -16px -26px; }
   .promise__text {
     margin: 0; max-width: 22em;
-    font-family: var(--font-display); font-variation-settings: var(--font-display-axes);
+    font-family: var(--font-body); font-variation-settings: var(--font-body-axes);
     font-size: clamp(1.375rem, 1.1rem + 1.2vw, 1.875rem); line-height: 1.3; font-weight: var(--weight-medium); letter-spacing: -0.02em;
   }
   .promise__text::before { content: "\201C"; display: block; font-size: 2.2em; line-height: 0.6; height: 0.42em; color: var(--clay); }

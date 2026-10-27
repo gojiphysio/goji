@@ -59,8 +59,8 @@
   --focus-ring: var(--color-accent);
 
   /* ---- Typography ---- */
-  /* Plus Jakarta Sans SemiBold for display (brand guideline); Fraunces for body
-     text, the design system's serif, with its soft axis on so the serifs echo
+  /* Plus Jakarta Sans SemiBold for headings and buttons (brand guideline); Fraunces for everything else
+     (body, nav, labels, prices, quotes), the design system's serif, soft axis on to echo
      the rounded GOJI wordmark. Optical sizing keeps it readable small. Never italic. */
   --font-display: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-display-axes: normal;
