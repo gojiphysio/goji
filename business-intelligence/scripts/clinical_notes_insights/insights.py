@@ -481,19 +481,22 @@ def mode_spot_check(plato: Plato, fields: Fields, n_patients: int) -> None:
             "leaking/urgency reported", "diastasis measured", "pain location", "main goal",
             "active-ageing goal"]
     short = ["pp first", "trimester", "birth", "leak", "DRA", "pain", "goal", "60+ goal"]
-    print("patient_id | " + " | ".join(short))
+    print("patient_id | notes | " + " | ".join(short))
     for pid in pids[:n_patients]:
+        # This endpoint ignores current_page and returns every note in one go.
+        batch = plato.get(f"/patient/{pid}/note")
+        if not isinstance(batch, list):
+            raise PlatoError(f"/patient/{{id}}/note: expected a list, got {type(batch).__name__}")
         notes = []
-        for batch in plato.pages(f"/patient/{pid}/note", max_pages=20):
-            for note in batch:
-                parsed = fields.parse(note, "/patient/{id}/note")
-                if parsed:
-                    notes.append(parsed[1:])
+        for note in batch:
+            parsed = fields.parse(note, "/patient/{id}/note")
+            if parsed:
+                notes.append(parsed[1:])
         if not notes:
-            print(f"{pid} | (no matching notes)")
+            print(f"{pid} | 0 | (no matching notes)")
             continue
         f = derive(notes)
-        print(f"{pid} | " + " | ".join(",".join(sorted(f[c])) or "-" for c in cols))
+        print(f"{pid} | {len(notes)} | " + " | ".join(",".join(sorted(f[c])) or "-" for c in cols))
 
 
 def in_window(now: datetime) -> bool:
