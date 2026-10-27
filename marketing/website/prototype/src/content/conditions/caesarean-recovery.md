@@ -13,7 +13,7 @@ draft: false
 relatedServices: ["postpartum-physiotherapy"]
 ---
 
-A Caesarean section is a major abdominal operation - seven layers of tissue are incised and sutured. Recovery involves not just the skin scar but the healing of the uterus, bladder reflection, fascial layers, and abdominal muscles. Physiotherapy supports that process: from early mobilisation and pain management to scar tissue work and a safe return to exercise.
+A Caesarean birth involves surgery through the abdominal wall and uterus. Recovery involves healing across different tissues, not just the visible skin scar. Physiotherapy can support your recovery through guidance on movement, managing discomfort, addressing scar-related concerns and gradually returning to exercise.
 
 ## What happens physically after a C-section?
 

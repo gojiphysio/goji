@@ -70,6 +70,8 @@ const services = defineCollection({
     durationMin: z.number(),
     priceClinic: z.number(),
     priceHome: z.number().optional(),
+    /** Usual price while `priceClinic` is an introductory price (shown beside it). */
+    priceUsual: z.number().optional(),
     /** Clinician display names for the "Seen by" line. */
     clinicians: z.array(z.string()),
     /** Which existing booking option this page preselects. Omit when the service

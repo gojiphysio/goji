@@ -28,9 +28,9 @@ order: 4
 draft: false
 ---
 
-A personalised physiotherapy assessment for bladder, bowel, pelvic floor or pelvic pain concerns.
+Pelvic floor concerns aren't always about weakness, and the answer isn't always more Kegels.
 
-Suitable for women at different stages of life, whether your symptoms are new, longstanding, related to childbirth or changing around menopause. Pelvic health physiotherapy may involve strengthening or relaxing the pelvic floor, depending on your symptoms and assessment findings.
+Whether you're experiencing bladder leakage, pelvic heaviness, constipation or pain during intimacy, our physiotherapists will help you understand what's happening and find an approach that works for your body.
 
 Note: The assessment and treatment described below are indicative. Your session will be tailored to your individual condition, needs and goals, and may be modified by your physiotherapist based on their clinical judgement.
 
@@ -75,7 +75,7 @@ This is followed by a physical assessment tailored to your concerns, which may i
 - Functional tasks such as lifting, squatting or impact movements
 - Pelvic floor assessment via transabdominal ultrasound, external observation or internal vaginal examination, where relevant
 
-An internal vaginal examination is always optional. Your physiotherapist will explain what it involves and why it may be helpful before asking for your consent. You can decline or stop the examination at any time without affecting your care. Rest assured that our physiotherapists are all female.
+Any internal pelvic floor examination will be explained beforehand and is entirely optional. It will only be performed with your informed consent, and you may decline or stop the examination at any time without affecting your care. Our physiotherapy team is currently all-female.
 
 Treatment may begin during the same session and may include manual therapy, exercise, symptom management strategies, and guidance on returning to daily activities, exercise or sport.
 

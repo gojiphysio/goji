@@ -32,7 +32,7 @@ const faqs = [
   },
   {
     q: "Can I see a physio during pregnancy?",
-    a: "Absolutely. Prenatal physiotherapy is safe and recommended. We treat common pregnancy concerns like pelvic girdle pain, lower back pain, and pelvic floor changes. We also help you prepare physically for birth and postpartum recovery.",
+    a: "Physiotherapy can be appropriate at different stages of pregnancy. Our physiotherapists support women with concerns such as pelvic girdle pain, lower back pain and pelvic floor changes, as well as physical preparation for birth and postpartum recovery. Your assessment and treatment will be tailored to your medical history, needs and stage of pregnancy, with input from your doctor where appropriate.",
   },
   {
     q: "Do you treat children? What ages?",
@@ -253,21 +253,20 @@ const reviews = [
       <div class="about__text gj-reveal">
         <h2>What is Goji Physio?</h2>
         <p>
-          Goji Women's and Family Physiotherapy (Goji Physio) is a physiotherapy
-          clinic at Lentor Modern, Singapore, one minute from Lentor MRT. Our
-          female, AHPC-registered physiotherapists care for women through
-          pelvic floor concerns, pregnancy and postpartum recovery, and for
-          children from infancy to 18, in the clinic or at home across Singapore.
+          Goji Women's and Family Physiotherapy is a physiotherapy clinic focused
+          on women's and family health, located at Lentor Modern, just a minute's
+          walk from Lentor MRT in Singapore.
         </p>
         <p>
-          Women make careful decisions about their bodies, especially during
-          pregnancy, recovery, and caring for their children. Finding the right
-          physio should not mean starting over at every life stage.
+          Our AHPC-registered physiotherapists provide personalised care across
+          women's health, pelvic health, pregnancy and postpartum recovery,
+          paediatrics, and musculoskeletal rehabilitation.
         </p>
         <p>
-          You are heard before you are treated, with care that combines clinical
-          expertise and real understanding. The same trusted support can extend to
-          your children and family too.
+          We believe good care starts with being heard. Whether you're navigating
+          changes in your body, recovering from an injury, or seeking support for
+          your child, we're here to help you move with confidence, at every stage
+          of life.
         </p>
       </div>
       <div class="about__media">
@@ -299,6 +298,7 @@ const reviews = [
               <p class="service-card__meta">{s.meta.join(" · ")}</p>
               <p class="service-card__price">
                 {s.price && <strong>${s.price}</strong>}
+                {s.priceUsual && <span class="service-card__usual">Introductory price (usual ${s.priceUsual})</span>}
               </p>
               <p class="service-card__lead">{s.lead}</p>
               <div class="service-card__cta">
@@ -364,7 +364,7 @@ const reviews = [
       <dl class="stats__grid">
         {[
           { value: "1 min", label: "walk from Lentor MRT", caption: "Ground floor, stroller-friendly" },
-          { value: "3", label: "specialist physios", caption: "AHPC-registered clinicians" },
+          { value: "3", label: "AHPC-registered physiotherapists", caption: "AHPC-registered clinicians" },
           { value: "20+", label: "years combined experience", caption: "Across pelvic health, sports, and paediatrics" },
           { value: "1000+", label: "patients collectively served", caption: "And growing" },
         ].map((st, i) => (
@@ -657,6 +657,7 @@ const reviews = [
     font-family: var(--font-body); font-variation-settings: var(--font-body-axes);
     font-size: var(--fs-h3); font-weight: var(--weight-bold); letter-spacing: -0.01em; line-height: 1; color: var(--text-accent);
   }
+  .service-card__usual { font-size: var(--fs-small); color: var(--text-muted); }
   .service-card__lead { font-size: var(--fs-small); line-height: 1.6; margin: 0; }
   .service-card__cta { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-4); margin-top: var(--space-3); align-self: end; }
   .service-card__learn {

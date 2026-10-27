@@ -23,9 +23,11 @@ order: 3
 draft: false
 ---
 
-A combined physiotherapy assessment for you and your baby, designed to support your postpartum recovery and your baby's early development.
+**One appointment, care for two.**
 
-Suitable for babies from 0-12 months, and for mothers at any stage of postpartum recovery. You do not need specific symptoms or concerns to book.
+Our Mummy & Baby Assessment brings together postpartum physiotherapy for you and a developmental assessment for your baby, all in one visit.
+
+From your recovery after childbirth to your baby's early movement milestones, we're here to help you understand how you're both doing and what support may be helpful.
 
 Note: The assessment and treatment described below are indicative. Your session will be tailored to you and your baby's individual needs and goals, and may be modified by your physiotherapist based on their clinical judgement.
 
@@ -77,7 +79,7 @@ The physical assessment may include:
 - Gentle assessment of your baby's muscle tone, joint movement and symmetry
 - Practical observation of tummy time, carrying and positioning
 
-An internal vaginal examination is always optional and will only be performed with your informed consent. Rest assured that our physiotherapists are all female.
+Any internal pelvic floor examination will be explained beforehand and is entirely optional. It will only be performed with your informed consent, and you may decline or stop the examination at any time without affecting your care. Our physiotherapy team is currently all-female.
 
 ## What you will leave with
 

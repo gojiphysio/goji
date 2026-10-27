@@ -25,6 +25,7 @@ const {
   durationMin,
   priceClinic,
   priceHome,
+  priceUsual,
   clinicians,
   bookingService,
   bookingFocus,
@@ -52,7 +53,9 @@ const bookHref = !bookingService
 const priceLabel =
   priceHome && priceHome !== priceClinic
     ? `In-clinic $${priceClinic} · Home visit $${priceHome}`
-    : `$${priceClinic}`;
+    : priceUsual
+      ? `$${priceClinic} introductory price (usual $${priceUsual})`
+      : `$${priceClinic}`;
 
 const origin = Astro.site ?? new URL(Astro.url.origin);
 const pageURL = new URL(Astro.url.pathname, origin).href;
@@ -353,6 +356,30 @@ if (faqs?.length) {
     display: flex;
     flex-direction: column;
     gap: var(--space-2);
+  }
+  /* Price tables (e.g. Private Pilates introductory offers). */
+  .svc-body :global(table) {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: var(--space-4);
+    font-size: var(--fs-small);
+  }
+  .svc-body :global(th),
+  .svc-body :global(td) {
+    text-align: left;
+    vertical-align: top;
+    padding: var(--space-3) var(--space-3) var(--space-3) 0;
+    border-bottom: 1px solid var(--color-border);
+    color: var(--text-muted);
+  }
+  .svc-body :global(th) {
+    font-weight: var(--weight-semibold);
+    color: var(--text-default);
+  }
+  .svc-body :global(tbody th),
+  .svc-body :global(td:first-child) {
+    font-weight: var(--weight-semibold);
+    color: var(--text-default);
   }
   .svc-body :global(a) {
     color: var(--color-primary);

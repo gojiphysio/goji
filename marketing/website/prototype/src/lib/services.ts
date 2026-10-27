@@ -44,6 +44,8 @@ export interface Service {
   lead: string;
   meta: string[];
   price: string;
+  /** Usual (non-promotional) price, shown beside `price` while an introductory price is active. */
+  priceUsual?: string;
   priceNote: string;
   supportsHome: boolean;
   durationMin: number;
@@ -68,7 +70,7 @@ export const services: Service[] = [
     id: "physiotherapy",
     icon: "tabler:stretching",
     title: "Physiotherapy",
-    lead: "Assessment and treatment for pain, injury, pelvic health, women's health, paediatric, vestibular, and lymphatic concerns.",
+    lead: "Personalised assessment and treatment for pain, injuries, pelvic health, musculoskeletal, vestibular and lymphatic concerns.",
     meta: ["55 min Initial consult", "In-clinic & home visits"],
     price: "260",
     priceNote: "Home visits $380",
@@ -81,7 +83,7 @@ export const services: Service[] = [
     id: "paediatric-physiotherapy",
     icon: "tabler:stretching",
     title: "Paediatric Physiotherapy",
-    lead: "Neurodevelopmental concerns, congenital conditions, chest physio, pelvic health (bed wetting / constipation) and other injuries.",
+    lead: "Thoughtful care for babies, children and teens, from early developmental milestones to scoliosis and sports injuries.",
     meta: ["From 30 min", "In-clinic & home visits"],
     price: "160",
     priceNote: "From 30 min. Home visits available on request with parent supervision",
@@ -95,7 +97,7 @@ export const services: Service[] = [
     id: "strength-conditioning",
     icon: "tabler:barbell",
     title: "Strength & Conditioning",
-    lead: "Build strength and resilience through tailored exercise, with guidance from professionals to sustain your momentum.",
+    lead: "Build strength and physical confidence with personalised training guided by our physiotherapists.",
     meta: ["55 min Initial consult", "1:1 or 2:1 sessions"],
     price: "180",
     priceNote: "",
@@ -108,7 +110,7 @@ export const services: Service[] = [
     id: "clinical-pilates",
     icon: "tabler:yoga",
     title: "Clinical Pilates",
-    lead: "AHPC-registered physiotherapist-led Pilates, combining clinical expertise with personalised exercise for strength, mobility and movement confidence.",
+    lead: "Physiotherapist-led Pilates, thoughtfully adapted to your movement goals and physical needs.",
     meta: ["55 min", "1:1 or 2:1 reformer"],
     price: "180",
     priceNote: "",
@@ -121,9 +123,12 @@ export const services: Service[] = [
     id: "private-pilates",
     icon: "tabler:stretching-2",
     title: "Private Pilates",
-    lead: "STOTT PILATES® certified instructor-led sessions tailored to your goals, helping you build strength, flexibility and body awareness.",
+    lead: "Personalised mat and reformer Pilates with our STOTT PILATES® certified instructor, in private 1:1 or 2:1 sessions.",
     meta: ["55 min", "1:1 or 2:1 reformer"],
-    price: "160",
+    // Introductory price (active promotion; no end date published). Usual price
+    // is shown beside it. Update `priceUsual`/`price` together when it ends.
+    price: "149",
+    priceUsual: "160",
     priceNote: "",
     supportsHome: false,
     durationMin: 55,
@@ -136,7 +141,7 @@ export const services: Service[] = [
     id: "mummy-baby",
     icon: "tabler:baby-carriage",
     title: "Mummy & Baby Assessment",
-    lead: "A joint assessment for postpartum mothers (suitable after both vaginal and Caesarean birth) and babies aged 0 to 12 months, supporting physical screening, developmental concerns, and early intervention therapy.",
+    lead: "One appointment for two. Supporting your postpartum recovery while assessing your baby's movement and early development.",
     meta: ["85 min Initial consult", "In-clinic & home visits"],
     price: "330",
     priceNote: "Home visits $450",

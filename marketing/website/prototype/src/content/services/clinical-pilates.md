@@ -29,9 +29,9 @@ order: 2
 draft: false
 ---
 
-Clinical Pilates combines controlled, low-impact Pilates exercises with the movement expertise of an AHPC-registered physiotherapist. Sessions focus on building strength, improving mobility, balance and movement control, with exercises adapted to your physical needs and goals.
+Move with the guidance of an AHPC-registered physiotherapist. Clinical Pilates combines personalised, low-impact exercise with an understanding of movement, physical function and individual health considerations.
 
-Whether you are returning to exercise after rehabilitation, navigating changes in your body or looking for physiotherapist-led guidance, Clinical Pilates offers a structured approach to moving with greater strength and confidence.
+Sessions are adapted to your goals and abilities, whether you're building strength, improving mobility or returning to regular exercise after rehabilitation.
 
 ## Who is Clinical Pilates for?
 
@@ -89,7 +89,7 @@ Neither service replaces physiotherapy assessment or treatment. If you're unsure
 
 ## Packages
 
-Clinical Pilates is available as a single à la carte session or in 5-session and 10-session packages.
+Clinical Pilates is available as a single a la carte session or in 5-session and 10-session packages.
 
 As part of the Goji experience, your package can be used interchangeably across Clinical Pilates and Strength & Conditioning sessions, allowing your exercise programme to evolve alongside your goals and needs.
 
