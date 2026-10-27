@@ -86,15 +86,33 @@ gcloud logging read 'resource.type="cloud_run_job" resource.labels.job_name="pla
 
 ## Schedule it
 
-Every 30 minutes during Singapore business hours (8am-8pm, on the hour and half-hour):
+Every 30 minutes during Singapore business hours (8am-8pm) at :12 and :42, off
+the :00/:30 slots so it never pages Plato at the same time as the appointments
+job (the key's 20 req/min is shared with the website booking form). These runs
+only fetch the last `RECENT_DAYS` (14) of invoices, 1-2 pages:
 
 ```bash
 gcloud scheduler jobs create http plato-invoices-30min \
   --location asia-southeast1 \
-  --schedule "*/30 8-20 * * *" \
+  --schedule "12,42 8-20 * * *" \
   --time-zone "Asia/Singapore" \
   --uri "https://run.googleapis.com/v2/projects/goji-bi/locations/asia-southeast1/jobs/plato-invoices-ingest:run" \
   --http-method POST \
+  --oauth-service-account-email "scheduler-sa@goji-bi.iam.gserviceaccount.com"
+```
+
+Plato ignores `modified_since` on `/invoice`, so a payment added to an invoice
+older than 14 days is only picked up by a nightly full sweep:
+
+```bash
+gcloud scheduler jobs create http plato-invoices-full-nightly \
+  --location asia-southeast1 \
+  --schedule "30 21 * * *" \
+  --time-zone "Asia/Singapore" \
+  --uri "https://run.googleapis.com/v2/projects/goji-bi/locations/asia-southeast1/jobs/plato-invoices-ingest:run" \
+  --http-method POST \
+  --headers "Content-Type=application/json" \
+  --message-body '{"overrides":{"containerOverrides":[{"env":[{"name":"RECENT_DAYS","value":"0"}]}]}}' \
   --oauth-service-account-email "scheduler-sa@goji-bi.iam.gserviceaccount.com"
 ```
 
@@ -111,10 +129,10 @@ The job's 7-day default only covers the last week. To pull historical invoices, 
 gcloud run jobs execute plato-invoices-ingest \
   --region asia-southeast1 \
   --wait \
-  --update-env-vars LOOKBACK_DAYS=3650
+  --update-env-vars RECENT_DAYS=0
 ```
 
-3650 days = 10 years, which covers everything Plato has. Plato pagination + 3s per-page sleep means a full backfill may take several minutes. The job's `--task-timeout` is 600s; bump it temporarily if needed:
+`RECENT_DAYS=0` pages every invoice Plato has (the same thing the nightly sweep does). Plato pagination + 3s per-page sleep means a full backfill may take several minutes. The job's `--task-timeout` is 600s; bump it temporarily if needed:
 
 ```bash
 gcloud run jobs update plato-invoices-ingest --region asia-southeast1 --task-timeout 1800s
