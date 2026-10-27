@@ -68,8 +68,8 @@ export const physioCategories: PhysioCategory[] = [
   },
   {
     id: "others",
-    label: "Others",
-    hint: "Please indicate your conditions / goals in the last booking step.",
+    label: "Not sure / other",
+    hint: "Tell us what's going on in the last step and we'll match you with the right physio.",
     clinicianIds: ["cheryl-long", "claire-ng", "kristy-ng"],
   },
 ];
