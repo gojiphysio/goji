@@ -133,8 +133,24 @@ Articles we write, and coverage written about us: https://www.gojiphysio.com/med
 Plain-language physiotherapy education written by our clinicians. Index:
 https://www.gojiphysio.com/blog/ (feed: https://www.gojiphysio.com/rss.xml)
 
-No articles are published yet. The first ones are in clinical review and this
-section will be updated when they go live.
+Pelvic and perinatal health:
+- Is it normal to leak when you sneeze after having a baby? (about 1 in 3 women leak in the first year; when to get assessed): https://www.gojiphysio.com/blog/is-leaking-after-birth-normal/
+- Pelvic floor exercises after birth (when to start, a starting routine, common mistakes): https://www.gojiphysio.com/blog/pelvic-floor-exercises-after-birth/
+- Your postpartum recovery checklist: the first twelve weeks (normal recovery, the Singapore postnatal check, urgent warning signs): https://www.gojiphysio.com/blog/postpartum-recovery-checklist/
+- Diastasis recti: when is physiotherapy enough, and when is surgery considered? (with a recap of our session with Dr Pek Wan Sze): https://www.gojiphysio.com/blog/diastasis-recti-physio-or-surgery/
+- Preparing your body for pregnancy (strength, activity and pelvic floor habits; recap of our session with Dr Serena Koh): https://www.gojiphysio.com/blog/preparing-your-body-for-pregnancy/
+- Prenatal and antenatal classes in Singapore (class types and providers): https://www.gojiphysio.com/blog/prenatal-classes-singapore/
+
+Movement and fitness:
+- Returning to exercise after birth: what the first twelve weeks can look like (strength before impact; readiness over a fixed date): https://www.gojiphysio.com/blog/returning-to-exercise-after-birth/
+
+Active ageing and family:
+- Exercise for osteoporosis: is walking enough? (resistance, impact and balance training; recap of our session with Dr Dinesh Mahendran): https://www.gojiphysio.com/blog/exercise-for-osteoporosis/
+- Lentor Modern with a baby or toddler (nursing rooms, getting there, places nearby): https://www.gojiphysio.com/blog/lentor-modern-with-a-baby/
+
+Clinic news:
+- What actually happens at your first physiotherapy visit (55 minutes, no referral needed, what you leave with): https://www.gojiphysio.com/blog/what-happens-at-your-first-physiotherapy-visit/
+- We're open: Goji Physiotherapy at Lentor Modern (grand opening, 6 June 2026, and the "In Sync With..." talk series): https://www.gojiphysio.com/blog/goji-grand-opening-lentor-modern/
 
 ## Press
 
