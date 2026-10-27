@@ -18,6 +18,33 @@ const categories = [
 
 type Category = (typeof categories)[number];
 
+/** Anchor ids for each category section (targets of the picker chips). */
+const categoryId: Record<Category, string> = {
+  "Women's Health Physiotherapy": "womens-health",
+  "Paediatric Physiotherapy (0-18Y)": "paediatric",
+  "Musculoskeletal Physiotherapy": "pain-injury",
+  "Holistic Care": "pilates-strength",
+};
+
+/**
+ * "Which do I need?" picker. Most visitors arrive knowing the problem, not
+ * the clinical name, so each chip jumps to the category that answers it.
+ */
+const picker: { label: string; cat: Category }[] = [
+  { label: "I'm pregnant or postpartum", cat: "Women's Health Physiotherapy" },
+  { label: "My baby or child", cat: "Paediatric Physiotherapy (0-18Y)" },
+  { label: "Pain or injury", cat: "Musculoskeletal Physiotherapy" },
+  { label: "Pilates or strength", cat: "Holistic Care" },
+];
+
+/** Same deep link the service page's Book button uses (preselects the option). */
+const bookHref = (data: any) =>
+  !data.bookingService
+    ? "/book/"
+    : data.bookingFocus
+      ? `/book/?service=${data.bookingService}&focus=${data.bookingFocus}`
+      : `/book/?service=${data.bookingService}`;
+
 const grouped = categories.reduce(
   (acc, cat) => {
     acc[cat] = allServices.filter((s) => s.data.category === cat);
@@ -82,26 +109,37 @@ const schema = {
 
 <BaseLayout
   title="Our Services | Goji Physiotherapy Singapore"
-  description="Physiotherapy at Goji, Lentor MRT: prenatal and postpartum physio, Mummy & Baby assessments, and Schroth therapy for scoliosis. In-clinic or home visits."
+  description="Physio near Lentor MRT: prenatal, postpartum and pelvic floor, paediatric and scoliosis care, sports injuries and clinical Pilates. In-clinic or home visits."
   schema={schema}
 >
-  <section class="services-hero">
+  <section class="services-hero" data-sticky-hide>
     <div class="container">
       <h1>Our services</h1>
       <p class="services-hero__lead">
         Every visit starts with an assessment. Each page covers what happens in
-        the appointment and who it's for. Not sure which one you need?
-        <a href="https://go.gojiphysio.com/web-wa" target="_blank" rel="noopener">Message us</a>. Prices as of {SITE.pricesAsOf}.
+        the appointment and who it's for. Not sure which one you need? Message
+        us and we'll point you to the right appointment. Prices as of {SITE.pricesAsOf}.
       </p>
+      <div class="services-hero__cta">
+        <Button slug="web-wa" variant="whatsapp" size="lg">Ask us on WhatsApp</Button>
+        <Button slug="web-book" variant="secondary" size="lg">Book an appointment</Button>
+      </div>
+      <nav class="svc-picker" aria-labelledby="svc-picker-label">
+        <p class="svc-picker__label" id="svc-picker-label">Which do I need?</p>
+        <ul class="svc-picker__list">
+          {picker.map((p) => (
+            <li><a class="svc-picker__chip" href={`#${categoryId[p.cat]}`}>{p.label}</a></li>
+          ))}
+        </ul>
+      </nav>
     </div>
   </section>
 
   {
-    categories.map((cat) => {
+    categories.filter((cat) => grouped[cat].length).map((cat, i) => {
       const items = grouped[cat];
-      if (!items.length) return null;
       return (
-        <Section tone={cat === "Pelvic Health" || cat === "Paediatrics" ? "linen" : "surface"}>
+        <Section tone={i % 2 ? "linen" : "surface"} id={categoryId[cat]} class="svc-section">
           <div class="section-head">
             <h2>{cat}</h2>
             {cat === "Women's Health Physiotherapy" && (
@@ -117,21 +155,26 @@ const schema = {
           </div>
           <div class="svc-grid">
             {items.map((s) => (
-              <a href={`/services/${s.slug}/`} class="svc-card">
+              <article class="svc-card">
                 {s.data.heroImage && (
                   <div class="svc-card__media">
                     <img src={s.data.heroImage} alt={s.data.heroAlt ?? ""} width="480" height="300" loading="lazy" />
                   </div>
                 )}
                 <div class="svc-card__body">
-                  <h3 class="svc-card__title">{s.data.cardTitle ?? s.data.title}</h3>
+                  <h3 class="svc-card__title">
+                    <a href={`/services/${s.slug}/`} class="svc-card__link">{s.data.cardTitle ?? s.data.title}</a>
+                  </h3>
                   <p class="svc-card__meta">
                     {displayDuration(s)} · {displayPrice(s)}
                   </p>
                   <p class="svc-card__lead">{s.data.cardLead}</p>
-                  <span class="svc-card__cta">Learn more</span>
+                  <div class="svc-card__actions">
+                    <Button href={bookHref(s.data)} variant="primary" size="md" class="svc-card__book">Book</Button>
+                    <span class="svc-card__cta" aria-hidden="true">Learn more</span>
+                  </div>
                 </div>
-              </a>
+              </article>
             ))}
           </div>
         </Section>
@@ -154,14 +197,38 @@ const schema = {
     </div>
   </Section>
 
-  <Section tone="linen" id="contact-cta">
+  <Section tone="linen" id="contact-cta" class="svc-contact">
     <div class="contact-strip">
       <h2>Not sure where to start?</h2>
       <p>Message us on WhatsApp - describe what you are experiencing and we will help you find the right appointment type.</p>
       <Button slug="web-wa" variant="whatsapp" size="lg">Ask us on WhatsApp</Button>
     </div>
   </Section>
+
+  <!-- Mobile-only CTA bar: appears once the hero's buttons scroll away, hides
+       again over the closing WhatsApp strip and the footer so it never
+       stacks on another CTA or covers footer links. -->
+  <div class="svc-sticky" data-svc-sticky data-search-ignore aria-hidden="true" inert>
+    <Button slug="web-wa" variant="whatsapp" size="md">WhatsApp us</Button>
+    <Button slug="web-book" variant="secondary" size="md">Book</Button>
+  </div>
 </BaseLayout>
+
+<script>
+  const bar = document.querySelector<HTMLElement>("[data-svc-sticky]");
+  const watch = document.querySelectorAll("[data-sticky-hide], .svc-contact, .site-footer");
+  if (bar && watch.length && "IntersectionObserver" in window) {
+    const onScreen = new Set<Element>();
+    const io = new IntersectionObserver((entries) => {
+      for (const e of entries) e.isIntersecting ? onScreen.add(e.target) : onScreen.delete(e.target);
+      const show = onScreen.size === 0;
+      bar.classList.toggle("is-shown", show);
+      bar.toggleAttribute("inert", !show);
+      bar.setAttribute("aria-hidden", String(!show));
+    });
+    watch.forEach((el) => io.observe(el));
+  }
+</script>
 
 <style>
   .services-hero {
@@ -174,10 +241,52 @@ const schema = {
     color: var(--text-muted);
     margin-top: var(--space-4);
   }
-  .services-hero__lead a {
+  .services-hero__cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-top: var(--space-5);
+  }
+
+  .svc-picker {
+    margin-top: var(--space-6);
+  }
+  .svc-picker__label {
+    font-weight: var(--weight-semibold);
+    color: var(--text-default);
+    margin-bottom: var(--space-3);
+  }
+  .svc-picker__list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .svc-picker__chip {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 1.1rem;
+    border: 1.5px solid var(--color-border);
+    border-radius: var(--radius-pill);
+    background: var(--bg-content);
+    color: var(--text-default);
+    font-size: var(--fs-small);
+    font-weight: var(--weight-semibold);
+    text-decoration: none;
+    transition: border-color var(--dur) var(--ease), color var(--dur) var(--ease);
+  }
+  .svc-picker__chip:hover,
+  .svc-picker__chip:focus-visible {
+    border-color: var(--color-primary);
     color: var(--color-primary);
-    text-decoration: underline;
-    text-underline-offset: 0.2em;
+  }
+
+  /* Chip jumps land below the sticky header, not under it. */
+  :global(.svc-section) {
+    scroll-margin-top: 5rem;
   }
 
   .section-head {
@@ -210,6 +319,7 @@ const schema = {
   }
 
   .svc-card {
+    position: relative;
     display: flex;
     flex-direction: column;
     background: var(--bg-content);
@@ -251,6 +361,34 @@ const schema = {
     font-size: var(--fs-h3);
     color: var(--text-default);
   }
+  /* Stretched link: the whole card opens the service page, while the Book
+     button sits above it as its own target (links can't nest). */
+  .svc-card__link {
+    color: inherit;
+    text-decoration: none;
+  }
+  .svc-card__link::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+  }
+  .svc-card__link:focus-visible {
+    outline: none;
+  }
+  .svc-card:has(.svc-card__link:focus-visible) {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 3px;
+  }
+  .svc-card__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    margin-top: var(--space-2);
+  }
+  .svc-card__actions :global(.svc-card__book) {
+    position: relative;
+    z-index: 1;
+  }
   .svc-card__meta {
     font-size: var(--fs-caption);
     font-weight: var(--weight-semibold);
@@ -270,7 +408,6 @@ const schema = {
     letter-spacing: var(--tracking-label);
     text-transform: uppercase;
     color: var(--color-primary);
-    margin-top: var(--space-2);
   }
 
   .svc-faq-wrap {
@@ -303,5 +440,34 @@ const schema = {
   }
   .contact-strip p {
     color: var(--text-muted);
+  }
+
+  .svc-sticky {
+    position: fixed;
+    inset: auto 0 0 0;
+    z-index: 40;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-4) calc(var(--space-3) + env(safe-area-inset-bottom));
+    background-color: color-mix(in srgb, var(--bg-page) 92%, transparent);
+    -webkit-backdrop-filter: saturate(1.2) blur(14px);
+    backdrop-filter: saturate(1.2) blur(14px);
+    border-top: 1px solid var(--color-border);
+    transform: translateY(100%);
+    transition: transform var(--dur) var(--ease);
+  }
+  .svc-sticky.is-shown {
+    transform: none;
+  }
+  .svc-sticky :global(.btn) {
+    width: 100%;
+  }
+  /* Phones only: wider screens keep the header's WhatsApp + Book in view. */
+  @media (min-width: 640px) {
+    .svc-sticky { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .svc-sticky { transition: none; }
   }
 </style>
