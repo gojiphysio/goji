@@ -24,6 +24,7 @@ const { entry } = Astro.props;
 const { Content } = await entry.render();
 const {
   title,
+  seoTitle,
   description,
   cardTitle,
   category,
@@ -107,7 +108,7 @@ if (postFaqSchema) postSchema.push(postFaqSchema);
 ---
 
 <BaseLayout
-  title={`${title} | Goji Physiotherapy`}
+  title={`${seoTitle ?? title} | Goji Physiotherapy`}
   description={description}
   schema={postSchema}
   searchType="Article"

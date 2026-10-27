@@ -191,9 +191,12 @@ One nav item, **Media**, fronts two children: `/blog` (what we write) and
 schema, different intent — but a single nav entry keeps the primary nav short
 on a phone. Breadcrumbs on all four pages read Home › Media › …
 
-**The blog is empty on purpose.** Drafts live in the shared Drive folder
-"Articles" (`1_7lYb2OiP3x3qORovG6Wg6TxLVClE7Nb`) until Cheryl has clinically
-reviewed them; see `src/content/blog/.gitkeep`. `src/pages/blog/index.astro`
+**Posts are reviewed in the PR, not in Drive.** A draft post lands as a `.md`
+in `src/content/blog/` on a branch; Cheryl reads it on the PR's Cloudflare
+Pages preview, and her sign-off adds `reviewer:` before the owner merges
+(tier B). Brief: `../../content-engine/blog-brief.md`; plan:
+`../../seo/blog-plan.md`. A new post also needs its line in `public/llms.txt`
+(`check_dist.py` fails otherwise). `src/pages/blog/index.astro`
 branches on `posts.length`: with none it renders a "Coming soon" placeholder
 that is `noindex` and excluded from search, and with one or more it becomes the
 real index and re-enables both. **Don't hardcode the placeholder away** — drop
