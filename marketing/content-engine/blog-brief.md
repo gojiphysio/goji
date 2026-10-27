@@ -17,7 +17,7 @@ title: "Question-shaped title, the way someone would type or ask it"
 description: "The direct answer in 140-160 characters. Hard max 160."
 cardTitle: "Short card heading"
 cardLead: "One sentence for the index card."
-pubDate: 2026-10-27
+pubDate: 2026-10-27 # placeholder; reset to the merge date at sign-off
 author:
   name: "Cheryl Long"
   slug: "cheryl-long"
@@ -96,4 +96,9 @@ important to note", "in today's world". Short paragraphs.
 ## Before it ships
 
 `npm run build && python3 ../../seo/tools/check_dist.py` passes; grep the post
-for `—`, `–` and the banned words; the clinician sign-off adds `reviewer:`.
+for `—`, `–` and the banned words.
+
+A post goes live as soon as Cheryl approves it, with no holding back for a
+cadence. In the sign-off commit, add `reviewer:` and set `pubDate` to the day
+it merges. `pubDate` is when the post went live (it is `datePublished` in the
+schema): never backdate it to an event date. The recap text carries that.
