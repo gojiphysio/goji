@@ -10,7 +10,7 @@ import time
 
 import pytest
 
-from booking.plato import PlatoBusy, PlatoClient, PlatoError, _RateLimiter
+from booking.plato import PlatoBusy, PlatoClient, PlatoError, PlatoThrottled, _RateLimiter
 
 
 class FakePlato(PlatoClient):
@@ -210,6 +210,34 @@ def test_penalty_never_shortens_an_existing_cooldown():
         lim.acquire(max_wait_s=0.0)
 
 
+def test_running_out_says_when_to_ask_again():
+    """The endpoint turns this into a 503 + retry_after, so the form waits
+    instead of showing "couldn't load times"."""
+    lim = _RateLimiter(limit_per_min=100)
+    lim.penalise(cooldown_s=15)
+    with pytest.raises(PlatoThrottled) as exc:
+        lim.acquire(max_wait_s=0.0)
+    assert 14 < exc.value.retry_after_s <= 15
+
+
+def test_low_key_wide_budget_holds_bulk_work_but_not_date_clicks():
+    """The key is shared with the ingestion jobs, so our own window can look
+    empty while Plato is nearly out. Its header is the truth: at the reserve,
+    a month crawl stands down and the last requests go to interactive calls."""
+    lim = _RateLimiter(limit_per_min=18, bulk_reserve=5)
+    lim.observe("4")
+    with pytest.raises(PlatoThrottled, match="another caller"):
+        lim.acquire(max_wait_s=0.0, bulk=True)
+    lim.acquire(max_wait_s=0.0)  # a date click still goes through
+
+
+def test_healthy_or_missing_budget_header_changes_nothing():
+    lim = _RateLimiter(limit_per_min=18, bulk_reserve=5)
+    for header in ("12", None, "", "n/a"):
+        lim.observe(header)
+    lim.acquire(max_wait_s=0.0, bulk=True)
+
+
 def test_limiter_disabled_when_rate_is_zero():
     lim = _RateLimiter(limit_per_min=0)
     for _ in range(50):
@@ -308,6 +336,29 @@ def test_fresh_read_never_serves_stale_on_error():
     key = ("2026-09-02", "2026-09-02")
     ts, rows = p._appts_cache[key]
     p._appts_cache[key] = (ts - plato_mod.APPTS_TTL_S - 1, rows)
+    with pytest.raises(RuntimeError):
+        p.appointments("2026-09-02", "2026-09-02", fresh=True)
+
+
+def test_a_failed_day_falls_back_to_an_older_cached_month():
+    """During a 429 cooldown a date click with no cached day of its own is
+    answered from the month we paged a few minutes ago, not an error. Safe:
+    the booking re-check reads fresh and refuses a slot that has gone."""
+    from booking import plato as plato_mod
+
+    p = FakePlato([_rows(2, "2026-09-02") + _rows(1, "2026-09-03"),
+                   PlatoThrottled("cooling down after a 429", retry_after_s=15)])
+    p.appointments("2026-09-01", "2026-09-30")
+    key = ("2026-09-01", "2026-09-30")
+    ts, rows = p._appts_cache[key]
+    p._appts_cache[key] = (ts - plato_mod.DAY_FROM_RANGE_MAX_AGE_S - 1, rows)
+    day = p.appointments("2026-09-02", "2026-09-02")
+    assert len(day) == 2
+
+
+def test_a_failed_fresh_day_never_falls_back_to_a_cached_month():
+    p = FakePlato([_rows(2), RuntimeError("Plato down")])
+    p.appointments("2026-09-01", "2026-09-30")
     with pytest.raises(RuntimeError):
         p.appointments("2026-09-02", "2026-09-02", fresh=True)
 
