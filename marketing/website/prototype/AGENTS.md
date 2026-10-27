@@ -23,7 +23,7 @@ so a token change reflows everything (styleguide is the QA surface).
 ## The watercolour look (Goji design system)
 - Source of truth is the Goji design system artifact
   (https://claude.ai/artifact/GGKPrziiY9GdwFqYLbW51t); `tokens.css` mirrors its
-  tokens. Type: Cormorant Garamond (weight 500) for headings and large brand
+  tokens. Type: Cormorant Garamond (SemiBold, line-height ~1.04) for headings and large brand
   quotes; Figtree for everything else (body, buttons, nav, labels, prices).
   Cormorant only at about 20px and up: a smaller heading (FAQ question, card
   label) sets `font-family: var(--font-body)` in SemiBold. Never italic. No
