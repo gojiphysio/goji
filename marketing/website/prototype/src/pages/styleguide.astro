@@ -19,10 +19,10 @@ const colors = [
 ];
 
 const typeScale = [
-  { token: "--fs-display", label: "Display", note: "Cormorant Garamond SemiBold · 48–78", cls: "t-display" },
-  { token: "--fs-h1", label: "Heading 1", note: "36–46", cls: "t-h1" },
-  { token: "--fs-h2", label: "Heading 2", note: "28–32", cls: "t-h2" },
-  { token: "--fs-h3", label: "Heading 3", note: "22–25", cls: "t-h3" },
+  { token: "--fs-display", label: "Display", note: "Newsreader Medium · 44–72", cls: "t-display" },
+  { token: "--fs-h1", label: "Heading 1", note: "32–40", cls: "t-h1" },
+  { token: "--fs-h2", label: "Heading 2", note: "26–30", cls: "t-h2" },
+  { token: "--fs-h3", label: "Heading 3", note: "20–22", cls: "t-h3" },
   { token: "--fs-body", label: "Body", note: "Figtree · 15–16 · line-height 1.55", cls: "t-body" },
   { token: "--fs-caption", label: "Caption", note: "12", cls: "t-caption" },
 ];
@@ -344,10 +344,10 @@ const radii = [
       font-size: var(--fs-caption);
       color: var(--text-muted);
     }
-    .t-display { font-family: var(--font-display); font-weight: 600; font-size: var(--fs-display); line-height: 1.1; }
-    .t-h1 { font-family: var(--font-display); font-weight: 600; font-size: var(--fs-h1); }
-    .t-h2 { font-family: var(--font-display); font-weight: 600; font-size: var(--fs-h2); }
-    .t-h3 { font-family: var(--font-display); font-weight: 600; font-size: var(--fs-h3); }
+    .t-display { font-family: var(--font-display); font-weight: 500; font-variation-settings: var(--font-display-axes); font-size: var(--fs-display); line-height: 1.1; }
+    .t-h1 { font-family: var(--font-display); font-weight: 500; font-variation-settings: var(--font-display-axes); font-size: var(--fs-h1); }
+    .t-h2 { font-family: var(--font-display); font-weight: 500; font-variation-settings: var(--font-display-axes); font-size: var(--fs-h2); }
+    .t-h3 { font-family: var(--font-display); font-weight: 500; font-variation-settings: var(--font-display-axes); font-size: var(--fs-h3); }
     .t-body { font-family: var(--font-body); font-size: var(--fs-body); }
     .t-caption { font-family: var(--font-body); font-size: var(--fs-caption); }
 

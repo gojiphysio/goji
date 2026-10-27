@@ -23,11 +23,11 @@ so a token change reflows everything (styleguide is the QA surface).
 ## The watercolour look (Goji design system)
 - Source of truth is the Goji design system artifact
   (https://claude.ai/artifact/GGKPrziiY9GdwFqYLbW51t); `tokens.css` mirrors its
-  tokens. Type: Cormorant Garamond (SemiBold, line-height ~1.04) for headings and large brand
-  quotes; Figtree for everything else (body, buttons, nav, labels, prices).
-  Cormorant only at about 20px and up: a smaller heading (FAQ question, card
-  label) sets `font-family: var(--font-body)` in SemiBold. Never italic. No
-  uppercase eyebrow labels on the home page.
+  tokens. Type: Newsreader Medium (display optical size) for headings and
+  large brand quotes; Figtree for everything else (body, buttons, nav, labels,
+  prices). A heading under about 20px (FAQ question, card label) sets
+  `font-family: var(--font-body)` in SemiBold. Never italic. No uppercase
+  eyebrow labels on the home page.
 - **No arches or round-topped frames** (they read as a tombstone in Asian
   culture). Photos use the petal frame (`components/watercolor/PetalPhoto.astro`).
 - **No WhatsApp green**, not even on the glyph; WhatsApp CTAs are brand red
@@ -37,7 +37,10 @@ so a token change reflows everything (styleguide is the QA surface).
   `Goji.enhance()` on every page: use `components/watercolor/Bloom.astro`,
   `PaintedWord.astro`, `PetalPhoto paint`, `.gj-reveal`, `data-gj-wash`.
   Never put a reveal or a paint-in veil on above-the-fold content (LCP), and
-  never let motion gate content or scrolling.
+  never let motion gate content or scrolling. Paintings start when a sliver is
+  in view; on the site they run at `speed` 1.5-1.6 (`Bloom speed`,
+  `data-speed`), with short `data-delay` steps, so a reader scrolling at normal
+  pace sees them grow.
 
 ## Hard rules (inherited from repo + marketing AGENTS.md)
 - **Every CTA is a tracked link.** Route through `go.gojiphysio.com/<slug>` via

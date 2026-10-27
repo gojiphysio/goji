@@ -484,7 +484,8 @@
       if (opts.manual) return; /* waits for replay() */
       setTimeout(function () { state = "playing"; t0 = 0; kick(); }, opts.delay || 0);
     }
-    if (opts.immediate) start(); else stopVisible = onVisible(el, start, 0.25);
+    /* start as soon as a sliver shows, so a quick scroll still sees it grow */
+    if (opts.immediate) start(); else stopVisible = onVisible(el, start, opts.ratio != null ? opts.ratio : 0.08);
 
     if ("IntersectionObserver" in W) {
       io = new IntersectionObserver(function (e) { visible = e[0].isIntersecting; if (visible && state !== "idle" && state !== "done") kick(); });
@@ -794,7 +795,7 @@
   /* ---------- Non-React pages (Astro): <div data-gj-bloom="ripen">, data-gj-wash, data-gj-veil, data-gj-reveal, .gj-mark ---------- */
   function enhance(root) {
     root = root || D;
-    root.querySelectorAll("[data-gj-bloom]").forEach(function (el) { paint(el, { preset: el.getAttribute("data-gj-bloom") || "ripen", seed: +el.getAttribute("data-seed") || 3, loop: el.hasAttribute("data-loop"), delay: +el.getAttribute("data-delay") || 0 }); });
+    root.querySelectorAll("[data-gj-bloom]").forEach(function (el) { paint(el, { preset: el.getAttribute("data-gj-bloom") || "ripen", seed: +el.getAttribute("data-seed") || 3, loop: el.hasAttribute("data-loop"), delay: +el.getAttribute("data-delay") || 0, speed: +el.getAttribute("data-speed") || undefined }); });
     root.querySelectorAll("[data-gj-wash]").forEach(function (el) { paint(el, { preset: el.getAttribute("data-gj-wash") || "dawn", seed: +el.getAttribute("data-seed") || 5, dpr: +el.getAttribute("data-dpr") || undefined, immediate: el.hasAttribute("data-immediate") }); });
     root.querySelectorAll("[data-gj-veil]").forEach(function (el) { veil(el); });
     root.querySelectorAll("[data-gj-reveal], .gj-reveal, .gj-mark").forEach(function (el) { onVisible(el, function () { el.classList.add("is-in"); }, 0.15); });

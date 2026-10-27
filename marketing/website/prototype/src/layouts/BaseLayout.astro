@@ -3,9 +3,9 @@
  * BaseLayout — document shell: <head>, fonts, tokens, skip link, site header
  * and footer. Pass `bare` to drop the header/footer (used by the styleguide).
  */
-import "@fontsource-variable/cormorant-garamond/wght.css";
+import "@fontsource-variable/newsreader/standard.css";
 import "@fontsource-variable/figtree/wght.css";
-import cormorantLatin from "@fontsource-variable/cormorant-garamond/files/cormorant-garamond-latin-wght-normal.woff2?url";
+import newsreaderLatin from "@fontsource-variable/newsreader/files/newsreader-latin-standard-normal.woff2?url";
 import figtreeLatin from "@fontsource-variable/figtree/files/figtree-latin-wght-normal.woff2?url";
 import { cta } from "../lib/links.ts";
 import "../styles/tokens.css";
@@ -139,7 +139,7 @@ const GADS_BOOKING_LABEL = import.meta.env.PUBLIC_GADS_BOOKING_LABEL;
         paints, so scroll-revealed content and painted-in photos start hidden
         instead of flashing on, off, then on again. If the engine never loads,
         drop the mark after 3s and show everything. */}
-    <link rel="preload" href={cormorantLatin} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={newsreaderLatin} as="font" type="font/woff2" crossorigin />
     <link rel="preload" href={figtreeLatin} as="font" type="font/woff2" crossorigin />
     <script is:inline>
       document.documentElement.classList.add("gj-js");

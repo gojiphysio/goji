@@ -63,7 +63,7 @@ h4 {
 
 h1 { font-size: var(--fs-h1); }
 h2 { font-size: var(--fs-h2); }
-h3 { font-size: var(--fs-h3); line-height: 1.1; }
+h3 { font-size: var(--fs-h3); line-height: 1.15; }
 
 p { line-height: var(--lh-body); }
 p + p { margin-top: var(--space-4); }
