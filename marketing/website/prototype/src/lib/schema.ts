@@ -27,7 +27,7 @@ export function businessSchema(origin: URL) {
     name: SITE.fullName,
     alternateName: [SITE.name, "Goji Physio"],
     url: origin.href,
-    image: new URL("/og-image.jpg", origin).href,
+    image: new URL("/og-image-prenatal.jpg", origin).href,
     logo: new URL("/brand/logo_main_transparent.png", origin).href,
     email: SITE.email,
     telephone: SITE.phoneE164,
