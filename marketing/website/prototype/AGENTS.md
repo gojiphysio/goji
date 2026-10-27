@@ -53,7 +53,10 @@ so a token change reflows everything (styleguide is the QA surface).
   `src/lib/booking.ts`) in the same PR, or the backend silently drops it.
   `service_selected` with `detail = "deep_link"` means step 1 was skipped (a
   service page's `/book/?service=…` link already filled it), so count those
-  apart when reading step-1 drop-off.
+  apart when reading step-1 drop-off. `detail = "no_focus"` means Continue was
+  tapped on Physiotherapy without a type: it books as "Not sure / other" and
+  step 3's optional answer lands in the Plato note as "Looking for: …", never
+  in `physio_focus` (that would re-filter clinicians after the slot was chosen).
 - **The landing beacon sends three event types**, all to `/api/web-event`:
   `session_start` / `page_view` on arrival, and `page_engagement` once per page
   load on first hide (`visibilitychange` → hidden, or `pagehide`), carrying
