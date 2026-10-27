@@ -4,6 +4,9 @@
  * and footer. Pass `bare` to drop the header/footer (used by the styleguide).
  */
 import "@fontsource-variable/inter";
+import interLatin from "@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url";
+import jakartaLatin600 from "@fontsource/plus-jakarta-sans/files/plus-jakarta-sans-latin-600-normal.woff2?url";
+import { cta } from "../lib/links.ts";
 import "@fontsource/plus-jakarta-sans/400.css";
 import "@fontsource/plus-jakarta-sans/500.css";
 import "@fontsource/plus-jakarta-sans/600.css";
@@ -133,6 +136,18 @@ const GADS_BOOKING_LABEL = import.meta.env.PUBLIC_GADS_BOOKING_LABEL;
     {noindex && <meta name="robots" content="noindex" />}
     <link rel="icon" type="image/png" href="/brand/logo_mark_transparent.png" />
     <meta name="theme-color" content="#f7f2e0" />
+
+    {/* First paint: preload the two faces above the fold so text paints in
+        its own font, and mark the page for the watercolour layer before it
+        paints, so scroll-revealed content and painted-in photos start hidden
+        instead of flashing on, off, then on again. If the engine never loads,
+        drop the mark after 3s and show everything. */}
+    <link rel="preload" href={interLatin} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={jakartaLatin600} as="font" type="font/woff2" crossorigin />
+    <script is:inline>
+      document.documentElement.classList.add("gj-js");
+      setTimeout(function () { if (!window.Goji) document.documentElement.classList.remove("gj-js"); }, 3000);
+    </script>
 
     {/* Open Graph / Twitter */}
     <meta property="og:type" content="website" />
@@ -461,7 +476,7 @@ const GADS_BOOKING_LABEL = import.meta.env.PUBLIC_GADS_BOOKING_LABEL;
                 <ul>
                   <li>{SITE.address.line1}<br />{SITE.address.line2}</li>
                   {SITE.hours.map((h) => <li>{h.days}: {h.time}</li>)}
-                  <li>{SITE.phone}</li>
+                  <li><a href={cta("web-wa")} target="_blank" rel="noopener noreferrer" aria-label={`WhatsApp us on ${SITE.phone}`}>{SITE.phone} (WhatsApp)</a></li>
                   <li><a href={`mailto:${SITE.email}`}>{SITE.email}</a></li>
                   <li><a href="/getting-here/">Getting here</a></li>
                   <li><a href={SITE.googleMaps} target="_blank" rel="noopener noreferrer">Open in Google Maps ↗</a></li>
@@ -502,7 +517,6 @@ const GADS_BOOKING_LABEL = import.meta.env.PUBLIC_GADS_BOOKING_LABEL;
         background-color: color-mix(in srgb, var(--bg-page) 84%, transparent);
         -webkit-backdrop-filter: saturate(1.2) blur(14px);
         backdrop-filter: saturate(1.2) blur(14px);
-        border-bottom: 1px solid var(--rule);
       }
       .site-header__logo { flex: none; display: block; }
       .site-header__logo :global(.logo) { margin-inline: -8px; }

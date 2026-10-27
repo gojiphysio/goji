@@ -212,8 +212,11 @@ const reviews = [
 >
   {/* ---- Hero: copy left, petal photo + ripening bloom right, dawn wash behind.
        Everything here is visible on first paint; only the paint moves. ---- */}
-  <section class="hero gj-washed">
-    <div class="gj-wc gj-wc--multiply gj-wc-wash" data-gj-wash="dawn" data-seed="5" aria-hidden="true"></div>
+  <div class="home gj-washed">
+  {/* One watercolour wash runs down the whole page (painted at half
+      resolution: it is soft anyway), so sections flow without divider bands. */}
+  <div class="gj-wc gj-wc--multiply gj-wc-wash" data-gj-wash="page" data-seed="5" data-dpr="0.5" data-immediate aria-hidden="true"></div>
+  <section class="hero">
     <div class="container hero__inner">
       <div class="hero__text">
         <p class="hero__tagline">Care that <PaintedWord>grows</PaintedWord> with you.</p>
@@ -387,11 +390,11 @@ const reviews = [
           team.map((t, i) => (
             <a href={`/team/${t.slug}/`} class="person">
               <PetalPhoto
-                src={`/photos/team/${t.slug}.webp`}
+                src={`/photos/team/portrait/${t.slug}.webp`}
                 alt={`${t.name}, ${t.role} at Goji Physiotherapy`}
                 paint
                 flip={i % 2 === 1}
-                position="50% 28%"
+                position="50% 40%"
                 class="person__photo"
               />
               <span class="person__role">{t.role}</span>
@@ -405,7 +408,7 @@ const reviews = [
   </section>
 
   {/* ---- For every stage of growth: bud, flower, ripe berry ---- */}
-  <section class="growth gj-washed">
+  <section class="growth">
     <div class="container growth__inner">
       <div class="growth__stages" role="img" aria-label="Watercolour paintings of a goji plant at three stages: a lilac bud, an open flower, and a ripe red berry">
         <div class="gj-wc gj-wc--multiply gj-wc-bloom" data-gj-bloom="node-bud" data-seed="7" aria-hidden="true"></div>
@@ -499,7 +502,7 @@ const reviews = [
       </figure>
     </div>
   </section>
-
+  </div>
 </BaseLayout>
 
 <script>
@@ -593,7 +596,7 @@ const reviews = [
   /* ======================================================
      Services
      ====================================================== */
-  .services { padding-block: var(--section-y); background: var(--bg-raised); border-block: 1px solid var(--rule); }
+  .services { padding-block: var(--section-y); }
   .service-grid {
     margin-top: var(--space-7);
     display: grid;
@@ -601,6 +604,8 @@ const reviews = [
     grid-auto-columns: min(84%, 340px);
     gap: var(--space-4);
     overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
     scroll-snap-type: x mandatory;
     padding-bottom: var(--space-4);
     margin-inline: calc(var(--gutter) * -1);
@@ -740,6 +745,8 @@ const reviews = [
     grid-auto-columns: min(72%, 280px);
     gap: var(--space-5);
     overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
     scroll-snap-type: x mandatory;
     margin-inline: calc(var(--gutter) * -1);
     padding: 0 var(--gutter) var(--space-4);
@@ -761,7 +768,7 @@ const reviews = [
   /* ======================================================
      Every stage of growth
      ====================================================== */
-  .growth { padding-block: var(--section-y); background: var(--blush); }
+  .growth { padding-block: var(--section-y); }
   .growth__inner { display: grid; gap: var(--space-7); align-items: center; }
   .growth__stages { display: grid; grid-template-columns: repeat(3, 1fr); align-items: end; max-width: 620px; }
   /* each painting fills only the middle of its square, so let them overlap */
@@ -785,7 +792,7 @@ const reviews = [
   .reviews__wrap { margin-top: var(--space-7); }
   .reviews__track {
     display: grid; grid-auto-flow: column; grid-auto-columns: min(86%, 420px); gap: var(--space-5);
-    overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none;
+    overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scrollbar-width: none;
     margin-inline: calc(var(--gutter) * -1); padding-inline: var(--gutter); scroll-padding-inline: var(--gutter);
   }
   .reviews__track::-webkit-scrollbar { display: none; }

@@ -164,9 +164,9 @@ so a token change reflows everything (styleguide is the QA surface).
 - **Prices carry an "as of" month** (`SITE.pricesAsOf`, shown on `/services`,
   the hub and in `llms.txt`). Bump it in the same PR as any price change or
   re-confirmation; `check_dist.py` fails if `llms.txt` disagrees with the site.
-- **The phone number is visible as plain text** (`SITE.phone` in the footer,
-  homepage contact block and `/getting-here`), never a `tel:` link: a call link
-  can't go through the tracked redirector, and WhatsApp stays the primary CTA.
+- **The phone number is never a `tel:` link** (a call link can't go through the
+  tracked redirector). Where it is tappable (footer, `/getting-here`) it opens
+  WhatsApp through `cta("web-wa")`, so the tap is still tracked.
 - **Every image gets descriptive alt text** (what a sighted visitor sees, as a
   sentence), and key facts live in static HTML, never injected by script:
   answer engines and agents read the accessibility tree and raw HTML.

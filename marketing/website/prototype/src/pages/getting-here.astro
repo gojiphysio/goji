@@ -15,6 +15,7 @@ import Button from "../components/Button.astro";
 import YouTubeShort from "../components/YouTubeShort.astro";
 import { Icon } from "astro-icon/components";
 import { SITE } from "../lib/site.ts";
+import { cta } from "../lib/links.ts";
 
 const title = "Getting Here | Goji Physiotherapy at Lentor MRT";
 const description =
@@ -60,7 +61,7 @@ const breadcrumbSchema = {
         <address class="gh-hero__address">
           {SITE.address.line1}<br />
           {SITE.address.line2}<br />
-          {SITE.phone}
+          <a href={cta("web-wa")} target="_blank" rel="noopener noreferrer" aria-label={`WhatsApp us on ${SITE.phone}`}>{SITE.phone}</a>
         </address>
         <div class="gh-hero__cta">
           <Button href={SITE.googleMaps} variant="primary" size="lg">Get directions</Button>

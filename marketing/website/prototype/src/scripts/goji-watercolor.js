@@ -376,6 +376,19 @@
       });
       return { fit: "cover", dur: 3200, breathe: true, strokes: s };
     },
+    /* one wash down a whole page: soft pools alternating left and right, sized
+       to the page width; aspect (height / width) sets how many */
+    page: function (r, aspect) {
+      var n = Math.max(5, Math.min(36, Math.round((aspect || 4) * 1.5))), s = [];
+      var cols = ["blush", "clay", "blush", "lilac"];
+      for (var i = 0; i < n; i++) {
+        var left = i % 2 === 0, rx = 0.3 + r() * 0.14;
+        s.push({ shape: "circle", color: cols[i % cols.length], x: left ? 0.04 + r() * 0.12 : 0.84 + r() * 0.12, y: (i + 0.35 + r() * 0.3) / n,
+          rx: rx, ry: rx * (0.6 + r() * 0.25), layers: 20, alpha: cols[i % cols.length] === "blush" ? 0.05 : 0.032,
+          rough: 0.26, spread: 0.22, grain: 0.2, start: Math.min(0.5, i * 0.06), dur: 0.6 });
+      }
+      return { fit: "width", dur: 3200, strokes: s };
+    },
     dusk: function () {
       return { fit: "cover", dur: 3200, breathe: true, strokes: [
         { shape: "circle", color: "deep-red", x: 0.92, y: 0.08, rx: 0.36, ry: 0.3, layers: 26, alpha: 0.07, rough: 0.26, spread: 0.26, start: 0, dur: 0.8 },
@@ -389,8 +402,13 @@
   function paint(el, opts) {
     opts = opts || {};
     var seed = opts.seed == null ? 3 : opts.seed;
-    var comp = (PRESETS[opts.preset] || PRESETS.ripen)(rng(seed * 31 + 1));
-    comp.strokes.forEach(function (s, i) { if (s.seed == null) s.seed = seed * 101 + i * 13 + 1; });
+    var compFn = PRESETS[opts.preset] || PRESETS.ripen;
+    function compose(aspect) {
+      var c = compFn(rng(seed * 31 + 1), aspect);
+      c.strokes.forEach(function (s, i) { if (s.seed == null) s.seed = seed * 101 + i * 13 + 1; });
+      return c;
+    }
+    var comp = compose();
     var canvas = D.createElement("canvas");
     canvas.setAttribute("aria-hidden", "true");
     el.appendChild(canvas);
@@ -400,13 +418,19 @@
     var dur = comp.dur * (opts.speed ? 1 / opts.speed : 1);
 
     function build() {
+      if (comp.fit === "width") el.style.height = "";
       w = el.clientWidth; h = el.clientHeight;
       if (!w || !h) return false;
-      dpr = opts.dpr || Math.min(W.devicePixelRatio || 1, comp.fit === "cover" ? 1 : 2);
+      /* a page-long wash: compose for this page's shape, then freeze its height so
+         an accordion opening below does not repaint the whole page */
+      if (comp.fit === "width") { comp = compose(h / w); el.style.height = h + "px"; }
+      dpr = opts.dpr || Math.min(W.devicePixelRatio || 1, comp.fit === "cover" || comp.fit === "width" ? 1 : 2);
+      /* stay under mobile Safari's canvas area limit (~16.7M px) */
+      if (w * h * dpr * dpr > 14e6) dpr = Math.sqrt(14e6 / (w * h));
       canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr);
       var S = Math.min(w, h), ox = (w - S) / 2, oy = (h - S) / 2;
-      var place = comp.fit === "cover"
-        ? { U: Math.max(w, h), x: function (v) { return v * w; }, y: function (v) { return v * h; } }
+      var place = comp.fit === "cover" || comp.fit === "width"
+        ? { U: comp.fit === "width" ? w : Math.max(w, h), x: function (v) { return v * w; }, y: function (v) { return v * h; } }
         : { U: S, x: function (v) { return ox + v * S; }, y: function (v) { return oy + v * S; } };
       blots = comp.strokes.map(function (st) { return paintStroke(st, place, dpr, tokenColor(el, st.color)); });
       return true;
@@ -471,7 +495,7 @@
         clearTimeout(rt);
         rt = setTimeout(function () {
           if (pending) { start(); return; }
-          if (Math.abs(el.clientWidth - w) < 2 && Math.abs(el.clientHeight - h) < 2) return;
+          if (Math.abs(el.clientWidth - w) < 2 && (comp.fit === "width" || Math.abs(el.clientHeight - h) < 2)) return;
           if (state === "idle") return;
           build();
           if (state === "done" || state === "breathing") frame(dur, performance.now());
@@ -504,14 +528,14 @@
   /* ---------- Photo reveal: the image is painted in through wet washes ---------- */
   function veil(frameEl, opts) {
     opts = opts || {};
-    if (reducedMotion()) return function () {};
     var img = frameEl.querySelector("img"), canvas = null, raf = 0, dead = false;
+    if (reducedMotion()) { if (img) img.style.opacity = "1"; return function () {}; }
     /* hidden until it scrolls in, so no first-paint flash of the bare photo */
     if (img) { img.style.opacity = "0"; img.style.transform = "scale(1.06)"; }
     function run() {
       if (dead) return;
       var w = frameEl.clientWidth, h = frameEl.clientHeight;
-      if (!w || !h) { if (img) img.style.opacity = ""; return; }
+      if (!w || !h) { if (img) img.style.opacity = "1"; return; }
       var dpr = Math.min(W.devicePixelRatio || 1, 1.5), r = rng(opts.seed || 11), t0 = 0, dur = opts.dur || 1900;
       canvas = D.createElement("canvas");
       canvas.className = "gj-veil"; canvas.setAttribute("aria-hidden", "true");
@@ -539,7 +563,7 @@
       }
       draw(0);
       if (img) {
-        img.style.opacity = "";
+        img.style.opacity = "1";
         img.style.transition = "transform 2400ms cubic-bezier(.22,1,.36,1)";
         requestAnimationFrame(function () { img.style.transform = "scale(1)"; });
       }
@@ -771,7 +795,7 @@
   function enhance(root) {
     root = root || D;
     root.querySelectorAll("[data-gj-bloom]").forEach(function (el) { paint(el, { preset: el.getAttribute("data-gj-bloom") || "ripen", seed: +el.getAttribute("data-seed") || 3, loop: el.hasAttribute("data-loop"), delay: +el.getAttribute("data-delay") || 0 }); });
-    root.querySelectorAll("[data-gj-wash]").forEach(function (el) { paint(el, { preset: el.getAttribute("data-gj-wash") || "dawn", seed: +el.getAttribute("data-seed") || 5 }); });
+    root.querySelectorAll("[data-gj-wash]").forEach(function (el) { paint(el, { preset: el.getAttribute("data-gj-wash") || "dawn", seed: +el.getAttribute("data-seed") || 5, dpr: +el.getAttribute("data-dpr") || undefined, immediate: el.hasAttribute("data-immediate") }); });
     root.querySelectorAll("[data-gj-veil]").forEach(function (el) { veil(el); });
     root.querySelectorAll("[data-gj-reveal], .gj-reveal, .gj-mark").forEach(function (el) { onVisible(el, function () { el.classList.add("is-in"); }, 0.15); });
   }
