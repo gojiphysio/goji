@@ -8,7 +8,7 @@ export const SITE = {
   name: "Goji Physiotherapy",
   fullName: "Goji Women's and Family Physiotherapy",
   promise:
-    "Good physiotherapy is about more than treating symptoms. It's about helping you understand your body, move with confidence and feel supported along the way.",
+    "Good physiotherapy is about more than treating symptoms. It's about helping you understand your body, move with confidence, and feel supported along the way.",
   tagline: "Care that grows with you.",
   seoTitle: "Goji Physiotherapy | Women's & Family Physio at Lentor MRT",
   seoDescription:
