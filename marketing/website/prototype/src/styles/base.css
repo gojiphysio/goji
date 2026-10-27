@@ -29,6 +29,8 @@ body {
   background-color: var(--bg-page);
   color: var(--text-default);
   font-family: var(--font-body);
+  font-variation-settings: var(--font-body-axes);
+  font-optical-sizing: auto;
   font-size: var(--fs-body);
   font-weight: var(--weight-regular);
   line-height: var(--lh-body);
