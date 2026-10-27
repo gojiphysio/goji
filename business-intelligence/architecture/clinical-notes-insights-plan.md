@@ -97,9 +97,9 @@ That table is the only artefact.
 
 Charles owns this pull (no clinical sign-off needed to run it).
 
-- [ ] Privacy notice covers aggregated, anonymised use
-- [ ] Codebook spot-checked against ~20 patients (step 3 below)
-- [ ] Run window agreed (date, 11 pm – 6 am SGT)
+- [x] Privacy notice covers aggregated, anonymised use (Charles, 2026-10-27)
+- [x] Codebook spot-checked against ~20 patients (2026-10-27; pain rule tightened after the first pass)
+- [x] Run window agreed: 2026-10-28, 00:15 SGT
 
 ## Run steps
 
