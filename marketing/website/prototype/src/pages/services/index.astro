@@ -112,7 +112,7 @@ const schema = {
   description="Physio near Lentor MRT: prenatal, postpartum and pelvic floor, paediatric and scoliosis care, sports injuries and clinical Pilates. In-clinic or home visits."
   schema={schema}
 >
-  <section class="services-hero" data-sticky-hide>
+  <section class="services-hero">
     <div class="container">
       <h1>Our services</h1>
       <p class="services-hero__lead">
@@ -197,7 +197,7 @@ const schema = {
     </div>
   </Section>
 
-  <Section tone="linen" id="contact-cta" class="svc-contact">
+  <Section tone="linen" id="contact-cta">
     <div class="contact-strip">
       <h2>Not sure where to start?</h2>
       <p>Message us on WhatsApp - describe what you are experiencing and we will help you find the right appointment type.</p>
@@ -205,30 +205,7 @@ const schema = {
     </div>
   </Section>
 
-  <!-- Mobile-only CTA bar: appears once the hero's buttons scroll away, hides
-       again over the closing WhatsApp strip and the footer so it never
-       stacks on another CTA or covers footer links. -->
-  <div class="svc-sticky" data-svc-sticky data-search-ignore aria-hidden="true" inert>
-    <Button slug="web-wa" variant="whatsapp" size="md">WhatsApp us</Button>
-    <Button slug="web-book" variant="secondary" size="md">Book</Button>
-  </div>
 </BaseLayout>
-
-<script>
-  const bar = document.querySelector<HTMLElement>("[data-svc-sticky]");
-  const watch = document.querySelectorAll("[data-sticky-hide], .svc-contact, .site-footer");
-  if (bar && watch.length && "IntersectionObserver" in window) {
-    const onScreen = new Set<Element>();
-    const io = new IntersectionObserver((entries) => {
-      for (const e of entries) e.isIntersecting ? onScreen.add(e.target) : onScreen.delete(e.target);
-      const show = onScreen.size === 0;
-      bar.classList.toggle("is-shown", show);
-      bar.toggleAttribute("inert", !show);
-      bar.setAttribute("aria-hidden", String(!show));
-    });
-    watch.forEach((el) => io.observe(el));
-  }
-</script>
 
 <style>
   .services-hero {
@@ -442,32 +419,4 @@ const schema = {
     color: var(--text-muted);
   }
 
-  .svc-sticky {
-    position: fixed;
-    inset: auto 0 0 0;
-    z-index: 40;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--space-2);
-    padding: var(--space-3) var(--space-4) calc(var(--space-3) + env(safe-area-inset-bottom));
-    background-color: color-mix(in srgb, var(--bg-page) 92%, transparent);
-    -webkit-backdrop-filter: saturate(1.2) blur(14px);
-    backdrop-filter: saturate(1.2) blur(14px);
-    border-top: 1px solid var(--color-border);
-    transform: translateY(100%);
-    transition: transform var(--dur) var(--ease);
-  }
-  .svc-sticky.is-shown {
-    transform: none;
-  }
-  .svc-sticky :global(.btn) {
-    width: 100%;
-  }
-  /* Phones only: wider screens keep the header's WhatsApp + Book in view. */
-  @media (min-width: 640px) {
-    .svc-sticky { display: none; }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .svc-sticky { transition: none; }
-  }
 </style>
