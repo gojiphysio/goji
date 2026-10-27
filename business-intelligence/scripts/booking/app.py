@@ -9,6 +9,7 @@ CORS. Endpoints:
   GET  /api/availability-summary?service=&month=&...      -> dates with any slot
   POST /api/book                                          -> create the booking
   POST /api/track                                         -> funnel event (fire-and-forget)
+  POST /internal/refresh-snapshot                         -> re-page Plato (Cloud Scheduler, 5 min)
   GET  /healthcheck
 """
 from __future__ import annotations
@@ -25,7 +26,7 @@ from flask import Flask, jsonify, request
 from .availability import SGT, derive_availability, derive_available_days
 from .booking import BookingError, create_booking
 from .config import CLINICIANS, MAX_ADVANCE_DAYS, SERVICES
-from .plato import PlatoBusy, PlatoClient, PlatoThrottled
+from .plato import PlatoBusy, PlatoClient, PlatoError, PlatoThrottled
 from . import mailer
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
@@ -77,6 +78,20 @@ AVAIL_STALE_MAX_S = float(os.environ.get("AVAIL_STALE_MAX", "1800"))
 # still checks day-level truth fresh.
 SUMMARY_TTL_S = float(os.environ.get("AVAIL_SUMMARY_CACHE_TTL", "300"))
 _summary_cache: dict[tuple, tuple[float, dict]] = {}
+
+# The availability snapshot (see SNAPSHOT_MAX_AGE_S in plato.py). The refresh
+# endpoint is unauthenticated on purpose — no secret to mint or rotate — so it
+# throttles itself instead: however often it is hit, Plato is paged at most
+# once per SNAPSHOT_MIN_INTERVAL_S, the same as the scheduler alone.
+SNAPSHOT_MIN_INTERVAL_S = float(os.environ.get("SNAPSHOT_MIN_INTERVAL", "240"))
+# The deep healthcheck fails once the snapshot is this old (the scheduler or
+# the refresh is broken; the form has fallen back to live Plato reads)...
+SNAPSHOT_ALERT_AGE_S = float(os.environ.get("SNAPSHOT_ALERT_AGE", "1200"))
+# ...but not in the first minutes after a cold start, before the first tick.
+SNAPSHOT_GRACE_S = float(os.environ.get("SNAPSHOT_GRACE", "600"))
+_snapshot_lock = threading.Lock()
+_snapshot_last_try = float("-inf")
+_STARTED = time.monotonic()
 
 
 def plato() -> PlatoClient:
@@ -144,6 +159,8 @@ def healthcheck_deep():
         `derivation_failed`   — Plato or our derivation threw (the 502 the
                                 visitor sees as "We couldn't load times just now")
         `no_bookable_dates`   — it ran clean but returned an empty calendar
+        `snapshot_stale`      — the 5-minute snapshot refresh has stopped, so
+                                every click is back on live Plato reads
 
     Uses one range fetch, which the Plato client caches, and the whole answer is
     cached for DEEP_TTL_S. Public by design: the uptime check is unauthenticated
@@ -191,9 +208,54 @@ def healthcheck_deep():
             payload["reason"] = "no_bookable_dates"
         status = 200 if ok else 503
 
+    age = plato().snapshot_age_s()
+    payload["snapshot_age_s"] = None if age is None else int(age)
+    if (status == 200 and time.monotonic() - _STARTED > SNAPSHOT_GRACE_S
+            and (age is None or age > SNAPSHOT_ALERT_AGE_S)):
+        log.error("deep healthcheck: availability snapshot is %s",
+                  "missing" if age is None else f"{age:.0f}s old")
+        payload.update(ok=False, reason="snapshot_stale")
+        status = 503
+
     with _deep_lock:
         _deep_cache = (nowm, payload, status)
     return jsonify(payload), status
+
+
+@app.route("/internal/refresh-snapshot", methods=["POST"])
+def refresh_snapshot():
+    """Re-page the bookable window into the availability snapshot.
+
+    Called by Cloud Scheduler (`booking-snapshot-refresh`, every 5 min, off the
+    ingest jobs' minutes). Also keeps the single instance warm, so the snapshot
+    is almost never cold. 200 with stats when refreshed or skipped; 503 when
+    Plato couldn't serve the window in time (the previous snapshot keeps serving
+    until it ages out)."""
+    global _snapshot_last_try
+    if not _snapshot_lock.acquire(blocking=False):
+        return jsonify({"ok": True, "skipped": "refresh in progress"})
+    try:
+        nowm = time.monotonic()
+        if nowm - _snapshot_last_try < SNAPSHOT_MIN_INTERVAL_S:
+            return jsonify({"ok": True, "skipped": "refreshed recently",
+                            "age_s": plato().snapshot_age_s()})
+        _snapshot_last_try = nowm
+        today = datetime.now(SGT).date()
+        start, end = today, today + timedelta(days=MAX_ADVANCE_DAYS)
+        try:
+            stats = plato().refresh_snapshot(start.isoformat(), end.isoformat())
+        except PlatoError as e:  # PlatoBusy / PlatoThrottled / transport
+            log.warning("snapshot refresh failed: %s", e)
+            return jsonify({"ok": False, "error": str(e),
+                            "age_s": plato().snapshot_age_s()}), 503
+        # Answers derived from the old snapshot would outlive it otherwise.
+        with _avail_cache_lock:
+            _avail_cache.clear()
+            _summary_cache.clear()
+        log.info("snapshot refreshed: %s", stats)
+        return jsonify({"ok": True, **stats})
+    finally:
+        _snapshot_lock.release()
 
 
 @app.route("/api/availability")

@@ -98,6 +98,16 @@ DAY_STALE_MAX_AGE_S = float(os.environ.get("PLATO_DAY_STALE_AGE", "1800"))
 # interactive reserve, bulk work stands down for this long and leaves what is
 # left to date clicks and booking writes.
 PLATO_SHARED_HOLD_S = float(os.environ.get("PLATO_SHARED_HOLD", "20"))
+# The availability snapshot: Cloud Scheduler hits /internal/refresh-snapshot
+# every 5 minutes, which pages the whole bookable window (today .. +60 days)
+# into memory. Date clicks and month shading then read it with no Plato call,
+# so the shared key running dry can only make times a few minutes stale, never
+# fail to load. Past this age the snapshot is ignored and the live path below
+# takes over (cold start, or the scheduler stopped).
+SNAPSHOT_MAX_AGE_S = float(os.environ.get("PLATO_SNAPSHOT_MAX_AGE", "900"))
+# How long one refresh may spend paging. Bulk paging gets 13 of the 18/min, so
+# a ~25-page window takes about 2 minutes; Cloud Run's request timeout is 300s.
+SNAPSHOT_BUDGET_S = float(os.environ.get("PLATO_SNAPSHOT_BUDGET", "200"))
 
 
 def _is_leave_title(title: str) -> bool:
@@ -275,6 +285,12 @@ class PlatoClient:
         self._partial: dict[tuple[str, str], tuple[float, int, list[dict]]] = {}
         self._key_locks: dict[tuple[str, str], threading.Lock] = {}
         self._key_locks_guard = threading.Lock()
+        # (taken_at, start, end, rows) — see SNAPSHOT_MAX_AGE_S.
+        self._snapshot: tuple[float, str, str, list[dict]] | None = None
+        # Days we wrote a booking on since the snapshot was taken -> when. Their
+        # slots are read live until the next refresh, so a just-booked time is
+        # never offered to the next visitor.
+        self._dirty_days: dict[str, float] = {}
 
     def _url(self, path: str) -> str:
         return f"{BASE}/{self.db}/{path.lstrip('/')}"
@@ -358,11 +374,18 @@ class PlatoClient:
         * **A failed refresh serves the last copy** rather than an error.
 
         `fresh=True` is for the booking re-check under the clinician lock: it
-        skips the range shortcut and never serves stale. Writing a booking off a
-        90-second-old read would defeat the lock.
+        skips the snapshot and the range shortcut and never serves stale. Writing
+        a booking off a 90-second-old read would defeat the lock.
+
+        Before any of that, a fresh snapshot (refresh_snapshot) that covers the
+        range answers it outright.
         """
         key = (start_date, end_date)
         single = start_date == end_date
+        if not fresh:
+            snap = self._from_snapshot(start_date, end_date)
+            if snap is not None:
+                return snap
         ttl = APPTS_TTL_S if single else APPTS_RANGE_TTL_S
         hit = self._appts_cache.get(key)
         if hit and time.monotonic() - hit[0] < ttl:
@@ -394,6 +417,52 @@ class PlatoClient:
             self._appts_cache[key] = (time.monotonic(), rows)
             return rows
 
+    def refresh_snapshot(self, start_date: str, end_date: str) -> dict:
+        """Page every appointment in [start_date, end_date] in bulk mode and make
+        it the snapshot the visitor path reads. Also refreshes the booking config
+        so its TTL never expires on a visitor's click. Raises PlatoBusy /
+        PlatoError if the window can't be paged within SNAPSHOT_BUDGET_S; the
+        previous snapshot keeps serving until it ages out."""
+        started = time.monotonic()
+        rows = self._page_in_bulk((start_date, end_date),
+                                  {"start_date": start_date, "end_date": end_date},
+                                  budget_s=SNAPSHOT_BUDGET_S)
+        self._tidy_appointments(rows)
+        self._snapshot = (time.monotonic(), start_date, end_date, rows)
+        # Bookings written while we paged may be missing from the pages we
+        # read before them, so only forget days dirtied before we started.
+        self._dirty_days = {d: t for d, t in self._dirty_days.items() if t >= started}
+        self._cfg_ts = time.monotonic() - CONFIG_TTL_S - 1
+        try:
+            self.online_booking_config()
+        except PlatoError as e:  # cold config failure: availability still has the snapshot
+            log.warning("config refresh with the snapshot failed: %s", e)
+        return {"rows": len(rows), "window": [start_date, end_date],
+                "took_s": round(time.monotonic() - started, 1)}
+
+    def snapshot_age_s(self) -> float | None:
+        snap = self._snapshot
+        return None if snap is None else time.monotonic() - snap[0]
+
+    def _from_snapshot(self, start_date: str, end_date: str) -> list[dict] | None:
+        """The rows `appointments(start_date, end_date)` would return, from the
+        snapshot — or None if there is no snapshot, it is past
+        SNAPSHOT_MAX_AGE_S, it doesn't cover the range, or a single day was
+        booked on since it was taken. A month (calendar shading) still reads a
+        dirtied snapshot: the date click re-reads that day live."""
+        snap = self._snapshot
+        if snap is None:
+            return None
+        taken_at, s, e, rows = snap
+        if time.monotonic() - taken_at > SNAPSHOT_MAX_AGE_S:
+            return None
+        if not (s <= start_date and end_date <= e):
+            return None
+        if start_date == end_date and start_date in self._dirty_days:
+            return None
+        return [r for r in rows
+                if start_date <= str(r.get("starttime", ""))[:10] <= end_date]
+
     def _key_lock(self, key: tuple[str, str]) -> threading.Lock:
         """One lock per range, so concurrent identical fetches (two visitors, or
         the summary and the deep healthcheck) share one crawl, not run two."""
@@ -421,9 +490,10 @@ class PlatoClient:
         self._tidy_appointments(rows)
         return rows
 
-    def _page_in_bulk(self, key: tuple[str, str], params: dict) -> list[dict]:
+    def _page_in_bulk(self, key: tuple[str, str], params: dict,
+                      budget_s: float = PLATO_BULK_BUDGET_S) -> list[dict]:
         """Page a long range using only the bulk share of the rate budget, for at
-        most PLATO_BULK_BUDGET_S. Progress survives a PlatoBusy: the next call
+        most `budget_s` (PLATO_BULK_BUDGET_S on the visitor path). Progress survives a PlatoBusy: the next call
         picks up at the next page, so a month Plato can only serve in ~2 minutes
         still completes, as a few short requests instead of one that hangs."""
         started = time.monotonic()
@@ -432,12 +502,12 @@ class PlatoClient:
             began, page, rows = started, 1, []
         while True:
             spent = time.monotonic() - started
-            if spent >= PLATO_BULK_BUDGET_S and page > 1:
+            if spent >= budget_s and page > 1:
                 raise PlatoBusy(f"month still loading ({len(rows)} rows, page {page})")
             try:
                 batch = self.get("appointment", {**params, "current_page": page},
                                  bulk=True,
-                                 max_wait_s=max(0.0, PLATO_BULK_BUDGET_S - spent))
+                                 max_wait_s=max(0.0, budget_s - spent))
             except PlatoError as e:  # out of budget, or cooling down after a 429
                 raise PlatoBusy(str(e)) from e
             got = batch if isinstance(batch, list) else batch.get("data", [])
@@ -548,6 +618,9 @@ class PlatoClient:
         r = self.post("appointment", payload)
         self._appts_cache.clear()  # a write changes availability — never re-read stale
         self._partial.clear()
+        day = str(payload.get("starttime", ""))[:10]
+        if day:
+            self._dirty_days[day] = time.monotonic()
         return r
 
     def delete_appointment(self, appointment_id: str) -> dict:

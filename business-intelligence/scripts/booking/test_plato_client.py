@@ -455,3 +455,93 @@ def test_empty_list_is_still_rejected():
     p = FakePlato([[]])
     with pytest.raises(PlatoError, match="malformed booking config"):
         p.online_booking_config()
+
+
+# --- availability snapshot --------------------------------------------------
+
+def _appt(day, hhmm="10:00"):
+    return {"starttime": f"{day} {hhmm}:00", "endtime": f"{day} 11:00:00", "title": "Patient"}
+
+
+SNAP_ROWS = [_appt("2026-11-02"), _appt("2026-11-03"), _appt("2026-11-20")]
+
+
+def _snapped():
+    """A client holding a fresh snapshot of 2026-11-01..2026-12-31 (one page of
+    rows, then the config refresh that rides along with every snapshot)."""
+    p = FakePlato([SNAP_ROWS, GOOD_CFG])
+    p.refresh_snapshot("2026-11-01", "2026-12-31")
+    p.calls.clear()
+    return p
+
+
+def test_a_fresh_snapshot_answers_days_and_months_without_calling_plato():
+    p = _snapped()
+    assert [r["starttime"][:10] for r in p.appointments("2026-11-03", "2026-11-03")] == ["2026-11-03"]
+    assert len(p.appointments("2026-11-01", "2026-11-30")) == 3
+    assert p.calls == []
+
+
+def test_the_snapshot_refresh_pages_in_bulk_and_refreshes_config():
+    p = FakePlato([SNAP_ROWS, GOOD_CFG])
+    stats = p.refresh_snapshot("2026-11-01", "2026-12-31")
+    assert stats["rows"] == 3
+    assert [c[0] for c in p.calls] == ["appointment", "onlineapptbooking/list"]
+    assert p.bulk_flags[0] is True  # never eats the date-click reserve
+
+
+def test_the_booking_recheck_never_reads_the_snapshot():
+    p = _snapped()
+    p.replies = [[_appt("2026-11-03"), _appt("2026-11-03", "14:00")]]
+    assert len(p.appointments("2026-11-03", "2026-11-03", fresh=True)) == 2
+    assert len(p.calls) == 1
+
+
+def test_an_aged_out_snapshot_falls_back_to_live_reads():
+    from booking import plato as plato_mod
+    p = _snapped()
+    ts, s, e, rows = p._snapshot
+    p._snapshot = (time.monotonic() - plato_mod.SNAPSHOT_MAX_AGE_S - 1, s, e, rows)
+    p.replies = [[]]
+    assert p.appointments("2026-11-03", "2026-11-03") == []
+    assert len(p.calls) == 1
+
+
+def test_a_range_outside_the_snapshot_falls_back_to_live_reads():
+    p = _snapped()
+    p.replies = [[]]
+    p.appointments("2027-01-05", "2027-01-05")
+    assert len(p.calls) == 1
+
+
+def test_a_day_just_booked_reads_live_until_the_next_refresh():
+    """Otherwise the next visitor is offered the slot that was just taken."""
+    p = _snapped()
+    p.post = lambda path, payload: {"success": True, "_id": "x"}
+    p.create_appointment({"starttime": "2026-11-03T10:00:00"})
+    p.replies = [[_appt("2026-11-03"), _appt("2026-11-03", "15:00")]]
+    assert len(p.appointments("2026-11-03", "2026-11-03")) == 2  # live
+    assert len(p.calls) == 1
+    assert len(p.appointments("2026-11-01", "2026-11-30")) == 3  # month shading: snapshot
+    assert len(p.calls) == 1
+
+
+def test_a_refresh_forgets_booked_days_it_has_now_read():
+    p = _snapped()
+    p.post = lambda path, payload: {"success": True, "_id": "x"}
+    p.create_appointment({"starttime": "2026-11-03T10:00:00"})
+    p.replies = [SNAP_ROWS, GOOD_CFG]
+    p.refresh_snapshot("2026-11-01", "2026-12-31")
+    p.calls.clear()
+    p.appointments("2026-11-03", "2026-11-03")
+    assert p.calls == []
+
+
+def test_a_failed_refresh_keeps_the_old_snapshot_serving():
+    p = _snapped()
+    p.replies = [PlatoThrottled("no budget", retry_after_s=20)]
+    with pytest.raises(PlatoBusy):
+        p.refresh_snapshot("2026-11-01", "2026-12-31")
+    p.calls.clear()
+    assert len(p.appointments("2026-11-01", "2026-11-30")) == 3
+    assert p.calls == []
