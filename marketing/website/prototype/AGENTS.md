@@ -173,6 +173,15 @@ so a token change reflows everything (styleguide is the QA surface).
   must stay distinct: AHPC-registered physiotherapist-led vs STOTT PILATES®
   certified instructor-led, and Private package credits are never described as
   interchangeable with Clinical/S&C.
+- **Introductory prices.** While a promotion is active, `priceClinic`
+  (services frontmatter) / `price` (`services.ts`) hold the introductory price
+  and `priceUsual` the usual one; both render beside each other. Drop
+  `priceUsual` and restore the price when it ends. Home visits are the in-clinic
+  physiotherapy fee + $120 (physio and Mummy & Baby only, never Pilates or S&C).
+- **Internal-exam consent wording is one paragraph** across the pelvic floor,
+  prenatal, postpartum and Mummy & Baby pages ("... entirely optional ... only
+  with your informed consent ... Our physiotherapy team is currently
+  all-female."). Keep it identical; don't hard-code "all female" as a promise.
 - **Only claim a physical presence at Lentor.** Wider reach is "home visits
   across Singapore" — no neighbourhood pages implying a clinic elsewhere.
 - **Update `public/llms.txt` in the same PR** as any page/service/price/team

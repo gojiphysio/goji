@@ -62,7 +62,8 @@ const displayPrice = (service: any) => {
   if (service.slug === "paediatric-physiotherapy") {
     return "From $160";  // lowest paediatric variant
   }
-  return fromPrice(service.data.priceClinic, service.data.priceHome);
+  const price = fromPrice(service.data.priceClinic, service.data.priceHome);
+  return service.data.priceUsual ? `${price} introductory (usual $${service.data.priceUsual})` : price;
 };
 
 /** For paediatric physio only (not Schroth), show the shortest variant duration ("From 30 min"). */
@@ -116,9 +117,10 @@ const schema = {
     <div class="container">
       <h1>Our services</h1>
       <p class="services-hero__lead">
-        Every visit starts with an assessment. Each page covers what happens in
-        the appointment and who it's for. Not sure which one you need? Message
-        us and we'll point you to the right appointment. Prices as of {SITE.pricesAsOf}.
+        From physiotherapy and rehabilitation to personalised Pilates and
+        strength training, Goji offers care that meets you where you are.
+        Explore our services to find the right support for your needs and
+        goals. Prices as of {SITE.pricesAsOf}.
       </p>
       <div class="services-hero__cta">
         <Button slug="web-wa" variant="whatsapp" size="lg">Ask us on WhatsApp</Button>
@@ -200,7 +202,7 @@ const schema = {
   <Section tone="linen" id="contact-cta">
     <div class="contact-strip">
       <h2>Not sure where to start?</h2>
-      <p>Message us on WhatsApp - describe what you are experiencing and we will help you find the right appointment type.</p>
+      <p>Chat with our team and we'll help you find the right fit.</p>
       <Button slug="web-wa" variant="whatsapp" size="lg">Ask us on WhatsApp</Button>
     </div>
   </Section>
