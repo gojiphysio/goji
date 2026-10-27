@@ -247,15 +247,6 @@ const reviews = [
   {/* ---- About ---- */}
   <section class="about" id="about">
     <div class="container about__inner">
-      <div class="about__media">
-        <PetalPhoto
-          src="/photos/space/reception-warm.webp"
-          alt="Goji reception at Lentor Modern: a red oval table and cushioned wooden stools beneath the Goji Women's and Family Physiotherapy sign"
-          paint
-          class="about__photo"
-        />
-        <Bloom preset="sprig" seed={4} class="about__bloom" />
-      </div>
       <div class="about__text gj-reveal">
         <h2>What is Goji Physio?</h2>
         <p>
@@ -275,6 +266,15 @@ const reviews = [
           expertise and real understanding. The same trusted support can extend to
           your children and family too.
         </p>
+      </div>
+      <div class="about__media">
+        <PetalPhoto
+          src="/photos/space/reception-warm.webp"
+          alt="Goji reception at Lentor Modern: a red oval table and cushioned wooden stools beneath the Goji Women's and Family Physiotherapy sign"
+          paint
+          class="about__photo"
+        />
+        <Bloom preset="sprig" seed={4} class="about__bloom" />
       </div>
     </div>
   </section>
@@ -584,8 +584,9 @@ const reviews = [
   .about__text p + p { margin-top: 0; }
   .about__text p { max-width: 36em; }
   @media (min-width: 900px) {
-    .about__inner { grid-template-columns: 5fr 6fr; }
-    .about__media :global(.about__bloom) { width: 50%; right: -20%; top: -17%; }
+    .about__inner { grid-template-columns: 6fr 5fr; }
+    .about__media { justify-self: end; width: 100%; }
+    .about__media :global(.about__bloom) { width: 46%; right: auto; left: -12%; top: -16%; }
   }
 
   /* ======================================================
