@@ -60,6 +60,32 @@ const ogImage = new URL("/og-image.jpg", origin);
 
 
 const isHome = Astro.url.pathname === "/";
+
+// Footer site map. Internal links end in "/" (Cloudflare 308s the bare form).
+const footerMap = [
+  {
+    title: "Care",
+    links: [
+      { href: "/services/", label: "All services" },
+      { href: "/womens-health-physiotherapy-singapore/", label: "Women's health" },
+      { href: "/services/pelvic-floor-physiotherapy/", label: "Pelvic floor physiotherapy" },
+      { href: "/pathways/postpartum/", label: "Postpartum pathway" },
+      { href: "/services/paediatric-physiotherapy/", label: "Paediatric physiotherapy" },
+      { href: "/services/clinical-pilates/", label: "Clinical Pilates" },
+      { href: "/conditions/", label: "Conditions we treat" },
+    ],
+  },
+  {
+    title: "Clinic",
+    links: [
+      { href: isHome ? "#about" : "/#about", label: "About Goji" },
+      { href: isHome ? "#team" : "/#team", label: "Our team" },
+      { href: "/media/", label: "Media" },
+      { href: "/physiotherapy-lentor/", label: "Physiotherapy in Lentor" },
+      { href: "/book/", label: "Book an appointment" },
+    ],
+  },
+];
 const nav = [
   { href: isHome ? "#about" : "/#about", label: "About" },
   { href: "/services/", label: "Services" },
@@ -412,17 +438,30 @@ const GADS_BOOKING_LABEL = import.meta.env.PUBLIC_GADS_BOOKING_LABEL;
               <LogoLockup variant="light" height={56} class="site-footer__logo" />
               <p class="site-footer__tagline">{SITE.tagline}</p>
             </div>
-            <div class="site-footer__meta">
-              <p>{SITE.address.line1}<br />{SITE.address.line2}</p>
-              <p><a href={`mailto:${SITE.email}`}>{SITE.email}</a></p>
-              <p>{SITE.phone}</p>
-              <p>
-                <a href="https://www.instagram.com/gojiphysio/" target="_blank" rel="noopener noreferrer">
-                  @gojiphysio ↗
-                </a>
-              </p>
-              <p><a href="/physiotherapy-lentor/">Physiotherapy in Lentor</a></p>
-            </div>
+            <nav class="site-footer__map" aria-label="Site map">
+              {footerMap.map((col) => (
+                <div class="site-footer__col">
+                  <h2 class="site-footer__heading">{col.title}</h2>
+                  <ul>
+                    {col.links.map((l) => (
+                      <li><a href={l.href}>{l.label}</a></li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+              <div class="site-footer__col">
+                <h2 class="site-footer__heading">Visit</h2>
+                <ul>
+                  <li>{SITE.address.line1}<br />{SITE.address.line2}</li>
+                  {SITE.hours.map((h) => <li>{h.days}: {h.time}</li>)}
+                  <li>{SITE.phone}</li>
+                  <li><a href={`mailto:${SITE.email}`}>{SITE.email}</a></li>
+                  <li><a href="/getting-here/">Getting here</a></li>
+                  <li><a href={SITE.googleMaps} target="_blank" rel="noopener noreferrer">Open in Google Maps ↗</a></li>
+                  <li><a href={SITE.instagram} target="_blank" rel="noopener noreferrer">Instagram @gojiphysio ↗</a></li>
+                </ul>
+              </div>
+            </nav>
           </div>
           <div class="container site-footer__copyright">
             <p>&copy; {new Date().getFullYear()} Goji Health. All rights reserved. &middot; <a href="/privacy/">Privacy</a></p>
@@ -509,30 +548,50 @@ const GADS_BOOKING_LABEL = import.meta.env.PUBLIC_GADS_BOOKING_LABEL;
       .site-footer :focus-visible { outline-color: var(--color-linen); }
       .site-footer__brand :global(.site-footer__logo) { margin: -14px -10px -10px; }
       .site-footer__inner {
-        display: flex;
-        flex-wrap: wrap;
+        display: grid;
         gap: var(--space-7);
-        justify-content: space-between;
-        align-items: start;
+      }
+      @media (min-width: 900px) {
+        .site-footer__inner { grid-template-columns: 4fr 8fr; gap: var(--space-9); }
       }
       .site-footer__tagline {
         margin-top: var(--space-3);
         font-size: var(--fs-small);
-        color: color-mix(in srgb, var(--color-linen) 60%, transparent);
-        line-height: var(--lh-body);
+        color: var(--text-on-dark-soft);
         max-width: 28ch;
       }
-      .site-footer__meta {
-        font-size: var(--fs-small);
+      .site-footer__map {
         display: grid;
-        gap: var(--space-2);
-        color: color-mix(in srgb, var(--color-linen) 75%, transparent);
+        gap: var(--space-7) var(--space-6);
+        grid-template-columns: 1fr 1fr;
       }
-      .site-footer__meta a {
+      @media (min-width: 900px) {
+        .site-footer__map { grid-template-columns: 1fr 1fr 1.3fr; }
+      }
+      .site-footer__col:last-child { grid-column: 1 / -1; }
+      @media (min-width: 900px) {
+        .site-footer__col:last-child { grid-column: auto; }
+      }
+      .site-footer__heading {
+        font-family: var(--font-body);
+        font-size: var(--fs-small);
+        font-weight: var(--weight-semibold);
+        letter-spacing: 0;
         color: var(--color-linen);
-        text-decoration: underline;
-        text-underline-offset: 0.2em;
+        margin-bottom: var(--space-4);
       }
+      .site-footer__col ul { list-style: none; padding: 0; display: grid; gap: var(--space-3); }
+      .site-footer__col li {
+        font-size: var(--fs-small);
+        line-height: 1.5;
+        color: var(--text-on-dark-soft);
+      }
+      .site-footer__col a {
+        color: var(--text-on-dark-soft);
+        text-decoration: none;
+        transition: color var(--dur) var(--ease);
+      }
+      .site-footer__col a:hover { color: var(--color-linen); text-decoration: underline; text-underline-offset: 0.2em; }
       .site-footer__copyright {
         margin-top: var(--space-6);
         padding-block: var(--space-4);

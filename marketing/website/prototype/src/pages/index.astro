@@ -1,7 +1,6 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Button from "../components/Button.astro";
-import ContactBlock from "../components/ContactBlock.astro";
 import Bloom from "../components/watercolor/Bloom.astro";
 import PaintedWord from "../components/watercolor/PaintedWord.astro";
 import PetalPhoto from "../components/watercolor/PetalPhoto.astro";
@@ -297,7 +296,6 @@ const reviews = [
               <p class="service-card__meta">{s.meta.join(" · ")}</p>
               <p class="service-card__price">
                 {s.price && <strong>${s.price}</strong>}
-                {s.price && s.priceNote && <span class="service-card__price-note">{s.priceNote}</span>}
               </p>
               <p class="service-card__lead">{s.lead}</p>
               <div class="service-card__cta">
@@ -502,12 +500,6 @@ const reviews = [
     </div>
   </section>
 
-  {/* ---- Contact ---- */}
-  <section class="contact-sec" id="contact">
-    <div class="container">
-      <ContactBlock />
-    </div>
-  </section>
 </BaseLayout>
 
 <script>
@@ -573,7 +565,7 @@ const reviews = [
   .hero__trust li::before { content: ""; width: 6px; height: 8px; border-radius: 50% 50% 50% 50% / 58% 58% 42% 42%; background: var(--berry); }
   .hero__media { position: relative; padding: 0 0 8% 10%; }
   .hero__media :global(.hero__photo) { aspect-ratio: 4 / 5; box-shadow: var(--shadow-lg); }
-  .hero__media :global(.hero__bloom) { position: absolute; left: -12%; bottom: -6%; width: 52%; }
+  .hero__media :global(.hero__bloom) { position: absolute; left: -6%; bottom: -6%; width: 50%; }
   @media (min-width: 900px) {
     .hero__inner { grid-template-columns: 1.15fr 1fr; gap: clamp(3rem, 6vw, 6rem); }
     .hero__media :global(.hero__bloom) { left: -24%; bottom: -4%; }
@@ -658,7 +650,6 @@ const reviews = [
     font-family: var(--font-display); font-variation-settings: var(--font-display-axes);
     font-size: 2rem; font-weight: var(--weight-display); letter-spacing: -0.02em; line-height: 1; color: var(--text-accent);
   }
-  .service-card__price-note { font-size: var(--fs-caption); color: var(--text-muted); }
   .service-card__lead { font-size: var(--fs-small); line-height: 1.6; margin: 0; }
   .service-card__cta { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-4); margin-top: var(--space-3); align-self: end; }
   .service-card__learn {
@@ -772,13 +763,14 @@ const reviews = [
   .growth__inner { display: grid; gap: var(--space-7); align-items: center; }
   .growth__stages { display: grid; grid-template-columns: repeat(3, 1fr); align-items: end; max-width: 620px; }
   /* each painting fills only the middle of its square, so let them overlap */
-  .growth__stages > * { width: 165%; margin-inline: -32.5%; }
+  .growth__stages > * { width: 140%; margin-inline: -20%; }
   .growth__stages > :nth-child(2) { transform: translateY(-12%); }
   .growth__text { display: grid; gap: var(--space-4); }
   .growth__text p + p { margin-top: 0; }
   .growth__text p { max-width: 34em; }
   @media (min-width: 900px) {
     .growth__inner { grid-template-columns: 1fr 1fr; gap: var(--space-9); }
+    .growth__stages > * { width: 165%; margin-inline: -32.5%; }
   }
 
   /* ======================================================
@@ -857,5 +849,4 @@ const reviews = [
   .promise :global(.promise__book) { color: var(--text-on-dark); border-color: color-mix(in srgb, var(--color-linen) 50%, transparent); }
   .promise :global(.promise__book:hover) { background: color-mix(in srgb, var(--color-linen) 10%, transparent); color: var(--text-on-dark); border-color: var(--color-linen); }
   .promise :focus-visible { outline-color: var(--color-linen); }
-  .contact-sec { padding-block: 0 var(--section-y); }
 </style>
