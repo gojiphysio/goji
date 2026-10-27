@@ -91,3 +91,60 @@ def test_day_out_of_plato_budget_is_a_retryable_503_with_a_wait(client, monkeypa
     assert r.status_code == 503
     assert r.get_json()["error"] == "loading"
     assert r.get_json()["retry_after"] == 15
+
+
+# --- /internal/refresh-snapshot ---------------------------------------------
+
+class _SnapPlato:
+    def __init__(self, fail=None):
+        self.windows = []
+        self.fail = fail
+
+    def refresh_snapshot(self, start, end):
+        self.windows.append((start, end))
+        if self.fail:
+            raise self.fail
+        return {"rows": 3, "window": [start, end], "took_s": 0.1}
+
+    def snapshot_age_s(self):
+        return 5.0
+
+
+@pytest.fixture
+def snap(monkeypatch, client):
+    monkeypatch.setattr(app_mod, "_snapshot_last_try", float("-inf"))
+    p = _SnapPlato()
+    monkeypatch.setattr(app_mod, "plato", lambda: p)
+    return p
+
+
+def test_refresh_pages_the_whole_bookable_window(client, snap):
+    r = client.post("/internal/refresh-snapshot")
+    assert r.status_code == 200 and r.get_json()["ok"]
+    (start, end), = snap.windows
+    today = datetime.now(app_mod.SGT).date()
+    assert start == today.isoformat()
+    assert end == (today + app_mod.timedelta(days=app_mod.MAX_ADVANCE_DAYS)).isoformat()
+
+
+def test_refresh_is_throttled_however_often_it_is_hit(client, snap):
+    """Unauthenticated by design, so it must not be a lever for burning the
+    clinic's Plato budget: back-to-back hits page Plato once."""
+    client.post("/internal/refresh-snapshot")
+    r = client.post("/internal/refresh-snapshot")
+    assert r.get_json()["skipped"] == "refreshed recently"
+    assert len(snap.windows) == 1
+
+
+def test_refresh_drops_answers_derived_from_the_old_snapshot(client, snap):
+    app_mod._avail_cache[("k",)] = (0.0, {})
+    app_mod._summary_cache[("k",)] = (0.0, {})
+    client.post("/internal/refresh-snapshot")
+    assert app_mod._avail_cache == {} and app_mod._summary_cache == {}
+
+
+def test_a_refresh_plato_cannot_serve_is_a_503(client, snap):
+    snap.fail = PlatoBusy("window still loading")
+    r = client.post("/internal/refresh-snapshot")
+    assert r.status_code == 503
+    assert r.get_json()["ok"] is False

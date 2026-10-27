@@ -6,6 +6,8 @@ pin exactly when it goes red.
 """
 from __future__ import annotations
 
+import time
+
 import pytest
 
 from booking import app as app_mod
@@ -27,7 +29,19 @@ def _stub_days(monkeypatch, result):
             raise result
         return result
     monkeypatch.setattr(app_mod, "derive_available_days", fake)
-    monkeypatch.setattr(app_mod, "plato", lambda: object())
+    stub = _StubPlato()
+    monkeypatch.setattr(app_mod, "plato", lambda: stub)
+    return stub
+
+
+class _StubPlato:
+    """What the deep check reads off the client besides the derivation."""
+
+    def __init__(self, age_s=30.0):
+        self.age_s = age_s
+
+    def snapshot_age_s(self):
+        return self.age_s
 
 
 def test_liveness_never_touches_plato(client, monkeypatch):
@@ -73,7 +87,7 @@ def test_deep_result_is_cached(client, monkeypatch):
         return ["2026-09-04"]
 
     monkeypatch.setattr(app_mod, "derive_available_days", fake)
-    monkeypatch.setattr(app_mod, "plato", lambda: object())
+    monkeypatch.setattr(app_mod, "plato", lambda: _StubPlato())
     for _ in range(5):
         assert client.get("/healthcheck/deep").status_code == 200
     assert len(calls) == 1
@@ -88,7 +102,7 @@ def test_deep_caches_failures_too(client, monkeypatch):
         raise RuntimeError("boom")
 
     monkeypatch.setattr(app_mod, "derive_available_days", fake)
-    monkeypatch.setattr(app_mod, "plato", lambda: object())
+    monkeypatch.setattr(app_mod, "plato", lambda: _StubPlato())
     for _ in range(5):
         assert client.get("/healthcheck/deep").status_code == 503
     assert len(calls) == 1
@@ -101,3 +115,32 @@ def test_deep_stays_green_when_plato_is_merely_busy(client, monkeypatch):
     r = client.get("/healthcheck/deep")
     assert r.status_code == 200
     assert r.get_json()["busy"] is True
+
+
+# --- availability snapshot --------------------------------------------------
+
+def test_deep_goes_red_when_the_snapshot_refresh_has_stopped(client, monkeypatch):
+    """The form still works off live reads, but the 5-minute refresh is broken
+    and every click is back on Plato's shared budget: worth an alert."""
+    stub = _stub_days(monkeypatch, ["2026-09-04"])
+    stub.age_s = app_mod.SNAPSHOT_ALERT_AGE_S + 1
+    monkeypatch.setattr(app_mod, "_STARTED", -1e9)  # well past the grace period
+    r = client.get("/healthcheck/deep")
+    assert r.status_code == 503
+    assert r.get_json()["reason"] == "snapshot_stale"
+
+
+def test_deep_goes_red_when_no_snapshot_ever_arrived(client, monkeypatch):
+    stub = _stub_days(monkeypatch, ["2026-09-04"])
+    stub.age_s = None
+    monkeypatch.setattr(app_mod, "_STARTED", -1e9)
+    assert client.get("/healthcheck/deep").status_code == 503
+
+
+def test_deep_waits_out_the_first_tick_after_a_cold_start(client, monkeypatch):
+    stub = _stub_days(monkeypatch, ["2026-09-04"])
+    stub.age_s = None
+    monkeypatch.setattr(app_mod, "_STARTED", time.monotonic())
+    r = client.get("/healthcheck/deep")
+    assert r.status_code == 200
+    assert r.get_json()["snapshot_age_s"] is None

@@ -19,11 +19,15 @@ the clinic's real rules — see the plan/validation notes in the repo.
 - `POST /api/track` → funnel event (fire-and-forget) → `marts.booking_funnel_events`
   (stages must be in `VALID_STAGES` in `app.py` — unknown stages are dropped;
   keep the website's `FunnelStage` type in `src/lib/booking.ts` in sync)
+- `POST /internal/refresh-snapshot` → re-pages the bookable window into the
+  availability snapshot (below). Hit by Cloud Scheduler every 5 min; public but
+  self-throttled to one Plato crawl per `SNAPSHOT_MIN_INTERVAL` (240s).
 - `GET /healthcheck` → liveness only ("is the container up"). Never touches Plato.
 - `GET /healthcheck/deep` → **readiness**: derives real availability for the next
   14 days. `200 {"ok":true,...}` = a visitor can book; `503` = they can't, with
-  `reason` = `derivation_failed` (Plato/derivation threw) or `no_bookable_dates`
-  (ran clean, empty calendar). Result cached 60s so probing it can't eat Plato's
+  `reason` = `derivation_failed` (Plato/derivation threw), `no_bookable_dates`
+  (ran clean, empty calendar) or `snapshot_stale` (the 5-min refresh has
+  stopped; clicks are back on live Plato reads). Result cached 60s so probing it can't eat Plato's
   budget. This is what the uptime check watches — plain `/healthcheck` stayed
   green through the 2026-09-01 outage, which is why it exists.
 
@@ -68,6 +72,21 @@ Three rules follow from that budget:
   answered from a cached month up to `PLATO_DAY_STALE_AGE` old, and an
   out-of-budget day returns `503 {"error":"loading","retry_after":N}`, which the
   form waits out (up to 30s) instead of showing an error.
+- **Visitors read a snapshot, not Plato.** Every 5 min Cloud Scheduler calls
+  `/internal/refresh-snapshot`, which pages today..+60 days (~25 pages, bulk
+  share) into memory. Date clicks and month shading read it with no Plato call,
+  so the shared key running dry can only make times up to ~5 min stale. The
+  booking re-check still reads the day live (`fresh=True`), a day we just booked
+  on reads live until the next refresh, and past `PLATO_SNAPSHOT_MAX_AGE` (15
+  min) everything falls back to the live path above. The scheduler tick also
+  keeps the single instance warm. Schedule (once, off the ingest jobs' minutes):
+  ```bash
+  gcloud scheduler jobs create http booking-snapshot-refresh \
+    --location asia-southeast1 --schedule "3-58/5 * * * *" \
+    --time-zone "Asia/Singapore" --http-method POST \
+    --uri "https://booking.gojiphysio.com/internal/refresh-snapshot" \
+    --attempt-deadline 300s
+  ```
 - **`--max-instances=1` is load-bearing** for the limiter, not just the booking
   locks. Raising it multiplies our request rate by the instance count.
 
