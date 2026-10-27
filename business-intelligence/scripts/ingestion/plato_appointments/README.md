@@ -73,12 +73,14 @@ bq query --use_legacy_sql=false \
 
 ## Schedule it
 
-Every 15 minutes, all day:
+Every 15 minutes, all day, at :07/:22/:37/:52: off the :00/:30 slots so it
+never pages Plato at the same time as the invoices job (the key's 20 req/min is
+shared with the website booking form):
 
 ```bash
 gcloud scheduler jobs create http plato-appointments-15min \
   --location asia-southeast1 \
-  --schedule "*/15 * * * *" \
+  --schedule "7,22,37,52 * * * *" \
   --time-zone "Asia/Singapore" \
   --uri "https://run.googleapis.com/v2/projects/goji-bi/locations/asia-southeast1/jobs/plato-appointments-ingest:run" \
   --http-method POST \

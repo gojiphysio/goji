@@ -51,6 +51,12 @@ source (Instagram, Search Console, GBP, …).
 - The **ingestion SA** writes `raw_*`; the **dashboard SA** reads `stg`/`marts`
   (one `dataViewer` grant per new `raw_*` dataset, or authorized views).
 - Schedule with **Cloud Scheduler** (daily unless the source needs more).
+- **The Plato key is shared with the website booking form** (20 req/min,
+  clinic-wide). Plato jobs keep `PLATO_HEADROOM` (10) of it free, run off the
+  :00/:30 slots and off each other's minutes, and never re-page what they don't
+  need. Check a Plato filter actually filters before relying on it:
+  `modified_since` on `/invoice` is ignored, so `plato_invoices` stops by
+  invoice date instead (2026-10-27).
 - Wire into `.github/workflows/deploy-dashboard.yml`: add the path, a change-detect
   output, a test step, and a gated `gcloud run jobs deploy` step (copy the
   `plato_patients` block). Tests gate the deploy.

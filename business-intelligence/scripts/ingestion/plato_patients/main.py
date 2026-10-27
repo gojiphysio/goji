@@ -53,6 +53,10 @@ log = logging.getLogger("plato-patients-ingest")
 
 PLATO_BASE = "https://clinic.platomedical.com/api"
 PER_PAGE_SLEEP_S = 3
+# The key's 20 req/min is shared with the website booking form. Once Plato
+# reports this many or fewer left, wait for the window to reset rather than
+# take them, so a patient picking a date always has budget.
+PLATO_HEADROOM = 10
 TIMEOUT_S = 30
 
 
@@ -295,8 +299,9 @@ def paged_get(session: requests.Session, url: str,
             return
         yield from batch
         rem = r.headers.get("x-ratelimit-remaining")
-        # Plato resets every 60s; if we're nearly out, wait a full window.
-        time.sleep(60 if (rem and rem.isdigit() and int(rem) < 2) else PER_PAGE_SLEEP_S)
+        # Plato resets every 60s; leave PLATO_HEADROOM for the booking form.
+        time.sleep(60 if (rem and rem.isdigit() and int(rem) <= PLATO_HEADROOM)
+                   else PER_PAGE_SLEEP_S)
         page += 1
 
 
