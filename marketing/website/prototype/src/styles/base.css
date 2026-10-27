@@ -29,6 +29,8 @@ body {
   background-color: var(--bg-page);
   color: var(--text-default);
   font-family: var(--font-body);
+  font-variation-settings: var(--font-body-axes);
+  font-optical-sizing: auto;
   font-size: var(--fs-body);
   font-weight: var(--weight-regular);
   line-height: var(--lh-body);
@@ -61,7 +63,7 @@ h4 {
 
 h1 { font-size: var(--fs-h1); }
 h2 { font-size: var(--fs-h2); }
-h3 { font-size: var(--fs-h3); line-height: var(--lh-snug); }
+h3 { font-size: var(--fs-h3); line-height: 1.15; }
 
 p { line-height: var(--lh-body); }
 p + p { margin-top: var(--space-4); }

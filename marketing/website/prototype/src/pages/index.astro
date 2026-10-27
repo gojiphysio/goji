@@ -212,8 +212,11 @@ const reviews = [
 >
   {/* ---- Hero: copy left, petal photo + ripening bloom right, dawn wash behind.
        Everything here is visible on first paint; only the paint moves. ---- */}
-  <section class="hero gj-washed">
-    <div class="gj-wc gj-wc--multiply gj-wc-wash" data-gj-wash="dawn" data-seed="5" aria-hidden="true"></div>
+  <div class="home gj-washed">
+  {/* One watercolour wash runs down the whole page (painted at half
+      resolution: it is soft anyway), so sections flow without divider bands. */}
+  <div class="gj-wc gj-wc--multiply gj-wc-wash" data-gj-wash="page" data-seed="5" data-dpr="0.5" data-immediate aria-hidden="true"></div>
+  <section class="hero">
     <div class="container hero__inner">
       <div class="hero__text">
         <p class="hero__tagline">Care that <PaintedWord>grows</PaintedWord> with you.</p>
@@ -239,7 +242,7 @@ const reviews = [
           position="50% 30%"
           class="hero__photo"
         />
-        <Bloom preset="ripen" class="hero__bloom" label="A watercolour goji flower opening and ripening into a red berry" />
+        <Bloom preset="ripen" speed={1.5} class="hero__bloom" label="A watercolour goji flower opening and ripening into a red berry" />
       </div>
     </div>
   </section>
@@ -274,7 +277,7 @@ const reviews = [
           paint
           class="about__photo"
         />
-        <Bloom preset="sprig" seed={4} class="about__bloom" />
+        <Bloom preset="sprig" seed={4} speed={1.6} class="about__bloom" />
       </div>
     </div>
   </section>
@@ -386,11 +389,11 @@ const reviews = [
           team.map((t, i) => (
             <a href={`/team/${t.slug}/`} class="person">
               <PetalPhoto
-                src={`/photos/team/${t.slug}.webp`}
+                src={`/photos/team/portrait/${t.slug}.webp`}
                 alt={`${t.name}, ${t.role} at Goji Physiotherapy`}
                 paint
                 flip={i % 2 === 1}
-                position="50% 28%"
+                position="50% 40%"
                 class="person__photo"
               />
               <span class="person__role">{t.role}</span>
@@ -404,12 +407,12 @@ const reviews = [
   </section>
 
   {/* ---- For every stage of growth: bud, flower, ripe berry ---- */}
-  <section class="growth gj-washed">
+  <section class="growth">
     <div class="container growth__inner">
       <div class="growth__stages" role="img" aria-label="Watercolour paintings of a goji plant at three stages: a lilac bud, an open flower, and a ripe red berry">
-        <div class="gj-wc gj-wc--multiply gj-wc-bloom" data-gj-bloom="node-bud" data-seed="7" aria-hidden="true"></div>
-        <div class="gj-wc gj-wc--multiply gj-wc-bloom" data-gj-bloom="node-flower" data-seed="8" data-delay="900" aria-hidden="true"></div>
-        <div class="gj-wc gj-wc--multiply gj-wc-bloom" data-gj-bloom="node-berry" data-seed="9" data-delay="1900" aria-hidden="true"></div>
+        <div class="gj-wc gj-wc--multiply gj-wc-bloom" data-gj-bloom="node-bud" data-seed="7" data-speed="1.6" aria-hidden="true"></div>
+        <div class="gj-wc gj-wc--multiply gj-wc-bloom" data-gj-bloom="node-flower" data-seed="8" data-speed="1.6" data-delay="350" aria-hidden="true"></div>
+        <div class="gj-wc gj-wc--multiply gj-wc-bloom" data-gj-bloom="node-berry" data-seed="9" data-speed="1.6" data-delay="700" aria-hidden="true"></div>
       </div>
       <div class="growth__text gj-reveal">
         <h2>For every stage of growth</h2>
@@ -498,7 +501,7 @@ const reviews = [
       </figure>
     </div>
   </section>
-
+  </div>
 </BaseLayout>
 
 <script>
@@ -543,13 +546,13 @@ const reviews = [
   }
   .hero__text { display: grid; gap: var(--space-4); align-content: center; }
   .hero__tagline { margin-bottom: var(--space-2) !important; }
-  .hero__h1 { font-family: var(--font-body); font-size: var(--fs-body); line-height: 1.45; font-weight: var(--weight-semibold); letter-spacing: 0; margin: 0; }
+  .hero__h1 { font-family: var(--font-body); font-variation-settings: var(--font-body-axes); font-size: var(--fs-body); line-height: 1.45; font-weight: var(--weight-semibold); letter-spacing: 0; margin: 0; }
   .hero__lead { color: var(--text-muted); }
   .hero__tagline {
     font-family: var(--font-display);
     font-variation-settings: var(--font-display-axes);
     /* sized so "Care that grows" holds one line beside the photo */
-    font-size: clamp(2.25rem, 1.7rem + 2.2vw, 3.25rem);
+    font-size: clamp(2.375rem, 1.8rem + 2.3vw, 3.375rem);
     font-weight: var(--weight-display);
     line-height: var(--lh-tight);
     letter-spacing: var(--tracking-display);
@@ -592,7 +595,7 @@ const reviews = [
   /* ======================================================
      Services
      ====================================================== */
-  .services { padding-block: var(--section-y); background: var(--bg-raised); border-block: 1px solid var(--rule); }
+  .services { padding-block: var(--section-y); }
   .service-grid {
     margin-top: var(--space-7);
     display: grid;
@@ -600,13 +603,16 @@ const reviews = [
     grid-auto-columns: min(84%, 340px);
     gap: var(--space-4);
     overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
     scroll-snap-type: x mandatory;
     padding-bottom: var(--space-4);
     margin-inline: calc(var(--gutter) * -1);
     padding-inline: var(--gutter);
     scroll-padding-inline: var(--gutter);
-    scrollbar-width: thin;
+    scrollbar-width: none;
   }
+  .service-grid::-webkit-scrollbar { display: none; }
   @media (min-width: 900px) {
     .service-grid {
       grid-auto-flow: row;
@@ -644,11 +650,11 @@ const reviews = [
     background: var(--blush); color: var(--color-primary);
     margin-bottom: var(--space-2);
   }
-  .service-card__name { font-size: 1.125rem; margin: 0; }
+  .service-card__name { font-size: 1.25rem; margin: 0; }
   .service-card__meta { font-size: var(--fs-caption); color: var(--text-muted); margin: 0; }
   .service-card__price { display: flex; align-items: baseline; gap: var(--space-3); margin: 0; }
   .service-card__price strong {
-    font-family: var(--font-display); font-variation-settings: var(--font-display-axes);
+    font-family: var(--font-body); font-variation-settings: var(--font-body-axes);
     font-size: var(--fs-h3); font-weight: var(--weight-bold); letter-spacing: -0.01em; line-height: 1; color: var(--text-accent);
   }
   .service-card__lead { font-size: var(--fs-small); line-height: 1.6; margin: 0; }
@@ -680,8 +686,8 @@ const reviews = [
   .accordion__trigger::-webkit-details-marker { display: none; }
   .accordion__name {
     flex: 1;
-    font-family: var(--font-display); font-variation-settings: var(--font-display-axes);
-    font-size: 1rem; font-weight: var(--weight-display); letter-spacing: -0.01em; line-height: 1.3;
+    font-family: var(--font-body); font-variation-settings: var(--font-body-axes);
+    font-size: 1rem; font-weight: var(--weight-semibold); letter-spacing: -0.01em; line-height: 1.3;
   }
   .accordion__count { font-size: var(--fs-caption); color: var(--text-muted); }
   .accordion__toggle {
@@ -739,12 +745,15 @@ const reviews = [
     grid-auto-columns: min(72%, 280px);
     gap: var(--space-5);
     overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
     scroll-snap-type: x mandatory;
     margin-inline: calc(var(--gutter) * -1);
     padding: 0 var(--gutter) var(--space-4);
     scroll-padding-inline: var(--gutter);
-    scrollbar-width: thin;
+    scrollbar-width: none;
   }
+  .team-grid::-webkit-scrollbar { display: none; }
   @media (min-width: 900px) {
     .team-grid { grid-auto-flow: row; grid-template-columns: repeat(4, 1fr); overflow: visible; margin-inline: 0; padding-inline: 0; }
   }
@@ -753,14 +762,14 @@ const reviews = [
   .person :global(.person__photo img) { transition: transform 1100ms var(--ease); }
   .person:hover :global(.person__photo img) { transform: scale(1.035); }
   .person__role { font-size: var(--fs-small); font-weight: var(--weight-semibold); color: var(--text-accent); }
-  .person__name { font-size: 1.125rem; margin: 0; }
+  .person__name { font-size: 1.25rem; margin: 0; }
   .person:hover .person__name { color: var(--text-accent); }
   .person__interests { font-size: var(--fs-caption); line-height: 1.6; color: var(--text-muted); margin-top: var(--space-2); padding-top: var(--space-3); border-top: 1px solid var(--rule); }
 
   /* ======================================================
      Every stage of growth
      ====================================================== */
-  .growth { padding-block: var(--section-y); background: var(--blush); }
+  .growth { padding-block: var(--section-y); }
   .growth__inner { display: grid; gap: var(--space-7); align-items: center; }
   .growth__stages { display: grid; grid-template-columns: repeat(3, 1fr); align-items: end; max-width: 620px; }
   /* each painting fills only the middle of its square, so let them overlap */
@@ -784,7 +793,7 @@ const reviews = [
   .reviews__wrap { margin-top: var(--space-7); }
   .reviews__track {
     display: grid; grid-auto-flow: column; grid-auto-columns: min(86%, 420px); gap: var(--space-5);
-    overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none;
+    overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scrollbar-width: none;
     margin-inline: calc(var(--gutter) * -1); padding-inline: var(--gutter); scroll-padding-inline: var(--gutter);
   }
   .reviews__track::-webkit-scrollbar { display: none; }
@@ -821,8 +830,8 @@ const reviews = [
   .faq__q {
     display: flex; align-items: center; justify-content: space-between; gap: var(--space-5);
     padding: var(--space-5) 0; cursor: pointer; list-style: none;
-    font-family: var(--font-display); font-variation-settings: var(--font-display-axes);
-    font-size: var(--fs-body); font-weight: var(--weight-display); letter-spacing: -0.005em; line-height: 1.4;
+    font-family: var(--font-body); font-variation-settings: var(--font-body-axes);
+    font-size: var(--fs-body); font-weight: var(--weight-semibold); letter-spacing: -0.005em; line-height: 1.4;
   }
   .faq__q::-webkit-details-marker { display: none; }
   .faq__a { padding: 0 var(--space-8) var(--space-5) 0; }
@@ -842,7 +851,7 @@ const reviews = [
   .promise__text {
     margin: 0; max-width: 22em;
     font-family: var(--font-display); font-variation-settings: var(--font-display-axes);
-    font-size: clamp(1.375rem, 1.1rem + 1.2vw, 1.875rem); line-height: 1.3; font-weight: var(--weight-medium); letter-spacing: -0.02em;
+    font-size: clamp(1.5rem, 1.2rem + 1.3vw, 2rem); line-height: 1.2; font-weight: var(--weight-display); letter-spacing: -0.015em;
   }
   .promise__text::before { content: "\201C"; display: block; font-size: 2.2em; line-height: 0.6; height: 0.42em; color: var(--clay); }
   .promise__by { font-size: var(--fs-small); color: var(--text-on-dark-soft); }
