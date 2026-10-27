@@ -1,7 +1,8 @@
-# Clinical notes → aggregate insights: one-off pull (PLAN, needs Cheryl's approval)
+# Clinical notes → aggregate insights: one-off pull
 
-**Status:** proposal. Nothing has been pulled. Do not run until Cheryl (Clinical
-Director) signs off below.
+**Status:** approved to build (Charles, 2026-10-27). Script:
+`scripts/clinical_notes_insights/insights.py`. Nothing has been pulled yet;
+run order is in **Run steps** below.
 
 ## Goal
 
@@ -16,14 +17,14 @@ get us so far; the detail is in the notes.
 1. **Aggregates only leave the run.** Raw note text is held in memory during the
    run and discarded. It is never written to disk, BigQuery, git, logs, a
    spreadsheet, or sent to any third-party service (including AI APIs).
-2. **Nobody but clinicians reads raw notes.** The extraction is a fixed,
-   rule-based codebook (below) that Cheryl approves. The script prints counts
+2. **Raw notes are read only in Plato, by Goji staff.** The extraction is a fixed,
+   rule-based codebook (below) that Charles approves. The script prints counts
    only, so the person running it and any assistant helping never see note text.
 3. **Small-cell suppression.** Any count under 5 patients is reported as "<5".
    Results are per patient, not per note.
 4. **One run, then delete the script's credentials use.** It's a one-off, not a
    pipeline. A future repeat needs a fresh approval.
-5. **Clinical framing stays with Cheryl.** Any published number goes through the
+5. **Clinical framing is reviewed before publishing.** Any number goes through the
    normal tier B review (`marketing/seo/AGENTS.md`): no outcome promises, no
    comparisons, "what we see", not "what you'll get".
 
@@ -58,11 +59,11 @@ Plato allows **20 requests/minute per API key, clinic-wide**, shared with the
   notice); stop on anything unexpected rather than guessing.
 - Estimate: ~280 patients × ~5 notes ≈ 1,400 notes ≈ 70 pages ≈ **20 minutes**.
 
-## Codebook (for Cheryl to edit)
+## Codebook (Charles to edit)
 
 Each feature is a per-patient flag or value derived from that patient's notes by
-keyword/regex rules. Cheryl reviews the rules and checks them against ~20 of her
-own patients' notes in Plato before the run (accuracy check, done by her).
+keyword/regex rules (`RULES` in the script). Charles checks them against ~20
+patients' notes in Plato before the full run (`--spot-check`, below).
 
 | Feature | Rule sketch | Feeds which piece |
 |---|---|---|
@@ -81,7 +82,7 @@ dates appear in the output. Dates are reduced to weeks-since-birth or trimester.
 ## Output
 
 One table of counts per feature (n patients, % of the relevant group, "<5" if
-small), written to the terminal and pasted by Cheryl or Charles into a draft.
+small), written to the terminal and pasted by Charles into a draft.
 That table is the only artefact.
 
 ## Consent / PDPA check (before the run)
@@ -94,9 +95,37 @@ That table is the only artefact.
 
 ## Approval
 
-- [ ] Cheryl Long (Clinical Director): codebook rules reviewed and spot-checked
-- [ ] Cheryl Long: privacy notice covers aggregated, anonymised use
-- [ ] Charles: run window agreed (date, 11 pm – 6 am SGT)
+Charles owns this pull (no clinical sign-off needed to run it).
 
-Once approved, the script is written to this spec, reviewed in a PR (tier C),
-run once, and its output pasted here as the record.
+- [ ] Privacy notice covers aggregated, anonymised use
+- [ ] Codebook spot-checked against ~20 patients (step 3 below)
+- [ ] Run window agreed (date, 11 pm – 6 am SGT)
+
+## Run steps
+
+Run from a laptop with `PLATO_API_KEY` set in the shell (never pasted into
+chat or a file). Every mode prints to the terminal only.
+
+```bash
+cd business-intelligence/scripts/clinical_notes_insights
+python3 -m pytest test_insights.py -q        # rules on synthetic notes
+python3 insights.py shape                    # step 1: 2 requests, field names only
+python3 insights.py spot-check --patients 20 # step 2: per-patient flags, no text
+python3 insights.py run                      # step 3: full pull, 11 pm–6 am SGT
+```
+
+1. **Shape.** Confirms `/patient/note` holds treatment notes and which fields
+   carry the patient id, date and text. If the field names differ from the
+   script's defaults, pass `--text-field`/`--patient-field`/`--date-field`.
+   If the notes aren't clinical, stop and revise this plan.
+2. **Spot-check.** Prints patient id + the flags each rule set, for the first
+   ~20 patients (a few pages). Open each in Plato and compare; tighten `RULES`
+   where it's wrong, re-run. Paging is slow by design, so this takes a few
+   minutes.
+3. **Run.** Refuses outside 11 pm – 6 am SGT. ~70 note pages + ~15 patient
+   pages (for the 60+ group) at 1 request / 15 s ≈ 25 min. Paste the printed
+   table below as the record.
+
+## Results
+
+_Not run yet._
