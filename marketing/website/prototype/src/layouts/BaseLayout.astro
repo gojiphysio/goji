@@ -439,6 +439,13 @@ const GADS_BOOKING_LABEL = import.meta.env.PUBLIC_GADS_BOOKING_LABEL;
                   </svg>
                 </summary>
                 <nav class="site-nav-mobile" aria-label="Primary">
+                  <button type="button" class="site-nav-mobile__search" data-search-open>
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                      <circle cx="11" cy="11" r="7" />
+                      <path d="M20 20l-3.5-3.5" />
+                    </svg>
+                    Search
+                  </button>
                   {nav.map((item) => (
                     <a href={item.href}>{item.label}</a>
                   ))}
@@ -667,15 +674,10 @@ const GADS_BOOKING_LABEL = import.meta.env.PUBLIC_GADS_BOOKING_LABEL;
         background: var(--cta-bg-hover);
         color: var(--cta-text);
       }
-      /* Book stays in the header from tablet up; on a phone WhatsApp leads. */
-      .site-header__cta :global(.header-book) { display: none; }
-      @media (min-width: 640px) {
-        .site-header__cta :global(.header-book) { display: inline-flex; }
-      }
-      /* Search trigger. Present at every width - on a phone it is the fastest
-         route to a condition or service, ahead of the hamburger. */
+      /* Search trigger. Desktop only - below the desktop-nav breakpoint it
+         lives in the hamburger so WhatsApp and Book keep the top bar. */
       .nav-search {
-        display: inline-flex;
+        display: none;
         align-items: center;
         justify-content: center;
         /* 44px: the comfortable-thumb minimum, and most of our traffic is
@@ -693,6 +695,9 @@ const GADS_BOOKING_LABEL = import.meta.env.PUBLIC_GADS_BOOKING_LABEL;
       }
       .nav-search:hover {
         background: var(--color-linen-deep);
+      }
+      @media (min-width: 880px) {
+        .nav-search { display: inline-flex; }
       }
 
       .header-wa__icon { flex: none; display: block; }
@@ -753,6 +758,25 @@ const GADS_BOOKING_LABEL = import.meta.env.PUBLIC_GADS_BOOKING_LABEL;
       }
       .site-nav-mobile a:last-child { border-bottom: none; }
       .site-nav-mobile a:hover { color: var(--text-accent); }
+      /* Search, first in the menu: styled as a nav row, opens the dialog. */
+      .site-nav-mobile__search {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        font: inherit;
+        font-family: var(--font-body);
+        font-variation-settings: var(--font-body-axes);
+        color: var(--text-default);
+        font-size: 1.125rem;
+        font-weight: var(--weight-semibold);
+        text-align: left;
+        padding: var(--space-3) 0;
+        border: none;
+        border-bottom: 1px solid var(--rule);
+        background: transparent;
+        cursor: pointer;
+      }
+      .site-nav-mobile__search:hover { color: var(--text-accent); }
 
       /* Desktop: hide the hamburger; the inline nav takes over. */
       @media (min-width: 880px) {
@@ -773,7 +797,7 @@ const GADS_BOOKING_LABEL = import.meta.env.PUBLIC_GADS_BOOKING_LABEL;
       const menu = document.querySelector(".mobile-menu");
       if (menu) {
         const close = () => menu.removeAttribute("open");
-        menu.querySelectorAll(".site-nav-mobile a").forEach((a) =>
+        menu.querySelectorAll(".site-nav-mobile a, [data-search-open]").forEach((a) =>
           a.addEventListener("click", close),
         );
         document.addEventListener("keydown", (e) => {
