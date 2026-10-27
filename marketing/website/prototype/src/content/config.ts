@@ -154,6 +154,11 @@ const blog = defineCollection({
   type: "content",
   schema: z.object({
     title: z.string(),
+    /** Overrides only the <title> tag (same contract as `services.seoTitle`),
+     *  so the H1 can stay the full question while the SERP title fits. The
+     *  template appends " | Goji Physiotherapy", so keep this to about 40
+     *  characters. */
+    seoTitle: z.string().optional(),
     /** Meta description. Hard SEO rule: 160 chars max. */
     description: z.string().max(160),
     /** Short heading shown on the index card (defaults to title). */
