@@ -89,6 +89,7 @@ const footerMap = [
       { href: isHome ? "#about" : "/#about", label: "About Goji" },
       { href: isHome ? "#team" : "/#team", label: "Our team" },
       { href: "/media/", label: "Media" },
+      { href: "/blog/", label: "Blog" },
       { href: "/physiotherapy-lentor/", label: "Physiotherapy in Lentor" },
       { href: "/book/", label: "Book an appointment" },
     ],
@@ -99,6 +100,7 @@ const nav = [
   { href: "/services/", label: "Services" },
   { href: "/conditions/", label: "Conditions" },
   { href: "/media/", label: "Media" },
+  { href: "/blog/", label: "Blog" },
   { href: isHome ? "#team" : "/#team", label: "Team" },
   { href: "/getting-here/", label: "Find us" },
 ];
@@ -530,6 +532,7 @@ const GADS_BOOKING_LABEL = import.meta.env.PUBLIC_GADS_BOOKING_LABEL;
         font-size: var(--fs-small);
         font-weight: var(--weight-medium);
         padding-block: 6px;
+        white-space: nowrap;
       }
       /* a deep-red underline draws in from the left */
       .site-nav a::after {
@@ -549,6 +552,12 @@ const GADS_BOOKING_LABEL = import.meta.env.PUBLIC_GADS_BOOKING_LABEL;
       @media (min-width: 880px) {
         .site-nav {
           display: flex;
+        }
+      }
+      /* Seven links fit at 880px only with a tighter gap. */
+      @media (min-width: 880px) and (max-width: 1023px) {
+        .site-nav {
+          gap: var(--space-4);
         }
       }
 
