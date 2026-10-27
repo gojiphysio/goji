@@ -20,6 +20,7 @@ import Section from "../../components/Section.astro";
 import Button from "../../components/Button.astro";
 import BerrySprig from "../../components/BerrySprig.astro";
 import { formatDate, isoDate } from "../../lib/dates.ts";
+import { clinicRef } from "../../lib/schema.ts";
 
 const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
   (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
@@ -58,7 +59,9 @@ const schema = hasPosts
           description: post.data.description,
           url: new URL(`/blog/${post.slug}/`, origin).href,
           datePublished: isoDate(post.data.pubDate),
-          author: { "@type": "Person", name: post.data.author.name },
+          author: post.data.author
+            ? { "@type": "Person", name: post.data.author.name }
+            : clinicRef(origin),
         })),
       },
       breadcrumb,
@@ -84,8 +87,8 @@ const schema = hasPosts
       </a>
       <h1>Answers, in plain language</h1>
       <p class="blog-hero__lead">
-        Questions we get asked in the clinic every week, written out properly by
-        the physiotherapists who answer them. Nothing here replaces an
+        Questions we get asked in the clinic, written out properly, plus news
+        from our events and the clinic. Nothing here replaces an
         assessment, but it should help you work out what is going on and what to
         ask for. You can also read the
         <a href="/press/">press coverage</a> of our work.

@@ -58,6 +58,14 @@
     {"id": "gen-cost", "q": "how much does physiotherapy cost in singapore", "cluster": "general-question", "target": "/services/"},
     {"id": "gen-referral", "q": "do i need a doctor's referral to see a physiotherapist in singapore", "cluster": "general-question", "target": "/services/"},
 
+    {"id": "blog-dra-surgery", "q": "do i need surgery for diastasis recti", "cluster": "blog", "target": "/blog/diastasis-recti-physio-or-surgery"},
+    {"id": "blog-pregnancy-prep", "q": "how to prepare your body for pregnancy", "cluster": "blog", "target": "/blog/preparing-your-body-for-pregnancy"},
+    {"id": "blog-osteo-walking", "q": "is walking enough exercise for osteoporosis", "cluster": "blog", "target": "/blog/exercise-for-osteoporosis"},
+    {"id": "blog-pf-exercises", "q": "how to do pelvic floor exercises after birth", "cluster": "blog", "target": "/blog/pelvic-floor-exercises-after-birth"},
+    {"id": "blog-pp-checklist", "q": "postpartum recovery checklist", "cluster": "blog", "target": "/blog/postpartum-recovery-checklist"},
+    {"id": "blog-prenatal-classes", "q": "prenatal classes singapore", "cluster": "blog", "target": "/blog/prenatal-classes-singapore"},
+    {"id": "blog-lentor-baby", "q": "lentor modern nursing room", "cluster": "blog", "target": "/blog/lentor-modern-with-a-baby"},
+
     {"id": "brand-goji", "q": "goji physio", "cluster": "brand", "target": "/"},
     {"id": "brand-formal", "q": "goji women's and family physiotherapy", "cluster": "brand", "target": "/"},
     {"id": "brand-what", "q": "what is goji physio singapore and what do they offer", "cluster": "brand", "target": "/"}

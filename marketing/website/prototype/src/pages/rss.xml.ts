@@ -26,7 +26,7 @@ export async function GET(context: APIContext) {
       pubDate: post.data.pubDate,
       link: `/blog/${post.slug}/`,
       categories: [post.data.category, ...post.data.tags],
-      author: post.data.author.name,
+      author: post.data.author?.name ?? "Goji Physiotherapy",
     })),
     customData: "<language>en-sg</language>",
   });
