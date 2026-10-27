@@ -38,7 +38,7 @@ so a token change reflows everything (styleguide is the QA surface).
   `PaintedWord.astro`, `PetalPhoto paint`, `.gj-reveal`, `data-gj-wash`.
   Never put a reveal or a paint-in veil on above-the-fold content (LCP), and
   never let motion gate content or scrolling. Paintings start when a sliver is
-  in view; on the site they run at `speed` 1.5-1.6 (`Bloom speed`,
+  in view; on the site they run at `speed` 2.25-2.4 (`Bloom speed`,
   `data-speed`), with short `data-delay` steps, so a reader scrolling at normal
   pace sees them grow.
 
