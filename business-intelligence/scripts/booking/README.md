@@ -59,6 +59,15 @@ Three rules follow from that budget:
   it. A day inside a fresh cached month needs no Plato call at all, but the
   booking re-check always passes `fresh=True`. Any new caller that *writes* off a
   read must do the same.
+- **The key is shared, so our limiter is not the whole story.** The ingestion
+  jobs (`plato-appointments` every 15 min, `plato-invoices` every 30 min, 08-20
+  SGT) page Plato on the same key; every 429 in Sep-Oct 2026 landed at :02-:04
+  or :32-:34 while they ran, and running out of budget caused all 40 of the
+  form's "couldn't load times" errors in Oct 2026. So `get()` feeds Plato's `x-ratelimit-remaining`
+  to the limiter (bulk paging stands down at the reserve), a failed day is
+  answered from a cached month up to `PLATO_DAY_STALE_AGE` old, and an
+  out-of-budget day returns `503 {"error":"loading","retry_after":N}`, which the
+  form waits out (up to 30s) instead of showing an error.
 - **`--max-instances=1` is load-bearing** for the limiter, not just the booking
   locks. Raising it multiplies our request rate by the instance count.
 

@@ -1157,7 +1157,7 @@ const steps = [
     isPhysioFocus,
     physioCategories,
   } from "../../lib/physioCategories";
-  import { bookingApi, type BookingDraft } from "../../lib/booking";
+  import { AvailabilityBusy, bookingApi, type BookingDraft } from "../../lib/booking";
 
   const form = document.getElementById("booking-form") as HTMLFormElement | null;
   if (form) init(form);
@@ -1704,6 +1704,9 @@ const steps = [
       availTimer = setTimeout(refreshSlots, 250);
     }
 
+    /** Longest the times list waits out a busy backend before giving up. */
+    const SLOT_PATIENCE_MS = 30000;
+
     async function refreshSlots() {
       if (!chips || !slotsMsg) return;
       const d = draft();
@@ -1718,12 +1721,18 @@ const steps = [
       // key-equality check let both responses render and duplicated the slots.
       const mySeq = ++availSeq;
       showSlotsLoading();
-      // One quiet retry: a failure here is usually Plato's rate limit, which has
-      // cleared a couple of seconds later. The skeleton stays up meanwhile.
+      // Retry quietly with the skeleton up. "Busy" (Plato's shared request
+      // budget is spent, usually while an ingestion job pages it) clears within
+      // ~20s, so wait as long as the backend says, up to SLOT_PATIENCE_MS in
+      // all. Any other failure gets the one quick retry it always had.
       let times: string[] | null = null;
-      for (let attempt = 0; attempt < 2 && times === null; attempt++) {
-        if (attempt > 0) {
-          await new Promise((resolve) => setTimeout(resolve, 2500));
+      let waited = 0;
+      let otherFailures = 0;
+      let nextWait = 0;
+      while (times === null) {
+        if (nextWait) {
+          await new Promise((resolve) => setTimeout(resolve, nextWait));
+          waited += nextWait;
           if (mySeq !== availSeq) return;
         }
         try {
@@ -1735,8 +1744,13 @@ const steps = [
             date: d.date,
             home: d.format === "home",
           });
-        } catch {
-          /* retried once above; reported below if it still fails */
+        } catch (err) {
+          if (err instanceof AvailabilityBusy) {
+            nextWait = Math.min(err.retryAfter * 1000, SLOT_PATIENCE_MS - waited);
+          } else {
+            nextWait = otherFailures++ === 0 ? 2500 : 0;
+          }
+          if (nextWait <= 0) break; // out of patience: reported below
         }
       }
       if (times === null) {

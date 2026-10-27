@@ -85,6 +85,19 @@ APPTS_RANGE_TTL_S = float(os.environ.get("PLATO_APPTS_RANGE_TTL", "300"))
 # shorter than APPTS_RANGE_TTL_S: the day list is what the visitor books from.
 # (create_booking always passes fresh=True and never takes this shortcut.)
 DAY_FROM_RANGE_MAX_AGE_S = float(os.environ.get("PLATO_DAY_FROM_RANGE_AGE", "90"))
+# When a day's fetch fails (usually a 429 cooldown), a cached range up to this
+# old still answers it rather than the form saying "couldn't load times". Safe
+# because create_booking re-reads fresh under the clinician lock and returns
+# slot_taken (409) if the stale view offered a time that has since gone.
+DAY_STALE_MAX_AGE_S = float(os.environ.get("PLATO_DAY_STALE_AGE", "1800"))
+# The 20 req/min cap is per API key, and the key is shared: the ingestion jobs
+# (plato-appointments every 15 min, plato-invoices every 30 min) page Plato on
+# the same key, outside this process's limiter. Every 429 episode Sep-Oct 2026
+# landed at :02-:04 / :32-:34 past the hour, while those jobs were paging. So
+# we also read Plato's own `x-ratelimit-remaining`: once it is down to the
+# interactive reserve, bulk work stands down for this long and leaves what is
+# left to date clicks and booking writes.
+PLATO_SHARED_HOLD_S = float(os.environ.get("PLATO_SHARED_HOLD", "20"))
 
 
 def _is_leave_title(title: str) -> bool:
@@ -97,6 +110,16 @@ def _is_leave_title(title: str) -> bool:
 
 class PlatoError(RuntimeError):
     pass
+
+
+class PlatoThrottled(PlatoError):
+    """No request budget right now (our window is full, or we are cooling down
+    after a 429). Not an outage: `retry_after_s` says when asking again is
+    worthwhile, so the endpoint can answer "still loading" instead of failing."""
+
+    def __init__(self, msg: str, retry_after_s: float):
+        super().__init__(msg)
+        self.retry_after_s = retry_after_s
 
 
 class PlatoBusy(PlatoError):
@@ -159,6 +182,7 @@ class _RateLimiter:
         self._reserve = max(0, min(int(bulk_reserve), self._limit - 1))
         self._stamps: deque[float] = deque()
         self._penalty_until = 0.0
+        self._bulk_hold_until = 0.0
         self._lock = threading.Lock()
 
     def acquire(self, max_wait_s: float, bulk: bool = False) -> None:
@@ -181,6 +205,9 @@ class _RateLimiter:
                 if now < self._penalty_until:
                     wait = self._penalty_until - now
                     reason = "cooling down after a 429"
+                elif bulk and now < self._bulk_hold_until:
+                    wait = self._bulk_hold_until - now
+                    reason = "budget in use by another caller on this key"
                 else:
                     while self._stamps and now - self._stamps[0] >= self.WINDOW_S:
                         self._stamps.popleft()
@@ -191,10 +218,25 @@ class _RateLimiter:
                     wait = self._stamps[len(self._stamps) - cap] + self.WINDOW_S - now
                     reason = f"budget exhausted at {self._limit} req/min"
             if now + wait > deadline:
-                raise PlatoError(
+                raise PlatoThrottled(
                     f"Plato rate limit — {reason}; would need {wait:.0f}s, "
-                    f"waited {max_wait_s:.0f}s")
+                    f"waited {max_wait_s:.0f}s", retry_after_s=wait)
             time.sleep(min(wait, max(0.0, deadline - now)))
+
+    def observe(self, remaining) -> None:
+        """Plato's `x-ratelimit-remaining` after a call. Our window only counts
+        our own requests; this is the key-wide truth. At or below the reserve,
+        hold bulk callers off so the budget that is left goes to interactive
+        calls, instead of a month crawl drawing the 429 that stops everyone."""
+        try:
+            left = int(remaining)
+        except (TypeError, ValueError):
+            return
+        if not self._limit or left > self._reserve:
+            return
+        with self._lock:
+            self._bulk_hold_until = max(self._bulk_hold_until,
+                                        time.monotonic() + PLATO_SHARED_HOLD_S)
 
     def penalise(self, cooldown_s: float) -> None:
         """Plato returned 429: hold every caller off for `cooldown_s`, not just
@@ -254,6 +296,7 @@ class PlatoClient:
         for attempt in range(_retries + 1):
             _limiter.acquire(wait_s, bulk=bulk)
             r = self.s.get(self._url(path), params=params, timeout=self.timeout)
+            _limiter.observe(r.headers.get("x-ratelimit-remaining"))
             if r.status_code == 429:
                 # Tell the whole process to stand down, then let the retry (if
                 # any) fail fast against the cooldown rather than calling Plato.
@@ -341,6 +384,12 @@ class PlatoClient:
                     log.warning("Plato appointments refresh failed (%s) — serving the "
                                 "last copy, %.0fs old", e, time.monotonic() - hit[0])
                     return hit[1]
+                if single and not fresh:
+                    covered = self._day_from_range(start_date, DAY_STALE_MAX_AGE_S)
+                    if covered is not None:
+                        log.warning("Plato day fetch failed (%s) — answering %s from "
+                                    "an older cached range", e, start_date)
+                        return covered
                 raise
             self._appts_cache[key] = (time.monotonic(), rows)
             return rows
@@ -351,13 +400,14 @@ class PlatoClient:
         with self._key_locks_guard:
             return self._key_locks.setdefault(key, threading.Lock())
 
-    def _day_from_range(self, day: str) -> list[dict] | None:
-        """The rows `appointments(day, day)` would return, taken from a fresh
-        cached range that covers `day` — or None if there isn't one. Same rule
-        Plato applies to a day query: starttime falls on that day."""
+    def _day_from_range(self, day: str,
+                        max_age_s: float = DAY_FROM_RANGE_MAX_AGE_S) -> list[dict] | None:
+        """The rows `appointments(day, day)` would return, taken from a cached
+        range under `max_age_s` old that covers `day` — or None if there isn't
+        one. Same rule Plato applies to a day query: starttime falls on that day."""
         now = time.monotonic()
         for (s, e), (ts, rows) in list(self._appts_cache.items()):
-            if s != e and s <= day <= e and now - ts < DAY_FROM_RANGE_MAX_AGE_S:
+            if s != e and s <= day <= e and now - ts < max_age_s:
                 return [r for r in rows if str(r.get("starttime", ""))[:10] == day]
         return None
 

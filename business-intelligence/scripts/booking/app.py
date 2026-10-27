@@ -25,7 +25,7 @@ from flask import Flask, jsonify, request
 from .availability import SGT, derive_availability, derive_available_days
 from .booking import BookingError, create_booking
 from .config import CLINICIANS, MAX_ADVANCE_DAYS, SERVICES
-from .plato import PlatoBusy, PlatoClient
+from .plato import PlatoBusy, PlatoClient, PlatoThrottled
 from . import mailer
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
@@ -227,6 +227,13 @@ def availability():
             log.warning("availability failed (%s %s): %s — serving a %.0fs-old answer",
                         service, day, e, nowm - stale[0])
             return jsonify(stale[1])
+        if isinstance(e, PlatoThrottled):
+            # Out of Plato budget for a few seconds (the key is shared with the
+            # ingestion jobs). Not an outage: tell the browser when to ask again
+            # so it waits it out instead of showing "couldn't load times".
+            retry = max(2, min(int(e.retry_after_s) + 1, 20))
+            log.info("availability throttled (%s %s): %s", service, day, e)
+            return jsonify({"error": "loading", "times": [], "retry_after": retry}), 503
         log.warning("availability failed (%s %s): %s", service, day, e, exc_info=True)
         return jsonify({"error": "unavailable", "times": []}), 502
     times = sorted({t for slots in avail.values() for t in slots})

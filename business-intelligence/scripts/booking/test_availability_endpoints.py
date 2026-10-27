@@ -10,7 +10,7 @@ from datetime import datetime
 import pytest
 
 from booking import app as app_mod
-from booking.plato import PlatoBusy
+from booking.plato import PlatoBusy, PlatoThrottled
 
 
 @pytest.fixture
@@ -79,3 +79,15 @@ def test_month_serves_old_shading_rather_than_an_error(client, monkeypatch):
         monkeypatch.setattr(app_mod, "derive_available_days", _raising(exc))
         r = client.get(MONTH)
         assert r.status_code == 200 and r.get_json()["available"] == ["2030-01-05"]
+
+
+def test_day_out_of_plato_budget_is_a_retryable_503_with_a_wait(client, monkeypatch):
+    """The 2026-10 "couldn't load times" errors were all this: a 429 cooldown
+    while an ingestion job paged Plato on the same key. The browser waits
+    retry_after seconds and asks again instead of giving up."""
+    monkeypatch.setattr(app_mod, "derive_availability",
+                        _raising(PlatoThrottled("cooling down after a 429", retry_after_s=14.2)))
+    r = client.get(DAY)
+    assert r.status_code == 503
+    assert r.get_json()["error"] == "loading"
+    assert r.get_json()["retry_after"] == 15
