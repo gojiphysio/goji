@@ -2,7 +2,7 @@
 title: "Caesarean Recovery and Scar Management"
 description: "A Caesarean section is a major abdominal operation. Physiotherapy supports recovery, from early mobilisation and pain management to scar work and exercise."
 cardTitle: "Caesarean Recovery and Scar Management"
-cardLead: "A Caesarean section is a major abdominal operation - seven layers of tissue are incised and sutured."
+cardLead: "Physiotherapy supports recovery after a Caesarean birth, from gentle early movement and pain management to scar care and a safe, gradual return to exercise."
 category: "Women's Health"
 reviewer:
   name: "Cheryl Long"

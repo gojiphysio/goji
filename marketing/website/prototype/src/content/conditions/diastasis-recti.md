@@ -2,7 +2,7 @@
 title: "Diastasis Recti"
 description: "Diastasis recti is the widening of the rectus abdominis at the linea alba, a normal adaptation in pregnancy. An assessment shows if physiotherapy is needed."
 cardTitle: "Diastasis Recti"
-cardLead: "Diastasis recti is the widening of the two sides of the rectus abdominis at the linea alba."
+cardLead: "Diastasis recti is the widening of the rectus abdominis at the linea alba."
 category: "Women's Health"
 reviewer:
   name: "Cheryl Long"
