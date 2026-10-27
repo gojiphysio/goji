@@ -130,11 +130,21 @@ Articles we write, and coverage written about us: https://www.gojiphysio.com/med
 
 ## Blog
 
-Plain-language physiotherapy education written by our clinicians. Index:
+Plain-language physiotherapy education and clinic news from Goji. Index:
 https://www.gojiphysio.com/blog/ (feed: https://www.gojiphysio.com/rss.xml)
 
-No articles are published yet. The first ones are in clinical review and this
-section will be updated when they go live.
+Pelvic and perinatal health:
+- Diastasis recti: when is physiotherapy enough, and when is surgery considered? (with a recap of our session with Dr Pek Wan Sze): https://www.gojiphysio.com/blog/diastasis-recti-physio-or-surgery/
+- Preparing your body for pregnancy (strength, activity and pelvic floor habits; recap of our session with Dr Serena Koh): https://www.gojiphysio.com/blog/preparing-your-body-for-pregnancy/
+- Prenatal and antenatal classes in Singapore (class types and providers): https://www.gojiphysio.com/blog/prenatal-classes-singapore/
+
+Active ageing and family:
+- Exercise for osteoporosis: is walking enough? (resistance, impact and balance training; recap of our session with Dr Dinesh Mahendran): https://www.gojiphysio.com/blog/exercise-for-osteoporosis/
+- Lentor Modern with a baby or toddler (nursing rooms, getting there, places nearby): https://www.gojiphysio.com/blog/lentor-modern-with-a-baby/
+
+Clinic news:
+- What actually happens at your first physiotherapy visit (55 minutes, no referral needed, what you leave with): https://www.gojiphysio.com/blog/what-happens-at-your-first-physiotherapy-visit/
+- We're open: Goji Physiotherapy at Lentor Modern (grand opening, 6 June 2026, and the "In Sync With..." talk series): https://www.gojiphysio.com/blog/goji-grand-opening-lentor-modern/
 
 ## Press
 

@@ -33,7 +33,16 @@ draft: false
 
 Authors (`/team/<slug>`): `cheryl-long` (Clinical Director), `kristy-ng`,
 `claire-ng` (Senior Physiotherapists), `camille-tan` (Pilates instructor; Lane B
-topics only). Every clinical post is reviewed by Cheryl Long before it merges.
+topics only).
+
+Who has to approve a post (decision 2026-10-27, to spare Cheryl's time):
+
+| Post type | Approval | Byline |
+|---|---|---|
+| Clinic news, event recaps, local guides, "what to expect" | None: the owner merges | Omit `author`: "By the Goji team" |
+| Clinical advice (symptoms, exercises, red flags, treatment) | Any AHPC-registered physio on the team signs off | That physio, plus `reviewer:` |
+
+Never put a clinician's name on a post they haven't read.
 
 ## Shape (what wins citations in the 2026-10 audits)
 

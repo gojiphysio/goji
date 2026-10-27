@@ -168,8 +168,11 @@ const blog = defineCollection({
     pubDate: z.date(),
     /** Set when a post is meaningfully revised, not for cosmetic edits. */
     updatedDate: z.date().optional(),
-    /** Byline. `slug` links to the author's /team/<slug> bio. */
-    author: z.object({ name: z.string(), slug: z.string() }),
+    /** Byline. `slug` links to the author's /team/<slug> bio. Omit it for a
+     *  post no clinician has written or approved (clinic news, event recaps,
+     *  local guides): it then reads "By the Goji team" and the schema author is
+     *  the clinic. Never put a clinician's name on words they haven't read. */
+    author: z.object({ name: z.string(), slug: z.string() }).optional(),
     /** Clinician who clinically reviewed the post — same E-E-A-T byline
      *  pattern as conditions. Omit while a post is awaiting review. */
     reviewer: z.object({ name: z.string(), slug: z.string() }).optional(),
