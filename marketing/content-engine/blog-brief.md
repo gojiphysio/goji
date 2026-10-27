@@ -84,6 +84,17 @@ Regular hyphens, never em or en dashes. No emojis, no italics, no bold in body
 copy. No "delve", "crucial", "robust", "comprehensive", "nuanced", "it's
 important to note", "in today's world". Short paragraphs.
 
+## Images
+
+- Every post has `heroImage` + `heroAlt` + `ogImage`. The hero is a real,
+  consented Goji photo (no stock, no before/after), preferably upright and
+  active. Reuse `public/photos/` until event or topic photos arrive; event
+  photos replace stand-ins once everyone shown has consented.
+- `ogImage` is a 1200x630 JPG crop of the hero in `public/og/blog/<slug>.jpg`
+  (the WhatsApp/Facebook preview). `heroAlt` describes what a sighted reader
+  sees, as a sentence.
+- Body photos are plain Markdown images; the template frames them.
+
 ## Links and CTAs
 
 - Internal links end in `/` (`/conditions/diastasis-recti/`). Bare forms fail
