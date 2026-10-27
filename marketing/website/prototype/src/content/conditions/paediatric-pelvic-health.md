@@ -2,7 +2,7 @@
 title: "Child Bedwetting, Soiling and Constipation"
 description: "Bedwetting, daytime wetting, soiling, and constipation in children are treatable with physiotherapy. Goji Physio, Lentor, Singapore. AHPC-registered."
 cardTitle: "Paediatric Pelvic Health"
-cardLead: "Bedwetting, daytime wetting, soiling, and constipation in children are common and treatable - these are physical conditions, not behavioural problems."
+cardLead: "Bedwetting, daytime wetting, soiling, and constipation in children are common and treatable."
 category: "Paediatrics"
 reviewer:
   name: "Kristy Ng"

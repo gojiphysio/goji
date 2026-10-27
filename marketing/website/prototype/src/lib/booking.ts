@@ -91,6 +91,14 @@ export interface BookingApi {
 
 const API = import.meta.env.PUBLIC_BOOKING_API as string | undefined;
 
+/** The availability service is out of Plato budget for a few seconds. The form
+ *  waits `retryAfter` seconds and asks again rather than showing an error. */
+export class AvailabilityBusy extends Error {
+  constructor(public retryAfter: number) {
+    super(`availability busy, retry in ${retryAfter}s`);
+  }
+}
+
 /** Stable per-session id so the backend can count drop-off by distinct session. */
 export function bookingSessionId(): string {
   try {
@@ -157,6 +165,12 @@ const realApi: BookingApi = {
     // load" apart from a genuine "no slots" (200 with an empty list) — a
     // rate-limited request must not read as "no availability".
     const r = await fetch(`${API}/api/availability?${p.toString()}`);
+    if (r.status === 503) {
+      // Plato's request budget is briefly spent (the key is shared with our
+      // ingestion jobs): not a failure, just "ask again in retry_after seconds".
+      const body = await r.json().catch(() => ({}));
+      throw new AvailabilityBusy(Number(body.retry_after) || 5);
+    }
     if (!r.ok) throw new Error(`availability ${r.status}`);
     const d = await r.json();
     return Array.isArray(d.times) ? d.times : [];

@@ -3,7 +3,7 @@ title: "Adult Scoliosis"
 seoTitle: "Adult Scoliosis Schroth Physio Singapore"
 description: "Adult scoliosis with back pain or stiffness? Cheryl Long guides Schroth-based exercise and pain management at Goji Physio, Lentor, Singapore. AHPC-registered."
 cardTitle: "Adult Scoliosis"
-cardLead: "Schroth-based exercise, strengthening and pain management for adults whose curve causes back pain, stiffness or concern."
+cardLead: "Schroth-based exercise, strengthening and pain management for adults whose curve contributes to back pain, stiffness or concern."
 category: "Musculoskeletal & Sports"
 reviewer:
   name: "Cheryl Long"

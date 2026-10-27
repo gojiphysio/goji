@@ -14,11 +14,13 @@
  * build, with no code change needed.
  */
 import { getCollection } from "astro:content";
+import PetalPhoto from "../../components/watercolor/PetalPhoto.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Section from "../../components/Section.astro";
 import Button from "../../components/Button.astro";
 import BerrySprig from "../../components/BerrySprig.astro";
 import { formatDate, isoDate } from "../../lib/dates.ts";
+import { clinicRef } from "../../lib/schema.ts";
 
 const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
   (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
@@ -57,7 +59,9 @@ const schema = hasPosts
           description: post.data.description,
           url: new URL(`/blog/${post.slug}/`, origin).href,
           datePublished: isoDate(post.data.pubDate),
-          author: { "@type": "Person", name: post.data.author.name },
+          author: post.data.author
+            ? { "@type": "Person", name: post.data.author.name }
+            : clinicRef(origin),
         })),
       },
       breadcrumb,
@@ -67,7 +71,7 @@ const schema = hasPosts
 
 <BaseLayout
   title="Blog | Physiotherapy Education | Goji Physiotherapy Singapore"
-  description="Plain-language physiotherapy articles on pelvic health, pregnancy and postnatal recovery, and getting back to movement, from the team at Goji, Lentor MRT."
+  description="Physiotherapy articles on pelvic health, pregnancy and postnatal recovery, and getting back to movement, from the team at Goji, Lentor MRT."
   schema={schema}
   noindex={!hasPosts}
   searchable={hasPosts}
@@ -81,13 +85,10 @@ const schema = hasPosts
         </svg>
         Media
       </a>
-      <h1>Answers, in plain language</h1>
+      <h1>Blog</h1>
       <p class="blog-hero__lead">
-        Questions we get asked in the clinic every week, written out properly by
-        the physiotherapists who answer them. Nothing here replaces an
-        assessment, but it should help you work out what is going on and what to
-        ask for. You can also read the
-        <a href="/press/">press coverage</a> of our work.
+        Answers to questions we get asked in the clinic, and news from our
+        events. Press coverage is on <a href="/press/">Goji in the media</a>.
       </p>
     </div>
   </section>
@@ -128,13 +129,7 @@ const schema = hasPosts
         <a href={`/blog/${featured.slug}/`} class="blog-feature">
           {featured.data.heroImage && (
             <div class="blog-feature__media">
-              <img
-                src={featured.data.heroImage}
-                alt={featured.data.heroAlt ?? ""}
-                width="760"
-                height="440"
-                loading="eager"
-              />
+              <PetalPhoto src={featured.data.heroImage} alt={featured.data.heroAlt ?? ""} priority />
             </div>
           )}
           <div class="blog-feature__body">
@@ -160,6 +155,9 @@ const schema = hasPosts
         <div class="blog-grid">
           {rest.map((post) => (
             <a href={`/blog/${post.slug}/`} class="blog-card">
+              {post.data.heroImage && (
+                <PetalPhoto src={post.data.heroImage} alt={post.data.heroAlt ?? ""} class="blog-card__media" flip />
+              )}
               <p class="blog-meta">
                 <span class="blog-badge">{post.data.category}</span>
                 <time datetime={isoDate(post.data.pubDate)}>
@@ -296,12 +294,20 @@ const schema = hasPosts
       align-items: stretch;
     }
   }
-  .blog-feature__media { background: var(--color-linen); }
-  .blog-feature__media img {
+  /* Grid items default to min-width:auto, so a photo could widen the card
+     past a phone screen; let the columns shrink. */
+  .blog-feature > * { min-width: 0; }
+  .blog-feature__media { background: var(--color-linen); padding: var(--space-4); }
+  .blog-feature__media :global(.gj-frame) {
     width: 100%;
-    height: 100%;
     aspect-ratio: 8 / 5;
-    object-fit: cover;
+  }
+  @media (min-width: 760px) {
+    .blog-feature__media :global(.gj-frame) {
+      height: 100%;
+      min-height: 260px;
+      aspect-ratio: auto;
+    }
   }
   .blog-feature__body {
     display: flex;
@@ -346,6 +352,10 @@ const schema = hasPosts
   .blog-card:hover {
     box-shadow: var(--shadow-md);
     transform: translateY(-2px);
+  }
+  .blog-card :global(.blog-card__media) {
+    aspect-ratio: 3 / 2;
+    margin-bottom: var(--space-2);
   }
   .blog-card__title {
     font-size: var(--fs-h3);

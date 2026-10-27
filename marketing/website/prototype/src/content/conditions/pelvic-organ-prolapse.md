@@ -3,7 +3,7 @@ title: "Pelvic Organ Prolapse"
 seoTitle: "Pelvic Organ Prolapse Physio Singapore"
 description: "Supervised pelvic floor training is the first-line treatment for prolapse symptoms. Assessment and a plan at Goji in Lentor, Singapore."
 cardTitle: "Pelvic Organ Prolapse"
-cardLead: "Pelvic organ prolapse (POP) affects approximately 1 in 3 women who have given birth, though many are unaware they have it."
+cardLead: "Pelvic organ prolapse (POP) affects approximately 1 in 3 women who have given birth."
 category: "Women's Health"
 reviewer:
   name: "Cheryl Long"

@@ -154,6 +154,11 @@ const blog = defineCollection({
   type: "content",
   schema: z.object({
     title: z.string(),
+    /** Overrides only the <title> tag (same contract as `services.seoTitle`),
+     *  so the H1 can stay the full question while the SERP title fits. The
+     *  template appends " | Goji Physiotherapy", so keep this to about 40
+     *  characters. */
+    seoTitle: z.string().optional(),
     /** Meta description. Hard SEO rule: 160 chars max. */
     description: z.string().max(160),
     /** Short heading shown on the index card (defaults to title). */
@@ -163,8 +168,11 @@ const blog = defineCollection({
     pubDate: z.date(),
     /** Set when a post is meaningfully revised, not for cosmetic edits. */
     updatedDate: z.date().optional(),
-    /** Byline. `slug` links to the author's /team/<slug> bio. */
-    author: z.object({ name: z.string(), slug: z.string() }),
+    /** Byline. `slug` links to the author's /team/<slug> bio. Omit it for a
+     *  post no clinician has written or approved (clinic news, event recaps,
+     *  local guides): it then reads "By the Goji team" and the schema author is
+     *  the clinic. Never put a clinician's name on words they haven't read. */
+    author: z.object({ name: z.string(), slug: z.string() }).optional(),
     /** Clinician who clinically reviewed the post — same E-E-A-T byline
      *  pattern as conditions. Omit while a post is awaiting review. */
     reviewer: z.object({ name: z.string(), slug: z.string() }).optional(),
@@ -177,8 +185,13 @@ const blog = defineCollection({
       "Clinic News",
     ]),
     tags: z.array(z.string()).default([]),
+    /** Hero photo (path under /public) + alt text: a real, consented clinic
+     *  photo, never stock. Shown in the petal frame and on the index cards. */
     heroImage: z.string().optional(),
     heroAlt: z.string().optional(),
+    /** 1200x630 JPG crop of the hero for link previews (WhatsApp, Facebook),
+     *  under /public/og/blog/. Falls back to the site-wide image. */
+    ogImage: z.string().optional(),
     /** Slugs of related content, rendered as an internal-links block. */
     relatedConditions: z.array(z.string()).default([]),
     relatedServices: z.array(z.string()).default([]),

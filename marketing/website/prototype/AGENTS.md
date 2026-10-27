@@ -57,6 +57,12 @@ so a token change reflows everything (styleguide is the QA surface).
   `bookingApi.track()` stage must be added to `VALID_STAGES` in
   `business-intelligence/scripts/booking/app.py` (and the `FunnelStage` type in
   `src/lib/booking.ts`) in the same PR, or the backend silently drops it.
+  `service_selected` with `detail = "deep_link"` means step 1 was skipped (a
+  service page's `/book/?service=…` link already filled it), so count those
+  apart when reading step-1 drop-off. `detail = "no_focus"` means Continue was
+  tapped on Physiotherapy without a type: it books as "Not sure / other" and
+  step 3's optional answer lands in the Plato note as "Looking for: …", never
+  in `physio_focus` (that would re-filter clinicians after the slot was chosen).
 - **The landing beacon sends three event types**, all to `/api/web-event`:
   `session_start` / `page_view` on arrival, and `page_engagement` once per page
   load on first hide (`visibilitychange` → hidden, or `pagehide`), carrying
@@ -77,6 +83,10 @@ so a token change reflows everything (styleguide is the QA surface).
   for the brand promise, not a testimonial.
 - **Voice/style:** warm, plain, educational. Regular dashes (no emdashes), no
   emojis in brand copy, **never italic** (enforced in `base.css`).
+  Page intros say what the page has, plainly: no copy about the page itself
+  ("in plain language", "written out properly"), no hedge-then-reassure
+  ("Nothing here replaces X, but…"), no "Explore", "tailored", "journey",
+  "with confidence".
 - **Condition pages carry a clinician byline.** Every `conditions` entry sets a
   `reviewer: { name, slug }` (the reviewing physio, from the source doc). The
   detail template renders a "Reviewed by <name>" line linking to `/team/<slug>`
@@ -197,9 +207,12 @@ One nav item, **Media**, fronts two children: `/blog` (what we write) and
 schema, different intent — but a single nav entry keeps the primary nav short
 on a phone. Breadcrumbs on all four pages read Home › Media › …
 
-**The blog is empty on purpose.** Drafts live in the shared Drive folder
-"Articles" (`1_7lYb2OiP3x3qORovG6Wg6TxLVClE7Nb`) until Cheryl has clinically
-reviewed them; see `src/content/blog/.gitkeep`. `src/pages/blog/index.astro`
+**Posts are reviewed in the PR, not in Drive.** A draft post lands as a `.md`
+in `src/content/blog/` on a branch; Cheryl reads it on the PR's Cloudflare
+Pages preview, and her sign-off adds `reviewer:` before the owner merges
+(tier B). Brief: `../../content-engine/blog-brief.md`; plan:
+`../../seo/blog-plan.md`. A new post also needs its line in `public/llms.txt`
+(`check_dist.py` fails otherwise). `src/pages/blog/index.astro`
 branches on `posts.length`: with none it renders a "Coming soon" placeholder
 that is `noindex` and excluded from search, and with one or more it becomes the
 real index and re-enables both. **Don't hardcode the placeholder away** — drop

@@ -34,6 +34,10 @@ interface Props {
   searchable?: boolean;
   /** Which bucket this page shows under in search results. */
   searchType?: SearchType;
+  /** Per-page link-preview image (1200x630 JPG under /public) and its alt
+   *  text. Defaults to the site-wide prenatal image. */
+  ogImage?: string;
+  ogImageAlt?: string;
 }
 const {
   title = SITE.seoTitle,
@@ -43,6 +47,8 @@ const {
   schema,
   searchable = true,
   searchType = "Page",
+  ogImage: ogImagePath = "/og-image-prenatal.jpg",
+  ogImageAlt = "A Goji physiotherapist guiding a pregnant woman through an assisted side stretch",
 } = Astro.props;
 
 // Pagefind indexes only what is inside a `data-pagefind-body` element, so
@@ -58,8 +64,7 @@ const origin = Astro.site ?? new URL(Astro.url.origin);
 const canonicalURL = new URL(Astro.url.pathname, origin);
 // Link-preview image. A new filename when it changes, so WhatsApp/Facebook
 // caches pick it up instead of serving the old picture.
-const ogImage = new URL("/og-image-prenatal.jpg", origin);
-const ogImageAlt = "A Goji physiotherapist guiding a pregnant woman through an assisted side stretch";
+const ogImage = new URL(ogImagePath, origin);
 
 
 const isHome = Astro.url.pathname === "/";
@@ -84,6 +89,7 @@ const footerMap = [
       { href: isHome ? "#about" : "/#about", label: "About Goji" },
       { href: isHome ? "#team" : "/#team", label: "Our team" },
       { href: "/media/", label: "Media" },
+      { href: "/blog/", label: "Blog" },
       { href: "/physiotherapy-lentor/", label: "Physiotherapy in Lentor" },
       { href: "/book/", label: "Book an appointment" },
     ],
@@ -94,6 +100,7 @@ const nav = [
   { href: "/services/", label: "Services" },
   { href: "/conditions/", label: "Conditions" },
   { href: "/media/", label: "Media" },
+  { href: "/blog/", label: "Blog" },
   { href: isHome ? "#team" : "/#team", label: "Team" },
   { href: "/getting-here/", label: "Find us" },
 ];
@@ -536,6 +543,7 @@ const GADS_BOOKING_LABEL = import.meta.env.PUBLIC_GADS_BOOKING_LABEL;
         font-size: var(--fs-small);
         font-weight: var(--weight-medium);
         padding-block: 6px;
+        white-space: nowrap;
       }
       /* a deep-red underline draws in from the left */
       .site-nav a::after {
@@ -555,6 +563,12 @@ const GADS_BOOKING_LABEL = import.meta.env.PUBLIC_GADS_BOOKING_LABEL;
       @media (min-width: 880px) {
         .site-nav {
           display: flex;
+        }
+      }
+      /* Seven links fit at 880px only with a tighter gap. */
+      @media (min-width: 880px) and (max-width: 1023px) {
+        .site-nav {
+          gap: var(--space-4);
         }
       }
 
