@@ -182,8 +182,13 @@ const blog = defineCollection({
       "Clinic News",
     ]),
     tags: z.array(z.string()).default([]),
+    /** Hero photo (path under /public) + alt text: a real, consented clinic
+     *  photo, never stock. Shown in the petal frame and on the index cards. */
     heroImage: z.string().optional(),
     heroAlt: z.string().optional(),
+    /** 1200x630 JPG crop of the hero for link previews (WhatsApp, Facebook),
+     *  under /public/og/blog/. Falls back to the site-wide image. */
+    ogImage: z.string().optional(),
     /** Slugs of related content, rendered as an internal-links block. */
     relatedConditions: z.array(z.string()).default([]),
     relatedServices: z.array(z.string()).default([]),
