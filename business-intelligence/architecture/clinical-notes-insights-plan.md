@@ -128,4 +128,10 @@ python3 insights.py run                      # step 3: full pull, 11 pm–6 am S
 
 ## Results
 
-_Not run yet._
+**Shape (2026-10-27):** 1,253 notes (~63 pages). Fields used: `patient_id`,
+`timestamp`, `note` (string, up to ~17.5k chars). Page 1 is all
+`folder_name = Casenotes`, so these are the clinical case notes. Cancelled
+notes (`cancel = 1`) are skipped; drafts are kept. Also present but unused:
+`diagnosis` (list), `author`, `signed`, `attachments`.
+
+_Full run not done yet._

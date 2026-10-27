@@ -133,9 +133,12 @@ class Plato:
         if isinstance(body, int):
             return body
         if isinstance(body, dict):
-            for k in ("count", "total"):
+            # Plato returns {records, per_page, pages}.
+            for k in ("records", "count", "total"):
                 if isinstance(body.get(k), int):
                     return body[k]
+            shape = ", ".join(f"{k}:{type(v).__name__}" for k, v in body.items())
+            raise PlatoError(f"{path}/count: unexpected shape {{{shape}}}")
         raise PlatoError(f"{path}/count: unexpected shape {type(body).__name__}")
 
     def pages(self, path: str, max_pages: int | None = None) -> Iterator[list]:
@@ -197,6 +200,8 @@ class Fields:
         Raises PlatoError naming the field if the shape is wrong."""
         if not isinstance(note, dict):
             raise PlatoError(f"{where}: note is {type(note).__name__}, not an object")
+        if note.get("cancel"):
+            return None  # cancelled notes don't count
         if self.type_field and self.types is not None:
             if str(dig(note, self.type_field)) not in self.types:
                 return None
@@ -428,7 +433,7 @@ def age_on(dob: str | None, today: date) -> int | None:
 # Modes
 # ---------------------------------------------------------------------------
 
-TYPE_LIKE = re.compile(r"type|category|kind|template|status|class", I)
+TYPE_LIKE = re.compile(r"type|category|kind|template|status|class|folder|cancel|draft", I)
 
 
 def mode_shape(plato: Plato) -> None:
@@ -538,7 +543,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("mode", choices=["shape", "spot-check", "run"])
     ap.add_argument("--patients", type=int, default=20, help="spot-check: how many patients")
     ap.add_argument("--patient-field", default="patient_id")
-    ap.add_argument("--date-field", default="created_at")
+    ap.add_argument("--date-field", default="timestamp")
     ap.add_argument("--text-field", default="note")
     ap.add_argument("--type-field", help="keep only notes whose FIELD is in --types")
     ap.add_argument("--types", help="comma-separated values of --type-field to keep")

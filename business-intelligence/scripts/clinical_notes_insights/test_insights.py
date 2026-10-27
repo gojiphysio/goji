@@ -162,7 +162,13 @@ def test_pages_stop_on_short_page_and_repeat():
 
 
 def test_parse_errors_name_the_field_not_the_value():
-    f = ci.Fields("patient_id", "created_at", "note")
+    f = ci.Fields("patient_id", "timestamp", "note")
     with pytest.raises(ci.PlatoError) as e:
         f.parse({"patient_id": "p1", "body": "SECRET TEXT"}, "page 1")
     assert "'note'" in str(e.value) and "SECRET" not in str(e.value)
+
+
+def test_parse_skips_cancelled_notes():
+    f = ci.Fields("patient_id", "timestamp", "note")
+    assert f.parse({"patient_id": "p1", "note": "x", "cancel": 1}, "p") is None
+    assert f.parse({"patient_id": "p1", "note": "x", "cancel": 0, "timestamp": "t"}, "p") == ("p1", "t", "x")
