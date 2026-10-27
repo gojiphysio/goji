@@ -5,9 +5,6 @@ description: "Physiotherapy-led rehab is the usual first step for diastasis rect
 cardTitle: "Diastasis recti: physio or surgery?"
 cardLead: "What diastasis recti is, how it is assessed, what rehab involves, and when surgical repair is generally considered."
 pubDate: 2026-10-27
-author:
-  name: "Cheryl Long"
-  slug: "cheryl-long"
 category: "Pelvic & Perinatal Health"
 tags: ["diastasis recti", "postnatal", "abdominoplasty", "events"]
 relatedConditions: ["diastasis-recti"]

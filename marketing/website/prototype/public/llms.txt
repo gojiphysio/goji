@@ -130,7 +130,7 @@ Articles we write, and coverage written about us: https://www.gojiphysio.com/med
 
 ## Blog
 
-Plain-language physiotherapy education written by our clinicians. Index:
+Plain-language physiotherapy education and clinic news from Goji. Index:
 https://www.gojiphysio.com/blog/ (feed: https://www.gojiphysio.com/rss.xml)
 
 Pelvic and perinatal health:

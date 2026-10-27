@@ -7,9 +7,6 @@ cardLead: "How long it takes, what we ask you, what the physical assessment invo
 pubDate: 2026-10-27
 category: "Clinic News"
 tags: ["what to expect", "first visit", "assessment"]
-author:
-  name: "Cheryl Long"
-  slug: "cheryl-long"
 relatedServices: ["musculoskeletal-physiotherapy", "pelvic-floor-physiotherapy"]
 heroImage: "/photos/services/musculoskeletal-physiotherapy.webp"
 heroAlt: "A Goji physiotherapist guiding a client through a leg exercise on a bench in the clinic gym."

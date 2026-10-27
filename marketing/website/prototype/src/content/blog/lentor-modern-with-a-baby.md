@@ -5,9 +5,6 @@ description: "Visiting Lentor Modern with a baby: MRT exit, step-free and shelte
 cardTitle: "Lentor Modern with a baby or toddler"
 cardLead: "The practical essentials for Lentor Modern with a pram, plus nearby parks, playgrounds and a library, checked against official sources."
 pubDate: 2026-10-27
-author:
-  name: "Cheryl Long"
-  slug: "cheryl-long"
 category: "Active Ageing & Family"
 tags: ["lentor", "family", "babies", "toddlers", "local guide"]
 relatedServices: ["mummy-baby-assessment", "paediatric-physiotherapy"]

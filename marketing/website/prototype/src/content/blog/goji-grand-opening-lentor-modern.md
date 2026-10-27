@@ -5,9 +5,6 @@ description: "Goji Physiotherapy celebrated its grand opening at Lentor Modern o
 cardTitle: "We're open at Lentor Modern"
 cardLead: "A look back at our grand opening on 6 June 2026, and what to know before your first visit."
 pubDate: 2026-10-27
-author:
-  name: "Cheryl Long"
-  slug: "cheryl-long"
 category: "Clinic News"
 tags: ["clinic news", "events", "Lentor"]
 relatedConditions: []

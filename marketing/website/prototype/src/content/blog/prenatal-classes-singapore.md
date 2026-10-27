@@ -5,9 +5,6 @@ description: "The main prenatal class types in Singapore: hospital antenatal cou
 cardTitle: "Prenatal and antenatal classes in Singapore"
 cardLead: "Hospital antenatal courses, prenatal yoga and Pilates, birth-preparation courses and physiotherapy: what each covers, who runs it and when people start."
 pubDate: 2026-10-27
-author:
-  name: "Cheryl Long"
-  slug: "cheryl-long"
 category: "Pelvic & Perinatal Health"
 tags: ["prenatal", "antenatal classes", "prenatal yoga", "prenatal pilates", "birth preparation"]
 relatedConditions: ["prenatal-care"]

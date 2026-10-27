@@ -5,9 +5,6 @@ description: "Walking alone is not enough to protect bone. Guidelines recommend 
 cardTitle: "Exercise for osteoporosis: is walking enough?"
 cardLead: "Why walking on its own is not enough for bone, which types of exercise help, and how to start safely, plus a recap of our October talk with Dr Dinesh Mahendran."
 pubDate: 2026-10-27
-author:
-  name: "Kristy Ng"
-  slug: "kristy-ng"
 category: "Active Ageing & Family"
 tags: ["osteoporosis", "osteopenia", "bone health", "strength training", "falls", "events"]
 relatedConditions: ["menopause", "fall-prevention", "balance-problems"]

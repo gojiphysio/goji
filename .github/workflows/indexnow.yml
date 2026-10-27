@@ -1,0 +1,27 @@
+name: IndexNow
+
+# Pings IndexNow (Bing, which feeds ChatGPT search) with every sitemap URL whose
+# <lastmod> changed in the last two days, so new blog posts and edited pages
+# are crawled within hours. Daily, after Cloudflare Pages has deployed the
+# previous day's merges; run it by hand after a content merge to go faster.
+# Script and rationale: marketing/seo/tools/indexnow_submit.py.
+
+on:
+  schedule:
+    - cron: "0 2 * * *" # 10:00 SGT
+  workflow_dispatch:
+    inputs:
+      days:
+        description: "Submit pages changed within this many days"
+        default: "2"
+
+permissions:
+  contents: read
+
+jobs:
+  submit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Submit changed URLs
+        run: python3 marketing/seo/tools/indexnow_submit.py --days "${{ inputs.days || '2' }}"

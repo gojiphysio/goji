@@ -5,9 +5,6 @@ description: "Strength train twice a week, build up to 150 minutes of activity, 
 cardTitle: "Preparing your body for pregnancy"
 cardLead: "Strength, activity and pelvic floor habits worth building in the months before you try to conceive, plus a recap of our September talk with Dr Serena Koh."
 pubDate: 2026-10-27
-author:
-  name: "Cheryl Long"
-  slug: "cheryl-long"
 category: "Pelvic & Perinatal Health"
 tags: ["pre-pregnancy", "pelvic floor", "strength training", "events"]
 relatedConditions: ["prenatal-care", "pelvic-girdle-pain"]
