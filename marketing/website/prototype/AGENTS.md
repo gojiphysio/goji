@@ -74,6 +74,10 @@ so a token change reflows everything (styleguide is the QA surface).
   for the brand promise, not a testimonial.
 - **Voice/style:** warm, plain, educational. Regular dashes (no emdashes), no
   emojis in brand copy, **never italic** (enforced in `base.css`).
+  Page intros say what the page has, plainly: no copy about the page itself
+  ("in plain language", "written out properly"), no hedge-then-reassure
+  ("Nothing here replaces X, but…"), no "Explore", "tailored", "journey",
+  "with confidence".
 - **Condition pages carry a clinician byline.** Every `conditions` entry sets a
   `reviewer: { name, slug }` (the reviewing physio, from the source doc). The
   detail template renders a "Reviewed by <name>" line linking to `/team/<slug>`
