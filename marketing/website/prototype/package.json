@@ -14,9 +14,9 @@
   "dependencies": {
     "@astrojs/rss": "^4.0.19",
     "@astrojs/sitemap": "^3.7.3",
-    "@fontsource-variable/fraunces": "^5.3.0",
+    "@fontsource-variable/cormorant-garamond": "^5.3.0",
+    "@fontsource-variable/figtree": "^5.3.0",
     "@fontsource/dm-serif-display": "^5.2.8",
-    "@fontsource/plus-jakarta-sans": "^5.2.5",
     "@iconify-json/tabler": "^1.2.35",
     "astro": "^5.6.1",
     "astro-icon": "^1.1.5"

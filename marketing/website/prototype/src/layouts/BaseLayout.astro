@@ -3,14 +3,11 @@
  * BaseLayout — document shell: <head>, fonts, tokens, skip link, site header
  * and footer. Pass `bare` to drop the header/footer (used by the styleguide).
  */
-import "@fontsource-variable/fraunces/full.css";
-import frauncesLatin from "@fontsource-variable/fraunces/files/fraunces-latin-full-normal.woff2?url";
-import jakartaLatin600 from "@fontsource/plus-jakarta-sans/files/plus-jakarta-sans-latin-600-normal.woff2?url";
+import "@fontsource-variable/cormorant-garamond/wght.css";
+import "@fontsource-variable/figtree/wght.css";
+import cormorantLatin from "@fontsource-variable/cormorant-garamond/files/cormorant-garamond-latin-wght-normal.woff2?url";
+import figtreeLatin from "@fontsource-variable/figtree/files/figtree-latin-wght-normal.woff2?url";
 import { cta } from "../lib/links.ts";
-import "@fontsource/plus-jakarta-sans/400.css";
-import "@fontsource/plus-jakarta-sans/500.css";
-import "@fontsource/plus-jakarta-sans/600.css";
-import "@fontsource/plus-jakarta-sans/700.css";
 import "../styles/tokens.css";
 import "../styles/base.css";
 import "../styles/watercolor.css";
@@ -142,8 +139,8 @@ const GADS_BOOKING_LABEL = import.meta.env.PUBLIC_GADS_BOOKING_LABEL;
         paints, so scroll-revealed content and painted-in photos start hidden
         instead of flashing on, off, then on again. If the engine never loads,
         drop the mark after 3s and show everything. */}
-    <link rel="preload" href={frauncesLatin} as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href={jakartaLatin600} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={cormorantLatin} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={figtreeLatin} as="font" type="font/woff2" crossorigin />
     <script is:inline>
       document.documentElement.classList.add("gj-js");
       setTimeout(function () { if (!window.Goji) document.documentElement.classList.remove("gj-js"); }, 3000);
@@ -594,7 +591,7 @@ const GADS_BOOKING_LABEL = import.meta.env.PUBLIC_GADS_BOOKING_LABEL;
         .site-footer__col:last-child { grid-column: auto; }
       }
       .site-footer__heading {
-        font-family: var(--font-display);
+        font-family: var(--font-body);
         font-size: var(--fs-small);
         font-weight: var(--weight-semibold);
         letter-spacing: 0;
@@ -645,7 +642,7 @@ const GADS_BOOKING_LABEL = import.meta.env.PUBLIC_GADS_BOOKING_LABEL;
         background: var(--cta-bg);
         color: var(--cta-text);
         text-decoration: none;
-        font-family: var(--font-display);
+        font-family: var(--font-body);
         font-weight: var(--weight-semibold);
         font-size: var(--fs-small);
         line-height: 1;
@@ -731,12 +728,12 @@ const GADS_BOOKING_LABEL = import.meta.env.PUBLIC_GADS_BOOKING_LABEL;
       }
       .mobile-menu[open] .site-nav-mobile { display: flex; }
       .site-nav-mobile a {
-        font-family: var(--font-display);
-        font-variation-settings: var(--font-display-axes);
+        font-family: var(--font-body);
+        font-variation-settings: var(--font-body-axes);
         color: var(--text-default);
         text-decoration: none;
         font-size: 1.125rem;
-        font-weight: var(--weight-display);
+        font-weight: var(--weight-semibold);
         padding: var(--space-3) 0;
         border-bottom: 1px solid var(--rule);
       }
