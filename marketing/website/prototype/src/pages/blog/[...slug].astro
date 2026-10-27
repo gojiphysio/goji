@@ -11,6 +11,7 @@ import { getCollection, getEntry } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Section from "../../components/Section.astro";
 import Button from "../../components/Button.astro";
+import PetalPhoto from "../../components/watercolor/PetalPhoto.astro";
 import { extractFaqs, faqSchema } from "../../lib/faq.ts";
 import { formatDate, isoDate } from "../../lib/dates.ts";
 import { clinicRef } from "../../lib/schema.ts";
@@ -34,6 +35,7 @@ const {
   reviewer,
   heroImage,
   heroAlt,
+  ogImage,
   relatedConditions,
   relatedServices,
   ctaSlug,
@@ -90,7 +92,7 @@ const postSchema: Record<string, unknown>[] = [
         }
       : {}),
     publisher: clinicRef(origin),
-    ...(heroImage ? { image: new URL(heroImage, origin).href } : {}),
+    ...(ogImage ?? heroImage ? { image: new URL((ogImage ?? heroImage)!, origin).href } : {}),
   },
   {
     "@context": "https://schema.org",
@@ -112,6 +114,8 @@ if (postFaqSchema) postSchema.push(postFaqSchema);
   description={description}
   schema={postSchema}
   searchType="Article"
+  ogImage={ogImage}
+  ogImageAlt={ogImage ? heroAlt : undefined}
 >
   <section class="post-header">
     <div class="container container--narrow post-header__inner">
@@ -146,7 +150,7 @@ if (postFaqSchema) postSchema.push(postFaqSchema);
   {
     heroImage && (
       <div class="container container--narrow post-hero">
-        <img src={heroImage} alt={heroAlt ?? ""} width="760" height="440" loading="eager" />
+        <PetalPhoto src={heroImage} alt={heroAlt ?? ""} priority />
       </div>
     )
   }
@@ -236,12 +240,17 @@ if (postFaqSchema) postSchema.push(postFaqSchema);
   .post-hero {
     margin-top: var(--space-6);
   }
-  .post-hero img {
+  .post-hero :global(.gj-frame) {
     width: 100%;
     aspect-ratio: 8 / 5;
-    object-fit: cover;
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-sm);
+  }
+  /* Photos inside the article body (Markdown images): same petal frame. */
+  .post-body :global(img) {
+    display: block;
+    width: 100%;
+    height: auto;
+    margin-block: var(--space-6);
+    border-radius: var(--radius-md) var(--radius-petal) var(--radius-md) var(--radius-petal);
   }
 
   /* Prose — matches the condition-page reading surface. */

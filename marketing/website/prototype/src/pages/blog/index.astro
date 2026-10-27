@@ -14,6 +14,7 @@
  * build, with no code change needed.
  */
 import { getCollection } from "astro:content";
+import PetalPhoto from "../../components/watercolor/PetalPhoto.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Section from "../../components/Section.astro";
 import Button from "../../components/Button.astro";
@@ -128,13 +129,7 @@ const schema = hasPosts
         <a href={`/blog/${featured.slug}/`} class="blog-feature">
           {featured.data.heroImage && (
             <div class="blog-feature__media">
-              <img
-                src={featured.data.heroImage}
-                alt={featured.data.heroAlt ?? ""}
-                width="760"
-                height="440"
-                loading="eager"
-              />
+              <PetalPhoto src={featured.data.heroImage} alt={featured.data.heroAlt ?? ""} priority />
             </div>
           )}
           <div class="blog-feature__body">
@@ -160,6 +155,9 @@ const schema = hasPosts
         <div class="blog-grid">
           {rest.map((post) => (
             <a href={`/blog/${post.slug}/`} class="blog-card">
+              {post.data.heroImage && (
+                <PetalPhoto src={post.data.heroImage} alt={post.data.heroAlt ?? ""} class="blog-card__media" flip />
+              )}
               <p class="blog-meta">
                 <span class="blog-badge">{post.data.category}</span>
                 <time datetime={isoDate(post.data.pubDate)}>
@@ -296,12 +294,12 @@ const schema = hasPosts
       align-items: stretch;
     }
   }
-  .blog-feature__media { background: var(--color-linen); }
-  .blog-feature__media img {
+  .blog-feature__media { background: var(--color-linen); padding: var(--space-4); }
+  .blog-feature__media :global(.gj-frame) {
     width: 100%;
     height: 100%;
+    min-height: 220px;
     aspect-ratio: 8 / 5;
-    object-fit: cover;
   }
   .blog-feature__body {
     display: flex;
@@ -346,6 +344,10 @@ const schema = hasPosts
   .blog-card:hover {
     box-shadow: var(--shadow-md);
     transform: translateY(-2px);
+  }
+  .blog-card :global(.blog-card__media) {
+    aspect-ratio: 3 / 2;
+    margin-bottom: var(--space-2);
   }
   .blog-card__title {
     font-size: var(--fs-h3);
