@@ -13,7 +13,7 @@ draft: false
 relatedServices: ["postpartum-physiotherapy"]
 ---
 
-Diastasis recti is the widening of the two sides of the rectus abdominis (the "six-pack" muscle) at the linea alba - the connective tissue running down the centre of the abdomen. By the end of the third trimester, diastasis happens in virtually every pregnancy - it is a completely normal, natural adaptation to give your baby room to grow. However postnatally, the extent of natural recovery for each woman varies widely. The distance alone does not determine whether physiotherapy is needed. What matters more is the ability of the abdominal wall to generate and transfer load effectively.
+Diastasis recti is the widening of the two sides of the rectus abdominis (the "six-pack" muscle) at the linea alba - the connective tissue running down the centre of the abdomen. By the end of the third trimester, diastasis happens in virtually every pregnancy - it is a normal adaptation to give your baby room to grow. However postnatally, the extent of natural recovery for each woman varies widely. The distance alone does not determine whether physiotherapy is needed. What matters more is the ability of the abdominal wall to generate and transfer load effectively.
 
 ## What causes diastasis recti, and is it normal?
 
@@ -27,7 +27,7 @@ As the uterus grows during pregnancy, it pushes the abdominal muscles outward an
 
 - How the abdominal wall is loaded in the weeks and months after birth
 
-Importantly, a small inter-recti distance does not necessarily mean a functional problem, and a larger gap does not automatically mean weakness or pain. This is why a clinical assessment - not just finger-width self-testing - is important.
+A small inter-recti distance does not necessarily mean a functional problem, and a larger gap does not automatically mean weakness or pain. This is why a clinical assessment - not just finger-width self-testing - is important.
 
 ## What are the signs that diastasis recti is affecting function?
 
@@ -43,11 +43,11 @@ Many women with diastasis recti are asymptomatic. Others notice:
 
 - Bladder or bowel symptoms that have not resolved
 
-If you are checking yourself at home: a gap wider than approximately 2 finger-widths at the umbilicus, combined with poor tension in the tissue when you lift your head, is worth having assessed. But the most important question is not "how big is the gap?" - it is "can the wall do its job?"
+If you are checking yourself at home: a gap wider than approximately 2 finger-widths at the umbilicus, combined with poor tension in the tissue when you lift your head, is worth having assessed. But what matters most is whether the wall can do its job, not how big the gap is.
 
 ## What does a session at Goji involve?
 
-Our physiotherapists will take a history of your pregnancy, birth, and current symptoms. This is followed by a hands-on assessment of the abdominal wall. This includes:
+Our physiotherapists will take a history of your pregnancy, birth, and current symptoms, followed by a hands-on assessment of the abdominal wall that includes:
 
 - Inter-recti distance: measured at multiple points along the linea alba using ultrasound or palpation
 
@@ -61,7 +61,7 @@ You will leave with a clear picture of whether your diastasis is affecting funct
 
 ## What exercises should I avoid with diastasis recti?
 
-The answer depends on your specific presentation. The older advice to avoid all sit-ups and crunches indefinitely has been largely superseded by a more nuanced approach: the goal is to progressively load the abdominal wall in a controlled way, not to avoid load permanently. There are situations where certain exercises are not appropriate at a given point in recovery, and a physiotherapist will advise specifically based on your assessment findings rather than applying blanket restrictions.
+The answer depends on your specific presentation. The older advice to avoid all sit-ups and crunches indefinitely has been largely superseded: the goal is to progressively load the abdominal wall in a controlled way, not to avoid load permanently. There are situations where certain exercises are not appropriate at a given point in recovery, and a physiotherapist will advise specifically based on your assessment findings rather than applying blanket restrictions.
 
 ## Frequently asked questions
 

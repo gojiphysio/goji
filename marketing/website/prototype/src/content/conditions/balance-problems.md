@@ -13,7 +13,7 @@ order: 3
 draft: false
 ---
 
-Good balance relies on three systems working together: the inner ear (vestibular system), vision, and the sense of position from your muscles and joints (proprioception/somatosensory), all coordinated by the brain. When any of these is affected - by an inner-ear problem, an injury, illness, or the natural changes of ageing - you may feel unsteady and giddy, making you less confident on your feet. Physiotherapy assessment at Goji Physio in Lentor, Singapore identifies which systems are contributing and builds a targeted programme to improve steadiness, strength, and confidence.
+Good balance relies on three systems working together: the inner ear (vestibular system), vision, and the sense of position from your muscles and joints (proprioception/somatosensory), all coordinated by the brain. When any of these is affected - by an inner-ear problem, an injury, illness, or the natural changes of ageing - you may feel unsteady and giddy, making you less confident on your feet. Physiotherapy assessment at Goji Physio in Lentor, Singapore identifies which systems are contributing and builds a programme to improve steadiness, strength, and confidence.
 
 ## What causes balance difficulties?
 
@@ -25,7 +25,7 @@ Balance problems can stem from one or several factors, including:
 - Neurological conditions and general health: affecting how the brain integrates balance information
 - Deconditioning: after illness, surgery, or a period of reduced activity
 
-Because balance depends on multiple systems, assessment focuses on identifying which are involved so the programme can target them specifically.
+Because balance depends on multiple systems, assessment focuses on identifying which are involved so the programme can target them.
 
 ## What are the signs balance should be assessed?
 
@@ -51,7 +51,7 @@ Your physiotherapist will take a history of your symptoms, general health, and a
 - Vestibular and gaze assessment: how the inner ear and eyes support stability
 - Gait analysis: how you walk and turn, and where steadiness reduces
 
-You will leave with an explanation of what is affecting your balance and a personalised programme to address the contributing factors.
+You will leave with an explanation of what is affecting your balance and a programme to address the contributing factors.
 
 ## How are balance difficulties treated?
 

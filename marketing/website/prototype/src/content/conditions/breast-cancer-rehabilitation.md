@@ -26,7 +26,7 @@ Common challenges physiotherapy can help with include:
 - Postural changes, deconditioning, and fatigue through treatment
 - Reduced confidence in moving and using the arm
 
-Everyone's recovery is different, depending on the surgery, treatment, and individual factors - so rehabilitation is tailored to you and your stage.
+Everyone's recovery is different, depending on the surgery, treatment, and individual factors - so rehabilitation is planned around you and your stage.
 
 ## What does a session at Goji involve?
 
@@ -41,7 +41,7 @@ You will leave with an explanation of your presentation and a gentle, staged reh
 
 ## How is post-operative rehabilitation approached?
 
-Rehabilitation is progressive and respects your surgeon's and oncology team's guidance. It may include gentle range-of-movement and gradually progressed strengthening exercises, scar and cording management, education on lymphoedema risk and skin care, and support with posture, and returning to activity. The pace is matched to your healing and any ongoing treatment, with the aim of restoring movement, function, and confidence.
+Rehabilitation is progressive and respects your surgeon's and oncology team's guidance. It may include gentle range-of-movement and gradually progressed strengthening exercises, scar and cording management, education on lymphoedema risk and skin care, and support with posture and returning to activity. The pace is matched to your healing and any ongoing treatment, with the aim of restoring movement, function, and confidence.
 
 ## Frequently asked questions
 
@@ -59,7 +59,7 @@ Physiotherapy supports lymphoedema risk reduction through education, movement, s
 
 ### Can I exercise during ongoing cancer treatment?
 
-Appropriate, guided exercise is often beneficial during and after treatment, but it should be tailored to you and your treatment plan. Your physiotherapist will work within your oncology team's guidance.
+Appropriate, guided exercise is often beneficial during and after treatment, but it should be fitted to you and your treatment plan. Your physiotherapist will work within your oncology team's guidance.
 
 ### Is it too late to start if my surgery was a while ago?
 

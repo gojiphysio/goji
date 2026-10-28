@@ -20,7 +20,7 @@ Prolapse affects approximately 1 in 3 women who have given birth, though many wo
 
 ## What causes pelvic organ prolapse?
 
-The pelvic organs are supported by a combination of ligaments, connective tissue, and the pelvic floor muscles. Prolapse occurs when this support system is overloaded, damaged, or overwhelmed. Key contributors include:
+The pelvic organs are supported by a combination of ligaments, connective tissue, and the pelvic floor muscles. Prolapse occurs when this support system is overloaded or damaged. Key contributors include:
 
 - Childbirth: vaginal birth - particularly with prolonged second stage, instrumental delivery (forceps, vacuum), or large babies - is the most significant risk factor. Caesarean section reduces but does not eliminate the risk.
 
@@ -66,7 +66,7 @@ Your management plan will focus on progressive pelvic floor strengthening, postu
 
 ### Can I make prolapse worse by exercising?
 
-The relationship between exercise and prolapse is nuanced. High-impact exercise and heavy lifting can increase symptoms if the pelvic floor is not functioning well. However, avoiding exercise entirely is not the answer - deconditioning is itself a risk factor. The goal is progressive load management: building pelvic floor capacity alongside returning to activity, guided by your physiotherapist.
+High-impact exercise and heavy lifting can increase symptoms if the pelvic floor is not functioning well. However, avoiding exercise entirely is not the answer - deconditioning is itself a risk factor. The goal is progressive load management: building pelvic floor capacity alongside returning to activity, guided by your physiotherapist.
 
 ### Is prolapse permanent?
 

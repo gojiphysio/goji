@@ -44,7 +44,7 @@ Our physiotherapist will take a detailed history of your pregnancy, delivery, an
 - Head shape and facial symmetry: screening for plagiocephaly or facial asymmetry
 - Developmental screen: observing how your baby is using their body in the context of their age
 
-Treatment involves manual stretching of the tight SCM, facilitated active exercises appropriate for your baby's age and tolerance, and - crucially - detailed parent education on stretching technique and positioning strategies for home. The home programme is as important as clinic sessions; our physiotherapist will ensure you are confident doing it safely between appointments.
+Treatment involves manual stretching of the tight SCM, facilitated active exercises appropriate for your baby's age and tolerance, and detailed parent education on stretching technique and positioning strategies for home. The home programme is as important as clinic sessions; our physiotherapist will make sure you are confident doing it safely between appointments.
 
 ## How long does treatment take?
 
@@ -54,7 +54,7 @@ Most infants who begin treatment before 3 months resolve fully within 2-6 months
 
 ### My baby was just diagnosed with torticollis. How quickly should we start physio?
 
-As soon as possible. The earlier treatment begins, the faster and more completely the SCM responds. If your baby is under 3 months, contact us promptly - the first few months are the highest-leverage window for conservative management.
+As soon as possible. The earlier treatment begins, the faster and more completely the SCM responds. If your baby is under 3 months, contact us promptly - the first few months are the most effective window for conservative management.
 
 ### Can I do the stretches at home myself?
 

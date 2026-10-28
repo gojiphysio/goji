@@ -49,7 +49,7 @@ You will leave with a clear picture of where you are and a practical plan - not 
 
 ## Can I continue exercising during pregnancy?
 
-In most uncomplicated pregnancies, yes - and the evidence supports staying active throughout. The question is not whether to move, but how to move well at each stage. Physiotherapy can help you adapt your current routine safely, understand which movements to modify as your pregnancy progresses, and maintain pelvic floor and deep abdominal function that supports both birth and postnatal recovery. A physiotherapist can also help you recognise when a symptom is a reason to stop, and when it is simply a reason to modify.
+In most uncomplicated pregnancies, yes - and the evidence supports staying active throughout. Physiotherapy can help you adapt your current routine safely, understand which movements to modify as your pregnancy progresses, and maintain pelvic floor and deep abdominal function that supports both birth and postnatal recovery. A physiotherapist can also help you recognise when a symptom is a reason to stop, and when it is simply a reason to modify.
 
 ## Birth preparation: what physiotherapy can offer
 
@@ -61,7 +61,7 @@ The third trimester is an evidence-supported window to prepare the pelvic floor 
 
 - Positions for labour: movement and positioning that may reduce pain and support fetal descent
 
-- Planning the fourth trimester: what to expect from your body in the weeks after birth, so postnatal recovery is intentional rather than reactive
+- Planning the fourth trimester: what to expect from your body in the weeks after birth
 
 This session is typically done at 32-36 weeks. You are welcome to come with your birth partner.
 

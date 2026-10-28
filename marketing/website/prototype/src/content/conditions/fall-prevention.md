@@ -3,7 +3,7 @@ title: "Fall Prevention and Age-Related Instability"
 seoTitle: "Fall Prevention Physio Singapore"
 description: "Worried about falls or feeling less steady with age? Goji's physiotherapists assess falls risk and build strength and balance plans in Lentor, Singapore."
 cardTitle: "Fall Prevention and Age-Related Instability"
-cardLead: "Strength and balance programmes that address your personal falls risk, so you can stay active, independent and confident on your feet."
+cardLead: "Strength and balance programmes that address your personal falls risk, so you can stay active and independent on your feet."
 category: "Vestibular Rehabilitation"
 reviewer:
   name: "Claire Ng"
@@ -13,7 +13,7 @@ order: 5
 draft: false
 ---
 
-Feeling less steady as we age is common, but falls are not an inevitable part of getting older - and much of the risk can be reduced. Instability often develops gradually from a mix of reduced strength, changes in balance and sensation, vision, medications, and confidence. Physiotherapy assessment at Goji Physio in Lentor, Singapore identifies which factors are most relevant to you and builds a targeted programme to improve strength, balance, and steadiness - helping you stay active, independent, and confident on your feet.
+Feeling less steady as we age is common, but falls are not an inevitable part of getting older - and much of the risk can be reduced. Instability often develops gradually from a mix of reduced strength, changes in balance and sensation, vision, medications, and confidence. Physiotherapy assessment at Goji Physio in Lentor, Singapore identifies which factors are most relevant to you and builds a programme to improve strength, balance, and steadiness - helping you stay active and independent.
 
 ## What increases the risk of falls?
 
@@ -47,7 +47,7 @@ Your physiotherapist will discuss your health, activity, any falls history, and 
 - Vestibular screening: checking whether the inner ear is contributing
 - Practical review: discussing footwear, home hazards, and confidence
 
-You will leave with a clear picture of your personal risk factors and a tailored programme to build strength, balance, and confidence.
+You will leave with a clear picture of your personal risk factors and a programme to build strength, balance, and confidence.
 
 ## How does physiotherapy reduce falls risk?
 
@@ -57,7 +57,7 @@ The most effective fall-prevention programmes combine progressive strength train
 
 ### Are falls just an unavoidable part of ageing?
 
-No. While risk can increase with age, falls are often preventable. Strength and balance are trainable at any age, and targeted programmes can meaningfully reduce risk.
+No. While risk can increase with age, falls are often preventable. Strength and balance are trainable at any age, and targeted programmes can reduce risk.
 
 ### Will the exercises be safe if I'm already unsteady?
 
@@ -65,7 +65,7 @@ Yes - programmes are graded to your current ability, with appropriate support an
 
 ### I've become afraid of falling - can that be helped?
 
-Very much so. Fear of falling is common and can reduce activity, which worsens strength and balance over time. A graded, confidence-building programme helps address both the physical and the confidence side.
+Yes. Fear of falling is common and can reduce activity, which worsens strength and balance over time. A graded, confidence-building programme helps address both the physical and the confidence side.
 
 ### Can you advise on my home environment?
 

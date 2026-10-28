@@ -14,7 +14,7 @@ draft: false
 relatedServices: ["musculoskeletal-physiotherapy"]
 ---
 
-Sports rehabilitation bridges the gap between an injury settling and you returning fully to training and competition - safely, confidently, and ideally more robust than before. It is also for active people who are not injured but want to move better, reduce their risk of injury, or improve how they perform. Physiotherapy assessment at Goji Physio in Lentor, Singapore identifies the physical qualities your sport demands and builds a progressive programme to meet them.
+Sports rehabilitation bridges the gap between an injury settling and you returning fully to training and competition - safely, and ideally in better shape than before. It is also for active people who are not injured but want to move better, reduce their risk of injury, or improve how they perform. Physiotherapy assessment at Goji Physio in Lentor, Singapore identifies the physical qualities your sport demands and builds a progressive programme to meet them.
 
 ## Who is sports rehabilitation for?
 
@@ -59,11 +59,11 @@ Readiness is based on objective measures - strength, control, and the ability to
 
 ### Can physiotherapy help me get back to running after an injury?
 
-Yes. A return-to-run plan builds strength and tolerance in stages, often starting with walking and strengthening and then moving to short run-walk intervals, guided by how the injured area responds. Your physiotherapist will tailor the stages to your injury, your running history, and your goals.
+Yes. A return-to-run plan builds strength and tolerance in stages, often starting with walking and strengthening and then moving to short run-walk intervals, guided by how the injured area responds. Your physiotherapist will fit the stages to your injury, your running history, and your goals.
 
 ### Will I need gym-based training?
 
-Progressive strength work is a core part of most sports rehabilitation, but programmes are tailored to your setting and equipment - whether that is a gym, home, or pitch-side. Your physiotherapist will design something realistic for you.
+Progressive strength work is a core part of most sports rehabilitation, but programmes fit your setting and equipment - whether that is a gym, home, or pitch-side. Your physiotherapist will design something realistic for you.
 
 ### How is this different from seeing a personal trainer?
 

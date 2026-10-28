@@ -19,7 +19,7 @@ Neurodevelopmental conditions are a group of conditions that affect how the brai
 
 The goals of physiotherapy are functional - defined by what the child and family want to be able to do. Depending on the condition and the child, physiotherapy can address:
 
-- Gross motor development: facilitating milestone achievement - rolling, sitting, standing, walking - using movement that is motivating and developmentally appropriate
+- Gross motor development: helping a child reach milestones - rolling, sitting, standing, walking - using movement that is motivating and developmentally appropriate
 - Muscle tone management: for children with spasticity (high tone) or hypotonia (low tone), therapy aims to optimise tone for functional movement and prevent secondary complications such as contractures
 - Postural management: developing programmes - including positioning equipment, splints, and active exercise - to maintain joint range and support body shape over time
 - Mobility and independence: supporting transitions (floor to standing, in and out of chairs), gait training, stair management, and safe participation in everyday activities
@@ -32,7 +32,7 @@ Cerebral palsy (CP) is the most common physical disability in childhood, caused 
 
 ## Down syndrome
 
-Children with Down syndrome have hypotonia (low muscle tone), which affects their posture, strength, and the pace of gross motor development. Physiotherapy targets tone-appropriate strengthening, joint stability, and milestone facilitation. Children with Down syndrome can achieve independent mobility and meaningful physical activity; physiotherapy supports that trajectory, particularly in the early years.
+Children with Down syndrome have hypotonia (low muscle tone), which affects their posture, strength, and the pace of gross motor development. Physiotherapy targets tone-appropriate strengthening, joint stability, and help with reaching milestones. Children with Down syndrome can achieve independent mobility and meaningful physical activity; physiotherapy supports that trajectory, particularly in the early years.
 
 ## Autism spectrum disorder and motor coordination
 

@@ -13,7 +13,7 @@ order: 2
 draft: false
 ---
 
-"Dizziness" is a broad term people use for several different sensations - spinning (vertigo), lightheadedness, floating or swaying, or a general feeling of unsteadiness. Because it can stem from the inner ear, the nervous system, blood pressure, or other causes, the first job is to work out what kind of dizziness you have and what is driving it. Vestibular physiotherapy assessment at Goji Physio in Lentor, Singapore helps clarify this and, where the balance system is involved, uses targeted rehabilitation to reduce symptoms and restore confidence in movement.
+"Dizziness" is a broad term people use for several different sensations - spinning (vertigo), lightheadedness, floating or swaying, or a general feeling of unsteadiness. Because it can stem from the inner ear, the nervous system, blood pressure, or other causes, the first job is to work out what kind of dizziness you have and what is driving it. Vestibular physiotherapy assessment at Goji Physio in Lentor, Singapore helps clarify this and, where the balance system is involved, uses rehabilitation to reduce symptoms and restore confidence in movement.
 
 ## What causes dizziness?
 
@@ -39,11 +39,11 @@ Your physiotherapist will take a careful history - describing your dizziness, it
 - Balance and gait assessment: how steady you are when standing and walking
 - Screening: checking for features that suggest a cause needing medical referral
 
-You will leave with an explanation of the likely contributors to your dizziness and, where appropriate, a tailored rehabilitation plan.
+You will leave with an explanation of the likely contributors to your dizziness and, where appropriate, a rehabilitation plan.
 
 ## How is dizziness treated?
 
-When the balance system is involved, vestibular rehabilitation - a personalised programme of gaze-stability, habituation, and balance exercises - helps the brain adapt and reduces symptoms over time. Where dizziness has other drivers, your physiotherapist will guide you toward the appropriate care, coordinating with your doctor as needed.
+When the balance system is involved, vestibular rehabilitation - a programme of gaze-stability, habituation, and balance exercises - helps the brain adapt and reduces symptoms over time. Where dizziness has other drivers, your physiotherapist will guide you toward the appropriate care, coordinating with your doctor as needed.
 
 ## Frequently asked questions
 
@@ -65,5 +65,5 @@ Some vestibular exercises briefly provoke symptoms as part of helping the brain 
 
 ### Could anxiety be contributing to my dizziness?
 
-Yes - dizziness and anxiety can influence each other, and this is common and understandable. Vestibular rehabilitation, education, and coordinated care can all help address this cycle.
+Yes - dizziness and anxiety can influence each other, and this is common. Vestibular rehabilitation, education, and coordinated care can all help address this cycle.
 

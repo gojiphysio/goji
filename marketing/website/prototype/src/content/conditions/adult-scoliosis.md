@@ -14,7 +14,7 @@ draft: false
 relatedServices: ["schroth-scoliosis-adults"]
 ---
 
-Scoliosis is a sideways curvature of the spine with an element of rotation. In adults it may be a curve that has been present since adolescence, or one that develops later as the spine's discs and joints change with age (degenerative scoliosis). Many adults with scoliosis live comfortably, while others experience pain, stiffness, or concerns about posture and progression. Physiotherapy assessment at Goji Physio in Lentor, Singapore clarifies how your curve affects you and guides a targeted, exercise-based plan to manage symptoms and support spinal function.
+Scoliosis is a sideways curvature of the spine with an element of rotation. In adults it may be a curve that has been present since adolescence, or one that develops later as the spine's discs and joints change with age (degenerative scoliosis). Many adults with scoliosis live comfortably, while others experience pain, stiffness, or concerns about posture and progression. Physiotherapy assessment at Goji Physio in Lentor, Singapore clarifies how your curve affects you and guides an exercise-based plan to manage symptoms and support spinal function.
 
 ## What causes adult scoliosis?
 
@@ -23,7 +23,7 @@ Adult scoliosis generally falls into two broad groups:
 - Adult idiopathic scoliosis: a curve that began in adolescence and has continued into adulthood
 - Degenerative (de novo) scoliosis: a curve that develops later in life as the discs and facet joints wear, more common with age
 
-Factors such as bone density, muscle strength, and overall activity levels can influence symptoms. Importantly, the size of a curve does not reliably predict how much pain or difficulty a person experiences - which is why individual assessment matters.
+Factors such as bone density, muscle strength, and overall activity levels can influence symptoms. The size of a curve does not reliably predict how much pain or difficulty a person experiences - which is why individual assessment matters.
 
 ## What are the signs adult scoliosis is affecting you?
 
@@ -46,7 +46,7 @@ Your physiotherapist will take a history of your curve, symptoms, and daily dema
 - Strength and control: assessing the muscles that support the trunk
 - Functional review: how the curve affects standing, walking, and the activities important to you
 
-Our clinicians are experienced in scoliosis-specific exercise approaches, including the Schroth method (Physiotherapy Scoliosis Specific Exercises) - a system of curve-specific exercises, breathing, and postural training. You will leave with a clear picture of your presentation and a personalised programme.
+Our clinicians are experienced in scoliosis-specific exercise approaches, including the Schroth method (Physiotherapy Scoliosis Specific Exercises) - a system of curve-specific exercises, breathing, and postural training. You will leave with a clear picture of your presentation and a programme.
 
 ## How is adult scoliosis managed?
 
@@ -56,15 +56,15 @@ Management is usually conservative and centred on active care: curve-specific an
 
 ### Can physiotherapy straighten my spine?
 
-Physiotherapy does not aim to reverse an established adult curve. The focus is on managing symptoms, building strength and control, maintaining function, and supporting the spine - which many adults find genuinely helpful for daily life.
+Physiotherapy does not aim to reverse an established adult curve. The focus is on managing symptoms, building strength and control, maintaining function, and supporting the spine - which many adults find helpful for daily life.
 
 ### What is the Schroth method?
 
-Schroth is a scoliosis-specific exercise approach that uses individualised exercises, breathing techniques, and postural awareness tailored to the shape and direction of your curve. It is taught and progressed by trained physiotherapists.
+Schroth is a scoliosis-specific exercise approach that uses individualised exercises, breathing techniques, and postural awareness matched to the shape and direction of your curve. It is taught and progressed by trained physiotherapists.
 
 ### Can scoliosis exercises help with back pain?
 
-Exercise is a core part of managing scoliosis-related back pain. Scoliosis-specific exercises such as the Schroth method, together with general strengthening and mobility work, aim to build the strength and control that support the spine and ease day-to-day discomfort. Your physiotherapist will tailor the programme to your curve and symptoms.
+Exercise is a core part of managing scoliosis-related back pain. Scoliosis-specific exercises such as the Schroth method, together with general strengthening and mobility work, aim to build the strength and control that support the spine and ease day-to-day discomfort. Your physiotherapist will set the programme around your curve and symptoms.
 
 ### Will my scoliosis get worse as I age?
 

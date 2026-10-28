@@ -48,7 +48,7 @@ Your physiotherapist will take a history - including any relevant surgery or tre
 - Movement and function: how the swelling affects your range and daily activities
 - Risk and self-care review: understanding your triggers and skin-care needs
 
-You will leave with an explanation of your presentation and an individualised management plan.
+You will leave with an explanation of your presentation and a management plan.
 
 ## How is lymphoedema managed?
 
@@ -59,7 +59,7 @@ Lymphoedema is typically managed with an approach often called complete deconges
 - Exercise and movement: to support lymphatic flow and function
 - Skin care and self-management: to protect the skin and reduce infection risk
 
-The emphasis is on effective long-term management and self-care, tailored to you and coordinated with your wider medical team.
+The emphasis is on long-term management and self-care, coordinated with your wider medical team.
 
 ## Frequently asked questions
 
@@ -69,7 +69,7 @@ Lymphoedema is generally a long-term condition rather than one that is cured, bu
 
 ### Will I need to wear compression garments forever?
 
-Compression is often an ongoing part of management, but the type and amount are tailored to you and can change over time. Your physiotherapist will guide what is appropriate at each stage.
+Compression is often an ongoing part of management, but the type and amount are set for you and can change over time. Your physiotherapist will guide what is appropriate at each stage.
 
 ### Is massage safe for lymphoedema?
 

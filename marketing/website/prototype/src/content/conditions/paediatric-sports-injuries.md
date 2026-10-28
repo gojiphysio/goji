@@ -19,7 +19,7 @@ Growing bodies are not simply smaller adult bodies. Children and adolescents hav
 
 The key difference is the growth plate (physis). In children and adolescents, the growth plates - cartilaginous zones at the ends and along the shafts of long bones - are the sites of bone lengthening. Growth plate cartilage is mechanically weaker than the surrounding bone and ligament, which means that forces that would cause ligament sprains in adults often cause growth plate injuries (physeal fractures) in children. This changes both the initial management and the return-to-sport timeline.
 
-Additionally, the tendons that attach to growing bone are subject to traction forces during rapid growth phases, leading to a specific group of conditions called apophyseal traction injuries - the most common of which are Osgood-Schlatter disease and Sever's disease.
+Tendons that attach to growing bone are also subject to traction forces during rapid growth phases, leading to a specific group of conditions called apophyseal traction injuries - the most common of which are Osgood-Schlatter disease and Sever's disease.
 
 ## Osgood-Schlatter disease
 

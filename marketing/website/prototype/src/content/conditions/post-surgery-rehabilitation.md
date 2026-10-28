@@ -13,7 +13,7 @@ order: 5
 draft: false
 ---
 
-Surgery is often only the first step - how you rehabilitate afterwards has a major influence on how well you recover your movement, strength, and function. Post-operative physiotherapy at Goji Physio in Lentor, Singapore provides a structured, staged plan that respects your surgeon's protocol and healing timelines while progressively rebuilding what surgery and the preceding injury took away. Whether you are recovering from a joint replacement, ligament reconstruction, spinal surgery, or a fracture repair, the goal is a confident return to the activities that matter to you.
+Surgery is often only the first step - how you rehabilitate afterwards has a major influence on how well you recover your movement, strength, and function. Post-operative physiotherapy at Goji Physio in Lentor, Singapore provides a structured, staged plan that respects your surgeon's protocol and healing timelines while progressively rebuilding what surgery and the preceding injury took away. The goal is a confident return to the activities that matter to you.
 
 ## What kinds of surgery does rehabilitation help with?
 
@@ -26,7 +26,7 @@ Physiotherapists commonly support recovery after:
 - Fracture fixation and orthopaedic trauma surgery
 - Abdominal or pelvic surgery, where movement and core function are affected (for caesarean birth, see Caesarean Recovery and Scar Management)
 
-Each procedure has its own healing timeline and precautions, so rehabilitation is always tailored to your specific operation and surgeon's guidance.
+Each procedure has its own healing timeline and precautions, so rehabilitation is always matched to your specific operation and your surgeon's guidance.
 
 ## What does knee or hip replacement rehabilitation involve?
 
@@ -71,7 +71,7 @@ Yes. Where a surgeon has provided a protocol or precautions, your programme is b
 
 ### How long does post-operative recovery take?
 
-Timelines vary widely by procedure - some recoveries take weeks, others many months. Rather than a fixed date, your physiotherapist will set staged milestones so you can track meaningful progress.
+Timelines vary widely by procedure - some recoveries take weeks, others many months. Rather than a fixed date, your physiotherapist will set staged milestones so you can track progress.
 
 ### What if I had surgery a while ago and still feel limited?
 

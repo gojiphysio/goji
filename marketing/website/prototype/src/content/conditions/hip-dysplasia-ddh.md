@@ -41,7 +41,7 @@ During harness wear, physiotherapy provides:
 
 After harness removal, many infants have delayed gross motor development - not because of neurological problems, but because the harness limited the movement experiences that drive motor learning. Physiotherapy after harness removal focuses on:
 
-- Facilitating milestone progression: rolling, sitting, weight-bearing through the legs, crawling, pulling to stand, and walking
+- Encouraging milestone progression: rolling, sitting, weight-bearing through the legs, crawling, pulling to stand, and walking
 - Hip muscle strengthening: the gluteals and hip external rotators, which are important for joint stability and normal gait
 - Gait analysis: once the child is walking, checking for any persisting asymmetry or abnormal movement patterns
 
@@ -49,13 +49,13 @@ For children who required surgical reduction or open hip surgery, post-operative
 
 ## What does a session at Goji involve?
 
-Our physiotherapist will review your child's ultrasound and orthopaedic correspondence, take a developmental history, and perform a physical assessment. For infants, this includes hip range of motion, muscle tone, reflexes, and a developmental screen appropriate to their age. For older children, it includes gait analysis, hip strength, and functional movement. You will leave with a clear programme and confidence in how to support your child's development at home.
+Our physiotherapist will review your child's ultrasound and orthopaedic correspondence, take a developmental history, and perform a physical assessment. For infants, this includes hip range of motion, muscle tone, reflexes, and a developmental screen appropriate to their age. For older children, it includes gait analysis, hip strength, and functional movement. You will leave with a clear programme and know how to support your child's development at home.
 
 ## Frequently asked questions
 
 ### My baby is in a Pavlik harness. Do they need physio as well as orthopaedic follow-up?
 
-Physiotherapy is a valuable complement to orthopaedic management during harness wear - particularly for parent education on handling and developmental support. It does not replace orthopaedic follow-up. Both are recommended.
+Physiotherapy complements orthopaedic management during harness wear - particularly for parent education on handling and developmental support. It does not replace orthopaedic follow-up. Both are recommended.
 
 ### My baby's harness has come off and they are not trying to stand yet. Is this a problem?
 
@@ -63,7 +63,7 @@ Delayed standing and walking after harness removal is common and expected. The h
 
 ### My toddler was diagnosed with DDH at 18 months. Is physio still relevant?
 
-Yes, though the pathway differs. Late-diagnosed DDH in a walking child requires orthopaedic assessment first, as surgical reduction might potentially be needed at this age. Post-surgical physiotherapy plays a significant role in restoring mobility, strength, and normal gait pattern.
+Yes, though the pathway differs. Late-diagnosed DDH in a walking child requires orthopaedic assessment first, as surgical reduction might be needed at this age. Post-surgical physiotherapy plays a significant role in restoring mobility, strength, and normal gait pattern.
 
 ### Can DDH cause problems in adulthood?
 

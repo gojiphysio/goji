@@ -71,7 +71,7 @@ Accidental bowel leakage (faecal incontinence) in any amount can result from sph
 
 ### Can stress and anxiety cause bowel problems?
 
-Yes. The gut-brain axis is real and well-established. Psychological stress activates the enteric nervous system in ways that affect bowel motility, sphincter tone, and visceral sensitivity. Physiotherapy addresses the physical contributors; if psychological factors are significant, our physiotherapist may recommend working alongside a psychologist or mindfulness-based approach in parallel.
+Yes. The gut-brain axis is well established. Psychological stress activates the enteric nervous system in ways that affect bowel motility, sphincter tone, and visceral sensitivity. Physiotherapy addresses the physical contributors; if psychological factors are significant, our physiotherapist may recommend working alongside a psychologist or mindfulness-based approach in parallel.
 
 ### Could my bowel symptoms be related to my pelvic floor, not just diet?
 

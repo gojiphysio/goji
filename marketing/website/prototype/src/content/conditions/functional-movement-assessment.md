@@ -37,7 +37,7 @@ Your physiotherapist will discuss your activity, history, and goals, then guide 
 - Strength and control: how well you stabilise and control movement, including single-leg tasks and balance
 - Task-specific movements: patterns relevant to your sport, work, or daily demands
 
-You will leave with an explanation of what the assessment found and a targeted programme of mobility, strength, and control work suited to your priorities.
+You will leave with an explanation of what the assessment found and a programme of mobility, strength, and control work suited to your priorities.
 
 ## What happens after the assessment?
 
@@ -55,7 +55,7 @@ No. Many people use a movement assessment proactively - to train more effectivel
 
 ### Will I get specific exercises to take away?
 
-Yes. The assessment is designed to produce a practical, prioritised set of exercises tailored to what it finds, not a generic routine.
+Yes. The assessment is designed to produce a practical, prioritised set of exercises built from what it finds, not a generic routine.
 
 ### Can it help my sport performance?
 
