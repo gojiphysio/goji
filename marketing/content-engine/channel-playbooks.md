@@ -21,7 +21,7 @@ How to run each channel week-to-week. The operator owns delivery; these are the 
 
 **Role:** show up in "physio near me" and Maps, convert with photos + reviews + booking link.
 
-- **Setup:** precise primary category (Physical therapy clinic) + secondaries (women's health clinic, sports medicine, fitness centre); complete hours; services; booking link; 10+ real interior/team photos; seed Q&A.
+- **Setup:** categories exactly as in `../seo/gbp-listing.md` (Physiotherapist primary, Women's health clinic secondary); complete hours; services; booking link; 10+ real interior/team photos; seed Q&A.
 - **Posts:** 2-3x/week, repurposed from IG (tips, services, hours, workshops). Each with a CTA button (Book/Call/Learn more).
 - **Reviews:** ask satisfied patients to share honest feedback - never incentivised, never scripted. Respond to every review professionally (replying lifts both ranking and conversion). Aim for steady velocity, not bursts.
 - **Photos:** add fresh ones regularly (profiles with photos get materially more direction requests and clicks).

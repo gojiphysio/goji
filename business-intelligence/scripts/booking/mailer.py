@@ -168,7 +168,7 @@ def send_customer_booking_email(result: dict, draft: dict) -> None:
                     "take care of it - that's where we handle all changes and "
                     "cancellations:")
         signoff = ["The Goji Physiotherapy team",
-                   "Lentor Modern, #01-13, Lentor Central, Singapore 788887"]
+                   "1 Lentor Central, #01-13, Lentor Modern, Singapore 788887"]
         details = [("Service", result['service'])]
         if result.get("physio_focus"):
             details.append(("Type", result['physio_focus']))

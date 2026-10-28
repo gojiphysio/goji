@@ -28,8 +28,8 @@ export const SITE = {
   googleMapsEmbed:
     "https://maps.google.com/maps?q=Goji%20Physiotherapy%2C%20Lentor%20Modern%2C%20Lentor%20Central%2C%20Singapore%20788887&output=embed",
   address: {
-    line1: "Lentor Modern, #01-13",
-    line2: "Lentor Central, Singapore 788887",
+    line1: "1 Lentor Central, #01-13",
+    line2: "Lentor Modern, Singapore 788887",
     note: "1-minute walk from Lentor MRT (Thomson-East Coast Line, Exit 1).",
   },
   hours: [

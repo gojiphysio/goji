@@ -75,7 +75,7 @@ How SG clinics build these: cross-referral agreements, co-hosted workshops, list
 
 ## 7. Local discovery (GBP + SEO)
 
-- **GBP is the highest-leverage local asset.** Precise primary category (Physical therapy clinic) + secondaries (women's health, sports medicine, fitness centre); booking link; complete hours; real interior/team photos; active Posts (2-3x/week) and Q&A. Profiles with photos get ~42% more direction requests and ~35% more website clicks. [Lead to Conversion](https://leadtoconversion.com/blog/google-business-profile-for-healthcare-services/)
+- **GBP is the highest-leverage local asset.** Precise primary category (Physiotherapist, the category the winning women's-health clinics use) + Women's health clinic as secondary; current values in `../seo/gbp-listing.md`; booking link; complete hours; real interior/team photos; active Posts (2-3x/week) and Q&A. Profiles with photos get ~42% more direction requests and ~35% more website clicks. [Lead to Conversion](https://leadtoconversion.com/blog/google-business-profile-for-healthcare-services/)
 - **Reviews drive ranking + conversion.** Steady velocity + owner responses matter. Compliance tension: ask satisfied patients to share honest feedback but never incentivise. [practicebeat](https://www.practicebeat.com/blog/google-business-profile-optimization-healthcare-marketing)
 - **"Physio near me"** ranking = GBP completeness + proximity + NAP consistency (keep Name/Address/Phone identical everywhere). Build condition/neighbourhood landing pages. Expect 2-4 months to first movement, 4-6 to stable top-3. [causalfunnel](https://www.causalfunnel.com/blog/top-10-local-seo-strategies-for-physiotherapists-in-2026/)
 
