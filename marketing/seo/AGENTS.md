@@ -4,28 +4,31 @@ The site is audited and improved by an agent on a schedule, with as little
 human intervention as is safe. This file is the contract for that loop.
 Strategy, keyword→page map and GEO rules live in `seo-geo-review.md`; copy
 rules in `../strategy/03-compliance-guardrails.md`; site rules in
-`../website/prototype/AGENTS.md`.
+`../website/AGENTS.md`.
 
 ## Never a medical untruth
 
 Hard rule, above every metric: the loop never invents, strengthens or extends
 a clinical claim. A tier A edit may only **restate** what the site already
 says (copy Cheryl has reviewed): shorter, clearer, better structured. New
-facts, numbers, timeframes, outcomes, conditions or services are tier B and
-wait for clinical review. When unsure, it is tier B.
+facts, numbers, timeframes, outcomes, conditions or services are tier B: the
+loop never self-merges them, and each must be sourced per
+`../content-engine/blog-brief.md`. When unsure, it is tier B.
 
 ## Approval tiers (enforced by `tools/tier_gate.py` in CI)
 
 | Tier | What | Who merges |
 |---|---|---|
 | **A** | Meta titles/descriptions, H1s, JSON-LD (`src/lib/schema.ts` + page schema), internal links, `llms.txt` sync, image weight/alt, rewording reviewed copy, audit outputs | The loop, after all checks pass |
-| **B** | New pages or blog posts, new numeric/time claims, compliance-lint hits, `reviewer`/`lastReviewed` changes | Cheryl reviews, owner merges |
+| **B** | New pages or blog posts, new numeric/time claims, compliance-lint hits, `reviewer`/`lastReviewed` changes | Owner merges; a physio reviews after it ships (decision 2026-10-28; queue in `blog-plan.md`) |
 | **C** | `/book` and booking code, CTAs/`links.ts`, prices, NAP/hours (`site.ts`), `_redirects`, `robots.txt`, `astro.config`, layouts (analytics beacon), CI, this file, `tools/` | Owner |
 
 - The loop labels a PR `tier-a` only when it intends to self-merge. The
   `SEO tier gate` check fails a `tier-a` PR whose diff is not tier A, so a
   mislabel can't ship. Merge only when **SEO tier gate, Site checks and
   Cloudflare Pages** are all green (`gh pr checks`), then `gh pr merge --merge`.
+  In auto permission mode the merge can be refused as "merge without
+  review"; then leave the PR open and say so in the report rather than retry.
 - One concern per PR (e.g. "meta descriptions", "llms.txt sync"), so a bad
   change reverts cleanly.
 - Never split a B/C change into tier A pieces to get it through.

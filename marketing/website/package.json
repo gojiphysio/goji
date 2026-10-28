@@ -1,0 +1,30 @@
+{
+  "name": "goji-website",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Goji Health public website (Astro, Cloudflare Pages).",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build && pagefind",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/rss": "^4.0.19",
+    "@astrojs/sitemap": "^3.7.3",
+    "@fontsource-variable/figtree": "^5.3.0",
+    "@fontsource-variable/newsreader": "^5.3.0",
+    "@fontsource/dm-serif-display": "^5.2.8",
+    "@iconify-json/tabler": "^1.2.35",
+    "astro": "^5.6.1",
+    "astro-icon": "^1.1.5"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "pagefind": "^1.5.2"
+  }
+}

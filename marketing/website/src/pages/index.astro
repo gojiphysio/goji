@@ -1,0 +1,853 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import FaqList from "../components/FaqList.astro";
+import Button from "../components/Button.astro";
+import Bloom from "../components/watercolor/Bloom.astro";
+import PaintedWord from "../components/watercolor/PaintedWord.astro";
+import PetalPhoto from "../components/watercolor/PetalPhoto.astro";
+import { Icon } from "astro-icon/components";
+import { SITE } from "../lib/site.ts";
+import { services } from "../lib/services.ts";
+
+// Service cards that have a matching explanatory page under /services link to it.
+// Physiotherapy spans several sub-types, so it points at the index.
+const serviceLearnMore: Record<string, string> = {
+  physiotherapy: "/services/",
+  "paediatric-physiotherapy": "/services/",
+  "mummy-baby": "/services/mummy-baby-assessment/",
+  "clinical-pilates": "/services/clinical-pilates/",
+  "private-pilates": "/services/private-pilates/",
+  "strength-conditioning": "/services/strength-conditioning/",
+};
+
+// FAQ — single source for both the on-page accordion and the FAQPage JSON-LD
+// (so AI answer engines and Google rich results read the same Q&A).
+const faqs = [
+  {
+    q: "What should I expect at my first visit?",
+    a: "Your first session starts with a conversation. We'll ask about your history, your current concerns, and your goals. Then we'll do a physical assessment and walk you through what we find. You'll leave with a clear understanding of what's going on and a plan for what comes next. First sessions typically run 55 minutes.",
+  },
+  {
+    q: "What should I wear to my appointment?",
+    a: "Comfortable clothing that allows movement. Think activewear, loose shorts, or leggings. We'll provide anything else you need during your session.",
+  },
+  {
+    q: "Can I see a physio during pregnancy?",
+    a: "Physiotherapy can be appropriate at different stages of pregnancy. Our physiotherapists support women with concerns such as pelvic girdle pain, lower back pain and pelvic floor changes, as well as physical preparation for birth and postpartum recovery. Your assessment and treatment will be based on your medical history, needs and stage of pregnancy, with input from your doctor where appropriate.",
+  },
+  {
+    q: "Do you treat children? What ages?",
+    a: "Yes. We see children from infancy through to 18. Our paediatric physiotherapy covers developmental concerns, movement milestones, sports injuries, scoliosis, and paediatric pelvic health. Sessions are designed to be comfortable for kids and informative for parents.",
+  },
+  {
+    q: "Do you treat men?",
+    a: "Yes. Goji Physio in Lentor treats men as well as women and children. Men see us for sports injuries, back and neck pain, joint and muscle problems, post-surgery rehabilitation and return to sport. Our AHPC-registered physiotherapists are trained in sports and orthopaedic rehabilitation, and our team includes a Master of Exercise Science. Clinical Pilates and strength and conditioning are open to men too.",
+  },
+  {
+    q: "How is Goji different from other physio clinics?",
+    a: "We specialise in providing a continuum of care for women. We built Goji so you can trust one clinic for your pelvic health, your postpartum recovery, and your child's physio needs. You don't have to start over with a new provider when your family's needs change.",
+  },
+  {
+    q: "Do you accept insurance?",
+    a: "We do not do direct billing. We recommend checking with your insurer before your first visit. Most of our patients pay first and claim later with their relevant corporate and personal insurance providers. Some insurance providers require a referral letter from a doctor.",
+  },
+];
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: faqs.map((f) => ({
+    "@type": "Question",
+    name: f.q,
+    acceptedAnswer: { "@type": "Answer", text: f.a },
+  })),
+};
+
+// Trust line under the hero CTAs, each led by the berry dot.
+const tickerItems = [
+  "1 min from Lentor MRT",
+  "AHPC-registered physiotherapists",
+  "Home visits available",
+];
+
+// Condition lists mirror the clinic-vetted old-site copy. Items link through to
+// the real condition pages under /conditions where one exists; the few without
+// a dedicated page yet are plain text. Group names must match the `category`
+// enum in src/content/config.ts and the `categories` array on /conditions.
+const careAreas = [
+  {
+    title: "Women's Health",
+    guideHref: "/conditions/",
+    points: [
+      { text: "Prenatal care and birth preparation", href: "/conditions/prenatal-care/" },
+      { text: "Antenatal and postnatal musculoskeletal concerns (pelvic girdle pain and mummy's wrist)", href: "/conditions/pelvic-girdle-pain/" },
+      "Postpartum recovery and return to sport",
+      { text: "Diastasis recti", href: "/conditions/diastasis-recti/" },
+      { text: "Caesarean recovery and scar management", href: "/conditions/caesarean-recovery/" },
+      { text: "Perineal tear, scar, and birth trauma", href: "/conditions/perineal-tear/" },
+      { text: "Blocked ducts and mastitis", href: "/conditions/blocked-ducts-mastitis/" },
+      "Pelvic floor dysfunction",
+      { text: "Pelvic organ prolapse (POP)", href: "/conditions/pelvic-organ-prolapse/" },
+      { text: "Pelvic pain and dyspareunia", href: "/conditions/pelvic-pain/" },
+      { text: "Osteopenia / osteoporosis and fragility fractures management", href: "/conditions/menopause/" },
+      { text: "Urinary incontinence", href: "/conditions/urinary-incontinence/" },
+      { text: "Bowel dysfunction and constipation", href: "/conditions/bowel-dysfunction/" },
+    ],
+  },
+  {
+    title: "Paediatrics",
+    guideHref: "/conditions/",
+    points: [
+      { text: "Congenital torticollis", href: "/conditions/congenital-torticollis/" },
+      { text: "Postural / structural congenital talipes equinovarus (CTEV)", href: "/conditions/clubfoot-ctev/" },
+      { text: "Developmental dysplasia of the hip (DDH)", href: "/conditions/hip-dysplasia-ddh/" },
+      { text: "Developmental concerns and early intervention", href: "/conditions/developmental-concerns/" },
+      { text: "Neurodevelopmental conditions", href: "/conditions/neurodevelopmental-conditions/" },
+      { text: "Adolescent idiopathic scoliosis and Schroth therapy", href: "/conditions/adolescent-scoliosis-schroth/" },
+      { text: "Paediatric pelvic health (bedwetting, soiling, and constipation)", href: "/conditions/paediatric-pelvic-health/" },
+      { text: "Musculoskeletal and sports injury", href: "/conditions/paediatric-sports-injuries/" },
+      { text: "Post-fracture rehabilitation", href: "/conditions/post-fracture-rehab/" },
+    ],
+  },
+  {
+    title: "Musculoskeletal & Sports",
+    guideHref: "/conditions/",
+    points: [
+      { text: "Injuries", href: "/conditions/musculoskeletal-pain-and-injuries/" },
+      { text: "Persistent or recurrent pain", href: "/conditions/persistent-pain/" },
+      { text: "Adult scoliosis", href: "/conditions/adult-scoliosis/" },
+      { text: "Sports rehabilitation and performance", href: "/conditions/sports-rehabilitation/" },
+      { text: "Post-operation recovery and rehabilitation", href: "/conditions/post-surgery-rehabilitation/" },
+      { text: "Functional movement assessment", href: "/conditions/functional-movement-assessment/" },
+      { text: "Dry needling", href: "/conditions/dry-needling/" },
+    ],
+  },
+  {
+    title: "Vestibular Rehabilitation",
+    guideHref: "/conditions/",
+    points: [
+      { text: "Vertigo", href: "/conditions/vertigo/" },
+      { text: "Dizziness", href: "/conditions/dizziness/" },
+      { text: "Balance difficulties", href: "/conditions/balance-problems/" },
+      { text: "Benign paroxysmal positional vertigo (BPPV)", href: "/conditions/bppv/" },
+      { text: "Fall prevention and age-related instability", href: "/conditions/fall-prevention/" },
+    ],
+  },
+  {
+    title: "Lymphatic Health",
+    guideHref: "/conditions/",
+    points: [
+      { text: "Lymphoedema", href: "/conditions/lymphoedema/" },
+      { text: "Swelling management", href: "/conditions/swelling-management/" },
+      { text: "Lipoedema", href: "/conditions/lipoedema/" },
+      { text: "Breast cancer post-op rehabilitation", href: "/conditions/breast-cancer-rehabilitation/" },
+      { text: "Chronic venous insufficiency (CVI)", href: "/conditions/chronic-venous-insufficiency/" },
+    ],
+  },
+];
+
+const team = [
+  {
+    name: "Cheryl Long",
+    role: "Clinical Director",
+    interests:
+      "Women's health, paediatric orthopaedic conditions, pelvic health (women's & paediatric), pre & postnatal care, musculoskeletal rehabilitation, scoliosis management, clinical Pilates, dry needling.",
+    slug: "cheryl-long",
+  },
+  {
+    name: "Claire Ng",
+    role: "Senior Physiotherapist",
+    interests:
+      "Pelvic health, pre & postnatal care, women's rehabilitation, musculoskeletal, sports, lymphoedema, vestibular physiotherapy, clinical Pilates.",
+    slug: "claire-ng",
+  },
+  {
+    name: "Kristy Ng",
+    role: "Senior Physiotherapist",
+    interests:
+      "Pelvic health, pre & postnatal care, women's rehabilitation, sports, paediatric physiotherapy including neuro cases.",
+    slug: "kristy-ng",
+  },
+  {
+    name: "Camille Tan",
+    role: "Pilates Instructor",
+    interests:
+      "STOTT PILATES® certified mat and reformer instruction, core strength and stability, mobility and flexibility, body awareness, mindful movement, posture and alignment.",
+    slug: "camille-tan",
+  },
+];
+
+// COMPLIANCE NOTE: Outcome/superlative phrases trimmed per SG healthcare ad rules.
+// Trimmed: "Cheryl is the best", "She is truly a gem" (superlatives); Zachary W. outcome sentence
+// and referral solicitation removed. All reviews are authentic public Google Reviews.
+// Order: Cheryl → Cheryl → Kristy → Claire → general → Cheryl, so all three physios appear early
+const reviews = [
+  {
+    name: "Jennifer O.",
+    text: "Cheryl has been instrumental in helping me in my pre and postnatal recovery. She has given me so much more confidence in my body post partum and helped me tremendously in preparing for birth. She is also just in general really sweet and lovely which makes our sessions very enjoyable.",
+  },
+  {
+    name: "Sulwyn N.",
+    text: "I've had a wonderful experience with Cheryl at Goji. She is incredibly supportive, knowledgeable and always takes a gentle yet thoughtful approach to treatment. What stands out most is that Goji isn't just a physio clinic — the entire team has built a welcoming and encouraging community that genuinely cares about your progress.",
+  },
+  {
+    name: "Grace S.",
+    text: "Did a postpartum physio check with Kristy! She was very knowledgeable and shared what she's checking for and how. Also gave me tips on breath work to incorporate in my usual workouts to activate my deep core. Very useful and practical for me!",
+  },
+  {
+    name: "Alison K.",
+    text: "Had a physio session with Claire after hurting my back as a postpartum mum getting back into strength training. She is really able to balance the sports side and women's health sides of physio. Would highly recommend!",
+  },
+  {
+    name: "Nadjib S.",
+    text: "Love the ambience of the newly opened clinic. Was attended by Chris and handled by Cheryl. Cheryl guided me to a personalised exercise suitable for my current injury and was very professional. I enjoyed my sessions there. Overall satisfied!",
+  },
+  {
+    name: "Zachary W.",
+    text: "Cheryl is an extremely patient and amicable physiotherapist who has helped me with my injuries through the process of dry needling. Cheryl explains the procedures cohesively so that I was able to understand the dry needling process.",
+  },
+];
+
+---
+
+<BaseLayout
+  title="Women's & Family Physiotherapy in Lentor | Goji Physio"
+  description="Women's & family physiotherapy at Lentor Modern, Singapore: pelvic health, pregnancy and postpartum care, paediatrics and strength. One minute from Lentor MRT."
+  schema={faqSchema}
+>
+  {/* ---- Hero: copy left, petal photo + ripening bloom right, dawn wash behind.
+       Everything here is visible on first paint; only the paint moves. ---- */}
+  <div class="home gj-washed">
+  {/* One watercolour wash runs down the whole page (painted at half
+      resolution: it is soft anyway), so sections flow without divider bands. */}
+  <div class="gj-wc gj-wc--multiply gj-wc-wash" data-gj-wash="page" data-seed="5" data-dpr="0.5" data-immediate aria-hidden="true"></div>
+  <section class="hero">
+    <div class="container hero__inner">
+      <div class="hero__text">
+        <p class="hero__tagline">Care that <PaintedWord>grows</PaintedWord> with you.</p>
+        <h1 class="hero__h1">Women's and Family Physiotherapy in Lentor, Singapore</h1>
+        <p class="hero__lead">
+          Expert care for pelvic health, pregnancy and postpartum recovery,
+          paediatrics and everyday strength.
+        </p>
+        <div class="hero__actions">
+          <Button slug="web-wa" variant="whatsapp" size="lg">WhatsApp us</Button>
+          <Button href="/book/" variant="book" size="lg">Book now</Button>
+        </div>
+        <ul class="hero__trust" aria-label="Why families choose Goji">
+          {tickerItems.map((item) => <li>{item}</li>)}
+        </ul>
+      </div>
+      <div class="hero__media">
+        <PetalPhoto
+          src="/photos/services/prenatal-physiotherapy-warm.webp"
+          alt="A Goji physiotherapist guiding a pregnant woman through an assisted side stretch on a mat"
+          flip
+          priority
+          position="50% 30%"
+          class="hero__photo"
+        />
+        <Bloom preset="ripen" speed={2.25} class="hero__bloom" label="A watercolour goji flower opening and ripening into a red berry" />
+      </div>
+    </div>
+  </section>
+
+  {/* ---- About ---- */}
+  <section class="about" id="about">
+    <div class="container about__inner">
+      <div class="about__text gj-reveal">
+        <h2>What is Goji Physio?</h2>
+        <p>
+          Goji Women's and Family Physiotherapy is a physiotherapy clinic focused
+          on women's and family health, located at Lentor Modern, just a minute's
+          walk from Lentor MRT in Singapore.
+        </p>
+        <p>
+          Our AHPC-registered physiotherapists provide care across
+          women's health, pelvic health, pregnancy and postpartum recovery,
+          paediatrics, and musculoskeletal rehabilitation.
+        </p>
+        <p>
+          We believe good care starts with being heard. We work with women,
+          children and anyone recovering from an injury, at every stage of life.
+        </p>
+      </div>
+      <div class="about__media">
+        <PetalPhoto
+          src="/photos/space/reception-warm.webp"
+          alt="Goji reception at Lentor Modern: a red oval table and cushioned wooden stools beneath the Goji Women's and Family Physiotherapy sign"
+          paint
+          class="about__photo"
+        />
+        <Bloom preset="sprig" seed={4} speed={2.4} class="about__bloom" />
+      </div>
+    </div>
+  </section>
+
+  {/* ---- Services: white (tappable) cards; a snap-scroll row on phones ---- */}
+  <section class="services" id="services">
+    <div class="container">
+      <header class="sec-head gj-reveal">
+        <h2>Care for the whole family, under one roof</h2>
+      </header>
+      <div class="service-grid">
+        {
+          services.map((s, i) => (
+            <article class="service-card gj-reveal" style={`--i:${i % 3}`}>
+              <span class="service-card__icon" aria-hidden="true">
+                <Icon name={s.icon} size={22} />
+              </span>
+              <h3 class="service-card__name">{s.title}</h3>
+              <p class="service-card__meta">{s.meta.join(" · ")}</p>
+              <p class="service-card__price">
+                {s.price && <strong>${s.price}</strong>}
+                {s.priceUsual && <span class="service-card__usual">Introductory price (usual ${s.priceUsual})</span>}
+              </p>
+              <p class="service-card__lead">{s.lead}</p>
+              <div class="service-card__cta">
+                {serviceLearnMore[s.id] && (
+                  <a href={serviceLearnMore[s.id]} class="service-card__learn">
+                    <span>Learn more<span class="visually-hidden"> about {s.title}</span></span>
+                    <Icon name="tabler:arrow-up-right" size={16} />
+                  </a>
+                )}
+                <Button href="/book/" variant="secondary" class="service-card__book">
+                  Book<span class="visually-hidden"> {s.title}</span>
+                </Button>
+              </div>
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  {/* ---- Conditions we treat (accordion) ---- */}
+  <section class="care" id="care">
+    <div class="container care__inner">
+      <header class="sec-head care__head gj-reveal">
+        <h2>Conditions we treat</h2>
+        <p class="sec-head__lead">
+          Physiotherapy for women, children and families, at every stage of life.
+        </p>
+        <a href="/conditions/" class="care__all">View all conditions</a>
+      </header>
+      <div class="accordion">
+        {
+          careAreas.map((c) => (
+            <details class="accordion__item">
+              <summary class="accordion__trigger">
+                <span class="accordion__name">{c.title}</span>
+                <span class="accordion__toggle" aria-hidden="true" />
+              </summary>
+              <div class="accordion__body">
+                <ul class="care-list">
+                  {c.points.map((p) =>
+                    typeof p === "string" ? (
+                      <li>{p}</li>
+                    ) : (
+                      <li>
+                        <a href={p.href} class="care-list__link">
+                          {p.text}
+                          <span class="visually-hidden"> — read more</span>
+                        </a>
+                      </li>
+                    ),
+                  )}
+                </ul>
+              </div>
+            </details>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  {/* ---- Stats: facts on the ground with hairlines, never card-shaped ---- */}
+  <section class="stats" aria-label="Goji at a glance">
+    <div class="container">
+      <dl class="stats__grid">
+        {[
+          { value: "1 min", label: "walk from Lentor MRT", caption: "Ground floor, stroller-friendly" },
+          { value: "3", label: "AHPC-registered physiotherapists", caption: "AHPC-registered clinicians" },
+          { value: "20+", label: "years combined experience", caption: "Across pelvic health, sports, and paediatrics" },
+          { value: "1000+", label: "patients collectively served", caption: "And growing" },
+        ].map((st, i) => (
+          <div class="stat gj-reveal" style={`--i:${i}`}>
+            <dt class="stat__label">{st.label}</dt>
+            <dd class="stat__value">{st.value}</dd>
+            <dd class="stat__caption">{st.caption}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  </section>
+
+  {/* ---- Team ---- */}
+  <section class="team" id="team">
+    <div class="container">
+      <header class="sec-head gj-reveal">
+        <h2>Practitioners who get it</h2>
+      </header>
+      <div class="team-grid">
+        {
+          team.map((t, i) => (
+            <a href={`/team/${t.slug}/`} class="person">
+              <PetalPhoto
+                src={`/photos/team/portrait/${t.slug}.webp`}
+                alt={`${t.name}, ${t.role} at Goji Physiotherapy`}
+                paint
+                flip={i % 2 === 1}
+                position="50% 40%"
+                class="person__photo"
+              />
+              <span class="person__role">{t.role}</span>
+              <h3 class="person__name">{t.name}</h3>
+              <p class="person__interests">{t.interests}</p>
+            </a>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  {/* ---- For every stage of growth: bud, flower, ripe berry ---- */}
+  <section class="growth">
+    <div class="container growth__inner">
+      <div class="growth__stages" role="img" aria-label="Watercolour paintings of a goji plant at three stages: a lilac bud, an open flower, and a ripe red berry">
+        <div class="gj-wc gj-wc--multiply gj-wc-bloom" data-gj-bloom="node-bud" data-seed="7" data-speed="2.4" aria-hidden="true"></div>
+        <div class="gj-wc gj-wc--multiply gj-wc-bloom" data-gj-bloom="node-flower" data-seed="8" data-speed="2.4" data-delay="230" aria-hidden="true"></div>
+        <div class="gj-wc gj-wc--multiply gj-wc-bloom" data-gj-bloom="node-berry" data-seed="9" data-speed="2.4" data-delay="470" aria-hidden="true"></div>
+      </div>
+      <div class="growth__text gj-reveal">
+        <h2>For every stage of growth</h2>
+        <p>
+          Goji takes its name from a berry that ripens in its own time. Bodies are
+          the same. They grow, change, and recover in stages, and care should meet
+          you at each one.
+        </p>
+        <p>
+          From pregnancy and birth to postpartum recovery, from your children's
+          early milestones to the changes of menopause, the same trusted team is
+          here for every stage.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  {/* ---- Google Reviews carousel ---- */}
+  <section class="reviews">
+    <div class="container">
+      <div class="reviews__head">
+        <header class="sec-head gj-reveal">
+          <h2>The Goji community</h2>
+        </header>
+        <div class="reviews__rating">
+          <a href="https://maps.app.goo.gl/wBaCkBiDNfF7JCGv8" target="_blank" rel="noopener noreferrer">See all reviews on Google</a>
+        </div>
+      </div>
+      <PetalPhoto
+        src="/photos/space/community-class-warm.webp"
+        alt="Two smiling women sitting cross-legged on a mat, reaching into a side stretch as an instructor leads the class"
+        paint
+        position="50% 70%"
+        class="reviews__photo"
+      />
+      <div class="reviews__wrap">
+        <div class="reviews__track" id="reviewsTrack">
+          {reviews.map((r) => (
+            <blockquote class="review">
+              <div class="review__stars" aria-label="5 stars">★★★★★</div>
+              <p class="review__text">{r.text}</p>
+              <footer class="review__name">{r.name}</footer>
+            </blockquote>
+          ))}
+        </div>
+        <div class="reviews__nav">
+          <button class="round-btn" id="reviewsPrev" aria-label="Previous review" disabled>
+            <Icon name="tabler:arrow-left" size={20} />
+          </button>
+          <button class="round-btn" id="reviewsNext" aria-label="Next review">
+            <Icon name="tabler:arrow-right" size={20} />
+          </button>
+        </div>
+      </div>
+      <p class="reviews__disclaimer">All reviews sourced from <a href="https://maps.app.goo.gl/wBaCkBiDNfF7JCGv8" target="_blank" rel="noopener noreferrer">Google Maps</a>.</p>
+    </div>
+  </section>
+
+  {/* ---- FAQ ---- */}
+  <section class="faq" id="faq">
+    <div class="container faq__inner">
+      <header class="sec-head gj-reveal">
+        <h2>Frequently asked questions</h2>
+      </header>
+      <FaqList items={faqs} />
+    </div>
+  </section>
+
+  {/* ---- Closing promise: the page's one burgundy surface ---- */}
+  <section class="promise-sec">
+    <div class="container">
+      <figure class="promise gj-washed">
+        <div class="gj-wc gj-wc-wash" data-gj-wash="dusk" data-seed="9" aria-hidden="true"></div>
+        <img class="promise__logo" src="/brand/logo_light_transparent.webp" alt="Goji" width="515" height="252" loading="lazy" />
+        <blockquote class="promise__text">{SITE.promise}</blockquote>
+        <div class="promise__actions" data-search-ignore>
+          <Button slug="web-wa" variant="light" size="lg">WhatsApp us</Button>
+          <Button href="/book/" variant="secondary" size="lg" class="promise__book">Book an appointment</Button>
+        </div>
+      </figure>
+    </div>
+  </section>
+  </div>
+</BaseLayout>
+
+<script>
+  // Reviews: arrow buttons scroll by one card and disable at either end.
+  const track = document.getElementById("reviewsTrack");
+  const prev = document.getElementById("reviewsPrev") as HTMLButtonElement | null;
+  const next = document.getElementById("reviewsNext") as HTMLButtonElement | null;
+  if (track && prev && next) {
+    const step = () => {
+      const card = track.firstElementChild as HTMLElement | null;
+      return card ? card.offsetWidth + parseInt(getComputedStyle(track).columnGap || "0") : 0;
+    };
+    const update = () => {
+      const max = track.scrollWidth - track.clientWidth;
+      prev.disabled = track.scrollLeft <= 1;
+      next.disabled = track.scrollLeft >= max - 1;
+    };
+    prev.addEventListener("click", () => track.scrollBy({ left: -step(), behavior: "smooth" }));
+    next.addEventListener("click", () => track.scrollBy({ left: step(), behavior: "smooth" }));
+    track.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    update();
+  }
+</script>
+
+<style>
+  section { scroll-margin-top: 88px; }
+  .sec-head { display: grid; gap: var(--space-4); max-width: 44rem; }
+  .sec-head h2 { margin: 0; }
+  .sec-head__lead { font-size: var(--fs-body); color: var(--text-muted); max-width: 34em; }
+
+  /* ======================================================
+     Hero
+     ====================================================== */
+  .hero {
+    padding-block: clamp(2.5rem, 1rem + 5vw, 6rem) clamp(4rem, 2rem + 6vw, 8rem);
+  }
+  .hero__inner {
+    display: grid;
+    gap: clamp(3rem, 2rem + 4vw, 4.5rem);
+    align-items: center;
+  }
+  .hero__text { display: grid; gap: var(--space-4); align-content: center; }
+  .hero__tagline { margin-bottom: var(--space-2) !important; }
+  .hero__h1 { font-family: var(--font-body); font-variation-settings: var(--font-body-axes); font-size: var(--fs-body); line-height: 1.45; font-weight: var(--weight-semibold); letter-spacing: 0; margin: 0; }
+  .hero__lead { color: var(--text-muted); }
+  .hero__tagline {
+    font-family: var(--font-display);
+    font-variation-settings: var(--font-display-axes);
+    /* sized so "Care that grows" holds one line beside the photo */
+    font-size: clamp(2.375rem, 1.8rem + 2.3vw, 3.375rem);
+    font-weight: var(--weight-display);
+    line-height: var(--lh-tight);
+    letter-spacing: var(--tracking-display);
+    color: var(--text-default);
+    text-wrap: balance;
+    margin: 0;
+  }
+  .hero__lead { font-size: var(--fs-body); max-width: 34em; margin: 0; }
+  .hero__actions { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-2); }
+  .hero__trust { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-5); margin-top: var(--space-2); }
+  .hero__trust li { display: inline-flex; align-items: center; gap: 8px; font-size: var(--fs-caption); color: var(--text-muted); }
+  /* a small watercolour goji berry with its sage calyx */
+  .hero__trust li::before { content: ""; flex: none; width: 15px; height: 20px; margin-top: -4px; background: url("/brand/goji-berry-bullet.svg") center / contain no-repeat; }
+  .hero__media { position: relative; padding: 0 0 8% 10%; }
+  .hero__media :global(.hero__photo) { aspect-ratio: 4 / 5; box-shadow: var(--shadow-lg); }
+  .hero__media :global(.hero__bloom) { position: absolute; left: -6%; bottom: -6%; width: 50%; }
+  @media (min-width: 900px) {
+    .hero__inner { grid-template-columns: 1.15fr 1fr; gap: clamp(3rem, 6vw, 6rem); }
+    .hero__media :global(.hero__bloom) { left: -24%; bottom: -4%; }
+  }
+
+  /* ======================================================
+     About: petal photo + sprig, text
+     ====================================================== */
+  .about { padding-block: var(--section-y); }
+  .about__inner { display: grid; gap: clamp(3rem, 6vw, 6rem); align-items: center; }
+  .about__media { position: relative; max-width: 520px; }
+  .about__media :global(.about__photo) { aspect-ratio: 4 / 5; }
+  .about__media :global(.about__bloom) { position: absolute; width: 46%; right: -4%; top: -15%; }
+  .about__text { display: grid; gap: var(--space-4); }
+  .about__text h2 { margin-bottom: var(--space-2); }
+  .about__text p + p { margin-top: 0; }
+  .about__text p { max-width: 36em; }
+  @media (min-width: 900px) {
+    .about__inner { grid-template-columns: 6fr 5fr; }
+    .about__media { justify-self: end; width: 100%; }
+    .about__media :global(.about__bloom) { width: 46%; right: auto; left: -12%; top: -16%; }
+  }
+
+  /* ======================================================
+     Services
+     ====================================================== */
+  .services { padding-block: var(--section-y); }
+  .service-grid {
+    margin-top: var(--space-7);
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: min(84%, 340px);
+    gap: var(--space-4);
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    padding-bottom: var(--space-4);
+    margin-inline: calc(var(--gutter) * -1);
+    padding-inline: var(--gutter);
+    scroll-padding-inline: var(--gutter);
+    scrollbar-width: none;
+  }
+  .service-grid::-webkit-scrollbar { display: none; }
+  @media (min-width: 900px) {
+    .service-grid {
+      grid-auto-flow: row;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: none;
+      grid-auto-rows: auto;
+      overflow: visible;
+      margin-inline: 0;
+      padding-inline: 0;
+      column-gap: var(--space-5);
+    }
+    .service-card { margin-bottom: var(--space-5); }
+  }
+  /* Six shared rows (icon, name, meta, price, description, actions): each card
+     is a subgrid, so the same part starts at the same height in every card. */
+  .service-grid { grid-template-rows: repeat(6, auto); row-gap: 0; }
+  .service-card {
+    scroll-snap-align: start;
+    grid-row: span 6;
+    display: grid;
+    grid-template-rows: subgrid;
+    row-gap: var(--space-3);
+    align-content: start;
+    padding: var(--space-6) var(--space-5);
+    background: var(--bg-content);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow 320ms var(--ease), transform 320ms var(--ease);
+  }
+  .service-card:hover { box-shadow: var(--shadow-md); }
+  .service-card__icon {
+    width: 48px; height: 48px; border-radius: 50%;
+    display: grid; place-items: center;
+    background: var(--blush); color: var(--color-primary);
+    margin-bottom: var(--space-2);
+  }
+  .service-card__name { font-size: 1.25rem; margin: 0; }
+  .service-card__meta { font-size: var(--fs-caption); color: var(--text-muted); margin: 0; }
+  .service-card__price { display: flex; align-items: baseline; gap: var(--space-3); margin: 0; }
+  .service-card__price strong {
+    font-family: var(--font-body); font-variation-settings: var(--font-body-axes);
+    font-size: var(--fs-h3); font-weight: var(--weight-bold); letter-spacing: -0.01em; line-height: 1; color: var(--text-accent);
+  }
+  .service-card__usual { font-size: var(--fs-small); color: var(--text-muted); }
+  .service-card__lead { font-size: var(--fs-small); line-height: 1.6; margin: 0; }
+  .service-card__cta { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); margin-top: var(--space-3); align-self: end; }
+  .service-card__cta :global(.service-card__book) { margin-left: auto; }
+  .service-card__learn {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: var(--fs-small); font-weight: var(--weight-semibold);
+    color: var(--text-accent); text-decoration: none;
+  }
+  .service-card__learn :global(svg) { transition: transform var(--dur) var(--ease); }
+  .service-card__learn:hover :global(svg) { transform: translate(2px, -2px); }
+
+  /* ======================================================
+     Conditions accordion
+     ====================================================== */
+  .care { padding-block: var(--section-y); }
+  .care__inner { display: grid; gap: var(--space-7); }
+  .care__all { font-size: var(--fs-small); font-weight: var(--weight-semibold); color: var(--text-accent); }
+  @media (min-width: 900px) {
+    .care__inner { grid-template-columns: 4fr 7fr; gap: var(--space-9); align-items: start; }
+    .care__head { position: sticky; top: 120px; }
+  }
+  .accordion { border-top: 1px solid var(--rule); }
+  .accordion__item { border-bottom: 1px solid var(--rule); }
+  .accordion__trigger {
+    display: flex; align-items: center; gap: var(--space-4);
+    padding: var(--space-5) 0; cursor: pointer; list-style: none;
+  }
+  .accordion__trigger::-webkit-details-marker { display: none; }
+  .accordion__name {
+    flex: 1;
+    font-family: var(--font-body); font-variation-settings: var(--font-body-axes);
+    font-size: 1rem; font-weight: var(--weight-semibold); letter-spacing: -0.01em; line-height: 1.3;
+  }
+  .accordion__count { font-size: var(--fs-caption); color: var(--text-muted); }
+  .accordion__toggle {
+    position: relative; flex: none; width: 36px; height: 36px; border-radius: 50%;
+    border: 1.5px solid var(--color-border-strong);
+    transition: background var(--dur) var(--ease), transform 400ms var(--ease);
+  }
+  .accordion__toggle::before, .accordion__toggle::after {
+    content: ""; position: absolute; left: 50%; top: 50%; width: 12px; height: 1.5px;
+    background: var(--text-default); transform: translate(-50%, -50%);
+  }
+  .accordion__toggle::after { transform: translate(-50%, -50%) rotate(90deg); transition: transform 400ms var(--ease); }
+  details[open] > summary .accordion__toggle { background: var(--color-linen-deep); }
+  details[open] > summary .accordion__toggle::after { transform: translate(-50%, -50%) rotate(0deg); }
+  summary:hover .accordion__toggle { border-color: var(--text-default); }
+  .accordion__body { padding: 0 0 var(--space-6); }
+  .care-list { list-style: none; padding: 0; display: grid; gap: var(--space-2) var(--space-6); }
+  @media (min-width: 640px) { .care-list { grid-template-columns: 1fr 1fr; } }
+  .care-list li { position: relative; padding-left: 20px; font-size: var(--fs-small); line-height: 1.55; }
+  .care-list li::before { content: ""; position: absolute; left: 2px; top: 0.55em; width: 7px; height: 9px; border-radius: 50% 50% 50% 50% / 58% 58% 42% 42%; background: var(--berry); }
+  .care-list__link { color: var(--text-default); text-decoration-color: var(--color-border-strong); }
+  .care-list__link:hover { color: var(--text-accent); text-decoration-color: currentColor; }
+
+  /* ======================================================
+     Stats
+     ====================================================== */
+  .stats { padding-block: 0 var(--section-y); }
+  .stats__grid { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--rule); margin: 0; }
+  .stat { display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-6) var(--space-4) var(--space-6) 0; border-bottom: 1px solid var(--rule); }
+  .stat:nth-child(odd) { border-right: 1px solid var(--rule); }
+  .stat:nth-child(even) { padding-left: var(--space-5); }
+  .stat__value {
+    order: -1; margin: 0;
+    font-family: var(--font-display); font-variation-settings: var(--font-display-axes);
+    font-size: clamp(1.75rem, 1.3rem + 1.8vw, 2.5rem); font-weight: var(--weight-bold); line-height: 1;
+    letter-spacing: -0.035em; color: var(--text-accent);
+  }
+  .stat__label { font-size: var(--fs-small); font-weight: var(--weight-semibold); }
+  .stat__caption { margin: 0; font-size: var(--fs-caption); color: var(--text-muted); }
+  @media (min-width: 900px) {
+    .stats__grid { grid-template-columns: repeat(4, 1fr); border-bottom: 1px solid var(--rule); }
+    .stat, .stat:nth-child(odd), .stat:nth-child(even) { padding: var(--space-7) var(--space-6); border-bottom: 0; border-right: 1px solid var(--rule); }
+    .stat:first-child { padding-left: 0; }
+    .stat:last-child { border-right: 0; }
+  }
+
+  /* ======================================================
+     Team
+     ====================================================== */
+  .team { padding-block: 0 var(--section-y); }
+  .team-grid {
+    margin-top: var(--space-7);
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: min(72%, 280px);
+    gap: var(--space-5);
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    margin-inline: calc(var(--gutter) * -1);
+    padding: 0 var(--gutter) var(--space-4);
+    scroll-padding-inline: var(--gutter);
+    scrollbar-width: none;
+  }
+  .team-grid::-webkit-scrollbar { display: none; }
+  @media (min-width: 900px) {
+    .team-grid { grid-auto-flow: row; grid-template-columns: repeat(4, 1fr); overflow: visible; margin-inline: 0; padding-inline: 0; }
+  }
+  .person { scroll-snap-align: start; display: flex; flex-direction: column; gap: var(--space-2); color: var(--text-default); text-decoration: none; }
+  .person :global(.person__photo) { aspect-ratio: 4 / 5; margin-bottom: var(--space-3); }
+  .person :global(.person__photo img) { transition: transform 1100ms var(--ease); }
+  .person:hover :global(.person__photo img) { transform: scale(1.035); }
+  .person__role { font-size: var(--fs-small); font-weight: var(--weight-semibold); color: var(--text-accent); }
+  .person__name { font-size: 1.25rem; margin: 0; }
+  .person:hover .person__name { color: var(--text-accent); }
+  .person__interests { font-size: var(--fs-caption); line-height: 1.6; color: var(--text-muted); margin-top: var(--space-2); padding-top: var(--space-3); border-top: 1px solid var(--rule); }
+
+  /* ======================================================
+     Every stage of growth
+     ====================================================== */
+  .growth { padding-block: var(--section-y); }
+  .growth__inner { display: grid; gap: var(--space-7); align-items: center; }
+  .growth__stages { display: grid; grid-template-columns: repeat(3, 1fr); align-items: end; max-width: 620px; }
+  /* each painting fills only the middle of its square, so let them overlap */
+  .growth__stages > * { width: 140%; margin-inline: -20%; }
+  .growth__stages > :nth-child(2) { transform: translateY(-12%); }
+  .growth__text { display: grid; gap: var(--space-4); }
+  .growth__text p + p { margin-top: 0; }
+  .growth__text p { max-width: 34em; }
+  @media (min-width: 900px) {
+    .growth__inner { grid-template-columns: 1fr 1fr; gap: var(--space-9); }
+    .growth__stages > * { width: 165%; margin-inline: -32.5%; }
+  }
+
+  /* ======================================================
+     Reviews
+     ====================================================== */
+  .reviews { padding-block: var(--section-y); }
+  .reviews__head { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: var(--space-5); }
+  .reviews__rating { display: flex; align-items: center; gap: var(--space-3); font-size: var(--fs-small); }
+  .reviews__rating a { color: var(--text-default); }
+  .reviews :global(.reviews__photo) { aspect-ratio: 3 / 2; margin-top: var(--space-7); box-shadow: var(--shadow-lg); }
+  @media (min-width: 768px) { .reviews :global(.reviews__photo) { aspect-ratio: 16 / 7; } }
+  .reviews__wrap { margin-top: var(--space-7); }
+  .reviews__track {
+    display: grid; grid-auto-flow: column; grid-auto-columns: min(86%, 420px); gap: var(--space-5);
+    overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scrollbar-width: none;
+    margin-inline: calc(var(--gutter) * -1); padding-inline: var(--gutter); scroll-padding-inline: var(--gutter);
+  }
+  .reviews__track::-webkit-scrollbar { display: none; }
+  .review {
+    scroll-snap-align: start; margin: 0; display: flex; flex-direction: column; gap: var(--space-4);
+    padding: var(--space-6); background: var(--bg-raised); border: 1px solid var(--rule); border-radius: var(--radius-md);
+  }
+  .review__stars { color: var(--text-accent); font-size: var(--fs-caption); letter-spacing: 2px; }
+  .review__text {
+    flex: 1; margin: 0;
+    font-family: var(--font-body);
+    font-size: var(--fs-body); line-height: 1.65; font-weight: var(--weight-regular);
+  }
+  .review__name { font-size: var(--fs-caption); font-weight: var(--weight-semibold); color: var(--text-muted); }
+  .reviews__nav { display: flex; gap: var(--space-3); justify-content: flex-end; margin-top: var(--space-5); }
+  .round-btn {
+    width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center;
+    border: 1.5px solid var(--color-border-strong); background: transparent; color: var(--text-default); cursor: pointer;
+    transition: background var(--dur) var(--ease), border-color var(--dur) var(--ease);
+  }
+  .round-btn:hover:not(:disabled) { background: var(--color-linen-deep); border-color: var(--text-default); }
+  .round-btn:disabled { opacity: 0.35; cursor: default; }
+  .reviews__disclaimer { margin-top: var(--space-5); font-size: var(--fs-caption); color: var(--text-muted); }
+  .reviews__disclaimer a { color: inherit; }
+
+  /* ======================================================
+     FAQ
+     ====================================================== */
+  .faq { padding-block: 0 var(--section-y); }
+  .faq__inner { display: grid; gap: var(--space-7); }
+  @media (min-width: 900px) { .faq__inner { grid-template-columns: 4fr 7fr; gap: var(--space-9); align-items: start; } }
+
+  /* ======================================================
+     Promise (burgundy) + contact
+     ====================================================== */
+  .promise-sec { padding-block: 0 var(--section-y); }
+  .promise {
+    margin: 0; overflow: hidden; border-radius: var(--radius-lg);
+    background: var(--bg-closing); color: var(--text-on-dark);
+    padding: clamp(3.5rem, 2rem + 6vw, 7.5rem) clamp(1.5rem, 1rem + 5vw, 6rem);
+    display: grid; gap: var(--space-6); justify-items: start;
+  }
+  .promise__logo { height: 84px; width: auto; max-width: none; margin: -22px -16px -26px; }
+  .promise__text {
+    margin: 0; max-width: 22em;
+    font-family: var(--font-display); font-variation-settings: var(--font-display-axes);
+    font-size: clamp(1.5rem, 1.2rem + 1.3vw, 2rem); line-height: 1.2; font-weight: var(--weight-display); letter-spacing: -0.015em;
+  }
+  .promise__text::before { content: "\201C"; display: block; font-size: 2.2em; line-height: 0.6; height: 0.42em; color: var(--clay); }
+  .promise__actions { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+  .promise :global(.promise__book) { color: var(--text-on-dark); border-color: color-mix(in srgb, var(--color-linen) 50%, transparent); }
+  .promise :global(.promise__book:hover) { background: color-mix(in srgb, var(--color-linen) 10%, transparent); color: var(--text-on-dark); border-color: var(--color-linen); }
+  .promise :focus-visible { outline-color: var(--color-linen); }
+</style>

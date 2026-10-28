@@ -1,0 +1,489 @@
+---
+/**
+ * Commercial hub for the national query "women's health physiotherapy
+ * Singapore". The topic was previously split across the homepage, /services
+ * and the individual service and condition pages, leaving Google no single
+ * URL to rank for the broad term (2026-08 SEO review; ../../seo/seo-geo-review.md).
+ *
+ * This page is a HUB, not another explainer: it summarises each area in a few
+ * lines and hands off to the page that owns that keyword. Every card links
+ * down to a service or condition page, and those pages link back up here — the
+ * internal-link structure is the point.
+ *
+ * Compliance (Lane A, ../../strategy/03-compliance-guardrails.md): education
+ * first, no superlatives, no comparisons, no cure or outcome guarantees, no
+ * testimonials, plain prices. The 2026-08 review suggested adding patient
+ * testimonials — deliberately NOT done, they are off-limits by default on the
+ * clinical side.
+ */
+import BaseLayout from "../layouts/BaseLayout.astro";
+import FaqList from "../components/FaqList.astro";
+import Section from "../components/Section.astro";
+import Button from "../components/Button.astro";
+import { SITE } from "../lib/site.ts";
+import { clinicRef } from "../lib/schema.ts";
+
+const title = "Women's Health Physiotherapy Singapore | Goji Physio";
+const description =
+  "Women's health physiotherapy in Singapore for pelvic floor, pregnancy, postnatal recovery, pelvic pain and menopause. Female AHPC-registered physios at Lentor.";
+
+/** The four appointment types that make up the women's health service. */
+const services = [
+  {
+    href: "/services/pelvic-floor-physiotherapy/",
+    name: "Pelvic Floor Physiotherapy",
+    mins: 55,
+    price: 260,
+    lead:
+      "Assessment and treatment for bladder, bowel, pelvic floor or pelvic pain concerns, whether your symptoms are new, longstanding or changing around menopause.",
+  },
+  {
+    href: "/services/prenatal-physiotherapy/",
+    name: "Prenatal Physiotherapy",
+    mins: 55,
+    price: 260,
+    lead:
+      "Support to move comfortably through pregnancy, manage pain and pelvic floor symptoms, and prepare your body for birth.",
+  },
+  {
+    href: "/services/postpartum-physiotherapy/",
+    name: "Postpartum Physiotherapy",
+    mins: 55,
+    price: 260,
+    lead:
+      "A check of how your body is recovering after a vaginal or Caesarean birth, and a plan for returning to movement, exercise and sport.",
+  },
+  {
+    href: "/services/mummy-baby-assessment/",
+    name: "Mummy & Baby Assessment",
+    mins: 85,
+    price: 330,
+    lead:
+      "A combined appointment covering your own postpartum recovery and your baby's early movement and development, from 0-12 months.",
+  },
+];
+
+/** Conditions we assess, grouped so a searcher finds their own words fast. */
+const conditionGroups = [
+  {
+    heading: "Bladder, bowel and prolapse",
+    items: [
+      { href: "/conditions/urinary-incontinence/", name: "Urinary incontinence and leakage" },
+      { href: "/conditions/pelvic-organ-prolapse/", name: "Pelvic organ prolapse" },
+      { href: "/conditions/bowel-dysfunction/", name: "Bowel dysfunction and constipation" },
+    ],
+  },
+  {
+    heading: "Pregnancy and birth",
+    items: [
+      { href: "/conditions/prenatal-care/", name: "Prenatal care and birth preparation" },
+      { href: "/conditions/pelvic-girdle-pain/", name: "Pelvic girdle pain and mummy's wrist" },
+      { href: "/conditions/perineal-tear/", name: "Perineal tear, scar and birth trauma" },
+      { href: "/conditions/caesarean-recovery/", name: "Caesarean recovery and scar management" },
+    ],
+  },
+  {
+    heading: "Postnatal recovery",
+    items: [
+      { href: "/conditions/diastasis-recti/", name: "Diastasis recti" },
+      { href: "/conditions/blocked-ducts-mastitis/", name: "Blocked ducts and mastitis" },
+    ],
+  },
+  {
+    heading: "Pain and life stage",
+    items: [
+      { href: "/conditions/pelvic-pain/", name: "Pelvic pain and dyspareunia" },
+      { href: "/conditions/menopause/", name: "Perimenopause, menopause and bone health" },
+    ],
+  },
+];
+
+const faqs = [
+  {
+    q: "What is women's health physiotherapy?",
+    a: "Women's health physiotherapy is the assessment and treatment of conditions affecting the pelvic floor, abdomen and musculoskeletal system across a woman's life - through pregnancy, after birth, and around perimenopause and menopause. It covers bladder and bowel symptoms, prolapse, pelvic and abdominal pain, diastasis recti, scar recovery and return to exercise. Pelvic floor muscle training is recommended as a first-line treatment for common conditions such as stress urinary incontinence in international clinical guidelines.",
+  },
+  {
+    q: "Do I need a doctor's referral to see a women's health physiotherapist in Singapore?",
+    a: "No referral is needed. You can book directly with us. If your assessment suggests input from a gynaecologist, urogynaecologist, colorectal specialist or another doctor would help, we will say so and can work alongside them.",
+  },
+  {
+    q: "What happens at the first appointment?",
+    a: "Your first session starts with a conversation about your history, your symptoms and what you want to get back to. Your physiotherapist then carries out a physical assessment, explains what they found, and sets out a plan with you - usually a combination of in-clinic sessions and a home programme. A pelvic floor appointment is 55 minutes; a Mummy and Baby assessment is 85 minutes.",
+  },
+  {
+    q: "Is an internal examination always required?",
+    a: "No. An internal vaginal examination is the most accurate way to assess pelvic floor muscle function, but it is always optional and only ever carried out with your informed consent, after your physiotherapist has explained what it involves. If you prefer not to have one, or it is not appropriate on the day, the assessment is adapted using external and functional measures instead.",
+  },
+  {
+    q: "Are your physiotherapists female?",
+    a: "Yes. Our physiotherapists are female and AHPC-registered, with postgraduate training and clinical experience in women's and pelvic health.",
+  },
+  {
+    q: "How much does women's health physiotherapy cost in Singapore?",
+    a: "At Goji, a 55-minute women's health physiotherapy appointment is $260 at the clinic or $380 as a home visit. The 85-minute Mummy and Baby assessment is $330 at the clinic or $450 as a home visit. Prices are per session and include the assessment, treatment and your plan.",
+  },
+  {
+    q: "How many sessions will I need?",
+    a: "It depends on your symptoms, your goals and your starting point. Your physiotherapist will recommend a plan after the first assessment. International guidelines for pelvic floor muscle training generally suggest a supervised programme of around three months before formally reassessing progress.",
+  },
+  {
+    q: "Can I be seen at home instead of the clinic?",
+    a: "Yes. We offer home-visit physiotherapy across Singapore, which many patients use in the early weeks after birth or when getting to a clinic is difficult. The clinic itself is at Lentor Modern, a one-minute walk from Lentor MRT on the Thomson-East Coast Line.",
+  },
+  {
+    q: "I gave birth years ago. Is it too late?",
+    a: "No. Pelvic floor muscles respond to training at any age and any stage: soon after birth, years after your last birth, or during perimenopause. Longstanding symptoms are still worth assessing.",
+  },
+];
+
+const origin = Astro.site ?? new URL(Astro.url.origin);
+const pageURL = new URL(Astro.url.pathname, origin).href;
+const schema = [
+  {
+    "@context": "https://schema.org",
+    "@type": "MedicalWebPage",
+    name: "Women's Health Physiotherapy in Singapore",
+    description,
+    url: pageURL,
+    about: { "@type": "MedicalSpecialty", name: "Physiotherapy" },
+    audience: { "@type": "PeopleAudience", suggestedGender: "female" },
+    provider: clinicRef(origin),
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: origin.href },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Women's Health Physiotherapy Singapore",
+        item: pageURL,
+      },
+    ],
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((f) => ({
+      "@type": "Question",
+      name: f.q,
+      acceptedAnswer: { "@type": "Answer", text: f.a },
+    })),
+  },
+];
+---
+
+<BaseLayout title={title} description={description} schema={schema} searchType="Page">
+  <section class="wh-hero">
+    <div class="container">
+      <h1>Women's Health Physiotherapy in Singapore</h1>
+      <p class="wh-hero__lead">
+        Physiotherapy for the pelvic floor, pregnancy, recovery after birth,
+        pelvic pain and the changes around menopause - with female,
+        AHPC-registered physiotherapists. We see patients at our clinic at
+        Lentor Modern, one minute from Lentor MRT, and at home across Singapore.
+      </p>
+      <div class="wh-hero__cta">
+        <Button slug="web-book" variant="primary" size="lg">Book an appointment</Button>
+        <Button slug="web-wa" variant="whatsapp" size="lg">Ask us on WhatsApp</Button>
+      </div>
+      <p class="wh-hero__note">
+        No doctor's referral needed. $260 for a 55-minute clinic appointment.
+      </p>
+    </div>
+  </section>
+
+  <Section tone="surface">
+    <div class="container--narrow wh-body">
+      <h2>Which appointment do I need?</h2>
+      <p>
+        It depends on your stage and symptoms. If you are pregnant, book
+        <a href="/services/prenatal-physiotherapy/">Prenatal Physiotherapy</a>.
+        If you are recovering after a vaginal or Caesarean birth, book
+        <a href="/services/postpartum-physiotherapy/">Postpartum Physiotherapy</a>,
+        or the <a href="/services/mummy-baby-assessment/">Mummy &amp; Baby Assessment</a>
+        if you would also like your baby's movement and development checked
+        (0-12 months). For leaking, urgency, bowel symptoms, prolapse, pelvic
+        pain or changes around menopause, book
+        <a href="/services/pelvic-floor-physiotherapy/">Pelvic Floor Physiotherapy</a>.
+        Not sure? Message us on WhatsApp and we will point you to the right
+        appointment.
+      </p>
+
+      <h2>What women's health physiotherapy covers</h2>
+      <p>
+        Women's health physiotherapy - also called pelvic health physiotherapy -
+        assesses and treats the muscles, nerves and connective tissue that
+        support the bladder, bowel and pelvic organs, along with the
+        musculoskeletal changes that come with pregnancy, birth and menopause.
+      </p>
+      <p>
+        Symptoms such as leaking with a cough or a run, heaviness or dragging in
+        the pelvis, pain with sex, a tummy gap that has not closed, or back and
+        pelvic pain in pregnancy are common - but common is not the same as
+        something you have to live with. Most are assessable, and physiotherapy
+        can help with many of them.
+      </p>
+      <p>
+        Your session is one-to-one, in a private room, for the full appointment
+        time.
+      </p>
+    </div>
+  </Section>
+
+  <Section tone="linen">
+    <div class="container">
+      <div class="section-head">
+        <h2>Appointments</h2>
+      </div>
+      <div class="wh-grid">
+        {services.map((s) => (
+          <a href={s.href} class="wh-card">
+            <h3>{s.name}</h3>
+            <p class="wh-card__meta">{s.mins} min · ${s.price}</p>
+            <p class="wh-card__lead">{s.lead}</p>
+            <span class="wh-card__cta">Learn more</span>
+          </a>
+        ))}
+      </div>
+      <p class="wh-note">
+        Home visits are available across Singapore for each of these
+        appointments. See <a href="/services/">all services</a> for paediatrics,
+        musculoskeletal physiotherapy, Schroth therapy for scoliosis, clinical
+        Pilates and strength and conditioning.
+      </p>
+    </div>
+  </Section>
+
+  <Section tone="surface">
+    <div class="container">
+      <div class="section-head">
+        <h2>Conditions we assess</h2>
+      </div>
+      <div class="wh-conditions">
+        {conditionGroups.map((g) => (
+          <div class="wh-conditions__group">
+            <h3>{g.heading}</h3>
+            <ul>
+              {g.items.map((c) => (
+                <li><a href={c.href}>{c.name}</a></li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+      <p class="wh-note">
+        Every condition page is written and reviewed by one of our
+        physiotherapists. Browse <a href="/conditions/">all conditions</a>.
+      </p>
+    </div>
+  </Section>
+
+  <Section tone="linen">
+    <div class="container--narrow wh-body">
+      <h2>Your first appointment</h2>
+      <p>
+        The first session starts with a conversation, not an examination. Your
+        physiotherapist will ask about your history, your symptoms and what you
+        want to get back to - running, lifting your child, sleeping through the
+        night, sex without pain.
+      </p>
+      <p>
+        A physical assessment follows. For pelvic floor concerns this may
+        include an internal vaginal examination, which is the most accurate way
+        to assess how the pelvic floor muscles are working. It is always
+        optional, always explained first, and only carried out with your
+        informed consent. If you would rather not, or it is not appropriate that
+        day, your physiotherapist will assess using external and functional
+        measures instead.
+      </p>
+      <p>
+        You will leave with an explanation of what was found and a plan you have
+        agreed to, usually combining in-clinic sessions with a home programme.
+      </p>
+
+      <h2>Who you will see</h2>
+      <p>
+        Our physiotherapists are female and registered with the Allied Health
+        Professions Council (AHPC), with postgraduate training and hospital
+        experience in women's and pelvic health. You can read their full
+        backgrounds on their profiles:
+        <a href="/team/cheryl-long/">Cheryl Long</a>,
+        <a href="/team/claire-ng/">Claire Ng</a> and
+        <a href="/team/kristy-ng/">Kristy Ng</a>.
+      </p>
+
+      <h2>Where we see you, and what it costs</h2>
+      <p>
+        The clinic is at {SITE.address.line1}, {SITE.address.line2}, a
+        one-minute walk from Exit 1 of Lentor MRT on the Thomson-East Coast
+        Line. See <a href="/getting-here/">getting here</a>, or read more about
+        <a href="/physiotherapy-lentor/">physiotherapy in Lentor</a> and the
+        neighbourhoods around us.
+      </p>
+      <p>
+        A 55-minute women's health appointment is $260 at the clinic or $380 as
+        a home visit. The 85-minute Mummy and Baby assessment is $330 at the
+        clinic or $450 as a home visit, as of {SITE.pricesAsOf}. No referral
+        is required.
+      </p>
+
+      <h2>Frequently asked questions</h2>
+      <FaqList items={faqs} />
+    </div>
+  </Section>
+
+  <Section tone="surface">
+    <div class="wh-cta">
+      <div>
+        <h2>Not sure which appointment you need?</h2>
+        <p>
+          Message us on WhatsApp and describe what you are experiencing - we
+          will point you to the right appointment type before you book.
+        </p>
+      </div>
+      <div class="wh-cta__btns">
+        <Button slug="web-book" variant="primary" size="lg">Book an appointment</Button>
+        <Button slug="web-wa" variant="whatsapp" size="lg">Ask us on WhatsApp</Button>
+      </div>
+    </div>
+  </Section>
+</BaseLayout>
+
+<style>
+  .wh-hero {
+    background: var(--bg-page);
+    padding-block: clamp(2.5rem, 2rem + 3vw, 5rem);
+    border-bottom: 1px solid var(--color-border);
+  }
+  .wh-hero__lead {
+    margin-top: var(--space-4);
+    max-width: 62ch;
+    color: var(--text-muted);
+    line-height: var(--lh-body);
+  }
+  .wh-hero__cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-top: var(--space-5);
+  }
+  .wh-hero__note {
+    margin-top: var(--space-4);
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+  }
+
+  .wh-body :global(h2) {
+    margin-top: var(--space-7);
+    margin-bottom: var(--space-3);
+  }
+  .wh-body :global(h2:first-child) { margin-top: 0; }
+  .wh-body p {
+    color: var(--text-muted);
+    margin-bottom: var(--space-4);
+    line-height: var(--lh-body);
+  }
+  .wh-body a {
+    color: var(--color-primary);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+
+  /* Appointment cards. Single column on a phone — most of our reach. */
+  .wh-grid {
+    display: grid;
+    gap: var(--space-4);
+  }
+  @media (min-width: 640px) {
+    .wh-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  .wh-card {
+    display: block;
+    padding: var(--space-5);
+    background: var(--bg-content);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    text-decoration: none;
+    color: inherit;
+  }
+  .wh-card:hover { border-color: var(--color-primary); }
+  .wh-card h3 { margin-bottom: var(--space-2); }
+  .wh-card__meta {
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+    margin-bottom: var(--space-3);
+  }
+  .wh-card__lead {
+    color: var(--text-muted);
+    line-height: var(--lh-body);
+    margin-bottom: var(--space-3);
+  }
+  .wh-card__cta {
+    color: var(--color-primary);
+    font-weight: var(--weight-semibold);
+  }
+
+  .wh-conditions {
+    display: grid;
+    gap: var(--space-5);
+  }
+  @media (min-width: 640px) {
+    .wh-conditions { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (min-width: 1000px) {
+    .wh-conditions { grid-template-columns: repeat(4, 1fr); }
+  }
+  .wh-conditions h3 {
+    font-family: var(--font-body);
+    line-height: var(--lh-snug);
+    font-weight: var(--weight-semibold);
+    font-size: var(--fs-body);
+    margin-bottom: var(--space-3);
+  }
+  .wh-conditions ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: var(--space-2);
+  }
+  .wh-conditions a {
+    color: var(--text-muted);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+  .wh-conditions a:hover { color: var(--color-primary); }
+
+  .wh-note {
+    margin-top: var(--space-5);
+    color: var(--text-muted);
+    font-size: var(--fs-small);
+    max-width: 62ch;
+  }
+  .wh-note a {
+    color: var(--color-primary);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+
+
+  .wh-cta {
+    display: grid;
+    gap: var(--space-5);
+    align-items: start;
+  }
+  @media (min-width: 760px) {
+    .wh-cta { grid-template-columns: 1fr auto; align-items: center; }
+  }
+  .wh-cta h2 { margin-bottom: var(--space-2); }
+  .wh-cta p { color: var(--text-muted); max-width: 44ch; }
+  .wh-cta__btns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+</style>

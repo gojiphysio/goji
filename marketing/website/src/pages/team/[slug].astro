@@ -1,0 +1,429 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Button from "../../components/Button.astro";
+import LogoLockup from "../../components/LogoLockup.astro";
+import ImageTextSplit from "../../components/ImageTextSplit.astro";
+import { SITE } from "../../lib/site.ts";
+import { clinicRef } from "../../lib/schema.ts";
+
+export async function getStaticPaths() {
+  const entries = await getCollection("team", ({ data }) => !data.draft);
+  return entries.map((entry) => ({
+    params: { slug: entry.slug },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await entry.render();
+const d = entry.data;
+const firstName = d.name.split(" ")[0];
+
+// The hero lede underlines one phrase in Deep Red, as the old bio pages did. Split it
+// here so the markup stays flat. A highlight that no longer matches its tagline falls
+// back to plain text rather than breaking the page.
+const hl = d.taglineHighlight;
+const hlAt = hl ? d.tagline.indexOf(hl) : -1;
+const taglineParts =
+  hl && hlAt >= 0
+    ? [d.tagline.slice(0, hlAt), hl, d.tagline.slice(hlAt + hl.length)]
+    : null;
+
+// Credential columns, in display order; empty lists are skipped so each bio shows
+// only what is verified. Grid width follows the column count (max four).
+const credBlocks = [
+  { heading: "Education", items: d.education },
+  { heading: "Clinical experience", items: d.experience },
+  { heading: "Specialist training", items: d.training },
+  { heading: "Certifications", items: d.certifications },
+  { heading: "Teaching approach", items: d.teachingApproach },
+  { heading: "Languages", items: d.languages },
+].filter((b) => b.items.length > 0);
+const ApproachTag = d.approachHeading ? "p" : "blockquote";
+
+const origin = Astro.site ?? new URL(Astro.url.origin);
+const pageURL = new URL(Astro.url.pathname, origin).href;
+// Person schema ties each physiotherapist to the clinic (E-E-A-T / author
+// authority for GEO); BreadcrumbList gives the Home › Team › <name> trail.
+const teamSchema = [
+  {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: d.name,
+    jobTitle: d.role,
+    description: d.tagline,
+    image: d.photo ? new URL(d.photo, origin).href : undefined,
+    url: pageURL,
+    knowsLanguage: d.languages.length ? d.languages : undefined,
+    // E-E-A-T signals for answer engines: credentials and specialty topics
+    // straight from the bio frontmatter, plus the clinic's public profiles.
+    hasCredential: {
+      "@type": "EducationalOccupationalCredential",
+      name: d.credentials,
+    },
+    knowsAbout: d.specialties.map((s) => s.title),
+    sameAs: [SITE.instagram],
+    worksFor: clinicRef(origin),
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: origin.href },
+      { "@type": "ListItem", position: 2, name: "Team", item: new URL("/#team", origin).href },
+      { "@type": "ListItem", position: 3, name: d.name, item: pageURL },
+    ],
+  },
+];
+---
+
+<BaseLayout
+  title={d.seoTitle ?? `${d.name} - ${d.role} | Goji Health`}
+  description={d.metaDescription ?? d.tagline}
+  schema={teamSchema}
+  searchType="Team"
+>
+  {/* ---- Hero ---- */}
+  <section class="bio-hero">
+    <div class="container bio-hero__inner">
+      <div class="bio-hero__photo">
+        {d.photo ? (
+          <img src={d.photo} alt={d.photoAlt ?? `Portrait of ${d.name}`} class="bio-hero__img" loading="eager" decoding="async" />
+        ) : (
+          <div class="bio-hero__placeholder" role="img" aria-label={`Portrait of ${d.name} (photo coming soon)`}>
+            <LogoLockup variant="mark" height={52} />
+          </div>
+        )}
+      </div>
+      <div class="bio-hero__text">
+        <h1 class="bio-hero__name">{d.name}</h1>
+        <p class="bio-hero__role">{d.role}</p>
+        <p class="bio-hero__creds">{d.credentials}</p>
+        <p class="bio-hero__tagline">
+          {taglineParts ? (
+            <>
+              {taglineParts[0]}<span class="tagline-hl">{taglineParts[1]}</span>{taglineParts[2]}
+            </>
+          ) : (
+            d.tagline
+          )}
+        </p>
+        <div class="bio-hero__actions">
+          <Button slug="web-book" variant="primary">Book with {firstName}</Button>
+          <Button slug="web-wa" variant="whatsapp">WhatsApp us</Button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* ---- Patients see [name] for ---- */}
+  <section class="bio-specialties">
+    <div class="container">
+      <h2 class="bio-specialties__heading">{d.specialtiesHeading ?? `Patients see ${firstName} for`}</h2>
+      <div class="specialty-grid">
+        {d.specialties.map((s) => (
+          <div class="specialty-card">
+            <h3 class="specialty-card__title">{s.title}</h3>
+            <p class="specialty-card__desc">{s.description}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  {/* ---- Bio (from markdown body) ---- */}
+  <section class="bio-body">
+    <div class="container bio-body__inner">
+      <div class="bio-prose">
+        <Content />
+      </div>
+    </div>
+  </section>
+
+  {/* ---- Approach ---- */}
+  <section class="bio-approach">
+    <div class="container bio-approach__inner">
+      {d.approachHeading && <h2 class="bio-approach__heading">{d.approachHeading}</h2>}
+      <ApproachTag class="bio-approach__quote">{d.approach}</ApproachTag>
+    </div>
+  </section>
+
+  {/* ---- Credentials ---- */}
+  <section class="bio-creds">
+    <div class="container bio-creds__inner" style={`--cred-count:${Math.min(credBlocks.length, 4)}`}>
+      {credBlocks.map((b) => (
+        <div class="cred-block">
+          <h3 class="cred-block__heading">{b.heading}</h3>
+          <ul class="cred-list">
+            {b.items.map((item) => <li>{item}</li>)}
+          </ul>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  {/* ---- Personal note (optional) ---- */}
+  {d.personalNote && (
+    <section class="bio-personal">
+      <div class="container">
+        <ImageTextSplit image={d.personalPhoto} imageAlt={d.personalPhotoAlt}>
+          <h2 class="bio-personal__heading">Personal note</h2>
+          <p class="bio-personal__text">{d.personalNote}</p>
+        </ImageTextSplit>
+      </div>
+    </section>
+  )}
+
+  {/* ---- CTA strip ---- */}
+  <section class="bio-cta">
+    <div class="container bio-cta__inner">
+      <h2>{d.ctaHeading ?? `Book an appointment with ${firstName}`}</h2>
+      <p>{d.ctaText ?? "Book online or reach out on WhatsApp. We'll talk through what's going on before your first session."}</p>
+      <div class="bio-cta__actions">
+        <Button slug="web-book" variant="primary" size="lg">{d.ctaBookLabel ?? "Book an appointment"}</Button>
+        <Button slug="web-wa" variant="whatsapp" size="lg">Ask us on WhatsApp</Button>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  /* ---- Hero ---- */
+  .bio-hero {
+    background: var(--bg-page);
+    padding-block: var(--section-y);
+  }
+  .bio-hero__inner {
+    display: grid;
+    gap: var(--space-8);
+    align-items: center;
+  }
+  @media (min-width: 720px) {
+    .bio-hero__inner {
+      grid-template-columns: 5fr 7fr;
+      gap: var(--space-9);
+    }
+  }
+  .bio-hero__img,
+  .bio-hero__placeholder {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    border-radius: var(--radius-lg);
+  }
+  .bio-hero__img { object-fit: cover; }
+  .bio-hero__placeholder {
+    background: radial-gradient(120% 120% at 50% 25%, var(--color-linen-deep), var(--color-linen));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .bio-hero__name {
+    font-size: var(--fs-h1);
+    color: var(--color-primary);
+    margin-top: var(--space-3);
+    margin-bottom: var(--space-2);
+  }
+  /* Reads as a bold dark line under the now-red name, rather than competing with it */
+  .bio-hero__role {
+    font-family: var(--font-body);
+    font-size: var(--fs-body);
+    font-weight: var(--weight-semibold);
+    color: var(--text-default);
+    margin-bottom: var(--space-1);
+  }
+  .bio-hero__creds {
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+    margin-bottom: var(--space-5);
+  }
+  .bio-hero__tagline {
+    font-family: var(--font-display);
+    font-size: var(--fs-h3);
+    font-weight: var(--weight-medium);
+    color: var(--text-default);
+    line-height: var(--lh-snug);
+    letter-spacing: var(--tracking-tight);
+    max-width: 30ch;
+    margin-bottom: var(--space-6);
+    text-wrap: pretty;
+  }
+  .tagline-hl {
+    border-bottom: 2px solid var(--color-primary);
+    padding-bottom: 0.04em;
+  }
+  .bio-hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+
+  /* ---- Specialties ---- */
+  .bio-specialties {
+    background: var(--bg-content);
+    padding-block: var(--section-y);
+    border-top: 1px solid var(--rule);
+  }
+  .bio-specialties__heading {
+    font-size: var(--fs-h2);
+    margin-bottom: var(--space-6);
+  }
+  .specialty-grid {
+    display: grid;
+    gap: var(--space-4);
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 540px) {
+    .specialty-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (min-width: 900px) {
+    .specialty-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+  .specialty-card {
+    border-top: 2px solid var(--color-primary);
+    padding-top: var(--space-4);
+    padding-bottom: var(--space-3);
+  }
+  .specialty-card__title {
+    font-family: var(--font-body);
+    line-height: var(--lh-snug);
+    font-size: var(--fs-body);
+    font-weight: var(--weight-semibold);
+    margin-bottom: var(--space-2);
+  }
+  .specialty-card__desc {
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+    line-height: var(--lh-body);
+  }
+
+  /* ---- Bio body ---- */
+  .bio-body {
+    background: var(--bg-page);
+    padding-block: var(--section-y);
+  }
+  .bio-body__inner {
+    max-width: var(--container-narrow);
+  }
+  .bio-prose {
+    margin-top: var(--space-5);
+    font-size: var(--fs-body);
+    color: var(--text-muted);
+    line-height: var(--lh-body);
+  }
+
+  /* ---- Approach ---- */
+  .bio-approach {
+    background: var(--color-linen-deep);
+    padding-block: var(--section-y);
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+  }
+  .bio-approach__inner {
+    max-width: var(--container-narrow);
+  }
+  .bio-approach__heading {
+    font-family: var(--font-body);
+    font-size: var(--fs-body);
+    font-weight: var(--weight-semibold);
+    color: var(--text-accent);
+  }
+  .bio-approach__quote {
+    margin-top: var(--space-5);
+    font-family: var(--font-display);
+    font-size: var(--fs-h2);
+    font-weight: var(--weight-semibold);
+    line-height: var(--lh-snug);
+    letter-spacing: var(--tracking-tight);
+    color: var(--text-default);
+    text-wrap: balance;
+  }
+
+  /* ---- Credentials ---- */
+  .bio-creds {
+    background: var(--bg-content);
+    padding-block: var(--section-y);
+  }
+  .bio-creds__inner {
+    display: grid;
+    gap: var(--space-7);
+  }
+  @media (min-width: 720px) {
+    .bio-creds__inner { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (min-width: 1000px) {
+    .bio-creds__inner { grid-template-columns: repeat(var(--cred-count, 4), 1fr); }
+  }
+  .cred-block__heading {
+    font-family: var(--font-body);
+    line-height: var(--lh-snug);
+    font-size: var(--fs-body);
+    font-weight: var(--weight-semibold);
+    margin-bottom: var(--space-4);
+    padding-bottom: var(--space-2);
+    border-bottom: 1.5px solid var(--rule);
+  }
+  .cred-list {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  .cred-list li {
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+    line-height: var(--lh-body);
+    padding-left: 1em;
+    position: relative;
+  }
+  .cred-list li::before {
+    content: "-";
+    position: absolute;
+    left: 0;
+    color: var(--color-primary);
+  }
+
+  /* ---- Personal note ---- */
+  .bio-personal {
+    background: var(--bg-page);
+    padding-block: var(--section-y);
+    border-top: 1px solid var(--rule);
+  }
+  .bio-personal__heading {
+    font-size: var(--fs-h2);
+  }
+  .bio-personal__text {
+    font-size: var(--fs-body);
+    color: var(--text-muted);
+    line-height: var(--lh-body);
+  }
+
+  /* ---- CTA strip ---- */
+  .bio-cta {
+    background: var(--color-ink);
+    padding-block: var(--section-y);
+  }
+  .bio-cta__inner {
+    max-width: var(--container-narrow);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+  .bio-cta__inner h2 {
+    color: var(--color-linen);
+    font-size: var(--fs-h2);
+  }
+  .bio-cta__inner p {
+    color: color-mix(in srgb, var(--color-linen) 75%, transparent);
+    font-size: var(--fs-body);
+    line-height: var(--lh-body);
+    max-width: 48ch;
+  }
+  .bio-cta__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-top: var(--space-2);
+  }
+</style>

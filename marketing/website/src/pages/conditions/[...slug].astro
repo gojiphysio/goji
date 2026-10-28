@@ -1,0 +1,246 @@
+---
+import { getCollection, getEntry } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Section from "../../components/Section.astro";
+import Button from "../../components/Button.astro";
+import { extractFaqs, faqSchema } from "../../lib/faq.ts";
+import "../../styles/faq-list.css";
+import { clinicRef } from "../../lib/schema.ts";
+
+export async function getStaticPaths() {
+  const conditions = await getCollection("conditions", ({ data }) => !data.draft);
+  return conditions.map((c) => ({ params: { slug: c.slug }, props: { entry: c } }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await entry.render();
+const { title, seoTitle, description, cardTitle, category, ctaSlug, reviewer, relatedServices } = entry.data;
+
+const origin = Astro.site ?? new URL(Astro.url.origin);
+const pageURL = new URL(Astro.url.pathname, origin).href;
+const reviewerURL = reviewer
+  ? new URL(`/team/${reviewer.slug}/`, origin).href
+  : undefined;
+
+// Resolve related service slugs to live entries so a typo or a drafted
+// service drops the link rather than 404ing (same idiom as the blog template).
+const services = (
+  await Promise.all(
+    relatedServices.map(async (slug) => {
+      const e = await getEntry("services", slug);
+      return e && !e.data.draft
+        ? { href: `/services/${e.slug}/`, label: e.data.cardTitle ?? e.data.title }
+        : null;
+    }),
+  )
+).filter((x): x is { href: string; label: string } => x !== null);
+
+// FAQPage JSON-LD is extracted from the body's "## Frequently asked questions"
+// section (### question + answer paragraphs) so the visible copy stays the
+// single source of truth. Shared with the blog template — see src/lib/faq.ts.
+const faqs = extractFaqs(entry.body);
+
+// MedicalWebPage marks this as clinical reference content (GEO: answer engines
+// prefer typed medical pages); BreadcrumbList gives crawlers the Home ›
+// Conditions › <page> trail on these nested routes.
+const conditionSchema: Record<string, unknown>[] = [
+  {
+    "@context": "https://schema.org",
+    "@type": "MedicalWebPage",
+    name: title,
+    description,
+    url: pageURL,
+    about: { "@type": "MedicalCondition", name: cardTitle ?? title },
+    audience: { "@type": "MedicalAudience", audienceType: "Patient" },
+    publisher: clinicRef(origin),
+    ...(services.length
+      ? { relatedLink: services.map((x) => new URL(x.href, origin).href) }
+      : {}),
+    ...(reviewer && reviewerURL
+      ? {
+          reviewedBy: {
+            "@type": "Person",
+            name: reviewer.name,
+            url: reviewerURL,
+          },
+        }
+      : {}),
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: origin.href },
+      { "@type": "ListItem", position: 2, name: "Conditions", item: new URL("/conditions/", origin).href },
+      { "@type": "ListItem", position: 3, name: cardTitle ?? title, item: pageURL },
+    ],
+  },
+];
+const conditionFaqSchema = faqSchema(faqs);
+if (conditionFaqSchema) conditionSchema.push(conditionFaqSchema);
+---
+
+<BaseLayout title={`${seoTitle ?? title} | Goji Physiotherapy`} description={description} schema={conditionSchema} searchType="Condition">
+  {/* Page header */}
+  <section class="cond-header">
+    <div class="container cond-header__inner">
+      <a href="/conditions/" class="cond-header__back">
+        <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M10 3L5 8l5 5"/>
+        </svg>
+        All conditions
+      </a>
+      <h1>{cardTitle ?? title}</h1>
+      {reviewer && (
+        <p class="cond-header__review">
+          Reviewed by{" "}
+          <a href={`/team/${reviewer.slug}/`}>{reviewer.name}</a>, AHPC-registered physiotherapist
+        </p>
+      )}
+    </div>
+  </section>
+
+  {/* Main content */}
+  <Section tone="surface">
+    <div class="cond-body container--narrow">
+      <Content />
+      {services.length > 0 && (
+        <aside class="cond-related">
+          <h2>Related appointments</h2>
+          <ul>
+            {services.map((x) => (
+              <li><a href={x.href}>{x.label}</a></li>
+            ))}
+          </ul>
+        </aside>
+      )}
+    </div>
+  </Section>
+
+  {/* Sticky CTA */}
+  <Section tone="linen">
+    <div class="cond-cta">
+      <div>
+        <h2>Ready to get some answers?</h2>
+        <p>Message us to describe your symptoms. We will recommend the right appointment type and answer any questions before you book.</p>
+      </div>
+      <div class="cond-cta__btns">
+        <Button slug={ctaSlug as "web-wa" | "web-book"} variant="whatsapp" size="lg">Ask us on WhatsApp</Button>
+        <Button slug="web-book" variant="secondary" size="lg">Book an appointment</Button>
+      </div>
+    </div>
+  </Section>
+</BaseLayout>
+
+<style>
+  .cond-header {
+    background: var(--bg-page);
+    padding-block: clamp(2rem, 1.5rem + 3vw, 4rem);
+    border-bottom: 1px solid var(--color-border);
+  }
+  .cond-header__inner {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+  .cond-header__back {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--fs-small);
+    font-weight: var(--weight-medium);
+    color: var(--text-muted);
+    text-decoration: none;
+  }
+  .cond-header__back:hover { color: var(--color-primary); }
+
+  .cond-header__review {
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+  }
+  .cond-header__review a {
+    color: var(--color-primary);
+    font-weight: var(--weight-medium);
+    text-decoration: none;
+  }
+  .cond-header__review a:hover { text-decoration: underline; }
+
+  /* Prose content */
+  .cond-related {
+    margin-top: var(--space-8);
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--rule);
+  }
+  .cond-related h2 { margin-bottom: var(--space-3); }
+  .cond-related ul {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding-left: 1.25rem;
+  }
+
+  .cond-body {
+    /* The container--narrow class sets max-width: 760px */
+  }
+  .cond-body :global(h2) {
+    margin-top: var(--space-7);
+    margin-bottom: var(--space-3);
+  }
+  .cond-body :global(h2:first-child) {
+    margin-top: 0;
+  }
+  .cond-body :global(p) {
+    color: var(--text-muted);
+    margin-bottom: var(--space-4);
+    line-height: var(--lh-body);
+  }
+  .cond-body :global(ul), .cond-body :global(ol) {
+    color: var(--text-muted);
+    margin-bottom: var(--space-4);
+    padding-left: 1.4rem;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  .cond-body :global(strong) {
+    font-weight: var(--weight-semibold);
+    color: var(--text-default);
+  }
+  .cond-body :global(img) {
+    width: 100%;
+    height: auto;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    margin-block: var(--space-5);
+  }
+  .cond-body :global(hr) {
+    border: none;
+    border-top: 1px solid var(--color-border);
+    margin-block: var(--space-7);
+  }
+  .cond-body :global(blockquote) {
+    border-left: 3px solid var(--color-primary);
+    padding-left: var(--space-5);
+    color: var(--text-muted);
+  }
+
+  /* CTA section */
+  .cond-cta {
+    display: grid;
+    gap: var(--space-5);
+    align-items: start;
+  }
+  @media (min-width: 760px) {
+    .cond-cta {
+      grid-template-columns: 1fr auto;
+      align-items: center;
+    }
+  }
+  .cond-cta h2 { margin-bottom: var(--space-2); }
+  .cond-cta p { color: var(--text-muted); max-width: 44ch; }
+  .cond-cta__btns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+</style>

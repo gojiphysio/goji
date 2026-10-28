@@ -2,7 +2,7 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "website-prototype",
+      "name": "website-dev",
       "runtimeExecutable": "npm",
       "runtimeArgs": [
         "run",
@@ -11,7 +11,7 @@
         "--port",
         "4232"
       ],
-      "cwd": "marketing/website/prototype",
+      "cwd": "marketing/website",
       "port": 4232
     },
     {
@@ -24,7 +24,7 @@
         "--port",
         "4233"
       ],
-      "cwd": "marketing/website/prototype",
+      "cwd": "marketing/website",
       "port": 4233
     },
     {

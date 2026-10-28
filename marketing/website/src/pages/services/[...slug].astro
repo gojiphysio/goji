@@ -1,0 +1,393 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import FaqList from "../../components/FaqList.astro";
+import Section from "../../components/Section.astro";
+import Button from "../../components/Button.astro";
+import { clinicRef } from "../../lib/schema.ts";
+
+export async function getStaticPaths() {
+  const services = await getCollection("services", ({ data }) => !data.draft);
+  return services.map((s) => ({ params: { slug: s.slug }, props: { entry: s } }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await entry.render();
+const {
+  title,
+  seoTitle,
+  metaTitle,
+  description,
+  cardTitle,
+  cardLead,
+  heroImage,
+  heroAlt,
+  category,
+  durationMin,
+  priceClinic,
+  priceHome,
+  priceUsual,
+  clinicians,
+  bookingService,
+  bookingFocus,
+  faqs,
+  closingCopy,
+} = entry.data;
+
+// Link each clinician to their team page where one exists (matched by name).
+const team = await getCollection("team", ({ data }) => !data.draft);
+const slugForName = new Map(team.map((t) => [t.data.name, t.slug]));
+const clinicianLinks = clinicians.map((name) => ({
+  name,
+  slug: slugForName.get(name),
+}));
+
+// Book CTA deep-links into the booking form: preselects the existing option and,
+// for physiotherapy, the compulsory sub-type (so the right clinicians' calendars
+// open). See src/lib/physioCategories.ts and BookingForm.astro.
+const bookHref = !bookingService
+  ? "/book/"
+  : bookingFocus
+    ? `/book/?service=${bookingService}&focus=${bookingFocus}`
+    : `/book/?service=${bookingService}`;
+
+const priceLabel =
+  priceHome && priceHome !== priceClinic
+    ? `In-clinic $${priceClinic} · Home visit $${priceHome}`
+    : priceUsual
+      ? `$${priceClinic} introductory price (usual $${priceUsual})`
+      : `$${priceClinic}`;
+
+const origin = Astro.site ?? new URL(Astro.url.origin);
+const pageURL = new URL(Astro.url.pathname, origin).href;
+
+// GEO/SEO structured data. `Service` + an `Offer` (price in SGD) makes the
+// appointment and its price quotable by answer engines and eligible for rich
+// results; BreadcrumbList gives crawlers the Home › Services › <page> trail;
+// FAQPage is emitted only when the page defines FAQs.
+const serviceSchema: Record<string, unknown> = {
+  "@context": "https://schema.org",
+  "@type": "Service",
+  serviceType: cardTitle ?? title,
+  name: title,
+  description,
+  url: pageURL,
+  category,
+  provider: clinicRef(origin),
+  areaServed: { "@type": "Place", name: "Singapore" },
+  offers: {
+    "@type": "Offer",
+    price: priceClinic,
+    priceCurrency: "SGD",
+    availability: "https://schema.org/InStock",
+    url: new URL(bookHref, origin).href,
+  },
+};
+
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Home", item: origin.href },
+    { "@type": "ListItem", position: 2, name: "Services", item: new URL("/services/", origin).href },
+    { "@type": "ListItem", position: 3, name: cardTitle ?? title, item: pageURL },
+  ],
+};
+
+const schema: Record<string, unknown>[] = [serviceSchema, breadcrumbSchema];
+if (faqs?.length) {
+  schema.push({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((f) => ({
+      "@type": "Question",
+      name: f.q,
+      acceptedAnswer: { "@type": "Answer", text: f.a },
+    })),
+  });
+}
+---
+
+<BaseLayout title={metaTitle ?? `${seoTitle ?? title} | Goji Physiotherapy`} description={description} schema={schema} searchType="Service">
+  {/* Hero: text + image */}
+  <section class="svc-hero">
+    <div class="container svc-hero__grid">
+      <div class="svc-hero__text">
+        <a href="/services/" class="svc-hero__back">
+          <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M10 3L5 8l5 5"/>
+          </svg>
+          All services
+        </a>
+        <h1>{cardTitle ?? title}</h1>
+        <p class="svc-hero__lead">{cardLead}</p>
+        <div class="svc-hero__cta">
+          <Button href={bookHref} variant="primary" size="lg">Book an appointment</Button>
+          <Button slug="web-wa" variant="whatsapp" size="lg">Ask on WhatsApp</Button>
+        </div>
+      </div>
+      {heroImage && (
+        <div class="svc-hero__media">
+          <img src={heroImage} alt={heroAlt ?? (cardTitle ?? title)} width="720" height="560" fetchpriority="high" />
+        </div>
+      )}
+    </div>
+  </section>
+
+  {/* Quick facts — an evenly-spaced strip */}
+  <section class="svc-facts-band">
+    <div class="container">
+      <dl class="svc-facts">
+        <div class="svc-facts__item">
+          <dt>Duration</dt>
+          <dd>{durationMin} min</dd>
+        </div>
+        <div class="svc-facts__item">
+          <dt>Options</dt>
+          <dd>{priceLabel}</dd>
+        </div>
+        <div class="svc-facts__item">
+          <dt>Seen by</dt>
+          <dd class="svc-facts__clin">
+            {clinicianLinks.map((c, i) => (
+              <Fragment>
+                {i > 0 && <span aria-hidden="true">, </span>}
+                {c.slug ? <a href={`/team/${c.slug}/`}>{c.name}</a> : <span>{c.name}</span>}
+              </Fragment>
+            ))}
+          </dd>
+        </div>
+      </dl>
+    </div>
+  </section>
+
+  {/* Main content */}
+  <Section tone="surface">
+    <div class="svc-body container--narrow">
+      <Content />
+      {faqs?.length ? (
+        <section class="svc-faqs" aria-labelledby="svc-faqs-heading">
+          {/* Visible twin of the FAQPage JSON-LD above: structured data must
+              match on-page content, so the two always render from `faqs`. */}
+          <h2 id="svc-faqs-heading">Frequently asked questions</h2>
+          <FaqList items={faqs} />
+        </section>
+      ) : null}
+    </div>
+  </Section>
+
+  {/* Sticky CTA */}
+  <Section tone="linen">
+    <div class="svc-cta">
+      <div>
+        <h2>Book your {cardTitle ?? title}</h2>
+        <p>{closingCopy ?? "We'll take a few details and match you with the right physiotherapist. Prefer to talk it through first? Message us on WhatsApp."}</p>
+      </div>
+      <div class="svc-cta__btns">
+        <Button href={bookHref} variant="primary" size="lg">Book an appointment</Button>
+        <Button slug="web-wa" variant="whatsapp" size="lg">Ask us on WhatsApp</Button>
+      </div>
+    </div>
+  </Section>
+</BaseLayout>
+
+<style>
+  /* Hero */
+  .svc-hero {
+    background: var(--bg-page);
+    padding-block: clamp(2rem, 1.5rem + 3vw, 4.5rem);
+  }
+  .svc-hero__grid {
+    display: grid;
+    gap: clamp(var(--space-5), 4vw, var(--space-7));
+    align-items: center;
+  }
+  @media (min-width: 860px) {
+    .svc-hero__grid {
+      grid-template-columns: 1.05fr 0.95fr;
+    }
+  }
+  .svc-hero__text {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-3);
+  }
+  .svc-hero__back {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--fs-small);
+    font-weight: var(--weight-medium);
+    color: var(--text-muted);
+    text-decoration: none;
+    margin-bottom: var(--space-2);
+  }
+  .svc-hero__back:hover { color: var(--color-primary); }
+  .svc-hero__text h1 {
+    margin: 0;
+  }
+  .svc-hero__lead {
+    font-size: var(--fs-lead, var(--fs-body));
+    color: var(--text-muted);
+    line-height: var(--lh-body);
+    max-width: 46ch;
+  }
+  .svc-hero__cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-top: var(--space-3);
+  }
+  .svc-hero__media {
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+    background: var(--color-linen);
+  }
+  .svc-hero__media img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    aspect-ratio: 5 / 4;
+    object-fit: cover;
+  }
+
+  /* Quick-facts strip — three evenly-spaced cells with dividers */
+  .svc-facts-band {
+    background: var(--bg-page);
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+  }
+  .svc-facts {
+    display: grid;
+    grid-template-columns: 1fr;
+    margin: 0;
+  }
+  .svc-facts__item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: var(--space-4) 0;
+    border-top: 1px solid var(--color-border);
+  }
+  .svc-facts__item:first-child { border-top: none; }
+  @media (min-width: 640px) {
+    .svc-facts {
+      grid-template-columns: repeat(3, 1fr);
+    }
+    .svc-facts__item {
+      padding: var(--space-5) var(--space-5);
+      border-top: none;
+      border-left: 1px solid var(--color-border);
+      align-items: flex-start;
+    }
+    .svc-facts__item:first-child {
+      padding-left: 0;
+      border-left: none;
+    }
+  }
+  .svc-facts__item dt {
+    font-size: var(--fs-caption);
+    font-weight: var(--weight-semibold);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .svc-facts__item dd {
+    margin: 0;
+    font-size: var(--fs-body);
+    color: var(--text-default);
+    font-weight: var(--weight-medium);
+  }
+  .svc-facts__clin a {
+    color: var(--color-primary);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+    text-decoration-thickness: 1px;
+  }
+  .svc-facts__clin a:hover { text-decoration-thickness: 2px; }
+
+  /* Prose content (mirrors the conditions page) */
+  .svc-body :global(h2) {
+    margin-top: var(--space-7);
+    margin-bottom: var(--space-3);
+  }
+  .svc-body :global(h2:first-child) { margin-top: 0; }
+  .svc-body :global(h3) {
+    margin-top: var(--space-5);
+    margin-bottom: var(--space-2);
+  }
+  .svc-body :global(p) {
+    color: var(--text-muted);
+    margin-bottom: var(--space-4);
+    line-height: var(--lh-body);
+  }
+  .svc-body :global(ul), .svc-body :global(ol) {
+    color: var(--text-muted);
+    margin-bottom: var(--space-4);
+    padding-left: 1.4rem;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  /* Price tables (e.g. Private Pilates introductory offers). */
+  .svc-body :global(table) {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: var(--space-4);
+    font-size: var(--fs-small);
+  }
+  .svc-body :global(th),
+  .svc-body :global(td) {
+    text-align: left;
+    vertical-align: top;
+    padding: var(--space-3) var(--space-3) var(--space-3) 0;
+    border-bottom: 1px solid var(--color-border);
+    color: var(--text-muted);
+  }
+  .svc-body :global(th) {
+    font-weight: var(--weight-semibold);
+    color: var(--text-default);
+  }
+  .svc-body :global(tbody th),
+  .svc-body :global(td:first-child) {
+    font-weight: var(--weight-semibold);
+    color: var(--text-default);
+  }
+  .svc-body :global(a) {
+    color: var(--color-primary);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+  .svc-body :global(strong) {
+    font-weight: var(--weight-semibold);
+    color: var(--text-default);
+  }
+  .svc-body :global(img) {
+    width: 100%;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    margin-block: var(--space-5);
+  }
+
+  /* CTA section */
+  .svc-cta {
+    display: grid;
+    gap: var(--space-5);
+    align-items: start;
+  }
+  @media (min-width: 760px) {
+    .svc-cta {
+      grid-template-columns: 1fr auto;
+      align-items: center;
+    }
+  }
+  .svc-cta h2 { margin-bottom: var(--space-2); }
+  .svc-cta p { color: var(--text-muted); max-width: 44ch; }
+  .svc-cta__btns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+</style>

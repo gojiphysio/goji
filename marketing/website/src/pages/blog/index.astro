@@ -1,0 +1,397 @@
+---
+/**
+ * /blog — the education surface, newest first.
+ *
+ * Deliberately a single flat index: at this size, per-category index pages
+ * would be thin and would compete with the posts themselves. Categories are
+ * shown as badges so the shape of the archive is still readable.
+ *
+ * The collection is currently EMPTY - the first drafts are with Cheryl for
+ * clinical review (see src/content/blog/.gitkeep). Rather than hardcode a
+ * placeholder page, this template branches on `posts.length`: with no posts it
+ * renders "Coming soon", noindexed and kept out of site search; drop an
+ * approved .md into the collection and it becomes a real index on the next
+ * build, with no code change needed.
+ */
+import { getCollection } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Section from "../../components/Section.astro";
+import Button from "../../components/Button.astro";
+import BerrySprig from "../../components/BerrySprig.astro";
+import { formatDate, isoDate } from "../../lib/dates.ts";
+import { clinicRef } from "../../lib/schema.ts";
+import { existsSync } from "node:fs";
+
+// Cards show the 800px copy of a hero photo (`<name>-800.webp`, made with
+// `cwebp -q 78 -resize 800 0`) when there is one; the full file is 2-4x heavier.
+const small = (src: string) => {
+  const v = src.replace(/\.webp$/, "-800.webp");
+  return existsSync(`public${v}`) ? v : src;
+};
+
+const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+const hasPosts = posts.length > 0;
+
+const [featured, ...rest] = posts;
+
+const origin = Astro.site ?? new URL(Astro.url.origin);
+const pageURL = new URL("/blog/", origin).href;
+
+const breadcrumb = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Home", item: origin.href },
+    { "@type": "ListItem", position: 2, name: "Blog", item: pageURL },
+  ],
+};
+
+// An empty blog gets no Blog schema - there is nothing to describe yet.
+const schema = hasPosts
+  ? [
+      {
+        "@context": "https://schema.org",
+        "@type": "Blog",
+        name: "Goji Physiotherapy Blog",
+        description:
+          "Plain-language physiotherapy education for women and families from the team at Goji, Lentor MRT Singapore.",
+        url: pageURL,
+        inLanguage: "en-SG",
+        blogPost: posts.map((post) => ({
+          "@type": "BlogPosting",
+          headline: post.data.title,
+          description: post.data.description,
+          url: new URL(`/blog/${post.slug}/`, origin).href,
+          datePublished: isoDate(post.data.pubDate),
+          author: post.data.author
+            ? { "@type": "Person", name: post.data.author.name }
+            : clinicRef(origin),
+        })),
+      },
+      breadcrumb,
+    ]
+  : [breadcrumb];
+---
+
+<BaseLayout
+  title="Blog | Physiotherapy Education | Goji Physiotherapy Singapore"
+  description="Physiotherapy articles on pelvic health, pregnancy and postnatal recovery, and getting back to movement, from the team at Goji, Lentor MRT."
+  schema={schema}
+  noindex={!hasPosts}
+  searchable={hasPosts}
+  searchType="Article"
+>
+  <section class="blog-hero">
+    <div class="container">
+      <h1>Blog</h1>
+      <p class="blog-hero__lead">
+        Answers to common physiotherapy questions, and news from our
+        events. Press coverage is on <a href="/press/">Goji in the media</a>.
+      </p>
+    </div>
+  </section>
+
+  {
+    !hasPosts && (
+      <Section tone="surface">
+        <div class="blog-soon">
+          <div class="blog-soon__text">
+            <h2>The first articles are being written</h2>
+            <p class="blog-soon__lead">
+              Our physiotherapists are drafting them now, and every one gets a
+              clinical review before it goes up. In the meantime, the condition
+              and service pages cover what we treat and what each appointment
+              involves.
+            </p>
+            <div class="blog-soon__links">
+              <Button href="/conditions/" variant="primary">Conditions we treat</Button>
+              <Button href="/services/" variant="secondary">Our services</Button>
+            </div>
+            <p class="blog-soon__note">
+              Have a question you would like us to write about? Tell us and we
+              will put it on the list.
+            </p>
+          </div>
+          <div class="blog-soon__sprig" aria-hidden="true">
+            <BerrySprig />
+          </div>
+        </div>
+      </Section>
+    )
+  }
+
+  {
+    featured && (
+      <Section tone="surface">
+        <a href={`/blog/${featured.slug}/`} class="blog-feature">
+          {featured.data.heroImage && (
+            <div class="blog-feature__media">
+              <img
+                src={featured.data.heroImage}
+                srcset={small(featured.data.heroImage) !== featured.data.heroImage ? `${small(featured.data.heroImage)} 800w, ${featured.data.heroImage} 1600w` : undefined}
+                sizes="(min-width: 760px) 50vw, 100vw"
+                alt={featured.data.heroAlt ?? ""}
+                width="760"
+                height="475"
+                loading="eager"
+                fetchpriority="high"
+              />
+            </div>
+          )}
+          <div class="blog-feature__body">
+            <p class="blog-meta">
+              <span class="blog-badge">{featured.data.category}</span>
+              <time datetime={isoDate(featured.data.pubDate)}>
+                {formatDate(featured.data.pubDate)}
+              </time>
+            </p>
+            <h2>{featured.data.cardTitle ?? featured.data.title}</h2>
+            <p class="blog-feature__lead">{featured.data.cardLead}</p>
+            <span class="blog-card__cta">Read the article</span>
+          </div>
+        </a>
+      </Section>
+    )
+  }
+
+  {
+    rest.length > 0 && (
+      <Section tone="linen">
+        <h2 class="blog-section-title">More from the clinic</h2>
+        <div class="blog-grid">
+          {rest.map((post) => (
+            <a href={`/blog/${post.slug}/`} class="blog-card">
+              {post.data.heroImage && (
+                <img
+                  src={small(post.data.heroImage)}
+                  alt={post.data.heroAlt ?? ""}
+                  width="480"
+                  height="300"
+                  loading="lazy"
+                  class="blog-card__media"
+                />
+              )}
+              <p class="blog-meta">
+                <span class="blog-badge">{post.data.category}</span>
+                <time datetime={isoDate(post.data.pubDate)}>
+                  {formatDate(post.data.pubDate)}
+                </time>
+              </p>
+              <h3 class="blog-card__title">{post.data.cardTitle ?? post.data.title}</h3>
+              <p class="blog-card__lead">{post.data.cardLead}</p>
+              <span class="blog-card__cta">Read more</span>
+            </a>
+          ))}
+        </div>
+      </Section>
+    )
+  }
+
+  <Section tone="surface" id="contact-cta">
+    <div class="contact-strip">
+      <h2>Have a question we have not covered?</h2>
+      <p>
+        Message us on WhatsApp - describe what you are experiencing and we will
+        help you find the right appointment type.
+      </p>
+      <Button slug="web-wa" variant="whatsapp" size="lg">Ask us on WhatsApp</Button>
+    </div>
+  </Section>
+</BaseLayout>
+
+<style>
+  .blog-hero {
+    background: var(--bg-page);
+    padding-block: clamp(2.5rem, 1.5rem + 4vw, 5rem);
+    border-bottom: 1px solid var(--color-border);
+  }
+  .blog-hero__lead {
+    max-width: 56ch;
+    color: var(--text-muted);
+    margin-top: var(--space-4);
+  }
+  .blog-hero__lead a {
+    color: var(--color-primary);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+
+  /* Coming-soon placeholder. Removed automatically once a post exists. */
+  .blog-soon {
+    display: grid;
+    gap: var(--space-5);
+    align-items: center;
+  }
+  .blog-soon__text {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    gap: var(--space-3);
+    max-width: 52ch;
+  }
+  /* The sprig is decoration only: it gets its own column when there is room,
+     and is dropped entirely on a phone rather than sitting behind the copy. */
+  .blog-soon__sprig { display: none; }
+  @media (min-width: 900px) {
+    .blog-soon {
+      grid-template-columns: minmax(0, 1fr) 200px;
+      gap: var(--space-7);
+    }
+    .blog-soon__sprig {
+      display: block;
+      opacity: 0.5;
+      pointer-events: none;
+    }
+  }
+  .blog-soon__lead { color: var(--text-muted); }
+  .blog-soon__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-top: var(--space-2);
+  }
+  .blog-soon__note {
+    margin-top: var(--space-3);
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+  }
+
+  .blog-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3);
+    font-size: var(--fs-caption);
+    color: var(--text-muted);
+  }
+  .blog-badge {
+    font-weight: var(--weight-semibold);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--color-primary);
+  }
+
+  /* Featured post: image left, copy right on desktop; stacked on a phone. */
+  .blog-feature {
+    display: grid;
+    gap: var(--space-5);
+    background: var(--bg-content);
+    border: 1px solid var(--color-border);
+    border-top: 3px solid var(--color-primary);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+    transition: box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease);
+  }
+  .blog-feature:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+  @media (min-width: 760px) {
+    .blog-feature {
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      align-items: stretch;
+    }
+  }
+  /* Grid items default to min-width:auto, so a photo could widen the card
+     past a phone screen; let the columns shrink. */
+  .blog-feature > * { min-width: 0; }
+  /* The photo fills its half of the card, edge to edge. */
+  .blog-feature__media { background: var(--color-linen); }
+  .blog-feature__media img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    aspect-ratio: 8 / 5;
+    object-fit: cover;
+  }
+  @media (min-width: 760px) {
+    .blog-feature__media img { min-height: 260px; aspect-ratio: auto; }
+  }
+  .blog-feature__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding: var(--space-5);
+  }
+  .blog-feature__lead {
+    color: var(--text-muted);
+    line-height: var(--lh-snug);
+    max-width: 52ch;
+  }
+
+  .blog-section-title { margin-bottom: var(--space-5); }
+
+  .blog-grid {
+    display: grid;
+    gap: var(--space-4);
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 640px) {
+    .blog-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (min-width: 980px) {
+    .blog-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+
+  .blog-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding: var(--space-5);
+    background: var(--bg-content);
+    border: 1px solid var(--color-border);
+    border-top: 3px solid var(--color-primary);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    text-decoration: none;
+    color: inherit;
+    transition: box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease);
+  }
+  .blog-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+  /* Thumbnail bleeds to the card edges and fills the top of the card. */
+  .blog-card { overflow: hidden; }
+  .blog-card__media {
+    display: block;
+    width: calc(100% + 2 * var(--space-5));
+    max-width: none;
+    margin: calc(-1 * var(--space-5)) calc(-1 * var(--space-5)) var(--space-3);
+    aspect-ratio: 8 / 5;
+    object-fit: cover;
+    background: var(--color-linen);
+  }
+  .blog-card__title {
+    font-size: var(--fs-h3);
+    color: var(--text-default);
+  }
+  .blog-card__lead {
+    font-size: var(--fs-body);
+    color: var(--text-muted);
+    flex: 1;
+    line-height: var(--lh-snug);
+  }
+  .blog-card__cta {
+    font-size: var(--fs-caption);
+    font-weight: var(--weight-semibold);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--color-primary);
+    margin-top: var(--space-2);
+  }
+
+  .contact-strip {
+    max-width: 44ch;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+  .contact-strip p { color: var(--text-muted); }
+</style>

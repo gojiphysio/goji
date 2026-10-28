@@ -8,7 +8,7 @@ Reads the LIVE sitemap, keeps URLs whose <lastmod> falls within --days, checks
 each returns 200 (so a page that hasn't deployed yet is skipped, not burned),
 and posts them in one batch. The key file is public by design: IndexNow
 verifies ownership by fetching https://www.gojiphysio.com/<key>.txt, which
-lives in website/prototype/public/. Stdlib only.
+lives in website/public/. Stdlib only.
 
 Usage: python3 indexnow_submit.py [--days 2] [--url URL ...] [--dry-run]
 """

@@ -1,0 +1,36 @@
+# Cloudflare Pages redirects. Preserve SEO from the old Squarespace URLs.
+# Old conditions lived at /blog/conditions/<slug>-physiotherapy; new at /conditions/<slug>.
+# Format: /source  /destination  <status>. Specific rules first, wildcards last.
+
+/blog/conditions/prenatal-physiotherapy            /conditions/prenatal-care            301
+/blog/conditions/diastasis-recti-physiotherapy     /conditions/diastasis-recti          301
+/blog/conditions/caesarean-recovery-physiotherapy  /conditions/caesarean-recovery       301
+/blog/conditions/perineal-tear-physiotherapy       /conditions/perineal-tear            301
+/blog/conditions/urinary-incontinence-physiotherapy /conditions/urinary-incontinence    301
+/blog/conditions/pelvic-organ-prolapse-physiotherapy /conditions/pelvic-organ-prolapse  301
+/blog/conditions/pelvic-pain-physiotherapy         /conditions/pelvic-pain              301
+/blog/conditions/pelvic-girdle-pain-physiotherapy  /conditions/pelvic-girdle-pain       301
+/blog/conditions/bowel-dysfunction-physiotherapy   /conditions/bowel-dysfunction        301
+/blog/conditions/blocked-ducts-mastitis            /conditions/blocked-ducts-mastitis   301
+/blog/conditions/menopause-physiotherapy           /conditions/menopause                301
+
+# Any other old Squarespace condition URL falls back to the conditions index.
+# NOTE: scoped to /blog/conditions/* on purpose. `/blog/*` and `/blog` used to
+# be listed here too, but /blog is now a real section of this site and
+# Cloudflare Pages evaluates _redirects BEFORE serving static assets - those two
+# rules would 301 every blog post to /conditions. Never re-add them.
+/blog/conditions/*  /conditions  301
+
+# Old standalone Squarespace bio pages → team pages.
+/cheryl-long        /team/cheryl-long  301
+/claire-ng          /team/claire-ng    301
+/kristy-ng          /team/kristy-ng    301
+
+# Old standalone pages now live as homepage sections.
+/about-us           /#about      301
+/team               /#team       301
+
+# The /media hub (Blog + Press) was retired: Blog has its own nav item and
+# "Media" now means press coverage.
+/media              /press/      301
+/media/             /press/      301

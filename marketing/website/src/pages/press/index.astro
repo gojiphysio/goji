@@ -1,0 +1,285 @@
+---
+/**
+ * /press — media coverage and events.
+ *
+ * A credibility surface, not a content surface: third-party corroboration is
+ * what AI answer engines look for when deciding whether to cite a clinic
+ * (marketing/seo/seo-geo-review.md §4). Each entry is our own summary plus a
+ * link to the outlet - we never reproduce the outlet's copy.
+ *
+ * Outlet names are set in the display typeface rather than shown as logos: we
+ * have no licence for publication marks. Sourcing them is a follow-up.
+ */
+import { getCollection } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Section from "../../components/Section.astro";
+import Button from "../../components/Button.astro";
+import { formatDate, isoDate } from "../../lib/dates.ts";
+import { SITE } from "../../lib/site.ts";
+import { clinicId } from "../../lib/schema.ts";
+
+const entries = (await getCollection("press", ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+
+// Map outlets to their logos (if available)
+const outletLogos = new Map<string, string | undefined>();
+entries.forEach((e) => {
+  outletLogos.set(e.data.outlet, e.data.logo);
+});
+
+const outlets = [...new Set(entries.map((e) => e.data.outlet))];
+
+const origin = Astro.site ?? new URL(Astro.url.origin);
+const pageURL = new URL("/press/", origin).href;
+
+// The clinic Organization is the subject of these articles. `subjectOf` is the
+// honest way to state that: we are written about, we are not the publisher.
+const schema = [
+  {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: "Press and media coverage",
+    description: "Media coverage of Goji Women's and Family Physiotherapy.",
+    url: pageURL,
+    about: {
+      "@id": clinicId(origin),
+      "@type": "Organization",
+      name: SITE.fullName,
+      url: origin.href,
+      subjectOf: entries.map((e) => ({
+        "@type": "NewsArticle",
+        headline: e.data.originalTitle,
+        url: e.data.originalUrl,
+        datePublished: isoDate(e.data.pubDate),
+        inLanguage: e.data.language === "zh" ? "zh-SG" : "en-SG",
+        ...(e.data.author
+          ? { author: { "@type": "Person", name: e.data.author } }
+          : {}),
+        publisher: {
+          "@type": "Organization",
+          name: e.data.outlet,
+          url: e.data.outletUrl,
+        },
+      })),
+    },
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: origin.href },
+      { "@type": "ListItem", position: 2, name: "Media", item: pageURL },
+    ],
+  },
+];
+---
+
+<BaseLayout
+  title="Press and Media | Goji Physiotherapy Singapore"
+  description="Interviews, features and commentary from Goji Physiotherapy on women's health, children's physiotherapy and family care."
+  schema={schema}
+  searchType="Press"
+>
+  <section class="press-hero">
+    <div class="container">
+      <h1>Goji in the media</h1>
+      <p class="press-hero__lead">
+        Interviews and features about Goji and our clinicians. Each one has our summary and a link to the original article.
+      </p>
+      {
+        outlets.length > 0 && (
+          <div class="press-outlets">
+            <p class="press-outlets__label">Featured in</p>
+            <ul>
+              {outlets.map((outlet) => {
+                const logo = outletLogos.get(outlet);
+                return (
+                  <li>
+                    {logo ? (
+                      <img
+                        src={`/press/${logo}`}
+                        alt={outlet}
+                        width="120"
+                        height="120"
+                        class="press-outlets__logo"
+                      />
+                    ) : (
+                      <span>{outlet}</span>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        )
+      }
+    </div>
+  </section>
+
+  <Section tone="surface">
+    {
+      entries.length === 0 ? (
+        <p>No coverage listed yet.</p>
+      ) : (
+        <ul class="press-list">
+          {entries.map((entry) => (
+            <li>
+              <a href={`/press/${entry.slug}/`} class="press-card">
+                <p class="press-card__meta">
+                  <span class="press-card__outlet">{entry.data.outlet}</span>
+                  <time datetime={isoDate(entry.data.pubDate)}>
+                    {formatDate(entry.data.pubDate)}
+                  </time>
+                  {entry.data.language === "zh" && <span class="press-card__lang">In Chinese</span>}
+                </p>
+                <h2 class="press-card__title">{entry.data.title}</h2>
+                <p class="press-card__lead">{entry.data.cardLead}</p>
+                <span class="press-card__cta">Read the summary</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      )
+    }
+  </Section>
+
+  <Section tone="linen">
+    <div class="contact-strip">
+      <h2>For media enquiries</h2>
+      <p>
+        Writing about women's health, children's physiotherapy, or family care? Our physiotherapists and team may be available for interviews, commentary and background conversations.
+      </p>
+      <p>
+        Email <a href={`mailto:${SITE.email}`}>{SITE.email}</a> with your publication, topic, deadline, and what you need from us.
+      </p>
+      <div style="display: flex; gap: var(--space-3); flex-wrap: wrap;">
+        <Button href={`mailto:${SITE.email}`} variant="primary">Email our team</Button>
+        <Button slug="web-wa" variant="whatsapp" size="lg">Message us on WhatsApp</Button>
+      </div>
+    </div>
+  </Section>
+</BaseLayout>
+
+<style>
+  .press-hero {
+    background: var(--bg-page);
+    padding-block: clamp(2.5rem, 1.5rem + 4vw, 5rem);
+    border-bottom: 1px solid var(--color-border);
+  }
+  .press-hero__lead {
+    max-width: 54ch;
+    color: var(--text-muted);
+    margin-top: var(--space-4);
+  }
+
+  .press-outlets { margin-top: var(--space-6); }
+  .press-outlets__label {
+    font-size: var(--fs-caption);
+    font-weight: var(--weight-semibold);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .press-outlets ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3) var(--space-6);
+    list-style: none;
+    padding: 0;
+    margin-top: var(--space-3);
+  }
+  .press-outlets li {
+    font-family: var(--font-display);
+    font-size: var(--fs-h3);
+    font-weight: var(--weight-semibold);
+    letter-spacing: var(--tracking-tight);
+    color: var(--text-default);
+  }
+  .press-outlets__logo {
+    height: 90px;
+    width: auto;
+    max-width: 150px;
+    object-fit: contain;
+  }
+
+  .press-list {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: var(--space-4);
+  }
+  @media (min-width: 760px) {
+    .press-list { grid-template-columns: 1fr 1fr; }
+  }
+
+  .press-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    height: 100%;
+    padding: var(--space-5);
+    background: var(--bg-content);
+    border: 1px solid var(--color-border);
+    border-top: 3px solid var(--color-accent);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    text-decoration: none;
+    color: inherit;
+    transition: box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease);
+  }
+  .press-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+  .press-card__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3);
+    font-size: var(--fs-caption);
+    color: var(--text-muted);
+  }
+  .press-card__outlet {
+    font-weight: var(--weight-semibold);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--color-accent);
+  }
+  .press-card__lang {
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-pill);
+    padding: 0.1rem 0.5rem;
+  }
+  .press-card__title {
+    font-size: var(--fs-h3);
+    color: var(--text-default);
+  }
+  .press-card__lead {
+    font-size: var(--fs-body);
+    color: var(--text-muted);
+    flex: 1;
+    line-height: var(--lh-snug);
+  }
+  .press-card__cta {
+    font-size: var(--fs-caption);
+    font-weight: var(--weight-semibold);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--color-primary);
+    margin-top: var(--space-2);
+  }
+
+  .contact-strip {
+    max-width: 48ch;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+  .contact-strip p { color: var(--text-muted); }
+  .contact-strip a {
+    color: var(--color-primary);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+</style>

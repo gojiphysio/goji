@@ -61,3 +61,10 @@ source (Instagram, Search Console, GBP, …).
   output, a test step, and a gated `gcloud run jobs deploy` step (copy the
   `plato_patients` block). Tests gate the deploy.
 - SQL is idempotent; `deploy_all.sh` auto-globs new `.sql` files.
+
+## Outbound jobs (write to an external service)
+`gbp_post_sync` (Instagram → GBP posts) lives here because it shares the job
+machinery, but it publishes. Rules for any job like it: ship with a dry run
+that needs no write credential, go live only on a repo var, keep an
+append-only ledger checked before each write, and ledger each write as soon
+as it succeeds (not buffered to the end), so a re-run can't publish twice.

@@ -1,0 +1,29 @@
+---
+/**
+ * FAQ accordion: the one look for every on-page FAQ (home, services, hubs).
+ * Render it from the same `faqs` array as the page's FAQPage JSON-LD so the
+ * structured data always matches what is on the page.
+ */
+interface Props {
+  items: { q: string; a: string }[];
+  class?: string;
+}
+
+import "../styles/faq-list.css";
+
+const { items, class: className = "" } = Astro.props;
+---
+
+<div class:list={["faq-list", className]}>
+  {items.map((item) => (
+    <details class="faq-list__item">
+      <summary class="faq-list__q">
+        {item.q}
+        <span class="faq-list__toggle" aria-hidden="true" />
+      </summary>
+      <div class="faq-list__a">
+        <p>{item.a}</p>
+      </div>
+    </details>
+  ))}
+</div>
