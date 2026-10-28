@@ -99,7 +99,7 @@ Charles owns this pull (no clinical sign-off needed to run it).
 
 - [x] Privacy notice covers aggregated, anonymised use (Charles, 2026-10-27)
 - [x] Codebook spot-checked against ~20 patients (2026-10-27; pain rule tightened after the first pass)
-- [x] Run window agreed: 2026-10-28, 00:15 SGT
+- [x] Run window agreed: 2026-10-29, 00:15 SGT (28 Oct attempt skipped: Mac slept on battery, window guard stopped it, no Plato calls)
 
 ## Run steps
 
