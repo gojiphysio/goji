@@ -139,6 +139,9 @@ so a token change reflows everything (styleguide is the QA surface).
   `## Frequently asked questions` with `### <question>` blocks — other
   heading levels (e.g. `####`) or bullet questions silently emit no FAQPage.
   The parser is shared (`src/lib/faq.ts`) — don't re-implement it per template.
+  The same section renders as the FAQ accordion via
+  `src/lib/rehype-faq-accordion.mjs` (markup and `src/styles/faq-list.css`
+  shared with `components/FaqList.astro`); answers keep their links.
 - **Every condition page carries a byline** via `reviewer: { name, slug }`
   frontmatter; the template renders "Reviewed by <name>" linking to
   `/team/<slug>` and emits `reviewedBy` in the MedicalWebPage JSON-LD.
