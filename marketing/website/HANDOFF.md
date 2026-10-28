@@ -5,8 +5,8 @@
 
 Pick-up notes for continuing this work in a local session.
 
-- **Project root:** `marketing/website/prototype/` (directory name is
-  historical — this is the production site source).
+- **Project root:** `marketing/website/` (was `marketing/website/prototype/`
+  until 2026-10).
 - **Status (2026-07-13): LIVE IN PRODUCTION at gojiphysio.com** on
   Cloudflare Pages, deploying from `main`. Squarespace is deprecated. Built
   out: homepage, `/book` (native booking + attribution), 11 condition pages,
@@ -23,7 +23,7 @@ Pick-up notes for continuing this work in a local session.
 - **Live ops notes:** the apex→www 301 is a Cloudflare zone rule (not in
   `public/_redirects`) — verify it exists when touching DNS. Google Search
   Console ownership + sitemap submission is an operator task tracked in
-  `../../seo/seo-geo-review.md` §1 (P0: inner pages were not indexed at the
+  `../seo/seo-geo-review.md` §1 (P0: inner pages were not indexed at the
   2026-07-13 audit).
 
 ## Where we're heading next (owner's priorities)
@@ -62,7 +62,7 @@ In rough order, the immediate goals for the next session(s):
 Requires Node 20+ (22 recommended). From the repo root:
 
 ```bash
-cd marketing/website/prototype
+cd marketing/website
 npm install
 npm run dev            # http://localhost:4321  (hot reload)
 ```
@@ -71,9 +71,9 @@ Open **http://localhost:4321/** and **http://localhost:4321/styleguide**.
 To tweak the look, edit `src/styles/tokens.css` and watch it reflow live.
 
 **In Claude Code:** a launch config is committed at `.claude/launch.json`
-(`website-prototype`, port 4232), so the built-in preview tool can start the dev
+(`website-dev`, port 4232), so the built-in preview tool can start the dev
 server and show a live pane without touching the terminal — just start the
-`website-prototype` server. Port 4232 is only a convention for that pane; plain
+`website-dev` server. Port 4232 is only a convention for that pane; plain
 `npm run dev` still serves on 4321.
 
 Production-parity check (what Cloudflare Pages will serve):
@@ -95,7 +95,7 @@ Do it from your own browser:
    - Framework preset: **Astro**
    - Build command: `npm run build`
    - Build output directory: `dist`
-   - Root directory (Advanced): `marketing/website/prototype`
+   - Root directory (Advanced): `marketing/website`
    - (If Node errors) env var `NODE_VERSION` = `22`
 4. **Save and Deploy** → you get a `https://<project>.pages.dev` URL that rebuilds
    on every push, with per-branch/PR preview URLs.
@@ -123,7 +123,7 @@ Status re-marked 2026-08-03: phase 2 (blog scaffolding) is **done** alongside 4
 and `/blog` shows a "Coming soon" placeholder until one is approved. The enquiry
 form piece of 7 remains. Active items: 1 (design polish), per-page OG images,
 and getting the drafts reviewed and published against the clusters in
-`../../seo/seo-geo-review.md` §3.
+`../seo/seo-geo-review.md` §3.
 
 1. **Design polish** — raise the look + feel. Work in `src/styles/tokens.css`
    (the single knob) and the component CSS; `/styleguide` is the QA surface so a

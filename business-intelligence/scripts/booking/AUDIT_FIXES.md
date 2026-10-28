@@ -227,5 +227,5 @@ CLINICIAN_RESTRICTED_BLOCKS = {
 - Audit Document: `Goji Booking System Audit and Fix.docx`
 - Booking Service: `business-intelligence/scripts/booking/`
 - Config Source of Truth: Plato's `GET /onlineapptbooking/list` + calendar appointments
-- Website Config Mirror: `marketing/website/prototype/src/lib/services.ts`, `src/lib/clinicians.ts`, `src/lib/physioCategories.ts`
+- Website Config Mirror: `marketing/website/src/lib/services.ts`, `src/lib/clinicians.ts`, `src/lib/physioCategories.ts`
 - Block Detection: `plato.py` LEAVE_KEYWORDS, `availability.py` _booked_by_calendar()

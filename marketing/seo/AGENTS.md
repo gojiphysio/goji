@@ -4,7 +4,7 @@ The site is audited and improved by an agent on a schedule, with as little
 human intervention as is safe. This file is the contract for that loop.
 Strategy, keyword→page map and GEO rules live in `seo-geo-review.md`; copy
 rules in `../strategy/03-compliance-guardrails.md`; site rules in
-`../website/prototype/AGENTS.md`.
+`../website/AGENTS.md`.
 
 ## Never a medical untruth
 

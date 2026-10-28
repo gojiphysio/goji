@@ -21,7 +21,7 @@ import re
 import subprocess
 import sys
 
-SITE = "marketing/website/prototype/"
+SITE = "marketing/website/"
 
 # Tier A may touch only these (modifications; new files are tier B).
 ALLOW_A = [

@@ -7,7 +7,7 @@ rules. Plan and phase order: `../seo/blog-plan.md`. Keyword map:
 
 ## Where a post lives
 
-`website/prototype/src/content/blog/<slug>.md`, one file per post. The slug is
+`website/src/content/blog/<slug>.md`, one file per post. The slug is
 the URL (`/blog/<slug>/`): lowercase, hyphenated, query-shaped, no
 `-singapore` unless the query needs it.
 

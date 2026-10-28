@@ -1,4 +1,4 @@
-"""Static SEO/AEO checks over the built site (marketing/website/prototype/dist).
+"""Static SEO/AEO checks over the built site (marketing/website/dist).
 
 Runs in CI on every site PR (.github/workflows/site-checks.yml) and in the
 monthly SEO loop. No network. Exit 1 when any ERROR-level rule fails.
@@ -20,7 +20,7 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 HERE = Path(__file__).resolve().parent
-SITE_DIR = HERE.parent.parent / "website" / "prototype"
+SITE_DIR = HERE.parent.parent / "website"
 ORIGIN = "https://www.gojiphysio.com"
 
 # rule -> level. Promote WARN -> ERROR once the site is clean for that rule.

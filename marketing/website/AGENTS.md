@@ -1,9 +1,8 @@
 # Website — conventions
 
 The Goji public website: **Astro** (static output) on **Cloudflare Pages**,
-**live in production at gojiphysio.com** since the Squarespace cutover
-(directory name "prototype" is historical). `/styleguide` remains the design
-QA surface (noindexed).
+**live in production at gojiphysio.com** since the Squarespace cutover.
+`/styleguide` remains the design QA surface (noindexed).
 
 > **This subtree owns the repo's only Node/npm build step**, on purpose. The
 > rest of the repo is deliberately no-build (the Flask dashboard is inline
@@ -16,11 +15,11 @@ QA surface (noindexed).
 ## Fast path (commands agents kept rediscovering)
 From this directory:
 - Fresh worktree: `test -d node_modules || npm ci` first, or the
-  `website-prototype` preview fails with "astro: command not found".
-- Previews (`.claude/launch.json`): `website-prototype` = `astro dev` on 4232;
+  `website-dev` preview fails with "astro: command not found".
+- Previews (`.claude/launch.json`): `website-dev` = `astro dev` on 4232;
   `website-preview` = built `dist/` on 4233 (`npm run build` first; needed for
   search and Lighthouse).
-- SEO/AEO gate (CI runs it): `npm run build && python3 ../../seo/tools/check_dist.py --dist dist`.
+- SEO/AEO gate (CI runs it): `npm run build && python3 ../seo/tools/check_dist.py --dist dist`.
 - Lighthouse (not installed globally), against `website-preview`:
   `npx -y lighthouse@12 http://localhost:4233/ --only-categories=performance --form-factor=mobile --output=json --output-path=<scratch>/home.json --quiet --chrome-flags="--headless=new"`.
 - A PR's Cloudflare preview URL:
@@ -135,7 +134,7 @@ so a token change reflows everything (styleguide is the QA surface).
   down to ~375px.
 - **Branch & PR to `main`** — never push to `main` directly.
 
-## SEO/GEO rules (from the 2026-07 review — full map in `../../seo/seo-geo-review.md`)
+## SEO/GEO rules (from the 2026-07 review — full map in `../seo/seo-geo-review.md`)
 - **Per-page schema is required**, by page type: conditions emit MedicalWebPage
   + reviewedBy (from `reviewer`) + BreadcrumbList + FAQPage; services emit
   Service + Offer + BreadcrumbList + FAQPage (frontmatter `faqs`); team pages
@@ -144,7 +143,7 @@ so a token change reflows everything (styleguide is the QA surface).
   FAQPage. New page types define their schema before merging.
 - **Site-wide JSON-LD lives in `src/lib/schema.ts`**, not in `BaseLayout`, so
   the SEO loop can improve it as a tier A change without touching the layout
-  (analytics beacon, tier C). Tiers: `../../seo/AGENTS.md`.
+  (analytics beacon, tier C). Tiers: `../seo/AGENTS.md`.
 - **Press pages never claim authorship.** A `/press/<slug>` page is a `WebPage`
   whose `citation` is the outlet's `NewsArticle` (their headline, their URL,
   their publisher); the index adds `subjectOf` against the clinic
@@ -251,8 +250,8 @@ Breadcrumbs read Home › Blog › … and Home › Media › … (Media = `/pre
 **Posts ship from the PR, not from Drive.** A draft post lands as a `.md`
 in `src/content/blog/` on a branch and the owner merges it with a "By the Goji
 team" byline. Clinical posts are reviewed by a physio after they are live; the
-review adds `reviewer:` (decision 2026-10-28, queue in `blog-plan.md`). Brief: `../../content-engine/blog-brief.md`; plan:
-`../../seo/blog-plan.md`. A new post also needs its line in `public/llms.txt`
+review adds `reviewer:` (decision 2026-10-28, queue in `blog-plan.md`). Brief: `../content-engine/blog-brief.md`; plan:
+`../seo/blog-plan.md`. A new post also needs its line in `public/llms.txt`
 (`check_dist.py` fails otherwise). `src/pages/blog/index.astro`
 branches on `posts.length`: with none it renders a "Coming soon" placeholder
 that is `noindex` and excluded from search, and with one or more it becomes the
@@ -310,7 +309,7 @@ of `npm run build`. Config in `pagefind.yml`; Cloudflare Pages needs no change.
   *is* on the element you can see in devtools.
 
 ## Roadmap (remaining)
-Active focus: design polish (via `tokens.css`), more blog posts on the clusters in `../../seo/seo-geo-review.md` §3, and an
+Active focus: design polish (via `tokens.css`), more blog posts on the clusters in `../seo/seo-geo-review.md` §3, and an
 enquiry-form handler (free/DIY, a Pages Function feeding the front-desk Leads
 pipeline). Deploy, content porting, SEO/schema, the Squarespace cutover, and
 the blog/press/search surfaces are done. Capture new rules here as they surface.

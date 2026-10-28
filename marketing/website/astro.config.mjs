@@ -56,10 +56,13 @@ function lastmodFor(url) {
   );
   if (!file) return undefined;
   try {
-    const iso = execFileSync("git", ["log", "-1", "--format=%cI", "--", file], {
-      cwd: new URL(".", import.meta.url),
-      encoding: "utf8",
-    }).trim();
+    // --follow + --diff-filter=AM skip pure moves (the site moved out of
+    // marketing/website/prototype in 2026-10), so a move isn't a content edit.
+    const iso = execFileSync(
+      "git",
+      ["log", "-1", "--format=%cI", "--follow", "--diff-filter=AM", "--", file],
+      { cwd: new URL(".", import.meta.url), encoding: "utf8" },
+    ).trim();
     return iso || undefined;
   } catch {
     return undefined;
