@@ -197,9 +197,9 @@ For "physio near me" and "women's physio near me", the Google **map pack** (the
 local results with the map) often matters more than ads - and it's free. Make sure
 your **Google Business Profile** is complete:
 
-- **Primary category:** Physiotherapist. **Additional:** Women's health clinic,
-  Physical therapy clinic.
-- Correct name, address (Lentor Modern #01-13), phone, website, and hours.
+- **Categories:** as in `../seo/gbp-listing.md` (Physiotherapist primary, Women's
+  health clinic secondary).
+- Correct name, address (1 Lentor Central, #01-13, Lentor Modern), phone, website, and hours.
 - Services listed (prenatal, postnatal, pelvic health, paediatric, Pilates, S&C).
 - Real photos of the clinic and team.
 - Ask happy patients for Google reviews (within compliance - no incentives).

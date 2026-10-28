@@ -25,7 +25,7 @@ A note on sequencing: discoverability (GBP, SEO, website) compounds slowly (2-4 
 ### Week 1 - Audit & instrument
 - Pull baselines from the BI dashboard (patients, visits, bookings) and from IG/GBP/site analytics into the operator KPI sheet.
 - Confirm the pivotal compliance item with MOH: is Goji's physio licensable under HCSA? (Decides Lane A latitude.)
-- GBP audit: primary category (Physical therapy clinic) + secondaries; complete hours; booking link; 10+ real interior/team photos; services list; Q&A seeded.
+- GBP audit: categories per `../seo/gbp-listing.md` (Physiotherapist primary, Women's health clinic secondary); complete hours; booking link; 10+ real interior/team photos; services list; Q&A seeded.
 - Set up enquiry-source tagging (WhatsApp, calls, form) so we can attribute first visits.
 - Decide the month's content themes (wedge + MSK led).
 

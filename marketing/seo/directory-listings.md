@@ -19,15 +19,15 @@ record of what's live.
 | Field | Value |
 |---|---|
 | Business name | `Goji Women's and Family Physiotherapy` |
-| Address | `Lentor Modern, #01-13, Lentor Central, Singapore 788887` |
+| Address | `1 Lentor Central, #01-13, Lentor Modern, Singapore 788887` |
 | Phone | `+65 8377 0401` |
 | Website | `https://www.gojiphysio.com/` |
 | Email | `hello@gojiphysio.com` |
 | Hours | Mon–Sat 8:00 am – 8:00 pm; Sun & PH closed (by appointment only) |
 | Coordinates | 1.3858436, 103.8350854 |
 | Booking link | `https://go.gojiphysio.com/gbp-book` (tracked; use for any "book" button) |
-| Description | the 524-char compliance-checked text in `gbp-listing.md` |
-| Categories | Physiotherapist (primary); Women's health clinic; Physical fitness program — map to the nearest each platform offers |
+| Description | the compliance-checked text in `gbp-listing.md` |
+| Categories | Physiotherapist (primary); Women's health clinic — map to the nearest each platform offers |
 
 ## Bing Places (≈5 min)
 
@@ -68,7 +68,7 @@ LAST	Aen	"Goji Physio"
 LAST	P31	Q1774898	S854	"https://www.zaobao.com.sg/news/singapore/story20260721-9394054"
 LAST	P101	Q186005
 LAST	P17	Q334
-LAST	P6375	en:"Lentor Modern, #01-13, Lentor Central, Singapore 788887"
+LAST	P6375	en:"1 Lentor Central, #01-13, Lentor Modern, Singapore 788887"
 LAST	P281	"788887"
 LAST	P625	@1.3858436/103.8350854
 LAST	P856	"https://www.gojiphysio.com/"
@@ -84,4 +84,6 @@ Live since 26 Oct 2026 as
 [Q141874843](https://www.wikidata.org/wiki/Q141874843), with all of the
 statements above. `SITE.wikidata` is in the Organization `sameAs`
 (`src/lib/schema.ts`), so the site and the graph point at each other. Still
-to do: declare the affiliation on the Gojiphysio user page.
+to do: declare the affiliation on the Gojiphysio user page, and update the
+street address (P6375) to the new form above (changed 28 Oct 2026 to match
+the Business Profile). Bing syncs from GBP, so it already has it.
