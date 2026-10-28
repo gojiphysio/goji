@@ -6,7 +6,8 @@
  * - variants: primary (Deep Red fill), secondary (outline), ghost (underlined
  *   text link), whatsapp (the primary look plus the WhatsApp glyph, for web-wa
  *   CTAs; never WhatsApp green, which clashes with burgundy), light (linen fill
- *   for burgundy surfaces).
+ *   for burgundy surfaces), book (inverse of primary: white fill, Deep Red
+ *   outline and text, so the Book CTA stands out on linen next to WhatsApp).
  * - `berry` prepends the signature berry dot (ignored on the whatsapp variant,
  *   which shows the WhatsApp icon instead).
  */
@@ -15,7 +16,7 @@ import { cta, type CtaSlug } from "../lib/links.ts";
 interface Props {
   slug?: CtaSlug;
   href?: string;
-  variant?: "primary" | "secondary" | "ghost" | "whatsapp" | "light";
+  variant?: "primary" | "secondary" | "ghost" | "whatsapp" | "light" | "book";
   size?: "md" | "lg";
   berry?: boolean;
   class?: string;
@@ -103,6 +104,16 @@ const isWhatsApp = variant === "whatsapp";
     background-color: var(--color-linen-deep);
     border-color: var(--text-default);
     color: var(--text-default);
+  }
+
+  .btn--book {
+    background-color: #ffffff;
+    color: var(--color-primary);
+    border-color: var(--color-primary);
+  }
+  .btn--book:hover {
+    background-color: var(--color-primary);
+    color: var(--cta-text);
   }
 
   .btn--ghost {
