@@ -100,8 +100,18 @@ class Plato:
         server_errors = 0
         while True:
             self._pace()
-            r = self.session.get(f"{PLATO_BASE}/{self.db}{path}", params=params,
-                                 timeout=TIMEOUT_S)
+            try:
+                r = self.session.get(f"{PLATO_BASE}/{self.db}{path}", params=params,
+                                     timeout=TIMEOUT_S)
+            except (requests.ConnectionError, requests.Timeout) as e:
+                # Dropped connections happen; retry like a 5xx.
+                self._last = self.clock()
+                server_errors += 1
+                if server_errors > MAX_5XX_RETRIES:
+                    raise PlatoError(f"{path}: {type(e).__name__} after {MAX_5XX_RETRIES} retries") from None
+                log(f"{type(e).__name__} on {path}, retrying in 30s")
+                self.sleep(30)
+                continue
             self._last = self.clock()
             self.requests += 1
             if r.status_code == 429:

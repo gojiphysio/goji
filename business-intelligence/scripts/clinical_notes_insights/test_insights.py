@@ -179,3 +179,19 @@ def test_parse_skips_cancelled_notes():
     f = ci.Fields("patient_id", "timestamp", "note")
     assert f.parse({"patient_id": "p1", "note": "x", "cancel": 1}, "p") is None
     assert f.parse({"patient_id": "p1", "note": "x", "cancel": 0, "timestamp": "t"}, "p") == ("p1", "t", "x")
+
+
+def test_retries_dropped_connection():
+    import requests
+
+    class Flaky(FakeSession):
+        def get(self, url, params=None, timeout=None):
+            self.calls += 1
+            if self.calls == 1:
+                raise requests.ConnectionError("Remote end closed connection")
+            return self.responses.pop(0)
+
+    sleeps = []
+    p = ci.Plato("db", "k", session=Flaky([FakeResp(200, [])]), sleep=sleeps.append, clock=lambda: 0.0)
+    assert p.get("/x") == []
+    assert 30 in sleeps
