@@ -8,7 +8,10 @@ Compliance floor for all copy below: `../strategy/03-compliance-guardrails.md`.
 
 GBP is an **operator UI task**, except posts. Posts come from Instagram
 automatically: `business-intelligence/scripts/ingestion/gbp_post_sync` turns
-each new IG post into a GBP post (dry run until Google approves API access).
+each new IG post into a GBP post (dry run until Google approves API access;
+requested 28 Oct 2026 as hello@ for project goji-bi / 277737358846, case
+2-7527000041676, quoted review time 7–10 business days. Don't file a second
+request: duplicates slow the review).
 Instagram is also linked under Social profiles (28 Oct 2026), which shows IG
 posts in the profile's mobile "Social media updates" section.
 
