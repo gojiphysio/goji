@@ -49,6 +49,10 @@ Injury risk can never be eliminated, but it can often be reduced. Building stren
 
 ## Frequently asked questions
 
+### Do you treat men?
+
+Yes. Goji Physio in Lentor treats men as well as women and children, for sports injuries, return to sport and performance work. Our AHPC-registered physiotherapists are trained in sports and orthopaedic rehabilitation, and our team includes a Master of Exercise Science.
+
 ### I'm not injured - can I still benefit?
 
 Yes. Performance and injury-risk-reduction work is for active people who want to move and perform better. An assessment can highlight strengths to build on and areas that may be limiting you.
