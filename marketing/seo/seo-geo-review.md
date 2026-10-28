@@ -37,7 +37,7 @@ Rank Sweep `../strategy/05-30-day-campaigns.md` (Campaign 5).
 |---|---|
 | **Blog scaffolding SHIPPED (2026-08-03), content still pending.** `/media` hub + `/blog` + `/press` + site search are live; the post template emits BlogPosting + BreadcrumbList + FAQPage. **7 posts live 2026-10-27** (clinic news, event recaps, local guides, first visit; team byline). **4 clinical-advice posts live 2026-10-28** with a team byline; physio review now happens after publishing (queue in `blog-plan.md`, brief: `../content-engine/blog-brief.md`). | Repo, then a physio (review after publishing) |
 | **Press/citation surface now exists** — `/press` carries the Lianhe Zaobao interview (21 Jul 2026) as our summary + attributed quote + link out, with `citation`/`subjectOf` NewsArticle schema. This is the first owned third-party corroboration signal (§4.5). Add each new piece of coverage here in the same PR as it lands. | Repo |
-| Pitch the roundups that own our SERPs and feed AI answers (Sassy Mama, Homage, Little Steps, Expat Living, Women's Weekly). **Status and pitch drafts: `../partnerships/roundup-outreach.md`** (4 sent by 28 Oct 2026; Homage drafted) | Operator |
+| Pitch the roundups that own our SERPs and feed AI answers (Sassy Mama, Homage, Little Steps, Expat Living, Women's Weekly). **Status and pitch drafts: `../partnerships/roundup-outreach.md`** (all 5 sent by 28 Oct 2026) | Operator |
 | Bing Places + Apple Business Connect listings (free; Bing feeds ChatGPT answers) | Operator |
 | GSC ingestion job → `marts.gsc_search_performance` (see §6) | Repo |
 | Discovery Rank Sweep first baseline run (strategy/05 Campaign 5) | Operator + repo |
