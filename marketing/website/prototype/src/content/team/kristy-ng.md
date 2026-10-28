@@ -6,7 +6,7 @@ credentials: "AHPC-registered Physiotherapist | Master of Physiotherapy Studies 
 tagline: >
   Kristy supports
   women, children, and seniors
-  to recover, build strength, and move with confidence
+  to recover, build strength and move well
   across pelvic health, pregnancy and postpartum care, paediatric physiotherapy, and
   long-term movement rehabilitation.
 metaDescription: "Kristy Ng, Senior Physiotherapist at Goji. Pelvic health, pregnancy and postpartum care, and paediatric physiotherapy in Singapore."
@@ -29,9 +29,9 @@ approach: >
   life, and the activities that matter most to you or your child. Her care combines clinical
   reasoning, exercise rehabilitation, and practical strategies so each session supports both
   recovery and longer-term function. For children, she works closely with families to support
-  functional independence, participation, and confidence in everyday environments such as
+  independence and participation in everyday environments such as
   home, school, and play. For seniors, she focuses on strength, balance, mobility, and
-  confidence, helping patients stay active, independent, and engaged in the activities they
+  confidence, helping patients stay active and independent in the activities they
   value.
 education:
   - "Master of Physiotherapy Studies, The University of Queensland"
@@ -67,12 +67,12 @@ draft: false
 Kristy is a senior physiotherapist with a special interest in women's health, paediatric
 physiotherapy, active ageing, and performance-based rehabilitation.
 
-Her work sits at the intersection of clinical rehabilitation and exercise science. She
+Her work combines clinical rehabilitation and exercise science. She
 supports women, children, and seniors through a wide range of concerns, from pregnancy-related
 aches and postpartum recovery to pelvic health, paediatric orthopaedic and neuromuscular
 conditions, strength, balance, mobility, and long-term movement care.
 
-Kristy brings a strong clinical background across both adult and paediatric populations. She
+Kristy has a clinical background across both adult and paediatric populations. She
 has six years of experience at KK Women's and Children's Hospital, where she managed women
 with gynaecological concerns and pregnancy-related musculoskeletal conditions. She also worked
 with children with physical disabilities at AWWA Ltd, collaborating closely with families,
@@ -80,9 +80,9 @@ educators, and multidisciplinary teams to support each child's participation in 
 daily life.
 
 With a background in exercise physiology and rehabilitation, Kristy combines evidence-based
-care with performance principles. Her sessions are holistic, patient-centred, and tailored to
-each person's needs, helping patients recover well while building strength, confidence,
-independence, and long-term resilience.
+care with performance principles. Her sessions are patient-centred and built around each
+person's needs, helping patients recover well while building strength, independence and
+long-term resilience.
 
-Kristy is passionate about empowering her patients with the knowledge and tools they need to
-feel more confident and in control of their health, movement, and daily function.
+Kristy is passionate about giving her patients the knowledge and tools to feel more in
+control of their health, movement and daily function.

@@ -27,7 +27,7 @@ order: 1
 draft: false
 ---
 
-Strength is for everyone. Whether you're new to resistance training, getting back into exercise or working towards a sporting goal, our physiotherapists will help you build strength safely and progressively.
+Strength is for everyone. Our physiotherapists will help you build strength safely and progressively. That can mean starting resistance training, getting back into exercise or working towards a sporting goal.
 
 With dedicated 1:1 or 2:1 guidance, each session is adapted to your abilities, experience and goals.
 
@@ -41,7 +41,7 @@ Strength & Conditioning may be suitable if you want to:
 - Improve movement confidence and exercise technique
 - Return to regular exercise after completing rehabilitation
 - Prepare for running, sport or other physical activities
-- Improve balance, coordination and physical capacity
+- Work on balance, coordination and physical capacity
 - Maintain strength during pregnancy or after childbirth, where appropriate
 - Train with professional guidance and structured progression
 
@@ -67,11 +67,11 @@ If you develop new pain or experience a significant change in your symptoms, you
 You will receive:
 
 - Clear exercise guidance from your physiotherapist
-- A tailored programme suited to your goals and current ability
+- A programme suited to your goals and current ability
 - Support with safe and effective exercise technique
-- Appropriate exercise modifications and progressions
+- Exercise modifications and progressions
 - A structured approach to building strength and physical confidence
 
 ## Packages
 
-Strength & Conditioning sessions are available as a single a la carte session, or in 5-session and 10-session packs. As part of the Goji experience, your package can be used interchangeably across Strength & Conditioning and Clinical Pilates sessions, so your programme can adapt as your goals and needs change. Enquire today for package prices.
+Strength & Conditioning sessions are available as a single a la carte session, or in 5-session and 10-session packs. Your package can be used interchangeably across Strength & Conditioning and Clinical Pilates sessions, so your programme can adapt as your goals change. Enquire today for package prices.

@@ -3,7 +3,7 @@
 > Goji Physiotherapy (also known as Goji Physio) is a women's and family
 > physiotherapy clinic at Lentor Modern, Singapore (1 minute from Lentor MRT,
 > Thomson-East Coast Line, Exit 1). We provide prenatal, postnatal,
-> pelvic-health, paediatric, and musculoskeletal physiotherapy — a continuum of
+> pelvic-health, paediatric, and musculoskeletal physiotherapy, a continuum of
 > care for women and their families in one clinic. AHPC-registered
 > physiotherapists. Home visits available across Singapore, including the East
 > Coast.
@@ -13,7 +13,7 @@
 - Name: Goji Women's and Family Physiotherapy (short forms: Goji Physiotherapy, Goji Physio)
 - Website: https://www.gojiphysio.com/
 - Location: 1 Lentor Central, #01-13, Lentor Modern, Singapore 788887 (above Lentor MRT station; serves Lentor, Ang Mo Kio, Yio Chu Kang, Upper Thomson, Springleaf and Bishan, with home visits island-wide)
-- Hours: Monday–Saturday 8am–8pm; Sunday & public holidays by appointment only
+- Hours: Monday to Saturday 8am to 8pm; Sunday & public holidays by appointment only
 - Phone: +65 8377 0401
 - Email: hello@gojiphysio.com
 - Instagram: https://www.instagram.com/gojiphysio/
@@ -130,7 +130,7 @@ Articles we write, and coverage written about us: https://www.gojiphysio.com/med
 
 ## Blog
 
-Plain-language physiotherapy education and clinic news from Goji. Index:
+Physiotherapy education and clinic news from Goji. Index:
 https://www.gojiphysio.com/blog/ (feed: https://www.gojiphysio.com/rss.xml)
 
 Pelvic and perinatal health:
@@ -150,7 +150,7 @@ Clinic news:
 
 Third-party media coverage. Index: https://www.gojiphysio.com/press/
 
-- Lianhe Zaobao (21 July 2026) interviewed Clinical Director Cheryl Long about pelvic floor, postpartum and menopausal symptoms women are often told to accept. Our summary: https://www.gojiphysio.com/press/zaobao-womens-hidden-pain/ — original article (in Chinese): https://www.zaobao.com.sg/news/singapore/story20260721-9394054
+- Lianhe Zaobao (21 July 2026) interviewed Clinical Director Cheryl Long about pelvic floor, postpartum and menopausal symptoms women are often told to accept. Our summary: https://www.gojiphysio.com/press/zaobao-womens-hidden-pain/ - original article (in Chinese): https://www.zaobao.com.sg/news/singapore/story20260721-9394054
 
 ## Site search
 
@@ -159,7 +159,7 @@ Third-party media coverage. Index: https://www.gojiphysio.com/press/
 
 ## Team
 
-- Cheryl Long — Clinical Director: https://www.gojiphysio.com/team/cheryl-long/
-- Claire Ng — Senior Physiotherapist: https://www.gojiphysio.com/team/claire-ng/
-- Kristy Ng — Senior Physiotherapist: https://www.gojiphysio.com/team/kristy-ng/
-- Camille Tan — Pilates Instructor: https://www.gojiphysio.com/team/camille-tan/
+- Cheryl Long - Clinical Director: https://www.gojiphysio.com/team/cheryl-long/
+- Claire Ng - Senior Physiotherapist: https://www.gojiphysio.com/team/claire-ng/
+- Kristy Ng - Senior Physiotherapist: https://www.gojiphysio.com/team/kristy-ng/
+- Camille Tan - Pilates Instructor: https://www.gojiphysio.com/team/camille-tan/

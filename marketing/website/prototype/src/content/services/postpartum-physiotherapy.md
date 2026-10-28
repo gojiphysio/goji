@@ -3,7 +3,7 @@ title: "Postpartum Physiotherapy"
 seoTitle: "Postnatal & Postpartum Physiotherapy Singapore"
 description: "Postpartum physiotherapy in Singapore: assess your recovery after birth and plan your return to movement, exercise and sport. After vaginal or Caesarean birth."
 cardTitle: "Postpartum Physiotherapy"
-cardLead: "Understand how your body is recovering after birth and get a personalised plan for returning to movement, exercise and sport."
+cardLead: "Understand how your body is recovering after birth and get a plan for returning to movement, exercise and sport."
 heroImage: "/photos/services/postpartum-physiotherapy.webp"
 heroAlt: "A Goji physiotherapist guiding a mother through a postpartum recovery assessment."
 category: "Women's Health Physiotherapy"
@@ -26,11 +26,11 @@ order: 2
 draft: false
 ---
 
-Recovery after birth looks different for everyone. Whether you're a few weeks or several years postpartum, physiotherapy can help you better understand your body, address ongoing symptoms and work towards returning to the activities you love.
+Recovery after birth looks different for everyone. Physiotherapy can help you understand your body, address ongoing symptoms and work towards returning to the activities you love, from a few weeks to several years after birth.
 
-Our physiotherapists support recovery after vaginal and Caesarean births, with care tailored to your symptoms and goals.
+Our physiotherapists support recovery after vaginal and Caesarean births, with care based on your symptoms and goals.
 
-Note: The assessment and treatment described below are indicative. Your session will be tailored to your individual condition, needs and goals, and may be modified by your physiotherapist based on their clinical judgement.
+Note: The assessment and treatment described below are indicative. Your session will reflect your individual condition, needs and goals, and may be modified by your physiotherapist based on their clinical judgement.
 
 ## Who is postpartum physiotherapy for?
 
@@ -66,7 +66,7 @@ Your physiotherapist will first discuss your:
 - Current symptoms
 - Goals
 
-This is followed by a physical assessment tailored to your concerns, which may include:
+This is followed by a physical assessment focused on your concerns, which may include:
 
 - General postural assessment
 - Pelvic floor assessment via transabdominal ultrasound, external observation or internal vaginal examination, where appropriate
@@ -89,7 +89,7 @@ You will receive:
 
 - A clear explanation of your assessment findings
 - Practical guidance for managing your symptoms
-- A personalised exercise plan, where appropriate
+- An exercise plan, where appropriate
 - Guidance on returning to exercise or sport
 - Recommendations for follow-up care
 

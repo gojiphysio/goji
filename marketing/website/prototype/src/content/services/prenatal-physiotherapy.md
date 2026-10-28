@@ -3,7 +3,7 @@ title: "Prenatal Physiotherapy"
 seoTitle: "Prenatal Physiotherapy Singapore"
 description: "Prenatal physiotherapy in Singapore to move comfortably through pregnancy, manage pain and pelvic floor symptoms, and prepare your body for birth."
 cardTitle: "Prenatal Physiotherapy"
-cardLead: "Move with greater comfort through pregnancy with a personalised plan for your symptoms, activity goals and preparation for birth."
+cardLead: "Move with greater comfort through pregnancy with a plan for your symptoms, activity goals and preparation for birth."
 heroImage: "/photos/services/prenatal-physiotherapy.webp"
 heroAlt: "A pregnant woman working with a Goji physiotherapist during a prenatal assessment."
 category: "Women's Health Physiotherapy"
@@ -15,7 +15,7 @@ bookingService: "physiotherapy"
 bookingFocus: "womens-health"
 faqs:
   - q: "When in pregnancy can I start prenatal physiotherapy?"
-    a: "At any stage. Some women come early to stay ahead of symptoms and keep exercising confidently; others come in the second or third trimester when aches, pelvic pain or pelvic floor symptoms appear. Techniques and positioning are adapted to your stage of pregnancy."
+    a: "At any stage. Some women come early to stay ahead of symptoms and keep exercising; others come in the second or third trimester when aches, pelvic pain or pelvic floor symptoms appear. Techniques and positioning are adapted to your stage of pregnancy."
   - q: "Can prenatal physiotherapy help me prepare for birth?"
     a: "Yes - birth preparation is a core part of prenatal physiotherapy. Depending on your stage and goals, this can include pelvic floor preparation, perineal massage instruction, labour positions and breathing strategies."
   - q: "Is physiotherapy safe during pregnancy?"
@@ -26,11 +26,11 @@ order: 1
 draft: false
 ---
 
-A comprehensive physiotherapy assessment to help you move comfortably through pregnancy, manage symptoms and prepare your body for birth.
+A full physiotherapy assessment to help you move comfortably through pregnancy, manage symptoms and prepare your body for birth.
 
-Suitable at any stage of pregnancy, whether you are experiencing pain, pelvic floor symptoms or simply want guidance on staying active safely.
+Suitable at any stage of pregnancy, for pain, pelvic floor symptoms or guidance on staying active safely.
 
-Note: The assessment and treatment described below are indicative. Your session will be tailored to your individual condition, needs and goals, and may be modified by your physiotherapist based on their clinical judgement.
+Note: The assessment and treatment described below are indicative. Your session will reflect your individual condition, needs and goals, and may be modified by your physiotherapist based on their clinical judgement.
 
 ## Who is prenatal physiotherapy for?
 
@@ -66,7 +66,7 @@ Your physiotherapist will first discuss your:
 - Activity levels
 - Goals
 
-This is followed by a physical assessment tailored to your concerns, which may include:
+This is followed by a physical assessment focused on your concerns, which may include:
 
 - Breathing and posture assessment
 - Assessment of your back, hips and pelvic girdle
@@ -90,7 +90,7 @@ You will receive:
 - A clear explanation of your assessment findings
 - Practical guidance for managing pain and daily activities
 - Strategies for breathing, core and pelvic floor coordination
-- A personalised exercise plan, where appropriate
+- An exercise plan, where appropriate
 - Advice on staying active safely during pregnancy
 - Guidance on preparing your body for labour, birth and postpartum recovery
 - Recommendations for follow-up care

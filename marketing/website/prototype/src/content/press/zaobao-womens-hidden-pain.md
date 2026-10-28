@@ -35,4 +35,4 @@ The article also touches on the wider shift of physiotherapists from public hosp
 
 The article brings welcome attention to symptoms that many women quietly live with through pregnancy, postpartum recovery and menopause.
 
-For readers who recognise some of these experiences, our guides to [urinary incontinence](/conditions/urinary-incontinence/), [pelvic organ prolapse](/conditions/pelvic-organ-prolapse/) and [menopause](/conditions/menopause/) explain common signs, what a physiotherapy assessment may involve and the kinds of support that may be available.
+Our guides to [urinary incontinence](/conditions/urinary-incontinence/), [pelvic organ prolapse](/conditions/pelvic-organ-prolapse/) and [menopause](/conditions/menopause/) explain common signs, what a physiotherapy assessment may involve and the kinds of support that may be available.

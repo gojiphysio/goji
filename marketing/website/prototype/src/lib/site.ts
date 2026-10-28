@@ -12,7 +12,7 @@ export const SITE = {
   tagline: "Care that grows with you.",
   seoTitle: "Goji Physiotherapy | Women's & Family Physio at Lentor MRT",
   seoDescription:
-    "Physiotherapy for women and children at Lentor MRT. Prenatal, post-partum, paediatric, and pelvic health care in one trusted clinic.",
+    "Physiotherapy for women and children at Lentor MRT. Prenatal, post-partum, paediatric and pelvic health care in one clinic.",
   email: "hello@gojiphysio.com",
   /** Month the published prices were last confirmed. Shown as "Prices as of
    *  <month>" next to prices (answer engines weight dated facts). Update it in
@@ -33,7 +33,7 @@ export const SITE = {
     note: "1-minute walk from Lentor MRT (Thomson-East Coast Line, Exit 1).",
   },
   hours: [
-    { days: "Monday – Saturday", time: "8am – 8pm" },
+    { days: "Monday to Saturday", time: "8am to 8pm" },
     { days: "Sunday & Public Holidays", time: "Closed (by appointment only)" },
   ],
 } as const;

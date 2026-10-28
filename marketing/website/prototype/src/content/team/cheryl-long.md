@@ -4,7 +4,7 @@ photo: "/photos/team/cheryl-long.webp"
 role: Clinical Director
 credentials: "AHPC-registered Physiotherapist | BSc (Hons) Physiotherapy"
 tagline: >
-  Cheryl provides thoughtful, evidence-informed physiotherapy for
+  Cheryl provides evidence-informed physiotherapy for
   women, children, and families,
   from injury recovery and pregnancy to pelvic health, scoliosis, and long-term
   movement care.
@@ -26,8 +26,8 @@ specialties:
 approach: >
   Cheryl takes time to understand the full picture, from immediate symptoms to your
   long-term family and lifestyle context. Her care combines clinical reasoning with
-  practical rehabilitation, so each session provides both effective treatment and the
-  clarity needed to navigate recovery. Depending on clinical needs, she draws on manual
+  practical rehabilitation, so each session provides treatment and the
+  clarity needed to move through recovery. Depending on clinical needs, she draws on manual
   therapy, dry needling, movement retraining, clinical Pilates, and home strategies so
   that progress continues beyond the clinic.
 education:
@@ -73,21 +73,21 @@ Cheryl is a senior physiotherapist with over 10 years of clinical experience in 
 health, paediatric pelvic health, orthopaedic rehabilitation, scoliosis management, and
 clinical Pilates.
 
-Working at the heart of women's and children's health, she offers a continuum of care that
-supports the whole family, from managing pelvic floor dysfunction and postpartum recovery to
+Working in women's and children's health, she offers a continuum of care for the whole
+family, from managing pelvic floor dysfunction and postpartum recovery to
 treating a sprained ankle.
 
 Cheryl's experience spans both tertiary hospital and private practice settings, including her
 foundational years at KK Women's and Children's Hospital and subsequent senior roles in
-private practice. Her sessions are comprehensive and highly individualised, so patients leave
+private practice. Her sessions are individualised, so patients leave
 with a clear understanding of their condition and treatment plan.
 
 With over a decade of experience in clinical Pilates, Cheryl often integrates movement and
 functional rehabilitation into her care. She also uses dry needling to treat pain and
-muscular dysfunction. Her approach is evidence-informed, practical, and focused on helping
-patients recover with confidence while building long-term physical resilience.
+muscular dysfunction. Her approach is evidence-informed and practical, focused on helping
+patients recover while building long-term physical resilience.
 
 As a mother of three, Cheryl brings both professional expertise and personal insight to her
-work with women, children, and families. She understands how physical health, family life,
-recovery, and everyday demands often overlap, and offers continuity of care across different
+work with women, children, and families. She understands how physical health, family life
+and everyday demands often overlap, and offers continuity of care across different
 life stages.

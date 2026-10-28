@@ -1,9 +1,9 @@
 ---
 title: "Clinical Pilates"
 metaTitle: "Clinical Pilates in Singapore | Goji Physio"
-description: "Explore AHPC-registered physiotherapist-led Clinical Pilates at Goji in Lentor. Personalised 1:1 and 2:1 Pilates for strength, mobility and movement confidence."
+description: "AHPC-registered physiotherapist-led Clinical Pilates at Goji in Lentor. 1:1 and 2:1 Pilates for strength, mobility and movement confidence."
 cardTitle: "Clinical Pilates"
-cardLead: "Physiotherapist-led Pilates that combines clinical expertise with personalised exercise to build strength, improve mobility and move with greater confidence."
+cardLead: "Physiotherapist-led Pilates that combines clinical expertise with exercise adapted to you, to build strength and improve mobility."
 heroImage: "/photos/services/clinical-pilates.webp"
 heroAlt: "A Goji physiotherapist guiding two clients through a reformer Clinical Pilates session."
 category: "Holistic Care"
@@ -11,7 +11,7 @@ durationMin: 55
 priceClinic: 180
 clinicians: ["Cheryl Long", "Claire Ng"]
 bookingService: "clinical-pilates"
-closingCopy: "Ready to build strength and move with greater confidence? Book a session with our AHPC-registered physiotherapists, or speak to our team to find out whether Clinical Pilates is right for you."
+closingCopy: "Ready to start? Book a session with our AHPC-registered physiotherapists, or speak to our team to find out whether Clinical Pilates is right for you."
 faqs:
   - q: "What is Clinical Pilates?"
     a: "Clinical Pilates at Goji is a 55-minute Pilates session led by an AHPC-registered physiotherapist, in a private 1:1 or 2:1 setting at our Lentor clinic. Sessions use reformer or mat-based exercises adapted to your physical needs and goals, focusing on strength, mobility, balance and movement control."
@@ -29,9 +29,9 @@ order: 2
 draft: false
 ---
 
-Move with the guidance of an AHPC-registered physiotherapist. Clinical Pilates combines personalised, low-impact exercise with an understanding of movement, physical function and individual health considerations.
+Move with the guidance of an AHPC-registered physiotherapist. Clinical Pilates combines low-impact exercise with a physiotherapist's understanding of movement and physical function.
 
-Sessions are adapted to your goals and abilities, whether you're building strength, improving mobility or returning to regular exercise after rehabilitation.
+Sessions are adapted to your goals and abilities, for example building strength, improving mobility or returning to regular exercise after rehabilitation.
 
 ## Who is Clinical Pilates for?
 
@@ -52,7 +52,7 @@ Clinical Pilates is intended for individuals who are medically ready to exercise
 A typical session may include:
 
 - A brief check-in on your physical condition and exercise goals
-- A warm-up tailored to the planned exercises
+- A warm-up for the planned exercises
 - Reformer-based or mat-based Pilates exercises
 - Core, upper-body and lower-body strengthening
 - Mobility, balance and movement-control exercises
@@ -69,28 +69,28 @@ If you experience new pain or significant changes in your symptoms, your physiot
 
 You will receive:
 
-- Personalised guidance from an AHPC-registered physiotherapist
+- Guidance from an AHPC-registered physiotherapist
 - Exercises adapted to your physical abilities and goals
 - Attention to movement technique, breathing and alignment
-- Thoughtful modifications and progressions
-- A structured approach to improving strength, mobility and movement confidence
+- Modifications and progressions
+- A structured approach to improving strength and mobility
 
 ## Clinical Pilates vs. Private Pilates: What's the difference?
 
-At Goji, both Clinical Pilates and Private Pilates offer personalised, low-impact exercise in a private 1:1 or 2:1 setting. The difference lies in who guides your sessions and the type of expertise they bring.
+At Goji, both Clinical Pilates and Private Pilates offer low-impact exercise in a private 1:1 or 2:1 setting. The difference lies in who guides your sessions and the type of expertise they bring.
 
 Clinical Pilates is led by an AHPC-registered physiotherapist, making it suitable for individuals who prefer exercise guided by clinical knowledge, particularly when returning to activity after rehabilitation or exercising with specific physical considerations.
 
-Private Pilates, on the other hand, is led by a STOTT PILATES® certified instructor. It focuses on developing strength, flexibility, body awareness and movement confidence through a Pilates practice tailored to your abilities and fitness goals.
+Private Pilates is led by a STOTT PILATES® certified instructor. It focuses on developing strength, flexibility, body awareness and movement confidence through a Pilates practice built around your abilities and fitness goals.
 
 Neither service replaces physiotherapy assessment or treatment. If you're unsure which is right for you, our team can help you choose.
 
-[Explore Private Pilates →](/services/private-pilates/)
+[See Private Pilates →](/services/private-pilates/)
 
 ## Packages
 
 Clinical Pilates is available as a single a la carte session or in 5-session and 10-session packages.
 
-As part of the Goji experience, your package can be used interchangeably across Clinical Pilates and Strength & Conditioning sessions, allowing your exercise programme to evolve alongside your goals and needs.
+Your package can be used interchangeably across Clinical Pilates and Strength & Conditioning sessions, so your exercise programme can change as your goals do.
 
 Enquire today for package prices.
