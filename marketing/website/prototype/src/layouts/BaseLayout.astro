@@ -88,7 +88,7 @@ const footerMap = [
     links: [
       { href: isHome ? "#about" : "/#about", label: "About Goji" },
       { href: isHome ? "#team" : "/#team", label: "Our team" },
-      { href: "/media/", label: "Media" },
+      { href: "/press/", label: "Media" },
       { href: "/blog/", label: "Blog" },
       { href: "/physiotherapy-lentor/", label: "Physiotherapy in Lentor" },
       { href: "/book/", label: "Book an appointment" },
@@ -99,7 +99,7 @@ const nav = [
   { href: isHome ? "#about" : "/#about", label: "About" },
   { href: "/services/", label: "Services" },
   { href: "/conditions/", label: "Conditions" },
-  { href: "/media/", label: "Media" },
+  { href: "/press/", label: "Media" },
   { href: "/blog/", label: "Blog" },
   { href: isHome ? "#team" : "/#team", label: "Team" },
   { href: "/getting-here/", label: "Find us" },
@@ -138,7 +138,8 @@ const GADS_BOOKING_LABEL = import.meta.env.PUBLIC_GADS_BOOKING_LABEL;
     <meta name="description" content={description} />
     <link rel="canonical" href={canonicalURL.href} />
     {noindex && <meta name="robots" content="noindex" />}
-    <link rel="icon" type="image/png" href="/brand/logo_mark_transparent.png" />
+    <link rel="icon" type="image/png" sizes="96x96" href="/brand/favicon-96.png" />
+    <link rel="apple-touch-icon" href="/brand/apple-touch-icon.png" />
     <meta name="theme-color" content="#f7f2e0" />
 
     {/* First paint: preload the two faces above the fold so text paints in
@@ -636,7 +637,7 @@ const GADS_BOOKING_LABEL = import.meta.env.PUBLIC_GADS_BOOKING_LABEL;
         padding-block: var(--space-4);
         border-top: 1px solid color-mix(in srgb, var(--color-linen) 10%, transparent);
         font-size: var(--fs-caption);
-        color: color-mix(in srgb, var(--color-linen) 45%, transparent);
+        color: var(--text-on-dark-soft);
       }
       .site-footer__copyright a {
         color: inherit;
@@ -787,8 +788,26 @@ const GADS_BOOKING_LABEL = import.meta.env.PUBLIC_GADS_BOOKING_LABEL;
     <script>
       // Watercolour engine: paints data-gj-bloom / data-gj-wash / data-gj-veil
       // elements and reveals .gj-reveal / .gj-mark as they scroll into view.
+      // Starts after the load event, when the browser is idle: painting a
+      // page-long wash is a long task, and running it first held back the hero
+      // photo (LCP) by seconds on a mid-range phone.
       import "../scripts/goji-watercolor.js";
-      (window as unknown as { Goji: { enhance: () => void } }).Goji.enhance();
+      const enhance = () => (window as unknown as { Goji: { enhance: () => void } }).Goji.enhance();
+      const whenIdle = () =>
+        "requestIdleCallback" in window ? requestIdleCallback(enhance, { timeout: 2000 }) : setTimeout(enhance, 200);
+      if (document.readyState === "complete") whenIdle();
+      else window.addEventListener("load", whenIdle, { once: true });
+    </script>
+
+    <script>
+      // Paint the canvas burgundy once past halfway, so overscrolling at the
+      // bottom shows more footer, not linen (see html in base.css).
+      const root = document.documentElement;
+      const paintCanvas = () =>
+        root.classList.toggle("is-past-half", window.scrollY * 2 >= root.scrollHeight - window.innerHeight);
+      paintCanvas();
+      window.addEventListener("scroll", paintCanvas, { passive: true });
+      window.addEventListener("resize", paintCanvas, { passive: true });
     </script>
 
     <script>

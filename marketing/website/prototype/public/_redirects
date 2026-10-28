@@ -29,3 +29,8 @@
 # Old standalone pages now live as homepage sections.
 /about-us           /#about      301
 /team               /#team       301
+
+# The /media hub (Blog + Press) was retired: Blog has its own nav item and
+# "Media" now means press coverage.
+/media              /press/      301
+/media/             /press/      301

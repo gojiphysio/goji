@@ -23,6 +23,14 @@ body {
 html {
   -webkit-text-size-adjust: 100%;
   scroll-behavior: smooth;
+  /* The canvas shows past the page edge (overscroll bounce, short pages).
+     Linen at the top, footer burgundy once past halfway, so the footer looks
+     like it carries on instead of the page ground poking out. BaseLayout
+     toggles the class; body keeps its own linen background. */
+  background-color: var(--bg-page);
+}
+html.is-past-half {
+  background-color: var(--bg-closing);
 }
 
 body {

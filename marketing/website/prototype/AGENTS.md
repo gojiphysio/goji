@@ -26,8 +26,9 @@ so a token change reflows everything (styleguide is the QA surface).
   tokens. Type: Newsreader Medium (display optical size) for headings and
   large brand quotes; Figtree for everything else (body, buttons, nav, labels,
   prices). A heading under about 20px (FAQ question, card label) sets
-  `font-family: var(--font-body)` in SemiBold. Never italic. No uppercase
-  eyebrow labels on the home page.
+  `font-family: var(--font-body)` in SemiBold. Never italic. No eyebrow
+  labels above headings on any page (a label that repeats the H1 or the
+  section's own heading adds nothing); put needed info in the heading or meta line.
 - **No arches or round-topped frames** (they read as a tombstone in Asian
   culture). Photos use the petal frame (`components/watercolor/PetalPhoto.astro`).
 - **No WhatsApp green**, not even on the glyph; WhatsApp CTAs are brand red
@@ -40,7 +41,13 @@ so a token change reflows everything (styleguide is the QA surface).
   never let motion gate content or scrolling. Paintings start when a sliver is
   in view; on the site they run at `speed` 2.25-2.4 (`Bloom speed`,
   `data-speed`), with short `data-delay` steps, so a reader scrolling at normal
-  pace sees them grow.
+  pace sees them grow. `BaseLayout` starts the engine after `load`, when the
+  browser is idle: run first, the home page's page-long wash held the hero
+  photo (LCP) back by seconds. Page-local `data-reveal` scripts (getting-here,
+  postpartum) follow the same no-reveal-above-the-fold rule.
+- **Ship card-sized photos.** Blog cards use `<name>-800.webp` beside the full
+  photo when it exists (`cwebp -q 78 -resize 800 0 in.webp -o in-800.webp`);
+  make one when you add a post hero over ~60 KB. Lighthouse is the check.
 
 ## Hard rules (inherited from repo + marketing AGENTS.md)
 - **Every CTA is a tracked link.** Route through `go.gojiphysio.com/<slug>` via
@@ -132,6 +139,9 @@ so a token change reflows everything (styleguide is the QA surface).
   `## Frequently asked questions` with `### <question>` blocks — other
   heading levels (e.g. `####`) or bullet questions silently emit no FAQPage.
   The parser is shared (`src/lib/faq.ts`) — don't re-implement it per template.
+  The same section renders as the FAQ accordion via
+  `src/lib/rehype-faq-accordion.mjs` (markup and `src/styles/faq-list.css`
+  shared with `components/FaqList.astro`); answers keep their links.
 - **Every condition page carries a byline** via `reviewer: { name, slug }`
   frontmatter; the template renders "Reviewed by <name>" linking to
   `/team/<slug>` and emits `reviewedBy` in the MedicalWebPage JSON-LD.
@@ -215,11 +225,11 @@ Icons come from Tabler via `astro-icon` (`<Icon name="tabler:*" />`). When Table
 has no suitable glyph, drop a stroke-styled SVG into `src/icons/` and reference
 it by filename (`<Icon name="subway" />`) — don't pull in another icon set.
 
-## Media IA (/media, /blog, /press)
-One nav item, **Media**, fronts two children: `/blog` (what we write) and
-`/press` (what others write about us). They stay separate pages — different
-schema, different intent — but a single nav entry keeps the primary nav short
-on a phone. Breadcrumbs on all four pages read Home › Media › …
+## Blog and Media IA (/blog, /press)
+Two top-level nav items: **Blog** (`/blog`, what we write) and **Media**
+(`/press`, what others write about us). The old `/media` hub that fronted both
+was retired (it duplicated the two nav items) and 301s to `/press/`.
+Breadcrumbs read Home › Blog › … and Home › Media › … (Media = `/press/`).
 
 **Posts ship from the PR, not from Drive.** A draft post lands as a `.md`
 in `src/content/blog/` on a branch and the owner merges it with a "By the Goji

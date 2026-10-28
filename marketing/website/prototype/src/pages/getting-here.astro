@@ -49,8 +49,7 @@ const breadcrumbSchema = {
   {/* ---- Hero ---- */}
   <section class="gh-hero">
     <div class="container gh-hero__grid">
-      <div class="gh-hero__text" data-reveal>
-        <p class="eyebrow">Getting here</p>
+      <div class="gh-hero__text">
         <h1>Finding us at Lentor Modern</h1>
         <p class="gh-hero__lead">
           We're on the ground floor of Lentor Modern, next to
@@ -68,9 +67,11 @@ const breadcrumbSchema = {
         </div>
       </div>
 
-      <figure class="gh-photo gh-hero__photo" data-reveal>
+      <figure class="gh-photo gh-hero__photo">
         <img
           src="/photos/directions/exterior-frontage.webp"
+          srcset="/photos/directions/exterior-frontage-800.webp 800w, /photos/directions/exterior-frontage.webp 1600w"
+          sizes="(min-width: 900px) 50vw, 100vw"
           alt="Entrance to Goji Women's and Family Physiotherapy on the ground floor of Lentor Modern, next to Burger King and beside the Lentor Drive pick-up point"
           width="1600"
           height="1173"
@@ -104,7 +105,6 @@ const breadcrumbSchema = {
   {/* ---- Map ---- */}
   <Section tone="surface">
     <div class="gh-block-head" data-reveal>
-      <p class="eyebrow">On the map</p>
       <h2>Lentor Modern, beside Lentor MRT</h2>
     </div>
     {/*
@@ -196,7 +196,6 @@ const breadcrumbSchema = {
       <div class="gh-mode__head">
         <span class="gh-mode__icon" aria-hidden="true"><Icon name="subway" width={24} height={24} /></span>
         <div>
-          <p class="eyebrow">By MRT</p>
           <h2>A 1-minute walk from Lentor MRT</h2>
         </div>
       </div>
@@ -223,7 +222,6 @@ const breadcrumbSchema = {
       <div class="gh-mode__head">
         <span class="gh-mode__icon" aria-hidden="true"><Icon name="tabler:steering-wheel" width={24} height={24} /></span>
         <div>
-          <p class="eyebrow">By car</p>
           <h2>Basement parking at Lentor Modern</h2>
         </div>
       </div>
@@ -270,8 +268,7 @@ const breadcrumbSchema = {
       <div class="gh-mode__head">
         <span class="gh-mode__icon" aria-hidden="true"><Icon name="tabler:car" width={24} height={24} /></span>
         <div>
-          <p class="eyebrow">By taxi or Grab</p>
-          <h2>Two drop-off points, both sheltered</h2>
+          <h2>Taxi or Grab: two sheltered drop-off points</h2>
         </div>
       </div>
 

@@ -1,6 +1,7 @@
 ---
 import { getCollection } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import FaqList from "../../components/FaqList.astro";
 import Section from "../../components/Section.astro";
 import Button from "../../components/Button.astro";
 import { clinicRef } from "../../lib/schema.ts";
@@ -118,7 +119,6 @@ if (faqs?.length) {
           </svg>
           All services
         </a>
-        <p class="svc-hero__eyebrow">{category}</p>
         <h1>{cardTitle ?? title}</h1>
         <p class="svc-hero__lead">{cardLead}</p>
         <div class="svc-hero__cta">
@@ -170,12 +170,7 @@ if (faqs?.length) {
           {/* Visible twin of the FAQPage JSON-LD above: structured data must
               match on-page content, so the two always render from `faqs`. */}
           <h2 id="svc-faqs-heading">Frequently asked questions</h2>
-          {faqs.map((f) => (
-            <details class="svc-faq">
-              <summary>{f.q}</summary>
-              <p>{f.a}</p>
-            </details>
-          ))}
+          <FaqList items={faqs} />
         </section>
       ) : null}
     </div>
@@ -229,13 +224,6 @@ if (faqs?.length) {
     margin-bottom: var(--space-2);
   }
   .svc-hero__back:hover { color: var(--color-primary); }
-  .svc-hero__eyebrow {
-    font-size: var(--fs-caption);
-    font-weight: var(--weight-semibold);
-    letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
-    color: var(--color-primary);
-  }
   .svc-hero__text h1 {
     margin: 0;
   }
@@ -326,20 +314,6 @@ if (faqs?.length) {
     margin-bottom: var(--space-3);
   }
   .svc-body :global(h2:first-child) { margin-top: 0; }
-  .svc-faq {
-    border-top: 1px solid var(--color-border);
-    padding-block: var(--space-3);
-  }
-  .svc-faq:last-of-type { border-bottom: 1px solid var(--color-border); }
-  .svc-faq summary {
-    cursor: pointer;
-    font-weight: var(--weight-semibold);
-    color: var(--text-default);
-  }
-  .svc-faq p {
-    margin-top: var(--space-3);
-    margin-bottom: var(--space-2);
-  }
   .svc-body :global(h3) {
     margin-top: var(--space-5);
     margin-bottom: var(--space-2);

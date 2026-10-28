@@ -4,6 +4,7 @@ import fs from "node:fs";
 import { defineConfig } from "astro/config";
 import icon from "astro-icon";
 import sitemap from "@astrojs/sitemap";
+import rehypeFaqAccordion from "./src/lib/rehype-faq-accordion.mjs";
 
 // While the blog has no published posts, /blog renders a `noindex` "Coming
 // soon" placeholder (see src/pages/blog/index.astro). Listing a noindexed URL
@@ -75,6 +76,8 @@ export default defineConfig({
   // Our CSS is small (~18 KB across all bundles), so inline it rather than
   // make the first paint wait on separate stylesheet requests (mobile LCP).
   build: { inlineStylesheets: "always" },
+  // Markdown FAQ sections render as the site's FAQ accordion.
+  markdown: { rehypePlugins: [rehypeFaqAccordion] },
   integrations: [
     icon(),
     // Generates /sitemap-index.xml; keep the internal styleguide and the
