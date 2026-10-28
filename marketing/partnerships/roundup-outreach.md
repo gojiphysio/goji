@@ -28,13 +28,13 @@ The monthly SEO audit counts the "live" rows.
 | Expat Living | Roundup cited by Claude (audit 2026-10-12) | Sent (before 28 Oct 2026) | |
 | Sassy Mama | Pelvic floor experts roundup | Sent (before 28 Oct 2026) | |
 | Women's Weekly | Roundup cited by Claude (audit 2026-10-12) | Sent (before 28 Oct 2026) | |
-| Homage | [Best Physiotherapy Clinics for Women's Health Issues in Singapore](https://www.homage.sg/resources/physiotherapy-clinics-women-singapore/) | Draft below, not sent | #2 on "women's physio singapore"; cited by Google AIO and logged-out ChatGPT |
+| Homage | [Best Physiotherapy Clinics for Women's Health Issues in Singapore](https://www.homage.sg/resources/physiotherapy-clinics-women-singapore/) | Sent 28 Oct 2026 | #2 on "women's physio singapore"; cited by Google AIO and logged-out ChatGPT |
 
 ## Homage pitch
 
 Homage also sells home physiotherapy, so lead with the clinic's women's-health
-focus and offer expert input rather than our home visits. Find the editor or
-content contact on the article or homage.sg's contact page before sending.
+focus and offer expert input rather than our home visits. Sent from
+hello@gojiphysio.com on 28 Oct 2026; the text below is what went out.
 
 Subject: Women's health physiotherapy clinic in Lentor for your Singapore guide
 
