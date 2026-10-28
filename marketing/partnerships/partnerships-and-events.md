@@ -37,7 +37,7 @@ Target: 4-5 intros out by end of month 1; 2-3 live agreements by end of month 2;
 
 ## Editorial round-ups (credibility, not paid)
 
-Pursue listings in: Sassy Mama SG, HoneyKids Asia, Little Steps Asia ("best postnatal physio / pelvic-floor expert" round-ups). These are editorial - we can be included and pitch our expertise, but we cannot pay for a "best" endorsement (compliance + credibility). Pitch angle: a practitioner available for expert commentary on women's-health topics.
+Pursue listings in: Sassy Mama SG, HoneyKids Asia, Little Steps Asia ("best postnatal physio / pelvic-floor expert" round-ups). These are editorial - we can be included and pitch our expertise, but we cannot pay for a "best" endorsement (compliance + credibility). Pitch angle: a practitioner available for expert commentary on women's-health topics. Tracker and drafts: `roundup-outreach.md`.
 
 ## Workshops (trust at scale)
 
