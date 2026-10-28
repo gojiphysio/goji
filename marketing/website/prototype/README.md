@@ -10,7 +10,7 @@ Two pages to look at:
 
 ```bash
 cd marketing/website/prototype
-npm install
+npm ci
 npm run dev          # http://localhost:4321  (hot reload — edit and see instantly)
 ```
 

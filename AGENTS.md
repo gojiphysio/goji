@@ -32,6 +32,9 @@ you're working in (`scripts/dashboard/`, `scripts/ingestion/`, `marketing/`).
   use the internal `dashboard.*` domain.
 - **Branch & PR.** Develop on a feature branch and open a PR to `main`. **Never
   push directly to `main`** — deploys run from `main` via GitHub Actions.
+  PRs get merged mid-session: run `gh pr view N --json state` before pushing
+  follow-ups, and if it is merged, branch from `origin/main` for a new PR
+  (commits pushed to a merged branch never ship; hit on #183 and #189).
 - **SQL is idempotent.** Every `.sql` is `CREATE OR REPLACE` (views) or
   `CREATE TABLE IF NOT EXISTS` (tables); `deploy_all.sh` re-runs them safely.
 - **Least privilege.** The dashboard service account is read-only on BigQuery
