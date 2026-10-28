@@ -43,6 +43,10 @@ def get(url: str) -> tuple[int, str]:
             return r.status, r.read().decode("utf-8", "replace")
     except urllib.error.HTTPError as e:
         return e.code, ""
+    except (urllib.error.URLError, TimeoutError) as e:
+        # One slow page shouldn't fail the run; status 0 means "skip it today".
+        print(f"warn: {url}: {e}")
+        return 0, ""
 
 
 def sitemap_entries() -> list[tuple[str, datetime | None]]:
@@ -75,7 +79,7 @@ def main() -> int:
     live = [u for u in dict.fromkeys(urls) if get(u)[0] == 200]
     skipped = sorted(set(urls) - set(live))
     for u in skipped:
-        print(f"skip (not 200 yet): {u}")
+        print(f"skip (not 200 or timed out): {u}")
     if not live:
         print(f"Nothing changed in the last {args.days:g} days.")
         return 0
