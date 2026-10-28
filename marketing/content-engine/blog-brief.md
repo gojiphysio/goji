@@ -35,14 +35,18 @@ Authors (`/team/<slug>`): `cheryl-long` (Clinical Director), `kristy-ng`,
 `claire-ng` (Senior Physiotherapists), `camille-tan` (Pilates instructor; Lane B
 topics only).
 
-Who has to approve a post (decision 2026-10-27, to spare Cheryl's time):
+Who has to approve a post (decision 2026-10-28: the Goji team publishes
+without waiting on clinical sign-off, so posts ship at the plan's pace):
 
-| Post type | Approval | Byline |
+| Post type | Before it goes live | Byline |
 |---|---|---|
 | Clinic news, event recaps, local guides, "what to expect" | None: the owner merges | Omit `author`: "By the Goji team" |
-| Clinical advice (symptoms, exercises, red flags, treatment) | Any AHPC-registered physio on the team signs off | That physio, plus `reviewer:` |
+| Clinical advice (symptoms, exercises, red flags, treatment) | The owner merges once the accuracy and compliance rules below are met. A physio reviews after it is live (queue in `../seo/blog-plan.md`) | "By the Goji team" until a physio has read it; then that physio as `reviewer:` |
 
-Never put a clinician's name on a post they haven't read.
+Never put a clinician's name on a post they haven't read. Because clinical
+posts can now go live unreviewed, the accuracy rules below are the safety net:
+every clinical claim sourced to a primary guideline or paper, nothing stronger
+than the source says, and red flags pointing to a doctor.
 
 ## Shape (what wins citations in the 2026-10 audits)
 
@@ -118,7 +122,8 @@ important to note", "in today's world". Short paragraphs.
 `npm run build && python3 ../../seo/tools/check_dist.py` passes; grep the post
 for `—`, `–` and the banned words.
 
-A post goes live as soon as Cheryl approves it, with no holding back for a
-cadence. In the sign-off commit, add `reviewer:` and set `pubDate` to the day
-it merges. `pubDate` is when the post went live (it is `datePublished` in the
+A post goes live as soon as the owner merges it, with no holding back for a
+cadence. Set `pubDate` to the day it merges. When a physio later reviews a
+live clinical post, their commit adds `reviewer:` and any corrections, and
+removes the post from the review queue (`pubDate` stays). `pubDate` is when the post went live (it is `datePublished` in the
 schema): never backdate it to an event date. The recap text carries that.

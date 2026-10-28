@@ -11,15 +11,16 @@ rules in `../strategy/03-compliance-guardrails.md`; site rules in
 Hard rule, above every metric: the loop never invents, strengthens or extends
 a clinical claim. A tier A edit may only **restate** what the site already
 says (copy Cheryl has reviewed): shorter, clearer, better structured. New
-facts, numbers, timeframes, outcomes, conditions or services are tier B and
-wait for clinical review. When unsure, it is tier B.
+facts, numbers, timeframes, outcomes, conditions or services are tier B: the
+loop never self-merges them, and each must be sourced per
+`../content-engine/blog-brief.md`. When unsure, it is tier B.
 
 ## Approval tiers (enforced by `tools/tier_gate.py` in CI)
 
 | Tier | What | Who merges |
 |---|---|---|
 | **A** | Meta titles/descriptions, H1s, JSON-LD (`src/lib/schema.ts` + page schema), internal links, `llms.txt` sync, image weight/alt, rewording reviewed copy, audit outputs | The loop, after all checks pass |
-| **B** | New pages or blog posts, new numeric/time claims, compliance-lint hits, `reviewer`/`lastReviewed` changes | Cheryl reviews, owner merges |
+| **B** | New pages or blog posts, new numeric/time claims, compliance-lint hits, `reviewer`/`lastReviewed` changes | Owner merges; a physio reviews after it ships (decision 2026-10-28; queue in `blog-plan.md`) |
 | **C** | `/book` and booking code, CTAs/`links.ts`, prices, NAP/hours (`site.ts`), `_redirects`, `robots.txt`, `astro.config`, layouts (analytics beacon), CI, this file, `tools/` | Owner |
 
 - The loop labels a PR `tier-a` only when it intends to self-merge. The

@@ -21,8 +21,22 @@ per cluster): `seo-geo-review.md` §3. Every target query goes into
 - **Every event gets a post** within two weeks: a short recap restating only
   what Goji published (Luma page, our Instagram caption), then our own
   explainer on the topic. The explainer is the part that ranks.
-- **Clinical review is the bottleneck.** Every clinical post is Cheryl-reviewed
-  before merge (tier B). Batch reviews; don't let drafts sit for months.
+- **Clinical review happens after publishing** (decision 2026-10-28). The
+  owner merges clinical posts that meet the brief's accuracy rules; a physio
+  reviews them live and adds `reviewer:`. Fix any error they find the same
+  day.
+
+## Clinical review queue (live, not yet read by a physio)
+
+| Post | Live since |
+|---|---|
+| `/blog/is-leaking-after-birth-normal/` | 2026-10-28 |
+| `/blog/pelvic-floor-exercises-after-birth/` | 2026-10-28 |
+| `/blog/postpartum-recovery-checklist/` | 2026-10-28 |
+| `/blog/returning-to-exercise-after-birth/` | 2026-10-28 |
+| `/blog/diastasis-recti-physio-or-surgery/` | 2026-10-27 |
+| `/blog/exercise-for-osteoporosis/` | 2026-10-27 |
+| `/blog/preparing-your-body-for-pregnancy/` | 2026-10-27 |
 - Instagram reels become posts only when they teach something; team and
   lifestyle reels don't.
 
