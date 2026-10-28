@@ -1,4 +1,4 @@
-# Goji website — design-system prototype
+# Goji website
 
 Astro project that turns the Goji brand brief into real, reusable components.
 Two pages to look at:
@@ -9,7 +9,7 @@ Two pages to look at:
 ## Run locally
 
 ```bash
-cd marketing/website/prototype
+cd marketing/website
 npm ci
 npm run dev          # http://localhost:4321  (hot reload — edit and see instantly)
 ```

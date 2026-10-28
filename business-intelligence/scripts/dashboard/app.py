@@ -1970,7 +1970,7 @@ ORDER BY sessions DESC
 # pageview, not just the session's first landing. This CASE turns raw paths into
 # a small, stable set of pages so "Website" splits into Home / Booking /
 # Conditions / … instead of one vague surface. Keep buckets in sync with the
-# site's route tree (marketing/website/prototype/src/pages).
+# site's route tree (marketing/website/src/pages).
 _WEB_PAGE_CASE_SQL = """
 CASE
   WHEN landing_path = '/' OR landing_path = '' OR landing_path IS NULL THEN 'Home'

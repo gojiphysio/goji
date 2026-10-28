@@ -34,7 +34,7 @@ See `strategy/01-campaign-strategy.md` for the full funnel and leading indicator
 |   |-- google-ads-campaign-plan.md    The live Google Ads campaign spec (launch-ready).
 |   `-- google-ads-playbook.md         Beginner how-to for the Ads UI.
 |-- website/
-|   `-- prototype/                     The LIVE production site (Astro, Cloudflare Pages).
+|   `-- (site)                         The LIVE production site (Astro, Cloudflare Pages).
 |-- design-system/
 |   `-- design-system-brief.md         Brief for Claude Design app (brand tokens, components).
 |-- assets/

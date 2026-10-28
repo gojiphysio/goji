@@ -10,7 +10,7 @@ import unittest
 from pathlib import Path
 
 GATE = Path(__file__).resolve().parent / "tier_gate.py"
-SITE = "marketing/website/prototype/"
+SITE = "marketing/website/"
 COND = SITE + "src/content/conditions/diastasis-recti.md"
 BASE_FILES = {
     COND: "---\ndescription: Old description.\nreviewer: { name: Cheryl Long, slug: cheryl-long }\n---\nBody text about the abdominal wall.\n",

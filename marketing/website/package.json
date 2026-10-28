@@ -1,9 +1,9 @@
 {
-  "name": "goji-website-prototype",
+  "name": "goji-website",
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Design-system prototype for the Goji Health website (Astro, Cloudflare Pages-bound).",
+  "description": "Goji Health public website (Astro, Cloudflare Pages).",
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",

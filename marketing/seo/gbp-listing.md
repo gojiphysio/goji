@@ -1,7 +1,7 @@
 # Google Business Profile — source of truth
 
 The checked-in canonical for Goji's GBP listing. **NAP here must stay
-byte-identical** with the site's structured data ([`site.ts`](../website/prototype/src/lib/site.ts))
+byte-identical** with the site's structured data ([`site.ts`](../website/src/lib/site.ts))
 and every external citation — diff against this when auditing NAP consistency.
 Task list / cadence: `../strategy/05-30-day-campaigns.md` (Campaign 2).
 Compliance floor for all copy below: `../strategy/03-compliance-guardrails.md`.

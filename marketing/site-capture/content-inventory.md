@@ -1,9 +1,9 @@
 # Goji Physiotherapy — Squarespace Site Content Inventory (historical)
 
 > **HISTORICAL SNAPSHOT — the Squarespace site is deprecated.** The live site
-> is now the Astro build in `../website/prototype/` (gojiphysio.com, Cloudflare
+> is now the Astro build in `../website/` (gojiphysio.com, Cloudflare
 > Pages). This capture is kept as the content-porting record and the source of
-> the old-URL → new-URL 301 map (`../website/prototype/public/_redirects`).
+> the old-URL → new-URL 301 map (`../website/public/_redirects`).
 
 Captured 2026-05-30 from the then-live Squarespace site (gojiphysio.com). This
 is the verbatim copy, structure, and asset list of that site — nothing here is

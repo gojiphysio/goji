@@ -2,7 +2,7 @@
  * Site-wide JSON-LD, rendered on every page by BaseLayout.
  *
  * Lives here rather than in BaseLayout so the SEO loop can improve structured
- * data (a Tier A change, see ../../../../seo/AGENTS.md) without touching the
+ * data (a Tier A change, see ../../../seo/AGENTS.md) without touching the
  * layout, which also carries the analytics beacon and booking wiring (Tier C).
  */
 import { SITE } from "./site.ts";

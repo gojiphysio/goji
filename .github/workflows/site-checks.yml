@@ -10,7 +10,7 @@ name: Site checks
 on:
   pull_request:
     paths:
-      - "marketing/website/prototype/**"
+      - "marketing/website/**"
       - "marketing/seo/**"
       - ".github/workflows/site-checks.yml"
   schedule:
@@ -28,11 +28,11 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version-file: marketing/website/prototype/.nvmrc
+          node-version-file: marketing/website/.nvmrc
           cache: npm
-          cache-dependency-path: marketing/website/prototype/package-lock.json
+          cache-dependency-path: marketing/website/package-lock.json
       - name: Build
-        working-directory: marketing/website/prototype
+        working-directory: marketing/website
         run: npm ci && npm run build
       - name: Static checks
         run: python3 marketing/seo/tools/check_dist.py
