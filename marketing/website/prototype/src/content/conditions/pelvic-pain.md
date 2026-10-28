@@ -50,7 +50,7 @@ A physical assessment, when you are ready for it, may include:
 
 - Musculoskeletal screen: lumbar spine, hip, SI joint, and coccyx, as pain in these regions can refer into the pelvis
 
-Treatment will depend on what the assessment reveals, and is always tailored to your presentation. It may include manual therapy, pelvic floor relaxation techniques, neurosensory retraining, and progressive load management. There is no expectation of rapid progress - pelvic pain often responds gradually, and the plan will be adjusted accordingly.
+Treatment will depend on what the assessment reveals. It may include manual therapy, pelvic floor relaxation techniques, neurosensory retraining, and progressive load management. There is no expectation of rapid progress - pelvic pain often responds gradually, and the plan will be adjusted accordingly.
 
 ## Is pelvic pain "in my head"?
 

@@ -13,7 +13,7 @@ draft: false
 relatedServices: ["postpartum-physiotherapy"]
 ---
 
-Blocked milk ducts and mastitis are painful and common challenges during breastfeeding. Physiotherapy - specifically therapeutic ultrasound and hands-on breast massage - is an evidence-supported adjunct for resolving blocked ducts and supporting recovery from mastitis. This is not a substitute for medical care or lactation support, but it is a meaningful complement to it.
+Blocked milk ducts and mastitis are painful and common challenges during breastfeeding. Physiotherapy - specifically therapeutic ultrasound and hands-on breast massage - is an evidence-supported adjunct for resolving blocked ducts and supporting recovery from mastitis. This is not a substitute for medical care or lactation support.
 
 ## What causes blocked ducts and mastitis?
 
@@ -23,7 +23,7 @@ Mastitis is an inflammatory condition of the breast tissue - it may or may not b
 
 ## How can physiotherapy help with blocked ducts?
 
-Therapeutic ultrasound uses sound wave energy to generate gentle mechanical vibration in the breast tissue. There is evidence supporting that this can help to break up blocked ducts, improve local circulation, and reduce inflammation - when applied correctly by a trained physiotherapist. This is different from the "ultrasound" imaging used in scans; therapeutic ultrasound is a treatment modality.
+Therapeutic ultrasound uses sound wave energy to generate gentle mechanical vibration in the breast tissue. There is evidence that this can help to break up blocked ducts, improve local circulation, and reduce inflammation - when applied correctly by a trained physiotherapist. This is different from the "ultrasound" imaging used in scans; therapeutic ultrasound is a treatment modality.
 
 Physiotherapy for blocked ducts may also include:
 
@@ -39,7 +39,7 @@ Physiotherapy works best alongside - not instead of - input from a lactation con
 
 Our physiotherapist will take a history of your symptoms - duration, feeding pattern, any previous episodes, and whether you have had any medical assessment. A clinical assessment of the affected area will be done. Therapeutic ultrasound treatment is typically around 5-10 minutes per affected area, applied through appropriate coupling gel, and is not painful.
 
-You are welcome to continue feeding or pumping before and after the session. Most women find a session comfortable and manageable with a newborn in tow - there is space at Goji for you to feed during or between treatment elements if needed.
+You are welcome to continue feeding or pumping before and after the session. Most women find a session comfortable. There is space at Goji for you to feed during or between treatment elements if needed.
 
 One to three sessions are typically needed for a straightforward blocked duct; mastitis recovery may require more. Our physiotherapist will give you a realistic expectation at your first appointment.
 

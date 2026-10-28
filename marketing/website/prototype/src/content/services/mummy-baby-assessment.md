@@ -18,7 +18,7 @@ faqs:
   - q: "What does the baby's assessment cover?"
     a: "Your physiotherapist reviews your baby's movement and early motor development - how they move, hold their head, roll and progress towards their milestones - and answers your questions about positioning, tummy time and play. It is designed to be comfortable for your baby and informative for you."
   - q: "What happens if the assessment picks something up?"
-    a: "You will get a plain-language explanation of what was observed, a home plan where appropriate, and honest guidance on whether follow-up physiotherapy or a review by a paediatrician is worth considering. Most findings are things you can work on through positioning and play."
+    a: "You will get a plain-language explanation of what was observed, a home plan where appropriate, and guidance on whether follow-up physiotherapy or a review by a paediatrician is worth considering. Most findings are things you can work on through positioning and play."
 order: 3
 draft: false
 ---
@@ -27,9 +27,9 @@ draft: false
 
 Our Mummy & Baby Assessment brings together postpartum physiotherapy for you and a developmental assessment for your baby, all in one visit.
 
-From your recovery after childbirth to your baby's early movement milestones, we're here to help you understand how you're both doing and what support may be helpful.
+From your recovery after childbirth to your baby's early movement milestones, we help you understand how you are both doing and what support may help.
 
-Note: The assessment and treatment described below are indicative. Your session will be tailored to you and your baby's individual needs and goals, and may be modified by your physiotherapist based on their clinical judgement.
+Note: The assessment and treatment described below are indicative. Your session will reflect you and your baby's individual needs and goals, and may be modified by your physiotherapist based on their clinical judgement.
 
 ## Who is the Mummy and Baby Assessment for?
 
@@ -86,7 +86,7 @@ Any internal pelvic floor examination will be explained beforehand and is entire
 You will receive:
 
 - A clear explanation of your assessment findings
-- A personalised plan for your postpartum recovery
+- A plan for your postpartum recovery
 - Advice on core coordination, daily movement and return to exercise
 - Positioning and handling guidance for your baby
 - Tummy time and play recommendations

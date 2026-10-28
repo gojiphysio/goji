@@ -1,7 +1,7 @@
 ---
 title: "Persistent and Recurrent Pain"
 seoTitle: "Chronic Pain & Arthritis Physio Singapore"
-description: "Pain that keeps coming back, or arthritis-related joint pain? Goji's physiotherapists build a personalised plan in Lentor, Singapore. AHPC-registered."
+description: "Pain that keeps coming back, or arthritis-related joint pain? Goji's physiotherapists build a plan in Lentor, Singapore. AHPC-registered."
 cardTitle: "Persistent and Recurrent Pain"
 cardLead: "Pain that lingers or keeps returning, including arthritis-related joint pain, with a graded plan that rebuilds capacity and confidence."
 category: "Musculoskeletal & Sports"
@@ -24,7 +24,7 @@ In the early stages, pain usually reflects tissue injury or irritation. When pai
 - Sleep, stress, and general activity levels
 - Previous episodes that were never fully rehabilitated
 
-Understanding that persistent pain is real - and influenced by more than tissue damage - is an important first step, and it opens up more ways to help.
+Understanding that persistent pain is real - and influenced by more than tissue damage - is an important first step.
 
 ## What kinds of persistent pain does physiotherapy help with?
 
@@ -76,7 +76,7 @@ Scans often show normal age-related changes that do not explain persistent pain 
 
 ### How long will it take to improve?
 
-This varies from person to person and depends on how long the pain has been present and the factors involved. Rather than a fixed timeline, your physiotherapist will set meaningful milestones and adjust the plan as your capacity builds.
+This varies from person to person and depends on how long the pain has been present and the factors involved. Rather than a fixed timeline, your physiotherapist will set milestones and adjust the plan as your capacity builds.
 
 ### Can old injuries that keep flaring up be helped?
 

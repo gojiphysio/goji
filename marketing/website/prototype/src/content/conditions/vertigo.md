@@ -39,7 +39,7 @@ Your physiotherapist will take a detailed history of your symptoms - what trigge
 - Balance and gait testing: how steady you are standing and walking
 - Screening: checking for features that would prompt onward medical referral
 
-You will leave with an explanation of what is likely causing your vertigo and, where appropriate, treatment or an individualised exercise programme.
+You will leave with an explanation of what is likely causing your vertigo and, where appropriate, treatment or an exercise programme.
 
 ## How is vertigo treated?
 

@@ -3,7 +3,7 @@ title: "Chronic Venous Insufficiency (CVI)"
 seoTitle: "Venous Insufficiency Physio Singapore"
 description: "Aching, heavy, swollen legs from chronic venous insufficiency? Goji's physiotherapists support CVI care with exercise and compression in Lentor, Singapore."
 cardTitle: "Chronic Venous Insufficiency (CVI)"
-cardLead: "Supportive care for aching, heavy or swollen legs from weak vein valves, using compression, calf-pump exercise and skin care alongside medical care."
+cardLead: "Care for aching, heavy or swollen legs from weak vein valves, using compression, calf-pump exercise and skin care alongside medical care."
 category: "Lymphatic Health"
 reviewer:
   name: "Claire Ng"
@@ -13,7 +13,7 @@ order: 5
 draft: false
 ---
 
-Chronic venous insufficiency (CVI) develops when the veins in the legs struggle to return blood back to the heart efficiently, often because the small valves inside the veins are not working well. Blood can then pool in the lower legs, leading to swelling, aching, heaviness, and skin changes over time. While CVI is managed medically, physiotherapy at Goji Physio in Lentor, Singapore plays a valuable supporting role - using compression, exercise, and self-management strategies to improve circulation, reduce swelling, and help your legs feel and move better.
+Chronic venous insufficiency (CVI) develops when the veins in the legs struggle to return blood back to the heart efficiently, often because the small valves inside the veins are not working well. Blood can then pool in the lower legs, leading to swelling, aching, heaviness, and skin changes over time. While CVI is managed medically, physiotherapy at Goji Physio in Lentor, Singapore plays a supporting role - using compression, exercise, and self-management strategies to improve circulation, reduce swelling, and help your legs feel and move better.
 
 ## What causes and contributes to CVI?
 
@@ -41,12 +41,12 @@ Any leg wound that is not healing, or sudden painful swelling in one leg, should
 
 ## What does a session at Goji involve?
 
-Your physiotherapist will take a detailed history of your symptoms, medical history, and activity levels, followed by a comprehensive lymphoedema assessment. Your first session will include:
+Your physiotherapist will take a detailed history of your symptoms, medical history, and activity levels, followed by a full lymphoedema assessment. Your first session will include:
 
 - Detailed leg measurements: measuring both legs at multiple points to establish a baseline and assess the extent and distribution of swelling.
 - Swelling and skin assessment: evaluating swelling patterns, skin condition, and tissue changes.
 - Functional assessment: assessing mobility and calf-muscle pump function.
-- Individualised treatment plan: developing a personalised management plan based on your assessment findings and goals.
+- Individualised treatment plan: developing a management plan based on your assessment findings and goals.
 
 From your second session onwards, treatment may include manual lymphatic drainage (MLD), compression bandaging, and advice on ongoing lymphoedema management, as appropriate.
 

@@ -26,7 +26,7 @@ specialties:
     description: "Assessment and treatment of dizziness, vertigo, and balance disorders."
 approach: >
   Claire takes time to understand your symptoms, goals, lifestyle, and the activities you
-  want to return to. Her care is practical and personalised, combining clear clinical
+  want to return to. Her care is practical, combining clear clinical
   reasoning with movement-based rehabilitation so that each session helps you understand
   what is happening and what to do next. Where appropriate, Claire may include hands-on
   treatment, pelvic floor rehabilitation, Manual Lymphatic Drainage, Clinical Pilates,
@@ -71,7 +71,7 @@ rehabilitation, pregnancy and postpartum care, musculoskeletal rehabilitation, l
 management, vestibular rehabilitation, and Clinical Pilates.
 
 Her work is grounded in a simple belief: that every person deserves the physical capacity to
-meet the demands of daily life, not just to recover, but to move with confidence and thrive.
+meet the demands of daily life, beyond recovery alone.
 She supports patients through a wide range of concerns, from pregnancy-related aches and
 postnatal recovery to sports injuries, persistent pain, swelling management, dizziness,
 balance concerns, and return to activity.
@@ -81,7 +81,7 @@ for four years at Changi General Hospital under the MOH Scholarship Programme, w
 developed broad clinical competencies across orthopaedics, neurology, geriatrics, and
 respiratory care before moving into private practice.
 
-Her sessions are thoughtful, practical, and movement-centred. Claire combines targeted
+Her sessions are practical and movement-centred. Claire combines targeted
 exercise, movement education, hands-on care, and Clinical Pilates to help patients understand
 their bodies, recover well, and build the strength and confidence to return to what matters to
 them.

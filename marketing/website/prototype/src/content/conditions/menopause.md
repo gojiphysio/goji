@@ -56,7 +56,7 @@ From this, a programme will be designed that is specific to you - not a generic 
 
 ### I have been told I have osteopenia. What exercise should I be doing?
 
-Osteopenia (low bone density that has not yet reached the threshold for osteoporosis) is a common finding in perimenopausal and postmenopausal women. The evidence supports a combination of weight-bearing impact exercise (e.g. jumping, jogging, stair climbing) and progressive resistance training. The specific programme should be tailored to your bone density, fitness, and any joint or mobility limitations. Our physiotherapist will design this for you following assessment.
+Osteopenia (low bone density that has not yet reached the threshold for osteoporosis) is a common finding in perimenopausal and postmenopausal women. The evidence supports a combination of weight-bearing impact exercise (e.g. jumping, jogging, stair climbing) and progressive resistance training. The specific programme should fit your bone density, fitness, and any joint or mobility limitations. Our physiotherapist will design this for you following assessment.
 
 ### Is it too late to improve bone density after menopause?
 

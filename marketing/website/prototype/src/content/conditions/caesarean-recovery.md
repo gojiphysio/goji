@@ -17,7 +17,7 @@ A Caesarean birth involves surgery through the abdominal wall and uterus. Recove
 
 ## What happens physically after a C-section?
 
-In the immediate postoperative period, the priority is pain management and early, gentle mobilisation. Walking short distances within 24 hours of surgery is typically encouraged by the ward team, and this is appropriate. What many women are not prepared for is what happens over the following weeks and months:
+In the immediate postoperative period, the priority is pain management and early, gentle mobilisation. Walking short distances within 24 hours of surgery is typically encouraged by the ward team, and this is appropriate. Over the following weeks and months, further changes develop:
 
 - Scar tissue formation: the body lays down collagen fibres during healing. These fibres are not as organised as the original tissue and can cause the scar to feel tight, numb, hypersensitive, or raised. Internal adhesions can form between the scar and the bladder, uterus, or fascia, sometimes causing a pulling sensation with certain movements or a visible overhang above the scar ("shelf" or "ledge").
 
@@ -39,7 +39,7 @@ Scar management is typically introduced from around 6-8 weeks post-surgery, once
 
 - Patient-led massage technique: our physiotherapist will teach you a technique to continue at home as part of your daily routine
 
-Scar management is not only cosmetic - it is functional. An immobile scar can contribute to bladder symptoms, pelvic floor dysfunction, diastasis recti, and pain with movement.
+Scar management is functional as well as cosmetic. An immobile scar can contribute to bladder symptoms, pelvic floor dysfunction, diastasis recti, and pain with movement.
 
 ## What does a full postnatal assessment look like?
 
@@ -53,7 +53,7 @@ Your first session begins with a conversation about your birth experience, your 
 
 - Movement and load advice: what is safe to start, and what to introduce progressively
 
-You will leave with a structured plan that takes your specific surgery, recovery, and goals into account.
+You will leave with a structured plan based on your surgery, recovery, and goals.
 
 ## Frequently asked questions
 

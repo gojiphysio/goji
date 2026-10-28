@@ -24,7 +24,7 @@ The principles of Schroth include:
 - Three-dimensional correction: exercises are designed to address the lateral deviation, rotation, and sagittal plane changes of the scoliotic spine simultaneously
 - Rotational angular breathing (RAB): using breathing to expand the concave side of the rib cage and derotate the spine - a central and unique feature of the Schroth approach
 - Postural correction: the patient learns to actively correct their posture in specific positions, and progressively in more functional and dynamic activities
-- Muscle activation: targeted strengthening of the muscles that stabilise the spine in the corrected position for long-term stability
+- Muscle activation: strengthening of the muscles that stabilise the spine in the corrected position for long-term stability
 
 ## Who is Schroth therapy (PSSE) for?
 
@@ -45,7 +45,7 @@ The first session is a thorough assessment. Our physiotherapist will review your
 - Breathing assessment: chest expansion and ribcage mechanics
 - General strength and core/pelvic stability
 
-Schroth exercises are then taught progressively - typically beginning with foundational positions and breathing awareness before progressing to functional and dynamic exercises. Each exercise programme is curve-specific: a right thoracic curve requires a different correction pattern from a left lumbar curve. Sessions are usually 45-60 minutes. The home programme is central to outcomes, and our physiotherapist will ensure your child and family are confident and clear on what to practise between sessions.
+Schroth exercises are then taught progressively - typically beginning with foundational positions and breathing awareness before progressing to functional and dynamic exercises. Each exercise programme is curve-specific: a right thoracic curve requires a different correction pattern from a left lumbar curve. Sessions are usually 45-60 minutes. The home programme is central to outcomes, and our physiotherapist will make sure your child and family are clear on what to practise between sessions.
 
 ## Does Schroth therapy prevent surgery?
 

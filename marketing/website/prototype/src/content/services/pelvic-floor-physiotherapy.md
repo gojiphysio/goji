@@ -21,7 +21,7 @@ faqs:
   - q: "How many sessions will I need?"
     a: "It depends on your symptoms, goals and starting point. After your first assessment your physiotherapist will explain what they found and recommend a plan, typically combining in-clinic sessions with a home programme. International guidelines for pelvic floor muscle training generally recommend a supervised programme of around three months before formally reassessing progress."
   - q: "I gave birth years ago. Is it too late for pelvic floor physiotherapy?"
-    a: "No. Pelvic floor muscles respond to training at any age and any stage - whether you are newly postpartum, years past your last birth, or navigating perimenopause. Longstanding symptoms are still assessable and treatable."
+    a: "No. Pelvic floor muscles respond to training at any age and any stage - whether you are newly postpartum, years past your last birth, or going through perimenopause. Longstanding symptoms are still assessable and treatable."
   - q: "Do I need a doctor's referral?"
     a: "No referral is needed. You can book directly with us. If your assessment suggests input from a gynaecologist, colorectal specialist or other doctor would help, we will let you know and can work alongside them."
 order: 4
@@ -30,9 +30,9 @@ draft: false
 
 Pelvic floor concerns aren't always about weakness, and the answer isn't always more Kegels.
 
-Whether you're experiencing bladder leakage, pelvic heaviness, constipation or pain during intimacy, our physiotherapists will help you understand what's happening and find an approach that works for your body.
+If you have bladder leakage, pelvic heaviness, constipation or pain during intimacy, our physiotherapists will help you understand what's happening and find an approach that suits your body.
 
-Note: The assessment and treatment described below are indicative. Your session will be tailored to your individual condition, needs and goals, and may be modified by your physiotherapist based on their clinical judgement.
+Note: The assessment and treatment described below are indicative. Your session will reflect your individual condition, needs and goals, and may be modified by your physiotherapist based on their clinical judgement.
 
 ## Who is pelvic floor physiotherapy for?
 
@@ -68,7 +68,7 @@ Your physiotherapist will first discuss your:
 - Daily routines
 - Goals
 
-This is followed by a physical assessment tailored to your concerns, which may include:
+This is followed by a physical assessment focused on your concerns, which may include:
 
 - Breathing, abdominal and movement assessment
 - Assessment of the back, hips and pelvis
@@ -87,7 +87,7 @@ You will receive:
 - Guidance on whether your pelvic floor needs strengthening, relaxation or improved coordination
 - Practical strategies for managing bladder, bowel or prolapse symptoms
 - Advice on breathing, pressure management and daily movement
-- A personalised exercise plan, where appropriate
+- An exercise plan, where appropriate
 - Guidance on returning to exercise, running or sport
 - Recommendations for follow-up care
 

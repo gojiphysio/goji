@@ -81,7 +81,7 @@ Often, yes. Many people with sciatica or disc-related pain improve with a plan t
 
 ### Can physiotherapy help with frozen shoulder?
 
-Physiotherapy is a common first approach for frozen shoulder. It focuses on managing pain, keeping the shoulder moving within comfortable limits, and gradually restoring range and strength. Frozen shoulder tends to move through stages over many months, so your physiotherapist will tailor the plan to the stage you are in.
+Physiotherapy is a common first approach for frozen shoulder. It focuses on managing pain, keeping the shoulder moving within comfortable limits, and gradually restoring range and strength. Frozen shoulder tends to move through stages over many months, so your physiotherapist will match the plan to the stage you are in.
 
 ### Should I use ice or heat?
 

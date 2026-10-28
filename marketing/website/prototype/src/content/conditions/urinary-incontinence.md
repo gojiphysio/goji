@@ -68,7 +68,7 @@ Not necessarily, and not indefinitely. The goal of physiotherapy for exercise-as
 
 ### Could my incontinence be related to prolapse?
 
-Urinary incontinence and pelvic organ prolapse frequently co-occur, as they share common risk factors and the pelvic floor structures involved overlap. A comprehensive pelvic floor assessment will screen for both.
+Urinary incontinence and pelvic organ prolapse frequently co-occur, as they share common risk factors and the pelvic floor structures involved overlap. A full pelvic floor assessment will screen for both.
 
 ### Is urinary incontinence more common during perimenopause?
 

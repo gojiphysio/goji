@@ -13,7 +13,7 @@ draft: false
 relatedServices: ["paediatric-physiotherapy"]
 ---
 
-Bladder and bowel difficulties in children - including bedwetting, daytime wetting, soiling, and constipation - are common, often undertreated, and consistently under-discussed. Many families wait years before seeking help, often because they have been told the child will "grow out of it." While many children do improve with time, physiotherapy significantly accelerates that progress and addresses the underlying bladder and bowel coordination that drives these symptoms. These are real, physical conditions - not behavioural problems.
+Bladder and bowel difficulties in children - including bedwetting, daytime wetting, soiling, and constipation - are common and often undertreated. Many families wait years before seeking help, often because they have been told the child will "grow out of it." While many children do improve with time, physiotherapy significantly accelerates that progress and addresses the underlying bladder and bowel coordination that drives these symptoms. These are real, physical conditions - not behavioural problems.
 
 ## Bedwetting (nocturnal enuresis)
 
@@ -35,7 +35,7 @@ Soiling (encopresis) - the involuntary passage of stool into underwear in childr
 
 ## What does a session at Goji involve?
 
-Our physiotherapist will take a detailed history - your child's bladder and bowel habits, toilet routines, fluid and fibre intake, any previous assessments or treatment, and the impact on your child and family. This conversation is clinical, straightforward, and non-judgmental. Children are included in the conversation at an age-appropriate level; our physiotherapist is skilled at engaging children directly in a way that feels safe and not embarrassing.
+Our physiotherapist will take a detailed history - your child's bladder and bowel habits, toilet routines, fluid and fibre intake, any previous assessments or treatment, and the impact on your child and family. This conversation is straightforward and non-judgmental. Children are included in the conversation at an age-appropriate level; our physiotherapist is skilled at engaging children directly in a way that feels safe and not embarrassing.
 
 The assessment includes:
 

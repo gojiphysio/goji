@@ -45,7 +45,7 @@ For pregnancy and the postpartum period, WHO recommends at least 150 minutes of 
 
 Your pelvic floor is a group of muscles that supports your bladder, bowel and uterus and helps you stay continent. A well-functioning pelvic floor can contract when it needs to, such as when you cough, sneeze or lift, and it can also relax fully, which you need for emptying your bladder and bowel comfortably, for comfortable sex, and later for birth.
 
-That is why pelvic floor training is not just about squeezing harder. Some people hold tension in their pelvic floor without realising it. More squeezing is not the answer for them, and learning to let go is part of the work. The [NICE guideline on pelvic floor dysfunction (NG210)](https://www.nice.org.uk/guidance/ng210/chapter/Recommendations) reflects this: when a programme is supervised, it says the first step is assessing a woman's ability to both contract and relax her pelvic floor.
+Some people hold tension in their pelvic floor without realising it. More squeezing is not the answer for them, and learning to let go is part of the work. The [NICE guideline on pelvic floor dysfunction (NG210)](https://www.nice.org.uk/guidance/ng210/chapter/Recommendations) reflects this: when a programme is supervised, it says the first step is assessing a woman's ability to both contract and relax her pelvic floor.
 
 ## Should I start pelvic floor exercises before I am pregnant?
 

@@ -58,7 +58,7 @@ Home visits are also available across Singapore. Durations and prices for each s
 | 19 September 2026 | [Your 30s, Your Options](/blog/preparing-your-body-for-pregnancy/) | Dr Serena Koh, The O&G Specialist Clinic |
 | 10 October 2026 | [Decoding Osteoporosis](/blog/exercise-for-osteoporosis/) | Dr Dinesh Mahendran, The Metabolic Clinic |
 
-Each session has a write-up on this blog, linked above. Future sessions are announced on our Instagram, @gojiphysio.
+Future sessions are announced on our Instagram, @gojiphysio.
 
 ## Frequently asked questions
 

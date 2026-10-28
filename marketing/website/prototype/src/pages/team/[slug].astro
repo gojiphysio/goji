@@ -79,7 +79,7 @@ const teamSchema = [
 ---
 
 <BaseLayout
-  title={d.seoTitle ?? `${d.name} — ${d.role} | Goji Health`}
+  title={d.seoTitle ?? `${d.name} - ${d.role} | Goji Health`}
   description={d.metaDescription ?? d.tagline}
   schema={teamSchema}
   searchType="Team"
@@ -180,7 +180,7 @@ const teamSchema = [
   <section class="bio-cta">
     <div class="container bio-cta__inner">
       <h2>{d.ctaHeading ?? `Book an appointment with ${firstName}`}</h2>
-      <p>{d.ctaText ?? "Ready to get started? Book online or reach out on WhatsApp — we'll talk through what's going on before your first session."}</p>
+      <p>{d.ctaText ?? "Book online or reach out on WhatsApp. We'll talk through what's going on before your first session."}</p>
       <div class="bio-cta__actions">
         <Button slug="web-book" variant="primary" size="lg">{d.ctaBookLabel ?? "Book an appointment"}</Button>
         <Button slug="web-wa" variant="whatsapp" size="lg">Ask us on WhatsApp</Button>

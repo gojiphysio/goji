@@ -95,7 +95,9 @@ than the source says, and red flags pointing to a doctor.
 Warm, plain, educational; British spelling (physiotherapy, centre, colour).
 Regular hyphens, never em or en dashes. No emojis, no italics, no bold in body
 copy. No "delve", "crucial", "robust", "comprehensive", "nuanced", "it's
-important to note", "in today's world". Short paragraphs.
+important to note", "in today's world". Short paragraphs. Run an unslop pass
+before merge (ban list: https://github.com/MohamedAbdallah-14/unslop,
+`anti-aiisms.md`); on clinical claims, cut slop only and never change meaning.
 
 ## Images
 

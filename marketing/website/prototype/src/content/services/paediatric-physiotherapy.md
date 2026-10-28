@@ -1,8 +1,8 @@
 ---
 title: "Paediatric Physiotherapy"
-description: "Paediatric physiotherapy in Singapore for children 0-18: movement, pain, injury and developmental concerns, assessed and managed with a personalised plan."
+description: "Paediatric physiotherapy in Singapore for children 0-18: movement, pain, injury and developmental concerns, assessed and managed with a plan for your child."
 cardTitle: "Paediatric Physiotherapy"
-cardLead: "Individualised assessment and practical guidance for your child's movement, development, pain or injury - from babies to teens. 30-min, 45-min and 55-min options available."
+cardLead: "Assessment and practical guidance for your child's movement, development, pain or injury - from babies to teens. 30-min, 45-min and 55-min options available."
 heroImage: "/photos/services/paediatric-physiotherapy.webp"
 heroAlt: "A parent and baby during tummy time at a Goji paediatric physiotherapy session."
 category: "Paediatric Physiotherapy (0-18Y)"
@@ -20,7 +20,7 @@ faqs:
   - q: "What happens during my child's appointment?"
     a: "Your physiotherapist will discuss your child's medical and developmental history, current concerns, daily activities and goals, then assess them through play, age-appropriate movement tasks and milestone checks. Parents or caregivers are involved throughout, and findings are explained clearly with time for questions."
   - q: "How long is a session?"
-    a: "We offer 30-minute, 45-minute and 55-minute sessions. For children aged 0-2 years, a 30-minute session may be a good fit; 45 minutes suits many school-age children; the full 55-minute appointment works best for comprehensive assessments."
+    a: "We offer 30-minute, 45-minute and 55-minute sessions. For children aged 0-2 years, a 30-minute session may be a good fit; 45 minutes suits many school-age children; the full 55-minute appointment works best for complete assessments."
   - q: "How much does paediatric physiotherapy cost, and can you come to our home?"
     a: "A 55-minute session is $260 at our Lentor clinic, or $380 as a home visit. Shorter sessions start from $160."
   - q: "Do I need a doctor's referral?"
@@ -29,11 +29,11 @@ order: 1
 draft: false
 ---
 
-Every child develops and moves differently. From your baby's earliest milestones to your teenager's sporting injuries, our paediatric physiotherapists provide personalised care that supports your child's development, movement and physical confidence.
+Every child develops and moves differently. From your baby's earliest milestones to your teenager's sporting injuries, our paediatric physiotherapists support your child's development and movement.
 
 We work closely with parents and caregivers, so you leave with a clearer understanding of your child's needs and practical ways to support them.
 
-Note: The assessment and treatment described below are indicative. Your child's session will be tailored to their individual condition, needs and goals, and may be modified by your physiotherapist based on their clinical judgement.
+Note: The assessment and treatment described below are indicative. Your child's session will reflect their individual condition, needs and goals, and may be modified by your physiotherapist based on their clinical judgement.
 
 ## Who is paediatric physiotherapy for?
 
@@ -86,7 +86,7 @@ Depending on your child's needs, you may receive:
 - A clear explanation of the assessment findings
 - Practical advice for positioning, handling or daily activities
 - Age-appropriate play and movement recommendations
-- A personalised home exercise programme
+- A home exercise programme
 - Guidance for school, sport or physical activity
 - Strategies to support strength, mobility and confidence
 - Recommendations for follow-up care or further assessment

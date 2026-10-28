@@ -1,8 +1,8 @@
 ---
 title: "Schroth Therapy for Scoliosis in Adults"
-description: "Schroth Method scoliosis physiotherapy for adults in Singapore: a personalised, curve-specific programme to move with greater comfort and control."
+description: "Schroth Method scoliosis physiotherapy for adults in Singapore: a curve-specific programme to move with greater comfort and control."
 cardTitle: "Schroth Therapy - Adults"
-cardLead: "Scoliosis-specific physiotherapy (Schroth Method) tailored to your curve and symptoms, to move with greater comfort, confidence and control."
+cardLead: "Scoliosis-specific physiotherapy (Schroth Method) built around your curve and symptoms, to move with greater comfort and control."
 heroImage: "/photos/services/schroth-scoliosis-adults.webp"
 heroAlt: "An adult practising Schroth Method scoliosis exercises with a Goji physiotherapist."
 category: "Musculoskeletal Physiotherapy"
@@ -18,16 +18,16 @@ faqs:
   - q: "How is Schroth therapy different from general physiotherapy?"
     a: "The Schroth Method is scoliosis-specific: exercises are built around your individual curve pattern in three dimensions, combining postural correction, breathing mechanics and targeted strengthening, rather than generic back exercises."
   - q: "Do I need an X-ray before starting?"
-    a: "A recent spinal X-ray or specialist report helps us classify your curve and tailor the programme, so bring one if you have it. Without one, we can still assess your posture, movement and symptoms and advise on next steps."
+    a: "A recent spinal X-ray or specialist report helps us classify your curve and shape the programme, so bring one if you have it. Without one, we can still assess your posture, movement and symptoms and advise on next steps."
 order: 2
 draft: false
 ---
 
-A personalised, scoliosis-specific physiotherapy programme based on the Schroth Method. Exercises are tailored to your spinal curve, symptoms, physical needs and personal goals.
+A scoliosis-specific physiotherapy programme based on the Schroth Method. Exercises are built around your spinal curve, symptoms and goals.
 
 The Schroth Method uses three-dimensional postural correction, breathing and movement exercises to support posture, mobility, strength and everyday function.
 
-Note: The assessment and treatment described below are indicative. Your programme will be tailored to your individual curve, symptoms and goals, and may be modified by your physiotherapist based on their clinical judgement.
+Note: The assessment and treatment described below are indicative. Your programme will reflect your individual curve, symptoms and goals, and may be modified by your physiotherapist based on their clinical judgement.
 
 ## Who can benefit from the Schroth Method?
 
@@ -39,7 +39,7 @@ Schroth Therapy may be suitable if you:
 - Experience stiffness or muscular fatigue during daily activities
 - Find prolonged sitting, standing or walking uncomfortable
 - Have noticed changes in your posture, balance or movement
-- Want to remain active and exercise with greater confidence
+- Want to remain active and feel more confident exercising
 - Want guidance on managing scoliosis independently
 - Have been referred for scoliosis-specific physiotherapy
 
@@ -76,7 +76,7 @@ You will receive:
 
 - A clear explanation of your assessment findings
 - An understanding of your individual curve pattern
-- Personalised Schroth-based exercises
+- Schroth-based exercises
 - Breathing and postural correction strategies
 - A home exercise programme with clear instructions
 - Guidance for work, daily activities, exercise and sport

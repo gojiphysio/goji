@@ -17,7 +17,7 @@ Developmental physiotherapy focuses on children who are not meeting expected gro
 
 ## What are gross motor milestones, and when should I be concerned?
 
-Gross motor development follows a broadly predictable sequence, though there is meaningful variation in the timing of individual milestones. As a general guide:
+Gross motor development follows a broadly predictable sequence, though there is variation in the timing of individual milestones. As a general guide:
 
 - 2-3 months: head control in supported sitting; pushing up on forearms during tummy time
 - 4-5 months: rolling from tummy to back; reaching for objects
@@ -62,7 +62,7 @@ Yes. Goji can work alongside school-based early intervention programmes. Coordin
 
 ### Is early intervention just for children with a diagnosis?
 
-No. Early intervention physiotherapy is appropriate for any child who is showing developmental delays or movement concerns, regardless of whether a formal diagnosis has been made. In fact, early physiotherapy can sometimes prevent a mild delay from becoming a more significant one - without needing a label attached first.
+No. Early intervention physiotherapy is appropriate for any child who is showing developmental delays or movement concerns, regardless of whether a formal diagnosis has been made. Early physiotherapy can sometimes prevent a mild delay from becoming a more significant one - without needing a label attached first.
 
 ### My child is 3 years old and has only just been referred for physio. Is it too late?
 

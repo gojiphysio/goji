@@ -86,7 +86,12 @@ so a token change reflows everything (styleguide is the QA surface).
   Page intros say what the page has, plainly: no copy about the page itself
   ("in plain language", "written out properly"), no hedge-then-reassure
   ("Nothing here replaces X, but…"), no "Explore", "tailored", "journey",
-  "with confidence".
+  "with confidence". New copy gets an unslop pass before merge (ban list and
+  rules: https://github.com/MohamedAbdallah-14/unslop, `anti-aiisms.md`):
+  no filler words (holistic, comprehensive, thoughtful, supportive,
+  personalised as padding), no rhetorical "X, Y and Z" triples, no "not just
+  X but Y" or "Whether you're..." openers. On clinical copy, precision beats
+  voice: cut slop only, never change a claim.
 - **Condition pages carry a clinician byline.** Every `conditions` entry sets a
   `reviewer: { name, slug }` (the reviewing physio, from the source doc). The
   detail template renders a "Reviewed by <name>" line linking to `/team/<slug>`

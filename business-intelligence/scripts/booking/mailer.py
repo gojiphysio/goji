@@ -164,9 +164,8 @@ def send_customer_booking_email(result: dict, draft: dict) -> None:
         greeting = f"Hi {name},"
         intro = ("Thanks for booking with Goji Physiotherapy. We've received your "
                  "request and here are the details:")
-        wa_intro = ("Need to change or cancel? Just message us on WhatsApp and we'll "
-                    "take care of it - that's where we handle all changes and "
-                    "cancellations:")
+        wa_intro = ("To change or cancel, message us on WhatsApp. That's where we "
+                    "handle all changes and cancellations:")
         signoff = ["The Goji Physiotherapy team",
                    "1 Lentor Central, #01-13, Lentor Modern, Singapore 788887"]
         details = [("Service", result['service'])]

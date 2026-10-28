@@ -13,7 +13,7 @@ draft: false
 relatedServices: ["paediatric-physiotherapy"]
 ---
 
-Congenital talipes equinovarus (CTEV), commonly known as clubfoot, is a foot deformity present at birth in which the foot is turned inward and downward. It occurs in approximately 1-2 per 1,000 live births and can affect one or both feet. The management of CTEV depends critically on whether it is structural or postural - and this distinction determines the role of physiotherapy in your child's care.
+Congenital talipes equinovarus (CTEV), commonly known as clubfoot, is a foot deformity present at birth in which the foot is turned inward and downward. It occurs in approximately 1-2 per 1,000 live births and can affect one or both feet. The management of CTEV depends on whether it is structural or postural - and this distinction determines the role of physiotherapy in your child's care.
 
 ## Structural vs postural CTEV: why the distinction matters
 
@@ -66,7 +66,7 @@ Brace wear - particularly the foot abduction orthosis - may affect how children 
 
 ### Is the outcome different for one foot vs two feet?
 
-Bilateral CTEV (both feet affected) is common and does not necessarily mean a worse outcome. The Ponseti method is equally applicable. The practical challenge is brace compliance and the impact on mobility during the bracing phase, which physiotherapy support can help to navigate.
+Bilateral CTEV (both feet affected) is common and does not necessarily mean a worse outcome. The Ponseti method is equally applicable. The practical challenge is brace compliance and the impact on mobility during the bracing phase, which physiotherapy support can help with.
 
 ### My child is 4 years old and was never treated for their clubfoot. What can be done?
 

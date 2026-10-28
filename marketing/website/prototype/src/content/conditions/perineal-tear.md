@@ -57,7 +57,7 @@ Once the scar is healed (typically 6-8 weeks postpartum), physiotherapy can begi
 
 ## Birth trauma: acknowledging what happened
 
-Birth trauma is a real experience. It can result from physical injury, a difficult or emergency labour, or simply a birth that did not go as anticipated. Many women find that their physical recovery is complicated by distress, hypervigilance, or avoidance behaviours - particularly around pelvic examination or intimacy.
+Birth trauma can result from physical injury, a difficult or emergency labour, or simply a birth that did not go as anticipated. Many women find that their physical recovery is complicated by distress, hypervigilance, or avoidance behaviours - particularly around pelvic examination or intimacy.
 
 Goji's approach is to follow your lead. A pelvic floor assessment is offered when it is clinically appropriate, never required, and always done with a full explanation of what is being assessed and why. If you are not ready for certain elements of assessment, that is a valid starting point. Recovery is not linear, and there is no timeline you need to meet.
 
@@ -89,7 +89,7 @@ Yes. Third-degree tears are typically managed by a specialist obstetric team ini
 
 ### I feel embarrassed about what happened during my birth. Is that normal?
 
-Very much so. Feelings of shame, grief, or failure are common after a traumatic or difficult birth, even when the outcome was healthy. These feelings are real and deserve support - not dismissal. Goji's approach is non-judgmental, and you do not need to recount your birth story in more detail than you are comfortable with.
+Very much so. Feelings of shame, grief, or failure are common after a traumatic or difficult birth, even when the outcome was healthy. Goji's approach is non-judgmental, and you do not need to recount your birth story in more detail than you are comfortable with.
 
 ### When is it safe to have sex after a perineal tear?
 

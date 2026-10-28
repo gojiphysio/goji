@@ -45,7 +45,7 @@ Your physiotherapist will take a history of your symptoms and how they have deve
 - Movement and function: how symptoms affect your mobility and daily life
 - Self-management review: understanding your goals and current care
 
-You will leave with an explanation of your presentation and a personalised, conservative management plan.
+You will leave with an explanation of your presentation and a conservative management plan.
 
 ## How is lipoedema managed?
 
@@ -62,7 +62,7 @@ Physiotherapy works alongside your medical team, and for some people specialist 
 
 ### Is lipoedema just being overweight?
 
-No. Lipoedema is a distinct condition with a characteristic pattern and tenderness, and the affected fat does not respond to diet and exercise the way ordinary fat does. It is often mistaken for obesity, which can be frustrating for those affected.
+No. Lipoedema is a distinct condition with a characteristic pattern and tenderness, and the affected fat does not respond to diet and exercise the way ordinary fat does. It is often mistaken for obesity.
 
 ### Will losing weight get rid of it?
 
@@ -74,9 +74,9 @@ They are different conditions, though they can coexist. Lymphoedema is primarily
 
 ### Can physiotherapy help lipoedema?
 
-Yes. Physiotherapy can help manage pain, tenderness, swelling and mobility through personalised exercise, compression therapy and self-management strategies. Manual lymphatic drainage may also be helpful for selected individuals, particularly when swelling or pain is present. While physiotherapy cannot cure lipoedema or remove the affected fat tissue, it can help improve function and quality of life.
+Yes. Physiotherapy can help manage pain, tenderness, swelling and mobility through exercise, compression therapy and self-management strategies. Manual lymphatic drainage may also be helpful for selected individuals, particularly when swelling or pain is present. While physiotherapy cannot cure lipoedema or remove the affected fat tissue, it can help improve function and quality of life.
 
 ### Does exercise help?
 
-Yes. Exercise can improve muscle strength, build and maintain muscle mass, support circulation and mobility, and enhance overall quality of life. A combination of aerobic activities (e.g. walking, cycling or swimming) and progressive strength training is encouraged. While exercise cannot reliably eliminate lipoedema-related fat tissue, your physiotherapist can tailor a programme to your symptoms, abilities and goals.
+Yes. Exercise can improve muscle strength, build and maintain muscle mass, support circulation and mobility, and enhance overall quality of life. A combination of aerobic activities (e.g. walking, cycling or swimming) and progressive strength training is encouraged. While exercise cannot reliably eliminate lipoedema-related fat tissue, your physiotherapist can adapt a programme to your symptoms, abilities and goals.
 

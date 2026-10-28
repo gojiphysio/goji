@@ -17,8 +17,6 @@ draft: false
 
 A first appointment at Goji runs 55 minutes. Most of it is spent working out what is going on, not treating. You leave with an explanation of what we found, a plan, and something to do before the next session. You do not need a doctor's referral to book.
 
-People often arrive expecting either a massage or a telling-off about posture. It is neither, so here is the actual shape of it.
-
 ## What should I bring, and do I need a referral?
 
 | | Do you need it? |
