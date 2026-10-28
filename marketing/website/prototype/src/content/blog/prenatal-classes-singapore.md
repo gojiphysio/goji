@@ -41,7 +41,7 @@ Eligibility varies, so check before you book. NUH's programme, for example, is o
 
 ## Where can I find prenatal yoga?
 
-- [Inspire Mum & Baby](https://inspiremumbaby.com/prenatal/): small-group prenatal yoga tailored by trimester, at studios in Tanjong Katong Road and Serangoon Road.
+- [Inspire Mum & Baby](https://inspiremumbaby.com/prenatal/): small-group prenatal yoga adapted by trimester, at studios in Tanjong Katong Road and Serangoon Road.
 - [Mother & Child](https://www.motherandchild.com.sg/yoga-and-pilates): small-group prenatal yoga at Tanglin Mall, taught by instructors who specialise in prenatal and postnatal bodies.
 - [Sweatbox Yoga](https://www.sweatboxyoga.com.sg/yoga-class/prenatal-yoga/): a six-week prenatal yoga course with one class a week; book 24 hours ahead.
 

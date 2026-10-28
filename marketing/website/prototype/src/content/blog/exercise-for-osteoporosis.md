@@ -24,7 +24,7 @@ Exercise can help maintain bone density and reduce your risk of falling. It does
 
 On Saturday 10 October 2026 we hosted In Sync with Dr Dinesh - Decoding Osteoporosis at Goji, Lentor Modern. Dr Dinesh Mahendran, Endocrinologist & Medical Director at The Metabolic Clinic, covered the medical side: risk factors, menopause, DEXA scans, calcium and vitamin D, and when medical treatment may be appropriate. Kristy Ng covered the physiotherapy side: strength training, weight-bearing exercise, balance and reducing fall risk. 12 people attended.
 
-As we shared on Instagram afterwards, bones are living tissue, constantly breaking down and rebuilding, and the way we move helps keep them strong. Different types of exercise support bone health in different ways, from building strength to improving balance and reducing fall risk. Our biggest takeaway? Keep moving, and move in different ways!
+As we shared on Instagram afterwards, bones are living tissue, constantly breaking down and rebuilding, and the way we move helps keep them strong. Different types of exercise support bone health in different ways, from building strength to improving balance and reducing fall risk. Our biggest takeaway was to keep moving, and to move in different ways.
 
 The rest of this post is our own explainer on that physiotherapy side.
 
@@ -32,7 +32,7 @@ The rest of this post is our own explainer on that physiotherapy side.
 
 Generally, no. A [2013 meta-analysis of walking trials](https://pubmed.ncbi.nlm.nih.gov/24149921/) in perimenopausal and postmenopausal women found that walking on its own had no significant effect on bone density at the lumbar spine, forearm or whole body. There was some benefit at the hip, but only in programmes lasting more than six months.
 
-The international [Too Fit To Fracture recommendations](https://pubmed.ncbi.nlm.nih.gov/24281053/) for people with osteoporosis advise against doing aerobic exercise, such as walking, to the exclusion of resistance and balance training. The UK consensus statement [Strong, steady and straight](https://pubmed.ncbi.nlm.nih.gov/35577538/) makes the same point in its own way: people with osteoporosis should do resistance and impact exercise for bone strength, strength and balance work to reduce falls, and spinal extension exercise for posture.
+The international [Too Fit To Fracture recommendations](https://pubmed.ncbi.nlm.nih.gov/24281053/) for people with osteoporosis advise against doing aerobic exercise, such as walking, to the exclusion of resistance and balance training. The UK consensus statement [Strong, steady and straight](https://pubmed.ncbi.nlm.nih.gov/35577538/) makes a similar point: people with osteoporosis should do resistance and impact exercise for bone strength, strength and balance work to reduce falls, and spinal extension exercise for posture.
 
 So keep walking if you enjoy it. It is good for your heart and general fitness. Just add the other types of exercise as well.
 
@@ -69,7 +69,7 @@ Osteopenia means your bone density is lower than average but not low enough to b
 
 ## Should I get a bone density scan?
 
-Whether you need a bone density (DEXA) scan, and whether you need medication, are questions for your GP or an endocrinologist. In Singapore, the ACE guideline asks doctors to assess the need for bone density testing in people with risk factors, particularly all postmenopausal women and men aged 65 and over. You do not need a scan before starting exercise, but your results can help a physiotherapist tailor your programme.
+Whether you need a bone density (DEXA) scan, and whether you need medication, are questions for your GP or an endocrinologist. In Singapore, the ACE guideline asks doctors to assess the need for bone density testing in people with risk factors, particularly all postmenopausal women and men aged 65 and over. You do not need a scan before starting exercise, but your results can help a physiotherapist plan your programme.
 
 ## Frequently asked questions
 
