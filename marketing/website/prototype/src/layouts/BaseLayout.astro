@@ -88,7 +88,7 @@ const footerMap = [
     links: [
       { href: isHome ? "#about" : "/#about", label: "About Goji" },
       { href: isHome ? "#team" : "/#team", label: "Our team" },
-      { href: "/media/", label: "Media" },
+      { href: "/press/", label: "Media" },
       { href: "/blog/", label: "Blog" },
       { href: "/physiotherapy-lentor/", label: "Physiotherapy in Lentor" },
       { href: "/book/", label: "Book an appointment" },
@@ -99,7 +99,7 @@ const nav = [
   { href: isHome ? "#about" : "/#about", label: "About" },
   { href: "/services/", label: "Services" },
   { href: "/conditions/", label: "Conditions" },
-  { href: "/media/", label: "Media" },
+  { href: "/press/", label: "Media" },
   { href: "/blog/", label: "Blog" },
   { href: isHome ? "#team" : "/#team", label: "Team" },
   { href: "/getting-here/", label: "Find us" },
@@ -636,7 +636,7 @@ const GADS_BOOKING_LABEL = import.meta.env.PUBLIC_GADS_BOOKING_LABEL;
         padding-block: var(--space-4);
         border-top: 1px solid color-mix(in srgb, var(--color-linen) 10%, transparent);
         font-size: var(--fs-caption);
-        color: color-mix(in srgb, var(--color-linen) 45%, transparent);
+        color: var(--text-on-dark-soft);
       }
       .site-footer__copyright a {
         color: inherit;
@@ -789,6 +789,17 @@ const GADS_BOOKING_LABEL = import.meta.env.PUBLIC_GADS_BOOKING_LABEL;
       // elements and reveals .gj-reveal / .gj-mark as they scroll into view.
       import "../scripts/goji-watercolor.js";
       (window as unknown as { Goji: { enhance: () => void } }).Goji.enhance();
+    </script>
+
+    <script>
+      // Paint the canvas burgundy once past halfway, so overscrolling at the
+      // bottom shows more footer, not linen (see html in base.css).
+      const root = document.documentElement;
+      const paintCanvas = () =>
+        root.classList.toggle("is-past-half", window.scrollY * 2 >= root.scrollHeight - window.innerHeight);
+      paintCanvas();
+      window.addEventListener("scroll", paintCanvas, { passive: true });
+      window.addEventListener("resize", paintCanvas, { passive: true });
     </script>
 
     <script>

@@ -304,13 +304,15 @@ const reviews = [
               </p>
               <p class="service-card__lead">{s.lead}</p>
               <div class="service-card__cta">
-                <Button href="/book/" variant="secondary" class="service-card__book">Book {s.title}</Button>
                 {serviceLearnMore[s.id] && (
                   <a href={serviceLearnMore[s.id]} class="service-card__learn">
-                    Learn more
+                    <span>Learn more<span class="visually-hidden"> about {s.title}</span></span>
                     <Icon name="tabler:arrow-up-right" size={16} />
                   </a>
                 )}
+                <Button href="/book/" variant="secondary" class="service-card__book">
+                  Book<span class="visually-hidden"> {s.title}</span>
+                </Button>
               </div>
             </article>
           ))
@@ -469,7 +471,7 @@ const reviews = [
           </button>
         </div>
       </div>
-      <p class="reviews__disclaimer">All reviews sourced from <a href="https://maps.app.goo.gl/wBaCkBiDNfF7JCGv8" target="_blank" rel="noopener noreferrer">Google Maps</a>. Individual experiences may vary.</p>
+      <p class="reviews__disclaimer">All reviews sourced from <a href="https://maps.app.goo.gl/wBaCkBiDNfF7JCGv8" target="_blank" rel="noopener noreferrer">Google Maps</a>.</p>
     </div>
   </section>
 
@@ -667,7 +669,8 @@ const reviews = [
   }
   .service-card__usual { font-size: var(--fs-small); color: var(--text-muted); }
   .service-card__lead { font-size: var(--fs-small); line-height: 1.6; margin: 0; }
-  .service-card__cta { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-4); margin-top: var(--space-3); align-self: end; }
+  .service-card__cta { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); margin-top: var(--space-3); align-self: end; }
+  .service-card__cta :global(.service-card__book) { margin-left: auto; }
   .service-card__learn {
     display: inline-flex; align-items: center; gap: 6px;
     font-size: var(--fs-small); font-weight: var(--weight-semibold);
