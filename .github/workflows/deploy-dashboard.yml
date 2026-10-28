@@ -23,6 +23,7 @@ on:
       - "business-intelligence/scripts/sql/**"
       - "business-intelligence/scripts/ingestion/plato_patients/**"
       - "business-intelligence/scripts/ingestion/marketing_ingest/**"
+      - "business-intelligence/scripts/ingestion/gbp_post_sync/**"
       - "business-intelligence/scripts/reminders/**"
       - ".github/workflows/deploy-dashboard.yml"
   workflow_dispatch: {}   # allow manual "Run workflow" from the Actions tab
@@ -65,6 +66,12 @@ env:
   # ingestion-sa@goji-bi.iam.gserviceaccount.com as a restricted user on the
   # property in Search Console → Settings → Users and permissions.
   GSC_SITE_URL: ${{ vars.GSC_SITE_URL }}
+  # gbp-post-sync (Instagram -> GBP posts) deploys in dry run as soon as
+  # IG_USER_ID is set. It only posts for real when GBP_LIVE is 'true' AND
+  # GBP_LOCATION ('accounts/<id>/locations/<id>') is set; the OAuth JSON lives
+  # in Secret Manager as gbp-oauth. See ingestion/gbp_post_sync/README.md.
+  GBP_LIVE: ${{ vars.GBP_LIVE }}
+  GBP_LOCATION: ${{ vars.GBP_LOCATION }}
 
 jobs:
   # ---- 1. Tests gate the deploy -------------------------------------------
@@ -88,6 +95,11 @@ jobs:
         run: |
           pip install -r requirements.txt
           python -m pytest test_extract.py -q
+      - name: GBP post-sync tests
+        working-directory: business-intelligence/scripts/ingestion/gbp_post_sync
+        run: |
+          pip install -r requirements.txt
+          python -m pytest test_sync.py -q
       - name: Appointment-reminder tests
         working-directory: business-intelligence/scripts/reminders
         run: |
@@ -111,7 +123,7 @@ jobs:
              || [ "$base" = "0000000000000000000000000000000000000000" ] \
              || ! git cat-file -e "${base}^{commit}" 2>/dev/null; then
             echo "No usable base commit — deploying everything."
-            { echo "sql=true"; echo "patients=true"; echo "marketing=true"; echo "dashboard=true"; echo "reminders=true"; } >> "$GITHUB_OUTPUT"
+            { echo "sql=true"; echo "patients=true"; echo "marketing=true"; echo "gbpsync=true"; echo "dashboard=true"; echo "reminders=true"; } >> "$GITHUB_OUTPUT"
             exit 0
           fi
           changed="$(git diff --name-only "$base" "${{ github.sha }}")"
@@ -120,6 +132,7 @@ jobs:
           grep -q "^${base_path}/sql/"                      <<<"$changed" && echo "sql=true"       >>"$GITHUB_OUTPUT" || echo "sql=false"       >>"$GITHUB_OUTPUT"
           grep -q "^${base_path}/ingestion/plato_patients/" <<<"$changed" && echo "patients=true"  >>"$GITHUB_OUTPUT" || echo "patients=false"  >>"$GITHUB_OUTPUT"
           grep -q "^${base_path}/ingestion/marketing_ingest/" <<<"$changed" && echo "marketing=true" >>"$GITHUB_OUTPUT" || echo "marketing=false" >>"$GITHUB_OUTPUT"
+          grep -q "^${base_path}/ingestion/gbp_post_sync/" <<<"$changed" && echo "gbpsync=true" >>"$GITHUB_OUTPUT" || echo "gbpsync=false" >>"$GITHUB_OUTPUT"
           grep -q "^${base_path}/dashboard/"                <<<"$changed" && echo "dashboard=true" >>"$GITHUB_OUTPUT" || echo "dashboard=false" >>"$GITHUB_OUTPUT"
           grep -q "^${base_path}/reminders/"                <<<"$changed" && echo "reminders=true" >>"$GITHUB_OUTPUT" || echo "reminders=false" >>"$GITHUB_OUTPUT"
 
@@ -262,6 +275,37 @@ jobs:
             --service-account "ingestion-sa@${PROJECT}.iam.gserviceaccount.com" \
             ${secrets:+--set-secrets=$secrets} \
             --set-env-vars="^@^${envs}@SOURCES=${sources}" \
+            --quiet
+
+      - name: Deploy gbp-post-sync job
+        if: steps.changes.outputs.gbpsync == 'true'
+        working-directory: business-intelligence/scripts/ingestion/gbp_post_sync
+        run: |
+          # Republishes new Instagram posts as Google Business Profile posts.
+          # Needs the same IG id + Meta token as marketing-ingest. Dry run
+          # unless BOTH GBP_LIVE=true and GBP_LOCATION are set, so a half-done
+          # setup can never post. Every deploy passes the full env block
+          # (--set-env-vars replaces it), including GBP_DRY_RUN either way.
+          if [ -z "${IG_USER_ID}" ]; then
+            echo "IG_USER_ID repo var not set — skipping gbp-post-sync deploy."
+            exit 0
+          fi
+          secrets="META_GRAPH_TOKEN=meta-graph-token:latest"
+          envs="BQ_PROJECT=${PROJECT}@IG_USER_ID=${IG_USER_ID}"
+          if [ "${GBP_LIVE}" = "true" ] && [ -n "${GBP_LOCATION}" ]; then
+            echo "Deploying gbp-post-sync LIVE -> ${GBP_LOCATION}"
+            secrets="${secrets},GBP_OAUTH_JSON=gbp-oauth:latest"
+            envs="${envs}@GBP_DRY_RUN=false@GBP_LOCATION=${GBP_LOCATION}"
+          else
+            echo "Deploying gbp-post-sync in DRY RUN (GBP_LIVE/GBP_LOCATION not both set)"
+            envs="${envs}@GBP_DRY_RUN=true"
+          fi
+          gcloud run jobs deploy gbp-post-sync \
+            --source . --region "${REGION}" --project "${PROJECT}" \
+            --service-account "ingestion-sa@${PROJECT}.iam.gserviceaccount.com" \
+            --set-secrets="${secrets}" \
+            --set-env-vars="^@^${envs}" \
+            --max-retries=0 \
             --quiet
 
       - name: Deploy dashboard

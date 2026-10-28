@@ -6,9 +6,14 @@ and every external citation — diff against this when auditing NAP consistency.
 Task list / cadence: `../strategy/05-30-day-campaigns.md` (Campaign 2).
 Compliance floor for all copy below: `../strategy/03-compliance-guardrails.md`.
 
-GBP is an **operator UI task** — no programmatic edit path is wired up (the
-Google Business Profile API needs `business.manage` OAuth + Google's manual
-API-access approval; revisit only once posting cadence justifies it).
+GBP is an **operator UI task**, except posts. Posts come from Instagram
+automatically: `business-intelligence/scripts/ingestion/gbp_post_sync` turns
+each new IG post into a GBP post (dry run until Google approves API access;
+requested 28 Oct 2026 as hello@ for project goji-bi / 277737358846, case
+2-7527000041676, quoted review time 7–10 business days. Don't file a second
+request: duplicates slow the review).
+Instagram is also linked under Social profiles (28 Oct 2026), which shows IG
+posts in the profile's mobile "Social media updates" section.
 
 ## NAP (byte-identical — do not vary spelling/spacing)
 
@@ -63,6 +68,7 @@ review, and the ~15 Oct batch was followed by a Maps ranking drop.
 |---|---|---|
 | Booking / appointment | `https://go.gojiphysio.com/gbp-book` | `gbp-book` |
 | WhatsApp / message | `https://go.gojiphysio.com/gbp-wa` | `gbp-wa` |
+| Post button (auto-synced from IG) | `https://go.gojiphysio.com/gbp-post-book` | `gbp-post-book` |
 
 **Open (28 Oct 2026):** the profile's Chat field is a raw
 `https://wa.me/+6583770401`, so those taps are not logged (and ChatGPT copies
@@ -103,5 +109,6 @@ no cure/outcome/time guarantees, no discounts/packages/testimonials.
 - Upload 10+ real interior + team photos (no stock).
 - Seed Q&A from the homepage FAQ (first-visit, what to wear, physio in
   pregnancy, ages treated, insurance).
-- 2–3 posts/week thereafter.
+- 2–3 posts/week thereafter: automatic from Instagram once `gbp_post_sync`
+  is live; don't post by hand as well or the profile shows each one twice.
 - Reviews: **ask, never incentivize** (no discounts-for-reviews — hard NO).

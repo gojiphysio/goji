@@ -398,7 +398,7 @@ own `/book` form** (`-book`), not Plato. Publish each as
 |---|---|---|
 | Website (www.gojiphysio.com) | `…/web-wa` | `…/web-book` |
 | `gojiphysio.com/links` (Instagram link in bio; replaced bio.site Oct 2026) | `…/bio-wa` | `…/bio-book` |
-| Google Business Profile (later) | `…/gbp-wa` | `…/gbp-book` |
+| Google Business Profile | `…/gbp-wa` | `…/gbp-book` (posts synced from IG: `…/gbp-post-book`) |
 | Paid ads (later) | `…/ads-wa` | `…/ads-book` |
 | QR codes (print / events / in-person) | `…/qr-wa` | `…/qr-book` |
 

@@ -181,6 +181,9 @@ LINK_SLUGS: dict[str, dict] = {
     "web-book": {"kind": "book", "label": "Web"},
     "bio-book": {"kind": "book", "label": "Link in bio"},
     "gbp-book": {"kind": "book", "label": "Google"},
+    # Button on GBP posts auto-created from Instagram (ingestion/gbp_post_sync),
+    # kept apart from the profile's own Book button so posts are measurable.
+    "gbp-post-book": {"kind": "book", "label": "Google post"},
     "ads-book": {"kind": "book", "label": "Ads"},
     "qr-book":  {"kind": "book", "label": "QR"},
     "book":     {"kind": "book", "label": "Social"},  # generic fallback
@@ -2083,7 +2086,7 @@ FUNNEL_DISCOVERY_MIN = 2
 # Campaign slugs ("<channel>-99-wa") partition to the suffix "99-wa"; map it so
 # the Sankey attributes campaign taps to WhatsApp explicitly, not by fallback.
 FUNNEL_CTA = {"wa": "WhatsApp", "book": "Native booking", "plato": "Native booking",
-              "99-wa": "WhatsApp"}
+              "99-wa": "WhatsApp", "post-book": "Native booking"}
 
 
 def _build_funnel_paths(link_clicks: dict, kpis: dict, lead_wins: dict,
