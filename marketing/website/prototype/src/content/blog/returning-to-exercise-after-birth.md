@@ -18,7 +18,7 @@ draft: false
 
 The six-week check is a medical clearance, not a starting gun. It tells you that healing is on track. It does not tell you that your pelvic floor and abdominal wall are ready for running, jumping or heavy lifting, because it does not test them under load. Build strength first, and bring impact back when your body passes those tests rather than on a set date.
 
-What follows is an illustration of how a straightforward return can unfold. Every birth and every body is different, and a physiotherapist sets the actual pace with you. Treat it as a map rather than a timetable.
+What follows is an illustration of how a straightforward return can unfold. Every birth and every body is different, and a physiotherapist sets the actual pace with you.
 
 ## What does each stage usually involve?
 
@@ -33,13 +33,13 @@ What follows is an illustration of how a straightforward return can unfold. Ever
 
 The work in this window is unglamorous: breathing that coordinates with the pelvic floor, gentle activation, walking that builds gradually, and getting positions for feeding and lifting sorted so you are not spending all day loaded badly.
 
-Two things people underestimate here. Walking counts, and it progresses faster than expected if you build it steadily. And sleep and feeding load matter to recovery as much as any exercise does; a plan that ignores them does not survive contact with a newborn.
+Two things people underestimate here. Walking counts, and it progresses faster than expected if you build it steadily. And sleep and feeding load matter to recovery as much as any exercise does.
 
 ## Around week 6: get assessed, then decide
 
 This is a useful point for a postpartum physiotherapy assessment. It looks at the pelvic floor's ability to contract and relax, the abdominal wall including any separation, how your breathing and pressure management work, and how all of that behaves when load goes up.
 
-That assessment is what turns a generic timeline into your timeline. Someone with good pelvic floor control and no symptoms progresses differently from someone with a heaviness sensation or a persistent gap, and it is not possible to tell which you are without looking.
+The assessment is what makes the timeline specific to you. Someone with good pelvic floor control and no symptoms progresses differently from someone with a heaviness sensation or a persistent gap, and it is not possible to tell which you are without looking.
 
 ## Weeks 6 to 12: build capacity before impact
 

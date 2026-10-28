@@ -16,7 +16,7 @@ ctaSlug: "web-wa"
 draft: false
 ---
 
-Short answer: it is common. Across 24 studies of more than 35,000 women, about 31% had some urinary leaking between six weeks and one year after birth ([Moossdorff-Steinhauser et al., 2021](https://pmc.ncbi.nlm.nih.gov/articles/PMC8295150/)). Some of it settles by itself as the pelvic floor recovers. Leaking that is still there at three months, or that is changing what you are willing to do, is worth getting assessed. Common is not the same as something you have to accept.
+Short answer: it is common. Across 24 studies of more than 35,000 women, about 31% had some urinary leaking between six weeks and one year after birth ([Moossdorff-Steinhauser et al., 2021](https://pmc.ncbi.nlm.nih.gov/articles/PMC8295150/)). Some of it settles by itself as the pelvic floor recovers. Leaking that is still there at three months, or that is changing what you are willing to do, is worth getting assessed.
 
 "That's just what happens after babies" is still a very common thing for women to be told. The guidelines say otherwise: supervised pelvic floor muscle training is the recommended first treatment for stress and mixed urinary incontinence ([NICE](https://www.nice.org.uk/guidance/qs77/chapter/Quality-statement-4-Supervised-pelvic-floor-muscle-training)).
 

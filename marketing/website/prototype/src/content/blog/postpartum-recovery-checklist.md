@@ -16,7 +16,7 @@ ctaSlug: "web-wa"
 draft: false
 ---
 
-Recovery after birth normally takes around six to twelve weeks for the basics: bleeding that is heavy at first and fades over a few weeks, a perineum or caesarean wound that heals, tiredness, and bladder, bowel and pelvic floor control that gradually return. In Singapore, KK Women's and Children's Hospital (KKH) gives a postnatal check-up appointment at 4-6 weeks after delivery ([KKH](https://www.kkh.com.sg/symptoms-treatments/preparing-for-an-elective-planned-caesarean-section)). Some symptoms are not part of normal recovery and need a doctor without delay, and those come first below.
+Recovery after birth normally takes around six to twelve weeks for the basics: bleeding that is heavy at first and fades over a few weeks, a perineum or caesarean wound that heals, tiredness, and bladder, bowel and pelvic floor control that gradually return. In Singapore, KK Women's and Children's Hospital (KKH) gives a postnatal check-up appointment at 4-6 weeks after delivery ([KKH](https://www.kkh.com.sg/symptoms-treatments/preparing-for-an-elective-planned-caesarean-section)). Some symptoms are not part of normal recovery and need a doctor without delay.
 
 ## Which symptoms after birth need a doctor urgently?
 
@@ -60,7 +60,7 @@ It helps to write a list before you go, because appointments can feel rushed wit
 - A gap or bulge down the middle of your tummy. The NHS advises seeing your doctor if the gap is still obvious 8 weeks after birth ([NHS](https://www.nhs.uk/baby/support-and-services/your-post-pregnancy-body/)). Our [diastasis recti](/conditions/diastasis-recti/) page explains why the gap is only part of the picture.
 - Pain with sex, or worries about it.
 - Contraception. The NHS notes that you can get pregnant again from 3 weeks after birth, even if you are breastfeeding ([NHS](https://www.nhs.uk/pregnancy/labour-and-birth/after-the-birth/your-body/)).
-- How you are feeling, honestly.
+- How you are feeling.
 
 ## What about low mood and postnatal depression?
 

@@ -44,7 +44,7 @@ NICE suggests considering a 3-month supervised programme for women whose birth i
 
 ## What is a good starting routine?
 
-The table below is a starting point, not a prescription. The right amount depends on how your birth went and what your pelvic floor is doing, and a pelvic health physiotherapist can tailor it to you.
+The table below is a starting point, not a prescription. The right amount depends on how your birth went and what your pelvic floor is doing, and a pelvic health physiotherapist can adjust it for you.
 
 | Stage | Position | Slow holds | Quick squeezes | How often | Source |
 | --- | --- | --- | --- | --- | --- |
@@ -67,7 +67,7 @@ The NICE figure in the third row comes from its guideline on urinary incontinenc
 
 The evidence is clearer for prevention than for treatment. A 2020 Cochrane review of 46 trials found that structured pelvic floor training during pregnancy, in women who were not leaking, probably lowers the chance of leaking in late pregnancy and slightly lowers it 3-6 months after birth. For women who are already leaking after birth, the effect of training was uncertain, and the programmes studied varied a lot ([Woodley et al. 2020](https://pubmed.ncbi.nlm.nih.gov/32378735/)).
 
-That does not mean the exercises are pointless after birth. NICE still recommends encouraging pelvic floor training after birth, and recommends that training is supervised by a physiotherapist or other professional with the right expertise, who checks your technique and tailors the programme ([NICE NG210, 1.3.13-1.3.16](https://www.nice.org.uk/guidance/ng210/chapter/Recommendations)). Getting the technique right is a large part of the answer.
+That does not mean the exercises are pointless after birth. NICE still recommends encouraging pelvic floor training after birth, and recommends that training is supervised by a physiotherapist or other professional with the right expertise, who checks your technique and adjusts the programme ([NICE NG210, 1.3.13-1.3.16](https://www.nice.org.uk/guidance/ng210/chapter/Recommendations)). Getting the technique right is a large part of the answer.
 
 ## When should I get assessed instead of managing it myself?
 
