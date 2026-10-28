@@ -2,15 +2,21 @@
 """
 Cloud Run Job: ingest Plato /invoice into raw_plato.invoices_raw.
 
-Pulls every invoice with modified_at within the last LOOKBACK_DAYS via Plato's
-modified_since filter, stamps each with _loaded_at, and appends to BigQuery
-using a single load job (free tier). Dedupe to "latest version per invoice_id"
-happens in stg.invoices, so this stays append-only and idempotent.
+Pages Plato's invoice list, stamps each row with _loaded_at, and appends to
+BigQuery using a single load job (free tier). Dedupe to "latest version per
+invoice_id" happens in stg.invoices, so this stays append-only and idempotent.
+
+Plato ignores the modified_since filter on /invoice (verified 2026-10-27: a
+2-day window returned all 1,149 invoices), but it does return invoices newest
+first. So daytime runs stop once a full page is older than RECENT_DAYS by
+invoice date (~1-2 pages instead of ~58), and a nightly run with RECENT_DAYS=0
+sweeps everything to pick up payments on older invoices.
 
 Env vars:
   PLATO_DB         Plato database name              default: gojihealth
   PLATO_API_KEY    Plato bearer token               (required, from Secret Manager)
-  LOOKBACK_DAYS    How many days back to scan       default: 7
+  LOOKBACK_DAYS    modified_since sent to Plato     default: 7 (ignored by Plato)
+  RECENT_DAYS      Stop after invoices this old     default: 14 (0 = full sweep)
   BQ_PROJECT       Target BQ project                default: goji-bi
   BQ_DATASET       Target dataset                   default: raw_plato
   BQ_TABLE         Target table                     default: invoices_raw
@@ -38,6 +44,10 @@ log = logging.getLogger("plato-invoices-ingest")
 
 PLATO_BASE = "https://clinic.platomedical.com/api"
 PER_PAGE_SLEEP_S = 3
+# The key's 20 req/min is shared with the website booking form. Once Plato
+# reports this many or fewer left, wait for the window to reset rather than
+# take them, so a patient picking a date always has budget.
+PLATO_HEADROOM = 10
 TIMEOUT_S = 30
 
 
@@ -71,9 +81,30 @@ def paged_get(session: requests.Session, url: str,
             return
         yield from batch
         rem = r.headers.get("x-ratelimit-remaining")
-        # Plato resets every 60s; if we're nearly out, wait a full window.
-        time.sleep(60 if (rem and rem.isdigit() and int(rem) < 2) else PER_PAGE_SLEEP_S)
+        # Plato resets every 60s; leave PLATO_HEADROOM for the booking form.
+        time.sleep(60 if (rem and rem.isdigit() and int(rem) <= PLATO_HEADROOM)
+                   else PER_PAGE_SLEEP_S)
         page += 1
+
+
+def recent_only(invoices: Iterator[dict], cutoff_date: str | None,
+                page_size: int = 20) -> Iterator[dict]:
+    """Pass invoices through until a full page in a row is dated before
+    cutoff_date (YYYY-MM-DD), then stop so no further pages are requested.
+    Plato lists invoices newest first; rows without a date never count as old.
+    cutoff_date=None passes everything (full sweep)."""
+    older = 0
+    for inv in invoices:
+        yield inv
+        if not cutoff_date:
+            continue
+        day = (inv.get("date") or "")[:10]
+        if day and day < cutoff_date:
+            older += 1
+            if older >= page_size:
+                return
+        else:
+            older = 0
 
 
 def to_iso_utc(value: str | None) -> str | None:
@@ -94,6 +125,7 @@ def main() -> None:
     plato_db = env("PLATO_DB", "gojihealth", required=False)
     plato_key = env("PLATO_API_KEY")
     lookback_days = int(env("LOOKBACK_DAYS", "7", required=False))
+    recent_days = int(env("RECENT_DAYS", "14", required=False))
     bq_project = env("BQ_PROJECT", "goji-bi", required=False)
     bq_dataset = env("BQ_DATASET", "raw_plato", required=False)
     bq_table = env("BQ_TABLE", "invoices_raw", required=False)
@@ -101,11 +133,14 @@ def main() -> None:
     table_ref = f"{bq_project}.{bq_dataset}.{bq_table}"
     cutoff = datetime.now(timezone.utc) - timedelta(days=lookback_days)
     modified_since = cutoff.strftime("%Y-%m-%d %H:%M:%S")
+    recent_cutoff = ((datetime.now(timezone.utc) - timedelta(days=recent_days))
+                     .strftime("%Y-%m-%d") if recent_days > 0 else None)
     loaded_at_iso = datetime.now(timezone.utc).isoformat()
 
     log.info(
         f"plato_db={plato_db} lookback_days={lookback_days} "
-        f"modified_since={modified_since} target={table_ref}"
+        f"modified_since={modified_since} recent_cutoff={recent_cutoff or 'full sweep'} "
+        f"target={table_ref}"
     )
 
     session = requests.Session()
@@ -119,11 +154,11 @@ def main() -> None:
     rows: list[dict] = []
     seen_ids: set[str] = set()
     try:
-        for inv in paged_get(
+        for inv in recent_only(paged_get(
             session,
             f"{PLATO_BASE}/{plato_db}/invoice",
             {"modified_since": modified_since},
-        ):
+        ), recent_cutoff):
             # Plato returns the invoice id as `_id` (Mongo-style). Fall back to
             # `id` defensively in case a future API rev renames it.
             invoice_id = str(inv.get("_id") or inv.get("id") or "").strip()

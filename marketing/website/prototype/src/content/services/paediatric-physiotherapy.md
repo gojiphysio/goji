@@ -29,9 +29,9 @@ order: 1
 draft: false
 ---
 
-Paediatric physiotherapy supports children with movement, pain, injury and developmental concerns, from birth to 18 years.
+Every child develops and moves differently. From your baby's earliest milestones to your teenager's sporting injuries, our paediatric physiotherapists provide personalised care that supports your child's development, movement and physical confidence.
 
-As every child presents differently, the assessment and plan will depend on their age, symptoms, stage of development and individual goals. We offer 30-minute, 45-minute and 55-minute session lengths — for children aged 0-2 years, a 30-minute session may be a good fit; 45 minutes suits many school-age children; the full 55-minute appointment works best for comprehensive assessments.
+We work closely with parents and caregivers, so you leave with a clearer understanding of your child's needs and practical ways to support them.
 
 Note: The assessment and treatment described below are indicative. Your child's session will be tailored to their individual condition, needs and goals, and may be modified by your physiotherapist based on their clinical judgement.
 

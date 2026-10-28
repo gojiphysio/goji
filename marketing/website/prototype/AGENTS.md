@@ -23,8 +23,11 @@ so a token change reflows everything (styleguide is the QA surface).
 ## The watercolour look (Goji design system)
 - Source of truth is the Goji design system artifact
   (https://claude.ai/artifact/GGKPrziiY9GdwFqYLbW51t); `tokens.css` mirrors its
-  tokens, except type: the site keeps the brand pair (Plus Jakarta Sans SemiBold
-  display, Inter body), never italic. No uppercase eyebrow labels on the home page.
+  tokens. Type: Newsreader Medium (display optical size) for headings and
+  large brand quotes; Figtree for everything else (body, buttons, nav, labels,
+  prices). A heading under about 20px (FAQ question, card label) sets
+  `font-family: var(--font-body)` in SemiBold. Never italic. No uppercase
+  eyebrow labels on the home page.
 - **No arches or round-topped frames** (they read as a tombstone in Asian
   culture). Photos use the petal frame (`components/watercolor/PetalPhoto.astro`).
 - **No WhatsApp green**, not even on the glyph; WhatsApp CTAs are brand red
@@ -34,7 +37,10 @@ so a token change reflows everything (styleguide is the QA surface).
   `Goji.enhance()` on every page: use `components/watercolor/Bloom.astro`,
   `PaintedWord.astro`, `PetalPhoto paint`, `.gj-reveal`, `data-gj-wash`.
   Never put a reveal or a paint-in veil on above-the-fold content (LCP), and
-  never let motion gate content or scrolling.
+  never let motion gate content or scrolling. Paintings start when a sliver is
+  in view; on the site they run at `speed` 2.25-2.4 (`Bloom speed`,
+  `data-speed`), with short `data-delay` steps, so a reader scrolling at normal
+  pace sees them grow.
 
 ## Hard rules (inherited from repo + marketing AGENTS.md)
 - **Every CTA is a tracked link.** Route through `go.gojiphysio.com/<slug>` via
@@ -53,7 +59,10 @@ so a token change reflows everything (styleguide is the QA surface).
   `src/lib/booking.ts`) in the same PR, or the backend silently drops it.
   `service_selected` with `detail = "deep_link"` means step 1 was skipped (a
   service page's `/book/?service=…` link already filled it), so count those
-  apart when reading step-1 drop-off.
+  apart when reading step-1 drop-off. `detail = "no_focus"` means Continue was
+  tapped on Physiotherapy without a type: it books as "Not sure / other" and
+  step 3's optional answer lands in the Plato note as "Looking for: …", never
+  in `physio_focus` (that would re-filter clinicians after the slot was chosen).
 - **The landing beacon sends three event types**, all to `/api/web-event`:
   `session_start` / `page_view` on arrival, and `page_engagement` once per page
   load on first hide (`visibilitychange` → hidden, or `pagehide`), carrying
@@ -74,6 +83,10 @@ so a token change reflows everything (styleguide is the QA surface).
   for the brand promise, not a testimonial.
 - **Voice/style:** warm, plain, educational. Regular dashes (no emdashes), no
   emojis in brand copy, **never italic** (enforced in `base.css`).
+  Page intros say what the page has, plainly: no copy about the page itself
+  ("in plain language", "written out properly"), no hedge-then-reassure
+  ("Nothing here replaces X, but…"), no "Explore", "tailored", "journey",
+  "with confidence".
 - **Condition pages carry a clinician byline.** Every `conditions` entry sets a
   `reviewer: { name, slug }` (the reviewing physio, from the source doc). The
   detail template renders a "Reviewed by <name>" line linking to `/team/<slug>`
@@ -160,6 +173,15 @@ so a token change reflows everything (styleguide is the QA surface).
   must stay distinct: AHPC-registered physiotherapist-led vs STOTT PILATES®
   certified instructor-led, and Private package credits are never described as
   interchangeable with Clinical/S&C.
+- **Introductory prices.** While a promotion is active, `priceClinic`
+  (services frontmatter) / `price` (`services.ts`) hold the introductory price
+  and `priceUsual` the usual one; both render beside each other. Drop
+  `priceUsual` and restore the price when it ends. Home visits are the in-clinic
+  physiotherapy fee + $120 (physio and Mummy & Baby only, never Pilates or S&C).
+- **Internal-exam consent wording is one paragraph** across the pelvic floor,
+  prenatal, postpartum and Mummy & Baby pages ("... entirely optional ... only
+  with your informed consent ... Our physiotherapy team is currently
+  all-female."). Keep it identical; don't hard-code "all female" as a promise.
 - **Only claim a physical presence at Lentor.** Wider reach is "home visits
   across Singapore" — no neighbourhood pages implying a clinic elsewhere.
 - **Update `public/llms.txt` in the same PR** as any page/service/price/team
@@ -167,9 +189,9 @@ so a token change reflows everything (styleguide is the QA surface).
 - **Prices carry an "as of" month** (`SITE.pricesAsOf`, shown on `/services`,
   the hub and in `llms.txt`). Bump it in the same PR as any price change or
   re-confirmation; `check_dist.py` fails if `llms.txt` disagrees with the site.
-- **The phone number is visible as plain text** (`SITE.phone` in the footer,
-  homepage contact block and `/getting-here`), never a `tel:` link: a call link
-  can't go through the tracked redirector, and WhatsApp stays the primary CTA.
+- **The phone number is never a `tel:` link** (a call link can't go through the
+  tracked redirector). Where it is tappable (footer, `/getting-here`) it opens
+  WhatsApp through `cta("web-wa")`, so the tap is still tracked.
 - **Every image gets descriptive alt text** (what a sighted visitor sees, as a
   sentence), and key facts live in static HTML, never injected by script:
   answer engines and agents read the accessibility tree and raw HTML.

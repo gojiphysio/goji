@@ -32,7 +32,10 @@ const { service: s } = Astro.props;
     <span class="soption__meta">{s.meta.join(" · ")}</span>
   </span>
   {s.price && (
-    <span class="soption__price">${s.price}</span>
+    <span class="soption__price">
+      ${s.price}
+      {s.priceUsual && <span class="soption__usual">Introductory price (usual ${s.priceUsual})</span>}
+    </span>
   )}
   <span class="soption__tick" aria-hidden="true"></span>
 </label>
@@ -81,7 +84,7 @@ const { service: s } = Astro.props;
     min-width: 0;
   }
   .soption__name {
-    font-family: var(--font-display);
+    font-family: var(--font-body);
     font-weight: var(--weight-semibold);
     color: var(--text-default);
   }
@@ -90,11 +93,19 @@ const { service: s } = Astro.props;
     color: var(--text-muted);
   }
   .soption__price {
-    font-family: var(--font-display);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    font-family: var(--font-body);
     font-size: var(--fs-small);
     font-weight: var(--weight-semibold);
     color: var(--text-default);
     white-space: nowrap;
+  }
+  .soption__usual {
+    font-size: var(--fs-caption);
+    font-weight: var(--weight-regular, 400);
+    color: var(--text-muted);
   }
 
   /* Berry tick that fills in when the card is selected. */

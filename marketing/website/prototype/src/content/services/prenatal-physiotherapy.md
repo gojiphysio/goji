@@ -73,7 +73,7 @@ This is followed by a physical assessment tailored to your concerns, which may i
 - Functional tasks such as walking, squatting, lifting or balancing
 - Pelvic floor assessment via transabdominal ultrasound, external observation or internal vaginal examination, where relevant
 
-An internal vaginal examination is always optional and will only be performed when appropriate and with your informed consent. Rest assured that our physiotherapists are all female.
+Any internal pelvic floor examination will be explained beforehand and is entirely optional. It will only be performed when appropriate and with your informed consent, and you may decline or stop the examination at any time without affecting your care. Our physiotherapy team is currently all-female.
 
 Treatment may begin during the same session and may include:
 

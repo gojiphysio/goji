@@ -26,9 +26,9 @@ order: 2
 draft: false
 ---
 
-A comprehensive physiotherapy assessment to understand how your body is recovering after pregnancy and birth, and to create a clear plan for returning to daily activities, exercise and sport.
+Recovery after birth looks different for everyone. Whether you're a few weeks or several years postpartum, physiotherapy can help you better understand your body, address ongoing symptoms and work towards returning to the activities you love.
 
-Suitable after both vaginal and Caesarean birth, whether you are weeks, months or more than a year postpartum.
+Our physiotherapists support recovery after vaginal and Caesarean births, with care tailored to your symptoms and goals.
 
 Note: The assessment and treatment described below are indicative. Your session will be tailored to your individual condition, needs and goals, and may be modified by your physiotherapist based on their clinical judgement.
 
@@ -74,7 +74,7 @@ This is followed by a physical assessment tailored to your concerns, which may i
 - Caesarean and perineal scar assessment
 - Movement and functional testing
 
-An internal vaginal examination is always optional and will only be performed with your informed consent. Rest assured that our physiotherapists are all female.
+Any internal pelvic floor examination will be explained beforehand and is entirely optional. It will only be performed with your informed consent, and you may decline or stop the examination at any time without affecting your care. Our physiotherapy team is currently all-female.
 
 Treatment may begin during the same session and may include:
 

@@ -8,7 +8,7 @@ export const SITE = {
   name: "Goji Physiotherapy",
   fullName: "Goji Women's and Family Physiotherapy",
   promise:
-    "We're not here to fix you. We're here to help you feel confident in your body again.",
+    "Good physiotherapy is about more than treating symptoms. It's about helping you understand your body, move with confidence, and feel supported along the way.",
   tagline: "Care that grows with you.",
   seoTitle: "Goji Physiotherapy | Women's & Family Physio at Lentor MRT",
   seoDescription:

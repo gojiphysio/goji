@@ -42,8 +42,9 @@ const steps = [
     </legend>
 
     {/* The physiotherapy sub-type sits directly under the Physiotherapy option,
-        so choosing it is the immediate next step. It's required and narrows which
-        clinicians' calendars open (see src/lib/physioCategories.ts). */}
+        so choosing it is the immediate next step. It narrows which clinicians'
+        calendars open (see src/lib/physioCategories.ts). Skipping it books as
+        "Not sure / other" and step 3 asks again, optionally. */}
     <div class="booking__services" role="group" aria-label="Service">
       {services.filter((s) => !s.bookingHidden).map((s) => (
         <Fragment>
@@ -241,6 +242,21 @@ const steps = [
     </div>
     <p class="booking__suggest" data-email-suggest role="status" hidden></p>
 
+    {/* Shown only when Continue was tapped without a physiotherapy type. The
+        answer goes into the booking note for the clinic; it can't change the
+        type sent with the booking, since the slot was found across all physios. */}
+    <div class="field booking__late-focus" data-late-focus hidden>
+      <p class="field__label" id="late-focus-label">What's it mainly for? (optional)</p>
+      <div class="booking__toggle" role="radiogroup" aria-labelledby="late-focus-label">
+        {physioCategories.filter((c) => c.id !== "others").map((c) => (
+          <label class="pill">
+            <input class="pill__input visually-hidden" type="radio" name="lateFocus" value={c.id} />
+            <span class="pill__face">{c.label}</span>
+          </label>
+        ))}
+      </div>
+    </div>
+
     <div class="field booking__condition-field">
       <p class="field__label" id="notes-label">Tell us about your condition (optional)</p>
       <textarea
@@ -332,7 +348,7 @@ const steps = [
     border-radius: 50%;
     border: 1.5px solid var(--color-border-strong);
     background: var(--bg-content);
-    font-family: var(--font-display);
+    font-family: var(--font-body);
     font-size: var(--fs-small);
     font-weight: var(--weight-semibold);
     color: var(--text-muted);
@@ -433,7 +449,7 @@ const steps = [
   }
 
   .booking__sublabel {
-    font-family: var(--font-display);
+    font-family: var(--font-body);
     font-size: var(--fs-small);
     font-weight: var(--weight-semibold);
     color: var(--text-default);
@@ -505,7 +521,8 @@ const steps = [
     line-height: var(--lh-body);
   }
 
-  .booking__condition-field {
+  .booking__condition-field,
+  .booking__late-focus {
     gap: var(--space-3);
   }
   .booking__notes {
@@ -542,7 +559,7 @@ const steps = [
     margin-bottom: var(--space-3);
   }
   .cal__title {
-    font-family: var(--font-display);
+    font-family: var(--font-body);
     font-size: var(--fs-body);
     font-weight: var(--weight-semibold);
     color: var(--text-default);
@@ -726,7 +743,7 @@ const steps = [
     cursor: pointer;
     list-style: none;
     border-radius: var(--radius-md); /* keeps the focus ring on the card's shape */
-    font-family: var(--font-display);
+    font-family: var(--font-body);
     font-weight: var(--weight-semibold);
     color: var(--text-default);
   }
@@ -813,7 +830,7 @@ const steps = [
     outline-offset: 2px;
   }
   .copt__name {
-    font-family: var(--font-display);
+    font-family: var(--font-body);
     font-weight: var(--weight-semibold);
     color: var(--text-default);
   }
@@ -890,7 +907,7 @@ const steps = [
     outline-offset: 2px;
   }
   .fopt__name {
-    font-family: var(--font-display);
+    font-family: var(--font-body);
     font-weight: var(--weight-semibold);
     color: var(--text-default);
   }
@@ -950,7 +967,7 @@ const steps = [
   }
   .vopt__name {
     flex: 1;
-    font-family: var(--font-display);
+    font-family: var(--font-body);
     font-weight: var(--weight-semibold);
     color: var(--text-default);
   }
@@ -958,7 +975,7 @@ const steps = [
     font-weight: normal;
   }
   .vopt__price {
-    font-family: var(--font-display);
+    font-family: var(--font-body);
     font-weight: var(--weight-semibold);
     color: var(--text-muted);
   }
@@ -1192,6 +1209,9 @@ const steps = [
       stepEls.find((el) => el.dataset.step === String(n)) ?? null;
 
     let current = 1;
+    // Continue was tapped on Physiotherapy without a type: booked as "others"
+    // and asked again (optionally) on step 3.
+    let focusSkipped = false;
     let selectedTime = "";
     let availSeq = 0; // monotonic token so only the latest availability request renders
     let availTimer: ReturnType<typeof setTimeout> | undefined; // debounce handle
@@ -1213,7 +1233,10 @@ const steps = [
 
     /** Free-text detail the patient shares about their condition. */
     function composeNotes(): string {
-      return getValue("notes");
+      const notes = getValue("notes");
+      const late = focusSkipped ? physioCategories.find((c) => c.id === getChecked("lateFocus")) : undefined;
+      if (!late) return notes;
+      return `Looking for: ${late.label}${notes ? `\n${notes}` : ""}`;
     }
 
     function getChecked(name: string): string | null {
@@ -1304,6 +1327,7 @@ const steps = [
       (input) => {
         input.addEventListener("change", () => {
           setError("physioFocus", "");
+          focusSkipped = false;
           syncVariantVisibility();  // show/hide variant block based on sub-type
           filterClinicians();  // sub-type narrows the clinician set
           selectedTime = "";
@@ -1362,6 +1386,7 @@ const steps = [
         const isPhysio = svc.id === "physiotherapy";
         focusBlock.hidden = !isPhysio;
         if (!isPhysio) {
+          focusSkipped = false;
           setError("physioFocus", "");
           focusBlock
             .querySelectorAll<HTMLInputElement>('input[name="physioFocus"]')
@@ -1978,9 +2003,13 @@ const steps = [
           return false;
         }
         if (d.service === "physiotherapy" && !d.physioFocus) {
-          setError("physioFocus", "Please choose a type of physiotherapy.");
-          bookingApi.track("validation_error", "physioFocus");
-          return false;
+          // Don't block: "Not sure / other" opens every physio, and step 3
+          // asks again. Checked silently so "Change" shows what was assumed.
+          const others = form!.querySelector<HTMLInputElement>(
+            'input[name="physioFocus"][value="others"]',
+          );
+          if (others) others.checked = true;
+          focusSkipped = true;
         }
         if (d.physioFocus === "paediatrics" && !d.variant) {
           setError("variant", "Please choose a session duration.");
@@ -2109,14 +2138,18 @@ const steps = [
     function advance(scroll = true, detail?: string) {
       if (!validate(current)) return;
       if (current === 1) {
-        bookingApi.track("service_selected", detail);
+        bookingApi.track("service_selected", detail ?? (focusSkipped ? "no_focus" : undefined));
         buildRecap();
         cal?.rerender(); // shade the calendar for the step-1 selection
         cal?.autoPickFirstAvailable(); // never open the step on an empty date
         scheduleRefresh();
       }
       if (current === 2) bookingApi.track("time_selected");
-      if (current + 1 === 3) buildSummary();
+      if (current + 1 === 3) {
+        buildSummary();
+        const lateFocus = form!.querySelector<HTMLElement>("[data-late-focus]");
+        if (lateFocus) lateFocus.hidden = !focusSkipped;
+      }
       goto(current + 1, scroll);
     }
 
