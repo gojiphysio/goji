@@ -4,12 +4,9 @@ seoTitle: "Is Leaking After Birth Normal?"
 description: "Common, yes: about 1 in 3 women leak in the first year after birth. Early leaking often settles; if it's still there at three months, get it assessed."
 cardTitle: "Is leaking after birth normal?"
 cardLead: "Common is not the same as unavoidable. What tends to settle on its own, what does not, and the point at which it is worth getting assessed."
-pubDate: 2026-10-27
+pubDate: 2026-10-28
 category: "Pelvic & Perinatal Health"
 tags: ["pelvic floor", "postnatal", "incontinence"]
-author:
-  name: "Cheryl Long"
-  slug: "cheryl-long"
 relatedConditions: ["urinary-incontinence", "pelvic-organ-prolapse"]
 relatedServices: ["pelvic-floor-physiotherapy", "postpartum-physiotherapy"]
 heroImage: "/photos/services/pelvic-floor-physiotherapy.webp"

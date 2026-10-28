@@ -4,12 +4,9 @@ seoTitle: "Exercise After Birth: Weeks 0 to 12"
 description: "The six-week check clears healing, not running. Build strength first and add impact when your body passes load tests, not on a set date."
 cardTitle: "Returning to exercise after birth"
 cardLead: "Why the six-week check is not a starting gun, what each stage usually involves, and the signs that say slow down."
-pubDate: 2026-10-27
+pubDate: 2026-10-28
 category: "Movement & Fitness"
 tags: ["postnatal", "return to running", "strength"]
-author:
-  name: "Cheryl Long"
-  slug: "cheryl-long"
 relatedConditions: ["diastasis-recti", "pelvic-girdle-pain"]
 relatedServices: ["postpartum-physiotherapy", "clinical-pilates"]
 heroImage: "/photos/services/strength-conditioning.webp"

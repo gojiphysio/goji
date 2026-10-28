@@ -4,10 +4,7 @@ seoTitle: "Pelvic Floor Exercises After Birth"
 description: "Gentle pelvic floor squeezes can usually start in the first days after birth, if comfortable. How to do them, a starting routine and the mistakes to avoid."
 cardTitle: "Pelvic floor exercises after birth"
 cardLead: "How to find the right muscles, a simple starting routine, and the mistakes that make the exercises less useful."
-pubDate: 2026-10-27
-author:
-  name: "Cheryl Long"
-  slug: "cheryl-long"
+pubDate: 2026-10-28
 category: "Pelvic & Perinatal Health"
 tags: ["postnatal", "pelvic floor", "exercise"]
 relatedConditions: ["urinary-incontinence", "pelvic-organ-prolapse"]

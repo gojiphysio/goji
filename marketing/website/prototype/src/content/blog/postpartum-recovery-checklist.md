@@ -4,10 +4,7 @@ seoTitle: "Postpartum Recovery Checklist"
 description: "What normal recovery after birth looks like from week 1 to 12, when your postnatal check is due in Singapore, and the warning signs that need a doctor urgently."
 cardTitle: "Postpartum recovery checklist"
 cardLead: "A week-by-week checklist for the first twelve weeks after birth, with the warning signs that need a doctor straight away."
-pubDate: 2026-10-27
-author:
-  name: "Cheryl Long"
-  slug: "cheryl-long"
+pubDate: 2026-10-28
 category: "Pelvic & Perinatal Health"
 tags: ["postnatal", "recovery", "checklist"]
 relatedConditions: ["caesarean-recovery", "perineal-tear", "diastasis-recti"]
