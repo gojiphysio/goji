@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import FaqList from "../components/FaqList.astro";
 import Button from "../components/Button.astro";
 import Bloom from "../components/watercolor/Bloom.astro";
 import PaintedWord from "../components/watercolor/PaintedWord.astro";
@@ -481,19 +482,7 @@ const reviews = [
       <header class="sec-head gj-reveal">
         <h2>Frequently asked questions</h2>
       </header>
-      <div class="faq__list">
-        {faqs.map((item) => (
-          <details class="faq__item">
-            <summary class="faq__q">
-              {item.q}
-              <span class="accordion__toggle" aria-hidden="true" />
-            </summary>
-            <div class="faq__a">
-              <p>{item.a}</p>
-            </div>
-          </details>
-        ))}
-      </div>
+      <FaqList items={faqs} />
     </div>
   </section>
 
@@ -839,17 +828,6 @@ const reviews = [
   .faq { padding-block: 0 var(--section-y); }
   .faq__inner { display: grid; gap: var(--space-7); }
   @media (min-width: 900px) { .faq__inner { grid-template-columns: 4fr 7fr; gap: var(--space-9); align-items: start; } }
-  .faq__list { border-top: 1px solid var(--rule); }
-  .faq__item { border-bottom: 1px solid var(--rule); }
-  .faq__q {
-    display: flex; align-items: center; justify-content: space-between; gap: var(--space-5);
-    padding: var(--space-5) 0; cursor: pointer; list-style: none;
-    font-family: var(--font-body); font-variation-settings: var(--font-body-axes);
-    font-size: var(--fs-body); font-weight: var(--weight-semibold); letter-spacing: -0.005em; line-height: 1.4;
-  }
-  .faq__q::-webkit-details-marker { display: none; }
-  .faq__a { padding: 0 var(--space-8) var(--space-5) 0; }
-  .faq__a p { max-width: 38em; }
 
   /* ======================================================
      Promise (burgundy) + contact

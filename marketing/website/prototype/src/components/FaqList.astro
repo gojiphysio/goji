@@ -1,0 +1,59 @@
+---
+/**
+ * FAQ accordion: the one look for every on-page FAQ (home, services, hubs).
+ * Render it from the same `faqs` array as the page's FAQPage JSON-LD so the
+ * structured data always matches what is on the page.
+ */
+interface Props {
+  items: { q: string; a: string }[];
+  class?: string;
+}
+
+const { items, class: className = "" } = Astro.props;
+---
+
+<div class:list={["faq-list", className]}>
+  {items.map((item) => (
+    <details class="faq-list__item">
+      <summary class="faq-list__q">
+        {item.q}
+        <span class="faq-list__toggle" aria-hidden="true" />
+      </summary>
+      <div class="faq-list__a">
+        <p>{item.a}</p>
+      </div>
+    </details>
+  ))}
+</div>
+
+<style>
+  .faq-list { border-top: 1px solid var(--rule); }
+  /* Same gap under the "Frequently asked questions" heading on every page. */
+  :global(h2) + .faq-list { margin-top: var(--space-5); }
+  .faq-list__item { border-bottom: 1px solid var(--rule); }
+  .faq-list__q {
+    display: flex; align-items: center; justify-content: space-between; gap: var(--space-5);
+    padding: var(--space-5) 0; cursor: pointer; list-style: none;
+    font-family: var(--font-body); font-variation-settings: var(--font-body-axes);
+    font-size: var(--fs-body); font-weight: var(--weight-semibold); letter-spacing: -0.005em; line-height: 1.4;
+    color: var(--text-default);
+  }
+  .faq-list__q::-webkit-details-marker { display: none; }
+  .faq-list__a { padding: 0 var(--space-8) var(--space-5) 0; }
+  .faq-list__a p { max-width: 38em; line-height: var(--lh-body); }
+
+  /* Plus that turns into a minus. */
+  .faq-list__toggle {
+    position: relative; flex: none; width: 36px; height: 36px; border-radius: 50%;
+    border: 1.5px solid var(--color-border-strong);
+    transition: background var(--dur) var(--ease);
+  }
+  .faq-list__toggle::before, .faq-list__toggle::after {
+    content: ""; position: absolute; left: 50%; top: 50%; width: 12px; height: 1.5px;
+    background: var(--text-default); transform: translate(-50%, -50%);
+  }
+  .faq-list__toggle::after { transform: translate(-50%, -50%) rotate(90deg); transition: transform 400ms var(--ease); }
+  .faq-list__item[open] .faq-list__toggle { background: var(--color-linen-deep); }
+  .faq-list__item[open] .faq-list__toggle::after { transform: translate(-50%, -50%) rotate(0deg); }
+  .faq-list__q:hover .faq-list__toggle { border-color: var(--text-default); }
+</style>

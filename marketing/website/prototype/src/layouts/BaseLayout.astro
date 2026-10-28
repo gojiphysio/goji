@@ -138,7 +138,8 @@ const GADS_BOOKING_LABEL = import.meta.env.PUBLIC_GADS_BOOKING_LABEL;
     <meta name="description" content={description} />
     <link rel="canonical" href={canonicalURL.href} />
     {noindex && <meta name="robots" content="noindex" />}
-    <link rel="icon" type="image/png" href="/brand/logo_mark_transparent.png" />
+    <link rel="icon" type="image/png" sizes="96x96" href="/brand/favicon-96.png" />
+    <link rel="apple-touch-icon" href="/brand/apple-touch-icon.png" />
     <meta name="theme-color" content="#f7f2e0" />
 
     {/* First paint: preload the two faces above the fold so text paints in
@@ -787,8 +788,15 @@ const GADS_BOOKING_LABEL = import.meta.env.PUBLIC_GADS_BOOKING_LABEL;
     <script>
       // Watercolour engine: paints data-gj-bloom / data-gj-wash / data-gj-veil
       // elements and reveals .gj-reveal / .gj-mark as they scroll into view.
+      // Starts after the load event, when the browser is idle: painting a
+      // page-long wash is a long task, and running it first held back the hero
+      // photo (LCP) by seconds on a mid-range phone.
       import "../scripts/goji-watercolor.js";
-      (window as unknown as { Goji: { enhance: () => void } }).Goji.enhance();
+      const enhance = () => (window as unknown as { Goji: { enhance: () => void } }).Goji.enhance();
+      const whenIdle = () =>
+        "requestIdleCallback" in window ? requestIdleCallback(enhance, { timeout: 2000 }) : setTimeout(enhance, 200);
+      if (document.readyState === "complete") whenIdle();
+      else window.addEventListener("load", whenIdle, { once: true });
     </script>
 
     <script>

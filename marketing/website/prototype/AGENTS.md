@@ -26,8 +26,9 @@ so a token change reflows everything (styleguide is the QA surface).
   tokens. Type: Newsreader Medium (display optical size) for headings and
   large brand quotes; Figtree for everything else (body, buttons, nav, labels,
   prices). A heading under about 20px (FAQ question, card label) sets
-  `font-family: var(--font-body)` in SemiBold. Never italic. No uppercase
-  eyebrow labels on the home page.
+  `font-family: var(--font-body)` in SemiBold. Never italic. No eyebrow
+  labels above headings on any page (a label that repeats the H1 or the
+  section's own heading adds nothing); put needed info in the heading or meta line.
 - **No arches or round-topped frames** (they read as a tombstone in Asian
   culture). Photos use the petal frame (`components/watercolor/PetalPhoto.astro`).
 - **No WhatsApp green**, not even on the glyph; WhatsApp CTAs are brand red
@@ -40,7 +41,13 @@ so a token change reflows everything (styleguide is the QA surface).
   never let motion gate content or scrolling. Paintings start when a sliver is
   in view; on the site they run at `speed` 2.25-2.4 (`Bloom speed`,
   `data-speed`), with short `data-delay` steps, so a reader scrolling at normal
-  pace sees them grow.
+  pace sees them grow. `BaseLayout` starts the engine after `load`, when the
+  browser is idle: run first, the home page's page-long wash held the hero
+  photo (LCP) back by seconds. Page-local `data-reveal` scripts (getting-here,
+  postpartum) follow the same no-reveal-above-the-fold rule.
+- **Ship card-sized photos.** Blog cards use `<name>-800.webp` beside the full
+  photo when it exists (`cwebp -q 78 -resize 800 0 in.webp -o in-800.webp`);
+  make one when you add a post hero over ~60 KB. Lighthouse is the check.
 
 ## Hard rules (inherited from repo + marketing AGENTS.md)
 - **Every CTA is a tracked link.** Route through `go.gojiphysio.com/<slug>` via

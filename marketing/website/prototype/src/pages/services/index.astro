@@ -1,6 +1,7 @@
 ---
 import { getCollection } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import FaqList from "../../components/FaqList.astro";
 import Section from "../../components/Section.astro";
 import Button from "../../components/Button.astro";
 import { SITE } from "../../lib/site.ts";
@@ -188,12 +189,7 @@ const schema = {
     <!-- NEEDS CHERYL: when /blog/what-happens-at-your-first-physiotherapy-visit/ is approved and published, link the first-appointment answer to it. -->
     <div class="svc-faq-wrap">
       <h2>Frequently asked questions</h2>
-      {faqs.map((f) => (
-        <details class="svc-faq">
-          <summary>{f.q}</summary>
-          <p>{f.a}</p>
-        </details>
-      ))}
+      <FaqList items={faqs} />
     </div>
   </Section>
 
@@ -392,21 +388,6 @@ const schema = {
   }
   .svc-faq-wrap h2 {
     margin-bottom: var(--space-4);
-  }
-  .svc-faq {
-    border-top: 1px solid var(--color-border);
-    padding-block: var(--space-3);
-  }
-  .svc-faq:last-of-type { border-bottom: 1px solid var(--color-border); }
-  .svc-faq summary {
-    cursor: pointer;
-    font-weight: var(--weight-semibold);
-    color: var(--text-default);
-  }
-  .svc-faq p {
-    margin-top: var(--space-3);
-    margin-bottom: var(--space-2);
-    line-height: var(--lh-body);
   }
 
   .contact-strip {

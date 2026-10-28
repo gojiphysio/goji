@@ -97,7 +97,6 @@ const teamSchema = [
         )}
       </div>
       <div class="bio-hero__text">
-        <p class="eyebrow eyebrow--flower">Meet the team</p>
         <h1 class="bio-hero__name">{d.name}</h1>
         <p class="bio-hero__role">{d.role}</p>
         <p class="bio-hero__creds">{d.credentials}</p>
@@ -145,7 +144,7 @@ const teamSchema = [
   {/* ---- Approach ---- */}
   <section class="bio-approach">
     <div class="container bio-approach__inner">
-      {d.approachHeading && <h2 class="eyebrow">{d.approachHeading}</h2>}
+      {d.approachHeading && <h2 class="bio-approach__heading">{d.approachHeading}</h2>}
       <ApproachTag class="bio-approach__quote">{d.approach}</ApproachTag>
     </div>
   </section>
@@ -190,16 +189,6 @@ const teamSchema = [
 </BaseLayout>
 
 <style>
-  /* Swap the editorial red dash for the open goji bloom on this page's eyebrows.
-     bloom-4 is the full-open flower; the later frames are the wilt and the berry. */
-  .eyebrow--flower::before {
-    content: '';
-    width: 20px;
-    height: 20px;
-    background: url('/illustrations/bloom-4.png') center / contain no-repeat;
-    border-radius: 0;
-  }
-
   /* ---- Hero ---- */
   .bio-hero {
     background: var(--bg-page);
@@ -332,6 +321,12 @@ const teamSchema = [
   }
   .bio-approach__inner {
     max-width: var(--container-narrow);
+  }
+  .bio-approach__heading {
+    font-family: var(--font-body);
+    font-size: var(--fs-body);
+    font-weight: var(--weight-semibold);
+    color: var(--text-accent);
   }
   .bio-approach__quote {
     margin-top: var(--space-5);

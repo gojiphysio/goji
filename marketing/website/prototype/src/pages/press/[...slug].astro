@@ -100,10 +100,9 @@ const pressSchema = [
           </svg>
           All press
         </a>
-        <p class="article-category">{outlet}</p>
         <h1 class="article-title">{title}</h1>
         <p class="article-meta">
-          Published <time datetime={isoDate(pubDate)}>{formatDate(pubDate)}</time>
+          {outlet}, <time datetime={isoDate(pubDate)}>{formatDate(pubDate)}</time>
           {author && <span> &middot; by {author}</span>}
           {language === "zh" && <span> &middot; originally published in Chinese</span>}
         </p>
@@ -218,15 +217,6 @@ const pressSchema = [
     align-self: start;
   }
   .article-breadcrumb:hover { color: var(--color-primary); }
-
-  .article-category {
-    font-size: var(--fs-caption);
-    font-weight: var(--weight-semibold);
-    letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
-    color: var(--color-accent);
-    margin: 0;
-  }
 
   .article-title {
     font-size: clamp(1.75rem, 4vw, 2.5rem);

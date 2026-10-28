@@ -14,13 +14,20 @@
  * build, with no code change needed.
  */
 import { getCollection } from "astro:content";
-import PetalPhoto from "../../components/watercolor/PetalPhoto.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Section from "../../components/Section.astro";
 import Button from "../../components/Button.astro";
 import BerrySprig from "../../components/BerrySprig.astro";
 import { formatDate, isoDate } from "../../lib/dates.ts";
 import { clinicRef } from "../../lib/schema.ts";
+import { existsSync } from "node:fs";
+
+// Cards show the 800px copy of a hero photo (`<name>-800.webp`, made with
+// `cwebp -q 78 -resize 800 0`) when there is one; the full file is 2-4x heavier.
+const small = (src: string) => {
+  const v = src.replace(/\.webp$/, "-800.webp");
+  return existsSync(`public${v}`) ? v : src;
+};
 
 const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
   (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
@@ -91,7 +98,6 @@ const schema = hasPosts
       <Section tone="surface">
         <div class="blog-soon">
           <div class="blog-soon__text">
-            <p class="eyebrow">Coming soon</p>
             <h2>The first articles are being written</h2>
             <p class="blog-soon__lead">
               Our physiotherapists are drafting them now, and every one gets a
@@ -122,7 +128,16 @@ const schema = hasPosts
         <a href={`/blog/${featured.slug}/`} class="blog-feature">
           {featured.data.heroImage && (
             <div class="blog-feature__media">
-              <PetalPhoto src={featured.data.heroImage} alt={featured.data.heroAlt ?? ""} priority />
+              <img
+                src={featured.data.heroImage}
+                srcset={small(featured.data.heroImage) !== featured.data.heroImage ? `${small(featured.data.heroImage)} 800w, ${featured.data.heroImage} 1600w` : undefined}
+                sizes="(min-width: 760px) 50vw, 100vw"
+                alt={featured.data.heroAlt ?? ""}
+                width="760"
+                height="475"
+                loading="eager"
+                fetchpriority="high"
+              />
             </div>
           )}
           <div class="blog-feature__body">
@@ -149,7 +164,14 @@ const schema = hasPosts
           {rest.map((post) => (
             <a href={`/blog/${post.slug}/`} class="blog-card">
               {post.data.heroImage && (
-                <PetalPhoto src={post.data.heroImage} alt={post.data.heroAlt ?? ""} class="blog-card__media" flip />
+                <img
+                  src={small(post.data.heroImage)}
+                  alt={post.data.heroAlt ?? ""}
+                  width="480"
+                  height="300"
+                  loading="lazy"
+                  class="blog-card__media"
+                />
               )}
               <p class="blog-meta">
                 <span class="blog-badge">{post.data.category}</span>
@@ -279,17 +301,17 @@ const schema = hasPosts
   /* Grid items default to min-width:auto, so a photo could widen the card
      past a phone screen; let the columns shrink. */
   .blog-feature > * { min-width: 0; }
-  .blog-feature__media { background: var(--color-linen); padding: var(--space-4); }
-  .blog-feature__media :global(.gj-frame) {
+  /* The photo fills its half of the card, edge to edge. */
+  .blog-feature__media { background: var(--color-linen); }
+  .blog-feature__media img {
+    display: block;
     width: 100%;
+    height: 100%;
     aspect-ratio: 8 / 5;
+    object-fit: cover;
   }
   @media (min-width: 760px) {
-    .blog-feature__media :global(.gj-frame) {
-      height: 100%;
-      min-height: 260px;
-      aspect-ratio: auto;
-    }
+    .blog-feature__media img { min-height: 260px; aspect-ratio: auto; }
   }
   .blog-feature__body {
     display: flex;
@@ -335,9 +357,16 @@ const schema = hasPosts
     box-shadow: var(--shadow-md);
     transform: translateY(-2px);
   }
-  .blog-card :global(.blog-card__media) {
-    aspect-ratio: 3 / 2;
-    margin-bottom: var(--space-2);
+  /* Thumbnail bleeds to the card edges and fills the top of the card. */
+  .blog-card { overflow: hidden; }
+  .blog-card__media {
+    display: block;
+    width: calc(100% + 2 * var(--space-5));
+    max-width: none;
+    margin: calc(-1 * var(--space-5)) calc(-1 * var(--space-5)) var(--space-3);
+    aspect-ratio: 8 / 5;
+    object-fit: cover;
+    background: var(--color-linen);
   }
   .blog-card__title {
     font-size: var(--fs-h3);

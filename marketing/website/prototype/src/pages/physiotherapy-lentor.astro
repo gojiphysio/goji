@@ -5,6 +5,7 @@
  * Lentor Modern; wider coverage is via home visits, stated plainly.
  */
 import BaseLayout from "../layouts/BaseLayout.astro";
+import FaqList from "../components/FaqList.astro";
 import Section from "../components/Section.astro";
 import Button from "../components/Button.astro";
 import { SITE } from "../lib/site.ts";
@@ -118,12 +119,7 @@ const schema = [
       </p>
 
       <h2>Frequently asked questions</h2>
-      {faqs.map((f) => (
-        <details class="lentor-faq">
-          <summary>{f.q}</summary>
-          <p>{f.a}</p>
-        </details>
-      ))}
+      <FaqList items={faqs} />
     </div>
   </Section>
 
@@ -176,20 +172,6 @@ const schema = [
     text-underline-offset: 0.2em;
   }
 
-  .lentor-faq {
-    border-top: 1px solid var(--color-border);
-    padding-block: var(--space-3);
-  }
-  .lentor-faq:last-of-type { border-bottom: 1px solid var(--color-border); }
-  .lentor-faq summary {
-    cursor: pointer;
-    font-weight: var(--weight-semibold);
-    color: var(--text-default);
-  }
-  .lentor-faq p {
-    margin-top: var(--space-3);
-    margin-bottom: var(--space-2);
-  }
 
   .lentor-cta {
     display: grid;
