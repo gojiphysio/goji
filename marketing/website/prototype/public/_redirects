@@ -33,3 +33,4 @@
 # The /media hub (Blog + Press) was retired: Blog has its own nav item and
 # "Media" now means press coverage.
 /media              /press/      301
+/media/             /press/      301
