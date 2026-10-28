@@ -1,5 +1,8 @@
 # Handoff — Goji website
 
+> **Historical (last updated 2026-08).** Counts and status below are out of
+> date; `AGENTS.md` is the current guide.
+
 Pick-up notes for continuing this work in a local session.
 
 - **Project root:** `marketing/website/prototype/` (directory name is

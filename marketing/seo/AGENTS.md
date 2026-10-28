@@ -27,6 +27,8 @@ loop never self-merges them, and each must be sourced per
   `SEO tier gate` check fails a `tier-a` PR whose diff is not tier A, so a
   mislabel can't ship. Merge only when **SEO tier gate, Site checks and
   Cloudflare Pages** are all green (`gh pr checks`), then `gh pr merge --merge`.
+  In auto permission mode the merge can be refused as "merge without
+  review"; then leave the PR open and say so in the report rather than retry.
 - One concern per PR (e.g. "meta descriptions", "llms.txt sync"), so a bad
   change reverts cleanly.
 - Never split a B/C change into tier A pieces to get it through.

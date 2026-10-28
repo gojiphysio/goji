@@ -13,6 +13,21 @@ QA surface (noindexed).
 > scoped to this directory; `node_modules/`, `dist/`, `.astro/` are gitignored.
 > Astro + npm + Cloudflare Pages are all free (honours repo "Free/DIY first").
 
+## Fast path (commands agents kept rediscovering)
+From this directory:
+- Fresh worktree: `test -d node_modules || npm ci` first, or the
+  `website-prototype` preview fails with "astro: command not found".
+- Previews (`.claude/launch.json`): `website-prototype` = `astro dev` on 4232;
+  `website-preview` = built `dist/` on 4233 (`npm run build` first; needed for
+  search and Lighthouse).
+- SEO/AEO gate (CI runs it): `npm run build && python3 ../../seo/tools/check_dist.py --dist dist`.
+- Lighthouse (not installed globally), against `website-preview`:
+  `npx -y lighthouse@12 http://localhost:4233/ --only-categories=performance --form-factor=mobile --output=json --output-path=<scratch>/home.json --quiet --chrome-flags="--headless=new"`.
+- A PR's Cloudflare preview URL:
+  `gh pr view N --json comments --jq '.comments[].body' | grep -oE 'https://[a-z0-9]+\.goji-bgb\.pages\.dev'`.
+- Image scripts: system `python3` has no numpy/Pillow/cv2; use
+  `uv run --with numpy,pillow python …`. `sips` and `cwebp` cover resizing.
+
 ## The look lives in one file
 `src/styles/tokens.css` is the single knob. Colour, type scale, spacing, radius,
 shadow, and layout are all CSS custom properties. To retheme (warmer, softer,
@@ -29,6 +44,8 @@ so a token change reflows everything (styleguide is the QA surface).
   `font-family: var(--font-body)` in SemiBold. Never italic. No eyebrow
   labels above headings on any page (a label that repeats the H1 or the
   section's own heading adds nothing); put needed info in the heading or meta line.
+- **No Google rating badge or star score** anywhere, and no count badges
+  beside condition groups (owner decision).
 - **No arches or round-topped frames** (they read as a tombstone in Asian
   culture). Photos use the petal frame (`components/watercolor/PetalPhoto.astro`).
 - **No WhatsApp green**, not even on the glyph; WhatsApp CTAs are brand red
@@ -262,6 +279,10 @@ of `npm run build`. Config in `pagefind.yml`; Cloudflare Pages needs no change.
   `TYPE_ORDER` and `typeLabel` too) before it will group correctly.
 
 ## Gotchas worth remembering
+- **Keep the first paint unblocked.** Third-party tags (gtag/Ads, ~190 KB) load
+  after `window.onload`, with only the inline `dataLayer`/`gtag()` shim in the
+  head (#175); CSS is inlined (`build.inlineStylesheets: "always"`, #171). Add a
+  new pixel or tag the same deferred way, or Lighthouse regresses.
 - **`_redirects` beats static assets on Cloudflare Pages.** A wildcard rule
   shadows real pages under that path. `/blog/*` and `/blog` used to 301 to
   `/conditions` and had to be removed when the blog shipped; the legacy rule is
@@ -288,14 +309,8 @@ of `npm run build`. Config in `pagefind.yml`; Cloudflare Pages needs no change.
   doesn't reach into child components" rule, but easier to miss because the class
   *is* on the element you can see in devtools.
 
-## Run it
-See `README.md`. `npm install` then `npm run dev` (hot reload). `npm run build`
-+ `npm run preview` is the Cloudflare-Pages-parity dry run (serves `dist/`) and
-the only way to test search.
-
 ## Roadmap (remaining)
-Active focus (see `HANDOFF.md` for status): design polish (via `tokens.css`),
-more blog posts on the clusters in `../../seo/seo-geo-review.md` §3, and an
+Active focus: design polish (via `tokens.css`), more blog posts on the clusters in `../../seo/seo-geo-review.md` §3, and an
 enquiry-form handler (free/DIY, a Pages Function feeding the front-desk Leads
 pipeline). Deploy, content porting, SEO/schema, the Squarespace cutover, and
 the blog/press/search surfaces are done. Capture new rules here as they surface.
