@@ -441,6 +441,13 @@ const reviews = [
           <a href="https://maps.app.goo.gl/wBaCkBiDNfF7JCGv8" target="_blank" rel="noopener noreferrer">See all reviews on Google</a>
         </div>
       </div>
+      <PetalPhoto
+        src="/photos/space/community-class-warm.webp"
+        alt="Two smiling women sitting cross-legged on a mat, reaching into a side stretch as an instructor leads the class"
+        paint
+        position="50% 70%"
+        class="reviews__photo"
+      />
       <div class="reviews__wrap">
         <div class="reviews__track" id="reviewsTrack">
           {reviews.map((r) => (
@@ -790,6 +797,8 @@ const reviews = [
   .reviews__head { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: var(--space-5); }
   .reviews__rating { display: flex; align-items: center; gap: var(--space-3); font-size: var(--fs-small); }
   .reviews__rating a { color: var(--text-default); }
+  .reviews :global(.reviews__photo) { aspect-ratio: 3 / 2; margin-top: var(--space-7); box-shadow: var(--shadow-lg); }
+  @media (min-width: 768px) { .reviews :global(.reviews__photo) { aspect-ratio: 16 / 7; } }
   .reviews__wrap { margin-top: var(--space-7); }
   .reviews__track {
     display: grid; grid-auto-flow: column; grid-auto-columns: min(86%, 420px); gap: var(--space-5);
