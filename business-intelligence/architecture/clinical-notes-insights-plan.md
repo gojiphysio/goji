@@ -134,4 +134,56 @@ python3 insights.py run                      # step 3: full pull, 11 pm–6 am S
 notes (`cancel = 1`) are skipped; drafts are kept. Also present but unused:
 `diagnosis` (list), `author`, `signed`, `attachments`.
 
-_Full run not done yet._
+**Full run (2026-10-29, 00:44 – 08:14 SGT):** 1,276 notes, 256 patients,
+80 requests. 240/256 matched a patient record with a DOB. The Mac slept on
+and off, so a ~25 min job stretched past 06:00; pacing held (it paused
+whenever `x-ratelimit-remaining` dipped to 4–6) and 16 dropped connections
+were retried. Next time: plugged in, lid open.
+
+```
+Patients with notes: 256
+Aged 60+ (from Plato DOB): 18
+
+feature                            label                        n     %  of group
+-- weeks postpartum at first visit  [postpartum timing in first note: 34]
+                                   6-12 months                 13    38
+                                   3-6 months                   9    26
+                                   6-12 weeks                   7    21
+                                   1 year+                     <5      
+                                   under 6 weeks               <5      
+-- trimester at first visit  [pregnancy timing in first note: 33]
+                                   3rd                         18    55
+                                   1st                          8    24
+                                   2nd                          7    21
+-- birth type mentioned  [birth type in notes: 70]
+                                   vaginal                     40    57
+                                   c-section                   32    46
+                                   instrumental                16    23
+-- leaking/urgency reported  [postpartum patients: 70]
+                                   yes                         40    57
+-- diastasis measured  [postpartum patients: 70]
+                                   yes                         28    40
+-- pain location  [postpartum patients: 70]
+                                   back                        31    44
+                                   shoulder                     5     7
+                                   pelvic girdle                5     7
+                                   neck                        <5      
+                                   wrist/thumb                 <5      
+-- pain location  [all patients: 256]
+                                   back                        84    33
+                                   shoulder                    25    10
+                                   neck                        17     7
+                                   pelvic girdle               14     5
+                                   wrist/thumb                 10     4
+-- main goal  [patients with a goal recorded: 109]
+                                   exercise/sport              40    37
+                                   work                        16    15
+                                   running                     12    11
+                                   lifting/carrying baby        5     5
+                                   sleep                       <5      
+-- active-ageing goal  [aged 60+ with a goal recorded: <5]
+```
+
+Reading notes: birth types sum past 100% (more than one birth, VBAC, or a
+type mentioned in discussion). The 60+ group is too small (<5 with a goal) to
+publish. Postpartum = any postpartum mention in the notes.
