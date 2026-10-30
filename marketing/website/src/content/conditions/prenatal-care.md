@@ -55,7 +55,7 @@ In most uncomplicated pregnancies, yes - and the evidence supports staying activ
 
 The third trimester is an evidence-supported window to prepare the pelvic floor and body for labour. This is distinct from standard antenatal classes - it focuses specifically on the physiology of the pelvic floor during active labour:
 
-- Perineal preparation: evidence from randomised controlled trials supports perineal massage from 34-36 weeks in reducing the risk of third- and fourth-degree perineal tears
+- Perineal preparation: in randomised trials, perineal massage from around 34-35 weeks lowered the chance of a tear or episiotomy needing stitches, mainly in a first vaginal birth. It did not change the rate of third- and fourth-degree tears
 
 - Breathing strategies: how to use intra-abdominal pressure effectively in the second stage of labour, rather than defaulting to sustained breath-holding
 
