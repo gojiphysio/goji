@@ -163,6 +163,11 @@ See `DEPLOY.md`.
   `_WEB_PAGE_CASE_SQL` bucket it into Home / Booking / Conditions / … — that's the
   per-page split, no new site tracking needed. Keep the buckets in sync with the
   site's route tree.
+- **Tap counts are real taps, filtered in SQL.** `fetch_link_clicks` drops
+  `BOT_UA_RE` user agents on every slug, and keeps a `web-*` tap only if its
+  `?sid=` session started under 6h earlier with a visitor id. Crawlers, Google's
+  Nexus-5X renderer and our own QA/audit tabs inflated raw web-wa taps 8x
+  (Oct 2026: 283 raw → 35 real). Any new tap reader reuses the same predicate.
 - **Golden flow = on-site path + booking drop-off + CTA session passthrough.**
   `fetch_onsite_flow` classifies booking-page sessions as booked / bailed-to-
   WhatsApp / dropped by joining `link_click_events.session_id` →
