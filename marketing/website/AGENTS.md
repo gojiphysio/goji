@@ -98,7 +98,10 @@ so a token change reflows everything (styleguide is the QA surface).
   seen" and pins the metric at 100 forever — measure on scroll and at flush),
   and **use `fetch(..., {keepalive:true})`, not `sendBeacon`** (the API is
   cross-origin and `sendBeacon` can't run the CORS preflight a JSON body needs,
-  so the browser drops it on unload without an error).
+  so the browser drops it on unload without an error). A third: the arrival
+  source is the body's `referrer` (`document.referrer`), **never** the request's
+  Referer header, which is always our own page; rows before Nov 2026 stored the
+  header, so their referer is gojiphysio.com and organic vs direct is unknowable.
 - **Compliance is a hard constraint** (`marketing/strategy/03-compliance-guardrails.md`).
   Applies to placeholder copy too: no cure/outcome/time guarantees, no
   superlatives ("best/leading/No.1"), no comparative claims, no before/after

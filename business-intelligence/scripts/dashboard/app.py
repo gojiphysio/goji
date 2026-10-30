@@ -1873,9 +1873,15 @@ CASE
   WHEN (fbclid IS NOT NULL AND fbclid != '') OR LOWER(utm_source) IN ('facebook','meta','fb') THEN 'Meta Ads'
   WHEN LOWER(utm_source) IN ('instagram','ig') OR REGEXP_CONTAINS(LOWER(referer), r'instagram') THEN 'Instagram'
   WHEN LOWER(utm_source) LIKE 'gbp%' OR LOWER(utm_source) LIKE 'google_business%' THEN 'Google'
+  WHEN LOWER(utm_source) IN ('chatgpt.com','perplexity','openai')
+    OR REGEXP_CONTAINS(LOWER(referer), r'^https?://([a-z0-9-]+\\.)*(chatgpt\\.com|openai\\.com|perplexity\\.ai|claude\\.ai|gemini\\.google\\.com|copilot\\.microsoft\\.com)') THEN 'AI assistants'
   WHEN LOWER(utm_source) LIKE 'google%' OR REGEXP_CONTAINS(LOWER(referer), r'google\\.') THEN 'Google'
+  WHEN REGEXP_CONTAINS(LOWER(referer), r'^https?://([a-z0-9-]+\\.)*(bing\\.com|duckduckgo\\.com|search\\.yahoo\\.com|ecosia\\.org|search\\.brave\\.com)') THEN 'Other search'
   WHEN utm_source IS NOT NULL AND utm_source != '' THEN utm_source
   WHEN referer IS NULL OR referer = '' THEN 'Direct'
+  -- Our own domain (pre-Nov-2026 rows stored the page URL, not the visitor's
+  -- referrer; a new tab opened from the site does the same) is not a referral.
+  WHEN REGEXP_CONTAINS(LOWER(referer), r'^https?://([a-z0-9-]+\\.)*(gojiphysio\\.com|goji-bgb\\.pages\\.dev)') THEN 'Direct'
   ELSE 'Referral'
 END
 """
