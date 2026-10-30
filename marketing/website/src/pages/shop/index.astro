@@ -45,9 +45,6 @@ const schema = {
           card or PayNow, and we'll WhatsApp you within one working day to
           arrange your first session.
         </p>
-        <p class="shop-hero__note">
-          Unused sessions are always refundable. See our <a href="/terms/">shop terms</a>.
-        </p>
         <nav class="shop-jump" aria-label="Shop collections">
           {SHOP.map((c) => <a href={`#${c.id}`}>{c.title}</a>)}
         </nav>
@@ -128,13 +125,6 @@ const schema = {
   .shop-hero__grid { display: grid; gap: clamp(var(--space-5), 4vw, var(--space-7)); align-items: center; }
   .shop-hero__text { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-3); }
   .shop-hero__lead { color: var(--text-muted); line-height: var(--lh-body); max-width: 54ch; }
-  .shop-hero__note {
-    font-size: var(--fs-small);
-    color: var(--text-muted);
-    padding-left: var(--space-4);
-    border-left: 3px solid var(--color-primary);
-  }
-  .shop-hero__note a { color: var(--color-primary); text-decoration: underline; text-underline-offset: 0.2em; }
   .shop-hero__sprig { display: none; justify-self: center; width: min(100%, 380px); }
   .shop-jump { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-3); }
   .shop-jump a {
