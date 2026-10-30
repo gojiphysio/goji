@@ -596,10 +596,39 @@ def test_pay_slug_without_link_falls_back_to_shop(client, monkeypatch, _no_click
 
 def test_pay_clicks_are_not_counted_as_whatsapp(monkeypatch):
     rows = [{"slug": "web-pay-cpsc-5", "clicks": 4}, {"slug": "web-wa", "clicks": 2}]
-    monkeypatch.setattr(app, "_query", lambda sql: rows)
+    monkeypatch.setattr(app, "_query", lambda sql, *a, **k: rows)
     lc = app.fetch_link_clicks(TODAY, TODAY)
     assert lc["wa_by_slug"] == {"web-wa": 2}
     assert lc["whatsapp"] == 2 and lc["booking"] == 0
+
+
+def test_fetch_link_clicks_counts_real_taps_only(monkeypatch):
+    # Bots, tooling and stale on-site sessions must be filtered in the query,
+    # not after it: raw taps were up to 8x real in Oct 2026.
+    seen = {}
+
+    def _fake(sql, *a, **k):
+        seen["sql"] = sql
+        return [{"slug": "web-wa", "clicks": 4}, {"slug": "gbp-book", "clicks": 2},
+                {"slug": ".env", "clicks": 17}]
+    monkeypatch.setattr(app, "_query", _fake)
+    r = app.fetch_link_clicks(TODAY - timedelta(days=30), TODAY)
+    assert r["wa_by_slug"] == {"web-wa": 4} and r["book_by_slug"] == {"gbp-book": 2}
+    sql = seen["sql"]
+    assert "REGEXP_CONTAINS(LOWER(c.user_agent)" in sql and "nexus 5x build/mmb29p" in sql
+    assert "INTERVAL 6 HOUR" in sql and "STARTS_WITH(c.slug, 'web-')" in sql
+
+
+def test_bot_ua_re_matches_tooling_not_phones():
+    import re
+    bot = re.compile(app.BOT_UA_RE)
+    for ua in ("Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 Chrome/153.0",
+               "Mozilla/5.0 (compatible; bingbot/2.0)", "facebookexternalhit/1.1",
+               "Mozilla/5.0 (compatible; GojiSiteAudit/1.0)", "python-requests/2.32"):
+        assert bot.search(ua.lower()), ua
+    for ua in ("Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148 Safari/604.1",
+               "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 Chrome/141.0 Mobile Safari/537.36"):
+        assert not bot.search(ua.lower()), ua
 
 
 def test_booking_funnel_labels_include_details():

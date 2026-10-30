@@ -481,13 +481,21 @@ def web_event_row(data, user_agent, referer) -> dict:
 
     Pure (bar the uuid/clock) so the coercion rules are unit-testable: the
     endpoint is public and unauthenticated, so every value here is untrusted.
+
+    `referer` must be the visitor's `document.referrer` (the body's `referrer`),
+    never the HTTP Referer header: the beacon is a cross-origin fetch from our
+    own page, so the header is always gojiphysio.com and every arrival looked
+    like a self-referral (Jul–Oct 2026). An empty body value is a real Direct.
+    The header is only a fallback for a payload with no `referrer` key at all.
     """
+    body_ref = data.get("referrer")
+    ref = body_ref if body_ref is not None else referer
     row = {
         "event_id": str(uuid.uuid4()),
         "event_type": str(data.get("event_type") or "page_view")[:32],
         "occurred_at": datetime.now(timezone.utc).isoformat(),
         "user_agent": ((user_agent or "")[:512] or None),
-        "referer": ((referer or data.get("referrer") or "")[:512] or None),
+        "referer": ((str(ref or ""))[:512] or None),
     }
     # Copy known string fields when present (keeps the row tidy; unknown keys
     # from a future beacon version are simply ignored).
