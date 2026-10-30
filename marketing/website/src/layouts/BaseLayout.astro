@@ -103,6 +103,7 @@ const nav = [
   { href: "/blog/", label: "Blog" },
   { href: isHome ? "#team" : "/#team", label: "Team" },
   { href: "/getting-here/", label: "Find us" },
+  { href: "/shop/", label: "Shop" },
 ];
 
 // GA4 (website tracking). Inert until PUBLIC_GA4_ID is set in the Cloudflare
@@ -498,7 +499,7 @@ const GADS_BOOKING_LABEL = import.meta.env.PUBLIC_GADS_BOOKING_LABEL;
             </nav>
           </div>
           <div class="container site-footer__copyright">
-            <p>&copy; {new Date().getFullYear()} Goji Health. All rights reserved. &middot; <a href="/privacy/">Privacy</a></p>
+            <p>&copy; {new Date().getFullYear()} Goji Health. All rights reserved. &middot; <a href="/shop/">Shop</a> &middot; <a href="/terms/">Shop terms</a> &middot; <a href="/privacy/">Privacy</a></p>
           </div>
         </footer>
       )
@@ -573,10 +574,10 @@ const GADS_BOOKING_LABEL = import.meta.env.PUBLIC_GADS_BOOKING_LABEL;
           display: flex;
         }
       }
-      /* Seven links fit at 880px only with a tighter gap. */
+      /* Eight links fit at 880px only with a tighter gap. */
       @media (min-width: 880px) and (max-width: 1023px) {
         .site-nav {
-          gap: var(--space-4);
+          gap: var(--space-3);
         }
       }
 

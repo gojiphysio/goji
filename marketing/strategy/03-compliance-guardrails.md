@@ -21,7 +21,7 @@ Three regimes exist. How hard they bite depends on the lane and on Goji's licenc
 2. **Medicines (Advertisement and Sale) Act (MASA)** - restricts advertising the *treatment of an ailment, disease, injury or condition*. Bites in Lane A. Largely irrelevant to Lane B.
 3. **HCSA Advertisement Regulations** - the strict list (no superlatives, no before/after, no discounts/packages in ads, etc.). These apply to *licensable* healthcare services. **Confirmed June 2026: Goji's physiotherapy is not currently a licensable service under HCSA. The physiotherapists hold individual AHPC licences; the business is not MOH-licensed. The HCSA strict list is therefore best practice (not law) for Lane A. The AHPC Code of Professional Conduct and MASA are the binding floor.** Use Embrace Physiotherapy and Physio Down Under as benchmarks — both operate under the same licensing model.
 
-**Why this does not limit us:** our Lane A strategy is education-first and conservative either way. We do not plan to use discounts, before/after imagery, or testimonials on the clinical side. The content we produce already complies with both the best-practice HCSA list and the binding AHPC floor. Confirm borderline Lane A claim wording with AHPC or a healthcare lawyer before any clinical promotion goes live.
+**Why this does not limit us:** our Lane A strategy is education-first and conservative either way. We do not plan to use before/after imagery or testimonials on the clinical side; packages of existing services are allowed under the AHPC floor (see Lane A). The content we produce already complies with both the best-practice HCSA list and the binding AHPC floor. Confirm borderline Lane A claim wording with AHPC or a healthcare lawyer before any clinical promotion goes live.
 
 ---
 
@@ -35,7 +35,8 @@ Covers: pelvic floor dysfunction, diastasis recti, incontinence, pre/post-natal 
 - No comparative claims against other named or implied providers.
 - No before/after photos in advertising (allowed only inside a private consultation).
 - No unsubstantiated or embellished clinical claims - every claim defensible with evidence.
-- Treat discounts/packages and testimonials as **off-limits by default** (best practice; the AHPC Code restricts inducing unnecessary demand, and HCSA compliance is the standard we hold ourselves to regardless of legal obligation).
+- Treat testimonials as **off-limits by default** (best practice; HCSA compliance is the standard we hold ourselves to on testimonials regardless of legal obligation).
+- **Packages and courses are allowed** (owner decision, 30 Oct 2026; HCSA does not bind us and the old default was stricter than the law). They repackage existing services, so they can be sold on the site, including physio-containing courses such as pre/postnatal. Keep the AHPC floor: an exact package price stated plainly, no outcome claim attached to the package, no urgency or pressure framing ("today only", countdowns), and unused sessions refundable (`/terms`).
 
 **Clear YES:**
 - Factual descriptions of what we assess and how a session works.
@@ -91,7 +92,8 @@ For every asset, first decide the lane, then check:
 - [ ] No cure/outcome/time guarantee
 - [ ] No superlative or comparative claim
 - [ ] No before/after imagery
-- [ ] No discount/package/testimonial (AHPC Code + best practice; apply regardless of HCSA obligation)
+- [ ] No testimonial (best practice; apply regardless of HCSA obligation)
+- [ ] Any package is plainly priced, carries no outcome claim or pressure framing, and is refundable for unused sessions (AHPC floor)
 - [ ] Every clinical claim defensible with evidence
 - [ ] Framed as education / "can help", not "will fix"
 

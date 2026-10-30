@@ -90,6 +90,7 @@ export default defineConfig({
         !page.includes("/styleguide") &&
         !page.includes("/search") &&
         !page.includes("/links") &&
+        !page.includes("/shop/thanks") &&
         (blogHasPosts || !page.includes("/blog")),
       serialize: (item) => {
         const lastmod = lastmodFor(item.url);

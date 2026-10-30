@@ -1,0 +1,32 @@
+---
+/**
+ * /shop/thanks — where every Stripe Payment Link lands after payment
+ * (after_completion redirect, `?item=<key>`). Noindexed and out of the sitemap.
+ */
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Section from "../../components/Section.astro";
+import Button from "../../components/Button.astro";
+import { CTA } from "../../lib/links.ts";
+---
+
+<BaseLayout
+  title="Thank you | Goji Physiotherapy"
+  description="Thank you for your purchase from Goji."
+  noindex
+  searchable={false}
+>
+  <Section tone="linen" narrow>
+    <h1>Thank you</h1>
+    <p class="thanks">
+      Your payment went through and Stripe has emailed your receipt. We'll
+      WhatsApp you within one working day to book your first session or send
+      your voucher code.
+    </p>
+    <p class="thanks">If you'd like to get started sooner, message us now.</p>
+    <Button slug={CTA.whatsapp.slug} variant="whatsapp">{CTA.whatsapp.label}</Button>
+  </Section>
+</BaseLayout>
+
+<style>
+  .thanks { color: var(--text-muted); margin-block: var(--space-4); line-height: var(--lh-body); }
+</style>

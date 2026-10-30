@@ -1,0 +1,109 @@
+---
+/**
+ * Shop terms — linked from /shop and from every Stripe Payment Link's submit
+ * message. Update "Last updated" whenever a term changes; a change applies to
+ * purchases made after that date.
+ */
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Section from "../components/Section.astro";
+import { SITE } from "../lib/site.ts";
+
+const lastUpdated = "30 October 2026";
+---
+
+<BaseLayout
+  title="Shop Terms | Goji Health"
+  description="Terms for packages and gift vouchers bought from the Goji website: validity, cancellations, refunds and vouchers."
+  searchable={false}
+>
+  <section class="legal-header">
+    <div class="container legal-header__inner">
+      <h1>Shop Terms</h1>
+      <p class="legal-updated">Last updated: {lastUpdated}</p>
+    </div>
+  </section>
+
+  <Section tone="surface">
+    <div class="legal container--narrow">
+      <p>
+        These terms apply to packages and gift vouchers bought from the
+        {SITE.fullName} ("Goji", "we", "us") website. Payments are processed by
+        Stripe. By paying, you agree to these terms.
+      </p>
+
+      <h2>Packages</h2>
+      <ul>
+        <li>A package is valid for 12 months from the date of purchase.</li>
+        <li>
+          Clinical Pilates and Strength & Conditioning packages can be used for
+          either service. Private Pilates packages are for Private Pilates only.
+        </li>
+        <li>
+          A 1:1 package is for the person named at checkout. A 2:1 package is for
+          the two people named at checkout, attending together.
+        </li>
+        <li>We'll WhatsApp you within one working day of payment to book your first session.</li>
+      </ul>
+
+      <h2>Cancellations</h2>
+      <p>
+        Please give at least 24 hours' notice to cancel or move a session. A
+        session cancelled with less notice, or missed, is deducted from your
+        package.
+      </p>
+
+      <h2>Refunds</h2>
+      <ul>
+        <li>
+          You can ask for a refund of a package's unused sessions at any time
+          while it is valid. We refund the amount paid less the sessions already
+          used, each charged at the usual single-session price.
+        </li>
+        <li>If we can no longer provide your sessions, we refund every unused session in full.</li>
+        <li>Refunds go back to the original payment method within 14 days.</li>
+      </ul>
+
+      <h2>Gift vouchers</h2>
+      <ul>
+        <li>A gift voucher is valid for 12 months from the date of purchase.</li>
+        <li>It can be used towards any Goji service, and part-used balances carry over until it expires.</li>
+        <li>Gift vouchers cannot be exchanged for cash. A voucher bought by mistake can be refunded within 14 days if it has not been used.</li>
+      </ul>
+
+      <h2>Your health</h2>
+      <p>
+        Please tell your instructor or physiotherapist about any injury, health
+        condition or pregnancy before your first session. If a session isn't
+        suitable for you, we'll suggest an alternative or refund the unused
+        sessions.
+      </p>
+
+      <h2>Contact</h2>
+      <p>
+        Questions about a purchase: email <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.
+        How we handle your details is set out in our <a href="/privacy/">Privacy Policy</a>.
+      </p>
+    </div>
+  </Section>
+</BaseLayout>
+
+<style>
+  .legal-header {
+    background: var(--bg-page);
+    padding-block: clamp(2rem, 1.5rem + 3vw, 4rem);
+    border-bottom: 1px solid var(--color-border);
+  }
+  .legal-header__inner { display: flex; flex-direction: column; gap: var(--space-2); }
+  .legal-updated { color: var(--text-muted); font-size: var(--fs-small); }
+  .legal :global(h2) { margin-top: var(--space-7); margin-bottom: var(--space-3); }
+  .legal :global(p) { color: var(--text-muted); margin-bottom: var(--space-4); line-height: var(--lh-body); }
+  .legal :global(ul) {
+    color: var(--text-muted);
+    margin-bottom: var(--space-4);
+    padding-left: 1.4rem;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  .legal :global(a) { color: var(--color-primary); text-decoration: underline; text-underline-offset: 0.2em; }
+</style>
