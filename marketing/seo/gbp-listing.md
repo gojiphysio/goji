@@ -85,8 +85,12 @@ Postnatal Physiotherapy · Mummy & Baby Assessment · Paediatric Physiotherapy �
 Clinical Pilates · Strength & Conditioning · Lymphoedema Physiotherapy ·
 Vestibular Rehabilitation
 
-**Add: Pelvic Floor Physiotherapy.** It's missing from the list above. Then
-paste a description into each service (GBP allows 300 characters). Why: Search
+**On the profile since 30 Oct 2026** (submitted; Google reviews edits for up
+to a day). Before that the profile had no services at all, so the list above
+was never live. The seven below were added as custom services under the
+Physiotherapist category, each with its description (GBP allows 300
+characters). Still to add: Physiotherapy, Paediatric Physiotherapy,
+Lymphoedema Physiotherapy, Vestibular Rehabilitation. Why: Search
 Console shows Goji at positions 1-4 for "women's physio singapore",
 "postnatal physio", "pelvic floor therapy" and "physiotherapy", with about 0
 website clicks. Those are Maps-pack impressions, where the services list
