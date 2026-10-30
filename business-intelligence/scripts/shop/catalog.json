@@ -73,9 +73,17 @@
       }
     },
     {
-      "key": "socks",
-      "name": "Goji socks",
-      "description": "One pair of Goji socks, collected at the clinic.",
+      "key": "socks-girl",
+      "name": "Goji Girl Socks",
+      "description": "One pair of Goji Girl Socks, collected at the clinic.",
+      "kind": "merch",
+      "amount": 2500,
+      "inferred": true
+    },
+    {
+      "key": "socks-gang",
+      "name": "Goji Gang Socks",
+      "description": "One pair of Goji Gang Socks, collected at the clinic.",
       "kind": "merch",
       "amount": 2500,
       "inferred": true

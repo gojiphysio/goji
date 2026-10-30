@@ -87,13 +87,14 @@ export const SHOP: ShopCollection[] = [
     ],
   },
   {
-    id: "goji-socks",
-    title: "Goji socks",
+    id: "goji-gang-merch",
+    title: "Goji Gang merch",
     lead: "Our own socks, in Goji colours. Collect them at the clinic on your next visit.",
     bloom: "flower",
     artCaption: "Photos coming soon",
     options: [
-      { key: "socks", name: "Goji socks", detail: "One pair, collect at the clinic", price: "$25", status: "buy", slug: "web-pay-socks" },
+      { key: "socks-girl", name: "Goji Girl Socks", detail: "One pair, collect at the clinic", price: "$25", status: "buy", slug: "web-pay-socks-girl" },
+      { key: "socks-gang", name: "Goji Gang Socks", detail: "One pair, collect at the clinic", price: "$25", status: "buy", slug: "web-pay-socks-gang" },
     ],
   },
 ];
