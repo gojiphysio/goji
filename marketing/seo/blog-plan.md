@@ -37,6 +37,11 @@ per cluster): `seo-geo-review.md` §3. Every target query goes into
 | `/blog/diastasis-recti-physio-or-surgery/` | 2026-10-27 |
 | `/blog/exercise-for-osteoporosis/` | 2026-10-27 |
 | `/blog/preparing-your-body-for-pregnancy/` | 2026-10-27 |
+| `/blog/perineal-massage-before-birth/` | on merge |
+| `/blog/c-section-scar-massage/` | on merge |
+| `/blog/postpartum-belly-binder/` | on merge |
+| `/blog/postnatal-physio-home-visit/` | on merge |
+| `/blog/postnatal-exercise-singapore/` | on merge |
 - Instagram reels become posts only when they teach something; team and
   lifestyle reels don't.
 

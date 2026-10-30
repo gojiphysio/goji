@@ -168,6 +168,12 @@ condition/service page that owns the cluster)**
 | prenatal classes singapore, antenatal classes singapore | /blog/prenatal-classes-singapore | **Live 2026-10-27** (team byline, no clinician review yet) |
 | lentor modern nursing room, lentor with a baby | /blog/lentor-modern-with-a-baby (supports /physiotherapy-lentor) | **Live 2026-10-27** (team byline, no clinician review yet) |
 | goji physio opening, goji lentor modern | /blog/goji-grand-opening-lentor-modern (branded; homepage owns the brand query) | **Live 2026-10-27** (team byline, no clinician review yet) |
+| medisave physiotherapy, insurance claim physio singapore | /blog/medisave-insurance-for-physiotherapy | **Live on merge** (team byline, physio review after publishing) |
+| postnatal physio home visit, physio come to my home after birth | /blog/postnatal-physio-home-visit (supports /services/postpartum-physiotherapy) | **Live on merge** (team byline, physio review after publishing) |
+| perineal massage singapore, how to do perineal massage | /blog/perineal-massage-before-birth (supports /conditions/prenatal-care) | **Live on merge** (team byline, physio review after publishing) |
+| c section scar massage | /blog/c-section-scar-massage (supports /conditions/caesarean-recovery) | **Live on merge** (team byline, physio review after publishing) |
+| postpartum binder, bengkung, belly wrap after birth | /blog/postpartum-belly-binder (supports /conditions/diastasis-recti) | **Live on merge** (team byline, physio review after publishing) |
+| postpartum gym singapore, postnatal exercise singapore | /blog/postnatal-exercise-singapore (supports /services/strength-conditioning) | **Live on merge** (team byline, physio review after publishing) |
 | goji physio zaobao, goji physio news | /press | **Live** |
 
 **Branded** — both names + variants → homepage. Organic-owned; ads
