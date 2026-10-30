@@ -1,37 +1,37 @@
 {
-  "_comment": "Website shop catalogue -> Stripe Products, Prices and Payment Links (stripe_catalog.py). Amounts are SGD cents. `inferred: true` = not published on the site yet; confirm before running against the live key. `enabled: false` items are skipped. Private Pilates prices are the introductory ones (offer ends 30 Nov 2026). Placeholder prices (cpsc, prenatal/postnatal courses, socks) stay `inferred` until confirmed, so a live run skips them.",
+  "_comment": "Website shop catalogue -> Stripe Products, Prices and Payment Links (stripe_catalog.py). Amounts are SGD cents. `inferred: true` = not published on the site yet; confirm before running against the live key. `enabled: false` items are skipped. Private Pilates prices are the introductory ones (offer ends 30 Nov 2026). Placeholder prices (cpsc, socks) stay `inferred` until confirmed, so a live run skips them.",
   "items": [
     {
       "key": "pp-1to1-5",
-      "name": "Private Pilates 1:1, 5 sessions",
+      "name": "Private Pilates 1:1 x 5 sessions Package",
       "description": "Five 55-minute 1:1 Private Pilates sessions with a STOTT PILATES certified instructor at Goji, Lentor.",
       "kind": "package",
       "amount": 66900
     },
     {
       "key": "pp-1to1-10",
-      "name": "Private Pilates 1:1, 10 sessions",
+      "name": "Private Pilates 1:1 x 10 sessions Package",
       "description": "Ten 55-minute 1:1 Private Pilates sessions with a STOTT PILATES certified instructor at Goji, Lentor.",
       "kind": "package",
       "amount": 122900
     },
     {
       "key": "pp-2to1-5",
-      "name": "Private Pilates 2:1, 5 sessions",
+      "name": "Private Pilates 2:1 x 5 sessions Package",
       "description": "Five 55-minute Private Pilates sessions shared by two people. The price covers both.",
       "kind": "package",
       "amount": 89900
     },
     {
       "key": "pp-2to1-10",
-      "name": "Private Pilates 2:1, 10 sessions",
+      "name": "Private Pilates 2:1 x 10 sessions Package",
       "description": "Ten 55-minute Private Pilates sessions shared by two people. The price covers both.",
       "kind": "package",
       "amount": 164900
     },
     {
       "key": "cpsc-5",
-      "name": "Clinical Pilates / Strength & Conditioning, 5 sessions",
+      "name": "Clinical Pilates / Strength & Conditioning, 5 sessions Package",
       "description": "Five 55-minute physiotherapist-led sessions, usable across Clinical Pilates and Strength & Conditioning.",
       "kind": "package",
       "amount": 81000,
@@ -39,24 +39,8 @@
     },
     {
       "key": "cpsc-10",
-      "name": "Clinical Pilates / Strength & Conditioning, 10 sessions",
+      "name": "Clinical Pilates / Strength & Conditioning, 10 sessions Package",
       "description": "Ten 55-minute physiotherapist-led sessions, usable across Clinical Pilates and Strength & Conditioning.",
-      "kind": "package",
-      "amount": 148500,
-      "inferred": true
-    },
-    {
-      "key": "prenatal-10",
-      "name": "Prenatal course, 10 sessions",
-      "description": "Ten sessions for pregnancy that bring together services Goji already offers.",
-      "kind": "package",
-      "amount": 148500,
-      "inferred": true
-    },
-    {
-      "key": "postnatal-10",
-      "name": "Postnatal course, 10 sessions",
-      "description": "Ten sessions for the months after birth that bring together services Goji already offers.",
       "kind": "package",
       "amount": 148500,
       "inferred": true
