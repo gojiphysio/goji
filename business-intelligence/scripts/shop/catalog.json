@@ -1,5 +1,5 @@
 {
-  "_comment": "Website shop catalogue -> Stripe Products, Prices and Payment Links (stripe_catalog.py). Amounts are SGD cents. `inferred: true` = not published on the site yet; confirm before running against the live key. `enabled: false` items are skipped. Private Pilates prices are the introductory ones (offer ends 30 Nov 2026).",
+  "_comment": "Website shop catalogue -> Stripe Products, Prices and Payment Links (stripe_catalog.py). Amounts are SGD cents. `inferred: true` = not published on the site yet; confirm before running against the live key. `enabled: false` items are skipped. Private Pilates prices are the introductory ones (offer ends 30 Nov 2026). Placeholder prices (cpsc, prenatal/postnatal courses, socks) stay `inferred` until confirmed, so a live run skips them.",
   "items": [
     {
       "key": "pp-1to1-5",
@@ -48,34 +48,37 @@
     {
       "key": "prenatal-10",
       "name": "Prenatal course, 10 sessions",
-      "description": "TBC",
+      "description": "Ten sessions for pregnancy that bring together services Goji already offers.",
       "kind": "package",
-      "amount": 0,
-      "enabled": false
+      "amount": 148500,
+      "inferred": true
     },
     {
       "key": "postnatal-10",
       "name": "Postnatal course, 10 sessions",
-      "description": "TBC",
+      "description": "Ten sessions for the months after birth that bring together services Goji already offers.",
       "kind": "package",
-      "amount": 0,
-      "enabled": false
+      "amount": 148500,
+      "inferred": true
     },
     {
       "key": "gift-voucher",
       "name": "Goji gift voucher",
       "description": "A Goji gift voucher, valid for 12 months on any Goji service.",
       "kind": "voucher",
-      "custom_amount": {"preset": 10000, "minimum": 5000, "maximum": 200000}
+      "custom_amount": {
+        "preset": 10000,
+        "minimum": 5000,
+        "maximum": 200000
+      }
     },
     {
       "key": "socks",
       "name": "Goji socks",
-      "description": "TBC",
+      "description": "One pair of Goji socks, collected at the clinic.",
       "kind": "merch",
-      "amount": 0,
-      "stock": 0,
-      "enabled": false
+      "amount": 2500,
+      "inferred": true
     }
   ]
 }

@@ -59,9 +59,10 @@ export const SHOP: ShopCollection[] = [
       "55-minute sessions led by our AHPC-registered physiotherapists. One package covers both, so your programme can change as you progress.",
     photo: { src: "/photos/services/strength-conditioning-800.webp", alt: "A woman training with a kettlebell during a Goji Strength & Conditioning session." },
     options: [
-      // TODO(price): switch to `buy` once the Stripe links exist (catalog.json `inferred`).
-      { key: "cpsc-5", name: "5 sessions", detail: "Use across both services", status: "ask" },
-      { key: "cpsc-10", name: "10 sessions", detail: "Use across both services", status: "ask" },
+      // PLACEHOLDER prices (CP/S&C, courses, socks): not confirmed; no Stripe link yet,
+      // so these Buy buttons fall back to /shop/ until catalog.json is confirmed and synced.
+      { key: "cpsc-5", name: "5 sessions", detail: "Use across both services", price: "$810", status: "buy", slug: "web-pay-cpsc-5" },
+      { key: "cpsc-10", name: "10 sessions", detail: "Use across both services", price: "$1,485", status: "buy", slug: "web-pay-cpsc-10" },
     ],
   },
   {
@@ -71,8 +72,8 @@ export const SHOP: ShopCollection[] = [
       "Ten-session courses that bring together services we already offer, so your sessions for pregnancy or the months after birth are planned as one course.",
     photo: { src: "/photos/services/prenatal-physiotherapy-800.webp", alt: "A pregnant client working with a Goji physiotherapist." },
     options: [
-      { key: "prenatal-10", name: "Prenatal course, 10 sessions", detail: "Details coming soon", status: "soon" },
-      { key: "postnatal-10", name: "Postnatal course, 10 sessions", detail: "Details coming soon", status: "soon" },
+      { key: "prenatal-10", name: "Prenatal course, 10 sessions", detail: "For pregnancy", price: "$1,485", status: "buy", slug: "web-pay-prenatal-10" },
+      { key: "postnatal-10", name: "Postnatal course, 10 sessions", detail: "For the months after birth", price: "$1,485", status: "buy", slug: "web-pay-postnatal-10" },
     ],
   },
   {
@@ -92,7 +93,7 @@ export const SHOP: ShopCollection[] = [
     bloom: "flower",
     artCaption: "Photos coming soon",
     options: [
-      { key: "socks", name: "Goji socks", detail: "Sizes and price coming soon", status: "soon" },
+      { key: "socks", name: "Goji socks", detail: "One pair, collect at the clinic", price: "$25", status: "buy", slug: "web-pay-socks" },
     ],
   },
 ];

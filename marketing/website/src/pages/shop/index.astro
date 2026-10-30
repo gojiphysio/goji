@@ -11,7 +11,6 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Section from "../../components/Section.astro";
 import Button from "../../components/Button.astro";
-import BerrySprig from "../../components/BerrySprig.astro";
 import PetalPhoto from "../../components/watercolor/PetalPhoto.astro";
 import Bloom from "../../components/watercolor/Bloom.astro";
 import { SHOP } from "../../lib/shop.ts";
@@ -53,8 +52,8 @@ const schema = {
           {SHOP.map((c) => <a href={`#${c.id}`}>{c.title}</a>)}
         </nav>
       </div>
-      <div class="shop-hero__sprig" aria-hidden="true">
-        <BerrySprig animate={true} />
+      <div class="shop-hero__sprig">
+        <Bloom preset="sprig" seed={7} speed={2.25} class="shop-hero__bloom" />
       </div>
     </div>
   </section>
@@ -136,7 +135,7 @@ const schema = {
     border-left: 3px solid var(--color-primary);
   }
   .shop-hero__note a { color: var(--color-primary); text-decoration: underline; text-underline-offset: 0.2em; }
-  .shop-hero__sprig { display: none; opacity: 0.85; }
+  .shop-hero__sprig { display: none; justify-self: center; width: min(100%, 380px); }
   .shop-jump { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-3); }
   .shop-jump a {
     font-size: var(--fs-small);
