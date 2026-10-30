@@ -23,7 +23,11 @@ const REDIRECT_BASE = "https://go.gojiphysio.com";
  * `web-99-wa` is the 9.9 Pilates / S&C promo CTA — a campaign slug, so drop it
  * from this union (and from `LINK_SLUGS`) when the offer ends. `bio-*` are the
  * Instagram link-in-bio CTAs, used only on /links (which replaces bio.site). */
-export type CtaSlug = "web-wa" | "web-book" | "web-99-wa" | "bio-wa" | "bio-book";
+export type CtaSlug =
+  | "web-wa" | "web-book" | "web-99-wa" | "bio-wa" | "bio-book"
+  // Shop: each redirects to that item's Stripe Payment Link (see lib/shop.ts).
+  | "web-pay-pp-1to1-5" | "web-pay-pp-1to1-10" | "web-pay-pp-2to1-5" | "web-pay-pp-2to1-10"
+  | "web-pay-cpsc-5" | "web-pay-cpsc-10" | "web-pay-gift-voucher";
 
 /** Resolve a slug to its tracked redirect URL. */
 export function cta(slug: CtaSlug): string {

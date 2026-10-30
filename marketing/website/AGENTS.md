@@ -74,8 +74,16 @@ so a token change reflows everything (styleguide is the QA surface).
   form via `web-book`, not Plato), plus the campaign slug `web-99-wa` (9.9
   Pilates / S&C promo - drop it from `CtaSlug` when the offer ends), and
   `bio-wa` / `bio-book`, used only on `/links` (the Instagram link-in-bio page that
-  replaced bio.site; the dashboard shows these as "Link in bio"). A new CTA
-  needs its slug added there first.
+  replaced bio.site; the dashboard shows these as "Link in bio"), and the
+  `web-pay-<item>` shop slugs (kind `pay`, → that item's Stripe Payment Link in
+  `SHOP_PAY_URLS`, falling back to `/shop/`). A new CTA needs its slug added
+  there first.
+- **The shop catalogue lives in two places - keep them in sync.**
+  `src/lib/shop.ts` (what /shop shows) and
+  `business-intelligence/scripts/shop/catalog.json` (what `stripe_catalog.py`
+  creates in Stripe). Packages of existing services, physio-containing ones
+  included, may go on /shop under the AHPC floor in the compliance guardrails
+  (plain price, no outcome claim, no pressure framing).
 - **Booking funnel stages are allowlisted server-side.** A new
   `bookingApi.track()` stage must be added to `VALID_STAGES` in
   `business-intelligence/scripts/booking/app.py` (and the `FunnelStage` type in

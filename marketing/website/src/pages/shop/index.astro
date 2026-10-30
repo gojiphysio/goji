@@ -1,0 +1,114 @@
+---
+/**
+ * /shop — Pilates and S&C packages and gift vouchers, paid online.
+ * Each Buy button is a tracked `web-pay-*` go-link that 302s to the item's
+ * Stripe Payment Link (catalogue: lib/shop.ts). Packages of existing services,
+ * physio-containing ones included, are allowed under the AHPC floor in
+ * marketing/strategy/03-compliance-guardrails.md: plain prices, no outcome
+ * claims, no pressure framing.
+ */
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Section from "../../components/Section.astro";
+import Button from "../../components/Button.astro";
+import { SHOP } from "../../lib/shop.ts";
+
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "OfferCatalog",
+  name: "Goji shop",
+  url: "https://www.gojiphysio.com/shop/",
+  itemListElement: SHOP.flatMap((g) =>
+    g.items.map((i) => ({
+      "@type": "Offer",
+      name: `${g.title}: ${i.name}`,
+      priceCurrency: "SGD",
+      ...(i.price.startsWith("$") ? { price: i.price.replace(/[$,]/g, "") } : {}),
+      url: "https://www.gojiphysio.com/shop/",
+    })),
+  ),
+};
+---
+
+<BaseLayout
+  title="Shop: Pilates packages and gift vouchers | Goji Physiotherapy"
+  description="Buy Private Pilates packages or a Goji gift voucher online. Pay by card or PayNow."
+  schema={schema}
+>
+  <section class="shop-header">
+    <div class="container shop-header__inner">
+      <h1>Shop</h1>
+      <p class="shop-header__lead">
+        Pilates and Strength & Conditioning packages and gift vouchers. Pay by
+        card or PayNow, and we'll WhatsApp you within one working day to book
+        your first session.
+      </p>
+    </div>
+  </section>
+
+  {SHOP.map((group, gi) => (
+    <Section tone={gi % 2 ? "linen" : "surface"}>
+      <h2 class="shop-group__title">{group.title}</h2>
+      <p class="shop-group__intro">{group.intro}</p>
+      <ul class="shop-grid">
+        {group.items.map((item) => (
+          <li class="shop-card">
+            <h3 class="shop-card__name">{item.name}</h3>
+            <p class="shop-card__price">{item.price}</p>
+            {item.note && <p class="shop-card__note">{item.note}</p>}
+            <p class="shop-card__lead">{item.lead}</p>
+            <Button slug={item.slug} class="shop-card__buy">Buy</Button>
+          </li>
+        ))}
+      </ul>
+    </Section>
+  ))}
+
+  <Section tone="linen" narrow>
+    <p class="shop-terms">
+      Packages are valid for 12 months from purchase, and unused sessions are
+      refundable. Read the full <a href="/terms/">shop terms</a>.
+    </p>
+  </Section>
+</BaseLayout>
+
+<style>
+  .shop-header {
+    background: var(--bg-page);
+    padding-block: clamp(2rem, 1.5rem + 3vw, 4rem);
+    border-bottom: 1px solid var(--color-border);
+  }
+  .shop-header__inner { display: flex; flex-direction: column; gap: var(--space-3); }
+  .shop-header__lead { color: var(--text-muted); max-width: 60ch; line-height: var(--lh-body); }
+  .shop-group__title { margin-bottom: var(--space-2); }
+  .shop-group__intro { color: var(--text-muted); max-width: 60ch; margin-bottom: var(--space-5); }
+  .shop-grid {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: var(--space-4);
+    grid-template-columns: 1fr;
+  }
+  .shop-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding: var(--space-5);
+    border-top: 1px solid var(--rule);
+  }
+  .shop-card__name {
+    font-family: var(--font-body);
+    font-weight: var(--weight-semibold);
+    font-size: var(--fs-body);
+  }
+  .shop-card__price { font-size: var(--fs-h3); font-weight: var(--weight-semibold); }
+  .shop-card__note, .shop-card__lead { color: var(--text-muted); font-size: var(--fs-small); }
+  .shop-card :global(.shop-card__buy) { align-self: flex-start; margin-top: auto; }
+  .shop-terms { color: var(--text-muted); }
+  .shop-terms a { color: var(--color-primary); text-decoration: underline; text-underline-offset: 0.2em; }
+  @media (min-width: 640px) {
+    .shop-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (min-width: 1024px) {
+    .shop-grid { grid-template-columns: repeat(4, 1fr); }
+  }
+</style>

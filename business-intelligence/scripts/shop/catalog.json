@@ -1,0 +1,81 @@
+{
+  "_comment": "Website shop catalogue -> Stripe Products, Prices and Payment Links (stripe_catalog.py). Amounts are SGD cents. `inferred: true` = not published on the site yet; confirm before running against the live key. `enabled: false` items are skipped. Private Pilates prices are the introductory ones (offer ends 30 Nov 2026).",
+  "items": [
+    {
+      "key": "pp-1to1-5",
+      "name": "Private Pilates 1:1, 5 sessions",
+      "description": "Five 55-minute 1:1 Private Pilates sessions with a STOTT PILATES certified instructor at Goji, Lentor.",
+      "kind": "package",
+      "amount": 66900
+    },
+    {
+      "key": "pp-1to1-10",
+      "name": "Private Pilates 1:1, 10 sessions",
+      "description": "Ten 55-minute 1:1 Private Pilates sessions with a STOTT PILATES certified instructor at Goji, Lentor.",
+      "kind": "package",
+      "amount": 122900
+    },
+    {
+      "key": "pp-2to1-5",
+      "name": "Private Pilates 2:1, 5 sessions",
+      "description": "Five 55-minute Private Pilates sessions shared by two people. The price covers both.",
+      "kind": "package",
+      "amount": 89900
+    },
+    {
+      "key": "pp-2to1-10",
+      "name": "Private Pilates 2:1, 10 sessions",
+      "description": "Ten 55-minute Private Pilates sessions shared by two people. The price covers both.",
+      "kind": "package",
+      "amount": 164900
+    },
+    {
+      "key": "cpsc-5",
+      "name": "Clinical Pilates / Strength & Conditioning, 5 sessions",
+      "description": "Five 55-minute physiotherapist-led sessions, usable across Clinical Pilates and Strength & Conditioning.",
+      "kind": "package",
+      "amount": 81000,
+      "inferred": true
+    },
+    {
+      "key": "cpsc-10",
+      "name": "Clinical Pilates / Strength & Conditioning, 10 sessions",
+      "description": "Ten 55-minute physiotherapist-led sessions, usable across Clinical Pilates and Strength & Conditioning.",
+      "kind": "package",
+      "amount": 148500,
+      "inferred": true
+    },
+    {
+      "key": "prenatal-10",
+      "name": "Prenatal course, 10 sessions",
+      "description": "TBC",
+      "kind": "package",
+      "amount": 0,
+      "enabled": false
+    },
+    {
+      "key": "postnatal-10",
+      "name": "Postnatal course, 10 sessions",
+      "description": "TBC",
+      "kind": "package",
+      "amount": 0,
+      "enabled": false
+    },
+    {
+      "key": "gift-voucher",
+      "name": "Goji gift voucher",
+      "description": "A Goji gift voucher, valid for 12 months on any Goji service.",
+      "kind": "voucher",
+      "custom_amount": {"preset": 10000, "minimum": 5000, "maximum": 200000}
+    },
+    {
+      "key": "socks",
+      "name": "Goji socks",
+      "description": "TBC",
+      "kind": "merch",
+      "amount": 0,
+      "stock": 0,
+      "enabled": false
+    }
+  ]
+}

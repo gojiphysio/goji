@@ -580,6 +580,28 @@ def test_book_slug_counts_as_a_booking_click():
     assert book == {"web-book": 5, "bio-book": 3}
 
 
+def test_pay_slug_goes_to_stripe_with_click_id(client, monkeypatch, _no_click_logging):
+    # Shop slugs 302 to the item's Stripe Payment Link, carrying the click_id as
+    # client_reference_id so a purchase joins back to the click.
+    monkeypatch.setattr(app, "SHOP_PAY_URLS", {"cpsc-5": "https://buy.stripe.com/test_abc"})
+    loc = client.get("/r/web-pay-cpsc-5").headers["Location"]
+    assert loc.startswith("https://buy.stripe.com/test_abc?client_reference_id=")
+    assert app.LINK_SLUG_KIND["web-pay-cpsc-5"] == "pay"
+
+
+def test_pay_slug_without_link_falls_back_to_shop(client, monkeypatch, _no_click_logging):
+    monkeypatch.setattr(app, "SHOP_PAY_URLS", {})
+    assert client.get("/r/web-pay-gift-voucher").headers["Location"] == app.SHOP_FALLBACK_URL
+
+
+def test_pay_clicks_are_not_counted_as_whatsapp(monkeypatch):
+    rows = [{"slug": "web-pay-cpsc-5", "clicks": 4}, {"slug": "web-wa", "clicks": 2}]
+    monkeypatch.setattr(app, "_query", lambda sql: rows)
+    lc = app.fetch_link_clicks(TODAY, TODAY)
+    assert lc["wa_by_slug"] == {"web-wa": 2}
+    assert lc["whatsapp"] == 2 and lc["booking"] == 0
+
+
 def test_booking_funnel_labels_include_details():
     # The "Entered details" stage must sit between time_selected and submitted.
     stages = [s for s, _ in app.BOOKING_FUNNEL_STAGES]
