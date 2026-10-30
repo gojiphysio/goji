@@ -1430,9 +1430,25 @@ def _record_link_click_async(click_id: str, slug: str, user_agent: str | None, r
                      daemon=True).start()
 
 
+# Crawlers, link previewers, scripts and our own audit runner all follow go-links.
+# Google's renderer poses as a Nexus 5X phone, so it's matched by device string.
+BOT_UA_RE = (r"bot|crawl|spider|slurp|headless|lighthouse|preview|python|curl|wget|"
+             r"go-http|okhttp|axios|node-fetch|httpclient|facebookexternalhit|"
+             r"whatsapp/|nexus 5x build/mmb29p|gojisiteaudit")
+# On-site taps carry the tab's session id (?sid=) from this date on.
+WEB_TAP_SID_SINCE = "2026-07-14"
+
+
 def fetch_link_clicks(start: date, end: date) -> dict:
     """Tracked-link clicks for [start, end], split into WhatsApp vs booking
     (the two CTAs) with a per-channel breakdown each.
+
+    Counts real taps only. Every slug drops bot/tooling user agents. On-site
+    `web-*` taps must also belong to a beacon session (with a visitor id) that
+    started under 6 hours earlier: crawlers don't run the script that adds
+    ?sid=, and the long-open desktop tabs of our own QA and audit tools tap the
+    same CTA for days. Raw counts were up to 8x real in Oct 2026. Taps from
+    before the ?sid= passthrough existed keep the UA filter only.
 
     Degrades to zeros if the table isn't deployed yet (see DEPLOY.md): the
     Marketing tab must still render.
@@ -1440,10 +1456,23 @@ def fetch_link_clicks(start: date, end: date) -> dict:
     empty = {"whatsapp": 0, "booking": 0, "total": 0, "wa_by_slug": {}, "book_by_slug": {}}
     try:
         rows = _query(f"""
-SELECT slug, COUNT(*) AS clicks
-FROM `{PROJECT}.marts.link_click_events`
-WHERE DATE(clicked_at) BETWEEN '{start}' AND '{end}'
-GROUP BY slug
+WITH s AS (
+  SELECT session_id, MIN(occurred_at) AS first_seen
+  FROM `{PROJECT}.marts.web_session_events`
+  WHERE DATE(occurred_at) BETWEEN DATE_SUB('{start}', INTERVAL 1 DAY) AND '{end}'
+    AND visitor_id IS NOT NULL
+  GROUP BY session_id
+)
+SELECT c.slug, COUNT(*) AS clicks
+FROM `{PROJECT}.marts.link_click_events` c
+LEFT JOIN s USING (session_id)
+WHERE DATE(c.clicked_at) BETWEEN '{start}' AND '{end}'
+  AND c.user_agent IS NOT NULL
+  AND NOT REGEXP_CONTAINS(LOWER(c.user_agent), r'{BOT_UA_RE}')
+  AND (NOT STARTS_WITH(c.slug, 'web-')
+       OR DATE(c.clicked_at) < '{WEB_TAP_SID_SINCE}'
+       OR c.clicked_at < TIMESTAMP_ADD(s.first_seen, INTERVAL 6 HOUR))
+GROUP BY c.slug
 """)
     except Exception as e:
         log.warning("link_click_events unavailable (run deploy_all.sh?): %s", e)
@@ -1873,9 +1902,15 @@ CASE
   WHEN (fbclid IS NOT NULL AND fbclid != '') OR LOWER(utm_source) IN ('facebook','meta','fb') THEN 'Meta Ads'
   WHEN LOWER(utm_source) IN ('instagram','ig') OR REGEXP_CONTAINS(LOWER(referer), r'instagram') THEN 'Instagram'
   WHEN LOWER(utm_source) LIKE 'gbp%' OR LOWER(utm_source) LIKE 'google_business%' THEN 'Google'
+  WHEN LOWER(utm_source) IN ('chatgpt.com','perplexity','openai')
+    OR REGEXP_CONTAINS(LOWER(referer), r'^https?://([a-z0-9-]+\\.)*(chatgpt\\.com|openai\\.com|perplexity\\.ai|claude\\.ai|gemini\\.google\\.com|copilot\\.microsoft\\.com)') THEN 'AI assistants'
   WHEN LOWER(utm_source) LIKE 'google%' OR REGEXP_CONTAINS(LOWER(referer), r'google\\.') THEN 'Google'
+  WHEN REGEXP_CONTAINS(LOWER(referer), r'^https?://([a-z0-9-]+\\.)*(bing\\.com|duckduckgo\\.com|search\\.yahoo\\.com|ecosia\\.org|search\\.brave\\.com)') THEN 'Other search'
   WHEN utm_source IS NOT NULL AND utm_source != '' THEN utm_source
   WHEN referer IS NULL OR referer = '' THEN 'Direct'
+  -- Our own domain (pre-Nov-2026 rows stored the page URL, not the visitor's
+  -- referrer; a new tab opened from the site does the same) is not a referral.
+  WHEN REGEXP_CONTAINS(LOWER(referer), r'^https?://([a-z0-9-]+\\.)*(gojiphysio\\.com|goji-bgb\\.pages\\.dev)') THEN 'Direct'
   ELSE 'Referral'
 END
 """

@@ -168,6 +168,18 @@ Also note Search Console **omits low-volume queries** for privacy, so the
 Use `fct_search_console_daily` for headline numbers and
 `fct_search_console_terms` only for "what are we ranking for".
 
+**Backfilling history** needs no code change: run the job once with a long
+lookback and the API's maximum row limit (date×query is ~50 rows a day, so the
+default 5000 truncates past ~3 months). Re-loaded days just win in stg.
+
+```bash
+gcloud run jobs execute marketing-ingest --region=asia-southeast1 --project=goji-bi \
+  --update-env-vars=SOURCES=search_console,GSC_LOOKBACK_DAYS=400,GSC_ROW_LIMIT=25000 --wait
+```
+
+Done 2026-10-30: Google holds data for the property from **2026-07-13**, so that
+is where history starts.
+
 ### Data flow
 
 ```

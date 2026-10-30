@@ -73,3 +73,25 @@ def test_junk_engagement_values_are_dropped_but_row_survives():
 def test_event_type_defaults_and_is_length_capped():
     assert web_event_row({}, None, None)["event_type"] == "page_view"
     assert len(web_event_row({"event_type": "x" * 200}, None, None)["event_type"]) == 32
+
+
+def test_referer_is_the_visitors_document_referrer_not_the_header():
+    """The beacon is a cross-origin fetch from our own page, so the HTTP Referer
+    header is always gojiphysio.com. Storing it made every arrival look like a
+    self-referral; the body's `referrer` (document.referrer) is the real source."""
+    row = web_event_row({"event_type": "session_start", "referrer": "https://www.google.com/"},
+                        "UA", "https://www.gojiphysio.com/")
+    assert row["referer"] == "https://www.google.com/"
+
+
+def test_empty_body_referrer_is_direct_not_the_header():
+    """document.referrer == "" is a genuine Direct arrival; falling back to the
+    header would mislabel it as our own domain."""
+    row = web_event_row({"event_type": "session_start", "referrer": ""},
+                        "UA", "https://www.gojiphysio.com/")
+    assert row["referer"] is None
+
+
+def test_header_is_only_a_fallback_when_the_body_has_no_referrer_key():
+    row = web_event_row({"event_type": "session_start"}, "UA", "https://example.com/")
+    assert row["referer"] == "https://example.com/"
