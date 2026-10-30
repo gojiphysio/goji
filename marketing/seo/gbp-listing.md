@@ -85,6 +85,23 @@ Postnatal Physiotherapy · Mummy & Baby Assessment · Paediatric Physiotherapy �
 Clinical Pilates · Strength & Conditioning · Lymphoedema Physiotherapy ·
 Vestibular Rehabilitation
 
+**Add: Pelvic Floor Physiotherapy.** It's missing from the list above. Then
+paste a description into each service (GBP allows 300 characters). Why: Search
+Console shows Goji at positions 1-4 for "women's physio singapore",
+"postnatal physio", "pelvic floor therapy" and "physiotherapy", with about 0
+website clicks. Those are Maps-pack impressions, where the services list
+decides what the profile matches. Every line restates the site:
+
+| Service | Description |
+|---|---|
+| Pelvic Floor Physiotherapy | Private, unhurried one-to-one sessions for leaking, prolapse, pelvic pain and recovery after birth. 55 minutes with an AHPC-registered physio. You can book directly, no referral needed. |
+| Postnatal Physiotherapy | A proper look at how your body is recovering after a vaginal or Caesarean birth, and a plan for getting back to exercise, the gym or sport. Bring your baby along, or book a home visit. |
+| Pregnancy Physiotherapy | Help to move more comfortably through pregnancy: back and pelvic pain, pelvic floor symptoms, staying active, and getting your body ready for birth. |
+| Mummy & Baby Assessment | One appointment for both of you: your recovery after birth, and your baby's movement and early development from 0 to 12 months. $330 at the clinic, $450 at home. |
+| Women's Health Physiotherapy | Physio for women at every stage, from pregnancy and the months after birth to pelvic floor and bladder concerns. At Lentor Modern, one minute from Lentor MRT, or at home. |
+| Clinical Pilates | Pilates led by a physiotherapist, one-to-one or two-to-one, to build strength, mobility and confidence in how you move. |
+| Strength & Conditioning | Physio-led training to build strength and movement capacity, matched to where you are now and where you want to get to. |
+
 ## Business description (live on the profile, 28 Oct 2026; compliance-checked)
 
 > Goji Women's and Family Physiotherapy is a physiotherapy clinic at Lentor
