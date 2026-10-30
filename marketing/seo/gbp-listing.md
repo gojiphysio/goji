@@ -85,6 +85,30 @@ Postnatal Physiotherapy · Mummy & Baby Assessment · Paediatric Physiotherapy �
 Clinical Pilates · Strength & Conditioning · Lymphoedema Physiotherapy ·
 Vestibular Rehabilitation
 
+**On the profile since 30 Oct 2026** (submitted; Google reviews edits for up
+to a day). Before that the profile had no services at all, so the list above
+was never live. The seven below were added as custom services under the
+Physiotherapist category, each with its description (GBP allows 300
+characters), plus the four rows at the end of the table, so all eleven are live. Why: Search
+Console shows Goji at positions 1-4 for "women's physio singapore",
+"postnatal physio", "pelvic floor therapy" and "physiotherapy", with about 0
+website clicks. Those are Maps-pack impressions, where the services list
+decides what the profile matches. Every line restates the site:
+
+| Service | Description |
+|---|---|
+| Pelvic Floor Physiotherapy | Private, unhurried one-to-one sessions for leaking, prolapse, pelvic pain and recovery after birth. 55 minutes with an AHPC-registered physio. You can book directly, no referral needed. |
+| Postnatal Physiotherapy | A proper look at how your body is recovering after a vaginal or Caesarean birth, and a plan for getting back to exercise, the gym or sport. Bring your baby along, or book a home visit. |
+| Pregnancy Physiotherapy | Help to move more comfortably through pregnancy: back and pelvic pain, pelvic floor symptoms, staying active, and getting your body ready for birth. |
+| Mummy & Baby Assessment | One appointment for both of you: your recovery after birth, and your baby's movement and early development from 0 to 12 months. $330 at the clinic, $450 at home. |
+| Women's Health Physiotherapy | Physio for women at every stage, from pregnancy and the months after birth to pelvic floor and bladder concerns. At Lentor Modern, one minute from Lentor MRT, or at home. |
+| Clinical Pilates | Pilates led by a physiotherapist, one-to-one or two-to-one, to build strength, mobility and confidence in how you move. |
+| Strength & Conditioning | Physio-led training to build strength and movement capacity, matched to where you are now and where you want to get to. |
+| Physiotherapy | Assessment and hands-on treatment for back, neck, shoulder, knee, joint and sports injuries, with a clear plan to get you moving well again. 55 minutes, $260 at the clinic or $380 at home. |
+| Paediatric Physiotherapy | For babies, children and teens up to 18: movement, development, pain and injury, assessed with practical guidance for you and your child. 30, 45 and 55-minute sessions. |
+| Lymphoedema Physiotherapy | Long-term arm or leg swelling managed with manual lymphatic drainage, compression, exercise and skin care, coordinated with your medical team. Swelling after surgery too. |
+| Vestibular Rehabilitation | For vertigo, dizziness and unsteadiness. We look for what's driving it, then use repositioning manoeuvres for BPPV, or vestibular exercises where the balance system is involved. |
+
 ## Business description (live on the profile, 28 Oct 2026; compliance-checked)
 
 > Goji Women's and Family Physiotherapy is a physiotherapy clinic at Lentor

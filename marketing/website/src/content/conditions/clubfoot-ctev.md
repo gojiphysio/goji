@@ -1,6 +1,7 @@
 ---
 title: "Clubfoot (Congenital Talipes Equinovarus)"
-description: "Clubfoot (congenital talipes equinovarus) in infants - physiotherapy for postural CTEV and post-Ponseti maintenance. Goji Physio, Lentor, Singapore."
+seoTitle: "Clubfoot (CTEV): Postural vs Structural"
+description: "CTEV, or clubfoot, is a foot turned in and down at birth. Postural CTEV is flexible and responds to physio; structural CTEV starts with Ponseti casting."
 cardTitle: "Clubfoot (CTEV)"
 cardLead: "Physiotherapy for clubfoot in infants - direct treatment for postural CTEV, and support alongside the Ponseti pathway for structural CTEV."
 category: "Paediatrics"
