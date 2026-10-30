@@ -1,114 +1,213 @@
 ---
 /**
- * /shop — Pilates and S&C packages and gift vouchers, paid online.
- * Each Buy button is a tracked `web-pay-*` go-link that 302s to the item's
- * Stripe Payment Link (catalogue: lib/shop.ts). Packages of existing services,
- * physio-containing ones included, are allowed under the AHPC floor in
- * marketing/strategy/03-compliance-guardrails.md: plain prices, no outcome
- * claims, no pressure framing.
+ * /shop — packages, courses, gift vouchers and merch, as curated collections
+ * (catalogue: lib/shop.ts). A `buy` option is a tracked `web-pay-*` go-link to
+ * the item's Stripe Payment Link; `ask` and `soon` options route to WhatsApp.
+ * Packages of existing services, physio-containing ones included, are allowed
+ * under the AHPC floor in marketing/strategy/03-compliance-guardrails.md: plain
+ * prices, no outcome claims, no pressure framing. Deliberately not a product
+ * grid: one photo-led block per collection, options as a quiet price list.
  */
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Section from "../../components/Section.astro";
 import Button from "../../components/Button.astro";
+import BerrySprig from "../../components/BerrySprig.astro";
+import PetalPhoto from "../../components/watercolor/PetalPhoto.astro";
+import Bloom from "../../components/watercolor/Bloom.astro";
 import { SHOP } from "../../lib/shop.ts";
 
+const buyable = SHOP.flatMap((c) => c.options.filter((o) => o.status === "buy").map((o) => ({ c, o })));
 const schema = {
   "@context": "https://schema.org",
   "@type": "OfferCatalog",
   name: "Goji shop",
   url: "https://www.gojiphysio.com/shop/",
-  itemListElement: SHOP.flatMap((g) =>
-    g.items.map((i) => ({
-      "@type": "Offer",
-      name: `${g.title}: ${i.name}`,
-      priceCurrency: "SGD",
-      ...(i.price.startsWith("$") ? { price: i.price.replace(/[$,]/g, "") } : {}),
-      url: "https://www.gojiphysio.com/shop/",
-    })),
-  ),
+  itemListElement: buyable.map(({ c, o }) => ({
+    "@type": "Offer",
+    name: `${c.title}: ${o.name}`,
+    priceCurrency: "SGD",
+    ...(o.price?.startsWith("$") ? { price: o.price.replace(/[$,]/g, "") } : {}),
+    url: `https://www.gojiphysio.com/shop/#${c.id}`,
+  })),
 };
 ---
 
 <BaseLayout
   title="Shop: Pilates packages and gift vouchers | Goji Physiotherapy"
-  description="Buy Private Pilates packages or a Goji gift voucher online. Pay by card or PayNow."
+  description="Buy Pilates packages and Goji gift vouchers online, by card or PayNow. Pregnancy and postnatal courses and Goji socks coming soon."
   schema={schema}
 >
-  <section class="shop-header">
-    <div class="container shop-header__inner">
-      <h1>Shop</h1>
-      <p class="shop-header__lead">
-        Pilates and Strength & Conditioning packages and gift vouchers. Pay by
-        card or PayNow, and we'll WhatsApp you within one working day to book
-        your first session.
-      </p>
+  <section class="shop-hero">
+    <div class="container shop-hero__grid">
+      <div class="shop-hero__text">
+        <h1>Shop</h1>
+        <p class="shop-hero__lead">
+          Packages, courses, gift vouchers and a little Goji merch. Pay online by
+          card or PayNow, and we'll WhatsApp you within one working day to
+          arrange your first session.
+        </p>
+        <p class="shop-hero__note">
+          Unused sessions are always refundable. See our <a href="/terms/">shop terms</a>.
+        </p>
+        <nav class="shop-jump" aria-label="Shop collections">
+          {SHOP.map((c) => <a href={`#${c.id}`}>{c.title}</a>)}
+        </nav>
+      </div>
+      <div class="shop-hero__sprig" aria-hidden="true">
+        <BerrySprig animate={true} />
+      </div>
     </div>
   </section>
 
-  {SHOP.map((group, gi) => (
-    <Section tone={gi % 2 ? "linen" : "surface"}>
-      <h2 class="shop-group__title">{group.title}</h2>
-      <p class="shop-group__intro">{group.intro}</p>
-      <ul class="shop-grid">
-        {group.items.map((item) => (
-          <li class="shop-card">
-            <h3 class="shop-card__name">{item.name}</h3>
-            <p class="shop-card__price">{item.price}</p>
-            {item.note && <p class="shop-card__note">{item.note}</p>}
-            <p class="shop-card__lead">{item.lead}</p>
-            <Button slug={item.slug} class="shop-card__buy">Buy</Button>
-          </li>
-        ))}
-      </ul>
-    </Section>
-  ))}
+  {SHOP.map((c, i) => {
+    const soon = c.options.every((o) => o.status === "soon");
+    return (
+      <section id={c.id} class:list={["shop-coll", i % 2 ? "shop-coll--linen" : "shop-coll--surface"]}>
+        <div class:list={["container shop-coll__grid", i % 2 && "shop-coll__grid--flip"]}>
+          <div class="shop-coll__media">
+            {c.photo ? (
+              <PetalPhoto src={c.photo.src} alt={c.photo.alt} position={c.photo.position} flip={i % 2 === 1} paint class="shop-coll__frame" />
+            ) : (
+              <figure class:list={["gj-frame gj-frame--petal shop-coll__frame shop-art", i % 2 === 1 && "gj-frame--flip"]}>
+                <Bloom preset={c.bloom ?? "berry"} seed={i + 4} speed={2.3} class="shop-art__bloom" />
+                {c.artCaption && <figcaption class="shop-art__caption">{c.artCaption}</figcaption>}
+              </figure>
+            )}
+          </div>
+          <div class="shop-coll__body">
+            <h2>{c.title}</h2>
+            <p class="shop-coll__lead">{c.lead}</p>
+            {c.note && <p class="shop-coll__note">{c.note}</p>}
+            <ul class="shop-opts">
+              {c.options.map((o) => (
+                <li class="shop-opt">
+                  <div class="shop-opt__text">
+                    <h3 class="shop-opt__name">{o.name}</h3>
+                    {o.detail && <p class="shop-opt__detail">{o.detail}</p>}
+                  </div>
+                  <p class:list={["shop-opt__price", !o.price && "shop-opt__price--muted"]}>
+                    {o.price ?? (o.status === "ask" ? "Price on request" : "Coming soon")}
+                  </p>
+                  <div class="shop-opt__action">
+                    {o.status === "buy" && o.slug && <Button slug={o.slug}>Buy</Button>}
+                    {o.status === "ask" && <Button slug="web-wa" variant="secondary">Ask us</Button>}
+                  </div>
+                </li>
+              ))}
+            </ul>
+            {soon && (
+              <div class="shop-coll__interest">
+                <Button slug="web-wa" variant="whatsapp">Register your interest</Button>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+    );
+  })}
 
   <Section tone="linen" narrow>
-    <p class="shop-terms">
-      Packages are valid for 12 months from purchase, and unused sessions are
-      refundable. Read the full <a href="/terms/">shop terms</a>.
-    </p>
+    <div class="shop-help">
+      <h2>Not sure which to choose?</h2>
+      <p>
+        Tell us what you'd like to work on and we'll suggest a package, or help
+        you pick a gift.
+      </p>
+      <Button slug="web-wa" variant="whatsapp">Message us on WhatsApp</Button>
+    </div>
   </Section>
 </BaseLayout>
 
 <style>
-  .shop-header {
+  /* Hero: same shape as the postpartum pathway hero. */
+  .shop-hero {
     background: var(--bg-page);
-    padding-block: clamp(2rem, 1.5rem + 3vw, 4rem);
+    padding-block: clamp(2.5rem, 1.5rem + 4vw, 5rem);
     border-bottom: 1px solid var(--color-border);
+    overflow: hidden;
   }
-  .shop-header__inner { display: flex; flex-direction: column; gap: var(--space-3); }
-  .shop-header__lead { color: var(--text-muted); max-width: 60ch; line-height: var(--lh-body); }
-  .shop-group__title { margin-bottom: var(--space-2); }
-  .shop-group__intro { color: var(--text-muted); max-width: 60ch; margin-bottom: var(--space-5); }
-  .shop-grid {
-    list-style: none;
-    padding: 0;
+  .shop-hero__grid { display: grid; gap: clamp(var(--space-5), 4vw, var(--space-7)); align-items: center; }
+  .shop-hero__text { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-3); }
+  .shop-hero__lead { color: var(--text-muted); line-height: var(--lh-body); max-width: 54ch; }
+  .shop-hero__note {
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+    padding-left: var(--space-4);
+    border-left: 3px solid var(--color-primary);
+  }
+  .shop-hero__note a { color: var(--color-primary); text-decoration: underline; text-underline-offset: 0.2em; }
+  .shop-hero__sprig { display: none; opacity: 0.85; }
+  .shop-jump { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-3); }
+  .shop-jump a {
+    font-size: var(--fs-small);
+    font-weight: var(--weight-medium);
+    color: var(--text-default);
+    text-decoration: none;
+    padding: 6px 14px;
+    border-radius: var(--radius-pill);
+    background: var(--bg-content);
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-sm);
+  }
+  .shop-jump a:hover { border-color: var(--color-primary); }
+
+  /* Collections: photo-led blocks, alternating sides and surfaces. */
+  .shop-coll { padding-block: var(--section-y); scroll-margin-top: 80px; }
+  .shop-coll--surface { background: var(--bg-content); }
+  .shop-coll--linen { background: var(--bg-page); }
+  .shop-coll__grid { display: grid; gap: clamp(var(--space-5), 4vw, var(--space-8)); align-items: center; }
+  .shop-coll__media { max-width: 420px; width: 100%; }
+  /* Landscape on a phone so the prices aren't a screen below the photo. */
+  .shop-coll :global(.shop-coll__frame) { aspect-ratio: 3 / 2; width: 100%; }
+  .shop-art :global(.shop-art__bloom) { width: 48%; }
+  .shop-art { margin: 0; display: grid; place-items: center; background: var(--blush); }
+  .shop-art__caption {
+    position: absolute;
+    bottom: var(--space-5);
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+  }
+  .shop-coll__body h2 { margin-bottom: var(--space-3); }
+  .shop-coll__lead { color: var(--text-muted); line-height: var(--lh-body); max-width: 54ch; }
+  .shop-coll__note { color: var(--text-muted); font-size: var(--fs-small); margin-top: var(--space-2); }
+
+  /* Options: a quiet price list on the page ground, not cards. */
+  .shop-opts { list-style: none; padding: 0; margin-top: var(--space-5); border-top: 1px solid var(--rule); }
+  .shop-opt {
     display: grid;
-    gap: var(--space-4);
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr auto;
+    grid-template-areas: "text price" "text action";
+    gap: var(--space-2) var(--space-4);
+    align-items: center;
+    padding-block: var(--space-4);
+    border-bottom: 1px solid var(--rule);
   }
-  .shop-card {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
-    padding: var(--space-5);
-    border-top: 1px solid var(--rule);
-  }
-  .shop-card__name {
-    font-family: var(--font-body);
-    font-weight: var(--weight-semibold);
-    font-size: var(--fs-body);
-  }
-  .shop-card__price { font-size: var(--fs-h3); font-weight: var(--weight-semibold); }
-  .shop-card__note, .shop-card__lead { color: var(--text-muted); font-size: var(--fs-small); }
-  .shop-card :global(.shop-card__buy) { align-self: flex-start; margin-top: auto; }
-  .shop-terms { color: var(--text-muted); }
-  .shop-terms a { color: var(--color-primary); text-decoration: underline; text-underline-offset: 0.2em; }
+  .shop-opt__text { grid-area: text; }
+  .shop-opt__name { font-family: var(--font-body); font-weight: var(--weight-semibold); font-size: var(--fs-body); }
+  .shop-opt__detail { color: var(--text-muted); font-size: var(--fs-small); margin-top: 2px; }
+  .shop-opt__price { grid-area: price; font-family: var(--font-body); font-weight: var(--weight-semibold); font-size: var(--fs-lead); text-align: right; white-space: nowrap; }
+  .shop-opt__price--muted { font-size: var(--fs-small); font-weight: var(--weight-medium); color: var(--text-muted); }
+  .shop-opt__action { grid-area: action; display: flex; justify-content: flex-end; }
+  .shop-opt__action:empty { display: none; }
+  .shop-coll__interest { margin-top: var(--space-5); }
+
+  .shop-help { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-3); }
+  .shop-help p { color: var(--text-muted); line-height: var(--lh-body); }
+
   @media (min-width: 640px) {
-    .shop-grid { grid-template-columns: repeat(2, 1fr); }
+    .shop-opt { grid-template-columns: 1fr auto auto; grid-template-areas: "text price action"; }
+    .shop-opt__action { min-width: 92px; }
   }
-  @media (min-width: 1024px) {
-    .shop-grid { grid-template-columns: repeat(4, 1fr); }
+  @media (min-width: 860px) {
+    .shop-hero__grid { grid-template-columns: 1.1fr 0.9fr; }
+    .shop-hero__sprig { display: block; }
+    .shop-coll__grid { grid-template-columns: 0.85fr 1.15fr; }
+    .shop-coll :global(.shop-coll__frame) { aspect-ratio: 4 / 5; }
+    .shop-art :global(.shop-art__bloom) { width: 78%; }
+    .shop-coll__grid--flip { grid-template-columns: 1.15fr 0.85fr; }
+    .shop-coll__grid--flip .shop-coll__media { order: 2; justify-self: end; }
   }
 </style>
