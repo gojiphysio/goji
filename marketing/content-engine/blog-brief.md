@@ -72,6 +72,11 @@ than the source says, and red flags pointing to a doctor.
 - **No invented clinic experience.** Goji opened in mid-2026. Don't write
   "many of our patients", "the most common thing we hear", "plenty of the women
   we see". Say what is generally true and cite it.
+- **Clinic numbers only from a recorded aggregate.** Our own counts (e.g. the
+  Results in `business-intelligence/architecture/clinical-notes-insights-plan.md`)
+  may be quoted with the group size and date range, counts under 5 kept as
+  "<5", and a note that the people we see are not all mothers. Never round a
+  count up, combine cells to unhide one, or quote a number not in the record.
 - **Event recaps restate only what was published** (the Luma page, Goji's own
   Instagram caption). Never put words in a guest speaker's mouth or describe
   what was said in the room unless Goji published it. The educational part of a
