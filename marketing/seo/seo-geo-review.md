@@ -174,6 +174,8 @@ condition/service page that owns the cluster)**
 | c section scar massage | /blog/c-section-scar-massage (supports /conditions/caesarean-recovery) | **Live on merge** (team byline, physio review after publishing) |
 | postpartum binder, bengkung, belly wrap after birth | /blog/postpartum-belly-binder (supports /conditions/diastasis-recti) | **Live on merge** (team byline, physio review after publishing) |
 | postpartum gym singapore, postnatal exercise singapore | /blog/postnatal-exercise-singapore (supports /services/strength-conditioning) | **Live on merge** (team byline, physio review after publishing) |
+| why see a postnatal physio, postnatal physio singapore | /blog/why-mums-see-a-postnatal-physio (supports /services/postpartum-physiotherapy; original clinic-notes data) | **Live on merge** (team byline, physio review after publishing) |
+| when to see a physio after birth, how soon after birth physio | /blog/when-to-see-a-physio-after-birth (supports /services/postpartum-physiotherapy) | **Live on merge** (team byline, physio review after publishing) |
 | goji physio zaobao, goji physio news | /press | **Live** |
 
 **Branded** — both names + variants → homepage. Organic-owned; ads
