@@ -210,7 +210,7 @@ LINK_SLUGS: dict[str, dict] = {
     # --- Shop: "<channel>-pay-<item>" → that item's Stripe Payment Link ---
     **{f"web-pay-{item}": {"kind": "pay", "label": "Web", "item": item} for item in (
         "pp-1to1-5", "pp-1to1-10", "pp-2to1-5", "pp-2to1-10",
-        "cpsc-5", "cpsc-10", "gift-voucher", "prenatal-10", "postnatal-10",
+        "cpsc-5", "cpsc-10", "gift-voucher",
         "socks-girl", "socks-gang",
     )},
 }

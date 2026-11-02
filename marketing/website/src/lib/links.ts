@@ -28,7 +28,7 @@ export type CtaSlug =
   // Shop: each redirects to that item's Stripe Payment Link (see lib/shop.ts).
   | "web-pay-pp-1to1-5" | "web-pay-pp-1to1-10" | "web-pay-pp-2to1-5" | "web-pay-pp-2to1-10"
   | "web-pay-cpsc-5" | "web-pay-cpsc-10" | "web-pay-gift-voucher"
-  | "web-pay-prenatal-10" | "web-pay-postnatal-10" | "web-pay-socks-girl" | "web-pay-socks-gang";
+  | "web-pay-socks-girl" | "web-pay-socks-gang";
 
 /** Resolve a slug to its tracked redirect URL. */
 export function cta(slug: CtaSlug): string {

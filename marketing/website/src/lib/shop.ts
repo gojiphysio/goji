@@ -39,6 +39,17 @@ export interface ShopCollection {
 
 export const SHOP: ShopCollection[] = [
   {
+    id: "goji-gang-merch",
+    title: "Goji Gang merch",
+    lead: "Our own socks, in Goji colours. Collect them at the clinic on your next visit.",
+    bloom: "flower",
+    artCaption: "Photos coming soon",
+    options: [
+      { key: "socks-girl", name: "Goji Girl Socks", detail: "One pair, collect at the clinic", price: "$25", status: "buy", slug: "web-pay-socks-girl" },
+      { key: "socks-gang", name: "Goji Gang Socks", detail: "One pair, collect at the clinic", price: "$25", status: "buy", slug: "web-pay-socks-gang" },
+    ],
+  },
+  {
     id: "private-pilates",
     title: "Private Pilates",
     lead:
@@ -46,10 +57,10 @@ export const SHOP: ShopCollection[] = [
     note: "Introductory prices until 30 Nov 2026.",
     photo: { src: "/photos/services/private-pilates-800.webp", alt: "A client on the reformer during a Private Pilates session at Goji." },
     options: [
-      { key: "pp-1to1-5", name: "1:1, 5 sessions", detail: "Just you and your instructor", price: "$669", status: "buy", slug: "web-pay-pp-1to1-5" },
-      { key: "pp-1to1-10", name: "1:1, 10 sessions", detail: "Just you and your instructor", price: "$1,229", status: "buy", slug: "web-pay-pp-1to1-10" },
-      { key: "pp-2to1-5", name: "2:1, 5 sessions", detail: "Shared by two people, price covers both", price: "$899", status: "buy", slug: "web-pay-pp-2to1-5" },
-      { key: "pp-2to1-10", name: "2:1, 10 sessions", detail: "Shared by two people, price covers both", price: "$1,649", status: "buy", slug: "web-pay-pp-2to1-10" },
+      { key: "pp-1to1-5", name: "1:1 x 5 sessions Package", price: "$669", status: "buy", slug: "web-pay-pp-1to1-5" },
+      { key: "pp-1to1-10", name: "1:1 x 10 sessions Package", price: "$1,229", status: "buy", slug: "web-pay-pp-1to1-10" },
+      { key: "pp-2to1-5", name: "2:1 x 5 sessions Package", detail: "Shared by two people, price covers both", price: "$899", status: "buy", slug: "web-pay-pp-2to1-5" },
+      { key: "pp-2to1-10", name: "2:1 x 10 sessions Package", detail: "Shared by two people, price covers both", price: "$1,649", status: "buy", slug: "web-pay-pp-2to1-10" },
     ],
   },
   {
@@ -59,21 +70,10 @@ export const SHOP: ShopCollection[] = [
       "55-minute sessions led by our AHPC-registered physiotherapists. One package covers both, so your programme can change as you progress.",
     photo: { src: "/photos/services/strength-conditioning-800.webp", alt: "A woman training with a kettlebell during a Goji Strength & Conditioning session." },
     options: [
-      // PLACEHOLDER prices (CP/S&C, courses, socks): not confirmed; no Stripe link yet,
+      // PLACEHOLDER prices (CP/S&C, socks): not confirmed; no Stripe link yet,
       // so these Buy buttons fall back to /shop/ until catalog.json is confirmed and synced.
-      { key: "cpsc-5", name: "5 sessions", detail: "Use across both services", price: "$810", status: "buy", slug: "web-pay-cpsc-5" },
-      { key: "cpsc-10", name: "10 sessions", detail: "Use across both services", price: "$1,485", status: "buy", slug: "web-pay-cpsc-10" },
-    ],
-  },
-  {
-    id: "pregnancy-courses",
-    title: "Pregnancy and postnatal courses",
-    lead:
-      "Ten-session courses that bring together services we already offer, so your sessions for pregnancy or the months after birth are planned as one course.",
-    photo: { src: "/photos/services/prenatal-physiotherapy-800.webp", alt: "A pregnant client working with a Goji physiotherapist." },
-    options: [
-      { key: "prenatal-10", name: "Prenatal course, 10 sessions", detail: "For pregnancy", price: "$1,485", status: "buy", slug: "web-pay-prenatal-10" },
-      { key: "postnatal-10", name: "Postnatal course, 10 sessions", detail: "For the months after birth", price: "$1,485", status: "buy", slug: "web-pay-postnatal-10" },
+      { key: "cpsc-5", name: "5 sessions Package", detail: "Use across both services", price: "$810", status: "buy", slug: "web-pay-cpsc-5" },
+      { key: "cpsc-10", name: "10 sessions Package", detail: "Use across both services", price: "$1,485", status: "buy", slug: "web-pay-cpsc-10" },
     ],
   },
   {
@@ -84,17 +84,6 @@ export const SHOP: ShopCollection[] = [
     bloom: "ripen",
     options: [
       { key: "gift-voucher", name: "Goji gift voucher", detail: "We'll send you the code to pass on", price: "From $50", status: "buy", slug: "web-pay-gift-voucher" },
-    ],
-  },
-  {
-    id: "goji-gang-merch",
-    title: "Goji Gang merch",
-    lead: "Our own socks, in Goji colours. Collect them at the clinic on your next visit.",
-    bloom: "flower",
-    artCaption: "Photos coming soon",
-    options: [
-      { key: "socks-girl", name: "Goji Girl Socks", detail: "One pair, collect at the clinic", price: "$25", status: "buy", slug: "web-pay-socks-girl" },
-      { key: "socks-gang", name: "Goji Gang Socks", detail: "One pair, collect at the clinic", price: "$25", status: "buy", slug: "web-pay-socks-gang" },
     ],
   },
 ];
