@@ -9,8 +9,8 @@ category: "Pelvic & Perinatal Health"
 tags: ["postnatal", "caesarean", "diastasis recti", "confinement"]
 relatedConditions: ["caesarean-recovery", "diastasis-recti"]
 relatedServices: ["postpartum-physiotherapy"]
-heroImage: "/photos/services/postpartum-physiotherapy.webp"
-heroAlt: "A Goji physiotherapist gently checking the tummy muscles of a smiling woman lying on an exercise mat."
+heroImage: "/photos/blog/postpartum-belly-binder.webp"
+heroAlt: "A folded cream cotton belly wrap and a berry-print muslin cloth on a white bed, with a sprig of green leaves."
 ogImage: "/og/blog/postpartum-belly-binder.jpg"
 ctaSlug: "web-wa"
 draft: false

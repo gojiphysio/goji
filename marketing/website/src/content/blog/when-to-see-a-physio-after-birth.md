@@ -9,8 +9,8 @@ category: "Pelvic & Perinatal Health"
 tags: ["postnatal", "prenatal", "pelvic floor"]
 relatedConditions: ["urinary-incontinence", "diastasis-recti", "prenatal-care"]
 relatedServices: ["postpartum-physiotherapy", "prenatal-physiotherapy", "mummy-baby-assessment"]
-heroImage: "/photos/services/mummy-baby-assessment.webp"
-heroAlt: "A mother's hands supporting her baby during tummy time at a Goji Mummy and Baby assessment."
+heroImage: "/photos/blog/when-to-see-a-physio-after-birth.webp"
+heroAlt: "A mother in pyjamas holding her baby on her lap by a sunlit glass door."
 ogImage: "/og/blog/when-to-see-a-physio-after-birth.jpg"
 ctaSlug: "web-wa"
 draft: false

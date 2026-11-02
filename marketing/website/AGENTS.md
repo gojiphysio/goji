@@ -236,7 +236,9 @@ so a token change reflows everything (styleguide is the QA surface).
 Logos in `public/brand/` are **copies** of the source of truth at
 `business-intelligence/design/brand_assets/`. Re-sync if the brand updates.
 Photos are real, consented clinic/practitioner images in production — no stock,
-no before/after. Components show branded placeholders until photos land (a
+no before/after. The one exception is blog heroes in `public/photos/blog/`,
+which may be free-licence stock or AI still lifes when no Goji photo fits
+(rules and source log in `../content-engine/blog-brief.md`). Components show branded placeholders until photos land (a
 `public/` photo that isn't in yet should degrade to a placeholder, not a broken
 `<img>` — see the `.gh-photo[data-missing]` pattern on `/getting-here`).
 

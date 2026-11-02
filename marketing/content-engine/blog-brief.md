@@ -106,10 +106,14 @@ before merge (ban list: https://github.com/MohamedAbdallah-14/unslop,
 
 ## Images
 
-- Every post has `heroImage` + `heroAlt` + `ogImage`. The hero is a real,
-  consented Goji photo (no stock, no before/after), preferably upright and
-  active. Reuse `public/photos/` until event or topic photos arrive; event
-  photos replace stand-ins once everyone shown has consented.
+- Every post has `heroImage` + `heroAlt` + `ogImage`. Prefer a real,
+  consented Goji photo (no before/after), and don't give two posts the same
+  hero. When no Goji photo fits, use a free-licence Unsplash photo (not
+  Unsplash+) or an AI-generated still life with no people, saved as
+  `public/photos/blog/<slug>.webp` plus a `-800.webp` card copy, with its
+  source logged in `image-sources.md`. Stock never shows a physio or a
+  treatment, so it can't pass as a Goji client or clinician. Event photos
+  replace stand-ins once everyone shown has consented.
 - `ogImage` is a 1200x630 JPG crop of the hero in `public/og/blog/<slug>.jpg`
   (the WhatsApp/Facebook preview). `heroAlt` describes what a sighted reader
   sees, as a sentence.

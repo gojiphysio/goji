@@ -9,8 +9,8 @@ category: "Pelvic & Perinatal Health"
 tags: ["postnatal", "pelvic floor", "diastasis recti", "back pain"]
 relatedConditions: ["urinary-incontinence", "diastasis-recti", "pelvic-girdle-pain"]
 relatedServices: ["postpartum-physiotherapy", "pelvic-floor-physiotherapy"]
-heroImage: "/photos/services/postpartum-physiotherapy.webp"
-heroAlt: "A Goji physiotherapist gently checking the tummy muscles of a smiling woman lying on an exercise mat."
+heroImage: "/photos/blog/why-mums-see-a-postnatal-physio.webp"
+heroAlt: "A mother lifting her laughing baby up for a kiss on the cheek against a pink background."
 ogImage: "/og/blog/why-mums-see-a-postnatal-physio.jpg"
 ctaSlug: "web-wa"
 draft: false
