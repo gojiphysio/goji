@@ -4,7 +4,7 @@ seoTitle: "Why Mums See a Postnatal Physio"
 description: "Leaking, back pain and a tummy gap are the most common reasons mums see a postnatal physio. All three are common after birth, and all can be treated."
 cardTitle: "What mums see a postnatal physio for"
 cardLead: "Leaking, back pain and a tummy gap top the list, and most mums want to get back to exercise. None of them is unusual, and all can be treated."
-pubDate: 2026-11-01
+pubDate: 2026-11-02
 category: "Pelvic & Perinatal Health"
 tags: ["postnatal", "pelvic floor", "diastasis recti", "back pain"]
 relatedConditions: ["urinary-incontinence", "diastasis-recti", "pelvic-girdle-pain"]

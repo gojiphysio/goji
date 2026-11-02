@@ -4,7 +4,7 @@ seoTitle: "When to See a Physio After Birth"
 description: "Any time after birth. Six weeks is a common point, but there is no deadline, and most of the mums we see first come more than three months after birth."
 cardTitle: "When to see a physio after birth"
 cardLead: "There is no deadline. If something is bothering you, come sooner, and if your baby is already one, it is not too late."
-pubDate: 2026-11-01
+pubDate: 2026-11-02
 category: "Pelvic & Perinatal Health"
 tags: ["postnatal", "prenatal", "pelvic floor"]
 relatedConditions: ["urinary-incontinence", "diastasis-recti", "prenatal-care"]
