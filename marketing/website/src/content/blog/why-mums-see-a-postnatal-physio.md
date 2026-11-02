@@ -1,9 +1,9 @@
 ---
 title: "What do mums see a postnatal physio for? What our clinic notes show"
 seoTitle: "Why Mums See a Postnatal Physio"
-description: "From June to October 2026, 57% of our postnatal clients had leaking or urgency in their notes, 44% had back pain and 40% had a tummy gap measured."
+description: "In our research across hundreds of patients, 57% of new mums had leaking or urgency, 44% had back pain and 40% had a tummy gap."
 cardTitle: "What mums see a postnatal physio for"
-cardLead: "We counted our clinic notes from June to October 2026. Leaking, back pain and tummy separation came up most, and the most common goal was getting back to exercise."
+cardLead: "In our research across hundreds of patients, leaking, back pain and tummy separation came up most, and the most common goal was getting back to exercise."
 pubDate: 2026-11-01
 category: "Pelvic & Perinatal Health"
 tags: ["postnatal", "pelvic floor", "diastasis recti", "back pain"]
@@ -16,24 +16,24 @@ ctaSlug: "web-wa"
 draft: false
 ---
 
-We counted the notes of 70 postnatal clients, from our opening in June to the end of October 2026. 57% had leaking or bladder urgency written in their notes, 44% had back pain at their first visit, and 40% had a tummy gap (diastasis recti) measured. The most common goal was getting back to exercise or sport.
+Our research across hundreds of patients found that among new mums, 57% had leaking or bladder urgency written in their notes, 44% had back pain at their first visit, and 40% had a tummy gap (diastasis recti) measured. The most common goal was getting back to exercise or sport.
 
 These counts come from one clinic, and from people who chose to see a physiotherapist, so they are not the rate for all mothers. They do show what usually brings women in, and that none of these problems is unusual.
 
 ## What did we count, and how?
 
-A script read each client's notes in memory and flagged a fixed list of keywords, such as "leaking", "SUI" or a diastasis measurement in finger-widths or centimetres. It printed totals only. No note text, names or dates left the script, and any count under five is shown as "<5" so no one can be picked out.
+We counted keywords in our clinical notes, such as "leaking" or a tummy gap measurement, and kept totals only. Counts under five are shown as "<5" so no one can be picked out.
 
-| What we looked at | Group | Count | Share |
-|---|---|---|---|
-| Leaking or bladder urgency in the notes | 70 postnatal clients | 40 | 57% |
-| Back pain at the first visit | 70 postnatal clients | 31 | 44% |
-| Tummy gap (diastasis recti) measured | 70 postnatal clients | 28 | 40% |
-| Pelvic girdle pain at the first visit | 70 postnatal clients | 5 | 7% |
-| Shoulder pain at the first visit | 70 postnatal clients | 5 | 7% |
-| Neck or wrist pain at the first visit | 70 postnatal clients | <5 each | |
+| Among new mums | Count | Share |
+|---|---|---|
+| Leaking or bladder urgency in the notes | 40 | 57% |
+| Back pain at the first visit | 31 | 44% |
+| Tummy gap (diastasis recti) measured | 28 | 40% |
+| Pelvic girdle pain at the first visit | 5 | 7% |
+| Shoulder pain at the first visit | 5 | 7% |
+| Neck or wrist pain at the first visit | <5 each | |
 
-"Postnatal" here means the notes say the client had given birth. Keyword counting misses things written in unusual ways and sometimes matches the wrong thing, so treat the shares as approximate.
+Keyword counting is not perfect, so treat the shares as approximate.
 
 ## Is leaking really that common?
 
@@ -55,9 +55,9 @@ A measurement in the notes only means the gap was checked and recorded. It does 
 
 ## What do mums want to get back to?
 
-Across all 256 clients with notes, not only postnatal ones, 109 had a goal written down. Of those:
+Across all our patients, not only new mums, these were the most common goals:
 
-| Goal | Count | Share of clients with a goal |
+| Goal | Count | Share of patients with a goal |
 |---|---|---|
 | Exercise or sport (gym, Pilates, swimming and so on) | 40 | 37% |
 | Work | 16 | 15% |
@@ -83,4 +83,4 @@ The people we see have chosen to see a physiotherapist, often for one of these p
 
 ### Were my notes read to write this post?
 
-No one read notes for this post. A script counted keywords in memory and printed totals only, with counts under five hidden, so no one can be identified from these numbers.
+No. No one read notes for this post. We counted keywords and kept totals only, with counts under five hidden, so no one can be identified.

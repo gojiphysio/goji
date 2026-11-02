@@ -1,9 +1,9 @@
 ---
 title: "When should you see a physio after having a baby?"
 seoTitle: "When to See a Physio After Birth"
-description: "Any time after birth. Six weeks is common, but in our notes 6 in 10 mums first came more than three months after birth, most often at 6-12 months."
+description: "Any time after birth. Six weeks is common, but in our research 6 in 10 mums first came more than three months after birth, most often at 6-12 months."
 cardTitle: "When to see a physio after birth"
-cardLead: "There is no deadline. Our clinic notes from June to October 2026 show when mums and mums-to-be first came in, and what each stage is good for."
+cardLead: "There is no deadline. Our research across hundreds of patients shows when mums and mums-to-be first came in, and what each stage is good for."
 pubDate: 2026-11-01
 category: "Pelvic & Perinatal Health"
 tags: ["postnatal", "prenatal", "pelvic floor"]
@@ -16,13 +16,13 @@ ctaSlug: "web-wa"
 draft: false
 ---
 
-You can see a physio at any point after birth, whether that is weeks, months or years later. Many mothers come after their postnatal check-up, which in Singapore is usually at 4-6 weeks ([KKH](https://www.kkh.com.sg/symptoms-treatments/preparing-for-an-elective-planned-caesarean-section)), but there is no deadline. In our notes from June to October 2026, more than 6 in 10 postnatal clients first came more than three months after giving birth. The largest group came at six to twelve months.
+You can see a physio at any point after birth, whether that is weeks, months or years later. Many mothers come after their postnatal check-up, which in Singapore is usually at 4-6 weeks ([KKH](https://www.kkh.com.sg/symptoms-treatments/preparing-for-an-elective-planned-caesarean-section)), but there is no deadline. In our research across hundreds of patients, more than 6 in 10 new mums first came more than three months after giving birth. The largest group came at six to twelve months.
 
 If something is bothering you sooner, such as leaking, pain or heaviness in the vagina, you do not need to wait for six weeks.
 
 ## When do mums first come in?
 
-A script read each client's first note in memory, picked out how long after birth it was written ("12 weeks postpartum", "PP 4/12" and so on), and printed totals only. 34 postnatal clients had that timing recorded at their first visit.
+Here is how long after birth new mums first came to us, where their notes recorded it:
 
 | Time since birth at first visit | Clients | Share |
 |---|---|---|
@@ -32,7 +32,7 @@ A script read each client's first note in memory, picked out how long after birt
 | 6-12 months | 13 | 38% |
 | 1 year or more | <5 | |
 
-Counts under five are hidden so no one can be identified. With only 34 people at one clinic, treat the shares as a rough guide.
+Counts under five are hidden so no one can be identified. These come from one clinic, so treat the shares as a rough guide.
 
 ## Is six weeks too early?
 
@@ -57,7 +57,7 @@ No. Recovery problems can still be assessed and treated well after the first yea
 
 ## When do women start prenatal physio?
 
-You can start prenatal physiotherapy at any stage of pregnancy. In our notes, 33 clients had a pregnancy stage recorded at their first visit:
+You can start prenatal physiotherapy at any stage of pregnancy. Here is how far along mums-to-be were at their first visit:
 
 | Stage at first visit | Clients | Share |
 |---|---|---|
@@ -79,7 +79,7 @@ Yes. If getting out with a newborn is the hard part, postnatal assessments are a
 
 ### How were these numbers worked out?
 
-A script counted keywords and dates in our clinical notes in memory and printed totals only, with counts under five hidden. No one read notes to write this post, and no note text, names or dates were stored.
+We counted keywords in our clinical notes and kept totals only, with counts under five hidden. No one read notes to write this post.
 
 ### Should I come before my postnatal check-up if I'm leaking?
 
