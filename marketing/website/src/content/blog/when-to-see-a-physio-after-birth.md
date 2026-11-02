@@ -1,9 +1,9 @@
 ---
 title: "When should you see a physio after having a baby?"
 seoTitle: "When to See a Physio After Birth"
-description: "Any time after birth. Six weeks is common, but in our research 6 in 10 mums first came more than three months after birth, most often at 6-12 months."
+description: "Any time after birth. Six weeks is a common point, but there is no deadline, and most of the mums we see first come more than three months after birth."
 cardTitle: "When to see a physio after birth"
-cardLead: "There is no deadline. Our research across hundreds of patients shows when mums and mums-to-be first came in, and what each stage is good for."
+cardLead: "There is no deadline. If something is bothering you, come sooner, and if your baby is already one, it is not too late."
 pubDate: 2026-11-01
 category: "Pelvic & Perinatal Health"
 tags: ["postnatal", "prenatal", "pelvic floor"]
@@ -16,23 +16,9 @@ ctaSlug: "web-wa"
 draft: false
 ---
 
-You can see a physio at any point after birth, whether that is weeks, months or years later. Many mothers come after their postnatal check-up, which in Singapore is usually at 4-6 weeks ([KKH](https://www.kkh.com.sg/symptoms-treatments/preparing-for-an-elective-planned-caesarean-section)), but there is no deadline. In our research across hundreds of patients, more than 6 in 10 new mums first came more than three months after giving birth. The largest group came at six to twelve months.
+Any time after birth. There is no deadline. Many mums come after their postnatal check-up, which in Singapore is usually at 4-6 weeks ([KKH](https://www.kkh.com.sg/symptoms-treatments/preparing-for-an-elective-planned-caesarean-section)). If something is bothering you before then, such as leaking, pain or heaviness in the vagina, you do not need to wait. And if your baby is already one or older, it is not too late.
 
-If something is bothering you sooner, such as leaking, pain or heaviness in the vagina, you do not need to wait for six weeks.
-
-## When do mums first come in?
-
-Here is how long after birth new mums first came to us, where their notes recorded it:
-
-| Time since birth at first visit | Clients | Share |
-|---|---|---|
-| Under 6 weeks | <5 | |
-| 6-12 weeks | 7 | 21% |
-| 3-6 months | 9 | 26% |
-| 6-12 months | 13 | 38% |
-| 1 year or more | <5 | |
-
-Counts under five are hidden so no one can be identified. These come from one clinic, so treat the shares as a rough guide.
+Most mums come later than they expect. More than 6 in 10 of the new mums we see first come more than three months after giving birth.
 
 ## Is six weeks too early?
 
@@ -42,7 +28,7 @@ Some problems need a doctor straight away, not a physio appointment, such as hea
 
 ## Is it too late if my baby is already one?
 
-No. Recovery problems can still be assessed and treated well after the first year, and pelvic floor muscle training is recommended as a first treatment however long symptoms have lasted. In our numbers, six to twelve months was the most common time to come in, often because someone wanted to get back to exercise, running or work and something was holding them back.
+No. Recovery problems can still be assessed and treated well after the first year, and pelvic floor muscle training is recommended as a first treatment however long symptoms have lasted. Six to twelve months after birth is the most common time for a mum's first visit with us, often because she wants to get back to exercise, running or work and something is holding her back.
 
 ## What is each stage good for?
 
@@ -55,17 +41,27 @@ No. Recovery problems can still be assessed and treated well after the first yea
 
 [What happens at your first physiotherapy visit](/blog/what-happens-at-your-first-physiotherapy-visit/) walks through the appointment. A [Mummy and Baby assessment](/services/mummy-baby-assessment/) checks your recovery and your baby's development in one visit.
 
-## When do women start prenatal physio?
+## When should I start prenatal physio?
 
-You can start prenatal physiotherapy at any stage of pregnancy. Here is how far along mums-to-be were at their first visit:
+At any stage of pregnancy. More than half of the mums-to-be we see first come in the third trimester, which is often when aches, pelvic girdle pain or pelvic floor symptoms start. 32-36 weeks is also when a birth preparation session is most useful. Our [prenatal physiotherapy](/services/prenatal-physiotherapy/) page covers what that session includes, and [perineal massage before birth](/blog/perineal-massage-before-birth/) covers one part of it.
 
-| Stage at first visit | Clients | Share |
-|---|---|---|
-| First trimester (up to 13 weeks) | 8 | 24% |
-| Second trimester (14-27 weeks) | 7 | 21% |
-| Third trimester (28 weeks on) | 18 | 55% |
+## Our numbers
 
-More than half first came in the third trimester, which is often when aches, pelvic girdle pain or pelvic floor symptoms start. 32-36 weeks is also when a birth preparation session is most useful. Our [prenatal physiotherapy](/services/prenatal-physiotherapy/) page covers what that session includes, and [perineal massage before birth](/blog/perineal-massage-before-birth/) covers one part of it.
+These figures come from our research across hundreds of patients. We counted keywords in our clinical notes and kept only the totals. They come from one clinic, so treat them as a rough guide.
+
+| Time since birth at first visit | Share of new mums |
+|---|---|
+| 6-12 weeks | 21% |
+| 3-6 months | 26% |
+| 6-12 months | 38% |
+
+A small number came in the first six weeks or after a year.
+
+| Stage of pregnancy at first visit | Share of mums-to-be |
+|---|---|
+| First trimester (up to 13 weeks) | 24% |
+| Second trimester (14-27 weeks) | 21% |
+| Third trimester (28 weeks on) | 55% |
 
 ## Frequently asked questions
 
@@ -76,10 +72,6 @@ You do not need a referral to book. If you have a high-risk pregnancy, we check 
 ### Can I bring my baby?
 
 Yes. If getting out with a newborn is the hard part, postnatal assessments are also available as a home visit. A [Mummy and Baby assessment](/services/mummy-baby-assessment/) checks your recovery and your baby's development together.
-
-### How were these numbers worked out?
-
-We counted keywords in our clinical notes and kept totals only, with counts under five hidden. No one read notes to write this post.
 
 ### Should I come before my postnatal check-up if I'm leaking?
 

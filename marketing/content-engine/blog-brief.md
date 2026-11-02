@@ -75,9 +75,11 @@ than the source says, and red flags pointing to a doctor.
 - **Clinic numbers only from a recorded aggregate.** Our own counts (e.g. the
   Results in `business-intelligence/architecture/clinical-notes-insights-plan.md`)
   may be quoted as "our research across hundreds of patients" (true while the
-  record covers 200+), with counts under 5 kept as "<5" and a note that the
-  people we see are not all mothers. Leave date ranges, group sizes and how
-  the script works out of reader copy: readers don't care. Never round a
+  record covers 200+), as percentages or "4 in 10" only, never absolute
+  counts, and with a note that the people we see are not all mothers. Lead
+  with the message for the reader; the numbers back it up in the body and a
+  short "Our numbers" table near the end. Leave out date ranges, group
+  sizes, how the script works and any cell under 5. Never round a
   count up, combine cells to unhide one, or quote a number not in the record.
 - **Event recaps restate only what was published** (the Luma page, Goji's own
   Instagram caption). Never put words in a guest speaker's mouth or describe

@@ -1,9 +1,9 @@
 ---
-title: "What do mums see a postnatal physio for? What our clinic notes show"
+title: "What do mums see a postnatal physio for?"
 seoTitle: "Why Mums See a Postnatal Physio"
-description: "In our research across hundreds of patients, 57% of new mums had leaking or urgency, 44% had back pain and 40% had a tummy gap."
+description: "Leaking, back pain and a tummy gap are the most common reasons mums see a postnatal physio. All three are common after birth, and all can be treated."
 cardTitle: "What mums see a postnatal physio for"
-cardLead: "In our research across hundreds of patients, leaking, back pain and tummy separation came up most, and the most common goal was getting back to exercise."
+cardLead: "Leaking, back pain and a tummy gap top the list, and most mums want to get back to exercise. None of them is unusual, and all can be treated."
 pubDate: 2026-11-01
 category: "Pelvic & Perinatal Health"
 tags: ["postnatal", "pelvic floor", "diastasis recti", "back pain"]
@@ -16,56 +16,50 @@ ctaSlug: "web-wa"
 draft: false
 ---
 
-Our research across hundreds of patients found that among new mums, 57% had leaking or bladder urgency written in their notes, 44% had back pain at their first visit, and 40% had a tummy gap (diastasis recti) measured. The most common goal was getting back to exercise or sport.
+The most common reasons mums see us after birth are leaking, back pain and a gap in the tummy muscles (diastasis recti). Most of them want to get back to exercise or sport. None of these problems is unusual, and all of them can be treated.
 
-These counts come from one clinic, and from people who chose to see a physiotherapist, so they are not the rate for all mothers. They do show what usually brings women in, and that none of these problems is unusual.
+## Is leaking after birth normal?
 
-## What did we count, and how?
+It is common, but you do not have to live with it. Leaking when you cough, sneeze, laugh or jump, or a sudden need to rush to the toilet, is the most common thing we see in new mums. More than half of the mums who come to us have it.
 
-We counted keywords in our clinical notes, such as "leaking" or a tummy gap measurement, and kept totals only. Counts under five are shown as "<5" so no one can be picked out.
+It is common outside our clinic too. Across 24 studies of more than 35,000 women, about 31% had some leaking between six weeks and one year after birth ([Moossdorff-Steinhauser et al., 2021](https://pmc.ncbi.nlm.nih.gov/articles/PMC8295150/)). Our share is higher because mums with a bladder problem are the ones most likely to book a pelvic floor assessment.
 
-| Among new mums | Count | Share |
-|---|---|---|
-| Leaking or bladder urgency in the notes | 40 | 57% |
-| Back pain at the first visit | 31 | 44% |
-| Tummy gap (diastasis recti) measured | 28 | 40% |
-| Pelvic girdle pain at the first visit | 5 | 7% |
-| Shoulder pain at the first visit | 5 | 7% |
-| Neck or wrist pain at the first visit | <5 each | |
+The recommended first treatment is supervised pelvic floor muscle training ([NICE](https://www.nice.org.uk/guidance/qs77/chapter/Quality-statement-4-Supervised-pelvic-floor-muscle-training)). Our post on [whether leaking after birth is normal](/blog/is-leaking-after-birth-normal/) covers what tends to settle on its own and what is worth getting checked.
 
-Keyword counting is not perfect, so treat the shares as approximate.
+## Why does my back hurt after having a baby?
 
-## Is leaking really that common?
+You lift and carry your baby many times a day and spend long stretches feeding in one position, while your tummy muscles are still recovering from pregnancy. Back pain is the most common pain we see in new mums, in more than 4 in 10 of them, and well ahead of neck, shoulder or wrist pain.
 
-More than half of our postnatal clients had leaking or urgency recorded. That is higher than for new mothers in general, which is what you would expect, because people with a bladder problem are the ones who book a pelvic floor assessment. A review of 24 studies covering more than 35,000 women found that about 31% had some urinary leaking between six weeks and one year after birth ([Moossdorff-Steinhauser et al., 2021](https://pmc.ncbi.nlm.nih.gov/articles/PMC8295150/)).
+A physio looks at how you lift, carry and feed as well as at where it hurts, so the plan fits your day. Pain at the front or back of the pelvis, around the pubic bone or the sacroiliac joints, is a different problem called pelvic girdle pain. Our [pelvic girdle pain page](/conditions/pelvic-girdle-pain/) explains it.
 
-So leaking after birth is common. It is also treatable. Supervised pelvic floor muscle training is the recommended first treatment for stress and mixed urinary incontinence ([NICE](https://www.nice.org.uk/guidance/qs77/chapter/Quality-statement-4-Supervised-pelvic-floor-muscle-training)). Our post on [whether leaking after birth is normal](/blog/is-leaking-after-birth-normal/) covers what tends to settle and what is worth getting assessed.
+## Is a gap in my tummy muscles normal?
 
-## Why does back pain come up so often after birth?
+Yes. The two sides of the six-pack muscle separate during pregnancy to make room for your baby, and the gap often narrows over the first year. In a Norwegian study of 300 first-time mothers, 60.0% had a gap of two finger-widths or more at 6 weeks after birth, and 32.6% still did at 12 months ([Sperstad et al., 2016, British Journal of Sports Medicine](https://doi.org/10.1136/bjsports-2016-096065)).
 
-Back pain was in 44% of postnatal first-visit notes, well ahead of neck, shoulder, wrist or pelvic girdle pain. New mums lift and carry a lot and spend long stretches feeding in one position, while their tummy muscles are still recovering from pregnancy.
-
-A physiotherapy assessment looks at how you lift, carry and feed as well as at the sore area, so the plan fits your day. Pain at the front or back of the pelvis, around the pubic bone or the sacroiliac joints, is a different problem with its own treatment. Our [pelvic girdle pain page](/conditions/pelvic-girdle-pain/) explains it.
-
-## How many mums have a gap in their tummy muscles?
-
-A tummy gap was measured in 40% of postnatal clients' notes. A gap between the two sides of the six-pack muscle is normal in pregnancy and often narrows over the first year. In a Norwegian study of 300 first-time mothers, 60.0% had a gap of two finger-widths or more at 6 weeks after birth, and 32.6% still did at 12 months ([Sperstad et al., 2016, British Journal of Sports Medicine](https://doi.org/10.1136/bjsports-2016-096065)).
-
-A measurement in the notes only means the gap was checked and recorded. It does not mean the gap was large or a problem. Our [diastasis recti page](/conditions/diastasis-recti/) covers what is normal and what physiotherapy involves, and [diastasis recti: physio or surgery](/blog/diastasis-recti-physio-or-surgery/) covers when surgery is considered.
+We measure the gap in about 4 in 10 of the new mums we see. A measurement does not mean the gap is large or a problem, only that we checked it. Our [diastasis recti page](/conditions/diastasis-recti/) covers what is normal and what physiotherapy involves, and [diastasis recti: physio or surgery](/blog/diastasis-recti-physio-or-surgery/) covers when surgery is considered.
 
 ## What do mums want to get back to?
 
-Across all our patients, not only new mums, these were the most common goals:
+Most people come to us with something specific they want to do again, not only to stop hurting. Across all our patients, the most common goal is exercise or sport, such as the gym, Pilates or swimming, followed by work and running. Some mums simply want to lift and carry their baby without pain.
 
-| Goal | Count | Share of patients with a goal |
-|---|---|---|
-| Exercise or sport (gym, Pilates, swimming and so on) | 40 | 37% |
-| Work | 16 | 15% |
-| Running | 12 | 11% |
-| Lifting or carrying their baby or child without pain | 5 | 5% |
-| Sleep | <5 | |
+That is why an assessment ends with a plan built around the activity you want back. [Returning to exercise after birth](/blog/returning-to-exercise-after-birth/) covers what the first twelve weeks can look like.
 
-A client can have more than one goal, so the shares are not meant to add up to 100%. Most goals were about getting back to a particular activity, not only about being pain-free. That is why an assessment usually ends with a plan built around the activity you want back. [Returning to exercise after birth](/blog/returning-to-exercise-after-birth/) covers what the first twelve weeks can look like.
+## Our numbers
+
+These figures come from our research across hundreds of patients. We counted keywords in our clinical notes and kept only the totals. They describe people who chose to see a physio, so they are not the rate for all mothers.
+
+| Among new mums we see | Share |
+|---|---|
+| Leaking or bladder urgency | 57% |
+| Back pain at the first visit | 44% |
+| Tummy gap measured | 40% |
+
+| Most common goals, all patients | Share of those with a goal |
+|---|---|
+| Exercise or sport | 37% |
+| Work | 15% |
+| Running | 11% |
+| Lifting or carrying their baby or child without pain | 5% |
 
 ## Frequently asked questions
 
@@ -77,10 +71,10 @@ No. You can book directly. Our [postpartum physiotherapy](/services/postpartum-p
 
 No. Pregnancy itself loads the pelvic floor, so pelvic floor problems can follow a caesarean birth as well as a vaginal one. Our [caesarean recovery page](/conditions/caesarean-recovery/) covers recovery after a C-section.
 
-### Why do your numbers look higher than research figures?
+### Why are your numbers higher than research figures?
 
 The people we see have chosen to see a physiotherapist, often for one of these problems. Research figures come from all women after birth, whether or not they had symptoms or sought help.
 
 ### Were my notes read to write this post?
 
-No. No one read notes for this post. We counted keywords and kept totals only, with counts under five hidden, so no one can be identified.
+No. No one read notes for this post. We counted keywords and kept only the totals, so no one can be identified.
