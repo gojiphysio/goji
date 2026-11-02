@@ -95,14 +95,14 @@ const footerMap = [
     ],
   },
 ];
+// Primary nav. About (a home-page section) and Media (/press/) live in the
+// footer's Clinic column; they don't need a top-level slot.
 const nav = [
-  { href: isHome ? "#about" : "/#about", label: "About" },
+  { href: isHome ? "#team" : "/#team", label: "Team" },
   { href: "/services/", label: "Services" },
   { href: "/conditions/", label: "Conditions" },
-  { href: "/press/", label: "Media" },
   { href: "/blog/", label: "Blog" },
-  { href: isHome ? "#team" : "/#team", label: "Team" },
-  { href: "/getting-here/", label: "Find us" },
+  { href: "/getting-here/", label: "Find Us" },
 ];
 
 // GA4 (website tracking). Inert until PUBLIC_GA4_ID is set in the Cloudflare

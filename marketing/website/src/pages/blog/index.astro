@@ -34,7 +34,37 @@ const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
 );
 const hasPosts = posts.length > 0;
 
-const [featured, ...rest] = posts;
+// Mosaic: posts fill rows on a 6-column grid, cycling through row shapes so
+// each card gets its own layout instead of one big feature over a uniform
+// grid. Spans in a row always total 6, so the desktop grid never has holes.
+type Variant = "spread" | "portrait" | "tile" | "classic" | "wide";
+const SPAN: Record<Variant, number> = { spread: 4, portrait: 2, tile: 2, classic: 2, wide: 6 };
+const ROWS: Variant[][] = [
+  ["spread", "portrait"],
+  ["tile", "classic", "classic"],
+  ["portrait", "spread"],
+  ["classic", "classic", "tile"],
+];
+const cards: { post: (typeof posts)[number]; variant: Variant; flip: boolean }[] = [];
+for (let i = 0, r = 0; i < posts.length; r++) {
+  let row = ROWS[r % ROWS.length];
+  const left = posts.length - i;
+  // A short last row: one post spans the width, two take a spread + portrait.
+  if (left < row.length) row = left === 1 ? ["wide"] : ["spread", "portrait"];
+  row.forEach((variant, j) => {
+    cards.push({ post: posts[i + j], variant, flip: variant === "spread" && j > 0 });
+  });
+  i += row.length;
+}
+
+// Each category gets its own wash, so neighbouring cards read as different.
+const TINT: Record<string, string> = {
+  "Pelvic & Perinatal Health": "blush",
+  "Movement & Fitness": "sage",
+  "Active Ageing & Family": "ochre",
+  "Clinic News": "lilac",
+};
+const tint = (category: string) => TINT[category] ?? "blush";
 
 const origin = Astro.site ?? new URL(Astro.url.origin);
 const pageURL = new URL("/blog/", origin).href;
@@ -123,65 +153,41 @@ const schema = hasPosts
   }
 
   {
-    featured && (
-      <Section tone="surface">
-        <a href={`/blog/${featured.slug}/`} class="blog-feature">
-          {featured.data.heroImage && (
-            <div class="blog-feature__media">
-              <img
-                src={featured.data.heroImage}
-                srcset={small(featured.data.heroImage) !== featured.data.heroImage ? `${small(featured.data.heroImage)} 800w, ${featured.data.heroImage} 1600w` : undefined}
-                sizes="(min-width: 760px) 50vw, 100vw"
-                alt={featured.data.heroAlt ?? ""}
-                width="760"
-                height="475"
-                loading="eager"
-                fetchpriority="high"
-              />
-            </div>
-          )}
-          <div class="blog-feature__body">
-            <p class="blog-meta">
-              <span class="blog-badge">{featured.data.category}</span>
-              <time datetime={isoDate(featured.data.pubDate)}>
-                {formatDate(featured.data.pubDate)}
-              </time>
-            </p>
-            <h2>{featured.data.cardTitle ?? featured.data.title}</h2>
-            <p class="blog-feature__lead">{featured.data.cardLead}</p>
-            <span class="blog-card__cta">Read the article</span>
-          </div>
-        </a>
-      </Section>
-    )
-  }
-
-  {
-    rest.length > 0 && (
+    hasPosts && (
       <Section tone="linen">
-        <h2 class="blog-section-title">More from the clinic</h2>
-        <div class="blog-grid">
-          {rest.map((post) => (
-            <a href={`/blog/${post.slug}/`} class="blog-card">
+        <div class="blog-mosaic">
+          {cards.map(({ post, variant, flip }, i) => (
+            <a
+              href={`/blog/${post.slug}/`}
+              class:list={["blog-card", `blog-card--${variant}`, `tint-${tint(post.data.category)}`, { "blog-card--flip": flip }]}
+              style={`--span: ${SPAN[variant]}`}
+            >
               {post.data.heroImage && (
-                <img
-                  src={small(post.data.heroImage)}
-                  alt={post.data.heroAlt ?? ""}
-                  width="480"
-                  height="300"
-                  loading="lazy"
-                  class="blog-card__media"
-                />
+                <div class:list={["blog-card__media", { "is-thumb": variant === "tile" }]}>
+                  <img
+                    src={variant === "tile" || variant === "classic" || variant === "portrait" ? small(post.data.heroImage) : post.data.heroImage}
+                    srcset={(variant === "spread" || variant === "wide") && small(post.data.heroImage) !== post.data.heroImage ? `${small(post.data.heroImage)} 800w, ${post.data.heroImage} 1600w` : undefined}
+                    sizes={variant === "spread" || variant === "wide" ? "(min-width: 980px) 40vw, 100vw" : undefined}
+                    alt={post.data.heroAlt ?? ""}
+                    width="800"
+                    height="533"
+                    loading={i === 0 ? "eager" : "lazy"}
+                    fetchpriority={i === 0 ? "high" : undefined}
+                  />
+                </div>
               )}
-              <p class="blog-meta">
-                <span class="blog-badge">{post.data.category}</span>
-                <time datetime={isoDate(post.data.pubDate)}>
-                  {formatDate(post.data.pubDate)}
-                </time>
-              </p>
-              <h3 class="blog-card__title">{post.data.cardTitle ?? post.data.title}</h3>
-              <p class="blog-card__lead">{post.data.cardLead}</p>
-              <span class="blog-card__cta">Read more</span>
+              <div class="blog-card__body">
+                {i === 0 || variant === "spread" || variant === "wide" || variant === "tile" ? (
+                  <h2 class="blog-card__title">{post.data.cardTitle ?? post.data.title}</h2>
+                ) : (
+                  <h2 class="blog-card__title blog-card__title--sm">{post.data.cardTitle ?? post.data.title}</h2>
+                )}
+                <p class="blog-card__lead">{post.data.cardLead}</p>
+                <p class="blog-meta">
+                  <span>{post.data.category}</span>
+                  <time datetime={isoDate(post.data.pubDate)}>{formatDate(post.data.pubDate)}</time>
+                </p>
+              </div>
             </a>
           ))}
         </div>
@@ -262,93 +268,45 @@ const schema = hasPosts
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: var(--space-3);
-    font-size: var(--fs-caption);
+    gap: var(--space-1) var(--space-4);
+    font-size: var(--fs-small);
     color: var(--text-muted);
-  }
-  .blog-badge {
-    font-weight: var(--weight-semibold);
-    letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
-    color: var(--color-primary);
+    margin-top: auto;
+    padding-top: var(--space-3);
   }
 
-  /* Featured post: image left, copy right on desktop; stacked on a phone. */
-  .blog-feature {
+  /* Mosaic. One column on a phone, two on a tablet (the wide cards span
+     both, and dense flow back-fills any gap), six on desktop, where each
+     card spans --span columns and every row adds up to 6. */
+  .blog-mosaic {
     display: grid;
     gap: var(--space-5);
-    background: var(--bg-content);
-    border: 1px solid var(--color-border);
-    border-top: 3px solid var(--color-primary);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-sm);
-    overflow: hidden;
-    text-decoration: none;
-    color: inherit;
-    transition: box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease);
-  }
-  .blog-feature:hover {
-    box-shadow: var(--shadow-md);
-    transform: translateY(-2px);
-  }
-  @media (min-width: 760px) {
-    .blog-feature {
-      grid-template-columns: 1fr 1fr;
-      gap: 0;
-      align-items: stretch;
-    }
-  }
-  /* Grid items default to min-width:auto, so a photo could widen the card
-     past a phone screen; let the columns shrink. */
-  .blog-feature > * { min-width: 0; }
-  /* The photo fills its half of the card, edge to edge. */
-  .blog-feature__media { background: var(--color-linen); }
-  .blog-feature__media img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    aspect-ratio: 8 / 5;
-    object-fit: cover;
-  }
-  @media (min-width: 760px) {
-    .blog-feature__media img { min-height: 260px; aspect-ratio: auto; }
-  }
-  .blog-feature__body {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-3);
-    padding: var(--space-5);
-  }
-  .blog-feature__lead {
-    color: var(--text-muted);
-    line-height: var(--lh-snug);
-    max-width: 52ch;
-  }
-
-  .blog-section-title { margin-bottom: var(--space-5); }
-
-  .blog-grid {
-    display: grid;
-    gap: var(--space-4);
     grid-template-columns: 1fr;
   }
   @media (min-width: 640px) {
-    .blog-grid { grid-template-columns: 1fr 1fr; }
+    .blog-mosaic { grid-template-columns: 1fr 1fr; grid-auto-flow: dense; }
+    .blog-card--spread, .blog-card--wide { grid-column: span 2; }
   }
   @media (min-width: 980px) {
-    .blog-grid { grid-template-columns: repeat(3, 1fr); }
+    .blog-mosaic { grid-template-columns: repeat(6, 1fr); grid-auto-flow: row; }
+    .blog-card { grid-column: span var(--span); }
   }
+
+  /* Category washes: decorative pigments mixed into paper. */
+  .tint-blush { --wash: var(--blush); }
+  .tint-sage { --wash: color-mix(in srgb, var(--sage) 22%, var(--color-paper)); }
+  .tint-ochre { --wash: color-mix(in srgb, var(--ochre) 24%, var(--color-paper)); }
+  .tint-lilac { --wash: color-mix(in srgb, var(--lilac) 28%, var(--color-paper)); }
 
   .blog-card {
     display: flex;
     flex-direction: column;
-    gap: var(--space-2);
-    padding: var(--space-5);
+    gap: var(--space-4);
+    min-width: 0;
+    padding: var(--space-4);
     background: var(--bg-content);
     border: 1px solid var(--color-border);
-    border-top: 3px solid var(--color-primary);
     border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-sm);
     text-decoration: none;
     color: inherit;
     transition: box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease);
@@ -357,35 +315,89 @@ const schema = hasPosts
     box-shadow: var(--shadow-md);
     transform: translateY(-2px);
   }
-  /* Thumbnail bleeds to the card edges and fills the top of the card. */
-  .blog-card { overflow: hidden; }
-  .blog-card__media {
-    display: block;
-    width: calc(100% + 2 * var(--space-5));
-    max-width: none;
-    margin: calc(-1 * var(--space-5)) calc(-1 * var(--space-5)) var(--space-3);
-    aspect-ratio: 8 / 5;
-    object-fit: cover;
-    background: var(--color-linen);
+  .blog-card__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    flex: 1;
+    padding: 0 var(--space-2) var(--space-2);
   }
   .blog-card__title {
-    font-size: var(--fs-h3);
+    font-size: var(--fs-h2);
+    line-height: 1.12;
     color: var(--text-default);
   }
+  .blog-card__title--sm { font-size: var(--fs-h3); }
+  .blog-card:hover .blog-card__title { color: var(--text-accent); }
   .blog-card__lead {
-    font-size: var(--fs-body);
     color: var(--text-muted);
-    flex: 1;
     line-height: var(--lh-snug);
+    max-width: 52ch;
   }
-  .blog-card__cta {
-    font-size: var(--fs-caption);
-    font-weight: var(--weight-semibold);
-    letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
-    color: var(--color-primary);
-    margin-top: var(--space-2);
+
+  /* Photos sit inside the card in the petal frame (never an arch). */
+  .blog-card__media {
+    overflow: hidden;
+    background: var(--blush);
+    border-radius: 72px var(--radius-md) 72px var(--radius-md);
   }
+  .blog-card__media img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+  }
+
+  /* Spread: photo beside the copy on a white card. */
+  @media (min-width: 640px) {
+    .blog-card--spread, .blog-card--wide {
+      flex-direction: row;
+      align-items: stretch;
+      padding: var(--space-5);
+      gap: var(--space-6);
+    }
+    .blog-card--spread .blog-card__media,
+    .blog-card--wide .blog-card__media { flex: 0 0 48%; }
+    .blog-card--spread .blog-card__media img,
+    .blog-card--wide .blog-card__media img { aspect-ratio: auto; min-height: 300px; }
+    .blog-card--spread .blog-card__body,
+    .blog-card--wide .blog-card__body { justify-content: center; padding: var(--space-3) 0; }
+    .blog-card--spread .blog-card__title,
+    .blog-card--wide .blog-card__title { font-size: var(--fs-h1); }
+    .blog-card--spread .blog-card__lead,
+    .blog-card--wide .blog-card__lead { font-size: var(--fs-lead); }
+    .blog-card--flip { flex-direction: row-reverse; }
+    .blog-card--flip .blog-card__media { border-radius: var(--radius-md) 72px var(--radius-md) 72px; }
+  }
+
+  /* Portrait: a tall photo on the category wash. */
+  .blog-card--portrait {
+    background: var(--wash);
+    border-color: transparent;
+  }
+  .blog-card--portrait .blog-card__media { border-radius: var(--radius-md) 72px var(--radius-md) 72px; }
+  @media (min-width: 980px) {
+    .blog-card--portrait .blog-card__media img { aspect-ratio: 1; }
+  }
+
+  /* Tile: words first on the wash, with a small petal thumbnail. */
+  .blog-card--tile {
+    background: var(--wash);
+    border-color: transparent;
+    padding: var(--space-6) var(--space-5) var(--space-5);
+  }
+  .blog-card--tile .blog-card__media {
+    order: 2;
+    width: 104px;
+    border-radius: 40px var(--radius-sm) 40px var(--radius-sm);
+    align-self: flex-end;
+  }
+  .blog-card--tile .blog-card__media img { aspect-ratio: 1; }
+  .blog-card--tile .blog-card__body { padding: 0; }
+
+  /* Classic: photo on top of a white card. */
+  .blog-card--classic .blog-card__media img { aspect-ratio: 8 / 5; }
 
   .contact-strip {
     max-width: 44ch;
