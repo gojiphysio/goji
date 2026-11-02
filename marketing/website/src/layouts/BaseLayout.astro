@@ -95,14 +95,14 @@ const footerMap = [
     ],
   },
 ];
+// Primary nav. About (a home-page section) and Media (/press/) live in the
+// footer's Clinic column; they don't need a top-level slot.
 const nav = [
-  { href: isHome ? "#about" : "/#about", label: "About" },
+  { href: isHome ? "#team" : "/#team", label: "Team" },
   { href: "/services/", label: "Services" },
   { href: "/conditions/", label: "Conditions" },
-  { href: "/press/", label: "Media" },
   { href: "/blog/", label: "Blog" },
-  { href: isHome ? "#team" : "/#team", label: "Team" },
-  { href: "/getting-here/", label: "Find us" },
+  { href: "/getting-here/", label: "Find Us" },
   { href: "/shop/", label: "Shop" },
 ];
 
@@ -574,10 +574,10 @@ const GADS_BOOKING_LABEL = import.meta.env.PUBLIC_GADS_BOOKING_LABEL;
           display: flex;
         }
       }
-      /* Eight links fit at 880px only with a tighter gap. */
+      /* Six links fit at 880px only with a tighter gap. */
       @media (min-width: 880px) and (max-width: 1023px) {
         .site-nav {
-          gap: var(--space-3);
+          gap: var(--space-4);
         }
       }
 

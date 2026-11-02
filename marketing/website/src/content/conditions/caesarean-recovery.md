@@ -1,6 +1,7 @@
 ---
 title: "Caesarean Recovery and Scar Management"
-description: "A Caesarean section is a major abdominal operation. Physiotherapy supports recovery, from early mobilisation and pain management to scar work and exercise."
+seoTitle: "C-Section Recovery and Scar Care: Physio"
+description: "After a C-section: when to start physio, what scar work involves, numbness around the scar, and getting back to exercise. Goji Physio, Lentor."
 cardTitle: "Caesarean Recovery and Scar Management"
 cardLead: "Physiotherapy supports recovery after a Caesarean birth, from gentle early movement and pain management to scar care and a safe, gradual return to exercise."
 category: "Women's Health"

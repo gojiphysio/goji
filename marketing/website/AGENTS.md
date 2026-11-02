@@ -253,9 +253,11 @@ has no suitable glyph, drop a stroke-styled SVG into `src/icons/` and reference
 it by filename (`<Icon name="subway" />`) — don't pull in another icon set.
 
 ## Blog and Media IA (/blog, /press)
-Two top-level nav items: **Blog** (`/blog`, what we write) and **Media**
-(`/press`, what others write about us). The old `/media` hub that fronted both
-was retired (it duplicated the two nav items) and 301s to `/press/`.
+**Blog** (`/blog`, what we write) is in the top nav; **Media** (`/press`, what
+others write about us) is linked from the footer and the blog intro, not the
+top nav. The primary nav is Team, Services, Conditions, Blog, Find Us (owner
+decision 2026-11-02; About is a home-page section, linked from the footer).
+The old `/media` hub that fronted both was retired and 301s to `/press/`.
 Breadcrumbs read Home › Blog › … and Home › Media › … (Media = `/press/`).
 
 **Posts ship from the PR, not from Drive.** A draft post lands as a `.md`
