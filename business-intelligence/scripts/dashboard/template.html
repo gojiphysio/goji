@@ -644,73 +644,38 @@
     .btn-print svg { flex-shrink: 0; }
 
     /* ========== P&L Section ========== */
-    .pl-period-bar {
-      display: inline-flex; align-items: center; gap: 10px;
-      flex-wrap: wrap;
-    }
-    .pl-period-bar > button {
-      background: var(--card); border: 1px solid var(--border);
-      padding: 6px 12px; border-radius: 999px;
-      font: inherit; font-size: 12px; font-weight: 500;
-      color: var(--ink-soft); cursor: pointer;
-      transition: background 0.15s, color 0.15s, border-color 0.15s;
-    }
-    .pl-period-bar > button:hover { background: var(--bg); color: var(--ink); }
-    .pl-period-bar > button.active {
-      background: var(--goji); border-color: var(--goji); color: white;
-    }
-    .pl-period-dates {
-      font-size: 12px; color: var(--ink-muted);
-      margin-top: 4px; font-variant-numeric: tabular-nums;
-    }
-    .pl-cycle-month {
-      font-weight: 400; opacity: 0.85; margin-left: 2px;
-    }
-    .pl-custom-dates {
-      display: inline-flex; align-items: center; gap: 6px;
-      font-size: 12px;
-    }
-    .pl-custom-dates input[type="date"] {
-      padding: 5px 8px; border: 1px solid var(--border); border-radius: 6px;
-      background: var(--card); font: inherit; font-size: 12px; color: var(--ink);
-    }
-    .pl-revenue-loading { opacity: 0.5; }
-
-    /* P&L loading state — only shows for cache-miss (Custom). 30d and pay
-       cycle are pre-cached so toggling them is instant. */
-    #pl-section { position: relative; }
-    .pl-loading-badge {
-      position: absolute; top: 16px; left: 50%; transform: translateX(-50%);
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: 999px; padding: 8px 16px;
-      font-size: 13px; font-weight: 500; color: var(--ink);
-      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    .pl-month-picker {
       display: inline-flex; align-items: center; gap: 8px;
-      z-index: 5; white-space: nowrap;
+      font-size: 12px; color: var(--ink-soft);
     }
-    .pl-loading-badge[hidden] { display: none; }
-    .loading-spinner-small {
-      width: 14px; height: 14px;
-      border: 2px solid var(--border);
-      border-top-color: var(--goji);
-      border-radius: 50%;
-      animation: loading-spin 0.8s linear infinite;
-      display: inline-block;
+    .pl-month-picker select {
+      padding: 6px 10px; border: 1px solid var(--border); border-radius: 8px;
+      background: var(--card); font: inherit; font-size: 13px; font-weight: 500;
+      color: var(--ink);
     }
-    .pl-grid.pl-loading {
-      opacity: 0.45; transition: opacity 0.15s ease-out;
-      pointer-events: none;
+    .pl-freshness { font-size: 12px; color: var(--ink-muted); margin-right: auto; }
+    .pl-warnings { display: grid; gap: 8px; margin-bottom: 16px; }
+    .pl-warnings:empty { display: none; }
+    .pl-warning {
+      background: #fbf1e3; border: 1px solid #ecd9b8; border-radius: 8px;
+      padding: 9px 12px; font-size: 13px; line-height: 1.45; color: var(--ink);
     }
+    .pl-warning.pl-warning-bad { background: #fbeae7; border-color: #f0c9c2; }
+    .pl-empty { text-align: center; padding: 36px 16px; color: var(--ink-soft); font-size: 14px; }
+    .pl-empty strong { display: block; color: var(--ink); font-size: 16px; margin-bottom: 6px; }
+
+    #page-pl .kpi-row.pl-kpis-4 { grid-template-columns: repeat(4, 1fr); margin-bottom: 14px; }
+    #page-pl .kpi-row.pl-kpis-5 { grid-template-columns: repeat(5, 1fr); }
+    #page-pl .pl-kpis-5 .kpi-value { font-size: 22px; }
+    .pl-negative-value { color: var(--goji); }
 
     .pl-header {
       display: flex; align-items: flex-start; justify-content: space-between;
-      flex-wrap: wrap; gap: 12px; margin-bottom: 0;
+      flex-wrap: wrap; gap: 12px; margin-bottom: 14px;
     }
-    .pl-toggle-stack {
-      display: flex; flex-direction: column; gap: 6px; align-items: stretch;
-    }
-    .pl-toggle-stack > .pl-view-toggle { display: flex; }
-    .pl-toggle-stack > .pl-view-toggle > button { flex: 1; }
+    .pl-header .subtitle { margin: 0; }
+    .pl-header > div { min-width: 0; }
+    .pl-controls { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
     .pl-view-toggle {
       display: inline-flex; background: var(--bg);
       border: 1px solid var(--border); border-radius: 999px; overflow: hidden;
@@ -724,123 +689,62 @@
     .pl-view-toggle button:hover { background: #ede9e2; color: var(--ink); }
     .pl-view-toggle button.active { background: var(--ink); color: #fff; }
     .pl-view-toggle button + button { border-left: 1px solid var(--border); }
+    .pl-amort-months { font-size: 12px; color: var(--ink-soft); display: inline-flex; align-items: center; gap: 6px; }
+    /* The display above would otherwise defeat the hidden attr. */
+    .pl-amort-months[hidden] { display: none; }
+    .pl-amort-months input {
+      width: 56px; padding: 4px 6px; border: 1px solid var(--border); border-radius: 6px;
+      background: var(--bg); font: inherit; font-size: 12px; text-align: right;
+    }
+    .pl-chart-wrap { position: relative; height: 260px; }
 
-    .pl-grid {
-      display: grid; grid-template-columns: 360px 1fr;
-      gap: 28px; align-items: start; margin-top: 4px;
+    /* Scrolls rather than overflows on a phone: see the mobile rules in AGENTS.md. */
+    .pl-statement {
+      display: block; width: max-content; max-width: 100%; overflow-x: auto;
+      border-collapse: collapse; font-size: 13px; font-variant-numeric: tabular-nums;
     }
-    @media (max-width: 900px) { .pl-grid { grid-template-columns: 1fr; } }
+    .pl-statement th, .pl-statement td {
+      padding: 7px 10px; text-align: right; white-space: nowrap;
+      border-bottom: 1px solid #f0ebe2;
+    }
+    .pl-statement th:first-child, .pl-statement td:first-child {
+      text-align: left; position: sticky; left: 0; background: var(--card); min-width: 170px;
+    }
+    .pl-statement thead th { font-size: 12px; font-weight: 600; color: var(--ink-soft); border-bottom: 2px solid var(--border); }
+    .pl-statement .pl-col-selected { background: #f7f3ec; }
+    .pl-statement .pl-col-provisional { color: var(--ink-muted); }
+    .pl-col-tag { display: block; font-size: 10px; font-weight: 500; color: var(--ink-muted); }
+    .pl-statement tr.pl-revenue td { font-weight: 600; color: var(--ink); }
+    .pl-statement tr.pl-group td { font-weight: 500; color: var(--ink); }
+    .pl-statement tr.pl-line td { color: var(--ink-soft); font-size: 12px; background: #faf8f5; }
+    .pl-statement tr.pl-line td:first-child { padding-left: 30px; background: #faf8f5; }
+    .pl-statement tr.pl-line td.pl-col-selected { background: #f3eee4; }
+    .pl-statement tr.pl-total td { font-weight: 600; color: var(--ink); border-top: 1px solid var(--border); }
+    .pl-statement tr.pl-result td { font-weight: 700; color: var(--ink); font-size: 14px; border-bottom: 2px solid var(--border); }
+    .pl-statement tr.pl-ratio td { color: var(--ink-soft); font-size: 12px; }
+    .pl-statement .pl-up { color: var(--good); }
+    .pl-statement .pl-down { color: var(--goji); }
+    .pl-statement .pl-est { font-size: 10px; color: var(--ink-muted); margin-left: 3px; font-style: italic; }
+    .pl-group-btn {
+      background: none; border: 0; padding: 0; font: inherit; color: inherit; cursor: pointer;
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .pl-group-btn:hover { color: var(--goji); }
+    .pl-chevron { display: inline-block; font-size: 9px; color: var(--ink-muted); transition: transform 0.18s; }
+    .pl-group-btn[aria-expanded="true"] .pl-chevron { transform: rotate(90deg); }
+    .pl-footnote { font-size: 12px; color: var(--ink-muted); line-height: 1.5; margin-top: 12px; }
 
-    .pl-row {
-      display: flex; justify-content: space-between; align-items: baseline;
-      padding: 9px 2px; border-bottom: 1px solid #f0ebe2; font-size: 14px;
+    @media (max-width: 1100px) {
+      #page-pl .kpi-row.pl-kpis-5 { grid-template-columns: repeat(3, 1fr); }
     }
-    .pl-row:first-child { border-top: 1px solid var(--border); padding-top: 10px; }
-    .pl-label { color: var(--ink-soft); }
-    .pl-val { font-variant-numeric: tabular-nums; font-weight: 500; color: var(--ink); }
-    .pl-row.pl-cost .pl-val { color: var(--ink-soft); }
-    .pl-row.pl-total { border-bottom: 2px solid var(--border); }
-    .pl-row.pl-total .pl-label { font-weight: 600; color: var(--ink); }
-    .pl-row.pl-total .pl-val   { font-weight: 600; color: var(--ink); }
-    .pl-row.pl-result { border-bottom: none; padding-top: 12px; }
-    .pl-row.pl-result .pl-label { font-size: 16px; font-weight: 700; color: var(--ink); }
-    .pl-row.pl-result .pl-val   { font-size: 24px; font-weight: 700; }
-    .pl-positive .pl-val { color: var(--good) !important; }
-    .pl-negative .pl-val { color: var(--goji) !important; }
-    .pl-row.pl-expandable { cursor: pointer; user-select: none; }
-    .pl-row.pl-expandable:hover .pl-label { color: var(--ink); }
-    .pl-chevron {
-      display: inline-block; font-size: 9px; margin-left: 5px;
-      color: var(--ink-muted); transition: transform 0.18s; vertical-align: middle;
+    @media (max-width: 900px) {
+      #page-pl .kpi-row.pl-kpis-4 { grid-template-columns: repeat(2, 1fr); }
+      #page-pl .kpi-row.pl-kpis-5 { grid-template-columns: repeat(2, 1fr); }
     }
-    .pl-chevron.open { transform: rotate(90deg); }
-    .pl-subrow {
-      display: flex; justify-content: space-between; align-items: baseline;
-      padding: 6px 2px 6px 18px; border-bottom: 1px solid #f5f0e8; font-size: 13px;
-      background: #faf8f5;
-    }
-    .pl-subrow .pl-label { color: var(--ink-muted); }
-    .pl-subrow .pl-val   { color: var(--ink-soft); font-variant-numeric: tabular-nums; font-weight: 500; }
-    .pl-subrow-note      { font-size: 11px; color: var(--ink-muted); margin-left: 6px; font-style: italic; }
-
-    .pl-breakeven {
-      margin-top: 16px; background: var(--bg);
-      border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px;
-    }
-    .pl-be-header {
-      display: flex; justify-content: space-between; align-items: baseline;
-      margin-bottom: 8px;
-    }
-    .pl-be-label {
-      font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em;
-      font-weight: 600; color: var(--ink-soft);
-    }
-    .pl-be-pct { font-size: 14px; font-weight: 700; color: var(--ink); }
-    .pl-progress-track {
-      height: 8px; background: #e3ddd2; border-radius: 999px; overflow: hidden;
-      margin-bottom: 8px;
-    }
-    .pl-progress-fill {
-      height: 100%; border-radius: 999px; transition: width 0.4s ease;
-      background: var(--goji);
-    }
-    .pl-progress-fill.at-target { background: var(--good); }
-    .pl-be-sub { font-size: 11px; color: var(--ink-muted); line-height: 1.5; }
-
-    /* Cost input panel */
-    .pl-inputs-toggle {
-      width: 100%; text-align: left; border-radius: 8px;
-      display: flex; justify-content: space-between; align-items: center;
-      font-size: 12px; padding: 8px 14px;
-    }
-    .pl-chevron { font-size: 10px; transition: transform 0.2s; }
-    .pl-inputs-toggle.open .pl-chevron { transform: rotate(180deg); }
-
-    .pl-inputs-panel {
-      display: none; border: 1px solid var(--border); border-radius: 8px;
-      overflow: hidden; margin-top: 8px; background: var(--card);
-    }
-    .pl-inputs-panel.open { display: block; }
-
-    .pl-input-group {
-      padding: 12px 14px; border-bottom: 1px solid #f0ebe2;
-    }
-    .pl-input-group:last-child { border-bottom: none; }
-    .pl-input-group-title {
-      font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em;
-      font-weight: 700; color: var(--ink-muted); margin-bottom: 10px;
-    }
-    .pl-input-row {
-      display: flex; align-items: center; justify-content: space-between;
-      gap: 8px; margin-bottom: 7px;
-    }
-    .pl-input-row:last-child { margin-bottom: 0; }
-    .pl-input-row label { font-size: 12px; color: var(--ink-soft); flex: 1; min-width: 0; }
-    .pl-input-wrap { position: relative; width: 100px; flex-shrink: 0; }
-    .pl-prefix {
-      position: absolute; left: 9px; top: 50%; transform: translateY(-50%);
-      color: var(--ink-muted); font-size: 12px; pointer-events: none;
-    }
-    .pl-suffix {
-      position: absolute; right: 9px; top: 50%; transform: translateY(-50%);
-      color: var(--ink-muted); font-size: 11px; pointer-events: none;
-    }
-    .pl-input-wrap input {
-      width: 100%; padding: 5px 8px 5px 20px;
-      border: 1px solid var(--border); border-radius: 6px;
-      background: var(--bg); font: inherit; font-size: 12px;
-      color: var(--ink); font-variant-numeric: tabular-nums; text-align: right;
-    }
-    .pl-input-wrap input.no-prefix { padding-left: 8px; padding-right: 28px; }
-    .pl-input-wrap input:focus {
-      outline: none; border-color: var(--goji);
-      box-shadow: 0 0 0 2px var(--goji-soft);
-    }
-    .pl-total-line {
-      display: flex; justify-content: space-between;
-      font-size: 11px; color: var(--ink-muted);
-      padding-top: 8px; margin-top: 4px;
-      border-top: 1px dashed #e3ddd2;
+    @media (max-width: 480px) {
+      #page-pl .kpi-row.pl-kpis-4,
+      #page-pl .kpi-row.pl-kpis-5 { grid-template-columns: 1fr; }
+      .pl-statement th:first-child, .pl-statement td:first-child { min-width: 130px; }
     }
 
     /* ===== Marketing tab ===== */
@@ -1276,20 +1180,10 @@
     <div id="page-pl" class="page" hidden>
 
     <div class="page-toolbar">
-      <div class="pl-period-bar" role="group" aria-label="P&L period">
-        <button type="button" data-plperiod="30d" class="active">Last 30 days</button>
-        <button type="button" data-plperiod="cycle">
-          This month <span class="pl-cycle-month" id="pl_cycle_month"></span>
-        </button>
-        <button type="button" data-plperiod="prev_cycle">
-          Last month <span class="pl-cycle-month" id="pl_prev_cycle_month"></span>
-        </button>
-        <button type="button" data-plperiod="custom">Custom</button>
-      </div>
-      <div class="pl-custom-dates" id="pl_custom_dates" hidden>
-        <input type="date" id="pl_period_start">
-        <span style="color:var(--ink-muted);">to</span>
-        <input type="date" id="pl_period_end">
+      <span class="pl-freshness" id="pl_freshness"></span>
+      <div class="pl-month-picker">
+        <label for="pl_month">Month</label>
+        <select id="pl_month"></select>
       </div>
       <button type="button" class="btn primary" id="pl_export_xlsx">
         <span style="margin-right:6px;">↓</span> Download Excel
@@ -1297,251 +1191,97 @@
     </div>
 
     <!-- ===== P&L Section ===== -->
-    <section class="q" id="pl-section" style="margin-bottom: 28px;">
-      <div class="pl-loading-badge" id="pl_loading_badge" hidden>
-        <span class="loading-spinner-small"></span>
-        <span>Fetching data for selected period…</span>
-      </div>
-      <div class="pl-grid">
+    <section class="q" id="pl_empty" hidden>
+      <div class="pl-empty" id="pl_empty_text">Loading the Cash Book…</div>
+    </section>
 
-        <!-- Left: controls (toggles + cost assumptions) -->
-        <div>
-          <div class="pl-toggle-stack" style="margin-bottom: 14px;">
+    <div id="pl_content" hidden>
+      <div class="pl-warnings" id="pl_warnings"></div>
+
+      <div class="kpi-row pl-kpis-4">
+        <div class="kpi-card">
+          <div class="kpi-label">Cash balance</div>
+          <div class="kpi-value" id="pl_kpi_cash">—</div>
+          <div class="kpi-sub" id="pl_kpi_cash_sub"></div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">EBITDA</div>
+          <div class="kpi-value" id="pl_kpi_ebitda">—</div><div class="kpi-trend" id="pl_kpi_ebitda_trend" hidden></div>
+          <div class="kpi-sub" id="pl_kpi_ebitda_sub"></div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label" id="pl_kpi_revenue_label">Revenue</div>
+          <div class="kpi-value" id="pl_kpi_revenue">—</div><div class="kpi-trend" id="pl_kpi_revenue_trend" hidden></div>
+          <div class="kpi-sub" id="pl_kpi_revenue_sub"></div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Staff cost % of revenue</div>
+          <div class="kpi-value" id="pl_kpi_staff">—</div><div class="kpi-trend" id="pl_kpi_staff_trend" hidden></div>
+          <div class="kpi-sub">Payroll + CPF. Lower is better</div>
+        </div>
+      </div>
+      <div class="kpi-row pl-kpis-5">
+        <div class="kpi-card">
+          <div class="kpi-label">3-month EBITDA</div>
+          <div class="kpi-value" id="pl_kpi_trailing">—</div>
+          <div class="kpi-sub">Smooths one-off costs</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Staff + rent %</div>
+          <div class="kpi-value" id="pl_kpi_staffrent">—</div><div class="kpi-trend" id="pl_kpi_staffrent_trend" hidden></div>
+          <div class="kpi-sub">What's left covers the rest</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Break-even revenue</div>
+          <div class="kpi-value" id="pl_kpi_breakeven">—</div>
+          <div class="kpi-sub" id="pl_kpi_breakeven_sub"></div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Deferred revenue</div>
+          <div class="kpi-value" id="pl_kpi_deferred">—</div>
+          <div class="kpi-sub">Sessions paid for, not yet delivered</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Shareholder loans</div>
+          <div class="kpi-value" id="pl_kpi_loans">—</div>
+          <div class="kpi-sub" id="pl_kpi_loans_sub"></div>
+        </div>
+      </div>
+
+      <section class="q">
+        <h2>Revenue, costs and EBITDA <span class="badge live">Actuals</span></h2>
+        <div class="subtitle">Closed months only. Costs from the Cash Book, revenue from Plato.</div>
+        <div class="pl-chart-wrap"><canvas id="plChart"></canvas></div>
+      </section>
+
+      <section class="q" id="pl-section">
+        <div class="pl-header">
+          <div>
+            <h2 style="margin: 0 0 4px;">Profit &amp; Loss</h2>
+            <div class="subtitle">Each cost sits in the month it covers, not the month it was paid. Click a group for its lines.</div>
+          </div>
+          <div class="pl-controls">
             <div class="pl-view-toggle" role="group" aria-label="Revenue source">
               <button type="button" data-plrev="recognised" class="active">Revenue</button>
               <button type="button" data-plrev="bookings">Bookings</button>
             </div>
+            <div class="pl-view-toggle" role="group" aria-label="Amounts or changes">
+              <button type="button" data-plstatement="amounts" class="active">Amounts</button>
+              <button type="button" data-plstatement="mom">MoM change</button>
+            </div>
             <div class="pl-view-toggle" role="group" aria-label="P&L view">
-              <button type="button" data-plview="cash" class="active">Cash only</button>
+              <button type="button" data-plview="cash" class="active">EBITDA</button>
               <button type="button" data-plview="full">+ Amortisation</button>
             </div>
-          </div>
-
-          <button type="button" class="btn pl-inputs-toggle" id="pl_toggle_btn">
-            <span>Edit cost assumptions</span>
-            <span class="pl-chevron">▾</span>
-          </button>
-
-          <div class="pl-inputs-panel" id="pl_inputs_panel">
-
-            <!-- Payroll -->
-            <div class="pl-input-group">
-              <div class="pl-input-group-title">Monthly payroll (base salaries)</div>
-              <div class="pl-input-row">
-                <label>Cheryl (Clinical Director)</label>
-                <div class="pl-input-wrap">
-                  <span class="pl-prefix">$</span>
-                  <input type="number" id="pl_pay_cheryl" value="12000" min="0" step="500">
-                </div>
-              </div>
-              <div class="pl-input-row">
-                <label>Claire (Senior Physio)</label>
-                <div class="pl-input-wrap">
-                  <span class="pl-prefix">$</span>
-                  <input type="number" id="pl_pay_claire" value="5000" min="0" step="500">
-                </div>
-              </div>
-              <div class="pl-input-row">
-                <label>Kristy (Senior Physio)</label>
-                <div class="pl-input-wrap">
-                  <span class="pl-prefix">$</span>
-                  <input type="number" id="pl_pay_kristy" value="5000" min="0" step="500">
-                </div>
-              </div>
-              <div class="pl-input-row">
-                <label>Chris (Director)</label>
-                <div class="pl-input-wrap">
-                  <span class="pl-prefix">$</span>
-                  <input type="number" id="pl_pay_chris" value="6000" min="0" step="500">
-                </div>
-              </div>
-              <div class="pl-total-line">
-                <span>Payroll subtotal</span>
-                <span id="pl_payroll_subtotal">$28,000</span>
-              </div>
-            </div>
-
-            <!-- Commission structure -->
-            <div class="pl-input-group">
-              <div class="pl-input-group-title">Commission structure <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:10px;">(Claire &amp; Kristy · calculated from live 30d revenue)</span></div>
-              <div class="pl-input-row">
-                <label>Revenue threshold</label>
-                <div class="pl-input-wrap">
-                  <span class="pl-prefix">$</span>
-                  <input type="number" id="pl_comm_quota" value="13000" min="0" step="500">
-                </div>
-              </div>
-              <div class="pl-input-row">
-                <label>Commission rate (above threshold)</label>
-                <div class="pl-input-wrap">
-                  <input type="number" id="pl_comm_rate" value="40" min="0" max="100" step="1" class="no-prefix">
-                  <span class="pl-suffix">%</span>
-                </div>
-              </div>
-              <div class="pl-total-line">
-                <span>Commission this period</span>
-                <span id="pl_commission_subtotal">$0</span>
-              </div>
-            </div>
-
-            <!-- Employer CPF -->
-            <div class="pl-input-group">
-              <div class="pl-input-group-title">Employer CPF <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:10px;">(Singapore — applies to salary + commission)</span></div>
-              <div class="pl-input-row">
-                <label>Employer CPF rate</label>
-                <div class="pl-input-wrap">
-                  <input type="number" id="pl_cpf_rate" value="17" min="0" max="20" step="0.5" class="no-prefix">
-                  <span class="pl-suffix">%</span>
-                </div>
-              </div>
-              <div class="pl-input-row">
-                <label>Ordinary Wage ceiling</label>
-                <div class="pl-input-wrap">
-                  <span class="pl-prefix">$</span>
-                  <input type="number" id="pl_cpf_ceiling" value="8000" min="0" step="100">
-                </div>
-              </div>
-              <div class="pl-total-line">
-                <span>Employer CPF this period</span>
-                <span id="pl_cpf_subtotal">—</span>
-              </div>
-            </div>
-
-            <!-- Operating expenses -->
-            <div class="pl-input-group">
-              <div class="pl-input-group-title">Monthly operating expenses</div>
-              <div class="pl-input-row">
-                <label>Rent (Y1)</label>
-                <div class="pl-input-wrap">
-                  <span class="pl-prefix">$</span>
-                  <input type="number" id="pl_opex_rent" value="9723" min="0" step="100">
-                </div>
-              </div>
-              <div class="pl-input-row">
-                <label>Utilities</label>
-                <div class="pl-input-wrap">
-                  <span class="pl-prefix">$</span>
-                  <input type="number" id="pl_opex_util" value="1000" min="0" step="50">
-                </div>
-              </div>
-              <div class="pl-input-row">
-                <label>Marketing</label>
-                <div class="pl-input-wrap">
-                  <span class="pl-prefix">$</span>
-                  <input type="number" id="pl_opex_mktg" value="200" min="0" step="50">
-                </div>
-              </div>
-              <div class="pl-input-row">
-                <label>Consumables</label>
-                <div class="pl-input-wrap">
-                  <span class="pl-prefix">$</span>
-                  <input type="number" id="pl_opex_cons" value="1000" min="0" step="50">
-                </div>
-              </div>
-              <div class="pl-input-row">
-                <label>Software, admin &amp; other</label>
-                <div class="pl-input-wrap">
-                  <span class="pl-prefix">$</span>
-                  <input type="number" id="pl_opex_other" value="826" min="0" step="50">
-                </div>
-              </div>
-              <div class="pl-total-line">
-                <span>Opex subtotal</span>
-                <span id="pl_opex_subtotal">$12,749</span>
-              </div>
-            </div>
-
-            <!-- Amortisation -->
-            <div class="pl-input-group" id="pl_capex_group">
-              <div class="pl-input-group-title">Amortisation <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:10px;">(Full P&L view only)</span></div>
-              <div class="pl-input-row">
-                <label>Total one-time capex</label>
-                <div class="pl-input-wrap">
-                  <span class="pl-prefix">$</span>
-                  <input type="number" id="pl_capex_total" value="181500" min="0" step="1000">
-                </div>
-              </div>
-              <div class="pl-input-row">
-                <label>Amortise over</label>
-                <div class="pl-input-wrap">
-                  <input type="number" id="pl_amort_months" value="24" min="1" step="1" class="no-prefix">
-                  <span class="pl-suffix">mo</span>
-                </div>
-              </div>
-              <div class="pl-total-line">
-                <span>Monthly amortisation</span>
-                <span id="pl_amort_subtotal">$7,563</span>
-              </div>
-            </div>
-
-          </div><!-- /.pl-inputs-panel -->
-        </div>
-
-        <!-- Right: the P&L statement -->
-        <div>
-          <div class="pl-header" style="margin-bottom: 14px;">
-            <div>
-              <h2 style="margin: 0 0 4px;">Profit &amp; Loss <span class="badge live">Live revenue</span></h2>
-              <div class="subtitle" style="margin: 0;" id="pl_subtitle">Revenue/Bookings vs. your monthly cost base. Toggle to include or exclude amortised capex.</div>
-              <div class="pl-period-dates" id="pl_period_dates">-</div>
-            </div>
-          </div>
-
-          <div class="pl-row">
-            <span class="pl-label" id="pl_revenue_label">Recognised revenue (last 30 days)</span>
-            <span class="pl-val" id="pl_revenue">—</span>
-          </div>
-          <div class="pl-row pl-cost">
-            <span class="pl-label">Payroll <span style="font-size:11px;color:var(--ink-muted);">(base + commission + employer CPF)</span></span>
-            <span class="pl-val" id="pl_payroll_total_val">—</span>
-          </div>
-          <div class="pl-row pl-cost pl-expandable" id="pl_opex_toggle_row" onclick="toggleOpexDetail()">
-            <span class="pl-label">Operating expenses <span class="pl-chevron open" id="pl_opex_chevron">▶</span></span>
-            <span class="pl-val" id="pl_opex_val">—</span>
-          </div>
-          <div class="pl-subrow" id="pl_pmtfee_subrow">
-            <span class="pl-label">↳ Payment processing fees
-              <span class="pl-subrow-note">(Plato Terminal: 2.1% + $0.20/txn)</span>
-            </span>
-            <span class="pl-val" id="pl_pmtfee_val">Awaiting data</span>
-          </div>
-          <div class="pl-row pl-cost" id="pl_amort_row" hidden>
-            <span class="pl-label">Amortised capex <span style="font-size:11px;color:var(--ink-muted);">(one-time costs ÷ months)</span></span>
-            <span class="pl-val" id="pl_amort_val">—</span>
-          </div>
-          <div class="pl-row pl-total">
-            <span class="pl-label">Total monthly costs</span>
-            <span class="pl-val" id="pl_costs_total">—</span>
-          </div>
-          <div class="pl-row pl-result" id="pl_result_row">
-            <span class="pl-label">Profit / (Loss)</span>
-            <span class="pl-val" id="pl_result_val">—</span>
-          </div>
-
-          <!-- Break-even bar -->
-          <div class="pl-breakeven">
-            <div class="pl-be-header">
-              <span class="pl-be-label">Revenue vs. break-even</span>
-              <span class="pl-be-pct" id="pl_be_pct">—</span>
-            </div>
-            <div class="pl-progress-track">
-              <div class="pl-progress-fill" id="pl_progress_fill" style="width: 0%;"></div>
-            </div>
-            <div class="pl-be-sub" id="pl_be_sub">—</div>
-            <div id="pl_profit_track_wrap" hidden style="margin-top: 12px;">
-              <div class="pl-be-header" style="margin-bottom: 4px;">
-                <span class="pl-be-label" style="color: var(--good);">Profit margin</span>
-                <span class="pl-be-pct" id="pl_margin_pct" style="color: var(--good);">—</span>
-              </div>
-              <div class="pl-progress-track">
-                <div class="pl-progress-fill at-target" id="pl_margin_fill" style="width: 0%;"></div>
-              </div>
-            </div>
+            <label class="pl-amort-months" id="pl_amort_wrap" hidden>
+              over <input type="number" id="pl_amort_months" value="24" min="1" step="1"> mo
+            </label>
           </div>
         </div>
-
-      </div><!-- /.pl-grid -->
-    </section>
+        <table class="pl-statement" id="pl_statement"></table>
+        <div class="pl-footnote" id="pl_footnote"></div>
+      </section>
+    </div>
     <!-- ===== End P&L Section ===== -->
 
     </div><!-- /#page-pl -->
@@ -3702,473 +3442,329 @@
     }
 
     /* ===== P&L Section ===== */
+    let plChart = null;
     function initPL() {
-      let plView = 'cash';
-      let plRevenueMode = 'recognised'; // 'recognised' | 'bookings'
-      let plPeriod = '30d';          // '30d' | 'cycle' | 'custom'
-      // plWindow holds the current period's BQ-sourced figures. Starts from
-      // DATA.ranges['30d'] so the page can render before the first fetch.
-      let plWindow = null;
-      // Cache + in-flight tracking. Keyed by `${start}|${end}` so 30d and the
-      // current month are both instant after the initial dashboard load, and the
-      // user only sees a loading state on cache-miss (Custom).
-      const plWindowCache = new Map();
-      const plInFlight    = new Map();
-      let   plRequestedKey = null;
+      let pnl = null;
+      let plMonth = null;
+      let plRevenueMode = 'recognised';  // 'recognised' | 'bookings'
+      let plStatementMode = 'amounts';   // 'amounts' | 'mom'
+      let plView = 'cash';               // 'cash' (EBITDA) | 'full' (+ amortisation)
+      const expandedGroups = new Set();
 
-      function cacheKey(start, end) { return `${start}|${end}`; }
+      const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      const monthLabel = key => MONTH_NAMES[Number(key.slice(5, 7)) - 1] + ' ' + key.slice(0, 4);
+      const monthShort = key => MONTH_NAMES[Number(key.slice(5, 7)) - 1];
+      const whole = v => Math.round(Math.abs(v)).toLocaleString();
+      const money = v => (v == null || isNaN(v)) ? '—' : (v < 0 ? '−$' : '$') + whole(v);
+      const pct = v => (v == null || isNaN(v)) ? '—' : (v * 100).toFixed(1) + '%';
+      const setText = (id, text) => { document.getElementById(id).textContent = text; };
 
-      function ymdLocal(d) {
-        const y = d.getFullYear();
-        const m = String(d.getMonth()+1).padStart(2,'0');
-        const day = String(d.getDate()).padStart(2,'0');
-        return `${y}-${m}-${day}`;
-      }
-      // Reporting periods are calendar months: 1st -> last day. `new Date(y, m+1, 0)`
-      // is the last day of month m, so 28/29/30/31 all fall out automatically.
-      function payCycleRange() {
-        const today = new Date(DATA.generated_at);
-        const y = today.getFullYear(), m = today.getMonth();
-        return { start: ymdLocal(new Date(y, m, 1)), end: ymdLocal(new Date(y, m + 1, 0)) };
-      }
-      function prevPayCycleRange() {
-        // Date normalises m-1 === -1 to December of the prior year, so no wrap case.
-        const today = new Date(DATA.generated_at);
-        const y = today.getFullYear(), m = today.getMonth();
-        return { start: ymdLocal(new Date(y, m - 1, 1)), end: ymdLocal(new Date(y, m, 0)) };
-      }
-      function last30Range() {
-        const today = new Date(DATA.generated_at);
-        const start = new Date(today); start.setDate(start.getDate() - 30);
-        return { start: ymdLocal(start), end: ymdLocal(today) };
-      }
-      function customRange() {
-        const s = document.getElementById('pl_period_start').value;
-        const e = document.getElementById('pl_period_end').value;
-        return (s && e) ? { start: s, end: e } : null;
+      const revenueOf = m => m[plRevenueMode] || 0;
+      // A provisional month's costs aren't all in, so its result would flatter.
+      // It stays null everywhere, never a number that reads as real.
+      const isClosed = m => m.status === 'closed';
+      const ebitdaOf = m => isClosed(m) ? revenueOf(m) - m.total_costs : null;
+      const marginOf = m => (isClosed(m) && revenueOf(m)) ? ebitdaOf(m) / revenueOf(m) : null;
+      const staffOf = m => (m.lines.Payroll || 0) + (m.lines.CPF || 0);
+      const ratioOf = (m, cost) => (isClosed(m) && revenueOf(m)) ? cost / revenueOf(m) : null;
+      const amortMonths = () => parseFloat(document.getElementById('pl_amort_months').value) || 24;
+      const amortOf = () => (pnl.capex_total || 0) / amortMonths();
+      const selected = () => pnl.months.find(m => m.month === plMonth);
+      const previous = m => pnl.months[pnl.months.indexOf(m) - 1] || null;
+
+      function trailing(m) {
+        if (m.trailing_3m_ebitda == null) return null;
+        const i = pnl.months.indexOf(m);
+        return pnl.months.slice(i - 2, i + 1).reduce((sum, x) => sum + ebitdaOf(x), 0);
       }
 
-      function seedFromDefault30d() {
-        const r30 = DATA.ranges['30d'];
-        if (!r30) return null;
-        const range = last30Range();
-        return {
-          start: range.start,
-          end:   range.end,
-          days:  30,
-          recognised: r30.kpis.recognised || 0,
-          bookings:   r30.kpis.bookings   || 0,
-          clinicians: r30.clinicians || [],
-          payment_by_method: DATA.payment_by_method || [],
+      function showEmpty(text) {
+        document.getElementById('pl_empty').hidden = false;
+        document.getElementById('pl_content').hidden = true;
+        document.getElementById('pl_empty_text').innerHTML = text;
+        document.getElementById('pl_export_xlsx').disabled = true;
+      }
+
+      function renderWarnings(m) {
+        const out = [];
+        const c = pnl.checks;
+        if (m.status === 'provisional') {
+          const why = m.missing.length ? 'No ' + m.missing.join(', ') + ' in the Cash Book yet.' : 'This month has not ended.';
+          out.push(['pl-warning-bad', '<strong>' + monthLabel(m.month) + ' is provisional.</strong> ' + why + ' EBITDA stays hidden until those costs are in, because it would look better than it is.']);
+        }
+        if (c.uncategorised_count) {
+          out.push(['', '<strong>' + c.uncategorised_count + ' row' + (c.uncategorised_count === 1 ? '' : 's') + ' (' + money(c.uncategorised_amount) + ') have no P&amp;L line.</strong> They are counted as costs under Uncategorised. Pick a line in the Cash Book.']);
+        }
+        if (!c.reconciled) {
+          out.push(['pl-warning-bad', '<strong>The P&amp;L does not tie to the Cash Book.</strong> Gap to the sheet totals: debits ' + money(c.debit_gap) + ', credits ' + money(c.credit_gap) + '. A row may be unreadable.']);
+        }
+        if (c.unreadable_rows) {
+          out.push(['pl-warning-bad', '<strong>' + c.unreadable_rows + ' Cash Book row' + (c.unreadable_rows === 1 ? ' has' : 's have') + ' an unreadable date or amount.</strong>']);
+        }
+        if (m.estimated.length) {
+          out.push(['', m.estimated.join(', ') + ' for ' + monthLabel(m.month) + ' is an estimate from the prior month, because the bill is not in yet.']);
+        }
+        document.getElementById('pl_warnings').innerHTML = out
+          .map(([cls, html]) => '<div class="pl-warning ' + cls + '">' + html + '</div>').join('');
+      }
+
+      function renderCards(m) {
+        const prev = previous(m);
+        const ps = prev && prev.start, pe = prev && prev.end;
+        const ebitda = ebitdaOf(m);
+
+        const cashEl = document.getElementById('pl_kpi_cash');
+        cashEl.textContent = money(pnl.cash.balance);
+        cashEl.classList.toggle('pl-negative-value', pnl.cash.balance < 0);
+        const costDays = (isClosed(m) && m.total_costs) ? pnl.cash.balance / (m.total_costs / 30) : null;
+        setText('pl_kpi_cash_sub', (pnl.cash.as_of ? 'As of ' + pnl.cash.as_of + '. ' : '')
+          + (costDays != null ? 'About ' + Math.max(0, Math.round(costDays)) + ' days of costs' : ''));
+
+        const ebitdaEl = document.getElementById('pl_kpi_ebitda');
+        ebitdaEl.textContent = money(ebitda);
+        ebitdaEl.classList.toggle('pl-negative-value', ebitda != null && ebitda < 0);
+        renderTrend('pl_kpi_ebitda_trend', ebitda, prev && ebitdaOf(prev), ps, pe);
+        setText('pl_kpi_ebitda_sub', isClosed(m)
+          ? pct(marginOf(m)) + ' margin, ' + monthLabel(m.month)
+          : monthLabel(m.month) + ' is provisional');
+
+        setText('pl_kpi_revenue_label', plRevenueMode === 'bookings' ? 'Bookings' : 'Recognised revenue');
+        setText('pl_kpi_revenue', money(revenueOf(m)));
+        renderTrend('pl_kpi_revenue_trend', revenueOf(m), prev && revenueOf(prev), ps, pe);
+        setText('pl_kpi_revenue_sub', m.visits.toLocaleString() + ' visits'
+          + (m.revenue_per_visit ? ', ' + money(m.revenue_per_visit) + ' per visit' : ''));
+
+        setText('pl_kpi_staff', pct(ratioOf(m, staffOf(m))));
+        renderTrend('pl_kpi_staff_trend', ratioOf(m, staffOf(m)), prev && ratioOf(prev, staffOf(prev)), ps, pe, { lowerIsBetter: true });
+
+        const staffRent = x => staffOf(x) + (x.lines.Rent || 0);
+        setText('pl_kpi_staffrent', pct(ratioOf(m, staffRent(m))));
+        renderTrend('pl_kpi_staffrent_trend', ratioOf(m, staffRent(m)), prev && ratioOf(prev, staffRent(prev)), ps, pe, { lowerIsBetter: true });
+
+        const t = trailing(m);
+        const trailingEl = document.getElementById('pl_kpi_trailing');
+        trailingEl.textContent = money(t);
+        trailingEl.classList.toggle('pl-negative-value', t != null && t < 0);
+
+        setText('pl_kpi_breakeven', isClosed(m) ? money(m.total_costs) : '—');
+        setText('pl_kpi_breakeven_sub', (isClosed(m) && m.breakeven_visits)
+          ? 'About ' + Math.round(m.breakeven_visits).toLocaleString() + ' visits (actual ' + m.visits.toLocaleString() + '). Treats costs as fixed'
+          : '');
+
+        setText('pl_kpi_deferred', money(m.deferred));
+        setText('pl_kpi_loans', money(pnl.loans_outstanding));
+        setText('pl_kpi_loans_sub', 'Paid in, net of repayments');
+      }
+
+      function renderChart() {
+        const closed = pnl.months.filter(isClosed);
+        const data = {
+          labels: closed.map(m => monthShort(m.month)),
+          datasets: [
+            { type: 'bar', label: plRevenueMode === 'bookings' ? 'Bookings' : 'Revenue',
+              data: closed.map(revenueOf), backgroundColor: COBALT, borderRadius: 4, order: 2 },
+            { type: 'bar', label: 'Total costs', data: closed.map(m => m.total_costs),
+              backgroundColor: GOJI + '88', borderRadius: 4, order: 2 },
+            { type: 'line', label: 'EBITDA', data: closed.map(ebitdaOf), borderColor: '#2a2622',
+              backgroundColor: '#2a2622', tension: 0.25, pointRadius: 3, borderWidth: 2, order: 1 },
+          ],
         };
-      }
-      // Seed the cache with the 30d window from the initial /api/data payload
-      // so the default render is instant and toggling back is free.
-      const seed30 = seedFromDefault30d();
-      if (seed30) plWindowCache.set(cacheKey(seed30.start, seed30.end), seed30);
-      plWindow = seed30;
-
-      function fmtPeriodLabel(w) {
-        if (!w) return '-';
-        return `${w.start} → ${w.end} (${w.days}d)`;
-      }
-      // Short month-day, e.g. "May 26". Parses YYYY-MM-DD as a local date so
-      // we don't shift across timezones.
-      function fmtMonthDay(ymd) {
-        if (!ymd) return '';
-        const [y, m, d] = ymd.split('-').map(Number);
-        const dt = new Date(y, m - 1, d);
-        return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-      }
-      function updateCycleMonthLabel() {
-        const r = payCycleRange();
-        document.getElementById('pl_cycle_month').textContent =
-          `(${fmtMonthDay(r.start)} → ${fmtMonthDay(r.end)})`;
-        const pr = prevPayCycleRange();
-        document.getElementById('pl_prev_cycle_month').textContent =
-          `(${fmtMonthDay(pr.start)} → ${fmtMonthDay(pr.end)})`;
-      }
-
-      function setLoadingState(loading) {
-        document.getElementById('pl_loading_badge').hidden = !loading;
-        document.querySelector('#pl-section .pl-grid')
-          .classList.toggle('pl-loading', loading);
-      }
-
-      // Fetches once per key. Concurrent callers for the same key share the
-      // same in-flight Promise. Successful results are cached forever.
-      function fetchOrCache(start, end) {
-        const key = cacheKey(start, end);
-        if (plWindowCache.has(key)) return Promise.resolve(plWindowCache.get(key));
-        if (plInFlight.has(key))    return plInFlight.get(key);
-        const p = (async () => {
-          const r = await fetch(`api/pl_window?start=${start}&end=${end}`,
-                                 { credentials: 'same-origin' });
-          if (!r.ok) throw new Error('HTTP ' + r.status);
-          const w = await r.json();
-          plWindowCache.set(key, w);
-          return w;
-        })();
-        plInFlight.set(key, p);
-        p.finally(() => plInFlight.delete(key));
-        return p;
-      }
-
-      async function loadWindow(start, end) {
-        const key = cacheKey(start, end);
-        plRequestedKey = key;
-        // Cache hit: render synchronously, no spinner. This is the happy path
-        // for 30d (seeded) and the current month (background-prefetched on init).
-        if (plWindowCache.has(key)) {
-          plWindow = plWindowCache.get(key);
-          renderPL();
+        if (plChart) {
+          plChart.data = data;
+          plChart.update();
           return;
         }
-        // Cache miss: show the loading badge while we wait. The badge is more
-        // visible than the previous "loading…" text in the dates label, since
-        // Custom can legitimately take a few seconds.
-        setLoadingState(true);
-        try {
-          const w = await fetchOrCache(start, end);
-          if (plRequestedKey !== key) return;  // user moved on; ignore
-          plWindow = w;
-          renderPL();
-        } catch (err) {
-          if (plRequestedKey !== key) return;
-          document.getElementById('pl_period_dates').textContent =
-            `load failed: ${err.message}`;
-        } finally {
-          if (plRequestedKey === key) setLoadingState(false);
+        plChart = new Chart(document.getElementById('plChart'), {
+          data,
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+              legend: { display: true, position: 'bottom', labels: { boxWidth: 12 } },
+              tooltip: { mode: 'index', intersect: false,
+                callbacks: { label: ctx => ctx.dataset.label + ': ' + money(ctx.parsed.y) } },
+            },
+            scales: { y: { ticks: { callback: v => (v < 0 ? '−$' : '$') + Math.abs(v).toLocaleString() } } },
+          },
+        });
+      }
+
+      // One statement row. `value` reads a month's figure; `kind` says which way
+      // is good in MoM view: 'income' (up is good) or 'cost' (up is bad).
+      function statementRow(cls, labelHtml, value, kind, opts) {
+        const o = opts || {};
+        const closed = pnl.months.filter(isClosed);
+        const fmtAmount = o.format || (v => v < 0 ? '(' + whole(v) + ')' : whole(v));
+        const cells = pnl.months.map((m, i) => {
+          const cur = value(m);
+          let text, tone = '';
+          if (plStatementMode === 'mom') {
+            const prior = pnl.months[i - 1];
+            const before = prior ? value(prior) : null;
+            if (!isClosed(m) || !prior || !isClosed(prior) || cur == null || before == null) {
+              text = '—';
+            } else {
+              const delta = cur - before;
+              const flat = Math.abs(delta) < (o.format ? 0.0005 : 0.5);
+              text = flat ? '0' : (o.formatDelta ? o.formatDelta(delta) : (delta > 0 ? '+' : '−') + whole(delta));
+              if (!flat && kind) {
+                const good = kind === 'income' ? delta > 0 : delta < 0;
+                tone = good ? ' pl-up' : ' pl-down';
+              }
+            }
+          } else {
+            text = cur == null ? '—' : fmtAmount(cur);
+          }
+          const est = (plStatementMode === 'amounts' && o.line && m.estimated.includes(o.line))
+            ? '<span class="pl-est">est</span>' : '';
+          const col = (m.month === plMonth ? ' pl-col-selected' : '')
+            + (m.status === 'provisional' ? ' pl-col-provisional' : '');
+          return '<td class="' + (col + tone).trim() + '">' + text + est + '</td>';
+        }).join('');
+        let totalCell = '';
+        if (plStatementMode === 'amounts') {
+          const total = o.total ? o.total(closed) : closed.reduce((sum, m) => sum + (value(m) || 0), 0);
+          totalCell = '<td>' + (total == null ? '—' : fmtAmount(total)) + '</td>';
         }
+        return '<tr class="' + cls + '"><td>' + labelHtml + '</td>' + cells + totalCell + '</tr>';
       }
 
-      // Fire-and-forget: warm the cache for the current month so the second tab
-      // is instant the first time the user clicks it.
-      function prefetchPayCycle() {
-        const r = payCycleRange();
-        fetchOrCache(r.start, r.end).catch(() => { /* swallow; UI will retry on click */ });
-        const pr = prevPayCycleRange();
-        fetchOrCache(pr.start, pr.end).catch(() => {});
-      }
+      function renderStatement() {
+        const heads = pnl.months.map(m =>
+          '<th class="' + (m.month === plMonth ? 'pl-col-selected' : '') + '">' + monthShort(m.month)
+          + (m.status === 'provisional' ? '<span class="pl-col-tag">provisional</span>' : '') + '</th>').join('');
+        const totalHead = plStatementMode === 'amounts'
+          ? '<th>Total<span class="pl-col-tag">closed months</span></th>' : '';
+        let body = statementRow('pl-revenue', plRevenueMode === 'bookings' ? 'Bookings' : 'Recognised revenue', revenueOf, 'income');
 
-      function applyPeriod(which) {
-        plPeriod = which;
-        document.querySelectorAll('[data-plperiod]').forEach(b =>
-          b.classList.toggle('active', b.dataset.plperiod === which)
-        );
-        // Custom date pickers only appear when Custom is selected.
-        document.getElementById('pl_custom_dates').hidden = (which !== 'custom');
-
-        const range =
-          (which === '30d')        ? last30Range()       :
-          (which === 'cycle')      ? payCycleRange()     :
-          (which === 'prev_cycle') ? prevPayCycleRange() :
-                                     customRange();
-        if (!range) return;     // custom: user hasn't picked dates yet
-        loadWindow(range.start, range.end);
-      }
-
-      // View toggle
-      document.querySelectorAll('[data-plview]').forEach(btn => {
-        btn.addEventListener('click', () => {
-          plView = btn.dataset.plview;
-          document.querySelectorAll('[data-plview]').forEach(b =>
-            b.classList.toggle('active', b.dataset.plview === plView)
-          );
-          document.getElementById('pl_amort_row').hidden = (plView !== 'full');
-          renderPL();
-        });
-      });
-
-      // Revenue source toggle
-      document.querySelectorAll('[data-plrev]').forEach(btn => {
-        btn.addEventListener('click', () => {
-          plRevenueMode = btn.dataset.plrev;
-          document.querySelectorAll('[data-plrev]').forEach(b =>
-            b.classList.toggle('active', b.dataset.plrev === plRevenueMode)
-          );
-          renderPL();
-        });
-      });
-
-      // Period selector
-      document.querySelectorAll('[data-plperiod]').forEach(btn => {
-        btn.addEventListener('click', () => applyPeriod(btn.dataset.plperiod));
-      });
-      // Initialise custom date pickers to the current month (sensible default)
-      const pc = payCycleRange();
-      document.getElementById('pl_period_start').value = pc.start;
-      document.getElementById('pl_period_end').value   = pc.end;
-      document.getElementById('pl_period_start').addEventListener('change', () => {
-        if (plPeriod === 'custom') applyPeriod('custom');
-      });
-      document.getElementById('pl_period_end').addEventListener('change', () => {
-        if (plPeriod === 'custom') applyPeriod('custom');
-      });
-
-      // Excel download
-      document.getElementById('pl_export_xlsx').addEventListener('click', downloadPLXlsx);
-
-      // Toggle cost input panel open/closed
-      const toggleBtn = document.getElementById('pl_toggle_btn');
-      const panel     = document.getElementById('pl_inputs_panel');
-      toggleBtn.addEventListener('click', () => {
-        const isOpen = panel.classList.toggle('open');
-        toggleBtn.classList.toggle('open', isOpen);
-      });
-
-      // Live-recalculate on any input change
-      document.querySelectorAll('#pl_inputs_panel input').forEach(input =>
-        input.addEventListener('input', renderPL)
-      );
-
-      document.getElementById('pl_period_dates').textContent = fmtPeriodLabel(plWindow);
-      updateCycleMonthLabel();
-      renderPL();
-      // Background-warm the current month so toggling to it is instant. No UI
-      // until the user actually clicks; failures are silent.
-      prefetchPayCycle();
-
-      // ---- helpers ----
-      function numVal(id) {
-        return parseFloat(document.getElementById(id).value) || 0;
-      }
-
-      function getBaseSalaries() {
-        return numVal('pl_pay_cheryl') + numVal('pl_pay_claire') +
-               numVal('pl_pay_kristy') + numVal('pl_pay_chris');
-      }
-
-      // Commission: Claire (PCN) and Kristy (PKN) earn rate% on recognised
-      // revenue above quota, sourced from the selected P&L period.
-      function getCommission() {
-        const clinicians = (plWindow && plWindow.clinicians) || [];
-        const quota     = numVal('pl_comm_quota');
-        const rate      = numVal('pl_comm_rate') / 100;
-        let total = 0;
-        clinicians.forEach(c => {
-          if (!c.is_director) {
-            total += Math.max(0, (c.recognised || 0) - quota) * rate;
+        pnl.groups.forEach(g => {
+          const used = g.lines.filter(l => pnl.months.some(m => m.lines[l]));
+          if (!used.length) return;
+          const open = expandedGroups.has(g.name);
+          const groupTotal = m => used.reduce((sum, l) => sum + (m.lines[l] || 0), 0);
+          const label = '<button type="button" class="pl-group-btn" data-plgroup="' + g.name + '" aria-expanded="' + open + '">'
+            + '<span class="pl-chevron">▶</span>' + g.name + '</button>';
+          body += statementRow('pl-group', label, groupTotal, 'cost');
+          if (open) {
+            used.forEach(l => { body += statementRow('pl-line', l, m => m.lines[l] || 0, 'cost', { line: l }); });
           }
         });
-        return total;
-      }
 
-      // Employer CPF: 17% on min(salary, OW_ceiling) + 17% on commission (AW)
-      // Applied per person so the OW cap is respected individually.
-      function getCPF(commission) {
-        const rate    = numVal('pl_cpf_rate') / 100;
-        const ceiling = numVal('pl_cpf_ceiling');
-
-        const salaries = [
-          numVal('pl_pay_cheryl'),  // PCL — no commission
-          numVal('pl_pay_claire'),  // PCN — may earn commission
-          numVal('pl_pay_kristy'), // PKN — may earn commission
-          numVal('pl_pay_chris')   // no commission
-        ];
-
-        const clinicians = (plWindow && plWindow.clinicians) || [];
-        const quota      = numVal('pl_comm_quota');
-        const commRate   = numVal('pl_comm_rate') / 100;
-        const commByClinician = { PCN: 0, PKN: 0 };
-        clinicians.forEach(c => {
-          if (c.clinician_id === 'PCN' || c.clinician_id === 'PKN') {
-            commByClinician[c.clinician_id] =
-              Math.max(0, (c.recognised || 0) - quota) * commRate;
-          }
+        body += statementRow('pl-total', 'Total costs', m => m.total_costs, 'cost');
+        body += statementRow('pl-result', 'EBITDA', ebitdaOf, 'income');
+        const percent = v => (v * 100).toFixed(1) + '%';
+        const points = d => (d > 0 ? '+' : '−') + Math.abs(d * 100).toFixed(1) + ' pt';
+        body += statementRow('pl-ratio', 'EBITDA margin', marginOf, 'income', {
+          format: percent, formatDelta: points,
+          total: closed => {
+            const rev = closed.reduce((sum, m) => sum + revenueOf(m), 0);
+            return rev ? closed.reduce((sum, m) => sum + ebitdaOf(m), 0) / rev : null;
+          },
         });
-        const commPerPerson = [
-          0,                            // Cheryl
-          commByClinician['PCN'] || 0, // Claire
-          commByClinician['PKN'] || 0, // Kristy
-          0                             // Chris
-        ];
+        if (plView === 'full') {
+          body += statementRow('pl-group', 'Amortised capex', () => amortOf(), null);
+          body += statementRow('pl-result', 'Net profit before tax',
+            m => isClosed(m) ? ebitdaOf(m) - amortOf() : null, 'income');
+        }
 
-        let totalCPF = 0;
-        salaries.forEach((sal, i) => {
-          const owSubject = Math.min(sal, ceiling);   // OW capped at ceiling
-          const awSubject = commPerPerson[i];           // commission = Additional Wages
-          totalCPF += rate * (owSubject + awSubject);
-        });
-        return totalCPF;
-      }
+        document.getElementById('pl_statement').innerHTML =
+          '<thead><tr><th>' + (plStatementMode === 'mom' ? 'Change vs prior month' : 'SGD') + '</th>' + heads + totalHead + '</tr></thead>'
+          + '<tbody>' + body + '</tbody>';
 
-      function getOpex() {
-        return numVal('pl_opex_rent')  + numVal('pl_opex_util') +
-               numVal('pl_opex_mktg') + numVal('pl_opex_cons') +
-               numVal('pl_opex_other');
-      }
-
-      // Returns exact payment processing fee for the currently selected P&L
-      // period, or null if not yet available.
-      // Fee structure: Plato Terminal = 2.1% of amount + $0.20 per transaction.
-      function getPmtFee() {
-        const methods = (plWindow && plWindow.payment_by_method) || [];
-        const plato = methods.find(m => m.method === 'platopay');
-        if (!plato) return null;
-        return plato.total_amount * 0.021 + plato.txn_count * 0.20;
-      }
-
-      let opexExpanded = true;
-      function toggleOpexDetail() {
-        opexExpanded = !opexExpanded;
-        document.getElementById('pl_pmtfee_subrow').style.display = opexExpanded ? '' : 'none';
-        const chevron = document.getElementById('pl_opex_chevron');
-        chevron.classList.toggle('open', opexExpanded);
-      }
-
-      function getAmort() {
-        const capex  = numVal('pl_capex_total');
-        const months = numVal('pl_amort_months') || 24;
-        return capex / months;
+        const notes = ['Card fees are calculated from Plato payments at 2.1% + $0.20, because Plato nets them out of its payouts before they reach the Cash Book.'];
+        if (plView === 'full') {
+          notes.push('Capex ' + money(pnl.capex_total) + ' ÷ ' + amortMonths() + ' months. Refundable deposits (' + money(pnl.deposits_total) + ') are not amortised.');
+        }
+        setText('pl_footnote', notes.join(' '));
       }
 
       function renderPL() {
-        const baseSalaries = getBaseSalaries();
-        const commission   = getCommission();
-        const cpf          = getCPF(commission);
-        const opex         = getOpex();
-        const amort        = (plView === 'full') ? getAmort() : 0;
-        const pmtFee       = getPmtFee();
-        const costs        = baseSalaries + commission + cpf + opex + amort + (pmtFee || 0);
+        const m = selected();
+        if (!m) return;
+        renderWarnings(m);
+        renderCards(m);
+        // A statement of an unfinished month would read as a real result.
+        const exportBtn = document.getElementById('pl_export_xlsx');
+        exportBtn.disabled = !isClosed(m);
+        exportBtn.title = isClosed(m) ? '' : 'Available once this month is closed';
+        renderChart();
+        renderStatement();
+      }
 
-        // Use the currently selected P&L window. Falls back to 0 if the
-        // initial fetch hasn't landed yet.
-        const revenueField = (plRevenueMode === 'bookings') ? 'bookings' : 'recognised';
-        const revenue = (plWindow && plWindow[revenueField]) || 0;
-        const profit  = revenue - costs;
+      function toggleGroup(attr, key, setter) {
+        document.querySelectorAll('[data-' + attr + ']').forEach(btn => {
+          btn.addEventListener('click', () => {
+            setter(btn.dataset[key]);
+            document.querySelectorAll('[data-' + attr + ']').forEach(b => b.classList.toggle('active', b === btn));
+            renderPL();
+          });
+        });
+      }
+      toggleGroup('plrev', 'plrev', v => { plRevenueMode = v; });
+      toggleGroup('plstatement', 'plstatement', v => { plStatementMode = v; });
+      toggleGroup('plview', 'plview', v => {
+        plView = v;
+        document.getElementById('pl_amort_wrap').hidden = (v !== 'full');
+      });
+      document.getElementById('pl_amort_months').addEventListener('input', renderPL);
+      document.getElementById('pl_month').addEventListener('change', e => { plMonth = e.target.value; renderPL(); });
+      document.getElementById('pl_statement').addEventListener('click', e => {
+        const btn = e.target.closest('[data-plgroup]');
+        if (!btn) return;
+        const name = btn.dataset.plgroup;
+        if (expandedGroups.has(name)) expandedGroups.delete(name); else expandedGroups.add(name);
+        renderStatement();
+      });
+      document.getElementById('pl_export_xlsx').addEventListener('click', downloadPLXlsx);
 
-        // Period-aware revenue label + dates line
-        const days = (plWindow && plWindow.days) || 0;
-        const revName = (plRevenueMode === 'bookings') ? 'Bookings' : 'Revenue';
-        const lbl  = (plPeriod === '30d')        ? `${revName} (last ${days || 30} days)`
-                   : (plPeriod === 'cycle')      ? `${revName} (this month, ${days}d)`
-                   : (plPeriod === 'prev_cycle') ? `${revName} (last month, ${days}d)`
-                                                 : `${revName} (custom, ${days}d)`;
-        document.getElementById('pl_revenue_label').textContent = lbl;
-        document.getElementById('pl_period_dates').textContent  = fmtPeriodLabel(plWindow);
-
-        // Update P&L rows (payroll lumped)
-        const totalPayroll = baseSalaries + commission + cpf;
-        document.getElementById('pl_revenue').textContent           = fmt$(revenue);
-        document.getElementById('pl_payroll_total_val').textContent = '(' + fmt$(totalPayroll) + ')';
-        document.getElementById('pl_opex_val').textContent          = '(' + fmt$(opex)         + ')';
-        document.getElementById('pl_amort_val').textContent         = '(' + fmt$(amort)        + ')';
-        document.getElementById('pl_costs_total').textContent       = '(' + fmt$(costs)        + ')';
-
-        // Payment processing sub-row
-        const pmtFeeEl = document.getElementById('pl_pmtfee_val');
-        if (pmtFee !== null) {
-          pmtFeeEl.textContent = '(' + fmt$(pmtFee) + ')';
-          pmtFeeEl.style.color = '';
-        } else {
-          pmtFeeEl.textContent = 'Awaiting data';
-          pmtFeeEl.style.color = 'var(--ink-muted)';
+      async function loadPnl() {
+        showEmpty('Loading the Cash Book…');
+        try {
+          const r = await fetch('api/pnl_monthly', { credentials: 'same-origin' });
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          pnl = await r.json();
+        } catch (err) {
+          showEmpty('<strong>Could not load the P&amp;L</strong>' + err.message);
+          return;
         }
-
-        const resultEl  = document.getElementById('pl_result_val');
-        const resultRow = document.getElementById('pl_result_row');
-        if (profit >= 0) {
-          resultEl.textContent = fmt$(profit);
-          resultRow.classList.add('pl-positive');
-          resultRow.classList.remove('pl-negative');
-        } else {
-          resultEl.textContent = '(' + fmt$(Math.abs(profit)) + ')';
-          resultRow.classList.add('pl-negative');
-          resultRow.classList.remove('pl-positive');
+        if (!pnl.available || !pnl.months.length) {
+          showEmpty('<strong>The Cash Book isn\'t connected yet</strong>Costs will appear here once its sync job has run. See ingestion/cash_book/README.md.');
+          return;
         }
-
-        // Update subtotals in the input panel
-        document.getElementById('pl_payroll_subtotal').textContent    = fmt$(baseSalaries);
-        document.getElementById('pl_commission_subtotal').textContent = fmt$(commission);
-        document.getElementById('pl_cpf_subtotal').textContent        = fmt$(cpf);
-        document.getElementById('pl_opex_subtotal').textContent       = fmt$(opex);
-        document.getElementById('pl_amort_subtotal').textContent      = fmt$(getAmort());
-
-        // Break-even bar
-        const rawPct   = costs > 0 ? (revenue / costs) * 100 : 0;
-        const clampPct = Math.min(rawPct, 100);
-        const fillEl   = document.getElementById('pl_progress_fill');
-        fillEl.style.width = clampPct.toFixed(1) + '%';
-        fillEl.classList.toggle('at-target', profit >= 0);
-        document.getElementById('pl_be_pct').textContent = rawPct.toFixed(0) + '%';
-
-        const subEl = document.getElementById('pl_be_sub');
-        const profitTrack = document.getElementById('pl_profit_track_wrap');
-
-        if (profit >= 0) {
-          subEl.textContent = 'Break-even achieved — surplus of ' + fmt$(profit) + ' this period.';
-          // Show profit margin bar
-          const margin = revenue > 0 ? (profit / revenue) * 100 : 0;
-          profitTrack.hidden = false;
-          document.getElementById('pl_margin_pct').textContent = margin.toFixed(1) + '%';
-          document.getElementById('pl_margin_fill').style.width =
-            Math.min(margin * 3, 100).toFixed(1) + '%'; // scale: 33% margin = full bar
-        } else {
-          const gap = Math.abs(profit);
-          const periodDays = (plWindow && plWindow.days) || 30;
-          const revenuePerDay = revenue > 0 ? revenue / periodDays : 1;
-          subEl.textContent =
-            'Need ' + fmt$(gap) + ' more this period to break even — ' +
-            'roughly ' + Math.round(gap / revenuePerDay) + ' more patient-days at current avg revenue.';
-          profitTrack.hidden = true;
+        document.getElementById('pl_empty').hidden = true;
+        document.getElementById('pl_content').hidden = false;
+        document.getElementById('pl_export_xlsx').disabled = false;
+        plMonth = pnl.latest_closed || pnl.months[pnl.months.length - 1].month;
+        document.getElementById('pl_month').innerHTML = pnl.months.slice().reverse().map(m =>
+          '<option value="' + m.month + '"' + (m.month === plMonth ? ' selected' : '') + '>'
+          + monthLabel(m.month) + (m.status === 'provisional' ? ' (provisional)' : '') + '</option>').join('');
+        if (pnl.loaded_at) {
+          const when = new Date(pnl.loaded_at);
+          if (!isNaN(when)) {
+            setText('pl_freshness', 'Cash Book synced ' + when.toLocaleString('en-SG', {
+              day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit', timeZone: 'Asia/Singapore' }));
+          }
         }
+        renderPL();
       }
 
       // Singapore-style P&L statement export. Builds a snapshot of exactly
       // what's on screen and POSTs to /api/pl.xlsx, which formats it.
       async function downloadPLXlsx() {
-        const baseSalaries = [
-          { id: 'pl_pay_cheryl',  name: 'Cheryl (Clinical Director)' },
-          { id: 'pl_pay_claire',  name: 'Claire (Senior Physio)' },
-          { id: 'pl_pay_kristy',  name: 'Kristy (Senior Physio)' },
-          { id: 'pl_pay_chris',   name: 'Chris (Director)' },
-        ].map(p => ({ name: p.name, amount: numVal(p.id) }));
-
-        const commission = getCommission();
-        const cpf        = getCPF(commission);
-        const opex       = [
-          { id: 'pl_opex_rent',  name: 'Rent' },
-          { id: 'pl_opex_util',  name: 'Utilities' },
-          { id: 'pl_opex_mktg',  name: 'Marketing' },
-          { id: 'pl_opex_cons',  name: 'Consumables' },
-          { id: 'pl_opex_other', name: 'Software, admin & other' },
-        ].map(o => ({ name: o.name, amount: numVal(o.id) }));
-
-        const pmtFee     = getPmtFee() || 0;
-        const amort      = (plView === 'full') ? getAmort() : 0;
-        const revField   = (plRevenueMode === 'bookings') ? 'bookings' : 'recognised';
-        const revenue    = (plWindow && plWindow[revField]) || 0;
-
-        const periodLabel =
-          (plPeriod === '30d')        ? 'Last 30 days' :
-          (plPeriod === 'cycle')      ? 'This month' :
-          (plPeriod === 'prev_cycle') ? 'Last month' :
-                                        'Custom period';
-
+        const m = selected();
+        if (!m) return;
+        const days = Number(m.end.slice(8, 10));
         const body = {
           entity: 'Goji Health Pte Ltd',
-          period: {
-            label: periodLabel,
-            start: plWindow && plWindow.start,
-            end:   plWindow && plWindow.end,
-            days:  plWindow && plWindow.days,
-          },
+          period: { label: monthLabel(m.month), start: m.start, end: m.end, days },
           view: plView,
           revenue_mode: plRevenueMode,
-          revenue,
-          payroll: {
-            base_salaries: baseSalaries,
-            commission,
-            employer_cpf: cpf,
-          },
-          opex,
-          payment_processing_fee: pmtFee,
-          amortisation: amort,
-          capex: {
-            total:  numVal('pl_capex_total'),
-            months: numVal('pl_amort_months'),
-          },
+          revenue: revenueOf(m),
+          groups: pnl.groups.map(g => ({
+            name: g.name,
+            lines: g.lines.filter(l => m.lines[l]).map(l => ({ name: l, amount: m.lines[l] })),
+          })).filter(g => g.lines.length),
+          amortisation: plView === 'full' ? amortOf() : 0,
+          capex: { total: pnl.capex_total, months: amortMonths() },
         };
 
         const btn = document.getElementById('pl_export_xlsx');
@@ -4187,7 +3783,7 @@
           const url = URL.createObjectURL(blob);
           const a = document.createElement('a');
           a.href = url;
-          a.download = `goji-pl-${(plWindow && plWindow.end) || 'latest'}.xlsx`;
+          a.download = `goji-pl-${m.month}.xlsx`;
           document.body.appendChild(a);
           a.click();
           document.body.removeChild(a);
@@ -4199,6 +3795,8 @@
           btn.innerHTML = originalText;
         }
       }
+
+      loadPnl();
     }
 
     /* ===== Page nav ===== */
@@ -4221,6 +3819,7 @@
       // Charts created while their page was hidden render at 0×0; resize once
       // the marketing page is first shown so the canvases pick up real dims.
       if (page === 'marketing') resizeMarketingCharts();
+      if (page === 'pl' && plChart) plChart.resize();
     }
 
     /* ===== Overview print ===== */

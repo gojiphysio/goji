@@ -712,43 +712,6 @@ GROUP BY item_given_id, item_name
     }
 
 
-def fetch_payment_methods(start: date, end: date) -> list[dict]:
-    """Return [{method, total_amount, txn_count}] from unnested invoice payments.
-
-    Plato stores payments as a JSON array on each invoice payload at
-    `payload.payment[]`, with fields `mode`, `amount`, and a `void` flag.
-    Method names are normalised to lowercase so the dashboard JS can find
-    'platopay' regardless of how Plato cased it.
-    """
-    sql = f"""
-WITH payments AS (
-  SELECT
-    LOWER(JSON_VALUE(p, '$.mode'))                     AS method,
-    SAFE_CAST(JSON_VALUE(p, '$.amount') AS FLOAT64)    AS amount,
-    SAFE_CAST(JSON_VALUE(p, '$.void')   AS INT64)      AS is_void
-  FROM `{PROJECT}.stg.invoices` AS inv,
-       UNNEST(JSON_QUERY_ARRAY(inv.payload, '$.payment')) AS p
-  WHERE inv.invoice_date BETWEEN '{start}' AND '{end}'
-    AND inv.is_finalized = TRUE
-    AND NOT inv.is_void
-)
-SELECT
-  method,
-  ROUND(SUM(amount), 2) AS total_amount,
-  COUNT(*)              AS txn_count
-FROM payments
-WHERE COALESCE(is_void, 0) = 0
-  AND method IS NOT NULL
-GROUP BY method
-ORDER BY total_amount DESC
-"""
-    return [{
-        "method":       r["method"],
-        "total_amount": _to_float(r["total_amount"]),
-        "txn_count":    _to_int(r["txn_count"]),
-    } for r in _query(sql)]
-
-
 def fetch_appointments(start: date, end: date) -> list[dict]:
     """Per-session deliveries used by the commission calculator.
 
@@ -2245,7 +2208,6 @@ def build_payload() -> dict:
     """
     log.info("Building dashboard payload from BigQuery (parallel)")
     today      = datetime.now(ZoneInfo("Asia/Singapore")).date()
-    pmt_start  = today - timedelta(days=30)
     # Commission calculator needs the per-session ledger for the current
     # calendar month plus a generous trailing window so custom-range reports work.
     # 120 days covers ~4 calendar months.
@@ -2261,7 +2223,6 @@ def build_payload() -> dict:
         f_cohorts       = ex.submit(fetch_cohorts)
         f_demographics  = ex.submit(fetch_patient_demographics)
         f_referrals     = ex.submit(fetch_patient_referrals)
-        f_payments      = ex.submit(fetch_payment_methods, pmt_start, today)
         f_appointments  = ex.submit(fetch_appointments, appt_start, today)
         f_mismatches    = ex.submit(fetch_invoice_doctor_mismatches)
         f_mismatch_hist = ex.submit(fetch_mismatch_history)
@@ -2384,7 +2345,6 @@ def build_payload() -> dict:
             "demographics":      f_demographics.result(),
             "referrals":         f_referrals.result(),
             "appointments":      f_appointments.result(),
-            "payment_by_method": f_payments.result(),
             "ranges":            ranges,
             "doctor_mismatches": f_mismatches.result(),
             "mismatch_history":  f_mismatch_hist.result(),
@@ -3014,30 +2974,232 @@ VALUES
         _cache.pop("payload", None)
 
 
-def fetch_pl_window(start: date, end: date) -> dict:
-    """Recompute the P&L revenue + payment fee inputs for an arbitrary window.
+# Cash Book P&L -------------------------------------------------------------
+# Costs come from the hand-kept Cash Book sheet (marts.fct_pnl_monthly), revenue
+# from Plato. Plato nets its Terminal fee out of its payouts, so card fees never
+# appear in the Cash Book, while recognised revenue is gross of them. They are
+# added here, or EBITDA would be overstated.
+CARD_FEE_PCT = 0.021
+CARD_FEE_PER_TXN = 0.20
+PNL_CARD_FEES = "Card fees"
+PNL_GROUPS = [
+    ("Staff", ["Payroll", "CPF"]),
+    ("Occupancy", ["Rent", "Utilities"]),
+    ("Marketing", ["Ads", "Printing"]),
+    ("Clinic ops", ["Clinical supplies", "Laundry & cleaning", PNL_CARD_FEES]),
+    ("Admin", ["Training", "Staff meals & events", "Software", "Insurance",
+               "Bank fees", "Professional fees", "Other", "Uncategorised"]),
+]
+# A month without these isn't finished being entered. Its EBITDA would look far
+# better than it is, so it is labelled provisional and never used as a headline.
+PNL_CLOSE_REQUIRED = ("Payroll", "CPF", "Rent")
 
-    Reuses fetch_kpis / fetch_clinicians / fetch_payment_methods so the rules
-    stay in lock-step with the main dashboard.
+
+def _month_key(value) -> str:
+    return str(value)[:7]
+
+
+def _month_end(month: str) -> date:
+    y, m = int(month[:4]), int(month[5:7])
+    return (date(y + (m == 12), m % 12 + 1, 1)) - timedelta(days=1)
+
+
+def _ratio(numerator: float, denominator: float) -> float | None:
+    return numerator / denominator if denominator else None
+
+
+def build_pnl(line_rows: list[dict], revenue_rows: list[dict], summary: dict,
+              today: date) -> dict:
+    """Assemble the monthly P&L from the mart rows. Pure, so tests need no BQ.
+
+    Starts at the first closed month: earlier months are pre-opening fit-out, not
+    trading. Months after the current one are dropped, since an annual payment
+    spreads into the future.
     """
-    key = f"pl_window_{start.isoformat()}_{end.isoformat()}"
-    cached = _disk_cache_get(key)
+    if not line_rows:
+        return {"available": False}
+
+    costs: dict[str, dict[str, float]] = {}
+    below_ebitda: dict[str, float] = {}
+    for r in line_rows:
+        if r["in_ebitda"]:
+            costs.setdefault(_month_key(r["month"]), {})[r["line"]] = _to_float(r["amount"])
+        else:
+            below_ebitda[r["line"]] = below_ebitda.get(r["line"], 0.0) + _to_float(r["amount"])
+
+    revenue = {_month_key(r["month"]): r for r in revenue_rows}
+    current = today.isoformat()[:7]
+    keys = sorted(k for k in set(costs) | set(revenue) if k <= current)
+
+    months: list[dict] = []
+    last_utilities = 0.0
+    deferred = 0.0
+    for key in keys:
+        rev = revenue.get(key, {})
+        deferred += _to_float(rev.get("package_sold")) - _to_float(rev.get("package_burned"))
+        lines = dict(costs.get(key, {}))
+        end = _month_end(key)
+        missing = [name for name in PNL_CLOSE_REQUIRED if not lines.get(name)]
+        closed = end < today and not missing
+
+        # The SP bill arrives mid next month, so the last closed month rarely has
+        # one yet. Carry the prior amount, labelled, rather than show zero.
+        estimated = []
+        if closed and not lines.get("Utilities") and last_utilities:
+            lines["Utilities"] = last_utilities
+            estimated.append("Utilities")
+        last_utilities = lines.get("Utilities") or last_utilities
+
+        fees = _to_float(rev.get("card_fees"))
+        if fees:
+            lines[PNL_CARD_FEES] = fees
+
+        recognised = _to_float(rev.get("recognised"))
+        visits = _to_int(rev.get("visits"))
+        total = sum(lines.values())
+        ebitda = recognised - total
+        staff = lines.get("Payroll", 0.0) + lines.get("CPF", 0.0)
+        per_visit = _ratio(recognised, visits)
+        months.append({
+            "month": key,
+            "start": f"{key}-01",
+            "end": end.isoformat(),
+            "status": "closed" if closed else "provisional",
+            "missing": missing,
+            "estimated": estimated,
+            "recognised": recognised,
+            "bookings": _to_float(rev.get("bookings")),
+            "visits": visits,
+            "lines": lines,
+            "total_costs": total,
+            "ebitda": ebitda,
+            "margin": _ratio(ebitda, recognised),
+            "staff_pct": _ratio(staff, recognised),
+            "staff_rent_pct": _ratio(staff + lines.get("Rent", 0.0), recognised),
+            "revenue_per_visit": per_visit,
+            "breakeven_visits": _ratio(total, per_visit) if per_visit else None,
+            "deferred": deferred,
+        })
+
+    closed_at = [i for i, m in enumerate(months) if m["status"] == "closed"]
+    first = closed_at[0] if closed_at else 0
+    for i, m in enumerate(months):
+        window = months[i - 2:i + 1] if i >= first + 2 else []
+        m["trailing_3m_ebitda"] = (
+            sum(x["ebitda"] for x in window)
+            if window and all(x["status"] == "closed" for x in window) else None)
+
+    book_debit = _to_float(summary.get("book_debit"))
+    book_credit = _to_float(summary.get("book_credit"))
+    sheet_debit = _to_float(summary.get("sheet_total_debit"))
+    sheet_credit = _to_float(summary.get("sheet_total_credit"))
+    return {
+        "available": True,
+        "months": months[first:],
+        "latest_closed": months[closed_at[-1]]["month"] if closed_at else None,
+        "groups": [{"name": name, "lines": lines} for name, lines in PNL_GROUPS],
+        "capex_total": below_ebitda.get("Capex", 0.0),
+        "deposits_total": below_ebitda.get("Deposit", 0.0),
+        "cash": {
+            "balance": _to_float(summary.get("sheet_balance")),
+            "as_of": str(summary.get("as_of") or "")[:10] or None,
+        },
+        # Financing rows are stored as debit - credit, so money in is negative.
+        "loans_outstanding": -below_ebitda.get("Financing", 0.0),
+        "loaded_at": str(summary.get("loaded_at") or "") or None,
+        "checks": {
+            "uncategorised_count": _to_int(summary.get("uncategorised_count")),
+            "uncategorised_amount": _to_float(summary.get("uncategorised_amount")),
+            "unreadable_rows": _to_int(summary.get("unreadable_rows")),
+            "reconciled": (abs(book_debit - sheet_debit) < 0.01
+                           and abs(book_credit - sheet_credit) < 0.01),
+            "debit_gap": round(sheet_debit - book_debit, 2),
+            "credit_gap": round(sheet_credit - book_credit, 2),
+        },
+    }
+
+
+def fetch_pnl_monthly() -> dict:
+    """The P&L page's data, cached like the main payload.
+
+    Degrades to {"available": False} if the Cash Book tables aren't deployed yet
+    or have no rows: the page shows an empty state and the rest still works.
+    """
+    now = time.time()
+    with _cache_lock:
+        entry = _cache.get("pnl_monthly")
+        if entry and now - entry[0] < CACHE_TTL:
+            return entry[1]
+    cached = _disk_cache_get("pnl_monthly")
     if cached is not None:
         return cached
 
-    kpis              = fetch_kpis(start, end)
-    clinicians        = fetch_clinicians(start, end)
-    payment_by_method = fetch_payment_methods(start, end)
-    result = {
-        "start":             start.isoformat(),
-        "end":               end.isoformat(),
-        "days":              (end - start).days + 1,
-        "recognised":        kpis["recognised"],
-        "bookings":          kpis["bookings"],
-        "clinicians":        clinicians,
-        "payment_by_method": payment_by_method,
-    }
-    _disk_cache_put(key, result)
+    today = datetime.now(ZoneInfo("Asia/Singapore")).date()
+    try:
+        line_rows = _query(f"""
+SELECT month, line, in_ebitda, amount
+FROM `{PROJECT}.marts.fct_pnl_monthly`
+ORDER BY month, line
+""")
+        summary_rows = _query(f"""
+SELECT
+  MAX(_loaded_at)                                  AS loaded_at,
+  MAX(entry_date)                                  AS as_of,
+  ANY_VALUE(sheet_balance)                         AS sheet_balance,
+  ANY_VALUE(sheet_total_debit)                     AS sheet_total_debit,
+  ANY_VALUE(sheet_total_credit)                    AS sheet_total_credit,
+  ROUND(SUM(debit), 2)                             AS book_debit,
+  ROUND(SUM(credit), 2)                            AS book_credit,
+  COUNTIF(line = 'Uncategorised')                  AS uncategorised_count,
+  SUM(IF(line = 'Uncategorised', debit, 0))        AS uncategorised_amount,
+  COUNTIF(parse_issue IS NOT NULL)                 AS unreadable_rows
+FROM `{PROJECT}.marts.fct_cash_book`
+""")
+        revenue_rows = _query(f"""
+WITH delivered AS (
+  SELECT
+    DATE_TRUNC(delivery_date, MONTH) AS month,
+    SUM(recognised_revenue) AS recognised,
+    COUNT(*) AS visits,
+    SUM(IF(delivery_method = 'package_burn', recognised_revenue, 0)) AS package_burned
+  FROM `{PROJECT}.marts.fct_service_delivered`
+  GROUP BY month
+),
+invoiced AS (
+  SELECT
+    DATE_TRUNC(invoice_date, MONTH) AS month,
+    SUM(booking_amount) AS bookings,
+    SUM(IF(is_package_sale, booking_amount, 0)) AS package_sold
+  FROM `{PROJECT}.marts.fct_invoice_line`
+  GROUP BY month
+),
+terminal AS (
+  SELECT
+    DATE_TRUNC(inv.invoice_date, MONTH) AS month,
+    SUM(SAFE_CAST(JSON_VALUE(p, '$.amount') AS FLOAT64)) * {CARD_FEE_PCT}
+      + COUNT(*) * {CARD_FEE_PER_TXN} AS card_fees
+  FROM `{PROJECT}.stg.invoices` AS inv,
+       UNNEST(JSON_QUERY_ARRAY(inv.payload, '$.payment')) AS p
+  WHERE inv.is_finalized = TRUE
+    AND NOT inv.is_void
+    AND LOWER(JSON_VALUE(p, '$.mode')) = 'platopay'
+    AND COALESCE(SAFE_CAST(JSON_VALUE(p, '$.void') AS INT64), 0) = 0
+  GROUP BY month
+)
+SELECT month, recognised, visits, package_burned, bookings, package_sold, card_fees
+FROM delivered
+FULL OUTER JOIN invoiced USING (month)
+FULL OUTER JOIN terminal USING (month)
+ORDER BY month
+""")
+    except Exception as e:
+        log.warning("Cash Book P&L unavailable: %s", e)
+        return {"available": False}
+
+    result = build_pnl(line_rows, revenue_rows, summary_rows[0] if summary_rows else {}, today)
+    _disk_cache_put("pnl_monthly", result)
+    with _cache_lock:
+        _cache["pnl_monthly"] = (now, result)
     return result
 
 
@@ -3170,37 +3332,17 @@ def _xlsx_pl_statement(payload: dict) -> bytes:
     # OPERATING EXPENSES
     write_section_header("Operating expenses")
 
-    payroll = payload.get("payroll") or {}
-    base_salaries = payroll.get("base_salaries") or []
-    base_total = sum(float(p.get("amount") or 0) for p in base_salaries)
-    commission = float(payroll.get("commission") or 0)
-    cpf        = float(payroll.get("employer_cpf") or 0)
+    total_opex = 0.0
+    for group in payload.get("groups") or []:
+        lines = group.get("lines") or []
+        write_section_header(f"  {group.get('name', '?')}")
+        for item in lines:
+            write_line(item.get("name", "?"), float(item.get("amount") or 0), sub=True, indent=2)
+        group_total = sum(float(i.get("amount") or 0) for i in lines)
+        write_subtotal(f"Total {str(group.get('name', '')).lower()}", group_total, indent=1)
+        blank()
+        total_opex += group_total
 
-    # Payroll subgroup
-    write_section_header("  Staff costs")
-    for p in base_salaries:
-        write_line(f"Salary — {p.get('name', '?')}", float(p.get('amount') or 0), sub=True, indent=2)
-    if commission:
-        write_line("Commission", commission, sub=True, indent=2)
-    if cpf:
-        write_line("Employer CPF contributions", cpf, sub=True, indent=2)
-    staff_total = base_total + commission + cpf
-    write_subtotal("Total staff costs", staff_total, indent=1)
-    blank()
-
-    # Opex subgroup
-    opex_items = payload.get("opex") or []
-    pmt_fee = float(payload.get("payment_processing_fee") or 0)
-    write_section_header("  Other operating expenses")
-    for item in opex_items:
-        write_line(item.get("name", "?"), float(item.get("amount") or 0), sub=True, indent=2)
-    if pmt_fee:
-        write_line("Payment processing fees (Plato Terminal)", pmt_fee, sub=True, indent=2)
-    other_opex_total = sum(float(i.get("amount") or 0) for i in opex_items) + pmt_fee
-    write_subtotal("Total other operating expenses", other_opex_total, indent=1)
-    blank()
-
-    total_opex = staff_total + other_opex_total
     write_subtotal("Total operating expenses", total_opex)
     blank()
 
@@ -3245,8 +3387,8 @@ def _xlsx_pl_statement(payload: dict) -> bytes:
         )
     ws.cell(row=row, column=1, value=(
         f"Notes:  {revenue_note} Singapore Dollar ($SGD) throughout. "
-        "Employer CPF computed at the statutory rate on Ordinary Wages "
-        "(capped at the OW ceiling) plus Additional Wages (commission)."
+        "Costs are actuals from the Cash Book, allocated to the period they cover. "
+        "Card fees are calculated from Plato payments at the Terminal rate."
     )).font = sub_font
     ws.row_dimensions[row].height = 30
     ws.merge_cells(start_row=row, start_column=1, end_row=row, end_column=3)
@@ -3480,21 +3622,11 @@ def api_mismatch_dismiss() -> Response:
     return Response('{"ok": true}', mimetype="application/json")
 
 
-@app.route("/api/pl_window")
+@app.route("/api/pnl_monthly")
 @require_roles("founder")
-def api_pl_window() -> Response:
-    """Recompute the P&L revenue + payment fees for an arbitrary date window.
-
-    Used by the P&L tab's date selector ("Last 30D" / "This month" / "Custom").
-    """
-    start = _parse_iso_date(request.args.get("start"))
-    end   = _parse_iso_date(request.args.get("end"))
-    if not start or not end or start > end:
-        return Response('{"error": "invalid start/end"}', status=400,
-                        mimetype="application/json")
-    log.info("P&L window query %s -> %s", start, end)
-    return Response(json.dumps(fetch_pl_window(start, end)),
-                    mimetype="application/json")
+def api_pnl_monthly() -> Response:
+    """Actual monthly P&L: Cash Book costs against Plato revenue."""
+    return Response(json.dumps(fetch_pnl_monthly()), mimetype="application/json")
 
 
 @app.route("/api/pl.xlsx", methods=["POST"])
@@ -3525,6 +3657,7 @@ def refresh() -> Response:
         _cache.pop("retention", None)
         _cache.pop("upcoming", None)
         _cache.pop("package_alerts", None)
+        _cache.pop("pnl_monthly", None)
     if DEV_MODE and CACHE_DIR.exists():
         for f in CACHE_DIR.glob("*.json"):
             f.unlink()

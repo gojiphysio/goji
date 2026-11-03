@@ -44,8 +44,8 @@ See `DEPLOY.md`.
   28/29/30/31-day months and leap years are handled. Month end is *first of next
   month minus one day* in Python and `new Date(y, m + 1, 0)` in JS. Three helpers
   implement it independently and **must stay in agreement**: `_fiscal_period()` /
-  `_prior_fiscal_start()` (projection chart, `app.py`), `payCycleRange()` /
-  `prevPayCycleRange()` (P&L selector), and `currentPayCycle()` (commission
+  `_prior_fiscal_start()` (projection chart, `app.py`), `_month_end()` (P&L,
+  `app.py`), and `currentPayCycle()` (commission
   calculator). The `cycle` / `payCycle` names are historical — the dashboard used
   to run a 26th→25th pay cycle; the period is now the plain calendar month.
 - **`date.today()` must use SGT.** All `date.today()` / `datetime.now()` calls in
@@ -69,6 +69,30 @@ See `DEPLOY.md`.
   clicks) use the **streaming API** (`insert_rows_json`), not DML — DML is capped
   at 1,500 statements/table/day. New writable table → add it to the grant loops in
   `deploy_admin.sh`, `DEPLOY.md`, and `.github/workflows/deploy-dashboard.yml`.
+
+## P&L tab
+- **Costs are actuals from the Cash Book sheet, never typed into the page.**
+  Sheet → `ingestion/cash_book` → `marts.fct_pnl_monthly` → `build_pnl()`. The old
+  browser inputs (rent $9,723 against an actual $10,598) showed a model, not what
+  happened. Xero can replace the sheet later by feeding the same mart shape.
+- **A cost belongs to the month it covers, not the month it was paid.** The sheet's
+  `Covers from`/`Covers to` spread a row evenly by day. Payroll ran 26th→25th until
+  Aug 2026, then calendar months, which is why August has two payroll rows.
+- **Card fees are not in the Cash Book.** Plato nets them out of its payouts, while
+  recognised revenue is gross of them, so `fetch_pnl_monthly` adds them from Plato
+  payments (2.1% + $0.20). Leaving them out overstated May–Oct 2026 EBITDA by $5k.
+- **A provisional month never shows a result.** A month that hasn't ended, or has no
+  Payroll, CPF or Rent yet, shows "—" for EBITDA and ratios, and is left out of the
+  chart, totals, MoM and the Excel export. Payroll lands days after month end, so
+  the unfinished month otherwise looks wildly profitable (a 99% margin in testing).
+  The headline defaults to the latest closed month.
+- **Unbilled utilities carry the prior month, labelled `est`.** The SP bill arrives
+  mid next month, so the latest closed month rarely has one.
+- **Nothing is silently dropped.** A debit with no line counts as an Uncategorised
+  cost with a warning, and the page warns if the book stops tying to the sheet's own
+  totals. Capex and refundable deposits are separate lines, so only capex amortises.
+- **The statement table is a deliberate exception to "no big tables".** A P&L is the
+  table, so it stays collapsed to groups, with lines one click away.
 
 ## Front desk portal (`frontdesk.*`)
 - It's the **worklists Plato doesn't track**, not a second calendar. Tabs read
