@@ -33,22 +33,18 @@ Do these before the SQL deploys, because `stg.cash_book` needs the table to exis
    ```bash
    gcloud services enable sheets.googleapis.com --project=goji-bi
    ```
-4. **Table and grants:**
+4. **Table:**
    ```bash
    bq --project_id=goji-bi --location=asia-southeast1 \
      query --use_legacy_sql=false < scripts/ingestion/cash_book/schema.sql
-   bq add-iam-policy-binding \
-     --member="serviceAccount:ingestion-sa@goji-bi.iam.gserviceaccount.com" \
-     --role="roles/bigquery.dataEditor" goji-bi:raw_cashbook
-   bq add-iam-policy-binding \
-     --member="serviceAccount:dashboard-sa@goji-bi.iam.gserviceaccount.com" \
-     --role="roles/bigquery.dataViewer" goji-bi:raw_cashbook
    ```
+   No dataset grants are needed: `ingestion-sa@` (`dataEditor`) and `dashboard-sa@`
+   (`dataViewer`) hold their roles at project level, as for `raw_marketing`.
 5. **Repo var:** set `CASH_BOOK_SHEET_ID` in GitHub. The deploy step skips the job
    until it exists.
 6. **Schedule**, off the hour so it stays clear of the Plato jobs:
    ```bash
-   gcloud scheduler jobs create http cash-book-ingest-schedule \
+   gcloud scheduler jobs create http cash-book-ingest-2h \
      --location=asia-southeast1 --schedule="17 */2 * * *" --time-zone="Asia/Singapore" \
      --uri="https://asia-southeast1-run.googleapis.com/apis/run.googleapis.com/v1/namespaces/goji-bi/jobs/cash-book-ingest:run" \
      --http-method=POST \
