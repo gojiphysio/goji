@@ -340,8 +340,10 @@ Founder dashboard — four pages, all live from BQ:
 - **Overview** — KPIs, daily/weekly/monthly trends, per-clinician table,
   discount summary, treatment-mix donuts, cohort table, deferred revenue,
   patient demographics, referral analytics, and the invoice-doctor mismatch alert.
-- **P&L** — Singapore-style P&L with revenue/bookings toggle, period selector,
-  and XLSX export.
+- **P&L** — actual monthly EBITDA by line with month-on-month changes: costs from
+  the Cash Book sheet (`ingestion/cash_book`, every 2 hours), revenue and card fees
+  from Plato. Revenue/bookings toggle, month picker, amortisation view and XLSX
+  export. Shows an empty state until the job has run.
 - **Commission** — per-clinician commission calculator over real appointment data.
 - **Marketing** — marketing-lens view of the clinic numbers: north-star KPIs
   (visits, active patients, bookings) and patient acquisition live from BQ;
