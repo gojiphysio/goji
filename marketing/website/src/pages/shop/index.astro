@@ -17,7 +17,11 @@ import PetalPhoto from "../../components/watercolor/PetalPhoto.astro";
 import Bloom from "../../components/watercolor/Bloom.astro";
 import { SHOP } from "../../lib/shop.ts";
 
-const buyable = SHOP.flatMap((c) => c.options.filter((o) => o.status === "buy").map((o) => ({ c, o })));
+const buyable = SHOP.flatMap((c) =>
+  c.options.flatMap((o) =>
+    (o.variants ?? [o]).filter((v) => v.status === "buy").map((v) => ({ c, o: v === o ? o : { ...v, name: `${o.name}, ${v.label}` } })),
+  ),
+);
 const schema = {
   "@context": "https://schema.org",
   "@type": "OfferCatalog",
@@ -81,8 +85,17 @@ const schema = {
                   />
                 </div>
                 <div class="shop-prod__thumbs" role="group" aria-label={`${o.name} photos`}>
-                  {o.photos!.map((ph, k) => (
-                    <button type="button" class="shop-prod__thumb" aria-pressed={k === 0 ? "true" : "false"} data-src={ph.src} data-alt={ph.alt}>
+                  {[...o.photos!.map((ph) => ({ ph, v: undefined as string | undefined })),
+                    ...(o.variants ?? []).filter((v) => v.photo).map((v) => ({ ph: v.photo!, v: v.key }))].map(({ ph, v }, k) => (
+                    <button
+                      type="button"
+                      class="shop-prod__thumb"
+                      aria-pressed={k === 0 ? "true" : "false"}
+                      data-src={ph.src}
+                      data-alt={ph.alt}
+                      data-variant={v}
+                      hidden={!!v && v !== o.variants?.[0]?.key}
+                    >
                       <img src={ph.src} alt="" width="64" height="64" loading="lazy" decoding="async" />
                       <span class="visually-hidden">Photo {k + 1}</span>
                     </button>
@@ -90,14 +103,27 @@ const schema = {
                 </div>
                 <h3 class="shop-prod__name">{o.name}</h3>
                 {o.blurb && <p class="shop-prod__blurb">{o.blurb}</p>}
-                <div class="shop-prod__buy">
-                  <div>
-                    <p class="shop-opt__price">{o.price ?? "Coming soon"}</p>
-                    {o.detail && <p class="shop-opt__detail">{o.detail}</p>}
+                {o.variants && (
+                  <fieldset class="shop-prod__variants">
+                    <legend class="visually-hidden">{o.name}: choose a sole</legend>
+                    {o.variants.map((v, k) => (
+                      <label class="shop-prod__variant">
+                        <input type="radio" name={`${o.key}-variant`} value={v.key} checked={k === 0} />
+                        <span>{v.label}</span>
+                      </label>
+                    ))}
+                  </fieldset>
+                )}
+                {(o.variants ?? [{ ...o, label: "" }]).map((v, k) => (
+                  <div class="shop-prod__buy" data-variant={o.variants ? v.key : undefined} hidden={k > 0}>
+                    <div>
+                      <p class="shop-opt__price">{v.price ?? "Coming soon"}</p>
+                      {o.detail && <p class="shop-opt__detail">{o.detail}</p>}
+                    </div>
+                    {v.status === "buy" && v.slug && <Button slug={v.slug}>Buy</Button>}
+                    {v.status !== "buy" && <Button slug="web-wa" variant="secondary">Ask us</Button>}
                   </div>
-                  {o.status === "buy" && o.slug && <Button slug={o.slug}>Buy</Button>}
-                  {o.status !== "buy" && <Button slug="web-wa" variant="secondary">Ask us</Button>}
-                </div>
+                ))}
               </article>
             ))}
           </div>
@@ -162,16 +188,26 @@ const schema = {
 </BaseLayout>
 
 <script>
-  // Product thumbnails swap the main shot; works without JS (first shot shows).
+  // Thumbnails swap the main shot; the sole picker swaps the price, Buy link and
+  // that variant's own shot. Without JS the first shot and first variant show.
   document.querySelectorAll<HTMLElement>("[data-shop-gallery]").forEach((card) => {
     const main = card.querySelector<HTMLImageElement>("[data-shop-main]");
     const thumbs = card.querySelectorAll<HTMLButtonElement>(".shop-prod__thumb");
-    thumbs.forEach((t) =>
-      t.addEventListener("click", () => {
-        if (!main) return;
-        main.src = t.dataset.src!;
-        main.alt = t.dataset.alt!;
-        thumbs.forEach((x) => x.setAttribute("aria-pressed", String(x === t)));
+    const show = (t: HTMLButtonElement) => {
+      if (!main) return;
+      main.src = t.dataset.src!;
+      main.alt = t.dataset.alt!;
+      thumbs.forEach((x) => x.setAttribute("aria-pressed", String(x === t)));
+    };
+    thumbs.forEach((t) => t.addEventListener("click", () => show(t)));
+    card.querySelectorAll<HTMLInputElement>(".shop-prod__variant input").forEach((r) =>
+      r.addEventListener("change", () => {
+        card.querySelectorAll<HTMLElement>(".shop-prod__buy[data-variant], .shop-prod__thumb[data-variant]").forEach((el) => {
+          el.hidden = el.dataset.variant !== r.value;
+        });
+        const picked = card.querySelector<HTMLButtonElement>(`.shop-prod__thumb[data-variant="${r.value}"]`);
+        const current = card.querySelector<HTMLButtonElement>('.shop-prod__thumb[aria-pressed="true"]');
+        if (picked && current?.hidden) show(picked);
       }),
     );
   });
@@ -246,24 +282,25 @@ const schema = {
   .shop-opt__action:empty { display: none; }
   .shop-coll__interest { margin-top: var(--space-5); }
 
-  /* Merch: product cards with real shots (cut-outs on the blush petal frame). */
+  /* Merch: product cards; shots are shot on the blush (#F1DCD2) ground, edge to edge. */
   .shop-prods__head { max-width: 60ch; margin-bottom: var(--space-6); }
   .shop-prods__head h2 { margin-bottom: var(--space-3); }
   .shop-prods { display: grid; gap: var(--space-7) clamp(var(--space-5), 4vw, var(--space-8)); }
   .shop-prod { display: flex; flex-direction: column; }
   .shop-prod__frame { aspect-ratio: 1 / 1; width: 100%; }
-  .shop-prod__frame img { width: 100%; height: 100%; object-fit: contain; padding: 6%; }
+  .shop-prod__frame img { width: 100%; height: 100%; object-fit: cover; }
   .shop-prod__thumbs { display: flex; gap: var(--space-2); margin-top: var(--space-3); }
   .shop-prod__thumb {
     width: 64px;
     height: 64px;
-    padding: 4px;
+    padding: 0;
+    overflow: hidden;
     border-radius: var(--radius-md);
     background: var(--blush);
     border: 2px solid transparent;
     cursor: pointer;
   }
-  .shop-prod__thumb img { width: 100%; height: 100%; object-fit: contain; }
+  .shop-prod__thumb img { width: 100%; height: 100%; object-fit: cover; }
   .shop-prod__thumb[aria-pressed="true"] { border-color: var(--color-primary); }
   .shop-prod__thumb:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
   .shop-prod__name { font-family: var(--font-body); font-weight: var(--weight-semibold); font-size: var(--fs-lead); margin-top: var(--space-4); }
@@ -278,6 +315,21 @@ const schema = {
     border-top: 1px solid var(--rule);
   }
   .shop-prod__buy .shop-opt__price { text-align: left; }
+  .shop-prod__buy[hidden], .shop-prod__thumb[hidden] { display: none; }
+  .shop-prod__variants { display: flex; gap: var(--space-2); border: 0; padding: 0; margin: auto 0 var(--space-4); }
+  .shop-prod__variant span {
+    display: inline-block;
+    padding: 6px 14px;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--color-border);
+    background: var(--bg-content);
+    font-size: var(--fs-small);
+    font-weight: var(--weight-medium);
+    cursor: pointer;
+  }
+  .shop-prod__variant input { position: absolute; opacity: 0; pointer-events: none; }
+  .shop-prod__variant input:checked + span { border-color: var(--color-primary); background: var(--blush); color: var(--color-primary); }
+  .shop-prod__variant input:focus-visible + span { outline: 2px solid var(--color-primary); outline-offset: 2px; }
 
   .shop-help { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-3); }
   .shop-help p { color: var(--text-muted); line-height: var(--lh-body); }
