@@ -7,6 +7,8 @@
  * under the AHPC floor in marketing/strategy/03-compliance-guardrails.md: plain
  * prices, no outcome claims, no pressure framing. Deliberately not a product
  * grid: one photo-led block per collection, options as a quiet price list.
+ * The exception is merch with product shots (options with `photos`): those
+ * render as product cards, at the top, with a thumbnail switcher.
  */
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Section from "../../components/Section.astro";
@@ -33,7 +35,7 @@ const schema = {
 
 <BaseLayout
   title="Shop: Pilates packages and gift vouchers | Goji Physiotherapy"
-  description="Buy Pilates packages and Goji gift vouchers online, by card or PayNow. Goji socks coming soon."
+  description="Goji Girl and Goji Gang grip socks, Pilates packages and Goji gift vouchers, online by card or PayNow."
   schema={schema}
 >
   <section class="shop-hero">
@@ -57,6 +59,51 @@ const schema = {
 
   {SHOP.map((c, i) => {
     const soon = c.options.every((o) => o.status === "soon");
+    if (c.options.some((o) => o.photos)) return (
+      <section id={c.id} class:list={["shop-coll", i % 2 ? "shop-coll--linen" : "shop-coll--surface"]}>
+        <div class="container">
+          <div class="shop-prods__head">
+            <h2>{c.title}</h2>
+            <p class="shop-coll__lead">{c.lead}</p>
+          </div>
+          <div class="shop-prods">
+            {c.options.map((o, j) => (
+              <article class="shop-prod" data-shop-gallery>
+                <div class:list={["gj-frame gj-frame--petal shop-prod__frame", j % 2 === 1 && "gj-frame--flip"]}>
+                  <img
+                    src={o.photos![0].src}
+                    alt={o.photos![0].alt}
+                    width="800"
+                    height="800"
+                    loading={i === 0 ? "eager" : "lazy"}
+                    decoding="async"
+                    data-shop-main
+                  />
+                </div>
+                <div class="shop-prod__thumbs" role="group" aria-label={`${o.name} photos`}>
+                  {o.photos!.map((ph, k) => (
+                    <button type="button" class="shop-prod__thumb" aria-pressed={k === 0 ? "true" : "false"} data-src={ph.src} data-alt={ph.alt}>
+                      <img src={ph.src} alt="" width="64" height="64" loading="lazy" decoding="async" />
+                      <span class="visually-hidden">Photo {k + 1}</span>
+                    </button>
+                  ))}
+                </div>
+                <h3 class="shop-prod__name">{o.name}</h3>
+                {o.blurb && <p class="shop-prod__blurb">{o.blurb}</p>}
+                <div class="shop-prod__buy">
+                  <div>
+                    <p class="shop-opt__price">{o.price ?? "Coming soon"}</p>
+                    {o.detail && <p class="shop-opt__detail">{o.detail}</p>}
+                  </div>
+                  {o.status === "buy" && o.slug && <Button slug={o.slug}>Buy</Button>}
+                  {o.status !== "buy" && <Button slug="web-wa" variant="secondary">Ask us</Button>}
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
     return (
       <section id={c.id} class:list={["shop-coll", i % 2 ? "shop-coll--linen" : "shop-coll--surface"]}>
         <div class:list={["container shop-coll__grid", i % 2 && "shop-coll__grid--flip"]}>
@@ -113,6 +160,22 @@ const schema = {
     </div>
   </Section>
 </BaseLayout>
+
+<script>
+  // Product thumbnails swap the main shot; works without JS (first shot shows).
+  document.querySelectorAll<HTMLElement>("[data-shop-gallery]").forEach((card) => {
+    const main = card.querySelector<HTMLImageElement>("[data-shop-main]");
+    const thumbs = card.querySelectorAll<HTMLButtonElement>(".shop-prod__thumb");
+    thumbs.forEach((t) =>
+      t.addEventListener("click", () => {
+        if (!main) return;
+        main.src = t.dataset.src!;
+        main.alt = t.dataset.alt!;
+        thumbs.forEach((x) => x.setAttribute("aria-pressed", String(x === t)));
+      }),
+    );
+  });
+</script>
 
 <style>
   /* Hero: same shape as the postpartum pathway hero. */
@@ -183,12 +246,48 @@ const schema = {
   .shop-opt__action:empty { display: none; }
   .shop-coll__interest { margin-top: var(--space-5); }
 
+  /* Merch: product cards with real shots (cut-outs on the blush petal frame). */
+  .shop-prods__head { max-width: 60ch; margin-bottom: var(--space-6); }
+  .shop-prods__head h2 { margin-bottom: var(--space-3); }
+  .shop-prods { display: grid; gap: var(--space-7) clamp(var(--space-5), 4vw, var(--space-8)); }
+  .shop-prod { display: flex; flex-direction: column; }
+  .shop-prod__frame { aspect-ratio: 1 / 1; width: 100%; }
+  .shop-prod__frame img { width: 100%; height: 100%; object-fit: contain; padding: 6%; }
+  .shop-prod__thumbs { display: flex; gap: var(--space-2); margin-top: var(--space-3); }
+  .shop-prod__thumb {
+    width: 64px;
+    height: 64px;
+    padding: 4px;
+    border-radius: var(--radius-md);
+    background: var(--blush);
+    border: 2px solid transparent;
+    cursor: pointer;
+  }
+  .shop-prod__thumb img { width: 100%; height: 100%; object-fit: contain; }
+  .shop-prod__thumb[aria-pressed="true"] { border-color: var(--color-primary); }
+  .shop-prod__thumb:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+  .shop-prod__name { font-family: var(--font-body); font-weight: var(--weight-semibold); font-size: var(--fs-lead); margin-top: var(--space-4); }
+  .shop-prod__blurb { color: var(--text-muted); line-height: var(--lh-body); margin-top: var(--space-2); margin-bottom: var(--space-4); }
+  .shop-prod__buy {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    margin-top: auto;
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--rule);
+  }
+  .shop-prod__buy .shop-opt__price { text-align: left; }
+
   .shop-help { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-3); }
   .shop-help p { color: var(--text-muted); line-height: var(--lh-body); }
 
   @media (min-width: 640px) {
     .shop-opt { grid-template-columns: 1fr auto auto; grid-template-areas: "text price action"; }
     .shop-opt__action { min-width: 92px; }
+  }
+  @media (min-width: 760px) {
+    .shop-prods { grid-template-columns: 1fr 1fr; }
   }
   @media (min-width: 860px) {
     .shop-hero__grid { grid-template-columns: 1.1fr 0.9fr; }
