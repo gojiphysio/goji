@@ -1,6 +1,6 @@
 ---
 title: "Postpartum Physiotherapy"
-seoTitle: "Postnatal & Postpartum Physiotherapy Singapore"
+seoTitle: "Postnatal & Postpartum Physio Singapore"
 description: "Postpartum physiotherapy in Singapore: assess your recovery after birth and plan your return to movement, exercise and sport. After vaginal or Caesarean birth."
 cardTitle: "Postpartum Physiotherapy"
 cardLead: "Understand how your body is recovering after birth and get a plan for returning to movement, exercise and sport."
