@@ -81,9 +81,9 @@ export const SHOP: ShopCollection[] = [
         detail: "One pair, collect at the clinic",
         status: "buy",
         blurb:
-          "Two berries, one pair of sunglasses, and absolutely no plans to skip leg day. The Goji Gang roll deep on a stone rib-knit sock with a cocoa cuff. Go grip and the sole spells out GOJI, so even your footprints are on brand.",
+          "Two berries, one pair of sunglasses, and absolutely no plans to skip leg day. The Goji Gang roll deep on an oat rib-knit sock with a cocoa cuff. Go grip and the sole spells out GOJI, so even your footprints are on brand.",
         photos: [
-          { src: "/photos/shop/socks-gang-art.webp", alt: "A pair of Goji Gang socks: stone rib-knit with a brown cuff and two embroidered goji berries, one in sunglasses." },
+          { src: "/photos/shop/socks-gang-art.webp", alt: "A pair of Goji Gang socks: oat rib-knit with a brown cuff and two embroidered goji berries, one in sunglasses." },
           { src: "/photos/shop/socks-gang-front.webp", alt: "A Goji Gang sock from the side, showing the two embroidered berries on the cuff." },
           { src: "/photos/shop/socks-gang-sole.webp", alt: "The grip sole of a Goji Gang sock, covered in grip dots with GOJI spelt out across the middle." },
         ],
