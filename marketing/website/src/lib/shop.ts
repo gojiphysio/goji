@@ -20,8 +20,6 @@ export interface ShopVariant {
   price?: string;
   status: ShopStatus;
   slug?: CtaSlug;
-  /** A shot shown only while this variant is picked (after the shared photos). */
-  photo?: { src: string; alt: string };
 }
 
 export interface ShopOption {
@@ -70,12 +68,11 @@ export const SHOP: ShopCollection[] = [
         photos: [
           { src: "/photos/shop/socks-girl-art.webp", alt: "A pair of Goji Girl socks: cream rib-knit with a red cuff and an embroidered goji berry doing Pilates on a mat." },
           { src: "/photos/shop/socks-girl-front.webp", alt: "A Goji Girl sock from the side, showing the embroidered berry on the cuff." },
+          { src: "/photos/shop/socks-girl-sole.webp", alt: "The grip sole of a Goji Girl sock, covered in grip dots with GOJI spelt out across the middle." },
         ],
         variants: [
-          { key: "socks-girl-grip", label: "Grip sole", price: "$25", status: "buy", slug: "web-pay-socks-girl-grip",
-            photo: { src: "/photos/shop/socks-girl-sole.webp", alt: "The sole of a Goji Girl grip sock, covered in grip dots with GOJI spelt out across the middle." } },
-          { key: "socks-girl-plain", label: "Plain sole", price: "$25", status: "buy", slug: "web-pay-socks-girl-plain",
-            photo: { src: "/photos/shop/socks-girl-sole-plain.webp", alt: "The plain knit sole of a Goji Girl sock, with no grip dots." } },
+          { key: "socks-girl-grip", label: "Grip sole", price: "$25", status: "buy", slug: "web-pay-socks-girl-grip" },
+          { key: "socks-girl-plain", label: "Plain sole", price: "$25", status: "buy", slug: "web-pay-socks-girl-plain" },
         ],
       },
       {
@@ -88,12 +85,11 @@ export const SHOP: ShopCollection[] = [
         photos: [
           { src: "/photos/shop/socks-gang-art.webp", alt: "A pair of Goji Gang socks: oat rib-knit with a brown cuff and two embroidered goji berries, one in sunglasses." },
           { src: "/photos/shop/socks-gang-front.webp", alt: "A Goji Gang sock from the side, showing the two embroidered berries on the cuff." },
+          { src: "/photos/shop/socks-gang-sole.webp", alt: "The grip sole of a Goji Gang sock, covered in grip dots with GOJI spelt out across the middle." },
         ],
         variants: [
-          { key: "socks-gang-grip", label: "Grip sole", price: "$25", status: "buy", slug: "web-pay-socks-gang-grip",
-            photo: { src: "/photos/shop/socks-gang-sole.webp", alt: "The sole of a Goji Gang grip sock, covered in grip dots with GOJI spelt out across the middle." } },
-          { key: "socks-gang-plain", label: "Plain sole", price: "$25", status: "buy", slug: "web-pay-socks-gang-plain",
-            photo: { src: "/photos/shop/socks-gang-sole-plain.webp", alt: "The plain knit sole of a Goji Gang sock, with no grip dots." } },
+          { key: "socks-gang-grip", label: "Grip sole", price: "$25", status: "buy", slug: "web-pay-socks-gang-grip" },
+          { key: "socks-gang-plain", label: "Plain sole", price: "$25", status: "buy", slug: "web-pay-socks-gang-plain" },
         ],
       },
     ],

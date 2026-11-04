@@ -85,17 +85,8 @@ const schema = {
                   />
                 </div>
                 <div class="shop-prod__thumbs" role="group" aria-label={`${o.name} photos`}>
-                  {[...o.photos!.map((ph) => ({ ph, v: undefined as string | undefined })),
-                    ...(o.variants ?? []).filter((v) => v.photo).map((v) => ({ ph: v.photo!, v: v.key }))].map(({ ph, v }, k) => (
-                    <button
-                      type="button"
-                      class="shop-prod__thumb"
-                      aria-pressed={k === 0 ? "true" : "false"}
-                      data-src={ph.src}
-                      data-alt={ph.alt}
-                      data-variant={v}
-                      hidden={!!v && v !== o.variants?.[0]?.key}
-                    >
+                  {o.photos!.map((ph, k) => (
+                    <button type="button" class="shop-prod__thumb" aria-pressed={k === 0 ? "true" : "false"} data-src={ph.src} data-alt={ph.alt}>
                       <img src={ph.src} alt="" width="64" height="64" loading="lazy" decoding="async" />
                       <span class="visually-hidden">Photo {k + 1}</span>
                     </button>
@@ -188,8 +179,8 @@ const schema = {
 </BaseLayout>
 
 <script>
-  // Thumbnails swap the main shot; the sole picker swaps the price, Buy link and
-  // that variant's own shot. Without JS the first shot and first variant show.
+  // Thumbnails swap the main shot; the sole picker swaps the price and Buy link
+  // (photos stay the same). Without JS the first shot and first variant show.
   document.querySelectorAll<HTMLElement>("[data-shop-gallery]").forEach((card) => {
     const main = card.querySelector<HTMLImageElement>("[data-shop-main]");
     const thumbs = card.querySelectorAll<HTMLButtonElement>(".shop-prod__thumb");
@@ -202,12 +193,9 @@ const schema = {
     thumbs.forEach((t) => t.addEventListener("click", () => show(t)));
     card.querySelectorAll<HTMLInputElement>(".shop-prod__variant input").forEach((r) =>
       r.addEventListener("change", () => {
-        card.querySelectorAll<HTMLElement>(".shop-prod__buy[data-variant], .shop-prod__thumb[data-variant]").forEach((el) => {
+        card.querySelectorAll<HTMLElement>(".shop-prod__buy[data-variant]").forEach((el) => {
           el.hidden = el.dataset.variant !== r.value;
         });
-        const picked = card.querySelector<HTMLButtonElement>(`.shop-prod__thumb[data-variant="${r.value}"]`);
-        const current = card.querySelector<HTMLButtonElement>('.shop-prod__thumb[aria-pressed="true"]');
-        if (picked && current?.hidden) show(picked);
       }),
     );
   });
@@ -315,7 +303,7 @@ const schema = {
     border-top: 1px solid var(--rule);
   }
   .shop-prod__buy .shop-opt__price { text-align: left; }
-  .shop-prod__buy[hidden], .shop-prod__thumb[hidden] { display: none; }
+  .shop-prod__buy[hidden] { display: none; }
   .shop-prod__variants { display: flex; gap: var(--space-2); border: 0; padding: 0; margin: auto 0 var(--space-4); }
   .shop-prod__variant span {
     display: inline-block;
