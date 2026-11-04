@@ -291,6 +291,10 @@ of `npm run build`. Config in `pagefind.yml`; Cloudflare Pages needs no change.
   `TYPE_ORDER` and `typeLabel` too) before it will group correctly.
 
 ## Gotchas worth remembering
+- **Hidden inputs keep the global input width.** `base.css` styles every
+  `input` at full width, so a radio hidden with only `opacity: 0` and
+  `position: absolute` is still a page-wide box and widens the page on phones
+  (the shop's sole picker did). Give it `.visually-hidden` or an explicit 1px size.
 - **Keep the first paint unblocked.** Third-party tags (gtag/Ads, ~190 KB) load
   after `window.onload`, with only the inline `dataLayer`/`gtag()` shim in the
   head (#175); CSS is inlined (`build.inlineStylesheets: "always"`, #171). Add a
