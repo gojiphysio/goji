@@ -42,7 +42,7 @@
       "runtimeExecutable": "sh",
       "runtimeArgs": [
         "-c",
-        "set -a; . \"$HOME/.goji-shop-test.env\"; set +a; CORS_ORIGIN=http://localhost:4234 SHOP_PLATO_DOCTOR=SHOP SHOP_PLATO_DRY_RUN=${SHOP_PLATO_DRY_RUN:-1} uv run -q --with-requirements booking/requirements.txt flask --app booking.app run --port 8090"
+        "set -a; . \"$HOME/.goji-shop-test.env\"; set +a; CORS_ORIGIN=http://localhost:4234 SHOP_PLATO_DOCTOR=SHP SHOP_PLATO_DRY_RUN=${SHOP_PLATO_DRY_RUN:-1} uv run -q --with-requirements booking/requirements.txt flask --app booking.app run --port 8090"
       ],
       "cwd": "business-intelligence/scripts",
       "port": 8090

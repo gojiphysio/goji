@@ -98,7 +98,7 @@ PROVIDERS = {
     "PKN": "Kristy Ng",
     # Not a clinician: the Plato "doctor" website shop invoices are billed under
     # (booking/shop.py, SHOP_PLATO_DOCTOR), so shop sales aren't credited to anyone.
-    "SHOP": "Online Shop",
+    "SHP": "Online Shop",
 }
 DIRECTOR_ID = "PCL"
 

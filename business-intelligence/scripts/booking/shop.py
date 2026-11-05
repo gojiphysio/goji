@@ -33,6 +33,7 @@ Verified against live Plato 2026-11-05 (test invoices #1231, #1232): payment
 mode "Stripe" is accepted; `remarks` is silently dropped, `notes` is kept; and an
 unknown doctor code is NOT rejected but silently replaced with a clinician (it
 billed #1232 to PCN), so the doctor is read back and checked after every create.
+The Online Shop doctor is code SHP (#1233 kept it).
 """
 from __future__ import annotations
 
