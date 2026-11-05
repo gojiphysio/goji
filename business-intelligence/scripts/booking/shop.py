@@ -29,8 +29,10 @@ Safety switches (env):
                       revenue the sale counts as. Required for real writes.
   SHOP_PLATO_LOCATION default "SG", the clinic's only location.
 
-Verified against live Plato 2026-11-05 (test invoice #1231): payment mode
-"Stripe" is accepted; `remarks` is silently dropped, `notes` is kept.
+Verified against live Plato 2026-11-05 (test invoices #1231, #1232): payment
+mode "Stripe" is accepted; `remarks` is silently dropped, `notes` is kept; and an
+unknown doctor code is NOT rejected but silently replaced with a clinician (it
+billed #1232 to PCN), so the doctor is read back and checked after every create.
 """
 from __future__ import annotations
 
@@ -232,6 +234,24 @@ def new_patient_body(order: dict) -> dict:
             "email": order["email"]}
 
 
+def _invoice_doctor(plato, invoice_id: str) -> str | None:
+    rows = _rows(plato.get("invoice", {"invoice_id": invoice_id, "include_drafts": "true"}))
+    return rows[0].get("doctor") if rows else None
+
+
+def _check_doctor(plato, invoice_id: str, want: str) -> None:
+    """Plato swaps an unknown doctor code for a clinician without an error, which
+    would credit a shop sale to them. Correct it, or stop before taking payment."""
+    if _invoice_doctor(plato, invoice_id) == want:
+        return
+    plato.put("invoice", {"invoice_id": invoice_id, "doctor": want})
+    got = _invoice_doctor(plato, invoice_id)
+    if got != want:
+        raise ShopError(f"Plato filed invoice {invoice_id} under doctor {got!r}, not {want!r}: "
+                        f"is {want!r} a doctor code in Plato? Invoice left unpaid and unfinalised.",
+                        "plato_doctor")
+
+
 def _lock(session_id: str) -> threading.Lock:
     with _locks_guard:
         return _locks.setdefault(session_id, threading.Lock())
@@ -275,6 +295,7 @@ def fulfil(session_id: str, plato, stripe: StripeClient | None = None) -> dict:
         invoice_id = inv.get("_id") or inv.get("invoice_id") or (inv.get("data") or {}).get("_id")
         if not invoice_id:
             raise ShopError(f"Plato invoice create returned no id: {inv}", "plato")
+        _check_doctor(plato, invoice_id, body["doctor"])
         if others:
             plato.post("invoice/items_others", {"invoice_id": invoice_id, "method": "append", "items": others})
         plato.post("invoice/payment", {"invoice_id": invoice_id, **payment})

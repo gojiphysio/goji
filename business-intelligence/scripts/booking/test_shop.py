@@ -43,11 +43,15 @@ class StubStripe:
 
 
 class StubPlato:
-    def __init__(self, patients=None):
+    def __init__(self, patients=None, swap_doctor=None):
         self.patients = patients or {}
-        self.searches, self.posts = [], []
+        self.searches, self.posts, self.puts = [], [], []
+        self.doctor = None
+        self.swap_doctor = swap_doctor  # mimic Plato replacing an unknown code
 
     def get(self, path, params=None):
+        if path == "invoice":
+            return {"data": [{"doctor": self.doctor}]}
         self.searches.append(params)
         for v in params.values():
             if v in self.patients:
@@ -56,7 +60,15 @@ class StubPlato:
 
     def post(self, path, payload):
         self.posts.append((path, payload))
+        if path == "invoice":
+            self.doctor = self.swap_doctor or payload.get("doctor")
         return {"_id": "pat_new" if path == "patient" else "inv_1"}
+
+    def put(self, path, payload):
+        self.puts.append((path, payload))
+        if not self.swap_doctor:
+            self.doctor = payload.get("doctor")
+        return {"success": True}
 
 
 @pytest.fixture
@@ -149,3 +161,12 @@ def test_real_write_needs_a_doctor(live_writes, monkeypatch):
     with pytest.raises(shop.ShopError) as e:
         shop.fulfil("cs_live_abc123", plato, StubStripe(session(livemode=True)))
     assert e.value.code == "config" and plato.posts == []
+
+
+def test_swapped_doctor_stops_before_payment(live_writes):
+    plato = StubPlato({"91234567": [{"_id": "pat_real"}]}, swap_doctor="PCN")
+    with pytest.raises(shop.ShopError) as e:
+        shop.fulfil("cs_live_abc123", plato, StubStripe(session(livemode=True)))
+    assert e.value.code == "plato_doctor"
+    assert [p for p, _ in plato.posts] == ["invoice"]      # no payment, no finalise
+    assert plato.puts == [("invoice", {"invoice_id": "inv_1", "doctor": "PCL"})]

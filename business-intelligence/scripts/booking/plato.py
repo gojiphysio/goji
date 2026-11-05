@@ -349,6 +349,12 @@ class PlatoClient:
         r.raise_for_status()
         return r.json()
 
+    def put(self, path: str, payload: dict):
+        _limiter.acquire(PLATO_RATE_MAX_WAIT_S)
+        r = self.s.put(self._url(path), json=payload, timeout=self.timeout)
+        r.raise_for_status()
+        return r.json()
+
     def delete(self, path: str):
         _limiter.acquire(PLATO_RATE_MAX_WAIT_S)
         r = self.s.delete(self._url(path), timeout=self.timeout)
