@@ -368,9 +368,12 @@ const schema = {
     const main = card.querySelector<HTMLImageElement>("[data-shop-main]");
     const thumbs = card.querySelectorAll<HTMLButtonElement>(".shop-prod__thumb");
     const show = (t: HTMLButtonElement) => {
-      if (!main) return;
+      if (!main || main.getAttribute("src") === t.dataset.src) return;
       main.src = t.dataset.src!;
       main.alt = t.dataset.alt!;
+      main.classList.remove("is-swapped");
+      void main.offsetWidth; // restart the fade
+      main.classList.add("is-swapped");
       thumbs.forEach((x) => x.setAttribute("aria-pressed", String(x === t)));
     };
     thumbs.forEach((t) => t.addEventListener("click", () => show(t)));
@@ -462,6 +465,11 @@ const schema = {
   .shop-prod { display: flex; flex-direction: column; min-width: 0; }
   .shop-prod__frame { aspect-ratio: 1 / 1; width: 100%; background: var(--clay); }
   .shop-prod__frame img { width: 100%; height: 100%; object-fit: cover; }
+  /* Switching photos: a very quick fade in (the thumbnails share the files, so
+     the new shot is already cached). */
+  .shop-prod__frame img.is-swapped { animation: shot-fade 160ms ease-out; }
+  @keyframes shot-fade { from { opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .shop-prod__frame img.is-swapped { animation: none; } }
   .shop-prod__thumbs { display: flex; gap: var(--space-2); margin-top: var(--space-3); }
   .shop-prod__thumb {
     width: 64px;
