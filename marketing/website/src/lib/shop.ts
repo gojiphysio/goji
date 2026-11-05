@@ -18,7 +18,7 @@ import type { CtaSlug } from "./links.ts";
  * a preview link can be shared for review without taking real money.
  * PUBLIC_SHOP_API overrides both (local testing).
  */
-export const SHOP_SANDBOX_API = "";
+export const SHOP_SANDBOX_API = "https://goji-shop-sandbox-277737358846.asia-southeast1.run.app"; // booking/deploy_sandbox.sh
 
 export function shopBackend(): { api: string; sandbox: boolean } {
   const branch = typeof process !== "undefined" ? process.env.CF_PAGES_BRANCH : undefined;
