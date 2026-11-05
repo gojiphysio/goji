@@ -112,7 +112,7 @@
   --radius-sm: 8px;
   --radius-md: 16px;
   --radius-lg: 28px;
-  --radius-petal: 56px; /* the petal photo frame's two swept corners. Never arches. Was 160px: on a phone's 3:2 frames the sweeps nearly met and the photo read as a slit. */
+  --radius-petal: min(160px, 30%); /* the petal photo frame's two swept corners. Never arches. Scales with the frame (% is of its own width/height), full 160px on big desktop frames; a fixed 160px nearly met on small 3:2 frames and the photo read as a slit. */
   --radius-pill: 999px;
 
   /* ---- Shadow (warm and low) ---- */
