@@ -61,15 +61,15 @@
       "name": "Goji Girl Socks (Grip)",
       "description": "One pair of Goji Girl Socks with grip soles, collected at the clinic.",
       "kind": "merch",
-      "amount": 2500,
+      "amount": 2000,
       "inferred": true
     },
     {
-      "key": "socks-girl-plain",
-      "name": "Goji Girl Socks (Plain)",
-      "description": "One pair of Goji Girl Socks with plain soles, collected at the clinic.",
+      "key": "socks-girl-nongrip",
+      "name": "Goji Girl Socks (Non-grip)",
+      "description": "One pair of Goji Girl Socks with non-grip soles, collected at the clinic.",
       "kind": "merch",
-      "amount": 2500,
+      "amount": 2000,
       "inferred": true
     },
     {
@@ -77,15 +77,15 @@
       "name": "Goji Gang Socks (Grip)",
       "description": "One pair of Goji Gang Socks with grip soles, collected at the clinic.",
       "kind": "merch",
-      "amount": 2500,
+      "amount": 2000,
       "inferred": true
     },
     {
-      "key": "socks-gang-plain",
-      "name": "Goji Gang Socks (Plain)",
-      "description": "One pair of Goji Gang Socks with plain soles, collected at the clinic.",
+      "key": "socks-gang-nongrip",
+      "name": "Goji Gang Socks (Non-grip)",
+      "description": "One pair of Goji Gang Socks with non-grip soles, collected at the clinic.",
       "kind": "merch",
-      "amount": 2500,
+      "amount": 2000,
       "inferred": true
     }
   ]

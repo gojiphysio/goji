@@ -13,7 +13,7 @@ import type { CtaSlug } from "./links.ts";
 
 export type ShopStatus = "buy" | "ask" | "soon";
 
-/** A buyable version of a product card (e.g. grip or plain sole). */
+/** A buyable version of a product card (e.g. grip or non-grip sole). */
 export interface ShopVariant {
   key: string;
   label: string;
@@ -56,7 +56,7 @@ export const SHOP: ShopCollection[] = [
   {
     id: "goji-gang-merch",
     title: "Goji Gang socks",
-    lead: "Crew socks with our two favourite berries on the cuff, with a grip sole for Pilates or plain for every day. Collect them at the clinic on your next visit.",
+    lead: "Crew socks with our two favourite berries on the cuff, with a grip sole for Pilates or non-grip for every day. Collect them at the clinic on your next visit.",
     options: [
       {
         key: "socks-girl",
@@ -64,15 +64,15 @@ export const SHOP: ShopCollection[] = [
         detail: "One pair, collect at the clinic",
         status: "buy",
         blurb:
-          "Goji Girl has been holding the same side-lying leg lift since the day we opened, and she isn't about to stop for you. She lives on a cream rib-knit crew sock with a red cuff. Go grip to stay put on the reformer while she shows off, or plain for lounging about.",
+          "Goji Girl has been holding the same side-lying leg lift since the day we opened, and she isn't about to stop for you. She lives on a cream rib-knit crew sock with a red cuff. Go grip to stay put on the reformer while she shows off, or non-grip for lounging about.",
         photos: [
           { src: "/photos/shop/socks-girl-art.webp", alt: "A pair of Goji Girl socks: cream rib-knit with a red cuff and an embroidered goji berry doing Pilates on a mat." },
           { src: "/photos/shop/socks-girl-front.webp", alt: "A Goji Girl sock from the side, showing the embroidered berry on the cuff." },
           { src: "/photos/shop/socks-girl-sole.webp", alt: "The grip sole of a Goji Girl sock, covered in grip dots with GOJI spelt out across the middle." },
         ],
         variants: [
-          { key: "socks-girl-grip", label: "Grip sole", price: "$25", status: "buy", slug: "web-pay-socks-girl-grip" },
-          { key: "socks-girl-plain", label: "Plain sole", price: "$25", status: "buy", slug: "web-pay-socks-girl-plain" },
+          { key: "socks-girl-grip", label: "Grip sole", price: "$20", status: "buy", slug: "web-pay-socks-girl-grip" },
+          { key: "socks-girl-nongrip", label: "Non-grip sole", price: "$20", status: "buy", slug: "web-pay-socks-girl-nongrip" },
         ],
       },
       {
@@ -88,8 +88,8 @@ export const SHOP: ShopCollection[] = [
           { src: "/photos/shop/socks-gang-sole.webp", alt: "The grip sole of a Goji Gang sock, covered in grip dots with GOJI spelt out across the middle." },
         ],
         variants: [
-          { key: "socks-gang-grip", label: "Grip sole", price: "$25", status: "buy", slug: "web-pay-socks-gang-grip" },
-          { key: "socks-gang-plain", label: "Plain sole", price: "$25", status: "buy", slug: "web-pay-socks-gang-plain" },
+          { key: "socks-gang-grip", label: "Grip sole", price: "$20", status: "buy", slug: "web-pay-socks-gang-grip" },
+          { key: "socks-gang-nongrip", label: "Non-grip sole", price: "$20", status: "buy", slug: "web-pay-socks-gang-nongrip" },
         ],
       },
     ],
