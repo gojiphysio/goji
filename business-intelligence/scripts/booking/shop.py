@@ -24,6 +24,13 @@ Safety switches (env):
   SHOP_TEST_PATIENT   name of the Plato patient every test-mode (livemode=false)
                       order is billed to, whatever the buyer typed. Default
                       "ZZ Goji Shop Test".
+  SHOP_PLATO_DOCTOR   Plato requires a doctor code on every invoice ("Invalid
+                      payload" without one, verified 2026-11-05); it decides whose
+                      revenue the sale counts as. Required for real writes.
+  SHOP_PLATO_LOCATION default "SG", the clinic's only location.
+
+Verified against live Plato 2026-11-05 (test invoice #1231): payment mode
+"Stripe" is accepted; `remarks` is silently dropped, `notes` is kept.
 """
 from __future__ import annotations
 
@@ -158,21 +165,21 @@ def invoice_payload(order: dict, patient_id: str) -> tuple[dict, list[dict], dic
                "selling_price": round(i["amount"] / i["qty"], 2)}
               for i in order["items"] if not i["plato_item"]]
     tag = "" if order["livemode"] else " (Stripe TEST mode)"
-    remarks = f"Website shop order {order['session_id']}{tag}"
+    notes = f"Website shop order {order['session_id']}{tag}"
     if order["attendee"]:
-        remarks += f". Attending/recipient: {order['attendee']}"
+        notes += f". Attending/recipient: {order['attendee']}"
     body = {
         "patient_id": patient_id,
         "date": datetime.now(SGT).strftime("%Y-%m-%d"),
         "invoice_notes": "Paid online (gojiphysio.com/shop)",
-        "remarks": remarks,
+        "notes": notes,
+        "location": os.environ.get("SHOP_PLATO_LOCATION", "SG"),
         "items": mapped,
     }
     payment = {"mode": PAYMENT_MODE, "amount": order["total"],
                "ref": order["payment_intent"] or order["session_id"]}
-    for k, env in (("doctor", "SHOP_PLATO_DOCTOR"), ("location", "SHOP_PLATO_LOCATION")):
-        if os.environ.get(env):
-            body[k] = os.environ[env]
+    if os.environ.get("SHOP_PLATO_DOCTOR"):
+        body["doctor"] = os.environ["SHOP_PLATO_DOCTOR"]
     return body, others, payment
 
 
@@ -256,6 +263,8 @@ def fulfil(session_id: str, plato, stripe: StripeClient | None = None) -> dict:
             log.info("shop DRY RUN %s: %s", session_id, plan)
             return {**base, "status": "dry_run", "plan": plan}
 
+        if not os.environ.get("SHOP_PLATO_DOCTOR"):
+            raise ShopError("SHOP_PLATO_DOCTOR not set (Plato rejects invoices without one)", "config")
         if not patient_id:
             created = plato.post("patient", new_patient_body(order))
             patient_id = created.get("_id") or (created.get("data") or {}).get("_id")

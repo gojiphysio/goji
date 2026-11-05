@@ -62,6 +62,7 @@ class StubPlato:
 @pytest.fixture
 def live_writes(monkeypatch):
     monkeypatch.setenv("SHOP_PLATO_DRY_RUN", "0")
+    monkeypatch.setenv("SHOP_PLATO_DOCTOR", "PCL")
 
 
 def test_dry_run_is_the_default_and_writes_nothing(monkeypatch):
@@ -79,7 +80,7 @@ def test_test_mode_always_bills_the_test_patient(live_writes):
     assert out["status"] == "invoiced"
     inv = dict(plato.posts)["invoice"]
     assert inv["patient_id"] == "pat_test"          # not Jane, even though her phone matches
-    assert "TEST mode" in inv["remarks"]
+    assert "TEST mode" in inv["notes"] and inv["location"] == "SG" and inv["doctor"] == "PCL"
 
 
 def test_live_matches_phone_and_writes_invoice_payment_finalize(live_writes):
@@ -140,3 +141,11 @@ def test_webhook_signature():
     assert shop.verify_webhook(payload, f"t={t},v1={sig}", "whsec_x", now=t)
     assert not shop.verify_webhook(payload, f"t={t},v1={sig}", "whsec_other", now=t)
     assert not shop.verify_webhook(payload, f"t={t},v1={sig}", "whsec_x", now=t + 3600)
+
+
+def test_real_write_needs_a_doctor(live_writes, monkeypatch):
+    monkeypatch.delenv("SHOP_PLATO_DOCTOR")
+    plato = StubPlato({"91234567": [{"_id": "pat_real"}]})
+    with pytest.raises(shop.ShopError) as e:
+        shop.fulfil("cs_live_abc123", plato, StubStripe(session(livemode=True)))
+    assert e.value.code == "config" and plato.posts == []
