@@ -10,6 +10,7 @@ CORS. Endpoints:
   POST /api/book                                          -> create the booking
   POST /api/track                                         -> funnel event (fire-and-forget)
   POST /internal/refresh-snapshot                         -> re-page Plato (Cloud Scheduler, 5 min)
+  POST /api/shop/checkout  {items:[{key,qty,amount?}]}    -> {url} of a Stripe Checkout for the cart
   POST /api/shop/confirm   {session_id}                   -> paid Stripe checkout -> Plato invoice
   POST /api/stripe/webhook                                -> same, from Stripe (signed)
   GET  /healthcheck
@@ -38,6 +39,9 @@ log = logging.getLogger("goji-booking")
 app = Flask(__name__)
 
 CORS_ORIGIN = os.environ.get("CORS_ORIGIN", "https://www.gojiphysio.com")
+# Comma-separated; the request's Origin is echoed back when it is one of these
+# (the shop-test service also serves the Cloudflare branch preview).
+CORS_ORIGINS = [o.strip().rstrip("/") for o in CORS_ORIGIN.split(",") if o.strip()]
 PROJECT = os.environ.get("GCP_PROJECT", "goji-bi")
 FUNNEL_TABLE = f"{PROJECT}.marts.booking_funnel_events"
 WEB_EVENT_TABLE = f"{PROJECT}.marts.web_session_events"
@@ -118,7 +122,9 @@ def bq():
 
 @app.after_request
 def _cors(resp):
-    resp.headers["Access-Control-Allow-Origin"] = CORS_ORIGIN
+    origin = (request.headers.get("Origin") or "").rstrip("/")
+    resp.headers["Access-Control-Allow-Origin"] = origin if origin in CORS_ORIGINS else CORS_ORIGINS[0]
+    resp.headers["Vary"] = "Origin"
     resp.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
     resp.headers["Access-Control-Allow-Headers"] = "Content-Type"
     resp.headers["Access-Control-Max-Age"] = "86400"
@@ -429,6 +435,29 @@ def _shop_fulfil(session_id: str):
     except Exception:
         log.exception("shop fulfil %s failed", session_id)
         return {"ok": False, "status": "error", "code": "plato"}, 502
+
+
+@app.route("/api/shop/checkout", methods=["POST", "OPTIONS"])
+def shop_checkout():
+    """Cart -> Stripe Checkout URL. Prices come from Stripe; the browser only
+    sends keys, quantities and a voucher amount. Returns to the calling site."""
+    if request.method == "OPTIONS":
+        return "", 204
+    origin = (request.headers.get("Origin") or "").rstrip("/")
+    if origin not in CORS_ORIGINS:
+        return jsonify({"ok": False, "code": "origin"}), 403
+    data = request.get_json(silent=True) or {}
+    try:
+        url = shop.create_checkout(list(data.get("items") or []), origin, data.get("ref"))
+    except shop.ShopError as e:
+        status = 400 if e.code == "bad_request" else 502
+        if status == 502:
+            log.error("shop checkout failed: %s", e)
+        return jsonify({"ok": False, "code": e.code, "error": str(e) if status == 400 else None}), status
+    except Exception:
+        log.exception("shop checkout failed")
+        return jsonify({"ok": False, "code": "stripe"}), 502
+    return jsonify({"ok": True, "url": url})
 
 
 @app.route("/api/shop/confirm", methods=["POST", "OPTIONS"])

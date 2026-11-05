@@ -291,6 +291,12 @@ of `npm run build`. Config in `pagefind.yml`; Cloudflare Pages needs no change.
   `TYPE_ORDER` and `typeLabel` too) before it will group correctly.
 
 ## Gotchas worth remembering
+- **Scoped styles don't reach script-built markup.** Astro scopes a page's
+  `<style>` with `data-astro-cid` attributes, which elements created at runtime
+  (`innerHTML`, `createElement`) never get. Style them as
+  `.parent :global(.child)` (the shop cart lines). Likewise `Button` styles are
+  scoped to `Button.astro`: use `<Button as="button">` for in-page actions rather
+  than a bare `<button class="btn">`.
 - **Hidden inputs keep the global input width.** `base.css` styles every
   `input` at full width, so a radio hidden with only `opacity: 0` and
   `position: absolute` is still a page-wide box and widens the page on phones

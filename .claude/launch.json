@@ -52,7 +52,7 @@
       "runtimeExecutable": "sh",
       "runtimeArgs": [
         "-c",
-        "set -a; . \"$HOME/.goji-shop-test.env\"; set +a; PUBLIC_BOOKING_API=http://localhost:8090 npm run dev -- --port 4234"
+        "set -a; . \"$HOME/.goji-shop-test.env\"; set +a; PUBLIC_SHOP_API=http://localhost:8090 PUBLIC_SHOP_SANDBOX=1 npm run dev -- --port 4234"
       ],
       "cwd": "marketing/website",
       "port": 4234

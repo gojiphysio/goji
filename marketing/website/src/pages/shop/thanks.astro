@@ -11,6 +11,9 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import Section from "../../components/Section.astro";
 import Button from "../../components/Button.astro";
 import { CTA } from "../../lib/links.ts";
+import { shopBackend } from "../../lib/shop.ts";
+
+const { api } = shopBackend();
 ---
 
 <BaseLayout
@@ -22,21 +25,23 @@ import { CTA } from "../../lib/links.ts";
   <Section tone="linen" narrow>
     <h1>Thank you</h1>
     <p class="thanks">
-      Your payment went through and Stripe has emailed your receipt. We'll
-      WhatsApp you within one working day to book your first session or send
-      your voucher code.
+      Your payment went through. We'll WhatsApp you within one working day to
+      book your first session, send your voucher code or arrange collection.
     </p>
     <p class="thanks">If you'd like to get started sooner, message us now.</p>
     <Button slug={CTA.whatsapp.slug} variant="whatsapp">{CTA.whatsapp.label}</Button>
-    <p class="thanks thanks--ref" data-order-ref hidden></p>
+    <p class="thanks thanks--ref" data-order-ref data-api={api} hidden></p>
   </Section>
 </BaseLayout>
 
 <script>
-  const API = import.meta.env.PUBLIC_BOOKING_API as string | undefined;
+  const API = document.querySelector<HTMLElement>("[data-order-ref]")?.dataset.api;
   const sid = new URLSearchParams(location.search).get("session_id");
+  if (sid) {
+    try { localStorage.removeItem("goji_cart"); } catch {} // paid: empty the cart
+  }
   if (API && sid) {
-    fetch(`${API.replace(/\/$/, "")}/api/shop/confirm`, {
+    fetch(`${API}/api/shop/confirm`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ session_id: sid }),

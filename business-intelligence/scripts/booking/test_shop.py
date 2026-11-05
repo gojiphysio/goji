@@ -170,3 +170,46 @@ def test_swapped_doctor_stops_before_payment(live_writes):
     assert e.value.code == "plato_doctor"
     assert [p for p, _ in plato.posts] == ["invoice"]      # no payment, no finalise
     assert plato.puts == [("invoice", {"invoice_id": "inv_1", "doctor": "PCL"})]
+
+
+PRICES = {
+    "socks-girl-grip": {"price": "price_sock", "amount": 2000, "product": "goji_socks_girl_grip", "name": "Socks"},
+    "pp-1to1-5": {"price": "price_pp5", "amount": 66900, "product": "goji_pp_1to1_5", "name": "PP"},
+    "gift-voucher": {"price": None, "amount": None, "product": "goji_gift_voucher", "name": "Voucher"},
+}
+
+
+def _p(params):
+    return dict(params)
+
+
+def test_cart_uses_stripe_prices_not_browser_amounts():
+    params = _p(shop.checkout_params(
+        [{"key": "socks-girl-grip", "qty": 2, "amount": 1}, {"key": "pp-1to1-5", "qty": 1}],
+        PRICES, "https://www.gojiphysio.com", "visitor_1"))
+    assert params["line_items[0][price]"] == "price_sock" and params["line_items[0][quantity]"] == "2"
+    assert "line_items[0][price_data][unit_amount]" not in params
+    assert params["line_items[1][price]"] == "price_pp5"
+    assert params["success_url"] == "https://www.gojiphysio.com/shop/thanks/?session_id={CHECKOUT_SESSION_ID}"
+    assert params["custom_fields[0][key]"] == "attendee" and params["client_reference_id"] == "visitor_1"
+
+
+def test_cart_voucher_amount_bounded():
+    params = _p(shop.checkout_params([{"key": "gift-voucher", "qty": 1, "amount": 150}], PRICES, "https://x"))
+    assert params["line_items[0][price_data][unit_amount]"] == "15000"
+    assert params["custom_fields[0][key]"] == "recipient"
+    for bad in (10, 5000):
+        with pytest.raises(shop.ShopError):
+            shop.checkout_params([{"key": "gift-voucher", "amount": bad}], PRICES, "https://x")
+
+
+@pytest.mark.parametrize("cart", [[], [{"key": "nope"}], [{"key": "pp-1to1-5", "qty": 11}],
+                                  [{"key": "pp-1to1-5", "qty": 0}]])
+def test_cart_rejects_bad_input(cart):
+    with pytest.raises(shop.ShopError):
+        shop.checkout_params(cart, PRICES, "https://x")
+
+
+def test_merch_only_cart_asks_nothing_extra():
+    params = _p(shop.checkout_params([{"key": "socks-girl-grip", "qty": 1}], PRICES, "https://x"))
+    assert not any(k.startswith("custom_fields") for k in params)

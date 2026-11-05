@@ -1,8 +1,11 @@
 ---
 /**
  * /shop — packages, gift vouchers and merch, as curated collections
- * (catalogue: lib/shop.ts). A `buy` option is a tracked `web-pay-*` go-link to
- * the item's Stripe Payment Link; `ask` and `soon` options route to WhatsApp.
+ * (catalogue: lib/shop.ts). A `buy` option goes in the cart (localStorage
+ * `goji_cart`); Checkout posts the cart to the booking service, which prices it
+ * from Stripe and returns a Stripe Checkout URL. `ask` and `soon` options route
+ * to WhatsApp. (The per-item `web-pay-*` Payment Links still exist for sharing a
+ * single item elsewhere, e.g. Instagram.)
  * Packages of existing services, physio-containing ones included, are allowed
  * under the AHPC floor in marketing/strategy/03-compliance-guardrails.md: plain
  * prices, no outcome claims, no pressure framing. Deliberately not a product
@@ -15,13 +18,9 @@ import Section from "../../components/Section.astro";
 import Button from "../../components/Button.astro";
 import PetalPhoto from "../../components/watercolor/PetalPhoto.astro";
 import Bloom from "../../components/watercolor/Bloom.astro";
-import { SHOP } from "../../lib/shop.ts";
+import { SHOP, VOUCHER_AMOUNTS, priceCents, shopBackend } from "../../lib/shop.ts";
 
-// Local checkout testing only: PUBLIC_SHOP_TEST_LINKS='{"socks-girl-grip":"https://buy.stripe.com/test_..."}'
-// sends Buy straight to Stripe test-mode links instead of the live go-links.
-// Never set in the Cloudflare build.
-const TEST_LINKS: Record<string, string> = JSON.parse(import.meta.env.PUBLIC_SHOP_TEST_LINKS || "{}");
-const buyHref = (key: string) => TEST_LINKS[key];
+const { api, sandbox } = shopBackend();
 
 const buyable = SHOP.flatMap((c) =>
   c.options.flatMap((o) =>
@@ -37,7 +36,7 @@ const schema = {
     "@type": "Offer",
     name: `${c.title}: ${o.name}`,
     priceCurrency: "SGD",
-    ...(o.price?.startsWith("$") ? { price: o.price.replace(/[$,]/g, "") } : {}),
+    ...(priceCents(o.price) ? { price: String(priceCents(o.price)! / 100) } : {}),
     url: `https://www.gojiphysio.com/shop/#${c.id}`,
   })),
 };
@@ -53,9 +52,9 @@ const schema = {
       <div class="shop-hero__text">
         <h1>Shop</h1>
         <p class="shop-hero__lead">
-          Packages, courses, gift vouchers and a little Goji merch. Pay online by
-          card or PayNow, and we'll WhatsApp you within one working day to
-          arrange your first session.
+          Pilates sessions and packs, gift vouchers and a little Goji merch. Pay
+          online by card or PayNow, and we'll WhatsApp you within one working day
+          to arrange your first session.
         </p>
         <nav class="shop-jump" aria-label="Shop collections">
           {SHOP.map((c) => <a href={`#${c.id}`}>{c.title}</a>)}
@@ -117,7 +116,10 @@ const schema = {
                       <p class="shop-opt__price">{v.price ?? "Coming soon"}</p>
                       {o.detail && <p class="shop-opt__detail">{o.detail}</p>}
                     </div>
-                    {v.status === "buy" && v.slug && (buyHref(v.key) ? <Button href={buyHref(v.key)}>Buy</Button> : <Button slug={v.slug}>Buy</Button>)}
+                    {v.status === "buy" && (
+                      <Button as="button" data-add={v.key} data-name={o.variants ? `${o.name}, ${v.label}` : o.name}
+                        data-cents={priceCents(v.price)}>Add to cart</Button>
+                    )}
                     {v.status !== "buy" && <Button slug="web-wa" variant="secondary">Ask us</Button>}
                   </div>
                 ))}
@@ -144,18 +146,45 @@ const schema = {
             <h2>{c.title}</h2>
             <p class="shop-coll__lead">{c.lead}</p>
             {c.note && <p class="shop-coll__note">{c.note}</p>}
+            {c.groups && (
+              <div class="shop-group" data-group-switch>
+                <fieldset class="shop-prod__variants shop-group__pick">
+                  <legend class="visually-hidden">{c.title}: session type</legend>
+                  {c.groups.map((g, k) => (
+                    <label class="shop-prod__variant">
+                      <input type="radio" name={`${c.id}-group`} value={g.id} checked={k === 0} />
+                      <span>{g.label}</span>
+                    </label>
+                  ))}
+                </fieldset>
+                {c.groups.map((g, k) => g.hint && <p class="shop-group__hint" data-group={g.id} hidden={k > 0}>{g.hint}</p>)}
+              </div>
+            )}
             <ul class="shop-opts">
               {c.options.map((o) => (
-                <li class="shop-opt">
+                <li class="shop-opt" data-group={o.group} hidden={!!o.group && o.group !== c.groups?.[0]?.id}>
                   <div class="shop-opt__text">
                     <h3 class="shop-opt__name">{o.name}</h3>
                     {o.detail && <p class="shop-opt__detail">{o.detail}</p>}
                   </div>
-                  <p class:list={["shop-opt__price", !o.price && "shop-opt__price--muted"]}>
-                    {o.price ?? (o.status === "ask" ? "Price on request" : "Coming soon")}
-                  </p>
+                  {o.key !== "gift-voucher" && (
+                    <p class:list={["shop-opt__price", !o.price && "shop-opt__price--muted"]}>
+                      {o.price ?? (o.status === "ask" ? "Price on request" : "Coming soon")}
+                    </p>
+                  )}
                   <div class="shop-opt__action">
-                    {o.status === "buy" && o.slug && (buyHref(o.key) ? <Button href={buyHref(o.key)}>Buy</Button> : <Button slug={o.slug}>Buy</Button>)}
+                    {o.status === "buy" && o.key === "gift-voucher" && (
+                      <div class="shop-voucher">
+                        <label class="visually-hidden" for="voucher-amount">Voucher amount</label>
+                        <select id="voucher-amount" class="shop-voucher__amount" data-voucher-amount>
+                          {VOUCHER_AMOUNTS.map((a) => <option value={a} selected={a === 100}>${a}</option>)}
+                        </select>
+                        <Button as="button" data-add={o.key} data-name={o.name} data-voucher>Add to cart</Button>
+                      </div>
+                    )}
+                    {o.status === "buy" && o.key !== "gift-voucher" && (
+                      <Button as="button" data-add={o.key} data-name={o.cartName ?? o.name} data-cents={priceCents(o.price)}>Add to cart</Button>
+                    )}
                     {o.status === "ask" && <Button slug="web-wa" variant="secondary">Ask us</Button>}
                   </div>
                 </li>
@@ -172,6 +201,35 @@ const schema = {
     );
   })}
 
+  <div class="cart-bar" data-cart-bar hidden>
+    <div class="container cart-bar__inner">
+      <p class="cart-bar__summary"><span data-cart-count></span> · <strong data-cart-total></strong></p>
+      <Button as="button" data-cart-open>View cart</Button>
+    </div>
+  </div>
+
+  <dialog class="cart" data-cart data-api={api} aria-labelledby="cart-title">
+    <div class="cart__head">
+      <h2 id="cart-title" class="cart__title">Your cart</h2>
+      <button type="button" class="cart__close" data-cart-close aria-label="Close cart">×</button>
+    </div>
+    {sandbox && (
+      <p class="cart__sandbox">
+        Test shop: no real money moves. Pay with card 4242 4242 4242 4242, any future date and any CVC.
+      </p>
+    )}
+    <ul class="cart__lines" data-cart-lines></ul>
+    <p class="cart__empty" data-cart-empty>Your cart is empty.</p>
+    <div class="cart__foot">
+      <p class="cart__total"><span>Total</span> <strong data-cart-total></strong></p>
+      <p class="cart__note">Pay by card or PayNow. Socks are collected at the clinic.</p>
+      <p class="cart__error" data-cart-error hidden>
+        Checkout didn't open. Please try again, or message us on WhatsApp and we'll sort it out.
+      </p>
+      <Button as="button" size="lg" class="cart__checkout" data-cart-checkout>Checkout</Button>
+    </div>
+  </dialog>
+
   <Section tone="linen" narrow>
     <div class="shop-help">
       <h2>Not sure which to choose?</h2>
@@ -185,6 +243,112 @@ const schema = {
 </BaseLayout>
 
 <script>
+  // --- Cart: a list of {key, name, cents, qty, amount?} in localStorage. Only
+  // key/qty/amount go to the server, which prices the order from Stripe.
+  type Line = { key: string; name: string; cents: number; qty: number; amount?: number };
+  const STORE = "goji_cart";
+  const dlg = document.querySelector<HTMLDialogElement>("[data-cart]")!;
+  const bar = document.querySelector<HTMLElement>("[data-cart-bar]")!;
+  const money = (c: number) => `$${(c / 100).toLocaleString("en-SG", { minimumFractionDigits: c % 100 ? 2 : 0 })}`;
+  const load = (): Line[] => {
+    try { return JSON.parse(localStorage.getItem(STORE) || "[]"); } catch { return []; }
+  };
+  let cart: Line[] = load();
+  const save = () => {
+    try { localStorage.setItem(STORE, JSON.stringify(cart)); } catch {}
+    render();
+  };
+  const same = (a: Line, key: string, amount?: number) => a.key === key && a.amount === amount;
+
+  function render() {
+    const count = cart.reduce((n, l) => n + l.qty, 0);
+    const total = cart.reduce((n, l) => n + l.cents * l.qty, 0);
+    bar.hidden = count === 0;
+    document.querySelectorAll("[data-cart-count]").forEach((el) => (el.textContent = `${count} item${count === 1 ? "" : "s"}`));
+    document.querySelectorAll("[data-cart-total]").forEach((el) => (el.textContent = money(total)));
+    dlg.querySelector<HTMLElement>("[data-cart-empty]")!.hidden = count > 0;
+    dlg.querySelector<HTMLElement>(".cart__foot")!.hidden = count === 0;
+    const ul = dlg.querySelector("[data-cart-lines]")!;
+    ul.innerHTML = "";
+    cart.forEach((l, i) => {
+      const li = document.createElement("li");
+      li.className = "cart__line";
+      li.innerHTML = `
+        <div class="cart__item"><p class="cart__name"></p><p class="cart__unit"></p></div>
+        <div class="cart__qty" role="group">
+          <button type="button" data-dec aria-label="One fewer">−</button>
+          <span aria-live="polite"></span>
+          <button type="button" data-inc aria-label="One more">+</button>
+        </div>
+        <p class="cart__sum"></p>
+        <button type="button" class="cart__remove" data-remove>Remove</button>`;
+      li.querySelector(".cart__name")!.textContent = l.amount ? `${l.name} (${money(l.cents)})` : l.name;
+      li.querySelector(".cart__unit")!.textContent = `${money(l.cents)} each`;
+      li.querySelector(".cart__qty span")!.textContent = String(l.qty);
+      li.querySelector(".cart__sum")!.textContent = money(l.cents * l.qty);
+      li.querySelector("[data-dec]")!.addEventListener("click", () => { l.qty > 1 ? l.qty-- : cart.splice(i, 1); save(); });
+      li.querySelector("[data-inc]")!.addEventListener("click", () => { if (l.qty < 10) l.qty++; save(); });
+      li.querySelector("[data-remove]")!.addEventListener("click", () => { cart.splice(i, 1); save(); });
+      ul.appendChild(li);
+    });
+  }
+
+  document.querySelectorAll<HTMLButtonElement>("[data-add]").forEach((btn) =>
+    btn.addEventListener("click", () => {
+      const key = btn.dataset.add!;
+      let amount: number | undefined;
+      let cents = Number(btn.dataset.cents);
+      if (btn.hasAttribute("data-voucher")) {
+        amount = Number(btn.closest(".shop-voucher")?.querySelector<HTMLSelectElement>("[data-voucher-amount]")?.value || 100);
+        cents = amount * 100;
+      }
+      if (!cents) return;
+      const hit = cart.find((l) => same(l, key, amount));
+      if (hit) hit.qty = Math.min(10, hit.qty + 1);
+      else cart.push({ key, name: btn.dataset.name || key, cents, qty: 1, amount });
+      save();
+      dlg.showModal();
+    }),
+  );
+  document.querySelector("[data-cart-open]")?.addEventListener("click", () => dlg.showModal());
+  dlg.querySelector("[data-cart-close]")?.addEventListener("click", () => dlg.close());
+  dlg.addEventListener("click", (e) => { if (e.target === dlg) dlg.close(); }); // backdrop
+
+  const checkout = dlg.querySelector<HTMLButtonElement>("[data-cart-checkout]")!;
+  checkout.addEventListener("click", async () => {
+    const err = dlg.querySelector<HTMLElement>("[data-cart-error]")!;
+    err.hidden = true;
+    checkout.disabled = true;
+    try {
+      let ref: string | undefined;
+      try { ref = localStorage.getItem("goji_vid") || undefined; } catch {}
+      const r = await fetch(`${dlg.dataset.api}/api/shop/checkout`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ items: cart.map(({ key, qty, amount }) => ({ key, qty, amount })), ref }),
+      });
+      const d = await r.json();
+      if (!r.ok || !d.url) throw new Error(d.code || "checkout");
+      location.href = d.url;
+    } catch {
+      err.hidden = false;
+      checkout.disabled = false;
+    }
+  });
+  render();
+
+  // 1:1 / 2:1 switch: show that group's price rows (and its hint).
+  document.querySelectorAll<HTMLElement>("[data-group-switch]").forEach((sw) => {
+    const coll = sw.closest("section")!;
+    sw.querySelectorAll<HTMLInputElement>("input").forEach((r) =>
+      r.addEventListener("change", () => {
+        coll.querySelectorAll<HTMLElement>("[data-group]").forEach((el) => {
+          if (el.dataset.group) el.hidden = el.dataset.group !== r.value;
+        });
+      }),
+    );
+  });
+
   // Thumbnails swap the main shot; the sole picker swaps the price and Buy link
   // (photos stay the same). Without JS the first shot and first variant show.
   document.querySelectorAll<HTMLElement>("[data-shop-gallery]").forEach((card) => {
@@ -258,19 +422,20 @@ const schema = {
 
   /* Options: a quiet price list on the page ground, not cards. */
   .shop-opts { list-style: none; padding: 0; margin-top: var(--space-5); border-top: 1px solid var(--rule); }
+  /* Phone: name over price on the left, Add to cart beside them. */
   .shop-opt {
     display: grid;
     grid-template-columns: 1fr auto;
-    grid-template-areas: "text price" "text action";
-    gap: var(--space-2) var(--space-4);
+    grid-template-areas: "text action" "price action";
+    gap: 2px var(--space-4);
     align-items: center;
-    padding-block: var(--space-4);
+    padding-block: var(--space-3);
     border-bottom: 1px solid var(--rule);
   }
   .shop-opt__text { grid-area: text; }
   .shop-opt__name { font-family: var(--font-body); font-weight: var(--weight-semibold); font-size: var(--fs-body); }
   .shop-opt__detail { color: var(--text-muted); font-size: var(--fs-small); margin-top: 2px; }
-  .shop-opt__price { grid-area: price; font-family: var(--font-body); font-weight: var(--weight-semibold); font-size: var(--fs-lead); text-align: right; white-space: nowrap; }
+  .shop-opt__price { grid-area: price; margin: 0; font-family: var(--font-body); font-weight: var(--weight-semibold); font-size: var(--fs-lead); white-space: nowrap; }
   .shop-opt__price--muted { font-size: var(--fs-small); font-weight: var(--weight-medium); color: var(--text-muted); }
   .shop-opt__action { grid-area: action; display: flex; justify-content: flex-end; }
   .shop-opt__action:empty { display: none; }
@@ -328,11 +493,105 @@ const schema = {
   .shop-prod__variant input:checked + span { border-color: var(--color-primary); background: var(--blush); color: var(--color-primary); }
   .shop-prod__variant input:focus-visible + span { outline: 2px solid var(--color-primary); outline-offset: 2px; }
 
+  /* 1:1 / 2:1 switch above a grouped price list. */
+  .shop-group { margin-top: var(--space-5); }
+  .shop-group :global(.shop-group__pick) { margin: 0; }
+  .shop-group__hint { margin: var(--space-2) 0 0; font-size: var(--fs-small); color: var(--text-muted); }
+  .shop-group__hint[hidden], .shop-opt[hidden] { display: none; }
+  .shop-group + .shop-opts { margin-top: var(--space-4); }
+
+  /* Voucher: amount picker beside Add to cart. */
+  .shop-voucher { display: flex; gap: var(--space-2); align-items: center; }
+  /* Phone: the voucher's picker + button get their own line under the name. */
+  .shop-opt:has(.shop-voucher) { grid-template-columns: 1fr; grid-template-areas: "text" "action"; }
+  .shop-opt:has(.shop-voucher) .shop-opt__action { justify-content: flex-start; margin-top: var(--space-2); }
+  .shop-voucher__amount {
+    width: auto;
+    padding: 10px 12px;
+    border-radius: var(--radius-pill);
+    font-weight: var(--weight-semibold);
+  }
+
+  /* Cart: a bar pinned to the bottom of the shop while it has items. */
+  .cart-bar {
+    position: sticky;
+    bottom: 0;
+    z-index: 20;
+    background: var(--bg-content);
+    border-top: 1px solid var(--color-border);
+    box-shadow: 0 -6px 20px rgb(60 30 31 / 0.08);
+    padding-block: var(--space-3);
+  }
+  .cart-bar[hidden] { display: none; }
+  .cart-bar__inner { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); }
+  .cart-bar__summary { margin: 0; color: var(--text-default); }
+
+  .cart {
+    margin: auto;
+    width: min(100% - 32px, 520px);
+    max-height: min(100dvh - 32px, 760px);
+    padding: var(--space-5);
+    border: none;
+    border-radius: var(--radius-lg);
+    background: var(--bg-page);
+    color: var(--text-default);
+    box-shadow: var(--shadow-lg, 0 20px 60px rgb(60 30 31 / 0.25));
+  }
+  .cart::backdrop { background: rgb(60 30 31 / 0.45); }
+  .cart__head { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-3); }
+  .cart__title { margin: 0; }
+  .cart__close { background: none; border: 0; font-size: 1.75rem; line-height: 1; cursor: pointer; color: var(--text-muted); padding: 4px 8px; }
+  .cart__sandbox {
+    background: var(--blush);
+    border-radius: var(--radius-md);
+    padding: var(--space-3);
+    font-size: var(--fs-small);
+    margin-bottom: var(--space-3);
+  }
+  .cart__lines { list-style: none; padding: 0; margin: 0; border-top: 1px solid var(--rule); }
+  .cart :global(.cart__line) {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    grid-template-areas: "item qty sum" "item remove remove";
+    gap: var(--space-1) var(--space-3);
+    align-items: center;
+    padding-block: var(--space-3);
+    border-bottom: 1px solid var(--rule);
+  }
+  .cart :global(.cart__item) { grid-area: item; min-width: 0; }
+  .cart :global(.cart__name) { margin: 0; font-weight: var(--weight-semibold); }
+  .cart :global(.cart__unit) { margin: 2px 0 0; font-size: var(--fs-small); color: var(--text-muted); }
+  .cart :global(.cart__qty) { grid-area: qty; display: inline-flex; align-items: center; gap: var(--space-2); }
+  .cart :global(.cart__qty button) {
+    width: 32px; height: 32px; border-radius: 50%;
+    border: 1px solid var(--color-border-strong); background: var(--bg-content);
+    font-size: 1.1rem; line-height: 1; cursor: pointer; color: var(--text-default);
+  }
+  .cart :global(.cart__qty span) { min-width: 1.5ch; text-align: center; font-weight: var(--weight-semibold); }
+  .cart :global(.cart__sum) { grid-area: sum; margin: 0; font-weight: var(--weight-semibold); text-align: right; min-width: 64px; }
+  .cart :global(.cart__remove) {
+    grid-area: remove; justify-self: end; background: none; border: 0; padding: 0;
+    font-size: var(--fs-small); color: var(--text-muted); text-decoration: underline; cursor: pointer;
+  }
+  .cart__empty { color: var(--text-muted); margin: var(--space-4) 0; }
+  .cart__empty[hidden], .cart__foot[hidden], .cart__error[hidden] { display: none; }
+  .cart__total { display: flex; justify-content: space-between; font-size: var(--fs-lead); margin: var(--space-4) 0 var(--space-1); }
+  .cart__note { font-size: var(--fs-small); color: var(--text-muted); margin: 0 0 var(--space-4); }
+  .cart__error { font-size: var(--fs-small); color: var(--color-primary); margin: 0 0 var(--space-3); }
+  .cart :global(.cart__checkout) { width: 100%; }
+  .cart :global(.cart__checkout:disabled) { opacity: 0.6; cursor: progress; }
+  .cart :global(.cart__qty button:focus-visible), .cart__close:focus-visible, .cart :global(.cart__remove:focus-visible) {
+    outline: 2px solid var(--focus-ring); outline-offset: 2px;
+  }
+
   .shop-help { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-3); }
   .shop-help p { color: var(--text-muted); line-height: var(--lh-body); }
 
   @media (min-width: 640px) {
-    .shop-opt { grid-template-columns: 1fr auto auto; grid-template-areas: "text price action"; }
+    .shop-opt { grid-template-columns: 1fr auto auto; grid-template-areas: "text price action"; padding-block: var(--space-4); }
+    .shop-opt:has(.shop-voucher) { grid-template-columns: 1fr auto; grid-template-areas: "text action"; }
+    .shop-opt:has(.shop-voucher) .shop-opt__action { margin-top: 0; }
+    .shop-opt__price { text-align: right; }
     .shop-opt__action { min-width: 92px; }
   }
   @media (min-width: 760px) {

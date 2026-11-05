@@ -26,8 +26,11 @@ const REDIRECT_BASE = "https://go.gojiphysio.com";
 export type CtaSlug =
   | "web-wa" | "web-book" | "web-99-wa" | "bio-wa" | "bio-book"
   // Shop: each redirects to that item's Stripe Payment Link (see lib/shop.ts).
-  | "web-pay-pp-1to1-5" | "web-pay-pp-1to1-10" | "web-pay-pp-2to1-5" | "web-pay-pp-2to1-10"
-  | "web-pay-cpsc-5" | "web-pay-cpsc-10" | "web-pay-gift-voucher"
+  | "web-pay-pp-1to1-1" | "web-pay-pp-1to1-5" | "web-pay-pp-1to1-10"
+  | "web-pay-pp-2to1-1" | "web-pay-pp-2to1-5" | "web-pay-pp-2to1-10"
+  | "web-pay-cpsc-1to1-1" | "web-pay-cpsc-1to1-5" | "web-pay-cpsc-1to1-10"
+  | "web-pay-cpsc-2to1-1" | "web-pay-cpsc-2to1-5" | "web-pay-cpsc-2to1-10"
+  | "web-pay-gift-voucher"
   | "web-pay-socks-girl-grip" | "web-pay-socks-girl-nongrip"
   | "web-pay-socks-gang-grip" | "web-pay-socks-gang-nongrip";
 

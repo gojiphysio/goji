@@ -212,8 +212,9 @@ LINK_SLUGS: dict[str, dict] = {
     "99-wa":     {"kind": "whatsapp", "label": "Social",   "text": PROMO_99_TEXT},  # generic fallback
     # --- Shop: "<channel>-pay-<item>" → that item's Stripe Payment Link ---
     **{f"web-pay-{item}": {"kind": "pay", "label": "Web", "item": item} for item in (
-        "pp-1to1-5", "pp-1to1-10", "pp-2to1-5", "pp-2to1-10",
-        "cpsc-5", "cpsc-10", "gift-voucher",
+        "pp-1to1-1", "pp-1to1-5", "pp-1to1-10", "pp-2to1-1", "pp-2to1-5", "pp-2to1-10",
+        "cpsc-1to1-1", "cpsc-1to1-5", "cpsc-1to1-10", "cpsc-2to1-1", "cpsc-2to1-5", "cpsc-2to1-10",
+        "gift-voucher",
         "socks-girl-grip", "socks-girl-nongrip", "socks-gang-grip", "socks-gang-nongrip",
     )},
 }
@@ -221,10 +222,9 @@ LINK_SLUGS: dict[str, dict] = {
 # shop_links.<mode>.json; paste the live ones here). An item with no URL yet
 # falls back to the /shop page, so a published shop link never dead-ends.
 SHOP_PAY_URLS: dict[str, str] = {
-    "pp-1to1-5": "https://buy.stripe.com/00w00idHW32u1564CuejK00",
-    "pp-1to1-10": "https://buy.stripe.com/8x28wO33icD44hi0meejK01",
-    "pp-2to1-5": "https://buy.stripe.com/dRm00i6fu8mOaFG2umejK02",
-    "pp-2to1-10": "https://buy.stripe.com/00waEW6fu0Um7tud90ejK03",
+    # The Private Pilates links (shop_links.live.json) charge the old intro prices,
+    # so they're unhooked until a live stripe_catalog.py run makes links at the
+    # price-card prices; until then those slugs fall back to /shop/ (the cart).
     "gift-voucher": "https://buy.stripe.com/14A9AS0Va0Um1569WOejK04",
 }
 SHOP_FALLBACK_URL = "https://www.gojiphysio.com/shop/"

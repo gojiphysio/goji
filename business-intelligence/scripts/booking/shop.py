@@ -3,7 +3,8 @@ Website shop fulfilment: a paid Stripe Checkout Session becomes a finalised
 Plato invoice, so online sales sit in Plato beside in-clinic ones (one patient
 record, one revenue ledger for the dashboards and the Cash Book P&L).
 
-    /shop Buy -> Stripe Payment Link -> /shop/thanks/?session_id=cs_...
+    /shop cart -> POST /api/shop/checkout -> Stripe Checkout (all cart lines)
+      -> /shop/thanks/?session_id=cs_...
       thanks page -> POST /api/shop/confirm      } both call fulfil(); the
       Stripe      -> POST /api/stripe/webhook    } first one wins, once
 
@@ -55,6 +56,13 @@ SGT = timezone(timedelta(hours=8))
 PAYMENT_MODE = os.environ.get("SHOP_PLATO_PAYMENT_MODE", "Stripe")
 TEST_PATIENT = os.environ.get("SHOP_TEST_PATIENT", "ZZ Goji Shop Test")
 WEBHOOK_TOLERANCE_S = 300
+PRICE_CACHE_S = 300
+MAX_QTY = 10
+VOUCHER_MIN, VOUCHER_MAX = 50, 2000  # SGD, same bounds as the voucher Payment Link
+SUBMIT_MESSAGE = ("By paying you agree to Goji's shop terms (gojiphysio.com/terms). "
+                  "We'll WhatsApp you within one working day to arrange your sessions, "
+                  "voucher or collection.")
+_price_cache: tuple[float, dict] | None = None
 
 _locks: dict[str, threading.Lock] = {}
 _locks_guard = threading.Lock()
@@ -89,6 +97,42 @@ class StripeClient:
         if r.status_code == 404:
             raise ShopError("unknown checkout session", "not_found")
         r.raise_for_status()
+        return r.json()
+
+    def prices(self) -> dict[str, dict]:
+        """goji key -> its current fixed Price (from the products stripe_catalog.py
+        syncs). Cached briefly: the cart prices from Stripe, never the browser."""
+        global _price_cache
+        if _price_cache and time.monotonic() - _price_cache[0] < PRICE_CACHE_S:
+            return _price_cache[1]
+        out: dict[str, dict] = {}
+        params: list[tuple[str, str]] = [("active", "true"), ("limit", "100"), ("expand[]", "data.product")]
+        while True:
+            r = self.s.get(f"{STRIPE_API}/prices", params=params, timeout=self.timeout)
+            r.raise_for_status()
+            page = r.json()
+            for pr in page["data"]:
+                prod = pr.get("product") or {}
+                key = (prod.get("metadata") or {}).get("goji_key") if isinstance(prod, dict) else None
+                # Stripe lists newest first: the first fixed price per key is current
+                # (an old price stays active after an amount change).
+                if key and prod.get("active", True) and pr.get("unit_amount") is not None \
+                        and pr.get("currency") == "sgd" and not (out.get(key) or {}).get("price"):
+                    out[key] = {"price": pr["id"], "amount": pr["unit_amount"], "product": prod["id"],
+                                "name": prod.get("name")}
+                elif key and prod.get("active", True) and pr.get("custom_unit_amount"):
+                    out.setdefault(key, {"price": None, "amount": None, "product": prod["id"],
+                                         "name": prod.get("name")})
+            if not page.get("has_more"):
+                break
+            params = [p for p in params if p[0] != "starting_after"] + [("starting_after", page["data"][-1]["id"])]
+        _price_cache = (time.monotonic(), out)
+        return out
+
+    def create_session(self, params: list[tuple[str, str]]) -> dict:
+        r = self.s.post(f"{STRIPE_API}/checkout/sessions", data=params, timeout=self.timeout)
+        if r.status_code >= 400:
+            raise ShopError(f"Stripe checkout create failed: {r.text[:300]}", "stripe")
         return r.json()
 
     def tag_payment(self, payment_intent_id: str, invoice_id: str) -> None:
@@ -251,6 +295,73 @@ def _check_doctor(plato, invoice_id: str, want: str) -> None:
         raise ShopError(f"Plato filed invoice {invoice_id} under doctor {got!r}, not {want!r}: "
                         f"is {want!r} a doctor code in Plato? Invoice left unpaid and unfinalised.",
                         "plato_doctor")
+
+
+def checkout_params(cart: list[dict], prices: dict[str, dict], origin: str,
+                    client_ref: str | None = None) -> list[tuple[str, str]]:
+    """Stripe Checkout Session form params for a cart of {key, qty[, amount]}.
+    Fixed-price items use their synced Price; a gift voucher carries the amount
+    the buyer chose (SGD, bounded) as inline price_data on the voucher product."""
+    if not cart or len(cart) > 20:
+        raise ShopError("empty or oversized cart", "bad_request")
+    params: list[tuple[str, str]] = [
+        ("mode", "payment"),
+        ("success_url", f"{origin}/shop/thanks/?session_id={{CHECKOUT_SESSION_ID}}"),
+        ("cancel_url", f"{origin}/shop/"),
+        ("phone_number_collection[enabled]", "true"),
+        ("custom_text[submit][message]", SUBMIT_MESSAGE),
+        ("payment_intent_data[description]", "Goji website shop"),
+    ]
+    if client_ref and re.fullmatch(r"[A-Za-z0-9_-]{1,200}", client_ref):
+        params.append(("client_reference_id", client_ref))
+    kinds = set()
+    for n, line in enumerate(cart):
+        key = str(line.get("key") or "")
+        try:
+            qty = int(line.get("qty", 1))
+        except (TypeError, ValueError):
+            qty = 0
+        if not 1 <= qty <= MAX_QTY:
+            raise ShopError(f"bad quantity for {key}", "bad_request")
+        p = prices.get(key)
+        if not p:
+            raise ShopError(f"unknown item {key}", "bad_request")
+        pre = f"line_items[{n}]"
+        if p["price"]:
+            params += [(f"{pre}[price]", p["price"]), (f"{pre}[quantity]", str(qty))]
+        else:  # voucher: buyer-chosen amount
+            try:
+                amount = int(line.get("amount") or 0)
+            except (TypeError, ValueError):
+                amount = 0
+            if not VOUCHER_MIN <= amount <= VOUCHER_MAX:
+                raise ShopError("voucher amount out of range", "bad_request")
+            params += [(f"{pre}[price_data][currency]", "sgd"),
+                       (f"{pre}[price_data][product]", p["product"]),
+                       (f"{pre}[price_data][unit_amount]", str(amount * 100)),
+                       (f"{pre}[quantity]", str(qty))]
+        kinds.add("voucher" if not p["price"] else ("package" if key.startswith(("pp-", "cpsc-")) else "merch"))
+    # Up to 3 custom fields; only ask what the front desk needs for Plato.
+    fields = []
+    if "package" in kinds:
+        fields.append(("attendee", "Name of the person attending", "false"))
+    if "voucher" in kinds:
+        fields.append(("recipient", "Voucher recipient's name", "true"))
+    for i, (k, label, optional) in enumerate(fields):
+        params += [(f"custom_fields[{i}][key]", k), (f"custom_fields[{i}][type]", "text"),
+                   (f"custom_fields[{i}][label][type]", "custom"),
+                   (f"custom_fields[{i}][label][custom]", label),
+                   (f"custom_fields[{i}][optional]", optional)]
+    return params
+
+
+def create_checkout(cart: list[dict], origin: str, client_ref: str | None = None,
+                    stripe: StripeClient | None = None) -> str:
+    """Returns the Stripe Checkout URL for a cart."""
+    stripe = stripe or StripeClient()
+    sess = stripe.create_session(checkout_params(cart, stripe.prices(), origin, client_ref))
+    log.info("shop checkout %s: %s", sess.get("id"), [(c.get("key"), c.get("qty")) for c in cart])
+    return sess["url"]
 
 
 def _lock(session_id: str) -> threading.Lock:

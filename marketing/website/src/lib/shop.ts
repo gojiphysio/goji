@@ -11,6 +11,32 @@
  */
 import type { CtaSlug } from "./links.ts";
 
+/**
+ * The shop's checkout backend (booking service, POST /api/shop/checkout and
+ * /api/shop/confirm). Production builds use PUBLIC_BOOKING_API. Cloudflare branch
+ * previews (CF_PAGES_BRANCH != main) use the Stripe-sandbox service instead, so
+ * a preview link can be shared for review without taking real money.
+ * PUBLIC_SHOP_API overrides both (local testing).
+ */
+export const SHOP_SANDBOX_API = "";
+
+export function shopBackend(): { api: string; sandbox: boolean } {
+  const branch = typeof process !== "undefined" ? process.env.CF_PAGES_BRANCH : undefined;
+  const preview = !!branch && branch !== "main";
+  const api = (import.meta.env.PUBLIC_SHOP_API as string | undefined)
+    || (preview ? SHOP_SANDBOX_API : (import.meta.env.PUBLIC_BOOKING_API as string | undefined)) || "";
+  const sandbox = preview || import.meta.env.PUBLIC_SHOP_SANDBOX === "1";
+  return { api: api.replace(/\/$/, ""), sandbox };
+}
+
+/** "$1,229" -> 122900; undefined for "From $50" / no price. */
+export function priceCents(price?: string): number | undefined {
+  const m = price?.match(/^\$([\d,]+(?:\.\d{2})?)$/);
+  return m ? Math.round(parseFloat(m[1].replace(/,/g, "")) * 100) : undefined;
+}
+
+export const VOUCHER_AMOUNTS = [50, 100, 150, 200, 300, 500];
+
 export type ShopStatus = "buy" | "ask" | "soon";
 
 /** A buyable version of a product card (e.g. grip or non-grip sole). */
@@ -37,9 +63,15 @@ export interface ShopOption {
   blurb?: string;
   /** Versions to pick between on a product card; each has its own price and link. */
   variants?: ShopVariant[];
+  /** Price-list rows sharing a group ("1:1" / "2:1") show under a group switch. */
+  group?: string;
+  /** Full name for the cart line when `name` only reads well under its group. */
+  cartName?: string;
 }
 
 export interface ShopCollection {
+  /** Labels and hints for the group switch, in order (first is selected). */
+  groups?: { id: string; label: string; hint?: string }[];
   id: string;
   title: string;
   lead: string;
@@ -99,36 +131,47 @@ export const SHOP: ShopCollection[] = [
     title: "Private Pilates",
     lead:
       "55-minute reformer and mat sessions with our STOTT PILATES® certified instructor, one to one or shared with someone you train with.",
-    note: "Introductory prices until 30 Nov 2026.",
     photo: { src: "/photos/services/private-pilates-800.webp", alt: "A client on the reformer during a Private Pilates session at Goji." },
+    groups: [
+      { id: "1:1", label: "1:1" },
+      { id: "2:1", label: "2:1, shared", hint: "Shared by two people. The price covers both." },
+    ],
     options: [
-      { key: "pp-1to1-5", name: "1:1 x 5 sessions Package", price: "$669", status: "buy", slug: "web-pay-pp-1to1-5" },
-      { key: "pp-1to1-10", name: "1:1 x 10 sessions Package", price: "$1,229", status: "buy", slug: "web-pay-pp-1to1-10" },
-      { key: "pp-2to1-5", name: "2:1 x 5 sessions Package", detail: "Shared by two people, price covers both", price: "$899", status: "buy", slug: "web-pay-pp-2to1-5" },
-      { key: "pp-2to1-10", name: "2:1 x 10 sessions Package", detail: "Shared by two people, price covers both", price: "$1,649", status: "buy", slug: "web-pay-pp-2to1-10" },
+      { key: "pp-1to1-1", group: "1:1", name: "Single session", cartName: "Private Pilates 1:1, single session", price: "$160", status: "buy", slug: "web-pay-pp-1to1-1" },
+      { key: "pp-1to1-5", group: "1:1", name: "5-session pack", cartName: "Private Pilates 1:1, 5-session pack", price: "$750", status: "buy", slug: "web-pay-pp-1to1-5" },
+      { key: "pp-1to1-10", group: "1:1", name: "10-session pack", cartName: "Private Pilates 1:1, 10-session pack", price: "$1,400", status: "buy", slug: "web-pay-pp-1to1-10" },
+      { key: "pp-2to1-1", group: "2:1", name: "Single session", cartName: "Private Pilates 2:1, single session", price: "$210", status: "buy", slug: "web-pay-pp-2to1-1" },
+      { key: "pp-2to1-5", group: "2:1", name: "5-session pack", cartName: "Private Pilates 2:1, 5-session pack", price: "$1,000", status: "buy", slug: "web-pay-pp-2to1-5" },
+      { key: "pp-2to1-10", group: "2:1", name: "10-session pack", cartName: "Private Pilates 2:1, 10-session pack", price: "$1,900", status: "buy", slug: "web-pay-pp-2to1-10" },
     ],
   },
   {
     id: "clinical-pilates-sc",
     title: "Clinical Pilates and Strength & Conditioning",
     lead:
-      "55-minute sessions led by our AHPC-registered physiotherapists. One package covers both, so your programme can change as you progress.",
+      "55-minute sessions led by our AHPC-licensed physiotherapists. Sessions are interchangeable, so your programme can move between Clinical Pilates and Strength & Conditioning as you progress.",
     photo: { src: "/photos/services/strength-conditioning-800.webp", alt: "A woman training with a kettlebell during a Goji Strength & Conditioning session." },
+    groups: [
+      { id: "1:1", label: "1:1" },
+      { id: "2:1", label: "2:1, shared", hint: "Shared by two people. The price covers both." },
+    ],
     options: [
-      // PLACEHOLDER prices (CP/S&C, socks): not confirmed; no Stripe link yet,
-      // so these Buy buttons fall back to /shop/ until catalog.json is confirmed and synced.
-      { key: "cpsc-5", name: "5 sessions Package", detail: "Use across both services", price: "$810", status: "buy", slug: "web-pay-cpsc-5" },
-      { key: "cpsc-10", name: "10 sessions Package", detail: "Use across both services", price: "$1,485", status: "buy", slug: "web-pay-cpsc-10" },
+      { key: "cpsc-1to1-1", group: "1:1", name: "Single session", cartName: "Clinical Pilates & S&C 1:1, single session", price: "$180", status: "buy", slug: "web-pay-cpsc-1to1-1" },
+      { key: "cpsc-1to1-5", group: "1:1", name: "5-session pack", cartName: "Clinical Pilates & S&C 1:1, 5-session pack", price: "$850", status: "buy", slug: "web-pay-cpsc-1to1-5" },
+      { key: "cpsc-1to1-10", group: "1:1", name: "10-session pack", cartName: "Clinical Pilates & S&C 1:1, 10-session pack", price: "$1,600", status: "buy", slug: "web-pay-cpsc-1to1-10" },
+      { key: "cpsc-2to1-1", group: "2:1", name: "Single session", cartName: "Clinical Pilates & S&C 2:1, single session", price: "$230", status: "buy", slug: "web-pay-cpsc-2to1-1" },
+      { key: "cpsc-2to1-5", group: "2:1", name: "5-session pack", cartName: "Clinical Pilates & S&C 2:1, 5-session pack", price: "$1,100", status: "buy", slug: "web-pay-cpsc-2to1-5" },
+      { key: "cpsc-2to1-10", group: "2:1", name: "10-session pack", cartName: "Clinical Pilates & S&C 2:1, 10-session pack", price: "$2,100", status: "buy", slug: "web-pay-cpsc-2to1-10" },
     ],
   },
   {
     id: "gift-vouchers",
     title: "Gift vouchers",
     lead:
-      "For someone expecting, recovering or getting stronger. A voucher can be used on any Goji service for 12 months, and you choose the amount at checkout.",
+      "For someone expecting, recovering or getting stronger. A voucher can be used on any Goji service for 12 months. Pick the amount below.",
     bloom: "ripen",
     options: [
-      { key: "gift-voucher", name: "Goji gift voucher", detail: "We'll send you the code to pass on", price: "From $50", status: "buy", slug: "web-pay-gift-voucher" },
+      { key: "gift-voucher", name: "Goji gift voucher", detail: "We'll send you the code to pass on", price: "$50 to $500", status: "buy", slug: "web-pay-gift-voucher" },
     ],
   },
 ];
