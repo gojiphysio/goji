@@ -50,7 +50,7 @@ SUBMIT_MESSAGE = (
 # Checkout fields per item kind (Stripe allows up to 3). Phone and email are
 # always collected, so these only cover what the front desk needs for Plato.
 CUSTOM_FIELDS = {
-    "package": [{"key": "attendee", "label": "Name of the person attending", "optional": False}],
+    "package": [{"key": "attendee", "label": "Your name", "optional": False}],
     "voucher": [{"key": "recipient", "label": "Recipient's name", "optional": True}],
     "merch": [],
 }

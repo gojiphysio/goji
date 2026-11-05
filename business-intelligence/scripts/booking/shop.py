@@ -356,7 +356,7 @@ def checkout_params(cart: list[dict], prices: dict[str, dict], origin: str,
     # Up to 3 custom fields; only ask what the front desk needs for Plato.
     fields = []
     if "package" in kinds:
-        fields.append(("attendee", "Name of the person attending", "false"))
+        fields.append(("attendee", "Your name", "false"))
     if "voucher" in kinds:
         fields.append(("recipient", "Voucher recipient's name", "true"))
     for i, (k, label, optional) in enumerate(fields):

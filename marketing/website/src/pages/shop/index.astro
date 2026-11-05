@@ -307,7 +307,20 @@ const schema = {
       if (hit) hit.qty = Math.min(10, hit.qty + 1);
       else cart.push({ key, name: btn.dataset.name || key, cents, qty: 1, amount });
       save();
-      dlg.showModal();
+      // Confirm in place (the cart bar's count updates too); don't open the cart.
+      const label = btn.querySelector<HTMLElement>(".btn__label");
+      if (label) {
+        clearTimeout(Number(btn.dataset.timer));
+        label.textContent = "Added ✓";
+        btn.classList.add("is-added");
+        btn.dataset.timer = String(window.setTimeout(() => {
+          label.textContent = "Add to cart";
+          btn.classList.remove("is-added");
+        }, 1600));
+      }
+      bar.classList.remove("is-bumped");
+      void bar.offsetWidth; // restart the animation
+      bar.classList.add("is-bumped");
     }),
   );
   document.querySelector("[data-cart-open]")?.addEventListener("click", () => dlg.showModal());
@@ -523,6 +536,11 @@ const schema = {
     padding-block: var(--space-3);
   }
   .cart-bar[hidden] { display: none; }
+  .cart-bar.is-bumped .cart-bar__summary { animation: cart-bump 0.5s var(--ease); }
+  @keyframes cart-bump { 30% { transform: scale(1.08); } }
+  @media (prefers-reduced-motion: reduce) { .cart-bar.is-bumped .cart-bar__summary { animation: none; } }
+  /* "Added ✓": the button briefly turns to the outline look. */
+  :global(.btn.btn--primary.is-added) { background: var(--bg-content); color: var(--color-primary); border-color: var(--color-primary); }
   .cart-bar__inner { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); }
   .cart-bar__summary { margin: 0; color: var(--text-default); }
 
