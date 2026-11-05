@@ -1,8 +1,9 @@
 {
-  "_comment": "Website shop catalogue -> Stripe Products, Prices and Payment Links (stripe_catalog.py). Amounts are SGD cents. `inferred: true` = not published on the site yet; confirm before running against the live key. `enabled: false` items are skipped. Private Pilates prices are the introductory ones (offer ends 30 Nov 2026). Placeholder prices (cpsc, socks) stay `inferred` until confirmed, so a live run skips them.",
+  "_comment": "plato_item = the Plato inventory code the order is invoiced as (verified against Plato search/inventory 2026-11-05). Website shop catalogue -> Stripe Products, Prices and Payment Links (stripe_catalog.py). Amounts are SGD cents. `inferred: true` = not published on the site yet; confirm before running against the live key. `enabled: false` items are skipped. Private Pilates prices are the introductory ones (offer ends 30 Nov 2026). Placeholder prices (cpsc, socks) stay `inferred` until confirmed, so a live run skips them.",
   "items": [
     {
       "key": "pp-1to1-5",
+      "plato_item": "PP1:1-5IP",
       "name": "Private Pilates 1:1 x 5 sessions Package",
       "description": "Five 55-minute 1:1 Private Pilates sessions with a STOTT PILATES certified instructor at Goji, Lentor.",
       "kind": "package",
@@ -10,6 +11,7 @@
     },
     {
       "key": "pp-1to1-10",
+      "plato_item": "PP1:1-10IP",
       "name": "Private Pilates 1:1 x 10 sessions Package",
       "description": "Ten 55-minute 1:1 Private Pilates sessions with a STOTT PILATES certified instructor at Goji, Lentor.",
       "kind": "package",
@@ -17,6 +19,7 @@
     },
     {
       "key": "pp-2to1-5",
+      "plato_item": "PP2:1-5IP",
       "name": "Private Pilates 2:1 x 5 sessions Package",
       "description": "Five 55-minute Private Pilates sessions shared by two people. The price covers both.",
       "kind": "package",
@@ -24,6 +27,7 @@
     },
     {
       "key": "pp-2to1-10",
+      "plato_item": "PP2:1-10IP",
       "name": "Private Pilates 2:1 x 10 sessions Package",
       "description": "Ten 55-minute Private Pilates sessions shared by two people. The price covers both.",
       "kind": "package",
@@ -31,6 +35,7 @@
     },
     {
       "key": "cpsc-5",
+      "plato_item": "GJCPSC_1:1_5P",
       "name": "Clinical Pilates / Strength & Conditioning, 5 sessions Package",
       "description": "Five 55-minute physiotherapist-led sessions, usable across Clinical Pilates and Strength & Conditioning.",
       "kind": "package",
@@ -39,6 +44,7 @@
     },
     {
       "key": "cpsc-10",
+      "plato_item": "GJCPSC_1:1_10P",
       "name": "Clinical Pilates / Strength & Conditioning, 10 sessions Package",
       "description": "Ten 55-minute physiotherapist-led sessions, usable across Clinical Pilates and Strength & Conditioning.",
       "kind": "package",
@@ -47,6 +53,7 @@
     },
     {
       "key": "gift-voucher",
+      "plato_item": "Voucher",
       "name": "Goji gift voucher",
       "description": "A Goji gift voucher, valid for 12 months on any Goji service.",
       "kind": "voucher",
@@ -58,6 +65,7 @@
     },
     {
       "key": "socks-girl-grip",
+      "plato_item": "GJGL-G-001",
       "name": "Goji Girl Socks (Grip)",
       "description": "One pair of Goji Girl Socks with grip soles, collected at the clinic.",
       "kind": "merch",
@@ -66,6 +74,7 @@
     },
     {
       "key": "socks-girl-nongrip",
+      "plato_item": "GJGL-NG-001",
       "name": "Goji Girl Socks (Non-grip)",
       "description": "One pair of Goji Girl Socks with non-grip soles, collected at the clinic.",
       "kind": "merch",
@@ -74,6 +83,7 @@
     },
     {
       "key": "socks-gang-grip",
+      "plato_item": "GJGG-G-001",
       "name": "Goji Gang Socks (Grip)",
       "description": "One pair of Goji Gang Socks with grip soles, collected at the clinic.",
       "kind": "merch",
@@ -82,6 +92,7 @@
     },
     {
       "key": "socks-gang-nongrip",
+      "plato_item": "GJGG-NG-001",
       "name": "Goji Gang Socks (Non-grip)",
       "description": "One pair of Goji Gang Socks with non-grip soles, collected at the clinic.",
       "kind": "merch",
