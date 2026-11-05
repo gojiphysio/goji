@@ -213,3 +213,17 @@ def test_cart_rejects_bad_input(cart):
 def test_merch_only_cart_asks_nothing_extra():
     params = _p(shop.checkout_params([{"key": "socks-girl-grip", "qty": 1}], PRICES, "https://x"))
     assert not any(k.startswith("custom_fields") for k in params)
+
+
+def test_sandbox_never_writes_or_reads_plato(monkeypatch):
+    monkeypatch.setenv("SHOP_SANDBOX", "1")
+    monkeypatch.setenv("SHOP_PLATO_DRY_RUN", "0")       # sandbox overrides it
+    out = shop.fulfil("cs_test_abc123", None, StubStripe(session()))
+    assert out["status"] == "dry_run" and "sandbox" in out["plan"]["patient_match"]
+
+
+def test_sandbox_refuses_live_key(monkeypatch):
+    monkeypatch.setenv("SHOP_SANDBOX", "1")
+    with pytest.raises(shop.ShopError):
+        shop.StripeClient(key="sk_live_123")
+    shop.StripeClient(key="sk_test_123")

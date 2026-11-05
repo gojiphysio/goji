@@ -29,6 +29,10 @@ Safety switches (env):
                       payload" without one, verified 2026-11-05); it decides whose
                       revenue the sale counts as. Required for real writes.
   SHOP_PLATO_LOCATION default "SG", the clinic's only location.
+  SHOP_SANDBOX        "1" on the review sandbox (goji-shop-sandbox): refuses any
+                      Stripe key that isn't sk_test_, and never calls Plato (not
+                      even reads), so reviewers can't touch clinic data or eat
+                      into Plato's shared rate limit.
 
 Verified against live Plato 2026-11-05 (test invoices #1231, #1232): payment
 mode "Stripe" is accepted; `remarks` is silently dropped, `notes` is kept; and an
@@ -74,7 +78,13 @@ class ShopError(Exception):
         self.code = code
 
 
+def sandbox() -> bool:
+    return os.environ.get("SHOP_SANDBOX", "").lower() in ("1", "true", "yes")
+
+
 def dry_run() -> bool:
+    if sandbox():
+        return True
     return os.environ.get("SHOP_PLATO_DRY_RUN", "1").lower() not in ("0", "false", "no")
 
 
@@ -85,6 +95,8 @@ class StripeClient:
         key = key or os.environ.get("STRIPE_API_KEY")
         if not key:
             raise ShopError("STRIPE_API_KEY not set", "config")
+        if sandbox() and not key.startswith(("sk_test_", "rk_test_")):
+            raise ShopError("sandbox refuses a live Stripe key", "config")
         self.s = requests.Session()
         self.s.auth = (key, "")
         self.timeout = timeout
@@ -385,7 +397,10 @@ def fulfil(session_id: str, plato, stripe: StripeClient | None = None) -> dict:
         if order["plato_invoice_id"]:
             return {**base, "status": "already", "invoice_id": order["plato_invoice_id"]}
 
-        patient_id, how = find_patient(plato, order)
+        if plato is None:  # sandbox: no Plato at all
+            patient_id, how = None, "skipped (sandbox, no Plato)"
+        else:
+            patient_id, how = find_patient(plato, order)
         plan = {"patient_match": how}
         if dry_run():
             body, others, payment = invoice_payload(order, patient_id or "<new patient>")

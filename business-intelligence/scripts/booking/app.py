@@ -426,7 +426,7 @@ def book():
 
 def _shop_fulfil(session_id: str):
     try:
-        return shop.fulfil(session_id, plato()), 200
+        return shop.fulfil(session_id, None if shop.sandbox() else plato()), 200
     except shop.ShopError as e:
         status = {"bad_request": 400, "not_found": 404, "unsupported": 400}.get(e.code, 502)
         if status == 502:
