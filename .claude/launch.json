@@ -36,6 +36,26 @@
       ],
       "cwd": "business-intelligence/scripts/dashboard",
       "port": 8080
+    },
+    {
+      "name": "shop-test-booking",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": [
+        "-c",
+        "set -a; . \"$HOME/.goji-shop-test.env\"; set +a; CORS_ORIGIN=http://localhost:4234 SHOP_PLATO_DRY_RUN=${SHOP_PLATO_DRY_RUN:-1} uv run -q --with-requirements booking/requirements.txt flask --app booking.app run --port 8090"
+      ],
+      "cwd": "business-intelligence/scripts",
+      "port": 8090
+    },
+    {
+      "name": "shop-test-site",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": [
+        "-c",
+        "set -a; . \"$HOME/.goji-shop-test.env\"; set +a; PUBLIC_BOOKING_API=http://localhost:8090 npm run dev -- --port 4234"
+      ],
+      "cwd": "marketing/website",
+      "port": 4234
     }
   ]
 }

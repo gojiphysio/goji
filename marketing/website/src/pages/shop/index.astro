@@ -17,6 +17,12 @@ import PetalPhoto from "../../components/watercolor/PetalPhoto.astro";
 import Bloom from "../../components/watercolor/Bloom.astro";
 import { SHOP } from "../../lib/shop.ts";
 
+// Local checkout testing only: PUBLIC_SHOP_TEST_LINKS='{"socks-girl-grip":"https://buy.stripe.com/test_..."}'
+// sends Buy straight to Stripe test-mode links instead of the live go-links.
+// Never set in the Cloudflare build.
+const TEST_LINKS: Record<string, string> = JSON.parse(import.meta.env.PUBLIC_SHOP_TEST_LINKS || "{}");
+const buyHref = (key: string) => TEST_LINKS[key];
+
 const buyable = SHOP.flatMap((c) =>
   c.options.flatMap((o) =>
     (o.variants ?? [o]).filter((v) => v.status === "buy").map((v) => ({ c, o: v === o ? o : { ...v, name: `${o.name}, ${v.label}` } })),
@@ -111,7 +117,7 @@ const schema = {
                       <p class="shop-opt__price">{v.price ?? "Coming soon"}</p>
                       {o.detail && <p class="shop-opt__detail">{o.detail}</p>}
                     </div>
-                    {v.status === "buy" && v.slug && <Button slug={v.slug}>Buy</Button>}
+                    {v.status === "buy" && v.slug && (buyHref(v.key) ? <Button href={buyHref(v.key)}>Buy</Button> : <Button slug={v.slug}>Buy</Button>)}
                     {v.status !== "buy" && <Button slug="web-wa" variant="secondary">Ask us</Button>}
                   </div>
                 ))}
@@ -149,7 +155,7 @@ const schema = {
                     {o.price ?? (o.status === "ask" ? "Price on request" : "Coming soon")}
                   </p>
                   <div class="shop-opt__action">
-                    {o.status === "buy" && o.slug && <Button slug={o.slug}>Buy</Button>}
+                    {o.status === "buy" && o.slug && (buyHref(o.key) ? <Button href={buyHref(o.key)}>Buy</Button> : <Button slug={o.slug}>Buy</Button>)}
                     {o.status === "ask" && <Button slug="web-wa" variant="secondary">Ask us</Button>}
                   </div>
                 </li>

@@ -1,7 +1,11 @@
 ---
 /**
  * /shop/thanks — where every Stripe Payment Link lands after payment
- * (after_completion redirect, `?item=<key>`). Noindexed and out of the sitemap.
+ * (after_completion redirect, `?item=<key>&session_id=cs_...`). Noindexed and
+ * out of the sitemap. The script hands the session id to the booking service
+ * (POST /api/shop/confirm), which re-checks it with Stripe and invoices it in
+ * Plato. The page reads the same whatever that call returns: the Stripe webhook
+ * is the backstop, and the buyer has already paid.
  */
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Section from "../../components/Section.astro";
@@ -24,9 +28,32 @@ import { CTA } from "../../lib/links.ts";
     </p>
     <p class="thanks">If you'd like to get started sooner, message us now.</p>
     <Button slug={CTA.whatsapp.slug} variant="whatsapp">{CTA.whatsapp.label}</Button>
+    <p class="thanks thanks--ref" data-order-ref hidden></p>
   </Section>
 </BaseLayout>
 
+<script>
+  const API = import.meta.env.PUBLIC_BOOKING_API as string | undefined;
+  const sid = new URLSearchParams(location.search).get("session_id");
+  if (API && sid) {
+    fetch(`${API.replace(/\/$/, "")}/api/shop/confirm`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ session_id: sid }),
+    })
+      .then((r) => r.json())
+      .then((d) => {
+        const el = document.querySelector<HTMLElement>("[data-order-ref]");
+        if (!el || !d) return;
+        const ref = `Order reference: ${sid.slice(-8).toUpperCase()}`;
+        el.textContent = d.livemode === false ? `${ref} (test order, ${d.status})` : ref;
+        el.hidden = false;
+      })
+      .catch(() => {}); // the webhook will invoice it; nothing for the buyer to do
+  }
+</script>
+
 <style>
   .thanks { color: var(--text-muted); margin-block: var(--space-4); line-height: var(--lh-body); }
+  .thanks--ref { font-size: var(--fs-small); }
 </style>

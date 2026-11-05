@@ -36,7 +36,9 @@ from pathlib import Path
 
 API = "https://api.stripe.com/v1"
 HERE = Path(__file__).resolve().parent
-SITE = "https://www.gojiphysio.com"
+# Where checkout returns to. A test-mode run can point at a local dev site:
+#   SHOP_SITE=http://localhost:4232 python3 stripe_catalog.py --apply
+SITE = os.environ.get("SHOP_SITE", "https://www.gojiphysio.com").rstrip("/")
 
 # Shown above the Pay button on every link.
 SUBMIT_MESSAGE = (
@@ -114,6 +116,13 @@ def price_params(item: dict, product_id: str) -> tuple[str, dict]:
                     "unit_amount": item["amount"]}
 
 
+def after_completion(item: dict) -> dict:
+    # {CHECKOUT_SESSION_ID} is filled in by Stripe; /shop/thanks hands it to the
+    # booking service, which turns the paid session into a Plato invoice.
+    return {"type": "redirect", "redirect": {
+        "url": f"{SITE}/shop/thanks/?item={item['key']}&session_id={{CHECKOUT_SESSION_ID}}"}}
+
+
 def link_params(item: dict, price_id: str) -> dict:
     p = {
         "line_items": [{"price": price_id, "quantity": 1}],
@@ -124,8 +133,7 @@ def link_params(item: dict, price_id: str) -> dict:
             for f in CUSTOM_FIELDS[item["kind"]]
         ],
         "custom_text": {"submit": {"message": SUBMIT_MESSAGE}},
-        "after_completion": {"type": "redirect",
-                             "redirect": {"url": f"{SITE}/shop/thanks/?item={item['key']}"}},
+        "after_completion": after_completion(item),
         "metadata": {"goji_key": item["key"], "goji_price": price_id},
     }
     if item["kind"] == "merch" and item.get("stock"):
@@ -158,14 +166,17 @@ def main() -> None:
     for item in items:
         k = item["key"]
         product_id = f"goji_{k.replace('-', '_')}"
-        product = {"name": item["name"], "description": item["description"],
-                   "metadata": {"goji_key": k}}
+        # plato_item: the Plato inventory code this item is invoiced as (see
+        # booking/shop.py). Empty means a named "other" line on the invoice.
+        meta = {"goji_key": k, "plato_item": item.get("plato_item", "")}
+        product = {"name": item["name"], "description": item["description"], "metadata": meta}
         got = s.call("GET", f"/products/{product_id}")
         if got.get("_missing"):
             print(f"{k}: create product")
             if args.apply:
                 s.call("POST", "/products", {"id": product_id, **product})
-        elif got["name"] != item["name"] or got.get("description") != item["description"]:
+        elif (got["name"] != item["name"] or got.get("description") != item["description"]
+              or any((got.get("metadata") or {}).get(mk, "") != mv for mk, mv in meta.items())):
             print(f"{k}: update product")
             if args.apply:
                 s.call("POST", f"/products/{product_id}", product)
@@ -182,6 +193,11 @@ def main() -> None:
         current = next((l for l in mine if l["metadata"].get("goji_price") == price_id), None)
         if current:
             urls[k] = current["url"]
+            want = after_completion(item)
+            if current.get("after_completion", {}).get("redirect", {}).get("url") != want["redirect"]["url"]:
+                print(f"{k}: update link return URL")
+                if args.apply:
+                    s.call("POST", f"/payment_links/{current['id']}", {"after_completion": want})
         else:
             print(f"{k}: create payment link")
             if args.apply:

@@ -10,6 +10,8 @@ CORS. Endpoints:
   POST /api/book                                          -> create the booking
   POST /api/track                                         -> funnel event (fire-and-forget)
   POST /internal/refresh-snapshot                         -> re-page Plato (Cloud Scheduler, 5 min)
+  POST /api/shop/confirm   {session_id}                   -> paid Stripe checkout -> Plato invoice
+  POST /api/stripe/webhook                                -> same, from Stripe (signed)
   GET  /healthcheck
 """
 from __future__ import annotations
@@ -28,6 +30,7 @@ from .booking import BookingError, create_booking
 from .config import CLINICIANS, MAX_ADVANCE_DAYS, SERVICES
 from .plato import PlatoBusy, PlatoClient, PlatoError, PlatoThrottled
 from . import mailer
+from . import shop
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger("goji-booking")
@@ -413,6 +416,48 @@ def book():
     _track_async("confirmed", draft.get("session_id"), draft.get("service"),
                  ua, ref, attribution=attribution)
     return jsonify({"ok": True, "reference": result["reference"]})
+
+
+def _shop_fulfil(session_id: str):
+    try:
+        return shop.fulfil(session_id, plato()), 200
+    except shop.ShopError as e:
+        status = {"bad_request": 400, "not_found": 404, "unsupported": 400}.get(e.code, 502)
+        if status == 502:
+            log.error("shop fulfil %s failed: %s", session_id, e)
+        return {"ok": False, "status": "error", "code": e.code}, status
+    except Exception:
+        log.exception("shop fulfil %s failed", session_id)
+        return {"ok": False, "status": "error", "code": "plato"}, 502
+
+
+@app.route("/api/shop/confirm", methods=["POST", "OPTIONS"])
+def shop_confirm():
+    """Called by /shop/thanks with the Checkout Session id from Stripe's
+    redirect. The session is re-read from Stripe, so the browser can't fake a
+    paid order; an unpaid or already-invoiced session is a no-op."""
+    if request.method == "OPTIONS":
+        return "", 204
+    data = request.get_json(silent=True) or {}
+    body, status = _shop_fulfil(str(data.get("session_id") or ""))
+    return jsonify(body), status
+
+
+@app.route("/api/stripe/webhook", methods=["POST"])
+def stripe_webhook():
+    """Backstop for buyers who close the tab before /shop/thanks loads. A non-2xx
+    makes Stripe retry, which is what we want when Plato is briefly down."""
+    secret = os.environ.get("STRIPE_WEBHOOK_SECRET")
+    payload = request.get_data()
+    if not secret or not shop.verify_webhook(payload, request.headers.get("Stripe-Signature", ""), secret):
+        return "", 400
+    event = request.get_json(silent=True) or {}
+    if event.get("type") not in ("checkout.session.completed",
+                                 "checkout.session.async_payment_succeeded"):
+        return "", 200
+    session_id = ((event.get("data") or {}).get("object") or {}).get("id", "")
+    body, status = _shop_fulfil(session_id)
+    return ("", 200) if status < 500 else (jsonify(body), status)
 
 
 @app.route("/api/track", methods=["POST", "OPTIONS"])
