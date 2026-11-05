@@ -74,8 +74,16 @@ so a token change reflows everything (styleguide is the QA surface).
   form via `web-book`, not Plato), plus the campaign slug `web-99-wa` (9.9
   Pilates / S&C promo - drop it from `CtaSlug` when the offer ends), and
   `bio-wa` / `bio-book`, used only on `/links` (the Instagram link-in-bio page that
-  replaced bio.site; the dashboard shows these as "Link in bio"). A new CTA
-  needs its slug added there first.
+  replaced bio.site; the dashboard shows these as "Link in bio"), and the
+  `web-pay-<item>` shop slugs (kind `pay`, → that item's Stripe Payment Link in
+  `SHOP_PAY_URLS`, falling back to `/shop/`). A new CTA needs its slug added
+  there first.
+- **The shop catalogue lives in two places - keep them in sync.**
+  `src/lib/shop.ts` (what /shop shows) and
+  `business-intelligence/scripts/shop/catalog.json` (what `stripe_catalog.py`
+  creates in Stripe). Packages of existing services, physio-containing ones
+  included, may go on /shop under the AHPC floor in the compliance guardrails
+  (plain price, no outcome claim, no pressure framing).
 - **Booking funnel stages are allowlisted server-side.** A new
   `bookingApi.track()` stage must be added to `VALID_STAGES` in
   `business-intelligence/scripts/booking/app.py` (and the `FunnelStage` type in
@@ -285,6 +293,16 @@ of `npm run build`. Config in `pagefind.yml`; Cloudflare Pages needs no change.
   `TYPE_ORDER` and `typeLabel` too) before it will group correctly.
 
 ## Gotchas worth remembering
+- **Scoped styles don't reach script-built markup.** Astro scopes a page's
+  `<style>` with `data-astro-cid` attributes, which elements created at runtime
+  (`innerHTML`, `createElement`) never get. Style them as
+  `.parent :global(.child)` (the shop cart lines). Likewise `Button` styles are
+  scoped to `Button.astro`: use `<Button as="button">` for in-page actions rather
+  than a bare `<button class="btn">`.
+- **Hidden inputs keep the global input width.** `base.css` styles every
+  `input` at full width, so a radio hidden with only `opacity: 0` and
+  `position: absolute` is still a page-wide box and widens the page on phones
+  (the shop's sole picker did). Give it `.visually-hidden` or an explicit 1px size.
 - **Keep the first paint unblocked.** Third-party tags (gtag/Ads, ~190 KB) load
   after `window.onload`, with only the inline `dataLayer`/`gtag()` shim in the
   head (#175); CSS is inlined (`build.inlineStylesheets: "always"`, #171). Add a

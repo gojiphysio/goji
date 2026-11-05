@@ -10,6 +10,9 @@ CORS. Endpoints:
   POST /api/book                                          -> create the booking
   POST /api/track                                         -> funnel event (fire-and-forget)
   POST /internal/refresh-snapshot                         -> re-page Plato (Cloud Scheduler, 5 min)
+  POST /api/shop/checkout  {items:[{key,qty,amount?}]}    -> {url} of a Stripe Checkout for the cart
+  POST /api/shop/confirm   {session_id}                   -> paid Stripe checkout -> Plato invoice
+  POST /api/stripe/webhook                                -> same, from Stripe (signed)
   GET  /healthcheck
 """
 from __future__ import annotations
@@ -28,6 +31,7 @@ from .booking import BookingError, create_booking
 from .config import CLINICIANS, MAX_ADVANCE_DAYS, SERVICES
 from .plato import PlatoBusy, PlatoClient, PlatoError, PlatoThrottled
 from . import mailer
+from . import shop
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger("goji-booking")
@@ -35,6 +39,9 @@ log = logging.getLogger("goji-booking")
 app = Flask(__name__)
 
 CORS_ORIGIN = os.environ.get("CORS_ORIGIN", "https://www.gojiphysio.com")
+# Comma-separated; the request's Origin is echoed back when it is one of these
+# (the shop-test service also serves the Cloudflare branch preview).
+CORS_ORIGINS = [o.strip().rstrip("/") for o in CORS_ORIGIN.split(",") if o.strip()]
 PROJECT = os.environ.get("GCP_PROJECT", "goji-bi")
 FUNNEL_TABLE = f"{PROJECT}.marts.booking_funnel_events"
 WEB_EVENT_TABLE = f"{PROJECT}.marts.web_session_events"
@@ -115,7 +122,9 @@ def bq():
 
 @app.after_request
 def _cors(resp):
-    resp.headers["Access-Control-Allow-Origin"] = CORS_ORIGIN
+    origin = (request.headers.get("Origin") or "").rstrip("/")
+    resp.headers["Access-Control-Allow-Origin"] = origin if origin in CORS_ORIGINS else CORS_ORIGINS[0]
+    resp.headers["Vary"] = "Origin"
     resp.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
     resp.headers["Access-Control-Allow-Headers"] = "Content-Type"
     resp.headers["Access-Control-Max-Age"] = "86400"
@@ -413,6 +422,71 @@ def book():
     _track_async("confirmed", draft.get("session_id"), draft.get("service"),
                  ua, ref, attribution=attribution)
     return jsonify({"ok": True, "reference": result["reference"]})
+
+
+def _shop_fulfil(session_id: str):
+    try:
+        return shop.fulfil(session_id, None if shop.sandbox() else plato()), 200
+    except shop.ShopError as e:
+        status = {"bad_request": 400, "not_found": 404, "unsupported": 400}.get(e.code, 502)
+        if status == 502:
+            log.error("shop fulfil %s failed: %s", session_id, e)
+        return {"ok": False, "status": "error", "code": e.code}, status
+    except Exception:
+        log.exception("shop fulfil %s failed", session_id)
+        return {"ok": False, "status": "error", "code": "plato"}, 502
+
+
+@app.route("/api/shop/checkout", methods=["POST", "OPTIONS"])
+def shop_checkout():
+    """Cart -> Stripe Checkout URL. Prices come from Stripe; the browser only
+    sends keys, quantities and a voucher amount. Returns to the calling site."""
+    if request.method == "OPTIONS":
+        return "", 204
+    origin = (request.headers.get("Origin") or "").rstrip("/")
+    if origin not in CORS_ORIGINS:
+        return jsonify({"ok": False, "code": "origin"}), 403
+    data = request.get_json(silent=True) or {}
+    try:
+        url = shop.create_checkout(list(data.get("items") or []), origin, data.get("ref"))
+    except shop.ShopError as e:
+        status = 400 if e.code == "bad_request" else 502
+        if status == 502:
+            log.error("shop checkout failed: %s", e)
+        return jsonify({"ok": False, "code": e.code, "error": str(e) if status == 400 else None}), status
+    except Exception:
+        log.exception("shop checkout failed")
+        return jsonify({"ok": False, "code": "stripe"}), 502
+    return jsonify({"ok": True, "url": url})
+
+
+@app.route("/api/shop/confirm", methods=["POST", "OPTIONS"])
+def shop_confirm():
+    """Called by /shop/thanks with the Checkout Session id from Stripe's
+    redirect. The session is re-read from Stripe, so the browser can't fake a
+    paid order; an unpaid or already-invoiced session is a no-op."""
+    if request.method == "OPTIONS":
+        return "", 204
+    data = request.get_json(silent=True) or {}
+    body, status = _shop_fulfil(str(data.get("session_id") or ""))
+    return jsonify(body), status
+
+
+@app.route("/api/stripe/webhook", methods=["POST"])
+def stripe_webhook():
+    """Backstop for buyers who close the tab before /shop/thanks loads. A non-2xx
+    makes Stripe retry, which is what we want when Plato is briefly down."""
+    secret = os.environ.get("STRIPE_WEBHOOK_SECRET")
+    payload = request.get_data()
+    if not secret or not shop.verify_webhook(payload, request.headers.get("Stripe-Signature", ""), secret):
+        return "", 400
+    event = request.get_json(silent=True) or {}
+    if event.get("type") not in ("checkout.session.completed",
+                                 "checkout.session.async_payment_succeeded"):
+        return "", 200
+    session_id = ((event.get("data") or {}).get("object") or {}).get("id", "")
+    body, status = _shop_fulfil(session_id)
+    return ("", 200) if status < 500 else (jsonify(body), status)
 
 
 @app.route("/api/track", methods=["POST", "OPTIONS"])
