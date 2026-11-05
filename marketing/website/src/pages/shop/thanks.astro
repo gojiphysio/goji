@@ -51,7 +51,7 @@ const { api } = shopBackend();
         const el = document.querySelector<HTMLElement>("[data-order-ref]");
         if (!el || !d) return;
         const ref = `Order reference: ${sid.slice(-8).toUpperCase()}`;
-        el.textContent = d.livemode === false ? `${ref} (test order, ${d.status})` : ref;
+        el.textContent = d.livemode === false ? `${ref} (test order, nothing was charged)` : ref;
         el.hidden = false;
       })
       .catch(() => {}); // the webhook will invoice it; nothing for the buyer to do
