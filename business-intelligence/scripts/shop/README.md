@@ -11,7 +11,8 @@ Payment Links. Each paid order becomes a finalised Plato invoice automatically:
        closes the tab; whichever lands first invoices it, once.)
 
 Code: `scripts/booking/shop.py`. Plato rejects an invoice without a doctor code,
-so real writes need `SHOP_PLATO_DOCTOR` (whose revenue the sale counts as). Items with `plato_item` in `catalog.json` bill
+so real writes need `SHOP_PLATO_DOCTOR`: `SHOP`, a non-clinician Plato doctor
+named "Online Shop", so shop sales aren't credited to any clinician. Items with `plato_item` in `catalog.json` bill
 that Plato inventory code; others go on as a named "other" line. Writes are off
 until `SHOP_PLATO_DRY_RUN=0`; test-mode orders always bill the Plato patient
 "ZZ Goji Shop Test", whatever the buyer typed.
