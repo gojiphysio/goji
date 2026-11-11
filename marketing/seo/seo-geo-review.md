@@ -57,6 +57,12 @@ Rank Sweep `../strategy/05-30-day-campaigns.md` (Campaign 5).
 
 ## 2. Current-state audit (2026-07-13)
 
+> **Latest loop run: 2026-11-04** (`audits/2026-11-04/summary.md`). AEO, SERP and
+> Search Console were not measured (engines signed out, VPN IP, `bq` auth).
+> Technical: one 404 (`/team/`, fixed in #223), postpartum title shortened
+> in #222. The 26 Oct scoreboard (`audits/2026-10-26/`) is still the latest
+> engine baseline.
+
 **Strong already** — canonical URLs on every page; `@astrojs/sitemap` +
 robots.txt; site-wide MedicalClinic/LocalBusiness JSON-LD with NAP, hours,
 geo, services; llms.txt; Squarespace 301 map; every CTA a tracked go-link;

@@ -1,0 +1,1515 @@
+{
+ "findings": [
+  {
+   "level": "ERROR",
+   "check": "internal_link",
+   "target": "/team/",
+   "detail": "404"
+  },
+  {
+   "level": "WARN",
+   "check": "external_link_broken",
+   "target": "https://www.sweatboxyoga.com.sg/yoga-class/prenatal-yoga/",
+   "detail": "502 on https://www.gojiphysio.com/blog/prenatal-classes-singapore/"
+  },
+  {
+   "level": "WARN",
+   "check": "psi",
+   "target": "-",
+   "detail": "PSI_API_KEY not set; Core Web Vitals not measured"
+  }
+ ],
+ "pages": {
+  "https://www.gojiphysio.com/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/",
+   "title": "Women's & Family Physiotherapy in Lentor | Goji Physio"
+  },
+  "https://www.gojiphysio.com/blog/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/blog/",
+   "title": "Blog | Physiotherapy Education | Goji Physiotherapy Singapore"
+  },
+  "https://www.gojiphysio.com/blog/c-section-scar-massage/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/blog/c-section-scar-massage/",
+   "title": "C-Section Scar Massage | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/blog/diastasis-recti-physio-or-surgery/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/blog/diastasis-recti-physio-or-surgery/",
+   "title": "Diastasis Recti: Physio or Surgery? | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/blog/exercise-for-osteoporosis/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/blog/exercise-for-osteoporosis/",
+   "title": "Exercise for Osteoporosis | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/blog/goji-grand-opening-lentor-modern/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/blog/goji-grand-opening-lentor-modern/",
+   "title": "Now Open at Lentor Modern | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/blog/is-leaking-after-birth-normal/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/blog/is-leaking-after-birth-normal/",
+   "title": "Is Leaking After Birth Normal? | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/blog/lentor-modern-with-a-baby/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/blog/lentor-modern-with-a-baby/",
+   "title": "Lentor Modern With a Baby | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/blog/medisave-insurance-for-physiotherapy/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/blog/medisave-insurance-for-physiotherapy/",
+   "title": "MediSave and Insurance for Physio | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/blog/pelvic-floor-exercises-after-birth/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/blog/pelvic-floor-exercises-after-birth/",
+   "title": "Pelvic Floor Exercises After Birth | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/blog/perineal-massage-before-birth/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/blog/perineal-massage-before-birth/",
+   "title": "Perineal Massage Before Birth | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/blog/postnatal-exercise-singapore/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/blog/postnatal-exercise-singapore/",
+   "title": "Postpartum Gym and Exercise in Singapore | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/blog/postnatal-physio-home-visit/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/blog/postnatal-physio-home-visit/",
+   "title": "Postnatal Physio Home Visits | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/blog/postpartum-belly-binder/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/blog/postpartum-belly-binder/",
+   "title": "Belly Binder After Birth: Does It Help? | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/blog/postpartum-recovery-checklist/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/blog/postpartum-recovery-checklist/",
+   "title": "Postpartum Recovery Checklist | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/blog/prenatal-classes-singapore/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/blog/prenatal-classes-singapore/",
+   "title": "Prenatal Classes in Singapore | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/blog/preparing-your-body-for-pregnancy/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/blog/preparing-your-body-for-pregnancy/",
+   "title": "Preparing Your Body for Pregnancy | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/blog/returning-to-exercise-after-birth/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/blog/returning-to-exercise-after-birth/",
+   "title": "Exercise After Birth: Weeks 0 to 12 | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/blog/what-happens-at-your-first-physiotherapy-visit/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/blog/what-happens-at-your-first-physiotherapy-visit/",
+   "title": "Your First Physiotherapy Visit | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/blog/when-to-see-a-physio-after-birth/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/blog/when-to-see-a-physio-after-birth/",
+   "title": "When to See a Physio After Birth | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/blog/why-mums-see-a-postnatal-physio/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/blog/why-mums-see-a-postnatal-physio/",
+   "title": "Why Mums See a Postnatal Physio | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/book/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/book/",
+   "title": "Book an appointment | Goji Health"
+  },
+  "https://www.gojiphysio.com/conditions/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/conditions/",
+   "title": "Conditions We Treat | Goji Physiotherapy Singapore"
+  },
+  "https://www.gojiphysio.com/conditions/adolescent-scoliosis-schroth/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/conditions/adolescent-scoliosis-schroth/",
+   "title": "Adolescent Scoliosis and Schroth Therapy | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/conditions/adult-scoliosis/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/conditions/adult-scoliosis/",
+   "title": "Adult Scoliosis Schroth Physio Singapore | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/conditions/balance-problems/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/conditions/balance-problems/",
+   "title": "Balance Problems Physio Singapore | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/conditions/blocked-ducts-mastitis/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/conditions/blocked-ducts-mastitis/",
+   "title": "Blocked Ducts and Mastitis | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/conditions/bowel-dysfunction/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/conditions/bowel-dysfunction/",
+   "title": "Bowel Dysfunction and Constipation | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/conditions/bppv/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/conditions/bppv/",
+   "title": "BPPV Vertigo Physio Singapore | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/conditions/breast-cancer-rehabilitation/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/conditions/breast-cancer-rehabilitation/",
+   "title": "Breast Cancer Rehab Physio Singapore | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/conditions/caesarean-recovery/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/conditions/caesarean-recovery/",
+   "title": "C-Section Recovery and Scar Care: Physio | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/conditions/chronic-venous-insufficiency/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/conditions/chronic-venous-insufficiency/",
+   "title": "Venous Insufficiency Physio Singapore | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/conditions/clubfoot-ctev/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/conditions/clubfoot-ctev/",
+   "title": "Clubfoot (CTEV): Postural vs Structural | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/conditions/congenital-torticollis/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/conditions/congenital-torticollis/",
+   "title": "Congenital Torticollis | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/conditions/developmental-concerns/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/conditions/developmental-concerns/",
+   "title": "Developmental Concerns: Early Intervention | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/conditions/diastasis-recti/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/conditions/diastasis-recti/",
+   "title": "Diastasis Recti | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/conditions/dizziness/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/conditions/dizziness/",
+   "title": "Dizziness & Vestibular Physio Singapore | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/conditions/dry-needling/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/conditions/dry-needling/",
+   "title": "Dry Needling Physiotherapy Singapore | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/conditions/fall-prevention/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/conditions/fall-prevention/",
+   "title": "Fall Prevention Physio Singapore | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/conditions/functional-movement-assessment/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/conditions/functional-movement-assessment/",
+   "title": "Functional Movement Assessment Singapore | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/conditions/hip-dysplasia-ddh/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/conditions/hip-dysplasia-ddh/",
+   "title": "Developmental Dysplasia of the Hip (DDH) | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/conditions/lipoedema/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/conditions/lipoedema/",
+   "title": "Lipoedema Physiotherapy Singapore | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/conditions/lymphoedema/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/conditions/lymphoedema/",
+   "title": "Lymphoedema Physiotherapy Singapore | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/conditions/menopause/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/conditions/menopause/",
+   "title": "Menopause Physiotherapy Singapore | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/conditions/musculoskeletal-pain-and-injuries/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/conditions/musculoskeletal-pain-and-injuries/",
+   "title": "Back & Joint Pain Physio Singapore | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/conditions/neurodevelopmental-conditions/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/conditions/neurodevelopmental-conditions/",
+   "title": "Neurodevelopmental Conditions | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/conditions/paediatric-pelvic-health/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/conditions/paediatric-pelvic-health/",
+   "title": "Child Bedwetting, Soiling and Constipation | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/conditions/paediatric-sports-injuries/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/conditions/paediatric-sports-injuries/",
+   "title": "Paediatric Musculoskeletal & Sports Injuries | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/conditions/pelvic-girdle-pain/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/conditions/pelvic-girdle-pain/",
+   "title": "Pelvic Girdle Pain Physio Singapore | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/conditions/pelvic-organ-prolapse/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/conditions/pelvic-organ-prolapse/",
+   "title": "Pelvic Organ Prolapse Physio Singapore | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/conditions/pelvic-pain/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/conditions/pelvic-pain/",
+   "title": "Pelvic Pain Physiotherapy Singapore | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/conditions/perineal-tear/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/conditions/perineal-tear/",
+   "title": "Perineal Tear, Scar, and Birth Trauma | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/conditions/persistent-pain/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/conditions/persistent-pain/",
+   "title": "Chronic Pain & Arthritis Physio Singapore | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/conditions/post-fracture-rehab/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/conditions/post-fracture-rehab/",
+   "title": "Post-Fracture Rehabilitation for Children | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/conditions/post-surgery-rehabilitation/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/conditions/post-surgery-rehabilitation/",
+   "title": "Post-Surgery Physio & Rehab Singapore | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/conditions/prenatal-care/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/conditions/prenatal-care/",
+   "title": "Prenatal Care and Birth Preparation | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/conditions/sports-rehabilitation/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/conditions/sports-rehabilitation/",
+   "title": "Sports Rehabilitation Physio Singapore | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/conditions/swelling-management/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/conditions/swelling-management/",
+   "title": "Swelling & Oedema Physio Singapore | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/conditions/urinary-incontinence/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/conditions/urinary-incontinence/",
+   "title": "Urinary Incontinence Physio Singapore | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/conditions/vertigo/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/conditions/vertigo/",
+   "title": "Vertigo & Vestibular Physio Singapore | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/getting-here/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/getting-here/",
+   "title": "Getting Here and Parking | Goji Physio, Lentor Modern"
+  },
+  "https://www.gojiphysio.com/pathways/postpartum/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/pathways/postpartum/",
+   "title": "Postpartum Pathway | Return to Movement | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/physiotherapy-lentor/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/physiotherapy-lentor/",
+   "title": "Physio Clinic at Lentor Modern, by Lentor MRT | Goji Physio"
+  },
+  "https://www.gojiphysio.com/press/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/press/",
+   "title": "Press and Media | Goji Physiotherapy Singapore"
+  },
+  "https://www.gojiphysio.com/press/zaobao-womens-hidden-pain/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/press/zaobao-womens-hidden-pain/",
+   "title": "Cheryl Long speaks to Lianhe Zaobao about women's hidden pain | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/privacy/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/privacy/",
+   "title": "Privacy Policy | Goji Health"
+  },
+  "https://www.gojiphysio.com/services/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/services/",
+   "title": "Our Services | Goji Physiotherapy Singapore"
+  },
+  "https://www.gojiphysio.com/services/clinical-pilates/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/services/clinical-pilates/",
+   "title": "Clinical Pilates in Singapore | Goji Physio"
+  },
+  "https://www.gojiphysio.com/services/mummy-baby-assessment/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/services/mummy-baby-assessment/",
+   "title": "Mummy and Baby Physiotherapy Singapore | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/services/musculoskeletal-physiotherapy/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/services/musculoskeletal-physiotherapy/",
+   "title": "Musculoskeletal Physiotherapy | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/services/paediatric-physiotherapy/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/services/paediatric-physiotherapy/",
+   "title": "Paediatric Physiotherapy | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/services/pelvic-floor-physiotherapy/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/services/pelvic-floor-physiotherapy/",
+   "title": "Pelvic Floor Physiotherapy Singapore | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/services/postpartum-physiotherapy/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/services/postpartum-physiotherapy/",
+   "title": "Postnatal & Postpartum Physiotherapy Singapore | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/services/prenatal-physiotherapy/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/services/prenatal-physiotherapy/",
+   "title": "Prenatal Physiotherapy Singapore | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/services/private-pilates/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/services/private-pilates/",
+   "title": "Private Pilates in Singapore | Goji Physio"
+  },
+  "https://www.gojiphysio.com/services/schroth-scoliosis-adults/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/services/schroth-scoliosis-adults/",
+   "title": "Schroth Therapy for Scoliosis in Adults | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/services/schroth-scoliosis-children/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/services/schroth-scoliosis-children/",
+   "title": "Schroth Therapy for Scoliosis in Children | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/services/strength-conditioning/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/services/strength-conditioning/",
+   "title": "Strength & Conditioning | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/team/camille-tan/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/team/camille-tan/",
+   "title": "Camille Tan - Pilates Instructor | Goji Physiotherapy"
+  },
+  "https://www.gojiphysio.com/team/cheryl-long/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/team/cheryl-long/",
+   "title": "Cheryl Long - Clinical Director | Goji Health"
+  },
+  "https://www.gojiphysio.com/team/claire-ng/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/team/claire-ng/",
+   "title": "Claire Ng - Senior Physiotherapist | Goji Health"
+  },
+  "https://www.gojiphysio.com/team/kristy-ng/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/team/kristy-ng/",
+   "title": "Kristy Ng - Senior Physiotherapist | Goji Health"
+  },
+  "https://www.gojiphysio.com/womens-health-physiotherapy-singapore/": {
+   "status": 200,
+   "hops": [],
+   "canonical": "https://www.gojiphysio.com/womens-health-physiotherapy-singapore/",
+   "title": "Women's Health Physiotherapy Singapore | Goji Physio"
+  }
+ },
+ "links": {
+  "/": {
+   "status": 200,
+   "hops": []
+  },
+  "/blog/": {
+   "status": 200,
+   "hops": []
+  },
+  "/blog/c-section-scar-massage/": {
+   "status": 200,
+   "hops": []
+  },
+  "/blog/diastasis-recti-physio-or-surgery/": {
+   "status": 200,
+   "hops": []
+  },
+  "/blog/exercise-for-osteoporosis/": {
+   "status": 200,
+   "hops": []
+  },
+  "/blog/goji-grand-opening-lentor-modern/": {
+   "status": 200,
+   "hops": []
+  },
+  "/blog/is-leaking-after-birth-normal/": {
+   "status": 200,
+   "hops": []
+  },
+  "/blog/lentor-modern-with-a-baby/": {
+   "status": 200,
+   "hops": []
+  },
+  "/blog/medisave-insurance-for-physiotherapy/": {
+   "status": 200,
+   "hops": []
+  },
+  "/blog/pelvic-floor-exercises-after-birth/": {
+   "status": 200,
+   "hops": []
+  },
+  "/blog/perineal-massage-before-birth/": {
+   "status": 200,
+   "hops": []
+  },
+  "/blog/postnatal-exercise-singapore/": {
+   "status": 200,
+   "hops": []
+  },
+  "/blog/postnatal-physio-home-visit/": {
+   "status": 200,
+   "hops": []
+  },
+  "/blog/postpartum-belly-binder/": {
+   "status": 200,
+   "hops": []
+  },
+  "/blog/postpartum-recovery-checklist/": {
+   "status": 200,
+   "hops": []
+  },
+  "/blog/prenatal-classes-singapore/": {
+   "status": 200,
+   "hops": []
+  },
+  "/blog/preparing-your-body-for-pregnancy/": {
+   "status": 200,
+   "hops": []
+  },
+  "/blog/returning-to-exercise-after-birth/": {
+   "status": 200,
+   "hops": []
+  },
+  "/blog/what-happens-at-your-first-physiotherapy-visit/": {
+   "status": 200,
+   "hops": []
+  },
+  "/blog/when-to-see-a-physio-after-birth/": {
+   "status": 200,
+   "hops": []
+  },
+  "/blog/why-mums-see-a-postnatal-physio/": {
+   "status": 200,
+   "hops": []
+  },
+  "/book/": {
+   "status": 200,
+   "hops": []
+  },
+  "/conditions/": {
+   "status": 200,
+   "hops": []
+  },
+  "/conditions/adolescent-scoliosis-schroth/": {
+   "status": 200,
+   "hops": []
+  },
+  "/conditions/adult-scoliosis/": {
+   "status": 200,
+   "hops": []
+  },
+  "/conditions/balance-problems/": {
+   "status": 200,
+   "hops": []
+  },
+  "/conditions/blocked-ducts-mastitis/": {
+   "status": 200,
+   "hops": []
+  },
+  "/conditions/bowel-dysfunction/": {
+   "status": 200,
+   "hops": []
+  },
+  "/conditions/bppv/": {
+   "status": 200,
+   "hops": []
+  },
+  "/conditions/breast-cancer-rehabilitation/": {
+   "status": 200,
+   "hops": []
+  },
+  "/conditions/caesarean-recovery/": {
+   "status": 200,
+   "hops": []
+  },
+  "/conditions/chronic-venous-insufficiency/": {
+   "status": 200,
+   "hops": []
+  },
+  "/conditions/clubfoot-ctev/": {
+   "status": 200,
+   "hops": []
+  },
+  "/conditions/congenital-torticollis/": {
+   "status": 200,
+   "hops": []
+  },
+  "/conditions/developmental-concerns/": {
+   "status": 200,
+   "hops": []
+  },
+  "/conditions/diastasis-recti/": {
+   "status": 200,
+   "hops": []
+  },
+  "/conditions/dizziness/": {
+   "status": 200,
+   "hops": []
+  },
+  "/conditions/dry-needling/": {
+   "status": 200,
+   "hops": []
+  },
+  "/conditions/fall-prevention/": {
+   "status": 200,
+   "hops": []
+  },
+  "/conditions/functional-movement-assessment/": {
+   "status": 200,
+   "hops": []
+  },
+  "/conditions/hip-dysplasia-ddh/": {
+   "status": 200,
+   "hops": []
+  },
+  "/conditions/lipoedema/": {
+   "status": 200,
+   "hops": []
+  },
+  "/conditions/lymphoedema/": {
+   "status": 200,
+   "hops": []
+  },
+  "/conditions/menopause/": {
+   "status": 200,
+   "hops": []
+  },
+  "/conditions/musculoskeletal-pain-and-injuries/": {
+   "status": 200,
+   "hops": []
+  },
+  "/conditions/neurodevelopmental-conditions/": {
+   "status": 200,
+   "hops": []
+  },
+  "/conditions/paediatric-pelvic-health/": {
+   "status": 200,
+   "hops": []
+  },
+  "/conditions/paediatric-sports-injuries/": {
+   "status": 200,
+   "hops": []
+  },
+  "/conditions/pelvic-girdle-pain/": {
+   "status": 200,
+   "hops": []
+  },
+  "/conditions/pelvic-organ-prolapse/": {
+   "status": 200,
+   "hops": []
+  },
+  "/conditions/pelvic-pain/": {
+   "status": 200,
+   "hops": []
+  },
+  "/conditions/perineal-tear/": {
+   "status": 200,
+   "hops": []
+  },
+  "/conditions/persistent-pain/": {
+   "status": 200,
+   "hops": []
+  },
+  "/conditions/post-fracture-rehab/": {
+   "status": 200,
+   "hops": []
+  },
+  "/conditions/post-surgery-rehabilitation/": {
+   "status": 200,
+   "hops": []
+  },
+  "/conditions/prenatal-care/": {
+   "status": 200,
+   "hops": []
+  },
+  "/conditions/sports-rehabilitation/": {
+   "status": 200,
+   "hops": []
+  },
+  "/conditions/swelling-management/": {
+   "status": 200,
+   "hops": []
+  },
+  "/conditions/urinary-incontinence/": {
+   "status": 200,
+   "hops": []
+  },
+  "/conditions/vertigo/": {
+   "status": 200,
+   "hops": []
+  },
+  "/getting-here/": {
+   "status": 200,
+   "hops": []
+  },
+  "/pathways/postpartum/": {
+   "status": 200,
+   "hops": []
+  },
+  "/photos/directions/lentor-modern-level-1.webp": {
+   "status": 200,
+   "hops": []
+  },
+  "/physiotherapy-lentor/": {
+   "status": 200,
+   "hops": []
+  },
+  "/press/": {
+   "status": 200,
+   "hops": []
+  },
+  "/press/zaobao-womens-hidden-pain/": {
+   "status": 200,
+   "hops": []
+  },
+  "/privacy/": {
+   "status": 200,
+   "hops": []
+  },
+  "/services/": {
+   "status": 200,
+   "hops": []
+  },
+  "/services/clinical-pilates/": {
+   "status": 200,
+   "hops": []
+  },
+  "/services/mummy-baby-assessment/": {
+   "status": 200,
+   "hops": []
+  },
+  "/services/musculoskeletal-physiotherapy/": {
+   "status": 200,
+   "hops": []
+  },
+  "/services/paediatric-physiotherapy/": {
+   "status": 200,
+   "hops": []
+  },
+  "/services/pelvic-floor-physiotherapy/": {
+   "status": 200,
+   "hops": []
+  },
+  "/services/postpartum-physiotherapy/": {
+   "status": 200,
+   "hops": []
+  },
+  "/services/prenatal-physiotherapy/": {
+   "status": 200,
+   "hops": []
+  },
+  "/services/private-pilates/": {
+   "status": 200,
+   "hops": []
+  },
+  "/services/schroth-scoliosis-adults/": {
+   "status": 200,
+   "hops": []
+  },
+  "/services/schroth-scoliosis-children/": {
+   "status": 200,
+   "hops": []
+  },
+  "/services/strength-conditioning/": {
+   "status": 200,
+   "hops": []
+  },
+  "/team/": {
+   "status": 404,
+   "hops": []
+  },
+  "/team/camille-tan/": {
+   "status": 200,
+   "hops": []
+  },
+  "/team/cheryl-long/": {
+   "status": 200,
+   "hops": []
+  },
+  "/team/claire-ng/": {
+   "status": 200,
+   "hops": []
+  },
+  "/team/kristy-ng/": {
+   "status": 200,
+   "hops": []
+  },
+  "/womens-health-physiotherapy-singapore/": {
+   "status": 200,
+   "hops": []
+  },
+  "https://app.grab.com/s/MBrymmum": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/getting-here/"
+  },
+  "https://app.grab.com/s/j6NRBBzy": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/getting-here/"
+  },
+  "https://athleticsni.org/download/files/Returning_to_running_postnatal_guideline_for_medical_health_and_fitness_professionals_managing_this_population.05.pdf": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/blog/postnatal-exercise-singapore/"
+  },
+  "https://belovedbumps.sg/active-birth-workshop/": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/blog/prenatal-classes-singapore/"
+  },
+  "https://belovedbumps.sg/antenatal-classes/": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/blog/prenatal-classes-singapore/"
+  },
+  "https://bjsm.bmj.com/content/50/17/1092": {
+   "status": 403,
+   "from": "https://www.gojiphysio.com/blog/returning-to-exercise-after-birth/"
+  },
+  "https://bjsm.bmj.com/content/58/4/183": {
+   "status": 403,
+   "from": "https://www.gojiphysio.com/blog/returning-to-exercise-after-birth/"
+  },
+  "https://ch-api.healthhub.sg/api/public/content/33c28df48ee84ca1a76e989190dbc8cc": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/blog/postnatal-exercise-singapore/"
+  },
+  "https://childrenandteens.nlb.gov.sg/": {
+   "status": 202,
+   "from": "https://www.gojiphysio.com/blog/lentor-modern-with-a-baby/"
+  },
+  "https://doi.org/10.1002/ijgo.13607": {
+   "status": 403,
+   "from": "https://www.gojiphysio.com/blog/postpartum-belly-binder/"
+  },
+  "https://doi.org/10.1016/j.bjpt.2021.06.006": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/blog/diastasis-recti-physio-or-surgery/"
+  },
+  "https://doi.org/10.1016/j.ejogrb.2021.05.014": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/blog/postpartum-belly-binder/"
+  },
+  "https://doi.org/10.1016/j.midw.2024.104281": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/blog/postpartum-belly-binder/"
+  },
+  "https://doi.org/10.1016/j.physio.2023.02.002": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/blog/postpartum-belly-binder/"
+  },
+  "https://doi.org/10.1080/01443615.2019.1631768": {
+   "status": 403,
+   "from": "https://www.gojiphysio.com/blog/postpartum-belly-binder/"
+  },
+  "https://doi.org/10.1080/09593985.2019.1675207": {
+   "status": 403,
+   "from": "https://www.gojiphysio.com/blog/postpartum-belly-binder/"
+  },
+  "https://doi.org/10.1093/bjs/znab128": {
+   "status": 403,
+   "from": "https://www.gojiphysio.com/blog/diastasis-recti-physio-or-surgery/"
+  },
+  "https://doi.org/10.1097/AOG.0000000000003772": {
+   "status": 403,
+   "from": "https://www.gojiphysio.com/blog/prenatal-classes-singapore/"
+  },
+  "https://doi.org/10.1136/bjsports-2016-096065": {
+   "status": 403,
+   "from": "https://www.gojiphysio.com/blog/diastasis-recti-physio-or-surgery/"
+  },
+  "https://doi.org/10.1177/1457496920961000": {
+   "status": 403,
+   "from": "https://www.gojiphysio.com/blog/diastasis-recti-physio-or-surgery/"
+  },
+  "https://doi.org/10.2519/jospt.2016.6536": {
+   "status": 403,
+   "from": "https://www.gojiphysio.com/blog/diastasis-recti-physio-or-surgery/"
+  },
+  "https://go.gojiphysio.com/web-book": {
+   "status": "TOO_MANY_REDIRECTS",
+   "from": "https://www.gojiphysio.com/conditions/adolescent-scoliosis-schroth/"
+  },
+  "https://go.gojiphysio.com/web-wa": {
+   "status": "TOO_MANY_REDIRECTS",
+   "from": "https://www.gojiphysio.com/"
+  },
+  "https://inspiremumbaby.com/prenatal/": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/blog/prenatal-classes-singapore/"
+  },
+  "https://isomer-user-content.by.gov.sg/68/4a49cec3-170b-47cb-b1a8-0f7dc15807c0/Osteoporosis%20diagnosis%20and%20management%20(Aug%202025)%20%5BPDF%5D.pdf": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/blog/exercise-for-osteoporosis/"
+  },
+  "https://maps.app.goo.gl/wBaCkBiDNfF7JCGv8": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/"
+  },
+  "https://mtalvernia.sg/maternity/parent-craft/": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/blog/prenatal-classes-singapore/"
+  },
+  "https://mtalvernia.sg/wp-content/uploads/2025/04/Childbirth-Education-FAQ.pdf": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/blog/prenatal-classes-singapore/"
+  },
+  "https://pmc.ncbi.nlm.nih.gov/articles/PMC8130752/": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/blog/prenatal-classes-singapore/"
+  },
+  "https://pmc.ncbi.nlm.nih.gov/articles/PMC8295150/": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/blog/is-leaking-after-birth-normal/"
+  },
+  "https://pubmed.ncbi.nlm.nih.gov/1872333/": {
+   "status": 403,
+   "from": "https://www.gojiphysio.com/blog/pelvic-floor-exercises-after-birth/"
+  },
+  "https://pubmed.ncbi.nlm.nih.gov/21735380/": {
+   "status": 403,
+   "from": "https://www.gojiphysio.com/blog/exercise-for-osteoporosis/"
+  },
+  "https://pubmed.ncbi.nlm.nih.gov/22093081/": {
+   "status": 403,
+   "from": "https://www.gojiphysio.com/blog/c-section-scar-massage/"
+  },
+  "https://pubmed.ncbi.nlm.nih.gov/23633325/": {
+   "status": 403,
+   "from": "https://www.gojiphysio.com/blog/perineal-massage-before-birth/"
+  },
+  "https://pubmed.ncbi.nlm.nih.gov/24149921/": {
+   "status": 403,
+   "from": "https://www.gojiphysio.com/blog/exercise-for-osteoporosis/"
+  },
+  "https://pubmed.ncbi.nlm.nih.gov/24281053/": {
+   "status": 403,
+   "from": "https://www.gojiphysio.com/blog/exercise-for-osteoporosis/"
+  },
+  "https://pubmed.ncbi.nlm.nih.gov/28975661/": {
+   "status": 403,
+   "from": "https://www.gojiphysio.com/blog/exercise-for-osteoporosis/"
+  },
+  "https://pubmed.ncbi.nlm.nih.gov/30703272/": {
+   "status": 403,
+   "from": "https://www.gojiphysio.com/blog/exercise-for-osteoporosis/"
+  },
+  "https://pubmed.ncbi.nlm.nih.gov/32217980/": {
+   "status": 403,
+   "from": "https://www.gojiphysio.com/blog/preparing-your-body-for-pregnancy/"
+  },
+  "https://pubmed.ncbi.nlm.nih.gov/32378735/": {
+   "status": 403,
+   "from": "https://www.gojiphysio.com/blog/pelvic-floor-exercises-after-birth/"
+  },
+  "https://pubmed.ncbi.nlm.nih.gov/33239350/": {
+   "status": 403,
+   "from": "https://www.gojiphysio.com/blog/preparing-your-body-for-pregnancy/"
+  },
+  "https://pubmed.ncbi.nlm.nih.gov/35577538/": {
+   "status": 403,
+   "from": "https://www.gojiphysio.com/blog/exercise-for-osteoporosis/"
+  },
+  "https://pubmed.ncbi.nlm.nih.gov/9670874/": {
+   "status": 403,
+   "from": "https://www.gojiphysio.com/blog/pelvic-floor-exercises-after-birth/"
+  },
+  "https://search.pedro.org.au/search-results/record-detail/55106": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/blog/c-section-scar-massage/"
+  },
+  "https://www.aafp.org/pubs/afp/issues/2014/0301/p335.html": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/blog/perineal-massage-before-birth/"
+  },
+  "https://www.breathepilates.com.sg/prenatal-pilates": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/blog/prenatal-classes-singapore/"
+  },
+  "https://www.cpf.gov.sg/member/healthcare-financing/using-your-medisave-savings": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/blog/medisave-insurance-for-physiotherapy/"
+  },
+  "https://www.cpf.gov.sg/member/infohub/educational-resources/cpf-changes-announced-in-budget-and-cos-2025-and-what-it-means-for-you": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/blog/medisave-insurance-for-physiotherapy/"
+  },
+  "https://www.cpf.gov.sg/service/article/what-can-i-use-flexi-medisave-for": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/blog/medisave-insurance-for-physiotherapy/"
+  },
+  "https://www.cuh.nhs.uk/patient-information/antenatal-perineal-massage-explained/": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/blog/perineal-massage-before-birth/"
+  },
+  "https://www.guocoland.com.sg/Documents/PressReleases/2026/Media_Release_GuocoLands_Lentor_Modern_mall_opens_enhancing_the_Lentor_Hills_estate.pdf": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/blog/lentor-modern-with-a-baby/"
+  },
+  "https://www.healthhub.sg/programmes/letsmoveit/workout-classes": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/blog/postnatal-exercise-singapore/"
+  },
+  "https://www.healthhub.sg/well-being-and-lifestyle/pregnancy-and-infant-health/pregnancy-first-days-of-our-lives-with-baby": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/blog/postnatal-physio-home-visit/"
+  },
+  "https://www.healthxchange.sg/pregnancy/postnatal/confinement-after-pregnancy-myths-facts": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/blog/postpartum-belly-binder/"
+  },
+  "https://www.instagram.com/gojiphysio/": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/"
+  },
+  "https://www.kch.nhs.uk/wp-content/uploads/2023/01/pl-970.1-exercise-after-pregnancy-%E2%80%93-how-to-get-started.pdf": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/blog/pelvic-floor-exercises-after-birth/"
+  },
+  "https://www.kingstonandrichmond.nhs.uk/patients-and-families/patient-leaflets/scar-massage-after-caesarean": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/blog/c-section-scar-massage/"
+  },
+  "https://www.kkh.com.sg/patient-care/areas-of-care/womens-services/Pages/Giving-birth-at-KKH/classes-and-workshops.aspx": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/blog/prenatal-classes-singapore/"
+  },
+  "https://www.kkh.com.sg/symptoms-treatments/postnatal-depression-mental-wellness": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/blog/postpartum-recovery-checklist/"
+  },
+  "https://www.kkh.com.sg/symptoms-treatments/preparing-for-an-elective-planned-caesarean-section": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/blog/c-section-scar-massage/"
+  },
+  "https://www.leedsth.nhs.uk/patients/resources/antenatal-perineal-massage/": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/blog/perineal-massage-before-birth/"
+  },
+  "https://www.lia.org.sg/consumers/getting-started/healthcare/": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/blog/medisave-insurance-for-physiotherapy/"
+  },
+  "https://www.moh.gov.sg/managing-expenses/schemes-and-subsidies/integrated-shield-plans/about-integrated-shield-plans/": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/blog/medisave-insurance-for-physiotherapy/"
+  },
+  "https://www.moh.gov.sg/managing-expenses/schemes-and-subsidies/integrated-shield-plans/comparision-of-integrated-shield-plans/": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/blog/medisave-insurance-for-physiotherapy/"
+  },
+  "https://www.moh.gov.sg/newsroom/financial-counselling-and-transparent-billing-process-in-place-to-assist-patients/": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/blog/medisave-insurance-for-physiotherapy/"
+  },
+  "https://www.moh.gov.sg/newsroom/plan-to-work-with-insurers-to-develop-integrated-shield-plans-covering-home-nursing-care-and-outpatient-rehabilitative-services/": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/blog/medisave-insurance-for-physiotherapy/"
+  },
+  "https://www.moneysense.gov.sg/health-insurance/": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/blog/medisave-insurance-for-physiotherapy/"
+  },
+  "https://www.motherandchild.com.sg/antenatal-care-singapore": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/blog/prenatal-classes-singapore/"
+  },
+  "https://www.motherandchild.com.sg/yoga-and-pilates": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/blog/prenatal-classes-singapore/"
+  },
+  "https://www.nhs.uk/baby/breastfeeding-and-bottle-feeding/breastfeeding/the-first-few-days/": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/blog/postnatal-physio-home-visit/"
+  },
+  "https://www.nhs.uk/baby/support-and-services/keeping-fit-and-healthy-with-a-baby/": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/blog/pelvic-floor-exercises-after-birth/"
+  },
+  "https://www.nhs.uk/baby/support-and-services/your-post-pregnancy-body/": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/blog/pelvic-floor-exercises-after-birth/"
+  },
+  "https://www.nhs.uk/conditions/caesarean-section/recovery/": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/blog/c-section-scar-massage/"
+  },
+  "https://www.nhs.uk/mental-health/conditions/post-natal-depression/overview/": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/blog/postpartum-recovery-checklist/"
+  },
+  "https://www.nhs.uk/pregnancy/labour-and-birth/after-the-birth/your-body/": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/blog/pelvic-floor-exercises-after-birth/"
+  },
+  "https://www.nhs.uk/pregnancy/labour-and-birth/what-happens/episiotomy-and-perineal-tears/": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/blog/perineal-massage-before-birth/"
+  },
+  "https://www.nice.org.uk/guidance/ng123/chapter/Recommendations": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/blog/pelvic-floor-exercises-after-birth/"
+  },
+  "https://www.nice.org.uk/guidance/ng194/chapter/Recommendations": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/blog/pelvic-floor-exercises-after-birth/"
+  },
+  "https://www.nice.org.uk/guidance/ng210/chapter/Recommendations": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/blog/pelvic-floor-exercises-after-birth/"
+  },
+  "https://www.nice.org.uk/guidance/qs77/chapter/Quality-statement-4-Supervised-pelvic-floor-muscle-training": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/blog/is-leaking-after-birth-normal/"
+  },
+  "https://www.nlb.gov.sg/main/visit-us/our-libraries-and-locations/libraries/bishan-public-library": {
+   "status": 202,
+   "from": "https://www.gojiphysio.com/blog/lentor-modern-with-a-baby/"
+  },
+  "https://www.nparks.gov.sg/visit/parks/bishan-ang-mo-kio-park": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/blog/lentor-modern-with-a-baby/"
+  },
+  "https://www.nparks.gov.sg/visit/parks/bishan-ang-mo-kio-park/amenities/playgrounds": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/blog/lentor-modern-with-a-baby/"
+  },
+  "https://www.nparks.gov.sg/visit/parks/park-detail/lower-peirce-reservoir-park": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/blog/lentor-modern-with-a-baby/"
+  },
+  "https://www.nparks.gov.sg/visit/parks/springleaf-nature-park": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/blog/lentor-modern-with-a-baby/"
+  },
+  "https://www.nparks.gov.sg/visit/parks/thomson-nature-park": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/blog/lentor-modern-with-a-baby/"
+  },
+  "https://www.nuh.com.sg/care-at-nuh/specialties/women-and-childrens-health/community-antenatal-programme": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/blog/prenatal-classes-singapore/"
+  },
+  "https://www.pilates.com.sg/find-us": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/blog/prenatal-classes-singapore/"
+  },
+  "https://www.pilates.com.sg/types-of-classes": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/blog/prenatal-classes-singapore/"
+  },
+  "https://www.plasticsurgery.org/cosmetic-procedures/tummy-tuck": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/blog/diastasis-recti-physio-or-surgery/"
+  },
+  "https://www.rcog.org.uk/for-the-public/browse-all-patient-information-leaflets/perineal-tears-during-childbirth/": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/blog/perineal-massage-before-birth/"
+  },
+  "https://www.sos.org.sg/": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/blog/postpartum-recovery-checklist/"
+  },
+  "https://www.stgeorges.nhs.uk/wp-content/uploads/2025/08/THE_STM.pdf": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/blog/c-section-scar-massage/"
+  },
+  "https://www.sweatboxyoga.com.sg/yoga-class/prenatal-yoga/": {
+   "status": 502,
+   "from": "https://www.gojiphysio.com/blog/prenatal-classes-singapore/"
+  },
+  "https://www.thomsonmedical.com/classes/child-birth-education-course/": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/blog/prenatal-classes-singapore/"
+  },
+  "https://www.thomsonmedical.com/courses-and-workshops/hypnobirthing": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/blog/prenatal-classes-singapore/"
+  },
+  "https://www.who.int/tools/elena/interventions/folate-periconceptional": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/blog/preparing-your-body-for-pregnancy/"
+  },
+  "https://www.zaobao.com.sg/news/singapore/story20260721-9394054": {
+   "status": 200,
+   "from": "https://www.gojiphysio.com/press/zaobao-womens-hidden-pain/"
+  }
+ },
+ "bots": [
+  {
+   "bot": "GPTBot",
+   "path": "/",
+   "status": 200,
+   "challenge": false
+  },
+  {
+   "bot": "GPTBot",
+   "path": "/services/pelvic-floor-physiotherapy/",
+   "status": 200,
+   "challenge": false
+  },
+  {
+   "bot": "GPTBot",
+   "path": "/conditions/diastasis-recti/",
+   "status": 200,
+   "challenge": false
+  },
+  {
+   "bot": "GPTBot",
+   "path": "/llms.txt",
+   "status": 200,
+   "challenge": false
+  },
+  {
+   "bot": "OAI-SearchBot",
+   "path": "/",
+   "status": 200,
+   "challenge": false
+  },
+  {
+   "bot": "OAI-SearchBot",
+   "path": "/services/pelvic-floor-physiotherapy/",
+   "status": 200,
+   "challenge": false
+  },
+  {
+   "bot": "OAI-SearchBot",
+   "path": "/conditions/diastasis-recti/",
+   "status": 200,
+   "challenge": false
+  },
+  {
+   "bot": "OAI-SearchBot",
+   "path": "/llms.txt",
+   "status": 200,
+   "challenge": false
+  },
+  {
+   "bot": "ChatGPT-User",
+   "path": "/",
+   "status": 200,
+   "challenge": false
+  },
+  {
+   "bot": "ChatGPT-User",
+   "path": "/services/pelvic-floor-physiotherapy/",
+   "status": 200,
+   "challenge": false
+  },
+  {
+   "bot": "ChatGPT-User",
+   "path": "/conditions/diastasis-recti/",
+   "status": 200,
+   "challenge": false
+  },
+  {
+   "bot": "ChatGPT-User",
+   "path": "/llms.txt",
+   "status": 200,
+   "challenge": false
+  },
+  {
+   "bot": "PerplexityBot",
+   "path": "/",
+   "status": 200,
+   "challenge": false
+  },
+  {
+   "bot": "PerplexityBot",
+   "path": "/services/pelvic-floor-physiotherapy/",
+   "status": 200,
+   "challenge": false
+  },
+  {
+   "bot": "PerplexityBot",
+   "path": "/conditions/diastasis-recti/",
+   "status": 200,
+   "challenge": false
+  },
+  {
+   "bot": "PerplexityBot",
+   "path": "/llms.txt",
+   "status": 200,
+   "challenge": false
+  },
+  {
+   "bot": "ClaudeBot",
+   "path": "/",
+   "status": 200,
+   "challenge": false
+  },
+  {
+   "bot": "ClaudeBot",
+   "path": "/services/pelvic-floor-physiotherapy/",
+   "status": 200,
+   "challenge": false
+  },
+  {
+   "bot": "ClaudeBot",
+   "path": "/conditions/diastasis-recti/",
+   "status": 200,
+   "challenge": false
+  },
+  {
+   "bot": "ClaudeBot",
+   "path": "/llms.txt",
+   "status": 200,
+   "challenge": false
+  },
+  {
+   "bot": "Claude-SearchBot",
+   "path": "/",
+   "status": 200,
+   "challenge": false
+  },
+  {
+   "bot": "Claude-SearchBot",
+   "path": "/services/pelvic-floor-physiotherapy/",
+   "status": 200,
+   "challenge": false
+  },
+  {
+   "bot": "Claude-SearchBot",
+   "path": "/conditions/diastasis-recti/",
+   "status": 200,
+   "challenge": false
+  },
+  {
+   "bot": "Claude-SearchBot",
+   "path": "/llms.txt",
+   "status": 200,
+   "challenge": false
+  },
+  {
+   "bot": "Googlebot",
+   "path": "/",
+   "status": 200,
+   "challenge": false
+  },
+  {
+   "bot": "Googlebot",
+   "path": "/services/pelvic-floor-physiotherapy/",
+   "status": 200,
+   "challenge": false
+  },
+  {
+   "bot": "Googlebot",
+   "path": "/conditions/diastasis-recti/",
+   "status": 200,
+   "challenge": false
+  },
+  {
+   "bot": "Googlebot",
+   "path": "/llms.txt",
+   "status": 200,
+   "challenge": false
+  },
+  {
+   "bot": "Bingbot",
+   "path": "/",
+   "status": 200,
+   "challenge": false
+  },
+  {
+   "bot": "Bingbot",
+   "path": "/services/pelvic-floor-physiotherapy/",
+   "status": 200,
+   "challenge": false
+  },
+  {
+   "bot": "Bingbot",
+   "path": "/conditions/diastasis-recti/",
+   "status": 200,
+   "challenge": false
+  },
+  {
+   "bot": "Bingbot",
+   "path": "/llms.txt",
+   "status": 200,
+   "challenge": false
+  },
+  {
+   "bot": "meta-externalagent",
+   "path": "/",
+   "status": 200,
+   "challenge": false
+  },
+  {
+   "bot": "meta-externalagent",
+   "path": "/services/pelvic-floor-physiotherapy/",
+   "status": 200,
+   "challenge": false
+  },
+  {
+   "bot": "meta-externalagent",
+   "path": "/conditions/diastasis-recti/",
+   "status": 200,
+   "challenge": false
+  },
+  {
+   "bot": "meta-externalagent",
+   "path": "/llms.txt",
+   "status": 200,
+   "challenge": false
+  },
+  {
+   "bot": "meta-webindexer",
+   "path": "/",
+   "status": 200,
+   "challenge": false
+  },
+  {
+   "bot": "meta-webindexer",
+   "path": "/services/pelvic-floor-physiotherapy/",
+   "status": 200,
+   "challenge": false
+  },
+  {
+   "bot": "meta-webindexer",
+   "path": "/conditions/diastasis-recti/",
+   "status": 200,
+   "challenge": false
+  },
+  {
+   "bot": "meta-webindexer",
+   "path": "/llms.txt",
+   "status": 200,
+   "challenge": false
+  }
+ ],
+ "psi": {},
+ "hosts": {
+  "https://gojiphysio.com/": {
+   "status": 200,
+   "final": "https://www.gojiphysio.com/",
+   "hops": [
+    "301 https://gojiphysio.com/"
+   ]
+  },
+  "http://www.gojiphysio.com/": {
+   "status": 200,
+   "final": "https://www.gojiphysio.com/",
+   "hops": [
+    "301 http://www.gojiphysio.com/"
+   ]
+  }
+ }
+}
