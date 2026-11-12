@@ -2697,7 +2697,7 @@
         if (st.validation_error)   items.push(`<span class="stuck-item">form errors <b>${fmtInt(st.validation_error)}</b></span>`);
         const byCode = st.book_error_by_code || {};
         Object.entries(byCode).sort((a, b) => b[1] - a[1]).forEach(([code, n]) =>
-          items.push(`<span class="stuck-item">${ERR_LABEL[code] || code} <b>${fmtInt(n)}</b></span>`));
+          items.push(`<span class="stuck-item">${escapeHtml(ERR_LABEL[code] || code)} <b>${fmtInt(n)}</b></span>`));
         if (items.length) {
           stuckEl.innerHTML = '<span class="lbl">Stuck:</span>' + items.join('');
           stuckEl.hidden = false;

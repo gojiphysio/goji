@@ -50,6 +50,13 @@ VALID_STAGES = {"page_view", "service_selected", "time_selected", "details",
                 "submitted", "confirmed",
                 "availability_empty", "availability_error", "validation_error",
                 "book_error", "date_picked", "clinician_changed"}
+# The subset the browser may send to the public /api/track. The rest are logged
+# server-side only: `confirmed`, `book_error` and `availability_empty` are facts
+# the server observed, so accepting them from anyone would let a script forge
+# bookings in the funnel and plant arbitrary `detail` text (an HTML payload in a
+# forged book_error code reached the dashboard's "Stuck" line, 2026-11-12).
+# Keep in sync with the website's FunnelStage type in src/lib/booking.ts.
+CLIENT_STAGES = VALID_STAGES - {"confirmed", "book_error", "availability_empty"}
 # Attribution fields the browser may attach (first-touch, from the landing
 # beacon) so a booking event can be traced to how the visitor arrived.
 ATTRIB_KEYS = ("visitor_id", "utm_source", "utm_campaign", "gclid", "go_click_id")
@@ -420,6 +427,8 @@ def track():
     if request.method == "OPTIONS":
         return "", 204
     data = request.get_json(silent=True) or {}
+    if data.get("stage") not in CLIENT_STAGES:
+        return "", 204   # server-only or unknown stage: drop silently
     _track_async(data.get("stage"), data.get("session_id"), data.get("service"),
                  request.headers.get("User-Agent"), request.headers.get("Referer"),
                  detail=data.get("detail"), attribution=data.get("attribution"))
