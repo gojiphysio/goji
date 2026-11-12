@@ -37,7 +37,7 @@ gcloud config set project "${PROJECT}" >/dev/null
 # `gcloud secrets describe`: under CI the deploy SA can't read Secret Manager, so
 # that check dropped the mount and disabled emails. Keep this matching the CI
 # workflow (.github/workflows/deploy-booking.yml).
-SECRETS="PLATO_API_KEY=plato-api-key:latest,GMAIL_APP_PASSWORD=gmail-app-password:latest"
+SECRETS="PLATO_API_KEY=plato-api-key:latest,GMAIL_APP_PASSWORD=gmail-app-password:latest,TURNSTILE_SECRET=turnstile-secret:latest"
 
 echo "==> Deploying ${SERVICE}"
 gcloud run deploy "${SERVICE}" \
