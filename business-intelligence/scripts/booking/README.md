@@ -18,7 +18,9 @@ the clinic's real rules — see the plan/validation notes in the repo.
 - `POST /api/book` → `{ok, reference}` (409 if the slot was just taken; 429
   `rate_limited` past 10 attempts/IP/hour, 3 bookings/IP/day or 2 per phone or
   email/day, in-memory since we run one instance; names/notes with markup are
-  refused as `validation`. Added after a scanner booked twice on 2026-11-12)
+  refused as `validation`. Added after a scanner booked twice on 2026-11-12).
+  Before any Plato call it also runs the **bot check** (below); a fail is
+  `400 bot_check`, logged as `book_error` with detail `bot_<reason>`
 - `POST /api/track` → funnel event (fire-and-forget) → `marts.booking_funnel_events`
   (stages must be in `VALID_STAGES` in `app.py` — unknown stages are dropped;
   keep the website's `FunnelStage` type in `src/lib/booking.ts` in sync)
@@ -33,6 +35,33 @@ the clinic's real rules — see the plan/validation notes in the repo.
   stopped; clicks are back on live Plato reads). Result cached 60s so probing it can't eat Plato's
   budget. This is what the uptime check watches — plain `/healthcheck` stayed
   green through the 2026-09-01 outage, which is why it exists.
+
+## Bot check on `/api/book`
+The limits cap how much a bot can book; the bot check stops it booking at all.
+`_bot_reason()` in `app.py`, cheapest first:
+- **Honeypot** `company_url`: a hidden field on the form. Filled = script.
+- **Fill time** `elapsed_ms` < `BOOK_MIN_FILL_MS` (3000) = script. Client-reported,
+  so it only stops naive bots; a missing value is let through (old open tabs).
+- **Cloudflare Turnstile** (free): when `TURNSTILE_SECRET` is set, the form's
+  token is required and verified with Cloudflare. This is the only layer a direct
+  API caller can't fake. If Cloudflare is unreachable the booking goes through
+  (an outage there must not close the form; the limits still apply).
+
+**Turning Turnstile on.** The widget's site key is public and lives in
+`marketing/website/src/lib/booking.ts`, so the live form shows the widget once
+that build ships. The backend only enforces it once `TURNSTILE_SECRET` is
+mounted. The order matters: the site goes live with the widget first, or every
+booking is refused.
+1. `printf '%s' '<secret key>' | gcloud secrets create turnstile-secret --data-file=- --project goji-bi`
+   then `gcloud secrets add-iam-policy-binding turnstile-secret --project goji-bi
+   --member serviceAccount:dashboard-sa@goji-bi.iam.gserviceaccount.com
+   --role roles/secretmanager.secretAccessor`.
+2. Once the site with the widget is live, add `,TURNSTILE_SECRET=turnstile-secret:latest`
+   to `--set-secrets` in **both** `deploy.sh` and `.github/workflows/deploy-booking.yml`
+   and merge. Don't set it by hand on the service: the next deploy's flags drop it.
+3. Check the funnel for `book_error` / `bot_captcha_*` the next day.
+Widget settings (hostnames, mode) are in the Cloudflare dashboard → Turnstile.
+To rotate the secret, add a new version of `turnstile-secret` and redeploy.
 
 ## Monitoring
 `setup_monitoring.sh` (re-runnable) provisions a Cloud Monitoring uptime check on
