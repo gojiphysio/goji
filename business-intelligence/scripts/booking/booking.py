@@ -36,6 +36,11 @@ _SGT = ZoneInfo("Asia/Singapore")
 _EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 _PHONE_RE = re.compile(r"^[+\d][\d\s()-]{6,}$")
 _TIME_RE = re.compile(r"^\d{2}:\d{2}$")
+# Markup in a name or note is never a real patient: it is a scanner probing for
+# HTML/script injection (2026-11-12: "<img onerror>" names, "<script>" notes).
+# Names refuse any angle bracket; notes/address refuse only tag-like text, so
+# "pain < 3 weeks" still books.
+_TAG_RE = re.compile(r"<\s*[A-Za-z/!?]")
 
 # Common consumer webmail domains. A booking email like "gmail.con" passes the
 # format check above but bounces, so the confirmation and the clinic's own copy
@@ -149,6 +154,8 @@ def create_booking(plato, draft: dict, *, now: datetime | None = None) -> dict:
     phone = (draft.get("phone") or "").strip()
     email = (draft.get("email") or "").strip()
     _require(name, "Please enter your name.")
+    _require("<" not in name and ">" not in name,
+             "Please enter your name without < or > characters.")
     _require(_PHONE_RE.match(phone), "Please enter a valid phone number.")
     _require(_EMAIL_RE.match(email), "Please enter a valid email.")
     # A well-formed but mistyped domain (gmail.con) would sail through the regex
@@ -169,6 +176,8 @@ def create_booking(plato, draft: dict, *, now: datetime | None = None) -> dict:
     # Optional free-text the patient shares about their condition; capped so a
     # runaway paste can't bloat the Plato appointment note.
     notes = (draft.get("notes") or "").strip()[:1000]
+    _require(not _TAG_RE.search(notes) and not _TAG_RE.search(address),
+             "Please remove the < and > characters from your note.")
 
     # Physiotherapy sub-type the patient chose (website's "What type of
     # physiotherapy?" step). Only meaningful for physiotherapy. `focus_label` is

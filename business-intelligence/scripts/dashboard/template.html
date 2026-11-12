@@ -2690,7 +2690,7 @@
       const stuckEl = document.getElementById('mkt_booking_stuck');
       if (stuckEl) {
         const st = bf.stuck || {};
-        const ERR_LABEL = { slot_taken: 'slot taken', validation: 'invalid details', plato_error: 'system error', error: 'error' };
+        const ERR_LABEL = { slot_taken: 'slot taken', validation: 'invalid details', plato_error: 'system error', rate_limited: 'rate limited', error: 'error' };
         const items = [];
         if (st.availability_empty) items.push(`<span class="stuck-item">no slots on chosen date <b>${fmtInt(st.availability_empty)}</b></span>`);
         if (st.availability_error) items.push(`<span class="stuck-item">times failed to load <b>${fmtInt(st.availability_error)}</b></span>`);

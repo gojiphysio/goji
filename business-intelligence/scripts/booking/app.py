@@ -393,6 +393,59 @@ def availability_summary():
     return jsonify(payload)
 
 
+# Abuse limits for the public booking endpoint (2026-11-12: a scanner created
+# real Plato appointments). In-memory is enough: the service runs with
+# --max-instances=1. A cold start resets the counts, which only errs lenient.
+BOOK_ATTEMPTS_PER_IP_HOUR = int(os.environ.get("BOOK_ATTEMPTS_PER_IP_HOUR", "10"))
+BOOKINGS_PER_IP_DAY = int(os.environ.get("BOOKINGS_PER_IP_DAY", "3"))
+BOOKINGS_PER_CONTACT_DAY = int(os.environ.get("BOOKINGS_PER_CONTACT_DAY", "2"))
+_hits: dict[str, list[float]] = {}
+_hits_lock = threading.Lock()
+RATE_LIMITED_MSG = ("We've already received several bookings from you. "
+                    "Please message us on WhatsApp and we'll help you book.")
+
+
+def _client_ip() -> str:
+    """Cloud Run appends the real client address as the LAST X-Forwarded-For
+    entry; anything before it is whatever the caller sent, so never trust it."""
+    xff = request.headers.get("X-Forwarded-For", "")
+    return (xff.split(",")[-1].strip() if xff else "") or (request.remote_addr or "?")
+
+
+def _count(key: str, window_s: float) -> int:
+    """How many hits `key` has inside the window (prunes older ones)."""
+    now = time.monotonic()
+    with _hits_lock:
+        ts = [t for t in _hits.get(key, []) if now - t < window_s]
+        if ts:
+            _hits[key] = ts
+        else:
+            _hits.pop(key, None)
+        return len(ts)
+
+
+def _hit(*keys: str) -> None:
+    now = time.monotonic()
+    with _hits_lock:
+        for k in keys:
+            _hits.setdefault(k, []).append(now)
+
+
+def _contact_keys(draft: dict) -> list[str]:
+    phone = "".join(ch for ch in str(draft.get("phone") or "") if ch.isdigit())
+    email = str(draft.get("email") or "").strip().lower()
+    return [k for k in (phone and f"phone:{phone[-8:]}", email and f"email:{email}") if k]
+
+
+def _over_limit(ip: str, draft: dict) -> bool:
+    if _count(f"try:{ip}", 3600) >= BOOK_ATTEMPTS_PER_IP_HOUR:
+        return True
+    if _count(f"ok:{ip}", 86400) >= BOOKINGS_PER_IP_DAY:
+        return True
+    return any(_count(f"ok:{k}", 86400) >= BOOKINGS_PER_CONTACT_DAY
+               for k in _contact_keys(draft))
+
+
 @app.route("/api/book", methods=["POST", "OPTIONS"])
 def book():
     if request.method == "OPTIONS":
@@ -400,6 +453,14 @@ def book():
     draft = request.get_json(silent=True) or {}
     ua, ref = request.headers.get("User-Agent"), request.headers.get("Referer")
     attribution = draft.get("attribution") or {}
+    ip = _client_ip()
+    if _over_limit(ip, draft):
+        log.warning("booking rate-limited (ip=%s)", ip)
+        _track_async("book_error", draft.get("session_id"), draft.get("service"),
+                     ua, ref, detail="rate_limited", attribution=attribution)
+        return jsonify({"ok": False, "error": RATE_LIMITED_MSG,
+                        "code": "rate_limited"}), 429
+    _hit(f"try:{ip}")
     try:
         result = create_booking(plato(), draft)
     except BookingError as e:
@@ -415,6 +476,7 @@ def book():
                      ua, ref, detail="plato_error", attribution=attribution)
         return jsonify({"ok": False,
                         "error": "Something went wrong. Please try again or message us."}), 502
+    _hit(f"ok:{ip}", *(f"ok:{k}" for k in _contact_keys(draft)))
     mailer.send_admin_booking_email(result, draft)     # best-effort
     mailer.send_customer_booking_email(result, draft)  # best-effort
     _track_async("confirmed", draft.get("session_id"), draft.get("service"),
