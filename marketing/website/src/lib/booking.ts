@@ -331,9 +331,16 @@ const mockApi: BookingApi = {
   },
 };
 
-/** Cloudflare Turnstile site key (public). Unset = no widget, and the backend
- *  must not have TURNSTILE_SECRET set either, or every booking is refused. */
+/** Cloudflare Turnstile site key for www.gojiphysio.com. Public by design (it
+ *  ships in the page), so it lives here rather than in the Pages dashboard; the
+ *  matching secret is `turnstile-secret` in Secret Manager. Only the real build
+ *  (PUBLIC_BOOKING_API set) uses it: the key is locked to our hostname, so the
+ *  mock build on localhost/previews would only show a failing widget. Override
+ *  with PUBLIC_TURNSTILE_SITE_KEY (Cloudflare's always-pass test key
+ *  1x00000000000000000000AA works on localhost). */
+const GOJI_TURNSTILE_SITE_KEY = "0x4AAAAAAF-VF-HZnvawjuXM";
 export const TURNSTILE_SITE_KEY =
-  (import.meta.env.PUBLIC_TURNSTILE_SITE_KEY as string | undefined) || "";
+  (import.meta.env.PUBLIC_TURNSTILE_SITE_KEY as string | undefined) ||
+  (API ? GOJI_TURNSTILE_SITE_KEY : "");
 
 export const bookingApi: BookingApi = API ? realApi : mockApi;

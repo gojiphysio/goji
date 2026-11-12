@@ -47,18 +47,21 @@ The limits cap how much a bot can book; the bot check stops it booking at all.
   API caller can't fake. If Cloudflare is unreachable the booking goes through
   (an outage there must not close the form; the limits still apply).
 
-**Turning Turnstile on** (off until both keys exist; order matters, or every
-booking is refused):
-1. Cloudflare dashboard → Turnstile → add widget for `www.gojiphysio.com`
-   (Managed mode). Keep the site key and secret key.
-2. Cloudflare Pages → goji → Settings → env vars: `PUBLIC_TURNSTILE_SITE_KEY` =
-   site key; redeploy the site. The widget now shows on step 3.
-3. `gcloud secrets create turnstile-secret --data-file=-` (paste the secret key),
-   grant `dashboard-sa` secretAccessor, then add
-   `,TURNSTILE_SECRET=turnstile-secret:latest` to `--set-secrets` in **both**
-   `deploy.sh` and `.github/workflows/deploy-booking.yml` and merge. (Don't set
-   it by hand on the service: the next deploy's flags would drop it.)
-4. Check the funnel for `book_error` / `bot_captcha_*` the next day.
+**Turning Turnstile on.** The widget's site key is public and lives in
+`marketing/website/src/lib/booking.ts`, so the live form shows the widget once
+that build ships. The backend only enforces it once `TURNSTILE_SECRET` is
+mounted. The order matters: the site goes live with the widget first, or every
+booking is refused.
+1. `printf '%s' '<secret key>' | gcloud secrets create turnstile-secret --data-file=- --project goji-bi`
+   then `gcloud secrets add-iam-policy-binding turnstile-secret --project goji-bi
+   --member serviceAccount:dashboard-sa@goji-bi.iam.gserviceaccount.com
+   --role roles/secretmanager.secretAccessor`.
+2. Once the site with the widget is live, add `,TURNSTILE_SECRET=turnstile-secret:latest`
+   to `--set-secrets` in **both** `deploy.sh` and `.github/workflows/deploy-booking.yml`
+   and merge. Don't set it by hand on the service: the next deploy's flags drop it.
+3. Check the funnel for `book_error` / `bot_captcha_*` the next day.
+Widget settings (hostnames, mode) are in the Cloudflare dashboard → Turnstile.
+To rotate the secret, add a new version of `turnstile-secret` and redeploy.
 
 ## Monitoring
 `setup_monitoring.sh` (re-runnable) provisions a Cloud Monitoring uptime check on
