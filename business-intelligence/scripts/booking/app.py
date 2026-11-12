@@ -50,6 +50,13 @@ VALID_STAGES = {"page_view", "service_selected", "time_selected", "details",
                 "submitted", "confirmed",
                 "availability_empty", "availability_error", "validation_error",
                 "book_error", "date_picked", "clinician_changed"}
+# The subset the browser may send to the public /api/track. The rest are logged
+# server-side only: `confirmed`, `book_error` and `availability_empty` are facts
+# the server observed, so accepting them from anyone would let a script forge
+# bookings in the funnel and plant arbitrary `detail` text (an HTML payload in a
+# forged book_error code reached the dashboard's "Stuck" line, 2026-11-12).
+# Keep in sync with the website's FunnelStage type in src/lib/booking.ts.
+CLIENT_STAGES = VALID_STAGES - {"confirmed", "book_error", "availability_empty"}
 # Attribution fields the browser may attach (first-touch, from the landing
 # beacon) so a booking event can be traced to how the visitor arrived.
 ATTRIB_KEYS = ("visitor_id", "utm_source", "utm_campaign", "gclid", "go_click_id")
@@ -386,6 +393,59 @@ def availability_summary():
     return jsonify(payload)
 
 
+# Abuse limits for the public booking endpoint (2026-11-12: a scanner created
+# real Plato appointments). In-memory is enough: the service runs with
+# --max-instances=1. A cold start resets the counts, which only errs lenient.
+BOOK_ATTEMPTS_PER_IP_HOUR = int(os.environ.get("BOOK_ATTEMPTS_PER_IP_HOUR", "10"))
+BOOKINGS_PER_IP_DAY = int(os.environ.get("BOOKINGS_PER_IP_DAY", "3"))
+BOOKINGS_PER_CONTACT_DAY = int(os.environ.get("BOOKINGS_PER_CONTACT_DAY", "2"))
+_hits: dict[str, list[float]] = {}
+_hits_lock = threading.Lock()
+RATE_LIMITED_MSG = ("We've already received several bookings from you. "
+                    "Please message us on WhatsApp and we'll help you book.")
+
+
+def _client_ip() -> str:
+    """Cloud Run appends the real client address as the LAST X-Forwarded-For
+    entry; anything before it is whatever the caller sent, so never trust it."""
+    xff = request.headers.get("X-Forwarded-For", "")
+    return (xff.split(",")[-1].strip() if xff else "") or (request.remote_addr or "?")
+
+
+def _count(key: str, window_s: float) -> int:
+    """How many hits `key` has inside the window (prunes older ones)."""
+    now = time.monotonic()
+    with _hits_lock:
+        ts = [t for t in _hits.get(key, []) if now - t < window_s]
+        if ts:
+            _hits[key] = ts
+        else:
+            _hits.pop(key, None)
+        return len(ts)
+
+
+def _hit(*keys: str) -> None:
+    now = time.monotonic()
+    with _hits_lock:
+        for k in keys:
+            _hits.setdefault(k, []).append(now)
+
+
+def _contact_keys(draft: dict) -> list[str]:
+    phone = "".join(ch for ch in str(draft.get("phone") or "") if ch.isdigit())
+    email = str(draft.get("email") or "").strip().lower()
+    return [k for k in (phone and f"phone:{phone[-8:]}", email and f"email:{email}") if k]
+
+
+def _over_limit(ip: str, draft: dict) -> bool:
+    if _count(f"try:{ip}", 3600) >= BOOK_ATTEMPTS_PER_IP_HOUR:
+        return True
+    if _count(f"ok:{ip}", 86400) >= BOOKINGS_PER_IP_DAY:
+        return True
+    return any(_count(f"ok:{k}", 86400) >= BOOKINGS_PER_CONTACT_DAY
+               for k in _contact_keys(draft))
+
+
 @app.route("/api/book", methods=["POST", "OPTIONS"])
 def book():
     if request.method == "OPTIONS":
@@ -393,6 +453,14 @@ def book():
     draft = request.get_json(silent=True) or {}
     ua, ref = request.headers.get("User-Agent"), request.headers.get("Referer")
     attribution = draft.get("attribution") or {}
+    ip = _client_ip()
+    if _over_limit(ip, draft):
+        log.warning("booking rate-limited (ip=%s)", ip)
+        _track_async("book_error", draft.get("session_id"), draft.get("service"),
+                     ua, ref, detail="rate_limited", attribution=attribution)
+        return jsonify({"ok": False, "error": RATE_LIMITED_MSG,
+                        "code": "rate_limited"}), 429
+    _hit(f"try:{ip}")
     try:
         result = create_booking(plato(), draft)
     except BookingError as e:
@@ -408,6 +476,7 @@ def book():
                      ua, ref, detail="plato_error", attribution=attribution)
         return jsonify({"ok": False,
                         "error": "Something went wrong. Please try again or message us."}), 502
+    _hit(f"ok:{ip}", *(f"ok:{k}" for k in _contact_keys(draft)))
     mailer.send_admin_booking_email(result, draft)     # best-effort
     mailer.send_customer_booking_email(result, draft)  # best-effort
     _track_async("confirmed", draft.get("session_id"), draft.get("service"),
@@ -420,6 +489,8 @@ def track():
     if request.method == "OPTIONS":
         return "", 204
     data = request.get_json(silent=True) or {}
+    if data.get("stage") not in CLIENT_STAGES:
+        return "", 204   # server-only or unknown stage: drop silently
     _track_async(data.get("stage"), data.get("session_id"), data.get("service"),
                  request.headers.get("User-Agent"), request.headers.get("Referer"),
                  detail=data.get("detail"), attribution=data.get("attribution"))

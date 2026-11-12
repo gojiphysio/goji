@@ -27,6 +27,11 @@ See `DEPLOY.md`.
   - **Base CSS must come before `@media` blocks** — equal-specificity rules later
     in source win, so base after a media query silently overrides it.
   - The page-nav pill is `inline-flex` so it hugs its tabs.
+- **Every data value through `innerHTML` goes through `escapeHtml`/`esc`** — even
+  ones that "are always codes". Patient names and notes come from Plato, and the
+  funnel/beacon tables are written by public endpoints, so any of them can carry
+  an HTML payload (a security scanner booked with `<script>` in name + notes on
+  2026-11-12). Only static labels and numbers through `fmt*` may go in raw.
 
 ## Backend
 - **Auth is per-route** via `@require_roles(...)`; there's no global guard. A

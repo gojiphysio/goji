@@ -2690,14 +2690,14 @@
       const stuckEl = document.getElementById('mkt_booking_stuck');
       if (stuckEl) {
         const st = bf.stuck || {};
-        const ERR_LABEL = { slot_taken: 'slot taken', validation: 'invalid details', plato_error: 'system error', error: 'error' };
+        const ERR_LABEL = { slot_taken: 'slot taken', validation: 'invalid details', plato_error: 'system error', rate_limited: 'rate limited', error: 'error' };
         const items = [];
         if (st.availability_empty) items.push(`<span class="stuck-item">no slots on chosen date <b>${fmtInt(st.availability_empty)}</b></span>`);
         if (st.availability_error) items.push(`<span class="stuck-item">times failed to load <b>${fmtInt(st.availability_error)}</b></span>`);
         if (st.validation_error)   items.push(`<span class="stuck-item">form errors <b>${fmtInt(st.validation_error)}</b></span>`);
         const byCode = st.book_error_by_code || {};
         Object.entries(byCode).sort((a, b) => b[1] - a[1]).forEach(([code, n]) =>
-          items.push(`<span class="stuck-item">${ERR_LABEL[code] || code} <b>${fmtInt(n)}</b></span>`));
+          items.push(`<span class="stuck-item">${escapeHtml(ERR_LABEL[code] || code)} <b>${fmtInt(n)}</b></span>`));
         if (items.length) {
           stuckEl.innerHTML = '<span class="lbl">Stuck:</span>' + items.join('');
           stuckEl.hidden = false;

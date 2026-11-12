@@ -15,7 +15,10 @@ the clinic's real rules — see the plan/validation notes in the repo.
   `{available: [dates]}` — which dates in the month have any slot (the website
   calendar's shading + first-free-date auto-pick). One Plato appointments fetch
   covers the month; cached ~5 min (`AVAIL_SUMMARY_CACHE_TTL`).
-- `POST /api/book` → `{ok, reference}` (409 if the slot was just taken)
+- `POST /api/book` → `{ok, reference}` (409 if the slot was just taken; 429
+  `rate_limited` past 10 attempts/IP/hour, 3 bookings/IP/day or 2 per phone or
+  email/day, in-memory since we run one instance; names/notes with markup are
+  refused as `validation`. Added after a scanner booked twice on 2026-11-12)
 - `POST /api/track` → funnel event (fire-and-forget) → `marts.booking_funnel_events`
   (stages must be in `VALID_STAGES` in `app.py` — unknown stages are dropped;
   keep the website's `FunnelStage` type in `src/lib/booking.ts` in sync)
