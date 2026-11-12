@@ -58,6 +58,17 @@ export interface AvailableDaysQuery {
   home: boolean;
 }
 
+/** What the form sends alongside the draft so the backend can tell a person
+ *  from a script (see "Bot check" in the booking service's app.py). */
+export interface BookingProof {
+  /** The hidden bot-trap field. Always "" for a person. */
+  companyUrl: string;
+  /** Milliseconds since the form loaded. */
+  elapsedMs: number;
+  /** Cloudflare Turnstile token, when PUBLIC_TURNSTILE_SITE_KEY is set. */
+  turnstileToken?: string;
+}
+
 export interface BookingResult {
   ok: boolean;
   reference?: string;
@@ -83,7 +94,7 @@ export interface BookingApi {
   /** The dates in a calendar month with at least one bookable slot — powers the
    *  calendar's availability shading and the first-free-date auto-pick. */
   getAvailableDays(query: AvailableDaysQuery): Promise<string[]>;
-  createBooking(draft: BookingDraft): Promise<BookingResult>;
+  createBooking(draft: BookingDraft, proof: BookingProof): Promise<BookingResult>;
   /** Fire-and-forget funnel event; no-op in the mock. `detail` adds context for
    *  stuck events (e.g. which field failed validation). */
   track(stage: FunnelStage, detail?: string): void;
@@ -187,7 +198,7 @@ const realApi: BookingApi = {
     return Array.isArray(d.available) ? d.available : [];
   },
 
-  async createBooking(draft) {
+  async createBooking(draft, proof) {
     try {
       const r = await fetch(`${API}/api/book`, {
         method: "POST",
@@ -205,6 +216,9 @@ const realApi: BookingApi = {
           clinician_id: draft.clinicianId,
           address: draft.address,
           notes: draft.notes,
+          company_url: proof.companyUrl,
+          elapsed_ms: proof.elapsedMs,
+          turnstile_token: proof.turnstileToken,
           session_id: bookingSessionId(),
           attribution: bookingAttribution(),
         }),
@@ -299,7 +313,7 @@ const mockApi: BookingApi = {
     }
     return out;
   },
-  async createBooking(draft) {
+  async createBooking(draft, _proof) {
     await new Promise((r) => setTimeout(r, MOCK_LATENCY_MS));
     if (!draft.service || !draft.date || !draft.time || !draft.name) {
       return { ok: false, error: "Missing required booking details." };
@@ -316,5 +330,10 @@ const mockApi: BookingApi = {
     /* no-op in the mock */
   },
 };
+
+/** Cloudflare Turnstile site key (public). Unset = no widget, and the backend
+ *  must not have TURNSTILE_SECRET set either, or every booking is refused. */
+export const TURNSTILE_SITE_KEY =
+  (import.meta.env.PUBLIC_TURNSTILE_SITE_KEY as string | undefined) || "";
 
 export const bookingApi: BookingApi = API ? realApi : mockApi;

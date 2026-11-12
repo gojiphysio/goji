@@ -21,6 +21,7 @@ import time
 import uuid
 from datetime import date, datetime, timedelta, timezone
 
+import requests
 from flask import Flask, jsonify, request
 
 from .availability import SGT, derive_availability, derive_available_days
@@ -446,6 +447,58 @@ def _over_limit(ip: str, draft: dict) -> bool:
                for k in _contact_keys(draft))
 
 
+# Bot check for /api/book. The limits above cap how much a bot can do; this
+# keeps it from booking at all. Three layers, cheapest first:
+#   - honeypot: the form has a hidden field (`company_url`) people never see;
+#     anything that fills it is a script.
+#   - fill time: the form reports ms since it loaded. A 3-step form finished in
+#     under BOOK_MIN_FILL_MS was not filled by a person. Client-reported, so it
+#     only stops naive bots; a caller that omits it is let through (an open tab
+#     may still run the older form).
+#   - Turnstile: when TURNSTILE_SECRET is set, the form's Cloudflare Turnstile
+#     token is required and verified with Cloudflare. This is the real gate, and
+#     the only layer a direct API caller cannot fake.
+BOOK_MIN_FILL_MS = int(os.environ.get("BOOK_MIN_FILL_MS", "3000"))
+TURNSTILE_SECRET = os.environ.get("TURNSTILE_SECRET", "").strip()
+TURNSTILE_VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
+BOT_CHECK_MSG = ("We couldn't verify this booking. Please try again, or message "
+                 "us on WhatsApp and we'll book you in.")
+
+
+def _turnstile_ok(token: str, ip: str) -> bool:
+    """Ask Cloudflare whether the form's Turnstile token is genuine. If
+    Cloudflare itself can't be reached we let the booking through: an outage
+    there must not close the clinic's booking form, and the limits still apply."""
+    try:
+        r = requests.post(TURNSTILE_VERIFY_URL, timeout=5,
+                          data={"secret": TURNSTILE_SECRET, "response": token,
+                                "remoteip": ip})
+        body = r.json()
+    except Exception as e:
+        log.warning("turnstile verify unreachable, allowing booking: %s", e)
+        return True
+    if not body.get("success"):
+        log.warning("turnstile rejected token: %s", body.get("error-codes"))
+    return bool(body.get("success"))
+
+
+def _bot_reason(draft: dict, ip: str) -> str | None:
+    """Why this submission looks automated, or None if it passes."""
+    if str(draft.get("company_url") or "").strip():
+        return "honeypot"
+    elapsed = draft.get("elapsed_ms")
+    if (isinstance(elapsed, (int, float)) and not isinstance(elapsed, bool)
+            and elapsed < BOOK_MIN_FILL_MS):
+        return "too_fast"
+    if TURNSTILE_SECRET:
+        token = str(draft.get("turnstile_token") or "").strip()
+        if not token:
+            return "captcha_missing"
+        if not _turnstile_ok(token[:2048], ip):
+            return "captcha_failed"
+    return None
+
+
 @app.route("/api/book", methods=["POST", "OPTIONS"])
 def book():
     if request.method == "OPTIONS":
@@ -461,6 +514,12 @@ def book():
         return jsonify({"ok": False, "error": RATE_LIMITED_MSG,
                         "code": "rate_limited"}), 429
     _hit(f"try:{ip}")
+    bot = _bot_reason(draft, ip)
+    if bot:
+        log.warning("booking refused by bot check (%s, ip=%s)", bot, ip)
+        _track_async("book_error", draft.get("session_id"), draft.get("service"),
+                     ua, ref, detail=f"bot_{bot}", attribution=attribution)
+        return jsonify({"ok": False, "error": BOT_CHECK_MSG, "code": "bot_check"}), 400
     try:
         result = create_booking(plato(), draft)
     except BookingError as e:

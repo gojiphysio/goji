@@ -80,6 +80,11 @@ so a token change reflows everything (styleguide is the QA surface).
   `bookingApi.track()` stage must be added to `VALID_STAGES` in
   `business-intelligence/scripts/booking/app.py` (and the `FunnelStage` type in
   `src/lib/booking.ts`) in the same PR, or the backend silently drops it.
+- **The booking form proves it's a person.** Keep the hidden `company_url`
+  honeypot empty and untabbable, and keep sending `elapsed_ms` and the Turnstile
+  token with `/api/book`. Never set the backend's `TURNSTILE_SECRET` before the
+  site has `PUBLIC_TURNSTILE_SITE_KEY` live, or every booking is refused
+  (rollout steps: `business-intelligence/scripts/booking/README.md`).
   `service_selected` with `detail = "deep_link"` means step 1 was skipped (a
   service page's `/book/?service=…` link already filled it), so count those
   apart when reading step-1 drop-off. `detail = "no_focus"` means Continue was
