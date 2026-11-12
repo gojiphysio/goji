@@ -388,7 +388,9 @@ class PlatoClient:
                 return snap
         ttl = APPTS_TTL_S if single else APPTS_RANGE_TTL_S
         hit = self._appts_cache.get(key)
-        if hit and time.monotonic() - hit[0] < ttl:
+        # fresh never takes a cached copy, however young: another visitor (or
+        # another instance's booking) can have filled the slot inside the TTL.
+        if hit and not fresh and time.monotonic() - hit[0] < ttl:
             return hit[1]
         if single and not fresh:
             covered = self._day_from_range(start_date)
@@ -398,7 +400,7 @@ class PlatoClient:
         with self._key_lock(key):
             # Another thread may have finished this very fetch while we queued.
             hit = self._appts_cache.get(key)
-            if hit and time.monotonic() - hit[0] < ttl:
+            if hit and not fresh and time.monotonic() - hit[0] < ttl:
                 return hit[1]
             try:
                 rows = self._fetch_appointments(key, bulk=not single)
