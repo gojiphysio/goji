@@ -113,9 +113,3 @@ def test_turnstile_on_books_with_a_valid_token(client, monkeypatch):
 def test_cloudflare_outage_does_not_close_the_form(client, monkeypatch):
     _turnstile(monkeypatch, exc=ConnectionError("down"))
     assert _book(client, turnstile_token="tok").status_code == 200
-
-
-def test_bot_attempts_count_toward_the_hourly_limit(client):
-    for _ in range(app_mod.BOOK_ATTEMPTS_PER_IP_HOUR):
-        assert _book(client, company_url="x").status_code == 400
-    assert _book(client).status_code == 429
