@@ -121,6 +121,8 @@ before merge (ban list: https://github.com/MohamedAbdallah-14/unslop,
 - `ogImage` is a 1200x630 JPG crop of the hero in `public/og/blog/<slug>.jpg`
   (the WhatsApp/Facebook preview). `heroAlt` describes what a sighted reader
   sees, as a sentence.
+- Index cards crop the hero to tall and square shapes. If the subject is off
+  centre, set `heroFocus` to where it sits (a CSS object-position, `"22% 50%"`).
 - Body photos are plain Markdown images; the template frames them.
 
 ## Links and CTAs

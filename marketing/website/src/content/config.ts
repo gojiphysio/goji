@@ -187,10 +187,13 @@ const blog = defineCollection({
       "Clinic News",
     ]),
     tags: z.array(z.string()).default([]),
-    /** Hero photo (path under /public) + alt text: a real, consented clinic
-     *  photo, never stock. Shown in the petal frame and on the index cards. */
+    /** Hero photo (path under /public) + alt text. Shown in the petal frame
+     *  and on the index cards. Sourcing rules: content-engine/blog-brief.md. */
     heroImage: z.string().optional(),
     heroAlt: z.string().optional(),
+    /** Where the subject sits in the hero, as a CSS object-position ("20% 50%").
+     *  Index cards crop the photo to their shape; this keeps the subject in. */
+    heroFocus: z.string().optional(),
     /** 1200x630 JPG crop of the hero for link previews (WhatsApp, Facebook),
      *  under /public/og/blog/. Falls back to the site-wide image. */
     ogImage: z.string().optional(),
