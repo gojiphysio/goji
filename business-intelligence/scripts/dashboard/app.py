@@ -96,6 +96,9 @@ PROVIDERS = {
     "PCN": "Claire Ng",
     "PCL": "Cheryl Long",
     "PKN": "Kristy Ng",
+    # Not a clinician: the Plato "doctor" website shop invoices are billed under
+    # (booking/shop.py, SHOP_PLATO_DOCTOR), so shop sales aren't credited to anyone.
+    "SHP": "Online Shop",
 }
 DIRECTOR_ID = "PCL"
 
@@ -207,7 +210,24 @@ LINK_SLUGS: dict[str, dict] = {
     "qr-99-wa":  {"kind": "whatsapp", "label": "QR",       "text": PROMO_99_TEXT},
     "ig-99-wa":  {"kind": "whatsapp", "label": "IG",       "text": PROMO_99_TEXT},
     "99-wa":     {"kind": "whatsapp", "label": "Social",   "text": PROMO_99_TEXT},  # generic fallback
+    # --- Shop: "<channel>-pay-<item>" → that item's Stripe Payment Link ---
+    **{f"web-pay-{item}": {"kind": "pay", "label": "Web", "item": item} for item in (
+        "pp-1to1-1", "pp-1to1-5", "pp-1to1-10", "pp-2to1-1", "pp-2to1-5", "pp-2to1-10",
+        "cpsc-1to1-1", "cpsc-1to1-5", "cpsc-1to1-10", "cpsc-2to1-1", "cpsc-2to1-5", "cpsc-2to1-10",
+        "gift-voucher",
+        "socks-girl-grip", "socks-girl-nongrip", "socks-gang-grip", "socks-gang-nongrip",
+    )},
 }
+# Shop item → Stripe Payment Link (scripts/shop/stripe_catalog.py writes these to
+# shop_links.<mode>.json; paste the live ones here). An item with no URL yet
+# falls back to the /shop page, so a published shop link never dead-ends.
+SHOP_PAY_URLS: dict[str, str] = {
+    # The Private Pilates links (shop_links.live.json) charge the old intro prices,
+    # so they're unhooked until a live stripe_catalog.py run makes links at the
+    # price-card prices; until then those slugs fall back to /shop/ (the cart).
+    "gift-voucher": "https://buy.stripe.com/14A9AS0Va0Um1569WOejK04",
+}
+SHOP_FALLBACK_URL = "https://www.gojiphysio.com/shop/"
 # slug -> kind, for splitting the click metric (WhatsApp vs booking).
 LINK_SLUG_KIND = {s: c["kind"] for s, c in LINK_SLUGS.items()}
 
@@ -1444,8 +1464,10 @@ GROUP BY c.slug
     book_by_slug: dict[str, int] = {}
     for r in rows:
         kind = LINK_SLUG_KIND.get(r["slug"])
-        if kind is None:
-            continue  # unknown slug = bot/scanner traffic, not a marketing channel
+        if kind is None or kind == "pay":
+            # unknown slug = bot/scanner traffic, not a marketing channel; shop
+            # (pay) clicks are neither a WhatsApp nor a booking CTA.
+            continue
         n = _to_int(r["clicks"])
         if kind == "book":  # website /book form (incl. retired *-plato slugs)
             book_by_slug[r["slug"]] = n
@@ -3831,10 +3853,19 @@ def _slug_target(slug: str, click_id: str | None = None) -> str:
     `?cid=` plus `?src=<slug>`, so the site's landing beacon can record them on
     web_session_events — that's the exact join back to this click
     (link_click_events.click_id) and the origin→booking attribution chain.
-    WhatsApp targets are external, so the passthrough doesn't apply there."""
+    WhatsApp targets are external, so the passthrough doesn't apply there.
+
+    For `pay` slugs the click_id rides to Stripe as `client_reference_id`, which
+    Stripe stores on the Checkout Session: the exact join from a purchase back
+    to this click."""
     cfg = LINK_SLUGS.get(slug)
     if not cfg:
         return WHATSAPP_FALLBACK_URL
+    if cfg["kind"] == "pay":
+        url = SHOP_PAY_URLS.get(cfg["item"])
+        if not url:
+            return SHOP_FALLBACK_URL
+        return f"{url}?client_reference_id={click_id}" if click_id else url
     if cfg["kind"] == "book":
         base = SITE_BOOKING_URL or WHATSAPP_FALLBACK_URL
         if click_id and base:
