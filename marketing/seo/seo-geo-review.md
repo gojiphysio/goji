@@ -57,12 +57,14 @@ Rank Sweep `../strategy/05-30-day-campaigns.md` (Campaign 5).
 
 ## 2. Current-state audit (2026-07-13)
 
-> **Latest loop run: 2026-11-11** (`audits/2026-11-11/summary.md`). ChatGPT
-> (logged out, sg-ip) names Goji 14/47 (26 Oct: 12/47), every time citing
-> gojiphysio.com; it quotes the home visit at S$330 (site: S$380). Claude,
-> Google and Search Console not measured (claude.ai signed out, Google
-> skipped, `bq` auth). Technical: `/team/` 404 and postpartum title fixed by
-> #222/#223 (merged 11 Nov).
+> **Latest loop run: 2026-11-12** (`audits/2026-11-12/summary.md`), the first
+> unattended run on tidepool. No engine measured: headless Chrome hit Google's
+> CAPTCHA and ChatGPT's Cloudflare challenge on request 1, and claude.ai has no
+> signed-in profile there. Search Console n/a (no `gcloud`/`bq`). Technical:
+> live audit 0 errors (`/team/` fix live); the last `check_dist` warning, the
+> Zaobao title, is fixed in #226. The S$330/S$380 mix-up likely traces to
+> `llms.txt:33`, which pairs the two prices in one sentence (fix: owner).
+> Last engine data: 2026-11-11, ChatGPT (logged out, sg-ip) names Goji 14/47.
 
 **Strong already** — canonical URLs on every page; `@astrojs/sitemap` +
 robots.txt; site-wide MedicalClinic/LocalBusiness JSON-LD with NAP, hours,
