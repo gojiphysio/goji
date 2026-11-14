@@ -394,11 +394,11 @@ def availability_summary():
     return jsonify(payload)
 
 
-# Abuse limits for the public booking endpoint (2026-11-12: a scanner created
+# Abuse limit for the public booking endpoint (2026-11-12: a scanner created
 # real Plato appointments). In-memory is enough: the service runs with
 # --max-instances=1. A cold start resets the counts, which only errs lenient.
-BOOK_ATTEMPTS_PER_IP_HOUR = int(os.environ.get("BOOK_ATTEMPTS_PER_IP_HOUR", "10"))
-BOOKINGS_PER_IP_DAY = int(os.environ.get("BOOKINGS_PER_IP_DAY", "3"))
+# Per contact only, not per IP: Singapore mobile carriers put many customers
+# behind one IP, and Turnstile (below) is what stops scripts (2026-11-13).
 BOOKINGS_PER_CONTACT_DAY = int(os.environ.get("BOOKINGS_PER_CONTACT_DAY", "2"))
 _hits: dict[str, list[float]] = {}
 _hits_lock = threading.Lock()
@@ -438,16 +438,12 @@ def _contact_keys(draft: dict) -> list[str]:
     return [k for k in (phone and f"phone:{phone[-8:]}", email and f"email:{email}") if k]
 
 
-def _over_limit(ip: str, draft: dict) -> bool:
-    if _count(f"try:{ip}", 3600) >= BOOK_ATTEMPTS_PER_IP_HOUR:
-        return True
-    if _count(f"ok:{ip}", 86400) >= BOOKINGS_PER_IP_DAY:
-        return True
+def _over_limit(draft: dict) -> bool:
     return any(_count(f"ok:{k}", 86400) >= BOOKINGS_PER_CONTACT_DAY
                for k in _contact_keys(draft))
 
 
-# Bot check for /api/book. The limits above cap how much a bot can do; this
+# Bot check for /api/book. The limit above caps how much a bot can do; this
 # keeps it from booking at all. Three layers, cheapest first:
 #   - honeypot: the form has a hidden field (`company_url`) people never see;
 #     anything that fills it is a script.
@@ -507,13 +503,12 @@ def book():
     ua, ref = request.headers.get("User-Agent"), request.headers.get("Referer")
     attribution = draft.get("attribution") or {}
     ip = _client_ip()
-    if _over_limit(ip, draft):
+    if _over_limit(draft):
         log.warning("booking rate-limited (ip=%s)", ip)
         _track_async("book_error", draft.get("session_id"), draft.get("service"),
                      ua, ref, detail="rate_limited", attribution=attribution)
         return jsonify({"ok": False, "error": RATE_LIMITED_MSG,
                         "code": "rate_limited"}), 429
-    _hit(f"try:{ip}")
     bot = _bot_reason(draft, ip)
     if bot:
         log.warning("booking refused by bot check (%s, ip=%s)", bot, ip)
@@ -535,7 +530,7 @@ def book():
                      ua, ref, detail="plato_error", attribution=attribution)
         return jsonify({"ok": False,
                         "error": "Something went wrong. Please try again or message us."}), 502
-    _hit(f"ok:{ip}", *(f"ok:{k}" for k in _contact_keys(draft)))
+    _hit(*(f"ok:{k}" for k in _contact_keys(draft)))
     mailer.send_admin_booking_email(result, draft)     # best-effort
     mailer.send_customer_booking_email(result, draft)  # best-effort
     _track_async("confirmed", draft.get("session_id"), draft.get("service"),

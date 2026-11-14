@@ -41,31 +41,18 @@ def test_same_phone_is_capped_per_day(client, monkeypatch):
     assert r.status_code == 429 and r.get_json()["code"] == "rate_limited"
 
 
-def test_same_ip_is_capped_per_day(client, monkeypatch):
+def test_one_shared_ip_is_not_capped(client, monkeypatch):
+    """SG mobile carriers put many customers behind one IP (CGNAT): different
+    people booking from the same address must all get through."""
     _ok(monkeypatch)
-    for i in range(app_mod.BOOKINGS_PER_IP_DAY):
-        assert _book(client, phone=f"+65 8000 000{i}",
+    for i in range(10):
+        assert _book(client, ip="5.5.5.5", phone=f"+65 8000 00{i:02d}",
                      email=f"p{i}@example.com").status_code == 200
-    assert _book(client, phone="+65 8000 0099", email="z@example.com").status_code == 429
 
 
-def test_failed_attempts_are_capped_per_hour(client, monkeypatch):
+def test_failed_attempts_from_one_ip_are_not_capped(client, monkeypatch):
     def fail(_p, _d):
         raise BookingError("That time is no longer available.", "slot_taken")
     monkeypatch.setattr(app_mod, "create_booking", fail)
-    for _ in range(app_mod.BOOK_ATTEMPTS_PER_IP_HOUR):
+    for _ in range(15):
         assert _book(client).status_code == 409
-    assert _book(client).status_code == 429
-
-
-def test_spoofed_leading_forwarded_for_does_not_dodge_the_limit(client, monkeypatch):
-    """Only the last X-Forwarded-For entry (added by Cloud Run) is the client."""
-    _ok(monkeypatch)
-    for i in range(app_mod.BOOKINGS_PER_IP_DAY):
-        r = client.post("/api/book",
-                        json={**DRAFT, "phone": f"+65 8100 000{i}", "email": f"s{i}@example.com"},
-                        headers={"X-Forwarded-For": f"10.0.0.{i}, 5.5.5.5"})
-        assert r.status_code == 200
-    r = client.post("/api/book", json={**DRAFT, "phone": "+65 8100 0099", "email": "y@example.com"},
-                    headers={"X-Forwarded-For": "10.0.0.99, 5.5.5.5"})
-    assert r.status_code == 429
