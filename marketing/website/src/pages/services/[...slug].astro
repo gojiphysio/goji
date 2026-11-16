@@ -5,6 +5,7 @@ import FaqList from "../../components/FaqList.astro";
 import Section from "../../components/Section.astro";
 import Button from "../../components/Button.astro";
 import { clinicRef } from "../../lib/schema.ts";
+import { existsSync } from "node:fs";
 
 export async function getStaticPaths() {
   const services = await getCollection("services", ({ data }) => !data.draft);
@@ -12,6 +13,14 @@ export async function getStaticPaths() {
 }
 
 const { entry } = Astro.props;
+
+// Phones get the 800px copy of the hero (`<name>-800.webp`, ~18 KB vs ~46 KB)
+// when one exists: it is the LCP element on service pages.
+const heroSmall = (src?: string) => {
+  if (!src) return undefined;
+  const v = src.replace(/\.webp$/, "-800.webp");
+  return v !== src && existsSync(`public${v}`) ? v : undefined;
+};
 const { Content } = await entry.render();
 const {
   title,
@@ -128,7 +137,15 @@ if (faqs?.length) {
       </div>
       {heroImage && (
         <div class="svc-hero__media">
-          <img src={heroImage} alt={heroAlt ?? (cardTitle ?? title)} width="720" height="560" fetchpriority="high" />
+          <img
+            src={heroImage}
+            srcset={heroSmall(heroImage) ? `${heroSmall(heroImage)} 800w, ${heroImage} 1440w` : undefined}
+            sizes={heroSmall(heroImage) ? "(min-width: 860px) 560px, calc(100vw - 48px)" : undefined}
+            alt={heroAlt ?? (cardTitle ?? title)}
+            width="720"
+            height="560"
+            fetchpriority="high"
+          />
         </div>
       )}
     </div>
