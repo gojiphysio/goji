@@ -5,10 +5,17 @@
  * and the individual service and condition pages, leaving Google no single
  * URL to rank for the broad term (2026-08 SEO review; ../../seo/seo-geo-review.md).
  *
- * This page is a HUB, not another explainer: it summarises each area in a few
- * lines and hands off to the page that owns that keyword. Every card links
- * down to a service or condition page, and those pages link back up here — the
- * internal-link structure is the point.
+ * This page is a HUB: it summarises each area in a few lines and hands off to
+ * the page that owns that keyword. Every card links down to a service or
+ * condition page, and those pages link back up here — the internal-link
+ * structure is the point.
+ *
+ * Since 2026-11 it is also an answer-first explainer for the generic query
+ * ("women's health physiotherapy", GSC pos ~54): question-shaped H2s (what is
+ * it, which conditions, first appointment, referral, cost). The conditions
+ * table only RESTATES each condition page's "What does a session involve"
+ * section; any new clinical claim here needs a primary source linked inline
+ * and listed in `sources` (emitted as `citation` in the JSON-LD).
  *
  * Compliance (Lane A, ../../strategy/03-compliance-guardrails.md): education
  * first, no superlatives, no comparisons, no cure or outcome guarantees, no
@@ -63,38 +70,132 @@ const services = [
   },
 ];
 
-/** Conditions we assess, grouped so a searcher finds their own words fast. */
+/**
+ * Conditions we assess, grouped so a searcher finds their own words fast.
+ * `concern` is the searcher's words; `involves` restates the condition page's
+ * own "What does a session at Goji involve?" section (reviewed copy) - edit
+ * that page first, then mirror it here, never the other way round.
+ */
 const conditionGroups = [
   {
     heading: "Bladder, bowel and prolapse",
     items: [
-      { href: "/conditions/urinary-incontinence/", name: "Urinary incontinence and leakage" },
-      { href: "/conditions/pelvic-organ-prolapse/", name: "Pelvic organ prolapse" },
-      { href: "/conditions/bowel-dysfunction/", name: "Bowel dysfunction and constipation" },
+      {
+        href: "/conditions/urinary-incontinence/",
+        name: "Urinary incontinence and leakage",
+        concern: "Leaking when you cough, sneeze or exercise, or a sudden urge to go",
+        involves:
+          "A bladder history, a pelvic floor muscle assessment and load testing, then a programme designed for your pelvic floor.",
+      },
+      {
+        href: "/conditions/pelvic-organ-prolapse/",
+        name: "Pelvic organ prolapse",
+        concern: "Heaviness, pressure or dragging in the pelvis",
+        involves:
+          "A pelvic floor assessment and symptom mapping, then progressive pelvic floor strengthening, movement strategies and lifestyle advice.",
+      },
+      {
+        href: "/conditions/bowel-dysfunction/",
+        name: "Bowel dysfunction and constipation",
+        concern: "Constipation, straining, or difficulty controlling your bowels or wind",
+        involves:
+          "A bowel history and pelvic floor assessment. Treatment may include pelvic floor downtraining, toilet position advice and a graded bowel retraining programme.",
+      },
     ],
   },
   {
     heading: "Pregnancy and birth",
     items: [
-      { href: "/conditions/prenatal-care/", name: "Prenatal care and birth preparation" },
-      { href: "/conditions/pelvic-girdle-pain/", name: "Pelvic girdle pain and mummy's wrist" },
-      { href: "/conditions/perineal-tear/", name: "Perineal tear, scar and birth trauma" },
-      { href: "/conditions/caesarean-recovery/", name: "Caesarean recovery and scar management" },
+      {
+        href: "/conditions/prenatal-care/",
+        name: "Prenatal care and birth preparation",
+        concern: "Aches in pregnancy, or preparing your body for birth",
+        involves:
+          "A musculoskeletal screen, a pelvic floor assessment when relevant, movement advice, and birth preparation such as perineal massage and breathing strategies.",
+      },
+      {
+        href: "/conditions/pelvic-girdle-pain/",
+        name: "Pelvic girdle pain and mummy's wrist",
+        concern: "Pelvic, hip or back pain in pregnancy, or thumb and wrist pain from holding and feeding your baby",
+        involves:
+          "Clinical tests and a movement assessment, then reducing load, restoring movement and graded strengthening for your stage.",
+      },
+      {
+        href: "/conditions/perineal-tear/",
+        name: "Perineal tear, scar and birth trauma",
+        concern: "A painful, tight or sensitive perineal scar after birth",
+        involves:
+          "Once the scar has healed, scar desensitisation and mobilisation, a massage technique to continue at home, and pelvic floor rehabilitation, paced to your readiness.",
+      },
+      {
+        href: "/conditions/caesarean-recovery/",
+        name: "Caesarean recovery and scar management",
+        concern: "Recovering from a C-section, or a scar that feels tight, numb or pulls",
+        involves:
+          "A scar, abdominal wall and pelvic floor assessment, scar management once the scar is fully closed, and advice on what to start and what to build up to.",
+      },
     ],
   },
   {
     heading: "Postnatal recovery",
     items: [
-      { href: "/conditions/diastasis-recti/", name: "Diastasis recti" },
-      { href: "/conditions/blocked-ducts-mastitis/", name: "Blocked ducts and mastitis" },
+      {
+        href: "/conditions/diastasis-recti/",
+        name: "Diastasis recti",
+        concern: "A gap, or a cone or ridge down the middle of your tummy, after pregnancy",
+        involves:
+          "Measuring the gap and the tension along the linea alba, load testing and a pelvic floor screen, then a progressive plan if it is affecting function.",
+      },
+      {
+        href: "/conditions/blocked-ducts-mastitis/",
+        name: "Blocked ducts and mastitis",
+        concern: "A blocked duct or mastitis while breastfeeding",
+        involves:
+          "Therapeutic ultrasound, breast massage techniques and advice on positioning and feeding, alongside your GP or a lactation consultant.",
+      },
     ],
   },
   {
     heading: "Pain and life stage",
     items: [
-      { href: "/conditions/pelvic-pain/", name: "Pelvic pain and dyspareunia" },
-      { href: "/conditions/menopause/", name: "Perimenopause, menopause and bone health" },
+      {
+        href: "/conditions/pelvic-pain/",
+        name: "Pelvic pain and dyspareunia",
+        concern: "Ongoing pelvic pain, or pain during sex",
+        involves:
+          "A largely conversational first session, then external assessment, an optional internal assessment and a back and hip screen. Treatment may include manual therapy, relaxation techniques and progressive load.",
+      },
+      {
+        href: "/conditions/menopause/",
+        name: "Perimenopause, menopause and bone health",
+        concern: "Changes around perimenopause and menopause, or bone density",
+        involves:
+          "A strength, balance and (if relevant) pelvic floor assessment, then a progressive exercise programme for bone and muscle.",
+      },
     ],
+  },
+];
+
+/**
+ * Primary sources cited in the body. Each was fetched and checked on
+ * 2026-11-16; the body never says more than the source does.
+ */
+const sources = [
+  {
+    name: "Pelvic Health - Singapore General Hospital Physiotherapy",
+    url: "https://www.sgh.com.sg/our-specialties/physiotherapy/pelvic-health",
+    publisher: "Singapore General Hospital",
+  },
+  {
+    name:
+      "Pelvic floor muscle training versus no treatment, or inactive control treatments, for urinary incontinence in women (Dumoulin, Cacciari, Hay-Smith, 2018)",
+    url: "https://doi.org/10.1002/14651858.CD005654.pub4",
+    publisher: "Cochrane Database of Systematic Reviews",
+  },
+  {
+    name: "Conservative prevention and management of pelvic organ prolapse in women (Hagen, Stark, 2011)",
+    url: "https://doi.org/10.1002/14651858.CD003882.pub4",
+    publisher: "Cochrane Database of Systematic Reviews",
   },
 ];
 
@@ -149,6 +250,12 @@ const schema = [
     about: { "@type": "MedicalSpecialty", name: "Physiotherapy" },
     audience: { "@type": "PeopleAudience", suggestedGender: "female" },
     provider: clinicRef(origin),
+    citation: sources.map((src) => ({
+      "@type": "CreativeWork",
+      name: src.name,
+      url: src.url,
+      publisher: { "@type": "Organization", name: src.publisher },
+    })),
   },
   {
     "@context": "https://schema.org",
@@ -197,6 +304,36 @@ const schema = [
 
   <Section tone="surface">
     <div class="container--narrow wh-body">
+      <h2>What is women's health physiotherapy?</h2>
+      <p>
+        Women's health physiotherapy - also called pelvic health physiotherapy -
+        assesses and treats the muscles, nerves and connective tissue that
+        support the bladder, bowel and pelvic organs, along with the
+        musculoskeletal changes that come with pregnancy, birth and menopause.
+        It covers bladder and bowel symptoms, prolapse, pelvic pain, pain in
+        pregnancy, recovery after a vaginal or Caesarean birth, diastasis recti
+        and bone health around menopause.
+      </p>
+      <p>
+        In Singapore, the
+        <a href="https://www.sgh.com.sg/our-specialties/physiotherapy/pelvic-health" rel="noopener">pelvic health physiotherapy service at Singapore General Hospital</a>,
+        for example, covers continence, pelvic organ prolapse, and antenatal and postnatal
+        care. A
+        <a href="https://doi.org/10.1002/14651858.CD005654.pub4" rel="noopener">2018 Cochrane review</a>
+        found that pelvic floor muscle training can improve the symptoms of stress urinary incontinence and other types of urinary
+        incontinence in women, and could be included in first-line conservative
+        management. A
+        <a href="https://doi.org/10.1002/14651858.CD003882.pub4" rel="noopener">2011 Cochrane review</a>
+        found some evidence that it helps prolapse symptoms and severity.
+      </p>
+      <p>
+        Symptoms such as leaking with a cough or a run, heaviness or dragging in
+        the pelvis, pain with sex, a tummy gap that has not closed, or back and
+        pelvic pain in pregnancy are common - but common is not the same as
+        something you have to live with. Most are assessable, and physiotherapy
+        can help with many of them.
+      </p>
+
       <h2>Which appointment do I need?</h2>
       <p>
         It depends on your stage and symptoms. If you are pregnant, book
@@ -210,21 +347,6 @@ const schema = [
         <a href="/services/pelvic-floor-physiotherapy/">Pelvic Floor Physiotherapy</a>.
         Not sure? Message us on WhatsApp and we will point you to the right
         appointment.
-      </p>
-
-      <h2>What women's health physiotherapy covers</h2>
-      <p>
-        Women's health physiotherapy - also called pelvic health physiotherapy -
-        assesses and treats the muscles, nerves and connective tissue that
-        support the bladder, bowel and pelvic organs, along with the
-        musculoskeletal changes that come with pregnancy, birth and menopause.
-      </p>
-      <p>
-        Symptoms such as leaking with a cough or a run, heaviness or dragging in
-        the pelvis, pain with sex, a tummy gap that has not closed, or back and
-        pelvic pain in pregnancy are common - but common is not the same as
-        something you have to live with. Most are assessable, and physiotherapy
-        can help with many of them.
       </p>
       <p>
         Your session is one-to-one, in a private room, for the full appointment
@@ -260,20 +382,37 @@ const schema = [
   <Section tone="surface">
     <div class="container">
       <div class="section-head">
-        <h2>Conditions we assess</h2>
+        <h2>Which conditions does women's health physiotherapy help with?</h2>
       </div>
-      <div class="wh-conditions">
+      <p class="wh-intro">
+        These are the women's health concerns we assess, in the words people
+        usually use for them, with what physiotherapy typically involves. Each
+        condition page explains the condition, the session and when to see a
+        doctor instead.
+      </p>
+      <table class="wh-table">
+        <thead>
+          <tr>
+            <th scope="col">Concern</th>
+            <th scope="col">What physiotherapy typically involves</th>
+            <th scope="col">Condition page</th>
+          </tr>
+        </thead>
         {conditionGroups.map((g) => (
-          <div class="wh-conditions__group">
-            <h3>{g.heading}</h3>
-            <ul>
-              {g.items.map((c) => (
-                <li><a href={c.href}>{c.name}</a></li>
-              ))}
-            </ul>
-          </div>
+          <tbody>
+            <tr class="wh-table__group">
+              <th scope="colgroup" colspan="3">{g.heading}</th>
+            </tr>
+            {g.items.map((c) => (
+              <tr>
+                <td class="wh-table__concern">{c.concern}</td>
+                <td>{c.involves}</td>
+                <td><a href={c.href}>{c.name}</a></td>
+              </tr>
+            ))}
+          </tbody>
         ))}
-      </div>
+      </table>
       <p class="wh-note">
         Every condition page is written and reviewed by one of our
         physiotherapists. Browse <a href="/conditions/">all conditions</a>.
@@ -283,7 +422,7 @@ const schema = [
 
   <Section tone="linen">
     <div class="container--narrow wh-body">
-      <h2>Your first appointment</h2>
+      <h2>What happens at a first women's health physiotherapy appointment?</h2>
       <p>
         The first session starts with a conversation, not an examination. Your
         physiotherapist will ask about your history, your symptoms and what you
@@ -291,20 +430,36 @@ const schema = [
         night, sex without pain.
       </p>
       <p>
-        A physical assessment follows. For pelvic floor concerns this may
-        include an internal vaginal examination, which is the most accurate way
-        to assess how the pelvic floor muscles are working. It is always
-        optional, always explained first, and only carried out with your
-        informed consent. If you would rather not, or it is not appropriate that
-        day, your physiotherapist will assess using external and functional
-        measures instead.
+        A physical assessment follows, focused on your concerns. It may include
+        your breathing, abdominal muscles and movement, your back, hips and
+        pelvis, and functional tasks such as lifting or squatting. Where
+        relevant, the pelvic floor is assessed by transabdominal ultrasound,
+        external observation or an internal vaginal examination.
+      </p>
+      <p>
+        Any internal pelvic floor examination will be explained beforehand and
+        is entirely optional. It will only be performed with your informed
+        consent, and you may decline or stop the examination at any time without
+        affecting your care. Our physiotherapy team is currently all-female.
       </p>
       <p>
         You will leave with an explanation of what was found and a plan you have
         agreed to, usually combining in-clinic sessions with a home programme.
+        Read more about the
+        <a href="/services/pelvic-floor-physiotherapy/">pelvic floor assessment</a>
+        or what to expect at a
+        <a href="/blog/what-happens-at-your-first-physiotherapy-visit/">first physiotherapy visit</a>.
       </p>
 
-      <h2>Who you will see</h2>
+      <h2>Do I need a doctor's referral for women's health physiotherapy?</h2>
+      <p>
+        No referral is needed. You can book directly with us. If your assessment
+        suggests input from a gynaecologist, urogynaecologist, colorectal
+        specialist or another doctor would help, we will say so and can work
+        alongside them.
+      </p>
+
+      <h2>Who will I see?</h2>
       <p>
         Our physiotherapists are female and registered with the Allied Health
         Professions Council (AHPC), with postgraduate training and hospital
@@ -315,7 +470,13 @@ const schema = [
         <a href="/team/kristy-ng/">Kristy Ng</a>.
       </p>
 
-      <h2>Where we see you, and what it costs</h2>
+      <h2>How much does women's health physiotherapy cost, and where?</h2>
+      <p>
+        A 55-minute women's health appointment costs $260 at the clinic, and a
+        women's health home visit costs $380. The 85-minute Mummy and Baby
+        assessment costs $330 at the clinic, and a Mummy and Baby home visit
+        costs $450. Prices as of {SITE.pricesAsOf}. No referral is required.
+      </p>
       <p>
         The clinic is at {SITE.address.line1}, {SITE.address.line2}, a
         one-minute walk from Exit 1 of Lentor MRT on the Thomson-East Coast
@@ -323,15 +484,16 @@ const schema = [
         <a href="/physiotherapy-lentor/">physiotherapy in Lentor</a> and the
         neighbourhoods around us.
       </p>
-      <p>
-        A 55-minute women's health appointment costs $260 at the clinic, and a
-        women's health home visit costs $380. The 85-minute Mummy and Baby
-        assessment costs $330 at the clinic, and a Mummy and Baby home visit
-        costs $450. Prices as of {SITE.pricesAsOf}. No referral is required.
-      </p>
 
       <h2>Frequently asked questions</h2>
       <FaqList items={faqs} />
+
+      <h2>Sources</h2>
+      <ul class="wh-sources">
+        {sources.map((src) => (
+          <li><a href={src.url} rel="noopener">{src.name}</a>. {src.publisher}.</li>
+        ))}
+      </ul>
     </div>
   </Section>
 
@@ -427,36 +589,82 @@ const schema = [
     font-weight: var(--weight-semibold);
   }
 
-  .wh-conditions {
-    display: grid;
-    gap: var(--space-5);
+
+  .wh-intro {
+    color: var(--text-muted);
+    line-height: var(--lh-body);
+    max-width: 62ch;
+    margin-bottom: var(--space-5);
   }
-  @media (min-width: 640px) {
-    .wh-conditions { grid-template-columns: repeat(2, 1fr); }
+
+  /* Conditions table. Stacked rows on a phone (no sideways scroll), a real
+     three-column table from 760px. */
+  .wh-table {
+    display: block;
+    border-collapse: collapse;
+    font-size: var(--fs-small);
+    line-height: var(--lh-body);
   }
-  @media (min-width: 1000px) {
-    .wh-conditions { grid-template-columns: repeat(4, 1fr); }
+  .wh-table thead { display: none; }
+  .wh-table tbody,
+  .wh-table tr,
+  .wh-table td,
+  .wh-table th { display: block; }
+  .wh-table th,
+  .wh-table td {
+    text-align: left;
+    vertical-align: top;
+    padding: var(--space-1) 0;
   }
-  .wh-conditions h3 {
+  .wh-table tbody tr {
+    padding: var(--space-3) 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .wh-table .wh-table__group th {
     font-family: var(--font-body);
-    line-height: var(--lh-snug);
     font-weight: var(--weight-semibold);
     font-size: var(--fs-body);
-    margin-bottom: var(--space-3);
+    padding-top: var(--space-5);
   }
-  .wh-conditions ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: grid;
-    gap: var(--space-2);
-  }
-  .wh-conditions a {
-    color: var(--text-muted);
+  .wh-table__concern { font-weight: var(--weight-semibold); }
+  .wh-table td { color: var(--text-muted); }
+  .wh-table a {
+    color: var(--color-primary);
     text-decoration: underline;
     text-underline-offset: 0.2em;
   }
-  .wh-conditions a:hover { color: var(--color-primary); }
+  @media (min-width: 760px) {
+    .wh-table { display: table; }
+    .wh-table thead { display: table-header-group; }
+    .wh-table tbody { display: table-row-group; }
+    .wh-table tr { display: table-row; }
+    .wh-table td,
+    .wh-table th {
+      display: table-cell;
+      padding: var(--space-3) var(--space-4) var(--space-3) 0;
+      border-bottom: 1px solid var(--color-border);
+    }
+    .wh-table thead th {
+      font-family: var(--font-body);
+      font-weight: var(--weight-semibold);
+    }
+    .wh-table td:nth-child(1) { width: 30%; }
+    .wh-table td:nth-child(3) { width: 24%; }
+  }
+
+  .wh-sources {
+    padding-left: var(--space-5);
+    color: var(--text-muted);
+    font-size: var(--fs-small);
+    line-height: var(--lh-body);
+    display: grid;
+    gap: var(--space-2);
+  }
+  .wh-sources a {
+    color: var(--color-primary);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
 
   .wh-note {
     margin-top: var(--space-5);
