@@ -39,7 +39,7 @@ LEVEL = {
     "schema_recommended": "WARN",
     "llms_missing_page": "ERROR",
     "img_alt": "ERROR",
-    "title_length": "WARN",
+    "title_length": "ERROR",
 }
 
 # Required / recommended JSON-LD @type per page type (website AGENTS.md).
