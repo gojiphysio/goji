@@ -24,11 +24,11 @@ The monthly SEO audit counts the "live" rows.
 
 | Outlet | Piece | Status | Notes |
 |---|---|---|---|
-| Little Steps Asia | Pregnancy / postnatal physio roundup | Sent (before 28 Oct 2026) | |
-| Expat Living | Roundup cited by Claude (audit 2026-10-12) | Sent (before 28 Oct 2026) | |
-| Sassy Mama | Pelvic floor experts roundup | Sent (before 28 Oct 2026) | |
-| Women's Weekly | Roundup cited by Claude (audit 2026-10-12) | Sent (before 28 Oct 2026) | |
-| Homage | [Best Physiotherapy Clinics for Women's Health Issues in Singapore](https://www.homage.sg/resources/physiotherapy-clinics-women-singapore/) | Sent 28 Oct 2026 | #2 on "women's physio singapore"; cited by Google AIO and logged-out ChatGPT |
+| Little Steps Asia | Pregnancy / postnatal physio roundup | Sent 26 Oct 2026, no reply (checked 16 Nov) | Follow up once |
+| Expat Living | Roundup cited by Claude (audit 2026-10-12) | Sent 26 Oct 2026 (story idea). Sales replied 26 Oct offering a **paid** listing on their physio feature | Paid: declined under our editorial-only rule unless the owner decides otherwise. Pitch the editor directly, not sales |
+| Sassy Mama | Pelvic floor experts roundup | Sent 26 Oct 2026, no reply (checked 16 Nov) | Follow up once |
+| Women's Weekly | Roundup cited by Claude (audit 2026-10-12) | **Not found** in hello@ Sent (checked 16 Nov) | Maybe sent by web form; otherwise still to send |
+| Homage | [Best Physiotherapy Clinics for Women's Health Issues in Singapore](https://www.homage.sg/resources/physiotherapy-clinics-women-singapore/) | Sent 28 Oct 2026, no reply (checked 16 Nov) | #2 on "women's physio singapore"; cited by Google AIO and logged-out ChatGPT |
 
 ## Homage pitch
 
