@@ -16,7 +16,7 @@ ctaSlug: "web-wa"
 draft: false
 ---
 
-Yes. Goji's physiotherapists do home visits across Singapore, including in the weeks after birth. A 55-minute postpartum or pelvic floor session at home is $380. The 85-minute Mummy and Baby assessment, which looks at your recovery and your baby's movement in one visit, is $450 at home. The same appointments at our Lentor clinic are $260 and $330. You don't need a doctor's referral to book.
+Yes. Goji's physiotherapists do home visits across Singapore, including in the weeks after birth. A 55-minute postpartum or pelvic floor session at home is $380. The 85-minute Mummy and Baby assessment, which looks at your recovery and your baby's movement in one visit, is $450 at home. At our Lentor clinic, the 55-minute session is $260 and the Mummy and Baby assessment is $330. You don't need a doctor's referral to book.
 
 ## Which postnatal appointments can be done at home?
 
