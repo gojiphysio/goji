@@ -42,9 +42,11 @@ loop never self-merges them, and each must be sourced per
   into the next owner-reviewed PR.)
 - `tools/live_audit.py` — live site, weekly in CI. Set the `PSI_API_KEY`
   repo secret for Core Web Vitals (the keyless quota 429s).
-- `tools/tier_gate.py` + `test_tier_gate.py` — the tier classifier.
+- `tools/tier_gate.py` + `test_tier_gate.py` — the tier classifier. Run it
+  **after committing**: it diffs commits against the base, so on uncommitted
+  work it sees nothing and always says tier A (hit 2026-11-16, #234).
 
-## AEO measurement (monthly)
+## AEO measurement (weekly)
 
 - One canonical query set: `aeo-queries.json`. Add queries; never rename or
   reword one (it breaks the trend).
@@ -59,9 +61,21 @@ loop never self-merges them, and each must be sourced per
     check for a "Log in" button first. Check the chip on every send; broken
     loads drop it. Chat does not consume the weekly "usage remaining" quota
     (verified 2026-10-20: 5% before and after 45 queries); still stop if it
-    falls, so the owner keeps their quota.
+    falls, so the owner keeps their quota. Logged out, long answers take
+    ~30s; read only once the stop button is gone. The tab sometimes hangs and
+    leaves the query unsent in the box: reload and send it again, and note
+    the resend in the record.
   - **Claude**: claude.ai **Incognito** chat with web search, a new chat per
-    query.
+    query. There is no web-search toggle in "+" any more (16 Nov 2026);
+    search runs by default. Record which tool each answer used (places
+    search, web search, both or none): Goji shows up through places data and
+    is missing from web-only answers, so the split explains most movement.
+  - **Google on tidepool: no browser checks** (owner decision 2026-11-16).
+    Google organic comes from Search Console `terms.json`: impressions,
+    clicks and position per AEO query (exact match, last 28 days), written
+    to `aeo-google-gsc.json`. A query with no impressions is "not ranking".
+    AI Overviews and the Maps pack are not measured; say so in one line.
+    The rest of this bullet applies only if browser checks come back.
   - **Google**: logged out, `&gl=sg&hl=en&pws=0&uule=w+CAIQICIJU2luZ2Fwb3Jl`,
     from the normal (non-VPN) IP. CAPTCHAs arrive after ~35 rapid queries:
     pace 15s+, finish next day if hit. A VPN IP is challenged on query 1.
@@ -80,6 +94,12 @@ loop never self-merges them, and each must be sourced per
     around, run **logged out** as a separate series
     (`aeo-chatgpt-sg-ip-loggedout.json`), never mixed with the logged-in
     trend.
+- **Browser on tidepool**: Claude in Chrome (`--chrome`), in its own tab
+  group; it can't open Incognito windows, and osascript hangs on a macOS
+  Automation prompt. Headless Chrome gets Google's CAPTCHA and ChatGPT's
+  Cloudflare challenge on request 1: record those engines as skipped, don't
+  retry. A Singapore IP whose ipinfo `org` is a home ISP (MyRepublic) is not
+  a VPN.
 - Location: ChatGPT/Claude infer it from IP. When the machine is not in SG,
   run variant `sg-context` (prefix rule in `aeo-queries.json`); when it is,
   also run `sg-ip`. Never mix the two series in one trend line. A Singapore
@@ -87,7 +107,7 @@ loop never self-merges them, and each must be sourced per
   with **Tailscale off**: the two VPNs fight over DNS/routes and NordVPN
   passes no traffic while Tailscale is up.
 
-## Monthly loop (local scheduled task on the owner's Mac)
+## Weekly loop (scheduled task on tidepool, the owner's Mac mini)
 
 1. **Measure**: `live_audit.py`, build + `check_dist.py`, the AEO sweep,
    Search Console (`marts.fct_search_console_daily`) for the last 28 days.
