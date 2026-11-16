@@ -226,8 +226,6 @@ def main():
             for t in rec:
                 if t not in have:
                     add("schema_recommended", path, f"missing {t} JSON-LD")
-            if section == "conditions" and '"reviewedBy"' not in "".join(pg.jsonld):
-                add("schema_required", path, "MedicalWebPage has no reviewedBy")
 
     llms = dist / "llms.txt"
     if llms.exists():

@@ -5,9 +5,6 @@ description: "Stress, urge or mixed urinary incontinence: what each type is, the
 cardTitle: "Urinary Incontinence"
 cardLead: "Urinary incontinence is among the most common and most treatable conditions in women's health."
 category: "Women's Health"
-reviewer:
-  name: "Cheryl Long"
-  slug: "cheryl-long"
 ctaSlug: "web-wa"
 order: 5
 draft: false

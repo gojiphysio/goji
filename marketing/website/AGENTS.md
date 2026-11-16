@@ -123,8 +123,10 @@ so a token change reflows everything (styleguide is the QA surface).
   personalised as padding), no rhetorical "X, Y and Z" triples, no "not just
   X but Y" or "Whether you're..." openers. On clinical copy, precision beats
   voice: cut slop only, never change a claim.
-- **Condition pages carry a clinician byline.** Every `conditions` entry sets a
-  `reviewer: { name, slug }` (the reviewing physio, from the source doc). The
+- **Condition pages carry a clinician byline when a physio has reviewed them.**
+  A `conditions` entry sets `reviewer: { name, slug }` (the reviewing physio,
+  from the source doc); it is optional, so leave it off rather than name
+  someone who hasn't read the page (owner decision 2026-11-16). The
   detail template renders a "Reviewed by <name>" line linking to `/team/<slug>`
   and emits `reviewedBy` in the MedicalWebPage JSON-LD. Strip the source doc's
   italic reviewer/status/SEO-slug/structured-data notes and inline CTA — the
@@ -166,8 +168,8 @@ so a token change reflows everything (styleguide is the QA surface).
   The same section renders as the FAQ accordion via
   `src/lib/rehype-faq-accordion.mjs` (markup and `src/styles/faq-list.css`
   shared with `components/FaqList.astro`); answers keep their links.
-- **Every condition page carries a byline** via `reviewer: { name, slug }`
-  frontmatter; the template renders "Reviewed by <name>" linking to
+- **A reviewed condition page carries a byline** via `reviewer: { name, slug }`
+  frontmatter (optional, see above); the template renders "Reviewed by <name>" linking to
   `/team/<slug>` and emits `reviewedBy` in the MedicalWebPage JSON-LD.
 - **Meta descriptions ≤160 chars.**
 - **Internal page links end in `/`** (`/conditions/vertigo/`). Cloudflare
