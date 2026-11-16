@@ -193,6 +193,10 @@ so a token change reflows everything (styleguide is the QA surface).
   bold, no inline links and no "Related pages" section (strip the source doc's
   internal-links line). `cardTitle` is the page H1, so keep it equal to the doc
   title unless a shorter heading is intended. Add new pages to `public/llms.txt`.
+  Exception: new clinical claims added by the SEO loop (tier B) carry inline
+  links to their primary sources (`../content-engine/blog-brief.md`), and a
+  table is fine where it helps; internal links stay out (`relatedServices`
+  covers them). First done on `dry-needling.md`, 16 Nov 2026.
 - **`/womens-health-physiotherapy-singapore` is the women's-health hub.** It
   owns the broad national query; the four women's-health service pages own
   their own keyword and each links back up to it. Adding a women's-health
