@@ -91,6 +91,9 @@ loop never self-merges them, and each must be sourced per
 
 1. **Measure**: `live_audit.py`, build + `check_dist.py`, the AEO sweep,
    Search Console (`marts.fct_search_console_daily`) for the last 28 days.
+   Fetch it with `tools/fetch_search_console.sh <dir>`: it runs the keyless
+   "Search Console export" workflow and downloads `daily.json`/`terms.json`.
+   It needs only `gh`, no gcloud login or Google key.
 2. **Diagnose**: diff against the previous `audits/` run; write
    `audits/<date>/summary.md` (what moved, top gaps, proposed fixes by tier).
 3. **Fix**: tier A changes as `tier-a` PRs; tier B/C as normal PRs with the
