@@ -199,6 +199,11 @@ so a token change reflows everything (styleguide is the QA surface).
   links to their primary sources (`../content-engine/blog-brief.md`), and a
   table is fine where it helps; internal links stay out (`relatedServices`
   covers them). First done on `dry-needling.md`, 16 Nov 2026.
+- **`relatedServices` links both ways.** A condition lists its services in
+  `relatedServices`; each service page renders the reverse as "Conditions we
+  treat" (`[...slug].astro`). So linking a condition to a service is one
+  frontmatter edit, and a condition with no `relatedServices` is orphaned from
+  every service page.
 - **`/womens-health-physiotherapy-singapore` is the women's-health hub.** It
   owns the broad national query; the four women's-health service pages own
   their own keyword and each links back up to it. Adding a women's-health
