@@ -24,19 +24,49 @@ The monthly SEO audit counts the "live" rows.
 
 | Outlet | Piece | Status | Notes |
 |---|---|---|---|
-| Little Steps Asia | Pregnancy / postnatal physio roundup | Sent 26 Oct 2026, no reply (checked 16 Nov) | Follow up once |
-| Expat Living | Roundup cited by Claude (audit 2026-10-12) | Sent 26 Oct 2026 (story idea). Sales replied 26 Oct offering a **paid** listing on their physio feature | Paid: declined under our editorial-only rule unless the owner decides otherwise. Pitch the editor directly, not sales |
-| Sassy Mama | Pelvic floor experts roundup | Sent 26 Oct 2026, no reply (checked 16 Nov) | Follow up once |
-| Women's Weekly | Roundup cited by Claude (audit 2026-10-12) | **Not found** in hello@ Sent (checked 16 Nov) | Maybe sent by web form; otherwise still to send |
-| Homage | [Best Physiotherapy Clinics for Women's Health Issues in Singapore](https://www.homage.sg/resources/physiotherapy-clinics-women-singapore/) | Sent 28 Oct 2026, no reply (checked 16 Nov) | #2 on "women's physio singapore"; cited by Google AIO and logged-out ChatGPT |
-| HoneyKids Asia | [Physiotherapy centres in Singapore for kids](https://honeykidsasia.com/physiotherapy-centres-in-singapore-for-kids/) | Not sent | Cited by Claude for "paediatric physiotherapy singapore" (audit 2026-11-16); kids pitch below |
-| Little Steps Asia | [Physiotherapists for kids in Singapore](https://www.littlestepsasia.com/singapore/health/wellness-and-mental-health/physiotherapists-for-kids-sg/) | Not sent | Cited by Claude for "paediatric physiotherapy singapore" (audit 2026-11-16). Not the pregnancy roundup above; kids pitch below |
+| Little Steps Asia | Pregnancy / postnatal physio roundup | Followed up 17 Nov 2026 | Original sent 26 Oct to editor@littlestepsasia.com covered this and the kids list below. One combined follow-up in that thread; allowance used. Await reply. |
+| Expat Living | [Physiotherapy roundup](https://expatliving.sg/physiotherapist-in-singapore-how-physiotherapy-helps/) | Sent 17 Nov 2026 | Fresh editorial pitch to editorial@expatliving.sg, addressed to Cherry and the editorial team. Original story idea sent 26 Oct; sales offered paid inclusion that day. New editorial email declined the paid offer and requested unpaid consideration; sales thread left untouched. Await editorial reply. |
+| Sassy Mama | Pelvic Floor Experts and Postnatal Physiotherapists in Singapore | Followed up 17 Nov 2026 | Original sent 26 Oct to sassy@sassymamasg.com. Follow-up in original thread; allowance used. Await reply. |
+| Women's Weekly | Women's health clinic roundups | Sent 17 Nov 2026 | Fresh pitch to sww@sph.com.sg, addressed to Estelle and the team. No earlier pitch or form confirmation found in hello@ mailbox. Await reply. |
+| Homage | [Best Physiotherapy Clinics for Women's Health Issues in Singapore](https://www.homage.sg/resources/physiotherapy-clinics-women-singapore/) | Followed up 17 Nov 2026 | Original sent 28 Oct to care@homage.co, addressed to Jia Hui. Follow-up in original thread; allowance used. Await reply. #2 on "women's physio singapore"; cited by Google AIO and logged-out ChatGPT. |
+| HoneyKids Asia | [Physiotherapy centres in Singapore for kids](https://honeykidsasia.com/physiotherapy-centres-in-singapore-for-kids/) | Followed up 17 Nov 2026 | Mailbox confirms original sent 26 Oct to hello@honeykidsasia.com. Follow-up in original thread; allowance used. Await reply. Cited by Claude in audit 2026-11-16. |
+| Little Steps Asia | [Physiotherapists for kids in Singapore](https://www.littlestepsasia.com/singapore/health/wellness-and-mental-health/physiotherapists-for-kids-sg/) | Followed up 17 Nov 2026 | Covered by the same 26 Oct pitch and 17 Nov follow-up as the pregnancy roundup above. Not a separate send or follow-up allowance. Cited by Claude in audit 2026-11-16. |
+
+### Mailbox reconciliation — 17 Nov 2026
+
+Six sends verified from hello@gojiphysio.com: four follow-ups and two fresh
+editorial pitches. Seven tracker rows reflect six threads because the Little
+Steps email covers both pieces. The earlier "Not sent" kids statuses were
+incorrect; no duplicate new paediatric pitches were sent.
+
+| Outlet | Sent time (SGT) | Subject / thread |
+|---|---|---|
+| Sassy Mama | 09:55 | Follow-up: For your pelvic floor and postnatal physio guide: Goji, Lentor |
+| Little Steps Asia | 09:56 | Follow-up: Clinic suggestion for your prenatal/postnatal and paediatric physio guides |
+| HoneyKids Asia | 09:56 | Follow-up: Paediatric physio in the north: Goji, Lentor |
+| Homage | 09:57 | Follow-up: Goji Women’s and Family Physiotherapy for your women’s health physio guide |
+| Expat Living | 09:58 | Editorial consideration: women's health physiotherapy in Lentor |
+| Women's Weekly | 09:58 | Women's health physiotherapy in Lentor for your clinic roundups |
+
+No new editorial replies at the final mailbox check on 17 Nov. The four
+followed-up threads have used their one-follow-up allowance: wait for replies,
+with no further nudges. Expat Living remains awaiting editorial consideration,
+not "Declined (paid only)". No paid placement was accepted.
+
+Price check against the live `https://www.gojiphysio.com/llms.txt` on 17 Nov:
+$260 / 55-minute clinic physiotherapy, $380 home visits and $330 / 85-minute
+Mummy & Baby Assessment matched. **Owner confirmation pending:** shorter
+paediatric sessions from $160 were absent from that source. That figure was
+not repeated in today's newly written messages; the older draft below is
+retained for reference and must not be reused without verification.
 
 ## Homage pitch
 
 Homage also sells home physiotherapy, so lead with the clinic's women's-health
-focus and offer expert input rather than our home visits. Sent from
-hello@gojiphysio.com on 28 Oct 2026; the text below is what went out.
+focus and offer expert input rather than our home visits. The original was sent
+from hello@gojiphysio.com on 28 Oct 2026 and followed up on 17 Nov. The text below
+is the saved pitch template, not a verbatim mailbox record; the verified
+subject and recipient are recorded above.
 
 Subject: Women's health physiotherapy clinic in Lentor for your Singapore guide
 
@@ -77,7 +107,9 @@ Subject: Women's health physiotherapy clinic in Lentor for your Singapore guide
 
 ## Kids physiotherapy pitch (HoneyKids, Little Steps)
 
-Not sent yet. These two lists are what Claude cites when asked for
+Reference draft only: mailbox verification on 17 Nov confirmed both outlets
+had already been pitched on 26 Oct and were followed up on 17 Nov. Do not send
+this as a new pitch. These two lists are what Claude cites when asked for
 paediatric physiotherapy in Singapore, and neither engine names Goji on any
 of the six paediatric queries (audit 2026-11-16). Lead with what a kids-only
 clinic can't offer: a parent and baby seen together, and one team from birth
