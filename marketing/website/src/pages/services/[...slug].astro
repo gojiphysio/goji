@@ -43,6 +43,17 @@ const {
   closingCopy,
 } = entry.data;
 
+// Condition pages that name this service in `relatedServices`, so the service
+// page links down to them as they link up to it.
+const conditions = (
+  await getCollection(
+    "conditions",
+    ({ data }) => !data.draft && data.relatedServices.includes(entry.slug),
+  )
+)
+  .sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99))
+  .map((c) => ({ href: `/conditions/${c.slug}/`, label: c.data.cardTitle ?? c.data.title }));
+
 // Link each clinician to their team page where one exists (matched by name).
 const team = await getCollection("team", ({ data }) => !data.draft);
 const slugForName = new Map(team.map((t) => [t.data.name, t.slug]));
@@ -182,6 +193,16 @@ if (faqs?.length) {
   <Section tone="surface">
     <div class="svc-body container--narrow">
       <Content />
+      {conditions.length > 0 && (
+        <aside class="svc-conditions" aria-labelledby="svc-conditions-heading">
+          <h2 id="svc-conditions-heading">Conditions we treat</h2>
+          <ul>
+            {conditions.map((c) => (
+              <li><a href={c.href}>{c.label}</a></li>
+            ))}
+          </ul>
+        </aside>
+      )}
       {faqs?.length ? (
         <section class="svc-faqs" aria-labelledby="svc-faqs-heading">
           {/* Visible twin of the FAQPage JSON-LD above: structured data must
@@ -347,6 +368,13 @@ if (faqs?.length) {
     display: flex;
     flex-direction: column;
     gap: var(--space-2);
+  }
+  /* Links down to the condition pages (mirrors .cond-related). */
+  .svc-conditions {
+    margin-top: var(--space-7);
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--rule);
+    margin-bottom: var(--space-7);
   }
   /* Price tables (e.g. Private Pilates introductory offers). */
   .svc-body :global(table) {
