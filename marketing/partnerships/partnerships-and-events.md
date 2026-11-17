@@ -32,6 +32,8 @@ Compliance note: partnerships are mostly Lane A (clinical). Genuine cross-referr
 | ___ | doula/lactation | ___ | not started | send intro | operator |
 | ___ | prenatal studio | ___ | not started | send intro | operator |
 | ___ | postnatal hub | ___ | not started | send intro | operator |
+| ___ | paediatrician (Lentor, Thomson, Ang Mo Kio) | ___ | not started | send intro: what we see in children (torticollis, milestones, DDH, clubfoot) | operator |
+| ___ | infant care / preschool (Lentor estate) | ___ | not started | offer a parent talk (tummy time, milestones) | operator |
 
 Target: 4-5 intros out by end of month 1; 2-3 live agreements by end of month 2; a working referral loop by month 3.
 
