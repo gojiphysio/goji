@@ -1,6 +1,6 @@
 ---
 title: "Clubfoot (Congenital Talipes Equinovarus)"
-seoTitle: "Clubfoot (CTEV): Postural vs Structural"
+seoTitle: "Positional vs Structural Clubfoot (CTEV)"
 description: "CTEV, or clubfoot, is a foot turned in and down at birth. Postural CTEV is flexible and responds to physio; structural CTEV starts with Ponseti casting."
 cardTitle: "Clubfoot (CTEV)"
 cardLead: "Physiotherapy for clubfoot in infants - direct treatment for postural CTEV, and support alongside the Ponseti pathway for structural CTEV."

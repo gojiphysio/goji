@@ -1,5 +1,6 @@
 ---
 title: "Paediatric Physiotherapy"
+seoTitle: "Paediatric Physiotherapy Singapore"
 description: "Paediatric physiotherapy in Singapore for children 0-18: movement, pain, injury and developmental concerns, assessed and managed with a plan for your child."
 cardTitle: "Paediatric Physiotherapy"
 cardLead: "Assessment and practical guidance for your child's movement, development, pain or injury - from babies to teens. 30-min, 45-min and 55-min options available."
