@@ -34,6 +34,6 @@ export const SITE = {
   },
   hours: [
     { days: "Monday to Saturday", time: "8am to 8pm" },
-    { days: "Sunday & Public Holidays", time: "Closed (by appointment only)" },
+    { days: "Sunday & Public Holidays", time: "By appointment only" },
   ],
 } as const;

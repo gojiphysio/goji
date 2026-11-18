@@ -71,8 +71,8 @@ const tickerItems = [
 ];
 
 // Condition lists mirror the clinic-vetted old-site copy. Items link through to
-// the real condition pages under /conditions where one exists; the few without
-// a dedicated page yet are plain text. Group names must match the `category`
+// the real condition pages under /conditions where one exists, else to the
+// closest pathway or service page; the few with neither are plain text. Group names must match the `category`
 // enum in src/content/config.ts and the `categories` array on /conditions.
 const careAreas = [
   {
@@ -81,15 +81,15 @@ const careAreas = [
     points: [
       { text: "Prenatal care and birth preparation", href: "/conditions/prenatal-care/" },
       { text: "Antenatal and postnatal musculoskeletal concerns (pelvic girdle pain and mummy's wrist)", href: "/conditions/pelvic-girdle-pain/" },
-      "Postpartum recovery and return to sport",
+      { text: "Postpartum recovery and return to sport", href: "/pathways/postpartum/" },
       { text: "Diastasis recti", href: "/conditions/diastasis-recti/" },
       { text: "Caesarean recovery and scar management", href: "/conditions/caesarean-recovery/" },
       { text: "Perineal tear, scar, and birth trauma", href: "/conditions/perineal-tear/" },
       { text: "Blocked ducts and mastitis", href: "/conditions/blocked-ducts-mastitis/" },
-      "Pelvic floor dysfunction",
+      { text: "Pelvic floor dysfunction", href: "/services/pelvic-floor-physiotherapy/" },
       { text: "Pelvic organ prolapse (POP)", href: "/conditions/pelvic-organ-prolapse/" },
       { text: "Pelvic pain and dyspareunia", href: "/conditions/pelvic-pain/" },
-      { text: "Osteopenia / osteoporosis and fragility fractures management", href: "/conditions/menopause/" },
+      { text: "Osteopenia / osteoporosis and fragility fractures management", href: "/conditions/menopause/#why-is-bone-health-a-physiotherapy-issue" },
       { text: "Urinary incontinence", href: "/conditions/urinary-incontinence/" },
       { text: "Bowel dysfunction and constipation", href: "/conditions/bowel-dysfunction/" },
     ],
