@@ -264,6 +264,9 @@ See `DEPLOY.md`.
   passthrough (`/r/<slug>?cid=` for `-book` slugs → beacon `go_click_id`) closes
   the old "no FK from `link_click_events`" gap for the on-site journey.
   `renderFunnelSankey` degrades gracefully if the plugin or any stream is missing.
+  **Rebuild the Sankey on each render (`destroy()` + `new Chart`), never
+  `update()` it in place** — the plugin keeps stale flow elements across a data
+  swap, and a shorter flow list crashed the custom-range Apply.
   The Sankey stays **channel-level and tidy**: discovery channels below
   `FUNNEL_DISCOVERY_MIN` arrival sessions fold into "Other" (except Direct) so it
   doesn't sprout hairline bands — the granular story lives in the on-site-path viz.
