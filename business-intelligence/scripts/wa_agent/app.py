@@ -10,6 +10,9 @@ goji-wa-agent: the WhatsApp assistant's webhook service (Cloud Run).
   POST /admin/chats/<wa_id>/pause      silence the agent here until handback
   GET  /admin/chats/<wa_id>            chat mode + transcript (Phase 0 testing)
   POST /admin/kill                     {"on": true|false}, all chats
+  GET  /admin/autonomy                 per-intent auto-send record, demotions
+  POST /admin/autonomy/<intent>/promote  put a demoted intent back on auto
+  GET  /feedback                       one-tap rating from a staff email (signed)
   GET  /healthcheck
 
 The webhook acks at once and works on a background thread (Meta retries slow
@@ -35,7 +38,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 from flask import Flask, jsonify, request
 
-from . import agent, config, events, notify
+from . import agent, config, events, learning, notify
 from .policy import (AGENT, DRAFT, ESCALATE, HUMAN, PAUSED, SEND, SGT, apply_idle_handback,
                      decide, gate, human_replied_since, is_acknowledgement, on_human_message,
                      reply_problems, set_mode)
@@ -49,6 +52,7 @@ app = Flask(__name__)
 
 _executor = ThreadPoolExecutor(max_workers=8)
 locks = ChatLocks()
+_autonomy_lock = threading.Lock()
 store = None
 wa = None
 claude = None
@@ -152,11 +156,47 @@ def handle_echo(ev: Echo) -> None:
         if not mark_seen(state, ev.msg_id):
             return
         old = state.mode
-        on_human_message(state, time.time())
+        now = time.time()
+        if old == AGENT:
+            signal = learning.classify_echo(state, now)
+        else:  # a planned handover or admin takeover: Chris was meant to reply
+            signal, state.pending_draft, state.last_auto = {}, {}, {}
+        on_human_message(state, now)
         append_history(state, "staff", ev.text, ev.ts, ev.msg_id)
         st.save(state)
-    events.record("echo", ev.wa_id, echo_lag_s=round(time.time() - ev.ts, 1))
+    draft_text = signal.pop("_draft_text", None)
+    if draft_text is not None:
+        signal["draft_similarity"], signal["draft_outcome"] = \
+            learning.draft_outcome(draft_text, ev.text)
+    events.record("echo", ev.wa_id, echo_lag_s=round(time.time() - ev.ts, 1), **signal)
     _mode_event(state, old, time.time())
+    if signal.get("rescue") and signal.get("intent"):
+        _note_rescue(st, signal["intent"], ev.wa_id)
+
+
+def _note_rescue(st, intent: str, wa_id: str) -> None:
+    with _autonomy_lock:
+        autonomy = st.get_autonomy()
+        demoted = learning.note_rescue(autonomy, intent)
+        st.save_autonomy(autonomy)
+    if demoted:
+        reason = f"demoted:{learning.DEMOTE_RESCUES}_rescues_in_last_{learning.DEMOTE_WINDOW}"
+        events.record("autonomy", wa_id, intent=intent, reason=reason)
+        notify.send("demoted", customer="", wa_id=wa_id,
+                    staff_note=f"'{intent}' messages now come to you as drafts instead of "
+                               f"being sent automatically, because you stepped in "
+                               f"{learning.DEMOTE_RESCUES} times recently.",
+                    suggested_reply="", reason=reason, last_message="")
+
+
+def _test_show(client, wa_id: str, text: str) -> None:
+    """Local battle-testing: show the tester what would otherwise only reach
+    staff. Never on a deployed service, never stored in the transcript."""
+    if config.TEST_SHOW_DRAFTS and config.STATE_BACKEND == "memory":
+        try:
+            client.send_text(wa_id, "🧪 TEST MODE (customers never see this)\n\n" + text)
+        except Exception as e:
+            log.warning("test-mode send failed: %s", e)
 
 
 def handle_inbound(ev: Inbound, received: float) -> None:
@@ -202,7 +242,8 @@ def handle_inbound(ev: Inbound, received: float) -> None:
     res = agent.propose(history, wa_id=ev.wa_id, now=now, customer_name=ev.name,
                         client=model)
     p = res.proposal
-    d = decide(p)
+    d = decide(p, intent_policy=learning.effective_policy(config.INTENT_POLICY,
+                                                          st.get_autonomy()))
     events.record("proposal", ev.wa_id, intent=p.intent, confidence=p.confidence,
                   escalate=p.escalate, decision=d.action, reason=d.reason,
                   agent_ms=res.total_ms, steps=[s.__dict__ for s in res.steps],
@@ -212,11 +253,19 @@ def handle_inbound(ev: Inbound, received: float) -> None:
                   cache_write_tokens=res.cache_write_tokens, cost_usd=round(res.cost_usd, 5))
 
     notice = dict(customer=ev.name, wa_id=ev.wa_id, staff_note=p.staff_note,
-                  suggested_reply=p.reply, reason=d.reason, last_message=ev.text)
+                  suggested_reply=p.reply, reason=d.reason, last_message=ev.text,
+                  feedback=learning.feedback_links(events.chat_key(ev.wa_id), int(now)))
 
     if d.action == DRAFT:
+        with locks(ev.wa_id):
+            state = st.load(ev.wa_id)
+            state.pending_draft = {"text": p.reply, "intent": p.intent, "at": time.time()}
+            state.last_auto = {}
+            st.save(state)
         notify.send("drafted", **notice)
-        events.record("drafted", ev.wa_id, reason=d.reason)
+        events.record("drafted", ev.wa_id, intent=p.intent, reason=d.reason)
+        _test_show(client, ev.wa_id,
+                   f"Not sent. Chris gets this draft to check ({d.reason}):\n\n{p.reply}")
         return
 
     if d.action == SEND:
@@ -251,7 +300,16 @@ def handle_inbound(ev: Inbound, received: float) -> None:
         old = state.mode
         if d.action == ESCALATE:
             set_mode(state, HUMAN, f"escalated:{d.reason}", sent_at)
+            state.last_auto = {}
+        else:
+            state.last_auto = {"intent": p.intent, "at": sent_at}
+        state.pending_draft = {}
         st.save(state)
+    if d.action == SEND:
+        with _autonomy_lock:
+            autonomy = st.get_autonomy()
+            learning.note_auto_send(autonomy, p.intent, wa_msg_id)
+            st.save_autonomy(autonomy)
 
     events.record("sent" if d.action == SEND else "escalated", ev.wa_id, wa_msg_id=wa_msg_id,
                   intent=p.intent, reason=d.reason,
@@ -259,6 +317,8 @@ def handle_inbound(ev: Inbound, received: float) -> None:
     _mode_event(state, old, sent_at)
     if d.action == ESCALATE:
         notify.send("urgent" if p.intent == "urgent" else "escalated", **notice)
+        _test_show(client, ev.wa_id, f"Handed to Chris ({d.reason}). She'd get an email "
+                                     f"saying: {p.staff_note}")
 
 
 # --- admin (Phase 0: token; Phase 1: front-desk portal auth) -------------------
@@ -312,6 +372,40 @@ def kill():
     st.set_kill(on)
     events.record("kill_switch", "", kill_on=on)
     return jsonify({"kill_switch": on})
+
+
+@app.get("/admin/autonomy")
+def autonomy_state():
+    if not _authorised():
+        return jsonify({"error": "forbidden"}), 403
+    st, _, _ = _deps()
+    return jsonify(st.get_autonomy())
+
+
+@app.post("/admin/autonomy/<intent>/promote")
+def promote_intent(intent: str):
+    if not _authorised():
+        return jsonify({"error": "forbidden"}), 403
+    st, _, _ = _deps()
+    with _autonomy_lock:
+        autonomy = st.get_autonomy()
+        learning.promote(autonomy, intent)
+        st.save_autonomy(autonomy)
+    events.record("autonomy", "", intent=intent, reason="promoted:admin")
+    return jsonify({"intent": intent, "demoted": False})
+
+
+@app.get("/feedback")
+def feedback():
+    """PUBLIC: the 👍/👎 link in a staff email. Signed, so it can only rate the
+    conversation the email was about; repeat taps just add another row."""
+    a = request.args
+    if not learning.feedback_valid(a.get("c", ""), a.get("t", ""), a.get("r", ""), a.get("s", "")):
+        return "This link isn't valid.", 403
+    events.record("feedback", "", key=a["c"], rating=a["r"])
+    msg = "Thanks, noted." if a["r"] == "up" else "Thanks. We'll look at what went wrong."
+    return f"<!doctype html><meta name=viewport content='width=device-width'>" \
+           f"<p style='font:18px system-ui;margin:2em'>{msg}</p>", 200
 
 
 @app.get("/healthcheck")

@@ -1,6 +1,7 @@
 from types import SimpleNamespace as NS
 
 from booking import config as booking_config
+from wa_agent.events import chat_key
 from wa_agent import tools
 
 
@@ -17,8 +18,9 @@ def test_booking_link_goes_through_the_tracked_redirector():
     out, err = tools.run_tool("booking_link", {"service": "physiotherapy",
                                                "focus": "womens-health"}, wa_id="x")
     assert not err
+    # ref is the chat's salted hash, so a booking can be credited to the chat
     assert out["url"] == ("https://go.gojiphysio.com/wa-book?"
-                          "service=physiotherapy&focus=womens-health")
+                          f"service=physiotherapy&focus=womens-health&ref={chat_key('x')}")
 
 
 def test_bad_service_is_an_error_result_not_an_exception():

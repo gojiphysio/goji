@@ -37,6 +37,8 @@ class ChatState:
     last_human_at: float = 0.0
     history: list[dict] = field(default_factory=list)  # {role, text, ts, id}
     seen_ids: list[str] = field(default_factory=list)  # webhook de-dupe
+    pending_draft: dict = field(default_factory=dict)  # {text, intent, at}: scored on Chris's reply
+    last_auto: dict = field(default_factory=dict)      # {intent, at}: a rescue if Chris writes next
 
     def to_dict(self) -> dict:
         return dict(self.__dict__)

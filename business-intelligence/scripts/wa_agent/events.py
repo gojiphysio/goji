@@ -41,13 +41,15 @@ def _client():
         return _bq
 
 
-def record(event: str, wa_id: str, **fields) -> dict:
+def record(event: str, wa_id: str, *, key: str | None = None, **fields) -> dict:
     """event: inbound | echo | proposal | sent | drafted | escalated | silent |
-    mode | status | send_failed | superseded. Returns the row (tests read it)."""
+    mode | status | send_failed | superseded | autonomy | feedback.
+    `key` passes a chat_key directly (feedback links carry the hash, not the
+    number). Returns the row (tests read it)."""
     row = {
         "event_id": str(uuid.uuid4()),
         "event": event,
-        "chat_key": chat_key(wa_id) if wa_id else None,
+        "chat_key": key or (chat_key(wa_id) if wa_id else None),
         "at": time.time(),
         **{k: v for k, v in fields.items() if k != "steps"},
     }

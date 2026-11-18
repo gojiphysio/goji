@@ -99,6 +99,14 @@ ALWAYS_HUMAN = frozenset(
 # Phase 0 admin endpoints (take over / hand back / kill) are behind this token
 # until they move into the front-desk portal's role-gated auth.
 ADMIN_TOKEN = os.environ.get("WA_AGENT_ADMIN_TOKEN", "")
+# One-tap feedback links in staff emails: the service's public base URL, and
+# the key that signs the links (falls back to the admin token).
+PUBLIC_URL = os.environ.get("WA_AGENT_PUBLIC_URL", "")
+FEEDBACK_SECRET = os.environ.get("WA_AGENT_FEEDBACK_SECRET", "")
+# Local battle-testing only (needs WA_AGENT_STATE=memory): drafts and staff
+# notices are also sent to the tester's chat, clearly labelled, because a
+# local run has no email for them to go to.
+TEST_SHOW_DRAFTS = os.environ.get("WA_AGENT_TEST_SHOW_DRAFTS", "") == "1"
 
 # --- Tools --------------------------------------------------------------------
 # Availability comes from goji-booking's 5-minute snapshot, never Plato

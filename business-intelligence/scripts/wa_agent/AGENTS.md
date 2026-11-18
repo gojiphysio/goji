@@ -30,6 +30,10 @@ The WhatsApp assistant. What it is and how to run it: [`README.md`](README.md).
   `marts.wa_agent_events` (set by `deploy.sh`, not the dashboard grant loops).
 - **Booking links use the `wa-book` go-link** (`dashboard/app.py` LINK_SLUGS),
   which forwards `service`/`focus` to `/book`.
+- **Learning signals are labels, never text.** Draft similarity, rescues and
+  ratings are worked out in `learning.py` when they happen, so BigQuery gets
+  `draft_outcome` / `rescue` / `rating`, not the messages. Demotion (auto to
+  draft) is automatic; promotion is a person's call and a code change.
 - **Every request pays for the always-on prompt.** Keep `kb.build`'s core
   small (`test_kb.py` caps it); new content goes behind `read_page`. Build
   every request with `agent.request_kwargs` so the warm-up and real turns

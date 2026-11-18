@@ -55,6 +55,13 @@ class MemoryStore:
     def get_kill(self) -> bool:
         return self._kill
 
+    def get_autonomy(self) -> dict:
+        import copy
+        return copy.deepcopy(getattr(self, "_autonomy", {}))
+
+    def save_autonomy(self, autonomy: dict) -> None:
+        self._autonomy = autonomy
+
     def set_kill(self, on: bool) -> None:
         self._kill = on
 
@@ -90,6 +97,15 @@ class FirestoreStore:
     def set_kill(self, on: bool) -> None:
         self._flags.document("kill_switch").set({"on": on, "at": time.time()})
         self._kill_cache = (time.monotonic(), on)
+
+    def get_autonomy(self) -> dict:
+        """Per-intent auto-send record for automatic demotion (learning.py).
+        One small doc; read per message, written on auto-sends and rescues."""
+        snap = self._flags.document("autonomy").get()
+        return (snap.to_dict() or {}).get("intents", {}) if snap.exists else {}
+
+    def save_autonomy(self, autonomy: dict) -> None:
+        self._flags.document("autonomy").set({"intents": autonomy, "at": time.time()})
 
 
 def make_store():

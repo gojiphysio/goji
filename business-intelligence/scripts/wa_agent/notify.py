@@ -19,9 +19,11 @@ log = logging.getLogger("wa_agent.notify")
 
 
 def compose(kind: str, *, customer: str, wa_id: str, staff_note: str,
-            suggested_reply: str, reason: str, last_message: str) -> EmailMessage:
+            suggested_reply: str, reason: str, last_message: str,
+            feedback: dict | None = None) -> EmailMessage:
     subject = {"escalated": "WhatsApp: needs you", "drafted": "WhatsApp: draft reply to check",
-               "urgent": "URGENT WhatsApp: possible red flag"}.get(kind, f"WhatsApp: {kind}")
+               "urgent": "URGENT WhatsApp: possible red flag",
+               "demoted": "WhatsApp assistant: moved a kind of message back to drafts"}.get(kind, f"WhatsApp: {kind}")
     msg = EmailMessage()
     msg["Subject"] = f"{subject} - {customer or wa_id}"
     msg["From"] = config.GMAIL_USER
@@ -38,6 +40,8 @@ def compose(kind: str, *, customer: str, wa_id: str, staff_note: str,
            if kind != "drafted" else
            "Nothing was sent. If the draft is right, send it from the WhatsApp "
            "Business app (that also takes the chat over from the assistant).\n")
+        + (f"\nDid the assistant handle this right? One tap, no login:\n"
+           f"Yes: {feedback['up']}\nNo: {feedback['down']}\n" if feedback else "")
     )
     return msg
 

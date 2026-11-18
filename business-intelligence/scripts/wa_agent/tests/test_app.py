@@ -232,3 +232,74 @@ def test_url_token_route(env, monkeypatch):
     app_mod.claude.queue.append(final())
     assert client.post("/webhook/s3cret-long-token", json=inbound()).status_code == 200
     assert len(app_mod.wa.sent) == 1
+
+
+# --- learning signals ---------------------------------------------------------
+
+def test_chris_sending_the_draft_is_scored_on_her_reply(env):
+    client, rec, _ = env
+    app_mod.claude.queue.append(final(reply="Sure, Friday 3pm works!", intent="booking"))
+    post(client, inbound(text="can I book Friday 3pm?"))
+    post(client, echo(text="Sure, Friday 3pm works!"))
+    ev = dict(rec)["echo"]
+    assert ev["intent"] == "booking" and ev["draft_outcome"] == "sent_unchanged"
+    assert "rescue" not in ev
+
+
+def test_chris_stepping_into_an_auto_chat_is_a_rescue(env):
+    client, rec, _ = env
+    app_mod.claude.queue.append(final(intent="pricing"))
+    post(client, inbound())
+    post(client, echo(text="Sorry, that's not right, let me explain"))
+    ev = dict(rec)["echo"]
+    assert ev == {**ev, "rescue": True, "intent": "pricing"}
+
+
+def test_echo_after_escalation_is_a_planned_handover_not_a_rescue(env):
+    client, rec, _ = env
+    app_mod.claude.queue.append(final(reply="Chris will get back to you today.",
+                                      intent="complaint", escalate=True, reason="complaint"))
+    post(client, inbound(text="I'm unhappy"))
+    post(client, echo())
+    assert "rescue" not in dict(rec)["echo"]
+
+
+def test_repeated_rescues_demote_the_intent_to_draft(env):
+    client, rec, notes = env
+    for i in range(3):
+        app_mod.claude.queue.append(final(intent="pricing"))
+        post(client, inbound(msg_id=f"wamid.in{i}"))
+        post(client, echo(msg_id=f"wamid.echo{i}"))
+        app_mod.store.save(app_mod.store.load(CUSTOMER).__class__(wa_id=CUSTOMER))  # hand back
+    assert ("autonomy", {"intent": "pricing",
+                         "reason": "demoted:3_rescues_in_last_20"}) in rec
+    assert any(k == "demoted" for k, _ in notes)
+    sent_before = len(app_mod.wa.sent)
+    app_mod.claude.queue.append(final(intent="pricing"))
+    post(client, inbound(msg_id="wamid.in9"))
+    assert len(app_mod.wa.sent) == sent_before            # now drafted, not sent
+    assert rec[-1][0] == "drafted"
+
+
+def test_feedback_link_records_a_rating(env, monkeypatch):
+    client, rec, _ = env
+    monkeypatch.setattr(config, "FEEDBACK_SECRET", "k")
+    from wa_agent import learning
+    sig = learning.feedback_sig("0123456789abcdef", 1700, "down")
+    assert client.get(f"/feedback?c=0123456789abcdef&t=1700&r=down&s={sig}").status_code == 200
+    assert ("feedback", {"key": "0123456789abcdef", "rating": "down"}) in rec
+    assert client.get("/feedback?c=0123456789abcdef&t=1700&r=up&s=" + sig).status_code == 403
+
+
+def test_test_mode_shows_drafts_to_the_tester_only_locally(env, monkeypatch):
+    client, _, _ = env
+    monkeypatch.setattr(config, "TEST_SHOW_DRAFTS", True)
+    monkeypatch.setattr(config, "STATE_BACKEND", "memory")
+    app_mod.claude.queue.append(final(reply="Draft text", intent="booking"))
+    post(client, inbound(text="can I book Friday 3pm?"))
+    assert len(app_mod.wa.sent) == 1 and "TEST MODE" in app_mod.wa.sent[0][1]
+    assert [h["role"] for h in app_mod.store.load(CUSTOMER).history] == ["customer"]
+    monkeypatch.setattr(config, "STATE_BACKEND", "firestore")
+    app_mod.claude.queue.append(final(reply="Draft text", intent="booking"))
+    post(client, inbound(msg_id="wamid.in2", text="and Saturday?"))
+    assert len(app_mod.wa.sent) == 1                      # never on a deployed service

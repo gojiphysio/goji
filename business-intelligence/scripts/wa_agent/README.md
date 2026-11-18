@@ -237,6 +237,55 @@ SELECT reason, mode_to, COUNT(*) FROM `goji-bi.marts.wa_agent_events`
 WHERE event = 'mode' GROUP BY 1, 2;
 ```
 
+The dashboard's Agent page reads the two views below.
+
+## Learning loop
+
+Every conversation is scored by how it ended, and a change to the agent
+(instructions, knowledge base, policy) is kept only if it does better. The
+model isn't retrained; what improves is everything around it.
+
+**Scoring** (`marts.wa_agent_conversations`, one row per conversation: a
+customer message after 24h of quiet starts one):
+
+| Outcome | Score |
+|---|---|
+| booked (through the agent's `wa-book` link, within 7 days) | success |
+| resolved (agent answered, no person needed) | success |
+| handover (policy escalation), draft_sent (Chris sent the draft unchanged) | neutral |
+| rescued (Chris stepped into a chat the agent was answering), draft_edited, asked_for_human, unanswered (draft nobody replied to) | failure |
+| dropped (agent gave times and the link, no booking) | soft failure |
+
+**Signals** (`learning.py`, worked out when they happen so only labels reach
+BigQuery): how close Chris's reply was to the agent's draft; whether her
+message rescued an auto-handled chat; her 👍/👎 from the staff email
+(`/feedback`, signed links; needs `WA_AGENT_PUBLIC_URL`); and bookings, via
+`?ref=<chat_key>` on the booking link, logged by the links service
+(`link_click_events.chat_ref`) and joined through `/book?cid=`.
+
+**What uses the scores**
+- The dashboard's Agent page: pure-agent success rate, rescue rate, bookings,
+  first reply time, cost, outcome mix, and autonomy by intent
+  (`marts.wa_agent_intent_autonomy`).
+- Automatic demotion: an intent with 3 rescues in its last 20 auto-sent
+  replies drafts instead of sending, and Chris gets an email. Only a person
+  turns it back (`POST /admin/autonomy/<intent>/promote`), because draft to auto
+  is the risky direction.
+- Promotion: an intent whose drafts Chris sends unchanged (90% of at least 20)
+  shows "ready to promote" on the dashboard. Promoting it is a change to
+  `config.INTENT_POLICY` with a test.
+- Regression set: failures and Chris's edits become Track C replay cases (names
+  and numbers removed before the 30-day transcript expiry). A change must
+  match or beat the previous version on them before it merges.
+- Weekly review (to set up once live): a scheduled agent reads the week's
+  failures and opens a PR with the fix and its replay score.
+
+**Battle testing on the test number** (no email locally): add
+`WA_AGENT_TEST_SHOW_DRAFTS=1` with `WA_AGENT_STATE=memory`, and drafts and
+handover notices are also sent to the tester, marked 🧪 TEST MODE. They're
+never stored in the transcript, and the flag does nothing on a deployed
+service.
+
 ## Tests
 
 ```bash

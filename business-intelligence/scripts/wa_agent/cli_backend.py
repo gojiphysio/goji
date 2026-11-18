@@ -82,7 +82,7 @@ def mcp_config(wa_id: str) -> dict:
     env = {"PYTHONPATH": SCRIPTS_DIR, "WA_ID": wa_id, "WA_AGENT_KB": config.KB_PATH,
            "WA_AGENT_STATE": "memory", "WA_AGENT_LOG_EVENTS": "false"}
     for k in ("BOOKING_API_BASE", "BOOKING_LINK_BASE", "WA_AGENT_PATIENT_LOOKUP", "GCP_PROJECT",
-              "GOOGLE_APPLICATION_CREDENTIALS"):
+              "GOOGLE_APPLICATION_CREDENTIALS", "WA_AGENT_HASH_SALT"):
         if os.environ.get(k):
             env[k] = os.environ[k]
     return {"mcpServers": {"goji": {"command": sys.executable,

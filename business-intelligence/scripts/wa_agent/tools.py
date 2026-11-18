@@ -214,11 +214,16 @@ def next_slots(inp: dict, *, http=requests, today: date | None = None, **_) -> d
             "note": "" if slots else "no open slots in the next two months"}
 
 
-def booking_link(inp: dict, **_) -> dict:
+def booking_link(inp: dict, *, wa_id: str = "", **_) -> dict:
     svc = _check_service(inp)
     params = {"service": svc}
     if inp.get("focus"):
         params["focus"] = inp["focus"]
+    if wa_id:
+        # The chat's salted hash (events.chat_key), so a booking made from this
+        # link can be credited to the conversation. Not reversible.
+        from .events import chat_key
+        params["ref"] = chat_key(wa_id)
     return {"url": f"{config.BOOKING_LINK_BASE}?{urlencode(params)}"}
 
 
