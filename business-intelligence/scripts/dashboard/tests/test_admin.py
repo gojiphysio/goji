@@ -563,6 +563,22 @@ def test_book_redirect_goes_to_site_booking_form(client, monkeypatch, _no_click_
     assert app.LINK_SLUG_KIND["web-book"] == "book"
 
 
+def test_book_redirect_forwards_valid_preselect_only(client, monkeypatch, _no_click_logging):
+    # The WhatsApp assistant sends go.gojiphysio.com/wa-book?service=..&focus=..
+    # so /book opens on the right option. Only known keys with slug-shaped
+    # values pass through; anything else (markup, other params) is dropped.
+    monkeypatch.setattr(app, "SITE_BOOKING_URL", "https://www.gojiphysio.com/book")
+    from urllib.parse import urlparse, parse_qs
+    loc = client.get("/r/wa-book?service=physiotherapy&focus=womens-health"
+                     "&variant=<script>&utm_source=x").headers["Location"]
+    q = parse_qs(urlparse(loc).query)
+    assert q["src"] == ["wa-book"]
+    assert q["service"] == ["physiotherapy"]
+    assert q["focus"] == ["womens-health"]
+    assert "variant" not in q and "utm_source" not in q
+    assert app.LINK_SLUG_KIND["wa-book"] == "book"
+
+
 def test_whatsapp_redirect_has_no_click_id_passthrough(client, monkeypatch, _no_click_logging):
     # The cid/src passthrough only applies to on-site /book targets; a wa.me deep
     # link must stay clean (the click_id can't join anything on WhatsApp's side).
