@@ -173,9 +173,11 @@ def decide(proposal: Proposal, *, intent_policy: dict[str, str] = config.INTENT_
     send      reply goes out (after the pre-send hold and re-check)
     draft     nothing goes out; staff get the suggested reply
     """
-    if proposal.escalate:
-        return Decision(ESCALATE, proposal.escalation_reason or "model_escalated")
     rule = intent_policy.get(proposal.intent, DRAFT)
+    if proposal.escalate and not (rule == "draft" and proposal.intent != "urgent"):
+        return Decision(ESCALATE, proposal.escalation_reason or "model_escalated")
+    # A draft-for-Chris intent stays a draft even if the model wanted to hand
+    # over: the policy decides, and Chris checks the reply before it goes out.
     if rule == "escalate":
         return Decision(ESCALATE, f"intent:{proposal.intent}")
     if not proposal.reply.strip():

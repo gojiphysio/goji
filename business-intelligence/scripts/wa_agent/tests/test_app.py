@@ -164,9 +164,9 @@ def test_after_chris_replies_agent_is_silent(env):
 def test_escalation_sends_holding_reply_hands_over_and_notifies(env):
     client, rec, notes = env
     app_mod.claude.queue.append(final(reply="I'll get Chris to call you back today.",
-                                      intent="complaint", escalate=True,
+                                      intent="human_requested", escalate=True,
                                       reason="complaint about a session"))
-    post(client, inbound(text="I'm really unhappy with my last session"))
+    post(client, inbound(text="I'd like to speak to Chris about my last session"))
     assert app_mod.wa.sent == [(CUSTOMER, "I'll get Chris to call you back today.")]
     assert app_mod.store.load(CUSTOMER).mode == HUMAN
     assert notes[0][0] == "escalated"
@@ -184,8 +184,8 @@ def test_urgent_notifies_as_urgent(env):
 
 def test_draft_sends_nothing_and_notifies(env):
     client, rec, notes = env
-    app_mod.claude.queue.append(final(intent="booking"))
-    post(client, inbound(text="can I book Friday 3pm?"))
+    app_mod.claude.queue.append(final(intent="cancel"))
+    post(client, inbound(text="please cancel my Friday 3pm"))
     assert app_mod.wa.sent == [] and notes[0][0] == "drafted"
     assert app_mod.store.load(CUSTOMER).mode == AGENT
 
@@ -238,11 +238,11 @@ def test_url_token_route(env, monkeypatch):
 
 def test_chris_sending_the_draft_is_scored_on_her_reply(env):
     client, rec, _ = env
-    app_mod.claude.queue.append(final(reply="Sure, Friday 3pm works!", intent="booking"))
-    post(client, inbound(text="can I book Friday 3pm?"))
-    post(client, echo(text="Sure, Friday 3pm works!"))
+    app_mod.claude.queue.append(final(reply="Sure, I've cancelled Friday 3pm.", intent="cancel"))
+    post(client, inbound(text="please cancel Friday 3pm"))
+    post(client, echo(text="Sure, I've cancelled Friday 3pm."))
     ev = dict(rec)["echo"]
-    assert ev["intent"] == "booking" and ev["draft_outcome"] == "sent_unchanged"
+    assert ev["intent"] == "cancel" and ev["draft_outcome"] == "sent_unchanged"
     assert "rescue" not in ev
 
 
@@ -258,8 +258,8 @@ def test_chris_stepping_into_an_auto_chat_is_a_rescue(env):
 def test_echo_after_escalation_is_a_planned_handover_not_a_rescue(env):
     client, rec, _ = env
     app_mod.claude.queue.append(final(reply="Chris will get back to you today.",
-                                      intent="complaint", escalate=True, reason="complaint"))
-    post(client, inbound(text="I'm unhappy"))
+                                      intent="human_requested", escalate=True, reason="wants Chris"))
+    post(client, inbound(text="Can Chris call me?"))
     post(client, echo())
     assert "rescue" not in dict(rec)["echo"]
 
@@ -295,13 +295,13 @@ def test_test_mode_shows_drafts_to_the_tester_only_locally(env, monkeypatch):
     client, _, _ = env
     monkeypatch.setattr(config, "TEST_SHOW_DRAFTS", True)
     monkeypatch.setattr(config, "STATE_BACKEND", "memory")
-    app_mod.claude.queue.append(final(reply="Draft text", intent="booking"))
-    post(client, inbound(text="can I book Friday 3pm?"))
+    app_mod.claude.queue.append(final(reply="Draft text", intent="cancel"))
+    post(client, inbound(text="please cancel Friday 3pm"))
     assert len(app_mod.wa.sent) == 1 and "TEST MODE" in app_mod.wa.sent[0][1]
     assert [h["role"] for h in app_mod.store.load(CUSTOMER).history] == ["customer"]
     monkeypatch.setattr(config, "STATE_BACKEND", "firestore")
-    app_mod.claude.queue.append(final(reply="Draft text", intent="booking"))
-    post(client, inbound(msg_id="wamid.in2", text="and Saturday?"))
+    app_mod.claude.queue.append(final(reply="Draft text", intent="cancel"))
+    post(client, inbound(msg_id="wamid.in2", text="and Saturday's too"))
     assert len(app_mod.wa.sent) == 1                      # never on a deployed service
 
 
@@ -314,3 +314,13 @@ def test_is_this_chris_answers_as_front_desk_and_sends_chris_an_fyi(env):
     assert len(app_mod.wa.sent) == 1 and "front desk" in app_mod.wa.sent[0][1]
     assert [k for k, _ in notes] == ["fyi"]
     assert app_mod.store.load(CUSTOMER).mode == AGENT      # the agent keeps the chat
+
+
+def test_rescheduling_replies_and_tells_chris_to_move_it(env):
+    client, _, notes = env
+    app_mod.claude.queue.append(final(reply="Sure! Thu 10am or Fri 2pm are open. "
+                                            "The team will move it and confirm.",
+                                      intent="reschedule"))
+    post(client, inbound(text="can I move my Tuesday appointment?"))
+    assert len(app_mod.wa.sent) == 1 and [k for k, _ in notes] == ["reschedule"]
+    assert app_mod.store.load(CUSTOMER).mode == AGENT

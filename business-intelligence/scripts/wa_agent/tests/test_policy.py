@@ -26,13 +26,26 @@ def test_model_escalation_wins_over_intent_policy():
 
 
 def test_escalate_intents_escalate_even_if_model_did_not():
-    assert decide(prop(intent="clinical")).action == ESCALATE
+    assert decide(prop(intent="human_requested")).action == ESCALATE
     assert decide(prop(intent="urgent", confidence=1.0)).action == ESCALATE
 
 
 def test_draft_and_unknown_intents_draft():
-    assert decide(prop(intent="booking")).action == DRAFT
-    assert decide(prop(intent="something_new")).action == DRAFT
+    for intent in ("existing_appointment", "cancel", "billing", "clinical", "complaint",
+                   "something_new"):
+        assert decide(prop(intent=intent)).action == DRAFT, intent
+
+
+def test_draft_intents_stay_drafts_even_if_the_model_escalates():
+    # Chris asked for complaints, billing, clinical and cancelling as drafts she checks.
+    assert decide(prop(intent="complaint", escalate=True)).action == DRAFT
+    assert decide(prop(intent="urgent", escalate=True)).action == ESCALATE
+    assert decide(prop(intent="faq", escalate=True)).action == ESCALATE   # unsure on an auto intent
+
+
+def test_booking_and_rescheduling_send_on_their_own():
+    assert decide(prop(intent="booking")).action == SEND
+    assert decide(prop(intent="reschedule")).action == SEND
 
 
 def test_empty_reply_never_sends():

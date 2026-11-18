@@ -42,7 +42,13 @@ answered. `WA_AGENT_HOURS=after_hours` limits the agent to outside Mon-Sat
 8am-8pm.
 
 What happens to a proposal: `config.INTENT_POLICY` maps each intent to
-auto / draft / escalate; below `WA_AGENT_MIN_CONFIDENCE` it's a draft. A reply
+auto / auto_notify / draft / escalate; below `WA_AGENT_MIN_CONFIDENCE` it's a
+draft. Chris's routing (18 Nov): booking requests send on their own;
+rescheduling sends new times and emails Chris to move the booking (the agent
+can't change appointments); "is this Chris?" answers as the front desk and
+sends her an FYI; cancelling, billing, clinical and complaints are drafts she
+checks, even if the model wanted to hand over; asking for a person, sensitive
+topics and urgent red flags escalate with a holding reply. A reply
 that will be sent waits until `WA_AGENT_PRE_SEND_HOLD_S` (20s) after the
 customer's message arrived, then sends only if no person wrote in the chat and
 no newer customer message came in meanwhile (that message's own run answers

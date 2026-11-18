@@ -24,7 +24,8 @@ def compose(kind: str, *, customer: str, wa_id: str, staff_note: str,
     subject = {"escalated": "WhatsApp: needs you", "drafted": "WhatsApp: draft reply to check",
                "urgent": "URGENT WhatsApp: possible red flag",
                "demoted": "WhatsApp assistant: moved a kind of message back to drafts",
-               "fyi": "WhatsApp FYI: a customer asked for you"}.get(kind, f"WhatsApp: {kind}")
+               "fyi": "WhatsApp FYI: a customer asked for you",
+               "reschedule": "WhatsApp: please move an appointment"}.get(kind, f"WhatsApp: {kind}")
     msg = EmailMessage()
     msg["Subject"] = f"{subject} - {customer or wa_id}"
     msg["From"] = config.GMAIL_USER
@@ -34,7 +35,7 @@ def compose(kind: str, *, customer: str, wa_id: str, staff_note: str,
         f"What they want: {staff_note}\n"
         f"Why you're getting this: {reason}\n\n"
         f"Their last message:\n{last_message}\n\n"
-        f"{'Suggested reply (NOT sent)' if kind == 'drafted' else 'Agent sent this reply' if kind == 'fyi' else 'Agent sent this holding reply'}:\n"
+        f"{'Suggested reply (NOT sent)' if kind == 'drafted' else 'Agent sent this reply' if kind in ('fyi', 'reschedule') else 'Agent sent this holding reply'}:\n"
         f"{suggested_reply}\n\n"
         + ("Nothing was sent. If the draft is right, send it from the WhatsApp "
            "Business app (that also takes the chat over from the assistant).\n"
@@ -43,6 +44,11 @@ def compose(kind: str, *, customer: str, wa_id: str, staff_note: str,
            "it on. Reply yourself in the WhatsApp Business app if you'd rather "
            "(that takes the chat over).\n"
            if kind == "fyi" else
+           "The assistant offered new times and said the team will move it and "
+           "confirm. It can't change bookings: please move it in Plato and confirm "
+           "with them. If they haven't picked a time yet, another email follows "
+           "when they do.\n"
+           if kind == "reschedule" else
            "Reply to them in the WhatsApp Business app. The assistant stays out of "
            "this chat until you hand it back or 24 hours pass with no reply from you.\n")
         + (f"\nDid the assistant handle this right? One tap, no login:\n"
