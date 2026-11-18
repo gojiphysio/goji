@@ -30,6 +30,13 @@ The WhatsApp assistant. What it is and how to run it: [`README.md`](README.md).
   `marts.wa_agent_events` (set by `deploy.sh`, not the dashboard grant loops).
 - **Booking links use the `wa-book` go-link** (`dashboard/app.py` LINK_SLUGS),
   which forwards `service`/`focus` to `/book`.
+- **Replies are checked in code** (`policy.reply_problems`): only Goji's own
+  links, email and numbers (plus 995/1767), and booking links only via the
+  `wa-book` go-link. Anything else is drafted, never sent.
+- **The CLI backend is temporary** (`WA_AGENT_BACKEND=cli`, local testing on
+  test numbers). Production is the Messages API. Keep both backends returning
+  the same Proposal, and keep the CLI isolated (`--tools ""`,
+  `--strict-mcp-config`, `--setting-sources ""`).
 - **Paid vendor, flagged:** the WhatsApp provider (needed for coexistence) is
   this repo's one exception to "free / DIY first". Code speaks Cloud API
   payloads only, so the provider is a config change (`WA_API_BASE`, ...).

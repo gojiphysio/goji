@@ -15,7 +15,9 @@ message, or an admin hands back. `paused` only leaves by admin hand-back.
 """
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, field
+from urllib.parse import urlparse
 from datetime import datetime, timezone, timedelta
 
 from . import config
@@ -114,6 +116,38 @@ def gate(state: ChatState, now: float, *, kill_switch: bool = config.KILL_SWITCH
     return None
 
 
+# What a reply may contain, whatever the model was told or tricked into: only
+# Goji's own links, email and numbers, plus Singapore's emergency lines.
+ALLOWED_HOSTS = {"gojiphysio.com", "www.gojiphysio.com", "go.gojiphysio.com",
+                 "maps.app.goo.gl", "www.instagram.com", "instagram.com"}
+ALLOWED_EMAILS = {"hello@gojiphysio.com"}
+ALLOWED_NUMBERS = {"83770401", "995", "1767", "1777"}
+_URL = re.compile(r"(?:https?://|www\.)[^\s)>\]]+", re.I)
+_EMAIL = re.compile(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+")
+_PHONE = re.compile(r"(?<![\w$.])(?:\+?65[\s-]?)?(\d{4}[\s-]?\d{4})(?![\w])")
+
+
+def reply_problems(reply: str) -> list[str]:
+    """Links, emails or phone numbers in a reply that aren't Goji's own."""
+    problems = []
+    for url in _URL.findall(reply):
+        parsed = urlparse(url if "://" in url else "https://" + url)
+        host = (parsed.hostname or "").lower()
+        if host not in ALLOWED_HOSTS:
+            problems.append(f"link:{host}")
+        elif host.endswith("gojiphysio.com") and host != "go.gojiphysio.com" \
+                and parsed.path.startswith("/book"):
+            # Booking links must be the tracked go-link from booking_link (repo rule).
+            problems.append("untracked_booking_link")
+    for email in _EMAIL.findall(reply):
+        if email.lower() not in ALLOWED_EMAILS:
+            problems.append("email")
+    for num in _PHONE.findall(reply):
+        if re.sub(r"\D", "", num) not in ALLOWED_NUMBERS:
+            problems.append("phone")
+    return problems
+
+
 def decide(proposal: Proposal, *, intent_policy: dict[str, str] = config.INTENT_POLICY,
            min_confidence: float = config.MIN_CONFIDENCE) -> Decision:
     """What happens to a proposal that passed `gate`.
@@ -129,6 +163,9 @@ def decide(proposal: Proposal, *, intent_policy: dict[str, str] = config.INTENT_
         return Decision(ESCALATE, f"intent:{proposal.intent}")
     if not proposal.reply.strip():
         return Decision(DRAFT, "empty_reply")
+    problems = reply_problems(proposal.reply)
+    if problems:
+        return Decision(DRAFT, "content:" + ",".join(sorted(set(problems))))
     if proposal.confidence < min_confidence:
         return Decision(DRAFT, f"low_confidence:{proposal.confidence:.2f}")
     if rule == "auto":

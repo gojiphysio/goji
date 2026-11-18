@@ -36,7 +36,8 @@ from flask import Flask, jsonify, request
 
 from . import agent, config, events, notify
 from .policy import (AGENT, DRAFT, ESCALATE, HUMAN, PAUSED, SEND, apply_idle_handback,
-                     decide, gate, human_replied_since, on_human_message, set_mode)
+                     decide, gate, human_replied_since, on_human_message, reply_problems,
+                     set_mode)
 from .state import ChatLocks, append_history, make_store, mark_seen
 from .whatsapp import Echo, Inbound, Status, WhatsAppClient, parse_webhook, verify_signature
 
@@ -59,7 +60,7 @@ def _deps():
         store = make_store()
     if wa is None:
         wa = WhatsAppClient()
-    if claude is None:
+    if claude is None and config.BACKEND == "api":
         import anthropic
         claude = anthropic.Anthropic()
     return store, wa, claude
@@ -198,7 +199,9 @@ def handle_inbound(ev: Inbound, received: float) -> None:
         if config.KILL_SWITCH or st.get_kill():
             events.record("silent", ev.wa_id, reason="kill_switch")
             return
-        reply = p.reply.strip() or agent._escalation("empty").reply
+        reply = p.reply.strip()
+        if not reply or reply_problems(reply):  # escalations skip decide()'s content check
+            reply = agent._escalation("unsafe_or_empty").reply
         try:
             wa_msg_id = client.send_text(ev.wa_id, reply)
         except Exception as e:

@@ -93,3 +93,21 @@ def test_presend_recheck():
     assert human_replied_since(s, NOW)
     s2 = ChatState(wa_id="y", mode=HUMAN)
     assert human_replied_since(s2, NOW)
+
+
+def test_reply_content_guard():
+    from wa_agent.policy import reply_problems
+    ok = ("Book here: https://go.gojiphysio.com/wa-book?service=physiotherapy or call "
+          "+65 8377 0401, email hello@gojiphysio.com. In an emergency call 995. "
+          "It's $260 for 55 min, Mon-Sat 8am-8pm.")
+    assert reply_problems(ok) == []
+    assert reply_problems("Pay at https://evil.example/pay") == ["link:evil.example"]
+    assert reply_problems("Email charles@example.com") == ["email"]
+    assert reply_problems("Call Kristy on 9123 4567") == ["phone"]
+    # seen in the first live test: the raw /book URL instead of the tracked go-link
+    assert reply_problems("Book here: https://www.gojiphysio.com/book/") == ["untracked_booking_link"]
+
+
+def test_reply_with_foreign_link_is_drafted_not_sent():
+    d = decide(prop(reply="Pay here: https://evil.example/pay"))
+    assert d.action == DRAFT and d.reason == "content:link:evil.example"

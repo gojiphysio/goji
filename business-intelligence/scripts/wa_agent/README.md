@@ -153,6 +153,40 @@ curl -s -XPOST -H "X-Admin-Token: $T" -H 'Content-Type: application/json' \
    (`wa-token` = the provider's key). Check each provider's docs for the exact values.
 5. Subscribe **messages** and **smb_message_echoes**. Run the six scenarios.
 
+### Testing with the Claude CLI instead of the API (temporary)
+
+Until the Goji API key is set up, `WA_AGENT_BACKEND=cli` runs the agent through
+the local `claude -p`, logged in as you (`cli_backend.py`). Same instructions,
+knowledge base, tools (served over MCP by `mcp_server.py`), schema and policy.
+The CLI is isolated: no built-in tools, no settings/skills/CLAUDE.md, only our
+MCP server. **Local only and test numbers only:** a personal subscription is
+not for answering real customers, and the image doesn't ship the CLI. Latency
+includes CLI start-up and cost is the CLI's list-price estimate, so re-measure
+both on the API.
+
+```bash
+cd business-intelligence/scripts
+python -m wa_agent.kb --site ../../marketing/website --out wa_agent/_build/kb.json
+# offline replay (Track C) through the CLI:
+WA_AGENT_BACKEND=cli python -m wa_agent.eval.replay --cases ~/goji-eval/cases.jsonl \
+    --out ~/goji-eval/replay.csv --sample 30
+# live test number (Track A) from a laptop: run the service, expose it, and
+# point Meta's webhook at https://<tunnel>/webhook
+WA_AGENT_BACKEND=cli WA_AGENT_STATE=memory WA_AGENT_LOG_EVENTS=false \
+WA_PHONE_NUMBER_ID=... WA_TOKEN=... WA_APP_SECRET=... WA_VERIFY_TOKEN=... \
+WA_AGENT_ADMIN_TOKEN=... gunicorn -w 1 --threads 8 -b :8080 wa_agent.app:app
+cloudflared tunnel --url http://localhost:8080      # free quick tunnel
+```
+
+First live run (18 Nov 2026, 5 messages): prices, referral and Medisave answers
+correct; real availability offered with clinicians; a pregnancy red flag got
+995/A&E and an urgent escalation; a prompt injection was declined; a
+reschedule was handed over. Each reply took 6-11s. One fix came out of it: the
+model wrote the raw `/book` URL once, so `policy.reply_problems` now drafts any
+reply with an untracked booking link. Cost note: the ~30K-token knowledge base
+is a cache write (~$0.25) on the first message after an idle hour, so sporadic
+traffic costs more than the per-message estimate; measure on the API.
+
 ### Track C: offline test set
 
 Keep everything outside the repo; delete raw exports after redacting.

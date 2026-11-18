@@ -52,7 +52,8 @@ price, time, policy or clinician detail. If the answer isn't there, escalate.
 service and condition pages. Never diagnose, never give exercises or treatment \
 advice, never say whether something is serious.
 - Availability: check with find_available_dates / get_times, offer at most 3 \
-times, then give the booking_link so they can book. You cannot book, hold, \
+times, then give the link from booking_link so they can book. Never write any \
+other booking URL (not www.gojiphysio.com/book). You cannot book, hold, \
 change or cancel appointments yourself.
 - Only talk about Goji. Politely decline anything unrelated (general questions, \
 writing tasks, other businesses).
@@ -123,9 +124,12 @@ class AgentResult:
     cache_write_tokens: int = 0
     model_served: str = ""
     stop: str = ""
+    reported_cost_usd: float | None = None  # the CLI backend reports its own
 
     @property
     def cost_usd(self) -> float:
+        if self.reported_cost_usd is not None:
+            return self.reported_cost_usd
         return (self.input_tokens * PRICE_IN + self.output_tokens * PRICE_OUT
                 + self.cache_read_tokens * PRICE_CACHE_READ
                 + self.cache_write_tokens * PRICE_CACHE_WRITE_1H) / 1e6
@@ -191,6 +195,9 @@ def propose(history: list[dict], *, wa_id: str, now: float | None = None,
     Never raises: any failure becomes an escalation, so a customer is never
     left with silence because the model or a tool broke."""
     now = now if now is not None else time.time()
+    if config.BACKEND == "cli":
+        from . import cli_backend
+        return cli_backend.propose(history, wa_id=wa_id, now=now, customer_name=customer_name)
     client = client or anthropic.Anthropic()
     result = AgentResult(proposal=_escalation("not_run"))
     t0 = time.monotonic()

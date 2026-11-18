@@ -22,6 +22,11 @@ def _env_bool(name: str, default: bool) -> bool:
 PROJECT = os.environ.get("GCP_PROJECT", "goji-bi")
 
 # --- Claude -------------------------------------------------------------------
+# "api" (Messages API, the real path) or "cli" (TEMPORARY: `claude -p` with the
+# local login, for testing model behaviour before the API key; cli_backend.py).
+BACKEND = os.environ.get("WA_AGENT_BACKEND", "api")
+CLAUDE_BIN = os.environ.get("CLAUDE_BIN", "claude")
+CLI_TIMEOUT_S = int(os.environ.get("WA_AGENT_CLI_TIMEOUT_S", "120"))
 MODEL = os.environ.get("WA_AGENT_MODEL", "claude-opus-5-5")
 # Short conversational turns: low effort keeps replies quick. Raise per the eval.
 EFFORT = os.environ.get("WA_AGENT_EFFORT", "low")
