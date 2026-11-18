@@ -185,7 +185,7 @@ def decide(proposal: Proposal, *, intent_policy: dict[str, str] = config.INTENT_
         return Decision(DRAFT, "content:" + ",".join(sorted(set(problems))))
     if proposal.confidence < min_confidence:
         return Decision(DRAFT, f"low_confidence:{proposal.confidence:.2f}")
-    if rule == "auto":
+    if rule in ("auto", "auto_notify"):
         return Decision(SEND, f"intent:{proposal.intent}")
     return Decision(DRAFT, f"intent:{proposal.intent}")
 

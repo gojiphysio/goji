@@ -23,7 +23,8 @@ def compose(kind: str, *, customer: str, wa_id: str, staff_note: str,
             feedback: dict | None = None) -> EmailMessage:
     subject = {"escalated": "WhatsApp: needs you", "drafted": "WhatsApp: draft reply to check",
                "urgent": "URGENT WhatsApp: possible red flag",
-               "demoted": "WhatsApp assistant: moved a kind of message back to drafts"}.get(kind, f"WhatsApp: {kind}")
+               "demoted": "WhatsApp assistant: moved a kind of message back to drafts",
+               "fyi": "WhatsApp FYI: a customer asked for you"}.get(kind, f"WhatsApp: {kind}")
     msg = EmailMessage()
     msg["Subject"] = f"{subject} - {customer or wa_id}"
     msg["From"] = config.GMAIL_USER
@@ -33,13 +34,17 @@ def compose(kind: str, *, customer: str, wa_id: str, staff_note: str,
         f"What they want: {staff_note}\n"
         f"Why you're getting this: {reason}\n\n"
         f"Their last message:\n{last_message}\n\n"
-        f"{'Agent sent this holding reply' if kind != 'drafted' else 'Suggested reply (NOT sent)'}:\n"
+        f"{'Suggested reply (NOT sent)' if kind == 'drafted' else 'Agent sent this reply' if kind == 'fyi' else 'Agent sent this holding reply'}:\n"
         f"{suggested_reply}\n\n"
-        + ("Reply to them in the WhatsApp Business app. The assistant stays out of "
-           "this chat until you hand it back or 24 hours pass with no reply from you.\n"
-           if kind != "drafted" else
-           "Nothing was sent. If the draft is right, send it from the WhatsApp "
-           "Business app (that also takes the chat over from the assistant).\n")
+        + ("Nothing was sent. If the draft is right, send it from the WhatsApp "
+           "Business app (that also takes the chat over from the assistant).\n"
+           if kind == "drafted" else
+           "No action needed: the assistant asked what it's about and will pass "
+           "it on. Reply yourself in the WhatsApp Business app if you'd rather "
+           "(that takes the chat over).\n"
+           if kind == "fyi" else
+           "Reply to them in the WhatsApp Business app. The assistant stays out of "
+           "this chat until you hand it back or 24 hours pass with no reply from you.\n")
         + (f"\nDid the assistant handle this right? One tap, no login:\n"
            f"Yes: {feedback['up']}\nNo: {feedback['down']}\n" if feedback else "")
     )

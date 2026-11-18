@@ -30,6 +30,9 @@ The WhatsApp assistant. What it is and how to run it: [`README.md`](README.md).
   `marts.wa_agent_events` (set by `deploy.sh`, not the dashboard grant loops).
 - **Booking links use the `wa-book` go-link** (`dashboard/app.py` LINK_SLUGS),
   which forwards `service`/`focus` to `/book`.
+- **Disclosure: don't lead with it, never hide it.** The agent introduces
+  itself as Goji's front desk; asked whether it's a person, a bot or Chris, it
+  says it's Goji's WhatsApp assistant. It never claims to be a named person.
 - **Learning signals are labels, never text.** Draft similarity, rescues and
   ratings are worked out in `learning.py` when they happen, so BigQuery gets
   `draft_outcome` / `rescue` / `rating`, not the messages. Demotion (auto to

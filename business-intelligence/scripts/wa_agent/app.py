@@ -315,6 +315,9 @@ def handle_inbound(ev: Inbound, received: float) -> None:
                   intent=p.intent, reason=d.reason,
                   e2e_ms=int((sent_at - received) * 1000))
     _mode_event(state, old, sent_at)
+    if d.action == SEND and config.INTENT_POLICY.get(p.intent) == "auto_notify":
+        notify.send("fyi", **notice)
+        _test_show(client, ev.wa_id, f"Chris would get an FYI email: {p.staff_note}")
     if d.action == ESCALATE:
         notify.send("urgent" if p.intent == "urgent" else "escalated", **notice)
         _test_show(client, ev.wa_id, f"Handed to Chris ({d.reason}). She'd get an email "

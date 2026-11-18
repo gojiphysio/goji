@@ -303,3 +303,14 @@ def test_test_mode_shows_drafts_to_the_tester_only_locally(env, monkeypatch):
     app_mod.claude.queue.append(final(reply="Draft text", intent="booking"))
     post(client, inbound(msg_id="wamid.in2", text="and Saturday?"))
     assert len(app_mod.wa.sent) == 1                      # never on a deployed service
+
+
+def test_is_this_chris_answers_as_front_desk_and_sends_chris_an_fyi(env):
+    client, rec, notes = env
+    app_mod.claude.queue.append(final(
+        reply="Hi! This is Goji's front desk. I'll let Chris know you asked for her. "
+              "Is there a message I can pass along?", intent="person_check"))
+    post(client, inbound(text="Hi is this Chris"))
+    assert len(app_mod.wa.sent) == 1 and "front desk" in app_mod.wa.sent[0][1]
+    assert [k for k, _ in notes] == ["fyi"]
+    assert app_mod.store.load(CUSTOMER).mode == AGENT      # the agent keeps the chat

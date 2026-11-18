@@ -87,6 +87,9 @@ INTENT_POLICY: dict[str, str] = {
     "urgent": "escalate",
     "human_requested": "escalate",
     "other": "draft",
+    # "Is this Chris?" with no request yet: the agent answers as the front desk
+    # and asks for a message, and Chris gets an FYI. The chat stays with the agent.
+    "person_check": "auto_notify",
 }
 INTENTS = tuple(INTENT_POLICY)
 

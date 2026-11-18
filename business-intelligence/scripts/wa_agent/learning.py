@@ -92,7 +92,8 @@ def promote(autonomy: dict, intent: str) -> None:
 
 def effective_policy(base: dict[str, str], autonomy: dict) -> dict[str, str]:
     """Demoted intents draft instead of auto-sending. Escalations never relax."""
-    return {intent: ("draft" if rule == "auto" and autonomy.get(intent, {}).get("demoted")
+    return {intent: ("draft" if rule in ("auto", "auto_notify")
+                     and autonomy.get(intent, {}).get("demoted")
                      else rule)
             for intent, rule in base.items()}
 
