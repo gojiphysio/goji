@@ -222,6 +222,9 @@ LINK_SLUGS: dict[str, dict] = {
     "ads-book": {"kind": "book", "label": "Ads"},
     "qr-book":  {"kind": "book", "label": "QR"},
     "book":     {"kind": "book", "label": "Social"},  # generic fallback
+    # Booking links the WhatsApp assistant (scripts/wa_agent) sends in chat.
+    # They carry ?service=&focus= so /book opens on the right option.
+    "wa-book":  {"kind": "book", "label": "WhatsApp assistant"},
     # --- Legacy Plato-booking slugs (retired; alias to the native /book form
     #     below so old published links never dead-end) ---
     "web-plato": {"kind": "book", "label": "Web"},
@@ -3913,7 +3916,21 @@ def api_frontdesk_new_patients_save() -> Response:
     return Response('{"ok": true}', mimetype="application/json")
 
 
-def _slug_target(slug: str, click_id: str | None = None) -> str:
+# Query params a booking go-link may forward to /book so the form opens on the
+# right option (BookingForm.astro's applyDeepLink). Values are ids, so anything
+# that isn't a short lowercase slug is dropped rather than passed through.
+BOOK_PRESELECT_PARAMS = ("service", "focus", "variant")
+_PRESELECT_VALUE_RE = re.compile(r"^[a-z0-9-]{1,40}$")
+
+
+def _book_preselect(args) -> str:
+    """`&service=..&focus=..` from the go-link's own query, validated."""
+    kept = [(k, args.get(k)) for k in BOOK_PRESELECT_PARAMS
+            if args.get(k) and _PRESELECT_VALUE_RE.match(args.get(k))]
+    return "".join(f"&{k}={v}" for k, v in kept)
+
+
+def _slug_target(slug: str, click_id: str | None = None, preselect: str = "") -> str:
     """Resolve a slug to its redirect destination. Never dead-ends: an unknown
     or not-yet-configured target falls back to the marketing site.
 
@@ -3930,7 +3947,7 @@ def _slug_target(slug: str, click_id: str | None = None) -> str:
         base = SITE_BOOKING_URL or WHATSAPP_FALLBACK_URL
         if click_id and base:
             sep = "&" if "?" in base else "?"
-            return f"{base}{sep}cid={click_id}&src={slug}"
+            return f"{base}{sep}cid={click_id}&src={slug}{preselect}"
         return base
     if WHATSAPP_NUMBER:  # whatsapp
         return f"https://wa.me/{WHATSAPP_NUMBER}?text={quote(cfg.get('text', ''))}"
@@ -3960,7 +3977,7 @@ def tracked_redirect(slug: str):
                              request.headers.get("Referer"),
                              session_id=request.args.get("sid"),
                              page=request.args.get("p"))
-    return redirect(_slug_target(slug, click_id), code=302)
+    return redirect(_slug_target(slug, click_id, _book_preselect(request.args)), code=302)
 
 
 # On the public links subdomain the slug sits at the root (go.gojiphysio.com/ig),

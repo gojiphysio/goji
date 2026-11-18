@@ -183,6 +183,20 @@ Leads pipeline (`marts.lead_events`). Open follow-ups:
 
 ## Phase 4 — WhatsApp leads funnel tracking (idea / to-do)
 
+> **Now part of the WhatsApp assistant (Phase 0 in progress, Nov 2026).**
+> Chris answers WhatsApp by hand today; most questions are routine. The plan:
+> an agent answers routine questions on the clinic number (Cloud API with
+> coexistence, so Chris keeps her phone app) and hands everything else to her.
+> Plan, costs, lead times and runbook:
+> [`scripts/wa_agent/README.md`](../wa_agent/README.md). Rollout:
+> **Phase 0** prototype on test numbers (Plato availability, latency, takeover;
+> offline test set from Chris's exports) → **Phase 1** drafts on the real
+> number, Chris sends → **Phase 2** auto-send for safe intents → **Phase 3**
+> direct booking / rescheduling. That answers the "capture method" question
+> below: the agent records every enquiry itself (`marts.wa_agent_events` now;
+> writing `lead_events` from the agent is a Phase 1 item), so leads stop
+> depending on manual entry.
+
 ### Goal
 
 WhatsApp is the primary CTA — customers message us before they book — but once a

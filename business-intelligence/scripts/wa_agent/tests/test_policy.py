@@ -1,0 +1,95 @@
+from datetime import datetime
+
+from wa_agent.policy import (AGENT, DRAFT, ESCALATE, HUMAN, PAUSED, SEND, SGT, SILENT,
+                             ChatState, Proposal, apply_idle_handback, decide, gate,
+                             human_replied_since, in_clinic_hours, on_human_message)
+
+NOW = datetime(2026, 11, 18, 10, 0, tzinfo=SGT).timestamp()  # Wednesday 10am
+
+
+def prop(**kw):
+    base = dict(reply="hello", intent="faq", confidence=0.9, escalate=False)
+    return Proposal(**{**base, **kw})
+
+
+def test_auto_intent_with_confidence_sends():
+    assert decide(prop()).action == SEND
+
+
+def test_low_confidence_drafts_even_for_auto_intents():
+    d = decide(prop(confidence=0.5))
+    assert d.action == DRAFT and d.reason.startswith("low_confidence")
+
+
+def test_model_escalation_wins_over_intent_policy():
+    assert decide(prop(escalate=True, escalation_reason="asked for Chris")).action == ESCALATE
+
+
+def test_escalate_intents_escalate_even_if_model_did_not():
+    assert decide(prop(intent="clinical")).action == ESCALATE
+    assert decide(prop(intent="urgent", confidence=1.0)).action == ESCALATE
+
+
+def test_draft_and_unknown_intents_draft():
+    assert decide(prop(intent="booking")).action == DRAFT
+    assert decide(prop(intent="something_new")).action == DRAFT
+
+
+def test_empty_reply_never_sends():
+    assert decide(prop(reply="  ")).action == DRAFT
+
+
+def test_gate_blocks_in_order():
+    s = ChatState(wa_id="6591234567")
+    assert gate(s, NOW, kill_switch=True, always_human=frozenset()).reason == "kill_switch"
+    assert gate(s, NOW, kill_switch=False,
+                always_human=frozenset({"6591234567"})).reason == "always_human"
+    s.mode = HUMAN
+    assert gate(s, NOW, kill_switch=False, always_human=frozenset()).action == SILENT
+    s.mode = PAUSED
+    assert gate(s, NOW, kill_switch=False, always_human=frozenset()).reason == "paused"
+    s.mode = AGENT
+    assert gate(s, NOW, kill_switch=False, always_human=frozenset()) is None
+
+
+def test_after_hours_mode_is_silent_while_clinic_is_open():
+    s = ChatState(wa_id="x")
+    assert gate(s, NOW, kill_switch=False, always_human=frozenset(),
+                agent_hours="after_hours").reason == "clinic_hours"
+    late = datetime(2026, 11, 18, 22, 0, tzinfo=SGT).timestamp()
+    assert gate(s, late, kill_switch=False, always_human=frozenset(),
+                agent_hours="after_hours") is None
+
+
+def test_clinic_hours():
+    assert in_clinic_hours(NOW)
+    assert not in_clinic_hours(datetime(2026, 11, 22, 10, 0, tzinfo=SGT).timestamp())  # Sunday
+    assert not in_clinic_hours(datetime(2026, 11, 18, 20, 0, tzinfo=SGT).timestamp())
+
+
+def test_human_message_takes_over_and_idle_hands_back():
+    s = ChatState(wa_id="x")
+    assert on_human_message(s, NOW)
+    assert s.mode == HUMAN
+    assert not apply_idle_handback(s, NOW + 3600, idle_s=24 * 3600)
+    assert apply_idle_handback(s, NOW + 24 * 3600, idle_s=24 * 3600)
+    assert s.mode == AGENT and s.mode_reason == "idle_handback"
+
+
+def test_unanswered_escalation_also_hands_back():
+    s = ChatState(wa_id="x", mode=HUMAN, mode_since=NOW)  # no human ever replied
+    assert apply_idle_handback(s, NOW + 25 * 3600, idle_s=24 * 3600)
+
+
+def test_paused_never_times_out():
+    s = ChatState(wa_id="x", mode=PAUSED, mode_since=NOW)
+    assert not apply_idle_handback(s, NOW + 30 * 24 * 3600, idle_s=24 * 3600)
+
+
+def test_presend_recheck():
+    s = ChatState(wa_id="x")
+    assert not human_replied_since(s, NOW)
+    s.last_human_at = NOW + 5
+    assert human_replied_since(s, NOW)
+    s2 = ChatState(wa_id="y", mode=HUMAN)
+    assert human_replied_since(s2, NOW)
