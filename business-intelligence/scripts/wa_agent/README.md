@@ -152,6 +152,12 @@ curl -s -XPOST -H "X-Admin-Token: $T" -H 'Content-Type: application/json' \
    `WA_API_BASE=https://waba-v2.360dialog.io WA_SEND_PATH=/messages WA_AUTH_HEADER=D360-API-KEY WA_AUTH_PREFIX=`
    (`wa-token` = the provider's key). Check each provider's docs for the exact values.
 5. Subscribe **messages** and **smb_message_echoes**. Run the six scenarios.
+6. **Before go-live on Goji's real number:** turn off the WhatsApp Business
+   app's automatic replies on Chris's phone (Settings → Business tools →
+   Away message, and Greeting message). The current away message ("👋 Thank you
+   for your interest… We're not available right now…") comes from the app, not
+   from Meta's API or Plato, and fires mid-conversation even while Chris is
+   replying. Left on, customers get it as well as the assistant's reply.
 
 ### Testing with the Claude CLI instead of the API (temporary)
 
