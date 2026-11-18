@@ -25,6 +25,7 @@ from . import config
 SGT = timezone(timedelta(hours=8))
 
 AGENT, HUMAN, PAUSED = "agent", "human", "paused"
+LATE_CHANGE_H = 24  # the cancellation policy's notice period (gojiphysio.com/services/#faq)
 SEND, DRAFT, ESCALATE, SILENT = "send", "draft", "escalate", "silent"
 
 
@@ -57,6 +58,7 @@ class Proposal:
     escalate: bool
     escalation_reason: str = ""
     staff_note: str = ""
+    hours_to_appointment: float = -1.0  # reschedule/cancel: the booking being changed; -1 unknown
 
 
 @dataclass
@@ -180,6 +182,10 @@ def decide(proposal: Proposal, *, intent_policy: dict[str, str] = config.INTENT_
     # over: the policy decides, and Chris checks the reply before it goes out.
     if rule == "escalate":
         return Decision(ESCALATE, f"intent:{proposal.intent}")
+    if proposal.intent == "reschedule" and 0 <= proposal.hours_to_appointment < LATE_CHANGE_H:
+        # Inside the 24-hour policy: whether the $50 fee applies or is waived
+        # is Chris's call, so she checks the reply first.
+        return Decision(DRAFT, "late_change")
     if not proposal.reply.strip():
         return Decision(DRAFT, "empty_reply")
     problems = reply_problems(proposal.reply)

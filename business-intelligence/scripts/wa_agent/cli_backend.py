@@ -148,7 +148,8 @@ def propose(history: list[dict], *, wa_id: str, now: float, customer_name: str =
                 intent=s.get("intent") if s.get("intent") in config.INTENTS else "other",
                 confidence=float(s.get("confidence") or 0), escalate=bool(s.get("escalate")),
                 escalation_reason=s.get("escalation_reason", ""),
-                staff_note=s.get("staff_note", ""))
+                staff_note=s.get("staff_note", ""),
+                hours_to_appointment=float(s.get("hours_to_appointment", -1)))
     except subprocess.TimeoutExpired:
         result.proposal = _escalation("cli_timeout")
     except Exception as e:

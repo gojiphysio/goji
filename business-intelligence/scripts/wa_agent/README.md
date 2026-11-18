@@ -47,7 +47,10 @@ draft. Chris's routing (18 Nov): booking requests send on their own;
 rescheduling sends new times and emails Chris to move the booking (the agent
 can't change appointments); "is this Chris?" answers as the front desk and
 sends her an FYI; cancelling, billing, clinical and complaints are drafts she
-checks, even if the model wanted to hand over; asking for a person, sensitive
+checks, even if the model wanted to hand over; a reschedule less than 24
+hours before the appointment (the site's cancellation policy) is a draft, and
+late-change drafts waive the $50 fee as a first-time courtesy for Chris to
+keep or remove; asking for a person, sensitive
 topics and urgent red flags escalate with a holding reply. A reply
 that will be sent waits until `WA_AGENT_PRE_SEND_HOLD_S` (20s) after the
 customer's message arrived, then sends only if no person wrote in the chat and

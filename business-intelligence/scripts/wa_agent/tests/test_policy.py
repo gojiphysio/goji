@@ -135,3 +135,15 @@ def test_acknowledgements():
         assert not is_acknowledgement(t, after_reply), t
     # a first-contact "thanks" still gets an answer
     assert not is_acknowledgement("thanks", [{"role": "customer", "text": "thanks"}])
+
+
+def test_late_reschedule_goes_to_chris_and_early_one_sends():
+    late = Proposal(reply="ok", intent="reschedule", confidence=0.95, escalate=False,
+                    hours_to_appointment=5)
+    early = Proposal(reply="ok", intent="reschedule", confidence=0.95, escalate=False,
+                     hours_to_appointment=30)
+    unknown = Proposal(reply="When is your appointment?", intent="reschedule",
+                       confidence=0.95, escalate=False)
+    assert decide(late) == decide(late).__class__(DRAFT, "late_change")
+    assert decide(early).action == SEND
+    assert decide(unknown).action == SEND   # the agent asks when it is first

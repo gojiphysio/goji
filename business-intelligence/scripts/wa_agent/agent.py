@@ -136,9 +136,22 @@ so and give the booking link so they can take it. If not, offer the nearest \
 open times. You can't book for them, so never say it's booked.
 
 Rescheduling (intent=reschedule, escalate=false)
-- Look up their booking with my_appointments, offer up to 3 new times, and say \
-the team will move it and confirm. When they pick one, say you've passed it on \
-and the team will confirm. Never say it's been moved. Chris is told each time.
+- Look up their booking with my_appointments. If you can't tell when their \
+current appointment is, ask before offering times.
+- With 24 hours' notice or more: offer up to 3 new times and say the team will \
+move it and confirm. When they pick one, say you've passed it on and the team \
+will confirm. Never say it's been moved. Chris is told each time.
+
+Late changes (rescheduling or cancelling less than 24 hours before the \
+appointment; Chris checks these first)
+- Firm but friendly. Mention the 24-hour policy and the $50 fee, then say that \
+as it's their first late change, we'll waive it this time, and offer to \
+reschedule. Keep it warm, never scolding, e.g. "No worries! Just a gentle \
+reminder that we ask for 24 hours' notice, and a $50 fee applies to late \
+changes. As this is your first, we'll waive it this time 😊"
+- staff_note: say it's a late change, how many hours' notice, and that the \
+draft waives the fee as a first-time courtesy, so Chris can remove that line \
+if it isn't their first.
 
 Drafted for Chris (escalate=false): cancelling (intent=cancel), billing, \
 refunds or packages (billing), their own symptoms beyond which service fits or \
@@ -172,6 +185,9 @@ Your final answer is the JSON object only:
 the knowledge base and tools
 - escalate, escalation_reason (empty string if not escalating)
 - staff_note: one line for Chris summarising what the customer wants
+- hours_to_appointment: for reschedule or cancel, hours from now until the \
+appointment they want to change (from my_appointments or what they told you); \
+-1 if you don't know or it doesn't apply
 """
 
 PROPOSAL_SCHEMA = {
@@ -183,9 +199,10 @@ PROPOSAL_SCHEMA = {
         "escalate": {"type": "boolean"},
         "escalation_reason": {"type": "string"},
         "staff_note": {"type": "string"},
+        "hours_to_appointment": {"type": "number"},
     },
     "required": ["reply", "intent", "confidence", "escalate",
-                 "escalation_reason", "staff_note"],
+                 "escalation_reason", "staff_note", "hours_to_appointment"],
     "additionalProperties": False,
 }
 
@@ -303,7 +320,8 @@ def _parse_proposal(text: str) -> Proposal:
     return Proposal(reply=d["reply"], intent=d["intent"] if d["intent"] in config.INTENTS else "other",
                     confidence=float(d["confidence"]), escalate=bool(d["escalate"]),
                     escalation_reason=d.get("escalation_reason", ""),
-                    staff_note=d.get("staff_note", ""))
+                    staff_note=d.get("staff_note", ""),
+                    hours_to_appointment=float(d.get("hours_to_appointment", -1)))
 
 
 def propose(history: list[dict], *, wa_id: str, now: float | None = None,
