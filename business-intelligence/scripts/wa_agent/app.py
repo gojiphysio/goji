@@ -29,15 +29,16 @@ from __future__ import annotations
 
 import hmac
 import logging
+import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
 
 from flask import Flask, jsonify, request
 
 from . import agent, config, events, notify
-from .policy import (AGENT, DRAFT, ESCALATE, HUMAN, PAUSED, SEND, apply_idle_handback,
-                     decide, gate, human_replied_since, on_human_message, reply_problems,
-                     set_mode)
+from .policy import (AGENT, DRAFT, ESCALATE, HUMAN, PAUSED, SEND, SGT, apply_idle_handback,
+                     decide, gate, human_replied_since, is_acknowledgement, on_human_message,
+                     reply_problems, set_mode)
 from .state import ChatLocks, append_history, make_store, mark_seen
 from .whatsapp import Echo, Inbound, Status, WhatsAppClient, parse_webhook, verify_signature
 
@@ -63,7 +64,24 @@ def _deps():
     if claude is None and config.BACKEND == "api":
         import anthropic
         claude = anthropic.Anthropic()
+        if config.KEEP_WARM:
+            threading.Thread(target=_keep_warm, daemon=True).start()
     return store, wa, claude
+
+
+def _keep_warm() -> None:
+    """Refresh the prompt cache during the day when no real turn has in the
+    last WARM_EVERY_S. One cache read + 1 output token each, well under a cent."""
+    from datetime import datetime
+    while True:
+        try:
+            hour = datetime.now(SGT).hour
+            idle = time.time() - agent.last_call_at
+            if config.WARM_HOURS[0] <= hour < config.WARM_HOURS[1] and idle >= config.WARM_EVERY_S:
+                events.record("warm", "", **agent.warm_cache(claude))
+        except Exception as e:
+            log.warning("cache warm failed: %s", e)
+        time.sleep(60)
 
 
 def _submit(fn, *args):
@@ -160,6 +178,25 @@ def handle_inbound(ev: Inbound, received: float) -> None:
     if blocked:
         events.record("silent", ev.wa_id, reason=blocked.reason)
         return
+    if is_acknowledgement(ev.text, history):
+        events.record("silent", ev.wa_id, reason="acknowledgement")
+        return
+
+    # Debounce: let the customer finish typing. If they send more, that
+    # message's run answers everything; this one stops before the model.
+    if config.DEBOUNCE_S > 0:
+        _sleep(config.DEBOUNCE_S)
+        with locks(ev.wa_id):
+            state = st.load(ev.wa_id)
+            history = list(state.history)
+        latest = next((h["id"] for h in reversed(history) if h["role"] == "customer"), "")
+        if latest != ev.msg_id:
+            events.record("superseded", ev.wa_id, reason="debounced")
+            return
+        blocked = gate(state, time.time(), kill_switch=config.KILL_SWITCH or st.get_kill())
+        if blocked:
+            events.record("silent", ev.wa_id, reason=blocked.reason)
+            return
 
     client.mark_read_typing(ev.msg_id)
     res = agent.propose(history, wa_id=ev.wa_id, now=now, customer_name=ev.name,

@@ -9,6 +9,7 @@ os.environ.setdefault("WA_APP_SECRET", "test-secret")
 os.environ.setdefault("WA_VERIFY_TOKEN", "verify-me")
 os.environ.setdefault("WA_AGENT_ADMIN_TOKEN", "admin-token")
 os.environ.setdefault("GMAIL_APP_PASSWORD", "")
+os.environ.setdefault("WA_AGENT_KEEP_WARM", "false")
 
 import pytest  # noqa: E402
 

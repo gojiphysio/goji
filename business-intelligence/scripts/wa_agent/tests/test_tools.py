@@ -75,3 +75,44 @@ def test_read_page_only_serves_indexed_pages():
 def test_patient_lookup_off_by_default():
     out, err = tools.run_tool("my_appointments", {}, wa_id="6591234567")
     assert not err and out["enabled"] is False
+
+
+class _Avail:
+    """goji-booking API stand-in: month summaries + per-day times."""
+
+    def __init__(self, months, days):
+        self.months, self.days, self.calls = months, days, []
+
+    def get(self, url, params, timeout):
+        self.calls.append((url.rsplit("/", 1)[-1], dict(params)))
+        if url.endswith("availability-summary"):
+            payload = {"available": self.months.get(params["month"], [])}
+        else:
+            payload = self.days[params["date"]]
+        return NS(status_code=200, json=lambda: payload, raise_for_status=lambda: None)
+
+
+def _day(times_by):
+    return {"by_clinician": times_by,
+            "clinicians": [{"id": c, "name": c.split("-")[0].title()} for c in times_by]}
+
+
+def test_next_slots_spreads_across_days_in_one_tool_call():
+    from datetime import date
+    http = _Avail(
+        months={"2026-11": ["2026-11-17", "2026-11-28", "2026-11-30"], "2026-12": ["2026-12-01"]},
+        days={"2026-11-28": _day({"kristy-ng": ["09:00", "10:00", "11:00", "12:00"],
+                                   "claire-ng": ["10:00"]}),
+              "2026-11-30": _day({"claire-ng": ["14:00"]}),
+              "2026-12-01": _day({"kristy-ng": ["08:00"]})})
+    out, err = tools.run_tool("next_slots", {"service": "physiotherapy", "focus": "womens-health"},
+                              wa_id="x", http=http, today=date(2026, 11, 18))
+    assert not err
+    assert [(s["date"], s["time"]) for s in out["slots"]] == [
+        ("2026-11-28", "09:00"), ("2026-11-28", "10:00"), ("2026-11-28", "11:00"),
+        ("2026-11-30", "14:00"), ("2026-12-01", "08:00")]
+    assert out["slots"][1]["clinicians"] == ["Kristy", "Claire"]
+    assert out["slots"][0]["weekday"] == "Sat"
+    # past dates skipped; two month summaries + three day lookups at most
+    assert [c[0] for c in http.calls].count("availability") == 3
+    assert all(c[1].get("focus") == "womens-health" for c in http.calls)

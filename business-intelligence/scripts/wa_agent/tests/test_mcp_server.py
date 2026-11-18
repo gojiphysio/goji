@@ -17,7 +17,7 @@ def test_notifications_get_no_reply():
 def test_lists_the_same_tools_as_the_api_path():
     r = mcp_server.handle({"jsonrpc": "2.0", "id": 2, "method": "tools/list"})
     names = {t["name"] for t in r["result"]["tools"]}
-    assert names == {"find_available_dates", "get_times", "booking_link", "read_page",
+    assert names == {"next_slots", "find_available_dates", "get_times", "booking_link", "read_page",
                      "my_appointments"}
     assert all("inputSchema" in t for t in r["result"]["tools"])
 

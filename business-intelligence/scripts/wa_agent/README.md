@@ -92,7 +92,7 @@ provider forwards Meta's signature (if not: `USE_URL_TOKEN=1`, below), and the
 |---|---|---|
 | Provider | $0 (trials) | $12 (Dualhook) to ~$55 (360dialog) |
 | Meta | $0 | first 1,000 service replies free per number, then the SG service rate (since 1 Oct 2026) |
-| Claude | < $20 | ~$15-60 (~$0.03-0.06 per inbound message; `cost_usd` in the events table is the real figure) |
+| Claude | < $20 | ~$25-35 at ~$0.02-0.03 per message after the cost controls below (`cost_usd` in the events table is the real figure) |
 | Cloud Run (1 warm instance, CPU always on) + Firestore | ~$5 | ~$5-10 |
 | SIM + spare phone | S$15, + up to S$150 | - |
 
@@ -183,9 +183,23 @@ correct; real availability offered with clinicians; a pregnancy red flag got
 995/A&E and an urgent escalation; a prompt injection was declined; a
 reschedule was handed over. Each reply took 6-11s. One fix came out of it: the
 model wrote the raw `/book` URL once, so `policy.reply_problems` now drafts any
-reply with an untracked booking link. Cost note: the ~30K-token knowledge base
-is a cache write (~$0.25) on the first message after an idle hour, so sporadic
-traffic costs more than the per-message estimate; measure on the API.
+reply with an untracked booking link. That run cost ~$0.38 a message, almost
+all of it the ~30K-token knowledge base written to the prompt cache.
+
+### Cost controls (and what they measured)
+
+| Control | Where |
+|---|---|
+| Compact always-on knowledge base (~7K tokens: llms.txt, one line per service, clinician summaries, page index); full pages via `read_page` | `kb.py` |
+| Keep the 1-hour cache warm 7am-10pm SGT when real traffic hasn't (identical request, `max_tokens=1`: `max_tokens=0` is rejected with structured outputs) | `agent.warm_cache`, `app._keep_warm`, `WA_AGENT_KEEP_WARM` |
+| Debounce: wait `WA_AGENT_DEBOUNCE_S` (6s) so a burst of lines is one model run | `app.handle_inbound` |
+| `next_slots`: next open times across days in one tool call | `tools.py` |
+| Bare "ok" / "thanks" / 👍 after our reply: no model call | `policy.is_acknowledgement` |
+
+Re-run on the CLI (same 5 kinds of message, in sequence): **$0.048 a message on
+average**, first message $0.13 (cold cache), then $0.017-0.04; 5.5-8.3s each;
+availability in one `next_slots` call. Still to try: the same test set on
+cheaper models, judged by Chris's grades (a product decision, not a default).
 
 ### Track C: offline test set
 

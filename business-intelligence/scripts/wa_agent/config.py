@@ -60,6 +60,9 @@ KILL_SWITCH = _env_bool("WA_AGENT_KILL_SWITCH", False)
 HUMAN_IDLE_HANDBACK_S = int(os.environ.get("WA_AGENT_HUMAN_IDLE_S", str(24 * 3600)))
 # Wait this long before sending, then re-check whether a human replied meanwhile.
 PRE_SEND_HOLD_S = float(os.environ.get("WA_AGENT_PRE_SEND_HOLD_S", "20"))
+# Wait this long after a customer message before calling the model, so a burst
+# ("hi" / "quick question" / "how much is...") becomes one run, not three.
+DEBOUNCE_S = float(os.environ.get("WA_AGENT_DEBOUNCE_S", "6"))
 # Below this self-reported confidence a reply is drafted, never sent.
 MIN_CONFIDENCE = float(os.environ.get("WA_AGENT_MIN_CONFIDENCE", "0.8"))
 # "all" or "after_hours" (outside Mon-Sat 08:00-20:00 SGT, the clinic's hours).
@@ -107,6 +110,12 @@ SITE_BASE = "https://www.gojiphysio.com"
 # Existing-patient lookup reads BigQuery. Off by default in Phase 0 so testers'
 # numbers are never matched against real patient records by accident.
 PATIENT_LOOKUP = _env_bool("WA_AGENT_PATIENT_LOOKUP", False)
+
+# Keep the 1-hour prompt cache warm while customers are likely to write, so the
+# first message after a quiet spell doesn't pay the cold cache write (API only).
+KEEP_WARM = _env_bool("WA_AGENT_KEEP_WARM", True)
+WARM_EVERY_S = int(os.environ.get("WA_AGENT_WARM_EVERY_S", str(50 * 60)))
+WARM_HOURS = (7, 22)  # SGT, [start, end)
 
 # --- Storage / logging --------------------------------------------------------
 STATE_BACKEND = os.environ.get("WA_AGENT_STATE", "firestore")  # firestore | memory

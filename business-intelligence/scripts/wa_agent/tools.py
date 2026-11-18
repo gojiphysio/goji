@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import logging
 import re
-from datetime import date
+from datetime import date, datetime, timedelta, timezone
 from urllib.parse import urlencode
 
 import requests
@@ -33,6 +33,7 @@ SERVICES = {
     "strength-conditioning": "Strength & Conditioning",
 }
 FOCUSES = ("general", "womens-health", "paediatrics", "scoliosis", "others")
+SGT_TZ = timezone(timedelta(hours=8))
 CLINICIAN_NAMES = {"PCL": "Cheryl", "PKN": "Kristy", "PCN": "Claire", "ICT": "Camille"}
 
 _FOCUS_PROP = {"type": "string", "enum": list(FOCUSES),
@@ -41,6 +42,23 @@ _HOME_PROP = {"type": "boolean",
               "description": "True for a home visit (physiotherapy and mummy-baby only)."}
 
 TOOL_DEFS = [
+    {
+        "name": "next_slots",
+        "description": "The next open appointment times for a service, across the coming days, "
+                       "in one call. Use this for 'when can I come in?' style questions. For a "
+                       "specific day the customer named, use get_times.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "service": {"type": "string", "enum": list(SERVICES)},
+                "focus": _FOCUS_PROP,
+                "home": _HOME_PROP,
+                "from_date": {"type": "string",
+                              "description": "YYYY-MM-DD, earliest day to look. Default today."},
+            },
+            "required": ["service"],
+        },
+    },
     {
         "name": "find_available_dates",
         "description": "Dates in a month that have at least one free slot for a service. "
@@ -86,9 +104,9 @@ TOOL_DEFS = [
     },
     {
         "name": "read_page",
-        "description": "Full text of a condition or blog page listed in the knowledge base index, "
-                       "e.g. 'conditions/diastasis-recti'. Use it to answer from the page, "
-                       "never from general knowledge.",
+        "description": "Full text of a page named in the knowledge base: services/<id> (with "
+                       "its FAQs), team/<id>, conditions/<id> or blog/<id>. Use it for anything "
+                       "the short summaries don't cover; never answer from general knowledge.",
         "input_schema": {
             "type": "object",
             "properties": {"page_id": {"type": "string"}},
@@ -155,6 +173,47 @@ def get_times(inp: dict, *, http=requests, **_) -> dict:
                              for cid, slots in (data.get("by_clinician") or {}).items()}}
 
 
+NEXT_SLOTS_MAX_DAYS = 3      # days whose times we fetch
+NEXT_SLOTS_PER_DAY = 3       # times offered per day, so options spread across days
+
+
+def next_slots(inp: dict, *, http=requests, today: date | None = None, **_) -> dict:
+    """Open dates from the month summary (this month and next), then times for
+    the first few of them. At most 2 summary calls + 3 day calls, all served
+    from goji-booking's snapshot."""
+    svc = _check_service(inp)
+    today = today or datetime.now(SGT_TZ).date()
+    start = today
+    if inp.get("from_date"):
+        try:
+            start = max(today, date.fromisoformat(inp["from_date"]))
+        except ValueError:
+            raise ToolError("from_date must be YYYY-MM-DD")
+    common = {"service": svc, "focus": inp.get("focus"), "home": inp.get("home")}
+    dates: list[str] = []
+    month = start.replace(day=1)
+    for _ in range(2):
+        data = _booking_get("/api/availability-summary",
+                            {**common, "month": month.strftime("%Y-%m")}, http)
+        dates += [d for d in data.get("available", []) if d >= start.isoformat()]
+        if len(dates) >= NEXT_SLOTS_MAX_DAYS:
+            break
+        month = (month + timedelta(days=32)).replace(day=1)
+    slots = []
+    for d in sorted(dates)[:NEXT_SLOTS_MAX_DAYS]:
+        day = _booking_get("/api/availability", {**common, "date": d}, http)
+        names = {c["id"]: c["name"] for c in day.get("clinicians", [])}
+        by_time: dict[str, list[str]] = {}
+        for cid, times in (day.get("by_clinician") or {}).items():
+            for t in times:
+                by_time.setdefault(t, []).append(names.get(cid, cid))
+        for t in sorted(by_time)[:NEXT_SLOTS_PER_DAY]:
+            slots.append({"date": d, "weekday": date.fromisoformat(d).strftime("%a"),
+                          "time": t, "clinicians": by_time[t]})
+    return {"service": svc, "slots": slots,
+            "note": "" if slots else "no open slots in the next two months"}
+
+
 def booking_link(inp: dict, **_) -> dict:
     svc = _check_service(inp)
     params = {"service": svc}
@@ -215,6 +274,7 @@ def my_appointments(inp: dict, *, wa_id: str, bq=None, **_) -> dict:
 
 
 HANDLERS = {
+    "next_slots": next_slots,
     "find_available_dates": find_available_dates,
     "get_times": get_times,
     "booking_link": booking_link,

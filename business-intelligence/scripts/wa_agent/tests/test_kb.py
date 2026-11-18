@@ -18,6 +18,23 @@ def test_pages_are_indexed_and_fetchable():
     assert any(p.startswith("blog/") for p in built["pages"])
 
 
-def test_core_fits_comfortably_in_one_cached_prompt():
-    # ~4 chars/token: keep the always-on context under ~60K tokens.
-    assert len(kb.build(SITE)["core"]) < 240_000
+def test_core_stays_small():
+    # Every request pays for the core (and the first after an idle hour pays
+    # a 2x cache write), so it holds summaries; full pages go via read_page.
+    # ~4 chars/token: under ~10K tokens.
+    assert len(kb.build(SITE)["core"]) < 40_000
+
+
+def test_service_lines_carry_price_duration_and_booking_id():
+    core = kb.build(SITE)["core"]
+    line = next(l for l in core.splitlines() if l.startswith("- Pelvic Floor Physiotherapy"))
+    assert "55 min" in line and "$260 in clinic" in line and "$380 home visit" in line
+    assert "physiotherapy / focus womens-health" in line
+    assert "read_page services/pelvic-floor-physiotherapy" in line
+
+
+def test_full_service_and_team_pages_are_fetchable():
+    pages = kb.build(SITE)["pages"]
+    assert "Does the assessment involve an internal examination?" in \
+        pages["services/pelvic-floor-physiotherapy"]
+    assert "Kristy" in pages["team/kristy-ng"]

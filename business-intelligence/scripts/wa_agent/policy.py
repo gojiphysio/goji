@@ -148,6 +148,21 @@ def reply_problems(reply: str) -> list[str]:
     return problems
 
 
+_ACK = re.compile(
+    r"(ok+(ay)?|k+|thanks?( you)?( so much)?|thank u|thx|ty|tq|noted|alright|sure|great|cool|"
+    r"got it|will do|see you|perfect|nice)?[\s!.,~]*[\U0001F300-\U0001FAFF\u2600-\u27BF\u2764\uFE0F\s]*",
+    re.I)
+
+
+def is_acknowledgement(text: str, history: list[dict]) -> bool:
+    """A bare "ok" / "thanks" / 👍 straight after we (or Chris) replied needs no
+    answer, and no model call. A first message of "thanks" still gets one.
+    `history` ends with this message, as stored."""
+    t = text.strip()
+    prior_role = history[-2]["role"] if len(history) >= 2 else ""
+    return bool(t) and bool(_ACK.fullmatch(t)) and prior_role in ("agent", "staff")
+
+
 def decide(proposal: Proposal, *, intent_policy: dict[str, str] = config.INTENT_POLICY,
            min_confidence: float = config.MIN_CONFIDENCE) -> Decision:
     """What happens to a proposal that passed `gate`.

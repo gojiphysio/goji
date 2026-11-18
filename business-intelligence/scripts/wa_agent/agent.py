@@ -28,6 +28,10 @@ from .tools import TOOL_DEFS, run_tool
 
 log = logging.getLogger("wa_agent.agent")
 
+# When the API was last called (real turn or warm-up): the keep-warm loop only
+# fires when real traffic hasn't refreshed the cache recently.
+last_call_at = 0.0
+
 # USD per million tokens for config.MODEL (cache write = 1h TTL rate, 2x input).
 # Used only for the cost estimate in the event log; update with the model.
 PRICE_IN, PRICE_OUT, PRICE_CACHE_READ, PRICE_CACHE_WRITE_1H = 4.00, 20.00, 0.20, 8.00
@@ -51,8 +55,11 @@ price, time, policy or clinician detail. If the answer isn't there, escalate.
 - You may say which service and clinician usually fit a concern, using the \
 service and condition pages. Never diagnose, never give exercises or treatment \
 advice, never say whether something is serious.
-- Availability: check with find_available_dates / get_times, offer at most 3 \
-times, then give the link from booking_link so they can book. Never write any \
+- Details beyond the short summaries below (service FAQs, a clinician's \
+background, a condition): read the page with read_page first.
+- Availability: use next_slots for "when can I come in?", or get_times for a \
+day they named. Offer at most 3 times, then give the link from booking_link so \
+they can book. Never write any \
 other booking URL (not www.gojiphysio.com/book). You cannot book, hold, \
 change or cancel appointments yourself.
 - Only talk about Goji. Politely decline anything unrelated (general questions, \
@@ -147,6 +154,39 @@ def system_blocks() -> list[dict]:
     ]
 
 
+def request_kwargs(messages: list[dict], max_tokens: int = config.MAX_TOKENS) -> dict:
+    """Every request, real or warm-up, is built here so they share one cached
+    prefix (tools + system + output format + effort must match byte for byte)."""
+    return dict(
+        model=config.MODEL,
+        max_tokens=max_tokens,
+        system=system_blocks(),
+        tools=TOOL_DEFS,
+        messages=messages,
+        output_config={"effort": config.EFFORT,
+                       "format": {"type": "json_schema", "schema": PROPOSAL_SCHEMA}},
+        betas=["server-side-fallback-2026-07-01"],
+        fallbacks="default",
+    )
+
+
+def warm_cache(client: anthropic.Anthropic | None = None) -> dict:
+    """Refresh the 1-hour prompt cache with the identical prefix, so the next
+    customer doesn't pay the cold write (~7K tokens at 2x). `max_tokens: 0`
+    would be cheaper but the API rejects it with structured outputs, so this
+    asks for one token instead: a cache read plus ~1 output token."""
+    global last_call_at
+    client = client or anthropic.Anthropic()
+    last_call_at = time.time()
+    resp = client.beta.messages.create(
+        **request_kwargs([{"role": "user", "content": [{"type": "text", "text": "warmup"}]}],
+                         max_tokens=1))
+    u = resp.usage
+    return {"cache_read_tokens": getattr(u, "cache_read_input_tokens", 0) or 0,
+            "cache_write_tokens": getattr(u, "cache_creation_input_tokens", 0) or 0,
+            "output_tokens": u.output_tokens or 0}
+
+
 def build_messages(history: list[dict], now: float, customer_name: str = "") -> list[dict]:
     """Stored transcript -> alternating user/assistant messages. Customer lines
     are `user`; agent and staff lines are `assistant` (staff lines are labelled
@@ -198,7 +238,9 @@ def propose(history: list[dict], *, wa_id: str, now: float | None = None,
     if config.BACKEND == "cli":
         from . import cli_backend
         return cli_backend.propose(history, wa_id=wa_id, now=now, customer_name=customer_name)
+    global last_call_at
     client = client or anthropic.Anthropic()
+    last_call_at = time.time()
     result = AgentResult(proposal=_escalation("not_run"))
     t0 = time.monotonic()
     messages = build_messages(history, now, customer_name)
@@ -208,17 +250,7 @@ def propose(history: list[dict], *, wa_id: str, now: float | None = None,
     try:
         for _ in range(config.MAX_TOOL_ROUNDS + 1):
             t = time.monotonic()
-            resp = client.beta.messages.create(
-                model=config.MODEL,
-                max_tokens=config.MAX_TOKENS,
-                system=system_blocks(),
-                tools=TOOL_DEFS,
-                messages=messages,
-                output_config={"effort": config.EFFORT,
-                               "format": {"type": "json_schema", "schema": PROPOSAL_SCHEMA}},
-                betas=["server-side-fallback-2026-07-01"],
-                fallbacks="default",
-            )
+            resp = client.beta.messages.create(**request_kwargs(messages))
             result.steps.append(Step("model", resp.model, int((time.monotonic() - t) * 1000)))
             u = resp.usage
             result.input_tokens += u.input_tokens or 0

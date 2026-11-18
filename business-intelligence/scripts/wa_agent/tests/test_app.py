@@ -78,32 +78,78 @@ def test_duplicate_delivery_is_handled_once(env):
     assert len(app_mod.wa.sent) == 1
 
 
+def on_nth_sleep(n, action):
+    """_sleep stand-in that runs `action` on its nth call. Call 1 is the
+    debounce, call 2 the pre-send hold."""
+    calls = {"n": 0}
+
+    def sleep(_):
+        calls["n"] += 1
+        if calls["n"] == n:
+            action()
+    return sleep
+
+
+def chris_replies():
+    # Nested Flask requests can't run inside a request, so "meanwhile" events
+    # go straight to the handlers the webhook would have dispatched.
+    app_mod.handle_echo(parse_webhook(echo())[0])
+
+
+def customer_adds(text="also, do you take Medisave?"):
+    def act():
+        ev = parse_webhook(inbound(msg_id="wamid.in2", text=text, ts=1763431205))[0]
+        app_mod.handle_inbound(ev, ev.ts)
+    return act
+
+
 def test_person_replies_during_hold_so_agent_stays_quiet(env, monkeypatch):
     client, rec, _ = env
     app_mod.claude.queue.append(final())
-    # Nested Flask requests can't run inside a request, so the "during the hold"
-    # events go straight to the handlers the webhook would have dispatched.
-    monkeypatch.setattr(app_mod, "_sleep",
-                        lambda s: app_mod.handle_echo(parse_webhook(echo())[0]))
+    monkeypatch.setattr(app_mod, "_sleep", on_nth_sleep(2, chris_replies))
     post(client, inbound())
     assert app_mod.wa.sent == []
     assert ("superseded", {"reason": "human_replied"}) in rec
     assert app_mod.store.load(CUSTOMER).mode == HUMAN
 
 
-def test_newer_customer_message_supersedes_older_run(env, monkeypatch):
+def test_person_replies_during_debounce_so_model_is_never_called(env, monkeypatch):
+    client, rec, _ = env
+    monkeypatch.setattr(app_mod, "_sleep", on_nth_sleep(1, chris_replies))
+    post(client, inbound())
+    assert app_mod.claude.requests == [] and app_mod.wa.sent == []
+    assert ("silent", {"reason": "human_has_chat"}) in rec
+
+
+def test_burst_of_messages_costs_one_model_call(env, monkeypatch):
+    client, rec, _ = env
+    app_mod.claude.queue.append(final(reply="Yes, and here's the price."))
+    monkeypatch.setattr(app_mod, "_sleep", on_nth_sleep(1, customer_adds()))
+    post(client, inbound(text="hi, quick question"))
+    assert len(app_mod.claude.requests) == 1
+    assert app_mod.wa.sent == [(CUSTOMER, "Yes, and here's the price.")]
+    assert ("superseded", {"reason": "debounced"}) in rec
+    # the one call saw both lines
+    last = app_mod.claude.requests[0]["messages"][-1]["content"][0]["text"]
+    assert "hi, quick question\nalso, do you take Medisave?" in last
+
+
+def test_newer_message_during_hold_supersedes_older_run(env, monkeypatch):
     client, rec, _ = env
     app_mod.claude.queue.extend([final(reply="first"), final(reply="second")])
-
-    def customer_adds_a_line(_):
-        monkeypatch.setattr(app_mod, "_sleep", lambda s: None)
-        ev = parse_webhook(inbound(msg_id="wamid.in2", text="also, do you take Medisave?",
-                                   ts=1763431205))[0]
-        app_mod.handle_inbound(ev, ev.ts)
-    monkeypatch.setattr(app_mod, "_sleep", customer_adds_a_line)
+    monkeypatch.setattr(app_mod, "_sleep", on_nth_sleep(2, customer_adds()))
     post(client, inbound())
     assert app_mod.wa.sent == [(CUSTOMER, "second")]  # one reply, to both lines
     assert ("superseded", {"reason": "newer_customer_message"}) in rec
+
+
+def test_thanks_after_our_reply_needs_no_model_call(env):
+    client, rec, _ = env
+    app_mod.claude.queue.append(final())
+    post(client, inbound())
+    post(client, inbound(msg_id="wamid.in2", text="Thank you! 🙏"))
+    assert len(app_mod.claude.requests) == 1 and len(app_mod.wa.sent) == 1
+    assert ("silent", {"reason": "acknowledgement"}) in rec
 
 
 def test_after_chris_replies_agent_is_silent(env):

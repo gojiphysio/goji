@@ -30,6 +30,10 @@ The WhatsApp assistant. What it is and how to run it: [`README.md`](README.md).
   `marts.wa_agent_events` (set by `deploy.sh`, not the dashboard grant loops).
 - **Booking links use the `wa-book` go-link** (`dashboard/app.py` LINK_SLUGS),
   which forwards `service`/`focus` to `/book`.
+- **Every request pays for the always-on prompt.** Keep `kb.build`'s core
+  small (`test_kb.py` caps it); new content goes behind `read_page`. Build
+  every request with `agent.request_kwargs` so the warm-up and real turns
+  share one cached prefix.
 - **Replies are checked in code** (`policy.reply_problems`): only Goji's own
   links, email and numbers (plus 995/1767), and booking links only via the
   `wa-book` go-link. Anything else is drafted, never sent.

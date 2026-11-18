@@ -68,3 +68,13 @@ def test_history_roles_merge_and_staff_label():
     assert [m["role"] for m in msgs] == ["user", "assistant", "user"]
     assert msgs[0]["content"][0]["text"] == "hi\nare you open sunday?"
     assert msgs[1]["content"][0]["text"].startswith("[Chris from Goji wrote]")
+
+
+def test_warm_up_shares_the_real_requests_cached_prefix():
+    c = FakeClaude(final(), final())
+    agent.propose(H, wa_id="x", client=c)
+    agent.warm_cache(client=c)
+    real, warm = c.requests
+    for key in ("model", "system", "tools", "output_config", "betas", "fallbacks"):
+        assert real[key] == warm[key], key
+    assert warm["max_tokens"] == 1

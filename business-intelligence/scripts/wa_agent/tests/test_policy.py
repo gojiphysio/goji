@@ -111,3 +111,14 @@ def test_reply_content_guard():
 def test_reply_with_foreign_link_is_drafted_not_sent():
     d = decide(prop(reply="Pay here: https://evil.example/pay"))
     assert d.action == DRAFT and d.reason == "content:link:evil.example"
+
+
+def test_acknowledgements():
+    from wa_agent.policy import is_acknowledgement
+    after_reply = [{"role": "agent", "text": "Here's the link"}, {"role": "customer", "text": "x"}]
+    for t in ("ok", "Okay!", "thanks", "Thank you so much!!", "👍", "noted 🙏🏻", "ty"):
+        assert is_acknowledgement(t, after_reply), t
+    for t in ("ok can I book Friday?", "thanks, how much is pilates?", "Sunday?"):
+        assert not is_acknowledgement(t, after_reply), t
+    # a first-contact "thanks" still gets an answer
+    assert not is_acknowledgement("thanks", [{"role": "customer", "text": "thanks"}])
