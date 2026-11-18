@@ -47,6 +47,8 @@ def send(kind: str, **kw) -> None:
     msg = compose(kind, **kw)
     if not config.GMAIL_APP_PASSWORD:
         log.info("notify (no SMTP configured): %s", msg["Subject"])
+        if config.STATE_BACKEND == "memory":  # local testing: show the draft
+            log.info("notify body:\n%s", msg.get_content())
         return
 
     def _send():
