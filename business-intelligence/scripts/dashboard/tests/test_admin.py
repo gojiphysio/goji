@@ -660,3 +660,22 @@ def test_root_slug_not_exposed_in_dashboard_mode(client):
     # links mode. On the dashboard surface it must not exist, so the internal
     # tool never serves public-style short links. /r/<slug> stays available.
     assert client.get("/ig").status_code == 404
+
+
+def test_wa_book_click_records_the_chat_ref(client, monkeypatch):
+    # The assistant's link carries ?ref=<16-hex chat hash>; anything else is dropped.
+    seen = []
+    monkeypatch.setattr(app, "_record_link_click_async", lambda *a, **k: seen.append(k))
+    client.get("/r/wa-book?service=physiotherapy&ref=0123456789abcdef")
+    client.get("/r/wa-book?service=physiotherapy&ref=<script>")
+    assert seen[0]["chat_ref"] == "0123456789abcdef"
+    rows = []
+
+    class FakeBQ:
+        def insert_rows_json(self, table, r):
+            rows.extend(r)
+            return []
+    monkeypatch.setattr(app, "_bq", lambda: FakeBQ())
+    app._record_link_click("c1", "wa-book", None, None, chat_ref="<script>")
+    app._record_link_click("c2", "wa-book", None, None, chat_ref="0123456789abcdef")
+    assert [r["chat_ref"] for r in rows] == [None, "0123456789abcdef"]

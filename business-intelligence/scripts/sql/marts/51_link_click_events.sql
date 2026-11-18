@@ -49,3 +49,9 @@ CLUSTER BY slug;
 ALTER TABLE `goji-bi.marts.link_click_events`
   ADD COLUMN IF NOT EXISTS session_id STRING OPTIONS(description="On-site booking session_id the tap came from (joins booking_funnel_events / web_session_events). NULL for off-site channels."),
   ADD COLUMN IF NOT EXISTS page       STRING OPTIONS(description="Page path the on-site CTA was tapped from (e.g. /book). NULL for off-site channels.");
+
+-- WhatsApp assistant attribution: the wa-book link carries ?ref=<chat_key>
+-- (wa_agent/events.py salted hash, not a phone number) so a booking can be
+-- credited to the conversation that sent the link.
+ALTER TABLE `goji-bi.marts.link_click_events`
+  ADD COLUMN IF NOT EXISTS chat_ref STRING OPTIONS(description="wa-book only: the assistant chat's salted hash (wa_agent_events.chat_key). Not a phone number.");

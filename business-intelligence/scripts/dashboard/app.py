@@ -1448,7 +1448,8 @@ LINK_CLICK_TABLE = f"{PROJECT}.marts.link_click_events"
 
 
 def _record_link_click(click_id: str, slug: str, user_agent: str | None, referer: str | None,
-                       session_id: str | None = None, page: str | None = None) -> None:
+                       session_id: str | None = None, page: str | None = None,
+                       chat_ref: str | None = None) -> None:
     """Append one click via the streaming insert API (insert_rows_json), NOT
     DML: clicks are public/high-frequency, so this dodges BigQuery's 1,500
     DML-statements-per-table-per-day cap and the latency of a query job.
@@ -1457,7 +1458,9 @@ def _record_link_click(click_id: str, slug: str, user_agent: str | None, referer
     through to the /book landing (?cid=…) for an exact origin→booking join.
     `session_id`/`page` come from on-site CTA taps (the site appends ?sid=&p=) so
     a WhatsApp tap can be tied back to the booking session it came from — the
-    golden-flow join. NULL for off-site channels."""
+    golden-flow join. NULL for off-site channels. `chat_ref` is the WhatsApp
+    assistant's salted chat hash from a wa-book link, so a booking can be
+    credited to the conversation (marts.wa_agent_conversations)."""
     try:
         row = {
             "click_id":   click_id,
@@ -1467,6 +1470,7 @@ def _record_link_click(click_id: str, slug: str, user_agent: str | None, referer
             "referer":    ((referer or "")[:512] or None),
             "session_id": ((session_id or "")[:128] or None),
             "page":       ((page or "")[:512] or None),
+            "chat_ref":   chat_ref if chat_ref and CHAT_REF_RE.match(chat_ref) else None,
         }
         errors = _bq().insert_rows_json(LINK_CLICK_TABLE, [row])
         if errors:
@@ -1476,11 +1480,16 @@ def _record_link_click(click_id: str, slug: str, user_agent: str | None, referer
 
 
 def _record_link_click_async(click_id: str, slug: str, user_agent: str | None, referer: str | None,
-                             session_id: str | None = None, page: str | None = None) -> None:
+                             session_id: str | None = None, page: str | None = None,
+                             chat_ref: str | None = None) -> None:
     """Fire-and-forget so the public redirect returns immediately."""
     threading.Thread(target=_record_link_click,
-                     args=(click_id, slug, user_agent, referer, session_id, page),
+                     args=(click_id, slug, user_agent, referer, session_id, page, chat_ref),
                      daemon=True).start()
+
+
+# wa_agent's events.chat_key: 16 hex chars. Anything else is dropped.
+CHAT_REF_RE = re.compile(r"^[0-9a-f]{16}$")
 
 
 # Crawlers, link previewers, scripts and our own audit runner all follow go-links.
@@ -3976,7 +3985,8 @@ def tracked_redirect(slug: str):
     _record_link_click_async(click_id, slug, request.headers.get("User-Agent"),
                              request.headers.get("Referer"),
                              session_id=request.args.get("sid"),
-                             page=request.args.get("p"))
+                             page=request.args.get("p"),
+                             chat_ref=request.args.get("ref"))
     return redirect(_slug_target(slug, click_id, _book_preselect(request.args)), code=302)
 
 
