@@ -96,8 +96,43 @@ PROVIDERS = {
     "PCN": "Claire Ng",
     "PCL": "Cheryl Long",
     "PKN": "Kristy Ng",
+    "ICT": "Camille Tan",
 }
 DIRECTOR_ID = "PCL"
+
+# Freelancers are paid a flat fee per completed session, whatever the clinic
+# collected for it (a $0 complimentary session still pays). No base, no
+# commission, no CPF. Salaried clinicians are everyone in PROVIDERS not listed
+# here. Keep in sync with CLINICIAN_DEFAULTS in template.html.
+#   clinician_id -> {session type -> fee SGD}
+FREELANCE_RATES: dict[str, dict[str, float]] = {
+    "ICT": {"1:1": 60.0, "2:1": 70.0},   # Camille Tan, from Nov 2026
+}
+
+# Session type from the Plato SKU (item given_id). A 2:1 is invoiced as ONE line
+# for the pair, so one 2:1 line is one session. Anything that isn't a known
+# session SKU (products, new SKUs) is "other": shown in the payout breakdown so
+# it can be checked, but not paid automatically.
+# Checked against every SKU invoiced Aug-Nov 2026; GJCPSC_* is the Clinical
+# Pilates | S&C range.
+SESSION_2TO1_PREFIXES = ("CP2:1", "PP2:1", "GJCPSC_2:1")
+SESSION_1TO1_PREFIXES = ("PHY", "MB-", "CorpPT", "CP1:1", "PP1:1", "SC-", "HV-",
+                         "GJCPSC_1:1")
+
+
+def session_type(item_given_id: str | None) -> str:
+    """'2:1', '1:1' or 'other' for a Plato SKU."""
+    sku = item_given_id or ""
+    if sku.startswith(SESSION_2TO1_PREFIXES):
+        return "2:1"
+    if sku.startswith(SESSION_1TO1_PREFIXES):
+        return "1:1"
+    return "other"
+
+
+def freelance_fee(clinician_id: str, kind: str) -> float:
+    """Fee owed to a freelancer for one session of `kind` (0 for 'other')."""
+    return FREELANCE_RATES.get(clinician_id, {}).get(kind, 0.0)
 
 # Opening-promo "true discount cost" tile: for each pack SKU, we compute the
 # implicit discount as (units * pack_size * usual_per_session) - sold_total.
@@ -600,6 +635,7 @@ ORDER BY bookings DESC
         "bookings":     _to_float(r["bookings"]),
         "recognised":   _to_float(r["recognised"]),
         "is_director":  r["clinician_id"] == DIRECTOR_ID,
+        "pay_type":     "freelance" if r["clinician_id"] in FREELANCE_RATES else "salaried",
     } for r in _query(sql)]
 
 
@@ -742,6 +778,57 @@ ORDER BY sd.delivery_date, sd.clinician_id
         "service":      r["item_name"] or "(unnamed)",
         "value":        _to_float(r["recognised_revenue"]),
     } for r in _query(sql)]
+
+
+def fetch_freelancer_sessions(start: date, end: date) -> list[dict]:
+    """Every completed session a freelancer delivered, for per-session pay.
+
+    Reads stg.invoice_items rather than fct_service_delivered because the mart
+    drops $0 single-use sales, and a freelancer is paid for those too.
+    Redemptions fan out by qty, the same session-grain rule as the mart's
+    Part A. Package sales aren't sessions (they're paid when redeemed).
+    """
+    if not FREELANCE_RATES:
+        return []
+    ids = ", ".join(f"'{c}'" for c in FREELANCE_RATES)
+    sql = f"""
+SELECT
+  ii.invoice_date,
+  ii.clinician_id,
+  ii.patient_id,
+  p.initial_lastname,
+  ii.item_given_id,
+  ii.item_name,
+  IF(ii.classification = 'redemption',
+     SAFE_DIVIDE(COALESCE(ii.recognised_amount, 0), GREATEST(ii.qty, 1)),
+     COALESCE(ii.recognised_amount, 0))                   AS recognised_revenue
+FROM `{PROJECT}.stg.invoice_items` ii,
+  UNNEST(GENERATE_ARRAY(0, IF(ii.classification = 'redemption',
+                              CAST(GREATEST(ii.qty, 1) AS INT64), 1) - 1)) AS session_idx
+LEFT JOIN `{PROJECT}.marts.dim_patient` p USING (patient_id)
+WHERE ii.invoice_date BETWEEN '{start}' AND '{end}'
+  AND ii.clinician_id IN ({ids})
+  AND ii.classification IN ('redemption', 'sale')
+ORDER BY ii.invoice_date, ii.clinician_id
+"""
+    try:
+        rows = _query(sql)
+    except Exception as e:  # graceful degradation: the page still renders
+        log.warning("fetch_freelancer_sessions failed: %s", e)
+        return []
+    out = []
+    for r in rows:
+        kind = session_type(r["item_given_id"])
+        out.append({
+            "date":         r["invoice_date"].isoformat() if r["invoice_date"] else None,
+            "clinician_id": r["clinician_id"],
+            "patient":      r["initial_lastname"] or r["patient_id"] or "—",
+            "service":      r["item_name"] or "(unnamed)",
+            "session_type": kind,
+            "fee":          freelance_fee(r["clinician_id"], kind),
+            "value":        _to_float(r["recognised_revenue"]),
+        })
+    return out
 
 
 def fetch_upcoming_sessions(today: date) -> dict:
@@ -2224,6 +2311,7 @@ def build_payload() -> dict:
         f_demographics  = ex.submit(fetch_patient_demographics)
         f_referrals     = ex.submit(fetch_patient_referrals)
         f_appointments  = ex.submit(fetch_appointments, appt_start, today)
+        f_freelance     = ex.submit(fetch_freelancer_sessions, appt_start, today)
         f_mismatches    = ex.submit(fetch_invoice_doctor_mismatches)
         f_mismatch_hist = ex.submit(fetch_mismatch_history)
         f_projection    = ex.submit(fetch_monthly_projection, today)
@@ -2345,6 +2433,8 @@ def build_payload() -> dict:
             "demographics":      f_demographics.result(),
             "referrals":         f_referrals.result(),
             "appointments":      f_appointments.result(),
+            "freelancer_sessions": f_freelance.result(),
+            "freelance_rates":   FREELANCE_RATES,
             "ranges":            ranges,
             "doctor_mismatches": f_mismatches.result(),
             "mismatch_history":  f_mismatch_hist.result(),
@@ -2983,7 +3073,7 @@ CARD_FEE_PCT = 0.021
 CARD_FEE_PER_TXN = 0.20
 PNL_CARD_FEES = "Card fees"
 PNL_GROUPS = [
-    ("Staff", ["Payroll", "CPF"]),
+    ("Staff", ["Payroll", "CPF", "Freelancer fees"]),
     ("Occupancy", ["Rent", "Utilities"]),
     ("Marketing", ["Ads", "Printing"]),
     ("Clinic ops", ["Clinical supplies", "Laundry & cleaning", PNL_CARD_FEES]),
@@ -3058,7 +3148,8 @@ def build_pnl(line_rows: list[dict], revenue_rows: list[dict], summary: dict,
         visits = _to_int(rev.get("visits"))
         total = sum(lines.values())
         ebitda = recognised - total
-        staff = lines.get("Payroll", 0.0) + lines.get("CPF", 0.0)
+        staff = (lines.get("Payroll", 0.0) + lines.get("CPF", 0.0)
+                 + lines.get("Freelancer fees", 0.0))
         per_visit = _ratio(recognised, visits)
         months.append({
             "month": key,

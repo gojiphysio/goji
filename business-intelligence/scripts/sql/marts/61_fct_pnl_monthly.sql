@@ -28,7 +28,7 @@ SELECT
   month,
   line,
   CASE
-    WHEN line IN ('Payroll', 'CPF') THEN 'Staff'
+    WHEN line IN ('Payroll', 'CPF', 'Freelancer fees') THEN 'Staff'
     WHEN line IN ('Rent', 'Utilities') THEN 'Occupancy'
     WHEN line IN ('Ads', 'Printing') THEN 'Marketing'
     WHEN line IN ('Clinical supplies', 'Laundry & cleaning') THEN 'Clinic ops'
