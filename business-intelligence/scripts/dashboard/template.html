@@ -3072,24 +3072,27 @@
       const legend = document.getElementById('mkt_funnel_legend');
       const haveSankey = !!(window.Chart && window['chartjs-chart-sankey']);
 
+      // Rebuild rather than update() in place: the sankey plugin keeps its old
+      // node/flow elements across a data swap and calls the colour callbacks
+      // with stale dataIndex values, so a shorter flow list (e.g. switching to a
+      // Custom range) crashed with "Cannot read properties of undefined
+      // (reading 'from')".
+      if (mktFunnelChart) { mktFunnelChart.destroy(); mktFunnelChart = null; }
+
       if (!haveSankey || !flows.length) {
-        if (mktFunnelChart) { mktFunnelChart.data.datasets[0].data = []; mktFunnelChart.update(); }
         legend.innerHTML = haveSankey
           ? '<div class="stat" style="color:var(--ink-muted);font-style:italic;">No arrivals or tracked taps in this period yet.</div>'
           : '';
         return;
       }
 
-      if (mktFunnelChart) {
-        mktFunnelChart.data.datasets[0].data = flows;
-        mktFunnelChart.update();
-      } else {
+      {
         mktFunnelChart = new Chart(document.getElementById('mktFunnelChart'), {
           type: 'sankey',
           data: { datasets: [{
             data: flows,
-            colorFrom: c => FUNNEL_COLOR[c.dataset.data[c.dataIndex].from] || NEUTRAL,
-            colorTo:   c => FUNNEL_COLOR[c.dataset.data[c.dataIndex].to]   || NEUTRAL,
+            colorFrom: c => FUNNEL_COLOR[(c.dataset.data[c.dataIndex] || {}).from] || NEUTRAL,
+            colorTo:   c => FUNNEL_COLOR[(c.dataset.data[c.dataIndex] || {}).to]   || NEUTRAL,
             colorMode: 'gradient',
             column: FUNNEL_COLUMN,
             priority: FUNNEL_PRIORITY,
@@ -3104,6 +3107,7 @@
               legend: { display: false },
               tooltip: { callbacks: { label: c => {
                 const d = c.dataset.data[c.dataIndex];
+                if (!d) return '';
                 const unit = d.to === 'Website'  ? ' sessions'
                            : d.to === 'Booked'   ? ' bookings'
                            : ' taps';
