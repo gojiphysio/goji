@@ -9,8 +9,8 @@ category: "Pelvic & Perinatal Health"
 tags: ["postnatal", "recovery", "checklist"]
 relatedConditions: ["caesarean-recovery", "perineal-tear", "diastasis-recti"]
 relatedServices: ["postpartum-physiotherapy", "mummy-baby-assessment"]
-heroImage: "/photos/services/mummy-baby-assessment.webp"
-heroAlt: "A mother's hands supporting her baby during tummy time at a Goji Mummy and Baby assessment."
+heroImage: "/photos/blog/postpartum-recovery-checklist.webp"
+heroAlt: "A mother in a navy top lying in a white bed, smiling at her sleeping newborn beside her."
 ogImage: "/og/blog/postpartum-recovery-checklist.jpg"
 ctaSlug: "web-wa"
 draft: false

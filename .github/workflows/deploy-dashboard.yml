@@ -24,6 +24,7 @@ on:
       - "business-intelligence/scripts/ingestion/plato_patients/**"
       - "business-intelligence/scripts/ingestion/marketing_ingest/**"
       - "business-intelligence/scripts/ingestion/gbp_post_sync/**"
+      - "business-intelligence/scripts/ingestion/cash_book/**"
       - "business-intelligence/scripts/reminders/**"
       - ".github/workflows/deploy-dashboard.yml"
   workflow_dispatch: {}   # allow manual "Run workflow" from the Actions tab
@@ -72,6 +73,10 @@ env:
   # in Secret Manager as gbp-oauth. See ingestion/gbp_post_sync/README.md.
   GBP_LIVE: ${{ vars.GBP_LIVE }}
   GBP_LOCATION: ${{ vars.GBP_LOCATION }}
+  # cash-book-ingest (Cash Book sheet -> P&L tab) deploys once this is set. No
+  # secret: the sheet is shared read-only with ingestion-sa@. See
+  # ingestion/cash_book/README.md.
+  CASH_BOOK_SHEET_ID: ${{ vars.CASH_BOOK_SHEET_ID }}
 
 jobs:
   # ---- 1. Tests gate the deploy -------------------------------------------
@@ -100,6 +105,11 @@ jobs:
         run: |
           pip install -r requirements.txt
           python -m pytest test_sync.py -q
+      - name: Cash Book tests
+        working-directory: business-intelligence/scripts/ingestion/cash_book
+        run: |
+          pip install -r requirements.txt
+          python -m pytest test_extract.py -q
       - name: Appointment-reminder tests
         working-directory: business-intelligence/scripts/reminders
         run: |
@@ -123,7 +133,7 @@ jobs:
              || [ "$base" = "0000000000000000000000000000000000000000" ] \
              || ! git cat-file -e "${base}^{commit}" 2>/dev/null; then
             echo "No usable base commit — deploying everything."
-            { echo "sql=true"; echo "patients=true"; echo "marketing=true"; echo "gbpsync=true"; echo "dashboard=true"; echo "reminders=true"; } >> "$GITHUB_OUTPUT"
+            { echo "sql=true"; echo "patients=true"; echo "marketing=true"; echo "gbpsync=true"; echo "cashbook=true"; echo "dashboard=true"; echo "reminders=true"; } >> "$GITHUB_OUTPUT"
             exit 0
           fi
           changed="$(git diff --name-only "$base" "${{ github.sha }}")"
@@ -133,6 +143,7 @@ jobs:
           grep -q "^${base_path}/ingestion/plato_patients/" <<<"$changed" && echo "patients=true"  >>"$GITHUB_OUTPUT" || echo "patients=false"  >>"$GITHUB_OUTPUT"
           grep -q "^${base_path}/ingestion/marketing_ingest/" <<<"$changed" && echo "marketing=true" >>"$GITHUB_OUTPUT" || echo "marketing=false" >>"$GITHUB_OUTPUT"
           grep -q "^${base_path}/ingestion/gbp_post_sync/" <<<"$changed" && echo "gbpsync=true" >>"$GITHUB_OUTPUT" || echo "gbpsync=false" >>"$GITHUB_OUTPUT"
+          grep -q "^${base_path}/ingestion/cash_book/" <<<"$changed" && echo "cashbook=true" >>"$GITHUB_OUTPUT" || echo "cashbook=false" >>"$GITHUB_OUTPUT"
           grep -q "^${base_path}/dashboard/"                <<<"$changed" && echo "dashboard=true" >>"$GITHUB_OUTPUT" || echo "dashboard=false" >>"$GITHUB_OUTPUT"
           grep -q "^${base_path}/reminders/"                <<<"$changed" && echo "reminders=true" >>"$GITHUB_OUTPUT" || echo "reminders=false" >>"$GITHUB_OUTPUT"
 
@@ -306,6 +317,23 @@ jobs:
             --set-secrets="${secrets}" \
             --set-env-vars="^@^${envs}" \
             --max-retries=0 \
+            --quiet
+
+      - name: Deploy cash-book-ingest job
+        if: steps.changes.outputs.cashbook == 'true'
+        working-directory: business-intelligence/scripts/ingestion/cash_book
+        run: |
+          # Snapshots the Cash Book sheet for the P&L tab. Gated on the repo var,
+          # and every var is passed each deploy (--set-env-vars replaces the
+          # block). Cloud Scheduler runs it; we don't execute here.
+          if [ -z "${CASH_BOOK_SHEET_ID}" ]; then
+            echo "CASH_BOOK_SHEET_ID repo var not set — skipping cash-book-ingest deploy."
+            exit 0
+          fi
+          gcloud run jobs deploy cash-book-ingest \
+            --source . --region "${REGION}" --project "${PROJECT}" \
+            --service-account "ingestion-sa@${PROJECT}.iam.gserviceaccount.com" \
+            --set-env-vars="BQ_PROJECT=${PROJECT},CASH_BOOK_SHEET_ID=${CASH_BOOK_SHEET_ID}" \
             --quiet
 
       - name: Deploy dashboard

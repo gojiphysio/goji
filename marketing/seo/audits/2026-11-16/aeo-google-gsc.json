@@ -1,0 +1,920 @@
+[
+ {
+  "id": "local-lentor",
+  "q": "physiotherapy lentor",
+  "engine": "google-search-console",
+  "variant": "gsc-28d",
+  "date": "2026-11-16",
+  "window": {
+   "from": "2026-10-19",
+   "to": "2026-11-15"
+  },
+  "source": "marts.fct_search_console_daily via search-console-export workflow (terms.json, dimension=query, exact match, case-insensitive)",
+  "target": "/physiotherapy-lentor",
+  "impressions": 0,
+  "clicks": 0,
+  "position_avg": null,
+  "status": "not ranking"
+ },
+ {
+  "id": "local-lentor-mrt",
+  "q": "physio near lentor mrt",
+  "engine": "google-search-console",
+  "variant": "gsc-28d",
+  "date": "2026-11-16",
+  "window": {
+   "from": "2026-10-19",
+   "to": "2026-11-15"
+  },
+  "source": "marts.fct_search_console_daily via search-console-export workflow (terms.json, dimension=query, exact match, case-insensitive)",
+  "target": "/physiotherapy-lentor",
+  "impressions": 0,
+  "clicks": 0,
+  "position_avg": null,
+  "status": "not ranking"
+ },
+ {
+  "id": "local-amk",
+  "q": "physio ang mo kio",
+  "engine": "google-search-console",
+  "variant": "gsc-28d",
+  "date": "2026-11-16",
+  "window": {
+   "from": "2026-10-19",
+   "to": "2026-11-15"
+  },
+  "source": "marts.fct_search_console_daily via search-console-export workflow (terms.json, dimension=query, exact match, case-insensitive)",
+  "target": "/physiotherapy-lentor",
+  "impressions": 0,
+  "clicks": 0,
+  "position_avg": null,
+  "status": "not ranking"
+ },
+ {
+  "id": "local-thomson",
+  "q": "physiotherapy upper thomson",
+  "engine": "google-search-console",
+  "variant": "gsc-28d",
+  "date": "2026-11-16",
+  "window": {
+   "from": "2026-10-19",
+   "to": "2026-11-15"
+  },
+  "source": "marts.fct_search_console_daily via search-console-export workflow (terms.json, dimension=query, exact match, case-insensitive)",
+  "target": "/physiotherapy-lentor",
+  "impressions": 0,
+  "clicks": 0,
+  "position_avg": null,
+  "status": "not ranking"
+ },
+ {
+  "id": "local-wh-lentor",
+  "q": "women's health physio lentor",
+  "engine": "google-search-console",
+  "variant": "gsc-28d",
+  "date": "2026-11-16",
+  "window": {
+   "from": "2026-10-19",
+   "to": "2026-11-15"
+  },
+  "source": "marts.fct_search_console_daily via search-console-export workflow (terms.json, dimension=query, exact match, case-insensitive)",
+  "target": "/physiotherapy-lentor",
+  "impressions": 0,
+  "clicks": 0,
+  "position_avg": null,
+  "status": "not ranking"
+ },
+ {
+  "id": "local-wh-katong",
+  "q": "women's health physio katong",
+  "engine": "google-search-console",
+  "variant": "gsc-28d",
+  "date": "2026-11-16",
+  "window": {
+   "from": "2026-10-19",
+   "to": "2026-11-15"
+  },
+  "source": "marts.fct_search_console_daily via search-console-export workflow (terms.json, dimension=query, exact match, case-insensitive)",
+  "target": null,
+  "impressions": 0,
+  "clicks": 0,
+  "position_avg": null,
+  "status": "not ranking"
+ },
+ {
+  "id": "wedge-womens-physio",
+  "q": "women's physio singapore",
+  "engine": "google-search-console",
+  "variant": "gsc-28d",
+  "date": "2026-11-16",
+  "window": {
+   "from": "2026-10-19",
+   "to": "2026-11-15"
+  },
+  "source": "marts.fct_search_console_daily via search-console-export workflow (terms.json, dimension=query, exact match, case-insensitive)",
+  "target": "/womens-health-physiotherapy-singapore",
+  "impressions": 28,
+  "clicks": 0,
+  "position_avg": 1.1,
+  "status": "ranking"
+ },
+ {
+  "id": "wedge-wh-physio",
+  "q": "women's health physiotherapist singapore",
+  "engine": "google-search-console",
+  "variant": "gsc-28d",
+  "date": "2026-11-16",
+  "window": {
+   "from": "2026-10-19",
+   "to": "2026-11-15"
+  },
+  "source": "marts.fct_search_console_daily via search-console-export workflow (terms.json, dimension=query, exact match, case-insensitive)",
+  "target": "/womens-health-physiotherapy-singapore",
+  "impressions": 0,
+  "clicks": 0,
+  "position_avg": null,
+  "status": "not ranking"
+ },
+ {
+  "id": "wedge-pf",
+  "q": "pelvic floor physiotherapy singapore",
+  "engine": "google-search-console",
+  "variant": "gsc-28d",
+  "date": "2026-11-16",
+  "window": {
+   "from": "2026-10-19",
+   "to": "2026-11-15"
+  },
+  "source": "marts.fct_search_console_daily via search-console-export workflow (terms.json, dimension=query, exact match, case-insensitive)",
+  "target": "/services/pelvic-floor-physiotherapy",
+  "impressions": 50,
+  "clicks": 1,
+  "position_avg": 27.8,
+  "status": "ranking"
+ },
+ {
+  "id": "wedge-pf-near-me",
+  "q": "pelvic floor physio near me singapore",
+  "engine": "google-search-console",
+  "variant": "gsc-28d",
+  "date": "2026-11-16",
+  "window": {
+   "from": "2026-10-19",
+   "to": "2026-11-15"
+  },
+  "source": "marts.fct_search_console_daily via search-console-export workflow (terms.json, dimension=query, exact match, case-insensitive)",
+  "target": "/services/pelvic-floor-physiotherapy",
+  "impressions": 0,
+  "clicks": 0,
+  "position_avg": null,
+  "status": "not ranking"
+ },
+ {
+  "id": "wedge-postnatal",
+  "q": "postnatal physio singapore",
+  "engine": "google-search-console",
+  "variant": "gsc-28d",
+  "date": "2026-11-16",
+  "window": {
+   "from": "2026-10-19",
+   "to": "2026-11-15"
+  },
+  "source": "marts.fct_search_console_daily via search-console-export workflow (terms.json, dimension=query, exact match, case-insensitive)",
+  "target": "/services/postpartum-physiotherapy",
+  "impressions": 0,
+  "clicks": 0,
+  "position_avg": null,
+  "status": "not ranking"
+ },
+ {
+  "id": "wedge-postnatal-best",
+  "q": "best postnatal physio in singapore",
+  "engine": "google-search-console",
+  "variant": "gsc-28d",
+  "date": "2026-11-16",
+  "window": {
+   "from": "2026-10-19",
+   "to": "2026-11-15"
+  },
+  "source": "marts.fct_search_console_daily via search-console-export workflow (terms.json, dimension=query, exact match, case-insensitive)",
+  "target": "/services/postpartum-physiotherapy",
+  "impressions": 0,
+  "clicks": 0,
+  "position_avg": null,
+  "status": "not ranking"
+ },
+ {
+  "id": "wedge-prenatal",
+  "q": "prenatal physiotherapy singapore",
+  "engine": "google-search-console",
+  "variant": "gsc-28d",
+  "date": "2026-11-16",
+  "window": {
+   "from": "2026-10-19",
+   "to": "2026-11-15"
+  },
+  "source": "marts.fct_search_console_daily via search-console-export workflow (terms.json, dimension=query, exact match, case-insensitive)",
+  "target": "/services/prenatal-physiotherapy",
+  "impressions": 57,
+  "clicks": 0,
+  "position_avg": 7.2,
+  "status": "ranking"
+ },
+ {
+  "id": "wedge-pregnancy",
+  "q": "physio during pregnancy singapore",
+  "engine": "google-search-console",
+  "variant": "gsc-28d",
+  "date": "2026-11-16",
+  "window": {
+   "from": "2026-10-19",
+   "to": "2026-11-15"
+  },
+  "source": "marts.fct_search_console_daily via search-console-export workflow (terms.json, dimension=query, exact match, case-insensitive)",
+  "target": "/services/prenatal-physiotherapy",
+  "impressions": 0,
+  "clicks": 0,
+  "position_avg": null,
+  "status": "not ranking"
+ },
+ {
+  "id": "wedge-mummy-baby",
+  "q": "mummy and baby assessment singapore",
+  "engine": "google-search-console",
+  "variant": "gsc-28d",
+  "date": "2026-11-16",
+  "window": {
+   "from": "2026-10-19",
+   "to": "2026-11-15"
+  },
+  "source": "marts.fct_search_console_daily via search-console-export workflow (terms.json, dimension=query, exact match, case-insensitive)",
+  "target": "/services/mummy-baby-assessment",
+  "impressions": 0,
+  "clicks": 0,
+  "position_avg": null,
+  "status": "not ranking"
+ },
+ {
+  "id": "wedge-home-visit",
+  "q": "postnatal physio home visit singapore",
+  "engine": "google-search-console",
+  "variant": "gsc-28d",
+  "date": "2026-11-16",
+  "window": {
+   "from": "2026-10-19",
+   "to": "2026-11-15"
+  },
+  "source": "marts.fct_search_console_daily via search-console-export workflow (terms.json, dimension=query, exact match, case-insensitive)",
+  "target": "/services/postpartum-physiotherapy",
+  "impressions": 0,
+  "clicks": 0,
+  "position_avg": null,
+  "status": "not ranking"
+ },
+ {
+  "id": "wedge-postnatal-pilates",
+  "q": "postnatal pilates singapore",
+  "engine": "google-search-console",
+  "variant": "gsc-28d",
+  "date": "2026-11-16",
+  "window": {
+   "from": "2026-10-19",
+   "to": "2026-11-15"
+  },
+  "source": "marts.fct_search_console_daily via search-console-export workflow (terms.json, dimension=query, exact match, case-insensitive)",
+  "target": "/services/clinical-pilates",
+  "impressions": 2,
+  "clicks": 0,
+  "position_avg": 10.0,
+  "status": "ranking"
+ },
+ {
+  "id": "cond-diastasis",
+  "q": "diastasis recti physiotherapy singapore",
+  "engine": "google-search-console",
+  "variant": "gsc-28d",
+  "date": "2026-11-16",
+  "window": {
+   "from": "2026-10-19",
+   "to": "2026-11-15"
+  },
+  "source": "marts.fct_search_console_daily via search-console-export workflow (terms.json, dimension=query, exact match, case-insensitive)",
+  "target": "/conditions/diastasis-recti",
+  "impressions": 1,
+  "clicks": 0,
+  "position_avg": 9.0,
+  "status": "ranking"
+ },
+ {
+  "id": "cond-diastasis-how",
+  "q": "how to fix abdominal separation after pregnancy",
+  "engine": "google-search-console",
+  "variant": "gsc-28d",
+  "date": "2026-11-16",
+  "window": {
+   "from": "2026-10-19",
+   "to": "2026-11-15"
+  },
+  "source": "marts.fct_search_console_daily via search-console-export workflow (terms.json, dimension=query, exact match, case-insensitive)",
+  "target": "/conditions/diastasis-recti",
+  "impressions": 0,
+  "clicks": 0,
+  "position_avg": null,
+  "status": "not ranking"
+ },
+ {
+  "id": "cond-leaking",
+  "q": "is leaking after birth normal",
+  "engine": "google-search-console",
+  "variant": "gsc-28d",
+  "date": "2026-11-16",
+  "window": {
+   "from": "2026-10-19",
+   "to": "2026-11-15"
+  },
+  "source": "marts.fct_search_console_daily via search-console-export workflow (terms.json, dimension=query, exact match, case-insensitive)",
+  "target": "/conditions/urinary-incontinence",
+  "impressions": 0,
+  "clicks": 0,
+  "position_avg": null,
+  "status": "not ranking"
+ },
+ {
+  "id": "cond-incontinence",
+  "q": "urinary incontinence physio singapore",
+  "engine": "google-search-console",
+  "variant": "gsc-28d",
+  "date": "2026-11-16",
+  "window": {
+   "from": "2026-10-19",
+   "to": "2026-11-15"
+  },
+  "source": "marts.fct_search_console_daily via search-console-export workflow (terms.json, dimension=query, exact match, case-insensitive)",
+  "target": "/conditions/urinary-incontinence",
+  "impressions": 0,
+  "clicks": 0,
+  "position_avg": null,
+  "status": "not ranking"
+ },
+ {
+  "id": "cond-prolapse",
+  "q": "pelvic organ prolapse physiotherapy singapore",
+  "engine": "google-search-console",
+  "variant": "gsc-28d",
+  "date": "2026-11-16",
+  "window": {
+   "from": "2026-10-19",
+   "to": "2026-11-15"
+  },
+  "source": "marts.fct_search_console_daily via search-console-export workflow (terms.json, dimension=query, exact match, case-insensitive)",
+  "target": "/conditions/pelvic-organ-prolapse",
+  "impressions": 0,
+  "clicks": 0,
+  "position_avg": null,
+  "status": "not ranking"
+ },
+ {
+  "id": "cond-heaviness",
+  "q": "feeling of heaviness down there after giving birth",
+  "engine": "google-search-console",
+  "variant": "gsc-28d",
+  "date": "2026-11-16",
+  "window": {
+   "from": "2026-10-19",
+   "to": "2026-11-15"
+  },
+  "source": "marts.fct_search_console_daily via search-console-export workflow (terms.json, dimension=query, exact match, case-insensitive)",
+  "target": "/conditions/pelvic-organ-prolapse",
+  "impressions": 0,
+  "clicks": 0,
+  "position_avg": null,
+  "status": "not ranking"
+ },
+ {
+  "id": "cond-csection",
+  "q": "c-section recovery physiotherapy singapore",
+  "engine": "google-search-console",
+  "variant": "gsc-28d",
+  "date": "2026-11-16",
+  "window": {
+   "from": "2026-10-19",
+   "to": "2026-11-15"
+  },
+  "source": "marts.fct_search_console_daily via search-console-export workflow (terms.json, dimension=query, exact match, case-insensitive)",
+  "target": "/conditions/caesarean-recovery",
+  "impressions": 0,
+  "clicks": 0,
+  "position_avg": null,
+  "status": "not ranking"
+ },
+ {
+  "id": "cond-pgp",
+  "q": "pelvic girdle pain in pregnancy physio",
+  "engine": "google-search-console",
+  "variant": "gsc-28d",
+  "date": "2026-11-16",
+  "window": {
+   "from": "2026-10-19",
+   "to": "2026-11-15"
+  },
+  "source": "marts.fct_search_console_daily via search-console-export workflow (terms.json, dimension=query, exact match, case-insensitive)",
+  "target": "/conditions/pelvic-girdle-pain",
+  "impressions": 0,
+  "clicks": 0,
+  "position_avg": null,
+  "status": "not ranking"
+ },
+ {
+  "id": "cond-perineal",
+  "q": "perineal tear recovery physio singapore",
+  "engine": "google-search-console",
+  "variant": "gsc-28d",
+  "date": "2026-11-16",
+  "window": {
+   "from": "2026-10-19",
+   "to": "2026-11-15"
+  },
+  "source": "marts.fct_search_console_daily via search-console-export workflow (terms.json, dimension=query, exact match, case-insensitive)",
+  "target": "/conditions/perineal-tear",
+  "impressions": 0,
+  "clicks": 0,
+  "position_avg": null,
+  "status": "not ranking"
+ },
+ {
+  "id": "cond-mastitis",
+  "q": "physiotherapy for blocked milk ducts singapore",
+  "engine": "google-search-console",
+  "variant": "gsc-28d",
+  "date": "2026-11-16",
+  "window": {
+   "from": "2026-10-19",
+   "to": "2026-11-15"
+  },
+  "source": "marts.fct_search_console_daily via search-console-export workflow (terms.json, dimension=query, exact match, case-insensitive)",
+  "target": "/conditions/blocked-ducts-mastitis",
+  "impressions": 0,
+  "clicks": 0,
+  "position_avg": null,
+  "status": "not ranking"
+ },
+ {
+  "id": "cond-pelvic-pain",
+  "q": "pelvic pain physiotherapy singapore",
+  "engine": "google-search-console",
+  "variant": "gsc-28d",
+  "date": "2026-11-16",
+  "window": {
+   "from": "2026-10-19",
+   "to": "2026-11-15"
+  },
+  "source": "marts.fct_search_console_daily via search-console-export workflow (terms.json, dimension=query, exact match, case-insensitive)",
+  "target": "/conditions/pelvic-pain",
+  "impressions": 0,
+  "clicks": 0,
+  "position_avg": null,
+  "status": "not ranking"
+ },
+ {
+  "id": "cond-menopause",
+  "q": "menopause physiotherapy singapore",
+  "engine": "google-search-console",
+  "variant": "gsc-28d",
+  "date": "2026-11-16",
+  "window": {
+   "from": "2026-10-19",
+   "to": "2026-11-15"
+  },
+  "source": "marts.fct_search_console_daily via search-console-export workflow (terms.json, dimension=query, exact match, case-insensitive)",
+  "target": "/conditions/menopause",
+  "impressions": 0,
+  "clicks": 0,
+  "position_avg": null,
+  "status": "not ranking"
+ },
+ {
+  "id": "cond-run-after-birth",
+  "q": "when can i start running after giving birth",
+  "engine": "google-search-console",
+  "variant": "gsc-28d",
+  "date": "2026-11-16",
+  "window": {
+   "from": "2026-10-19",
+   "to": "2026-11-15"
+  },
+  "source": "marts.fct_search_console_daily via search-console-export workflow (terms.json, dimension=query, exact match, case-insensitive)",
+  "target": "/services/postpartum-physiotherapy",
+  "impressions": 0,
+  "clicks": 0,
+  "position_avg": null,
+  "status": "not ranking"
+ },
+ {
+  "id": "paeds-schroth",
+  "q": "schroth therapy singapore",
+  "engine": "google-search-console",
+  "variant": "gsc-28d",
+  "date": "2026-11-16",
+  "window": {
+   "from": "2026-10-19",
+   "to": "2026-11-15"
+  },
+  "source": "marts.fct_search_console_daily via search-console-export workflow (terms.json, dimension=query, exact match, case-insensitive)",
+  "target": "/services/schroth-scoliosis-children",
+  "impressions": 0,
+  "clicks": 0,
+  "position_avg": null,
+  "status": "not ranking"
+ },
+ {
+  "id": "paeds-scoliosis-child",
+  "q": "scoliosis physiotherapy for child singapore",
+  "engine": "google-search-console",
+  "variant": "gsc-28d",
+  "date": "2026-11-16",
+  "window": {
+   "from": "2026-10-19",
+   "to": "2026-11-15"
+  },
+  "source": "marts.fct_search_console_daily via search-console-export workflow (terms.json, dimension=query, exact match, case-insensitive)",
+  "target": "/conditions/adolescent-scoliosis-schroth",
+  "impressions": 0,
+  "clicks": 0,
+  "position_avg": null,
+  "status": "not ranking"
+ },
+ {
+  "id": "paeds-physio",
+  "q": "paediatric physiotherapy singapore",
+  "engine": "google-search-console",
+  "variant": "gsc-28d",
+  "date": "2026-11-16",
+  "window": {
+   "from": "2026-10-19",
+   "to": "2026-11-15"
+  },
+  "source": "marts.fct_search_console_daily via search-console-export workflow (terms.json, dimension=query, exact match, case-insensitive)",
+  "target": "/services/paediatric-physiotherapy",
+  "impressions": 19,
+  "clicks": 0,
+  "position_avg": 80.5,
+  "status": "ranking"
+ },
+ {
+  "id": "paeds-torticollis",
+  "q": "baby torticollis physiotherapy singapore",
+  "engine": "google-search-console",
+  "variant": "gsc-28d",
+  "date": "2026-11-16",
+  "window": {
+   "from": "2026-10-19",
+   "to": "2026-11-15"
+  },
+  "source": "marts.fct_search_console_daily via search-console-export workflow (terms.json, dimension=query, exact match, case-insensitive)",
+  "target": "/conditions/congenital-torticollis",
+  "impressions": 0,
+  "clicks": 0,
+  "position_avg": null,
+  "status": "not ranking"
+ },
+ {
+  "id": "paeds-ddh",
+  "q": "hip dysplasia baby physio singapore",
+  "engine": "google-search-console",
+  "variant": "gsc-28d",
+  "date": "2026-11-16",
+  "window": {
+   "from": "2026-10-19",
+   "to": "2026-11-15"
+  },
+  "source": "marts.fct_search_console_daily via search-console-export workflow (terms.json, dimension=query, exact match, case-insensitive)",
+  "target": "/conditions/hip-dysplasia-ddh",
+  "impressions": 0,
+  "clicks": 0,
+  "position_avg": null,
+  "status": "not ranking"
+ },
+ {
+  "id": "paeds-clubfoot",
+  "q": "clubfoot physiotherapy singapore",
+  "engine": "google-search-console",
+  "variant": "gsc-28d",
+  "date": "2026-11-16",
+  "window": {
+   "from": "2026-10-19",
+   "to": "2026-11-15"
+  },
+  "source": "marts.fct_search_console_daily via search-console-export workflow (terms.json, dimension=query, exact match, case-insensitive)",
+  "target": "/conditions/clubfoot-ctev",
+  "impressions": 0,
+  "clicks": 0,
+  "position_avg": null,
+  "status": "not ranking"
+ },
+ {
+  "id": "msk-back",
+  "q": "back pain physio singapore",
+  "engine": "google-search-console",
+  "variant": "gsc-28d",
+  "date": "2026-11-16",
+  "window": {
+   "from": "2026-10-19",
+   "to": "2026-11-15"
+  },
+  "source": "marts.fct_search_console_daily via search-console-export workflow (terms.json, dimension=query, exact match, case-insensitive)",
+  "target": "/services/musculoskeletal-physiotherapy",
+  "impressions": 0,
+  "clicks": 0,
+  "position_avg": null,
+  "status": "not ranking"
+ },
+ {
+  "id": "msk-fracture",
+  "q": "physiotherapy after fracture singapore",
+  "engine": "google-search-console",
+  "variant": "gsc-28d",
+  "date": "2026-11-16",
+  "window": {
+   "from": "2026-10-19",
+   "to": "2026-11-15"
+  },
+  "source": "marts.fct_search_console_daily via search-console-export workflow (terms.json, dimension=query, exact match, case-insensitive)",
+  "target": "/conditions/post-fracture-rehab",
+  "impressions": 12,
+  "clicks": 0,
+  "position_avg": 15.9,
+  "status": "ranking"
+ },
+ {
+  "id": "holistic-pilates",
+  "q": "clinical pilates with physiotherapist singapore",
+  "engine": "google-search-console",
+  "variant": "gsc-28d",
+  "date": "2026-11-16",
+  "window": {
+   "from": "2026-10-19",
+   "to": "2026-11-15"
+  },
+  "source": "marts.fct_search_console_daily via search-console-export workflow (terms.json, dimension=query, exact match, case-insensitive)",
+  "target": "/services/clinical-pilates",
+  "impressions": 0,
+  "clicks": 0,
+  "position_avg": null,
+  "status": "not ranking"
+ },
+ {
+  "id": "holistic-private-pilates",
+  "q": "private pilates lentor",
+  "engine": "google-search-console",
+  "variant": "gsc-28d",
+  "date": "2026-11-16",
+  "window": {
+   "from": "2026-10-19",
+   "to": "2026-11-15"
+  },
+  "source": "marts.fct_search_console_daily via search-console-export workflow (terms.json, dimension=query, exact match, case-insensitive)",
+  "target": "/services/private-pilates",
+  "impressions": 0,
+  "clicks": 0,
+  "position_avg": null,
+  "status": "not ranking"
+ },
+ {
+  "id": "holistic-private-reformer",
+  "q": "private reformer pilates singapore",
+  "engine": "google-search-console",
+  "variant": "gsc-28d",
+  "date": "2026-11-16",
+  "window": {
+   "from": "2026-10-19",
+   "to": "2026-11-15"
+  },
+  "source": "marts.fct_search_console_daily via search-console-export workflow (terms.json, dimension=query, exact match, case-insensitive)",
+  "target": "/services/private-pilates",
+  "impressions": 0,
+  "clicks": 0,
+  "position_avg": null,
+  "status": "not ranking"
+ },
+ {
+  "id": "gen-first-visit",
+  "q": "what happens at a first physiotherapy appointment",
+  "engine": "google-search-console",
+  "variant": "gsc-28d",
+  "date": "2026-11-16",
+  "window": {
+   "from": "2026-10-19",
+   "to": "2026-11-15"
+  },
+  "source": "marts.fct_search_console_daily via search-console-export workflow (terms.json, dimension=query, exact match, case-insensitive)",
+  "target": "/services/",
+  "impressions": 0,
+  "clicks": 0,
+  "position_avg": null,
+  "status": "not ranking"
+ },
+ {
+  "id": "gen-cost",
+  "q": "how much does physiotherapy cost in singapore",
+  "engine": "google-search-console",
+  "variant": "gsc-28d",
+  "date": "2026-11-16",
+  "window": {
+   "from": "2026-10-19",
+   "to": "2026-11-15"
+  },
+  "source": "marts.fct_search_console_daily via search-console-export workflow (terms.json, dimension=query, exact match, case-insensitive)",
+  "target": "/services/",
+  "impressions": 0,
+  "clicks": 0,
+  "position_avg": null,
+  "status": "not ranking"
+ },
+ {
+  "id": "gen-referral",
+  "q": "do i need a doctor's referral to see a physiotherapist in singapore",
+  "engine": "google-search-console",
+  "variant": "gsc-28d",
+  "date": "2026-11-16",
+  "window": {
+   "from": "2026-10-19",
+   "to": "2026-11-15"
+  },
+  "source": "marts.fct_search_console_daily via search-console-export workflow (terms.json, dimension=query, exact match, case-insensitive)",
+  "target": "/services/",
+  "impressions": 0,
+  "clicks": 0,
+  "position_avg": null,
+  "status": "not ranking"
+ },
+ {
+  "id": "blog-dra-surgery",
+  "q": "do i need surgery for diastasis recti",
+  "engine": "google-search-console",
+  "variant": "gsc-28d",
+  "date": "2026-11-16",
+  "window": {
+   "from": "2026-10-19",
+   "to": "2026-11-15"
+  },
+  "source": "marts.fct_search_console_daily via search-console-export workflow (terms.json, dimension=query, exact match, case-insensitive)",
+  "target": "/blog/diastasis-recti-physio-or-surgery",
+  "impressions": 0,
+  "clicks": 0,
+  "position_avg": null,
+  "status": "not ranking"
+ },
+ {
+  "id": "blog-pregnancy-prep",
+  "q": "how to prepare your body for pregnancy",
+  "engine": "google-search-console",
+  "variant": "gsc-28d",
+  "date": "2026-11-16",
+  "window": {
+   "from": "2026-10-19",
+   "to": "2026-11-15"
+  },
+  "source": "marts.fct_search_console_daily via search-console-export workflow (terms.json, dimension=query, exact match, case-insensitive)",
+  "target": "/blog/preparing-your-body-for-pregnancy",
+  "impressions": 0,
+  "clicks": 0,
+  "position_avg": null,
+  "status": "not ranking"
+ },
+ {
+  "id": "blog-osteo-walking",
+  "q": "is walking enough exercise for osteoporosis",
+  "engine": "google-search-console",
+  "variant": "gsc-28d",
+  "date": "2026-11-16",
+  "window": {
+   "from": "2026-10-19",
+   "to": "2026-11-15"
+  },
+  "source": "marts.fct_search_console_daily via search-console-export workflow (terms.json, dimension=query, exact match, case-insensitive)",
+  "target": "/blog/exercise-for-osteoporosis",
+  "impressions": 0,
+  "clicks": 0,
+  "position_avg": null,
+  "status": "not ranking"
+ },
+ {
+  "id": "blog-pf-exercises",
+  "q": "how to do pelvic floor exercises after birth",
+  "engine": "google-search-console",
+  "variant": "gsc-28d",
+  "date": "2026-11-16",
+  "window": {
+   "from": "2026-10-19",
+   "to": "2026-11-15"
+  },
+  "source": "marts.fct_search_console_daily via search-console-export workflow (terms.json, dimension=query, exact match, case-insensitive)",
+  "target": "/blog/pelvic-floor-exercises-after-birth",
+  "impressions": 0,
+  "clicks": 0,
+  "position_avg": null,
+  "status": "not ranking"
+ },
+ {
+  "id": "blog-pp-checklist",
+  "q": "postpartum recovery checklist",
+  "engine": "google-search-console",
+  "variant": "gsc-28d",
+  "date": "2026-11-16",
+  "window": {
+   "from": "2026-10-19",
+   "to": "2026-11-15"
+  },
+  "source": "marts.fct_search_console_daily via search-console-export workflow (terms.json, dimension=query, exact match, case-insensitive)",
+  "target": "/blog/postpartum-recovery-checklist",
+  "impressions": 15,
+  "clicks": 0,
+  "position_avg": 3.8,
+  "status": "ranking"
+ },
+ {
+  "id": "blog-prenatal-classes",
+  "q": "prenatal classes singapore",
+  "engine": "google-search-console",
+  "variant": "gsc-28d",
+  "date": "2026-11-16",
+  "window": {
+   "from": "2026-10-19",
+   "to": "2026-11-15"
+  },
+  "source": "marts.fct_search_console_daily via search-console-export workflow (terms.json, dimension=query, exact match, case-insensitive)",
+  "target": "/blog/prenatal-classes-singapore",
+  "impressions": 102,
+  "clicks": 1,
+  "position_avg": 10.5,
+  "status": "ranking"
+ },
+ {
+  "id": "blog-lentor-baby",
+  "q": "lentor modern nursing room",
+  "engine": "google-search-console",
+  "variant": "gsc-28d",
+  "date": "2026-11-16",
+  "window": {
+   "from": "2026-10-19",
+   "to": "2026-11-15"
+  },
+  "source": "marts.fct_search_console_daily via search-console-export workflow (terms.json, dimension=query, exact match, case-insensitive)",
+  "target": "/blog/lentor-modern-with-a-baby",
+  "impressions": 0,
+  "clicks": 0,
+  "position_avg": null,
+  "status": "not ranking"
+ },
+ {
+  "id": "brand-goji",
+  "q": "goji physio",
+  "engine": "google-search-console",
+  "variant": "gsc-28d",
+  "date": "2026-11-16",
+  "window": {
+   "from": "2026-10-19",
+   "to": "2026-11-15"
+  },
+  "source": "marts.fct_search_console_daily via search-console-export workflow (terms.json, dimension=query, exact match, case-insensitive)",
+  "target": "/",
+  "impressions": 126,
+  "clicks": 65,
+  "position_avg": 1.0,
+  "status": "ranking"
+ },
+ {
+  "id": "brand-formal",
+  "q": "goji women's and family physiotherapy",
+  "engine": "google-search-console",
+  "variant": "gsc-28d",
+  "date": "2026-11-16",
+  "window": {
+   "from": "2026-10-19",
+   "to": "2026-11-15"
+  },
+  "source": "marts.fct_search_console_daily via search-console-export workflow (terms.json, dimension=query, exact match, case-insensitive)",
+  "target": "/",
+  "impressions": 41,
+  "clicks": 16,
+  "position_avg": 1.9,
+  "status": "ranking"
+ },
+ {
+  "id": "brand-what",
+  "q": "what is goji physio singapore and what do they offer",
+  "engine": "google-search-console",
+  "variant": "gsc-28d",
+  "date": "2026-11-16",
+  "window": {
+   "from": "2026-10-19",
+   "to": "2026-11-15"
+  },
+  "source": "marts.fct_search_console_daily via search-console-export workflow (terms.json, dimension=query, exact match, case-insensitive)",
+  "target": "/",
+  "impressions": 0,
+  "clicks": 0,
+  "position_avg": null,
+  "status": "not ranking"
+ }
+]

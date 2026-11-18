@@ -9,8 +9,8 @@ category: "Pelvic & Perinatal Health"
 tags: ["postnatal", "caesarean", "scar"]
 relatedConditions: ["caesarean-recovery"]
 relatedServices: ["postpartum-physiotherapy", "mummy-baby-assessment"]
-heroImage: "/photos/services/postpartum-physiotherapy.webp"
-heroAlt: "A Goji physiotherapist resting her hands on the lower tummy of a smiling client who is lying on an exercise mat."
+heroImage: "/photos/blog/c-section-scar-massage.webp"
+heroAlt: "A mother in a hospital gown resting in a hospital bed with her newborn asleep on her chest."
 ogImage: "/og/blog/c-section-scar-massage.jpg"
 ctaSlug: "web-wa"
 draft: false

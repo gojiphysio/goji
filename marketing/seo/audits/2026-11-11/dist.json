@@ -1,0 +1,14 @@
+[
+ {
+  "level": "WARN",
+  "rule": "title_length",
+  "path": "/press/zaobao-womens-hidden-pain/",
+  "detail": "82 chars (max 65)"
+ },
+ {
+  "level": "WARN",
+  "rule": "title_length",
+  "path": "/services/postpartum-physiotherapy/",
+  "detail": "67 chars (max 65)"
+ }
+]

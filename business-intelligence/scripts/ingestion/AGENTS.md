@@ -16,6 +16,11 @@ source (Instagram, Search Console, GBP, …).
 - **Generic raw shape** (`_loaded_at, …keys…, metric, metric_date, value, payload
   JSON`): the `metric` column means adding metrics later is more rows, not a schema
   change.
+- **Hand-kept sheets are snapshots, not keyed rows** (`cash_book`). With no stable
+  id and rows edited or deleted by hand, each run appends the whole sheet and `stg`
+  reads only the newest `_loaded_at`, so a deleted row disappears. Read columns by
+  header name and exit non-zero if one is missing, so the last good snapshot stays
+  live. Don't load free text that can hold patient names: classify it, then drop it.
 - Additive metrics (clicks, impressions, profile views) sum daily downstream — no
   special handling. De-duplicated metrics (e.g. Instagram reach) need a
   period-level fetch. Running **totals** (e.g. `followers_count`) are snapshots:

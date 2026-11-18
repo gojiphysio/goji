@@ -24,6 +24,7 @@ import time
 import uuid
 from datetime import date, datetime, timedelta, timezone
 
+import requests
 from flask import Flask, jsonify, request
 
 from .availability import SGT, derive_availability, derive_available_days
@@ -57,6 +58,13 @@ VALID_STAGES = {"page_view", "service_selected", "time_selected", "details",
                 "submitted", "confirmed",
                 "availability_empty", "availability_error", "validation_error",
                 "book_error", "date_picked", "clinician_changed"}
+# The subset the browser may send to the public /api/track. The rest are logged
+# server-side only: `confirmed`, `book_error` and `availability_empty` are facts
+# the server observed, so accepting them from anyone would let a script forge
+# bookings in the funnel and plant arbitrary `detail` text (an HTML payload in a
+# forged book_error code reached the dashboard's "Stuck" line, 2026-11-12).
+# Keep in sync with the website's FunnelStage type in src/lib/booking.ts.
+CLIENT_STAGES = VALID_STAGES - {"confirmed", "book_error", "availability_empty"}
 # Attribution fields the browser may attach (first-touch, from the landing
 # beacon) so a booking event can be traced to how the visitor arrived.
 ATTRIB_KEYS = ("visitor_id", "utm_source", "utm_campaign", "gclid", "go_click_id")
@@ -395,6 +403,107 @@ def availability_summary():
     return jsonify(payload)
 
 
+# Abuse limit for the public booking endpoint (2026-11-12: a scanner created
+# real Plato appointments). In-memory is enough: the service runs with
+# --max-instances=1. A cold start resets the counts, which only errs lenient.
+# Per contact only, not per IP: Singapore mobile carriers put many customers
+# behind one IP, and Turnstile (below) is what stops scripts (2026-11-13).
+BOOKINGS_PER_CONTACT_DAY = int(os.environ.get("BOOKINGS_PER_CONTACT_DAY", "2"))
+_hits: dict[str, list[float]] = {}
+_hits_lock = threading.Lock()
+RATE_LIMITED_MSG = ("We've already received several bookings from you. "
+                    "Please message us on WhatsApp and we'll help you book.")
+
+
+def _client_ip() -> str:
+    """Cloud Run appends the real client address as the LAST X-Forwarded-For
+    entry; anything before it is whatever the caller sent, so never trust it."""
+    xff = request.headers.get("X-Forwarded-For", "")
+    return (xff.split(",")[-1].strip() if xff else "") or (request.remote_addr or "?")
+
+
+def _count(key: str, window_s: float) -> int:
+    """How many hits `key` has inside the window (prunes older ones)."""
+    now = time.monotonic()
+    with _hits_lock:
+        ts = [t for t in _hits.get(key, []) if now - t < window_s]
+        if ts:
+            _hits[key] = ts
+        else:
+            _hits.pop(key, None)
+        return len(ts)
+
+
+def _hit(*keys: str) -> None:
+    now = time.monotonic()
+    with _hits_lock:
+        for k in keys:
+            _hits.setdefault(k, []).append(now)
+
+
+def _contact_keys(draft: dict) -> list[str]:
+    phone = "".join(ch for ch in str(draft.get("phone") or "") if ch.isdigit())
+    email = str(draft.get("email") or "").strip().lower()
+    return [k for k in (phone and f"phone:{phone[-8:]}", email and f"email:{email}") if k]
+
+
+def _over_limit(draft: dict) -> bool:
+    return any(_count(f"ok:{k}", 86400) >= BOOKINGS_PER_CONTACT_DAY
+               for k in _contact_keys(draft))
+
+
+# Bot check for /api/book. The limit above caps how much a bot can do; this
+# keeps it from booking at all. Three layers, cheapest first:
+#   - honeypot: the form has a hidden field (`company_url`) people never see;
+#     anything that fills it is a script.
+#   - fill time: the form reports ms since it loaded. A 3-step form finished in
+#     under BOOK_MIN_FILL_MS was not filled by a person. Client-reported, so it
+#     only stops naive bots; a caller that omits it is let through (an open tab
+#     may still run the older form).
+#   - Turnstile: when TURNSTILE_SECRET is set, the form's Cloudflare Turnstile
+#     token is required and verified with Cloudflare. This is the real gate, and
+#     the only layer a direct API caller cannot fake.
+BOOK_MIN_FILL_MS = int(os.environ.get("BOOK_MIN_FILL_MS", "3000"))
+TURNSTILE_SECRET = os.environ.get("TURNSTILE_SECRET", "").strip()
+TURNSTILE_VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
+BOT_CHECK_MSG = ("We couldn't verify this booking. Please try again, or message "
+                 "us on WhatsApp and we'll book you in.")
+
+
+def _turnstile_ok(token: str, ip: str) -> bool:
+    """Ask Cloudflare whether the form's Turnstile token is genuine. If
+    Cloudflare itself can't be reached we let the booking through: an outage
+    there must not close the clinic's booking form, and the limits still apply."""
+    try:
+        r = requests.post(TURNSTILE_VERIFY_URL, timeout=5,
+                          data={"secret": TURNSTILE_SECRET, "response": token,
+                                "remoteip": ip})
+        body = r.json()
+    except Exception as e:
+        log.warning("turnstile verify unreachable, allowing booking: %s", e)
+        return True
+    if not body.get("success"):
+        log.warning("turnstile rejected token: %s", body.get("error-codes"))
+    return bool(body.get("success"))
+
+
+def _bot_reason(draft: dict, ip: str) -> str | None:
+    """Why this submission looks automated, or None if it passes."""
+    if str(draft.get("company_url") or "").strip():
+        return "honeypot"
+    elapsed = draft.get("elapsed_ms")
+    if (isinstance(elapsed, (int, float)) and not isinstance(elapsed, bool)
+            and elapsed < BOOK_MIN_FILL_MS):
+        return "too_fast"
+    if TURNSTILE_SECRET:
+        token = str(draft.get("turnstile_token") or "").strip()
+        if not token:
+            return "captcha_missing"
+        if not _turnstile_ok(token[:2048], ip):
+            return "captcha_failed"
+    return None
+
+
 @app.route("/api/book", methods=["POST", "OPTIONS"])
 def book():
     if request.method == "OPTIONS":
@@ -402,6 +511,19 @@ def book():
     draft = request.get_json(silent=True) or {}
     ua, ref = request.headers.get("User-Agent"), request.headers.get("Referer")
     attribution = draft.get("attribution") or {}
+    ip = _client_ip()
+    if _over_limit(draft):
+        log.warning("booking rate-limited (ip=%s)", ip)
+        _track_async("book_error", draft.get("session_id"), draft.get("service"),
+                     ua, ref, detail="rate_limited", attribution=attribution)
+        return jsonify({"ok": False, "error": RATE_LIMITED_MSG,
+                        "code": "rate_limited"}), 429
+    bot = _bot_reason(draft, ip)
+    if bot:
+        log.warning("booking refused by bot check (%s, ip=%s)", bot, ip)
+        _track_async("book_error", draft.get("session_id"), draft.get("service"),
+                     ua, ref, detail=f"bot_{bot}", attribution=attribution)
+        return jsonify({"ok": False, "error": BOT_CHECK_MSG, "code": "bot_check"}), 400
     try:
         result = create_booking(plato(), draft)
     except BookingError as e:
@@ -417,6 +539,7 @@ def book():
                      ua, ref, detail="plato_error", attribution=attribution)
         return jsonify({"ok": False,
                         "error": "Something went wrong. Please try again or message us."}), 502
+    _hit(*(f"ok:{k}" for k in _contact_keys(draft)))
     mailer.send_admin_booking_email(result, draft)     # best-effort
     mailer.send_customer_booking_email(result, draft)  # best-effort
     _track_async("confirmed", draft.get("session_id"), draft.get("service"),
@@ -494,6 +617,8 @@ def track():
     if request.method == "OPTIONS":
         return "", 204
     data = request.get_json(silent=True) or {}
+    if data.get("stage") not in CLIENT_STAGES:
+        return "", 204   # server-only or unknown stage: drop silently
     _track_async(data.get("stage"), data.get("session_id"), data.get("service"),
                  request.headers.get("User-Agent"), request.headers.get("Referer"),
                  detail=data.get("detail"), attribution=data.get("attribution"))

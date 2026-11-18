@@ -27,6 +27,11 @@ See `DEPLOY.md`.
   - **Base CSS must come before `@media` blocks** — equal-specificity rules later
     in source win, so base after a media query silently overrides it.
   - The page-nav pill is `inline-flex` so it hugs its tabs.
+- **Every data value through `innerHTML` goes through `escapeHtml`/`esc`** — even
+  ones that "are always codes". Patient names and notes come from Plato, and the
+  funnel/beacon tables are written by public endpoints, so any of them can carry
+  an HTML payload (a security scanner booked with `<script>` in name + notes on
+  2026-11-12). Only static labels and numbers through `fmt*` may go in raw.
 
 ## Backend
 - **Auth is per-route** via `@require_roles(...)`; there's no global guard. A
@@ -44,8 +49,8 @@ See `DEPLOY.md`.
   28/29/30/31-day months and leap years are handled. Month end is *first of next
   month minus one day* in Python and `new Date(y, m + 1, 0)` in JS. Three helpers
   implement it independently and **must stay in agreement**: `_fiscal_period()` /
-  `_prior_fiscal_start()` (projection chart, `app.py`), `payCycleRange()` /
-  `prevPayCycleRange()` (P&L selector), and `currentPayCycle()` (commission
+  `_prior_fiscal_start()` (projection chart, `app.py`), `_month_end()` (P&L,
+  `app.py`), and `currentPayCycle()` (commission
   calculator). The `cycle` / `payCycle` names are historical — the dashboard used
   to run a 26th→25th pay cycle; the period is now the plain calendar month.
 - **`date.today()` must use SGT.** All `date.today()` / `datetime.now()` calls in
@@ -60,6 +65,18 @@ See `DEPLOY.md`.
   formats at `'UTC'`; `reminders/test_reminders.py` pins it. Note this is the
   opposite of the `date.today()` rule above — *dates* are clinic-local
   (`appt_date` already is, so key windows on it), *times* are naive.
+- **Two pay models.** Salaried clinicians get base + 40% of recognised revenue
+  above $13k (`CLINICIAN_DEFAULTS` in `template.html`). **Freelancers**
+  (`FREELANCE_RATES` in `app.py`; Camille Tan `ICT`: $60 per 1:1, $70 per 2:1)
+  get a flat fee per completed session, **whatever the clinic collected**, so $0
+  sessions pay. They get no commission and no CPF. A 2:1 is one invoice line for
+  the pair, so it counts once. The session type comes from the SKU via
+  `session_type()`. An unknown SKU is shown as "not a session, check" rather
+  than paid. `fetch_freelancer_sessions` reads `stg.invoice_items`, not
+  `fct_service_delivered`, because the mart drops $0 sales. **Adding a
+  clinician:** put the Plato doctor code in `PROVIDERS`, the calendar colour in
+  `stg/03_appointments.sql` (or the mismatch alert flags every invoice), and the
+  pay terms in one of the two configs.
 - **Session grain.** `fct_service_delivered` Part A fans out by `qty` (physical
   session count), not `len(redeem_alloc)`. When a redemption spans two packages
   (cross-package transition), `redeem_alloc` has 2 entries for 1 visit — using
@@ -69,6 +86,34 @@ See `DEPLOY.md`.
   clicks) use the **streaming API** (`insert_rows_json`), not DML — DML is capped
   at 1,500 statements/table/day. New writable table → add it to the grant loops in
   `deploy_admin.sh`, `DEPLOY.md`, and `.github/workflows/deploy-dashboard.yml`.
+
+## P&L tab
+- **Costs are actuals from the Cash Book sheet, never typed into the page.**
+  Sheet → `ingestion/cash_book` → `marts.fct_pnl_monthly` → `build_pnl()`. The old
+  browser inputs (rent $9,723 against an actual $10,598) showed a model, not what
+  happened. Xero can replace the sheet later by feeding the same mart shape.
+- **A cost belongs to the month it covers, not the month it was paid.** The sheet's
+  `Covers from`/`Covers to` spread a row evenly by day. Payroll ran 26th→25th until
+  Aug 2026, then calendar months, which is why August has two payroll rows.
+- **Freelancer payouts are their own line, `Freelancer fees` (Staff group).**
+  They aren't Payroll, and they carry no CPF. The fee for a month is usually paid
+  after it ends, so give the row `Covers from`/`Covers to`, as with payroll.
+  The line isn't in `PNL_CLOSE_REQUIRED`, so a month can close without it.
+- **Card fees are not in the Cash Book.** Plato nets them out of its payouts, while
+  recognised revenue is gross of them, so `fetch_pnl_monthly` adds them from Plato
+  payments (2.1% + $0.20). Leaving them out overstated May–Oct 2026 EBITDA by $5k.
+- **A provisional month never shows a result.** A month that hasn't ended, or has no
+  Payroll, CPF or Rent yet, shows "—" for EBITDA and ratios, and is left out of the
+  chart, totals, MoM and the Excel export. Payroll lands days after month end, so
+  the unfinished month otherwise looks wildly profitable (a 99% margin in testing).
+  The headline defaults to the latest closed month.
+- **Unbilled utilities carry the prior month, labelled `est`.** The SP bill arrives
+  mid next month, so the latest closed month rarely has one.
+- **Nothing is silently dropped.** A debit with no line counts as an Uncategorised
+  cost with a warning, and the page warns if the book stops tying to the sheet's own
+  totals. Capex and refundable deposits are separate lines, so only capex amortises.
+- **The statement table is a deliberate exception to "no big tables".** A P&L is the
+  table, so it stays collapsed to groups, with lines one click away.
 
 ## Front desk portal (`frontdesk.*`)
 - It's the **worklists Plato doesn't track**, not a second calendar. Tabs read

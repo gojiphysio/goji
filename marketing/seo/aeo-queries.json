@@ -47,6 +47,10 @@
     {"id": "paeds-torticollis", "q": "baby torticollis physiotherapy singapore", "cluster": "paeds", "target": "/conditions/congenital-torticollis"},
     {"id": "paeds-ddh", "q": "hip dysplasia baby physio singapore", "cluster": "paeds", "target": "/conditions/hip-dysplasia-ddh"},
     {"id": "paeds-clubfoot", "q": "clubfoot physiotherapy singapore", "cluster": "paeds", "target": "/conditions/clubfoot-ctev"},
+    {"id": "paeds-torticollis-treatment", "q": "torticollis treatment singapore", "cluster": "paeds", "target": "/conditions/congenital-torticollis"},
+    {"id": "paeds-dev-delay", "q": "child developmental delay physiotherapy singapore", "cluster": "paeds", "target": "/conditions/developmental-concerns"},
+    {"id": "paeds-kids-physio", "q": "physiotherapy for kids singapore", "cluster": "paeds", "target": "/services/paediatric-physiotherapy"},
+    {"id": "paeds-lentor", "q": "paediatric physiotherapist near lentor", "cluster": "paeds", "target": "/services/paediatric-physiotherapy"},
 
     {"id": "msk-back", "q": "back pain physio singapore", "cluster": "msk", "target": "/services/musculoskeletal-physiotherapy"},
     {"id": "msk-fracture", "q": "physiotherapy after fracture singapore", "cluster": "msk", "target": "/conditions/post-fracture-rehab"},

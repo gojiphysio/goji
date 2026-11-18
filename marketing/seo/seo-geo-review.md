@@ -38,6 +38,7 @@ Rank Sweep `../strategy/05-30-day-campaigns.md` (Campaign 5).
 | **Blog scaffolding SHIPPED (2026-08-03), content still pending.** `/media` hub + `/blog` + `/press` + site search are live; the post template emits BlogPosting + BreadcrumbList + FAQPage. **7 posts live 2026-10-27** (clinic news, event recaps, local guides, first visit; team byline). **4 clinical-advice posts live 2026-10-28** with a team byline; physio review now happens after publishing (queue in `blog-plan.md`, brief: `../content-engine/blog-brief.md`). | Repo, then a physio (review after publishing) |
 | **Press/citation surface now exists** — `/press` carries the Lianhe Zaobao interview (21 Jul 2026) as our summary + attributed quote + link out, with `citation`/`subjectOf` NewsArticle schema. This is the first owned third-party corroboration signal (§4.5). Add each new piece of coverage here in the same PR as it lands. | Repo |
 | Pitch the roundups that own our SERPs and feed AI answers (Sassy Mama, Homage, Little Steps, Expat Living, Women's Weekly). **Status and pitch drafts: `../partnerships/roundup-outreach.md`** (all 5 sent by 28 Oct 2026) | Operator |
+| **Claude web search can't see gojiphysio.com (2026-11-16 audit).** Web-only Claude answers never name Goji and brand answers say no prices/hours are published. Check whether the site is in the index Claude searches (e.g. search.brave.com) and submit it where possible; get Goji into the roundups/directories both engines cite (Sassy Mama, Little Steps, Women's Weekly, Expat Living, Honeykids, WhatClinic, Fresha). | Operator |
 | Bing Places + Apple Business Connect listings (free; Bing feeds ChatGPT answers) | Operator |
 | GSC ingestion job → `marts.gsc_search_performance` (see §6) | Repo |
 | Discovery Rank Sweep first baseline run (strategy/05 Campaign 5) | Operator + repo |
@@ -56,6 +57,15 @@ Rank Sweep `../strategy/05-30-day-campaigns.md` (Campaign 5).
   LinkedIn should own her name.
 
 ## 2. Current-state audit (2026-07-13)
+
+> **Latest loop run: 2026-11-16** (`audits/2026-11-16/summary.md`), first run
+> with Claude in Chrome and Search Console. ChatGPT (logged out, sg-ip) names
+> Goji 14/47 (flat), cites gojiphysio.com 13/47; still pairs prices across
+> services (source fixed in #233). Claude (Incognito) 15/47: named whenever it
+> uses places search, never when it uses web search only, and its web results
+> never return gojiphysio.com. Search Console 28d: 238 clicks (+43%), 13,300
+> impressions (3.2x); 11/54 AEO queries have impressions. Google browser
+> checks dropped by owner decision. Live audit 0 errors; check_dist 0 warnings.
 
 **Strong already** — canonical URLs on every page; `@astrojs/sitemap` +
 robots.txt; site-wide MedicalClinic/LocalBusiness JSON-LD with NAP, hours,
@@ -174,6 +184,8 @@ condition/service page that owns the cluster)**
 | c section scar massage | /blog/c-section-scar-massage (supports /conditions/caesarean-recovery) | **Live on merge** (team byline, physio review after publishing) |
 | postpartum binder, bengkung, belly wrap after birth | /blog/postpartum-belly-binder (supports /conditions/diastasis-recti) | **Live on merge** (team byline, physio review after publishing) |
 | postpartum gym singapore, postnatal exercise singapore | /blog/postnatal-exercise-singapore (supports /services/strength-conditioning) | **Live on merge** (team byline, physio review after publishing) |
+| why see a postnatal physio, postnatal physio singapore | /blog/why-mums-see-a-postnatal-physio (supports /services/postpartum-physiotherapy; original clinic-notes data) | **Live on merge** (team byline, physio review after publishing) |
+| when to see a physio after birth, how soon after birth physio | /blog/when-to-see-a-physio-after-birth (supports /services/postpartum-physiotherapy) | **Live on merge** (team byline, physio review after publishing) |
 | goji physio zaobao, goji physio news | /press | **Live** |
 
 **Branded** — both names + variants → homepage. Organic-owned; ads

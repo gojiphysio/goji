@@ -1,0 +1,73 @@
+# Search Console numbers for the weekly SEO/AEO loop on tidepool, keyless.
+#
+# Signs in through Workload Identity Federation as seo-routine@goji-bi, a
+# service account that can read only the Search Console tables and that only
+# workflows on `main` may use. No Google key exists anywhere. tidepool fetches
+# the artifact with `gh` via marketing/seo/tools/fetch_search_console.sh, which
+# also dispatches a fresh run.
+name: Search Console export
+
+on:
+  schedule:
+    - cron: "17 2 * * 3"   # Wed 10:17 SGT, ahead of the 11:07 loop
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: search-console-export
+  cancel-in-progress: false
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Authenticate to Google Cloud (keyless)
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.WIF_PROVIDER }}
+          service_account: seo-routine@goji-bi.iam.gserviceaccount.com
+
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Export Search Console tables
+        env:
+          PROJECT: ${{ vars.GCP_PROJECT }}
+        run: |
+          set -euo pipefail
+          mkdir -p out
+          q() { bq --project_id="$PROJECT" query --quiet --use_legacy_sql=false \
+                  --format=json --max_rows=200000 "$1"; }
+          # Daily totals: 120 days covers 28d vs prior 28d with room for lag.
+          q "SELECT * FROM \`goji-bi.marts.fct_search_console_daily\`
+             WHERE metric_date >= DATE_SUB(CURRENT_DATE('Asia/Singapore'), INTERVAL 120 DAY)
+             ORDER BY metric_date" > out/daily.json
+          # Query/page terms for the last 56 days (two 28-day windows).
+          q "SELECT * FROM \`goji-bi.marts.fct_search_console_terms\`
+             WHERE metric_date >= DATE_SUB(CURRENT_DATE('Asia/Singapore'), INTERVAL 56 DAY)
+             ORDER BY metric_date, dimension, term" > out/terms.json
+          python3 - <<'PY'
+          import json, datetime
+          daily = json.load(open("out/daily.json"))
+          terms = json.load(open("out/terms.json"))
+          meta = {
+              "exported_at": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
+              "last_metric_date": max((r["metric_date"] for r in daily), default=None),
+              "daily_rows": len(daily),
+              "terms_rows": len(terms),
+              "note": "Google reports the last 2-3 days incompletely.",
+          }
+          json.dump(meta, open("out/meta.json", "w"), indent=2)
+          print(json.dumps(meta, indent=2))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: search-console
+          path: out/
+          retention-days: 14
+          if-no-files-found: error

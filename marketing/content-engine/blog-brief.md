@@ -72,6 +72,15 @@ than the source says, and red flags pointing to a doctor.
 - **No invented clinic experience.** Goji opened in mid-2026. Don't write
   "many of our patients", "the most common thing we hear", "plenty of the women
   we see". Say what is generally true and cite it.
+- **Clinic numbers only from a recorded aggregate.** Our own counts (e.g. the
+  Results in `business-intelligence/architecture/clinical-notes-insights-plan.md`)
+  may be quoted as "our research across hundreds of patients" (true while the
+  record covers 200+), as percentages or "4 in 10" only, never absolute
+  counts, and with a note that the people we see are not all mothers. Lead
+  with the message for the reader; the numbers back it up in the body and a
+  short "Our numbers" table near the end. Leave out date ranges, group
+  sizes, how the script works and any cell under 5. Never round a
+  count up, combine cells to unhide one, or quote a number not in the record.
 - **Event recaps restate only what was published** (the Luma page, Goji's own
   Instagram caption). Never put words in a guest speaker's mouth or describe
   what was said in the room unless Goji published it. The educational part of a
@@ -101,10 +110,14 @@ before merge (ban list: https://github.com/MohamedAbdallah-14/unslop,
 
 ## Images
 
-- Every post has `heroImage` + `heroAlt` + `ogImage`. The hero is a real,
-  consented Goji photo (no stock, no before/after), preferably upright and
-  active. Reuse `public/photos/` until event or topic photos arrive; event
-  photos replace stand-ins once everyone shown has consented.
+- Every post has `heroImage` + `heroAlt` + `ogImage`. Prefer a real,
+  consented Goji photo (no before/after), and don't give two posts the same
+  hero. When no Goji photo fits, use a free-licence Unsplash photo (not
+  Unsplash+) or an AI-generated still life with no people, saved as
+  `public/photos/blog/<slug>.webp` plus a `-800.webp` card copy, with its
+  source logged in `image-sources.md`. Stock never shows a physio or a
+  treatment, so it can't pass as a Goji client or clinician. Event photos
+  replace stand-ins once everyone shown has consented.
 - `ogImage` is a 1200x630 JPG crop of the hero in `public/og/blog/<slug>.jpg`
   (the WhatsApp/Facebook preview). `heroAlt` describes what a sighted reader
   sees, as a sentence.

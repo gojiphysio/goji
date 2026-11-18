@@ -88,6 +88,11 @@ so a token change reflows everything (styleguide is the QA surface).
   `bookingApi.track()` stage must be added to `VALID_STAGES` in
   `business-intelligence/scripts/booking/app.py` (and the `FunnelStage` type in
   `src/lib/booking.ts`) in the same PR, or the backend silently drops it.
+- **The booking form proves it's a person.** Keep the hidden `company_url`
+  honeypot empty and untabbable, and keep sending `elapsed_ms` and the Turnstile
+  token with `/api/book`. Never set the backend's `TURNSTILE_SECRET` before the
+  site has `PUBLIC_TURNSTILE_SITE_KEY` live, or every booking is refused
+  (rollout steps: `business-intelligence/scripts/booking/README.md`).
   `service_selected` with `detail = "deep_link"` means step 1 was skipped (a
   service page's `/book/?service=…` link already filled it), so count those
   apart when reading step-1 drop-off. `detail = "no_focus"` means Continue was
@@ -126,8 +131,10 @@ so a token change reflows everything (styleguide is the QA surface).
   personalised as padding), no rhetorical "X, Y and Z" triples, no "not just
   X but Y" or "Whether you're..." openers. On clinical copy, precision beats
   voice: cut slop only, never change a claim.
-- **Condition pages carry a clinician byline.** Every `conditions` entry sets a
-  `reviewer: { name, slug }` (the reviewing physio, from the source doc). The
+- **Condition pages carry a clinician byline when a physio has reviewed them.**
+  A `conditions` entry sets `reviewer: { name, slug }` (the reviewing physio,
+  from the source doc); it is optional, so leave it off rather than name
+  someone who hasn't read the page (owner decision 2026-11-16). The
   detail template renders a "Reviewed by <name>" line linking to `/team/<slug>`
   and emits `reviewedBy` in the MedicalWebPage JSON-LD. Strip the source doc's
   italic reviewer/status/SEO-slug/structured-data notes and inline CTA — the
@@ -169,8 +176,8 @@ so a token change reflows everything (styleguide is the QA surface).
   The same section renders as the FAQ accordion via
   `src/lib/rehype-faq-accordion.mjs` (markup and `src/styles/faq-list.css`
   shared with `components/FaqList.astro`); answers keep their links.
-- **Every condition page carries a byline** via `reviewer: { name, slug }`
-  frontmatter; the template renders "Reviewed by <name>" linking to
+- **A reviewed condition page carries a byline** via `reviewer: { name, slug }`
+  frontmatter (optional, see above); the template renders "Reviewed by <name>" linking to
   `/team/<slug>` and emits `reviewedBy` in the MedicalWebPage JSON-LD.
 - **Meta descriptions ≤160 chars.**
 - **Internal page links end in `/`** (`/conditions/vertigo/`). Cloudflare
@@ -196,6 +203,15 @@ so a token change reflows everything (styleguide is the QA surface).
   bold, no inline links and no "Related pages" section (strip the source doc's
   internal-links line). `cardTitle` is the page H1, so keep it equal to the doc
   title unless a shorter heading is intended. Add new pages to `public/llms.txt`.
+  Exception: new clinical claims added by the SEO loop (tier B) carry inline
+  links to their primary sources (`../content-engine/blog-brief.md`), and a
+  table is fine where it helps; internal links stay out (`relatedServices`
+  covers them). First done on `dry-needling.md`, 16 Nov 2026.
+- **`relatedServices` links both ways.** A condition lists its services in
+  `relatedServices`; each service page renders the reverse as "Conditions we
+  treat" (`[...slug].astro`). So linking a condition to a service is one
+  frontmatter edit, and a condition with no `relatedServices` is orphaned from
+  every service page.
 - **`/womens-health-physiotherapy-singapore` is the women's-health hub.** It
   owns the broad national query; the four women's-health service pages own
   their own keyword and each links back up to it. Adding a women's-health
@@ -244,7 +260,9 @@ so a token change reflows everything (styleguide is the QA surface).
 Logos in `public/brand/` are **copies** of the source of truth at
 `business-intelligence/design/brand_assets/`. Re-sync if the brand updates.
 Photos are real, consented clinic/practitioner images in production — no stock,
-no before/after. Components show branded placeholders until photos land (a
+no before/after. The one exception is blog heroes in `public/photos/blog/`,
+which may be free-licence stock or AI still lifes when no Goji photo fits
+(rules and source log in `../content-engine/blog-brief.md`). Components show branded placeholders until photos land (a
 `public/` photo that isn't in yet should degrade to a placeholder, not a broken
 `<img>` — see the `.gh-photo[data-missing]` pattern on `/getting-here`).
 

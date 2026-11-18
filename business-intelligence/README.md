@@ -50,7 +50,7 @@ dashboard scales to zero and costs well under a few dollars a month.
 - **P&L** — Singapore-style profit & loss with a revenue/bookings toggle,
   selectable period (Last 30D / current cycle / previous cycle / custom), and
   XLSX export.
-- **Commission** — per-clinician commission calculator over real appointment
+- **Payroll** (was Commission) — per-clinician pay: commission for salaried staff, per-session fees for freelancers, over real appointment
   data, with patient initials.
 
 **Data-quality alert** — the Overview surfaces invoice-doctor mismatches
@@ -135,10 +135,9 @@ vs. revenue distinction".
 The original six v1 questions (`architecture/objectives.md`) are answered. The
 next horizon:
 
-1. **Xero integration → a true P&L.** Today's P&L tab is revenue- and
-   commission-driven; real costs (payroll, rent, supplies, payment fees) and
-   AR/AP live in Xero. Pull Xero into `raw_xero.*` and join to revenue for a
-   real operating-profit picture.
+1. **Xero integration → AR/AP.** The P&L tab now shows actual operating profit,
+   with costs from the Cash Book sheet (`scripts/ingestion/cash_book`). Xero could
+   replace the sheet by feeding `marts.fct_pnl_monthly`, and would add AR/AP.
 2. **Operational call list (the deferred Q6).** Unconfirmed upcoming
    appointments worth chasing — a PII-bearing operational view for confirmation
    calls. Data and code mappings are ready (`objectives.md` §6); needs a page.

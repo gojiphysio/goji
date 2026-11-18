@@ -3,6 +3,8 @@ from __future__ import annotations
 
 from datetime import date, datetime
 
+import pytest
+
 from booking import availability
 from booking.booking import BookingError, create_booking
 
@@ -421,3 +423,25 @@ def test_booking_rejected_before_clinician_start_date(monkeypatch):
     except BookingError as e:
         assert e.code == "slot_taken"
     assert p.created == []
+
+
+# --- Markup probes (2026-11-12 scanner) -----------------------------------
+
+@pytest.mark.parametrize("field,value", [
+    ("name", "ZZ4539 <b>Probe</b> <img src=x onerror=alert(4539)>"),
+    ("name", "Jane > Tan"),
+    ("notes", "ZZ4539-NOTE <script>alert(document.domain)</script>"),
+    ("notes", "<iframe src=file:///etc/passwd></iframe>"),
+])
+def test_markup_in_name_or_notes_is_refused_before_plato(field, value):
+    p = StubPlato()
+    with pytest.raises(BookingError):
+        create_booking(p, {**BASE, "clinician_id": "cheryl-long", field: value}, now=NOW)
+    assert p.created == [] and p.fresh_reads == []
+
+
+def test_a_plain_less_than_in_notes_still_books():
+    p = StubPlato()
+    res = create_booking(p, {**BASE, "clinician_id": "cheryl-long",
+                             "notes": "knee pain < 3 weeks, worse on stairs"}, now=NOW)
+    assert res["ok"]

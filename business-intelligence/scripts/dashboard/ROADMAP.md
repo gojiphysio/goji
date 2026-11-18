@@ -149,7 +149,9 @@ Is a 15-min lag acceptable for the schedule view?
 - Slot utilisation rate — sessions booked / available capacity
 - `marketing` role — tab-gated read-only access to Demographics, Referrals,
   Treatment Mix, Cohort on `dashboard.*`; no P&L or commission
-- Xero integration — true net margin, payroll, rent, supplies (blocked on Xero)
+- Xero integration — optional now: the P&L tab reads actual costs from the Cash
+  Book sheet (`ingestion/cash_book`). Xero could replace it by feeding
+  `marts.fct_pnl_monthly`, adding AR/AP, without touching the page
 
 ### Marketing tab — DONE (founder-only) / follow-ups
 

@@ -29,7 +29,7 @@ Founder dashboard (`dashboard.gojiphysio.com`, `/`):
   patient demographics, referral analytics, and the invoice-doctor mismatch alert.
 - **P&L** — Singapore-style P&L with a revenue/bookings toggle, period selector
   (Last 30D / this month / last month / custom), and XLSX export.
-- **Commission** — per-clinician commission calculator over real appointment data.
+- **Payroll** (was Commission) — per-clinician pay: commission for salaried staff, per-session fees for freelancers (Camille Tan), over real appointment data.
 - **Marketing** — marketing-lens view: north-star KPIs and acquisition live from
   BQ; channel leading indicators (Instagram, GBP, website, paid) as WIP
   placeholders pending integrations; delivery-lane mix + ICP/clinical-focus; and

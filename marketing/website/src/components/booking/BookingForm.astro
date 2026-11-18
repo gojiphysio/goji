@@ -275,6 +275,14 @@ const steps = [
       <a href={cta("web-wa")} target="_blank" rel="noopener">WhatsApp</a>. That's
       where we handle all appointment changes and cancellations.
     </p>
+    {/* Bot trap: hidden from people and screen readers, so only a script fills
+        it; the backend refuses any booking where it has a value. */}
+    <div class="visually-hidden" aria-hidden="true">
+      <label for="company_url">Leave this field empty</label>
+      <input type="text" id="company_url" name="company_url" tabindex="-1" autocomplete="off" />
+    </div>
+    {/* Cloudflare Turnstile mounts here on step 3 when a site key is set. */}
+    <div class="booking__turnstile" data-turnstile></div>
     <p class="booking__error" data-error="submit" role="alert" hidden></p>
 
     <div class="booking__nav">
@@ -1193,7 +1201,12 @@ const steps = [
     isPhysioFocus,
     physioCategories,
   } from "../../lib/physioCategories";
-  import { AvailabilityBusy, bookingApi, type BookingDraft } from "../../lib/booking";
+  import {
+    AvailabilityBusy,
+    bookingApi,
+    TURNSTILE_SITE_KEY,
+    type BookingDraft,
+  } from "../../lib/booking";
 
   const form = document.getElementById("booking-form") as HTMLFormElement | null;
   if (form) init(form);
@@ -1208,6 +1221,7 @@ const steps = [
     const getStep = (n: number | string) =>
       stepEls.find((el) => el.dataset.step === String(n)) ?? null;
 
+    const loadedAt = Date.now(); // for the backend's minimum fill time
     let current = 1;
     // Continue was tapped on Physiotherapy without a type: booked as "others"
     // and asked again (optionally) on step 3.
@@ -2118,9 +2132,48 @@ const steps = [
         .join("");
     }
 
+    // ----- Cloudflare Turnstile (only when a site key is configured) -----
+    // Loaded on first reaching step 3, so it costs nothing on page load. The
+    // token is single-use and lasts 5 minutes; the widget renews it by itself,
+    // and we reset it after any failed submit.
+    type Turnstile = {
+      render(el: HTMLElement, opts: Record<string, unknown>): string;
+      reset(id: string): void;
+    };
+    let turnstileToken = "";
+    let turnstileId: string | undefined;
+    let turnstileLoading = false;
+    function mountTurnstile() {
+      const host = form!.querySelector<HTMLElement>("[data-turnstile]");
+      if (!TURNSTILE_SITE_KEY || !host || turnstileLoading) return;
+      turnstileLoading = true;
+      const s = document.createElement("script");
+      s.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+      s.async = true;
+      s.onload = () => {
+        const ts = (window as unknown as { turnstile?: Turnstile }).turnstile;
+        if (!ts) return;
+        turnstileId = ts.render(host, {
+          sitekey: TURNSTILE_SITE_KEY,
+          action: "book",
+          callback: (t: string) => (turnstileToken = t),
+          "expired-callback": () => (turnstileToken = ""),
+          "error-callback": () => (turnstileToken = ""),
+        });
+      };
+      s.onerror = () => (turnstileLoading = false); // retry on the next visit to step 3
+      document.head.appendChild(s);
+    }
+    function resetTurnstile() {
+      turnstileToken = "";
+      const ts = (window as unknown as { turnstile?: Turnstile }).turnstile;
+      if (ts && turnstileId) ts.reset(turnstileId);
+    }
+
     // ----- Navigation -----
     function goto(step: number, scroll = true) {
       current = step;
+      if (step === 3) mountTurnstile();
       stepEls.forEach((el) => {
         if (el.dataset.step === "done") return;
         el.hidden = el.dataset.step !== String(step);
@@ -2164,6 +2217,14 @@ const steps = [
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       if (!validate(3)) return;
+      if (TURNSTILE_SITE_KEY && !turnstileToken) {
+        // The check hasn't finished (or was blocked); the backend would refuse.
+        setError(
+          "submit",
+          "We're still running a quick security check. Please try again in a few seconds, or message us on WhatsApp.",
+        );
+        return;
+      }
       bookingApi.track("submitted");
       const submitBtn = form.querySelector<HTMLButtonElement>("[data-submit]");
       if (submitBtn) {
@@ -2171,12 +2232,17 @@ const steps = [
         submitBtn.textContent = "Sending…";
       }
       setError("submit", "");
-      const result = await bookingApi.createBooking(draft());
+      const result = await bookingApi.createBooking(draft(), {
+        companyUrl: getValue("company_url"),
+        elapsedMs: Date.now() - loadedAt,
+        turnstileToken: turnstileToken || undefined,
+      });
       if (submitBtn) {
         submitBtn.disabled = false;
         submitBtn.textContent = "Confirm booking";
       }
       if (!result.ok) {
+        resetTurnstile(); // the token was spent on this attempt
         setError(
           "submit",
           result.error || "Something went wrong. Please try again or message us.",

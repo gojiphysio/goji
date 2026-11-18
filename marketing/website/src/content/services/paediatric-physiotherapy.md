@@ -1,5 +1,6 @@
 ---
 title: "Paediatric Physiotherapy"
+seoTitle: "Paediatric Physiotherapy Singapore"
 description: "Paediatric physiotherapy in Singapore for children 0-18: movement, pain, injury and developmental concerns, assessed and managed with a plan for your child."
 cardTitle: "Paediatric Physiotherapy"
 cardLead: "Assessment and practical guidance for your child's movement, development, pain or injury - from babies to teens. 30-min, 45-min and 55-min options available."
@@ -34,6 +35,14 @@ Every child develops and moves differently. From your baby's earliest milestones
 We work closely with parents and caregivers, so you leave with a clearer understanding of your child's needs and practical ways to support them.
 
 Note: The assessment and treatment described below are indicative. Your child's session will reflect their individual condition, needs and goals, and may be modified by your physiotherapist based on their clinical judgement.
+
+## Who you will see
+
+Children are seen by Cheryl Long, our Clinical Director, and Kristy Ng, Senior Physiotherapist, both AHPC-registered. Cheryl has 10 years across KK Women's and Children's Hospital and private practice, with advanced training in paediatric bowel and bladder disorders. Kristy spent 6+ years at KK Women's and Children's Hospital and has worked in paediatric physiotherapy at AWWA with children with physical disabilities.
+
+## Babies and parents together
+
+For a new baby, the [Mummy and Baby Assessment](/services/mummy-baby-assessment/) covers your postpartum recovery and your baby's physical screening and development in one appointment. As your child grows, the same team can see them up to 18, and see you for your own care too.
 
 ## Who is paediatric physiotherapy for?
 
@@ -99,6 +108,6 @@ Depending on your child's assessment and goals, we may recommend:
 - Developmental physiotherapy follow-up
 - Sports injury rehabilitation
 - Strength and Conditioning
-- Scoliosis-specific (Schroth) physiotherapy
+- [Scoliosis-specific (Schroth) physiotherapy](/services/schroth-scoliosis-children/)
 - Home, school or caregiver-based strategies
 - Referral to another healthcare professional, where appropriate

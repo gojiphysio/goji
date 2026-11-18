@@ -131,7 +131,7 @@ if (postFaqSchema) postSchema.push(postFaqSchema);
       <p class="post-header__byline">
         {author
           ? <>By <a href={`/team/${author.slug}/`}>{author.name}</a></>
-          : <>By the <a href="/team/">Goji team</a></>}
+          : <>By the <a href="/#team">Goji team</a></>}
         <span aria-hidden="true"> &middot; </span>
         <time datetime={isoDate(pubDate)}>{formatDate(pubDate)}</time>
         {updatedDate && (

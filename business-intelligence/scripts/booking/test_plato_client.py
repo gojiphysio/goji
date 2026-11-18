@@ -305,6 +305,15 @@ def test_fresh_read_skips_the_month_shortcut():
     assert p.bulk_flags == [True, False], "a single day is interactive, not bulk"
 
 
+def test_fresh_read_skips_a_young_cached_day():
+    """The booking re-check must not reuse a day read seconds ago: a slot can be
+    taken inside APPTS_TTL_S (a same-slot second booking got through, 2026-11-12)."""
+    p = FakePlato([_rows(1), _rows(2)])
+    p.appointments("2026-09-02", "2026-09-02")
+    again = p.appointments("2026-09-02", "2026-09-02", fresh=True)
+    assert len(p.calls) == 2 and len(again) == 2
+
+
 def test_an_old_month_is_not_used_to_answer_a_day():
     from booking import plato as plato_mod
 

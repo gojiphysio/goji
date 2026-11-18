@@ -79,7 +79,7 @@ jobs:
             --source . --region "${REGION}" --project "${PROJECT}" \
             --service-account "${BOOKING_SA}" \
             --set-env-vars=GCP_PROJECT=${PROJECT},PLATO_DB=gojihealth,CORS_ORIGIN=${CORS_ORIGIN} \
-            --set-secrets=PLATO_API_KEY=plato-api-key:latest,GMAIL_APP_PASSWORD=gmail-app-password:latest \
+            --set-secrets=PLATO_API_KEY=plato-api-key:latest,GMAIL_APP_PASSWORD=gmail-app-password:latest,TURNSTILE_SECRET=turnstile-secret:latest \
             --max-instances=1 --min-instances=0 \
             --allow-unauthenticated \
             --quiet
