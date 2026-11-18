@@ -115,6 +115,24 @@ See `DEPLOY.md`.
 - **The statement table is a deliberate exception to "no big tables".** A P&L is the
   table, so it stays collapsed to groups, with lines one click away.
 
+## Agent tab (WhatsApp assistant)
+- **Reads views, never the event log.** `fetch_wa_agent_*` read
+  `marts.wa_agent_conversations` (per range, dated by `conversation_start` in
+  SGT) and `marts.wa_agent_intent_autonomy` (fixed 90 days), both built on
+  `wa_agent_events` in `sql/marts/`. Scoring lives in the SQL, not here. While
+  the views are missing or empty the tab shows "No assistant data yet".
+- **Pure-agent success = `score='success'` with `handled_by='agent'`, over ended
+  conversations.** Open ones (still live) are in neither side of the rate; rescue
+  rate uses the same denominator. Rescue rate, first reply and cost per
+  conversation are `lowerIsBetter`. Cost is the model estimate in **US$**, so it
+  is labelled `US$`, never the page's SGD `$`.
+- **The outcome mix renders any outcome**, coloured by its `score`, so a new
+  outcome in the SQL shows up without a page change (add a friendly label to
+  `AGENT_OUTCOME_LABELS`).
+- **The autonomy-by-intent table is a deliberate exception to "no big tables".**
+  The question is literally "which intents does the agent answer alone vs draft
+  vs escalate", so it is one row per intent, capped at `WA_AUTONOMY_MAX_ROWS`.
+
 ## Front desk portal (`frontdesk.*`)
 - It's the **worklists Plato doesn't track**, not a second calendar. Tabs read
   along the patient's arc: **Welcome** (new patients coming in) → **Follow-ups**

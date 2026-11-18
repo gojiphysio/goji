@@ -195,7 +195,10 @@ Leads pipeline (`marts.lead_events`). Open follow-ups:
 > direct booking / rescheduling. That answers the "capture method" question
 > below: the agent records every enquiry itself (`marts.wa_agent_events` now;
 > writing `lead_events` from the agent is a Phase 1 item), so leads stop
-> depending on manual entry.
+> depending on manual entry. The founder dashboard's **Agent** tab reads the
+> outcome (`marts.wa_agent_conversations`) and autonomy-per-intent
+> (`marts.wa_agent_intent_autonomy`) views, so promotion from drafts to
+> auto-send is decided from data.
 
 ### Goal
 
