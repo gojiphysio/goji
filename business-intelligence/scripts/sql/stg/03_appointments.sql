@@ -27,12 +27,14 @@ SELECT
   -- is encoded via calendar color. We resolve via fixed mapping below.
   JSON_VALUE(payload, '$.doctor')                           AS doctor_raw,
   CASE JSON_VALUE(payload, '$.color')
-    -- Stable mapping at Goji Health, recorded in MEMORY.md
-    -- (reference-plato-provider-codes). Update here if a clinician joins or
-    -- leaves and a new calendar is created.
+    -- Calendar colour -> Plato doctor code. Update here when a clinician joins
+    -- or leaves and a new calendar is created (see dashboard/AGENTS.md, "Adding
+    -- a clinician"). Find a new colour by matching the clinician's invoices to
+    -- appointments on the same patient + date.
     WHEN 'blue'  THEN 'PCL'  -- Cheryl Long (director)
     WHEN 'green' THEN 'PKN'  -- Kristy Ng
     WHEN '6hpO'  THEN 'PCN'  -- Claire Ng
+    WHEN 'pF9S'  THEN 'ICT'  -- Camille Tan (freelance, from Nov 2026)
     ELSE NULL
   END                                                       AS clinician_id,
 

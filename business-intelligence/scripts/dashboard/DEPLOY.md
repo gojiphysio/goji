@@ -344,7 +344,7 @@ Founder dashboard — four pages, all live from BQ:
   the Cash Book sheet (`ingestion/cash_book`, every 2 hours), revenue and card fees
   from Plato. Revenue/bookings toggle, month picker, amortisation view and XLSX
   export. Shows an empty state until the job has run.
-- **Commission** — per-clinician commission calculator over real appointment data.
+- **Payroll** (was Commission) — per-clinician pay: commission for salaried staff, per-session fees for freelancers (Camille Tan), over real appointment data.
 - **Marketing** — marketing-lens view of the clinic numbers: north-star KPIs
   (visits, active patients, bookings) and patient acquisition live from BQ;
   channel leading indicators (Instagram, GBP, website, paid) as **WIP

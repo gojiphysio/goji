@@ -50,7 +50,7 @@ dashboard scales to zero and costs well under a few dollars a month.
 - **P&L** — Singapore-style profit & loss with a revenue/bookings toggle,
   selectable period (Last 30D / current cycle / previous cycle / custom), and
   XLSX export.
-- **Commission** — per-clinician commission calculator over real appointment
+- **Payroll** (was Commission) — per-clinician pay: commission for salaried staff, per-session fees for freelancers, over real appointment
   data, with patient initials.
 
 **Data-quality alert** — the Overview surfaces invoice-doctor mismatches

@@ -17,7 +17,7 @@ WITH resolved AS (
     *,
     CASE
       WHEN pnl_line IN (
-        'Payroll', 'CPF', 'Rent', 'Utilities', 'Ads', 'Printing',
+        'Payroll', 'CPF', 'Freelancer fees', 'Rent', 'Utilities', 'Ads', 'Printing',
         'Clinical supplies', 'Laundry & cleaning', 'Training',
         'Staff meals & events', 'Software', 'Insurance', 'Bank fees',
         'Professional fees', 'Other', 'Capex', 'Deposit', 'Financing',

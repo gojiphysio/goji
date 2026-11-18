@@ -65,6 +65,18 @@ See `DEPLOY.md`.
   formats at `'UTC'`; `reminders/test_reminders.py` pins it. Note this is the
   opposite of the `date.today()` rule above — *dates* are clinic-local
   (`appt_date` already is, so key windows on it), *times* are naive.
+- **Two pay models.** Salaried clinicians get base + 40% of recognised revenue
+  above $13k (`CLINICIAN_DEFAULTS` in `template.html`). **Freelancers**
+  (`FREELANCE_RATES` in `app.py`; Camille Tan `ICT`: $60 per 1:1, $70 per 2:1)
+  get a flat fee per completed session, **whatever the clinic collected**, so $0
+  sessions pay. They get no commission and no CPF. A 2:1 is one invoice line for
+  the pair, so it counts once. The session type comes from the SKU via
+  `session_type()`. An unknown SKU is shown as "not a session, check" rather
+  than paid. `fetch_freelancer_sessions` reads `stg.invoice_items`, not
+  `fct_service_delivered`, because the mart drops $0 sales. **Adding a
+  clinician:** put the Plato doctor code in `PROVIDERS`, the calendar colour in
+  `stg/03_appointments.sql` (or the mismatch alert flags every invoice), and the
+  pay terms in one of the two configs.
 - **Session grain.** `fct_service_delivered` Part A fans out by `qty` (physical
   session count), not `len(redeem_alloc)`. When a redemption spans two packages
   (cross-package transition), `redeem_alloc` has 2 entries for 1 visit — using
@@ -83,6 +95,10 @@ See `DEPLOY.md`.
 - **A cost belongs to the month it covers, not the month it was paid.** The sheet's
   `Covers from`/`Covers to` spread a row evenly by day. Payroll ran 26th→25th until
   Aug 2026, then calendar months, which is why August has two payroll rows.
+- **Freelancer payouts are their own line, `Freelancer fees` (Staff group).**
+  They aren't Payroll, and they carry no CPF. The fee for a month is usually paid
+  after it ends, so give the row `Covers from`/`Covers to`, as with payroll.
+  The line isn't in `PNL_CLOSE_REQUIRED`, so a month can close without it.
 - **Card fees are not in the Cash Book.** Plato nets them out of its payouts, while
   recognised revenue is gross of them, so `fetch_pnl_monthly` adds them from Plato
   payments (2.1% + $0.20). Leaving them out overstated May–Oct 2026 EBITDA by $5k.

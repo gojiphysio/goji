@@ -11,6 +11,10 @@ Keep typing in the sheet. Three columns tell the P&L what each row is:
 | **P&L line** | Every money-out row | Dropdown. Blank money-out rows count as Uncategorised costs, and the page warns about them. Leave blank on patient receipts |
 | **Covers from** / **Covers to** | Only when payment and period differ | Payroll and CPF, utilities billed a month late, annual prepayments. Blank means the row's own month. The cost is spread evenly across these days |
 
+Pay to a freelancer (Camille Tan) goes on **Freelancer fees**, not Payroll,
+with Covers dates for the month the sessions were in. The sheet's dropdown needs
+that option added once (Data > Data validation on the P&L line column).
+
 Rows below EBITDA: **Capex**, **Deposit** (refundable, so never amortised),
 **Financing** (shareholder loans) and **Non-operating**.
 

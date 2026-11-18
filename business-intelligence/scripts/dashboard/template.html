@@ -342,7 +342,7 @@
     section.q .table-scroll,
     section.alert .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
-    /* --- Page nav (Dashboard / Commission Calculator) ---
+    /* --- Page nav (Dashboard / Payroll calculator) ---
        Defined before the media queries so the mobile overrides below
        (short labels, scrollable row) win on source order rather than
        being clobbered by these base rules. */
@@ -833,14 +833,14 @@
     <nav class="page-nav" role="tablist" aria-label="Page">
       <button type="button" data-page="dashboard" class="active">Overview</button>
       <button type="button" data-page="pl"><span class="nav-full">Profit &amp; Loss</span><span class="nav-short">P&amp;L</span></button>
-      <button type="button" data-page="commission"><span class="nav-full">Commission Calculator</span><span class="nav-short">Commission</span></button>
+      <button type="button" data-page="commission"><span class="nav-full">Payroll</span><span class="nav-short">Payroll</span></button>
       <button type="button" data-page="marketing">Marketing</button>
       <button type="button" data-page="alerts"><span class="nav-full">Alert history</span><span class="nav-short">Alerts</span></button>
       <button type="button" data-page="other">Other details</button>
     </nav>
 
     <!-- Global date-range selector — applies to Overview, Marketing, Other Details.
-         Hidden automatically when P&L or Commission tabs are active. -->
+         Hidden automatically when P&L or Payroll tabs are active. -->
     <div class="global-toolbar" id="global_toolbar">
       <div class="date-selector" role="tablist" aria-label="Date range">
         <button type="button" data-range="7d">7d</button>
@@ -1217,7 +1217,7 @@
         <div class="kpi-card">
           <div class="kpi-label">Staff cost % of revenue</div>
           <div class="kpi-value" id="pl_kpi_staff">—</div><div class="kpi-trend" id="pl_kpi_staff_trend" hidden></div>
-          <div class="kpi-sub">Payroll + CPF. Lower is better</div>
+          <div class="kpi-sub">Payroll + CPF + freelancer fees. Lower is better</div>
         </div>
       </div>
       <div class="kpi-row pl-kpis-5">
@@ -1290,13 +1290,13 @@
 
       <div class="brand-print">
         <img class="brand-img" src="static/soily.webp" alt="">
-        <div class="brand-name">Goji Health - Commission Summary</div>
+        <div class="brand-name">Goji Health - Payroll Summary</div>
       </div>
 
       <div class="calc-grid">
         <div class="calc-card">
-          <h2>Commission calculator</h2>
-          <div class="subtitle">Select a clinician and adjust the inputs. Revenue is prefilled from BigQuery (last 30 days) but editable for month-one validation.</div>
+          <h2>Payroll calculator</h2>
+          <div class="subtitle">Select a clinician and pay period. Salaried staff: base pay plus commission on revenue above the threshold. Freelancers: a fixed fee per completed session. Figures are prefilled from Plato and editable.</div>
 
           <div class="form-row">
             <label for="calc_clinician">Clinician</label>
@@ -1320,6 +1320,7 @@
             </div>
           </div>
 
+          <div id="calc_salaried_inputs">
           <div class="form-row">
             <label for="calc_base">Base pay (monthly)</label>
             <div class="input-prefix">
@@ -1357,6 +1358,38 @@
             </div>
             <div class="hint" id="revenue_source">Source: BigQuery, last 30 days.</div>
           </div>
+          </div><!-- /#calc_salaried_inputs -->
+
+          <!-- Freelancers: flat fee per completed session, no base/commission/CPF. -->
+          <div id="calc_freelance_inputs" hidden>
+          <div class="form-row">
+            <label for="calc_rate_1to1">Fee per 1:1 session</label>
+            <div class="input-prefix">
+              <span class="prefix">$</span>
+              <input type="number" id="calc_rate_1to1" min="0" step="5" value="60">
+            </div>
+          </div>
+          <div class="form-row">
+            <label for="calc_rate_2to1">Fee per 2:1 session</label>
+            <div class="input-prefix">
+              <span class="prefix">$</span>
+              <input type="number" id="calc_rate_2to1" min="0" step="5" value="70">
+            </div>
+            <div class="hint">A 2:1 is one invoice line for the pair, so it counts once.</div>
+          </div>
+          <div class="form-row">
+            <label for="calc_n_1to1">
+              Completed 1:1 sessions
+              <span id="sessionsFlag" class="prefill-flag">Prefilled</span>
+            </label>
+            <input type="number" id="calc_n_1to1" min="0" step="1" value="0">
+          </div>
+          <div class="form-row">
+            <label for="calc_n_2to1">Completed 2:1 sessions</label>
+            <input type="number" id="calc_n_2to1" min="0" step="1" value="0">
+            <div class="hint" id="sessions_source">Source: Plato invoices. $0 sessions count.</div>
+          </div>
+          </div><!-- /#calc_freelance_inputs -->
 
           <div class="calc-actions">
             <button type="button" class="btn" id="calc_reset">Reset to defaults</button>
@@ -1369,6 +1402,7 @@
           <div class="report-meta" id="report_meta">Select a clinician to begin.</div>
 
           <div class="summary-rows">
+            <div id="r_salaried_rows">
             <div class="summary-row">
               <span class="label">Base pay</span>
               <span class="value" id="r_base">$0</span>
@@ -1393,6 +1427,21 @@
               <span class="label">Commission earned</span>
               <span class="value" id="r_commission">$0</span>
             </div>
+            </div><!-- /#r_salaried_rows -->
+            <div id="r_freelance_rows" hidden>
+            <div class="summary-row">
+              <span class="label" id="r_1to1_label">1:1 sessions</span>
+              <span class="value" id="r_1to1_fee">$0</span>
+            </div>
+            <div class="summary-row">
+              <span class="label" id="r_2to1_label">2:1 sessions</span>
+              <span class="value" id="r_2to1_fee">$0</span>
+            </div>
+            <div class="summary-row subtle">
+              <span class="label">Collected by the clinic (not used for pay)</span>
+              <span class="value" id="r_collected">$0</span>
+            </div>
+            </div><!-- /#r_freelance_rows -->
             <div class="summary-row total">
               <span class="label">Total payout</span>
               <span class="value" id="r_total">$0</span>
@@ -1413,7 +1462,7 @@
                   <th>Date</th>
                   <th>Patient</th>
                   <th>Service</th>
-                  <th class="num">Value</th>
+                  <th class="num" id="appointments_value_head">Value</th>
                 </tr>
               </thead>
               <tbody id="appointments_tbody"></tbody>
@@ -3465,7 +3514,7 @@
       const isClosed = m => m.status === 'closed';
       const ebitdaOf = m => isClosed(m) ? revenueOf(m) - m.total_costs : null;
       const marginOf = m => (isClosed(m) && revenueOf(m)) ? ebitdaOf(m) / revenueOf(m) : null;
-      const staffOf = m => (m.lines.Payroll || 0) + (m.lines.CPF || 0);
+      const staffOf = m => (m.lines.Payroll || 0) + (m.lines.CPF || 0) + (m.lines['Freelancer fees'] || 0);
       const ratioOf = (m, cost) => (isClosed(m) && revenueOf(m)) ? cost / revenueOf(m) : null;
       const amortMonths = () => parseFloat(document.getElementById('pl_amort_months').value) || 24;
       const amortOf = () => (pnl.capex_total || 0) / amortMonths();
@@ -3851,6 +3900,10 @@
       'PKN': { base: 5000,  quota: 13000, pct: 40, isDirector: false },
       'PCN': { base: 5000,  quota: 13000, pct: 40, isDirector: false }
     };
+    // Freelancers (DATA.freelance_rates, from FREELANCE_RATES in app.py): a flat
+    // fee per completed session, whatever the clinic collected. No base,
+    // commission or CPF. Camille Tan (ICT): $60 per 1:1, $70 per 2:1.
+    const isFreelance = id => !!(DATA.freelance_rates || {})[id];
     const FALLBACK_DEFAULT = { base: 5000, quota: 13000, pct: 40, isDirector: false };
 
     function getClinicianRoster() {
@@ -3863,6 +3916,9 @@
           cur.name = c.name; cur.is_director = c.is_director;
           map.set(c.clinician_id, cur);
         });
+      });
+      Object.keys(DATA.freelance_rates || {}).forEach(id => {
+        if (!map.has(id)) map.set(id, { clinician_id: id, name: id, is_director: false, revenueByRange: {} });
       });
       return Array.from(map.values());
     }
@@ -3917,11 +3973,12 @@
       const roster = getClinicianRoster();
       const sel = document.getElementById('calc_clinician');
       sel.innerHTML = roster.map(c =>
-        `<option value="${c.clinician_id}">${escapeHtml(c.name)} (${escapeHtml(c.clinician_id)})${c.is_director ? ' - Director' : ''}</option>`
+        `<option value="${escapeHtml(c.clinician_id)}">${escapeHtml(c.name)} (${escapeHtml(c.clinician_id)})${c.is_director ? ' - Director' : ''}${isFreelance(c.clinician_id) ? ' - Freelance' : ''}</option>`
       ).join('');
 
       // Wire change handlers - all input changes trigger live recalculation
-      ['calc_clinician','calc_period','calc_base','calc_quota','calc_pct','calc_revenue']
+      ['calc_clinician','calc_period','calc_base','calc_quota','calc_pct','calc_revenue',
+       'calc_rate_1to1','calc_rate_2to1','calc_n_1to1','calc_n_2to1']
         .forEach(id => {
           const el = document.getElementById(id);
           el.addEventListener('input', onCalcInputChange);
@@ -3945,6 +4002,12 @@
         });
       });
       document.getElementById('calc_revenue').addEventListener('input', flagRevenueEdited);
+      ['calc_n_1to1','calc_n_2to1'].forEach(id =>
+        document.getElementById(id).addEventListener('input', () => {
+          const flag = document.getElementById('sessionsFlag');
+          flag.textContent = 'Edited';
+          flag.classList.add('edited');
+        }));
 
       document.getElementById('calc_reset').addEventListener('click', () => {
         document.getElementById('calc_period').value = 'cycle';
@@ -3973,6 +4036,18 @@
 
     function applyClinicianDefaults() {
       const id = document.getElementById('calc_clinician').value;
+      const freelance = isFreelance(id);
+      document.getElementById('calc_salaried_inputs').hidden = freelance;
+      document.getElementById('calc_freelance_inputs').hidden = !freelance;
+      document.getElementById('r_salaried_rows').hidden = freelance;
+      document.getElementById('r_freelance_rows').hidden = !freelance;
+      document.getElementById('appointments_value_head').textContent = freelance ? 'Fee' : 'Value';
+      if (freelance) {
+        const rates = DATA.freelance_rates[id];
+        document.getElementById('calc_rate_1to1').value = rates['1:1'] || 0;
+        document.getElementById('calc_rate_2to1').value = rates['2:1'] || 0;
+        return;
+      }
       const d = CLINICIAN_DEFAULTS[id] || FALLBACK_DEFAULT;
       document.getElementById('calc_base').value = d.base;
       document.getElementById('calc_quota').value = d.quota;
@@ -3990,6 +4065,27 @@
       document.getElementById('period_dates').textContent = fmtDateRange(start, end);
       document.getElementById('revenue_source').textContent =
         `Source: appointment ledger, ${fmtDateRange(start, end)}.`;
+
+      if (isFreelance(id)) {
+        const rows = getFreelanceSessionsForPeriod(id, start, end);
+        const count = kind => rows.filter(a => a.session_type === kind).length;
+        document.getElementById('calc_n_1to1').value = count('1:1');
+        document.getElementById('calc_n_2to1').value = count('2:1');
+        const sflag = document.getElementById('sessionsFlag');
+        sflag.textContent = 'Prefilled';
+        sflag.classList.remove('edited');
+        const other = count('other');
+        document.getElementById('sessions_source').textContent =
+          `Source: Plato invoices, ${fmtDateRange(start, end)}. $0 sessions count.` +
+          (other ? ` ${other} line${other === 1 ? ' is' : 's are'} not a recognised session SKU and ${other === 1 ? 'is' : 'are'} not counted: check the breakdown.` : '');
+      }
+    }
+
+    function getFreelanceSessionsForPeriod(clinicianId, start, end) {
+      const startKey = ymd(start), endKey = ymd(end);
+      return (DATA.freelancer_sessions || [])
+        .filter(a => a.clinician_id === clinicianId && a.date >= startKey && a.date <= endKey)
+        .sort((a, b) => a.date.localeCompare(b.date));
     }
 
     function flagRevenueEdited() {
@@ -4007,6 +4103,34 @@
       const opt = sel.options[sel.selectedIndex];
       const clinicianLabel = opt ? opt.textContent : '';
 
+      const periodLabel = document.getElementById('calc_period').selectedOptions[0].textContent;
+      document.getElementById('report_meta').textContent  =
+        `Pay period: ${periodLabel} | Generated ${new Date().toLocaleString()}`;
+
+      if (isFreelance(sel.value)) {
+        const rate1 = num(document.getElementById('calc_rate_1to1').value);
+        const rate2 = num(document.getElementById('calc_rate_2to1').value);
+        const n1    = num(document.getElementById('calc_n_1to1').value);
+        const n2    = num(document.getElementById('calc_n_2to1').value);
+        const fee1 = n1 * rate1, fee2 = n2 * rate2, total = fee1 + fee2;
+        const { start, end } = getSelectedPeriod();
+        const collected = getFreelanceSessionsForPeriod(sel.value, start, end)
+          .reduce((s, a) => s + (a.value || 0), 0);
+
+        document.getElementById('report_title').textContent = `Payout summary - ${clinicianLabel}`;
+        document.getElementById('r_1to1_label').textContent = `1:1 sessions (${n1} × ${fmt$(rate1)})`;
+        document.getElementById('r_2to1_label').textContent = `2:1 sessions (${n2} × ${fmt$(rate2)})`;
+        document.getElementById('r_1to1_fee').textContent   = fmt$(fee1);
+        document.getElementById('r_2to1_fee').textContent   = fmt$(fee2);
+        document.getElementById('r_collected').textContent  = fmt$(collected);
+        document.getElementById('r_total').textContent      = fmt$(total);
+        document.getElementById('r_formula').innerHTML =
+          `total payout = <code>${n1}</code> &times; <code>${fmt$(rate1)}</code> + <code>${n2}</code> &times; <code>${fmt$(rate2)}</code> = <code>${fmt$(total)}</code><br>` +
+          `Freelance: paid per completed session regardless of what the clinic collected. No base, commission or CPF.`;
+        renderFreelanceSessions(sel.value);
+        return;
+      }
+
       const base    = num(document.getElementById('calc_base').value);
       const quota   = num(document.getElementById('calc_quota').value);
       const pct     = num(document.getElementById('calc_pct').value);
@@ -4016,10 +4140,7 @@
       const commission = excess * (pct / 100);
       const total      = base + commission;
 
-      const periodLabel = document.getElementById('calc_period').selectedOptions[0].textContent;
       document.getElementById('report_title').textContent = `Commission summary - ${clinicianLabel}`;
-      document.getElementById('report_meta').textContent  =
-        `Pay period: ${periodLabel} | Generated ${new Date().toLocaleString()}`;
 
       document.getElementById('r_base').textContent       = fmt$(base);
       document.getElementById('r_revenue').textContent    = fmt$(revenue);
@@ -4062,6 +4183,39 @@
 
       const total = rows.reduce((s, a) => s + (a.value || 0), 0);
       totalEl.textContent = fmt$(total);
+    }
+
+    // Freelancer breakdown: every invoiced line, with the fee it earns. Lines
+    // that aren't a recognised session SKU are greyed and earn $0 until checked.
+    function renderFreelanceSessions(clinicianId) {
+      const { start, end } = getSelectedPeriod();
+      const rows = getFreelanceSessionsForPeriod(clinicianId, start, end);
+      const rate = { '1:1': num(document.getElementById('calc_rate_1to1').value),
+                     '2:1': num(document.getElementById('calc_rate_2to1').value) };
+      const tbody = document.getElementById('appointments_tbody');
+      const sessions = rows.filter(a => a.session_type !== 'other').length;
+      document.getElementById('appointments_meta').textContent =
+        `${sessions} session${sessions === 1 ? '' : 's'} | ${fmtDateRange(start, end)}`;
+
+      if (!rows.length) {
+        tbody.innerHTML = `<tr><td colspan="4" class="appointments-empty">No sessions recorded in this period.</td></tr>`;
+        document.getElementById('appointments_total').textContent = fmt$(0);
+        return;
+      }
+      tbody.innerHTML = rows.map(a => {
+        const other = a.session_type === 'other';
+        const fee = other ? 0 : (rate[a.session_type] || 0);
+        const tag = other ? 'not a session, check' : a.session_type;
+        return `
+        <tr${other ? ' style="color:var(--ink-muted);"' : ''}>
+          <td>${escapeHtml(formatApptDate(a.date))}</td>
+          <td>${escapeHtml(a.patient)}</td>
+          <td>${escapeHtml(a.service)} <span style="color:var(--ink-muted);">· ${escapeHtml(tag)}</span></td>
+          <td class="num">${fmt$(fee)}</td>
+        </tr>`;
+      }).join('');
+      const total = rows.reduce((s, a) => s + (a.session_type === 'other' ? 0 : (rate[a.session_type] || 0)), 0);
+      document.getElementById('appointments_total').textContent = fmt$(total);
     }
 
     function formatApptDate(ymdStr) {
