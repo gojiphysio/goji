@@ -106,9 +106,11 @@ def send_admin_booking_email(result: dict, draft: dict) -> None:
         return
     try:
         where = "Home visit" if result.get("home") else "In-clinic"
+        via_wa = result.get("source") == "whatsapp"
+        has_email = bool((draft.get("email") or "").strip())
         msg = EmailMessage()
-        msg["Subject"] = (f"New website booking — {result['service']} "
-                          f"({result['date']} {result['time']})")
+        msg["Subject"] = (f"New {'WhatsApp' if via_wa else 'website'} booking — "
+                          f"{result['service']} ({result['date']} {result['time']})")
         msg["From"] = SMTP_USER
         msg["To"] = ADMIN_TO
         # CC the matched clinician so the assigned physio sees their own booking.
@@ -116,7 +118,8 @@ def send_admin_booking_email(result: dict, draft: dict) -> None:
         if cc:
             msg["Cc"] = cc
         lines = [
-            "A new booking came in via the website:",
+            ("Booked via WhatsApp assistant." if via_wa
+             else "A new booking came in via the website:"),
             "",
             _row("Service", result['service']),
         ]
@@ -128,15 +131,19 @@ def send_admin_booking_email(result: dict, draft: dict) -> None:
             *_clinician_lines(result),
             _row("Name", draft.get('name')),
             _row("Phone", draft.get('phone')),
-            _row("Email", draft.get('email')),
+            _row("Email", draft.get('email') if has_email else "(none given)"),
         ]
         if result.get("home"):
             lines.append(_row("Address", draft.get('address')))
         if (draft.get("notes") or "").strip():
             lines.append(_row("Condition", draft.get('notes').strip()))
+        if has_email:
+            sent = "The customer has been sent Plato's confirmation."
+        else:
+            sent = ("No email was given, so Plato sent no confirmation; the "
+                    "assistant confirmed the booking in the WhatsApp chat.")
         lines += [_row("Reference", result['reference']), "",
-                  "The customer has been sent Plato's confirmation. Changes and "
-                  "cancellations are handled over WhatsApp."]
+                  f"{sent} Changes and cancellations are handled over WhatsApp."]
         msg.set_content("\n".join(lines))
         _send(msg, "admin booking", result.get("reference"))
     except Exception as e:

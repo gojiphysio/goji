@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import re
 import threading
+import uuid
 from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
 
@@ -121,12 +122,25 @@ def _dt(day: date, hhmm: str, offset_min: int = 0) -> str:
     return t.strftime("%Y-%m-%d %H:%M:%S")
 
 
-def create_booking(plato, draft: dict, *, now: datetime | None = None) -> dict:
+# Where a booking came from, as written into the Plato note.
+BOOKED_VIA = {"web": "website", "whatsapp": "WhatsApp assistant"}
+
+
+def create_booking(plato, draft: dict, *, now: datetime | None = None,
+                   email_required: bool = True, dry_run: bool = False,
+                   source: str = "web") -> dict:
     """Validate + create a booking. Raises BookingError on any problem.
 
     draft keys: service, date (YYYY-MM-DD), time (HH:MM), format ('clinic'|'home'),
     name, phone, email, clinician_id (optional; '' = first available), address
     (required for home).
+
+    email_required=False lets a booking through with no email (WhatsApp: the
+    assistant confirms in the chat). An email that IS given is still validated.
+    With no email, Plato gets no address and `connect` is False (no portal
+    invite to send). dry_run=True runs every check, including the locked fresh
+    re-check that picks the clinician, and returns the same result shape with a
+    DRYRUN- reference, but never writes to Plato.
     """
     service_id = (draft.get("service") or "").strip()
     svc = SERVICES.get(service_id)
@@ -157,12 +171,13 @@ def create_booking(plato, draft: dict, *, now: datetime | None = None) -> dict:
     _require("<" not in name and ">" not in name,
              "Please enter your name without < or > characters.")
     _require(_PHONE_RE.match(phone), "Please enter a valid phone number.")
-    _require(_EMAIL_RE.match(email), "Please enter a valid email.")
+    _require(email or not email_required, "Please enter a valid email.")
+    _require(not email or _EMAIL_RE.match(email), "Please enter a valid email.")
     # A well-formed but mistyped domain (gmail.con) would sail through the regex
     # and then bounce, so the confirmation never lands. Reject the obvious ones
     # with a corrective hint. (The website form catches these first; this guards
     # a stale/cached form or a direct API call.)
-    suggestion = email_typo_suggestion(email)
+    suggestion = email_typo_suggestion(email) if email else None
     _require(
         not suggestion,
         f"That email looks like a typo — did you mean {suggestion}? "
@@ -245,12 +260,20 @@ def create_booking(plato, draft: dict, *, now: datetime | None = None) -> dict:
             if time_ not in avail.get(cid, []):
                 last_err = BookingError("That time is no longer available.", "slot_taken")
                 continue
-            ids, visit_id = _create_appointments(
-                plato, svc, cid, day, time_, home, name, phone, email, address,
-                notes, clinician_requested, focus_label, variant)
+            if dry_run:
+                # Everything above ran for real; stop before the only write.
+                ids, reference = [], "DRYRUN-" + uuid.uuid4().hex[:6].upper()
+            else:
+                ids, visit_id = _create_appointments(
+                    plato, svc, cid, day, time_, home, name, phone, email, address,
+                    notes, clinician_requested, focus_label, variant,
+                    booked_via=BOOKED_VIA.get(source, "website"))
+                reference = "GOJI-" + visit_id[-6:].upper()
             return {
                 "ok": True,
-                "reference": "GOJI-" + visit_id[-6:].upper(),
+                "reference": reference,
+                "dry_run": dry_run,
+                "source": source,
                 "appointment_ids": ids,
                 "clinician_id": cid,
                 "clinician_name": CLINICIANS[cid]["name"],
@@ -278,7 +301,8 @@ def _post(plato, payload: dict) -> str:
 
 def _create_appointments(plato, svc, cid, day, time_, home, name, phone, email,
                          address, notes="", clinician_requested=False,
-                         focus_label="", variant="") -> tuple[list[str], str]:
+                         focus_label="", variant="",
+                         booked_via="website") -> tuple[list[str], str]:
     """Create the appointment(s). Returns (all_ids, visit_id). Rolls back on any
     failure so a partial home visit never lingers."""
     clin = CLINICIANS[cid]
@@ -299,6 +323,10 @@ def _create_appointments(plato, svc, cid, day, time_, home, name, phone, email,
     if not home:
         clin_line = ("\nClinician: chosen by patient" if clinician_requested
                      else "\nClinician: earliest available")
+    # Patient contact on the visit block. No email (a WhatsApp booking) means no
+    # email field and connect False: Plato's portal invite needs an address.
+    contact = ({"email": email, "handphone": phone, "connect": True} if email
+               else {"handphone": phone, "connect": False})
     created: list[str] = []
     try:
         if home:
@@ -311,14 +339,14 @@ def _create_appointments(plato, svc, cid, day, time_, home, name, phone, email,
             }))
             visit_id = _post(plato, {
                 "title": name,
-                "description": (f"HOME VISIT — {svc['title']}. Booked via website.\n"
+                "description": (f"HOME VISIT — {svc['title']}. Booked via {booked_via}.\n"
                                 f"Patient: {name} ({phone}).\nAddress: {address}"
                                 f"{focus_line}{note_line}"),
                 "starttime": _dt(day, time_),
                 "endtime": _dt(day, time_, dur),
                 "color": color, "doctor": doctor,
                 "code_Bottom": HOME_VISIT_TYPE_CODE,
-                "email": email, "handphone": phone, "connect": True,
+                **contact,
             })
             created.append(visit_id)
             created.append(_post(plato, {
@@ -331,7 +359,7 @@ def _create_appointments(plato, svc, cid, day, time_, home, name, phone, email,
         else:
             visit_id = _post(plato, {
                 "title": name,
-                "description": (f"{svc['title']}. Booked via website.\n"
+                "description": (f"{svc['title']}. Booked via {booked_via}.\n"
                                 f"Patient: {name} ({phone})."
                                 f"{focus_line}{clin_line}{note_line}"),
                 "starttime": _dt(day, time_),
@@ -339,7 +367,7 @@ def _create_appointments(plato, svc, cid, day, time_, home, name, phone, email,
                 "color": color, "doctor": doctor,
                 "code_Bottom": svc["type_code"],
                 **({"code_Left": svc["space_code"]} if svc.get("space_code") else {}),
-                "email": email, "handphone": phone, "connect": True,
+                **contact,
             })
             created.append(visit_id)
         return created, visit_id

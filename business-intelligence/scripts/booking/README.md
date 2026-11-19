@@ -28,6 +28,8 @@ the clinic's real rules — see the plan/validation notes in the repo.
 - `POST /internal/refresh-snapshot` → re-pages the bookable window into the
   availability snapshot (below). Hit by Cloud Scheduler every 5 min; public but
   self-throttled to one Plato crawl per `SNAPSHOT_MIN_INTERVAL` (240s).
+- `POST /internal/book` → booking on behalf of the WhatsApp assistant
+  (`X-Internal-Token`; see **WhatsApp assistant** below).
 - `GET /healthcheck` → liveness only ("is the container up"). Never touches Plato.
 - `GET /healthcheck/deep` → **readiness**: derives real availability for the next
   14 days. `200 {"ok":true,...}` = a visitor can book; `503` = they can't, with
@@ -63,6 +65,55 @@ booking is refused.
 3. Check the funnel for `book_error` / `bot_captcha_*` the next day.
 Widget settings (hostnames, mode) are in the Cloudflare dashboard → Turnstile.
 To rotate the secret, add a new version of `turnstile-secret` and redeploy.
+
+## WhatsApp assistant (`/internal/book` + booking-confirmed callback)
+The assistant (`goji-wa-agent`, its own Cloud Run service, `scripts/wa_agent/`)
+books through `POST /internal/book`, the same `create_booking` as `/api/book`.
+- **Auth:** header `X-Internal-Token` must equal `INTERNAL_TOKEN` (Secret Manager
+  `wa-agent-internal-token`, shared with the assistant). Unset → `404` (the route
+  doesn't exist); wrong/missing → `403`.
+- **Body:** `{service, date: "YYYY-MM-DD", time: "HH:MM", format: "clinic"|"home",
+  name, phone, email?, clinician_id?, physio_focus?, variant?, address? (home),
+  notes?, session_id?, source: "whatsapp", dry_run: bool}`. `source` other than
+  `whatsapp` and a non-boolean `dry_run` (e.g. `"false"`) are `400 invalid`.
+- **Differs from `/api/book`:** no bot check (honeypot/fill time/Turnstile; the
+  token replaces it); **email optional** (owner decision: WhatsApp bookings
+  needn't give one; the website still must). No email → Plato gets no address and
+  `connect:false` (no portal invite), no customer email; the admin email still
+  goes, marked "Booked via WhatsApp assistant". The Plato note says "Booked via
+  WhatsApp assistant." The per-contact daily limit is shared with the website.
+- **Response:** `200 {ok, reference, clinician_name, service, date, time, dry_run}`;
+  errors `{ok:false, error, code}`: `400`, `409 slot_taken`, `429 rate_limited`,
+  `502 plato_error`.
+- **`dry_run: true`** runs every check, the limit and the locked fresh
+  availability re-check (so the clinician is really chosen), then stops before
+  the Plato write: `reference` is `DRYRUN-XXXXXX`, no emails, no funnel row, no
+  callback, doesn't count toward the limit. Use it to test the flow against the
+  live calendar without touching it.
+- **Funnel:** real bookings log `confirmed` (detail `whatsapp`) and failures
+  `book_error` (detail `whatsapp_<code>`) under a `wa-` session id (hashed
+  phone + day, or the body's `session_id`). These have no `page_view`, so the
+  dashboard's website funnel should filter `session_id LIKE 'wa-%'` out.
+- **Callback:** after every real booking (website or WhatsApp; never a dry run),
+  if `WA_AGENT_URL` and `INTERNAL_TOKEN` are set, a background thread POSTs
+  `{phone, reference, service, date, time, clinician_name, source: "web"|"whatsapp"}`
+  to `{WA_AGENT_URL}/internal/booking-confirmed` with `X-Internal-Token` (5s
+  timeout; failures are logged and dropped). The assistant matches the phone to
+  a chat and acknowledges the booking there. `WA_AGENT_URL` is the repo variable
+  `vars.WA_AGENT_URL`; empty disables it.
+- **Rules:** any new booking entry point calls `_notify_wa_agent` after success;
+  a dry run must never reach `_create_appointments` (`test_internal_book.py`
+  runs one against a Plato stub that fails on any write).
+
+**Setup (once, before this deploys):** the deploy mounts the secret
+unconditionally, so a missing secret fails the deploy.
+```bash
+openssl rand -hex 32 | tr -d '\n' | gcloud secrets create wa-agent-internal-token --data-file=- --project goji-bi
+gcloud secrets add-iam-policy-binding wa-agent-internal-token --project goji-bi \
+  --member serviceAccount:dashboard-sa@goji-bi.iam.gserviceaccount.com \
+  --role roles/secretmanager.secretAccessor
+```
+Then set the repo variable `WA_AGENT_URL` to the assistant's Cloud Run URL.
 
 ## Monitoring
 `setup_monitoring.sh` (re-runnable) provisions a Cloud Monitoring uptime check on
@@ -178,7 +229,10 @@ sending) — and a `confirmed` funnel event is logged.
 Plato's `onlineapptbooking/list`.
 
 ## Run / test / deploy
-- Tests: `cd scripts && python3 -m booking.test_booking && python3 -m booking.test_availability`
+- Tests: `cd scripts && python -m pytest booking/ -q` (what CI runs)
 - Probe live availability (read-only): `PLATO_API_KEY=… python3 -m booking.probe_availability 2026-07-18 physiotherapy`
-- Deploy: `bash deploy.sh` (see the header — needs `plato-api-key`, optional
-  `gmail-app-password`; add `booking_funnel_events` to `deploy_admin.sh` grants first).
+- Deploy: `bash deploy.sh` (see the header — needs `plato-api-key`,
+  `turnstile-secret`, optional `gmail-app-password`; `WA_AGENT_URL=… bash
+  deploy.sh` turns on the WhatsApp assistant's route and callback and then also
+  needs `wa-agent-internal-token`, same in CI via the `WA_AGENT_URL` repo
+  variable; add `booking_funnel_events` to `deploy_admin.sh` grants first).

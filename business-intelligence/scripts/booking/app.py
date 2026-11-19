@@ -10,10 +10,13 @@ CORS. Endpoints:
   POST /api/book                                          -> create the booking
   POST /api/track                                         -> funnel event (fire-and-forget)
   POST /internal/refresh-snapshot                         -> re-page Plato (Cloud Scheduler, 5 min)
+  POST /internal/book                                     -> WhatsApp assistant booking (X-Internal-Token)
   GET  /healthcheck
 """
 from __future__ import annotations
 
+import hashlib
+import hmac
 import logging
 import os
 import threading
@@ -535,7 +538,143 @@ def book():
     mailer.send_customer_booking_email(result, draft)  # best-effort
     _track_async("confirmed", draft.get("session_id"), draft.get("service"),
                  ua, ref, attribution=attribution)
+    _notify_wa_agent(result, draft, "web")             # best-effort, async
     return jsonify({"ok": True, "reference": result["reference"]})
+
+
+# The WhatsApp assistant (goji-wa-agent, its own Cloud Run service) books through
+# /internal/book, and hears about every real booking on its
+# /internal/booking-confirmed. Both directions authenticate with the same shared
+# secret (`wa-agent-internal-token` in Secret Manager). Unset = the route does
+# not exist and no callback is sent.
+INTERNAL_TOKEN = os.environ.get("INTERNAL_TOKEN", "").strip()
+WA_AGENT_URL = os.environ.get("WA_AGENT_URL", "").strip()
+WA_CALLBACK_TIMEOUT_S = float(os.environ.get("WA_CALLBACK_TIMEOUT", "5"))
+INTERNAL_BOOK_UA = "goji-wa-agent"
+
+
+def _run_async(fn) -> None:
+    """Run `fn` on a daemon thread (a seam the tests replace to run inline)."""
+    threading.Thread(target=fn, daemon=True).start()
+
+
+def _notify_wa_agent(result: dict, draft: dict, source: str) -> None:
+    """Tell the assistant a booking was made, so it can acknowledge it in the
+    customer's chat (it matches on phone). Best effort: runs on a background
+    thread, and any failure is logged and dropped. Never called for dry runs."""
+    if not (WA_AGENT_URL and INTERNAL_TOKEN) or result.get("dry_run"):
+        return
+    url = WA_AGENT_URL.rstrip("/") + "/internal/booking-confirmed"
+    body = {
+        "phone": str(draft.get("phone") or "").strip(),
+        "reference": result.get("reference"),
+        "service": result.get("service"),
+        "date": result.get("date"),
+        "time": result.get("time"),
+        "clinician_name": result.get("clinician_name"),
+        "source": source,
+    }
+
+    def _post():
+        try:
+            r = requests.post(url, json=body, timeout=WA_CALLBACK_TIMEOUT_S,
+                              headers={"X-Internal-Token": INTERNAL_TOKEN})
+            if r.status_code >= 300:
+                log.warning("wa-agent booking callback returned %s (ref %s)",
+                            r.status_code, body["reference"])
+        except Exception as e:
+            log.warning("wa-agent booking callback failed (ref %s): %s",
+                        body["reference"], e)
+
+    _run_async(_post)
+
+
+def _wa_session_id(draft: dict) -> str:
+    """Funnel session for a WhatsApp booking. The assistant may pass its own;
+    otherwise one per contact per day, hashed so no phone lands in the table.
+    The `wa-` prefix keeps these apart from website sessions."""
+    sid = str(draft.get("session_id") or "").strip()
+    if sid:
+        return sid[:64]
+    digits = "".join(ch for ch in str(draft.get("phone") or "") if ch.isdigit())
+    day = datetime.now(SGT).date().isoformat()
+    return "wa-" + hashlib.sha256(f"{digits[-8:]}:{day}".encode()).hexdigest()[:16]
+
+
+@app.route("/internal/book", methods=["POST"])
+def internal_book():
+    """Book on behalf of the WhatsApp assistant.
+
+    Same create_booking as /api/book, minus the browser bot checks (honeypot,
+    fill time, Turnstile), which a server can't pass and which the shared token
+    replaces. The per-contact daily limit still applies. Email is optional.
+    `dry_run: true` runs every check and the fresh availability re-check but
+    writes nothing to Plato and sends nothing.
+
+    404 when INTERNAL_TOKEN is unset (fail closed), 403 on a wrong token.
+    """
+    if not INTERNAL_TOKEN:
+        return jsonify({"ok": False, "error": "not found", "code": "not_found"}), 404
+    token = request.headers.get("X-Internal-Token", "")
+    if not hmac.compare_digest(token.encode(), INTERNAL_TOKEN.encode()):
+        return jsonify({"ok": False, "error": "forbidden", "code": "forbidden"}), 403
+
+    draft = request.get_json(silent=True)
+    if not isinstance(draft, dict):
+        return jsonify({"ok": False, "error": "Expected a JSON object.",
+                        "code": "invalid"}), 400
+    source = draft.get("source") or "whatsapp"
+    if source != "whatsapp":
+        return jsonify({"ok": False, "error": "source must be 'whatsapp'.",
+                        "code": "invalid"}), 400
+    dry_run = draft.get("dry_run", False)
+    if not isinstance(dry_run, bool):
+        # A string "false" must never turn into a real booking, nor "true" into
+        # a silent no-op; refuse anything that isn't a JSON boolean.
+        return jsonify({"ok": False, "error": "dry_run must be true or false.",
+                        "code": "invalid"}), 400
+
+    sid = _wa_session_id(draft)
+    service = draft.get("service")
+
+    def _track(stage, detail):
+        if not dry_run:
+            _track_async(stage, sid, service, INTERNAL_BOOK_UA, None, detail=detail)
+
+    if _over_limit(draft):
+        log.warning("whatsapp booking rate-limited")
+        _track("book_error", "whatsapp_rate_limited")
+        return jsonify({"ok": False, "error": RATE_LIMITED_MSG,
+                        "code": "rate_limited"}), 429
+    try:
+        result = create_booking(plato(), draft, email_required=False,
+                                dry_run=dry_run, source="whatsapp")
+    except BookingError as e:
+        status = 409 if e.code == "slot_taken" else 400
+        _track("book_error", f"whatsapp_{e.code or 'error'}")
+        return jsonify({"ok": False, "error": str(e), "code": e.code}), status
+    except Exception:
+        log.exception("whatsapp booking failed")
+        _track("book_error", "whatsapp_plato_error")
+        return jsonify({"ok": False, "error": "Something went wrong.",
+                        "code": "plato_error"}), 502
+
+    if not dry_run:
+        _hit(*(f"ok:{k}" for k in _contact_keys(draft)))
+        mailer.send_admin_booking_email(result, draft)         # best-effort
+        if (draft.get("email") or "").strip():
+            mailer.send_customer_booking_email(result, draft)  # best-effort
+        _track("confirmed", "whatsapp")
+        _notify_wa_agent(result, draft, "whatsapp")            # best-effort, async
+    return jsonify({
+        "ok": True,
+        "reference": result["reference"],
+        "clinician_name": result["clinician_name"],
+        "service": result["service"],
+        "date": result["date"],
+        "time": result["time"],
+        "dry_run": dry_run,
+    })
 
 
 @app.route("/api/track", methods=["POST", "OPTIONS"])

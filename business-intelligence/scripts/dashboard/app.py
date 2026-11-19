@@ -1563,6 +1563,8 @@ BOOKING_FUNNEL_STAGES = [
 def fetch_booking_funnel(start: date, end: date) -> dict:
     """Website /book funnel for [start, end]: distinct sessions reaching each
     stage, in order, from marts.booking_funnel_events (written by goji-booking).
+    WhatsApp-assistant bookings (session ids starting `wa-`) are left out: they
+    never visited /book, and the Agent tab counts them.
 
     Degrades to zeros if the table isn't deployed yet, like fetch_link_clicks —
     the Marketing tab must still render.
@@ -1585,7 +1587,7 @@ def fetch_booking_funnel(start: date, end: date) -> dict:
 SELECT stage, IF(stage = 'book_error', detail, NULL) AS detail,
        COUNT(DISTINCT session_id) AS sessions
 FROM `{PROJECT}.marts.booking_funnel_events`
-WHERE DATE(occurred_at) BETWEEN '{start}' AND '{end}'
+WHERE DATE(occurred_at) BETWEEN '{start}' AND '{end}' AND NOT STARTS_WITH(session_id, 'wa-')
 GROUP BY stage, detail
 """)
     except Exception as e:
@@ -1716,12 +1718,12 @@ paid AS (
 funnel AS (
   SELECT DISTINCT session_id
   FROM `{PROJECT}.marts.booking_funnel_events`
-  WHERE DATE(occurred_at) BETWEEN '{start}' AND '{end}'
+  WHERE DATE(occurred_at) BETWEEN '{start}' AND '{end}' AND NOT STARTS_WITH(session_id, 'wa-')
 ),
 booked AS (
   SELECT DISTINCT session_id
   FROM `{PROJECT}.marts.booking_funnel_events`
-  WHERE DATE(occurred_at) BETWEEN '{start}' AND '{end}' AND stage = 'confirmed'
+  WHERE DATE(occurred_at) BETWEEN '{start}' AND '{end}' AND NOT STARTS_WITH(session_id, 'wa-') AND stage = 'confirmed'
 )
 SELECT COUNT(*)                                        AS sessions,
        COUNTIF(f.session_id IS NOT NULL)               AS entered_funnel,
@@ -2129,7 +2131,7 @@ WITH bf AS (
     COUNT(DISTINCT IF(stage = 'confirmed', session_id, NULL))          AS booked,
     ARRAY_AGG(DISTINCT session_id IGNORE NULLS)                        AS sids
   FROM `{PROJECT}.marts.booking_funnel_events`
-  WHERE DATE(occurred_at) BETWEEN '{start}' AND '{end}'
+  WHERE DATE(occurred_at) BETWEEN '{start}' AND '{end}' AND NOT STARTS_WITH(session_id, 'wa-')
 ),
 wa AS (
   SELECT COUNT(DISTINCT c.session_id) AS tapped_whatsapp
@@ -2141,7 +2143,7 @@ wa AS (
     AND c.session_id NOT IN UNNEST(
       (SELECT ARRAY_AGG(DISTINCT session_id IGNORE NULLS)
        FROM `{PROJECT}.marts.booking_funnel_events`
-       WHERE DATE(occurred_at) BETWEEN '{start}' AND '{end}' AND stage = 'confirmed'))
+       WHERE DATE(occurred_at) BETWEEN '{start}' AND '{end}' AND NOT STARTS_WITH(session_id, 'wa-') AND stage = 'confirmed'))
 )
 SELECT bf.booking_sessions, bf.booked, wa.tapped_whatsapp
 FROM bf, wa
