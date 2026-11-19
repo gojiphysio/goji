@@ -118,6 +118,11 @@ FEEDBACK_SECRET = os.environ.get("WA_AGENT_FEEDBACK_SECRET", "")
 # notices are also sent to the tester's chat, clearly labelled, because a
 # local run has no email for them to go to.
 TEST_SHOW_DRAFTS = os.environ.get("WA_AGENT_TEST_SHOW_DRAFTS", "") == "1"
+# Numbers allowed to send /reset from WhatsApp (E.164 digits, comma-separated).
+# Any number may on a local run (WA_AGENT_STATE=memory); never anyone else.
+TURBO_AT_START = os.environ.get("WA_AGENT_TURBO", "") == "1"  # local runs: start in /turbo
+TESTERS = frozenset(p.strip() for p in os.environ.get("WA_AGENT_TESTERS", "").split(",")
+                    if p.strip())
 
 # --- Tools --------------------------------------------------------------------
 # Availability comes from goji-booking's 5-minute snapshot, never Plato

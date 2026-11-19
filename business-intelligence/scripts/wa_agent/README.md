@@ -429,6 +429,14 @@ message rescued an auto-handled chat; her 👍/👎 from the staff email
 - Weekly review (to set up once live): a scheduled agent reads the week's
   failures and opens a PR with the fix and its replay score.
 
+**Tester commands from WhatsApp** (any number on a local run; on a deployed
+service only numbers in `WA_AGENT_TESTERS`): `/reset` forgets the chat
+(transcript, mode, pending bookings, cached patient record, late changes) so
+the next message starts fresh; `/turbo` (or `/turbo off`) drops the 20s
+pre-send hold and shortens the debounce to 1.5s for the whole service.
+`WA_AGENT_TURBO=1` starts a local run in turbo. Never turbo with real
+customers: the hold is what lets Chris reply first.
+
 **Battle testing on the test number** (no email locally): add
 `WA_AGENT_TEST_SHOW_DRAFTS=1` with `WA_AGENT_STATE=memory`, and drafts and
 handover notices are also sent to the tester, marked 🧪 TEST MODE. They're

@@ -698,3 +698,35 @@ def test_booking_for_a_wife_never_lands_on_the_husbands_record(env, monkeypatch)
     post(client, inbound(msg_id="wamid.in2", text="yes"))
     assert calls and calls[0][1] == ""                    # a new record in Mei's name
     assert app_mod.wa.sent[-1][1].startswith("Mei is booked!")
+
+
+def test_reset_from_whatsapp_starts_the_chat_fresh_for_testers_only(env, monkeypatch):
+    client, rec, _ = env
+    monkeypatch.setattr(config, "STATE_BACKEND", "memory")
+    app_mod.claude.queue.append(final(reply="Chris will get back to you.", intent="human_requested",
+                                      escalate=True, reason="x"))
+    post(client, inbound(text="can Chris call me?"))
+    assert app_mod.store.load(CUSTOMER).mode == WAITING
+    post(client, inbound(msg_id="wamid.r1", text="/reset"))
+    state = app_mod.store.load(CUSTOMER)
+    assert state.mode == AGENT and state.history == [] and state.pending_for_chris == ""
+    assert "Reset done" in app_mod.wa.sent[-1][1]
+    assert len(app_mod.claude.requests) == 1                     # no model call for /reset
+    # deployed: only listed testers
+    monkeypatch.setattr(config, "STATE_BACKEND", "firestore")
+    monkeypatch.setattr(config, "TESTERS", frozenset())
+    app_mod.claude.queue.append(final())
+    post(client, inbound(msg_id="wamid.r2", text="/reset"))
+    assert len(app_mod.claude.requests) == 2                     # treated as a normal message
+
+
+def test_turbo_toggles_the_hold_for_testers(env, monkeypatch):
+    client, rec, _ = env
+    monkeypatch.setattr(config, "STATE_BACKEND", "memory")
+    monkeypatch.setattr(config, "PRE_SEND_HOLD_S", 20.0)
+    monkeypatch.setattr(config, "DEBOUNCE_S", 6.0)
+    post(client, inbound(text="/turbo on"))
+    assert config.PRE_SEND_HOLD_S == 0.0 and config.DEBOUNCE_S == 1.5
+    assert "Turbo on" in app_mod.wa.sent[-1][1] and app_mod.claude.requests == []
+    post(client, inbound(msg_id="wamid.t2", text="/turbo off"))
+    assert config.PRE_SEND_HOLD_S == app_mod._NORMAL["hold"]

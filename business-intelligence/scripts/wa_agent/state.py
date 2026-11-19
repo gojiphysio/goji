@@ -61,6 +61,9 @@ class MemoryStore:
     def add_late_change(self, key: str, entry: dict) -> None:
         self.__dict__.setdefault("_late", {}).setdefault(key, []).append(entry)
 
+    def clear_late_changes(self, key: str) -> None:
+        self.__dict__.setdefault("_late", {}).pop(key, None)
+
     def get_autonomy(self) -> dict:
         import copy
         return copy.deepcopy(getattr(self, "_autonomy", {}))
@@ -115,6 +118,9 @@ class FirestoreStore:
         from google.cloud import firestore
         self._db.collection("wa_agent_late_changes").document(key).set(
             {"changes": firestore.ArrayUnion([entry])}, merge=True)
+
+    def clear_late_changes(self, key: str) -> None:
+        self._db.collection("wa_agent_late_changes").document(key).delete()
 
     def get_autonomy(self) -> dict:
         """Per-intent auto-send record for automatic demotion (learning.py).

@@ -387,9 +387,64 @@ def _patient_for(st, wa_id: str, state) -> dict:
     return patient
 
 
+RESET_COMMAND = "/reset"
+TURBO = {"hold": 0.0, "debounce": 1.5}   # /turbo on: no pre-send hold, short debounce
+_NORMAL = {"hold": config.PRE_SEND_HOLD_S, "debounce": config.DEBOUNCE_S}
+if config.TURBO_AT_START and config.STATE_BACKEND == "memory":  # local test runs only
+    config.PRE_SEND_HOLD_S, config.DEBOUNCE_S = TURBO["hold"], TURBO["debounce"]
+
+
+def _tester(ev: Inbound) -> bool:
+    return config.STATE_BACKEND == "memory" or ev.wa_id in config.TESTERS
+
+
+def _is_reset(ev: Inbound) -> bool:
+    return (ev.text or "").strip().lower() == RESET_COMMAND and _tester(ev)
+
+
+def _turbo_command(st, client, ev: Inbound) -> bool:
+    """Testing: '/turbo on' drops the 20s pre-send hold and shortens the
+    debounce for the whole service (so a person can't step in first: test
+    numbers only); '/turbo off' restores them. Returns True if handled."""
+    words = (ev.text or "").strip().lower().split()
+    if not words or words[0] != "/turbo" or not _tester(ev):
+        return False
+    on = len(words) < 2 or words[1] != "off"
+    vals = TURBO if on else _NORMAL
+    config.PRE_SEND_HOLD_S, config.DEBOUNCE_S = vals["hold"], vals["debounce"]
+    events.record("turbo", ev.wa_id, reason="on" if on else "off")
+    try:
+        client.send_text(ev.wa_id, f"🧪 Turbo {'on: replies as soon as they are ready' if on else 'off: normal 20s hold'}.")
+    except Exception as e:
+        log.warning("turbo reply failed: %s", e)
+    return True
+
+
+def _reset_chat(st, client, ev: Inbound) -> None:
+    """Testing: forget this chat (transcript, mode, pending bookings, cached
+    patient record, late-change record) so the next message starts fresh.
+    Kept: autonomy and everything outside this chat."""
+    with locks(ev.wa_id):
+        state = st.load(ev.wa_id)
+        fresh = state.__class__(wa_id=ev.wa_id, seen_ids=state.seen_ids)
+        mark_seen(fresh, ev.msg_id)
+        st.save(fresh)
+    st.clear_late_changes(events.chat_key(ev.wa_id))
+    events.record("reset", ev.wa_id, reason="tester")
+    try:
+        client.send_text(ev.wa_id, "🧪 Reset done. This chat starts fresh from your next message.")
+    except Exception as e:
+        log.warning("reset reply failed: %s", e)
+
+
 def handle_inbound(ev: Inbound, received: float) -> None:
     st, client, model = _deps()
     now = time.time()
+    if _is_reset(ev):
+        _reset_chat(st, client, ev)
+        return
+    if _turbo_command(st, client, ev):
+        return
     if ev.kind == "document" and ev.media_id:
         ev.text = documents.as_message(_read_document(client, ev), ev.filename, ev.caption)
     with locks(ev.wa_id):
