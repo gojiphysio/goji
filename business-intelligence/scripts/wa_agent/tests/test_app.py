@@ -651,3 +651,16 @@ def test_picking_an_offered_booking_time_books_it(env, monkeypatch):
                                                      "time": "11:00"}))
     post(client, inbound(msg_id="wamid.in2", text="11 please"))
     assert calls and calls[0]["time"] == "11:00" and calls[0]["full_name"] == "Charles Tan"
+
+
+def test_no_closer_for_someone_already_in_a_longer_conversation(env):
+    client, rec, _ = env
+    import time as _t
+    now = int(_t.time())
+    app_mod.claude.queue.extend([final(), final(), final()])
+    for i, text in enumerate(["hours?", "and prices?", "do you do pilates?"]):
+        post(client, inbound(msg_id=f"wamid.l{i}", text=text, ts=now - 300 + i))
+    asked = len(app_mod.claude.requests)
+    post(client, inbound(msg_id="wamid.l9", text="ok thanks!", ts=now))
+    assert len(app_mod.claude.requests) == asked                 # no nudge, no model call
+    assert ("silent", {"reason": "acknowledgement"}) in rec

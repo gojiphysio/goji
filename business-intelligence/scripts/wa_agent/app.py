@@ -393,8 +393,12 @@ def handle_inbound(ev: Inbound, received: float) -> None:
         # once they've booked or the chat is with Chris.
         last_agent = next((h for h in reversed(history) if h["role"] == "agent"), {})
         recently_booked = state.booked and time.time() - state.booked.get("at", 0) < 86400
+        # Only a brief first exchange (one quick question, like opening hours)
+        # earns the nudge; someone already deep in a conversation doesn't.
+        day_ago = time.time() - 86400
+        earlier = sum(1 for h in history[:-1] if h["role"] == "customer" and h["ts"] >= day_ago)
         if (last_agent.get("id") and last_agent.get("id") == state.closer_id) \
-                or recently_booked or state.mode == WAITING:
+                or recently_booked or state.mode == WAITING or earlier > 2:
             events.record("silent", ev.wa_id, reason="acknowledgement")
             return
         ack_closer = True
