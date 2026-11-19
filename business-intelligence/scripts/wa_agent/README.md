@@ -248,6 +248,37 @@ WHERE event = 'mode' GROUP BY 1, 2;
 
 The dashboard's Agent page reads the two views below.
 
+## Direct booking (planned, not built)
+
+Decided 19 Nov 2026, to build after go-live once the scorecard shows the
+agent is reliable. Today the agent's tools are read-only and it sends the
+`wa-book` link.
+
+- **Through goji-booking's `create_booking`**, the same path as the website
+  form, so availability, locks, clinician rules and the Plato write are shared.
+  The agent needs its own authenticated route: `/api/book`'s Turnstile check
+  can only be passed by a browser.
+- **Details it collects:** service (and physio type or session length where
+  relevant), date, time, clinic or home visit (home needs the address), and the
+  customer's full name. The phone number comes from the chat. Clinician and
+  notes are optional.
+- **Email is optional for WhatsApp bookings** (Charles: most businesses don't
+  ask). The agent may offer it ("if you'd like the confirmation by email too")
+  but never requires it. `create_booking` requires it today, so it needs a
+  WhatsApp-source path without it. The website form keeps requiring it.
+- **Without an email, WhatsApp does email's jobs:** the confirmation goes in
+  the chat (free, inside the 24-hour window); pre-registration and
+  questionnaire links go in the chat; the 48-hour reminder needs an approved
+  WhatsApp utility template from the clinic number (Meta charges per message;
+  needs coexistence live). Until then the reminder job's digest already lists
+  no-email patients for a manual WhatsApp. Check that Plato accepts a patient
+  with no email, and don't send Plato's portal invite (`connect`) without one.
+- **Gate:** the agent states the booking back and books only after the
+  customer confirms; a policy check in code; booking is its own intent so the
+  learning loop can demote it.
+- **Testing never touches the live calendar:** a dry-run mode (or a test
+  service in Plato) before any end-to-end test.
+
 ## Learning loop
 
 Every conversation is scored by how it ended, and a change to the agent
