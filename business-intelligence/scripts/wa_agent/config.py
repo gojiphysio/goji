@@ -104,6 +104,88 @@ INTENT_POLICY: dict[str, str] = {
 }
 INTENTS = tuple(INTENT_POLICY)
 
+# --- Go-live rollout ------------------------------------------------------------
+# Stage presets (WA_AGENT_STAGE 0-3; Firestore flags doc "rollout" overrides,
+# see resolve_rollout). The owner's call (19 Nov 2026): the assistant drives by
+# itself, so no stage drafts. What today's policy drafts becomes a handover
+# with a holding reply ("escalate"), except in stage 0, where everything off
+# the safe list is left alone for Chris ("leave": silent, no notice). A red
+# flag ("urgent") always gets the 995/A&E reply and alerts staff (decision D1).
+# Unset stage: today's INTENT_POLICY above, drafts and all, so tests and local
+# runs behave as before. A deployed service sets a stage.
+LEAVE = "leave"
+SAFE_INTENTS = frozenset({"greeting", "faq", "pricing", "location_hours", "availability",
+                          "service_fit", "person_check", "media_received",
+                          "booking"})  # direct booking on from day one (owner's call)
+STAGE2_EXTRA = frozenset({"existing_appointment", "reschedule"})
+STAGES = (0, 1, 2, 3)
+
+
+def stage_policy(stage: int | None) -> dict[str, str]:
+    """The INTENT_POLICY preset for a rollout stage. Hours are not part of a
+    stage: WA_AGENT_HOURS (or the rollout doc's "hours") sets those."""
+    if stage not in STAGES:
+        return dict(INTENT_POLICY)
+    if stage == 3:
+        return {i: ("escalate" if r == "draft" else r) for i, r in INTENT_POLICY.items()}
+    auto = SAFE_INTENTS | (STAGE2_EXTRA if stage == 2 else frozenset())
+    off_list = LEAVE if stage == 0 else "escalate"
+    return {i: ("auto" if i in auto else "escalate" if i == "urgent" else off_list)
+            for i in INTENT_POLICY}
+
+
+def _env_stage() -> int | None:
+    raw = os.environ.get("WA_AGENT_STAGE", "").strip()
+    return int(raw) if raw.isdigit() and int(raw) in STAGES else None
+
+
+STAGE = _env_stage()
+# "quiet": the 14-day rule alone decides which chats the agent may take.
+# "new_only": also silent ("out_of_scope") for any number with a patient record
+# or an earlier chat.
+CONTACT_SCOPES = ("quiet", "new_only")
+CONTACT_SCOPE = os.environ.get("WA_AGENT_CONTACT_SCOPE", "quiet")
+if CONTACT_SCOPE not in CONTACT_SCOPES:
+    CONTACT_SCOPE = "quiet"
+HOURS_VALUES = ("all", "after_hours")
+
+
+def resolve_rollout(flags: dict | None) -> dict:
+    """Stage, contact scope and hours: the Firestore rollout doc first (so a
+    redeploy can't silently reset them), env as the default. Invalid or
+    missing values in the doc fall back to env."""
+    f = flags or {}
+    stage = f.get("stage")
+    stage = stage if isinstance(stage, int) and not isinstance(stage, bool) \
+        and stage in STAGES else STAGE
+    scope = f.get("contact_scope") if f.get("contact_scope") in CONTACT_SCOPES else CONTACT_SCOPE
+    hours = f.get("hours") if f.get("hours") in HOURS_VALUES else AGENT_HOURS
+    return {"stage": stage, "contact_scope": scope, "hours": hours}
+
+
+# The 14-day rule: Chris stays primary. A chat the agent hasn't taken, with a
+# message either way in the last QUIET_DAYS, is hers (policy.recent_human_chat).
+# 0 turns the rule off. Must stay below state.RETENTION_DAYS (30), or the chat
+# doc holding the timestamps expires first (test_golive.py checks).
+QUIET_DAYS = int(os.environ.get("WA_AGENT_QUIET_DAYS", "14"))
+# When the service started seeing the clinic's real number (epoch seconds;
+# 0 = unset). Until the coexistence history import lands, a number with no
+# record here could be a chat Chris had before we were watching, so while
+# OBSERVED_SINCE is within the last QUIET_DAYS such numbers are left alone
+# ("coverage_gap").
+OBSERVED_SINCE = float(os.environ.get("WA_AGENT_OBSERVED_SINCE", "0") or 0)
+
+# Staff personal WhatsApp numbers (E.164 digits): Chris, optionally Charles.
+# They get a short WhatsApp when a chat needs them, can text stop / start /
+# status, and are never treated as customers.
+STAFF = frozenset(
+    p.strip() for p in os.environ.get("WA_AGENT_STAFF", "").split(",") if p.strip()
+)
+# Approved UTILITY template for a ping outside the staff member's 24h window.
+# Body: "Hi, the Goji WhatsApp assistant needs you: {{1}}. Please open the chat
+# in the WhatsApp Business app."
+STAFF_TEMPLATE = os.environ.get("WA_AGENT_STAFF_TEMPLATE", "goji_staff_alert")
+
 # Contacts the agent never answers (family, partners, VIP patients). E.164
 # digits, comma-separated. Phase 1 moves this to a portal-editable store.
 ALWAYS_HUMAN = frozenset(

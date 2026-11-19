@@ -65,6 +65,9 @@ Env vars:
   WA_API_BASE           Cloud API base URL          default: https://graph.facebook.com/v23.0
   WA_PHONE_NUMBER_ID    Sending number's id         (required for WhatsApp)
   WA_TOKEN              Cloud API token, Secret Manager wa-token (required for WhatsApp)
+  WA_SEND_PATH          Send path under WA_API_BASE  default: /{phone_number_id}/messages
+  WA_AUTH_HEADER        Header that carries WA_TOKEN default: Authorization
+  WA_AUTH_PREFIX        Prefix before WA_TOKEN       default: 'Bearer ' (set empty for a raw key)
   WA_REMINDER_TEMPLATE  Approved template name      default: goji_appointment_reminder
   WA_REMINDER_OVERRIDE_TO  test mode for WhatsApp (see SAFETY)
   (see reminder_mailer.py for the SMTP_* / link overrides)
@@ -430,7 +433,8 @@ def whatsapp_config(enabled: bool, *, dry_run: bool) -> tuple[bool, list[str], s
     if mailer.OVERRIDE_TO and not wa.OVERRIDE_TO:
         return False, ["Test mode: WhatsApp was skipped because "
                        "WA_REMINDER_OVERRIDE_TO is unset. Everyone went by email."], None
-    if not dry_run and not (wa.WA_TOKEN and wa.WA_PHONE_NUMBER_ID):
+    if not dry_run and not (wa.WA_TOKEN and (wa.WA_PHONE_NUMBER_ID
+                                             or not wa.needs_phone_number_id())):
         return False, ["WhatsApp reminders are enabled but WA_TOKEN or "
                        "WA_PHONE_NUMBER_ID is missing, so everyone went by "
                        "email. Fix the job config."], None

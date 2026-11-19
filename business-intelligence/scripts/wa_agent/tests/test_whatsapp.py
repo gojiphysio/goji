@@ -42,7 +42,7 @@ def test_parse_status():
 
 
 def test_unknown_fields_ignored():
-    body = {"entry": [{"changes": [{"field": "history", "value": {"x": 1}}]}]}
+    body = {"entry": [{"changes": [{"field": "account_update", "value": {"x": 1}}]}]}
     assert parse_webhook(body) == []
 
 

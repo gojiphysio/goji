@@ -135,6 +135,73 @@ provider forwards Meta's signature (if not: `USE_URL_TOKEN=1`, below), and the
 | Provider contract + DPA | Charles | 1-2 weeks |
 | Privacy policy line on AI-assisted replies | draft here, Charles approves | 1 day |
 
+## Go-live controls (built 19 Nov 2026)
+
+**Chris stays primary (the 14-day rule).** The agent doesn't answer in a chat
+it hasn't taken whose latest earlier message, from either side, is under
+`WA_AGENT_QUIET_DAYS` (14) old (`policy.recent_human_chat`). Each chat records
+an `owner` ("agent", "human" or neither) and the latest customer and staff
+message times. A message that passes the gate claims the chat for the agent,
+so the rest of a burst passes too. Chris writing in a chat makes it hers, and
+it stays hers until 14 quiet days pass, even after the 24h idle hand-back
+(decision D2); an admin hand-back gives it back at once. A message the agent
+stayed silent on (kill switch, clinic hours, coverage gap) counts as a recent
+message nobody claimed, so that chat stays Chris's too: the cautious side.
+Examples: chatted with Chris 10 days ago → hers; first-ever contact → the
+agent's; quiet for 3 weeks → the agent's.
+
+Where the times come from: going forward, the webhook and echoes. For chats
+before go-live, Meta's coexistence `history` webhook (subscribe the field):
+`whatsapp.parse_history` keeps only timestamps per customer, never text, and
+a business message in the import makes the chat Chris's. When the import
+reports 100% the `history_imported` flag is set (or by hand:
+`POST /admin/history-imported`). Until then, if `WA_AGENT_OBSERVED_SINCE`
+(epoch seconds when we started watching the number) is within the last 14
+days, a number we have no record of is left alone (`coverage_gap`). The
+history payload shape is coded from Meta's docs: check it against the real
+import when Goji's number is onboarded.
+
+**Rollout stages** (`WA_AGENT_STAGE` 0-3, `config.stage_policy`). No stage
+drafts (owner's call: the assistant drives by itself).
+
+| Stage | Answers itself | Everything else |
+|---|---|---|
+| 0 | greeting, faq, pricing, location/hours, availability, service fit, person check, media, booking | left to Chris silently (`stage_leave`); red flags still get the 995/A&E reply and alert staff; failures still alert |
+| 1 | as stage 0 | handover with a holding reply |
+| 2 | + appointment checks and moves | handover with a holding reply |
+| 3 | today's policy | today's drafts become handovers |
+| unset | today's policy, drafts included (local testing) | |
+
+`WA_AGENT_CONTACT_SCOPE=new_only` also leaves out any number with a patient
+record or an earlier chat (`out_of_scope`); `quiet` (default) is the 14-day
+rule alone. Stage, scope and hours live in the Firestore flags doc `rollout`
+(`GET/POST /admin/rollout`, null = back to env), so a redeploy can't reset
+them. Demotion still applies on top.
+
+**Staff on WhatsApp.** `WA_AGENT_STAFF` lists staff personal numbers (kept in
+`~/.config/goji-wa-agent/prod.env`, never the repo). Their messages never go
+through the customer flow: `handle_staff` answers `stop` (kill switch on),
+`start` (off) and `status` (switch, stage, chats waiting today), anything else
+gets a help line, and every message opens that number's 24h window. Handovers,
+red flags, sensitive topics, failed bookings and moves, demotions and the
+waiver-tag request ping each staff number: free text inside their window, the
+approved `goji_staff_alert` template outside it (`WA_AGENT_STAFF_TEMPLATE`).
+A ping names the customer by first name or last 4 digits only. Email stays
+the backup for red flags and sensitive topics, and the only channel when no
+staff number is set or a ping failed. Drafts (unset stage only) still email.
+
+**Morning summary.** A Cloud Run job, scheduled 07:30 SGT by `deploy.sh`, calls
+`POST /internal/morning-summary` (admin token): an email to hello@ with what
+the assistant answered, what it left or handed to Chris (until she replies)
+and any failures, from each chat's `outcomes` (`summary.py`); a one-line
+version goes to staff whose window is open.
+
+**Also:** the reminder Confirm tap and booking confirmations respect the kill
+switch and the 14-day rule; a deployed run without `WA_AGENT_HASH_SALT`
+records events with no `chat_key` (the public default salt would make them
+reversible) and logs an error at startup; `POST /admin/chats/<id>/forget`
+deletes a chat and its late-change record (PDPA).
+
 ## Runbook
 
 ### Track A: Meta test number

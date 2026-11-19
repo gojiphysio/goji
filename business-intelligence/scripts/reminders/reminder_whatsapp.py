@@ -39,9 +39,19 @@ from reminder_mailer import first_name
 
 log = logging.getLogger("reminders.whatsapp")
 
-# Meta's Cloud API. Same names and defaults as wa_agent/config.py.
+# Meta's Cloud API. Same names, defaults and meaning as wa_agent/config.py, so
+# one set of transport values serves both the assistant and this job. A
+# provider (360dialog-style) changes the base URL, the send path and the auth
+# header; the payload stays Cloud API shaped. E.g. 360dialog:
+#   WA_API_BASE=https://waba-v2.360dialog.io WA_SEND_PATH=/messages
+#   WA_AUTH_HEADER=D360-API-KEY WA_AUTH_PREFIX=   (set, but empty)
 WA_API_BASE = os.environ.get("WA_API_BASE", "https://graph.facebook.com/v23.0")
 WA_PHONE_NUMBER_ID = os.environ.get("WA_PHONE_NUMBER_ID", "")
+# Meta: /{phone_number_id}/messages. 360dialog-style providers: /messages.
+WA_SEND_PATH = os.environ.get("WA_SEND_PATH", "/{phone_number_id}/messages")
+WA_AUTH_HEADER = os.environ.get("WA_AUTH_HEADER", "Authorization")
+# Unset means "Bearer "; set-but-empty means the raw key (360dialog).
+WA_AUTH_PREFIX = os.environ.get("WA_AUTH_PREFIX", "Bearer ")
 WA_TOKEN = os.environ.get("WA_TOKEN", "")  # Secret Manager wa-token
 TEMPLATE = os.environ.get("WA_REMINDER_TEMPLATE", "goji_appointment_reminder")
 LANGUAGE = os.environ.get("WA_REMINDER_LANGUAGE", "en")
@@ -209,6 +219,17 @@ OVERRIDE_TO = normalise_phone(OVERRIDE_TO_RAW) or ""
 
 # --- transport -------------------------------------------------------------
 
+def needs_phone_number_id() -> bool:
+    """Meta's path carries the number id; a provider's /messages doesn't (the
+    key identifies the number), so WA_PHONE_NUMBER_ID is optional there."""
+    return "{phone_number_id}" in WA_SEND_PATH
+
+
+def send_url() -> str:
+    """WA_API_BASE + WA_SEND_PATH, built exactly as wa_agent/whatsapp.py does."""
+    return WA_API_BASE.rstrip("/") + WA_SEND_PATH.format(phone_number_id=WA_PHONE_NUMBER_ID)
+
+
 def _error_text(resp) -> str:
     """'HTTP 400: (#132001) Template name does not exist in the translation'."""
     try:
@@ -238,8 +259,8 @@ def send_template(to: str, params: list[str], appointment_id: str, *,
     """
     if OVERRIDE_TO:
         to = OVERRIDE_TO
-    url = f"{WA_API_BASE.rstrip('/')}/{WA_PHONE_NUMBER_ID}/messages"
-    headers = {"Authorization": f"Bearer {WA_TOKEN}",
+    url = send_url()
+    headers = {WA_AUTH_HEADER: f"{WA_AUTH_PREFIX}{WA_TOKEN}",
                "Content-Type": "application/json"}
     http = session or requests
     try:

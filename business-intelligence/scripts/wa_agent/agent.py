@@ -483,7 +483,8 @@ def _escalation(reason: str) -> Proposal:
     return Proposal(reply="Thanks for your message! I'll get the team to get back to "
                           "you shortly.",
                     intent="other", confidence=0.0, escalate=True,
-                    escalation_reason=reason, staff_note=f"Agent could not answer ({reason}).")
+                    escalation_reason=reason, staff_note=f"Agent could not answer ({reason}).",
+                    failed=True)
 
 
 def _parse_proposal(text: str) -> Proposal:

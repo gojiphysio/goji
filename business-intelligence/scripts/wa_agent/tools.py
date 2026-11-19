@@ -232,9 +232,12 @@ def booking_link(inp: dict, *, wa_id: str = "", **_) -> dict:
         params["focus"] = inp["focus"]
     if wa_id:
         # The chat's salted hash (events.chat_key), so a booking made from this
-        # link can be credited to the conversation. Not reversible.
-        from .events import chat_key
-        params["ref"] = chat_key(wa_id)
+        # link can be credited to the conversation. Not reversible, so left out
+        # when a deployed run has no secret salt (events.safe_chat_key).
+        from .events import safe_chat_key
+        ref = safe_chat_key(wa_id)
+        if ref:
+            params["ref"] = ref
     return {"url": f"{config.BOOKING_LINK_BASE}?{urlencode(params)}"}
 
 

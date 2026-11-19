@@ -61,3 +61,11 @@ The WhatsApp assistant. What it is and how to run it: [`README.md`](README.md).
 - **Paid vendor, flagged:** the WhatsApp provider (needed for coexistence) is
   this repo's one exception to "free / DIY first". Code speaks Cloud API
   payloads only, so the provider is a config change (`WA_API_BASE`, ...).
+- **Chris stays primary (14-day rule).** A chat the agent hasn't claimed with
+  a message either way in the last `QUIET_DAYS` is hers (`policy.recent_human_chat`).
+  Any new path that messages a customer (confirmations, reminders, pings)
+  checks the kill switch and this rule first.
+- **Staff numbers are never customers.** `WA_AGENT_STAFF` messages go to
+  `handle_staff` before any lookup, model call or metric; the numbers live in
+  a private env file, never the repo. Pings name customers by first name or
+  last 4 digits only.

@@ -620,6 +620,35 @@ def test_send_posts_to_the_cloud_api(monkeypatch):
     assert s.calls[0]["json"]["to"] == "6591234567"
 
 
+def test_send_through_a_provider_transport(monkeypatch):
+    """A 360dialog-style provider: its own base, /messages, a raw key header."""
+    monkeypatch.setattr(wa, "WA_API_BASE", "https://waba-v2.360dialog.io")
+    monkeypatch.setattr(wa, "WA_SEND_PATH", "/messages")
+    monkeypatch.setattr(wa, "WA_AUTH_HEADER", "D360-API-KEY")
+    monkeypatch.setattr(wa, "WA_AUTH_PREFIX", "")
+    monkeypatch.setattr(wa, "WA_PHONE_NUMBER_ID", "")
+    monkeypatch.setattr(wa, "WA_TOKEN", "key")
+    s = FakeSession()
+    wa.send_template("6591234567", ["a", "b", "c", "d"], "appt1", session=s)
+    assert s.calls[0]["url"] == "https://waba-v2.360dialog.io/messages"
+    assert s.calls[0]["headers"]["D360-API-KEY"] == "key"
+    assert "Authorization" not in s.calls[0]["headers"]
+    assert not wa.needs_phone_number_id()
+
+
+def test_provider_transport_needs_no_phone_number_id(monkeypatch):
+    monkeypatch.setattr(wa, "WA_SEND_PATH", "/messages")
+    monkeypatch.setattr(wa, "WA_TOKEN", "key")
+    monkeypatch.setattr(wa, "WA_PHONE_NUMBER_ID", "")
+    monkeypatch.setattr(wa, "OVERRIDE_TO", "")
+    monkeypatch.setattr(mailer, "OVERRIDE_TO", "")
+    ok, notes, _ = main.whatsapp_config(True, dry_run=False)
+    assert ok, notes
+    monkeypatch.setattr(wa, "WA_SEND_PATH", "/{phone_number_id}/messages")
+    ok, notes, _ = main.whatsapp_config(True, dry_run=False)
+    assert not ok and "WA_PHONE_NUMBER_ID" in notes[0]
+
+
 @pytest.mark.parametrize("response, fragment", [
     (FakeResponse(400, {"error": {"message": "Template name does not exist in the translation",
                                   "type": "OAuthException", "code": 132001,

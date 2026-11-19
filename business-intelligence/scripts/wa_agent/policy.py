@@ -14,6 +14,13 @@ A chat is in one of four modes:
 Ways into `human`: Chris writes in the chat (echo), the agent escalates, an
 admin takes over. Ways back to `agent`: HUMAN_IDLE_HANDBACK_S with no human
 message, or an admin hands back. `paused` only leaves by admin hand-back.
+
+Separately from the mode, `owner` says whose chat it is under the 14-day rule
+(Chris stays primary): "agent" once the agent has taken it (a message passed
+the gate, or an admin handed it back), "human" once a person wrote in it (an
+echo, history import, admin takeover or pause), "" for neither. A chat that
+isn't the agent's, with a message either way in the last QUIET_DAYS, is left
+to Chris (`recent_human_chat`), even after the 24h idle hand-back (decision D2).
 """
 from __future__ import annotations
 
@@ -49,6 +56,11 @@ class ChatState:
     seen_ids: list[str] = field(default_factory=list)  # webhook de-dupe
     pending_draft: dict = field(default_factory=dict)  # {text, intent, at}: scored on Chris's reply
     last_auto: dict = field(default_factory=dict)      # {intent, at}: a rescue if Chris writes next
+    owner: str = ""                # 14-day rule: "agent" | "human" | ""
+    last_customer_at: float = 0.0  # latest customer message (webhook or history import)
+    last_staff_at: float = 0.0     # latest business-number message from the app (echo or import)
+    name: str = ""                 # WhatsApp profile name, for staff pings and the summary
+    outcomes: list[dict] = field(default_factory=list)  # {at, intent, outcome}: morning summary
 
     def to_dict(self) -> dict:
         return dict(self.__dict__)
@@ -72,12 +84,17 @@ class Proposal:
     confirm_booking: bool = False                # the customer just confirmed the pending one
     move: dict = field(default_factory=dict)     # old/new date+time for moving an appointment
     confirm_move: bool = False
+    failed: bool = False  # agent._escalation: the model or a tool failed, nothing to judge
 
 
 @dataclass
 class Decision:
     action: str   # send | draft | escalate | silent
     reason: str
+    # escalate only: the model's reply wasn't written as a handover (the intent
+    # was a draft or auto before the stage made it a handover), so the code's
+    # holding reply goes out instead of it.
+    holding: bool = False
 
 
 def set_mode(state: ChatState, mode: str, reason: str, now: float) -> bool:
@@ -127,11 +144,50 @@ def in_clinic_hours(now: float) -> bool:
     return t.weekday() < 6 and 8 <= t.hour < 20
 
 
+def recent_human_chat(state: ChatState, prior_last_at: float, now: float,
+                      quiet_days: int = config.QUIET_DAYS) -> bool:
+    """The 14-day rule. A chat the agent hasn't taken (owner != "agent") whose
+    latest earlier message, from either side, is under `quiet_days` old is
+    Chris's: the agent stays out. `prior_last_at` is that latest message's
+    time, read before the current message was recorded. 0 days = off."""
+    if quiet_days <= 0 or state.owner == "agent" or prior_last_at <= 0:
+        return False
+    return now - prior_last_at < quiet_days * 86400
+
+
+def has_record(state: ChatState) -> bool:
+    """We know something about this number (a chat, an import, an owner)."""
+    return bool(state.owner or state.last_customer_at or state.last_staff_at or state.history)
+
+
+def coverage_gap_open(observed_since: float, history_imported: bool, now: float,
+                      quiet_days: int = config.QUIET_DAYS) -> bool:
+    """We started watching the number less than `quiet_days` ago and the
+    coexistence history hasn't been imported: a number with no record may be
+    a chat Chris had before we could see it. Off when OBSERVED_SINCE is unset."""
+    if quiet_days <= 0 or not observed_since or history_imported:
+        return False
+    return now - observed_since < quiet_days * 86400
+
+
+def out_of_scope(scope: str, state: ChatState, had_record: bool, patient: dict) -> bool:
+    """WA_AGENT_CONTACT_SCOPE=new_only: the agent only takes numbers it has
+    never seen and that have no patient record. A chat it already took stays
+    its own (so a burst of messages from a new number all pass)."""
+    if scope != "new_only" or state.owner == "agent":
+        return False
+    return had_record or bool((patient or {}).get("returning"))
+
+
 def gate(state: ChatState, now: float, *, kill_switch: bool = config.KILL_SWITCH,
          always_human: frozenset[str] = config.ALWAYS_HUMAN,
-         agent_hours: str = config.AGENT_HOURS) -> Decision | None:
+         agent_hours: str = config.AGENT_HOURS, prior_last_at: float = 0.0,
+         quiet_days: int = config.QUIET_DAYS, coverage_gap: bool = False,
+         scope_out: bool = False) -> Decision | None:
     """Checks that don't need a proposal. A Decision here means: don't even
-    call the model. None means the agent may think about this message."""
+    call the model. None means the agent may think about this message.
+    `coverage_gap` and `scope_out` are worked out by the caller
+    (`coverage_gap_open` + `has_record`, `out_of_scope`)."""
     if kill_switch:
         return Decision(SILENT, "kill_switch")
     if state.wa_id in always_human:
@@ -140,8 +196,14 @@ def gate(state: ChatState, now: float, *, kill_switch: bool = config.KILL_SWITCH
         return Decision(SILENT, "paused")
     if state.mode == HUMAN:
         return Decision(SILENT, "human_has_chat")
+    if recent_human_chat(state, prior_last_at, now, quiet_days):
+        return Decision(SILENT, "recent_human_chat")
+    if coverage_gap:
+        return Decision(SILENT, "coverage_gap")
     if agent_hours == "after_hours" and in_clinic_hours(now):
         return Decision(SILENT, "clinic_hours")
+    if scope_out:
+        return Decision(SILENT, "out_of_scope")
     return None
 
 
@@ -237,12 +299,18 @@ def decide(proposal: Proposal, *, intent_policy: dict[str, str] = config.INTENT_
     draft     nothing goes out; staff get the suggested reply
     """
     rule = intent_policy.get(proposal.intent, DRAFT)
+    if rule == config.LEAVE:
+        return Decision(SILENT, "stage_leave")
     if proposal.escalate and not (rule == "draft" and proposal.intent != "urgent"):
         return Decision(ESCALATE, proposal.escalation_reason or "model_escalated")
     # A draft-for-Chris intent stays a draft even if the model wanted to hand
     # over: the policy decides, and Chris checks the reply before it goes out.
     if rule == "escalate":
-        return Decision(ESCALATE, f"intent:{proposal.intent}")
+        # The model writes the handover reply itself only for the intents it
+        # was told hand over; for anything else its reply is an answer (maybe
+        # "I've cancelled it"), so the code's holding reply goes out instead.
+        return Decision(ESCALATE, f"intent:{proposal.intent}",
+                        holding=proposal.intent not in MODEL_HANDOVER_INTENTS)
     if proposal.intent == "reschedule" and 0 <= proposal.hours_to_appointment < LATE_CHANGE_H:
         # Inside the 24-hour policy: whether the $50 fee applies or is waived
         # is Chris's call, so she checks the reply first.
@@ -262,6 +330,29 @@ def decide(proposal: Proposal, *, intent_policy: dict[str, str] = config.INTENT_
     if rule in ("auto", "auto_notify"):
         return Decision(SEND, f"intent:{proposal.intent}")
     return Decision(DRAFT, f"intent:{proposal.intent}")
+
+
+# Intents the model is instructed to answer with a handover message (red flag
+# guidance, a sensitive acknowledgement, "Chris will get back to you").
+MODEL_HANDOVER_INTENTS = frozenset({"urgent", "sensitive", "human_requested"})
+
+
+def apply_stage(d: Decision, proposal: Proposal, stage: int | None) -> Decision:
+    """No drafts in a rollout stage (owner's call): what `decide` would draft
+    becomes a handover with the holding reply, and in stage 0 the assistant
+    leaves anything it won't answer itself to Chris, silently. A red flag
+    always escalates (D1). Unset stage: `decide`'s answer unchanged."""
+    if stage not in config.STAGES:
+        return d
+    if stage == 0:
+        # A failure still escalates: a person must hear of it (AGENTS.md).
+        if d.action == DRAFT or (d.action == ESCALATE and proposal.intent != "urgent"
+                                 and not proposal.failed):
+            return Decision(SILENT, "stage_leave")
+        return d
+    if d.action == DRAFT:
+        return Decision(ESCALATE, f"handover:{d.reason}", holding=True)
+    return d
 
 
 def human_replied_since(state: ChatState, since: float) -> bool:

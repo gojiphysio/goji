@@ -106,6 +106,9 @@ their appointment. To change the window, change the view.
 | `WA_API_BASE` | `https://graph.facebook.com/v23.0` | |
 | `WA_PHONE_NUMBER_ID` | — | The sending number's id (Meta app > WhatsApp > API Setup). Required for WhatsApp unless `DRY_RUN` |
 | `WA_TOKEN` | — | Secret Manager `wa-token`. Required for WhatsApp unless `DRY_RUN` |
+| `WA_SEND_PATH` | `/{phone_number_id}/messages` | Provider transport, same meaning as `wa_agent/config.py`. 360dialog-style: `/messages` (then `WA_PHONE_NUMBER_ID` isn't needed) |
+| `WA_AUTH_HEADER` | `Authorization` | Header that carries `WA_TOKEN`. 360dialog: `D360-API-KEY` |
+| `WA_AUTH_PREFIX` | `Bearer ` | Text before `WA_TOKEN`. Set it **empty** for a raw provider key; unset keeps `Bearer ` |
 | `WA_REMINDER_TEMPLATE` | `goji_appointment_reminder` | Approved template name |
 | `WA_REMINDER_LANGUAGE` | `en` | Template language code |
 | `WA_REMINDER_OVERRIDE_TO` | unset | Test mode for WhatsApp, see below. Only allowed with `REMINDER_OVERRIDE_TO` |

@@ -13,6 +13,9 @@ Three things arrive on the webhook and matter to us:
                         the API do not echo back here.
   statuses              sent / delivered / read / failed for our own sends,
                         used to time delivery
+  history               coexistence onboarding: up to 180 days of earlier
+                        chats, in chunks. Only timestamps are kept (who wrote
+                        last, and when) for the 14-day rule; never the text.
 
 The echo shape is coded from Meta's coexistence docs and must be confirmed
 against real traffic in Phase 0 Track B (see README).
@@ -64,6 +67,18 @@ class Echo:
 
 
 @dataclass
+class HistoryChunk:
+    """One `history` webhook chunk, reduced to timestamps per customer:
+    {wa_id: (latest customer message ts, latest business message ts)}, 0 for
+    none. `progress` 100 means the sync is complete; `declined` is set when the
+    business turned history sharing off (error 2593109)."""
+    threads: dict
+    progress: int = 0
+    declined: bool = False
+    error_code: int = 0
+
+
+@dataclass
 class Status:
     msg_id: str
     status: str     # sent | delivered | read | failed
@@ -96,10 +111,67 @@ def _message_text(m: dict) -> tuple[str, str]:
     return (f"{text} {caption}" if caption else text), kind
 
 
-def parse_webhook(payload: dict) -> list[Inbound | Echo | Status]:
+def _digits(x) -> str:
+    return "".join(ch for ch in str(x or "") if ch.isdigit())
+
+
+def parse_history(value: dict) -> HistoryChunk:
+    """Meta's coexistence `history` webhook value (developers.facebook.com/docs/
+    whatsapp/embedded-signup/custom-flows/onboarding-business-app-users):
+
+      value.metadata.display_phone_number     the business number
+      value.history[]: {metadata: {phase, chunk_order, progress},
+                        threads: [{id: <customer wa_id>, context: {wa_id},
+                                   messages: [{from, to?, id, timestamp, type,
+                                               history_context: {status}}]}]}
+      declined: value.history[]: {errors: [{code: 2593109, ...}]}
+
+    A message is the business's when it has `to` (Meta: present only on SMB
+    echoes) or `from` is the business number. The customer is the thread id
+    (or context.wa_id), else the other party of the message. Coded
+    defensively from the docs: any field may be missing, and real payloads
+    must be checked when the clinic's number is onboarded (README)."""
+    business = _digits((value.get("metadata") or {}).get("display_phone_number"))
+    threads: dict[str, list[float]] = {}
+    progress, declined, code = 0, False, 0
+    for h in value.get("history") or []:
+        if not isinstance(h, dict):
+            continue
+        for err in h.get("errors") or []:
+            declined, code = True, int((err or {}).get("code") or 0)
+        try:
+            progress = max(progress, int((h.get("metadata") or {}).get("progress") or 0))
+        except (TypeError, ValueError):
+            pass
+        for t in h.get("threads") or []:
+            if not isinstance(t, dict):
+                continue
+            thread_id = _digits(t.get("id") or (t.get("context") or {}).get("wa_id"))
+            for m in t.get("messages") or []:
+                if not isinstance(m, dict):
+                    continue
+                try:
+                    ts = float(m.get("timestamp") or 0)
+                except (TypeError, ValueError):
+                    ts = 0.0
+                if ts <= 0:
+                    continue
+                sender = _digits(m.get("from"))
+                from_business = bool(m.get("to")) or (bool(business) and sender == business)
+                customer = thread_id or (_digits(m.get("to")) if from_business else sender)
+                if not customer or customer == business:
+                    continue
+                last = threads.setdefault(customer, [0.0, 0.0])
+                i = 1 if from_business else 0
+                last[i] = max(last[i], ts)
+    return HistoryChunk(threads={k: (v[0], v[1]) for k, v in threads.items()},
+                        progress=progress, declined=declined, error_code=code)
+
+
+def parse_webhook(payload: dict) -> list[Inbound | Echo | Status | HistoryChunk]:
     """Flatten one webhook body into events, in payload order. Unknown fields
-    (history sync, app state sync, template updates) are ignored."""
-    events: list[Inbound | Echo | Status] = []
+    (app state sync, template updates) are ignored."""
+    events: list[Inbound | Echo | Status | HistoryChunk] = []
     for entry in payload.get("entry") or []:
         for change in entry.get("changes") or []:
             field_name = change.get("field")
@@ -126,6 +198,8 @@ def parse_webhook(payload: dict) -> list[Inbound | Echo | Status]:
                     text, _ = _message_text(m)
                     events.append(Echo(wa_id=m.get("to", ""), msg_id=m.get("id", ""),
                                        ts=float(m.get("timestamp") or 0), text=text))
+            elif field_name == "history":
+                events.append(parse_history(value))
     return events
 
 

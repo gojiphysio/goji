@@ -1,10 +1,10 @@
 """
 Tell a person when the agent hands a chat over or drafts a reply it won't send.
 
-Phase 0: email to hello@ over Gmail SMTP, the same path as the booking and
-reminder mailers. Whether Chris is better reached another way (a WhatsApp
-message to her own phone, a portal queue) is a Phase 1 decision; this module
-is the one place that changes.
+Email to hello@ over Gmail SMTP, the same path as the booking and reminder
+mailers. Staff with a number in WA_AGENT_STAFF are pinged on WhatsApp first
+(app._alert, staff.py); email then stays the backup for urgent and sensitive
+handovers, and the only channel when no staff number is set or a ping fails.
 """
 from __future__ import annotations
 
@@ -66,9 +66,26 @@ def compose(kind: str, *, customer: str, wa_id: str, staff_note: str,
     return msg
 
 
+def compose_plain(subject: str, body: str) -> EmailMessage:
+    msg = EmailMessage()
+    msg["Subject"] = subject
+    msg["From"] = config.GMAIL_USER
+    msg["To"] = config.NOTIFY_EMAIL
+    msg.set_content(body)
+    return msg
+
+
+def send_plain(subject: str, body: str) -> None:
+    """A plain email to NOTIFY_EMAIL (the morning summary). Fire-and-forget."""
+    _deliver(compose_plain(subject, body))
+
+
 def send(kind: str, **kw) -> None:
     """Fire-and-forget. Without a password configured it only logs."""
-    msg = compose(kind, **kw)
+    _deliver(compose(kind, **kw))
+
+
+def _deliver(msg: EmailMessage) -> None:
     if not config.GMAIL_APP_PASSWORD:
         log.info("notify (no SMTP configured): %s", msg["Subject"])
         if config.STATE_BACKEND == "memory":  # local testing: show the draft

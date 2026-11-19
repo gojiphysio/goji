@@ -23,13 +23,39 @@ from . import config
 
 log = logging.getLogger("wa_agent.events")
 
-_SALT = os.environ.get("WA_AGENT_HASH_SALT", "goji-wa-agent")
+# The salt is a secret: with the public default anyone could hash every
+# Singapore number and reverse a chat_key. The default is only for memory /
+# local runs; a deployed (Firestore) run without WA_AGENT_HASH_SALT records
+# events with chat_key None (see salt_ok) and logs an error at startup.
+DEFAULT_SALT = "goji-wa-agent"
+_SALT = os.environ.get("WA_AGENT_HASH_SALT", "") or DEFAULT_SALT
 _bq = None
 _bq_lock = threading.Lock()
 
 
 def chat_key(wa_id: str) -> str:
     return hashlib.sha256(f"{_SALT}:{wa_id}".encode()).hexdigest()[:16]
+
+
+def salt_ok() -> bool:
+    """False on a deployed run still using the public default salt."""
+    return _SALT != DEFAULT_SALT or config.STATE_BACKEND != "firestore"
+
+
+def safe_chat_key(wa_id: str) -> str | None:
+    """chat_key for anything that leaves Firestore (BigQuery rows, booking
+    link refs, feedback links); None when the salt is the public default on
+    a deployed run."""
+    return chat_key(wa_id) if wa_id and salt_ok() else None
+
+
+def check_salt() -> bool:
+    """Called at startup. Logs loudly when a deployed run has no salt."""
+    if not salt_ok():
+        log.error("WA_AGENT_HASH_SALT is not set on a deployed (Firestore) run: events are "
+                  "recorded WITHOUT chat_key until it is. Set it as a secret and redeploy.")
+        return False
+    return True
 
 
 def _client():
@@ -49,7 +75,7 @@ def record(event: str, wa_id: str, *, key: str | None = None, **fields) -> dict:
     row = {
         "event_id": str(uuid.uuid4()),
         "event": event,
-        "chat_key": key or (chat_key(wa_id) if wa_id else None),
+        "chat_key": (key or safe_chat_key(wa_id)) if salt_ok() else None,
         "at": time.time(),
         **{k: v for k, v in fields.items() if k != "steps"},
     }
