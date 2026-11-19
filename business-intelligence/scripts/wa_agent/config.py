@@ -127,6 +127,13 @@ SITE_BASE = "https://www.gojiphysio.com"
 # Existing-patient lookup reads BigQuery. Off by default in Phase 0 so testers'
 # numbers are never matched against real patient records by accident.
 PATIENT_LOOKUP = _env_bool("WA_AGENT_PATIENT_LOOKUP", False)
+# Direct booking (booking_client.py). Dry run until go-live: goji-booking checks
+# the slot but writes nothing to Plato.
+BOOKING_DRY_RUN = _env_bool("WA_AGENT_BOOKING_DRY_RUN", True)
+BOOKING_SIMULATE = _env_bool("WA_AGENT_BOOKING_SIMULATE", False)  # local, no private route
+# Shared with goji-booking for /internal/book and /internal/booking-confirmed.
+INTERNAL_TOKEN = os.environ.get("WA_AGENT_INTERNAL_TOKEN", "")
+BOOKING_CONFIRM_WINDOW_S = 30 * 60  # a pending booking expires if not confirmed
 # Local tone testing only (needs WA_AGENT_STATE=memory): made-up patient
 # context for test numbers, JSON {"6591234567": {"returning": true,
 # "first_name": "Sarah", "next_appointment": null, "last_visit": "2026-10-02"}}.

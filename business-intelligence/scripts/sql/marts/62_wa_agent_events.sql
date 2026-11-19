@@ -164,6 +164,10 @@ bookings AS (
   JOIN `goji-bi.marts.booking_funnel_events` c ON c.session_id = s.session_id AND c.stage = 'confirmed'
   WHERE l.slug = 'wa-book' AND l.chat_ref IS NOT NULL
   GROUP BY l.chat_ref, s.session_id
+  UNION ALL
+  -- booked in the chat by the agent, or confirmed back by goji-booking (not dry runs)
+  SELECT chat_key, at FROM `goji-bi.marts.wa_agent_events`
+  WHERE event = 'booked' AND NOT STARTS_WITH(IFNULL(reason, ''), 'dry_run')
 ),
 booked AS (
   SELECT a.chat_key, a.conversation_start, MIN(b.booked_at) AS booked_at

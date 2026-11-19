@@ -13,6 +13,7 @@ goji-wa-agent: the WhatsApp assistant's webhook service (Cloud Run).
   GET  /admin/autonomy                 per-intent auto-send record, demotions
   POST /admin/autonomy/<intent>/promote  put a demoted intent back on auto
   GET  /feedback                       one-tap rating from a staff email (signed)
+  POST /internal/booking-confirmed     goji-booking: a booking was made (token)
   GET  /healthcheck
 
 The webhook acks at once and works on a background thread (Meta retries slow
@@ -39,7 +40,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 from flask import Flask, jsonify, request
 
-from . import agent, config, documents, events, learning, notify, tools
+from . import agent, booking_client, config, documents, events, learning, notify, tools
 from .policy import (AGENT, DRAFT, ESCALATE, HUMAN, LATE_CHANGE_H, PAUSED, SEND, SGT, WAITING,
                      apply_idle_handback, handover_mode,
                      decide, gate, human_replied_since, is_acknowledgement, on_human_message,
@@ -201,6 +202,38 @@ def _test_show(client, wa_id: str, text: str) -> None:
             log.warning("test-mode send failed: %s", e)
 
 
+def _book_pending(state, ev: Inbound, received: float, fallback: str) -> tuple[str, dict | None]:
+    """The customer confirmed: book what was stated back to them, if it was
+    stated in an earlier message and recently. The model can't book on its
+    own say-so in the same turn. Returns (reply, booking or None)."""
+    pending = state.pending_booking or {}
+    if not pending or pending.get("at", 0) >= received \
+            or received - pending.get("at", 0) > config.BOOKING_CONFIRM_WINDOW_S:
+        events.record("book_skipped", ev.wa_id, reason="no_pending_booking")
+        return fallback, None
+    try:
+        res = booking_client.book(pending, wa_id=ev.wa_id)
+    except booking_client.BookingFailed as e:
+        state.pending_booking = {}
+        events.record("book_failed", ev.wa_id, reason=e.code)
+        notify.send("escalated", customer=ev.name, wa_id=ev.wa_id,
+                    staff_note=f"Booking failed ({e.code}): {pending.get('service')} "
+                               f"{pending.get('date')} {pending.get('time')}",
+                    suggested_reply="", reason=f"booking failed: {e}", last_message=ev.text)
+        if e.code == "slot_taken":
+            return ("Sorry, that time was just taken! Would you like me to find the next "
+                    "open one?"), None
+        return ("Sorry, I couldn't complete the booking just now. I've let the team "
+                "know and they'll sort it out with you shortly."), None
+    events.record("booked", ev.wa_id, intent="booking",
+                  reason="dry_run" if res.get("dry_run") else "agent")
+    first = (pending.get("full_name") or "").split(" ")[0]
+    return (booking_client.confirmation_text(res, first_name=first),
+            {"reference": res["reference"], "date": res["date"], "time": res["time"],
+             "with": res.get("clinician_name", ""), "service": res.get("service", ""),
+             "dry_run": bool(res.get("dry_run")), "at": time.time(), "source": "whatsapp"})
+
+
 def _read_document(client, ev: Inbound) -> str:
     try:
         data, mime = client.download_media(ev.media_id)
@@ -211,6 +244,15 @@ def _read_document(client, ev: Inbound) -> str:
 
 
 PATIENT_CACHE_S = 6 * 3600
+
+
+def _booked_note(state) -> str:
+    b = state.booked or {}
+    if not b or time.time() - b.get("at", 0) > 14 * 86400:
+        return ""
+    return (f"just booked ({b.get('source')}): {b.get('service')} {b.get('date')} "
+            f"{b.get('time')} with {b.get('with') or 'the team'}, ref {b.get('reference')}"
+            f"{' (test dry run)' if b.get('dry_run') else ''}; don't offer times for it again")
 
 
 def _late_change_note(changes: list[dict]) -> str:
@@ -288,7 +330,8 @@ def handle_inbound(ev: Inbound, received: float) -> None:
                         pending_for_chris=state.pending_for_chris if state.mode == WAITING else "",
                         patient="; ".join(filter(None, [
                             tools.describe_patient(patient),
-                            _late_change_note(st.get_late_changes(key))])))
+                            _late_change_note(st.get_late_changes(key)),
+                            _booked_note(state)])))
     p = res.proposal
     d = decide(p, intent_policy=learning.effective_policy(config.INTENT_POLICY,
                                                           st.get_autonomy()))
@@ -346,6 +389,9 @@ def handle_inbound(ev: Inbound, received: float) -> None:
         reply = p.reply.strip()
         if not reply or reply_problems(reply):  # escalations skip decide()'s content check
             reply = agent._escalation("unsafe_or_empty").reply
+        booked = None
+        if d.action == SEND and p.confirm_booking:
+            reply, booked = _book_pending(state, ev, received, reply)
         try:
             wa_msg_id = client.send_text(ev.wa_id, reply)
         except Exception as e:
@@ -369,6 +415,12 @@ def handle_inbound(ev: Inbound, received: float) -> None:
         else:
             state.last_auto = {"intent": p.intent, "at": sent_at}
         state.pending_draft = {}
+        if booked:
+            state.booked, state.pending_booking = booked, {}
+        elif d.action == SEND and not p.confirm_booking and booking_client.complete(p.booking):
+            # Stated back to the customer; only their next message can confirm it.
+            state.pending_booking = {**{k: p.booking.get(k, "") for k in booking_client.FIELDS},
+                                     "at": sent_at}
         st.save(state)
     if d.action == SEND:
         with _autonomy_lock:
@@ -462,6 +514,49 @@ def promote_intent(intent: str):
         st.save_autonomy(autonomy)
     events.record("autonomy", "", intent=intent, reason="promoted:admin")
     return jsonify({"intent": intent, "demoted": False})
+
+
+@app.post("/internal/booking-confirmed")
+def booking_confirmed():
+    """goji-booking calls this after a real booking (website or this agent).
+    If the booking's phone number has a chat here, note it on the chat and,
+    for a website booking inside the 24-hour window, acknowledge it there."""
+    if not (config.INTERNAL_TOKEN and hmac.compare_digest(
+            request.headers.get("X-Internal-Token", ""), config.INTERNAL_TOKEN)):
+        return "forbidden", 403
+    b = request.get_json(silent=True) or {}
+    digits = "".join(ch for ch in str(b.get("phone", "")) if ch.isdigit())
+    if len(digits) < 8:
+        return jsonify({"matched": False})
+    wa_id = digits if len(digits) > 8 else "65" + digits
+    st, client, _ = _deps()
+    with locks(wa_id):
+        state = st.load(wa_id)
+        if not state.history:
+            return jsonify({"matched": False})
+        state.booked = {"reference": b.get("reference", ""), "date": b.get("date", ""),
+                        "time": b.get("time", ""), "with": b.get("clinician_name", ""),
+                        "service": b.get("service", ""), "dry_run": False,
+                        "at": time.time(), "source": b.get("source", "web")}
+        state.pending_booking = {}
+        last_customer = max((h["ts"] for h in state.history if h["role"] == "customer"),
+                            default=0)
+        acked = False
+        if (b.get("source") != "whatsapp" and state.mode in (AGENT, WAITING)
+                and time.time() - last_customer < 23 * 3600 and b.get("date") and b.get("time")):
+            text = booking_client.confirmation_text(
+                {**b, "dry_run": False}, first_name="").replace(
+                "You're booked!", "Thanks for booking! You're all set for", 1)
+            try:
+                msg_id = client.send_text(wa_id, text)
+                append_history(state, "agent", text, time.time(), msg_id)
+                acked = True
+            except Exception as e:
+                log.warning("booking acknowledgement failed: %s", e)
+        st.save(state)
+    events.record("booked", wa_id, intent="booking", reason=f"{b.get('source', 'web')}"
+                  f"{':acknowledged' if acked else ''}")
+    return jsonify({"matched": True, "acknowledged": acked})
 
 
 @app.get("/feedback")

@@ -442,3 +442,85 @@ def test_a_photo_is_left_for_the_team(env):
     assert app_mod.store.load(CUSTOMER).history[0]["text"] == "[sent a photo]"
     assert app_mod.wa.sent[-1][1] == "Thanks! The team will take a look."
     assert "media" in [k for k, _ in notes]
+
+
+# --- direct booking -----------------------------------------------------------
+
+import json as _json
+
+BOOK = {"service": "physiotherapy", "date": "2026-11-26", "time": "10:00",
+        "clinician": "Kristy", "physio_focus": "", "variant": "", "format": "clinic",
+        "full_name": "Charles Tan", "email": "", "address": "", "notes": ""}
+
+
+def _final_with(reply, intent="booking", **extra):
+    r = final(reply=reply, intent=intent)
+    body = _json.loads(r.content[0].text)
+    body.update(extra)
+    r.content[0].text = _json.dumps(body)
+    return r
+
+
+def test_booking_needs_a_yes_in_a_later_message(env, monkeypatch):
+    client, rec, _ = env
+    calls = []
+    monkeypatch.setattr(app_mod.booking_client, "book", lambda b, wa_id: calls.append(b) or
+                        {"ok": True, "reference": "GOJI-AB12CD", "clinician_name": "Kristy Ng",
+                         "service": "Physiotherapy", "date": b["date"], "time": b["time"],
+                         "dry_run": True})
+    app_mod.claude.queue.append(_final_with(
+        "Shall I book Thu 26 Nov, 10:00am with Kristy for Charles Tan?", booking=BOOK))
+    post(client, inbound(text="book me Thursday 10am with Kristy, I'm Charles Tan"))
+    assert calls == [] and app_mod.store.load(CUSTOMER).pending_booking["time"] == "10:00"
+    app_mod.claude.queue.append(_final_with("Booking that now!", booking=BOOK,
+                                            confirm_booking=True))
+    post(client, inbound(msg_id="wamid.in2", text="yes please"))
+    assert len(calls) == 1 and calls[0]["full_name"] == "Charles Tan"
+    sent = app_mod.wa.sent[-1][1]
+    assert sent.startswith("You're booked, Charles! Thu 26 Nov, 10:00am with Kristy (ref GOJI-AB12CD)")
+    assert "dry run" in sent
+    state = app_mod.store.load(CUSTOMER)
+    assert state.booked["reference"] == "GOJI-AB12CD" and state.pending_booking == {}
+    assert ("booked", {"intent": "booking", "reason": "dry_run"}) in rec
+
+
+def test_the_model_cannot_book_in_the_same_turn_it_states_the_details(env, monkeypatch):
+    client, rec, _ = env
+    monkeypatch.setattr(app_mod.booking_client, "book",
+                        lambda b, wa_id: pytest.fail("booked without a confirmation"))
+    app_mod.claude.queue.append(_final_with("Booked!", booking=BOOK, confirm_booking=True))
+    post(client, inbound(text="book me Thursday 10am"))
+    assert ("book_skipped", {"reason": "no_pending_booking"}) in rec
+
+
+def test_a_taken_slot_gets_an_apology_and_tells_chris(env, monkeypatch):
+    client, rec, notes = env
+    def taken(b, wa_id):
+        raise app_mod.booking_client.BookingFailed("gone", "slot_taken")
+    monkeypatch.setattr(app_mod.booking_client, "book", taken)
+    app_mod.claude.queue.append(_final_with("Shall I book it?", booking=BOOK))
+    post(client, inbound(text="book Thursday 10am"))
+    app_mod.claude.queue.append(_final_with("Booking!", booking=BOOK, confirm_booking=True))
+    post(client, inbound(msg_id="wamid.in2", text="yes"))
+    assert app_mod.wa.sent[-1][1].startswith("Sorry, that time was just taken!")
+    assert notes[-1][0] == "escalated"
+
+
+def test_a_website_booking_is_acknowledged_in_the_chat(env, monkeypatch):
+    client, rec, _ = env
+    monkeypatch.setattr(config, "INTERNAL_TOKEN", "t")
+    body = {"phone": "+6591234567", "reference": "GOJI-ZZ99", "service": "Physiotherapy",
+            "date": "2026-11-26", "time": "15:30", "clinician_name": "Claire Ng",
+            "source": "web"}
+    assert client.post("/internal/booking-confirmed", json=body).status_code == 403
+    import time as _t
+    app_mod.claude.queue.append(final())
+    post(client, inbound(ts=int(_t.time())))     # an active chat
+    r = client.post("/internal/booking-confirmed", json=body, headers={"X-Internal-Token": "t"})
+    assert r.get_json() == {"matched": True, "acknowledged": True}
+    assert app_mod.wa.sent[-1][1].startswith(
+        "Thanks for booking! You're all set for Thu 26 Nov, 3:30pm with Claire")
+    assert app_mod.store.load(CUSTOMER).booked["reference"] == "GOJI-ZZ99"
+    unknown = client.post("/internal/booking-confirmed", json={**body, "phone": "+6580000000"},
+                          headers={"X-Internal-Token": "t"})
+    assert unknown.get_json() == {"matched": False}

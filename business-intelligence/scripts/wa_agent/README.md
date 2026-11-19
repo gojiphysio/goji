@@ -253,36 +253,43 @@ WHERE event = 'mode' GROUP BY 1, 2;
 
 The dashboard's Agent page reads the two views below.
 
-## Direct booking (planned, not built)
+## Direct booking (built 19 Nov 2026, dry run until go-live)
 
-Decided 19 Nov 2026, to build after go-live once the scorecard shows the
-agent is reliable. Today the agent's tools are read-only and it sends the
-`wa-book` link.
+The agent books new appointments in the chat. The model never books:
+1. It checks the slot (`get_times`), collects service, date, time, clinic or
+   home (+ address) and full name (phone = the chat; **email optional** for
+   WhatsApp bookings), states it back and fills `booking` in its proposal.
+   The service stores it as the chat's `pending_booking`.
+2. Only when the customer confirms in a **later** message (`confirm_booking`)
+   does `app._book_pending` call `booking_client.book`, which posts the stated
+   details to goji-booking's private `/internal/book` (shared token
+   `wa-agent-internal-token`; the website's `/api/book` bot checks can't be
+   passed by a server). A pending booking expires after 30 minutes.
+3. The confirmation the customer sees is built in code from goji-booking's
+   answer (`confirmation_text`), so it can't claim a booking that didn't happen.
+   A taken slot gets an apology and Chris an email.
 
-- **Through goji-booking's `create_booking`**, the same path as the website
-  form, so availability, locks, clinician rules and the Plato write are shared.
-  The agent needs its own authenticated route: `/api/book`'s Turnstile check
-  can only be passed by a browser.
-- **Details it collects:** service (and physio type or session length where
-  relevant), date, time, clinic or home visit (home needs the address), and the
-  customer's full name. The phone number comes from the chat. Clinician and
-  notes are optional.
-- **Email is optional for WhatsApp bookings** (Charles: most businesses don't
-  ask). The agent may offer it ("if you'd like the confirmation by email too")
-  but never requires it. `create_booking` requires it today, so it needs a
-  WhatsApp-source path without it. The website form keeps requiring it.
-- **Without an email, WhatsApp does email's jobs:** the confirmation goes in
-  the chat (free, inside the 24-hour window); pre-registration and
-  questionnaire links go in the chat; the 48-hour reminder needs an approved
-  WhatsApp utility template from the clinic number (Meta charges per message;
-  needs coexistence live). Until then the reminder job's digest already lists
-  no-email patients for a manual WhatsApp. Check that Plato accepts a patient
-  with no email, and don't send Plato's portal invite (`connect`) without one.
-- **Gate:** the agent states the booking back and books only after the
-  customer confirms; a policy check in code; booking is its own intent so the
-  learning loop can demote it.
-- **Testing never touches the live calendar:** a dry-run mode (or a test
-  service in Plato) before any end-to-end test.
+**Dry run by default** (`WA_AGENT_BOOKING_DRY_RUN`, deploy sets 1): goji-booking
+validates and checks the slot but writes nothing to Plato, and the
+confirmation says so. Set it to 0 at go-live. `WA_AGENT_BOOKING_SIMULATE=1`
+(local only) checks the slot against the public availability API instead,
+for testing before goji-booking has the private route.
+
+**Without an email**, WhatsApp does email's jobs: the confirmation is in the
+chat; pre-registration links go in the chat; the 48-hour reminder needs an
+approved WhatsApp utility template from the clinic number (per-message fee,
+needs coexistence). Until then the reminder job's digest lists no-email
+patients for a manual WhatsApp. goji-booking skips Plato's portal invite
+without an email.
+
+## Booking confirmations in the chat (built 19 Nov 2026)
+
+goji-booking calls `POST /internal/booking-confirmed` (same token) after every
+real booking, website or agent. The service matches the booking's phone to a
+chat; for a website booking inside the 24-hour window it says "Thanks for
+booking! You're all set for ..." in the chat. Either way the chat's `booked`
+note tells the model not to offer times for it again, and the learning loop
+records `booked` straight away. Needs goji-booking's `WA_AGENT_URL`.
 
 ## Returning-patient recognition (built 19 Nov 2026)
 
@@ -305,32 +312,6 @@ and children) the agent is told so and doesn't assume who's writing.
 - **Testing**: first a test-only stand-in that returns a made-up patient for
   the two test numbers, to check the greeting and tone. Then one end-to-end
   test against real data before go-live, with a test patient in Plato.
-
-## Booking confirmations in the chat (planned)
-
-Added 19 Nov 2026. The agent should know when a customer books through its
-link, and say so in the chat ("You're all set for Thu 10am with Kristy! See you
-then"), so later flows (confirmations, reminders, direct booking) don't repeat
-or contradict each other.
-
-- **Signal, in real time:** when goji-booking confirms a booking whose
-  attribution carries a `wa-book` click with a `chat_ref` (or whose phone
-  number matches a chat), it calls an internal, authenticated wa_agent route,
-  e.g. `POST /internal/booking-confirmed` with the reference, service, date,
-  time and clinician. The `link_click_events` → `booking_funnel_events` join
-  is the batch version, and too slow for a reply.
-- **Map the hash back to the chat:** keep a `chat_key → wa_id` lookup in
-  Firestore beside the chat docs (same 30-day TTL), since `chat_key` can't be
-  reversed.
-- **In the chat:** a short acknowledgement (inside the 24-hour window, so no
-  template needed) and a `booked` note on the chat state: the agent stops
-  offering times for that need, and won't answer "can I book?" as if nothing
-  happened. Chris's booking emails and the reminder job read the same state, so
-  one confirmation goes out, not two.
-- **Learning loop:** records `booked` the moment it happens, not after the
-  nightly join.
-- **Overlaps:** direct booking (above) produces the same event from the agent's
-  own booking; returning-patient recognition uses the same chat lookup.
 
 ## Learning loop
 

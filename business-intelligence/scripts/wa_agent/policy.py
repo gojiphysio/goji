@@ -39,6 +39,8 @@ class ChatState:
     mode_since: float = 0.0
     last_human_at: float = 0.0
     pending_for_chris: str = ""  # waiting: what was handed over (the staff note)
+    pending_booking: dict = field(default_factory=dict)  # stated back, awaiting the customer's yes
+    booked: dict = field(default_factory=dict)  # latest booking (agent or website), for context
     patient: dict = field(default_factory=dict)  # returning-patient lookup, cached per chat
     patient_at: float = 0.0
     history: list[dict] = field(default_factory=list)  # {role, text, ts, id}
@@ -64,6 +66,8 @@ class Proposal:
     escalation_reason: str = ""
     staff_note: str = ""
     hours_to_appointment: float = -1.0  # reschedule/cancel: the booking being changed; -1 unknown
+    booking: dict = field(default_factory=dict)  # details collected for direct booking
+    confirm_booking: bool = False                # the customer just confirmed the pending one
 
 
 @dataclass

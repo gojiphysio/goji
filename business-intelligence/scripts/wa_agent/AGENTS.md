@@ -6,9 +6,11 @@ The WhatsApp assistant. What it is and how to run it: [`README.md`](README.md).
   intent, confidence, escalate). Whether anything reaches a customer is decided
   in `policy.py` and `app.py`, never by the prompt. A new rule (hours, contacts,
   intents) goes in code with a test, not in `INSTRUCTIONS`.
-- **Tools are read-only.** Nothing the agent can call books, cancels or edits.
-  Writing tools (direct booking, rescheduling) are a Phase 3 decision and need
-  their own gate in `policy.py`.
+- **The model never writes.** Its tools are read-only. Direct booking happens
+  in code (`app._book_pending` → goji-booking `/internal/book`) only after the
+  customer confirms, in a later message, the details stated back to them; the
+  confirmation text is built from goji-booking's answer. Dry run until go-live
+  (`WA_AGENT_BOOKING_DRY_RUN`). Changing or cancelling bookings stays with staff.
 - **Never call Plato from here.** Availability comes from goji-booking's API,
   which serves its 5-minute snapshot. Plato allows 20 requests/min for the
   whole clinic (`booking/README.md`).
