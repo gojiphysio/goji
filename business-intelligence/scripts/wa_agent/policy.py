@@ -196,22 +196,23 @@ def is_acknowledgement(text: str, history: list[dict]) -> bool:
 
 
 BREAK = "<break>"
-MAX_BUBBLES = 3
 
 
-def split_bubbles(reply: str) -> list[str]:
-    """The model marks WhatsApp bubble breaks with a <break> line. At most
-    MAX_BUBBLES: anything past the limit joins the last bubble."""
+def split_bubbles(reply: str, max_bubbles: int | None = None) -> list[str]:
+    """Bubble breaks (<break> lines) the model may write. Multi-bubble replies
+    are off (19 Nov 2026: service messages may be charged per message), so by
+    default everything is one message; WA_AGENT_MAX_BUBBLES turns them back on."""
+    limit = max(1, max_bubbles if max_bubbles is not None else config.MAX_BUBBLES)
     parts = [p.strip() for p in (reply or "").split(BREAK)]
     parts = [p for p in parts if p]
-    if len(parts) > MAX_BUBBLES:
-        parts = parts[:MAX_BUBBLES - 1] + ["\n\n".join(parts[MAX_BUBBLES - 1:])]
+    if len(parts) > limit:
+        parts = parts[:limit - 1] + ["\n\n".join(parts[limit - 1:])]
     return parts
 
 
 def as_one_message(reply: str) -> str:
     """For staff emails, drafts and the transcript: bubbles as paragraphs."""
-    return "\n\n".join(split_bubbles(reply))
+    return "\n\n".join(split_bubbles(reply, max_bubbles=1))
 
 
 CLARIFY_MIN_CONFIDENCE = 0.5

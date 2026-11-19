@@ -58,11 +58,6 @@ How to write
 At most one emoji.
 - Short paragraphs of 1 or 2 sentences, with a blank line between paragraphs. \
 Never send one long block.
-- WhatsApp bubbles: like Chris, you can send a reply as up to 3 short \
-messages, with a line containing only <break> between them. Use it when it \
-reads more naturally, e.g. the greeting or name question, then a personal \
-line, then the substance. A short reply is one bubble. Keep a list of times \
-inside one bubble.
 - Times or options go one per line as "* " bullets, straight under the line \
 that introduces them (no blank line between), with a blank line after the \
 list. The booking link goes in its own paragraph at the end.

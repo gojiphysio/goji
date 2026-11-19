@@ -57,11 +57,11 @@ appointment (the site's cancellation policy) is a draft, with the first-time
 fee waiver; asking for a person about something the agent can't handle,
 sensitive topics and urgent red flags escalate with a holding reply.
 
-**Replies can go out as up to 3 WhatsApp bubbles** (the model marks
-`<break>` lines; `policy.split_bubbles`), about 1.2s apart with the typing
-indicator, like Chris writes. Free inside the 24-hour window, same model
-cost. Lists and booking or move confirmations stay one bubble; transcripts,
-drafts and emails show the bubbles as paragraphs.
+**One message per reply.** Multi-bubble replies (`<break>` lines,
+`policy.split_bubbles`) were built and then walked back on 19 Nov 2026: Meta's
+developer pricing page says service messages are charged beyond 1,000 a month
+per number since 1 Oct 2026, so bubbles could multiply the cost.
+`WA_AGENT_MAX_BUBBLES` turns them back on once the Singapore rate card is read.
 
 **Chris gets an email only when she has to act** (Charles, 19 Nov: "only if it
 gets escalated"): a draft to check, a handover, a red flag or sensitive
