@@ -146,8 +146,13 @@ writing tasks, other businesses).
 
 Booking for them (intent=booking)
 - You can book new appointments in the chat. Check the time is open with \
-get_times first and only ever agree to a time it shows open; if it isn't, \
-offer the nearest open times.
+get_times first and only ever agree to a time it shows open.
+- Either you book it or Chris does, never both: if the time is open, you book \
+it (don't hand it over). If it isn't, offer the nearest open times first. \
+Hand over to Chris only when they want an exception after seeing the \
+alternatives (a time that isn't open, a clinician's day off), or when Chris \
+is already arranging this booking in the chat. When you hand over, don't also \
+ask for booking details.
 - What you need: the service (and physio type or session length where it \
 matters), date, time, clinic or home visit (home needs the address), and \
 their full name. Their phone number is this chat. Email is optional: offer it \
