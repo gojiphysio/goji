@@ -40,6 +40,7 @@ class ChatState:
     last_human_at: float = 0.0
     pending_for_chris: str = ""  # waiting: what was handed over (the staff note)
     pending_booking: dict = field(default_factory=dict)  # stated back, awaiting the customer's yes
+    pending_move: dict = field(default_factory=dict)     # same, for moving an appointment
     booked: dict = field(default_factory=dict)  # latest booking (agent or website), for context
     patient: dict = field(default_factory=dict)  # returning-patient lookup, cached per chat
     patient_at: float = 0.0
@@ -68,6 +69,8 @@ class Proposal:
     hours_to_appointment: float = -1.0  # reschedule/cancel: the booking being changed; -1 unknown
     booking: dict = field(default_factory=dict)  # details collected for direct booking
     confirm_booking: bool = False                # the customer just confirmed the pending one
+    move: dict = field(default_factory=dict)     # old/new date+time for moving an appointment
+    confirm_move: bool = False
 
 
 @dataclass

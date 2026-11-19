@@ -258,6 +258,39 @@ def _book_pending(state, ev: Inbound, received: float, fallback: str) -> tuple[s
              "dry_run": bool(res.get("dry_run")), "at": time.time(), "source": "whatsapp"})
 
 
+def _move_pending(state, ev: Inbound, received: float, fallback: str) -> tuple[str, dict | None]:
+    """The customer confirmed the move stated back to them in an earlier message:
+    move it through goji-booking. Chris is only told if it fails."""
+    pending = state.pending_move or {}
+    if not pending or pending.get("at", 0) >= received \
+            or received - pending.get("at", 0) > config.BOOKING_CONFIRM_WINDOW_S:
+        events.record("move_skipped", ev.wa_id, reason="no_pending_move")
+        return fallback, None
+    ids = (state.patient or {}).get("patient_ids") or []
+    try:
+        res = booking_client.move(pending, wa_id=ev.wa_id,
+                                  patient_id=ids[0] if len(ids) == 1 else "")
+    except booking_client.BookingFailed as e:
+        state.pending_move = {}
+        events.record("move_failed", ev.wa_id, reason=e.code)
+        if e.code == "slot_taken":
+            return ("Sorry, that time was just taken! Would you like me to find another "
+                    "one?"), None
+        notify.send("escalated", customer=ev.name, wa_id=ev.wa_id,
+                    staff_note=f"Couldn't move their appointment ({e.code}): "
+                               f"{pending.get('old_date')} {pending.get('old_time')} -> "
+                               f"{pending.get('new_date')} {pending.get('new_time')}",
+                    suggested_reply="", reason=f"move failed: {e}", last_message=ev.text)
+        return ("Sorry, I couldn't move it just now. I've let the team know and they'll "
+                "sort it out with you shortly."), None
+    events.record("moved", ev.wa_id, intent="reschedule",
+                  reason="dry_run" if res.get("dry_run") else "agent")
+    return (booking_client.move_text(res),
+            {"reference": res["reference"], "date": res["new_date"], "time": res["new_time"],
+             "with": res.get("clinician_name", ""), "service": res.get("service", ""),
+             "dry_run": bool(res.get("dry_run")), "at": time.time(), "source": "whatsapp"})
+
+
 def _read_document(client, ev: Inbound) -> str:
     try:
         data, mime = client.download_media(ev.media_id)
@@ -381,10 +414,6 @@ def handle_inbound(ev: Inbound, received: float) -> None:
                   suggested_reply=p.reply, reason=d.reason, last_message=ev.text,
                   feedback=learning.feedback_links(events.chat_key(ev.wa_id), int(now)))
 
-    if ev.kind in ("image", "document"):
-        # The file itself is for the team: Chris opens it in the app.
-        notify.send("media", **{**notice, "last_message": ev.text[:1500]})
-
     if d.action == DRAFT:
         late = (p.intent in ("reschedule", "cancel")
                 and 0 <= p.hours_to_appointment < LATE_CHANGE_H)
@@ -423,6 +452,8 @@ def handle_inbound(ev: Inbound, received: float) -> None:
         booked = None
         if d.action == SEND and p.confirm_booking:
             reply, booked = _book_pending(state, ev, received, reply)
+        elif d.action == SEND and p.confirm_move:
+            reply, booked = _move_pending(state, ev, received, reply)
         try:
             wa_msg_id = client.send_text(ev.wa_id, reply)
         except Exception as e:
@@ -447,7 +478,10 @@ def handle_inbound(ev: Inbound, received: float) -> None:
             state.last_auto = {"intent": p.intent, "at": sent_at}
         state.pending_draft = {}
         if booked:
-            state.booked, state.pending_booking = booked, {}
+            state.booked, state.pending_booking, state.pending_move = booked, {}, {}
+        elif d.action == SEND and not p.confirm_move and booking_client.move_complete(p.move):
+            state.pending_move = {**{k: p.move.get(k, "") for k in booking_client.MOVE_FIELDS},
+                                  "at": sent_at}
         elif d.action == SEND and not p.confirm_booking and booking_client.complete(p.booking):
             # Stated back to the customer; only their next message can confirm it.
             state.pending_booking = {**{k: p.booking.get(k, "") for k in booking_client.FIELDS},
@@ -464,9 +498,8 @@ def handle_inbound(ev: Inbound, received: float) -> None:
                   e2e_ms=int((sent_at - received) * 1000))
     _mode_event(state, old, sent_at)
     if d.action == SEND and config.INTENT_POLICY.get(p.intent) == "auto_notify":
-        kind = "reschedule" if p.intent == "reschedule" else "fyi"
-        notify.send(kind, **notice)
-        _test_show(client, ev.wa_id, f"Chris would get an email ({kind}): {p.staff_note}")
+        notify.send("fyi", **notice)
+        _test_show(client, ev.wa_id, f"Chris would get an FYI email: {p.staff_note}")
     if d.action == ESCALATE:
         notify.send(p.intent if p.intent in ("urgent", "sensitive") else "escalated", **notice)
         _test_show(client, ev.wa_id, f"Handed to Chris ({d.reason}). She'd get an email "

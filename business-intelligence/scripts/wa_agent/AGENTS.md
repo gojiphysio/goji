@@ -22,6 +22,9 @@ The WhatsApp assistant. What it is and how to run it: [`README.md`](README.md).
 - **No message text or phone numbers in BigQuery.** `marts.wa_agent_events`
   uses a salted hash per chat. Transcripts live only in Firestore with a 30-day
   TTL. Don't add text columns.
+- **Email Chris only when she must act.** Drafts, handovers, red flags,
+  failures, demotions. A new `notify.send` for anything routine needs a reason
+  she can't see it in the WhatsApp Business app.
 - **Every failure becomes an escalation.** A model error, refusal, tool crash
   or send failure gives the customer a holding reply and emails a person. The
   customer is never left with silence.

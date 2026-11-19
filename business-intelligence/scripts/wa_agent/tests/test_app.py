@@ -305,25 +305,38 @@ def test_test_mode_shows_drafts_to_the_tester_only_locally(env, monkeypatch):
     assert len(app_mod.wa.sent) == 1                      # never on a deployed service
 
 
-def test_is_this_chris_answers_as_front_desk_and_sends_chris_an_fyi(env):
+def test_is_this_chris_answers_as_front_desk_without_emailing_chris(env):
     client, rec, notes = env
     app_mod.claude.queue.append(final(
         reply="Hi! This is Goji's front desk. I'll let Chris know you asked for her. "
               "Is there a message I can pass along?", intent="person_check"))
     post(client, inbound(text="Hi is this Chris"))
     assert len(app_mod.wa.sent) == 1 and "front desk" in app_mod.wa.sent[0][1]
-    assert [k for k, _ in notes] == ["fyi"]
+    assert notes == []                                     # Chris hears only if they leave a message
     assert app_mod.store.load(CUSTOMER).mode == AGENT      # the agent keeps the chat
 
 
-def test_rescheduling_replies_and_tells_chris_to_move_it(env):
-    client, _, notes = env
-    app_mod.claude.queue.append(final(reply="Sure! Thu 10am or Fri 2pm are open. "
-                                            "The team will move it and confirm.",
-                                      intent="reschedule"))
-    post(client, inbound(text="can I move my Tuesday appointment?"))
-    assert len(app_mod.wa.sent) == 1 and [k for k, _ in notes] == ["reschedule"]
-    assert app_mod.store.load(CUSTOMER).mode == AGENT
+def test_a_routine_move_is_done_by_the_agent_without_emailing_chris(env, monkeypatch):
+    client, rec, notes = env
+    moved = []
+    monkeypatch.setattr(app_mod.booking_client, "move", lambda m, wa_id, patient_id="":
+                        moved.append(m) or {"ok": True, "reference": "GOJI-MV1", "dry_run": True,
+                                            "clinician_name": "Kristy Ng", **{k: m[k] for k in
+                                            ("old_date", "old_time", "new_date", "new_time")}})
+    mv = {"old_date": "2026-11-25", "old_time": "10:00", "new_date": "2026-11-27",
+          "new_time": "14:00"}
+    app_mod.claude.queue.append(_final_with("Shall I move your Tue 10am to Thu 2pm?",
+                                            intent="reschedule", move=mv))
+    post(client, inbound(text="can I move Tuesday's appointment to Thursday 2pm?"))
+    assert moved == [] and app_mod.store.load(CUSTOMER).pending_move["new_time"] == "14:00"
+    app_mod.claude.queue.append(_final_with("Moving it now!", intent="reschedule", move=mv,
+                                            confirm_move=True))
+    post(client, inbound(msg_id="wamid.in2", text="yes"))
+    assert len(moved) == 1
+    assert app_mod.wa.sent[-1][1].startswith(
+        "Done! Your appointment has moved from Wed 25 Nov, 10:00am to Fri 27 Nov, 2:00pm with Kristy")
+    assert notes == []
+    assert ("moved", {"intent": "reschedule", "reason": "dry_run"}) in rec
 
 
 # --- waiting for Chris ------------------------------------------------------------
@@ -420,7 +433,7 @@ def test_late_changes_are_remembered_so_the_waiver_is_offered_once(env):
     assert "1 earlier late change(s) on record" in second_turn
 
 
-def test_a_document_is_read_into_the_chat_and_the_team_gets_the_file(env):
+def test_a_document_is_read_into_the_chat_without_an_email(env):
     client, _, notes = env
     app_mod.wa.media = (b"Referral: 12yo with scoliosis, please assess", "text/plain")
     body = inbound(kind="document")
@@ -431,7 +444,7 @@ def test_a_document_is_read_into_the_chat_and_the_team_gets_the_file(env):
     post(client, body)
     stored = app_mod.store.load(CUSTOMER).history[0]["text"]
     assert "[sent a document: referral.txt]" in stored and "scoliosis" in stored
-    assert "media" in [k for k, _ in notes]
+    assert notes == []                    # Chris sees the file in the app; no email
 
 
 def test_a_photo_is_left_for_the_team(env):
@@ -441,7 +454,7 @@ def test_a_photo_is_left_for_the_team(env):
     post(client, inbound(kind="image"))
     assert app_mod.store.load(CUSTOMER).history[0]["text"] == "[sent a photo]"
     assert app_mod.wa.sent[-1][1] == "Thanks! The team will take a look."
-    assert "media" in [k for k, _ in notes]
+    assert notes == []
 
 
 # --- direct booking -----------------------------------------------------------

@@ -82,9 +82,9 @@ INTENT_POLICY: dict[str, str] = {
     # "When's my appointment?" / "am I booked for Sat?": answered from the
     # patient lookup or my_appointments, keyed on the chat's own number.
     "existing_appointment": "auto",
-    # The agent can't move appointments: it offers new times and Chris gets an
-    # FYI to make the change.
-    "reschedule": "auto_notify",
+    # The agent moves the appointment itself (goji-booking /internal/reschedule)
+    # after the customer confirms; Chris only hears about failures.
+    "reschedule": "auto",
     "cancel": "draft",
     "billing": "draft",
     "clinical": "draft",
@@ -94,8 +94,8 @@ INTENT_POLICY: dict[str, str] = {
     "human_requested": "escalate",
     "other": "draft",
     # "Is this Chris?" with no request yet: the agent answers as the front desk
-    # and asks for a message, and Chris gets an FYI. The chat stays with the agent.
-    "person_check": "auto_notify",
+    # and asks for a message. Chris is told only when they leave one (escalation).
+    "person_check": "auto",
     # A photo: the agent can't see it, thanks them and says the team will look.
     "media_received": "auto",
 }

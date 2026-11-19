@@ -81,6 +81,56 @@ def book(b: dict, *, wa_id: str, http=requests) -> dict:
     return data
 
 
+MOVE_FIELDS = ("old_date", "old_time", "new_date", "new_time")
+
+
+def move_complete(m: dict | None) -> bool:
+    if not m:
+        return False
+    try:
+        date.fromisoformat(m.get("old_date", "")); date.fromisoformat(m.get("new_date", ""))
+    except ValueError:
+        return False
+    return bool(_TIME.match(m.get("old_time", "")) and _TIME.match(m.get("new_time", "")))
+
+
+def move(m: dict, *, wa_id: str, patient_id: str = "", http=requests) -> dict:
+    """Move an existing appointment through goji-booking's /internal/reschedule.
+    {ok, reference, clinician_name, old_*, new_*, dry_run} or BookingFailed."""
+    if config.BOOKING_SIMULATE and config.STATE_BACKEND == "memory":
+        return {"ok": True, "dry_run": True, "reference": "DRYRUN-" + secrets.token_hex(3).upper(),
+                "clinician_name": "", **{k: m[k] for k in MOVE_FIELDS}}
+    if not config.INTERNAL_TOKEN:
+        raise BookingFailed("moving isn't set up", "not_configured")
+    body = {**{k: m[k] for k in MOVE_FIELDS}, "phone": "+" + re.sub(r"\D", "", wa_id),
+            "patient_id": patient_id, "dry_run": config.BOOKING_DRY_RUN}
+    try:
+        r = http.post(f"{config.BOOKING_API_BASE}/internal/reschedule", json=body, timeout=30,
+                      headers={"X-Internal-Token": config.INTERNAL_TOKEN})
+        data = r.json()
+    except Exception as e:
+        raise BookingFailed(f"the booking system didn't answer: {e}", "unreachable")
+    if not data.get("ok"):
+        raise BookingFailed(data.get("error") or "move refused", data.get("code") or "error")
+    return data
+
+
+def _when(d: str, t: str) -> str:
+    day = date.fromisoformat(d)
+    h, mi = map(int, t.split(":"))
+    return f"{day:%a} {day.day} {day:%b}, {(h % 12) or 12}:{mi:02d}{'am' if h < 12 else 'pm'}"
+
+
+def move_text(res: dict) -> str:
+    who = (res.get("clinician_name") or "").split(" ")[0]
+    text = (f"Done! Your appointment has moved from {_when(res['old_date'], res['old_time'])} "
+            f"to {_when(res['new_date'], res['new_time'])}{' with ' + who if who else ''} "
+            f"(ref {res['reference']}). See you then 😊")
+    if res.get("dry_run"):
+        text += "\n\n🧪 TEST: dry run, nothing was changed in the calendar."
+    return text
+
+
 WAIVER_TAG = "Late change waiver used"
 
 

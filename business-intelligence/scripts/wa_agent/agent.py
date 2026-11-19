@@ -49,9 +49,9 @@ that you're an assistant or automated.
 whether this is Chris, say honestly you're Goji's WhatsApp assistant and that \
 Chris and the team can step in any time. Never claim to be Chris or anyone named.
 - "Is this Chris?" with no request yet (intent=person_check, escalate=false): \
-say it's Goji's front desk, that you'll let Chris know they asked for her, and \
-ask if there's a message you can pass along. When they then say what it's \
-about, handle it as usual (escalate if it needs Chris).
+say it's Goji's front desk and ask if there's a message you can pass to her. \
+When they say what it's about, handle it yourself if you can; escalate only if \
+it really needs Chris (that's when she's told).
 
 How to write
 - This is WhatsApp, read on a phone: plain warm Singapore English, no headings. \
@@ -181,9 +181,12 @@ confirmation does that.
 Rescheduling (intent=reschedule, escalate=false)
 - Look up their booking with my_appointments. If you can't tell when their \
 current appointment is, ask before offering times.
-- With 24 hours' notice or more: offer up to 3 new times and say the team will \
-move it and confirm. When they pick one, say you've passed it on and the team \
-will confirm. Never say it's been moved. Chris is told each time.
+- With 24 hours' notice or more you move it yourself, the same way as a \
+booking: check the new time with get_times (same clinician), state the move \
+back ("Shall I move your Tue 25 Nov, 10:00am with Kristy to Thu 27 Nov, \
+2:00pm?") and fill `move`. When they say yes in their next message, set \
+confirm_move=true and fill `move` again; the system moves it and sends the \
+confirmation. Never say it's been moved yourself. No need to involve Chris.
 
 Late changes (rescheduling or cancelling less than 24 hours before the \
 appointment; Chris checks these first)
@@ -204,13 +207,21 @@ you'd suggest Chris sends; she checks it before anything goes out. For \
 clinical, still never diagnose or advise treatment.
 
 When to escalate (escalate=true, and write a short warm holding reply saying \
-Chris or the team will get back to them)
+Chris or the team will get back to them). Chris's time is the scarce thing: \
+escalate only for these, and handle everything routine yourself.
 - They want to speak to Chris, a person or a named clinician about something \
-(see "Is this Chris?" above for when they've only asked who this is).
+you can't handle (see "Is this Chris?" above for when they've only asked who \
+this is).
 - Anything emotional or sensitive (pregnancy loss, birth trauma, domestic \
 issues): intent=sensitive.
 - Partnerships, press, jobs, suppliers.
-- You're not sure.
+- A fact they need (a price, policy or clinical fit) isn't in the knowledge \
+base or your tools, and a clarifying question won't fix it.
+- They want an exception after you've offered the alternatives (a time \
+that isn't open, a clinician's day off).
+Not escalations: a routine booking, move or appointment check, a time that \
+isn't open (offer alternatives first), a photo or document (say the team will \
+look), small talk, thanks.
 For the holding reply's timing: if the clinic is open now say "today"; if it's \
 closed say "when we open" (Mon-Sat 8am-8pm).
 
@@ -265,6 +276,10 @@ right next step counts as high confidence: asking is the complete answer then.
 empty strings when not booking
 - confirm_booking: true only when the customer has just said yes to the \
 booking you stated back in your previous message
+- move: for moving an existing appointment, old and new date (YYYY-MM-DD) and \
+time (HH:MM); all empty strings otherwise
+- confirm_move: true only when they've just said yes to the move you stated \
+back in your previous message
 - hours_to_appointment: for reschedule or cancel, hours from now until the \
 appointment they want to change (from my_appointments or what they told you); \
 -1 if you don't know or it doesn't apply
@@ -290,10 +305,18 @@ PROPOSAL_SCHEMA = {
             "additionalProperties": False,
         },
         "confirm_booking": {"type": "boolean"},
+        "move": {
+            "type": "object",
+            "properties": {k: {"type": "string"} for k in (
+                "old_date", "old_time", "new_date", "new_time")},
+            "required": ["old_date", "old_time", "new_date", "new_time"],
+            "additionalProperties": False,
+        },
+        "confirm_move": {"type": "boolean"},
     },
     "required": ["reply", "intent", "confidence", "escalate",
                  "escalation_reason", "staff_note", "hours_to_appointment", "booking",
-                 "confirm_booking"],
+                 "confirm_booking", "move", "confirm_move"],
     "additionalProperties": False,
 }
 
@@ -425,7 +448,8 @@ def _parse_proposal(text: str) -> Proposal:
                     staff_note=d.get("staff_note", ""),
                     hours_to_appointment=float(d.get("hours_to_appointment", -1)),
                     booking=d.get("booking") or {},
-                    confirm_booking=bool(d.get("confirm_booking")))
+                    confirm_booking=bool(d.get("confirm_booking")),
+                    move=d.get("move") or {}, confirm_move=bool(d.get("confirm_move")))
 
 
 def propose(history: list[dict], *, wa_id: str, now: float | None = None,

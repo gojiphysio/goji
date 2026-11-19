@@ -48,16 +48,20 @@ answered. `WA_AGENT_HOURS=after_hours` limits the agent to outside Mon-Sat
 
 What happens to a proposal: `config.INTENT_POLICY` maps each intent to
 auto / auto_notify / draft / escalate; below `WA_AGENT_MIN_CONFIDENCE` it's a
-draft. Chris's routing (18 Nov): booking requests and appointment checks
-("when's my appointment?", from the patient lookup) send on their own;
-rescheduling sends new times and emails Chris to move the booking (the agent
-can't change appointments); "is this Chris?" answers as the front desk and
-sends her an FYI; cancelling, billing, clinical and complaints are drafts she
-checks, even if the model wanted to hand over; a reschedule less than 24
-hours before the appointment (the site's cancellation policy) is a draft, and
-late-change drafts waive the $50 fee as a first-time courtesy for Chris to
-keep or remove; asking for a person, sensitive
-topics and urgent red flags escalate with a holding reply. A reply
+draft. Chris's routing (18-19 Nov): booking requests, appointment checks and
+routine moves (24h+ notice) are handled by the agent end to end, with no email
+to Chris; "is this Chris?" answers as the front desk and asks for a message;
+cancelling, billing, clinical and complaints are drafts she checks, even if
+the model wanted to hand over; a reschedule less than 24 hours before the
+appointment (the site's cancellation policy) is a draft, with the first-time
+fee waiver; asking for a person about something the agent can't handle,
+sensitive topics and urgent red flags escalate with a holding reply.
+
+**Chris gets an email only when she has to act** (Charles, 19 Nov: "only if it
+gets escalated"): a draft to check, a handover, a red flag or sensitive
+handover, a failed booking or move, an intent demoted to drafts, or a waiver
+tag the agent couldn't place. Never for routine bookings, moves, appointment
+checks, photos or documents (she sees those in the WhatsApp Business app). A reply
 that will be sent waits until `WA_AGENT_PRE_SEND_HOLD_S` (20s) after the
 customer's message arrived, then sends only if no person wrote in the chat and
 no newer customer message came in meanwhile (that message's own run answers
@@ -251,6 +255,23 @@ python -m wa_agent.eval.replay --cases ~/goji-eval/cases.jsonl \
 ```
 
 The sheet has `ai_grade`/`ai_note` (first pass) and `grade`/`notes` (Chris).
+
+### Scenario suite (behaviour tests)
+
+`eval/scenarios.py`: 42 scripted conversations against the real model with
+automatic pass/fail checks (intent, policy decision, required and forbidden
+phrases, one question per message, no repeat greeting or booking link, word
+caps). Groups: new enquiry, returning patient, booking, reschedule/cancel,
+handover, clinical (incl. red flags), malicious, media. Made-up people only.
+Run it after any change to the instructions, policy or knowledge base:
+
+```bash
+WA_AGENT_BACKEND=cli python -m wa_agent.eval.scenarios --out ~/goji-eval/scenarios.csv
+python -m wa_agent.eval.scenarios --only booking      # one group
+```
+
+When a real chat goes wrong, add it here as a scenario (made-up details) so
+it stays fixed.
 
 ### Readout (BigQuery)
 
