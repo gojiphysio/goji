@@ -203,7 +203,8 @@ Your final answer is the JSON object only:
 - reply: the WhatsApp message to send (or the holding reply when escalating)
 - intent: the main kind of message
 - confidence: 0 to 1, how sure you are the reply is correct and complete from \
-the knowledge base and tools
+the knowledge base and tools. A short clarifying question you're sure is the \
+right next step counts as high confidence: asking is the complete answer then.
 - escalate, escalation_reason (empty string if not escalating)
 - staff_note: one line for Chris summarising what the customer wants
 - hours_to_appointment: for reschedule or cancel, hours from now until the \
