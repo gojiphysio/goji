@@ -118,3 +118,30 @@ def test_next_slots_spreads_across_days_in_one_tool_call():
     # past dates skipped; two month summaries + three day lookups at most
     assert [c[0] for c in http.calls].count("availability") == 3
     assert all(c[1].get("focus") == "womens-health" for c in http.calls)
+
+
+def test_patient_context_off_by_default_and_stand_in_only_locally(monkeypatch):
+    from wa_agent import config as cfg
+    monkeypatch.setattr(cfg, "PATIENT_LOOKUP", False)
+    monkeypatch.setattr(cfg, "TEST_PATIENTS", {"6590000001": {"returning": True,
+                                                             "first_name": "Sarah"}})
+    monkeypatch.setattr(cfg, "STATE_BACKEND", "memory")
+    assert tools.patient_context("6590000001")["first_name"] == "Sarah"
+    assert tools.patient_context("6590000002") == {}
+    monkeypatch.setattr(cfg, "STATE_BACKEND", "firestore")   # never on a deployed service
+    assert tools.patient_context("6590000001") == {}
+
+
+def test_describe_patient_keeps_it_to_name_and_dates():
+    assert tools.describe_patient({}) == ""
+    assert "new enquiry" in tools.describe_patient({"returning": False})
+    one = tools.describe_patient({"returning": True, "first_name": "Sarah",
+                                  "patients_on_number": 1, "next_appointment": None,
+                                  "last_visit": "2026-10-02"})
+    assert one == ("returning patient; record first name Sarah; no upcoming appointment; "
+                   "last visit 2026-10-02")
+    shared = tools.describe_patient({"returning": True, "first_name": "Ghazal",
+                                     "patients_on_number": 2,
+                                     "next_appointment": {"date": "2026-11-21", "time": "16:30",
+                                                          "with": "Cheryl"}})
+    assert "2 patients share this number" in shared and "with Cheryl" in shared

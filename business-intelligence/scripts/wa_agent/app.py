@@ -38,7 +38,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 from flask import Flask, jsonify, request
 
-from . import agent, config, events, learning, notify
+from . import agent, config, events, learning, notify, tools
 from .policy import (AGENT, DRAFT, ESCALATE, HUMAN, PAUSED, SEND, SGT, WAITING,
                      apply_idle_handback, handover_mode,
                      decide, gate, human_replied_since, is_acknowledgement, on_human_message,
@@ -200,6 +200,25 @@ def _test_show(client, wa_id: str, text: str) -> None:
             log.warning("test-mode send failed: %s", e)
 
 
+PATIENT_CACHE_S = 6 * 3600
+
+
+def _patient_for(st, wa_id: str, state) -> dict:
+    """Who this number is (returning-patient recognition), looked up in code by
+    the chat's own number and cached on the chat for a few hours."""
+    if state.patient_at and time.time() - state.patient_at < PATIENT_CACHE_S:
+        return state.patient
+    patient = tools.patient_context(wa_id)
+    if patient:
+        with locks(wa_id):
+            fresh = st.load(wa_id)
+            fresh.patient, fresh.patient_at = patient, time.time()
+            st.save(fresh)
+        events.record("patient_lookup", wa_id, reason="returning" if patient.get("returning")
+                      else "no_record")
+    return patient
+
+
 def handle_inbound(ev: Inbound, received: float) -> None:
     st, client, model = _deps()
     now = time.time()
@@ -240,9 +259,11 @@ def handle_inbound(ev: Inbound, received: float) -> None:
             return
 
     client.mark_read_typing(ev.msg_id)
+    patient = _patient_for(st, ev.wa_id, state)
     res = agent.propose(history, wa_id=ev.wa_id, now=now, customer_name=ev.name,
                         client=model,
-                        pending_for_chris=state.pending_for_chris if state.mode == WAITING else "")
+                        pending_for_chris=state.pending_for_chris if state.mode == WAITING else "",
+                        patient=tools.describe_patient(patient))
     p = res.proposal
     d = decide(p, intent_policy=learning.effective_policy(config.INTENT_POLICY,
                                                           st.get_autonomy()))

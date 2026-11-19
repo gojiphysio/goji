@@ -386,3 +386,19 @@ def test_waiting_hands_back_after_a_quiet_day(env):
     state.mode, state.mode_since, state.pending_for_chris = WAITING, 0.0, "x"
     assert apply_idle_handback(state, 10**9)
     assert state.mode == AGENT and state.pending_for_chris == ""
+
+
+def test_returning_patient_context_reaches_the_model_and_is_cached(env, monkeypatch):
+    client, rec, _ = env
+    calls = []
+    monkeypatch.setattr(app_mod.tools, "patient_context",
+                        lambda wa_id: calls.append(wa_id) or
+                        {"returning": True, "first_name": "Sarah", "patients_on_number": 1,
+                         "next_appointment": None, "last_visit": "2026-10-02"})
+    app_mod.claude.queue.extend([final(), final()])
+    post(client, inbound())
+    post(client, inbound(msg_id="wamid.in2", text="and Saturdays?"))
+    turn = app_mod.claude.requests[0]["messages"][-1]["content"][0]["text"]
+    assert "patient record: returning patient; record first name Sarah" in turn
+    assert calls == [CUSTOMER]                              # looked up once, then cached
+    assert ("patient_lookup", {"reason": "returning"}) in rec

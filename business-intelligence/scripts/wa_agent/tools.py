@@ -278,6 +278,89 @@ def my_appointments(inp: dict, *, wa_id: str, bq=None, **_) -> dict:
                               "type": r["treatment_type"]} for r in rows]}
 
 
+# Returning-patient recognition: who this number is, run in code at the start of
+# a conversation (never a model tool, never another number). First name, next
+# appointment and last visit date only: no clinical notes, no other patients'
+# details. Several patients can share a number (a parent and children), so the
+# count goes with it and the name is only a hint.
+_PATIENT_SQL = """
+WITH patients AS (
+  SELECT patient_id, SPLIT(TRIM(full_name), ' ')[SAFE_OFFSET(0)] AS first_name
+  FROM `{project}.marts.dim_patient_contact`
+  WHERE RIGHT(REGEXP_REPLACE(COALESCE(phone, ''), r'\\D', ''), 8) = @last8
+),
+appts AS (
+  SELECT a.appt_date, FORMAT_TIMESTAMP('%H:%M', a.start_at, 'UTC') AS time_sgt,
+         a.clinician_id, a.treatment_type
+  FROM `{project}.stg.appointments` a
+  JOIN patients p USING (patient_id)
+  WHERE COALESCE(SAFE_CAST(JSON_VALUE(a.payload, '$.cancelled') AS INT64), 0) = 0
+    AND COALESCE(SAFE_CAST(JSON_VALUE(a.payload, '$.void') AS INT64), 0) = 0
+    AND LOWER(COALESCE(JSON_VALUE(a.payload, '$.status'), '')) NOT IN
+        ('cancelled', 'canceled', 'no_show', 'noshow', 'no-show')
+)
+SELECT
+  (SELECT COUNT(DISTINCT patient_id) FROM patients) AS n_patients,
+  (SELECT ANY_VALUE(first_name) FROM patients) AS first_name,
+  (SELECT AS STRUCT appt_date, time_sgt, clinician_id, treatment_type FROM appts
+    WHERE appt_date >= CURRENT_DATE('Asia/Singapore')
+    ORDER BY appt_date, time_sgt LIMIT 1) AS next_appt,
+  (SELECT MAX(appt_date) FROM appts WHERE appt_date < CURRENT_DATE('Asia/Singapore')) AS last_visit
+"""
+
+
+def patient_context(wa_id: str, *, bq=None) -> dict:
+    """{} when lookup is off or fails; {"returning": False} for an unknown
+    number; else first name, how many patients share the number, the next
+    appointment and the last visit date."""
+    digits = re.sub(r"\D", "", wa_id)
+    if config.TEST_PATIENTS and config.STATE_BACKEND == "memory":
+        fake = config.TEST_PATIENTS.get(digits)  # local tone testing only
+        if fake is not None:
+            return fake
+    if not config.PATIENT_LOOKUP or len(digits) < 8:
+        return {}
+    try:
+        if bq is None:
+            from google.cloud import bigquery
+            bq = bigquery.Client(project=config.PROJECT)
+        from google.cloud import bigquery as _bq
+        job = bq.query(_PATIENT_SQL.format(project=config.PROJECT),
+                       job_config=_bq.QueryJobConfig(query_parameters=[
+                           _bq.ScalarQueryParameter("last8", "STRING", digits[-8:])]))
+        row = next(iter(job.result()), None)
+    except Exception as e:
+        log.warning("patient lookup failed: %s", e)
+        return {}
+    if not row or not row["n_patients"]:
+        return {"returning": False}
+    nxt = row["next_appt"]
+    return {"returning": True, "first_name": row["first_name"] or "",
+            "patients_on_number": row["n_patients"],
+            "next_appointment": ({"date": nxt["appt_date"].isoformat(), "time": nxt["time_sgt"],
+                                  "with": CLINICIAN_NAMES.get(nxt["clinician_id"], "the team"),
+                                  "type": nxt["treatment_type"]} if nxt else None),
+            "last_visit": row["last_visit"].isoformat() if row["last_visit"] else None}
+
+
+def describe_patient(p: dict) -> str:
+    """The patient context as one line for the model."""
+    if not p:
+        return ""
+    if not p.get("returning"):
+        return "no patient record for this number (likely a new enquiry)"
+    bits = [f"returning patient; record first name {p.get('first_name') or 'unknown'}"]
+    if (p.get("patients_on_number") or 1) > 1:
+        bits.append(f"{p['patients_on_number']} patients share this number (e.g. a parent "
+                    "and children), so don't assume which one is writing")
+    n = p.get("next_appointment")
+    bits.append(f"next appointment {n['date']} {n['time']} with {n['with']}" if n
+                else "no upcoming appointment")
+    if p.get("last_visit"):
+        bits.append(f"last visit {p['last_visit']}")
+    return "; ".join(bits)
+
+
 HANDLERS = {
     "next_slots": next_slots,
     "find_available_dates": find_available_dates,

@@ -284,9 +284,13 @@ agent is reliable. Today the agent's tools are read-only and it sends the
 - **Testing never touches the live calendar:** a dry-run mode (or a test
   service in Plato) before any end-to-end test.
 
-## Returning-patient recognition (planned, after direct booking)
+## Returning-patient recognition (built 19 Nov 2026)
 
-Added 19 Nov 2026.
+`tools.patient_context` + `app._patient_for`, cached on the chat for 6 hours; on with
+`WA_AGENT_PATIENT_LOOKUP=1`. `WA_AGENT_TEST_PATIENTS` (JSON, local only) gives
+test numbers a made-up record. If several patients share a number (a parent
+and children) the agent is told so and doesn't assume who's writing.
+
 
 - **Lookup at the start of each conversation, in code**: match the chat's own
   number to the patient records (`dim_patient_contact`, as `my_appointments`

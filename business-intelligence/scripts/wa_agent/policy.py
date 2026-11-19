@@ -39,6 +39,8 @@ class ChatState:
     mode_since: float = 0.0
     last_human_at: float = 0.0
     pending_for_chris: str = ""  # waiting: what was handed over (the staff note)
+    patient: dict = field(default_factory=dict)  # returning-patient lookup, cached per chat
+    patient_at: float = 0.0
     history: list[dict] = field(default_factory=list)  # {role, text, ts, id}
     seen_ids: list[str] = field(default_factory=list)  # webhook de-dupe
     pending_draft: dict = field(default_factory=dict)  # {text, intent, at}: scored on Chris's reply

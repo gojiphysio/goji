@@ -125,6 +125,11 @@ SITE_BASE = "https://www.gojiphysio.com"
 # Existing-patient lookup reads BigQuery. Off by default in Phase 0 so testers'
 # numbers are never matched against real patient records by accident.
 PATIENT_LOOKUP = _env_bool("WA_AGENT_PATIENT_LOOKUP", False)
+# Local tone testing only (needs WA_AGENT_STATE=memory): made-up patient
+# context for test numbers, JSON {"6591234567": {"returning": true,
+# "first_name": "Sarah", "next_appointment": null, "last_visit": "2026-10-02"}}.
+import json as _json
+TEST_PATIENTS: dict = _json.loads(os.environ.get("WA_AGENT_TEST_PATIENTS", "") or "{}")
 
 # Keep the 1-hour prompt cache warm while customers are likely to write, so the
 # first message after a quiet spell doesn't pay the cold cache write (API only).

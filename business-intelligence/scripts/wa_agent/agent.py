@@ -180,6 +180,16 @@ issues): intent=sensitive.
 For the holding reply's timing: if the clinic is open now say "today"; if it's \
 closed say "when we open" (Mon-Sat 8am-8pm).
 
+Returning patients (the context's "patient record: ...")
+- A returning patient gets a warm hello in your first reply: "Hi Sarah! Good \
+to hear from you again". Use the record's first name only if it fits their \
+WhatsApp name or they've used it; if several patients share the number, or \
+it doesn't fit, greet them without a name ("Hi! Good to hear from you again").
+- Nothing clinical and no details from the record unless they raise it: don't \
+mention their last visit or condition. Use the next appointment only when it \
+helps with what they asked (rescheduling, "when is my appointment?").
+- No record: treat it as a new enquiry, and never say you looked them up.
+
 Waiting for Chris (the context says "waiting for Chris on: ...")
 - You've already handed that topic to Chris. Keep helping with anything else \
 as usual (hours, prices, open times, which service fits).
@@ -304,19 +314,22 @@ def warm_cache(client: anthropic.Anthropic | None = None) -> dict:
             "output_tokens": u.output_tokens or 0}
 
 
-def context_note(now: float, customer_name: str = "", pending_for_chris: str = "") -> str:
+def context_note(now: float, customer_name: str = "", pending_for_chris: str = "",
+                 patient: str = "") -> str:
     """The turn's context, appended after the cached prefix."""
     t = datetime.fromtimestamp(now, SGT)
     note = (f"\n\n[context, not from the customer: now {t:%A %d %B %Y, %H:%M} SGT; "
             f"clinic is {'open' if in_clinic_hours(now) else 'closed'} now; "
             f"customer's WhatsApp name: {customer_name or 'unknown'}")
+    if patient:
+        note += f"; patient record: {patient}"
     if pending_for_chris:
         note += f"; waiting for Chris on: {pending_for_chris}"
     return note + "]"
 
 
 def build_messages(history: list[dict], now: float, customer_name: str = "",
-                   pending_for_chris: str = "") -> list[dict]:
+                   pending_for_chris: str = "", patient: str = "") -> list[dict]:
     """Stored transcript -> alternating user/assistant messages. Customer lines
     are `user`; agent and staff lines are `assistant` (staff lines are labelled
     so the model knows a person already replied). Consecutive same-role lines
@@ -333,7 +346,7 @@ def build_messages(history: list[dict], now: float, customer_name: str = "",
     while msgs and msgs[0]["role"] != "user":
         msgs.pop(0)
     if msgs:
-        msgs[-1]["content"] += context_note(now, customer_name, pending_for_chris)
+        msgs[-1]["content"] += context_note(now, customer_name, pending_for_chris, patient)
     return [{"role": m["role"], "content": [{"type": "text", "text": m["content"]}]}
             for m in msgs]
 
@@ -356,7 +369,8 @@ def _parse_proposal(text: str) -> Proposal:
 
 def propose(history: list[dict], *, wa_id: str, now: float | None = None,
             customer_name: str = "", client: anthropic.Anthropic | None = None,
-            tool_deps: dict | None = None, pending_for_chris: str = "") -> AgentResult:
+            tool_deps: dict | None = None, pending_for_chris: str = "",
+            patient: str = "") -> AgentResult:
     """Run the tool loop for the latest customer message in `history`.
     Never raises: any failure becomes an escalation, so a customer is never
     left with silence because the model or a tool broke."""
@@ -364,13 +378,13 @@ def propose(history: list[dict], *, wa_id: str, now: float | None = None,
     if config.BACKEND == "cli":
         from . import cli_backend
         return cli_backend.propose(history, wa_id=wa_id, now=now, customer_name=customer_name,
-                                   pending_for_chris=pending_for_chris)
+                                   pending_for_chris=pending_for_chris, patient=patient)
     global last_call_at
     client = client or anthropic.Anthropic()
     last_call_at = time.time()
     result = AgentResult(proposal=_escalation("not_run"))
     t0 = time.monotonic()
-    messages = build_messages(history, now, customer_name, pending_for_chris)
+    messages = build_messages(history, now, customer_name, pending_for_chris, patient)
     if not messages:
         result.proposal = _escalation("no_customer_message")
         return result
