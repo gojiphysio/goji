@@ -402,3 +402,19 @@ def test_returning_patient_context_reaches_the_model_and_is_cached(env, monkeypa
     assert "patient record: returning patient; record first name Sarah" in turn
     assert calls == [CUSTOMER]                              # looked up once, then cached
     assert ("patient_lookup", {"reason": "returning"}) in rec
+
+
+def test_late_changes_are_remembered_so_the_waiver_is_offered_once(env):
+    client, rec, _ = env
+    late = lambda: final(reply="draft", intent="cancel")
+    app_mod.claude.queue.append(late())
+    app_mod.claude.queue[-1].content[0].text = app_mod.claude.queue[-1].content[0].text.replace(
+        '"staff_note"', '"hours_to_appointment": 3, "staff_note"')
+    post(client, inbound(text="sorry can't make it today"))
+    first_turn = app_mod.claude.requests[0]["messages"][-1]["content"][0]["text"]
+    assert "first-time waiver applies" in first_turn
+    assert any(e == "late_change" for e, _ in rec)
+    app_mod.claude.queue.append(final(reply="ok", intent="faq"))
+    post(client, inbound(msg_id="wamid.in2", text="another question"))
+    second_turn = app_mod.claude.requests[1]["messages"][-1]["content"][0]["text"]
+    assert "1 earlier late change(s) on record" in second_turn

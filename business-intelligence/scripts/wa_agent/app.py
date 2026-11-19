@@ -31,6 +31,7 @@ The life of a customer message (handle_inbound):
 from __future__ import annotations
 
 import hmac
+from datetime import datetime
 import logging
 import threading
 import time
@@ -39,7 +40,7 @@ from concurrent.futures import ThreadPoolExecutor
 from flask import Flask, jsonify, request
 
 from . import agent, config, events, learning, notify, tools
-from .policy import (AGENT, DRAFT, ESCALATE, HUMAN, PAUSED, SEND, SGT, WAITING,
+from .policy import (AGENT, DRAFT, ESCALATE, HUMAN, LATE_CHANGE_H, PAUSED, SEND, SGT, WAITING,
                      apply_idle_handback, handover_mode,
                      decide, gate, human_replied_since, is_acknowledgement, on_human_message,
                      reply_problems, set_mode)
@@ -203,6 +204,16 @@ def _test_show(client, wa_id: str, text: str) -> None:
 PATIENT_CACHE_S = 6 * 3600
 
 
+def _late_change_note(changes: list[dict]) -> str:
+    """Earlier late changes from this number (tracked since go-live), so the
+    agent only offers the first-time fee waiver once."""
+    if not changes:
+        return "no earlier late changes on record (first-time waiver applies)"
+    last = datetime.fromtimestamp(max(c["at"] for c in changes), SGT)
+    return (f"{len(changes)} earlier late change(s) on record, last {last:%d %b %Y} "
+            "(first-time waiver already used)")
+
+
 def _patient_for(st, wa_id: str, state) -> dict:
     """Who this number is (returning-patient recognition), looked up in code by
     the chat's own number and cached on the chat for a few hours."""
@@ -260,10 +271,13 @@ def handle_inbound(ev: Inbound, received: float) -> None:
 
     client.mark_read_typing(ev.msg_id)
     patient = _patient_for(st, ev.wa_id, state)
+    key = events.chat_key(ev.wa_id)
     res = agent.propose(history, wa_id=ev.wa_id, now=now, customer_name=ev.name,
                         client=model,
                         pending_for_chris=state.pending_for_chris if state.mode == WAITING else "",
-                        patient=tools.describe_patient(patient))
+                        patient="; ".join(filter(None, [
+                            tools.describe_patient(patient),
+                            _late_change_note(st.get_late_changes(key))])))
     p = res.proposal
     d = decide(p, intent_policy=learning.effective_policy(config.INTENT_POLICY,
                                                           st.get_autonomy()))
@@ -274,6 +288,12 @@ def handle_inbound(ev: Inbound, received: float) -> None:
                   input_tokens=res.input_tokens, output_tokens=res.output_tokens,
                   cache_read_tokens=res.cache_read_tokens,
                   cache_write_tokens=res.cache_write_tokens, cost_usd=round(res.cost_usd, 5))
+
+    if p.intent in ("reschedule", "cancel") and 0 <= p.hours_to_appointment < LATE_CHANGE_H:
+        st.add_late_change(key, {"at": round(time.time()), "kind": p.intent,
+                                 "hours": round(p.hours_to_appointment, 1)})
+        events.record("late_change", ev.wa_id, intent=p.intent,
+                      reason=f"hours:{p.hours_to_appointment:.0f}")
 
     notice = dict(customer=ev.name, wa_id=ev.wa_id, staff_note=p.staff_note,
                   suggested_reply=p.reply, reason=d.reason, last_message=ev.text,

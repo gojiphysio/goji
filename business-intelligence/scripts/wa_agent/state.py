@@ -55,6 +55,12 @@ class MemoryStore:
     def get_kill(self) -> bool:
         return self._kill
 
+    def get_late_changes(self, key: str) -> list[dict]:
+        return list(getattr(self, "_late", {}).get(key, []))
+
+    def add_late_change(self, key: str, entry: dict) -> None:
+        self.__dict__.setdefault("_late", {}).setdefault(key, []).append(entry)
+
     def get_autonomy(self) -> dict:
         import copy
         return copy.deepcopy(getattr(self, "_autonomy", {}))
@@ -97,6 +103,18 @@ class FirestoreStore:
     def set_kill(self, on: bool) -> None:
         self._flags.document("kill_switch").set({"on": on, "at": time.time()})
         self._kill_cache = (time.monotonic(), on)
+
+    # Late changes (cancel/reschedule inside 24h) per chat, kept beyond the
+    # transcript TTL so the first-time fee waiver can be checked. Keyed by the
+    # salted chat hash; holds dates and hours of notice only, no text.
+    def get_late_changes(self, key: str) -> list[dict]:
+        snap = self._db.collection("wa_agent_late_changes").document(key).get()
+        return (snap.to_dict() or {}).get("changes", []) if snap.exists else []
+
+    def add_late_change(self, key: str, entry: dict) -> None:
+        from google.cloud import firestore
+        self._db.collection("wa_agent_late_changes").document(key).set(
+            {"changes": firestore.ArrayUnion([entry])}, merge=True)
 
     def get_autonomy(self) -> dict:
         """Per-intent auto-send record for automatic demotion (learning.py).

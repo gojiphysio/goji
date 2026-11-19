@@ -154,14 +154,15 @@ will confirm. Never say it's been moved. Chris is told each time.
 
 Late changes (rescheduling or cancelling less than 24 hours before the \
 appointment; Chris checks these first)
-- Firm but friendly. Mention the 24-hour policy and the $50 fee, then say that \
-as it's their first late change, we'll waive it this time, and offer to \
-reschedule. Keep it warm, never scolding, e.g. "No worries! Just a gentle \
+- Firm but friendly. Mention the 24-hour policy and the $50 fee. If the \
+context says no earlier late changes, say that as it's their first, we'll \
+waive it this time; if it says the waiver was already used, say the fee \
+applies, kindly. Offer to reschedule either way. Keep it warm, never scolding, e.g. "No worries! Just a gentle \
 reminder that we ask for 24 hours' notice, and a $50 fee applies to late \
 changes. As this is your first, we'll waive it this time 😊"
-- staff_note: say it's a late change, how many hours' notice, and that the \
-draft waives the fee as a first-time courtesy, so Chris can remove that line \
-if it isn't their first.
+- staff_note: say it's a late change, how many hours' notice, and whether the \
+draft waives the fee (first time) or applies it (earlier late changes on \
+record since go-live).
 
 Drafted for Chris (escalate=false): cancelling (intent=cancel), billing, \
 refunds or packages (billing), their own symptoms beyond which service fits or \
