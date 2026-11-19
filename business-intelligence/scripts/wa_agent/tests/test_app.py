@@ -476,7 +476,7 @@ def test_a_photo_is_left_for_the_team(env):
 
 import json as _json
 
-BOOK = {"service": "physiotherapy", "date": "2026-11-26", "time": "10:00", "options": "",
+BOOK = {"service": "physiotherapy", "date": "2026-11-26", "time": "10:00", "options": "", "for_whom": "self", "booked_by": "", "patient_age": "",
         "clinician": "Kristy", "physio_focus": "", "variant": "", "format": "clinic",
         "full_name": "Charles Tan", "email": "", "address": "", "notes": ""}
 
@@ -492,7 +492,7 @@ def _final_with(reply, intent="booking", **extra):
 def test_booking_needs_a_yes_in_a_later_message(env, monkeypatch):
     client, rec, _ = env
     calls = []
-    monkeypatch.setattr(app_mod.booking_client, "book", lambda b, wa_id: calls.append(b) or
+    monkeypatch.setattr(app_mod.booking_client, "book", lambda b, wa_id, patient_id="": calls.append({**b, "_pid": patient_id}) or
                         {"ok": True, "reference": "GOJI-AB12CD", "clinician_name": "Kristy Ng",
                          "service": "Physiotherapy", "date": b["date"], "time": b["time"],
                          "dry_run": True})
@@ -515,7 +515,7 @@ def test_booking_needs_a_yes_in_a_later_message(env, monkeypatch):
 def test_the_model_cannot_book_in_the_same_turn_it_states_the_details(env, monkeypatch):
     client, rec, _ = env
     monkeypatch.setattr(app_mod.booking_client, "book",
-                        lambda b, wa_id: pytest.fail("booked without a confirmation"))
+                        lambda b, wa_id, patient_id="": pytest.fail("booked without a confirmation"))
     app_mod.claude.queue.append(_final_with("Booked!", booking=BOOK, confirm_booking=True))
     post(client, inbound(text="book me Thursday 10am"))
     assert ("book_skipped", {"reason": "no_pending_booking"}) in rec
@@ -523,7 +523,7 @@ def test_the_model_cannot_book_in_the_same_turn_it_states_the_details(env, monke
 
 def test_a_taken_slot_gets_an_apology_and_tells_chris(env, monkeypatch):
     client, rec, notes = env
-    def taken(b, wa_id):
+    def taken(b, wa_id, patient_id=""):
         raise app_mod.booking_client.BookingFailed("gone", "slot_taken")
     monkeypatch.setattr(app_mod.booking_client, "book", taken)
     app_mod.claude.queue.append(_final_with("Shall I book it?", booking=BOOK))
@@ -639,7 +639,7 @@ def test_a_time_that_was_never_offered_is_not_moved(env, monkeypatch):
 def test_picking_an_offered_booking_time_books_it(env, monkeypatch):
     client, rec, _ = env
     calls = []
-    monkeypatch.setattr(app_mod.booking_client, "book", lambda b, wa_id: calls.append(b) or
+    monkeypatch.setattr(app_mod.booking_client, "book", lambda b, wa_id, patient_id="": calls.append({**b, "_pid": patient_id}) or
                         {"ok": True, "reference": "GOJI-B3", "clinician_name": "Kristy",
                          "service": "Physiotherapy", "date": b["date"], "time": b["time"],
                          "dry_run": True})
@@ -678,3 +678,23 @@ def test_a_reply_goes_out_as_bubbles_with_typing_between(env):
     assert app_mod.wa.typing.count("wamid.in1") == 3        # once before, once per later bubble
     stored = app_mod.store.load(CUSTOMER).history[-1]["text"]
     assert "<break>" not in stored and stored.count("\n\n") == 2
+
+
+def test_booking_for_a_wife_never_lands_on_the_husbands_record(env, monkeypatch):
+    client, rec, _ = env
+    monkeypatch.setattr(app_mod.tools, "patient_context", lambda wa_id: {
+        "returning": True, "first_name": "Charles", "patients_on_number": 1,
+        "patient_ids": ["CHARLES"], "records": [{"id": "CHARLES", "name": "Charles Tan"}]})
+    calls = []
+    monkeypatch.setattr(app_mod.booking_client, "book", lambda b, wa_id, patient_id="":
+                        calls.append((b, patient_id)) or
+                        {"ok": True, "reference": "GOJI-W1", "clinician_name": "Kristy",
+                         "date": b["date"], "time": b["time"], "dry_run": True})
+    wife = {**BOOK, "full_name": "Mei Tan", "for_whom": "wife", "booked_by": "Charles",
+            "patient_age": ""}
+    app_mod.claude.queue.append(_final_with("Shall I book it for Mei?", booking=wife))
+    post(client, inbound(text="book my wife Mei Tan in for postnatal physio Thursday 10am"))
+    app_mod.claude.queue.append(_final_with("Booking!", booking=wife, confirm_booking=True))
+    post(client, inbound(msg_id="wamid.in2", text="yes"))
+    assert calls and calls[0][1] == ""                    # a new record in Mei's name
+    assert app_mod.wa.sent[-1][1].startswith("Mei is booked!")

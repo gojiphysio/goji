@@ -130,7 +130,8 @@ BOOKED_VIA = {"web": "website", "whatsapp": "WhatsApp assistant"}
 
 def create_booking(plato, draft: dict, *, now: datetime | None = None,
                    email_required: bool = True, dry_run: bool = False,
-                   source: str = "web") -> dict:
+                   source: str = "web", patient_id: str = "",
+                   create_patient: bool = False) -> dict:
     """Validate + create a booking. Raises BookingError on any problem.
 
     draft keys: service, date (YYYY-MM-DD), time (HH:MM), format ('clinic'|'home'),
@@ -266,10 +267,20 @@ def create_booking(plato, draft: dict, *, now: datetime | None = None,
                 # Everything above ran for real; stop before the only write.
                 ids, reference = [], "DRYRUN-" + uuid.uuid4().hex[:6].upper()
             else:
+                # WhatsApp bookings are linked to the patient's own record: the
+                # one the assistant matched by name AND number, or a new record
+                # in the patient's name (the texter may be booking for a spouse
+                # or child who shares their number, so a phone match alone
+                # would land on the wrong person). Website bookings stay as
+                # they are: unlinked until staff register the patient.
+                created_patient = False
+                if create_patient and not patient_id:
+                    patient_id = _create_patient(plato, name, phone, email)
+                    created_patient = True
                 ids, visit_id = _create_appointments(
                     plato, svc, cid, day, time_, home, name, phone, email, address,
                     notes, clinician_requested, focus_label, variant,
-                    booked_via=BOOKED_VIA.get(source, "website"))
+                    booked_via=BOOKED_VIA.get(source, "website"), patient_id=patient_id)
                 reference = "GOJI-" + visit_id[-6:].upper()
             return {
                 "ok": True,
@@ -289,8 +300,25 @@ def create_booking(plato, draft: dict, *, now: datetime | None = None,
                 "date": day.isoformat(),
                 "time": time_,
                 "home": home,
+                "patient_id": "" if dry_run else patient_id,
+                "patient_created": (not dry_run) and created_patient,
             }
     raise last_err or BookingError("That time is no longer available.", "slot_taken")
+
+
+def _create_patient(plato, name: str, phone: str, email: str = "") -> str:
+    """A new Plato patient for a WhatsApp booking (the patient may not be the
+    person texting; the texter's number is the contact). Returns its id."""
+    payload = {"name": name, "handphone": phone, **({"email": email} if email else {})}
+    try:
+        r = plato.post("patient", payload) or {}
+    except Exception as e:
+        raise BookingError("Could not register the patient. Please try again or message us.",
+                           "plato_error") from e
+    pid = r.get("_id") or r.get("id") or ""
+    if not pid:
+        raise BookingError("Plato did not accept the new patient.", "plato_error")
+    return pid
 
 
 def _post(plato, payload: dict) -> str:
@@ -304,7 +332,7 @@ def _post(plato, payload: dict) -> str:
 def _create_appointments(plato, svc, cid, day, time_, home, name, phone, email,
                          address, notes="", clinician_requested=False,
                          focus_label="", variant="",
-                         booked_via="website") -> tuple[list[str], str]:
+                         booked_via="website", patient_id: str = "") -> tuple[list[str], str]:
     """Create the appointment(s). Returns (all_ids, visit_id). Rolls back on any
     failure so a partial home visit never lingers."""
     clin = CLINICIANS[cid]
@@ -329,6 +357,8 @@ def _create_appointments(plato, svc, cid, day, time_, home, name, phone, email,
     # email field and connect False: Plato's portal invite needs an address.
     contact = ({"email": email, "handphone": phone, "connect": True} if email
                else {"handphone": phone, "connect": False})
+    if patient_id:
+        contact["patient_id"] = patient_id
     created: list[str] = []
     try:
         if home:

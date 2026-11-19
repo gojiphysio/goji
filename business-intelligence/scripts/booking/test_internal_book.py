@@ -101,7 +101,8 @@ def test_right_token_books_without_bot_checks(client, monkeypatch):
     r = _ibook(client, company_url="x", elapsed_ms=10)
     assert r.status_code == 200
     draft, kw = client.calls["booked"][0]
-    assert kw == {"email_required": False, "dry_run": False, "source": "whatsapp"}
+    assert kw == {"email_required": False, "dry_run": False, "source": "whatsapp",
+                  "patient_id": "", "create_patient": False}
 
 
 # ---- request validation -----------------------------------------------------
@@ -413,3 +414,34 @@ def test_admin_email_for_website_is_unchanged(monkeypatch):
     body = sent[0].get_content()
     assert sent[0]["Subject"].startswith("New website booking")
     assert "came in via the website" in body and "Plato's confirmation" in body
+
+
+def test_whatsapp_booking_links_or_creates_the_patients_own_record(monkeypatch):
+    """The texter may book for a spouse or child on the same number: the
+    appointment goes on the patient's record, never the texter's by phone."""
+    from booking import booking as bk
+    posted, appts = [], []
+
+    class P:
+        def post(self, path, payload):
+            posted.append((path, payload))
+            return {"_id": "NEWPATIENT1"}
+
+    monkeypatch.setattr(bk, "_create_appointments",
+                        lambda *a, **k: (appts.append(k.get("patient_id")) or (["A1"], "VISIT000001")))
+    assert bk._create_patient(P(), "Mei Tan", "+6582823628") == "NEWPATIENT1"
+    assert posted == [("patient", {"name": "Mei Tan", "handphone": "+6582823628"})]
+
+
+def test_create_patient_failure_is_a_booking_error():
+    from booking import booking as bk
+
+    class P:
+        def post(self, path, payload):
+            return {}
+    try:
+        bk._create_patient(P(), "Mei Tan", "+6582823628")
+    except bk.BookingError as e:
+        assert e.code == "plato_error"
+    else:
+        raise AssertionError("expected BookingError")

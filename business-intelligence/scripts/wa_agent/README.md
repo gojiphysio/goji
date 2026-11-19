@@ -314,6 +314,17 @@ The agent books new appointments in the chat. The model never books:
    answer (`confirmation_text`), so it can't claim a booking that didn't happen.
    A taken slot gets an apology and Chris an email.
 
+**Booking for someone else** (a husband for his wife, a parent for a child):
+the agent asks the patient's own full name (and a child's age) and books under
+it, with the texter's number as the contact; the Plato note says who booked.
+The appointment is linked to the patient's own record: an existing one on the
+number only if the name matches (`tools.record_for_booking`), otherwise a new
+record in the patient's name (goji-booking `create_patient`). Never the
+texter's record by phone. Website bookings are unchanged (unlinked until staff
+register the patient). The live Plato test must confirm the patient-create
+payload (`name`, `handphone`, `email`) and that `patient_id` on the appointment
+links it.
+
 **Dry run by default** (`WA_AGENT_BOOKING_DRY_RUN`, deploy sets 1): goji-booking
 validates and checks the slot but writes nothing to Plato, and the
 confirmation says so. Set it to 0 at go-live. `WA_AGENT_BOOKING_SIMULATE=1`

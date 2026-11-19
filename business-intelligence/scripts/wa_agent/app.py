@@ -250,8 +250,10 @@ def _book_pending(state, ev: Inbound, received: float, fallback: str,
     if not booking_client.complete(pending):
         events.record("book_skipped", ev.wa_id, reason="details_missing")
         return fallback, None
+    patient_id = tools.record_for_booking(state.patient or {}, pending.get("full_name", ""),
+                                          pending.get("for_whom", ""))
     try:
-        res = booking_client.book(pending, wa_id=ev.wa_id)
+        res = booking_client.book(pending, wa_id=ev.wa_id, patient_id=patient_id)
     except booking_client.BookingFailed as e:
         state.pending_booking = {}
         events.record("book_failed", ev.wa_id, reason=e.code)

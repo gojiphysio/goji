@@ -177,3 +177,14 @@ def test_find_booking_needs_name_and_number_to_match(monkeypatch):
     _, err = tools.run_tool("find_booking", {"full_name": "Sarah Tan", "phone": "91234567"},
                             wa_id="6580000000", bq=bq)
     assert err                                            # more than 3 tries in one chat
+
+
+def test_record_for_booking_never_uses_the_texters_record_for_someone_else():
+    p = {"records": [{"id": "CHARLES", "name": "Charles Tan"}]}
+    assert tools.record_for_booking(p, "Mei Tan", "wife") == ""            # new record for her
+    assert tools.record_for_booking(p, "Charles Tan", "self") == "CHARLES"
+    assert tools.record_for_booking(p, "Charles", "self") == "CHARLES"      # one record, first name fits
+    family = {"records": [{"id": "MUM", "name": "Lim Mei Ling"}, {"id": "KID", "name": "Lim Ethan"}]}
+    assert tools.record_for_booking(family, "Ethan Lim", "son") == "KID"
+    assert tools.record_for_booking(family, "Ethan", "son") == ""          # one word isn't enough
+    assert tools.record_for_booking({}, "Jamie Lee", "self") == ""

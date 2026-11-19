@@ -79,7 +79,7 @@ def _clinician_id(name: str) -> str:
     return CLINICIAN_IDS.get((name or "").strip().split(" ")[0].lower(), "")
 
 
-def book(b: dict, *, wa_id: str, http=requests) -> dict:
+def book(b: dict, *, wa_id: str, patient_id: str = "", http=requests) -> dict:
     """{ok, reference, clinician_name, service, date, time, dry_run} or BookingFailed."""
     if config.BOOKING_SIMULATE and config.STATE_BACKEND == "memory":
         return _simulate(b, http)
@@ -91,7 +91,10 @@ def book(b: dict, *, wa_id: str, http=requests) -> dict:
             "clinician_id": _clinician_id(b.get("clinician", "")),
             "physio_focus": b.get("physio_focus", ""), "variant": b.get("variant", ""),
             "address": b.get("address", ""), "notes": booking_note(b),
-            "source": "whatsapp", "dry_run": config.BOOKING_DRY_RUN}
+            "source": "whatsapp", "dry_run": config.BOOKING_DRY_RUN,
+            # The patient's own record (matched by name and number), or a new
+            # one: the texter may be booking for someone on the same number.
+            "patient_id": patient_id, "create_patient": not patient_id}
     try:
         r = http.post(f"{config.BOOKING_API_BASE}/internal/book", json=body, timeout=30,
                       headers={"X-Internal-Token": config.INTERNAL_TOKEN})

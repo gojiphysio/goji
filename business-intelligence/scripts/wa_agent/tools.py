@@ -313,6 +313,8 @@ appts AS (
 SELECT
   (SELECT COUNT(DISTINCT patient_id) FROM patients) AS n_patients,
   (SELECT ARRAY_AGG(DISTINCT patient_id) FROM patients) AS patient_ids,
+  (SELECT ARRAY_AGG(STRUCT(c.patient_id AS id, c.full_name AS name))
+     FROM `{project}.marts.dim_patient_contact` c JOIN patients p USING (patient_id)) AS records,
   (SELECT LOGICAL_OR('Late change waiver used' IN UNNEST(d.tags))
      FROM `{project}.marts.dim_patient` d JOIN patients p USING (patient_id)) AS waiver_used,
   (SELECT ANY_VALUE(first_name) FROM patients) AS first_name,
@@ -353,11 +355,29 @@ def patient_context(wa_id: str, *, bq=None) -> dict:
             "patients_on_number": row["n_patients"],
             # internal: for tagging in Plato, never shown to the model
             "patient_ids": list(row["patient_ids"] or []),
+            "records": [{"id": r["id"], "name": r["name"] or ""} for r in (row["records"] or [])],
             "waiver_used": bool(row["waiver_used"]),
             "next_appointment": ({"date": nxt["appt_date"].isoformat(), "time": nxt["time_sgt"],
                                   "with": CLINICIAN_NAMES.get(nxt["clinician_id"], "the team"),
                                   "type": nxt["treatment_type"]} if nxt else None),
             "last_visit": row["last_visit"].isoformat() if row["last_visit"] else None}
+
+
+def record_for_booking(patient: dict, full_name: str, for_whom: str) -> str:
+    """Which existing Plato record a WhatsApp booking belongs to, or "" (create
+    a new one). A record on this number only counts if the patient's name
+    matches it; the one exception is booking for oneself with exactly one
+    record on the number. Never the texter's record for someone else."""
+    records = (patient or {}).get("records") or []
+    named = [r for r in records if _name_matches(full_name, r.get("name", ""))]
+    if len(named) == 1:
+        return named[0]["id"]
+    self_booking = (for_whom or "self").strip().lower() in ("", "self")
+    if self_booking and len(records) == 1 and not named:
+        first = (full_name or "").split()
+        if first and first[0].lower() in records[0].get("name", "").lower():
+            return records[0]["id"]
+    return ""
 
 
 def describe_patient(p: dict) -> str:

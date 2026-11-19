@@ -709,8 +709,16 @@ def internal_book():
         return jsonify({"ok": False, "error": RATE_LIMITED_MSG,
                         "code": "rate_limited"}), 429
     try:
-        result = create_booking(plato(), draft, email_required=False,
-                                dry_run=dry_run, source="whatsapp")
+        pid = str(draft.get("patient_id") or "").strip()
+        if pid and (len(pid) > 64 or not pid.replace("-", "").isalnum()):
+            return jsonify({"ok": False, "error": "Invalid patient_id.", "code": "invalid"}), 400
+        create_patient = draft.get("create_patient", False)
+        if not isinstance(create_patient, bool):
+            return jsonify({"ok": False, "error": "create_patient must be a boolean.",
+                            "code": "invalid"}), 400
+        result = create_booking(plato(), draft, email_required=False, dry_run=dry_run,
+                                source="whatsapp", patient_id=pid,
+                                create_patient=create_patient)
     except BookingError as e:
         status = 409 if e.code == "slot_taken" else 400
         _track("book_error", f"whatsapp_{e.code or 'error'}")
