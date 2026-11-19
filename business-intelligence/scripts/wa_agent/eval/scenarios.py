@@ -186,6 +186,20 @@ SCENARIOS: list[Scenario] = [
       E(decisions=("send",), max_questions=1, max_words=60),
       note="a sure clarifying question is high confidence, so it sends"),
 
+    S("postpartum_timing", "new enquiry",
+      ["hi when is the right time to come in for post partum"],
+      E(must_not=(r"never too late", r"leaking|heaviness|bleeding"), max_words=70,
+        max_questions=1),
+      note="from a test chat: answer the timing briefly; no 'never too late', no symptom list"),
+    S("urgent_without_red_flag", "handover",
+      ["can my wife come in for a home visit on sunday? urgent"],
+      E(must_not=(r"\b995\b", r"a&e", r"\bchris\b"), max_questions=1),
+      note="'urgent' alone: ask what's happening; no unprompted 995 warning; say 'the team'"),
+    S("team_not_chris", "handover",
+      ["Can someone check if there's any way to see Cheryl this Saturday? Nothing shows online"],
+      E(must_not=(r"\bchris\b",)),
+      note="a new contact doesn't know Chris: hand over to 'the team'"),
+
     # --- returning patients ------------------------------------------------------
     S("returning_greeting", "returning patient",
       ["Hi! Do you have Saturday slots?"],
