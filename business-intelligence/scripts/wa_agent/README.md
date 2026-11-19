@@ -302,6 +302,32 @@ Added 19 Nov 2026.
   the two test numbers, to check the greeting and tone. Then one end-to-end
   test against real data before go-live, with a test patient in Plato.
 
+## Booking confirmations in the chat (planned)
+
+Added 19 Nov 2026. The agent should know when a customer books through its
+link, and say so in the chat ("You're all set for Thu 10am with Kristy! See you
+then"), so later flows (confirmations, reminders, direct booking) don't repeat
+or contradict each other.
+
+- **Signal, in real time:** when goji-booking confirms a booking whose
+  attribution carries a `wa-book` click with a `chat_ref` (or whose phone
+  number matches a chat), it calls an internal, authenticated wa_agent route,
+  e.g. `POST /internal/booking-confirmed` with the reference, service, date,
+  time and clinician. The `link_click_events` → `booking_funnel_events` join
+  is the batch version, and too slow for a reply.
+- **Map the hash back to the chat:** keep a `chat_key → wa_id` lookup in
+  Firestore beside the chat docs (same 30-day TTL), since `chat_key` can't be
+  reversed.
+- **In the chat:** a short acknowledgement (inside the 24-hour window, so no
+  template needed) and a `booked` note on the chat state: the agent stops
+  offering times for that need, and won't answer "can I book?" as if nothing
+  happened. Chris's booking emails and the reminder job read the same state, so
+  one confirmation goes out, not two.
+- **Learning loop:** records `booked` the moment it happens, not after the
+  nightly join.
+- **Overlaps:** direct booking (above) produces the same event from the agent's
+  own booking; returning-patient recognition uses the same chat lookup.
+
 ## Learning loop
 
 Every conversation is scored by how it ended, and a change to the agent
