@@ -601,6 +601,67 @@ def _wa_session_id(draft: dict) -> str:
     return "wa-" + hashlib.sha256(f"{digits[-8:]}:{day}".encode()).hexdigest()[:16]
 
 
+# Admin tags the WhatsApp assistant may add to a patient in Plato. An allowlist:
+# the route can't be used to write anything else to a patient record.
+ALLOWED_PATIENT_TAGS = frozenset({"Late change waiver used"})
+
+
+def _plato_tags(tag_field) -> list[str]:
+    """Plato's `tag` field ([{"tag": "..."}], defensively ["..."]) as names."""
+    if not isinstance(tag_field, list):
+        return []
+    out = []
+    for t in tag_field:
+        name = t.get("tag") if isinstance(t, dict) else t
+        if isinstance(name, str) and name.strip():
+            out.append(name.strip())
+    return out
+
+
+@app.route("/internal/patient-tag", methods=["POST"])
+def internal_patient_tag():
+    """Add an allowlisted admin tag to a patient (the WhatsApp assistant, e.g.
+    after Chris sends a late-change draft that waives the fee). Reads the
+    patient's current tags and writes them back with the new one: Plato
+    replaces the tag list as a whole, so sending only the new tag would drop
+    the others. `dry_run: true` reads but doesn't write. Same token as
+    /internal/book."""
+    if not INTERNAL_TOKEN:
+        return jsonify({"ok": False, "error": "not found", "code": "not_found"}), 404
+    token = request.headers.get("X-Internal-Token", "")
+    if not hmac.compare_digest(token.encode(), INTERNAL_TOKEN.encode()):
+        return jsonify({"ok": False, "error": "forbidden", "code": "forbidden"}), 403
+    body = request.get_json(silent=True)
+    if not isinstance(body, dict):
+        return jsonify({"ok": False, "error": "Expected a JSON object.", "code": "invalid"}), 400
+    patient_id = str(body.get("patient_id") or "").strip()
+    tag = str(body.get("tag") or "").strip()
+    dry_run = body.get("dry_run", False)
+    if not patient_id or not patient_id.replace("-", "").isalnum() or len(patient_id) > 64:
+        return jsonify({"ok": False, "error": "Invalid patient_id.", "code": "invalid"}), 400
+    if tag not in ALLOWED_PATIENT_TAGS:
+        return jsonify({"ok": False, "error": "Tag not allowed.", "code": "invalid"}), 400
+    if not isinstance(dry_run, bool):
+        return jsonify({"ok": False, "error": "dry_run must be a boolean.", "code": "invalid"}), 400
+    try:
+        patient = plato().get(f"/patient/{patient_id}")
+    except Exception as e:
+        log.warning("patient-tag: read failed for patient: %s", e)
+        return jsonify({"ok": False, "error": "Couldn't read the patient.", "code": "plato_error"}), 502
+    current = _plato_tags((patient or {}).get("tag"))
+    if tag in current:
+        return jsonify({"ok": True, "added": False, "dry_run": dry_run})
+    if not dry_run:
+        try:
+            plato().put(f"/patient/{patient_id}",
+                        {"tag": [{"tag": t} for t in current + [tag]]})
+        except Exception as e:
+            log.warning("patient-tag: write failed: %s", e)
+            return jsonify({"ok": False, "error": "Couldn't update the patient.",
+                            "code": "plato_error"}), 502
+    return jsonify({"ok": True, "added": True, "dry_run": dry_run})
+
+
 @app.route("/internal/book", methods=["POST"])
 def internal_book():
     """Book on behalf of the WhatsApp assistant.

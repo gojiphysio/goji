@@ -349,6 +349,13 @@ class PlatoClient:
         r.raise_for_status()
         return r.json()
 
+    def put(self, path: str, payload: dict):
+        """Plato PUT is a partial update: only the fields sent change."""
+        _limiter.acquire(PLATO_RATE_MAX_WAIT_S)
+        r = self.s.put(self._url(path), json=payload, timeout=self.timeout)
+        r.raise_for_status()
+        return r.json() if r.content else {}
+
     def delete(self, path: str):
         _limiter.acquire(PLATO_RATE_MAX_WAIT_S)
         r = self.s.delete(self._url(path), timeout=self.timeout)

@@ -524,3 +524,50 @@ def test_a_website_booking_is_acknowledged_in_the_chat(env, monkeypatch):
     unknown = client.post("/internal/booking-confirmed", json={**body, "phone": "+6580000000"},
                           headers={"X-Internal-Token": "t"})
     assert unknown.get_json() == {"matched": False}
+
+
+def _late_cancel_draft(reply="No worries! As it's your first late change, we'll waive the fee."):
+    r = final(reply=reply, intent="cancel")
+    r.content[0].text = r.content[0].text.replace('"staff_note"', '"hours_to_appointment": 3, "staff_note"')
+    return r
+
+
+def test_sending_the_waiver_draft_as_is_tags_the_patient_in_plato(env, monkeypatch):
+    client, rec, _ = env
+    monkeypatch.setattr(app_mod.tools, "patient_context", lambda wa_id: {
+        "returning": True, "first_name": "Sam", "patients_on_number": 1,
+        "patient_ids": ["p1"], "waiver_used": False, "next_appointment": None})
+    tagged = []
+    monkeypatch.setattr(app_mod.booking_client, "tag_patient",
+                        lambda pid: tagged.append(pid) or {"ok": True, "added": True})
+    app_mod.claude.queue.append(_late_cancel_draft())
+    post(client, inbound(text="sorry can't make it today"))
+    post(client, echo(text="No worries! As it's your first late change, we'll waive the fee."))
+    assert tagged == ["p1"]
+    assert ("patient_tagged", {"reason": "added"}) in rec
+
+
+def test_a_shared_number_asks_chris_to_tag_the_right_patient(env, monkeypatch):
+    client, rec, notes = env
+    monkeypatch.setattr(app_mod.tools, "patient_context", lambda wa_id: {
+        "returning": True, "first_name": "Mum", "patients_on_number": 2,
+        "patient_ids": ["p1", "p2"], "waiver_used": False, "next_appointment": None})
+    monkeypatch.setattr(app_mod.booking_client, "tag_patient",
+                        lambda pid: pytest.fail("tagged on a shared number"))
+    app_mod.claude.queue.append(_late_cancel_draft())
+    post(client, inbound(text="sorry can't make it today"))
+    post(client, echo(text="No worries! As it's your first late change, we'll waive the fee."))
+    assert ("patient_tag_skipped", {"reason": "several_patients_on_number"}) in rec
+    assert notes[-1][0] == "fyi"
+
+
+def test_the_plato_tag_means_no_waiver_is_offered(env, monkeypatch):
+    client, _, _ = env
+    monkeypatch.setattr(app_mod.tools, "patient_context", lambda wa_id: {
+        "returning": True, "first_name": "Sam", "patients_on_number": 1,
+        "patient_ids": ["p1"], "waiver_used": True, "next_appointment": None})
+    app_mod.claude.queue.append(final(intent="faq"))
+    post(client, inbound(text="hi"))
+    turn = app_mod.claude.requests[0]["messages"][-1]["content"][0]["text"]
+    assert "waiver already used (tagged in Plato)" in turn
+    assert "first-time waiver applies" not in turn

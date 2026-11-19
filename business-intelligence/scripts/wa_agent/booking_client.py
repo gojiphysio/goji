@@ -81,6 +81,30 @@ def book(b: dict, *, wa_id: str, http=requests) -> dict:
     return data
 
 
+WAIVER_TAG = "Late change waiver used"
+
+
+def tag_patient(patient_id: str, tag: str = WAIVER_TAG, *, http=requests) -> dict:
+    """Add an admin tag to the patient in Plato, through goji-booking (the one
+    service that writes to Plato). Dry run while bookings are."""
+    if config.BOOKING_SIMULATE and config.STATE_BACKEND == "memory":
+        log.info("simulate: would tag patient with %r", tag)
+        return {"ok": True, "added": True, "dry_run": True}
+    if not config.INTERNAL_TOKEN:
+        raise BookingFailed("tagging isn't set up", "not_configured")
+    try:
+        r = http.post(f"{config.BOOKING_API_BASE}/internal/patient-tag", timeout=20,
+                      headers={"X-Internal-Token": config.INTERNAL_TOKEN},
+                      json={"patient_id": patient_id, "tag": tag,
+                            "dry_run": config.BOOKING_DRY_RUN})
+        data = r.json()
+    except Exception as e:
+        raise BookingFailed(f"tagging failed: {e}", "unreachable")
+    if not data.get("ok"):
+        raise BookingFailed(data.get("error") or "tag refused", data.get("code") or "error")
+    return data
+
+
 def _simulate(b: dict, http) -> dict:
     """Local testing: confirm the slot is open, write nothing."""
     try:

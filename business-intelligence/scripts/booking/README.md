@@ -223,6 +223,14 @@ sending) — and a `confirmed` funnel event is logged.
 > `connect:true`. If that duplicates our email in practice, drop one after a live
 > test (either set `connect:false` or remove `send_customer_booking_email`).
 
+### `POST /internal/patient-tag` (WhatsApp assistant)
+Same token as `/internal/book`. Body `{patient_id, tag, dry_run?}`; only tags in
+`ALLOWED_PATIENT_TAGS` ("Late change waiver used"). Reads the patient's
+current tags and PUTs them back with the new one (Plato replaces the tag list
+as a whole). `dry_run` reads but doesn't write. **Verify once on a test patient
+in Plato before go-live** that the tag payload shape is accepted and existing
+tags survive.
+
 ## Config to keep in sync
 `config.py` mirrors the website's `src/lib/services.ts` + `clinicians.ts`
 (calendar `color`s, doctor codes, service→calendar/type). Source of truth is

@@ -54,7 +54,8 @@ def classify_echo(state, now: float) -> dict:
     draft = state.pending_draft or {}
     if draft and now - draft.get("at", 0) <= DRAFT_MATCH_WINDOW_S:
         state.pending_draft = {}
-        return {"intent": draft.get("intent"), "_draft_text": draft.get("text", "")}
+        return {"intent": draft.get("intent"), "_draft_text": draft.get("text", ""),
+                "_draft_meta": draft}
     auto = state.last_auto or {}
     if auto and now - auto.get("at", 0) <= RESCUE_WINDOW_S:
         state.last_auto = {}

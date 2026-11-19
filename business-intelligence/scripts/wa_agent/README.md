@@ -308,6 +308,25 @@ booking! You're all set for ..." in the chat. Either way the chat's `booked`
 note tells the model not to offer times for it again, and the learning loop
 records `booked` straight away. Needs goji-booking's `WA_AGENT_URL`.
 
+## Late changes and the first-time fee waiver (built 19 Nov 2026)
+
+Plato deletes cancellations, so late-change history is built from go-live:
+- **System of record: the Plato patient tag "Late change waiver used".** It's
+  on the patient (not a phone number), staff see it in Plato, and the nightly
+  patient sync copies tags to `marts.dim_patient`, which the patient lookup
+  reads. Not Plato notes: those are the clinical record.
+- **Who writes it:** when Chris sends the agent's late-change draft that
+  waives the fee unchanged, the service asks goji-booking to add the tag
+  (`POST /internal/patient-tag`, allowlisted tags only, reads the current tags
+  and writes them back with the new one). If several patients share the number,
+  or there's no record, Chris gets an email to tag the right patient herself.
+  If she edits the draft, the decision (and the tag) is hers.
+- **Cache:** the service also records each late change against the chat's
+  hash (`wa_agent_late_changes`, dates and hours of notice only), which covers
+  the gap until the nightly sync and people who aren't patients yet.
+- Dry run while bookings are (`WA_AGENT_BOOKING_DRY_RUN`): goji-booking reads
+  the patient but doesn't write the tag.
+
 ## Returning-patient recognition (built 19 Nov 2026)
 
 `tools.patient_context` + `app._patient_for`, cached on the chat for 6 hours; on with

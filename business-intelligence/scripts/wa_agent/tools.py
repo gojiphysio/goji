@@ -301,6 +301,9 @@ appts AS (
 )
 SELECT
   (SELECT COUNT(DISTINCT patient_id) FROM patients) AS n_patients,
+  (SELECT ARRAY_AGG(DISTINCT patient_id) FROM patients) AS patient_ids,
+  (SELECT LOGICAL_OR('Late change waiver used' IN UNNEST(d.tags))
+     FROM `{project}.marts.dim_patient` d JOIN patients p USING (patient_id)) AS waiver_used,
   (SELECT ANY_VALUE(first_name) FROM patients) AS first_name,
   (SELECT AS STRUCT appt_date, time_sgt, clinician_id, treatment_type FROM appts
     WHERE appt_date >= CURRENT_DATE('Asia/Singapore')
@@ -337,6 +340,9 @@ def patient_context(wa_id: str, *, bq=None) -> dict:
     nxt = row["next_appt"]
     return {"returning": True, "first_name": row["first_name"] or "",
             "patients_on_number": row["n_patients"],
+            # internal: for tagging in Plato, never shown to the model
+            "patient_ids": list(row["patient_ids"] or []),
+            "waiver_used": bool(row["waiver_used"]),
             "next_appointment": ({"date": nxt["appt_date"].isoformat(), "time": nxt["time_sgt"],
                                   "with": CLINICIAN_NAMES.get(nxt["clinician_id"], "the team"),
                                   "type": nxt["treatment_type"]} if nxt else None),
@@ -358,6 +364,8 @@ def describe_patient(p: dict) -> str:
                 else "no upcoming appointment")
     if p.get("last_visit"):
         bits.append(f"last visit {p['last_visit']}")
+    if p.get("waiver_used"):
+        bits.append("first-time late-change waiver already used (tagged in Plato)")
     return "; ".join(bits)
 
 

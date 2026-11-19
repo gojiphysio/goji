@@ -13,7 +13,7 @@ def test_draft_outcome_labels():
 def test_echo_after_draft_scores_the_draft_and_clears_it():
     s = ChatState(wa_id="1", pending_draft={"text": "hi", "intent": "booking", "at": 100.0})
     sig = learning.classify_echo(s, 200.0)
-    assert sig == {"intent": "booking", "_draft_text": "hi"} and s.pending_draft == {}
+    assert sig["intent"] == "booking" and sig["_draft_text"] == "hi" and s.pending_draft == {}
 
 
 def test_echo_after_auto_send_is_a_rescue_once():

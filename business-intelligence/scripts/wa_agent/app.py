@@ -167,11 +167,14 @@ def handle_echo(ev: Echo) -> None:
         on_human_message(state, now)
         append_history(state, "staff", ev.text, ev.ts, ev.msg_id)
         st.save(state)
+    meta = signal.pop("_draft_meta", {}) or {}
     draft_text = signal.pop("_draft_text", None)
     if draft_text is not None:
         signal["draft_similarity"], signal["draft_outcome"] = \
             learning.draft_outcome(draft_text, ev.text)
     events.record("echo", ev.wa_id, echo_lag_s=round(time.time() - ev.ts, 1), **signal)
+    if meta.get("waives_fee") and signal.get("draft_outcome") == "sent_unchanged":
+        _submit(_tag_waiver_used, st, ev.wa_id, state.patient)
     _mode_event(state, old, time.time())
     if signal.get("rescue") and signal.get("intent"):
         _note_rescue(st, signal["intent"], ev.wa_id)
@@ -200,6 +203,27 @@ def _test_show(client, wa_id: str, text: str) -> None:
             client.send_text(wa_id, "🧪 TEST MODE (customers never see this)\n\n" + text)
         except Exception as e:
             log.warning("test-mode send failed: %s", e)
+
+
+def _tag_waiver_used(st, wa_id: str, patient: dict) -> None:
+    """Chris sent the late-change draft that waives the fee as is: record the
+    waiver on the patient in Plato (the system of record), so it's used once."""
+    ids = (patient or {}).get("patient_ids") or []
+    if len(ids) != 1:
+        reason = "no_patient_record" if not ids else "several_patients_on_number"
+        events.record("patient_tag_skipped", wa_id, reason=reason)
+        notify.send("fyi", customer="", wa_id=wa_id, suggested_reply="",
+                    staff_note="You sent the late-change draft that waives the fee. Please "
+                               "add the 'Late change waiver used' tag to the right patient "
+                               "in Plato (the assistant couldn't tell which one).",
+                    reason=reason, last_message="")
+        return
+    try:
+        res = booking_client.tag_patient(ids[0])
+        events.record("patient_tagged", wa_id, reason="dry_run" if res.get("dry_run")
+                      else ("added" if res.get("added") else "already_tagged"))
+    except booking_client.BookingFailed as e:
+        events.record("patient_tag_failed", wa_id, reason=e.code)
 
 
 def _book_pending(state, ev: Inbound, received: float, fallback: str) -> tuple[str, dict | None]:
@@ -255,9 +279,11 @@ def _booked_note(state) -> str:
             f"{' (test dry run)' if b.get('dry_run') else ''}; don't offer times for it again")
 
 
-def _late_change_note(changes: list[dict]) -> str:
-    """Earlier late changes from this number (tracked since go-live), so the
-    agent only offers the first-time fee waiver once."""
+def _late_change_note(changes: list[dict], tagged: bool = False) -> str:
+    """Earlier late changes from this number (tracked since go-live) or the
+    Plato tag, so the agent only offers the first-time fee waiver once."""
+    if tagged and not changes:
+        return ""  # describe_patient already says the waiver was used
     if not changes:
         return "no earlier late changes on record (first-time waiver applies)"
     last = datetime.fromtimestamp(max(c["at"] for c in changes), SGT)
@@ -325,12 +351,14 @@ def handle_inbound(ev: Inbound, received: float) -> None:
     client.mark_read_typing(ev.msg_id)
     patient = _patient_for(st, ev.wa_id, state)
     key = events.chat_key(ev.wa_id)
+    earlier_late = st.get_late_changes(key)
+    waiver_used = bool(earlier_late) or bool(patient.get("waiver_used"))
     res = agent.propose(history, wa_id=ev.wa_id, now=now, customer_name=ev.name,
                         client=model,
                         pending_for_chris=state.pending_for_chris if state.mode == WAITING else "",
                         patient="; ".join(filter(None, [
                             tools.describe_patient(patient),
-                            _late_change_note(st.get_late_changes(key)),
+                            _late_change_note(earlier_late, patient.get("waiver_used")),
                             _booked_note(state)])))
     p = res.proposal
     d = decide(p, intent_policy=learning.effective_policy(config.INTENT_POLICY,
@@ -358,9 +386,12 @@ def handle_inbound(ev: Inbound, received: float) -> None:
         notify.send("media", **{**notice, "last_message": ev.text[:1500]})
 
     if d.action == DRAFT:
+        late = (p.intent in ("reschedule", "cancel")
+                and 0 <= p.hours_to_appointment < LATE_CHANGE_H)
         with locks(ev.wa_id):
             state = st.load(ev.wa_id)
-            state.pending_draft = {"text": p.reply, "intent": p.intent, "at": time.time()}
+            state.pending_draft = {"text": p.reply, "intent": p.intent, "at": time.time(),
+                                   "waives_fee": late and not waiver_used}
             state.last_auto = {}
             st.save(state)
         notify.send("drafted", **notice)
