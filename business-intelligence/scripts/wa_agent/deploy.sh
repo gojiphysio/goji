@@ -102,6 +102,9 @@ gcloud firestore databases describe --database="(default)" >/dev/null 2>&1 || \
   gcloud firestore databases create --location="${REGION}" --type=firestore-native --quiet
 gcloud firestore fields ttls update expire_at --collection-group=wa_chats \
   --enable-ttl --async --quiet >/dev/null 2>&1 || echo "    (TTL policy already set)"
+# Pause records for paused chats (no text), kept a year (state.HOLD_DAYS).
+gcloud firestore fields ttls update expire_at --collection-group=wa_chats_holds \
+  --enable-ttl --async --quiet >/dev/null 2>&1 || echo "    (holds TTL policy already set)"
 
 echo "==> 4/7 Events table + write grant"
 bq query --use_legacy_sql=false --quiet \

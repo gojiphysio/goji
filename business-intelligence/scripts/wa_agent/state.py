@@ -16,6 +16,8 @@ The flags collection (`<collection>_flags`) holds small global docs:
   history_imported  {on, at, source}               coexistence history import landed
   golive            {at, source}                   go-live moment (the 30-day cut-off)
   codes             {next}                         counter for chat codes ("004")
+  (and <collection>_holds/{wa_id}: {mode, mode_reason, mode_since, code},
+   kept HOLD_DAYS for paused chats, no text)
   staff             {windows: {wa_id: ts},         staff numbers' last inbound (24h window)
                      welcomed: {wa_id: ts}}        and who has had the walkthrough
 """
@@ -29,6 +31,11 @@ from . import config
 from .policy import ChatState
 
 RETENTION_DAYS = 30
+# A paused chat stays paused after its transcript expires: a small "hold"
+# record (mode, reason, code; no text) outlives the chat doc, so a customer
+# coming back after 30 quiet days still reaches Chris, not the agent
+# (Chris, 19 Nov 2026: silent until she resumes it). Removed on resume/forget.
+HOLD_DAYS = 365
 HISTORY_KEEP = 50
 SEEN_KEEP = 200
 OUTCOMES_KEEP = 20
@@ -50,6 +57,21 @@ def mark_seen(state: ChatState, msg_id: str) -> bool:
     state.seen_ids.append(msg_id)
     del state.seen_ids[:-SEEN_KEEP]
     return True
+
+
+def hold_doc(state: ChatState) -> dict:
+    return {"mode": state.mode, "mode_reason": state.mode_reason,
+            "mode_since": state.mode_since, "code": state.code}
+
+
+def from_hold(wa_id: str, hold: dict | None) -> ChatState:
+    """A chat with no doc: fresh, or still paused if a hold record exists."""
+    if not hold:
+        return ChatState(wa_id=wa_id)
+    return ChatState(wa_id=wa_id, mode=hold.get("mode", "paused"),
+                     mode_reason=hold.get("mode_reason", ""),
+                     mode_since=float(hold.get("mode_since") or 0),
+                     code=hold.get("code", ""), held=True)
 
 
 def format_code(n: int) -> str:
@@ -84,15 +106,28 @@ class MemoryStore:
 
     def load(self, wa_id: str) -> ChatState:
         d = self._chats.get(wa_id)
-        return ChatState.from_dict(d) if d else ChatState(wa_id=wa_id)
+        if d:
+            return ChatState.from_dict(d)
+        return from_hold(wa_id, getattr(self, "_holds", {}).get(wa_id))
 
     def save(self, state: ChatState) -> None:
+        holds = self.__dict__.setdefault("_holds", {})
+        if state.mode == "paused":
+            holds[state.wa_id], state.held = hold_doc(state), True
+        elif state.held:
+            holds.pop(state.wa_id, None)
+            state.held = False
         self._chats[state.wa_id] = state.to_dict()
         self._updated[state.wa_id] = time.time()
+
+    def expire_chat(self, wa_id: str) -> None:
+        """Tests: the transcript TTL ran out (the hold, if any, stays)."""
+        self._chats.pop(wa_id, None)
 
     def delete_chat(self, wa_id: str) -> None:
         self._chats.pop(wa_id, None)
         self._updated.pop(wa_id, None)
+        self.__dict__.setdefault("_holds", {}).pop(wa_id, None)
 
     def recent_chats(self, since: float) -> list[ChatState]:
         return [ChatState.from_dict(d) for w, d in self._chats.items()
@@ -125,7 +160,9 @@ class MemoryStore:
         return format_code(n)
 
     def find_by_code(self, code: str) -> str:
-        return next((w for w, d in self._chats.items() if d.get("code") == code), "")
+        found = next((w for w, d in self._chats.items() if d.get("code") == code), "")
+        return found or next((w for w, h in getattr(self, "_holds", {}).items()
+                              if h.get("code") == code), "")
 
     def paused_chats(self, limit: int = 50) -> list[ChatState]:
         return [ChatState.from_dict(d) for d in self._chats.values()
@@ -171,6 +208,7 @@ class FirestoreStore:
         self._db = firestore.Client(project=config.PROJECT)
         self._chats = self._db.collection(collection)
         self._flags = self._db.collection(f"{collection}_flags")
+        self._holds = self._db.collection(f"{collection}_holds")
         self._kill_cache: tuple[float, bool] = (0.0, False)
         self._rollout_cache: tuple[float, dict] = (-1e9, {})
         self._history_cache: tuple[float, bool] = (-1e9, False)
@@ -179,17 +217,29 @@ class FirestoreStore:
 
     def load(self, wa_id: str) -> ChatState:
         snap = self._chats.document(wa_id).get()
-        return ChatState.from_dict(snap.to_dict()) if snap.exists else ChatState(wa_id=wa_id)
+        if snap.exists:
+            return ChatState.from_dict(snap.to_dict())
+        hold = self._holds.document(wa_id).get()  # paused, transcript expired
+        return from_hold(wa_id, hold.to_dict() if hold.exists else None)
 
     def save(self, state: ChatState) -> None:
         from datetime import datetime, timedelta, timezone
+        now = datetime.now(timezone.utc)
+        if state.mode == "paused":
+            self._holds.document(state.wa_id).set(
+                {**hold_doc(state), "expire_at": now + timedelta(days=HOLD_DAYS)})
+            state.held = True
+        elif state.held:  # resumed: the pause record goes
+            self._holds.document(state.wa_id).delete()
+            state.held = False
         doc = state.to_dict()
-        doc["expire_at"] = datetime.now(timezone.utc) + timedelta(days=RETENTION_DAYS)
+        doc["expire_at"] = now + timedelta(days=RETENTION_DAYS)
         doc["updated_at"] = time.time()  # recent_chats (morning summary, staff status)
         self._chats.document(state.wa_id).set(doc)
 
     def delete_chat(self, wa_id: str) -> None:
         self._chats.document(wa_id).delete()
+        self._holds.document(wa_id).delete()
 
     def recent_chats(self, since: float) -> list[ChatState]:
         """Chat docs saved since `since` (epoch s). One single-field range
@@ -260,7 +310,15 @@ class FirestoreStore:
             q = self._chats.where(filter=FieldFilter("code", "==", code))
         except ImportError:
             q = self._chats.where("code", "==", code)
-        return next((snap.id for snap in q.limit(1).stream()), "")
+        found = next((snap.id for snap in q.limit(1).stream()), "")
+        if found:
+            return found
+        try:
+            from google.cloud.firestore_v1.base_query import FieldFilter
+            h = self._holds.where(filter=FieldFilter("code", "==", code))
+        except ImportError:
+            h = self._holds.where("code", "==", code)
+        return next((snap.id for snap in h.limit(1).stream()), "")
 
     def paused_chats(self, limit: int = 50) -> list[ChatState]:
         try:

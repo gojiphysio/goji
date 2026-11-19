@@ -61,6 +61,7 @@ class ChatState:
     last_auto: dict = field(default_factory=dict)      # {intent, at}: a rescue if Chris writes next
     owner: str = ""                # "agent" once the agent has taken the chat, else ""
     code: str = ""                 # short id staff use: "004" (resume 004)
+    held: bool = False             # a pause record exists in the holds store (state.py)
     last_customer_at: float = 0.0  # latest customer message (webhook or history import)
     last_staff_at: float = 0.0     # latest business-number message from the app (echo or import)
     name: str = ""                 # WhatsApp profile name, for staff pings and the summary

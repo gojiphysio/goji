@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS `goji-bi.marts.wa_agent_events` (
   event_id           STRING    NOT NULL,
   event              STRING    NOT NULL,
   chat_key           STRING    OPTIONS(description="Salted hash of the WhatsApp id. Not reversible, not a phone number."),
-  at                 TIMESTAMP NOT NULL,
+  `at`                 TIMESTAMP NOT NULL,
   kind               STRING    OPTIONS(description="inbound: text | image | audio | interactive ..."),
   webhook_lag_s      FLOAT64,
   echo_lag_s         FLOAT64,
@@ -55,18 +55,18 @@ CREATE TABLE IF NOT EXISTS `goji-bi.marts.wa_agent_events` (
   e2e_ms             INT64,
   kill_on            BOOL
 )
-PARTITION BY DATE(at);
+PARTITION BY DATE(`at`);
 
 -- One row per customer message the agent acted on: decision, timings, cost and
 -- when our reply was delivered. The Phase 0 latency/cost readout.
 CREATE OR REPLACE VIEW `goji-bi.marts.wa_agent_turns` AS
 WITH p AS (
-  SELECT chat_key, at, intent, confidence, decision, reason, agent_ms, tools,
+  SELECT chat_key, `at`, intent, confidence, decision, reason, agent_ms, tools,
          model, cost_usd
   FROM `goji-bi.marts.wa_agent_events` WHERE event = 'proposal'
 ),
 s AS (
-  SELECT chat_key, at, event AS outcome, wa_msg_id, e2e_ms
+  SELECT chat_key, `at`, event AS outcome, wa_msg_id, e2e_ms
   FROM `goji-bi.marts.wa_agent_events`
   WHERE event IN ('sent', 'escalated', 'drafted', 'superseded', 'send_failed')
 ),
@@ -76,16 +76,16 @@ d AS (
   GROUP BY wa_msg_id
 )
 SELECT
-  p.chat_key, p.at AS proposed_at, p.intent, p.confidence, p.decision, p.reason,
+  p.chat_key, p.`at` AS proposed_at, p.intent, p.confidence, p.decision, p.reason,
   p.agent_ms, p.tools, p.model, p.cost_usd,
   s.outcome, s.e2e_ms,
-  TIMESTAMP_DIFF(TIMESTAMP_SECONDS(CAST(d.delivered_ts AS INT64)), s.at, SECOND) AS send_to_delivered_s
+  TIMESTAMP_DIFF(TIMESTAMP_SECONDS(CAST(d.delivered_ts AS INT64)), s.`at`, SECOND) AS send_to_delivered_s
 FROM p
 LEFT JOIN s
   ON s.chat_key = p.chat_key
- AND s.at BETWEEN p.at AND TIMESTAMP_ADD(p.at, INTERVAL 2 MINUTE)
+ AND s.`at` BETWEEN p.`at` AND TIMESTAMP_ADD(p.`at`, INTERVAL 2 MINUTE)
 LEFT JOIN d USING (wa_msg_id)
-QUALIFY ROW_NUMBER() OVER (PARTITION BY p.chat_key, p.at ORDER BY s.at) = 1;
+QUALIFY ROW_NUMBER() OVER (PARTITION BY p.chat_key, p.`at` ORDER BY s.`at`) = 1;
 
 -- --- Learning signals (wa_agent/learning.py) ----------------------------------
 -- Labels only, never text: how Chris's reply compared with the agent's draft,
@@ -116,43 +116,43 @@ WITH ev AS (
     AND event IN ('inbound', 'proposal', 'sent', 'drafted', 'escalated', 'echo', 'feedback')
 ),
 inb AS (
-  SELECT chat_key, at, LAG(at) OVER (PARTITION BY chat_key ORDER BY at) AS prev_at
+  SELECT chat_key, `at`, LAG(`at`) OVER (PARTITION BY chat_key ORDER BY `at`) AS prev_at
   FROM ev WHERE event = 'inbound'
 ),
 convs AS (
-  SELECT chat_key, at AS conversation_start,
-         LEAD(at) OVER (PARTITION BY chat_key ORDER BY at) AS next_start
+  SELECT chat_key, `at` AS conversation_start,
+         LEAD(`at`) OVER (PARTITION BY chat_key ORDER BY `at`) AS next_start
   FROM inb
-  WHERE prev_at IS NULL OR TIMESTAMP_DIFF(at, prev_at, HOUR) >= 24
+  WHERE prev_at IS NULL OR TIMESTAMP_DIFF(`at`, prev_at, HOUR) >= 24
 ),
 tagged AS (
   SELECT c.conversation_start, e.*
   FROM convs c
   JOIN ev e
-    ON e.chat_key = c.chat_key AND e.at >= c.conversation_start
-   AND (c.next_start IS NULL OR e.at < c.next_start)
+    ON e.chat_key = c.chat_key AND e.`at` >= c.conversation_start
+   AND (c.next_start IS NULL OR e.`at` < c.next_start)
 ),
 agg AS (
   SELECT
     chat_key, conversation_start,
-    MAX(IF(event != 'feedback', at, NULL)) AS last_activity,
-    ARRAY_AGG(IF(event = 'proposal', intent, NULL) IGNORE NULLS ORDER BY at LIMIT 1)[SAFE_OFFSET(0)] AS first_intent,
+    MAX(IF(event != 'feedback', `at`, NULL)) AS last_activity,
+    ARRAY_AGG(IF(event = 'proposal', intent, NULL) IGNORE NULLS ORDER BY `at` LIMIT 1)[SAFE_OFFSET(0)] AS first_intent,
     COUNTIF(event = 'inbound')   AS customer_msgs,
     COUNTIF(event = 'sent')      AS auto_sent,
     COUNTIF(event = 'drafted')   AS drafted,
     COUNTIF(event = 'escalated') AS escalated,
     COUNTIF(event = 'echo')      AS staff_msgs,
     IFNULL(SUM(IF(event = 'proposal', cost_usd, NULL)), 0) AS cost_usd,
-    MIN(IF(event = 'inbound', at, NULL)) AS first_customer_at,
-    MIN(IF(event IN ('sent', 'escalated'), at, NULL)) AS first_agent_send_at,
-    MIN(IF(event = 'sent', at, NULL)) AS first_auto_at,
-    MIN(IF(event = 'echo', at, NULL)) AS first_echo_at,
+    MIN(IF(event = 'inbound', `at`, NULL)) AS first_customer_at,
+    MIN(IF(event IN ('sent', 'escalated'), `at`, NULL)) AS first_agent_send_at,
+    MIN(IF(event = 'sent', `at`, NULL)) AS first_auto_at,
+    MIN(IF(event = 'echo', `at`, NULL)) AS first_echo_at,
     LOGICAL_OR(event = 'echo' AND IFNULL(rescue, FALSE)) AS rescued,
-    ARRAY_AGG(IF(event = 'echo', draft_outcome, NULL) IGNORE NULLS ORDER BY at LIMIT 1)[SAFE_OFFSET(0)] AS draft_outcome,
-    MIN(IF(event = 'proposal' AND intent = 'human_requested', at, NULL)) AS asked_for_human_at,
+    ARRAY_AGG(IF(event = 'echo', draft_outcome, NULL) IGNORE NULLS ORDER BY `at` LIMIT 1)[SAFE_OFFSET(0)] AS draft_outcome,
+    MIN(IF(event = 'proposal' AND intent = 'human_requested', `at`, NULL)) AS asked_for_human_at,
     LOGICAL_OR(event = 'proposal' AND decision = 'send'
                AND STRPOS(IFNULL(tools, ''), 'booking_link') > 0) AS gave_link,
-    ARRAY_AGG(IF(event = 'feedback', rating, NULL) IGNORE NULLS ORDER BY at DESC LIMIT 1)[SAFE_OFFSET(0)] AS rating
+    ARRAY_AGG(IF(event = 'feedback', rating, NULL) IGNORE NULLS ORDER BY `at` DESC LIMIT 1)[SAFE_OFFSET(0)] AS rating
   FROM tagged
   GROUP BY chat_key, conversation_start
 ),
@@ -166,7 +166,7 @@ bookings AS (
   GROUP BY l.chat_ref, s.session_id
   UNION ALL
   -- booked in the chat by the agent, or confirmed back by goji-booking (not dry runs)
-  SELECT chat_key, at FROM `goji-bi.marts.wa_agent_events`
+  SELECT chat_key, `at` FROM `goji-bi.marts.wa_agent_events`
   WHERE event = 'booked' AND NOT STARTS_WITH(IFNULL(reason, ''), 'dry_run')
 ),
 booked AS (
@@ -225,7 +225,7 @@ FROM (
 CREATE OR REPLACE VIEW `goji-bi.marts.wa_agent_intent_autonomy` AS
 WITH e AS (
   SELECT * FROM `goji-bi.marts.wa_agent_events`
-  WHERE at >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 90 DAY)
+  WHERE `at` >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 90 DAY)
 ),
 p AS (
   SELECT intent, COUNT(*) AS proposals,
@@ -244,7 +244,7 @@ x AS (
   GROUP BY intent
 ),
 d AS (
-  SELECT intent, ARRAY_AGG(reason ORDER BY at DESC LIMIT 1)[SAFE_OFFSET(0)] AS last_change
+  SELECT intent, ARRAY_AGG(reason ORDER BY `at` DESC LIMIT 1)[SAFE_OFFSET(0)] AS last_change
   FROM `goji-bi.marts.wa_agent_events`
   WHERE event = 'autonomy' AND intent IS NOT NULL
   GROUP BY intent

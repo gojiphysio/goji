@@ -591,3 +591,28 @@ def test_welcome_covers_the_walkthrough():
     for must in ("RESUME 004", "PAUSE", "STOP", "START", "STATUS", "7:30", "go quiet"):
         assert must in staff.WELCOME
     assert len(staff.WELCOME) < 4096                       # one WhatsApp message
+
+
+def test_paused_chat_stays_paused_after_transcript_expires(env, with_staff):
+    client, rec, _, _ = env
+    now = int(time.time())
+    app_mod.claude.queue.append(final())
+    post(client, inbound(ts=now - 40 * DAY, msg_id="wamid.a"))
+    post(client, echo(ts=now - 40 * DAY + 60))
+    code = app_mod.store.load(CUSTOMER).code
+    app_mod.store.expire_chat(CUSTOMER)                       # 30-day TTL ran out
+    st = app_mod.store.load(CUSTOMER)
+    assert st.mode == PAUSED and st.history == [] and st.code == code
+    post(client, inbound(ts=now, msg_id="wamid.b"))           # back after 40 days
+    assert silent_reasons(rec)[-1] == "paused"
+    post(client, inbound(wa_id=CHRIS, text=f"resume {code}", ts=now, msg_id="s1"))
+    assert app_mod.store.load(CUSTOMER).mode == AGENT
+    app_mod.store.expire_chat(CUSTOMER)
+    assert app_mod.store.load(CUSTOMER).mode == AGENT        # the hold went on resume
+
+
+def test_forget_removes_the_hold(env):
+    client, rec, _, _ = env
+    post(client, echo(ts=int(time.time())))
+    client.post(f"/admin/chats/{CUSTOMER}/forget", headers=ADMIN)
+    assert app_mod.store.load(CUSTOMER).mode == AGENT
