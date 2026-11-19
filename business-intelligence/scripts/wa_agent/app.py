@@ -232,7 +232,7 @@ def _ping_staff(who: str, note: str) -> bool:
                 how = "text"
             else:
                 client.send_template(number, config.STAFF_TEMPLATE,
-                                     [staff.template_param(who, note)])
+                                     staff.template_params(who, note))
                 how = "template"
             ok = True
             events.record("staff_ping", "", reason=how)

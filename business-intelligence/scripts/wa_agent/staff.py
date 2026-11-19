@@ -11,7 +11,7 @@ Staff numbers (WA_AGENT_STAFF: Chris, optionally Charles) are never customers:
 app.handle_staff takes their messages before any patient lookup, model call
 or metric. A message from a staff number opens Meta's 24-hour window for that
 number, so pings inside it are free-form; outside it they go as the approved
-`goji_staff_alert` template.
+`goji_staff_alert_v2` template.
 
 Pure helpers; app.py does the sending. A ping never carries a customer's full
 phone number: a first name, or the last 4 digits.
@@ -58,11 +58,15 @@ def ping_text(who: str, note: str) -> str:
     return f"{head}: {note}. Open the chat in the Business app."
 
 
-def template_param(who: str, note: str) -> str:
-    """{{1}} of goji_staff_alert: short reason, one line, no phone numbers."""
-    note = redact(note).rstrip(" .") or "a chat needs a reply"
-    text = redact(f"{who}: {note}" if who else note)
+def _clip(text: str) -> str:
     return text if len(text) <= PARAM_MAX else text[:PARAM_MAX - 1].rstrip() + "…"
+
+
+def template_params(who: str, note: str) -> list[str]:
+    """goji_staff_alert_v2: "Staff alert: chat {{1}} on Goji's WhatsApp needs a
+    reply from the team. Reason: {{2}}. ..." One line each, no phone numbers."""
+    reason = redact(note).rstrip(" .") or "a customer is waiting for a reply"
+    return [_clip(redact(who) or "with a customer"), _clip(reason)]
 
 
 def window_open(last_inbound_at: float, now: float) -> bool:

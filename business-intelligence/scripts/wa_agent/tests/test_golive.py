@@ -363,8 +363,10 @@ def test_staff_helpers():
     assert staff.label("", CUSTOMER) == "the customer ending 4567"
     assert "[number]" in staff.redact("call me on +65 9123 4567")
     assert "4567" not in staff.redact("call me on +65 9123 4567")
-    p = staff.template_param("Mei", "x" * 400)
-    assert len(p) <= staff.PARAM_MAX and "\n" not in staff.template_param("Mei", "a\nb")
+    who, reason = staff.template_params("Mei (#004)", "x" * 400)
+    assert who == "Mei (#004)" and len(reason) <= staff.PARAM_MAX
+    assert "\n" not in staff.template_params("Mei", "a\nb")[1]
+    assert staff.template_params("", "")[1]
     assert staff.parse_command("Stop!") == ("stop", "")
     assert staff.parse_command("STATUS please") == ("status", "")
     assert staff.parse_command("hello") == ("help", "")
@@ -404,9 +406,9 @@ def test_handover_pings_staff_by_template_outside_window(env, with_staff):
                                       escalate=True, reason="asked for a person",
                                       note="wants to speak to someone about 98765432"))
     post(client, inbound(text="can I speak to a person", ts=int(time.time())))
-    ((to, name, (param,)),) = app_mod.wa.templates
-    assert to == CHRIS and name == config.STAFF_TEMPLATE
-    assert param.startswith("Mei (#001): ") and "98765432" not in param
+    ((to, name, (who, reason)),) = app_mod.wa.templates
+    assert to == CHRIS and name == config.STAFF_TEMPLATE == "goji_staff_alert_v2"
+    assert who == "Mei (#001)" and "98765432" not in reason and "[number]" in reason
     assert notes == []  # pinged, so no email for an ordinary handover
 
 

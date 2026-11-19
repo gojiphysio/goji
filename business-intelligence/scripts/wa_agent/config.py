@@ -178,10 +178,12 @@ GO_LIVE = float(os.environ.get("WA_AGENT_GO_LIVE", "0") or 0)
 STAFF = frozenset(
     p.strip() for p in os.environ.get("WA_AGENT_STAFF", "").split(",") if p.strip()
 )
-# Approved UTILITY template for a ping outside the staff member's 24h window.
-# Body: "Hi, the Goji WhatsApp assistant needs you: {{1}}. Please open the chat
-# in the WhatsApp Business app."
-STAFF_TEMPLATE = os.environ.get("WA_AGENT_STAFF_TEMPLATE", "goji_staff_alert")
+# Approved template for a ping outside the staff member's 24h window. Body:
+# "Staff alert: chat {{1}} on Goji's WhatsApp needs a reply from the team.
+# Reason: {{2}}. Open the chat in the WhatsApp Business app to respond."
+# ({{1}} "Mei (#004)", {{2}} the reason; staff.template_params). v1
+# (goji_staff_alert, one parameter) was recategorised as marketing by Meta.
+STAFF_TEMPLATE = os.environ.get("WA_AGENT_STAFF_TEMPLATE", "goji_staff_alert_v2")
 
 # Contacts the agent never answers (family, partners, VIP patients). E.164
 # digits, comma-separated. Phase 1 moves this to a portal-editable store.

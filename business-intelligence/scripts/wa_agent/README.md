@@ -190,7 +190,7 @@ through the customer flow: `handle_staff` answers `stop` (kill switch on),
 gets a help line, and every message opens that number's 24h window. Handovers,
 red flags, sensitive topics, failed bookings and moves, demotions and the
 waiver-tag request ping each staff number: free text inside their window, the
-approved `goji_staff_alert` template outside it (`WA_AGENT_STAFF_TEMPLATE`).
+approved `goji_staff_alert_v2` template outside it (v1 was recategorised as marketing) (`WA_AGENT_STAFF_TEMPLATE`).
 A ping names the customer by first name or last 4 digits, plus the chat code. Email stays
 the backup for red flags and sensitive topics, and the only channel when no
 staff number is set or a ping failed. Drafts (unset stage only) still email.
