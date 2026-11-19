@@ -50,9 +50,12 @@
 # Other knobs: USE_URL_TOKEN=1 (above), MORNING_SUMMARY=0 (skip the scheduler
 # step), MORNING_IMAGE (image for the summary job, any image with sh + curl).
 #
-# --max-instances=1: the per-chat locks are in-process. --min-instances=1 and
-# --no-cpu-throttling: the webhook acks first and works on a background thread,
-# which Cloud Run would otherwise starve of CPU (and cold starts cost seconds).
+# --max-instances=1: the per-chat locks are in-process. --min-instances=0 and
+# CPU only during requests (scale to zero, Charles 19 Nov 2026): the webhook
+# queues each event on Cloud Tasks (queue below) and acks; the queue calls
+# /tasks/run, and the turn runs inside that request, so it is billed only
+# while working. A cold start (a few seconds) fits inside the 20s pre-send
+# hold. --timeout=300: a turn is ~40s; room for a slow model call.
 # CI (.github/workflows/deploy-wa-agent.yml) rolls code with the same flags once
 # this script has created the service.
 
@@ -65,6 +68,7 @@ SA_NAME="wa-agent-sa"
 SA="${SA_NAME}@${PROJECT}.iam.gserviceaccount.com"
 SCHEDULER_SA="scheduler-sa@${PROJECT}.iam.gserviceaccount.com"
 SUMMARY_JOB="wa-agent-morning-summary"
+QUEUE="${QUEUE:-wa-agent}"
 SUMMARY_SCHEDULE="wa-agent-morning-summary-daily"
 MORNING_IMAGE="${MORNING_IMAGE:-gcr.io/google.com/cloudsdktool/google-cloud-cli:slim}"
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -112,7 +116,22 @@ for t in marts.dim_patient_contact marts.dim_patient stg.appointments; do
     --role=roles/bigquery.dataViewer "${PROJECT}:${t}" >/dev/null
 done
 
-echo "==> 5/7 Deploy ${SERVICE}"
+echo "==> 5/7 Cloud Tasks queue ${QUEUE} + deploy ${SERVICE}"
+gcloud services enable cloudtasks.googleapis.com --quiet
+# Retries are harmless (webhook de-dupe by message id) and help across a cold
+# start; /tasks/run answers 200 for anything it accepted.
+QUEUE_FLAGS=(--location="${REGION}" --max-attempts=3 --min-backoff=5s
+             --max-concurrent-dispatches=10)
+if gcloud tasks queues describe "${QUEUE}" --location="${REGION}" >/dev/null 2>&1; then
+  gcloud tasks queues update "${QUEUE}" "${QUEUE_FLAGS[@]}" --quiet >/dev/null
+else
+  gcloud tasks queues create "${QUEUE}" "${QUEUE_FLAGS[@]}" --quiet >/dev/null
+fi
+# Plain HTTP tasks signed in the body (tasks.py), so enqueuer is the only grant:
+# no OIDC token, so no actAs on any service account.
+gcloud tasks queues add-iam-policy-binding "${QUEUE}" --location="${REGION}" \
+  --member="serviceAccount:${SA}" --role=roles/cloudtasks.enqueuer --quiet >/dev/null
+export WA_AGENT_TASKS_QUEUE="projects/${PROJECT}/locations/${REGION}/queues/${QUEUE}"
 # Why --update-env-vars and not --set-env-vars: --set-env-vars replaces the
 # service's whole env block, so every deploy had to repeat every value, and
 # anything set by hand since (a tester added, the stage moved on) was silently
@@ -138,6 +157,7 @@ PASSTHROUGH = [
     "WA_AGENT_STAGE", "WA_AGENT_CONTACT_SCOPE", "WA_AGENT_GO_LIVE",
     "WA_AGENT_STAFF_TEMPLATE", "WA_AGENT_CONFIRMATIONS", "WA_AGENT_PUBLIC_URL",
     "WA_AGENT_BOOKING_DRY_RUN", "WA_AGENT_HOURS", "WA_AGENT_PATIENT_LOOKUP",
+    "WA_AGENT_TASKS_QUEUE",
 ]
 DEFAULTS = {"WA_AGENT_HOURS": "all", "WA_AGENT_PATIENT_LOOKUP": "1",
             "WA_AGENT_BOOKING_DRY_RUN": "0"}
@@ -191,7 +211,7 @@ gcloud run deploy "${SERVICE}" \
   --service-account="${SA}" \
   --update-env-vars="${ENV_UPDATE}" \
   --update-secrets="${SECRETS}" \
-  --max-instances=1 --min-instances=1 --no-cpu-throttling \
+  --max-instances=1 --min-instances=0 --cpu-throttling --timeout=300 \
   --allow-unauthenticated \
   --quiet
 

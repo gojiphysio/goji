@@ -121,7 +121,7 @@ provider forwards Meta's signature (if not: `USE_URL_TOKEN=1`, below), and the
 | Provider | $0 (trials) | $12 (Dualhook) to ~$55 (360dialog) |
 | Meta | $0 | first 1,000 service replies free per number, then the SG service rate (since 1 Oct 2026) |
 | Claude | < $20 | ~$25-35 at ~$0.02-0.03 per message after the cost controls below (`cost_usd` in the events table is the real figure) |
-| Cloud Run (1 warm instance, CPU always on) + Firestore | ~$5 | ~$5-10 |
+| Cloud Run (scales to zero; work runs inside Cloud Tasks requests) + Cloud Tasks + Firestore | ~$0 | ~$1-3 (an always-on instance would be ~$45: why it scales to zero) |
 | SIM + spare phone | S$15, + up to S$150 | - |
 
 ### Lead times (start now)

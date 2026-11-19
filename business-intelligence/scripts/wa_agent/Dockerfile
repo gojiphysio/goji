@@ -15,5 +15,6 @@ COPY . /app/wa_agent/
 RUN test -f /app/wa_agent/_build/kb.json || (echo "missing _build/kb.json: run deploy.sh" && exit 1)
 
 # ONE worker so the per-chat locks in state.py are authoritative (paired with
-# --max-instances=1). Webhook work runs on a thread pool after the ack.
-CMD exec gunicorn --bind :$PORT --workers 1 --threads 8 --timeout 120 wa_agent.app:app
+# --max-instances=1). Each queued turn holds a thread for ~40s inside its
+# /tasks/run request (tasks.py), so 16 threads = 16 chats at once.
+CMD exec gunicorn --bind :$PORT --workers 1 --threads 16 --timeout 300 wa_agent.app:app

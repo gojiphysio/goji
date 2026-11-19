@@ -240,6 +240,10 @@ TEST_PATIENTS: dict = _json.loads(os.environ.get("WA_AGENT_TEST_PATIENTS", "") o
 # Keep the 1-hour prompt cache warm while customers are likely to write, so the
 # first message after a quiet spell doesn't pay the cold cache write (API only).
 KEEP_WARM = _env_bool("WA_AGENT_KEEP_WARM", True)
+# Cloud Tasks queue ("projects/P/locations/L/queues/Q"). Set: the webhook queues
+# events and the work runs inside /tasks/run, so the service scales to zero and
+# warming rides the queue (tasks.py). Unset: background threads (local runs).
+TASKS_QUEUE = os.environ.get("WA_AGENT_TASKS_QUEUE", "")
 WARM_EVERY_S = int(os.environ.get("WA_AGENT_WARM_EVERY_S", str(50 * 60)))
 WARM_HOURS = (7, 22)  # SGT, [start, end)
 

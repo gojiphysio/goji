@@ -22,9 +22,11 @@ goji-wa-agent: the WhatsApp assistant's webhook service (Cloud Run).
   POST /internal/morning-summary       daily email + staff one-liner (admin token)
   GET  /healthcheck
 
-The webhook acks at once and works on a background thread (Meta retries slow
-acks), so the service runs with CPU always allocated and one warm instance.
-One instance also makes the per-chat locks authoritative.
+The webhook acks at once (Meta retries slow acks). Deployed, it queues each
+event on Cloud Tasks and the work runs inside POST /tasks/run, so the service
+scales to zero and is billed only while working (tasks.py); locally, without a
+queue, it works on a background thread. One instance (--max-instances=1)
+makes the per-chat locks authoritative.
 
 The life of a customer message (handle_inbound):
   0. a staff number (WA_AGENT_STAFF) goes to handle_staff instead: commands, never a customer
@@ -42,6 +44,7 @@ The life of a customer message (handle_inbound):
 from __future__ import annotations
 
 import hmac
+import json
 from datetime import datetime
 import logging
 import threading
@@ -51,7 +54,7 @@ from concurrent.futures import ThreadPoolExecutor
 from flask import Flask, jsonify, request
 
 from . import (agent, booking_client, config, documents, events, learning, notify, staff,
-               summary, tools)
+               summary, tasks, tools)
 from .policy import (AGENT, DRAFT, ESCALATE, HUMAN, LATE_CHANGE_H, PAUSED, SEND, SGT, SILENT,
                      WAITING, as_one_message, split_bubbles,
                      apply_idle_handback, apply_stage, handover_mode,
@@ -86,7 +89,7 @@ def _deps():
     if claude is None and config.BACKEND == "api":
         import anthropic
         claude = anthropic.Anthropic()
-        if config.KEEP_WARM:
+        if config.KEEP_WARM and not tasks.enabled():  # with a queue, warms are tasks
             threading.Thread(target=_keep_warm, daemon=True).start()
     return store, wa, claude
 
@@ -153,19 +156,81 @@ def webhook_with_url_token(token: str):
     return _dispatch()
 
 
+_HANDLERS = {"inbound": Inbound, "echo": Echo, "history": HistoryChunk}
+
+
+def _run_event(kind: str, ev, received: float) -> None:
+    if kind == "inbound":
+        handle_inbound(ev, received)
+    elif kind == "echo":
+        handle_echo(ev)
+    elif kind == "history":
+        handle_history(ev)
+
+
+def _queue_or_submit(kind: str, ev, received: float) -> None:
+    """With a queue: Cloud Tasks calls /tasks/run, where the work runs inside
+    a request (the service can scale to zero). Without one, or if queueing
+    fails: a background thread on this instance."""
+    if tasks.enabled():
+        try:
+            if tasks.enqueue(tasks.encode(kind, ev, received=received)):
+                return
+        except Exception as e:
+            log.error("enqueue %s failed, running here: %s", kind, e)
+    _submit(_run_event, kind, ev, received)
+
+
 def _dispatch():
     received = time.time()
     for ev in parse_webhook(request.get_json(silent=True) or {}):
-        if isinstance(ev, Inbound):
-            _submit(handle_inbound, ev, received)
-        elif isinstance(ev, Echo):
-            _submit(handle_echo, ev)
-        elif isinstance(ev, HistoryChunk):
-            _submit(handle_history, ev)
+        kind = next((k for k, cls in _HANDLERS.items() if isinstance(ev, cls)), "")
+        if kind:
+            _queue_or_submit(kind, ev, received)
         elif isinstance(ev, Status):
             events.record("status", ev.wa_id, wa_msg_id=ev.msg_id, status=ev.status,
                           status_ts=ev.ts)
     return "ok", 200
+
+
+@app.post("/tasks/run")
+def run_task():
+    """Cloud Tasks delivers a queued event (or a cache warm) here. Always 200:
+    a retry could only repeat work the de-dupe would skip anyway."""
+    body = request.get_data()
+    if not tasks.valid(body, request.headers.get(tasks.SIGNATURE_HEADER, "")):
+        return "forbidden", 403
+    t = json.loads(body or b"{}")
+    kind = t.get("kind", "")
+    if kind == "warm":
+        _safe(_warm_task)
+    elif kind in _HANDLERS:
+        _safe(_run_event, kind, _HANDLERS[kind](**t.get("event", {})),
+              float(t.get("received") or time.time()))
+    return "ok", 200
+
+
+def _schedule_warm() -> None:
+    """Keep the prompt cache warm through the day without an always-on
+    instance: a named task one WARM_EVERY_S slot ahead (names de-duplicate)."""
+    if not (tasks.enabled() and config.BACKEND == "api" and config.KEEP_WARM):
+        return
+    from datetime import datetime
+    later = time.time() + config.WARM_EVERY_S
+    if not config.WARM_HOURS[0] <= datetime.fromtimestamp(later, SGT).hour < config.WARM_HOURS[1]:
+        return
+    try:
+        tasks.enqueue(tasks.encode("warm"), delay_s=config.WARM_EVERY_S,
+                      name=tasks.warm_name(time.time()))
+    except Exception as e:
+        log.warning("warm scheduling failed: %s", e)
+
+
+def _warm_task() -> None:
+    _, _, model = _deps()
+    if model is not None and time.time() - agent.last_call_at >= config.WARM_EVERY_S - 60:
+        events.record("warm", "", **agent.warm_cache(model))
+    _schedule_warm()
 
 
 def handle_echo(ev: Echo) -> None:
@@ -736,6 +801,7 @@ def handle_inbound(ev: Inbound, received: float) -> None:
                             tools.describe_patient(patient),
                             _late_change_note(earlier_late, patient.get("waiver_used")),
                             _booked_note(state)])))
+    _schedule_warm()
     p = res.proposal
     d = decide(p, intent_policy=learning.effective_policy(config.stage_policy(rollout["stage"]),
                                                           st.get_autonomy()))

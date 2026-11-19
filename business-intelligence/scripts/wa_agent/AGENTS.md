@@ -33,6 +33,10 @@ The WhatsApp assistant. What it is and how to run it: [`README.md`](README.md).
 - **Every failure becomes an escalation.** A model error, refusal, tool crash
   or send failure gives the customer a holding reply and emails a person. The
   customer is never left with silence.
+- **Scale to zero.** No always-on instance: work runs inside Cloud Tasks
+  requests (`tasks.py`, `/tasks/run`), never on a thread after a response
+  when a queue is set. Anything scheduled (warms, summaries) is a task or a
+  job, not a loop in the process.
 - **One instance.** Per-chat locks are in-process (`--max-instances=1`). Moving
   to more instances needs the lock in Firestore first.
 - **Its own service account** (`wa-agent-sa`): it holds chat transcripts, so it
