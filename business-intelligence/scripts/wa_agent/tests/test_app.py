@@ -427,7 +427,7 @@ def test_returning_patient_context_reaches_the_model_and_is_cached(env, monkeypa
     post(client, inbound())
     post(client, inbound(msg_id="wamid.in2", text="and Saturdays?"))
     turn = app_mod.claude.requests[0]["messages"][-1]["content"][0]["text"]
-    assert "patient record: returning patient; record first name Sarah" in turn
+    assert "patient record: a patient record is linked to this number; record first name Sarah" in turn
     assert calls == [CUSTOMER]                              # looked up once, then cached
     assert ("patient_lookup", {"reason": "returning"}) in rec
 

@@ -366,7 +366,9 @@ def describe_patient(p: dict) -> str:
         return ""
     if not p.get("returning"):
         return "no patient record for this number (likely a new enquiry)"
-    bits = [f"returning patient; record first name {p.get('first_name') or 'unknown'}"]
+    bits = [f"a patient record is linked to this number; record first name "
+            f"{p.get('first_name') or 'unknown'} (the texter may be this patient or "
+            f"someone booking for them)"]
     if (p.get("patients_on_number") or 1) > 1:
         bits.append(f"{p['patients_on_number']} patients share this number (e.g. a parent "
                     "and children), so don't assume which one is writing")

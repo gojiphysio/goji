@@ -53,3 +53,22 @@ def test_confirmation_text_is_built_from_the_booking_systems_answer():
                                          first_name="Sam")
     assert t.startswith("You're booked, Sam! Thu 26 Nov, 3:30pm with Claire (ref GOJI-1).")
     assert "TEST" not in t
+
+
+def test_booking_for_someone_else_names_the_patient_and_notes_who_booked(monkeypatch):
+    monkeypatch.setattr(config, "INTERNAL_TOKEN", "t")
+    monkeypatch.setattr(config, "BOOKING_SIMULATE", False)
+    seen = {}
+
+    class Http:
+        def post(self, url, json, timeout, headers):
+            seen.update(json)
+            return NS(json=lambda: {"ok": True, "reference": "R", "date": json["date"],
+                                    "time": json["time"]})
+    b = {**B, "full_name": "Mei Tan", "for_whom": "wife", "booked_by": "Charles", "patient_age": ""}
+    booking_client.book(b, wa_id="6582823628", http=Http())
+    assert seen["name"] == "Mei Tan" and seen["phone"] == "+6582823628"
+    assert seen["notes"].startswith("Booked via WhatsApp by Charles (wife of the patient)")
+    t = booking_client.confirmation_text({"reference": "R", "date": "2026-11-23", "time": "08:00",
+                                          "clinician_name": "Kristy"}, patient="Mei")
+    assert t.startswith("Mei is booked! Mon 23 Nov, 8:00am with Kristy")

@@ -165,6 +165,21 @@ message, for their full name and the phone number the booking was made \
 under, then use find_booking. If it still finds nothing, say you couldn't \
 find their booking and hand over to the team (escalate=true). Never guess.
 
+The person texting vs the patient
+- The person messaging and the patient can be different people: a husband \
+booking for his wife, a parent for a child, someone for their mother. Work \
+out who the appointment is for before booking; if it isn't clear, ask ("Is \
+this for you or someone else?").
+- For someone else: the booking goes under the patient's own full name (ask \
+for it), with the texter's number as the contact. For a child, also ask \
+their age. Speak about the patient in the third person ("Would one of these \
+work for your wife?") and never use the texter's record name as the patient.
+- The patient record context belongs to whoever is registered with this \
+number. The texter may be that patient, or a family member of theirs, or \
+someone who has chatted before but never been a patient. Someone with \
+earlier messages in this chat but no record gets a warm "good to hear from \
+you again" without being treated as a patient.
+
 Booking for them (intent=booking)
 - You can book new appointments in the chat. Check the time is open with \
 get_times first and only ever agree to a time it shows open.
@@ -297,6 +312,10 @@ empty strings when not booking
 booking you stated back in your previous message
 - move: for moving an existing appointment, old and new date (YYYY-MM-DD) and \
 time (HH:MM); all empty strings otherwise
+- booking.full_name is always the PATIENT's full name. for_whom: "self", or \
+who the patient is to the person texting ("wife", "son", "mother"); \
+booked_by: the texter's name when booking for someone else; patient_age: \
+for a child, their age; else empty
 - options (in booking and move): when your reply offers times to pick from, \
 list them as "YYYY-MM-DD HH:MM" separated by commas; else empty
 - confirm_move: true only when they've just said yes to the move you stated \
@@ -320,9 +339,11 @@ PROPOSAL_SCHEMA = {
             "type": "object",
             "properties": {k: {"type": "string"} for k in (
                 "service", "date", "time", "clinician", "physio_focus", "variant", "format",
-                "full_name", "email", "address", "notes", "options")},
+                "full_name", "email", "address", "notes", "options", "for_whom",
+                "booked_by", "patient_age")},
             "required": ["service", "date", "time", "clinician", "physio_focus", "variant",
-                         "format", "full_name", "email", "address", "notes", "options"],
+                         "format", "full_name", "email", "address", "notes", "options",
+                         "for_whom", "booked_by", "patient_age"],
             "additionalProperties": False,
         },
         "confirm_booking": {"type": "boolean"},

@@ -29,7 +29,20 @@ log = logging.getLogger("wa_agent.booking")
 CLINICIAN_IDS = {"cheryl": "cheryl-long", "claire": "claire-ng", "kristy": "kristy-ng",
                  "camille": "camille-tan"}
 FIELDS = ("service", "date", "time", "clinician", "physio_focus", "variant", "format",
-          "full_name", "email", "address", "notes")
+          "full_name", "email", "address", "notes", "for_whom", "booked_by", "patient_age")
+
+
+def booking_note(b: dict) -> str:
+    """The Plato note: who booked, when it isn't the patient. The contact
+    number is the texter's, so staff know whom they'll reach."""
+    whom = (b.get("for_whom") or "").strip().lower()
+    note = (b.get("notes") or "").strip()
+    if whom and whom != "self":
+        by = (b.get("booked_by") or "the contact").strip()
+        age = f", age {b['patient_age']}" if (b.get("patient_age") or "").strip() else ""
+        note = (f"Booked via WhatsApp by {by} ({whom} of the patient{age}); the contact "
+                f"number is theirs. " + note).strip()
+    return note
 _TIME = re.compile(r"^\d{2}:\d{2}$")
 
 
@@ -77,7 +90,7 @@ def book(b: dict, *, wa_id: str, http=requests) -> dict:
             "phone": "+" + re.sub(r"\D", "", wa_id), "email": (b.get("email") or "").strip(),
             "clinician_id": _clinician_id(b.get("clinician", "")),
             "physio_focus": b.get("physio_focus", ""), "variant": b.get("variant", ""),
-            "address": b.get("address", ""), "notes": b.get("notes", ""),
+            "address": b.get("address", ""), "notes": booking_note(b),
             "source": "whatsapp", "dry_run": config.BOOKING_DRY_RUN}
     try:
         r = http.post(f"{config.BOOKING_API_BASE}/internal/book", json=body, timeout=30,
@@ -183,14 +196,16 @@ def _simulate(b: dict, http) -> dict:
             "time": b["time"]}
 
 
-def confirmation_text(res: dict, *, first_name: str = "") -> str:
+def confirmation_text(res: dict, *, first_name: str = "", patient: str = "") -> str:
     """What the customer sees once it's booked. Composed in code from the
     booking system's answer, so it can't claim a booking that didn't happen."""
     d = date.fromisoformat(res["date"])
     h, m = map(int, res["time"].split(":"))
     when = f"{d:%a} {d.day} {d:%b}, {(h % 12) or 12}:{m:02d}{'am' if h < 12 else 'pm'}"
     who = (res.get("clinician_name") or "").split(" ")[0]
-    text = (f"You're booked{', ' + first_name if first_name else ''}! {when}"
+    head = (f"{patient} is booked!" if patient
+            else f"You're booked{', ' + first_name if first_name else ''}!")
+    text = (f"{head} {when}"
             f"{' with ' + who if who else ''} (ref {res['reference']}).\n\n"
             "We'll send a reminder before your appointment. See you then 😊")
     if res.get("dry_run"):

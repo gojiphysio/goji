@@ -267,7 +267,9 @@ def _book_pending(state, ev: Inbound, received: float, fallback: str,
     events.record("booked", ev.wa_id, intent="booking",
                   reason="dry_run" if res.get("dry_run") else "agent")
     first = (pending.get("full_name") or "").split(" ")[0]
-    return (booking_client.confirmation_text(res, first_name=first),
+    for_other = (pending.get("for_whom") or "self").strip().lower() not in ("", "self")
+    return (booking_client.confirmation_text(res, first_name="" if for_other else first,
+                                             patient=first if for_other else ""),
             {"reference": res["reference"], "date": res["date"], "time": res["time"],
              "with": res.get("clinician_name", ""), "service": res.get("service", ""),
              "dry_run": bool(res.get("dry_run")), "at": time.time(), "source": "whatsapp"})

@@ -46,16 +46,16 @@ def _next_weekday(wd: int) -> date:  # 0 = Monday
 # --- the patient-record lines the service gives the model (tools.describe_patient)
 
 NEW = "no patient record for this number (likely a new enquiry)"
-SARAH = (f"returning patient; record first name Sarah; next appointment {_d(5)} 10:00 with "
+SARAH = (f"a patient record is linked to this number; record first name Sarah (the texter may be this patient or someone booking for them); next appointment {_d(5)} 10:00 with "
          f"Kristy; last visit {_d(-12)}; no earlier late changes on record (first-time waiver "
          "applies)")
-SARAH_TOMORROW = (f"returning patient; record first name Sarah; next appointment {_d(1)} 09:00 "
+SARAH_TOMORROW = (f"a patient record is linked to this number; record first name Sarah (the texter may be this patient or someone booking for them); next appointment {_d(1)} 09:00 "
                   f"with Kristy; last visit {_d(-12)}; no earlier late changes on record "
                   "(first-time waiver applies)")
-SARAH_TODAY_USED = (f"returning patient; record first name Sarah; next appointment {_d(0)} 15:00 "
+SARAH_TODAY_USED = (f"a patient record is linked to this number; record first name Sarah (the texter may be this patient or someone booking for them); next appointment {_d(0)} 15:00 "
                     f"with Claire; last visit {_d(-20)}; first-time late-change waiver already "
                     "used (tagged in Plato)")
-SHARED = (f"returning patient; record first name Ethan; 2 patients share this number (e.g. a "
+SHARED = (f"a patient record is linked to this number; record first name Ethan; 2 patients share this number (e.g. a "
           f"parent and children), so don't assume which one is writing; next appointment "
           f"{_d(3)} 16:30 with Cheryl")
 
@@ -221,6 +221,25 @@ SCENARIOS: list[Scenario] = [
       E(intents=("booking",), confirm_booking=True, must_not=(r"you'?re booked",)),
       note="yes to a stated-back booking sets confirm_booking; code books",
       build=build_booking_confirm),
+    S("booking_for_wife", "booking",
+      ["hi, I just had a baby", ("agent", "Hi Charles! Congratulations on your new baby 😊 How can we help?"),
+       "want to book in a postnatal physio session for my wife"],
+      E(intents=("booking", "service_fit", "availability"), decisions=("send",),
+        must=(r"wife|her\b",), must_not=(r"for you\b(?! and)", r"your (own )?recovery")),
+      patient=SARAH.replace("Sarah", "Charles"), customer_name="Charles",
+      note="texter books for someone else: speaks about the patient, doesn't use the texter's record"),
+    S("booking_for_wife_name", "booking",
+      ["want to book a postnatal physio session for my wife",
+       ("agent", "Lovely! Would Mon 23 Nov 8:00am or Tue 24 Nov 8:30am with Kristy work for her?"),
+       "monday works"],
+      E(must=(r"name",), must_not=(r"charles (tan|wong)", r"you're booked"), max_questions=1),
+      patient=SARAH.replace("Sarah", "Charles"), customer_name="Charles",
+      note="asks for the wife's full name; never books her under the texter's name"),
+    S("chatted_before_not_patient", "returning patient",
+      ["Hi there", ("agent", "Hi! How can we help?"), "Just checking your hours", ("agent", "We're open Mon-Sat 8am-8pm."),
+       "Hi again! Is there parking nearby?"],
+      E(must_not=(r"last visit", r"your (last|previous) (appointment|session)")),
+      note="has chatted before but no patient record: warm, not treated as a patient"),
     S("booking_no_email_required", "booking",
       ["Book me in for physio Friday 9am please, I'm Jamie Lee"],
       E(must_not=(r"(need|require)\w* (your )?email", r"what('?s| is) your email"))),

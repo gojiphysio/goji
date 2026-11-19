@@ -138,8 +138,9 @@ def test_describe_patient_keeps_it_to_name_and_dates():
     one = tools.describe_patient({"returning": True, "first_name": "Sarah",
                                   "patients_on_number": 1, "next_appointment": None,
                                   "last_visit": "2026-10-02"})
-    assert one == ("returning patient; record first name Sarah; no upcoming appointment; "
-                   "last visit 2026-10-02")
+    assert one == ("a patient record is linked to this number; record first name Sarah (the "
+                   "texter may be this patient or someone booking for them); no upcoming "
+                   "appointment; last visit 2026-10-02")
     shared = tools.describe_patient({"returning": True, "first_name": "Ghazal",
                                      "patients_on_number": 2,
                                      "next_appointment": {"date": "2026-11-21", "time": "16:30",
