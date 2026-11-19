@@ -5,11 +5,13 @@ Monorepo for Goji Health (physiotherapy clinic). Two main areas:
 - `business-intelligence/` — the BI/ops platform. Most work happens in
   `scripts/dashboard/` (Flask + vanilla-JS + Chart.js, on Cloud Run, reads
   BigQuery), `scripts/ingestion/` (Cloud Run Jobs that load external data into
-  BigQuery), and `scripts/sql/` (`stg/` views + `marts/` facts).
+  BigQuery), `scripts/sql/` (`stg/` views + `marts/` facts), and
+  `scripts/wa_agent/` (the WhatsApp assistant on Cloud Run).
 - `marketing/` — the 90-day campaign strategy, content, and guardrails (docs).
 
 **Nested `AGENTS.md` files carry the detail** — read the one for the directory
-you're working in (`scripts/dashboard/`, `scripts/ingestion/`, `marketing/`).
+you're working in (`scripts/dashboard/`, `scripts/ingestion/`, `scripts/wa_agent/`,
+`marketing/`).
 `DEPLOY.md` and `ROADMAP.md` in `scripts/dashboard/` are the deploy/roadmap source.
 
 > Instruction files use **`AGENTS.md`** as the source of truth (portable across

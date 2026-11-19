@@ -33,6 +33,9 @@ env:
   DOMAIN:  booking.gojiphysio.com
   CORS_ORIGIN: https://www.gojiphysio.com
   BOOKING_SA: dashboard-sa@${{ vars.GCP_PROJECT }}.iam.gserviceaccount.com
+  # goji-wa-agent's base URL for the booking-confirmed callback. Optional repo
+  # variable; empty disables the callback (booking is unaffected).
+  WA_AGENT_URL: ${{ vars.WA_AGENT_URL }}
 
 jobs:
   # ---- 1. Tests gate the deploy -------------------------------------------
@@ -75,11 +78,18 @@ jobs:
           # returned "not found" and silently dropped the mount, disabling emails.
           # The runtime SA (dashboard-sa) has secretAccessor, which is what
           # actually matters at request time. Both secrets exist in Secret Manager.
+          # wa-agent-internal-token (INTERNAL_TOKEN) is the shared secret with
+          # goji-wa-agent for /internal/book and the booking-confirmed callback.
+          # Mounted only once the repo variable WA_AGENT_URL is set (the assistant
+          # is live and the secret exists): Cloud Run fails a deploy that mounts a
+          # missing secret, and this workflow can't check Secret Manager.
+          SECRETS="PLATO_API_KEY=plato-api-key:latest,GMAIL_APP_PASSWORD=gmail-app-password:latest,TURNSTILE_SECRET=turnstile-secret:latest"
+          if [ -n "${WA_AGENT_URL}" ]; then SECRETS="${SECRETS},INTERNAL_TOKEN=wa-agent-internal-token:latest"; fi
           gcloud run deploy "${SERVICE}" \
             --source . --region "${REGION}" --project "${PROJECT}" \
             --service-account "${BOOKING_SA}" \
-            --set-env-vars=GCP_PROJECT=${PROJECT},PLATO_DB=gojihealth,CORS_ORIGIN=${CORS_ORIGIN} \
-            --set-secrets=PLATO_API_KEY=plato-api-key:latest,GMAIL_APP_PASSWORD=gmail-app-password:latest,TURNSTILE_SECRET=turnstile-secret:latest \
+            --set-env-vars=GCP_PROJECT=${PROJECT},PLATO_DB=gojihealth,CORS_ORIGIN=${CORS_ORIGIN},WA_AGENT_URL=${WA_AGENT_URL} \
+            --set-secrets="${SECRETS}" \
             --max-instances=1 --min-instances=0 \
             --allow-unauthenticated \
             --quiet

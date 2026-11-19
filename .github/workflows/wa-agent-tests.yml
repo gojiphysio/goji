@@ -1,0 +1,38 @@
+name: WhatsApp assistant tests
+
+# Tests for business-intelligence/scripts/wa_agent (the WhatsApp assistant).
+# Phase 0 deploys by hand (wa_agent/deploy.sh), so this only tests. It also
+# runs when the website content or the booking service config changes, because
+# the agent's knowledge base and service list are built from them.
+
+on:
+  pull_request:
+    paths:
+      - "business-intelligence/scripts/wa_agent/**"
+      - "business-intelligence/scripts/booking/config.py"
+      - "marketing/website/src/content/**"
+      - "marketing/website/public/llms.txt"
+      - ".github/workflows/wa-agent-tests.yml"
+  push:
+    branches: [main]
+    paths:
+      - "business-intelligence/scripts/wa_agent/**"
+      - ".github/workflows/wa-agent-tests.yml"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install deps
+        run: pip install -r business-intelligence/scripts/wa_agent/requirements.txt pytest
+      - name: wa_agent tests
+        working-directory: business-intelligence/scripts
+        run: python -m pytest wa_agent/ -q
