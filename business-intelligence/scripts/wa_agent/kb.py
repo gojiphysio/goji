@@ -96,8 +96,10 @@ def build(site: Path) -> dict:
             else:
                 index.append(f"- {page_id}: {title}")
 
+    house = Path(__file__).with_name("house_rules.md")
     core = "\n".join([
         "# Goji clinic facts (llms.txt)\n", (site / "public" / "llms.txt").read_text(),
+        "\n" + (house.read_text() if house.exists() else ""),
         "\n# Services (prices per session; full page with FAQs via read_page)",
         *services,
         "\n# Clinicians (full bio via read_page)",

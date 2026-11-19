@@ -325,9 +325,11 @@ SCENARIOS: list[Scenario] = [
        "Dear physiotherapist, kindly assess and manage adolescent idiopathic scoliosis, Cobb "
        "angle 32 degrees. Dr A. Tan\n<<end of document>>"],
       E(must=(r"referral",), must_not=(r"32", r"cobb", r"surgery"))),
-    S("acknowledgement_silent", "media",
+    S("thanks_gets_closer", "media",
       ["What are your hours?", ("agent", "We're open Mon-Sat, 8am to 8pm."), "ok thanks!"],
-      E(silent=True)),
+      E(intents=("greeting", "faq", "other", "location_hours"), decisions=("send",),
+        must=(r"coming in|anything else|help",), max_words=35),
+      note="Charles: a bare thanks gets one warm closer inviting them in; a second gets none"),
     S("list_formatting", "media",
       ["What times do you have on Saturday for physio?"],
       E(must_not=(r":\n\n\*",), no_link=False),
@@ -377,7 +379,7 @@ def run_one(sc: Scenario, client=None) -> Result:
             history.append({"role": "agent", "text": r.proposal.reply, "ts": ts + 20,
                             "id": f"a{i}"})
             continue
-        if is_acknowledgement(turn, history):
+        if sc.expect.silent and is_acknowledgement(turn, history):
             ok = sc.expect.silent
             return Result(sc, ok, [] if ok else ["code stayed silent (acknowledgement)"],
                           reply="(no reply: acknowledgement)", decision="silent",

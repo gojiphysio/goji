@@ -41,6 +41,7 @@ class ChatState:
     pending_for_chris: str = ""  # waiting: what was handed over (the staff note)
     pending_booking: dict = field(default_factory=dict)  # stated back, awaiting the customer's yes
     pending_move: dict = field(default_factory=dict)     # same, for moving an appointment
+    closer_id: str = ""  # our reply to a bare "thanks": the next one gets silence
     booked: dict = field(default_factory=dict)  # latest booking (agent or website), for context
     patient: dict = field(default_factory=dict)  # returning-patient lookup, cached per chat
     patient_at: float = 0.0

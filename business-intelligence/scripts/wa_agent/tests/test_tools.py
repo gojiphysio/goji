@@ -145,3 +145,34 @@ def test_describe_patient_keeps_it_to_name_and_dates():
                                      "next_appointment": {"date": "2026-11-21", "time": "16:30",
                                                           "with": "Cheryl"}})
     assert "2 patients share this number" in shared and "with Cheryl" in shared
+
+
+class _Rows:
+    def __init__(self, rows):
+        self.rows = rows
+
+    def query(self, sql, job_config=None):
+        return NS(result=lambda: self.rows)
+
+
+def test_find_booking_needs_name_and_number_to_match(monkeypatch):
+    from datetime import date as _date
+    from wa_agent import config as cfg
+    monkeypatch.setattr(cfg, "PATIENT_LOOKUP", True)
+    monkeypatch.setattr(tools, "_find_tries", {})
+    row = {"appt_date": _date(2026, 11, 26), "time_sgt": "10:00", "clinician_id": "PKN",
+           "name": "tan sarah mei ling"}
+    bq = _Rows([row])
+    ok, err = tools.run_tool("find_booking", {"full_name": "Sarah Tan", "phone": "9123 4567"},
+                             wa_id="6580000000", bq=bq)
+    assert not err and ok["next_appointment"] == {"date": "2026-11-26", "time": "10:00",
+                                                  "with": "Kristy"}
+    wrong, _ = tools.run_tool("find_booking", {"full_name": "Sarah Lim", "phone": "91234567"},
+                              wa_id="6580000000", bq=bq)
+    assert wrong == {"matched": False}
+    one_word, _ = tools.run_tool("find_booking", {"full_name": "Sarah", "phone": "91234567"},
+                                 wa_id="6580000000", bq=bq)
+    assert one_word == {"matched": False}                # a first name alone isn't enough
+    _, err = tools.run_tool("find_booking", {"full_name": "Sarah Tan", "phone": "91234567"},
+                            wa_id="6580000000", bq=bq)
+    assert err                                            # more than 3 tries in one chat

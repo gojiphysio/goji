@@ -386,9 +386,18 @@ def handle_inbound(ev: Inbound, received: float) -> None:
     if blocked:
         events.record("silent", ev.wa_id, reason=blocked.reason)
         return
+    ack_closer = False
     if is_acknowledgement(ev.text, history):
-        events.record("silent", ev.wa_id, reason="acknowledgement")
-        return
+        # One warm closer per conversation ("You're welcome! Were you thinking of
+        # coming in...?"), then silence, so a thank-you loop ends. None at all
+        # once they've booked or the chat is with Chris.
+        last_agent = next((h for h in reversed(history) if h["role"] == "agent"), {})
+        recently_booked = state.booked and time.time() - state.booked.get("at", 0) < 86400
+        if (last_agent.get("id") and last_agent.get("id") == state.closer_id) \
+                or recently_booked or state.mode == WAITING:
+            events.record("silent", ev.wa_id, reason="acknowledgement")
+            return
+        ack_closer = True
 
     # Debounce: let the customer finish typing. If they send more, that
     # message's run answers everything; this one stops before the model.
@@ -488,6 +497,8 @@ def handle_inbound(ev: Inbound, received: float) -> None:
             return
         sent_at = time.time()
         append_history(state, "agent", reply, sent_at, wa_msg_id)
+        if ack_closer:
+            state.closer_id = wa_msg_id
         old = state.mode
         if d.action == ESCALATE:
             # Most handovers wait for Chris while the agent keeps answering

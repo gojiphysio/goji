@@ -120,6 +120,17 @@ TOOL_DEFS = [
                        "(e.g. a parent booking for children).",
         "input_schema": {"type": "object", "properties": {}},
     },
+    {
+        "name": "find_booking",
+        "description": "Only when this chat's number has no patient record: look up the "
+                       "customer's next appointment by their full name AND the phone number "
+                       "the booking was made under. Both must match the same patient record. "
+                       "Returns only the next appointment's date, time and clinician.",
+        "input_schema": {"type": "object", "properties": {
+            "full_name": {"type": "string"},
+            "phone": {"type": "string", "description": "the number the booking was made under"}},
+            "required": ["full_name", "phone"]},
+    },
 ]
 
 
@@ -369,6 +380,64 @@ def describe_patient(p: dict) -> str:
     return "; ".join(bits)
 
 
+# Second-chance lookup for a chat whose own number has no record (Charles,
+# 19 Nov 2026: ask for details before handing over). Name AND booking number
+# must both match one patient, so a number alone, or a name alone, reveals
+# nothing; only the next appointment comes back. Capped per chat per process.
+_FIND_SQL = """
+WITH p AS (
+  SELECT patient_id, LOWER(TRIM(full_name)) AS name
+  FROM `{project}.marts.dim_patient_contact`
+  WHERE RIGHT(REGEXP_REPLACE(COALESCE(phone, ''), r'\\D', ''), 8) = @last8
+)
+SELECT a.appt_date, FORMAT_TIMESTAMP('%H:%M', a.start_at, 'UTC') AS time_sgt, a.clinician_id,
+       p.name
+FROM `{project}.stg.appointments` a JOIN p USING (patient_id)
+WHERE a.appt_date >= CURRENT_DATE('Asia/Singapore')
+  AND COALESCE(SAFE_CAST(JSON_VALUE(a.payload, '$.cancelled') AS INT64), 0) = 0
+  AND COALESCE(SAFE_CAST(JSON_VALUE(a.payload, '$.void') AS INT64), 0) = 0
+  AND LOWER(COALESCE(JSON_VALUE(a.payload, '$.status'), '')) NOT IN
+      ('cancelled', 'canceled', 'no_show', 'noshow', 'no-show')
+ORDER BY a.appt_date, time_sgt
+"""
+FIND_MAX_TRIES = 3
+_find_tries: dict[str, int] = {}
+
+
+def _name_matches(given: str, record: str) -> bool:
+    """Every word the customer gave appears in the record's name (order free),
+    and they gave at least two words: 'Sarah Tan' matches 'Tan Sarah Mei Ling'."""
+    g = [w for w in re.findall(r"[a-z]+", given.lower()) if len(w) > 1]
+    r = set(re.findall(r"[a-z]+", record.lower()))
+    return len(g) >= 2 and all(w in r for w in g)
+
+
+def find_booking(inp: dict, *, wa_id: str, bq=None, **_) -> dict:
+    if not config.PATIENT_LOOKUP:
+        return {"enabled": False}
+    _find_tries[wa_id] = _find_tries.get(wa_id, 0) + 1
+    if _find_tries[wa_id] > FIND_MAX_TRIES:
+        raise ToolError("too many lookups in this chat; hand over to the team")
+    digits = re.sub(r"\D", "", inp.get("phone", ""))
+    name = (inp.get("full_name") or "").strip()
+    if len(digits) < 8 or not name:
+        raise ToolError("need the full name and the phone number the booking was made under")
+    if bq is None:
+        from google.cloud import bigquery
+        bq = bigquery.Client(project=config.PROJECT)
+    from google.cloud import bigquery as _bq
+    rows = list(bq.query(_FIND_SQL.format(project=config.PROJECT),
+                         job_config=_bq.QueryJobConfig(query_parameters=[
+                             _bq.ScalarQueryParameter("last8", "STRING", digits[-8:])])).result())
+    hits = [r for r in rows if _name_matches(name, r["name"] or "")]
+    if not hits:
+        return {"matched": False}
+    r = hits[0]
+    return {"matched": True, "next_appointment": {
+        "date": r["appt_date"].isoformat(), "time": r["time_sgt"],
+        "with": CLINICIAN_NAMES.get(r["clinician_id"], "the team")}}
+
+
 HANDLERS = {
     "next_slots": next_slots,
     "find_available_dates": find_available_dates,
@@ -376,6 +445,7 @@ HANDLERS = {
     "booking_link": booking_link,
     "read_page": read_page,
     "my_appointments": my_appointments,
+    "find_booking": find_booking,
 }
 
 

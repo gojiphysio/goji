@@ -143,13 +143,28 @@ def test_newer_message_during_hold_supersedes_older_run(env, monkeypatch):
     assert ("superseded", {"reason": "newer_customer_message"}) in rec
 
 
-def test_thanks_after_our_reply_needs_no_model_call(env):
+def test_first_thanks_gets_one_warm_closer_then_silence(env):
+    client, rec, _ = env
+    app_mod.claude.queue.extend([final(), final(reply="You're welcome! Were you thinking of "
+                                                     "coming in?", intent="greeting")])
+    post(client, inbound())
+    post(client, inbound(msg_id="wamid.in2", text="Thank you! 🙏"))
+    assert len(app_mod.wa.sent) == 2 and "coming in" in app_mod.wa.sent[-1][1]
+    post(client, inbound(msg_id="wamid.in3", text="ok thanks!"))
+    assert len(app_mod.claude.requests) == 2 and len(app_mod.wa.sent) == 2   # loop ends
+    assert ("silent", {"reason": "acknowledgement"}) in rec
+
+
+def test_thanks_after_a_booking_needs_no_reply(env):
     client, rec, _ = env
     app_mod.claude.queue.append(final())
     post(client, inbound())
-    post(client, inbound(msg_id="wamid.in2", text="Thank you! 🙏"))
-    assert len(app_mod.claude.requests) == 1 and len(app_mod.wa.sent) == 1
-    assert ("silent", {"reason": "acknowledgement"}) in rec
+    state = app_mod.store.load(CUSTOMER)
+    import time as _t
+    state.booked = {"reference": "GOJI-1", "at": _t.time()}
+    app_mod.store.save(state)
+    post(client, inbound(msg_id="wamid.in2", text="thanks!"))
+    assert len(app_mod.claude.requests) == 1
 
 
 def test_after_chris_replies_agent_is_silent(env):

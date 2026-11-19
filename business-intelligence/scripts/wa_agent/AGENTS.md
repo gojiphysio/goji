@@ -14,9 +14,11 @@ The WhatsApp assistant. What it is and how to run it: [`README.md`](README.md).
 - **Never call Plato from here.** Availability comes from goji-booking's API,
   which serves its 5-minute snapshot. Plato allows 20 requests/min for the
   whole clinic (`booking/README.md`).
-- **Facts come only from the website.** `kb.py` builds the knowledge base from
-  `marketing/website` at deploy time. A wrong price is fixed on the site, not in
-  the prompt. Service ids mirror `booking/config.py` (`test_tools.py` checks).
+- **Facts come only from the website, plus `house_rules.md`.** `kb.py` builds
+  the knowledge base from `marketing/website` at deploy time. A wrong price is
+  fixed on the site, not in the prompt. A practice Chris confirms that doesn't
+  belong on the site (physio isn't sold as packages) goes in `house_rules.md`,
+  one dated line each. Service ids mirror `booking/config.py` (`test_tools.py` checks).
 - **Patient lookup is keyed on the chat's own number**, never on a number in
   the conversation, so a customer only ever sees their own appointments.
 - **No message text or phone numbers in BigQuery.** `marts.wa_agent_events`

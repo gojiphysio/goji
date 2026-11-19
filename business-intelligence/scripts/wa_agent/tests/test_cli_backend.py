@@ -50,7 +50,7 @@ def test_command_is_isolated_and_constrained():
     assert cmd[cmd.index("--permission-mode") + 1] == "dontAsk"
     assert "--no-session-persistence" in cmd
     allowed = cmd[cmd.index("--allowedTools") + 1].split()
-    assert all(a.startswith("mcp__goji__") for a in allowed) and len(allowed) == 6
+    assert all(a.startswith("mcp__goji__") for a in allowed) and len(allowed) == 7
     assert json.loads(cmd[cmd.index("--json-schema") + 1]) == agent.PROPOSAL_SCHEMA
     assert cmd[cmd.index("--model") + 1] == config.MODEL
     assert seen["kw"]["stdin"] == subprocess.DEVNULL
