@@ -39,7 +39,8 @@ from concurrent.futures import ThreadPoolExecutor
 from flask import Flask, jsonify, request
 
 from . import agent, config, events, learning, notify
-from .policy import (AGENT, DRAFT, ESCALATE, HUMAN, PAUSED, SEND, SGT, apply_idle_handback,
+from .policy import (AGENT, DRAFT, ESCALATE, HUMAN, PAUSED, SEND, SGT, WAITING,
+                     apply_idle_handback, handover_mode,
                      decide, gate, human_replied_since, is_acknowledgement, on_human_message,
                      reply_problems, set_mode)
 from .state import ChatLocks, append_history, make_store, mark_seen
@@ -240,7 +241,8 @@ def handle_inbound(ev: Inbound, received: float) -> None:
 
     client.mark_read_typing(ev.msg_id)
     res = agent.propose(history, wa_id=ev.wa_id, now=now, customer_name=ev.name,
-                        client=model)
+                        client=model,
+                        pending_for_chris=state.pending_for_chris if state.mode == WAITING else "")
     p = res.proposal
     d = decide(p, intent_policy=learning.effective_policy(config.INTENT_POLICY,
                                                           st.get_autonomy()))
@@ -299,7 +301,14 @@ def handle_inbound(ev: Inbound, received: float) -> None:
         append_history(state, "agent", reply, sent_at, wa_msg_id)
         old = state.mode
         if d.action == ESCALATE:
-            set_mode(state, HUMAN, f"escalated:{d.reason}", sent_at)
+            # Most handovers wait for Chris while the agent keeps answering
+            # routine questions; red flags and sensitive topics go fully quiet.
+            mode = handover_mode(p.intent)
+            if mode == WAITING and state.mode == WAITING:
+                state.pending_for_chris = f"{state.pending_for_chris}; {p.staff_note}"[:600]
+            else:
+                state.pending_for_chris = p.staff_note[:600] if mode == WAITING else ""
+                set_mode(state, mode, f"escalated:{d.reason}", sent_at)
             state.last_auto = {}
         else:
             state.last_auto = {"intent": p.intent, "at": sent_at}
@@ -320,7 +329,7 @@ def handle_inbound(ev: Inbound, received: float) -> None:
         notify.send(kind, **notice)
         _test_show(client, ev.wa_id, f"Chris would get an email ({kind}): {p.staff_note}")
     if d.action == ESCALATE:
-        notify.send("urgent" if p.intent == "urgent" else "escalated", **notice)
+        notify.send(p.intent if p.intent in ("urgent", "sensitive") else "escalated", **notice)
         _test_show(client, ev.wa_id, f"Handed to Chris ({d.reason}). She'd get an email "
                                      f"saying: {p.staff_note}")
 

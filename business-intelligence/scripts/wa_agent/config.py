@@ -88,6 +88,7 @@ INTENT_POLICY: dict[str, str] = {
     "clinical": "draft",
     "complaint": "draft",
     "urgent": "escalate",
+    "sensitive": "escalate",  # pregnancy loss, birth trauma, crises: agent goes quiet
     "human_requested": "escalate",
     "other": "draft",
     # "Is this Chris?" with no request yet: the agent answers as the front desk

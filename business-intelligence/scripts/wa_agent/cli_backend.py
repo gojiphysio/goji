@@ -48,15 +48,14 @@ ROLE_LABELS = {"customer": "Customer", "agent": "Goji assistant (you)",
                "staff": "Chris from Goji (a person)"}
 
 
-def render_transcript(history: list[dict], now: float, customer_name: str = "") -> str:
+def render_transcript(history: list[dict], now: float, customer_name: str = "",
+                      pending_for_chris: str = "") -> str:
+    from .agent import context_note
     lines = [f"{ROLE_LABELS.get(h['role'], h['role'])}: {h['text']}"
              for h in history[-config.HISTORY_MESSAGES:]]
-    t = datetime.fromtimestamp(now, SGT)
     return ("WhatsApp conversation so far (oldest first). Write the next reply to the "
             "customer's latest message.\n\n" + "\n".join(lines) +
-            f"\n\n[context, not from the customer: now {t:%A %d %B %Y, %H:%M} SGT; "
-            f"clinic is {'open' if in_clinic_hours(now) else 'closed'} now; "
-            f"customer's WhatsApp name: {customer_name or 'unknown'}]")
+            context_note(now, customer_name, pending_for_chris))
 
 
 def build_command(prompt: str, sys_prompt_file: str, mcp_config_file: str,
@@ -107,7 +106,7 @@ def parse_stream(stdout: str) -> dict:
 
 
 def propose(history: list[dict], *, wa_id: str, now: float, customer_name: str = "",
-            runner=subprocess.run):
+            runner=subprocess.run, pending_for_chris: str = ""):
     """Same contract as agent.propose: never raises, failures escalate."""
     from .agent import INSTRUCTIONS, PROPOSAL_SCHEMA, AgentResult, Step, _escalation
     from .tools import TOOL_DEFS
@@ -121,7 +120,8 @@ def propose(history: list[dict], *, wa_id: str, now: float, customer_name: str =
                                       "\n# Knowledge base\n\n" + kb.load()["core"])
             mcp_file = os.path.join(tmp, "mcp.json")
             Path(mcp_file).write_text(json.dumps(mcp_config(wa_id)))
-            cmd = build_command(render_transcript(history, now, customer_name), sys_file,
+            cmd = build_command(render_transcript(history, now, customer_name,
+                                                  pending_for_chris), sys_file,
                                 mcp_file, PROPOSAL_SCHEMA, [t["name"] for t in TOOL_DEFS])
             proc = runner(cmd, cwd=tmp, stdin=subprocess.DEVNULL, capture_output=True,
                           text=True, timeout=config.CLI_TIMEOUT_S)

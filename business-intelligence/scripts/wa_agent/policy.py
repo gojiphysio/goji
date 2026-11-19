@@ -4,10 +4,12 @@ Handoff policy: who answers a chat, and what happens to the agent's proposal.
 Pure functions over plain data, so every rule is unit-tested without WhatsApp,
 Claude or Firestore. Nothing here asks the model anything.
 
-A chat is in one of three modes:
-  agent   the agent may answer (subject to `decide`)
-  human   a person has the chat; the agent stays silent until hand-back
-  paused  silenced by an admin until explicitly handed back
+A chat is in one of four modes:
+  agent    the agent may answer (subject to `decide`)
+  waiting  the agent handed a topic to Chris and she hasn't replied yet: it
+           keeps answering everything else, but not that topic
+  human    a person has the chat; the agent stays silent until hand-back
+  paused   silenced by an admin until explicitly handed back
 
 Ways into `human`: Chris writes in the chat (echo), the agent escalates, an
 admin takes over. Ways back to `agent`: HUMAN_IDLE_HANDBACK_S with no human
@@ -24,7 +26,7 @@ from . import config
 
 SGT = timezone(timedelta(hours=8))
 
-AGENT, HUMAN, PAUSED = "agent", "human", "paused"
+AGENT, HUMAN, PAUSED, WAITING = "agent", "human", "paused", "waiting"
 LATE_CHANGE_H = 24  # the cancellation policy's notice period (gojiphysio.com/services/#faq)
 SEND, DRAFT, ESCALATE, SILENT = "send", "draft", "escalate", "silent"
 
@@ -36,6 +38,7 @@ class ChatState:
     mode_reason: str = ""
     mode_since: float = 0.0
     last_human_at: float = 0.0
+    pending_for_chris: str = ""  # waiting: what was handed over (the staff note)
     history: list[dict] = field(default_factory=list)  # {role, text, ts, id}
     seen_ids: list[str] = field(default_factory=list)  # webhook de-dupe
     pending_draft: dict = field(default_factory=dict)  # {text, intent, at}: scored on Chris's reply
@@ -77,14 +80,16 @@ def set_mode(state: ChatState, mode: str, reason: str, now: float) -> bool:
 
 def apply_idle_handback(state: ChatState, now: float,
                         idle_s: int = config.HUMAN_IDLE_HANDBACK_S) -> bool:
-    """A `human` chat with no human message for `idle_s` returns to the agent.
+    """A `human` or `waiting` chat with no human message for `idle_s` returns
+    to the agent.
     The clock runs from the later of the last human message and the takeover,
     so an escalation Chris never answered also hands back. `paused` never
     times out. Returns True if the chat was handed back."""
-    if state.mode != HUMAN:
+    if state.mode not in (HUMAN, WAITING):
         return False
     since = max(state.last_human_at, state.mode_since)
     if now - since >= idle_s:
+        state.pending_for_chris = ""
         return set_mode(state, AGENT, "idle_handback", now)
     return False
 
@@ -93,7 +98,17 @@ def on_human_message(state: ChatState, now: float) -> bool:
     """Chris (or anyone on the business number) wrote in this chat: the agent
     steps back. Returns True if this took the chat over."""
     state.last_human_at = now
+    state.pending_for_chris = ""
     return set_mode(state, HUMAN, "human_replied", now)
+
+
+# Handovers after which the agent goes fully quiet rather than waiting: a red
+# flag, or something sensitive where routine answers in the thread read badly.
+SILENT_HANDOVER_INTENTS = frozenset({"urgent", "sensitive"})
+
+
+def handover_mode(intent: str) -> str:
+    return HUMAN if intent in SILENT_HANDOVER_INTENTS else WAITING
 
 
 def in_clinic_hours(now: float) -> bool:
@@ -199,5 +214,6 @@ def decide(proposal: Proposal, *, intent_policy: dict[str, str] = config.INTENT_
 
 
 def human_replied_since(state: ChatState, since: float) -> bool:
-    """The pre-send re-check: did a human write in this chat after `since`?"""
+    """The pre-send re-check: did a human write in this chat after `since`?
+    (`waiting` doesn't count: Chris hasn't written yet.)"""
     return state.mode in (HUMAN, PAUSED) or state.last_human_at > since

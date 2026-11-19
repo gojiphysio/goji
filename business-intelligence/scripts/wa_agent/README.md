@@ -28,13 +28,18 @@ Rules for changing this code: [`AGENTS.md`](AGENTS.md).
 
 ## How a chat is shared between the agent and Chris
 
-Each chat is in one mode: `agent`, `human` or `paused` (`policy.py`).
+Each chat is in one mode: `agent`, `waiting`, `human` or `paused` (`policy.py`).
 
-| Goes to `human` (agent silent) | Goes back to `agent` |
-|---|---|
-| Chris writes in the chat from the app (`smb_message_echoes`) | 24h with no message from a person (`WA_AGENT_HUMAN_IDLE_S`) |
-| The agent escalates (holding reply + email to hello@) | `POST /admin/chats/<id>/handback` |
-| `POST /admin/chats/<id>/takeover` | |
+| Goes to `waiting` (agent keeps answering, not the handed-over topic) | Goes to `human` (agent silent) | Goes back to `agent` |
+|---|---|---|
+| The agent hands a topic to Chris (holding reply + email to hello@) | Chris writes in the chat from the app (`smb_message_echoes`) | 24h with no message from a person (`WA_AGENT_HUMAN_IDLE_S`) |
+| | A red flag (`urgent`) or `sensitive` handover | `POST /admin/chats/<id>/handback` |
+| | `POST /admin/chats/<id>/takeover` | |
+
+While `waiting`, the model is told what's with Chris (`pending_for_chris`, the
+staff note), so it answers everything else but not that, says once that Chris
+has it if asked, and adds any new topic for Chris to the list without a second
+standby message (19 Nov 2026, Charles: a handover shouldn't stop the front desk).
 
 `paused` only leaves by hand-back. Across all chats: `POST /admin/kill` and the
 `WA_AGENT_KILL_SWITCH` env var. Contacts in `WA_AGENT_ALWAYS_HUMAN` are never

@@ -9,7 +9,7 @@ import pytest
 
 from wa_agent import app as app_mod
 from wa_agent import config, events, notify
-from wa_agent.policy import AGENT, HUMAN
+from wa_agent.policy import AGENT, HUMAN, WAITING
 from wa_agent.state import MemoryStore
 from wa_agent.whatsapp import parse_webhook
 
@@ -168,9 +168,9 @@ def test_escalation_sends_holding_reply_hands_over_and_notifies(env):
                                       reason="complaint about a session"))
     post(client, inbound(text="I'd like to speak to Chris about my last session"))
     assert app_mod.wa.sent == [(CUSTOMER, "I'll get Chris to call you back today.")]
-    assert app_mod.store.load(CUSTOMER).mode == HUMAN
+    assert app_mod.store.load(CUSTOMER).mode == WAITING
     assert notes[0][0] == "escalated"
-    assert ("mode", {"mode_from": AGENT, "mode_to": HUMAN,
+    assert ("mode", {"mode_from": AGENT, "mode_to": WAITING,
                      "reason": "escalated:complaint about a session"}) in rec
 
 
@@ -324,3 +324,65 @@ def test_rescheduling_replies_and_tells_chris_to_move_it(env):
     post(client, inbound(text="can I move my Tuesday appointment?"))
     assert len(app_mod.wa.sent) == 1 and [k for k, _ in notes] == ["reschedule"]
     assert app_mod.store.load(CUSTOMER).mode == AGENT
+
+
+# --- waiting for Chris ------------------------------------------------------------
+
+def _hand_over(client, note="wants a 4:30pm slot with Cheryl"):
+    app_mod.claude.queue.append(final(reply="Chris will get back to you today.",
+                                      intent="availability", escalate=True,
+                                      reason="no 4:30pm slot", note=note))
+    post(client, inbound(msg_id="wamid.h1", text="any 4:30pm with Cheryl?"))
+
+
+def test_after_handover_the_agent_keeps_answering_other_questions(env):
+    client, rec, _ = env
+    _hand_over(client)
+    app_mod.claude.queue.append(final(reply="We're open Mon-Sat 8am-8pm.", intent="location_hours"))
+    post(client, inbound(msg_id="wamid.h2", text="what are your hours?"))
+    assert app_mod.wa.sent[-1] == (CUSTOMER, "We're open Mon-Sat 8am-8pm.")
+    assert app_mod.store.load(CUSTOMER).mode == WAITING
+    # the model is told what's pending, so it won't answer that topic
+    last_turn = app_mod.claude.requests[-1]["messages"][-1]["content"][0]["text"]
+    assert "waiting for Chris on: wants a 4:30pm slot with Cheryl" in last_turn
+
+
+def test_once_chris_replies_the_agent_steps_out(env):
+    client, rec, _ = env
+    _hand_over(client)
+    post(client, echo(text="Hi! Cheryl can do 4:30pm on Friday"))
+    state = app_mod.store.load(CUSTOMER)
+    assert state.mode == HUMAN and state.pending_for_chris == ""
+    sent = len(app_mod.wa.sent)
+    post(client, inbound(msg_id="wamid.h3", text="great, thanks! also what are your hours?"))
+    assert len(app_mod.wa.sent) == sent
+    assert "rescue" not in dict(rec)["echo"]          # a planned handover, not a rescue
+
+
+def test_a_second_topic_for_chris_adds_to_the_pending_list(env):
+    client, _, notes = env
+    _hand_over(client)
+    app_mod.claude.queue.append(final(reply="I've passed that on to Chris too.",
+                                      intent="human_requested", escalate=True,
+                                      reason="invoice", note="wants an invoice resent"))
+    post(client, inbound(msg_id="wamid.h4", text="also can Chris resend my invoice?"))
+    state = app_mod.store.load(CUSTOMER)
+    assert state.mode == WAITING
+    assert state.pending_for_chris == "wants a 4:30pm slot with Cheryl; wants an invoice resent"
+    assert [k for k, _ in notes] == ["escalated", "escalated"]
+
+
+def test_red_flags_and_sensitive_topics_go_fully_quiet(env):
+    client, _, notes = env
+    app_mod.claude.queue.append(final(reply="I'm so sorry. Chris will reach out to you.",
+                                      intent="sensitive", escalate=True, reason="loss"))
+    post(client, inbound(text="I lost the baby last week"))
+    assert app_mod.store.load(CUSTOMER).mode == HUMAN and notes[0][0] == "sensitive"
+
+
+def test_waiting_hands_back_after_a_quiet_day(env):
+    from wa_agent.policy import apply_idle_handback
+    state = app_mod.store.load(CUSTOMER)
+    state.mode, state.mode_since, state.pending_for_chris = WAITING, 0.0, "x"
+    assert apply_idle_handback(state, 10**9)
+    assert state.mode == AGENT and state.pending_for_chris == ""

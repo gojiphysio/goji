@@ -173,11 +173,22 @@ When to escalate (escalate=true, and write a short warm holding reply saying \
 Chris or the team will get back to them)
 - They want to speak to Chris, a person or a named clinician about something \
 (see "Is this Chris?" above for when they've only asked who this is).
-- Anything emotional or sensitive (pregnancy loss, birth trauma, domestic issues).
+- Anything emotional or sensitive (pregnancy loss, birth trauma, domestic \
+issues): intent=sensitive.
 - Partnerships, press, jobs, suppliers.
 - You're not sure.
 For the holding reply's timing: if the clinic is open now say "today"; if it's \
 closed say "when we open" (Mon-Sat 8am-8pm).
+
+Waiting for Chris (the context says "waiting for Chris on: ...")
+- You've already handed that topic to Chris. Keep helping with anything else \
+as usual (hours, prices, open times, which service fits).
+- Don't answer, promise or speculate on the pending topic. If they ask about \
+it ("any update?"), say once that Chris has it and will get back to them \
+(today if the clinic is open, otherwise when it opens). Don't repeat that.
+- Never send a second "we'll get back to you" message for a new topic: if \
+something new also needs Chris, set escalate=true and write a short reply \
+saying you've passed it on to Chris too.
 
 Urgent (intent=urgent, escalate=true)
 Heavy bleeding, chest pain, trouble breathing, severe or sudden pain in \
@@ -292,7 +303,19 @@ def warm_cache(client: anthropic.Anthropic | None = None) -> dict:
             "output_tokens": u.output_tokens or 0}
 
 
-def build_messages(history: list[dict], now: float, customer_name: str = "") -> list[dict]:
+def context_note(now: float, customer_name: str = "", pending_for_chris: str = "") -> str:
+    """The turn's context, appended after the cached prefix."""
+    t = datetime.fromtimestamp(now, SGT)
+    note = (f"\n\n[context, not from the customer: now {t:%A %d %B %Y, %H:%M} SGT; "
+            f"clinic is {'open' if in_clinic_hours(now) else 'closed'} now; "
+            f"customer's WhatsApp name: {customer_name or 'unknown'}")
+    if pending_for_chris:
+        note += f"; waiting for Chris on: {pending_for_chris}"
+    return note + "]"
+
+
+def build_messages(history: list[dict], now: float, customer_name: str = "",
+                   pending_for_chris: str = "") -> list[dict]:
     """Stored transcript -> alternating user/assistant messages. Customer lines
     are `user`; agent and staff lines are `assistant` (staff lines are labelled
     so the model knows a person already replied). Consecutive same-role lines
@@ -308,12 +331,8 @@ def build_messages(history: list[dict], now: float, customer_name: str = "") -> 
             msgs.append({"role": role, "content": text})
     while msgs and msgs[0]["role"] != "user":
         msgs.pop(0)
-    t = datetime.fromtimestamp(now, SGT)
-    context = (f"\n\n[context, not from the customer: now {t:%A %d %B %Y, %H:%M} SGT; "
-               f"clinic is {'open' if in_clinic_hours(now) else 'closed'} now; "
-               f"customer's WhatsApp name: {customer_name or 'unknown'}]")
     if msgs:
-        msgs[-1]["content"] += context
+        msgs[-1]["content"] += context_note(now, customer_name, pending_for_chris)
     return [{"role": m["role"], "content": [{"type": "text", "text": m["content"]}]}
             for m in msgs]
 
@@ -336,20 +355,21 @@ def _parse_proposal(text: str) -> Proposal:
 
 def propose(history: list[dict], *, wa_id: str, now: float | None = None,
             customer_name: str = "", client: anthropic.Anthropic | None = None,
-            tool_deps: dict | None = None) -> AgentResult:
+            tool_deps: dict | None = None, pending_for_chris: str = "") -> AgentResult:
     """Run the tool loop for the latest customer message in `history`.
     Never raises: any failure becomes an escalation, so a customer is never
     left with silence because the model or a tool broke."""
     now = now if now is not None else time.time()
     if config.BACKEND == "cli":
         from . import cli_backend
-        return cli_backend.propose(history, wa_id=wa_id, now=now, customer_name=customer_name)
+        return cli_backend.propose(history, wa_id=wa_id, now=now, customer_name=customer_name,
+                                   pending_for_chris=pending_for_chris)
     global last_call_at
     client = client or anthropic.Anthropic()
     last_call_at = time.time()
     result = AgentResult(proposal=_escalation("not_run"))
     t0 = time.monotonic()
-    messages = build_messages(history, now, customer_name)
+    messages = build_messages(history, now, customer_name, pending_for_chris)
     if not messages:
         result.proposal = _escalation("no_customer_message")
         return result
