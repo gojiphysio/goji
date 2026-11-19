@@ -398,7 +398,8 @@ def run_one(sc: Scenario, client=None) -> Result:
 
 
 def check(sc: Scenario, p, action: str, *, prior_agent: bool) -> list[str]:
-    e, r, f = sc.expect, p.reply or "", []
+    e, f = sc.expect, []
+    r = (p.reply or "").replace("<break>", "\n")
     if e.silent:
         f.append("expected no reply (acknowledgement) but the model was asked")
     if e.intents and p.intent not in e.intents:

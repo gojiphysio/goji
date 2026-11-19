@@ -664,3 +664,17 @@ def test_no_closer_for_someone_already_in_a_longer_conversation(env):
     post(client, inbound(msg_id="wamid.l9", text="ok thanks!", ts=now))
     assert len(app_mod.claude.requests) == asked                 # no nudge, no model call
     assert ("silent", {"reason": "acknowledgement"}) in rec
+
+
+def test_a_reply_goes_out_as_bubbles_with_typing_between(env):
+    client, rec, notes = env
+    app_mod.claude.queue.append(final(
+        reply="Hey! How can I address you?\n<break>\nCongrats on your newborn ❤️\n<break>\n"
+              "Our postpartum session is 55 minutes.", intent="service_fit"))
+    post(client, inbound(text="hi, I just had a baby"))
+    assert [t for _, t in app_mod.wa.sent] == ["Hey! How can I address you?",
+                                              "Congrats on your newborn ❤️",
+                                              "Our postpartum session is 55 minutes."]
+    assert app_mod.wa.typing.count("wamid.in1") == 3        # once before, once per later bubble
+    stored = app_mod.store.load(CUSTOMER).history[-1]["text"]
+    assert "<break>" not in stored and stored.count("\n\n") == 2

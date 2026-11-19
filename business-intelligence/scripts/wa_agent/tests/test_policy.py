@@ -171,3 +171,11 @@ def test_a_short_clarifying_question_sends_even_below_the_confidence_bar():
     assert decide(unsure).action == DRAFT            # very unsure: still drafted
     cancel = Proposal(reply="Which appointment?", intent="cancel", confidence=0.6, escalate=False)
     assert decide(cancel).action == DRAFT            # draft-for-Chris intents stay drafts
+
+
+def test_bubbles_split_and_cap_at_three():
+    from wa_agent.policy import as_one_message, split_bubbles
+    assert split_bubbles("one") == ["one"]
+    assert split_bubbles("a\n<break>\nb\n<break>\n\n<break>\nc") == ["a", "b", "c"]
+    assert split_bubbles("a<break>b<break>c<break>d") == ["a", "b", "c\n\nd"]
+    assert as_one_message("a\n<break>\nb") == "a\n\nb"

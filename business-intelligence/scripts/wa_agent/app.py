@@ -42,6 +42,7 @@ from flask import Flask, jsonify, request
 
 from . import agent, booking_client, config, documents, events, learning, notify, tools
 from .policy import (AGENT, DRAFT, ESCALATE, HUMAN, LATE_CHANGE_H, PAUSED, SEND, SGT, WAITING,
+                     as_one_message, split_bubbles,
                      apply_idle_handback, handover_mode,
                      decide, gate, human_replied_since, is_acknowledgement, on_human_message,
                      reply_problems, set_mode)
@@ -272,6 +273,23 @@ def _book_pending(state, ev: Inbound, received: float, fallback: str,
              "dry_run": bool(res.get("dry_run")), "at": time.time(), "source": "whatsapp"})
 
 
+BUBBLE_PAUSE_S = 1.2
+
+
+def _send_bubbles(client, ev: Inbound, reply: str) -> str:
+    """Send a reply as up to 3 WhatsApp bubbles, with the typing indicator
+    and a short pause between them so they read like a person typing.
+    Returns the last message id."""
+    bubbles = split_bubbles(reply) or [reply]
+    msg_id = ""
+    for i, bubble in enumerate(bubbles):
+        if i:
+            client.mark_read_typing(ev.msg_id)
+            _sleep(BUBBLE_PAUSE_S)
+        msg_id = client.send_text(ev.wa_id, bubble)
+    return msg_id
+
+
 def _move_pending(state, ev: Inbound, received: float, fallback: str,
                   chosen: dict | None = None) -> tuple[str, dict | None]:
     """The customer confirmed the move stated back to them in an earlier message:
@@ -449,7 +467,7 @@ def handle_inbound(ev: Inbound, received: float) -> None:
                       reason=f"hours:{p.hours_to_appointment:.0f}")
 
     notice = dict(customer=ev.name, wa_id=ev.wa_id, staff_note=p.staff_note,
-                  suggested_reply=p.reply, reason=d.reason, last_message=ev.text,
+                  suggested_reply=as_one_message(p.reply), reason=d.reason, last_message=ev.text,
                   feedback=learning.feedback_links(events.chat_key(ev.wa_id), int(now)))
 
     if d.action == DRAFT:
@@ -457,14 +475,16 @@ def handle_inbound(ev: Inbound, received: float) -> None:
                 and 0 <= p.hours_to_appointment < LATE_CHANGE_H)
         with locks(ev.wa_id):
             state = st.load(ev.wa_id)
-            state.pending_draft = {"text": p.reply, "intent": p.intent, "at": time.time(),
+            state.pending_draft = {"text": as_one_message(p.reply), "intent": p.intent,
+                                   "at": time.time(),
                                    "waives_fee": late and not waiver_used}
             state.last_auto = {}
             st.save(state)
         notify.send("drafted", **notice)
         events.record("drafted", ev.wa_id, intent=p.intent, reason=d.reason)
         _test_show(client, ev.wa_id,
-                   f"Not sent. Chris gets this draft to check ({d.reason}):\n\n{p.reply}")
+                   f"Not sent. Chris gets this draft to check ({d.reason}):\n\n"
+                   f"{as_one_message(p.reply)}")
         return
 
     if d.action == SEND:
@@ -493,14 +513,14 @@ def handle_inbound(ev: Inbound, received: float) -> None:
         elif d.action == SEND and p.confirm_move:
             reply, booked = _move_pending(state, ev, received, reply, p.move)
         try:
-            wa_msg_id = client.send_text(ev.wa_id, reply)
+            wa_msg_id = _send_bubbles(client, ev, reply)
         except Exception as e:
             log.warning("send failed: %s", e)
             events.record("send_failed", ev.wa_id, reason=type(e).__name__)
             notify.send("escalated", **{**notice, "reason": f"send failed: {e}"})
             return
         sent_at = time.time()
-        append_history(state, "agent", reply, sent_at, wa_msg_id)
+        append_history(state, "agent", as_one_message(reply), sent_at, wa_msg_id)
         if ack_closer:
             state.closer_id = wa_msg_id
         old = state.mode
