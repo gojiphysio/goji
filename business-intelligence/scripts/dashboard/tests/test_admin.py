@@ -563,6 +563,22 @@ def test_book_redirect_goes_to_site_booking_form(client, monkeypatch, _no_click_
     assert app.LINK_SLUG_KIND["web-book"] == "book"
 
 
+def test_book_redirect_forwards_valid_preselect_only(client, monkeypatch, _no_click_logging):
+    # The WhatsApp assistant sends go.gojiphysio.com/wa-book?service=..&focus=..
+    # so /book opens on the right option. Only known keys with slug-shaped
+    # values pass through; anything else (markup, other params) is dropped.
+    monkeypatch.setattr(app, "SITE_BOOKING_URL", "https://www.gojiphysio.com/book")
+    from urllib.parse import urlparse, parse_qs
+    loc = client.get("/r/wa-book?service=physiotherapy&focus=womens-health"
+                     "&variant=<script>&utm_source=x").headers["Location"]
+    q = parse_qs(urlparse(loc).query)
+    assert q["src"] == ["wa-book"]
+    assert q["service"] == ["physiotherapy"]
+    assert q["focus"] == ["womens-health"]
+    assert "variant" not in q and "utm_source" not in q
+    assert app.LINK_SLUG_KIND["wa-book"] == "book"
+
+
 def test_whatsapp_redirect_has_no_click_id_passthrough(client, monkeypatch, _no_click_logging):
     # The cid/src passthrough only applies to on-site /book targets; a wa.me deep
     # link must stay clean (the click_id can't join anything on WhatsApp's side).
@@ -644,3 +660,22 @@ def test_root_slug_not_exposed_in_dashboard_mode(client):
     # links mode. On the dashboard surface it must not exist, so the internal
     # tool never serves public-style short links. /r/<slug> stays available.
     assert client.get("/ig").status_code == 404
+
+
+def test_wa_book_click_records_the_chat_ref(client, monkeypatch):
+    # The assistant's link carries ?ref=<16-hex chat hash>; anything else is dropped.
+    seen = []
+    monkeypatch.setattr(app, "_record_link_click_async", lambda *a, **k: seen.append(k))
+    client.get("/r/wa-book?service=physiotherapy&ref=0123456789abcdef")
+    client.get("/r/wa-book?service=physiotherapy&ref=<script>")
+    assert seen[0]["chat_ref"] == "0123456789abcdef"
+    rows = []
+
+    class FakeBQ:
+        def insert_rows_json(self, table, r):
+            rows.extend(r)
+            return []
+    monkeypatch.setattr(app, "_bq", lambda: FakeBQ())
+    app._record_link_click("c1", "wa-book", None, None, chat_ref="<script>")
+    app._record_link_click("c2", "wa-book", None, None, chat_ref="0123456789abcdef")
+    assert [r["chat_ref"] for r in rows] == [None, "0123456789abcdef"]

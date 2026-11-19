@@ -222,6 +222,9 @@ LINK_SLUGS: dict[str, dict] = {
     "ads-book": {"kind": "book", "label": "Ads"},
     "qr-book":  {"kind": "book", "label": "QR"},
     "book":     {"kind": "book", "label": "Social"},  # generic fallback
+    # Booking links the WhatsApp assistant (scripts/wa_agent) sends in chat.
+    # They carry ?service=&focus= so /book opens on the right option.
+    "wa-book":  {"kind": "book", "label": "WhatsApp assistant"},
     # --- Legacy Plato-booking slugs (retired; alias to the native /book form
     #     below so old published links never dead-end) ---
     "web-plato": {"kind": "book", "label": "Web"},
@@ -1445,7 +1448,8 @@ LINK_CLICK_TABLE = f"{PROJECT}.marts.link_click_events"
 
 
 def _record_link_click(click_id: str, slug: str, user_agent: str | None, referer: str | None,
-                       session_id: str | None = None, page: str | None = None) -> None:
+                       session_id: str | None = None, page: str | None = None,
+                       chat_ref: str | None = None) -> None:
     """Append one click via the streaming insert API (insert_rows_json), NOT
     DML: clicks are public/high-frequency, so this dodges BigQuery's 1,500
     DML-statements-per-table-per-day cap and the latency of a query job.
@@ -1454,7 +1458,9 @@ def _record_link_click(click_id: str, slug: str, user_agent: str | None, referer
     through to the /book landing (?cid=…) for an exact origin→booking join.
     `session_id`/`page` come from on-site CTA taps (the site appends ?sid=&p=) so
     a WhatsApp tap can be tied back to the booking session it came from — the
-    golden-flow join. NULL for off-site channels."""
+    golden-flow join. NULL for off-site channels. `chat_ref` is the WhatsApp
+    assistant's salted chat hash from a wa-book link, so a booking can be
+    credited to the conversation (marts.wa_agent_conversations)."""
     try:
         row = {
             "click_id":   click_id,
@@ -1464,6 +1470,7 @@ def _record_link_click(click_id: str, slug: str, user_agent: str | None, referer
             "referer":    ((referer or "")[:512] or None),
             "session_id": ((session_id or "")[:128] or None),
             "page":       ((page or "")[:512] or None),
+            "chat_ref":   chat_ref if chat_ref and CHAT_REF_RE.match(chat_ref) else None,
         }
         errors = _bq().insert_rows_json(LINK_CLICK_TABLE, [row])
         if errors:
@@ -1473,11 +1480,16 @@ def _record_link_click(click_id: str, slug: str, user_agent: str | None, referer
 
 
 def _record_link_click_async(click_id: str, slug: str, user_agent: str | None, referer: str | None,
-                             session_id: str | None = None, page: str | None = None) -> None:
+                             session_id: str | None = None, page: str | None = None,
+                             chat_ref: str | None = None) -> None:
     """Fire-and-forget so the public redirect returns immediately."""
     threading.Thread(target=_record_link_click,
-                     args=(click_id, slug, user_agent, referer, session_id, page),
+                     args=(click_id, slug, user_agent, referer, session_id, page, chat_ref),
                      daemon=True).start()
+
+
+# wa_agent's events.chat_key: 16 hex chars. Anything else is dropped.
+CHAT_REF_RE = re.compile(r"^[0-9a-f]{16}$")
 
 
 # Crawlers, link previewers, scripts and our own audit runner all follow go-links.
@@ -3913,7 +3925,21 @@ def api_frontdesk_new_patients_save() -> Response:
     return Response('{"ok": true}', mimetype="application/json")
 
 
-def _slug_target(slug: str, click_id: str | None = None) -> str:
+# Query params a booking go-link may forward to /book so the form opens on the
+# right option (BookingForm.astro's applyDeepLink). Values are ids, so anything
+# that isn't a short lowercase slug is dropped rather than passed through.
+BOOK_PRESELECT_PARAMS = ("service", "focus", "variant")
+_PRESELECT_VALUE_RE = re.compile(r"^[a-z0-9-]{1,40}$")
+
+
+def _book_preselect(args) -> str:
+    """`&service=..&focus=..` from the go-link's own query, validated."""
+    kept = [(k, args.get(k)) for k in BOOK_PRESELECT_PARAMS
+            if args.get(k) and _PRESELECT_VALUE_RE.match(args.get(k))]
+    return "".join(f"&{k}={v}" for k, v in kept)
+
+
+def _slug_target(slug: str, click_id: str | None = None, preselect: str = "") -> str:
     """Resolve a slug to its redirect destination. Never dead-ends: an unknown
     or not-yet-configured target falls back to the marketing site.
 
@@ -3930,7 +3956,7 @@ def _slug_target(slug: str, click_id: str | None = None) -> str:
         base = SITE_BOOKING_URL or WHATSAPP_FALLBACK_URL
         if click_id and base:
             sep = "&" if "?" in base else "?"
-            return f"{base}{sep}cid={click_id}&src={slug}"
+            return f"{base}{sep}cid={click_id}&src={slug}{preselect}"
         return base
     if WHATSAPP_NUMBER:  # whatsapp
         return f"https://wa.me/{WHATSAPP_NUMBER}?text={quote(cfg.get('text', ''))}"
@@ -3959,8 +3985,9 @@ def tracked_redirect(slug: str):
     _record_link_click_async(click_id, slug, request.headers.get("User-Agent"),
                              request.headers.get("Referer"),
                              session_id=request.args.get("sid"),
-                             page=request.args.get("p"))
-    return redirect(_slug_target(slug, click_id), code=302)
+                             page=request.args.get("p"),
+                             chat_ref=request.args.get("ref"))
+    return redirect(_slug_target(slug, click_id, _book_preselect(request.args)), code=302)
 
 
 # On the public links subdomain the slug sits at the root (go.gojiphysio.com/ig),
