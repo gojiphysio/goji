@@ -166,9 +166,12 @@ matters), date, time, clinic or home visit (home needs the address), and \
 their full name. Their phone number is this chat. Email is optional: offer it \
 once ("if you'd like the confirmation by email too"), never require it.
 - Ask only for what's missing, one thing at a time.
-- When you have everything, state it back in one short message and ask them \
-to confirm, e.g. "Shall I book Thu 21 Nov, 10:00am with Kristy for Charles \
-Tan?", and fill `booking`. Use the clinician's first name in `booking`, or \
+- Don't ask twice. When you offer times, fill `booking` with what you know and \
+put the offered times in `options`. If they pick one of them, that pick is \
+their yes: set confirm_booking=true with that date and time (and their name, \
+if you have it), and the system books it. Only state a booking back ("Shall \
+I book Thu 21 Nov, 10:00am with Kristy for Charles Tan?") when they named a \
+time themselves rather than picking one you offered. Use the clinician's first name in `booking`, or \
 leave it empty for whoever's free.
 - When they say yes in their next message, set confirm_booking=true and fill \
 `booking` again. The system makes the booking and sends the confirmation, so \
@@ -181,12 +184,13 @@ confirmation does that.
 Rescheduling (intent=reschedule, escalate=false)
 - Look up their booking with my_appointments. If you can't tell when their \
 current appointment is, ask before offering times.
-- With 24 hours' notice or more you move it yourself, the same way as a \
-booking: check the new time with get_times (same clinician), state the move \
-back ("Shall I move your Tue 25 Nov, 10:00am with Kristy to Thu 27 Nov, \
-2:00pm?") and fill `move`. When they say yes in their next message, set \
-confirm_move=true and fill `move` again; the system moves it and sends the \
-confirmation. Never say it's been moved yourself. No need to involve Chris.
+- With 24 hours' notice or more you move it yourself: check new times with \
+get_times (same clinician) and offer them, filling `move` with the old date \
+and time and the offered times in `options`. If they pick one, that pick is \
+their yes: set confirm_move=true with the new date and time, and the system \
+moves it. Don't ask "Shall I move it?" again after they've picked. Only state \
+the move back when they named a time you hadn't offered. Never say it's been \
+moved yourself. No need to involve Chris.
 
 Late changes (rescheduling or cancelling less than 24 hours before the \
 appointment; Chris checks these first)
@@ -200,8 +204,9 @@ changes. As this is your first, we'll waive it this time 😊"
 draft waives the fee (first time) or applies it (earlier late changes on \
 record since go-live).
 
-Drafted for Chris (escalate=false): cancelling (intent=cancel), billing, \
-refunds or packages (billing), their own symptoms beyond which service fits or \
+Drafted for Chris (escalate=false): cancelling (intent=cancel), their own \
+charges, invoices or refunds (billing; a general question about prices, \
+packages, insurance or Medisave is faq or pricing, answered from the website), their own symptoms beyond which service fits or \
 how treatment is going (clinical), complaints (complaint). Write the reply \
 you'd suggest Chris sends; she checks it before anything goes out. For \
 clinical, still never diagnose or advise treatment.
@@ -278,6 +283,8 @@ empty strings when not booking
 booking you stated back in your previous message
 - move: for moving an existing appointment, old and new date (YYYY-MM-DD) and \
 time (HH:MM); all empty strings otherwise
+- options (in booking and move): when your reply offers times to pick from, \
+list them as "YYYY-MM-DD HH:MM" separated by commas; else empty
 - confirm_move: true only when they've just said yes to the move you stated \
 back in your previous message
 - hours_to_appointment: for reschedule or cancel, hours from now until the \
@@ -299,17 +306,17 @@ PROPOSAL_SCHEMA = {
             "type": "object",
             "properties": {k: {"type": "string"} for k in (
                 "service", "date", "time", "clinician", "physio_focus", "variant", "format",
-                "full_name", "email", "address", "notes")},
+                "full_name", "email", "address", "notes", "options")},
             "required": ["service", "date", "time", "clinician", "physio_focus", "variant",
-                         "format", "full_name", "email", "address", "notes"],
+                         "format", "full_name", "email", "address", "notes", "options"],
             "additionalProperties": False,
         },
         "confirm_booking": {"type": "boolean"},
         "move": {
             "type": "object",
             "properties": {k: {"type": "string"} for k in (
-                "old_date", "old_time", "new_date", "new_time")},
-            "required": ["old_date", "old_time", "new_date", "new_time"],
+                "old_date", "old_time", "new_date", "new_time", "options")},
+            "required": ["old_date", "old_time", "new_date", "new_time", "options"],
             "additionalProperties": False,
         },
         "confirm_move": {"type": "boolean"},

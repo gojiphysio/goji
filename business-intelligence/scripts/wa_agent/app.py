@@ -226,14 +226,28 @@ def _tag_waiver_used(st, wa_id: str, patient: dict) -> None:
         events.record("patient_tag_failed", wa_id, reason=e.code)
 
 
-def _book_pending(state, ev: Inbound, received: float, fallback: str) -> tuple[str, dict | None]:
+def _book_pending(state, ev: Inbound, received: float, fallback: str,
+                  chosen: dict | None = None) -> tuple[str, dict | None]:
     """The customer confirmed: book what was stated back to them, if it was
     stated in an earlier message and recently. The model can't book on its
     own say-so in the same turn. Returns (reply, booking or None)."""
+    chosen = chosen or {}
     pending = state.pending_booking or {}
     if not pending or pending.get("at", 0) >= received \
             or received - pending.get("at", 0) > config.BOOKING_CONFIRM_WINDOW_S:
         events.record("book_skipped", ev.wa_id, reason="no_pending_booking")
+        return fallback, None
+    # The customer either said yes to the booking stated back, or picked one of
+    # the times offered in that earlier message. Nothing else gets booked.
+    pick = (chosen.get("date", ""), chosen.get("time", ""))
+    if pick != (pending.get("date"), pending.get("time")):
+        if pick not in booking_client.offered(pending.get("options", "")):
+            events.record("book_skipped", ev.wa_id, reason="time_not_offered")
+            return fallback, None
+        pending = {**pending, "date": pick[0], "time": pick[1],
+                   "full_name": pending.get("full_name") or chosen.get("full_name", "")}
+    if not booking_client.complete(pending):
+        events.record("book_skipped", ev.wa_id, reason="details_missing")
         return fallback, None
     try:
         res = booking_client.book(pending, wa_id=ev.wa_id)
@@ -258,13 +272,24 @@ def _book_pending(state, ev: Inbound, received: float, fallback: str) -> tuple[s
              "dry_run": bool(res.get("dry_run")), "at": time.time(), "source": "whatsapp"})
 
 
-def _move_pending(state, ev: Inbound, received: float, fallback: str) -> tuple[str, dict | None]:
+def _move_pending(state, ev: Inbound, received: float, fallback: str,
+                  chosen: dict | None = None) -> tuple[str, dict | None]:
     """The customer confirmed the move stated back to them in an earlier message:
     move it through goji-booking. Chris is only told if it fails."""
     pending = state.pending_move or {}
     if not pending or pending.get("at", 0) >= received \
             or received - pending.get("at", 0) > config.BOOKING_CONFIRM_WINDOW_S:
         events.record("move_skipped", ev.wa_id, reason="no_pending_move")
+        return fallback, None
+    chosen = chosen or {}
+    pick = (chosen.get("new_date", ""), chosen.get("new_time", ""))
+    if pick != (pending.get("new_date"), pending.get("new_time")):
+        if pick not in booking_client.offered(pending.get("options", "")):
+            events.record("move_skipped", ev.wa_id, reason="time_not_offered")
+            return fallback, None
+        pending = {**pending, "new_date": pick[0], "new_time": pick[1]}
+    if not booking_client.move_complete(pending):
+        events.record("move_skipped", ev.wa_id, reason="details_missing")
         return fallback, None
     ids = (state.patient or {}).get("patient_ids") or []
     try:
@@ -451,9 +476,9 @@ def handle_inbound(ev: Inbound, received: float) -> None:
             reply = agent._escalation("unsafe_or_empty").reply
         booked = None
         if d.action == SEND and p.confirm_booking:
-            reply, booked = _book_pending(state, ev, received, reply)
+            reply, booked = _book_pending(state, ev, received, reply, p.booking)
         elif d.action == SEND and p.confirm_move:
-            reply, booked = _move_pending(state, ev, received, reply)
+            reply, booked = _move_pending(state, ev, received, reply, p.move)
         try:
             wa_msg_id = client.send_text(ev.wa_id, reply)
         except Exception as e:
@@ -479,13 +504,16 @@ def handle_inbound(ev: Inbound, received: float) -> None:
         state.pending_draft = {}
         if booked:
             state.booked, state.pending_booking, state.pending_move = booked, {}, {}
-        elif d.action == SEND and not p.confirm_move and booking_client.move_complete(p.move):
+        elif d.action == SEND and not p.confirm_move and p.move.get("old_date") and (
+                booking_client.move_complete(p.move) or booking_client.offered(p.move.get("options", ""))):
             state.pending_move = {**{k: p.move.get(k, "") for k in booking_client.MOVE_FIELDS},
-                                  "at": sent_at}
-        elif d.action == SEND and not p.confirm_booking and booking_client.complete(p.booking):
-            # Stated back to the customer; only their next message can confirm it.
+                                  "options": p.move.get("options", ""), "at": sent_at}
+        elif d.action == SEND and not p.confirm_booking and (
+                booking_client.complete(p.booking)
+                or (p.booking.get("service") and booking_client.offered(p.booking.get("options", "")))):
+            # Stated back, or times offered; only their next message can confirm.
             state.pending_booking = {**{k: p.booking.get(k, "") for k in booking_client.FIELDS},
-                                     "at": sent_at}
+                                     "options": p.booking.get("options", ""), "at": sent_at}
         st.save(state)
     if d.action == SEND:
         with _autonomy_lock:

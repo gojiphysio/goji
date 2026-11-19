@@ -11,6 +11,7 @@ CORS. Endpoints:
   POST /api/track                                         -> funnel event (fire-and-forget)
   POST /internal/refresh-snapshot                         -> re-page Plato (Cloud Scheduler, 5 min)
   POST /internal/book                                     -> WhatsApp assistant booking (X-Internal-Token)
+  POST /internal/reschedule                               -> WhatsApp assistant moves an appointment (same token)
   GET  /healthcheck
 """
 from __future__ import annotations
@@ -28,7 +29,7 @@ import requests
 from flask import Flask, jsonify, request
 
 from .availability import SGT, derive_availability, derive_available_days
-from .booking import BookingError, create_booking
+from .booking import BookingError, create_booking, reschedule_appointment
 from .config import CLINICIANS, MAX_ADVANCE_DAYS, SERVICES
 from .plato import PlatoBusy, PlatoClient, PlatoError, PlatoThrottled
 from . import mailer
@@ -735,6 +736,69 @@ def internal_book():
         "date": result["date"],
         "time": result["time"],
         "dry_run": dry_run,
+    })
+
+
+# BookingError code -> HTTP status for /internal/reschedule (anything else 400).
+RESCHEDULE_STATUS = {"not_found": 404, "ambiguous": 409, "late_change": 409,
+                     "slot_taken": 409, "unsupported": 409, "plato_error": 502}
+
+
+def _sgt_now() -> datetime:
+    """Naive SGT wall clock (a seam the tests replace)."""
+    return datetime.now(SGT).replace(tzinfo=None)
+
+
+@app.route("/internal/reschedule", methods=["POST"])
+def internal_reschedule():
+    """Move a patient's existing appointment for the WhatsApp assistant: same
+    clinician, same service and length, to a new date/time.
+
+    Body {phone, patient_id?, old_date, old_time, new_date, new_time, dry_run}.
+    reschedule_appointment finds the one live appointment at old_date/old_time
+    for the patient, refuses a change within 24h of it (late changes go to
+    staff), re-checks the new slot fresh under the clinician's lock, then PUTs
+    only the new start/end (+ a line on the description). `dry_run: true` does
+    all of that except the PUT and sends nothing. A real move emails the clinic
+    and fires the booking-confirmed callback. Same token rules as /internal/book.
+    """
+    if not INTERNAL_TOKEN:
+        return jsonify({"ok": False, "error": "not found", "code": "not_found"}), 404
+    token = request.headers.get("X-Internal-Token", "")
+    if not hmac.compare_digest(token.encode(), INTERNAL_TOKEN.encode()):
+        return jsonify({"ok": False, "error": "forbidden", "code": "forbidden"}), 403
+    body = request.get_json(silent=True)
+    if not isinstance(body, dict):
+        return jsonify({"ok": False, "error": "Expected a JSON object.",
+                        "code": "invalid"}), 400
+    dry_run = body.get("dry_run", False)
+    if not isinstance(dry_run, bool):
+        return jsonify({"ok": False, "error": "dry_run must be true or false.",
+                        "code": "invalid"}), 400
+    try:
+        result = reschedule_appointment(plato(), body, now=_sgt_now(), dry_run=dry_run)
+    except BookingError as e:
+        status = RESCHEDULE_STATUS.get(e.code, 400)
+        return jsonify({"ok": False, "error": str(e), "code": e.code}), status
+    except Exception:
+        log.exception("whatsapp reschedule failed")
+        return jsonify({"ok": False, "error": "Something went wrong.",
+                        "code": "plato_error"}), 502
+
+    if not dry_run:
+        log.info("rescheduled %s via WhatsApp assistant", result["reference"])
+        mailer.send_admin_reschedule_email(result, body)  # best-effort
+        _notify_wa_agent(result, body, "whatsapp")         # best-effort, async
+    return jsonify({
+        "ok": True,
+        "dry_run": dry_run,
+        "reference": result["reference"],
+        "clinician_name": result["clinician_name"],
+        "service": result["service"],
+        "old_date": result["old_date"],
+        "old_time": result["old_time"],
+        "new_date": result["new_date"],
+        "new_time": result["new_time"],
     })
 
 

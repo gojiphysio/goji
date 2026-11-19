@@ -30,6 +30,8 @@ the clinic's real rules — see the plan/validation notes in the repo.
   self-throttled to one Plato crawl per `SNAPSHOT_MIN_INTERVAL` (240s).
 - `POST /internal/book` → booking on behalf of the WhatsApp assistant
   (`X-Internal-Token`; see **WhatsApp assistant** below).
+- `POST /internal/reschedule` → the WhatsApp assistant moves a patient's
+  existing appointment (same token; see **WhatsApp assistant** below).
 - `GET /healthcheck` → liveness only ("is the container up"). Never touches Plato.
 - `GET /healthcheck/deep` → **readiness**: derives real availability for the next
   14 days. `200 {"ok":true,...}` = a visitor can book; `503` = they can't, with
@@ -66,7 +68,7 @@ booking is refused.
 Widget settings (hostnames, mode) are in the Cloudflare dashboard → Turnstile.
 To rotate the secret, add a new version of `turnstile-secret` and redeploy.
 
-## WhatsApp assistant (`/internal/book` + booking-confirmed callback)
+## WhatsApp assistant (`/internal/book`, `/internal/reschedule` + booking-confirmed callback)
 The assistant (`goji-wa-agent`, its own Cloud Run service, `scripts/wa_agent/`)
 books through `POST /internal/book`, the same `create_booking` as `/api/book`.
 - **Auth:** header `X-Internal-Token` must equal `INTERNAL_TOKEN` (Secret Manager
@@ -103,7 +105,11 @@ books through `POST /internal/book`, the same `create_booking` as `/api/book`.
   `vars.WA_AGENT_URL`; empty disables it.
 - **Rules:** any new booking entry point calls `_notify_wa_agent` after success;
   a dry run must never reach `_create_appointments` (`test_internal_book.py`
-  runs one against a Plato stub that fails on any write).
+  runs one against a Plato stub that fails on any write; `test_reschedule.py`
+  does the same for moves).
+- **Moving a booking:** `POST /internal/reschedule` (same token) moves an
+  existing appointment, same clinician and service; a real move also fires the
+  callback above. Full contract under **`POST /internal/reschedule`** below.
 
 **Setup (once, before this deploys):** the deploy mounts the secret
 unconditionally, so a missing secret fails the deploy.
@@ -230,6 +236,57 @@ current tags and PUTs them back with the new one (Plato replaces the tag list
 as a whole). `dry_run` reads but doesn't write. **Verify once on a test patient
 in Plato before go-live** that the tag payload shape is accepted and existing
 tags survive.
+
+### `POST /internal/reschedule` (WhatsApp assistant)
+Moves one existing appointment to a new date/time, keeping the clinician, the
+service and the length (no clinician change in this version).
+`reschedule_appointment` in `booking.py`; same token rules as `/internal/book`
+(unset `INTERNAL_TOKEN` → `404`, wrong/missing → `403`).
+- **Body:** `{phone, patient_id?, old_date: "YYYY-MM-DD", old_time: "HH:MM",
+  new_date, new_time, dry_run: bool}` (SGT wall clock). Non-boolean `dry_run`,
+  bad dates/times, a past `new_date`, or the same slot → `400 invalid`;
+  `new_date` past `MAX_ADVANCE_DAYS` → `400 too_far`.
+- **Finding the original:** Plato's appointments on `old_date`, read fresh,
+  skipping leave/unavailable entries and cancelled / void / no-show ones (same
+  rule as the BI marts), whose start is `old_time` and that belong to the
+  patient. With `patient_id`: an appointment linked to a patient must be linked
+  to that one, and an unlinked one (website/WhatsApp bookings carry the phone
+  inline, no patient link) matches on the last 8 digits of `handphone`. Without
+  `patient_id`, the phone decides. None → `404 not_found`; more than one →
+  `409 ambiguous`.
+- **Policy:** the original starting less than `RESCHEDULE_MIN_NOTICE_HOURS`
+  (24) from now → `409 late_change` (the assistant hands it to staff, who apply
+  the cancellation policy). Appointments it can't move alone → `409
+  unsupported`: home visits (three Plato appointments: travel / visit /
+  travel), and anything whose calendar isn't a known clinician or whose type +
+  length isn't a website service (`_service_for`: Physiotherapy and Mummy &
+  Baby share a type, so length decides; physio variants keep their length).
+- **New slot:** `derive_availability(..., clinician_id=…, fresh=True)` inside
+  the clinician's lock, like `create_booking`, with the appointment itself
+  hidden from the read so a same-day move that overlaps its own current slot
+  (10:00 → 10:30) isn't a clash. Not free (booked, outside online hours, day
+  off, inside `min_days`) → `409 slot_taken`.
+- **Write:** `PUT /appointment/{id}` (partial update) with only `starttime`,
+  `endtime` and, when the appointment has a `description`, the old text plus
+  `Moved via WhatsApp assistant from <old_date> <old_time>.` Patient link,
+  title, type, calendar and contact are not sent, so they stay.
+  `PlatoClient.update_appointment` clears the appointment caches and marks
+  both days dirty, like a booking. `dry_run: true` does everything but the PUT
+  and sends nothing.
+- **Response:** `200 {ok, dry_run, reference, clinician_name, service,
+  old_date, old_time, new_date, new_time}`; `reference` is `GOJI-` + the last 6
+  of the appointment id (the same reference a website/WhatsApp booking got).
+  Errors `{ok:false, error, code}`: `400 invalid|too_far`, `404 not_found`,
+  `409 ambiguous|late_change|unsupported|slot_taken`, `502 plato_error`.
+- **After a real move (never a dry run):** a short clinic email
+  "Rescheduled via WhatsApp assistant" (`send_admin_reschedule_email`, CCs the
+  clinician; best effort), and the booking-confirmed callback with the new
+  date/time and `source: "whatsapp"` so the chat's booked note updates.
+- **Verify once on a test patient in Plato before go-live** that PUT with new
+  start/end moves the appointment in the calendar and keeps the patient link
+  and notes; that the `YYYY-MM-DD HH:MM:SS` format is accepted on PUT; whether
+  `endtime` is required (we always send it); and that writing `description`
+  back doesn't mangle it (HTML/escaping).
 
 ## Config to keep in sync
 `config.py` mirrors the website's `src/lib/services.ts` + `clinicians.ts`

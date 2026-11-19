@@ -2,7 +2,7 @@ from datetime import datetime
 
 from wa_agent.policy import (AGENT, DRAFT, ESCALATE, HUMAN, PAUSED, SEND, SGT, SILENT,
                              ChatState, Proposal, apply_idle_handback, decide, gate,
-                             human_replied_since, in_clinic_hours, on_human_message)
+                             human_replied_since, in_clinic_hours, is_acknowledgement, on_human_message)
 
 NOW = datetime(2026, 11, 18, 10, 0, tzinfo=SGT).timestamp()  # Wednesday 10am
 
@@ -147,3 +147,11 @@ def test_late_reschedule_goes_to_chris_and_early_one_sends():
     assert decide(late) == decide(late).__class__(DRAFT, "late_change")
     assert decide(early).action == SEND
     assert decide(unknown).action == SEND   # the agent asks when it is first
+
+
+def test_multi_word_acknowledgements_need_no_reply():
+    h = [{"role": "agent"}, {"role": "customer"}]
+    for t in ("ok thanks!", "Noted, thank you 🙏", "see you then!"):
+        assert is_acknowledgement(t, h), t
+    for t in ("ok but what about sat?", "thanks, can I also ask about price"):
+        assert not is_acknowledgement(t, h), t

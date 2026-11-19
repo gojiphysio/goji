@@ -39,6 +39,16 @@ class BookingFailed(Exception):
         self.code = code
 
 
+def offered(options: str) -> set[tuple[str, str]]:
+    """'2026-11-27 14:00, 2026-11-28 09:00' -> {(date, time), ...}"""
+    out = set()
+    for part in (options or "").split(","):
+        bits = part.strip().split()
+        if len(bits) == 2 and _TIME.match(bits[1]):
+            out.add((bits[0], bits[1]))
+    return out
+
+
 def complete(b: dict | None) -> bool:
     """Has the model collected enough to book?"""
     if not b:

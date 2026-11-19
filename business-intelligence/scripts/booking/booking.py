@@ -18,7 +18,7 @@ import uuid
 from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
 
-from .availability import derive_availability
+from .availability import _calendar_color_for_appointment, derive_availability
 from .config import (
     CLINICIANS,
     FIRST_AVAILABLE_PRIORITY,
@@ -30,7 +30,9 @@ from .config import (
     PHYSIO_FOCUS_LABELS,
     SERVICE_CLINICIANS,
     SERVICES,
+    clinician_by_calendar,
 )
+from .plato import _is_leave_title
 
 _SGT = ZoneInfo("Asia/Singapore")
 
@@ -382,3 +384,205 @@ def _create_appointments(plato, svc, cid, day, time_, home, name, phone, email,
             "Could not complete the booking. Please try again or message us.",
             "plato_error",
         )
+
+
+# --- Reschedule (the WhatsApp assistant moves an existing appointment) --------
+
+# A move needs this much notice. A later change goes to staff, who apply the
+# cancellation policy (the assistant hands it over; see /internal/reschedule).
+RESCHEDULE_MIN_NOTICE_HOURS = 24
+# Plato status text that marks an appointment as not happening. Same rule as
+# the BI marts (fct_appointment_reminders): truthy `cancelled`/`void`, or this.
+_DEAD_STATUSES = {"cancelled", "canceled", "no_show", "noshow", "no-show"}
+
+
+def _truthy_flag(value) -> bool:
+    if isinstance(value, str):
+        return value.strip().lower() not in ("", "0", "false", "no")
+    return bool(value)
+
+
+def _is_live_booking(a: dict) -> bool:
+    """A real, still-booked appointment: not leave/unavailable, not cancelled,
+    void or a no-show."""
+    if a.get("type") == "leave" or _is_leave_title(str(a.get("title") or "")):
+        return False
+    if "unavailable" in str(a.get("title") or "").lower():
+        return False
+    if _truthy_flag(a.get("cancelled")) or _truthy_flag(a.get("void")):
+        return False
+    return str(a.get("status") or "").strip().lower() not in _DEAD_STATUSES
+
+
+def _last8(value) -> str:
+    return "".join(ch for ch in str(value or "") if ch.isdigit())[-8:]
+
+
+def _parse_plato_dt(value) -> datetime | None:
+    try:
+        return datetime.fromisoformat(str(value or "").strip())
+    except ValueError:
+        return None
+
+
+def _service_for(type_code: str, minutes: int) -> tuple[str, str] | None:
+    """(service_id, variant) for an appointment's Plato type + length, or None.
+    Physiotherapy and Mummy & Baby share a type, so the length decides."""
+    for sid, svc in SERVICES.items():
+        if svc["type_code"] != type_code:
+            continue
+        if svc["duration_min"] == minutes:
+            return sid, ""
+        for vid, v in (svc.get("variants") or {}).items():
+            if v["duration_min"] == minutes:
+                return sid, vid
+    return None
+
+
+class _WithoutAppointment:
+    """A Plato client that hides one appointment from `appointments()`, so the
+    re-check for a move doesn't count the appointment's own current slot as a
+    conflict (e.g. 10:00 -> 10:30 the same day overlaps 10:30-11:00)."""
+
+    def __init__(self, plato, appointment_id: str):
+        self._plato = plato
+        self._id = appointment_id
+
+    def appointments(self, start, end, fresh=False):
+        rows = self._plato.appointments(start, end, fresh=fresh)
+        return [a for a in rows if a.get("_id") != self._id]
+
+    def __getattr__(self, name):
+        return getattr(self._plato, name)
+
+
+def _find_appointment(plato, day: date, time_: str, patient_id: str,
+                      phone: str) -> dict:
+    """The one live appointment on `day` starting at `time_` that belongs to the
+    patient. With `patient_id`, an appointment linked to a patient must be
+    linked to that one; an unlinked appointment (website/WhatsApp bookings
+    carry the phone inline, no patient link) matches on the phone's last 8
+    digits. Without `patient_id`, the phone decides."""
+    phone8 = _last8(phone)
+    matches = []
+    for a in plato.appointments(day.isoformat(), day.isoformat(), fresh=True):
+        start = _parse_plato_dt(a.get("starttime"))
+        if not start or start.date() != day or start.strftime("%H:%M") != time_:
+            continue
+        if not _is_live_booking(a):
+            continue
+        linked = str(a.get("patient_id") or "").strip()
+        if patient_id and linked:
+            ok = linked == patient_id
+        else:
+            ok = len(phone8) == 8 and _last8(a.get("handphone")) == phone8
+        if ok:
+            matches.append(a)
+    if not matches:
+        raise BookingError("We couldn't find that appointment.", "not_found")
+    if len(matches) > 1:
+        raise BookingError("More than one appointment matches; staff will check.",
+                           "ambiguous")
+    return matches[0]
+
+
+def reschedule_appointment(plato, req: dict, *, now: datetime | None = None,
+                           dry_run: bool = False) -> dict:
+    """Move one existing appointment to a new date/time: same clinician, same
+    service and length. Raises BookingError (codes: invalid, too_far,
+    not_found, ambiguous, late_change, unsupported, slot_taken, plato_error).
+
+    req keys: phone, patient_id (optional, preferred), old_date, old_time,
+    new_date, new_time (YYYY-MM-DD / HH:MM, SGT wall clock).
+
+    The new slot is re-checked fresh inside the clinician's lock, like
+    create_booking, with the appointment itself hidden so its current slot
+    never blocks its own move. dry_run=True does everything but the PUT.
+    """
+    phone = str(req.get("phone") or "").strip()
+    patient_id = str(req.get("patient_id") or "").strip()
+    _require(_PHONE_RE.match(phone), "Please give a valid phone number.")
+    _require(not patient_id or (patient_id.replace("-", "").isalnum()
+                                and len(patient_id) <= 64), "Invalid patient_id.")
+    try:
+        old_day = date.fromisoformat(str(req.get("old_date") or "").strip())
+        new_day = date.fromisoformat(str(req.get("new_date") or "").strip())
+    except ValueError:
+        raise BookingError("Dates must be YYYY-MM-DD.")
+    old_time = str(req.get("old_time") or "").strip()
+    new_time = str(req.get("new_time") or "").strip()
+    _require(_TIME_RE.match(old_time) and _TIME_RE.match(new_time),
+             "Times must be HH:MM.")
+    _require((old_day, old_time) != (new_day, new_time),
+             "The new time is the same as the current one.")
+
+    now = now or datetime.now(_SGT).replace(tzinfo=None)
+    today = now.date()
+    _require(new_day >= today, "The new date is in the past.")
+    _require((new_day - today).days <= MAX_ADVANCE_DAYS,
+             f"Please choose a date within the next {MAX_ADVANCE_DAYS} days.",
+             "too_far")
+
+    appt = _find_appointment(plato, old_day, old_time, patient_id, phone)
+    appt_id = str(appt.get("_id") or "")
+    start = _parse_plato_dt(appt.get("starttime"))
+    end = _parse_plato_dt(appt.get("endtime"))
+    _require(appt_id and start and end and end > start,
+             "That appointment can't be moved automatically.", "unsupported")
+
+    _require(start - now >= timedelta(hours=RESCHEDULE_MIN_NOTICE_HOURS),
+             f"Changes within {RESCHEDULE_MIN_NOTICE_HOURS} hours go to our team.",
+             "late_change")
+
+    # Home visits are three appointments (travel / visit / travel); moving one
+    # alone would strand the travel blocks, so they stay with staff.
+    type_code = str(appt.get("code_Bottom") or "")
+    _require(type_code != HOME_VISIT_TYPE_CODE,
+             "Home visits are moved by our team.", "unsupported")
+    cid = clinician_by_calendar(_calendar_color_for_appointment(appt))
+    minutes = int((end - start).total_seconds() // 60)
+    found = _service_for(type_code, minutes)
+    _require(cid and found, "That appointment can't be moved automatically.",
+             "unsupported")
+    service_id, variant = found
+    svc = SERVICES[service_id]
+
+    with _lock_for(cid):
+        avail = derive_availability(_WithoutAppointment(plato, appt_id), service_id,
+                                    new_day, clinician_id=cid,
+                                    variant=variant or None, now=now, fresh=True)
+        _require(new_time in avail.get(cid, []),
+                 "That time isn't available.", "slot_taken")
+        if not dry_run:
+            payload = {"starttime": _dt(new_day, new_time),
+                       "endtime": _dt(new_day, new_time, minutes)}
+            desc = appt.get("description")
+            if isinstance(desc, str):
+                line = f"Moved via WhatsApp assistant from {old_day.isoformat()} {old_time}."
+                payload["description"] = f"{desc}\n{line}" if desc.strip() else line
+            try:
+                r = plato.update_appointment(
+                    appt_id, payload, days=(old_day.isoformat(), new_day.isoformat()))
+            except Exception:
+                raise BookingError("Could not move the appointment.", "plato_error")
+            if isinstance(r, dict) and r.get("success") is False:
+                raise BookingError("Plato did not accept the change.", "plato_error")
+
+    return {
+        "ok": True,
+        "dry_run": dry_run,
+        "source": "whatsapp",
+        "reference": "GOJI-" + appt_id[-6:].upper(),
+        "appointment_id": appt_id,
+        "clinician_id": cid,
+        "clinician_name": CLINICIANS[cid]["name"],
+        "clinician_email": CLINICIANS[cid].get("email"),
+        "service": svc["title"],
+        "old_date": old_day.isoformat(),
+        "old_time": old_time,
+        "new_date": new_day.isoformat(),
+        "new_time": new_time,
+        # The new slot, under the keys the booking callback reads.
+        "date": new_day.isoformat(),
+        "time": new_time,
+    }

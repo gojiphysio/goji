@@ -3,7 +3,7 @@ Thin Plato API client for the booking service.
 
 Bearer-token auth (Secret Manager `plato-api-key`), same base as the ingestion
 jobs. Read helpers are safe; write helpers (`create_appointment`,
-`delete_appointment`) mutate the live clinic calendar — callers must guard them
+`update_appointment`, `delete_appointment`) mutate the live clinic calendar — callers must guard them
 (availability re-check + per-clinician lock; see booking.py).
 """
 from __future__ import annotations
@@ -630,6 +630,21 @@ class PlatoClient:
         day = str(payload.get("starttime", ""))[:10]
         if day:
             self._dirty_days[day] = time.monotonic()
+        return r
+
+    def update_appointment(self, appointment_id: str, payload: dict,
+                           days: tuple[str, ...] = ()) -> dict:
+        """Partial update of one appointment (PUT sends only the fields that
+        change). Does NOT check conflicts — guard at the call site. `days`
+        (YYYY-MM-DD) are the days the write touches, e.g. a move's old and new
+        day: like a booking, they read live until the next snapshot refresh."""
+        r = self.put(f"appointment/{appointment_id}", payload)
+        self._appts_cache.clear()  # a write changes availability — never re-read stale
+        self._partial.clear()
+        now = time.monotonic()
+        for day in days:
+            if day:
+                self._dirty_days[day] = now
         return r
 
     def delete_appointment(self, appointment_id: str) -> dict:

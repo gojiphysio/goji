@@ -461,7 +461,7 @@ def test_a_photo_is_left_for_the_team(env):
 
 import json as _json
 
-BOOK = {"service": "physiotherapy", "date": "2026-11-26", "time": "10:00",
+BOOK = {"service": "physiotherapy", "date": "2026-11-26", "time": "10:00", "options": "",
         "clinician": "Kristy", "physio_focus": "", "variant": "", "format": "clinic",
         "full_name": "Charles Tan", "email": "", "address": "", "notes": ""}
 
@@ -584,3 +584,55 @@ def test_the_plato_tag_means_no_waiver_is_offered(env, monkeypatch):
     turn = app_mod.claude.requests[0]["messages"][-1]["content"][0]["text"]
     assert "waiver already used (tagged in Plato)" in turn
     assert "first-time waiver applies" not in turn
+
+
+def test_picking_an_offered_time_moves_it_without_asking_again(env, monkeypatch):
+    client, rec, _ = env
+    moved = []
+    monkeypatch.setattr(app_mod.booking_client, "move", lambda m, wa_id, patient_id="":
+                        moved.append(m) or {"ok": True, "reference": "GOJI-MV2", "dry_run": True,
+                                            "clinician_name": "Kristy", **{k: m[k] for k in
+                                            ("old_date", "old_time", "new_date", "new_time")}})
+    offer = {"old_date": "2026-11-25", "old_time": "10:00", "new_date": "", "new_time": "",
+             "options": "2026-11-27 14:00, 2026-11-28 09:00"}
+    app_mod.claude.queue.append(_final_with("I can do Thu 2pm or Fri 9am, which works?",
+                                            intent="reschedule", move=offer))
+    post(client, inbound(text="can I move Tuesday's appointment?"))
+    pick = {**offer, "new_date": "2026-11-28", "new_time": "09:00"}
+    app_mod.claude.queue.append(_final_with("Moving it!", intent="reschedule", move=pick,
+                                            confirm_move=True))
+    post(client, inbound(msg_id="wamid.in2", text="Fri 9am pls"))
+    assert moved and moved[0]["new_time"] == "09:00"
+    assert app_mod.wa.sent[-1][1].startswith("Done!")
+
+
+def test_a_time_that_was_never_offered_is_not_moved(env, monkeypatch):
+    client, rec, _ = env
+    monkeypatch.setattr(app_mod.booking_client, "move",
+                        lambda *a, **k: pytest.fail("moved to a time nobody offered"))
+    offer = {"old_date": "2026-11-25", "old_time": "10:00", "new_date": "", "new_time": "",
+             "options": "2026-11-27 14:00"}
+    app_mod.claude.queue.append(_final_with("Thu 2pm works?", intent="reschedule", move=offer))
+    post(client, inbound(text="move Tuesday?"))
+    app_mod.claude.queue.append(_final_with("Moving!", intent="reschedule", confirm_move=True,
+                                            move={**offer, "new_date": "2026-11-29",
+                                                  "new_time": "11:00"}))
+    post(client, inbound(msg_id="wamid.in2", text="sat 11 instead"))
+    assert ("move_skipped", {"reason": "time_not_offered"}) in rec
+
+
+def test_picking_an_offered_booking_time_books_it(env, monkeypatch):
+    client, rec, _ = env
+    calls = []
+    monkeypatch.setattr(app_mod.booking_client, "book", lambda b, wa_id: calls.append(b) or
+                        {"ok": True, "reference": "GOJI-B3", "clinician_name": "Kristy",
+                         "service": "Physiotherapy", "date": b["date"], "time": b["time"],
+                         "dry_run": True})
+    offer = {**BOOK, "date": "", "time": "", "options": "2026-11-26 10:00, 2026-11-26 11:00"}
+    app_mod.claude.queue.append(_final_with("Thu 10am or 11am, Charles?", booking=offer))
+    post(client, inbound(text="any thursday morning? I'm Charles Tan"))
+    app_mod.claude.queue.append(_final_with("Booking!", confirm_booking=True,
+                                            booking={**offer, "date": "2026-11-26",
+                                                     "time": "11:00"}))
+    post(client, inbound(msg_id="wamid.in2", text="11 please"))
+    assert calls and calls[0]["time"] == "11:00" and calls[0]["full_name"] == "Charles Tan"

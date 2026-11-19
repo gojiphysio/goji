@@ -176,9 +176,12 @@ def reply_problems(reply: str) -> list[str]:
     return problems
 
 
+_ACK_WORD = (r"(ok+(ay)?|k+|thanks?( you)?( so much)?|thank u|thx|ty|tq|noted|alright|sure|"
+             r"great|cool|got it|will do|see you( then| soon)?|perfect|nice|awesome)")
+# One or more acknowledgement words ("ok thanks!", "noted, thank you"), then
+# punctuation or emoji. Anything else is a real message.
 _ACK = re.compile(
-    r"(ok+(ay)?|k+|thanks?( you)?( so much)?|thank u|thx|ty|tq|noted|alright|sure|great|cool|"
-    r"got it|will do|see you|perfect|nice)?[\s!.,~]*[\U0001F300-\U0001FAFF\u2600-\u27BF\u2764\uFE0F\s]*",
+    rf"({_ACK_WORD}[\s!.,~]*)*[\U0001F300-\U0001FAFF\u2600-\u27BF\u2764\uFE0F\s!.,~]*",
     re.I)
 
 
