@@ -279,6 +279,24 @@ agent is reliable. Today the agent's tools are read-only and it sends the
 - **Testing never touches the live calendar:** a dry-run mode (or a test
   service in Plato) before any end-to-end test.
 
+## Returning-patient recognition (planned, after direct booking)
+
+Added 19 Nov 2026.
+
+- **Lookup at the start of each conversation, in code**: match the chat's own
+  number to the patient records (`dim_patient_contact`, as `my_appointments`
+  does). The agent gets "returning patient, first name, next appointment, last
+  visit date". `_LOOKUP_SQL` only covers upcoming appointments, so the last
+  visit date needs a small query change. Never past clinical notes, and never
+  anyone else's number.
+- **Warm greeting**: "Hi Sarah! Good to hear from you again", with nothing
+  clinical unless the patient raises it.
+- **Turn on the lookup** (`WA_AGENT_PATIENT_LOOKUP`, off today) once the
+  service has BigQuery access (`wa-agent-sa`).
+- **Testing**: first a test-only stand-in that returns a made-up patient for
+  the two test numbers, to check the greeting and tone. Then one end-to-end
+  test against real data before go-live, with a test patient in Plato.
+
 ## Learning loop
 
 Every conversation is scored by how it ended, and a change to the agent
