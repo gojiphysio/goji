@@ -79,7 +79,9 @@ INTENT_POLICY: dict[str, str] = {
     "service_fit": "auto",
     "availability": "auto",
     "booking": "auto",
-    "existing_appointment": "draft",
+    # "When's my appointment?" / "am I booked for Sat?": answered from the
+    # patient lookup or my_appointments, keyed on the chat's own number.
+    "existing_appointment": "auto",
     # The agent can't move appointments: it offers new times and Chris gets an
     # FYI to make the change.
     "reschedule": "auto_notify",

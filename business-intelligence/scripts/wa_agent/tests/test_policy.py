@@ -31,8 +31,7 @@ def test_escalate_intents_escalate_even_if_model_did_not():
 
 
 def test_draft_and_unknown_intents_draft():
-    for intent in ("existing_appointment", "cancel", "billing", "clinical", "complaint",
-                   "something_new"):
+    for intent in ("cancel", "billing", "clinical", "complaint", "something_new"):
         assert decide(prop(intent=intent)).action == DRAFT, intent
 
 
@@ -45,6 +44,7 @@ def test_draft_intents_stay_drafts_even_if_the_model_escalates():
 
 def test_booking_and_rescheduling_send_on_their_own():
     assert decide(prop(intent="booking")).action == SEND
+    assert decide(prop(intent="existing_appointment")).action == SEND
     assert decide(prop(intent="reschedule")).action == SEND
 
 

@@ -48,7 +48,8 @@ answered. `WA_AGENT_HOURS=after_hours` limits the agent to outside Mon-Sat
 
 What happens to a proposal: `config.INTENT_POLICY` maps each intent to
 auto / auto_notify / draft / escalate; below `WA_AGENT_MIN_CONFIDENCE` it's a
-draft. Chris's routing (18 Nov): booking requests send on their own;
+draft. Chris's routing (18 Nov): booking requests and appointment checks
+("when's my appointment?", from the patient lookup) send on their own;
 rescheduling sends new times and emails Chris to move the booking (the agent
 can't change appointments); "is this Chris?" answers as the front desk and
 sends her an FYI; cancelling, billing, clinical and complaints are drafts she
