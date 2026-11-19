@@ -19,8 +19,11 @@ The WhatsApp assistant. What it is and how to run it: [`README.md`](README.md).
   fixed on the site, not in the prompt. A practice Chris confirms that doesn't
   belong on the site (physio isn't sold as packages) goes in `house_rules.md`,
   one dated line each. Service ids mirror `booking/config.py` (`test_tools.py` checks).
-- **Patient lookup is keyed on the chat's own number**, never on a number in
-  the conversation, so a customer only ever sees their own appointments.
+- **Patient lookup is keyed on the chat's own number.** The one exception,
+  `find_booking` (no record for this number), needs the full name AND the
+  booking's number to match the same patient, returns only the next
+  appointment, and is capped at 3 tries per chat. A number alone or a name
+  alone never reveals anything.
 - **No message text or phone numbers in BigQuery.** `marts.wa_agent_events`
   uses a salted hash per chat. Transcripts live only in Firestore with a 30-day
   TTL. Don't add text columns.
