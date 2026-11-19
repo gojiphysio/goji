@@ -64,7 +64,10 @@ PRE_SEND_HOLD_S = float(os.environ.get("WA_AGENT_PRE_SEND_HOLD_S", "20"))
 # ("hi" / "quick question" / "how much is...") becomes one run, not three.
 DEBOUNCE_S = float(os.environ.get("WA_AGENT_DEBOUNCE_S", "6"))
 # Below this self-reported confidence a reply is drafted, never sent.
-MIN_CONFIDENCE = float(os.environ.get("WA_AGENT_MIN_CONFIDENCE", "0.8"))
+# Below this an auto-send intent drafts instead (19 Nov 2026: 0.8 -> 0.7; the
+# model scores good replies 0.75-0.85, and links, numbers and booking actions
+# are checked in code whatever the score).
+MIN_CONFIDENCE = float(os.environ.get("WA_AGENT_MIN_CONFIDENCE", "0.7"))
 # "all" or "after_hours" (outside Mon-Sat 08:00-20:00 SGT, the clinic's hours).
 AGENT_HOURS = os.environ.get("WA_AGENT_HOURS", "all")
 

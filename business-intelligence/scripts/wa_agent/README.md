@@ -47,7 +47,7 @@ answered. `WA_AGENT_HOURS=after_hours` limits the agent to outside Mon-Sat
 8am-8pm.
 
 What happens to a proposal: `config.INTENT_POLICY` maps each intent to
-auto / auto_notify / draft / escalate; below `WA_AGENT_MIN_CONFIDENCE` it's a
+auto / auto_notify / draft / escalate; below `WA_AGENT_MIN_CONFIDENCE` (0.7) it's a
 draft. Chris's routing (18-19 Nov): booking requests, appointment checks and
 routine moves (24h+ notice) are handled by the agent end to end, with no email
 to Chris; "is this Chris?" answers as the front desk and asks for a message;
