@@ -223,16 +223,33 @@ cheaper models, judged by Chris's grades (a product decision, not a default).
 
 ### Track C: offline test set
 
-Keep everything outside the repo; delete raw exports after redacting.
+Keep everything outside the repo, in `~/goji-eval/` (`chmod 700`); delete raw
+exports once you no longer need to rebuild.
+
+Layout: one folder per category under `~/goji-eval/chats/` (e.g.
+`new-enquiries/`, `regular/`, `rescheduling/`, `sensitive-doctors-referral/`),
+each export's `.zip` (an unzipped copy beside it is counted once). The folder
+becomes each chat's `category`; doctor-referral (partner) chats are marked
+`b2b` and replay skips them unless `--include-b2b`. Names the patterns miss
+go in `~/goji-eval/extra_names.txt`, one per line.
+
+How to rebuild and re-run:
 
 ```bash
 cd business-intelligence/scripts
 python -m wa_agent.kb --site ../../marketing/website --out wa_agent/_build/kb.json
-python -m wa_agent.eval.redact --in ~/goji-exports --out ~/goji-eval
-# skim ~/goji-eval/chats.jsonl for anything the redactor missed, then:
-ANTHROPIC_API_KEY=... python -m wa_agent.eval.replay \
-    --cases ~/goji-eval/cases.jsonl --out ~/goji-eval/replay.csv --sample 30
+python -m wa_agent.eval.redact --in ~/goji-eval/chats --out ~/goji-eval \
+    --extra-names ~/goji-eval/extra_names.txt
+chmod 600 ~/goji-eval/*.jsonl
+# skim ~/goji-eval/chats.jsonl for anything the redactor missed, then
+# (API: ANTHROPIC_API_KEY=...; or locally through the CLI as here):
+WA_AGENT_BACKEND=cli WA_AGENT_STATE=memory WA_AGENT_LOG_EVENTS=false \
+python -m wa_agent.eval.replay --cases ~/goji-eval/cases.jsonl \
+    --out ~/goji-eval/replay.csv --sample 25    # stratified by category, seeded
+# narrower: --category new-enquiries   all cases: drop --sample
 ```
+
+The sheet has `ai_grade`/`ai_note` (first pass) and `grade`/`notes` (Chris).
 
 ### Readout (BigQuery)
 
