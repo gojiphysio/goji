@@ -321,7 +321,7 @@ def test_real_move_emails_the_clinic_and_calls_the_assistant(client):
     assert posted["json"] == {"phone": PHONE, "reference": "GOJI-123456",
                               "service": "Physiotherapy", "date": "2026-07-17",
                               "time": "14:00", "clinician_name": "Cheryl Long",
-                              "source": "whatsapp"}
+                              "source": "whatsapp", "first_name": ""}
 
 
 def test_plato_write_failure_is_502_and_notifies_nobody(client, monkeypatch):

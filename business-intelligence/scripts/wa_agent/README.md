@@ -366,6 +366,27 @@ Plato deletes cancellations, so late-change history is built from go-live:
 - Dry run while bookings are (`WA_AGENT_BOOKING_DRY_RUN`): goji-booking reads
   the patient but doesn't write the tag.
 
+## Appointment confirmations and reminders on WhatsApp (19 Nov 2026)
+
+Templates submitted to Meta on the test account (UTILITY, pending review):
+`goji_appointment_confirmed` (name, service, date and time, clinician, plus a
+directions button) and `goji_appointment_reminder` (same fields, Confirm and
+Reschedule quick replies). `goji_referral_received` for referrals. All need
+resubmitting on Goji's real number once it's connected.
+
+- **Confirmations:** a website booking from a number with no chat in the last
+  24 hours gets `goji_appointment_confirmed` (`WA_AGENT_CONFIRMATIONS=1`, off
+  until the template is approved on the real number). Inside the window the
+  agent's free-form acknowledgement covers it; chat bookings are confirmed in
+  the chat. goji-booking's callback now carries the patient's first name.
+- **Reminders:** the reminders job (see `reminders/README.md`) sends
+  `goji_appointment_reminder` first and email as the fallback. A Confirm tap
+  gets a thank-you with no model call; Reschedule goes to the agent's move flow.
+- **Opt-in:** the website booking form says, by default, that Goji may send
+  the confirmation and reminders on WhatsApp (Meta needs opt-in naming the
+  business). Chat bookings: the customer messaged us, and the confirmation
+  says a reminder will follow.
+
 ## Returning-patient recognition (built 19 Nov 2026)
 
 `tools.patient_context` + `app._patient_for`, cached on the chat for 6 hours; on with

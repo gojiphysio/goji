@@ -551,7 +551,7 @@ def test_a_website_booking_is_acknowledged_in_the_chat(env, monkeypatch):
     assert app_mod.store.load(CUSTOMER).booked["reference"] == "GOJI-ZZ99"
     unknown = client.post("/internal/booking-confirmed", json={**body, "phone": "+6580000000"},
                           headers={"X-Internal-Token": "t"})
-    assert unknown.get_json() == {"matched": False}
+    assert unknown.get_json() == {"matched": False, "template_sent": False}
 
 
 def _late_cancel_draft(reply="No worries! As it's your first late change, we'll waive the fee."):
@@ -731,3 +731,41 @@ def test_turbo_toggles_the_hold_for_testers(env, monkeypatch):
     assert "Turbo on" in app_mod.wa.sent[-1][1] and app_mod.claude.requests == []
     post(client, inbound(msg_id="wamid.t2", text="/turbo off"))
     assert config.PRE_SEND_HOLD_S == app_mod._NORMAL["hold"]
+
+
+def test_website_booking_from_a_new_number_gets_the_confirmation_template(env, monkeypatch):
+    client, rec, _ = env
+    monkeypatch.setattr(config, "INTERNAL_TOKEN", "t")
+    monkeypatch.setattr(config, "CONFIRMATIONS", True)
+    sent = []
+    app_mod.wa.send_template = lambda wa_id, name, params, language="en": sent.append((wa_id, name, params)) or "wamid.tpl1"
+    r = client.post("/internal/booking-confirmed", headers={"X-Internal-Token": "t"},
+                    json={"phone": "+6590001111", "reference": "GOJI-1", "service": "Physiotherapy",
+                          "date": "2026-11-26", "time": "10:00", "clinician_name": "Kristy Ng",
+                          "source": "web", "first_name": "Sam"})
+    assert r.get_json() == {"matched": False, "template_sent": True}
+    assert sent == [("6590001111", "goji_appointment_confirmed",
+                     ["Sam", "physiotherapy", "Thu 26 Nov, 10:00am", "Kristy"])]
+    assert app_mod.store.load("6590001111").booked["reference"] == "GOJI-1"
+
+
+def test_confirmation_template_is_off_until_enabled(env, monkeypatch):
+    client, rec, _ = env
+    monkeypatch.setattr(config, "INTERNAL_TOKEN", "t")
+    monkeypatch.setattr(config, "CONFIRMATIONS", False)
+    app_mod.wa.send_template = lambda *a, **k: pytest.fail("sent while off")
+    r = client.post("/internal/booking-confirmed", headers={"X-Internal-Token": "t"},
+                    json={"phone": "+6590001111", "reference": "GOJI-1", "date": "2026-11-26",
+                          "time": "10:00", "source": "web"})
+    assert r.get_json() == {"matched": False, "template_sent": False}
+
+
+def test_reminder_confirm_tap_is_thanked_without_the_model(env):
+    client, rec, _ = env
+    body = inbound(kind="button")
+    body["entry"][0]["changes"][0]["value"]["messages"][0]["button"] = {"text": "Confirm",
+                                                                       "payload": "Confirm"}
+    post(client, body)
+    assert app_mod.wa.sent[-1][1].startswith("Thanks for confirming!")
+    assert app_mod.claude.requests == []
+    assert ("reminder_confirmed", {"reason": "button"}) in rec

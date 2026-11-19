@@ -445,6 +445,23 @@ def handle_inbound(ev: Inbound, received: float) -> None:
         return
     if _turbo_command(st, client, ev):
         return
+    if ev.kind == "button" and (ev.text or "").strip().lower() == "confirm":
+        # The reminder template's Confirm tap: thank them, no model call.
+        # (Reschedule goes to the agent like any message.)
+        with locks(ev.wa_id):
+            state = st.load(ev.wa_id)
+            if not mark_seen(state, ev.msg_id):
+                return
+            append_history(state, "customer", "Confirm", ev.ts, ev.msg_id)
+            try:
+                mid = client.send_text(ev.wa_id, "Thanks for confirming! See you then 😊")
+                append_history(state, "agent", "Thanks for confirming! See you then 😊",
+                               time.time(), mid)
+            except Exception as e:
+                log.warning("confirm reply failed: %s", e)
+            st.save(state)
+        events.record("reminder_confirmed", ev.wa_id, reason="button")
+        return
     if ev.kind == "document" and ev.media_id:
         ev.text = documents.as_message(_read_document(client, ev), ev.filename, ev.caption)
     with locks(ev.wa_id):
@@ -702,6 +719,25 @@ def promote_intent(intent: str):
     return jsonify({"intent": intent, "demoted": False})
 
 
+def _send_confirmation_template(client, wa_id: str, b: dict) -> str:
+    """A website booking from someone outside the 24-hour window: the
+    approved confirmation template (the booking form carries the opt-in).
+    Returns the message id, or "" when off or it failed."""
+    if not (config.CONFIRMATIONS and b.get("date") and b.get("time")):
+        return ""
+    when = booking_client._when(b["date"], b["time"])
+    params = [b.get("first_name") or "there", (b.get("service") or "physiotherapy").lower(),
+              when, (b.get("clinician_name") or "our team").split(" ")[0]]
+    try:
+        msg_id = client.send_template(wa_id, config.CONFIRM_TEMPLATE, params)
+    except Exception as e:
+        log.warning("confirmation template failed: %s", e)
+        events.record("confirmation_failed", wa_id, reason=type(e).__name__)
+        return ""
+    events.record("confirmation_sent", wa_id, reason="template")
+    return msg_id
+
+
 @app.post("/internal/booking-confirmed")
 def booking_confirmed():
     """goji-booking calls this after a real booking (website or this agent).
@@ -719,7 +755,16 @@ def booking_confirmed():
     with locks(wa_id):
         state = st.load(wa_id)
         if not state.history:
-            return jsonify({"matched": False})
+            sent = _send_confirmation_template(client, wa_id, b)
+            if sent:
+                state.booked = {"reference": b.get("reference", ""), "date": b.get("date", ""),
+                                "time": b.get("time", ""), "with": b.get("clinician_name", ""),
+                                "service": b.get("service", ""), "dry_run": False,
+                                "at": time.time(), "source": b.get("source", "web")}
+                append_history(state, "agent", "(appointment confirmation template sent)",
+                               time.time(), sent)
+                st.save(state)
+            return jsonify({"matched": False, "template_sent": bool(sent)})
         state.booked = {"reference": b.get("reference", ""), "date": b.get("date", ""),
                         "time": b.get("time", ""), "with": b.get("clinician_name", ""),
                         "service": b.get("service", ""), "dry_run": False,
@@ -728,8 +773,12 @@ def booking_confirmed():
         last_customer = max((h["ts"] for h in state.history if h["role"] == "customer"),
                             default=0)
         acked = False
+        in_window = time.time() - last_customer < 23 * 3600
+        if b.get("source") != "whatsapp" and not in_window:
+            # An old chat, outside the 24-hour window: free-form isn't allowed.
+            acked = bool(_send_confirmation_template(client, wa_id, b))
         if (b.get("source") != "whatsapp" and state.mode in (AGENT, WAITING)
-                and time.time() - last_customer < 23 * 3600 and b.get("date") and b.get("time")):
+                and in_window and b.get("date") and b.get("time")):
             text = booking_client.confirmation_text(
                 {**b, "dry_run": False}, first_name="").replace(
                 "You're booked!", "Thanks for booking! You're all set for", 1)

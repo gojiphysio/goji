@@ -222,7 +222,7 @@ def test_callback_fires_for_a_whatsapp_booking(client, monkeypatch):
     assert call["json"] == {"phone": "+65 9123 4567", "reference": "GOJI-ABC123",
                             "service": "Physiotherapy", "date": "2026-07-15",
                             "time": "10:00", "clinician_name": "Kristy Lim",
-                            "source": "whatsapp"}
+                            "source": "whatsapp", "first_name": "Jane"}
 
 
 def test_callback_fires_for_a_website_booking(client, monkeypatch):

@@ -123,6 +123,11 @@ FEEDBACK_SECRET = os.environ.get("WA_AGENT_FEEDBACK_SECRET", "")
 TEST_SHOW_DRAFTS = os.environ.get("WA_AGENT_TEST_SHOW_DRAFTS", "") == "1"
 # Numbers allowed to send /reset from WhatsApp (E.164 digits, comma-separated).
 # Any number may on a local run (WA_AGENT_STATE=memory); never anyone else.
+# Appointment confirmations for website bookings, as an approved template
+# (goji_appointment_confirmed). Off until the template is approved on the
+# clinic's real number.
+CONFIRMATIONS = _env_bool("WA_AGENT_CONFIRMATIONS", False)
+CONFIRM_TEMPLATE = os.environ.get("WA_AGENT_CONFIRM_TEMPLATE", "goji_appointment_confirmed")
 MAX_BUBBLES = int(os.environ.get("WA_AGENT_MAX_BUBBLES", "1"))  # 1 = one message per reply
 TURBO_AT_START = os.environ.get("WA_AGENT_TURBO", "") == "1"  # local runs: start in /turbo
 TESTERS = frozenset(p.strip() for p in os.environ.get("WA_AGENT_TESTERS", "").split(",")

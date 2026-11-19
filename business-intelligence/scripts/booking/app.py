@@ -574,6 +574,8 @@ def _notify_wa_agent(result: dict, draft: dict, source: str) -> None:
         "time": result.get("time"),
         "clinician_name": result.get("clinician_name"),
         "source": source,
+        # First name only: the assistant greets with it in the confirmation.
+        "first_name": (str(draft.get("name") or "").strip().split() or [""])[0],
     }
 
     def _post():
