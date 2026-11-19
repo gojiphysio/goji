@@ -14,6 +14,7 @@ goji-wa-agent: the WhatsApp assistant's webhook service (Cloud Run).
   GET  /admin/rollout                  stage, contact scope, hours (Firestore, env default)
   POST /admin/rollout                  {"stage": 0-3, "contact_scope", "hours"}; null = env
   POST /admin/history-imported         {"on": true|false}: coexistence history is in
+  POST /admin/go-live                  {"at": epoch | omitted = now | null = not live}
   GET  /admin/autonomy                 per-intent auto-send record, demotions
   POST /admin/autonomy/<intent>/promote  put a demoted intent back on auto
   GET  /feedback                       one-tap rating from a staff email (signed)
@@ -28,9 +29,10 @@ One instance also makes the per-chat locks authoritative.
 The life of a customer message (handle_inbound):
   0. a staff number (WA_AGENT_STAFF) goes to handle_staff instead: commands, never a customer
   1. de-dupe, record, idle hand-back check, append to transcript, and the gate
-     under the same lock: kill switch, always-human contacts, chat mode, the
-     14-day rule, coverage gap, agent hours, contact scope. A pass claims the
-     chat for the agent (owner="agent"), so the rest of a burst passes too.
+     under the same lock: kill switch, always-human contacts, chat mode (Chris
+     writing pauses a chat until she resumes it), not live yet, the go-live
+     cut-off, agent hours, contact scope. A pass claims the chat for the agent
+     (owner="agent"), so the rest of a burst passes too.
   3. agent.propose -> Proposal (the model never sends)
   4. policy.decide (stage preset + demotion) -> send | draft | escalate | silent
   5. send: wait until PRE_SEND_HOLD_S after the message arrived, then re-check
@@ -52,11 +54,11 @@ from . import (agent, booking_client, config, documents, events, learning, notif
                summary, tools)
 from .policy import (AGENT, DRAFT, ESCALATE, HUMAN, LATE_CHANGE_H, PAUSED, SEND, SGT, SILENT,
                      WAITING, as_one_message, split_bubbles,
-                     apply_idle_handback, apply_stage, coverage_gap_open, handover_mode,
-                     has_record, out_of_scope, recent_human_chat,
+                     apply_idle_handback, apply_stage, handover_mode,
+                     has_record, out_of_scope, pre_golive_chat,
                      decide, gate, human_replied_since, is_acknowledgement, on_human_message,
                      reply_problems, set_mode)
-from .state import ChatLocks, append_history, make_store, mark_seen, note_outcome
+from .state import ChatLocks, append_history, make_store, mark_seen, note_outcome, parse_code
 from .whatsapp import (Echo, HistoryChunk, Inbound, Status, WhatsAppClient, parse_webhook,
                        verify_signature)
 
@@ -167,8 +169,8 @@ def _dispatch():
 
 
 def handle_echo(ev: Echo) -> None:
-    """A person wrote from the WhatsApp Business app: they have the chat now,
-    and under the 14-day rule it stays theirs until QUIET_DAYS pass."""
+    """A person wrote from the WhatsApp Business app: the chat pauses, and the
+    agent stays out of it until they resume it ("resume 004")."""
     if ev.wa_id in config.STAFF:
         return  # the business number writing to a staff phone: not a customer chat
     st, _, _ = _deps()
@@ -183,7 +185,7 @@ def handle_echo(ev: Echo) -> None:
         else:  # a planned handover or admin takeover: Chris was meant to reply
             signal, state.pending_draft, state.last_auto = {}, {}, {}
         on_human_message(state, now)
-        state.owner = "human"
+        state.code = state.code or st.next_code()
         state.last_staff_at = max(state.last_staff_at, ev.ts or now)
         append_history(state, "staff", ev.text, ev.ts, ev.msg_id)
         st.save(state)
@@ -244,7 +246,9 @@ def _alert(kind: str, *, customer: str, wa_id: str, who: str | None = None, **kw
     """A chat needs a person. Staff are pinged on WhatsApp first; email stays
     the backup for red flags and sensitive topics, and the only channel when
     no staff number is set or every ping failed."""
-    who = staff.label(customer, wa_id) if who is None else who
+    if who is None:
+        st, _, _ = _deps()
+        who = staff.label(customer, wa_id, st.load(wa_id).code if wa_id else "")
     pinged = _ping_staff(who, kw.get("staff_note") or kw.get("reason") or "")
     if kind in ("urgent", "sensitive") or not pinged:
         notify.send(kind, customer=customer, wa_id=wa_id, **kw)
@@ -268,8 +272,10 @@ def handle_staff(ev: Inbound) -> None:
             return
         st.save(state)
     st.note_staff_inbound(ev.wa_id, ev.ts or now)
-    cmd = staff.parse_command(ev.text)
-    if cmd in ("stop", "start"):
+    cmd, code = staff.parse_command(ev.text)
+    if cmd in ("resume", "pause"):
+        reply = _staff_resume_pause(st, cmd, code, now)
+    elif cmd in ("stop", "start"):
         st.set_kill(cmd == "stop")
         events.record("kill_switch", "", kill_on=cmd == "stop", reason="staff")
         reply = ("Goji assistant stopped in every chat. Text START to turn it back on."
@@ -279,9 +285,12 @@ def handle_staff(ev: Inbound) -> None:
     elif cmd == "status":
         day = _sgt_day_start(now)
         chats = [c for c in st.recent_chats(day) if c.wa_id not in config.STAFF]
+        paused = [c for c in st.paused_chats() if c.wa_id not in config.STAFF]
         reply = staff.status_text(kill=config.KILL_SWITCH or st.get_kill(),
                                   rollout=config.resolve_rollout(st.get_rollout()),
-                                  waiting=summary.waiting_for_chris(chats, day))
+                                  waiting=summary.waiting_for_chris(chats, day),
+                                  paused=summary.paused_labels(paused),
+                                  live=not _not_live(st))
     else:
         reply = staff.HELP
     try:
@@ -290,9 +299,34 @@ def handle_staff(ev: Inbound) -> None:
         log.warning("staff reply failed: %s", e)
 
 
+def _staff_resume_pause(st, cmd: str, code: str, now: float) -> str:
+    """"resume 004": the agent watches chat #004 again from the customer's next
+    message (nothing is sent to them). "pause 004": it stays out of it."""
+    wa_id = st.find_by_code(code) if code else ""
+    if not wa_id:
+        return f"I can't find chat #{code}. The number is in the ping or the morning summary."
+    with locks(wa_id):
+        state = st.load(wa_id)
+        old = state.mode
+        if cmd == "resume":
+            set_mode(state, AGENT, "staff_resumed", now)
+            state.owner = "agent"
+            state.pending_for_chris, state.pending_draft, state.last_auto = "", {}, {}
+        else:
+            set_mode(state, PAUSED, "staff_paused", now)
+            state.owner = ""
+        st.save(state)
+    _mode_event(state, old, now)
+    who = staff.label(state.name, wa_id, state.code)
+    if cmd == "resume":
+        return (f"OK, I'm looking after {who} again. I won't message them now; I'll answer "
+                f"their next message.")
+    return f"OK, I'll stay out of {who} until you text RESUME {state.code}."
+
+
 def handle_history(chunk: HistoryChunk) -> None:
     """Coexistence history: who wrote last, and when, per customer (never the
-    text). A business message makes the chat Chris's under the 14-day rule."""
+    text). The go-live cut-off reads these times (pre_golive_chat)."""
     st, _, _ = _deps()
     for wa_id, (cust_ts, biz_ts) in chunk.threads.items():
         if wa_id in config.STAFF:
@@ -301,8 +335,6 @@ def handle_history(chunk: HistoryChunk) -> None:
             state = st.load(wa_id)
             state.last_customer_at = max(state.last_customer_at, cust_ts or 0.0)
             state.last_staff_at = max(state.last_staff_at, biz_ts or 0.0)
-            if biz_ts and state.owner != "agent":
-                state.owner = "human"
             st.save(state)
     if chunk.declined:
         events.record("history_import", "", reason=f"declined:{chunk.error_code}")
@@ -556,17 +588,32 @@ def _reset_chat(st, client, ev: Inbound) -> None:
         log.warning("reset reply failed: %s", e)
 
 
+def _go_live(st) -> float:
+    return st.get_go_live() or config.GO_LIVE
+
+
+def _not_live(st) -> bool:
+    """A deployed run answers nobody until go-live is set; it only records
+    message times, which the go-live cut-off reads. Local runs are live."""
+    return config.STATE_BACKEND == "firestore" and not _go_live(st)
+
+
 def _gate_now(st, state, now: float, rollout: dict, *, prior_last_at: float = 0.0,
               had_record: bool = True, patient: dict | None = None):
-    """policy.gate with the live switches: kill switch, rollout hours and
-    scope, the 14-day rule and the coverage gap."""
-    gap = (not had_record) and coverage_gap_open(config.OBSERVED_SINCE,
-                                                 st.get_history_imported(), now)
+    """policy.gate with the live switches: kill switch, not live yet, the
+    go-live cut-off, rollout hours and scope."""
     return gate(state, now, kill_switch=config.KILL_SWITCH or st.get_kill(),
-                agent_hours=rollout["hours"], prior_last_at=prior_last_at,
-                coverage_gap=gap,
+                agent_hours=rollout["hours"], not_live=_not_live(st),
+                pre_golive=pre_golive_chat(state, prior_last_at, _go_live(st)),
                 scope_out=out_of_scope(rollout["contact_scope"], state, had_record,
                                        patient or {}))
+
+
+def _hold_pre_golive(state, blocked, now: float) -> None:
+    """Chris was handling this chat at go-live: pause it, so it stays hers
+    until she resumes it, however long it goes quiet."""
+    if blocked and blocked.reason == "pre_golive_chat":
+        set_mode(state, PAUSED, "pre_golive_chat", now)
 
 
 def handle_inbound(ev: Inbound, received: float) -> None:
@@ -591,8 +638,10 @@ def handle_inbound(ev: Inbound, received: float) -> None:
             prior = max(state.last_customer_at, state.last_staff_at)
             state.last_customer_at = max(state.last_customer_at, ev.ts or now)
             append_history(state, "customer", "Confirm", ev.ts, ev.msg_id)
+            state.code = state.code or st.next_code()
             blocked = _gate_now(st, state, now, rollout, prior_last_at=prior)
             if blocked:  # kill switch, Chris's chat, paused...: she sees the tap
+                _hold_pre_golive(state, blocked, now)
                 st.save(state)
                 events.record("silent", ev.wa_id, reason=blocked.reason)
                 return
@@ -617,15 +666,17 @@ def handle_inbound(ev: Inbound, received: float) -> None:
         if not mark_seen(state, ev.msg_id):
             return
         old = state.mode
-        # The 14-day rule reads the latest message BEFORE this one.
+        # The go-live cut-off reads the latest message BEFORE this one.
         prior_last_at = max(state.last_customer_at, state.last_staff_at)
         had_record = has_record(state)
         apply_idle_handback(state, now)
         state.last_customer_at = max(state.last_customer_at, ev.ts or now)
         state.name = ev.name or state.name
+        state.code = state.code or st.next_code()
         append_history(state, "customer", ev.text, ev.ts, ev.msg_id)
         blocked = _gate_now(st, state, now, rollout, prior_last_at=prior_last_at,
                             had_record=had_record, patient=scope_patient)
+        _hold_pre_golive(state, blocked, now)
         if not blocked:
             state.owner = "agent"  # claimed under the lock: the rest of a burst passes
         st.save(state)
@@ -842,7 +893,7 @@ def _set_chat_mode(wa_id: str, mode: str, reason: str):
         state = st.load(wa_id)
         old = state.mode
         set_mode(state, mode, reason, time.time())
-        state.owner = "agent" if mode == AGENT else "human"
+        state.owner = "agent" if mode == AGENT else ""
         st.save(state)
     _mode_event(state, old, time.time())
     return jsonify({"wa_id": wa_id, "mode": state.mode})
@@ -924,7 +975,8 @@ def rollout_get():
     st, _, _ = _deps()
     saved = st.get_rollout()
     return jsonify({**config.resolve_rollout(saved), "saved": saved,
-                    "env": config.resolve_rollout({})})
+                    "env": config.resolve_rollout({}), "go_live": _go_live(st),
+                    "history_imported": st.get_history_imported()})
 
 
 @app.post("/admin/rollout")
@@ -966,6 +1018,23 @@ def history_imported():
     return jsonify({"history_imported": on})
 
 
+@app.post("/admin/go-live")
+def go_live():
+    """Set the go-live moment: from then on the agent answers, and chats with
+    a message in the 30 days before it stay Chris's. {"at": epoch} or omitted
+    for now; {"at": null} takes it back to not live."""
+    if not _authorised():
+        return jsonify({"error": "forbidden"}), 403
+    body = request.get_json(silent=True) or {}
+    at = body.get("at", time.time())
+    if at is not None and (isinstance(at, bool) or not isinstance(at, (int, float))):
+        return jsonify({"error": "at must be epoch seconds or null"}), 400
+    st, _, _ = _deps()
+    st.set_go_live(at or 0, source="admin")
+    events.record("go_live", "", reason=f"at:{int(at or 0)}")
+    return jsonify({"go_live": float(at or 0), "lookback_days": config.GOLIVE_LOOKBACK_DAYS})
+
+
 @app.post("/internal/morning-summary")
 def morning_summary():
     """Cloud Scheduler, ~7:30 SGT: the last 24h by email, a one-liner to staff
@@ -976,7 +1045,8 @@ def morning_summary():
     st, client, _ = _deps()
     now = time.time()
     chats = [c for c in st.recent_chats(now - summary.DAY_S) if c.wa_id not in config.STAFF]
-    s = summary.build(chats, now)
+    paused = [c for c in st.paused_chats() if c.wa_id not in config.STAFF]
+    s = summary.build(chats, now, paused=paused)
     notify.send_plain(s["subject"], s["body"])
     windows, pinged = st.get_staff_windows(), 0
     for number in sorted(config.STAFF):
@@ -988,7 +1058,8 @@ def morning_summary():
                 log.warning("summary ping failed: %s", e)
     events.record("morning_summary", "", reason=f"answered:{s['answered']},left:{s['left']},"
                                                 f"failed:{s['failed']}")
-    return jsonify({k: s[k] for k in ("answered", "left", "failed")} | {"staff_pinged": pinged})
+    return jsonify({k: s[k] for k in ("answered", "left", "failed", "paused")}
+                   | {"staff_pinged": pinged})
 
 
 def _send_confirmation_template(client, wa_id: str, b: dict) -> str:
@@ -1024,7 +1095,8 @@ def booking_confirmed():
         return jsonify({"matched": False})
     wa_id = digits if len(digits) > 8 else "65" + digits
     st, client, _ = _deps()
-    quiet = config.KILL_SWITCH or st.get_kill()  # note the booking, send nothing
+    # Kill switch or not live: note the booking, send nothing.
+    quiet = config.KILL_SWITCH or st.get_kill() or _not_live(st)
     with locks(wa_id):
         state = st.load(wa_id)
         if not state.history:
@@ -1047,9 +1119,10 @@ def booking_confirmed():
                             default=0)
         acked = False
         in_window = time.time() - last_customer < 23 * 3600
-        # The 14-day rule: a chat that is Chris's gets no message from us.
-        chris_has_it = recent_human_chat(state, max(state.last_customer_at, state.last_staff_at),
-                                         time.time())
+        # A chat Chris has (she wrote, or was handling it at go-live) gets no
+        # message from us.
+        chris_has_it = state.mode in (HUMAN, PAUSED) or pre_golive_chat(
+            state, max(state.last_customer_at, state.last_staff_at), _go_live(st))
         if quiet or chris_has_it:
             pass
         elif b.get("source") != "whatsapp" and not in_window:

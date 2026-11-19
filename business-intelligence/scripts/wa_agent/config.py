@@ -140,7 +140,7 @@ def _env_stage() -> int | None:
 
 
 STAGE = _env_stage()
-# "quiet": the 14-day rule alone decides which chats the agent may take.
+# "quiet": the go-live cut-off and paused chats alone decide which chats the agent may take.
 # "new_only": also silent ("out_of_scope") for any number with a patient record
 # or an earlier chat.
 CONTACT_SCOPES = ("quiet", "new_only")
@@ -163,17 +163,14 @@ def resolve_rollout(flags: dict | None) -> dict:
     return {"stage": stage, "contact_scope": scope, "hours": hours}
 
 
-# The 14-day rule: Chris stays primary. A chat the agent hasn't taken, with a
-# message either way in the last QUIET_DAYS, is hers (policy.recent_human_chat).
-# 0 turns the rule off. Must stay below state.RETENTION_DAYS (30), or the chat
-# doc holding the timestamps expires first (test_golive.py checks).
-QUIET_DAYS = int(os.environ.get("WA_AGENT_QUIET_DAYS", "14"))
-# When the service started seeing the clinic's real number (epoch seconds;
-# 0 = unset). Until the coexistence history import lands, a number with no
-# record here could be a chat Chris had before we were watching, so while
-# OBSERVED_SINCE is within the last QUIET_DAYS such numbers are left alone
-# ("coverage_gap").
-OBSERVED_SINCE = float(os.environ.get("WA_AGENT_OBSERVED_SINCE", "0") or 0)
+# The go-live cut-off (Chris, 19 Nov 2026): at go-live, chats with a message
+# either way in the GOLIVE_LOOKBACK_DAYS before it are Chris's, and pause on
+# their next message. Go-live is a moment someone sets (POST /admin/go-live,
+# Firestore flag "golive"); WA_AGENT_GO_LIVE (epoch seconds) is the fallback.
+# A deployed (Firestore) run with neither stays silent ("not_live"): it only
+# records message times until then. Local memory runs are always live.
+GOLIVE_LOOKBACK_DAYS = int(os.environ.get("WA_AGENT_GOLIVE_LOOKBACK_DAYS", "30"))
+GO_LIVE = float(os.environ.get("WA_AGENT_GO_LIVE", "0") or 0)
 
 # Staff personal WhatsApp numbers (E.164 digits): Chris, optionally Charles.
 # They get a short WhatsApp when a chat needs them, can text stop / start /

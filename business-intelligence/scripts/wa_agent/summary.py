@@ -21,7 +21,8 @@ DAY_S = 86400
 
 
 def _who(state: ChatState) -> str:
-    return label(state.name or (state.patient or {}).get("first_name", ""), state.wa_id)
+    return label(state.name or (state.patient or {}).get("first_name", ""), state.wa_id,
+                 state.code)
 
 
 def _in_window(state: ChatState, since: float, kinds: tuple[str, ...]) -> list[dict]:
@@ -53,8 +54,15 @@ def _line(state: ChatState, outcomes: list[dict]) -> str:
     return f"- {_who(state)}: {', '.join(parts)}"
 
 
-def build(chats: list[ChatState], now: float, window_s: int = DAY_S) -> dict:
-    """{subject, body, line, answered, left, failed} for the last `window_s`."""
+def paused_labels(paused: list[ChatState]) -> list[str]:
+    """Chats the agent stays out of until someone resumes them, oldest first."""
+    return [_who(c) for c in sorted(paused, key=lambda c: c.mode_since)]
+
+
+def build(chats: list[ChatState], now: float, window_s: int = DAY_S,
+          paused: list[ChatState] | None = None) -> dict:
+    """{subject, body, line, answered, left, failed, paused} for the last
+    `window_s`, plus every chat still paused (whenever it was paused)."""
     since = now - window_s
     answered, left, failed = [], [], []
     for c in sorted(chats, key=lambda s: s.wa_id):
@@ -70,9 +78,10 @@ def build(chats: list[ChatState], now: float, window_s: int = DAY_S) -> dict:
         bad = _in_window(c, since, FAILED)
         if bad:
             failed.append(_line(c, bad))
+    held = paused_labels(paused or [])
     day = datetime.fromtimestamp(now, SGT)
     subject = f"WhatsApp assistant: morning summary {day:%a %d %b}"
-    if not (answered or left or failed):
+    if not (answered or left or failed or held):
         body = "A quiet 24 hours: the assistant didn't handle any chats.\n"
     else:
         sections = []
@@ -84,11 +93,21 @@ def build(chats: list[ChatState], now: float, window_s: int = DAY_S) -> dict:
         if answered:
             sections.append(f"Answered by the assistant ({len(answered)}):\n"
                             + "\n".join(answered))
+        if held:
+            sections.append(f"Paused for you ({len(held)}): the assistant stays out of these "
+                            "until you hand them back. Text RESUME and the number (e.g. "
+                            "RESUME 004) to the Goji number from your phone; the assistant "
+                            "won't message them, it just answers their next message.\n"
+                            + "\n".join(f"- {h}" for h in held))
         body = ("The WhatsApp assistant's last 24 hours (to "
                 f"{day:%H:%M %a %d %b} SGT).\n\n" + "\n\n".join(sections) + "\n\n"
                 "Only the chats under \"Left for you\" and \"Failures\" need you. "
                 "Open them in the WhatsApp Business app.\n")
     line = (f"Goji assistant, last 24h: {len(answered)} chat(s) answered, "
-            f"{len(left)} left for you, {len(failed)} failure(s). Details in your email.")
+            f"{len(left)} left for you, {len(failed)} failure(s)."
+            + (f" Paused for you: {', '.join(held[:6])}{' and more' if len(held) > 6 else ''}"
+               ". Text RESUME and the number to hand one back." if held else "")
+            + " Details in your email.")
     return {"subject": subject, "body": body, "line": line,
-            "answered": len(answered), "left": len(left), "failed": len(failed)}
+            "answered": len(answered), "left": len(left), "failed": len(failed),
+            "paused": len(held)}

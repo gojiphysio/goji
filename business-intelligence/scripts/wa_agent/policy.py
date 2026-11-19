@@ -15,12 +15,15 @@ Ways into `human`: Chris writes in the chat (echo), the agent escalates, an
 admin takes over. Ways back to `agent`: HUMAN_IDLE_HANDBACK_S with no human
 message, or an admin hands back. `paused` only leaves by admin hand-back.
 
-Separately from the mode, `owner` says whose chat it is under the 14-day rule
-(Chris stays primary): "agent" once the agent has taken it (a message passed
-the gate, or an admin handed it back), "human" once a person wrote in it (an
-echo, history import, admin takeover or pause), "" for neither. A chat that
-isn't the agent's, with a message either way in the last QUIET_DAYS, is left
-to Chris (`recent_human_chat`), even after the 24h idle hand-back (decision D2).
+Chris writing in a chat (an echo) pauses it: the agent is fully silent there
+until she resumes it ("resume 004" on WhatsApp, or the admin hand-back). The
+24h idle hand-back only applies to handovers the agent made that no person
+answered (Chris, 19 Nov 2026).
+
+The go-live cut-off: at go-live, a chat with a message either way in the
+GOLIVE_LOOKBACK_DAYS (30) before go-live is Chris's (`pre_golive_chat`); its
+next message pauses it. `owner` = "agent" once the agent has taken a chat (a
+message passed the gate, or a hand-back), which exempts it from the cut-off.
 """
 from __future__ import annotations
 
@@ -56,7 +59,8 @@ class ChatState:
     seen_ids: list[str] = field(default_factory=list)  # webhook de-dupe
     pending_draft: dict = field(default_factory=dict)  # {text, intent, at}: scored on Chris's reply
     last_auto: dict = field(default_factory=dict)      # {intent, at}: a rescue if Chris writes next
-    owner: str = ""                # 14-day rule: "agent" | "human" | ""
+    owner: str = ""                # "agent" once the agent has taken the chat, else ""
+    code: str = ""                 # short id staff use: "004" (resume 004)
     last_customer_at: float = 0.0  # latest customer message (webhook or history import)
     last_staff_at: float = 0.0     # latest business-number message from the app (echo or import)
     name: str = ""                 # WhatsApp profile name, for staff pings and the summary
@@ -126,7 +130,9 @@ def on_human_message(state: ChatState, now: float) -> bool:
     steps back. Returns True if this took the chat over."""
     state.last_human_at = now
     state.pending_for_chris = ""
-    return set_mode(state, HUMAN, "human_replied", now)
+    state.owner = ""
+    # Fully silent until she resumes it: no idle hand-back (Chris, 19 Nov 2026).
+    return set_mode(state, PAUSED, "human_replied", now)
 
 
 # Handovers after which the agent goes fully quiet rather than waiting: a red
@@ -144,30 +150,19 @@ def in_clinic_hours(now: float) -> bool:
     return t.weekday() < 6 and 8 <= t.hour < 20
 
 
-def recent_human_chat(state: ChatState, prior_last_at: float, now: float,
-                      quiet_days: int = config.QUIET_DAYS) -> bool:
-    """The 14-day rule. A chat the agent hasn't taken (owner != "agent") whose
-    latest earlier message, from either side, is under `quiet_days` old is
-    Chris's: the agent stays out. `prior_last_at` is that latest message's
-    time, read before the current message was recorded. 0 days = off."""
-    if quiet_days <= 0 or state.owner == "agent" or prior_last_at <= 0:
+def pre_golive_chat(state: ChatState, prior_last_at: float, go_live: float,
+                    lookback_days: int = config.GOLIVE_LOOKBACK_DAYS) -> bool:
+    """The go-live cut-off: the latest message before this one (either side)
+    fell in the `lookback_days` before go-live, so Chris was handling this chat
+    when the agent went live. Not for a chat the agent has taken."""
+    if not go_live or state.owner == "agent" or prior_last_at <= 0:
         return False
-    return now - prior_last_at < quiet_days * 86400
+    return go_live - lookback_days * 86400 <= prior_last_at < go_live
 
 
 def has_record(state: ChatState) -> bool:
     """We know something about this number (a chat, an import, an owner)."""
     return bool(state.owner or state.last_customer_at or state.last_staff_at or state.history)
-
-
-def coverage_gap_open(observed_since: float, history_imported: bool, now: float,
-                      quiet_days: int = config.QUIET_DAYS) -> bool:
-    """We started watching the number less than `quiet_days` ago and the
-    coexistence history hasn't been imported: a number with no record may be
-    a chat Chris had before we could see it. Off when OBSERVED_SINCE is unset."""
-    if quiet_days <= 0 or not observed_since or history_imported:
-        return False
-    return now - observed_since < quiet_days * 86400
 
 
 def out_of_scope(scope: str, state: ChatState, had_record: bool, patient: dict) -> bool:
@@ -181,13 +176,12 @@ def out_of_scope(scope: str, state: ChatState, had_record: bool, patient: dict) 
 
 def gate(state: ChatState, now: float, *, kill_switch: bool = config.KILL_SWITCH,
          always_human: frozenset[str] = config.ALWAYS_HUMAN,
-         agent_hours: str = config.AGENT_HOURS, prior_last_at: float = 0.0,
-         quiet_days: int = config.QUIET_DAYS, coverage_gap: bool = False,
-         scope_out: bool = False) -> Decision | None:
+         agent_hours: str = config.AGENT_HOURS, not_live: bool = False,
+         pre_golive: bool = False, scope_out: bool = False) -> Decision | None:
     """Checks that don't need a proposal. A Decision here means: don't even
     call the model. None means the agent may think about this message.
-    `coverage_gap` and `scope_out` are worked out by the caller
-    (`coverage_gap_open` + `has_record`, `out_of_scope`)."""
+    `not_live` (a deployed run before go-live), `pre_golive`
+    (`pre_golive_chat`) and `scope_out` (`out_of_scope`) come from the caller."""
     if kill_switch:
         return Decision(SILENT, "kill_switch")
     if state.wa_id in always_human:
@@ -196,10 +190,10 @@ def gate(state: ChatState, now: float, *, kill_switch: bool = config.KILL_SWITCH
         return Decision(SILENT, "paused")
     if state.mode == HUMAN:
         return Decision(SILENT, "human_has_chat")
-    if recent_human_chat(state, prior_last_at, now, quiet_days):
-        return Decision(SILENT, "recent_human_chat")
-    if coverage_gap:
-        return Decision(SILENT, "coverage_gap")
+    if not_live:
+        return Decision(SILENT, "not_live")
+    if pre_golive:
+        return Decision(SILENT, "pre_golive_chat")
     if agent_hours == "after_hours" and in_clinic_hours(now):
         return Decision(SILENT, "clinic_hours")
     if scope_out:

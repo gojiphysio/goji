@@ -80,13 +80,14 @@ def test_clinic_hours():
     assert not in_clinic_hours(datetime(2026, 11, 18, 20, 0, tzinfo=SGT).timestamp())
 
 
-def test_human_message_takes_over_and_idle_hands_back():
-    s = ChatState(wa_id="x")
+def test_human_message_pauses_until_resumed():
+    """Chris, 19 Nov 2026: once a person writes, the agent is fully silent
+    until she resumes the chat; no idle hand-back."""
+    s = ChatState(wa_id="x", owner="agent")
     assert on_human_message(s, NOW)
-    assert s.mode == HUMAN
-    assert not apply_idle_handback(s, NOW + 3600, idle_s=24 * 3600)
-    assert apply_idle_handback(s, NOW + 24 * 3600, idle_s=24 * 3600)
-    assert s.mode == AGENT and s.mode_reason == "idle_handback"
+    assert s.mode == PAUSED and s.owner == ""
+    assert not apply_idle_handback(s, NOW + 90 * 24 * 3600, idle_s=24 * 3600)
+    assert s.mode == PAUSED
 
 
 def test_unanswered_escalation_also_hands_back():

@@ -32,9 +32,12 @@ Each chat is in one mode: `agent`, `waiting`, `human` or `paused` (`policy.py`).
 
 | Goes to `waiting` (agent keeps answering, not the handed-over topic) | Goes to `human` (agent silent) | Goes back to `agent` |
 |---|---|---|
-| The agent hands a topic to Chris (holding reply + email to hello@) | Chris writes in the chat from the app (`smb_message_echoes`) | 24h with no message from a person (`WA_AGENT_HUMAN_IDLE_S`) |
-| | A red flag (`urgent`) or `sensitive` handover | `POST /admin/chats/<id>/handback` |
-| | `POST /admin/chats/<id>/takeover` | |
+| The agent hands a topic to Chris (holding reply + email to hello@) | A red flag (`urgent`) or `sensitive` handover | 24h with no message from a person (`WA_AGENT_HUMAN_IDLE_S`), only for the agent's own handovers |
+| | `POST /admin/chats/<id>/takeover` | `POST /admin/chats/<id>/handback` |
+
+Chris writing in a chat from the app (`smb_message_echoes`) pauses it: `paused`
+never times out and only leaves when she texts `RESUME <code>` or an admin
+hands it back (see Go-live controls).
 
 While `waiting`, the model is told what's with Chris (`pending_for_chris`, the
 staff note), so it answers everything else but not that, says once that Chris
@@ -137,29 +140,31 @@ provider forwards Meta's signature (if not: `USE_URL_TOKEN=1`, below), and the
 
 ## Go-live controls (built 19 Nov 2026)
 
-**Chris stays primary (the 14-day rule).** The agent doesn't answer in a chat
-it hasn't taken whose latest earlier message, from either side, is under
-`WA_AGENT_QUIET_DAYS` (14) old (`policy.recent_human_chat`). Each chat records
-an `owner` ("agent", "human" or neither) and the latest customer and staff
-message times. A message that passes the gate claims the chat for the agent,
-so the rest of a burst passes too. Chris writing in a chat makes it hers, and
-it stays hers until 14 quiet days pass, even after the 24h idle hand-back
-(decision D2); an admin hand-back gives it back at once. A message the agent
-stayed silent on (kill switch, clinic hours, coverage gap) counts as a recent
-message nobody claimed, so that chat stays Chris's too: the cautious side.
-Examples: chatted with Chris 10 days ago → hers; first-ever contact → the
-agent's; quiet for 3 weeks → the agent's.
+**Chris stays primary** (Chris, 19 Nov 2026).
 
-Where the times come from: going forward, the webhook and echoes. For chats
-before go-live, Meta's coexistence `history` webhook (subscribe the field):
-`whatsapp.parse_history` keeps only timestamps per customer, never text, and
-a business message in the import makes the chat Chris's. When the import
-reports 100% the `history_imported` flag is set (or by hand:
-`POST /admin/history-imported`). Until then, if `WA_AGENT_OBSERVED_SINCE`
-(epoch seconds when we started watching the number) is within the last 14
-days, a number we have no record of is left alone (`coverage_gap`). The
-history payload shape is coded from Meta's docs: check it against the real
-import when Goji's number is onboarded.
+- *Chris writes in a chat → the assistant is fully silent there* (mode
+  `paused`, no 24h idle hand-back) until she resumes it. The idle hand-back
+  is only for handovers the assistant made that nobody answered.
+- *Resume over WhatsApp.* Every chat has a short code (`#004`) shown in pings,
+  the STATUS reply and the morning summary, which lists every paused chat.
+  Chris texts `RESUME 004` (or `PAUSE 004`) to the Goji number from her phone.
+  Resuming sends the customer nothing: the assistant just answers their next
+  message. The admin hand-back route does the same.
+- *Go-live cut-off.* Go-live is a moment someone sets (`POST /admin/go-live`;
+  `WA_AGENT_GO_LIVE` is the fallback). Until then a deployed service answers
+  nobody and only records message times (`not_live`). At go-live, a chat with
+  a message from either side in the `WA_AGENT_GOLIVE_LOOKBACK_DAYS` (30) before
+  go-live is Chris's: its next message pauses it (`pre_golive_chat`), so it
+  stays hers however long it then goes quiet. A chat whose last message was
+  over 30 days before go-live, or that starts after it, is the assistant's.
+
+The times before go-live come from the webhook once the number is connected
+and from Meta's coexistence `history` webhook (subscribe the field), which
+`whatsapp.parse_history` reduces to timestamps per customer, never text.
+`history_imported` is set when the import reports 100% (shown by
+`GET /admin/rollout`); set go-live after it. The history payload shape is
+coded from Meta's docs: check it against the real import when Goji's number
+is onboarded.
 
 **Rollout stages** (`WA_AGENT_STAGE` 0-3, `config.stage_policy`). No stage
 drafts (owner's call: the assistant drives by itself).
@@ -173,8 +178,8 @@ drafts (owner's call: the assistant drives by itself).
 | unset | today's policy, drafts included (local testing) | |
 
 `WA_AGENT_CONTACT_SCOPE=new_only` also leaves out any number with a patient
-record or an earlier chat (`out_of_scope`); `quiet` (default) is the 14-day
-rule alone. Stage, scope and hours live in the Firestore flags doc `rollout`
+record or an earlier chat (`out_of_scope`); `quiet` (default) is the go-live
+cut-off and paused chats alone. Stage, scope and hours live in the Firestore flags doc `rollout`
 (`GET/POST /admin/rollout`, null = back to env), so a redeploy can't reset
 them. Demotion still applies on top.
 
@@ -186,7 +191,7 @@ gets a help line, and every message opens that number's 24h window. Handovers,
 red flags, sensitive topics, failed bookings and moves, demotions and the
 waiver-tag request ping each staff number: free text inside their window, the
 approved `goji_staff_alert` template outside it (`WA_AGENT_STAFF_TEMPLATE`).
-A ping names the customer by first name or last 4 digits only. Email stays
+A ping names the customer by first name or last 4 digits, plus the chat code. Email stays
 the backup for red flags and sensitive topics, and the only channel when no
 staff number is set or a ping failed. Drafts (unset stage only) still email.
 
@@ -197,7 +202,7 @@ and any failures, from each chat's `outcomes` (`summary.py`); a one-line
 version goes to staff whose window is open.
 
 **Also:** the reminder Confirm tap and booking confirmations respect the kill
-switch and the 14-day rule; a deployed run without `WA_AGENT_HASH_SALT`
+switch, go-live and paused chats; a deployed run without `WA_AGENT_HASH_SALT`
 records events with no `chat_key` (the public default salt would make them
 reversible) and logs an error at startup; `POST /admin/chats/<id>/forget`
 deletes a chat and its late-change record (PDPA).

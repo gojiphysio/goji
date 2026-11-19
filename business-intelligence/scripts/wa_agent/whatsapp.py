@@ -15,7 +15,7 @@ Three things arrive on the webhook and matter to us:
                         used to time delivery
   history               coexistence onboarding: up to 180 days of earlier
                         chats, in chunks. Only timestamps are kept (who wrote
-                        last, and when) for the 14-day rule; never the text.
+                        last, and when) for the go-live cut-off; never the text.
 
 The echo shape is coded from Meta's coexistence docs and must be confirmed
 against real traffic in Phase 0 Track B (see README).

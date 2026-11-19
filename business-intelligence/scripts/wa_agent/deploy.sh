@@ -34,8 +34,8 @@
 #   Passed through when set (an empty value counts as set, e.g. WA_AUTH_PREFIX=
 #   for a provider's raw key, or WA_AGENT_TESTERS= to clear the list):
 #     WA_PHONE_NUMBER_ID WA_API_BASE WA_SEND_PATH WA_AUTH_HEADER WA_AUTH_PREFIX
-#     WA_AGENT_STAFF WA_AGENT_TESTERS WA_AGENT_ALWAYS_HUMAN WA_AGENT_QUIET_DAYS
-#     WA_AGENT_STAGE WA_AGENT_CONTACT_SCOPE WA_AGENT_OBSERVED_SINCE
+#     WA_AGENT_STAFF WA_AGENT_TESTERS WA_AGENT_ALWAYS_HUMAN WA_AGENT_GOLIVE_LOOKBACK_DAYS
+#     WA_AGENT_STAGE WA_AGENT_CONTACT_SCOPE WA_AGENT_GO_LIVE
 #     WA_AGENT_STAFF_TEMPLATE WA_AGENT_CONFIRMATIONS WA_AGENT_PUBLIC_URL
 #     WA_AGENT_BOOKING_DRY_RUN WA_AGENT_HOURS WA_AGENT_PATIENT_LOOKUP
 #   Defaults, used only when neither the shell nor the live service has a value:
@@ -134,8 +134,8 @@ import json, os, sys
 
 PASSTHROUGH = [
     "WA_PHONE_NUMBER_ID", "WA_API_BASE", "WA_SEND_PATH", "WA_AUTH_HEADER", "WA_AUTH_PREFIX",
-    "WA_AGENT_STAFF", "WA_AGENT_TESTERS", "WA_AGENT_ALWAYS_HUMAN", "WA_AGENT_QUIET_DAYS",
-    "WA_AGENT_STAGE", "WA_AGENT_CONTACT_SCOPE", "WA_AGENT_OBSERVED_SINCE",
+    "WA_AGENT_STAFF", "WA_AGENT_TESTERS", "WA_AGENT_ALWAYS_HUMAN", "WA_AGENT_GOLIVE_LOOKBACK_DAYS",
+    "WA_AGENT_STAGE", "WA_AGENT_CONTACT_SCOPE", "WA_AGENT_GO_LIVE",
     "WA_AGENT_STAFF_TEMPLATE", "WA_AGENT_CONFIRMATIONS", "WA_AGENT_PUBLIC_URL",
     "WA_AGENT_BOOKING_DRY_RUN", "WA_AGENT_HOURS", "WA_AGENT_PATIENT_LOOKUP",
 ]
@@ -259,4 +259,6 @@ if [[ "${FIRST_DEPLOY}" == "1" ]]; then
   echo "      - bash business-intelligence/scripts/wa_agent/setup_monitoring.sh"
   echo "      - from now on, merges to main redeploy via deploy-wa-agent.yml"
 fi
-echo "    Subscribe the fields: messages, smb_message_echoes, history (the 14-day rule reads it)"
+echo "    Subscribe the fields: messages, smb_message_echoes, history (the go-live cut-off reads it)"
+echo "    The assistant answers nobody until go-live is set:"
+echo "      curl -X POST -H \"X-Admin-Token: \$TOKEN\" ${URL}/admin/go-live"

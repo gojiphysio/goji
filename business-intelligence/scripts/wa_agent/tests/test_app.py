@@ -9,7 +9,7 @@ import pytest
 
 from wa_agent import app as app_mod
 from wa_agent import config, events, notify
-from wa_agent.policy import AGENT, HUMAN, WAITING
+from wa_agent.policy import AGENT, HUMAN, PAUSED, WAITING
 from wa_agent.state import MemoryStore
 from wa_agent.whatsapp import parse_webhook
 
@@ -110,7 +110,7 @@ def test_person_replies_during_hold_so_agent_stays_quiet(env, monkeypatch):
     post(client, inbound())
     assert app_mod.wa.sent == []
     assert ("superseded", {"reason": "human_replied"}) in rec
-    assert app_mod.store.load(CUSTOMER).mode == HUMAN
+    assert app_mod.store.load(CUSTOMER).mode == PAUSED
 
 
 def test_person_replies_during_debounce_so_model_is_never_called(env, monkeypatch):
@@ -118,7 +118,7 @@ def test_person_replies_during_debounce_so_model_is_never_called(env, monkeypatc
     monkeypatch.setattr(app_mod, "_sleep", on_nth_sleep(1, chris_replies))
     post(client, inbound())
     assert app_mod.claude.requests == [] and app_mod.wa.sent == []
-    assert ("silent", {"reason": "human_has_chat"}) in rec
+    assert ("silent", {"reason": "paused"}) in rec
 
 
 def test_burst_of_messages_costs_one_model_call(env, monkeypatch):
@@ -173,7 +173,7 @@ def test_after_chris_replies_agent_is_silent(env):
     post(client, inbound(msg_id="wamid.in2"))
     assert app_mod.wa.sent == []
     assert app_mod.claude.requests == []  # never even asked the model
-    assert ("silent", {"reason": "human_has_chat"}) in rec
+    assert ("silent", {"reason": "paused"}) in rec
 
 
 def test_escalation_sends_holding_reply_hands_over_and_notifies(env):
@@ -380,7 +380,7 @@ def test_once_chris_replies_the_agent_steps_out(env):
     _hand_over(client)
     post(client, echo(text="Hi! Cheryl can do 4:30pm on Friday"))
     state = app_mod.store.load(CUSTOMER)
-    assert state.mode == HUMAN and state.pending_for_chris == ""
+    assert state.mode == PAUSED and state.pending_for_chris == ""
     sent = len(app_mod.wa.sent)
     post(client, inbound(msg_id="wamid.h3", text="great, thanks! also what are your hours?"))
     assert len(app_mod.wa.sent) == sent
@@ -715,6 +715,7 @@ def test_reset_from_whatsapp_starts_the_chat_fresh_for_testers_only(env, monkeyp
     assert len(app_mod.claude.requests) == 1                     # no model call for /reset
     # deployed: only listed testers
     monkeypatch.setattr(config, "STATE_BACKEND", "firestore")
+    monkeypatch.setattr(config, "GO_LIVE", 1.0)   # deployed runs answer only once live
     monkeypatch.setattr(config, "TESTERS", frozenset())
     app_mod.claude.queue.append(final())
     post(client, inbound(msg_id="wamid.r2", text="/reset"))

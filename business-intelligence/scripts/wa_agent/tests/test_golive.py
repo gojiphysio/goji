@@ -1,5 +1,5 @@
-"""Go-live features: the 14-day rule, history import, coverage gap, rollout
-stages and contact scope, staff pings and commands, the morning summary,
+"""Go-live features: the go-live cut-off, history import, pause on Chris's
+reply and resume by chat code, rollout stages and contact scope, staff pings and commands, the morning summary,
 kill-switch gaps, the hash salt and PDPA forget."""
 import hashlib
 import hmac
@@ -10,9 +10,9 @@ import pytest
 
 from wa_agent import app as app_mod
 from wa_agent import config, events, notify, staff, state as state_mod, summary
-from wa_agent.policy import (AGENT, DRAFT, ESCALATE, HUMAN, SEND, SILENT, WAITING, ChatState,
-                             Decision, Proposal, apply_stage, coverage_gap_open, gate,
-                             out_of_scope, recent_human_chat)
+from wa_agent.policy import (AGENT, DRAFT, ESCALATE, HUMAN, PAUSED, SEND, SILENT, WAITING,
+                             ChatState, Decision, Proposal, apply_stage, gate, out_of_scope,
+                             pre_golive_chat)
 from wa_agent.state import MemoryStore, note_outcome
 from wa_agent.whatsapp import parse_webhook
 
@@ -72,57 +72,102 @@ def silent_reasons(rec):
     return [f.get("reason") for e, f in rec if e == "silent"]
 
 
-# --- the 14-day rule ------------------------------------------------------------
+# --- go-live cut-off, pause on reply, resume ------------------------------------
 
-def test_quiet_days_stay_below_retention():
-    assert 0 < config.QUIET_DAYS < state_mod.RETENTION_DAYS
+GO = 1_800_000_000.0
 
 
-@pytest.mark.parametrize("owner,ago_days,silent", [
-    ("human", 10, True),    # chatted with Chris 10 days ago: hers
-    ("", 0, False),         # first-ever contact (no earlier message): the agent's
-    ("human", 21, False),   # quiet three weeks: the agent's
-    ("agent", 2, False),    # the agent already has it
-    ("", 3, True),          # a recent message nobody claimed (history import)
+@pytest.mark.parametrize("owner,days_before,held", [
+    ("", 10, True),       # Chris's chat 10 days before go-live: hers
+    ("", 29, True),
+    ("", 31, False),      # quiet for over 30 days before go-live: the agent's
+    ("", None, False),    # first contact after go-live (no earlier message)
+    ("agent", 10, False), # the agent already took it
 ])
-def test_recent_human_chat(owner, ago_days, silent):
-    now = 1_800_000_000.0
+def test_pre_golive_chat(owner, days_before, held):
     st = ChatState(wa_id=CUSTOMER, owner=owner)
-    prior = now - ago_days * DAY if ago_days else 0.0
-    assert recent_human_chat(st, prior, now, 14) is silent
+    prior = GO - days_before * DAY if days_before is not None else 0.0
+    assert pre_golive_chat(st, prior, GO, 30) is held
 
 
-def test_rule_off_at_zero_days():
-    st = ChatState(wa_id=CUSTOMER, owner="human")
-    assert not recent_human_chat(st, 1000.0, 2000.0, 0)
+def test_cut_off_only_looks_before_go_live():
+    st = ChatState(wa_id=CUSTOMER)
+    assert not pre_golive_chat(st, GO + 3600, GO, 30)   # a chat that started after go-live
+    assert not pre_golive_chat(st, GO - DAY, 0, 30)     # go-live not set
 
 
-def test_gate_order_kill_switch_first_then_rule():
-    now = 1_800_000_000.0
-    st = ChatState(wa_id=CUSTOMER, owner="human")
-    assert gate(st, now, kill_switch=True, prior_last_at=now - DAY).reason == "kill_switch"
-    assert gate(st, now, kill_switch=False, prior_last_at=now - DAY).reason == \
-        "recent_human_chat"
-    assert gate(st, now, kill_switch=False, prior_last_at=now - DAY, coverage_gap=True
-                ).reason == "recent_human_chat"
-    assert gate(st, now, kill_switch=False, coverage_gap=True).reason == "coverage_gap"
-    assert gate(st, now, kill_switch=False, scope_out=True).reason == "out_of_scope"
+def test_lookback_is_thirty_days():
+    assert config.GOLIVE_LOOKBACK_DAYS == 30
 
 
-def test_chris_chat_stays_hers_after_idle_handback(env):
+def test_gate_order():
+    st = ChatState(wa_id=CUSTOMER)
+    assert gate(st, GO, kill_switch=True, not_live=True).reason == "kill_switch"
+    assert gate(st, GO, kill_switch=False, not_live=True, pre_golive=True).reason == "not_live"
+    assert gate(st, GO, kill_switch=False, pre_golive=True).reason == "pre_golive_chat"
+    assert gate(st, GO, kill_switch=False, scope_out=True).reason == "out_of_scope"
+
+
+def test_chris_chat_at_go_live_pauses_and_stays_hers(env):
     client, rec, _, _ = env
     now = time.time()
-    post(client, echo(ts=int(now - 2 * DAY)))       # Chris wrote two days ago
-    st = app_mod.store.load(CUSTOMER)
-    assert st.owner == "human" and st.mode == HUMAN
-    st.mode_since = st.last_human_at = now - 2 * DAY
-    app_mod.store.save(st)
+    app_mod.store.set_go_live(now - DAY)
+    st = ChatState(wa_id=CUSTOMER, last_customer_at=now - 5 * DAY, last_staff_at=now - 4 * DAY)
+    app_mod.store.save(st)                       # e.g. from the history import
     app_mod.claude.queue.append(final())
-    post(client, inbound(ts=int(now), msg_id="wamid.in2"))
-    # The 24h idle hand-back puts the mode back to agent, but the chat is still hers.
-    assert app_mod.store.load(CUSTOMER).mode == AGENT
-    assert silent_reasons(rec)[-1] == "recent_human_chat"
-    assert app_mod.wa.sent == []
+    post(client, inbound(ts=int(now)))
+    assert silent_reasons(rec)[-1] == "pre_golive_chat"
+    st = app_mod.store.load(CUSTOMER)
+    assert st.mode == PAUSED and st.code
+    # Months later it is still hers until she resumes it.
+    post(client, inbound(ts=int(now + 60 * DAY), msg_id="wamid.later"))
+    assert silent_reasons(rec)[-1] == "paused" and app_mod.wa.sent == []
+
+
+def test_new_chat_after_go_live_is_the_agents(env):
+    client, rec, _, _ = env
+    app_mod.store.set_go_live(time.time() - DAY)
+    app_mod.claude.queue.append(final())
+    post(client, inbound(ts=int(time.time())))
+    assert len(app_mod.wa.sent) == 1 and app_mod.store.load(CUSTOMER).owner == "agent"
+
+
+def test_deployed_run_is_silent_until_go_live(env, monkeypatch):
+    client, rec, _, _ = env
+    monkeypatch.setattr(config, "STATE_BACKEND", "firestore")
+    monkeypatch.setattr(config, "GO_LIVE", 0.0)
+    app_mod.claude.queue.extend([final(), final()])
+    post(client, inbound(ts=int(time.time()) - 3600))
+    assert silent_reasons(rec)[-1] == "not_live" and app_mod.wa.sent == []
+    assert app_mod.store.load(CUSTOMER).last_customer_at > 0      # times still recorded
+    r = client.post("/admin/go-live", json={}, headers=ADMIN)
+    assert r.json["go_live"] > 0
+    # That chat had a message before go-live: Chris's. A new number: the agent's.
+    post(client, inbound(ts=int(time.time()), msg_id="wamid.2"))
+    assert silent_reasons(rec)[-1] == "pre_golive_chat"
+    post(client, inbound(wa_id="6590000009", ts=int(time.time()), msg_id="wamid.3"))
+    assert len(app_mod.wa.sent) == 1
+
+
+def test_go_live_route_validates(env):
+    client, _, _, _ = env
+    assert client.post("/admin/go-live", json={}).status_code == 403
+    assert client.post("/admin/go-live", json={"at": "soon"}, headers=ADMIN).status_code == 400
+    assert client.post("/admin/go-live", json={"at": None}, headers=ADMIN).json["go_live"] == 0
+    assert client.post("/admin/go-live", json={"at": GO}, headers=ADMIN).json["go_live"] == GO
+
+
+def test_chris_writing_pauses_with_no_idle_handback(env):
+    client, rec, _, _ = env
+    now = int(time.time())
+    app_mod.claude.queue.append(final())
+    post(client, inbound(ts=now - 3 * DAY, msg_id="wamid.a"))
+    post(client, echo(ts=now - 3 * DAY + 60))
+    st = app_mod.store.load(CUSTOMER)
+    assert st.mode == PAUSED and st.owner == ""
+    app_mod.claude.queue.append(final())
+    post(client, inbound(ts=now, msg_id="wamid.b"))   # three days later: still hers
+    assert silent_reasons(rec)[-1] == "paused" and len(app_mod.wa.sent) == 1
 
 
 def test_first_message_claims_chat_so_burst_passes(env):
@@ -132,32 +177,52 @@ def test_first_message_claims_chat_so_burst_passes(env):
     post(client, inbound(ts=now - 5, msg_id="wamid.a"))
     assert app_mod.store.load(CUSTOMER).owner == "agent"
     post(client, inbound(ts=now, msg_id="wamid.b", text="and Saturdays?"))
-    assert "recent_human_chat" not in silent_reasons(rec)
     assert len(app_mod.wa.sent) == 2
 
 
-def test_echo_after_agent_reply_gives_chat_to_chris(env):
+@pytest.fixture
+def with_staff(monkeypatch):
+    monkeypatch.setattr(config, "STAFF", frozenset({CHRIS}))
+
+
+def test_staff_resume_by_code_sends_the_customer_nothing(env, with_staff):
     client, rec, _, _ = env
     now = int(time.time())
     app_mod.claude.queue.append(final())
-    post(client, inbound(ts=now - 60, msg_id="wamid.a"))
-    post(client, echo(ts=now - 30))
+    post(client, inbound(ts=now - 600, msg_id="wamid.a"))
+    post(client, echo(ts=now - 500))
+    code = app_mod.store.load(CUSTOMER).code
+    sent_before = list(app_mod.wa.sent)
+    post(client, inbound(wa_id=CHRIS, text=f"Resume chat #{int(code)}", ts=now, msg_id="s1"))
     st = app_mod.store.load(CUSTOMER)
-    assert st.owner == "human" and st.last_staff_at == now - 30
+    assert st.mode == AGENT and st.owner == "agent"
+    new = app_mod.wa.sent[len(sent_before):]
+    assert [to for to, _ in new] == [CHRIS]               # nothing to the customer
+    assert f"#{code}" in new[0][1] and "next message" in new[0][1]
+    app_mod.claude.queue.append(final())
+    post(client, inbound(ts=now + 60, msg_id="wamid.c"))  # the customer's next message
+    assert app_mod.wa.sent[-1][0] == CUSTOMER
 
 
-def test_admin_handback_gives_chat_back_to_agent(env):
+def test_staff_pause_and_unknown_code(env, with_staff):
     client, rec, _, _ = env
     now = int(time.time())
-    post(client, echo(ts=now - DAY))
-    client.post(f"/admin/chats/{CUSTOMER}/handback", headers=ADMIN)
-    assert app_mod.store.load(CUSTOMER).owner == "agent"
     app_mod.claude.queue.append(final())
-    post(client, inbound(ts=now, msg_id="wamid.x"))
-    assert len(app_mod.wa.sent) == 1
+    post(client, inbound(ts=now - 600, msg_id="wamid.a"))
+    code = app_mod.store.load(CUSTOMER).code
+    post(client, inbound(wa_id=CHRIS, text=f"pause {code}", ts=now, msg_id="s1"))
+    assert app_mod.store.load(CUSTOMER).mode == PAUSED
+    post(client, inbound(wa_id=CHRIS, text="resume 999", ts=now, msg_id="s2"))
+    assert "can't find chat #999" in app_mod.wa.sent[-1][1]
 
 
-# --- history import and the coverage gap ------------------------------------------
+def test_chat_codes_are_unique_and_padded():
+    st = MemoryStore()
+    assert [st.next_code() for _ in range(3)] == ["001", "002", "003"]
+    assert state_mod.parse_code("chat #4") == "004" and state_mod.parse_code("x") == ""
+
+
+# --- history import ------------------------------------------------------------------
 
 def history_body(threads, progress=100, errors=None):
     h = {"metadata": {"phase": 0, "chunk_order": 1, "progress": progress},
@@ -187,7 +252,7 @@ def test_parse_history_declined():
     assert chunk.declined and chunk.error_code == 2593109
 
 
-def test_history_import_marks_chris_chats_and_the_flag(env):
+def test_history_import_feeds_the_cut_off(env):
     client, rec, _, _ = env
     now = time.time()
     post(client, history_body([{"id": CUSTOMER, "messages": [
@@ -195,41 +260,12 @@ def test_history_import_marks_chris_chats_and_the_flag(env):
         {"from": "6583770401", "to": CUSTOMER, "id": "m2",
          "timestamp": str(int(now - 4 * DAY)), "type": "text"}]}]))
     st = app_mod.store.load(CUSTOMER)
-    assert st.owner == "human" and st.history == []
+    assert st.last_staff_at == int(now - 4 * DAY) and st.history == []
     assert app_mod.store.get_history_imported()
+    app_mod.store.set_go_live(now - DAY)
     app_mod.claude.queue.append(final())
     post(client, inbound(ts=int(now)))
-    assert silent_reasons(rec)[-1] == "recent_human_chat"
-
-
-def test_history_does_not_take_a_chat_from_the_agent(env):
-    client, _, _, _ = env
-    st = ChatState(wa_id=CUSTOMER, owner="agent")
-    app_mod.store.save(st)
-    post(client, history_body([{"id": CUSTOMER, "messages": [
-        {"from": "6583770401", "to": CUSTOMER, "id": "m2", "timestamp": "1000"}]}], progress=50))
-    assert app_mod.store.load(CUSTOMER).owner == "agent"
-    assert not app_mod.store.get_history_imported()
-
-
-def test_coverage_gap_window():
-    now = 1_800_000_000.0
-    assert coverage_gap_open(now - 3 * DAY, False, now, 14)
-    assert not coverage_gap_open(now - 20 * DAY, False, now, 14)
-    assert not coverage_gap_open(now - 3 * DAY, True, now, 14)
-    assert not coverage_gap_open(0, False, now, 14)
-
-
-def test_coverage_gap_silences_unknown_numbers_until_history(env, monkeypatch):
-    client, rec, _, _ = env
-    monkeypatch.setattr(config, "OBSERVED_SINCE", time.time() - 2 * DAY)
-    app_mod.claude.queue.append(final())
-    post(client, inbound(ts=int(time.time())))
-    assert silent_reasons(rec)[-1] == "coverage_gap"
-    client.post("/admin/history-imported", json={"on": True}, headers=ADMIN)
-    # That first number stays Chris's (a recent message nobody answered); a new one is ours.
-    post(client, inbound(wa_id="6590000009", ts=int(time.time()), msg_id="wamid.in9"))
-    assert len(app_mod.wa.sent) == 1
+    assert silent_reasons(rec)[-1] == "pre_golive_chat"
 
 
 # --- rollout stages and contact scope ---------------------------------------------
@@ -329,14 +365,13 @@ def test_staff_helpers():
     assert "4567" not in staff.redact("call me on +65 9123 4567")
     p = staff.template_param("Mei", "x" * 400)
     assert len(p) <= staff.PARAM_MAX and "\n" not in staff.template_param("Mei", "a\nb")
-    assert staff.parse_command("Stop!") == "stop"
-    assert staff.parse_command("STATUS please") == "status"
-    assert staff.parse_command("hello") == "help"
-
-
-@pytest.fixture
-def with_staff(monkeypatch):
-    monkeypatch.setattr(config, "STAFF", frozenset({CHRIS}))
+    assert staff.parse_command("Stop!") == ("stop", "")
+    assert staff.parse_command("STATUS please") == ("status", "")
+    assert staff.parse_command("hello") == ("help", "")
+    assert staff.parse_command("resume 004") == ("resume", "004")
+    assert staff.parse_command("Resume chat #12") == ("resume", "012")
+    assert staff.parse_command("resume") == ("help", "")
+    assert staff.label("Mei", CUSTOMER, "004") == "Mei (#004)"
 
 
 def test_staff_message_is_never_a_customer(env, with_staff):
@@ -360,7 +395,7 @@ def test_staff_stop_start_and_status(env, with_staff):
     post(client, inbound(wa_id=CHRIS, text="start", ts=now, msg_id="s3"))
     assert not app_mod.store.get_kill()
     post(client, inbound(wa_id=CHRIS, text="start", ts=now, msg_id="s3"))  # de-duped
-    assert len(app_mod.wa.sent) == 3
+    assert len([m for m in app_mod.wa.sent if m[0] == CHRIS]) == 3
 
 
 def test_handover_pings_staff_by_template_outside_window(env, with_staff):
@@ -371,7 +406,7 @@ def test_handover_pings_staff_by_template_outside_window(env, with_staff):
     post(client, inbound(text="can I speak to a person", ts=int(time.time())))
     ((to, name, (param,)),) = app_mod.wa.templates
     assert to == CHRIS and name == config.STAFF_TEMPLATE
-    assert param.startswith("Mei: ") and "98765432" not in param
+    assert param.startswith("Mei (#001): ") and "98765432" not in param
     assert notes == []  # pinged, so no email for an ordinary handover
 
 
@@ -381,7 +416,7 @@ def test_ping_is_free_text_inside_window_and_urgent_still_emails(env, with_staff
     app_mod.claude.queue.append(final(reply="Please call 995", intent="urgent", escalate=True,
                                       reason="red flag", note="chest pain"))
     post(client, inbound(text="chest pain", ts=int(time.time())))
-    assert (CHRIS, staff.ping_text("Mei", "chest pain")) in app_mod.wa.sent
+    assert (CHRIS, staff.ping_text("Mei (#001)", "chest pain")) in app_mod.wa.sent
     assert app_mod.wa.templates == []
     assert [k for k, _ in notes] == ["urgent"]
 
@@ -491,7 +526,7 @@ def test_booking_confirmed_stays_out_of_chris_chat(env, monkeypatch):
     st = app_mod.store.load(CUSTOMER)
     st.history.append({"role": "customer", "text": "hi", "ts": now - 600, "id": "x"})
     st.last_customer_at = now - 600
-    st.mode = AGENT
+    assert st.mode == PAUSED          # Chris wrote: hers until she resumes it
     app_mod.store.save(st)
     r = client.post("/internal/booking-confirmed", json=booking_body(),
                     headers={"X-Internal-Token": "tok"})
@@ -535,3 +570,14 @@ def test_forget_deletes_chat_and_late_changes(env):
     assert app_mod.store.load(CUSTOMER).history == []
     assert app_mod.store.get_late_changes(key) == []
     assert "forgotten" in names(rec)
+
+
+def test_summary_lists_paused_chats_with_resume_hint():
+    now = 1_800_000_000.0
+    p1 = ChatState(wa_id="6500000011", name="Ann", code="004", mode=PAUSED, mode_since=now - DAY)
+    p2 = ChatState(wa_id="6500000012", name="", code="007", mode=PAUSED, mode_since=now - 9 * DAY)
+    s = summary.build([], now, paused=[p1, p2])
+    assert s["paused"] == 2
+    assert "ending 0012 (#007)" in s["body"] and "Ann (#004)" in s["body"]
+    assert s["body"].index("#007") < s["body"].index("#004")      # oldest first
+    assert "RESUME 004" in s["body"] and "RESUME" in s["line"]

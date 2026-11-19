@@ -1,6 +1,11 @@
 """
 Staff on their personal WhatsApp: short pings when a chat needs them, and
-three text commands (stop / start / status).
+text commands: stop / start / status, and resume / pause <chat code>.
+
+Every chat has a short code ("004") shown in pings, the status reply and the
+morning summary. Chris writing in a chat pauses the agent there; "resume 004"
+hands it back. Resuming sends the customer nothing: the agent just starts
+paying attention again from their next message.
 
 Staff numbers (WA_AGENT_STAFF: Chris, optionally Charles) are never customers:
 app.handle_staff takes their messages before any patient lookup, model call
@@ -18,20 +23,24 @@ import re
 STAFF_WINDOW_S = 23 * 3600  # Meta's window is 24h; keep a margin
 PARAM_MAX = 150             # the template's one parameter
 
-HELP = ("Goji assistant: text STOP to pause it in every chat, START to turn it back "
-        "on, or STATUS for a quick summary.")
+HELP = ("Goji assistant: RESUME 004 hands chat #004 back to the assistant (it won't "
+        "message them, it just answers their next message), PAUSE 004 silences it in that "
+        "chat, STOP pauses it in every chat, START turns it back on, STATUS for a summary.")
 
 _NUMBER = re.compile(r"\+?\d[\d\s().-]{5,}\d")
 _SPACE = re.compile(r"\s+")
 
 
-def label(name: str, wa_id: str) -> str:
-    """How a customer is named to staff: first name, else the last 4 digits."""
+def label(name: str, wa_id: str, code: str = "") -> str:
+    """How a customer is named to staff: first name, else the last 4 digits,
+    plus the chat code when there is one ("Mei (#004)")."""
     first = (name or "").strip().split()
     if first:
-        return first[0]
-    digits = "".join(ch for ch in wa_id or "" if ch.isdigit())
-    return f"the customer ending {digits[-4:]}" if digits else "a customer"
+        who = first[0]
+    else:
+        digits = "".join(ch for ch in wa_id or "" if ch.isdigit())
+        who = f"the customer ending {digits[-4:]}" if digits else "a customer"
+    return f"{who} (#{code})" if code else who
 
 
 def redact(text: str) -> str:
@@ -60,18 +69,24 @@ def window_open(last_inbound_at: float, now: float) -> bool:
     return bool(last_inbound_at) and now - last_inbound_at < STAFF_WINDOW_S
 
 
-def parse_command(text: str) -> str:
-    """stop | start | status | help."""
+def parse_command(text: str) -> tuple[str, str]:
+    """(command, chat code): stop | start | status | resume | pause | help.
+    "resume 004", "Resume chat #4" -> ("resume", "004")."""
     words = re.sub(r"[^\w\s]", " ", (text or "").lower()).split()
     word = words[0] if words else ""
-    return word if word in ("stop", "start", "status") else "help"
+    if word in ("resume", "pause"):
+        digits = next((w for w in words[1:] if w.isdigit()), "")
+        return (word, f"{int(digits):03d}") if digits else ("help", "")
+    return (word if word in ("stop", "start", "status") else "help"), ""
 
 
-def status_text(*, kill: bool, rollout: dict, waiting: list[str]) -> str:
+def status_text(*, kill: bool, rollout: dict, waiting: list[str],
+                paused: list[str] | None = None, live: bool = True) -> str:
     stage = rollout.get("stage")
     lines = [
         "Goji assistant: " + ("STOPPED (kill switch on), text START to resume."
-                              if kill else "running."),
+                              if kill else "running." if live
+                              else "not live yet (it only records message times)."),
         f"Stage {stage if stage is not None else 'default (Phase 0 policy)'}, contacts: "
         f"{rollout.get('contact_scope')}, hours: {rollout.get('hours')}.",
     ]
@@ -80,4 +95,7 @@ def status_text(*, kill: bool, rollout: dict, waiting: list[str]) -> str:
         lines.append(f"Waiting for you today: {len(waiting)} ({shown}).")
     else:
         lines.append("Nothing waiting for you today.")
+    if paused:
+        shown = ", ".join(paused[:8]) + (f" and {len(paused) - 8} more" if len(paused) > 8 else "")
+        lines.append(f"Paused for you: {shown}. Text RESUME and the number to hand one back.")
     return "\n".join(lines)

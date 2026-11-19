@@ -14,6 +14,8 @@ The flags collection (`<collection>_flags`) holds small global docs:
   autonomy          {intents, at}                  learning.py demotion record
   rollout           {stage, contact_scope, hours}  go-live settings; env is the default
   history_imported  {on, at, source}               coexistence history import landed
+  golive            {at, source}                   go-live moment (the 30-day cut-off)
+  codes             {next}                         counter for chat codes ("004")
   staff             {windows: {wa_id: ts}}         staff numbers' last inbound (24h window)
 """
 from __future__ import annotations
@@ -49,6 +51,17 @@ def mark_seen(state: ChatState, msg_id: str) -> bool:
     return True
 
 
+def format_code(n: int) -> str:
+    return f"{n:03d}"
+
+
+def parse_code(text: str) -> str:
+    """"004", "#4", "chat 4" -> "004"; "" if there's no number."""
+    import re
+    m = re.search(r"\d+", text or "")
+    return format_code(int(m.group())) if m else ""
+
+
 def note_outcome(state: ChatState, intent: str, outcome: str, at: float) -> None:
     """What the agent did with a message, for the morning summary. outcome:
     answered | link sent | booked | moved | handed over | left | drafted | failed."""
@@ -64,6 +77,9 @@ class MemoryStore:
         self._rollout: dict = {}
         self._history_imported = False
         self._staff_windows: dict[str, float] = {}
+        self._go_live = 0.0
+        self._next_code = 1
+        self._code_lock = threading.Lock()
 
     def load(self, wa_id: str) -> ChatState:
         d = self._chats.get(wa_id)
@@ -95,6 +111,24 @@ class MemoryStore:
 
     def get_staff_windows(self) -> dict[str, float]:
         return dict(self._staff_windows)
+
+    def get_go_live(self) -> float:
+        return self._go_live
+
+    def set_go_live(self, at: float, source: str = "") -> None:
+        self._go_live = float(at or 0)
+
+    def next_code(self) -> str:
+        with self._code_lock:
+            n, self._next_code = self._next_code, self._next_code + 1
+        return format_code(n)
+
+    def find_by_code(self, code: str) -> str:
+        return next((w for w, d in self._chats.items() if d.get("code") == code), "")
+
+    def paused_chats(self, limit: int = 50) -> list[ChatState]:
+        return [ChatState.from_dict(d) for d in self._chats.values()
+                if d.get("mode") == "paused"][:limit]
 
     def note_staff_inbound(self, wa_id: str, ts: float) -> None:
         self._staff_windows[wa_id] = max(ts, self._staff_windows.get(wa_id, 0.0))
@@ -131,6 +165,8 @@ class FirestoreStore:
         self._kill_cache: tuple[float, bool] = (0.0, False)
         self._rollout_cache: tuple[float, dict] = (-1e9, {})
         self._history_cache: tuple[float, bool] = (-1e9, False)
+        self._golive_cache: tuple[float, float] = (-1e9, 0.0)
+        self._code_lock = threading.Lock()
 
     def load(self, wa_id: str) -> ChatState:
         snap = self._chats.document(wa_id).get()
@@ -187,6 +223,43 @@ class FirestoreStore:
 
     def get_staff_windows(self) -> dict[str, float]:
         return dict(self._flag("staff").get("windows") or {})
+
+    def get_go_live(self) -> float:
+        at, val = self._golive_cache
+        if time.monotonic() - at < FLAG_CACHE_S:
+            return val
+        val = float(self._flag("golive").get("at") or 0)
+        self._golive_cache = (time.monotonic(), val)
+        return val
+
+    def set_go_live(self, at: float, source: str = "") -> None:
+        self._flags.document("golive").set({"at": float(at or 0), "source": source,
+                                            "set_at": time.time()})
+        self._golive_cache = (time.monotonic(), float(at or 0))
+
+    def next_code(self) -> str:
+        """One instance (--max-instances=1), so an in-process lock around the
+        read-increment-write is enough."""
+        with self._code_lock:
+            n = int(self._flag("codes").get("next") or 1)
+            self._flags.document("codes").set({"next": n + 1})
+        return format_code(n)
+
+    def find_by_code(self, code: str) -> str:
+        try:
+            from google.cloud.firestore_v1.base_query import FieldFilter
+            q = self._chats.where(filter=FieldFilter("code", "==", code))
+        except ImportError:
+            q = self._chats.where("code", "==", code)
+        return next((snap.id for snap in q.limit(1).stream()), "")
+
+    def paused_chats(self, limit: int = 50) -> list[ChatState]:
+        try:
+            from google.cloud.firestore_v1.base_query import FieldFilter
+            q = self._chats.where(filter=FieldFilter("mode", "==", "paused"))
+        except ImportError:
+            q = self._chats.where("mode", "==", "paused")
+        return [ChatState.from_dict(snap.to_dict() or {}) for snap in q.limit(limit).stream()]
 
     def note_staff_inbound(self, wa_id: str, ts: float) -> None:
         self._flags.document("staff").set({"windows": {wa_id: ts}}, merge=True)
