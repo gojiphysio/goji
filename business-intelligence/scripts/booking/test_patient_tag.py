@@ -10,9 +10,10 @@ TOKEN = "t0k"
 
 
 class FakePlato:
-    def __init__(self, tags):
+    def __init__(self, tags, saves=True):
         self.patient = {"_id": "p1", "tag": [{"tag": t} for t in tags]}
         self.puts = []
+        self.saves = saves  # False: like Plato on 19 Nov 2026, accepts and drops it
 
     def get(self, path, params=None, **_):
         assert path == "/patient/p1"
@@ -20,6 +21,8 @@ class FakePlato:
 
     def put(self, path, payload):
         self.puts.append((path, payload))
+        if self.saves:
+            self.patient = {**self.patient, **payload}
         return {}
 
 
@@ -64,3 +67,11 @@ def test_only_allowlisted_tags_and_a_valid_token(setup, monkeypatch):
     monkeypatch.setattr(app_mod, "INTERNAL_TOKEN", "")
     assert _tag(c).status_code == 404
     assert fake.puts == []
+
+
+def test_a_write_plato_drops_is_an_error(monkeypatch):
+    monkeypatch.setattr(app_mod, "INTERNAL_TOKEN", TOKEN)
+    fake = FakePlato(["Post-partum"], saves=False)
+    monkeypatch.setattr(app_mod, "plato", lambda: fake)
+    r = _tag(app_mod.app.test_client())
+    assert r.status_code == 502 and r.get_json()["code"] == "tag_not_saved"

@@ -244,6 +244,12 @@ KEEP_WARM = _env_bool("WA_AGENT_KEEP_WARM", True)
 # events and the work runs inside /tasks/run, so the service scales to zero and
 # warming rides the queue (tasks.py). Unset: background threads (local runs).
 TASKS_QUEUE = os.environ.get("WA_AGENT_TASKS_QUEUE", "")
+# Writing the waiver tag to Plato. Off: the live test (19 Nov 2026) showed
+# Plato's PUT /patient accepts {"tag": [...]} but doesn't save it, even for a
+# tag that exists. Until the right API call is known, Chris is asked to add
+# the tag herself. goji-booking's /internal/patient-tag now verifies by
+# reading back, so turning this on can't silently "succeed".
+PLATO_TAG_WRITES = _env_bool("WA_AGENT_PLATO_TAG_WRITES", False)
 WARM_EVERY_S = int(os.environ.get("WA_AGENT_WARM_EVERY_S", str(50 * 60)))
 WARM_HOURS = (7, 22)  # SGT, [start, end)
 

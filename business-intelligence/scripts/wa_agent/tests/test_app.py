@@ -560,8 +560,13 @@ def _late_cancel_draft(reply="No worries! As it's your first late change, we'll 
     return r
 
 
+def test_waiver_tag_writes_are_off_until_plato_saves_them():
+    assert config.PLATO_TAG_WRITES is False   # 19 Nov 2026: Plato dropped the write
+
+
 def test_sending_the_waiver_draft_as_is_tags_the_patient_in_plato(env, monkeypatch):
     client, rec, _ = env
+    monkeypatch.setattr(config, "PLATO_TAG_WRITES", True)
     monkeypatch.setattr(app_mod.tools, "patient_context", lambda wa_id: {
         "returning": True, "first_name": "Sam", "patients_on_number": 1,
         "patient_ids": ["p1"], "waiver_used": False, "next_appointment": None})

@@ -427,13 +427,16 @@ def _tag_waiver_used(st, wa_id: str, patient: dict) -> None:
     """Chris sent the late-change draft that waives the fee as is: record the
     waiver on the patient in Plato (the system of record), so it's used once."""
     ids = (patient or {}).get("patient_ids") or []
-    if len(ids) != 1:
-        reason = "no_patient_record" if not ids else "several_patients_on_number"
+    if len(ids) != 1 or not config.PLATO_TAG_WRITES:
+        reason = ("tag_writes_off" if config.PLATO_TAG_WRITES is False and len(ids) == 1
+                  else "no_patient_record" if not ids else "several_patients_on_number")
         events.record("patient_tag_skipped", wa_id, reason=reason)
+        why = ("" if reason == "tag_writes_off"
+               else " (the assistant couldn't tell which one)")
         _alert("fyi", customer="", wa_id=wa_id, suggested_reply="",
                     staff_note="You sent the late-change draft that waives the fee. Please "
                                "add the 'Late change waiver used' tag to the right patient "
-                               "in Plato (the assistant couldn't tell which one).",
+                               f"in Plato{why}.",
                     reason=reason, last_message="")
         return
     try:

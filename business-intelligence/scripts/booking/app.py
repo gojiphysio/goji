@@ -658,10 +658,17 @@ def internal_patient_tag():
         try:
             plato().put(f"/patient/{patient_id}",
                         {"tag": [{"tag": t} for t in current + [tag]]})
+            # Read back: on 19 Nov 2026 Plato answered this PUT without error
+            # but kept no tags, so a write only counts once it's visible.
+            saved = _plato_tags((plato().get(f"/patient/{patient_id}") or {}).get("tag"))
         except Exception as e:
             log.warning("patient-tag: write failed: %s", e)
             return jsonify({"ok": False, "error": "Couldn't update the patient.",
                             "code": "plato_error"}), 502
+        if tag not in saved:
+            log.warning("patient-tag: Plato accepted the write but the tag isn't there")
+            return jsonify({"ok": False, "error": "Plato didn't save the tag.",
+                            "code": "tag_not_saved"}), 502
     return jsonify({"ok": True, "added": True, "dry_run": dry_run})
 
 
