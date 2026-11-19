@@ -53,3 +53,8 @@ class FakeWhatsApp:
 
     def mark_read_typing(self, msg_id):
         self.typing.append(msg_id)
+
+    media = (b"", "")
+
+    def download_media(self, media_id):
+        return self.media

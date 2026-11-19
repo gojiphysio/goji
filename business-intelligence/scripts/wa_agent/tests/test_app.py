@@ -418,3 +418,27 @@ def test_late_changes_are_remembered_so_the_waiver_is_offered_once(env):
     post(client, inbound(msg_id="wamid.in2", text="another question"))
     second_turn = app_mod.claude.requests[1]["messages"][-1]["content"][0]["text"]
     assert "1 earlier late change(s) on record" in second_turn
+
+
+def test_a_document_is_read_into_the_chat_and_the_team_gets_the_file(env):
+    client, _, notes = env
+    app_mod.wa.media = (b"Referral: 12yo with scoliosis, please assess", "text/plain")
+    body = inbound(kind="document")
+    body["entry"][0]["changes"][0]["value"]["messages"][0]["document"].update(
+        {"filename": "referral.txt", "mime_type": "text/plain"})
+    app_mod.claude.queue.append(final(reply="Thanks for sending the referral!",
+                                      intent="service_fit"))
+    post(client, body)
+    stored = app_mod.store.load(CUSTOMER).history[0]["text"]
+    assert "[sent a document: referral.txt]" in stored and "scoliosis" in stored
+    assert "media" in [k for k, _ in notes]
+
+
+def test_a_photo_is_left_for_the_team(env):
+    client, _, notes = env
+    app_mod.claude.queue.append(final(reply="Thanks! The team will take a look.",
+                                      intent="media_received"))
+    post(client, inbound(kind="image"))
+    assert app_mod.store.load(CUSTOMER).history[0]["text"] == "[sent a photo]"
+    assert app_mod.wa.sent[-1][1] == "Thanks! The team will take a look."
+    assert "media" in [k for k, _ in notes]

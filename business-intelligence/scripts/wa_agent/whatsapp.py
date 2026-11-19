@@ -49,6 +49,10 @@ class Inbound:
     text: str
     name: str = ""
     kind: str = "text"
+    media_id: str = ""     # image / document: fetched with WhatsAppClient.download_media
+    mime: str = ""
+    filename: str = ""
+    caption: str = ""
 
 
 @dataclass
@@ -105,9 +109,14 @@ def parse_webhook(payload: dict) -> list[Inbound | Echo | Status]:
                          for c in value.get("contacts") or []}
                 for m in value.get("messages") or []:
                     text, kind = _message_text(m)
+                    media = m.get(kind) if isinstance(m.get(kind), dict) else {}
                     events.append(Inbound(wa_id=m.get("from", ""), msg_id=m.get("id", ""),
                                           ts=float(m.get("timestamp") or 0), text=text,
-                                          name=names.get(m.get("from"), ""), kind=kind))
+                                          name=names.get(m.get("from"), ""), kind=kind,
+                                          media_id=media.get("id", "") if kind != "text" else "",
+                                          mime=media.get("mime_type", ""),
+                                          filename=media.get("filename", ""),
+                                          caption=media.get("caption", "")))
                 for s in value.get("statuses") or []:
                     events.append(Status(msg_id=s.get("id", ""), status=s.get("status", ""),
                                          ts=float(s.get("timestamp") or 0),
@@ -129,7 +138,8 @@ class WhatsAppClient:
                  auth_header: str = config.WA_AUTH_HEADER,
                  auth_prefix: str = config.WA_AUTH_PREFIX,
                  session: requests.Session | None = None):
-        self.url = base.rstrip("/") + send_path.format(phone_number_id=phone_number_id)
+        self.base = base.rstrip("/")
+        self.url = self.base + send_path.format(phone_number_id=phone_number_id)
         self.headers = {auth_header: f"{auth_prefix}{token}",
                         "Content-Type": "application/json"}
         self.http = session or requests.Session()
@@ -146,6 +156,19 @@ class WhatsAppClient:
                            "to": wa_id, "type": "text",
                            "text": {"preview_url": True, "body": text}})
         return ((resp.get("messages") or [{}])[0]).get("id", "")
+
+    def download_media(self, media_id: str) -> tuple[bytes, str]:
+        """(bytes, mime type) of a customer's photo or document. Cloud API:
+        look up the media's short-lived URL, then fetch it with the same token.
+        A provider with another media API needs its own version of this."""
+        meta = self.http.get(f"{self.base}/{media_id}", headers=self.headers, timeout=15)
+        meta.raise_for_status()
+        info = meta.json()
+        if int(info.get("file_size") or 0) > 10 * 1024 * 1024:
+            raise ValueError("media too large")
+        r = self.http.get(info["url"], headers=self.headers, timeout=30)
+        r.raise_for_status()
+        return r.content, info.get("mime_type", "")
 
     def mark_read_typing(self, msg_id: str) -> None:
         """Blue ticks + "typing..." while the agent thinks. Best effort."""

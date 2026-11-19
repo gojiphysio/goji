@@ -39,7 +39,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 from flask import Flask, jsonify, request
 
-from . import agent, config, events, learning, notify, tools
+from . import agent, config, documents, events, learning, notify, tools
 from .policy import (AGENT, DRAFT, ESCALATE, HUMAN, LATE_CHANGE_H, PAUSED, SEND, SGT, WAITING,
                      apply_idle_handback, handover_mode,
                      decide, gate, human_replied_since, is_acknowledgement, on_human_message,
@@ -201,6 +201,15 @@ def _test_show(client, wa_id: str, text: str) -> None:
             log.warning("test-mode send failed: %s", e)
 
 
+def _read_document(client, ev: Inbound) -> str:
+    try:
+        data, mime = client.download_media(ev.media_id)
+    except Exception as e:
+        log.warning("document download failed: %s", e)
+        return ""
+    return documents.extract_text(data, mime or ev.mime, ev.filename)
+
+
 PATIENT_CACHE_S = 6 * 3600
 
 
@@ -233,6 +242,8 @@ def _patient_for(st, wa_id: str, state) -> dict:
 def handle_inbound(ev: Inbound, received: float) -> None:
     st, client, model = _deps()
     now = time.time()
+    if ev.kind == "document" and ev.media_id:
+        ev.text = documents.as_message(_read_document(client, ev), ev.filename, ev.caption)
     with locks(ev.wa_id):
         state = st.load(ev.wa_id)
         if not mark_seen(state, ev.msg_id):
@@ -298,6 +309,10 @@ def handle_inbound(ev: Inbound, received: float) -> None:
     notice = dict(customer=ev.name, wa_id=ev.wa_id, staff_note=p.staff_note,
                   suggested_reply=p.reply, reason=d.reason, last_message=ev.text,
                   feedback=learning.feedback_links(events.chat_key(ev.wa_id), int(now)))
+
+    if ev.kind in ("image", "document"):
+        # The file itself is for the team: Chris opens it in the app.
+        notify.send("media", **{**notice, "last_message": ev.text[:1500]})
 
     if d.action == DRAFT:
         with locks(ev.wa_id):
