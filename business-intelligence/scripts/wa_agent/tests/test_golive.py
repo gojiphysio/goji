@@ -378,10 +378,12 @@ def test_staff_helpers():
 
 def test_staff_message_is_never_a_customer(env, with_staff):
     client, rec, notes, _ = env
-    post(client, inbound(wa_id=CHRIS, text="hello", ts=int(time.time())))
+    post(client, inbound(wa_id=CHRIS, text="hi", ts=int(time.time())))
     assert "inbound" not in names(rec) and "proposal" not in names(rec)
     assert app_mod.claude.requests == []
-    assert app_mod.wa.sent == [(CHRIS, staff.HELP)]
+    assert app_mod.wa.sent == [(CHRIS, staff.WELCOME)]      # first contact: the walkthrough
+    post(client, inbound(wa_id=CHRIS, text="hello", ts=int(time.time()), msg_id="s9"))
+    assert app_mod.wa.sent[-1] == (CHRIS, staff.HELP)       # after that, the short help
     assert staff.window_open(app_mod.store.get_staff_windows()[CHRIS], time.time())
 
 
@@ -389,7 +391,7 @@ def test_staff_stop_start_and_status(env, with_staff):
     client, rec, _, _ = env
     now = int(time.time())
     post(client, inbound(wa_id=CHRIS, text="stop", ts=now, msg_id="s1"))
-    assert app_mod.store.get_kill()
+    assert app_mod.store.get_kill()        # a command works even before the walkthrough
     post(client, inbound(ts=now, msg_id="c1"))   # a customer: kill switch holds
     assert silent_reasons(rec)[-1] == "kill_switch"
     post(client, inbound(wa_id=CHRIS, text="status", ts=now, msg_id="s2"))
@@ -583,3 +585,9 @@ def test_summary_lists_paused_chats_with_resume_hint():
     assert "ending 0012 (#007)" in s["body"] and "Ann (#004)" in s["body"]
     assert s["body"].index("#007") < s["body"].index("#004")      # oldest first
     assert "RESUME 004" in s["body"] and "RESUME" in s["line"]
+
+
+def test_welcome_covers_the_walkthrough():
+    for must in ("RESUME 004", "PAUSE", "STOP", "START", "STATUS", "7:30", "go quiet"):
+        assert must in staff.WELCOME
+    assert len(staff.WELCOME) < 4096                       # one WhatsApp message

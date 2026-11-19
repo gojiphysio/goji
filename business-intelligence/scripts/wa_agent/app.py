@@ -273,7 +273,11 @@ def handle_staff(ev: Inbound) -> None:
         st.save(state)
     st.note_staff_inbound(ev.wa_id, ev.ts or now)
     cmd, code = staff.parse_command(ev.text)
-    if cmd in ("resume", "pause"):
+    if not st.staff_welcomed(ev.wa_id) and cmd == "help":
+        # Their first message: the walkthrough is the first thing they get from us.
+        st.mark_staff_welcomed(ev.wa_id)
+        reply = staff.WELCOME
+    elif cmd in ("resume", "pause"):
         reply = _staff_resume_pause(st, cmd, code, now)
     elif cmd in ("stop", "start"):
         st.set_kill(cmd == "stop")

@@ -16,7 +16,8 @@ The flags collection (`<collection>_flags`) holds small global docs:
   history_imported  {on, at, source}               coexistence history import landed
   golive            {at, source}                   go-live moment (the 30-day cut-off)
   codes             {next}                         counter for chat codes ("004")
-  staff             {windows: {wa_id: ts}}         staff numbers' last inbound (24h window)
+  staff             {windows: {wa_id: ts},         staff numbers' last inbound (24h window)
+                     welcomed: {wa_id: ts}}        and who has had the walkthrough
 """
 from __future__ import annotations
 
@@ -132,6 +133,14 @@ class MemoryStore:
 
     def note_staff_inbound(self, wa_id: str, ts: float) -> None:
         self._staff_windows[wa_id] = max(ts, self._staff_windows.get(wa_id, 0.0))
+
+    def staff_welcomed(self, wa_id: str) -> bool:
+        return wa_id in getattr(self, "_welcomed", set())
+
+    def mark_staff_welcomed(self, wa_id: str) -> None:
+        if not hasattr(self, "_welcomed"):
+            self._welcomed = set()
+        self._welcomed.add(wa_id)
 
     def get_kill(self) -> bool:
         return self._kill
@@ -263,6 +272,12 @@ class FirestoreStore:
 
     def note_staff_inbound(self, wa_id: str, ts: float) -> None:
         self._flags.document("staff").set({"windows": {wa_id: ts}}, merge=True)
+
+    def staff_welcomed(self, wa_id: str) -> bool:
+        return wa_id in (self._flag("staff").get("welcomed") or {})
+
+    def mark_staff_welcomed(self, wa_id: str) -> None:
+        self._flags.document("staff").set({"welcomed": {wa_id: time.time()}}, merge=True)
 
     def get_kill(self) -> bool:
         # Read at most every 5s: the switch must bite fast, not cost a read per message.

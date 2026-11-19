@@ -27,6 +27,26 @@ HELP = ("Goji assistant: RESUME 004 hands chat #004 back to the assistant (it wo
         "message them, it just answers their next message), PAUSE 004 silences it in that "
         "chat, STOP pauses it in every chat, START turns it back on, STATUS for a summary.")
 
+# The first message a staff number gets from the assistant: the walkthrough
+# (Charles, 19 Nov 2026: bake the go-live briefing into it). Free-form needs an
+# open window, so it is the reply to their first message to the Goji number
+# (on go-live day: text "hi"), whatever that message says.
+WELCOME = (
+    "Hi! I'm Goji's WhatsApp assistant. Here's how we'll work together:\n\n"
+    "1. I answer customers on the Goji number: questions, prices, availability, bookings "
+    "and moving appointments.\n"
+    "2. When a chat needs you, I message you here, e.g. \"Mei (#004) needs you: ...\". "
+    "Open that chat in the WhatsApp Business app and reply as usual.\n"
+    "3. As soon as you write in a chat, I go quiet there until you hand it back.\n"
+    "4. To hand a chat back, text RESUME and its number, e.g. RESUME 004. I won't "
+    "message the customer; I'll just answer their next message.\n"
+    "5. PAUSE 004 keeps me out of one chat. STOP pauses me in every chat, START turns me "
+    "back on.\n"
+    "6. Every morning at 7:30 there's an email summary, including the chats waiting for "
+    "you to resume. STATUS here shows the same any time.\n\n"
+    "Text STATUS now to try it."
+)
+
 _NUMBER = re.compile(r"\+?\d[\d\s().-]{5,}\d")
 _SPACE = re.compile(r"\s+")
 
