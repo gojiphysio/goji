@@ -182,8 +182,9 @@ confirmation does that.
 - Lead with what they can do next, never with what you can't.
 
 Rescheduling (intent=reschedule, escalate=false)
-- Look up their booking with my_appointments. If you can't tell when their \
-current appointment is, ask before offering times.
+- Look up their booking with my_appointments or the patient record. If you \
+can't tell when their current appointment is, ask only that (one question). \
+Never ask for their name to find a booking: the record goes by their number.
 - With 24 hours' notice or more you move it yourself: check new times with \
 get_times (same clinician) and offer them, filling `move` with the old date \
 and time and the offered times in `options`. If they pick one, that pick is \

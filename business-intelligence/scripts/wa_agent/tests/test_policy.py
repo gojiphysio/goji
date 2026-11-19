@@ -155,3 +155,19 @@ def test_multi_word_acknowledgements_need_no_reply():
         assert is_acknowledgement(t, h), t
     for t in ("ok but what about sat?", "thanks, can I also ask about price"):
         assert not is_acknowledgement(t, h), t
+
+
+def test_a_short_clarifying_question_sends_even_below_the_confidence_bar():
+    q = Proposal(reply="No worries! Just to check, is your current appointment today at 3pm?",
+                 intent="reschedule", confidence=0.6, escalate=False)
+    assert decide(q).action == SEND and decide(q).reason.startswith("clarifying_question")
+    priced = Proposal(reply="It's $260, would you like to book?", intent="pricing",
+                      confidence=0.6, escalate=False)
+    assert decide(priced).action == DRAFT            # a fact in it: still drafted
+    two = Proposal(reply="Is it today? And at 3pm?", intent="reschedule", confidence=0.6,
+                   escalate=False)
+    assert decide(two).action == DRAFT               # more than one question
+    unsure = Proposal(reply="Is it today?", intent="reschedule", confidence=0.3, escalate=False)
+    assert decide(unsure).action == DRAFT            # very unsure: still drafted
+    cancel = Proposal(reply="Which appointment?", intent="cancel", confidence=0.6, escalate=False)
+    assert decide(cancel).action == DRAFT            # draft-for-Chris intents stay drafts

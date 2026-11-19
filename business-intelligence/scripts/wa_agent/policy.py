@@ -194,6 +194,19 @@ def is_acknowledgement(text: str, history: list[dict]) -> bool:
     return bool(t) and bool(_ACK.fullmatch(t)) and prior_role in ("agent", "staff")
 
 
+CLARIFY_MIN_CONFIDENCE = 0.5
+_FACTISH = re.compile(r"\$\s?\d|https?://|www\.", re.I)
+
+
+def is_clarifying_question(reply: str) -> bool:
+    """A short reply whose only job is one question, with no prices or links
+    in it (facts that could be wrong). Echoing the customer's own time back
+    ("is it today at 3pm?") is fine."""
+    r = (reply or "").strip()
+    return (0 < len(r.split()) <= 40 and r.count("?") == 1
+            and r.rstrip(" :)😊🙂").endswith("?") and not _FACTISH.search(r))
+
+
 def decide(proposal: Proposal, *, intent_policy: dict[str, str] = config.INTENT_POLICY,
            min_confidence: float = config.MIN_CONFIDENCE) -> Decision:
     """What happens to a proposal that passed `gate`.
@@ -219,6 +232,11 @@ def decide(proposal: Proposal, *, intent_policy: dict[str, str] = config.INTENT_
     if problems:
         return Decision(DRAFT, "content:" + ",".join(sorted(set(problems))))
     if proposal.confidence < min_confidence:
+        if rule in ("auto", "auto_notify") and is_clarifying_question(proposal.reply) \
+                and proposal.confidence >= CLARIFY_MIN_CONFIDENCE:
+            # Asking is safe: a short question with no facts in it can't be wrong
+            # the way an answer can, and a draft would leave the customer waiting.
+            return Decision(SEND, f"clarifying_question:{proposal.confidence:.2f}")
         return Decision(DRAFT, f"low_confidence:{proposal.confidence:.2f}")
     if rule in ("auto", "auto_notify"):
         return Decision(SEND, f"intent:{proposal.intent}")

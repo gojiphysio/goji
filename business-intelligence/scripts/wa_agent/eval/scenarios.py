@@ -87,9 +87,56 @@ class Scenario:
     customer_name: str = "Jamie"
     pending_for_chris: str = ""
     note: str = ""
+    build: object = None   # optional fn() -> turns, run at test time (live open slots)
 
 
 S = Scenario
+
+
+def _open_slots(n: int = 2, min_days: int = 2) -> list[dict]:
+    """Really open physio times from the live availability API, at least
+    `min_days` out, so a scripted 'agent offered these' turn offers times the
+    agent's own re-check will agree are open."""
+    from .. import tools
+    slots = tools.next_slots({"service": "physiotherapy",
+                              "from_date": _d(min_days)}).get("slots", [])
+    if len(slots) < n:
+        raise RuntimeError("not enough open physio slots to build the scenario")
+    return slots[:n]
+
+
+def _nice(s: dict) -> str:
+    h, m = map(int, s["time"].split(":"))
+    d = date.fromisoformat(s["date"])
+    return f"{s['weekday']} {d.day} {d:%b}, {(h % 12) or 12}:{m:02d}{'am' if h < 12 else 'pm'}"
+
+
+def _who(s: dict) -> str:
+    return s["clinicians"][0].split(" ")[0]
+
+
+def build_booking_confirm():
+    s = _open_slots(1)[0]
+    return [f"Can I book physio {_nice(s)} with {_who(s)}? I'm Jamie Lee.",
+            ("agent", f"{_nice(s)} with {_who(s)} is open! Shall I book physiotherapy on "
+                      f"{_nice(s)} with {_who(s)} for Jamie Lee?"),
+            "Yes please"]
+
+
+def build_booking_pick():
+    a, b = _open_slots(2)
+    return ["Any physio slots coming up? I'm Jamie Lee",
+            ("agent", f"I have {_nice(a)} with {_who(a)} or {_nice(b)} with {_who(b)}. "
+                      "Which would you like?"),
+            f"{_nice(b).split(', ')[0]} {_nice(b).split(', ')[1]} please"]
+
+
+def build_move_pick():
+    a, b = _open_slots(2, min_days=2)
+    return ["Can I move my appointment to another day?",
+            ("agent", f"Sure! I can move your 10:00am with Kristy to {_nice(a)} with {_who(a)} "
+                      f"or {_nice(b)} with {_who(b)}. Which works?"),
+            f"{_nice(a).split(', ')[1]} on {_nice(a).split(', ')[0]} pls"]
 E = Expect
 BOOK_LINK = r"go\.gojiphysio\.com/wa-book"
 GREETING = r"^\s*(hi|hello|hey|good (morning|afternoon|evening))\b"
@@ -111,7 +158,9 @@ SCENARIOS: list[Scenario] = [
       note="DR means diastasis recti here; proper term, not 'tummy gap'"),
     S("dr_not_postpartum", "new enquiry",
       ["Do you treat diastasis recti? I'm a guy, I lift weights."],
-      E(must_not=(r"pregnan", r"postpartum", r"postnatal", r"mama", r"baby", CASUAL_DR))),
+      E(must_not=(r"your (pregnancy|baby|birth)", r"after you gave birth", r"\bmamas?\b",
+                  r"are you (pregnant|postpartum)", CASUAL_DR)),
+      note="the site only covers diastasis recti after pregnancy, so a handover is fine"),
     S("price", "new enquiry",
       ["How much is a physio session?"],
       E(intents=("pricing",), decisions=("send",), must=(r"\$260",), max_words=90)),
@@ -123,7 +172,8 @@ SCENARIOS: list[Scenario] = [
       E(decisions=("send",), must=(r"medisave",))),
     S("packages", "new enquiry",
       ["Do you have packages for physio?"],
-      E(decisions=("send", "draft"), must_not=(r"\bpackage of \d+ physio",))),
+      E(must_not=(r"\bpackage of \d+ physio", r"\d+[- ]session physio package")),
+      note="physio-package rule isn't on the website yet, so a handover is allowed"),
     S("cancellation_policy", "new enquiry",
       ["What's your cancellation policy?"],
       E(decisions=("send",), must=(r"24", r"\$50"))),
@@ -166,12 +216,10 @@ SCENARIOS: list[Scenario] = [
         must_not=(r"you'?re booked", r"booked in", r"it is\b"), max_questions=1),
       note="either states a specific open time back (booking filled) or offers times"),
     S("booking_confirm", "booking",
-      ["Can I book physio Tuesday 10am with Kristy? I'm Jamie Lee.",
-       ("agent", "Tuesday 10:00am with Kristy is open! Shall I book physiotherapy on Tue at "
-                 "10:00am with Kristy for Jamie Lee?"),
-       "Yes please"],
+      ["(built at run time from live open slots)"],
       E(intents=("booking",), confirm_booking=True, must_not=(r"you'?re booked",)),
-      note="yes to a stated-back booking sets confirm_booking; code books"),
+      note="yes to a stated-back booking sets confirm_booking; code books",
+      build=build_booking_confirm),
     S("booking_no_email_required", "booking",
       ["Book me in for physio Friday 9am please, I'm Jamie Lee"],
       E(must_not=(r"(need|require)\w* (your )?email", r"what('?s| is) your email"))),
@@ -188,20 +236,16 @@ SCENARIOS: list[Scenario] = [
       E(intents=("reschedule",), decisions=("send",), must_not=(r"\$50",)),
       patient=SARAH, customer_name="Sarah"),
     S("reschedule_pick_confirms", "reschedule/cancel",
-      ["Can I move my appointment to later in the week?",
-       ("agent", "Sure! I can move your 10:00am with Kristy to Thu 2:00pm or Fri 9:00am. "
-                 "Which works?"),
-       "Fri 9am pls"],
+      ["(built at run time from live open slots)"],
       E(intents=("reschedule",), decisions=("send",), confirm_move=True,
         must_not=(r"shall i", r"would you like me to", r"confirm")),
       patient=SARAH, customer_name="Sarah",
-      note="picking an offered time is the yes: no second 'Shall I move it?'"),
+      note="picking an offered time is the yes: no second 'Shall I move it?'",
+      build=build_move_pick),
     S("booking_pick_confirms", "booking",
-      ["Any physio on Thursday morning? I'm Jamie Lee",
-       ("agent", "Thursday has 10:00am and 11:00am with Kristy. Which would you like?"),
-       "11 please"],
+      ["(built at run time from live open slots)"],
       E(intents=("booking",), confirm_booking=True, must_not=(r"shall i", r"would you like me to")),
-      note="picking an offered time is the yes"),
+      note="picking an offered time is the yes", build=build_booking_pick),
     S("late_reschedule_first_waiver", "reschedule/cancel",
       ["Sorry, something came up, can I move tomorrow's 9am?"],
       E(intents=("reschedule", "cancel"), decisions=("draft",), must=(r"24", r"waive")),
@@ -311,6 +355,9 @@ def _history(turns, upto: int) -> list[dict]:
 
 
 def run_one(sc: Scenario, client=None) -> Result:
+    if sc.build:
+        from dataclasses import replace
+        sc = replace(sc, turns=sc.build())
     history: list[dict] = []
     t0, cost = time.time(), 0.0
     customer_idx = [i for i, t in enumerate(sc.turns) if isinstance(t, str)]
