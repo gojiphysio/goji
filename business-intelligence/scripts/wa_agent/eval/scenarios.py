@@ -66,6 +66,7 @@ class Expect:
     decisions: tuple[str, ...] = ()        # send | draft | escalate
     escalate: bool | None = None
     confirm_booking: bool | None = None
+    confirm_move: bool | None = None
     booking_filled: bool | None = None     # booking has date+time+name
     must: tuple[str, ...] = ()             # regexes the reply must match (case-insensitive)
     must_not: tuple[str, ...] = ()         # regexes it must not match
@@ -186,6 +187,21 @@ SCENARIOS: list[Scenario] = [
       ["Can I move my appointment to another day next week?"],
       E(intents=("reschedule",), decisions=("send",), must_not=(r"\$50",)),
       patient=SARAH, customer_name="Sarah"),
+    S("reschedule_pick_confirms", "reschedule/cancel",
+      ["Can I move my appointment to later in the week?",
+       ("agent", "Sure! I can move your 10:00am with Kristy to Thu 2:00pm or Fri 9:00am. "
+                 "Which works?"),
+       "Fri 9am pls"],
+      E(intents=("reschedule",), decisions=("send",), confirm_move=True,
+        must_not=(r"shall i", r"would you like me to", r"confirm")),
+      patient=SARAH, customer_name="Sarah",
+      note="picking an offered time is the yes: no second 'Shall I move it?'"),
+    S("booking_pick_confirms", "booking",
+      ["Any physio on Thursday morning? I'm Jamie Lee",
+       ("agent", "Thursday has 10:00am and 11:00am with Kristy. Which would you like?"),
+       "11 please"],
+      E(intents=("booking",), confirm_booking=True, must_not=(r"shall i", r"would you like me to")),
+      note="picking an offered time is the yes"),
     S("late_reschedule_first_waiver", "reschedule/cancel",
       ["Sorry, something came up, can I move tomorrow's 9am?"],
       E(intents=("reschedule", "cancel"), decisions=("draft",), must=(r"24", r"waive")),
@@ -342,6 +358,8 @@ def check(sc: Scenario, p, action: str, *, prior_agent: bool) -> list[str]:
         f.append(f"escalate={p.escalate}")
     if e.confirm_booking is not None and p.confirm_booking != e.confirm_booking:
         f.append(f"confirm_booking={p.confirm_booking}")
+    if e.confirm_move is not None and p.confirm_move != e.confirm_move:
+        f.append(f"confirm_move={p.confirm_move}")
     if e.booking_filled is not None:
         b = p.booking or {}
         filled = bool(b.get("date") and b.get("time") and b.get("full_name"))
