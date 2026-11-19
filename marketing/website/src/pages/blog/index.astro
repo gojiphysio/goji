@@ -163,7 +163,7 @@ const schema = hasPosts
               style={`--span: ${SPAN[variant]}`}
             >
               {post.data.heroImage && (
-                <div class:list={["blog-card__media", { "is-thumb": variant === "tile" }]}>
+                <div class="blog-card__media">
                   <img
                     src={variant === "tile" || variant === "classic" || variant === "portrait" ? small(post.data.heroImage) : post.data.heroImage}
                     srcset={(variant === "spread" || variant === "wide") && small(post.data.heroImage) !== post.data.heroImage ? `${small(post.data.heroImage)} 800w, ${post.data.heroImage} 1600w` : undefined}
@@ -173,6 +173,7 @@ const schema = hasPosts
                     height="533"
                     loading={i === 0 ? "eager" : "lazy"}
                     fetchpriority={i === 0 ? "high" : undefined}
+                    style={post.data.heroFocus ? `object-position: ${post.data.heroFocus}` : undefined}
                   />
                 </div>
               )}
@@ -358,7 +359,7 @@ const schema = hasPosts
       gap: var(--space-6);
     }
     .blog-card--spread .blog-card__media,
-    .blog-card--wide .blog-card__media { flex: 0 0 48%; }
+    .blog-card--wide .blog-card__media { flex: 0 0 56%; }
     .blog-card--spread .blog-card__media img,
     .blog-card--wide .blog-card__media img { aspect-ratio: auto; min-height: 300px; }
     .blog-card--spread .blog-card__body,
@@ -381,20 +382,22 @@ const schema = hasPosts
     .blog-card--portrait .blog-card__media img { aspect-ratio: 1; }
   }
 
-  /* Tile: words first on the wash, with a small petal thumbnail. */
+  /* Tile: words first on the wash, then the photo fills whatever height the
+     row leaves, so the card has no dead space beside taller neighbours. */
   .blog-card--tile {
     background: var(--wash);
     border-color: transparent;
-    padding: var(--space-6) var(--space-5) var(--space-5);
+    padding: var(--space-5);
   }
+  .blog-card--tile .blog-card__body { order: 1; flex: 0 0 auto; padding: var(--space-2) var(--space-2) 0; }
   .blog-card--tile .blog-card__media {
     order: 2;
-    width: 104px;
-    border-radius: 40px var(--radius-sm) 40px var(--radius-sm);
-    align-self: flex-end;
+    flex: 1 1 auto;
+    position: relative;
+    min-height: 220px;
+    border-radius: var(--radius-md) 72px var(--radius-md) 72px;
   }
-  .blog-card--tile .blog-card__media img { aspect-ratio: 1; }
-  .blog-card--tile .blog-card__body { padding: 0; }
+  .blog-card--tile .blog-card__media img { position: absolute; inset: 0; aspect-ratio: auto; }
 
   /* Classic: photo on top of a white card. */
   .blog-card--classic .blog-card__media img { aspect-ratio: 8 / 5; }
