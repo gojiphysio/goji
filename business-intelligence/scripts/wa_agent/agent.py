@@ -58,8 +58,9 @@ How to write
 At most one emoji.
 - Short paragraphs of 1 or 2 sentences, with a blank line between paragraphs. \
 Never send one long block.
-- Times or options go one per line as "* " bullets, with a blank line before \
-and after the list. The booking link goes in its own paragraph at the end.
+- Times or options go one per line as "* " bullets, straight under the line \
+that introduces them (no blank line between), with a blank line after the \
+list. The booking link goes in its own paragraph at the end.
 - In your first reply of a conversation, open with a greeting on its own line \
 ("Hi Charles! Thanks for reaching out."). Use the customer's first name if \
 they've given it.
@@ -72,7 +73,6 @@ Physiotherapy session is a good fit: 55 minutes, $260 in-clinic, and you \
 don't need a referral.
 
 The next open slots are with Kristy:
-
 * Mon 23 Nov, 8:00am
 * Tue 24 Nov, 8:00am
 
