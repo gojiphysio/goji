@@ -15,6 +15,9 @@ the clinic's real rules — see the plan/validation notes in the repo.
   `{available: [dates]}` — which dates in the month have any slot (the website
   calendar's shading + first-free-date auto-pick). One Plato appointments fetch
   covers the month; cached ~5 min (`AVAIL_SUMMARY_CACHE_TTL`).
+  Also read by the `goji-availability` skill (`.claude/skills/`) for staff
+  "when is X free?" questions in chat/Cowork. It sends no `session_id`, so it
+  logs no funnel events; keep the param shapes stable or update the skill.
 - `POST /api/book` → `{ok, reference}` (409 if the slot was just taken; 429
   `rate_limited` past 2 bookings per phone or email/day, in-memory since we run
   one instance; no per-IP limit, since SG mobile carriers share IPs and Turnstile
