@@ -507,6 +507,67 @@ def test_available_days_respects_reformer_conflict():
     assert days == []
 
 
+
+# --- CLINICIAN_WEEKLY_HOURS: repo hours replace the Plato rule hours/days ---
+
+def _camille_two_rules_cfg():
+    # Mirrors live Plato: Wed/Thu 12:00-20:00 and Sat 09:00-18:00 as two rules.
+    return {"calendars": [{"id": "vXKlwa7", "rules": [
+        {"name": "Camille weekdays", "book_calendar": "pF9S", "starttime": "12:00",
+         "endtime": "20:00", "min_days": 1, "max_days": 365,
+         "restricted_days": ["Sun", "Mon", "Tue", "Fri", "Sat"], "restricted_blocks": []},
+        {"name": "Camille Saturday", "book_calendar": "pF9S", "starttime": "09:00",
+         "endtime": "18:00", "min_days": 1, "max_days": 365,
+         "restricted_days": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri"], "restricted_blocks": []},
+    ]}]}
+
+
+CAMILLE_HOURS = {"camille-tan": {"Mon": ("17:00", "20:00"), "Wed": ("08:00", "10:00")}}
+
+
+def test_weekly_hours_open_a_plato_day_off(monkeypatch):
+    monkeypatch.setattr(availability, "CLINICIAN_WEEKLY_HOURS", CAMILLE_HOURS)
+    mon = date(2026, 7, 20)
+    out = derive_availability(StubPlato([], _camille_two_rules_cfg()), "private-pilates",
+                              mon, now=NOW)
+    assert out == {"camille-tan": ["17:00", "17:30", "18:00", "18:30", "19:00"]}
+
+
+def test_weekly_hours_replace_plato_hours(monkeypatch):
+    monkeypatch.setattr(availability, "CLINICIAN_WEEKLY_HOURS", CAMILLE_HOURS)
+    out = derive_availability(StubPlato([], _camille_two_rules_cfg()), "private-pilates",
+                              WED, now=NOW)
+    assert out == {"camille-tan": ["08:00", "08:30", "09:00"]}
+
+
+def test_weekly_hours_missing_day_is_day_off(monkeypatch):
+    monkeypatch.setattr(availability, "CLINICIAN_WEEKLY_HOURS", CAMILLE_HOURS)
+    sat = date(2026, 7, 18)  # Plato has Saturday hours; the override does not
+    out = derive_availability(StubPlato([], _camille_two_rules_cfg()), "private-pilates",
+                              sat, now=NOW)
+    assert out == {}
+
+
+def test_weekly_hours_still_honour_bookings(monkeypatch):
+    monkeypatch.setattr(availability, "CLINICIAN_WEEKLY_HOURS", CAMILLE_HOURS)
+    appts = [{"color": "pF9S", "starttime": "2026-07-15 08:30:00",
+              "endtime": "2026-07-15 09:30:00"}]
+    out = derive_availability(StubPlato(appts, _camille_two_rules_cfg()), "private-pilates",
+                              WED, now=NOW)
+    assert out == {"camille-tan": []}
+
+
+def test_live_camille_hours():
+    from booking.config import CLINICIAN_WEEKLY_HOURS
+    assert CLINICIAN_WEEKLY_HOURS["camille-tan"] == {
+        "Mon": ("17:00", "20:00"),
+        "Tue": ("08:00", "16:00"),
+        "Wed": ("08:00", "16:00"),
+        "Thu": ("15:00", "20:00"),
+        "Fri": ("08:00", "16:00"),
+        "Sat": ("09:00", "18:00"),
+    }
+
 if __name__ == "__main__":
     for name, fn in sorted(globals().items()):
         if name.startswith("test_") and callable(fn):

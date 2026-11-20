@@ -155,6 +155,24 @@ CLINICIAN_RESTRICTED_BLOCKS: dict[str, list[dict]] = {
     ],
 }
 
+# Clinician weekly hours: when a clinician is listed here, these hours REPLACE
+# their Plato rule hours and days off (min/max_days and restricted blocks still
+# come from Plato). A day missing from the map is a day off. Use when the
+# clinician's hours change and the Plato online-booking rules haven't been
+# updated to match; once Plato matches, delete the entry so Plato is the source
+# of truth again.
+CLINICIAN_WEEKLY_HOURS: dict[str, dict[str, tuple[str, str]]] = {
+    # Camille's hours from 20 Nov 2026 (Plato rule still says Wed/Thu/Sat).
+    "camille-tan": {
+        "Mon": ("17:00", "20:00"),
+        "Tue": ("08:00", "16:00"),
+        "Wed": ("08:00", "16:00"),
+        "Thu": ("15:00", "20:00"),
+        "Fri": ("08:00", "16:00"),
+        "Sat": ("09:00", "18:00"),
+    },
+}
+
 # First day a clinician can be booked online. Before it they are not offered for
 # any service (month shading, slots, and the create_booking re-check all go
 # through availability.py). Use for a new starter whose Plato calendar is already

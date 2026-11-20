@@ -140,6 +140,10 @@ Rules layered on top (`config.py`):
 - `CLINICIAN_AVAILABLE_FROM` (`config.py`): a clinician is not offered for any
   service before their start date — for a new starter whose Plato calendar is
   live early (Camille: 2026-11-01). Delete the entry once the date has passed.
+- `CLINICIAN_WEEKLY_HOURS` (`config.py`): per-day hours that **replace** a
+  clinician's Plato rule hours and days off (Plato's min/max_days and restricted
+  blocks still apply). For when hours change before the Plato online-booking
+  rules are updated (Camille, from 2026-11-20). Delete the entry once Plato matches.
 - Home visits: **Cheryl only**, ±30-min travel padding.
 - **One shared reformer** (Camille's Private Pilates, Claire's Clinical Pilates).
   Plato has no resource model, so while any appointment, on any calendar, carries

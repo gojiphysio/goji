@@ -25,6 +25,7 @@ from zoneinfo import ZoneInfo
 from .config import (
     CLINICIAN_AVAILABLE_FROM,
     CLINICIAN_RESTRICTED_BLOCKS,
+    CLINICIAN_WEEKLY_HOURS,
     CLINICIANS,
     HOME_TRAVEL_MINUTES,
     HOME_VISIT_CLINICIAN,
@@ -290,12 +291,20 @@ def _derive_day(
     reformer_busy = booked.get(REFORMER_KEY, [])
 
     out: dict[str, list[str]] = {}
+    # Clinicians with CLINICIAN_WEEKLY_HOURS are derived once, from their first
+    # Plato rule, however many rules Plato holds for them.
+    overridden_done: set[str] = set()
 
     for rule in _rules_for(cfg, svc["online_calendar"]):
         color = rule.get("book_calendar")
         cid = clinician_by_calendar(color or "")
         if not cid:
             continue
+        weekly = CLINICIAN_WEEKLY_HOURS.get(cid)
+        if weekly is not None:
+            if cid in overridden_done:
+                continue
+            overridden_done.add(cid)
 
         # Early exclusion checks
         if home and cid != HOME_VISIT_CLINICIAN:
@@ -310,7 +319,9 @@ def _derive_day(
             if _DIAG:
                 log.info(f"  {cid}: not yet started (available from {CLINICIAN_AVAILABLE_FROM[cid]})")
             continue
-        if dow in (rule.get("restricted_days") or []):
+        day_off = (dow not in weekly) if weekly is not None \
+            else dow in (rule.get("restricted_days") or [])
+        if day_off:
             if _DIAG:
                 log.info(f"  {cid}: day-off ({dow})")
             continue
@@ -337,6 +348,8 @@ def _derive_day(
         # Window = the clinician's rule hours, clamped by any online-hours
         # override (e.g. Cheryl's online bookings don't start until 09:00).
         meta = CLINICIANS[cid]
+        if weekly is not None:
+            rule = {**rule, "starttime": weekly[dow][0], "endtime": weekly[dow][1]}
         win_start = max(at(rule.get("starttime", "08:00")),
                         at(meta["online_start"]) if meta.get("online_start") else at("00:00"))
         win_end = min(at(rule.get("endtime", "18:00")),
