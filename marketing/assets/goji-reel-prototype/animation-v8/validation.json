@@ -1,0 +1,55 @@
+{
+  "goji-v8-ui-silent.mp4": {
+    "duration": "30.800000",
+    "width": 1080,
+    "height": 1920,
+    "fps": 30,
+    "audio": false,
+    "full_decode": "passed",
+    "bytes": 25731237
+  },
+  "goji-v8-ui-sfx.mp4": {
+    "duration": "30.800000",
+    "width": 1080,
+    "height": 1920,
+    "fps": 30,
+    "audio": true,
+    "full_decode": "passed",
+    "bytes": 26207899
+  },
+  "audio": {
+    "peak": 0.3712158203125,
+    "music": false,
+    "source": "Original procedural effects, separate stems"
+  },
+  "black_transition": {
+    "sample_time": 17.2,
+    "max_pixel": 0
+  },
+  "requested_edit_checks": {
+    "walking_seconds": 4.3,
+    "mat_seconds": 5.0,
+    "reformer_removed": true,
+    "handbag_svg": "gold clasp and black body",
+    "mobility_popup": {
+      "hud_out": 16.9,
+      "popup_in": 25.3,
+      "popup_out": 30.8,
+      "mobility_in": 20.3,
+      "mobility_out": 24.8
+    },
+    "jump_cut_new_time": 12.5,
+    "removed_v6_interval": [
+      12.5,
+      16
+    ],
+    "new_duration": 30.8,
+    "exact_mobility_copy": "Mobility \u2013 Upgraded. Cops will now find it harder to arrest you."
+  },
+  "source_frame_match": {
+    "v6_recovery_frame": 42,
+    "v6_timeline_seconds": 16,
+    "new_run_frame": 0,
+    "rgb_mean_absolute_error": 0.5088298916816711
+  }
+}

@@ -1,3 +1,5 @@
+[**Latest: revision 8 — half a second more to exit the taxi**](animation-v8/README.md)
+
 [**Latest: revision 7 — direct arrival-to-run cut, black uniforms and new mobility joke**](animation-v7/README.md)
 
 [**Latest: revision 6 — longer walk, door action, handbag HUD and mobility popup**](animation-v6/README.md)
