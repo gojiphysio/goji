@@ -1,0 +1,24 @@
+[
+  {
+    "name": "02-pull",
+    "refs": [
+      "/Users/tidepool/Projects/goji-reel-animation-v4/assets/02-takeover.png"
+    ],
+    "prompt": "Edit this exact GTA San Andreas PS2 frame. Preserve composition, woman identity and maroon outfit, solid blue Comfort taxi, open front-hinged right driver door, driver pose, lighting and road. Change only the arm contact: the woman's left hand grips the driver's BARE FOREARM below the short sleeve, at least 12 cm away from the sleeve edge. His grey shirt is a close-fitting short-sleeve polo with a crisp sleeve hem and small natural folds, resting against his torso, no stretched cloth between their hands. Her right hand is empty at her side; remove the handbag for this shot. Driver is still partly seated, woman stands on both feet ready to pull him out sideways. Leave all other geometry unchanged. One coherent vertical videogame still; no HUD."
+  },
+  {
+    "name": "08b-mat-start",
+    "refs": [
+      "/Users/tidepool/Projects/goji-reel-animation-v4/assets/08b-mat.png"
+    ],
+    "prompt": "Edit this exact calm GTA San Andreas PS2 physio frame. Preserve character faces, maroon player outfit, navy therapist outfit, crossed legs, grounded hips, mat, reformer background, camera and warm light. Change therapist support from LIFTING to gently guiding DOWN AND LEFT into a deeper side bend. Her upper hand is a simple flat palm resting ON TOP of the player's raised upper arm near the shoulder, not underneath, fingers together only on visible top surface; her other flat palm stabilises the player's right waist. Begin with player's torso relatively UPRIGHT, only about 15 degrees of side bend toward screen LEFT, left floor-support hand planted, overhead arm gently arcing toward screen left. Therapist has relaxed shoulders and slightly bent elbow, ready to press softly down-left. Clear plausible contact, normal hands, no fingers on both sides, no pulling grip. Do not add arrows or text."
+  },
+  {
+    "name": "08b-mat-end",
+    "prompt": "Create the END pose of this same gentle assisted side stretch. Keep the two women, faces, outfits, camera, background, equipment, lighting, mat and all room geometry exactly unchanged. The maroon woman now leans her ribcage and head further DOWN toward screen LEFT, lowering her left shoulder toward her planted left hand and bringing the overhead fingertips farther left and lower. Increase the side bend gently by about 15 degrees while both hips and crossed legs remain grounded in exactly the same place. Her supporting left elbow bends a little to allow this. Navy therapist's upper palm stays ON TOP of raised upper arm, applying gentle downward-left guidance, fingers together; lower palm stabilises the right hip, following the waist. Therapist leans with her, not lifting her. Natural relaxed deeper stretch, no extreme contortion, no pulling the arm upward, no hand wrapping, no arrows, no text."
+  },
+  {
+    "name": "04-bail-end",
+    "prompt": "Create a single GTA San Andreas PS2 action keyframe, using image 1 as the exact camera/environment/car reference and image 2 ONLY as the woman identity and clothing reference. Same blue taxi on the kerb, open front right driver door, rooted grey lamp post, mall facade, daytime. This is a PRE-IMPACT BAILOUT, NOT a crash or windscreen ejection. The woman has just launched sideways out through the OPEN FRONT DRIVER DOOR. She is now fully OUTSIDE the car on the pavement on the RIGHT foreground, torso pitched forward and down, knees tucked, both feet clear of the sill, arms reaching toward the pavement to begin a shoulder tumble. Keep her whole body visible with generous space below. She wears MAROON FULL-LENGTH LEGGINGS and matching sleeveless maroon yoga top, black ponytail, WHITE athletic trainers, exactly as image 2; no skirt, no shorts, no heels, no handbag. Empty front driver seat visible through door. Every window remains intact. Taxi retains rigid unchanged geometry and continues forward toward but still SHORT OF the lamp post, with a clear gap between bumper and pole. Camera follows slightly toward the woman but remains rear three-quarter, no front view. No blood, no injury, no HUD."
+  }
+]

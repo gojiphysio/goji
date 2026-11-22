@@ -1,0 +1,287 @@
+[
+  {
+    "time": 0.12,
+    "stem": "footsteps",
+    "label": "swagger footstep"
+  },
+  {
+    "time": 0.52,
+    "stem": "footsteps",
+    "label": "swagger footstep"
+  },
+  {
+    "time": 0.94,
+    "stem": "footsteps",
+    "label": "swagger footstep"
+  },
+  {
+    "time": 1.36,
+    "stem": "footsteps",
+    "label": "swagger footstep"
+  },
+  {
+    "time": 0,
+    "stem": "vehicles",
+    "label": "bus air brake"
+  },
+  {
+    "time": 1.83,
+    "stem": "vehicles",
+    "label": "door latch"
+  },
+  {
+    "time": 2.3,
+    "stem": "footsteps",
+    "label": "driver pull scuffle"
+  },
+  {
+    "time": 2.9000000000000004,
+    "stem": "impact",
+    "label": "harmless driver roll"
+  },
+  {
+    "time": 3.1500000000000004,
+    "stem": "impact",
+    "label": "harmless driver roll"
+  },
+  {
+    "time": 3.92,
+    "stem": "vehicles",
+    "label": "door slam at edit"
+  },
+  {
+    "time": 4.0,
+    "stem": "vehicles",
+    "label": "accelerating engine and gear change"
+  },
+  {
+    "time": 5.2,
+    "stem": "vehicles",
+    "label": "accelerating engine and gear change"
+  },
+  {
+    "time": 6.4,
+    "stem": "vehicles",
+    "label": "accelerating engine and gear change"
+  },
+  {
+    "time": 5.2,
+    "stem": "vehicles",
+    "label": "swerve tyre squeal"
+  },
+  {
+    "time": 5.28,
+    "stem": "vehicles",
+    "label": "close traffic pass"
+  },
+  {
+    "time": 5.33,
+    "stem": "vehicles",
+    "label": "alarmed traffic horn"
+  },
+  {
+    "time": 6.7,
+    "stem": "vehicles",
+    "label": "swerve tyre squeal"
+  },
+  {
+    "time": 6.78,
+    "stem": "vehicles",
+    "label": "close traffic pass"
+  },
+  {
+    "time": 6.83,
+    "stem": "vehicles",
+    "label": "alarmed traffic horn"
+  },
+  {
+    "time": 8.0,
+    "stem": "vehicles",
+    "label": "fast approach engine"
+  },
+  {
+    "time": 8.3,
+    "stem": "vehicles",
+    "label": "kerb approach skid"
+  },
+  {
+    "time": 8.65,
+    "stem": "vehicles",
+    "label": "driver door opens before impact"
+  },
+  {
+    "time": 9.25,
+    "stem": "impact",
+    "label": "sideways bailout whoosh"
+  },
+  {
+    "time": 9.850000000000001,
+    "stem": "impact",
+    "label": "pavement landing"
+  },
+  {
+    "time": 9.82,
+    "stem": "impact",
+    "label": "taxi contact implied behind the player after bailout"
+  },
+  {
+    "time": 10.25,
+    "stem": "footsteps",
+    "label": "push up from pavement"
+  },
+  {
+    "time": 11.5,
+    "stem": "footsteps",
+    "label": "run toward mall"
+  },
+  {
+    "time": 11.74,
+    "stem": "footsteps",
+    "label": "run toward mall"
+  },
+  {
+    "time": 11.98,
+    "stem": "footsteps",
+    "label": "run toward mall"
+  },
+  {
+    "time": 12.22,
+    "stem": "footsteps",
+    "label": "run toward mall"
+  },
+  {
+    "time": 12.46,
+    "stem": "footsteps",
+    "label": "run toward mall"
+  },
+  {
+    "time": 12.7,
+    "stem": "footsteps",
+    "label": "run toward mall"
+  },
+  {
+    "time": 12.94,
+    "stem": "footsteps",
+    "label": "run toward mall"
+  },
+  {
+    "time": 13.18,
+    "stem": "footsteps",
+    "label": "run toward mall"
+  },
+  {
+    "time": 13.42,
+    "stem": "footsteps",
+    "label": "run toward mall"
+  },
+  {
+    "time": 14.0,
+    "stem": "footsteps",
+    "label": "running to entrance"
+  },
+  {
+    "time": 14.23,
+    "stem": "footsteps",
+    "label": "running to entrance"
+  },
+  {
+    "time": 14.46,
+    "stem": "footsteps",
+    "label": "running to entrance"
+  },
+  {
+    "time": 14.69,
+    "stem": "footsteps",
+    "label": "running to entrance"
+  },
+  {
+    "time": 14.92,
+    "stem": "footsteps",
+    "label": "running to entrance"
+  },
+  {
+    "time": 15.15,
+    "stem": "footsteps",
+    "label": "running to entrance"
+  },
+  {
+    "time": 15.38,
+    "stem": "footsteps",
+    "label": "running to entrance"
+  },
+  {
+    "time": 15.61,
+    "stem": "footsteps",
+    "label": "running to entrance"
+  },
+  {
+    "time": 15.8,
+    "stem": "ui",
+    "label": "entry trigger"
+  },
+  {
+    "time": 16.35,
+    "stem": "interior",
+    "label": "quiet reception door"
+  },
+  {
+    "time": 16.650000000000002,
+    "stem": "interior",
+    "label": "calm indoor step"
+  },
+  {
+    "time": 17.25,
+    "stem": "interior",
+    "label": "calm indoor step"
+  },
+  {
+    "time": 17.8,
+    "stem": "interior",
+    "label": "calm indoor step"
+  },
+  {
+    "time": 19.400000000000002,
+    "stem": "interior",
+    "label": "quiet stretch clothing"
+  },
+  {
+    "time": 21.6,
+    "stem": "interior",
+    "label": "quiet stretch clothing"
+  },
+  {
+    "time": 25.2,
+    "stem": "interior",
+    "label": "assisted stretching clothing"
+  },
+  {
+    "time": 27.6,
+    "stem": "interior",
+    "label": "assisted stretching clothing"
+  },
+  {
+    "time": 29.5,
+    "stem": "interior",
+    "label": "assisted stretching clothing"
+  },
+  {
+    "time": 31.299999999999997,
+    "stem": "ui",
+    "label": "Body Muscle upgraded notification"
+  },
+  {
+    "time": 31.6,
+    "stem": "interior",
+    "label": "quiet squat clothing"
+  },
+  {
+    "time": 33.6,
+    "stem": "interior",
+    "label": "quiet squat clothing"
+  },
+  {
+    "time": 35.6,
+    "stem": "interior",
+    "label": "quiet squat clothing"
+  }
+]

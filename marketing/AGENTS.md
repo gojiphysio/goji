@@ -34,3 +34,4 @@ tab, honour these:
 
 - **Remote-first handoffs.** Assume the user is on a phone away from Tidepool. Lead with a verified HTTPS review link; image storyboards need a GitHub-rendered Markdown page with embedded frames. Local paths, localhost and raw HTML links are supplementary. Preserve existing access controls.
 - **Generated reel continuity.** Continue linked action from the preceding clip's actual final frame, and review motion as well as keyframes. Keep HUD, text and sound separate from generated video so they can be edited without regenerating scenes.
+- **LTX moving-shot handoffs.** A shared still preserves appearance but not incoming motion. For a continuous moving shot, prefer video-tail continuation when supported and verify the seam; later image guides at strength 1 are not exact frame locks. Use motion or pose guides for precise mechanics. The project playbook lives in `assets/goji-reel-prototype/animation-v5/research/LTX_PLAYBOOK.md`.

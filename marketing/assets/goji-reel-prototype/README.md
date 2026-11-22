@@ -1,3 +1,5 @@
+[**Latest: door bailout and corrected assisted stretch**](animation-v5/README.md)
+
 [**Latest: revised action continuity, static-reformer stretch and spotted squat**](animation-v4/README.md)
 
 [**Latest: GTA SA-style HUD and reference-worded upgrade popup**](ui-v3/README.md)

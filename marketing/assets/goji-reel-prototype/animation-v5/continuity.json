@@ -1,0 +1,34 @@
+{
+  "old_version": {
+    "drive_to_impact": "Independent image-conditioned shots; no shared moving-video context.",
+    "impact_to_tumble": "Previous clip's decoded final frame used as the next opening image; no incoming velocity context.",
+    "keyframe_binding": "Default opening image replacement; later images were soft guides, not exact frame locks."
+  },
+  "new_version": {
+    "drive_selection": "Original v4 drive cut to first 97 frames before the orientation glitch.",
+    "approach": "Experimental extend --distilled carries last 25 frames; seed 902, append 15 latent frames. Keep first 129 frames of this result as clean approach input.",
+    "bailout": "Continue clean approach with last 25 frames, seed 906, append 6 latent frames (48 decoded frames); maroon-clothing door-bailout pose as final soft guide.",
+    "selected_drive_frames": [
+      0,
+      97
+    ],
+    "selected_bailout_frames": [
+      97,
+      138
+    ],
+    "range_semantics": "Zero-based start inclusive, end exclusive in full seed-906 output.",
+    "recovery": "Retain v4 ground-tumble/recovery from source time 0.625 seconds. The earlier windscreen/hood exit is excluded.",
+    "bailout_to_recovery": "Intentional action cut during fall. Separate camera framing; not a frame-matched continuous take.",
+    "reformer_and_squat": "Approved v4 native clips reused unchanged.",
+    "mat": "Opening and deeper endpoint guide; therapist hand above arm and motion down-left.",
+    "audio": "Original SFX added after selected picture; generated extension audio discarded; no music.",
+    "takeover": "Seed 741, original full-take duration and final pose retained as controlled comparison; bare forearm opening contact and related clothing prompt changed. Selected only first 2.2 seconds before entry."
+  },
+  "reproduction": {
+    "bailout_script": "scripts/extend_bailout.py",
+    "input_video": "controls/drive-clean-approach.mp4",
+    "pose_guide": "assets/04-bail-end.png",
+    "runtime_commit": "747b30ef10e92a011e85b2aa0f6c4ee86ced5218",
+    "model": "LTX-2.5 distilled Q8 MLX"
+  }
+}
