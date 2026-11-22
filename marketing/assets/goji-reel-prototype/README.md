@@ -1,3 +1,5 @@
+[**Latest: revision 7 — direct arrival-to-run cut, black uniforms and new mobility joke**](animation-v7/README.md)
+
 [**Latest: revision 6 — longer walk, door action, handbag HUD and mobility popup**](animation-v6/README.md)
 
 [**Latest: door bailout and corrected assisted stretch**](animation-v5/README.md)

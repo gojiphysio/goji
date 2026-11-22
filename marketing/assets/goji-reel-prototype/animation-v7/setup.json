@@ -1,0 +1,78 @@
+{
+  "selected_model": "LTX-2.5 Distilled, Q8 DiT, native MLX/Metal",
+  "engine": "dgrauet/ltx-2-mlx 0.18.0",
+  "engine_commit": "747b30ef10e92a011e85b2aa0f6c4ee86ced5218",
+  "adapter_source": "https://github.com/james-see/ltx-video-mac/blob/main/LTXVideoGenerator/Resources/ltx25_community_adapter.py",
+  "hardware": "Mac mini M5 Pro, 64 GB unified memory",
+  "decision": "Best fit found for this keyframe-driven stylised reel: native Apple GPU inference, multi-image anchors, small controlled shots and repeatable command-line runs. This is a task-specific selection, not a claim of universal best quality.",
+  "alternatives_considered": {
+    "MiniMax H3": "Native Metal implementation exists; larger model and less suitable for this short multi-anchor edit. Not installed.",
+    "LTX-2.3": "Older than verified LTX-2.5; not selected.",
+    "Wan 2.2": "Available Apple routes, but lacks this selected native multi-anchor workflow."
+  },
+  "sources": [
+    "https://huggingface.co/Lightricks/LTX-2.5",
+    "https://github.com/dgrauet/ltx-2-mlx",
+    "https://github.com/dgrauet/ltx-2-mlx/blob/main/docs/PIPELINES.md",
+    "https://github.com/james-see/ltx-video-mac",
+    "https://github.com/antirez/h3.c"
+  ],
+  "render": "576x1024 native, 24fps, 8+3 distilled steps; edit output upscaled to 1080x1920 at 30fps.",
+  "audio": "Regular generation uses --no-audio. Experimental video-tail extension generates audio; that audio is discarded before editing. Final cut has original procedural SFX only, with no sampled game assets and no music.",
+  "adapter_sha256": "8d9c1a90abe7303b9e2cbb336e27478c7e3c29eeb1506e953dd341f7bf7bbd33",
+  "ffmpeg_version": "ffmpeg version 9.0.2 Copyright (c) 2000-2026 the FFmpeg developers",
+  "packages": [
+    "annotated-doc==0.0.4",
+    "anyio==4.12.1",
+    "certifi==2026.2.25",
+    "click==8.3.1",
+    "filelock==3.25.2",
+    "fsspec==2026.2.0",
+    "h11==0.16.0",
+    "hf-xet==1.4.2",
+    "httpcore==1.0.9",
+    "httpx==0.28.1",
+    "huggingface-hub==1.7.1",
+    "idna==3.11",
+    "jinja2==3.1.6",
+    "-e file:///Users/tidepool/Projects/goji-video-engine/packages/ltx-core-mlx",
+    "-e file:///Users/tidepool/Projects/goji-video-engine/packages/ltx-pipelines-mlx",
+    "markdown-it-py==4.0.0",
+    "markupsafe==3.0.3",
+    "mdurl==0.1.2",
+    "mlx==0.32.2",
+    "mlx-arsenal==0.2.4",
+    "mlx-lm==0.31.1",
+    "mlx-metal==0.32.2",
+    "numpy==2.4.3",
+    "packaging==26.0",
+    "pillow==12.1.1",
+    "protobuf==6.33.6",
+    "pygments==2.19.2",
+    "pyyaml==6.0.3",
+    "regex==2026.2.28",
+    "rich==14.3.3",
+    "safetensors==0.7.0",
+    "sentencepiece==0.2.1",
+    "shellingham==1.5.4",
+    "tokenizers==0.22.2",
+    "tqdm==4.67.3",
+    "transformers==5.3.0",
+    "typer==0.24.1",
+    "typing-extensions==4.15.0"
+  ],
+  "weights": [
+    {
+      "repo": "notapalindrome/ltx25-mlx",
+      "revision": "38f776ef1b9485d197ddd17ce42630c239800fbd",
+      "role": "base components and BF16 Gemma 4 encoder; omitted full-precision transformer and unused LoRA/decoders"
+    },
+    {
+      "repo": "notapalindrome/ltx25-mlx-ditq8",
+      "revision": "0a005c82cf3fd9c49d28dc6c13bdc509b631107f",
+      "role": "8-bit distilled transformer overlay"
+    }
+  ],
+  "continuation": "extend --distilled, 25-frame pinned video tail, tested at existing runtime commit 747b30ef10e92a011e85b2aa0f6c4ee86ced5218; see continuity.json and research/LTX_PLAYBOOK.md",
+  "revision_7": "Existing model reused. Only three interior clips regenerated for uniform changes; exterior cut uses reviewed v6 frame indices. No new model installation."
+}

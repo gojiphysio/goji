@@ -38,3 +38,4 @@ tab, honour these:
 
 - **Exact retained-video handoffs.** Extract guide images by frame index and verify them against the retained clip's first source frame. Decimal seeking can select the following frame; matching timestamps alone does not establish an exact pose handoff.
 - **Vehicle reference checks.** Before animating a door action, check the whole vehicle in closed and open poses: separate front/rear doors, fixed centre pillar, correct seat occupancy, front hinge attachment and one mirror per side. Repairing one part can silently remove another; reject inconsistent anchors before rendering.
+- **Timecode revision edits.** Treat user timestamps as positions in the reviewed published cut. Record the source version and exact frame ranges before trimming; do not apply those timestamps directly to differently timed native generations.
