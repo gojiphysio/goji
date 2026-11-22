@@ -31,3 +31,5 @@ tab, honour these:
 - **Watercolour social clips** (Reels, Stories, feed, GBP) are made in `assets/watercolor-studio/` (open `index.html`; exports MP4/PNG). Its engine is a copy of the Goji design system bundle: re-copy it when the system changes rather than editing it here.
 - The Marketing tab's WIP cards are the **seams** for live integrations; see
   `../business-intelligence/scripts/dashboard/AGENTS.md`.
+
+- **Remote-first handoffs.** Assume the user is on a phone away from Tidepool. Lead with a verified HTTPS review link; image storyboards need a GitHub-rendered Markdown page with embedded frames. Local paths, localhost and raw HTML links are supplementary. Preserve existing access controls.
