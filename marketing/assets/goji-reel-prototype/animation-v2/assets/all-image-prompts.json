@@ -1,0 +1,65 @@
+[
+  {
+    "name": "03-drive",
+    "refs": [
+      "/Users/tidepool/Projects/goji-reel-prototype-v5/frames/03-drive.png"
+    ],
+    "prompt": "Use case: precise-object-edit. Edit this vertical 9:16 PS2 GTA San Andreas gameplay keyframe. Preserve EXACT same blue Comfort taxi, rear chase camera, maroon woman inside right driver seat, facade, pale teal sky, green trees and daylight grading. Add busy Singapore traffic ahead: silver sedan in left lane 12m ahead, white van 22m ahead on right, red sedan further ahead. A narrow gap exists between these vehicles through which the player's taxi will aggressively weave. They are all full solid cars, correct road scale and grounded wheels. Slightly widen roadway to 3 lanes; preserve Lentor Modern canopy and architecture. No crashes yet, no pedestrians in road. Taxi must be intact and all doors closed. Simple low-poly PS2 meshes, no glossy photorealism, no HUD, no captions. This is the start of a high speed chase."
+  },
+  {
+    "name": "07-entry",
+    "refs": [
+      "/Users/tidepool/Projects/goji-reel-prototype-v5/frames/07-calm-entry-v2.png"
+    ],
+    "prompt": "Use case: compositing. Edit this exact vertical GTA San Andreas PS2 low-poly Goji reception image. Keep woman in maroon with black purse entering at left, architecture, burgundy round table, checkered floor and GOJI oak wall sign. ADD one adult Asian female Goji team member wearing navy uniform with small name badge, seated on a chair behind the burgundy table on right, facing entering woman, relaxed smile and one hand raised for a small friendly welcome. Her torso and face clearly visible above table. She remains seated. Match existing angular simple PS2 game style and light. No other changes, no text overlay."
+  },
+  {
+    "name": "08a-reformer",
+    "refs": [
+      "/Users/tidepool/Projects/goji-reel-prototype-v5/references/goji-reformer-actual.webp",
+      "/Users/tidepool/Projects/goji-reel-prototype-v5/frames/08b-mat-side-stretch.png"
+    ],
+    "prompt": "Use case: stylized-concept. Generate a vertical 9:16 GTA San Andreas 2004 PS2 game cutscene. IMAGE1 is the EXACT exercise pose and cream Goji reformer equipment geometry reference; IMAGE2 defines fictional maroon player character, navy therapist, simple angular game style and room. Recreate image1's kneeling lunge with the fictional woman in maroon sleeveless yoga top and leggings, black ponytail, white socks: facing left, front left foot flat on fixed padded platform beside curved cream U footbar, front knee bent 90deg; both hands gripping grey horizontal footbar; rear right knee rests on moving padded carriage, shin laid backward, right sock foot by shoulder block. Torso upright. No shoes or purse on body. Female navy Goji physio kneeling directly beside player's right hip with both hands clearly contacting side and back of pelvis, supporting alignment, ready to guide small carriage travel. Cream rails with adjustment holes, grey upholstery, black knobs, separate fixed foot platform and sliding carriage, as actual reference. Medium full-body side view, fills vertical frame lower 2/3, both complete figures, all footbar and carriage in frame. Sheer curtains and pale floor, purse on stool in background. Soft calm daylight, low polygon meshes simple textures, not photorealistic. No extra limbs, no lying-down leg press, no HUD."
+  },
+  {
+    "name": "08b-mat",
+    "refs": [
+      "/Users/tidepool/Projects/goji-reel-prototype-v5/frames/08b-mat-side-stretch.png"
+    ],
+    "prompt": "Use case: precise-object-edit. Preserve this vertical GTA SA low-poly Goji image with maroon woman seated cross-legged doing side stretch toward image left, right hand planted and left arm overhead. Change therapist from passive observer to actively assisting. Move navy female therapist immediately behind and slightly right of patient, kneeling, one hand contacting patient's raised upper arm just above elbow to gently guide overhead reach, other hand contacting patient's opposite side waist/ribcage to stabilize torso. Therapist leans with her while supporting, anatomically plausible two arms, no fingers floating. Keep same woman, ponytail, maroon outfit, white socks, burgundy mat, actual cream reformer background, curtain daylight, purse on stool, PS2 polygon style. Frame somewhat closer to show clear hands-on contact. No text."
+  },
+  {
+    "name": "04-impact",
+    "refs": [
+      "/Users/tidepool/Projects/goji-reel-animation-v2/assets/03-drive.png",
+      "/Users/tidepool/Projects/goji-reel-prototype-v5/frames/05-ejection-compact-impact.png"
+    ],
+    "prompt": "Use case: compositing. Make a vertical 9:16 PS2 GTA San Andreas keyframe BEFORE a crash. Image1 is the strict style, lighting, pale teal sky, green foliage, exact blue Comfort taxi and Lentor Modern architecture reference. Image2 supplies ONLY the lamp-post and kerb composition, NOT its orange light and NOT airborne woman. Rear chase camera behind same intact taxi. Taxi has veered onto kerb in front Lentor Modern, front bumper is 2 metres short of a slender upright lamp post directly in its path, about to strike it. Nose still intact, no impact yet, no sparks. Maroon woman still SEATED in right driver seat, seen through rear window, black purse on passenger seat. Two adult pedestrians farther ahead on sidewalk turn toward the incoming taxi with alarm, one near storefront left and one by canopy right, clear landing path down centre. Match image1 daylight exactly, neutral grey concrete, pale teal sky, not orange sunset. Taxi stays same normal proportions. No HUD, no airborne woman, no blood."
+  },
+  {
+    "name": "05-ejection",
+    "refs": [
+      "/Users/tidepool/Projects/goji-reel-prototype-v5/frames/05-ejection-compact-impact.png",
+      "/Users/tidepool/Projects/goji-reel-animation-v2/assets/03-drive.png"
+    ],
+    "prompt": "Use case: compositing. Edit image1 GTA SA vertical ejection frame to match image2's EXACT neutral daytime grade, pale teal sky, green foliage and grey building. No orange sunset. Preserve identical blue Comfort taxi dimensions and rear chase camera. Front bumper hard against lamp post with only small compact nose dent, no inflated metal. Woman maroon yoga outfit black ponytail white trainers and black purse already airborne beyond windscreen and AHEAD of taxi, not above roof, horizontal flight away from camera, down clear pavement. Add two adult passersby in GTA NPC evasive poses: one to left beside shop windows beginning to launch into a sideways dive, one to right under canopy crouching to jump sideways away. They are visibly surprised and alive, nothing strikes them. Show open clear central landing path. Keep Lentor Modern building, lettering, canopy, and all taxi geometry consistent with image2. Low poly PS2 angular geometry, no blood, no HUD."
+  },
+  {
+    "name": "02-takeover-contact",
+    "refs": [
+      "/Users/tidepool/Projects/goji-reel-animation-v2/assets/02-takeover.png"
+    ],
+    "prompt": "Use case: precise-object-edit. Preserve this vertical GTA San Andreas taxi scene EXACT taxi body and correct front-hinged RIGHT front driver door geometry, same camera, daylight, young maroon yoga woman ponytail white trainers holding purse. Change ONLY character action: woman has stepped close into open doorway, her left hand firmly grips seated male driver's right upper arm. Driver is still seated with hips INSIDE taxi, but leaning sideways out toward woman and looking startled, one shoe just touches sill. Her legs braced, leaning backwards ready to pull him out. The driver must be a clearly visible solid person in light grey shirt dark trousers, visibly connected by her grip. Taxi is completely intact, no body panels clipped. Nobody on ground. No blood. No text."
+  },
+  {
+    "name": "04-contact",
+    "refs": [
+      "/Users/tidepool/Projects/goji-reel-animation-v2/assets/05-ejection.png"
+    ],
+    "prompt": "Use case: precise-object-edit. Edit this exact GTA SA vertical frame by removing ONLY the airborne maroon woman beyond the taxi. Put her in the right-hand driver seat visible through rear window instead, still seated at instant of impact. Keep taxi hard-contact with pole, compact damage, subtle sparks, same two diving pedestrians same positions, facade, daylight, tree, sky, blue body dimensions and camera. No other change. No big crumple or blood."
+  },
+  {
+    "name": "04-impact-final",
+    "prompt": "Use case: precise-object-edit. Create pre-impact frame matching this EXACT vertical rear-camera GTA San Andreas image. Keep the building, sky, daylight, road, lamp post, canopy and same two adult male NPCs (cream shirt on left, green shirt on right). Rewind action about one second: remove airborne woman and put her seated inside taxi RIGHT driver seat, maroon shoulders and ponytail visible through rear window. Move entire intact same blue taxi BACK about two metres along same path, leaving a CLEAR pavement gap between FRONT bumper and upright lamp post. Taxi normal proportions same orientation, no dent yet, no sparks, no smoke. Both pedestrians still in these same locations, standing startled with raised hands just before diving. Change bent lamp post to upright before impact, anchored exactly same position. All doors closed. This is a single pre-impact keyframe, not a collage. No sunset, no blood, no HUD."
+  }
+]

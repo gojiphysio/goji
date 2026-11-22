@@ -1,3 +1,5 @@
+[**Latest: revised animation v2 — expanded chaos, assisted physio, SFX and editing files**](animation-v2/README.md)
+
 # Goji reel prototype
 
 [Watch the animated cut — effects only, no music](animation-v1/README.md)
