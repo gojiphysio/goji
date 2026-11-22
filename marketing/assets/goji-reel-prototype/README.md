@@ -1,3 +1,5 @@
+[**Latest: GTA SA-style HUD and reference-worded upgrade popup**](ui-v3/README.md)
+
 [**Latest: revised animation v2 — expanded chaos, assisted physio, SFX and editing files**](animation-v2/README.md)
 
 # Goji reel prototype
