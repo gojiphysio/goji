@@ -1,0 +1,28 @@
+[
+  {
+    "name": "04-four-door-open",
+    "refs": [
+      "04-four-door-closed.png",
+      "04-door-bail-fixed.png"
+    ],
+    "prompt": "Create the middle action frame from FIRST image. First reference is the authoritative FOUR DOOR TAXI geometry, fixed camera, car position, lamp post and mall. Preserve its clear TWO visible near-side doors, TWO black handles, fixed black B-pillar and two windows. Make ONLY FRONT DRIVER DOOR open 55 degrees, rigidly attached at FRONT hinge behind front wheel. Its one wing mirror is mounted on that opening front door. Rear passenger door stays CLOSED and completely unchanged, its separate window, black handle and panel seam clearly visible behind the fixed B-pillar. Front door is short and ends at B-pillar; it must NOT swallow the rear door. Keep front and rear wheels and roof in same position. Empty driver seat. Place the maroon woman outside the front doorway in the low airborne tucked pose of SECOND reference: head and hands toward lower-left pavement, bent knees/white trainers trailing at right. The second image provides ONLY woman pose, NOT car design. ONE woman, full-length maroon leggings, ponytail. Preserve entire background and camera, low-poly game style. Do not duplicate mirror, float the door, remove rear passenger door, or merge windows. No labels or collage.",
+    "status": "selected"
+  },
+  {
+    "name": "04-four-door-approach",
+    "refs": [
+      "04-four-door-closed.png"
+    ],
+    "prompt": "Earlier moment of exact same fixed-camera GTA San Andreas game shot. Preserve this exact FOUR-DOOR blue taxi design: TWO separate near-side doors each with its own handle, fixed black B-pillar, front and rear side windows, single near-side mirror, two wheel positions relative to body. Same woman at steering wheel. Translate the WHOLE taxi about one metre backwards along its length toward LOWER RIGHT, so there is a visible one-metre gap between its front bumper and the stationary lamp post. Do not rotate the taxi or change camera. This is the only change. Rear of taxi may extend further past right edge, but both front and rear passenger doors remain visible. Keep all doors closed. Background, mall, pole and pavement stay exactly fixed, same lighting and game style. No new objects, no duplicate people, no motion streaks.",
+    "status": "selected"
+  },
+  {
+    "name": "04-four-door-ground",
+    "refs": [
+      "04-four-door-closed.png",
+      "05-ground-handoff.png"
+    ],
+    "prompt": "Final grounded pose of same fixed-camera GTA San Andreas shot. FIRST reference is authoritative for the FOUR-DOOR TAXI, its exact position and geometry, both distinct near-side closed doors with two handles and fixed black B-pillar; preserve all of it exactly. Preserve FIRST reference background, pole, camera and lighting. Empty the front driver seat. Place the maroon woman prone on pavement in the EXACT POSITION AND POSE from SECOND reference: head left/lower-left, legs toward right, white trainers at right, hands beside shoulders, ready to push up. Black small purse on ground by head as in second reference. Use second reference ONLY for woman's pose/location, NOT its incorrect old taxi geometry. Taxi stays exactly in first reference position, nose almost touching pole, no rotation. Both near-side doors CLOSED, intact windshield, one mirror. Keep full-length maroon leggings and sleeveless top and ponytail. No duplicate woman in car, no car deformation, no text overlays.",
+    "status": "selected"
+  }
+]

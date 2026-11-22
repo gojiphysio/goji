@@ -1,0 +1,50 @@
+{
+  "version": 6,
+  "model": "LTX-2.5 distilled Q8 MLX",
+  "runtime_commit": "747b30ef10e92a011e85b2aa0f6c4ee86ced5218",
+  "walk": {
+    "method": "Video-tail continuation of the approved 49-frame walk using extend --distilled",
+    "seed": 1001,
+    "input": "controls/walk-source.mp4",
+    "tail_context_frames": 25,
+    "extend_latent_frames": 8,
+    "output_frames": 113,
+    "edit_duration": 4.3,
+    "note": "Continued motion rather than a held frame or slowed two-second clip."
+  },
+  "taxi_takeover": {
+    "start": "Closed door, player hand on exterior handle, driver seated inside",
+    "end": "Driver seated on ground, player remains standing outside",
+    "control": "Four-door opening reference and four-door grounded-driver endpoint; front seat positioning corrected, rear door stays closed."
+  },
+  "drive": "Approved first 97 frames of v4 drive, reused via v5; removed orientation reversal remains excluded.",
+  "stop_and_bailout": {
+    "method": "One multi-anchor generated shot, not two independently generated approach and jump clips",
+    "camera": "Same side as the retained recovery; taxi nose left, rear right; stationary lamp post and mall",
+    "start": "assets/04-four-door-approach.png",
+    "mid": "assets/04-four-door-open.png",
+    "end": "assets/04-four-door-ground.png",
+    "end_source": "New four-door geometry; grounded player pose derived from approved recovery source frame 32",
+    "caveat": "Later image guides are soft constraints, not exact locked frames. The join to the existing get-up/run remains an editorial join and is visually checked.",
+    "braking_guide": "assets/04-four-door-closed.png",
+    "guide_frames": [
+      0,
+      24,
+      64,
+      120
+    ],
+    "seed": 1017,
+    "door_constraint": "Front-hinged rigid door attached to A-pillar; one near-side mirror mounted on door. Reference repaired after user identified floating panel and duplicate mirror.",
+    "selection_note": "Full 121-frame four-door take selected after checking approach direction, open-door attachment, separate rear door and one mirror. No tail from rejected coupe-like takes is used.",
+    "selected_frames": [
+      0,
+      121
+    ]
+  },
+  "recovery": "Retained original v4 animation from frame 32 onward; prior windscreen ejection excluded. The assembled shot uses crop=432:768:0:160 to retain the original movement with a tighter camera following the player.",
+  "interiors": "Hair-only reference edits establish short dark bob and gentle smile in welcome, mat and squat; motion regenerated locally. Reformer scene removed.",
+  "mat": "121 frames with starting and deeper down-left stretch guides, edited to 5 seconds.",
+  "ui": "Separate PNG/SVG handbag HUD, Mobility popup on mat, Body Muscle popup on squat.",
+  "audio": "Generated extension audio discarded. Original procedural effects only; no music or sampled game assets.",
+  "reference_source": "https://sgclassicrides.blogspot.com/2019/06/more-than-old-car-105-toyota-crown.html"
+}

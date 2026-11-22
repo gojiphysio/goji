@@ -1,3 +1,5 @@
+[**Latest: revision 6 — longer walk, door action, handbag HUD and mobility popup**](animation-v6/README.md)
+
 [**Latest: door bailout and corrected assisted stretch**](animation-v5/README.md)
 
 [**Latest: revised action continuity, static-reformer stretch and spotted squat**](animation-v4/README.md)

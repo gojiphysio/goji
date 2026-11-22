@@ -1,0 +1,42 @@
+{
+  "goji-v6-ui-silent.mp4": {
+    "duration": "34.300000",
+    "width": 1080,
+    "height": 1920,
+    "fps": 30,
+    "audio": false,
+    "full_decode": "passed",
+    "bytes": 28292799
+  },
+  "goji-v6-ui-sfx.mp4": {
+    "duration": "34.300000",
+    "width": 1080,
+    "height": 1920,
+    "fps": 30,
+    "audio": true,
+    "full_decode": "passed",
+    "bytes": 28814869
+  },
+  "audio": {
+    "peak": 0.3712158203125,
+    "music": false,
+    "source": "Original procedural effects, separate stems"
+  },
+  "black_transition": {
+    "sample_time": 20.7,
+    "max_pixel": 0
+  },
+  "requested_edit_checks": {
+    "walking_seconds": 4.3,
+    "mat_seconds": 5.0,
+    "reformer_removed": true,
+    "handbag_svg": "gold clasp and black body",
+    "mobility_popup": {
+      "hud_out": 20.4,
+      "popup_in": 28.799999999999997,
+      "popup_out": 34.3,
+      "mobility_in": 23.8,
+      "mobility_out": 28.3
+    }
+  }
+}

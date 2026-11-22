@@ -1,0 +1,102 @@
+[
+  {
+    "name": "08b-mat-start",
+    "refs": [
+      "goji-reel-animation-v5/assets/08b-mat-start.png"
+    ],
+    "prompt": "Edit only the NAVY UNIFORM PHYSIOTHERAPIST in this exact GTA San Andreas PS2 still. Give her a neat SHORT CHIN-LENGTH BLACK BOB tucked behind her ears, with a distinct visible short nape, NO ponytail, NO bun and NO tied-back hair. Give her a gentle warm closed-mouth smile and relaxed kind eyes. Preserve her adult face identity, skin tone and navy uniform. Preserve both hands and their exact support placement, the maroon patient's ponytail and pose, all clothes, camera, mat, background equipment, lighting and scene geometry exactly. The player remains ponytailed; only therapist changes.",
+    "status": "selected"
+  },
+  {
+    "name": "02-door-start",
+    "refs": [
+      "goji-reel-animation-v5/assets/02-pull.png"
+    ],
+    "prompt": "Restage the opening pose of this exact GTA San Andreas taxi scene, preserving the woman, taxi, driver, street, camera and daylight. The front RIGHT driver door is now FULLY CLOSED, flush with the blue taxi body, correctly front-hinged. Grey-shirt driver is fully SEATED in the front driver seat behind the steering wheel, visible through front side window, both legs inside. The maroon woman stands beside the door with a wide planted stance and knees bent, her left hand firmly gripping the exterior door handle, elbow bent, torso leaning aggressively toward the door ready to YANK it outward. Her right arm is drawn back for balance. Clear space around her to take a forceful backward step. Empty right hand, no handbag. No one on ground. Closed door has normal car geometry and visible frame and handle. Same PS2 low-poly style, vertical composition, no HUD.",
+    "status": "superseded; local draft only"
+  },
+  {
+    "name": "04-stop-start",
+    "refs": [
+      "goji-reel-animation-v6/assets/05-ground-handoff.png"
+    ],
+    "prompt": "Create the PRE-STOP starting frame for this exact GTA San Andreas rear three-quarter camera view. LOCK THE CAMERA AND BACKGROUND: every lamp post, pavement seam and mall facade stays exactly in the same screen position as reference. Remove the woman and purse from the pavement; she is inside the front driver seat, mostly hidden by the roof, NOT sitting in back seat. Move the SAME blue taxi BACKWARDS along its longitudinal axis toward lower-right by about two metres, so there is a clear two-metre pavement GAP between its FRONT bumper and the lamp-post base. Its front still points toward screen LEFT/upper-left exactly as reference; no car rotation and no camera rotation. Some rear of car may naturally lie beyond the right frame edge. Doors fully closed, all windows intact. The taxi is approaching fast toward the pole, slight wheel motion blur. Same scene, same lighting, same perspective, only car position and player location change. No person outside the car, no teleporting objects, no HUD.",
+    "status": "superseded; local draft only"
+  },
+  {
+    "name": "09-squat",
+    "refs": [
+      "goji-reel-animation-v4/assets/09-squat.png",
+      "goji-reel-animation-v6/assets/08b-mat-start.png"
+    ],
+    "prompt": "Edit image 1 only. Change only the NAVY UNIFORM physiotherapist behind the maroon squatting player, and her matching reflection in the mirror, to have the exact short chin-length black bob and gentle closed-mouth smile seen on the navy therapist in image 2. No ponytail, no bun, neat short nape, friendly relaxed eyes. Keep the maroon player's long ponytail UNCHANGED, and preserve the player, squat pose, all hands and spotting contact, bar, green plates, MATRIX rack, shelving, mirror, floor, camera, lighting and PS2 style exactly. Only the therapist hairstyle and expression change; reflect those changes consistently in mirror.",
+    "status": "selected"
+  },
+  {
+    "name": "07-entry",
+    "refs": [
+      "goji-reel-animation-v2/assets/07-entry.png",
+      "goji-reel-animation-v6/assets/08b-mat-start.png"
+    ],
+    "prompt": "Edit image 1 only. Give the seated navy-uniform Goji team member behind the reception table the same neat SHORT BLACK CHIN-LENGTH BOB, visible short nape and gentle warm closed-mouth smile as the navy therapist in image 2. Remove her bun/ponytail entirely. Keep her seated welcoming gesture, navy polo, face identity and adult age, all furniture, GOJI wall sign, warm light, camera, framing and PS2 style unchanged. Preserve maroon player's ponytail and all of her appearance exactly. Only seated staff member hair and facial expression change.",
+    "status": "selected"
+  },
+  {
+    "name": "08b-mat-end",
+    "refs": [
+      "goji-reel-animation-v5/assets/08b-mat-end.png",
+      "goji-reel-animation-v6/assets/08b-mat-start.png"
+    ],
+    "prompt": "Edit image 1 only, preserving the deeper DOWN-LEFT stretch pose and every body position. Change only navy therapist's hairstyle and expression to exactly match image 2: short chin-length black bob tucked behind ears, short nape, NO ponytail or bun, gentle closed-mouth smile and kind relaxed eyes. Preserve maroon patient's long ponytail, all clothes, hands on top of arm and at waist, mat, equipment, background, camera, lighting and PS2 rendering exactly. This must be the matching deeper-stretch endpoint for image 2.",
+    "status": "selected"
+  },
+  {
+    "name": "04-stop-start-fixed",
+    "refs": [
+      "goji-reel-animation-v6/assets/04-stop-start.png"
+    ],
+    "prompt": "Make only three precise corrections to this image; preserve camera, car position and heading, lamp post position, architecture and lighting EXACTLY. 1. Replace the incorrect white facade text with exactly LENTOR MODERN, spelled L E N T O R  M O D E R N. 2. The taxi windshield must be intact transparent glass: remove every crack and broken-glass mark. 3. Remove all prone people or bodies in distant background; leave empty clean pavement there. Keep woman seated at front steering wheel, maroon outfit, no person outside taxi. Do not move the taxi or lamp post and do not change viewpoint.",
+    "status": "superseded; local draft only"
+  },
+  {
+    "name": "04-door-bail-mid",
+    "refs": [
+      "05-ground-handoff.png",
+      "04-stop-start-fixed.png"
+    ],
+    "prompt": "Locked-camera middle keyframe: same blue taxi nose left beside stationary pole; maroon player jumps sideways through near front driver door toward lower-left pavement. Front-hinged open door, entire body clear, knees tucked and hands bracing. One woman, intact windshield, no ejection. Exact low-poly setting and daylight preserved.",
+    "status": "superseded; local draft only",
+    "prompt_source": "summary"
+  },
+  {
+    "name": "04-door-bail-fixed",
+    "status": "superseded; local draft only",
+    "refs": [
+      "04-door-bail-mid (rejected reference kept locally)"
+    ],
+    "prompt_summary": "Rebuild front-hinged driver door connected continuously to A-pillar behind front wheel, integral window frame and one mirror at the upper front door corner. Remove duplicate body mirror. Preserve player midair pose, camera, taxi and setting."
+  },
+  {
+    "name": "04-braking",
+    "status": "superseded; local draft only",
+    "refs": [
+      "04-door-bail-fixed.png"
+    ],
+    "prompt_summary": "Same locked camera and taxi position. Close door, remove airborne woman, place same maroon woman at front driver steering wheel reaching toward inside door handle. One mirror, empty pavement, unchanged taxi position."
+  },
+  {
+    "name": "02-four-door-seated",
+    "status": "selected",
+    "prompt_summary": "Keep aggressive handle grip and scene. Rebuild four-door car with separate handles, windows and B-pillar from real reference; move driver from erroneous rear-window position into front driver window."
+  },
+  {
+    "name": "02-four-door-end-clean",
+    "status": "selected",
+    "prompt_summary": "Same four-door taxi. Front door open; rear door remains closed. Woman upright, driver on ground unharmed. Remove duplicate mirror and stray extra window frame."
+  },
+  {
+    "name": "04-four-door-closed",
+    "status": "selected",
+    "prompt_summary": "Rebuild coupe-like car as four-door sedan using real Comfort taxi reference; both near-side doors, handles and windows distinct; maroon woman at front wheel."
+  }
+]

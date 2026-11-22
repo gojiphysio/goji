@@ -1,0 +1,73 @@
+{
+  "duration": 34.3,
+  "shots": [
+    {
+      "shot": "01-swagger",
+      "start": 0,
+      "duration": 4.3,
+      "source_start": 0,
+      "source_duration": 4.708333
+    },
+    {
+      "shot": "02-takeover",
+      "start": 4.3,
+      "duration": 2.8,
+      "source_start": 0,
+      "source_duration": 4.041667
+    },
+    {
+      "shot": "03-drive",
+      "start": 7.1,
+      "duration": 4.0,
+      "source_start": 0,
+      "source_duration": 4.041667
+    },
+    {
+      "shot": "04-bailout",
+      "start": 11.1,
+      "duration": 3.5,
+      "source_start": 0,
+      "source_duration": 5.041667
+    },
+    {
+      "shot": "05-recovery",
+      "start": 14.6,
+      "duration": 3.8,
+      "source_start": 0,
+      "source_duration": 4.708333
+    },
+    {
+      "shot": "06-marker",
+      "start": 18.4,
+      "duration": 2.0,
+      "source_start": 0,
+      "source_duration": 1.75
+    },
+    {
+      "shot": "black-transition",
+      "start": 20.4,
+      "duration": 0.4
+    },
+    {
+      "shot": "07-entry",
+      "start": 20.8,
+      "duration": 2.5,
+      "source_start": 0,
+      "source_duration": 3.041667
+    },
+    {
+      "shot": "08b-mat",
+      "start": 23.3,
+      "duration": 5.0,
+      "source_start": 0,
+      "source_duration": 5.041667
+    },
+    {
+      "shot": "09-squat",
+      "start": 28.3,
+      "duration": 6.0,
+      "source_start": 0,
+      "source_duration": 6.041667
+    }
+  ]
+}
