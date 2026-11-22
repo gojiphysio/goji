@@ -33,3 +33,4 @@ tab, honour these:
   `../business-intelligence/scripts/dashboard/AGENTS.md`.
 
 - **Remote-first handoffs.** Assume the user is on a phone away from Tidepool. Lead with a verified HTTPS review link; image storyboards need a GitHub-rendered Markdown page with embedded frames. Local paths, localhost and raw HTML links are supplementary. Preserve existing access controls.
+- **Generated reel continuity.** Continue linked action from the preceding clip's actual final frame, and review motion as well as keyframes. Keep HUD, text and sound separate from generated video so they can be edited without regenerating scenes.

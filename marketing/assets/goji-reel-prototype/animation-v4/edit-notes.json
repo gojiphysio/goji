@@ -1,0 +1,9 @@
+{
+  "format": "1080x1920 portrait, 30 fps, original SFX only",
+  "latest_user_correction": "Player stands ON the reformer; keep carriage and machine stationary.",
+  "interior_duration_seconds": {"reformer": 6, "mat": 6, "squat": 6},
+  "squat_reference": "User-supplied MATRIX rack photograph; left window replaced with shelving. Original photo retained locally.",
+  "popup": "Body Muscle - Upgraded. You're well-toned. Keep this up and your attacks will inflict more damage.",
+  "sound": "Original dry arcade-style effects, no sampled game audio, no music.",
+  "camera": "Third-person gameplay exteriors; calm fixed interior cutscenes."
+}

@@ -1,0 +1,64 @@
+[
+  {
+    "name": "02-takeover",
+    "refs": [
+      "/Users/tidepool/Projects/goji-reel-animation-v2/assets/02-takeover-contact.png"
+    ],
+    "prompt": "Use case: precise-object-edit. Revise this exact GTA SA PS2 vertical rear-three-quarter taxi frame. Keep taxi solid geometry, conventional front-hinged open right driver door, camera, blue Comfort livery, daylight, driver and maroon player identities. Fix player's stance: she stands UPRIGHT close to open door, both white shoes flat shoulder-width apart, knees softly bent, centre of gravity directly over feet, NOT leaning back and NOT falling. Her left hand has a firm grip on grey-shirt male driver's right upper arm. Black purse hangs from her right hand. Driver still seated with hips inside car, one foot emerging. She will guide him OUT sideways then enter seat herself while staying standing. Clear open space behind her to place driver on road. NO one on floor yet. No blood, no HUD."
+  },
+  {
+    "name": "03-drive",
+    "refs": [
+      "/Users/tidepool/Projects/goji-reel-animation-v2/assets/03-drive.png"
+    ],
+    "prompt": "Use case: precise-object-edit. Preserve this exact vertical GTA San Andreas PS2 rear-chase gameplay reference, blue Comfort taxi maroon woman in right driver seat, same daytime teal sky green foliage Lentor canopy. Simplify traffic: ONLY TWO other cars on entire road: one silver sedan 20 metres ahead keeping left lane, one white van 45 metres ahead keeping right lane. Remove red car completely. Lots of open road and a generous passing gap. Both vehicles perfectly aligned parallel to lane markings, no yaw, no drifting, no smoke. Taxi centred closest to camera. Preserve all original taxi geometry and image's lighting and style. No other cars/pedestrians/text overlays."
+  },
+  {
+    "name": "08a-warrior",
+    "refs": [
+      "/Users/tidepool/Projects/goji-reel-animation-v2/assets/08a-reformer.png"
+    ],
+    "prompt": "Use case: stylized-concept. Create vertical 9:16 original PS2 GTA SA low-poly Goji interior cutscene using this image's same fictional maroon-clad woman with ponytail, navy female therapist, cream actual-Goji reformer, curtains, calm daylight and polygon style. Change exercise: woman stands ON THE FLOOR on a burgundy mat beside the reformer, whole body and both hands fully visible, feet together white socks, both arms reaching straight overhead in an easy standing stretch. Therapist stands to right slightly behind and has one flat hand touching patient's side waist, ready to guide alignment. Reformer empty and completely STATIC behind them, all rails carriage footbar stationary. Wide full-body framing with space either side for arms to extend horizontally for Warrior II. Top third blank curtain for popup optional. No one standing on reformer, no machine motion, no purse on body; black purse on stool at side. No extra limbs, no HUD."
+  },
+  {
+    "name": "08b-mat",
+    "refs": [
+      "/Users/tidepool/Projects/goji-reel-animation-v2/assets/08b-mat.png"
+    ],
+    "prompt": "Use case: precise-object-edit. Fix therapist's anatomically impossible grip in this exact vertical GTA SA low-poly seated side-stretch image. Keep same maroon player, cross-legged pose, left arm stretching overhead, navy therapist kneeling next to her, burgundy mat, background and daylight. Therapist's right hand should be a FLAT OPEN PALM under the underside of player's upper arm near elbow, supporting from below. Her four fingers are TOGETHER all pointing in SAME direction along underside of arm, NOT wrapping across top, no fingers visible on opposite side of arm. A simple low-polygon mitten-like hand with one thumb is preferable to detailed fingers. Therapist's other open hand flat against patient's lateral waist. Exactly two hands per person, anatomically clear contact. Keep both faces and body positions stable; no other changes."
+  },
+  {
+    "name": "02-seated",
+    "refs": [
+      "/Users/tidepool/Projects/goji-reel-animation-v4/assets/02-takeover.png"
+    ],
+    "prompt": "Use case: precise-object-edit. This is END FRAME of the same single continuous taxi hijacking gameplay shot. Preserve EXACT blue taxi body, lens, camera location, background and daylight from reference, no shifts in taxi placement or size. Move maroon woman into right-hand DRIVER SEAT, fully seated, ponytail and maroon shoulders visible through open window, hands near steering wheel. Black purse on passenger seat. Front RIGHT door now almost closed, conventional front hinge unchanged, gap only 15 degrees. Same grey-shirt male driver now sitting unharmed on road 1 metre to right of taxi, knees bent, one hand braced on pavement, looking annoyed at her. Exactly one driver, one woman, no standing duplicate, no blood, no body panels disappearing. Keep low-poly GTA SA style."
+  },
+  {
+    "name": "08a-warrior-end",
+    "refs": [
+      "/Users/tidepool/Projects/goji-reel-animation-v4/assets/08a-warrior.png"
+    ],
+    "prompt": "Use case: precise-object-edit. END FRAME of this exact same locked camera Goji low-poly PS2 scene. Preserve exact room, empty reformer completely stationary same position, same burgundy mat, same women and outfits. Woman is now in WARRIOR II pose on the floor: wide stance across mat, LEFT knee bent 90deg and toes pointing image-left, RIGHT leg straight trailing toward image-right, both feet flat, torso upright facing camera slightly, arms extended horizontally in opposite directions at shoulder height, palms down, looking left over fingertips. Two complete arms and two legs. Navy therapist stands one small step behind her at right, one flat hand lightly supporting back of waist, other hand relaxed clear of patient's arm. Ensure clear unoccluded outline of pose and no arm passing through therapist. Reformer behind is unchanged and empty. No text."
+  },
+  {
+    "name": "04-crash-eject",
+    "refs": [
+      "/Users/tidepool/Projects/goji-reel-animation-v2/assets/04-impact.png",
+      "/Users/tidepool/Projects/goji-reel-animation-v4/assets/03-drive.png"
+    ],
+    "prompt": "Use case: stylized-concept. Vertical 9:16 GTA SA PS2 gameplay frame, same blue Comfort taxi, maroon female driver, pale teal sky daylight and Lentor Modern facade in reference. Set up ONE CONTINUOUS APPROACH AND WINDSCREEN EJECTION shot. Camera is an elevated rear-right three-quarter chase angle, looking diagonally forward and down, taxi rear nearest camera bottom-right and nose pointing toward upper-left, so right side windows, driver, FRONT WINDSCREEN plane, hood and front bumper are distinguishable in perspective. Taxi already moving, intact, 10 metres from slender upright lamp post straight ahead of FRONT BUMPER on pavement. View entire taxi plus ten metre approach and clear landing space BEYOND pole. Driver seated inside RIGHT seat wearing maroon, hands steering, black purse beside her. Two distant adult bystanders beside shopfront well out of path. No airborne person yet, no cracks, no damage. All daylight and buildings match refs; no sunset, no blood or HUD. Cinematic enough view to understand where driver exits but still classic third-person rear-quarter gameplay camera, NOT a front-facing view."
+  },
+  {
+    "name": "09-squat",
+    "prompt": "Use case: stylized-concept. Create a vertical 9:16 original 2004 GTA San Andreas PS2 low-polygon interior cutscene. Image1 is user-supplied squat-rack equipment and room-layout reference, image2 defines our fictional maroon yoga woman and navy female Goji physiotherapist and game rendering style. Model the exact black MATRIX free-weight squat rack from image1: two black perforated uprights, silver cross beam and pull-up bar, horizontal safety arms, black base feet, silver barbell, green and blue weight plates stored on right pegs, large mirror behind, dark rubber floor. IMPORTANT replace the entire tall left-side open window with built-in light oak open SHELVING holding neatly folded towels and small exercise props; no left window or outdoor view. Remove every real man and photographer from reference. Our young adult maroon sleeveless top/leggings woman, black ponytail and white trainers, stands inside rack facing mirror with modest loaded bar resting on upper back, hands gripping it symmetrically, feet shoulder width, knees slightly bent at start of squat. Same adult navy female physiotherapist stands directly behind and slightly offset so both are visible, knees soft, hands open close to player's lateral ribs ready to spot without grabbing bar; therapist watches player's torso. Simple mitten-like low-poly hands with no doubled fingers. Rear-three-quarter interior cutscene camera, wide full-body frame including rack top and feet and BOTH characters, reflection consistent with two characters only. Calm soft warm clinic light, charcoal rubber floor, muted cream walls, maroon mat optional none. Black purse on side shelf. NO real reference people, no photographer, no excessive plates, no text overlays or HUD. Keep PS2 angular faces and simplified textures, not photorealistic."
+  },
+  {
+    "name": "08a-on-reformer",
+    "prompt": "Use case: stylized-concept. Vertical 9:16 original PS2 GTA San Andreas low-polygon Goji interior cutscene. Preserve reference exact maroon woman and navy female therapist, cream real-Goji-style reformer frame with adjustment holes, grey padded carriage, curved open cream footbar, shoulder blocks, curtains and soft daylight. Change woman's pose: she stands UPRIGHT ON TOP OF THE REFORMER'S PADDED CARRIAGE, both white socked feet on padded carriage shoulder-width apart along machine length, both arms extended straight overhead. Feet do NOT touch floor. The entire reformer is locked and STATIONARY. Therapist stands on floor to the right side beside her, a head lower because player stands on the elevated carriage; one open flat hand gently supports player's hip. Full side view showing whole machine from footbar left to shoulder blocks right, woman's complete body and raised hands not cropped, therapist complete body. Black purse and shoes on side stool. Provide enough room on carriage for later Warrior II stance, but do not distort or enlarge machine. No extra limbs, no text or HUD. This is a standing balance stretch on stationary equipment, NO carriage travel."
+  },
+  {
+    "name": "08a-warrior-final",
+    "prompt": "Use case: precise-object-edit. Create END POSE of same continuous locked-camera shot. Keep EXACT same reformer, carriage, footbar, shoulder blocks, frame, floor, curtain, stool, camera and therapist location. The machine must remain absolutely IDENTICAL with no moved components. Change only the maroon woman from arms overhead to a compact WARRIOR II pose STANDING ON THE SAME PADDED CARRIAGE: slide left foot a little toward footbar left and right foot toward shoulder blocks right, both white-socked feet entirely supported by the carriage cushion, neither on floor. Bend left knee comfortably toward image-left, keep right leg straight toward image-right, open torso slightly toward camera, extend both arms horizontally in opposite directions at shoulder height, palms down, gaze over left fingertips. Shorter stance to fit actual carriage, do not stretch the machine. Navy therapist remains standing on FLOOR to right, one flat hand contacting player's right hip, other relaxed. Exactly two arms, two legs per person, low-poly hands, same maroon athleisure, black ponytail. No text. No machine motion."
+  }
+]

@@ -1,0 +1,20 @@
+{
+  "goji-v4-ui-sfx.mp4": {
+    "duration": "43.200000",
+    "streams": [
+      "h264",
+      "aac"
+    ],
+    "bytes": 38228561
+  },
+  "goji-v4-ui-silent.mp4": {
+    "duration": "43.200000",
+    "streams": [
+      "h264"
+    ],
+    "bytes": 37634505
+  },
+  "black_transition_max_pixel": 0,
+  "audio_peak_dbfs": -2.95,
+  "all_checks_passed": true
+}
