@@ -181,3 +181,106 @@ def test_bubbles_split_and_cap_at_three():
     assert split_bubbles("a\n<break>\nb\n<break>\n\n<break>\nc", 3) == ["a", "b", "c"]
     assert split_bubbles("a<break>b<break>c<break>d", 3) == ["a", "b", "c\n\nd"]
     assert as_one_message("a\n<break>\nb") == "a\n\nb"
+
+
+# --- off-topic: answered, never handed to Chris, watch-listed when it persists
+
+def test_off_topic_sends_whatever_the_confidence_or_escalate_flag():
+    from wa_agent import config
+    from wa_agent.policy import apply_stage
+    junk = prop(intent="off_topic", confidence=0.3, escalate=True, reply="Sorry, wrong number!")
+    d = decide(junk)
+    assert (d.action, d.reason) == (SEND, "off_topic")
+    for stage in config.STAGES:  # no stage turns it into a handover or leaves it
+        d = apply_stage(decide(junk, intent_policy=config.stage_policy(stage)), junk, stage)
+        assert d.action == SEND, stage
+    # even if repeated rescues demoted it, it never becomes a draft (a ping)
+    assert decide(junk, intent_policy={"off_topic": "draft"}).action == SEND
+
+
+def test_off_topic_reply_with_a_foreign_link_is_dropped_not_handed_over():
+    d = decide(prop(intent="off_topic", reply="Pay here: http://bit.ly/x"))
+    assert (d.action, d.reason) == (SILENT, "off_topic_unsafe_reply")
+
+
+def test_three_off_topic_in_a_row_puts_the_chat_on_the_watch_list():
+    from wa_agent.policy import WATCHLIST, note_off_topic
+    s = ChatState(wa_id="65")
+    assert not note_off_topic(s, "off_topic", NOW, limit=3)
+    assert not note_off_topic(s, "faq", NOW, limit=3)          # a real question resets it
+    assert s.off_topic_strikes == 0
+    assert [note_off_topic(s, "off_topic", NOW, limit=3) for _ in range(3)] == [False, False, True]
+    assert (s.mode, s.mode_reason) == (PAUSED, WATCHLIST)
+    assert gate(s, NOW, kill_switch=False).reason == WATCHLIST
+
+
+
+# --- holding replies: the model's own, specific one; the generic line as fallback
+
+def test_holding_reply_uses_the_models_own_when_it_is_clean():
+    from wa_agent.policy import holding_reply
+    p = prop(intent="complaint", reply="We'll refund you $50.",
+             holding_reply="So sorry about the wait yesterday, Jamie. I've passed this to the "
+                           "team and they'll get back to you today.")
+    assert holding_reply(p, NOW).startswith("So sorry about the wait")
+
+
+def test_holding_reply_falls_back_to_the_generic_line_timed_to_clinic_hours():
+    from wa_agent.policy import GENERIC_HOLDING, holding_reply
+    night = datetime(2026, 11, 18, 22, 0, tzinfo=SGT).timestamp()
+    assert holding_reply(prop(holding_reply=""), NOW) == GENERIC_HOLDING[True]
+    assert holding_reply(prop(holding_reply=""), night).endswith("when we open.")
+    bad = prop(holding_reply="Pay here http://bit.ly/x and we'll sort it")
+    assert holding_reply(bad, NOW) == GENERIC_HOLDING[True]
+    assert holding_reply(prop(holding_reply="word " * 120), NOW) == GENERIC_HOLDING[True]
+    assert holding_reply(prop(holding_reply="Fine", failed=True), NOW) == GENERIC_HOLDING[True]
+
+
+
+def test_a_handover_never_sends_the_draft_meant_for_chris():
+    from wa_agent.policy import Decision, customer_message
+    p = prop(intent="other", escalate=True, reply="Happy to discuss a partnership! What do "
+             "you have in mind?", holding_reply="Thanks! I've passed this to the team and "
+             "they'll get back to you today.")
+    assert customer_message(Decision(ESCALATE, "x"), p, NOW).startswith("Thanks! I've passed")
+    red = prop(intent="urgent", escalate=True, reply="Please call 995 now.", holding_reply="")
+    assert customer_message(Decision(ESCALATE, "x"), red, NOW) == "Please call 995 now."
+    assert customer_message(Decision(SEND, "x"), prop(reply="A session is $260."), NOW) \
+        == "A session is $260."
+
+
+
+def test_a_reply_with_a_placeholder_for_chris_never_reaches_the_customer():
+    from wa_agent.policy import Decision, customer_message, reply_problems
+    assert reply_problems("Yes, we can issue an MC [confirm] by [time].") == ["placeholder"]
+    assert reply_problems("A session is $260 (55 min).") == []
+    d = decide(prop(intent="faq", reply="Returning patients get [discount] off."))
+    assert d.action == DRAFT and "placeholder" in d.reason
+    held = prop(intent="other", escalate=True, reply="x",
+                holding_reply="We'll send the MC by [time].")
+    assert "[" not in customer_message(Decision(ESCALATE, "x"), held, NOW)
+
+
+
+def test_a_guessed_page_link_is_held(monkeypatch):
+    from wa_agent import kb
+    from wa_agent.policy import reply_problems
+    monkeypatch.setattr(kb, "_paths", frozenset({"/", "/services/clinical-pilates/"}))
+    assert reply_problems("More: https://www.gojiphysio.com/services/clinical-pilates/") == []
+    assert reply_problems("See https://www.gojiphysio.com/services/clinical-pilates.") == []
+    assert reply_problems("See https://www.gojiphysio.com/services/yoga/") == ["unknown_page"]
+
+
+
+def test_the_patient_record_makes_a_late_change_late_even_if_the_model_missed_it():
+    from wa_agent.policy import check_late_change
+    today_3pm = {"date": "2026-11-18", "time": "15:00"}          # NOW is 10am that day
+    p = prop(intent="reschedule", reply="Fee applies, sorry.", hours_to_appointment=-1)
+    check_late_change(p, today_3pm, NOW)
+    assert p.hours_to_appointment == 5 and decide(p).reason == "late_change"
+    later = prop(intent="reschedule", hours_to_appointment=2)
+    check_late_change(later, {"date": "2026-11-25", "time": "10:00"}, NOW)
+    assert later.hours_to_appointment == 2                         # the sooner one wins
+    faq = prop(intent="faq", hours_to_appointment=-1)
+    check_late_change(faq, today_3pm, NOW)
+    assert faq.hours_to_appointment == -1

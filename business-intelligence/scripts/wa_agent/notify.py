@@ -20,7 +20,7 @@ log = logging.getLogger("wa_agent.notify")
 
 def compose(kind: str, *, customer: str, wa_id: str, staff_note: str,
             suggested_reply: str, reason: str, last_message: str,
-            feedback: dict | None = None) -> EmailMessage:
+            feedback: dict | None = None, sent_reply: str = "") -> EmailMessage:
     subject = {"escalated": "WhatsApp: needs you", "drafted": "WhatsApp: draft reply to check",
                "urgent": "URGENT WhatsApp: possible red flag",
                "sensitive": "WhatsApp: needs you (sensitive)",
@@ -37,8 +37,7 @@ def compose(kind: str, *, customer: str, wa_id: str, staff_note: str,
         f"What they want: {staff_note}\n"
         f"Why you're getting this: {reason}\n\n"
         f"Their last message:\n{last_message}\n\n"
-        f"{'Suggested reply (NOT sent)' if kind == 'drafted' else 'Agent sent this reply' if kind in ('fyi', 'reschedule', 'media') else 'Agent sent this holding reply'}:\n"
-        f"{suggested_reply}\n\n"
+        + _replies(kind, suggested_reply, sent_reply)
         + ("Nothing was sent. If the draft is right, send it from the WhatsApp "
            "Business app (that also takes the chat over from the assistant).\n"
            if kind == "drafted" else
@@ -56,7 +55,7 @@ def compose(kind: str, *, customer: str, wa_id: str, staff_note: str,
            if kind == "reschedule" else
            "Reply to them in the WhatsApp Business app. Until you do, the assistant "
            "keeps answering their routine questions, but not this. Once you reply it "
-           "steps out until you hand the chat back or 24 hours pass.\n"
+           "stays out of the chat until you text RESUME and the chat number.\n"
            if kind == "escalated" else
            "Reply to them in the WhatsApp Business app. The assistant stays out of "
            "this chat until you hand it back or 24 hours pass with no reply from you.\n")
@@ -64,6 +63,21 @@ def compose(kind: str, *, customer: str, wa_id: str, staff_note: str,
            f"Yes: {feedback['up']}\nNo: {feedback['down']}\n" if feedback else "")
     )
     return msg
+
+
+def _replies(kind: str, suggested: str, sent: str) -> str:
+    """The reply part of a ping. On a handover the customer got the holding
+    reply (`sent`) and `suggested` is the agent's draft for Chris, with
+    [brackets] for her to fill in: show both, clearly apart."""
+    if sent and kind in ("escalated", "urgent", "sensitive"):
+        out = f"The customer got:\n{sent}\n\n"
+        if suggested.strip() and suggested.strip() != sent.strip():
+            out += ("Suggested reply for you (NOT sent; fill in anything in [brackets] "
+                    f"first):\n{suggested}\n\n")
+        return out
+    label = ("Suggested reply (NOT sent)" if kind == "drafted" else "Agent sent this reply"
+             if kind in ("fyi", "reschedule", "media") else "Agent sent this holding reply")
+    return f"{label}:\n{suggested}\n\n"
 
 
 def compose_plain(subject: str, body: str) -> EmailMessage:

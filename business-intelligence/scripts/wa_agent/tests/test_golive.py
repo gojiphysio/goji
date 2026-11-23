@@ -616,3 +616,31 @@ def test_forget_removes_the_hold(env):
     post(client, echo(ts=int(time.time())))
     client.post(f"/admin/chats/{CUSTOMER}/forget", headers=ADMIN)
     assert app_mod.store.load(CUSTOMER).mode == AGENT
+
+
+def test_off_topic_is_answered_quietly_then_watch_listed(env, with_staff):
+    client, rec, notes, _ = env
+    now = int(time.time())
+    junk = "Sorry, this is Goji's physio clinic, so we can't help with that one."
+    app_mod.claude.queue.extend([final(reply=junk, intent="off_topic", confidence=0.4,
+                                       escalate=True)] * 3)
+    for i in range(3):
+        post(client, inbound(ts=now - 300 + i, msg_id=f"wamid.j{i}", text="write my essay"))
+    assert [t for to, t in app_mod.wa.sent if to == CUSTOMER] == [junk] * 3
+    assert notes == []                                          # no email, no ping
+    st = app_mod.store.load(CUSTOMER)
+    assert (st.mode, st.mode_reason) == (PAUSED, "watchlist") and st.code
+    assert [o["outcome"] for o in st.outcomes] == ["off-topic", "off-topic", "watch-listed"]
+    assert "watchlist" in names(rec)
+
+    post(client, inbound(ts=now - 200, msg_id="wamid.j4", text="hello?? answer me"))
+    assert len(app_mod.claude.requests) == 3                     # no model call
+    assert ("silent", {"reason": "watchlist"}) in rec
+
+    s = summary.build([app_mod.store.load(CUSTOMER)], now, paused=app_mod.store.paused_chats())
+    assert s["off_topic"] == 1 and s["watched"] == 1 and s["paused"] == 0
+    assert "Stopped answering" in s["body"] and f"#{st.code}" in s["body"]
+
+    post(client, inbound(wa_id=CHRIS, text=f"resume {st.code}", ts=now, msg_id="s1"))
+    st = app_mod.store.load(CUSTOMER)
+    assert st.mode == AGENT and st.off_topic_strikes == 0

@@ -68,6 +68,9 @@ DEBOUNCE_S = float(os.environ.get("WA_AGENT_DEBOUNCE_S", "6"))
 # model scores good replies 0.75-0.85, and links, numbers and booking actions
 # are checked in code whatever the score).
 MIN_CONFIDENCE = float(os.environ.get("WA_AGENT_MIN_CONFIDENCE", "0.7"))
+# Off-topic messages in a row before the chat goes quiet on the watch list
+# (paused, kept HOLD_DAYS; staff RESUME it if it was a real customer).
+OFF_TOPIC_LIMIT = int(os.environ.get("WA_AGENT_OFF_TOPIC_LIMIT", "3"))
 # "all" or "after_hours" (outside Mon-Sat 08:00-20:00 SGT, the clinic's hours).
 AGENT_HOURS = os.environ.get("WA_AGENT_HOURS", "all")
 
@@ -101,6 +104,11 @@ INTENT_POLICY: dict[str, str] = {
     "person_check": "auto",
     # A photo: the agent can't see it, thanks them and says the team will look.
     "media_received": "auto",
+    # Wrong numbers, unrelated questions, attempts to misuse the chat: a short
+    # front-desk reply, whatever the confidence, and never a ping (owner,
+    # 23 Nov 2026). policy.decide handles it; OFF_TOPIC_LIMIT in a row pauses
+    # the chat on the watch list.
+    "off_topic": "auto",
 }
 INTENTS = tuple(INTENT_POLICY)
 
@@ -115,7 +123,7 @@ INTENTS = tuple(INTENT_POLICY)
 # runs behave as before. A deployed service sets a stage.
 LEAVE = "leave"
 SAFE_INTENTS = frozenset({"greeting", "faq", "pricing", "location_hours", "availability",
-                          "service_fit", "person_check", "media_received",
+                          "service_fit", "person_check", "media_received", "off_topic",
                           "booking"})  # direct booking on from day one (owner's call)
 STAGE2_EXTRA = frozenset({"existing_appointment", "reschedule"})
 STAGES = (0, 1, 2, 3)

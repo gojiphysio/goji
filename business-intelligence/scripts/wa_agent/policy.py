@@ -66,6 +66,7 @@ class ChatState:
     last_staff_at: float = 0.0     # latest business-number message from the app (echo or import)
     name: str = ""                 # WhatsApp profile name, for staff pings and the summary
     outcomes: list[dict] = field(default_factory=list)  # {at, intent, outcome}: morning summary
+    off_topic_strikes: int = 0     # off-topic messages in a row (note_off_topic)
 
     def to_dict(self) -> dict:
         return dict(self.__dict__)
@@ -90,6 +91,7 @@ class Proposal:
     move: dict = field(default_factory=dict)     # old/new date+time for moving an appointment
     confirm_move: bool = False
     failed: bool = False  # agent._escalation: the model or a tool failed, nothing to judge
+    holding_reply: str = ""  # the model's own handover message, sent when the code hands over
 
 
 @dataclass
@@ -188,7 +190,7 @@ def gate(state: ChatState, now: float, *, kill_switch: bool = config.KILL_SWITCH
     if state.wa_id in always_human:
         return Decision(SILENT, "always_human")
     if state.mode == PAUSED:
-        return Decision(SILENT, "paused")
+        return Decision(SILENT, WATCHLIST if state.mode_reason == WATCHLIST else "paused")
     if state.mode == HUMAN:
         return Decision(SILENT, "human_has_chat")
     if not_live:
@@ -211,10 +213,13 @@ ALLOWED_NUMBERS = {"83770401", "995", "1767", "1777"}
 _URL = re.compile(r"(?:https?://|www\.)[^\s)>\]]+", re.I)
 _EMAIL = re.compile(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+")
 _PHONE = re.compile(r"(?<![\w$.])(?:\+?65[\s-]?)?(\d{4}[\s-]?\d{4})(?![\w])")
+# A [placeholder] the model left for Chris to fill in: never sent to a customer.
+_PLACEHOLDER = re.compile(r"\[[^\[\]\n]{1,80}\]")
 
 
 def reply_problems(reply: str) -> list[str]:
-    """Links, emails or phone numbers in a reply that aren't Goji's own."""
+    """Links, emails or phone numbers in a reply that aren't Goji's own, and
+    [placeholders] left for Chris."""
     problems = []
     for url in _URL.findall(reply):
         parsed = urlparse(url if "://" in url else "https://" + url)
@@ -225,12 +230,21 @@ def reply_problems(reply: str) -> list[str]:
                 and parsed.path.startswith("/book"):
             # Booking links must be the tracked go-link from booking_link (repo rule).
             problems.append("untracked_booking_link")
+        elif host.endswith("gojiphysio.com") and host != "go.gojiphysio.com":
+            # A page link must be a page that exists: a guessed URL is a 404.
+            from .kb import site_paths
+            known = site_paths()
+            path = (parsed.path or "/").rstrip(".,!?") or "/"
+            if known is not None and (path if path.endswith("/") else path + "/") not in known:
+                problems.append("unknown_page")
     for email in _EMAIL.findall(reply):
         if email.lower() not in ALLOWED_EMAILS:
             problems.append("email")
     for num in _PHONE.findall(reply):
         if re.sub(r"\D", "", num) not in ALLOWED_NUMBERS:
             problems.append("phone")
+    if _PLACEHOLDER.search(reply):
+        problems.append("placeholder")
     return problems
 
 
@@ -285,6 +299,46 @@ def is_clarifying_question(reply: str) -> bool:
             and r.rstrip(" :)😊🙂").endswith("?") and not _FACTISH.search(r))
 
 
+OFF_TOPIC = "off_topic"
+WATCHLIST = "watchlist"
+
+
+def note_off_topic(state: ChatState, intent: str, now: float,
+                   limit: int = config.OFF_TOPIC_LIMIT) -> bool:
+    """Counts off-topic messages in a row; any other message resets the count.
+    At `limit` the chat is paused on the watch list: the agent answered the
+    first `limit`, and stays silent from the next one until staff resume it.
+    Returns True if this message put the chat on the watch list."""
+    if intent != OFF_TOPIC:
+        state.off_topic_strikes = 0
+        return False
+    state.off_topic_strikes += 1
+    return state.off_topic_strikes >= limit and set_mode(state, PAUSED, WATCHLIST, now)
+
+
+def hours_until(appointment: dict | None, now: float) -> float:
+    """Hours from `now` to a {date: YYYY-MM-DD, time: HH:MM} SGT appointment;
+    -1 if there isn't one or it can't be read."""
+    try:
+        at = datetime.strptime(f"{appointment['date']} {appointment['time']}",
+                               "%Y-%m-%d %H:%M").replace(tzinfo=SGT)
+    except (TypeError, KeyError, ValueError):
+        return -1.0
+    return max(0.0, (at.timestamp() - now) / 3600)
+
+
+def check_late_change(p: Proposal, appointment: dict | None, now: float) -> None:
+    """The 24-hour rule can't rest on the model's hours_to_appointment alone
+    (it sometimes leaves -1): for a reschedule or cancel, the patient record's
+    next appointment counts too, and the sooner of the two wins, so a late
+    change always reaches Chris (23 Nov 2026)."""
+    if p.intent not in ("reschedule", "cancel"):
+        return
+    rec = hours_until(appointment, now)
+    if rec >= 0 and (p.hours_to_appointment < 0 or rec < p.hours_to_appointment):
+        p.hours_to_appointment = rec
+
+
 def decide(proposal: Proposal, *, intent_policy: dict[str, str] = config.INTENT_POLICY,
            min_confidence: float = config.MIN_CONFIDENCE) -> Decision:
     """What happens to a proposal that passed `gate`.
@@ -296,6 +350,14 @@ def decide(proposal: Proposal, *, intent_policy: dict[str, str] = config.INTENT_
     rule = intent_policy.get(proposal.intent, DRAFT)
     if rule == config.LEAVE:
         return Decision(SILENT, "stage_leave")
+    if proposal.intent == OFF_TOPIC and not proposal.failed:
+        # Not worth Chris's time (owner, 23 Nov 2026): the polite reply goes
+        # out whatever the confidence or an escalate flag, and a reply that
+        # fails the content check is dropped, never handed over. It shows in
+        # the morning summary only.
+        if not proposal.reply.strip() or reply_problems(proposal.reply):
+            return Decision(SILENT, "off_topic_unsafe_reply")
+        return Decision(SEND, "off_topic")
     if proposal.escalate and not (rule == "draft" and proposal.intent != "urgent"):
         return Decision(ESCALATE, proposal.escalation_reason or "model_escalated")
     # A draft-for-Chris intent stays a draft even if the model wanted to hand
@@ -348,6 +410,40 @@ def apply_stage(d: Decision, proposal: Proposal, stage: int | None) -> Decision:
     if d.action == DRAFT:
         return Decision(ESCALATE, f"handover:{d.reason}", holding=True)
     return d
+
+
+HOLDING_MAX_WORDS = 90
+GENERIC_HOLDING = {True: "Thanks for your message! I've passed it to the team and they'll "
+                         "get back to you today.",
+                   False: "Thanks for your message! I've passed it to the team and they'll "
+                          "get back to you when we open."}
+
+
+def holding_reply(p: Proposal, now: float) -> str:
+    """What the customer gets when the code hands a message over instead of
+    sending the model's reply: the model's own holding_reply (specific to what
+    they asked, no promises that need a person) if it passes the same content
+    check as any reply; else the generic line, timed to the clinic's hours."""
+    text = (p.holding_reply or "").strip()
+    if text and not p.failed and len(text.split()) <= HOLDING_MAX_WORDS \
+            and not reply_problems(text):
+        return text
+    return GENERIC_HOLDING[in_clinic_hours(now)]
+
+
+def customer_message(d: Decision, p: Proposal, now: float) -> str:
+    """What the customer gets for a proposal that is sent or handed over.
+    A handover sends the holding_reply, never `reply`: `reply` is the draft
+    answer Chris gets to send or edit (owner, 23 Nov 2026). Red flags and
+    sensitive topics are the exception: their reply (995, a warm
+    acknowledgement) goes out at once. A reply that fails the content check
+    is never sent either."""
+    reply = (p.reply or "").strip()
+    if d.action == ESCALATE and p.intent not in SILENT_HANDOVER_INTENTS:
+        return holding_reply(p, now)
+    if not reply or reply_problems(reply):
+        return holding_reply(p, now)
+    return reply
 
 
 def human_replied_since(state: ChatState, since: float) -> bool:

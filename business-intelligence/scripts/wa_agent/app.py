@@ -55,10 +55,12 @@ from flask import Flask, jsonify, request
 
 from . import (agent, booking_client, config, documents, events, learning, notify, staff,
                summary, tasks, tools)
-from .policy import (AGENT, DRAFT, ESCALATE, HUMAN, LATE_CHANGE_H, PAUSED, SEND, SGT, SILENT,
-                     WAITING, as_one_message, split_bubbles,
+from .policy import (AGENT, DRAFT, ESCALATE, HUMAN, LATE_CHANGE_H, OFF_TOPIC, PAUSED, SEND,
+                     SGT, SILENT, WAITING, WATCHLIST, as_one_message, split_bubbles,
                      apply_idle_handback, apply_stage, handover_mode,
-                     has_record, out_of_scope, pre_golive_chat,
+                     check_late_change, customer_message, has_record, note_off_topic,
+                     out_of_scope,
+                     pre_golive_chat,
                      decide, gate, human_replied_since, is_acknowledgement, on_human_message,
                      reply_problems, set_mode)
 from .state import ChatLocks, append_history, make_store, mark_seen, note_outcome, parse_code
@@ -367,7 +369,8 @@ def handle_staff(ev: Inbound) -> None:
     elif cmd == "status":
         day = _sgt_day_start(now)
         chats = [c for c in st.recent_chats(day) if c.wa_id not in config.STAFF]
-        paused = [c for c in st.paused_chats() if c.wa_id not in config.STAFF]
+        paused = [c for c in st.paused_chats() if c.wa_id not in config.STAFF
+                  and c.mode_reason != WATCHLIST]  # the watch list is in the summary
         reply = staff.status_text(kill=config.KILL_SWITCH or st.get_kill(),
                                   rollout=config.resolve_rollout(st.get_rollout()),
                                   waiting=summary.waiting_for_chris(chats, day),
@@ -393,6 +396,7 @@ def _staff_resume_pause(st, cmd: str, code: str, now: float) -> str:
         if cmd == "resume":
             set_mode(state, AGENT, "staff_resumed", now)
             state.owner = "agent"
+            state.off_topic_strikes = 0
             state.pending_for_chris, state.pending_draft, state.last_auto = "", {}, {}
         else:
             set_mode(state, PAUSED, "staff_paused", now)
@@ -819,6 +823,7 @@ def handle_inbound(ev: Inbound, received: float) -> None:
                             _booked_note(state)])))
     _schedule_warm()
     p = res.proposal
+    check_late_change(p, patient.get("next_appointment"), time.time())
     d = decide(p, intent_policy=learning.effective_policy(config.stage_policy(rollout["stage"]),
                                                           st.get_autonomy()))
     d = apply_stage(d, p, rollout["stage"])
@@ -843,7 +848,11 @@ def handle_inbound(ev: Inbound, received: float) -> None:
     if d.action == SILENT:  # stage 0 leaves it to Chris: no reply, no notice
         with locks(ev.wa_id):
             state = st.load(ev.wa_id)
-            note_outcome(state, p.intent, "left", time.time())
+            if p.intent == OFF_TOPIC:  # junk whose reply failed the check: drop it
+                _watch(st, state, ev.wa_id, p.intent, time.time())
+                note_outcome(state, p.intent, "off-topic, no reply", time.time())
+            else:
+                note_outcome(state, p.intent, "left", time.time())
             st.save(state)
         events.record("silent", ev.wa_id, intent=p.intent, reason=d.reason)
         _test_show(client, ev.wa_id, f"Left for Chris, no reply ({d.reason}).")
@@ -884,11 +893,8 @@ def handle_inbound(ev: Inbound, received: float) -> None:
         if config.KILL_SWITCH or st.get_kill():
             events.record("silent", ev.wa_id, reason="kill_switch")
             return
-        reply = p.reply.strip()
-        if d.holding or not reply or reply_problems(reply):
-            # The model's reply wasn't written as a handover (or isn't safe):
-            # the code's holding reply goes out instead.
-            reply = agent._escalation("unsafe_or_empty").reply
+        # A handover sends the holding reply; p.reply is Chris's draft (notice).
+        reply = customer_message(d, p, time.time())
         booked, failed = None, False
         if d.action == SEND and p.confirm_booking:
             reply, booked, failed = _book_pending(state, ev, received, reply, p.booking)
@@ -921,7 +927,9 @@ def handle_inbound(ev: Inbound, received: float) -> None:
         else:
             state.last_auto = {"intent": p.intent, "at": sent_at}
         state.pending_draft = {}
-        note_outcome(state, p.intent, _outcome(d, p, reply, booked, failed), sent_at)
+        watched = _watch(st, state, ev.wa_id, p.intent, sent_at)
+        note_outcome(state, p.intent, "watch-listed" if watched
+                     else _outcome(d, p, reply, booked, failed), sent_at)
         if booked:
             state.booked, state.pending_booking, state.pending_move = booked, {}, {}
         elif d.action == SEND and not p.confirm_move and p.move.get("old_date") and (
@@ -949,15 +957,30 @@ def handle_inbound(ev: Inbound, received: float) -> None:
         notify.send("fyi", **notice)
         _test_show(client, ev.wa_id, f"Chris would get an FYI email: {p.staff_note}")
     if d.action == ESCALATE:
-        _alert(p.intent if p.intent in ("urgent", "sensitive") else "escalated", **notice)
+        _alert(p.intent if p.intent in ("urgent", "sensitive") else "escalated",
+               **{**notice, "sent_reply": as_one_message(reply)})
         _test_show(client, ev.wa_id, f"Handed to Chris ({d.reason}). She'd be told: "
                                      f"{p.staff_note}")
+
+
+def _watch(st, state, wa_id: str, intent: str, now: float) -> bool:
+    """The off-topic count (policy.note_off_topic); at the limit the chat is
+    paused on the watch list with a code staff can RESUME. No ping: it's in
+    the morning summary."""
+    if not note_off_topic(state, intent, now):
+        return False
+    state.code = state.code or st.next_code()
+    state.owner = ""
+    events.record("watchlist", wa_id, reason=f"off_topic:{state.off_topic_strikes}")
+    return True
 
 
 def _outcome(d, p, reply: str, booked: dict | None, failed: bool) -> str:
     """For the morning summary."""
     if failed:
         return "failed"
+    if p.intent == OFF_TOPIC:
+        return "off-topic"
     if d.action == ESCALATE:
         return "handed over"
     if booked:

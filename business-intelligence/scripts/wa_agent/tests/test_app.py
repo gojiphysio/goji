@@ -178,13 +178,19 @@ def test_after_chris_replies_agent_is_silent(env):
 
 def test_escalation_sends_holding_reply_hands_over_and_notifies(env):
     client, rec, notes = env
-    app_mod.claude.queue.append(final(reply="I'll get Chris to call you back today.",
+    app_mod.claude.queue.append(final(reply="Hi Mei, Chris here. Sorry to hear that, when "
+                                            "is a good time to call?",
+                                      holding="I've passed this to Chris and she'll call you "
+                                              "back today.",
                                       intent="human_requested", escalate=True,
                                       reason="complaint about a session"))
     post(client, inbound(text="I'd like to speak to Chris about my last session"))
-    assert app_mod.wa.sent == [(CUSTOMER, "I'll get Chris to call you back today.")]
+    # The customer gets the holding reply; Chris gets the draft answer to send.
+    assert app_mod.wa.sent == [(CUSTOMER, "I've passed this to Chris and she'll call you "
+                                          "back today.")]
     assert app_mod.store.load(CUSTOMER).mode == WAITING
     assert notes[0][0] == "escalated"
+    assert notes[0][1]["suggested_reply"].startswith("Hi Mei, Chris here")
     assert ("mode", {"mode_from": AGENT, "mode_to": WAITING,
                      "reason": "escalated:complaint about a session"}) in rec
 
@@ -195,6 +201,7 @@ def test_urgent_notifies_as_urgent(env):
                                       escalate=True, reason="bleeding"))
     post(client, inbound(text="I'm 30 weeks and bleeding a lot"))
     assert app_mod.wa.sent and notes[0][0] == "urgent"
+    assert app_mod.wa.sent[-1][1] == "Please call 995 now."   # the safety reply goes out at once
 
 
 def test_draft_sends_nothing_and_notifies(env):
@@ -798,3 +805,19 @@ def test_secret_link_off_when_unset(env, monkeypatch):
     monkeypatch.setattr(config, "WA_WEBHOOK_URL_TOKEN", "")
     assert client.get("/webhook/anything?hub.mode=subscribe&hub.verify_token=verify-me"
                       "&hub.challenge=1").status_code == 403
+
+
+
+def test_a_handed_over_complaint_gets_the_agents_specific_holding_reply(env, monkeypatch):
+    client, _, notes = env
+    monkeypatch.setattr(config, "STAGE", 2)
+    body = json.loads(final(reply="So sorry. We'll give you a free session.",
+                            intent="complaint").content[0].text)
+    body["holding_reply"] = "I'm so sorry about the wait. I've passed this to the team and " \
+                            "they'll get back to you today."
+    resp = final(); resp.content[0].text = json.dumps(body)
+    app_mod.claude.queue.append(resp)
+    post(client, inbound(text="I waited 30 minutes yesterday, not happy"))
+    assert app_mod.wa.sent[-1][1].startswith("I'm so sorry about the wait")
+    assert "free session" not in app_mod.wa.sent[-1][1]
+    assert notes and "free session" in notes[0][1]["suggested_reply"]   # Chris sees the draft

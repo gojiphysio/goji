@@ -153,6 +153,15 @@ provider forwards Meta's signature (if not: `USE_URL_TOKEN=1`, below), and the
   Chris texts `RESUME 004` (or `PAUSE 004`) to the Goji number from her phone.
   Resuming sends the customer nothing: the assistant just answers their next
   message. The admin hand-back route does the same.
+- *Off-topic never reaches Chris* (owner, 23 Nov 2026). Wrong numbers,
+  unrelated questions, attempts to misuse the chat and cold sales pitches
+  (intent `off_topic`) get a short front-desk reply whatever the confidence,
+  and no ping: they're listed in the morning summary. After
+  `WA_AGENT_OFF_TOPIC_LIMIT` (3) off-topic messages in a row the chat is
+  paused on the watch list (`mode_reason` `watchlist`, kept 365 days like any
+  pause): no replies and no model calls. The summary lists newly watched chats
+  with their code, so `RESUME 004` brings back a real customer. Partnerships,
+  press and jobs are not off-topic; they still go to Chris.
 - *Go-live cut-off.* Go-live is a moment someone sets (`POST /admin/go-live`;
   `WA_AGENT_GO_LIVE` is the fallback). Until then a deployed service answers
   nobody and only records message times (`not_live`). At go-live, a chat with
@@ -339,17 +348,33 @@ The sheet has `ai_grade`/`ai_note` (first pass) and `grade`/`notes` (Chris).
 
 ### Scenario suite (behaviour tests)
 
-`eval/scenarios.py`: 42 scripted conversations against the real model with
+`eval/scenarios.py`: 84 scripted conversations against the real model with
 automatic pass/fail checks (intent, policy decision, required and forbidden
 phrases, one question per message, no repeat greeting or booking link, word
 caps). Groups: new enquiry, returning patient, booking, reschedule/cancel,
-handover, clinical (incl. red flags), malicious, media. Made-up people only.
+handover, clinical (incl. red flags), malicious, media, and handoff (long
+conversations where the right call changes partway through, plus judgement
+calls marked "judgement:" for the owner to rule on). Made-up people only.
+
+Decisions are judged at the stage the service runs (`WA_AGENT_STAGE`, else 2),
+the way `app.py` does it: from stage 1 a draft is a handover with the holding
+reply. The conversation is played as it would be live: only replies that would
+go out stay in the history, and a handover puts the chat in `waiting` (later
+turns see "waiting for Chris on: ...") or, for a red flag or sensitive topic,
+silences the rest. `at={n: Expect(...)}` checks a middle turn.
+
 Run it after any change to the instructions, policy or knowledge base:
 
 ```bash
-WA_AGENT_BACKEND=cli python -m wa_agent.eval.scenarios --out ~/goji-eval/scenarios.csv
-python -m wa_agent.eval.scenarios --only booking      # one group
+WA_AGENT_BACKEND=cli python -m wa_agent.eval.scenarios --jobs 4 \
+  --out ~/goji-eval/scenarios.csv --turns-out ~/goji-eval/turns.csv     # one row per turn, decision at 0.5-0.9
+WA_AGENT_BACKEND=cli python -m wa_agent.eval.scenarios --only booking   # one group
+WA_AGENT_BACKEND=cli python -m wa_agent.eval.scenarios --stage none        # the unstaged policy (drafts)
 ```
+
+Use the CLI backend (subscription), not the API key, for evals. `--turns-out` gives each turn's confidence and what would happen at each
+`WA_AGENT_MIN_CONFIDENCE` from 0.5 to 0.9, for choosing the threshold. Later
+turns are judged on the earlier turns' outcomes at the current threshold.
 
 When a real chat goes wrong, add it here as a scenario (made-up details) so
 it stays fixed.
