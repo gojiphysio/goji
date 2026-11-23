@@ -56,6 +56,10 @@ The WhatsApp assistant. What it is and how to run it: [`README.md`](README.md).
   small (`test_kb.py` caps it); new content goes behind `read_page`. Build
   every request with `agent.request_kwargs` so the warm-up and real turns
   share one cached prefix.
+- **Evals judge at the deployed stage.** `eval/scenarios.py` decides with
+  `stage_policy` + `apply_stage` as `app.py` does, so a "draft" in a scenario
+  is a handover from stage 1. Judging with the bare `INTENT_POLICY` hid that
+  every low-confidence answer reaches Chris (23 Nov 2026).
 - **Replies are checked in code** (`policy.reply_problems`): only Goji's own
   links, email and numbers (plus 995/1767), and booking links only via the
   `wa-book` go-link. Anything else is drafted, never sent.
