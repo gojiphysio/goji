@@ -247,3 +247,15 @@ def test_a_handover_never_sends_the_draft_meant_for_chris():
     assert customer_message(Decision(ESCALATE, "x"), red, NOW) == "Please call 995 now."
     assert customer_message(Decision(SEND, "x"), prop(reply="A session is $260."), NOW) \
         == "A session is $260."
+
+
+
+def test_a_reply_with_a_placeholder_for_chris_never_reaches_the_customer():
+    from wa_agent.policy import Decision, customer_message, reply_problems
+    assert reply_problems("Yes, we can issue an MC [confirm] by [time].") == ["placeholder"]
+    assert reply_problems("A session is $260 (55 min).") == []
+    d = decide(prop(intent="faq", reply="Returning patients get [discount] off."))
+    assert d.action == DRAFT and "placeholder" in d.reason
+    held = prop(intent="other", escalate=True, reply="x",
+                holding_reply="We'll send the MC by [time].")
+    assert "[" not in customer_message(Decision(ESCALATE, "x"), held, NOW)

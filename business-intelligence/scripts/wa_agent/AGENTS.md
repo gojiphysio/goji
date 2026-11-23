@@ -63,7 +63,10 @@ The WhatsApp assistant. What it is and how to run it: [`README.md`](README.md).
 - **A handover splits two messages.** The customer gets the model's
   `holding_reply` (acknowledges the ask, apologises if they're unhappy,
   promises nothing a person must decide); Chris's ping carries `reply`, the
-  draft answer she can send or edit (`policy.customer_message`). Only red flags
+  draft answer she can send or edit (`policy.customer_message`), written as
+  the clinic answering with [brackets] for what only she knows, never "let me
+  check with the team". A [bracket] in any customer-bound text is held
+  (`reply_problems`: placeholder). Only red flags
   and sensitive topics send `reply` at once. A holding reply is checked like
   any reply; the generic line is only the fallback. (Before 23 Nov 2026 a model
   handover sent its holding message to the customer AND to Chris as her

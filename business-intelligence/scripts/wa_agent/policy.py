@@ -213,10 +213,13 @@ ALLOWED_NUMBERS = {"83770401", "995", "1767", "1777"}
 _URL = re.compile(r"(?:https?://|www\.)[^\s)>\]]+", re.I)
 _EMAIL = re.compile(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+")
 _PHONE = re.compile(r"(?<![\w$.])(?:\+?65[\s-]?)?(\d{4}[\s-]?\d{4})(?![\w])")
+# A [placeholder] the model left for Chris to fill in: never sent to a customer.
+_PLACEHOLDER = re.compile(r"\[[^\[\]\n]{1,80}\]")
 
 
 def reply_problems(reply: str) -> list[str]:
-    """Links, emails or phone numbers in a reply that aren't Goji's own."""
+    """Links, emails or phone numbers in a reply that aren't Goji's own, and
+    [placeholders] left for Chris."""
     problems = []
     for url in _URL.findall(reply):
         parsed = urlparse(url if "://" in url else "https://" + url)
@@ -233,6 +236,8 @@ def reply_problems(reply: str) -> list[str]:
     for num in _PHONE.findall(reply):
         if re.sub(r"\D", "", num) not in ALLOWED_NUMBERS:
             problems.append("phone")
+    if _PLACEHOLDER.search(reply):
+        problems.append("placeholder")
     return problems
 
 

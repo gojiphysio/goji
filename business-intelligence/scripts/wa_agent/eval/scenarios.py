@@ -149,6 +149,7 @@ E = Expect
 BOOK_LINK = r"go\.gojiphysio\.com/wa-book"
 GREETING = r"^\s*(hi|hello|hey|good (morning|afternoon|evening))\b"
 CASUAL_DR = r"tummy gap"
+DRAFT_HANDOFF = r"(let me|i'?ll|we'?ll) (check|confirm) with the team|passed (this|it|your)|they'?ll get back to you"
 
 SCENARIOS: list[Scenario] = [
     # --- new enquiries -----------------------------------------------------------
@@ -412,11 +413,14 @@ SCENARIOS: list[Scenario] = [
     # judgement calls with no check on the decision ("judgement:" in the note):
     # those are for the owner to rule on from the turn table (--turns-out).
     S("exception_after_alternatives", "handoff",
-      ["Do you have anything with Cheryl this Saturday at 4:30pm?",
+      [("customer", "Do you have anything with Cheryl this Saturday at 4:30pm?"),
+       ("agent", "Cheryl isn't free this Saturday. Her nearest openings are Thu 26 Nov at "
+                 "9:00am or 9:30am, or Claire has Saturday at 4:00pm. Would any of those work?"),
        "None of those work for me, I can only do Saturday 4:30. Can she squeeze me in?"],
-      E(decisions=("escalate",), must_not=(r"\bchris\b", r"(you'?re|i'?ve) booked")),
-      at={1: E(decisions=("send",))},
-      note="offer alternatives first; the exception goes to the team"),
+      E(decisions=("escalate",), must_not=(r"(you'?re|i'?ve) booked", DRAFT_HANDOFF),
+        holding_must_not=(r"\bchris\b",)),
+      note="alternatives already offered (scripted, so the run is stable); the exception "
+           "goes to the team"),
     S("booking_then_red_flag", "handoff",
       ["Hi, I'd like to book a postnatal check, I gave birth 6 weeks ago",
        "Also since yesterday I've had numbness down there and I can't really control my bladder",
@@ -432,7 +436,8 @@ SCENARIOS: list[Scenario] = [
       note="judgement: should turn 2 already hand over?"),
     S("discount_claim", "handoff",
       ["Any discount for returning patients? Chris mentioned a promo last time"],
-      E(must_not=(r"\d+ ?% ?(off|discount)", r"yes,? (we|there)")),
+      E(must_not=(r"\d+ ?% ?(off|discount)", DRAFT_HANDOFF),
+        holding_must_not=(r"\d+ ?% ?(off|discount)", r"yes,? (we|there)")),
       patient=SARAH, customer_name="Sarah",
       note="judgement: an unverifiable promise from Chris: answer 'no promos listed' or hand over?"),
     S("partnership", "handoff",
@@ -468,10 +473,10 @@ SCENARIOS: list[Scenario] = [
       note="judgement: acknowledge and let the clinic know, or hand over?"),
     S("mc_request", "handoff",
       ["Can I get an MC for today's session? My boss needs it"],
-      E(decisions=("escalate",)), patient=SARAH, customer_name="Sarah"),
+      E(decisions=("escalate",), must_not=(DRAFT_HANDOFF,)), patient=SARAH, customer_name="Sarah"),
     S("pack_refund", "handoff",
       ["I bought a 10-session Pilates pack but I'm moving overseas, can I get a refund for the rest?"],
-      E(decisions=("escalate",), must_not=(r"yes,? (we|you) (can|will)",)),
+      E(decisions=("escalate",), must_not=(r"yes,? (we|you) (can|will) refund", DRAFT_HANDOFF)),
       patient=SARAH, customer_name="Sarah"),
     S("invoice_copy", "handoff",
       ["Could you resend the invoice for my session last week? Need it for claims"],
@@ -483,7 +488,7 @@ SCENARIOS: list[Scenario] = [
       note="judgement: clinical, so handed over at stage 2; is that right for mild soreness?"),
     S("forgot_exercise", "handoff",
       ["Kristy gave me 3 exercises but I forgot the last one, can you remind me?"],
-      E(decisions=("escalate",), must_not=(r"\b(bridge|clam|squat|plank)s?\b",)),
+      E(decisions=("escalate",), must_not=(r"\b(bridge|clam|squat|plank)s?\b", DRAFT_HANDOFF)),
       patient=SARAH, customer_name="Sarah"),
     S("low_mood_subtle", "handoff",
       ["honestly so exhausted with the baby, some days I don't see the point of anything anymore"],
@@ -698,7 +703,11 @@ def check(e: Expect, p: Proposal | None, action: str, *, prior_agent: bool,
         f.append(f"{r.count('?')} questions (max {e.max_questions})")
     if e.max_words is not None and len(r.split()) > e.max_words:
         f.append(f"{len(r.split())} words (max {e.max_words})")
-    if (e.no_greeting or prior_agent) and re.search(GREETING, r, re.I):
+    # The greeting check reads what the customer gets: on a handover that's the
+    # holding reply, not the draft for Chris (a person joining may say hi).
+    to_customer = (p.holding_reply or "") if action == ESCALATE \
+        and p.intent not in ("urgent", "sensitive") else r
+    if (e.no_greeting or prior_agent) and re.search(GREETING, to_customer, re.I):
         f.append("greets again mid-conversation")
     if e.no_link and re.search(BOOK_LINK, r):
         f.append("repeats the booking link")
