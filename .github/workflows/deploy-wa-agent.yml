@@ -142,14 +142,15 @@ jobs:
 
           # Same list as deploy.sh SECRETS. Keep them in step.
           SECRETS="ANTHROPIC_API_KEY=anthropic-api-key:latest,WA_TOKEN=wa-token:latest,WA_APP_SECRET=wa-app-secret:latest,WA_VERIFY_TOKEN=wa-verify-token:latest,WA_AGENT_ADMIN_TOKEN=wa-agent-admin-token:latest,GMAIL_APP_PASSWORD=gmail-app-password:latest,WA_AGENT_INTERNAL_TOKEN=wa-agent-internal-token:latest,WA_AGENT_HASH_SALT=wa-agent-hash-salt:latest,WA_AGENT_FEEDBACK_SECRET=wa-agent-feedback-secret:latest"
-          # --max-instances=1: per-chat locks are in-process. Scale to zero:
-          # work runs inside Cloud Tasks requests (/tasks/run), see deploy.sh.
+          # --max-instances=1: per-chat locks are in-process. One idle instance
+          # with CPU throttled; work runs inside Cloud Tasks requests
+          # (/tasks/run). See deploy.sh for why.
           # No env flag on purpose (see the header).
           gcloud run deploy "${SERVICE}" \
             --source . --region "${REGION}" --project "${PROJECT}" \
             --service-account "${WA_AGENT_SA}" \
             --update-secrets="${SECRETS}" \
-            --max-instances=1 --min-instances=0 --cpu-throttling --timeout=300 \
+            --max-instances=1 --min-instances=1 --cpu-throttling --cpu-boost --timeout=300 \
             --allow-unauthenticated \
             --quiet
 

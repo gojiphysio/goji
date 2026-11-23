@@ -775,3 +775,26 @@ def test_reminder_confirm_tap_is_thanked_without_the_model(env):
     assert app_mod.wa.sent[-1][1].startswith("Thanks for confirming!")
     assert app_mod.claude.requests == []
     assert ("reminder_confirmed", {"reason": "button"}) in rec
+
+
+def test_secret_link_url_handshake_and_post(env, monkeypatch):
+    client, rec, _ = env
+    monkeypatch.setattr(config, "WA_WEBHOOK_URL_TOKEN", "s3cret-link")
+    ok = client.get("/webhook/s3cret-link?hub.mode=subscribe&hub.verify_token=verify-me"
+                    "&hub.challenge=1158201444")
+    assert ok.status_code == 200 and ok.data == b"1158201444"
+    assert ok.headers["Content-Type"].startswith("text/plain")
+    assert client.get("/webhook/wrong?hub.mode=subscribe&hub.verify_token=verify-me"
+                      "&hub.challenge=1").status_code == 403
+    assert client.get("/webhook/s3cret-link?hub.mode=subscribe&hub.verify_token=nope"
+                      "&hub.challenge=1").status_code == 403
+    app_mod.claude.queue.append(final())
+    assert client.post("/webhook/s3cret-link", json=inbound()).status_code == 200
+    assert client.post("/webhook/wrong", json=inbound()).status_code == 403
+
+
+def test_secret_link_off_when_unset(env, monkeypatch):
+    client, rec, _ = env
+    monkeypatch.setattr(config, "WA_WEBHOOK_URL_TOKEN", "")
+    assert client.get("/webhook/anything?hub.mode=subscribe&hub.verify_token=verify-me"
+                      "&hub.challenge=1").status_code == 403

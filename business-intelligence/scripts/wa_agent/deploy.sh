@@ -50,12 +50,14 @@
 # Other knobs: USE_URL_TOKEN=1 (above), MORNING_SUMMARY=0 (skip the scheduler
 # step), MORNING_IMAGE (image for the summary job, any image with sh + curl).
 #
-# --max-instances=1: the per-chat locks are in-process. --min-instances=0 and
-# CPU only during requests (scale to zero, Charles 19 Nov 2026): the webhook
-# queues each event on Cloud Tasks (queue below) and acks; the queue calls
-# /tasks/run, and the turn runs inside that request, so it is billed only
-# while working. A cold start (a few seconds) fits inside the 20s pre-send
-# hold. --timeout=300: a turn is ~40s; room for a slow model call.
+# --max-instances=1: the per-chat locks are in-process. CPU only during
+# requests (Charles 19 Nov 2026: no always-on CPU): the webhook queues each
+# event on Cloud Tasks (queue below) and acks; the queue calls /tasks/run and
+# the turn runs inside that request, so CPU is billed only while working.
+# --min-instances=1 keeps one idle instance (cheap with CPU throttled): a cold
+# start measured 19s (23 Nov 2026), and Meta / Dualhook give up on a webhook
+# after ~5s. --cpu-boost speeds up the restarts that still happen.
+# --timeout=300: a turn is ~40s; room for a slow model call.
 # CI (.github/workflows/deploy-wa-agent.yml) rolls code with the same flags once
 # this script has created the service.
 
@@ -214,7 +216,7 @@ gcloud run deploy "${SERVICE}" \
   --service-account="${SA}" \
   --update-env-vars="${ENV_UPDATE}" \
   --update-secrets="${SECRETS}" \
-  --max-instances=1 --min-instances=0 --cpu-throttling --timeout=300 \
+  --max-instances=1 --min-instances=1 --cpu-throttling --cpu-boost --timeout=300 \
   --allow-unauthenticated \
   --quiet
 

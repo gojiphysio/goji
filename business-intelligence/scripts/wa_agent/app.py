@@ -135,8 +135,22 @@ def _mode_event(state, old_mode: str, now: float) -> None:
 def verify():
     if (request.args.get("hub.mode") == "subscribe" and config.WA_VERIFY_TOKEN
             and request.args.get("hub.verify_token") == config.WA_VERIFY_TOKEN):
-        return request.args.get("hub.challenge", ""), 200
+        return request.args.get("hub.challenge", ""), 200, {"Content-Type": "text/plain"}
     return "forbidden", 403
+
+
+def _url_token_ok(token: str) -> bool:
+    return bool(config.WA_WEBHOOK_URL_TOKEN
+                and hmac.compare_digest(token, config.WA_WEBHOOK_URL_TOKEN))
+
+
+@app.get("/webhook/<token>")
+def verify_with_url_token(token: str):
+    """The handshake on the secret-link URL (a provider such as Dualhook,
+    whose webhooks Meta signs with the provider's app secret, not ours)."""
+    if not _url_token_ok(token):
+        return "forbidden", 403
+    return verify()
 
 
 @app.post("/webhook")
@@ -150,8 +164,7 @@ def webhook():
 @app.post("/webhook/<token>")
 def webhook_with_url_token(token: str):
     """For providers that don't pass Meta's signature through."""
-    if not (config.WA_WEBHOOK_URL_TOKEN
-            and hmac.compare_digest(token, config.WA_WEBHOOK_URL_TOKEN)):
+    if not _url_token_ok(token):
         return "forbidden", 403
     return _dispatch()
 
