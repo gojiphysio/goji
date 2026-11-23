@@ -957,7 +957,8 @@ def handle_inbound(ev: Inbound, received: float) -> None:
         notify.send("fyi", **notice)
         _test_show(client, ev.wa_id, f"Chris would get an FYI email: {p.staff_note}")
     if d.action == ESCALATE:
-        _alert(p.intent if p.intent in ("urgent", "sensitive") else "escalated", **notice)
+        _alert(p.intent if p.intent in ("urgent", "sensitive") else "escalated",
+               **{**notice, "sent_reply": as_one_message(reply)})
         _test_show(client, ev.wa_id, f"Handed to Chris ({d.reason}). She'd be told: "
                                      f"{p.staff_note}")
 

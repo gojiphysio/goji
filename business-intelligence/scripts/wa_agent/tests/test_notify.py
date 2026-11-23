@@ -23,3 +23,14 @@ def test_deployed_run_without_smtp_logs_subject_only(monkeypatch, caplog):
     monkeypatch.setattr(config, "STATE_BACKEND", "firestore")
     text = _send_draft(caplog)
     assert "no SMTP configured" in text and "Hi Ana!" not in text
+
+
+
+def test_a_handover_ping_shows_what_the_customer_got_and_the_draft_apart():
+    body = notify.compose("escalated", customer="Ana", wa_id="65", staff_note="MC",
+                          suggested_reply="Yes, we can issue an MC [confirm].",
+                          sent_reply="The team will get back to you today.",
+                          reason="intent:other", last_message="MC pls").get_content()
+    assert body.index("The customer got:") < body.index("The team will get back")
+    assert "NOT sent; fill in anything in [brackets]" in body
+    assert "Agent sent this holding reply" not in body and "24 hours" not in body

@@ -36,14 +36,16 @@ WELCOME = (
     "1. I answer customers on the Goji number: questions, prices, availability, bookings "
     "and moving appointments.\n"
     "2. When a chat needs you, I message you here, e.g. \"Mei (#004) needs you: ...\". "
-    "Open that chat in the WhatsApp Business app and reply as usual.\n"
+    "I've already told them the team will get back to them. The email has my suggested "
+    "reply: fill in anything in [brackets], then send it from the WhatsApp Business app.\n"
     "3. As soon as you write in a chat, I go quiet there until you hand it back.\n"
     "4. To hand a chat back, text RESUME and its number, e.g. RESUME 004. I won't "
     "message the customer; I'll just answer their next message.\n"
     "5. PAUSE 004 keeps me out of one chat. STOP pauses me in every chat, START turns me "
     "back on.\n"
     "6. Every morning at 7:30 there's an email summary, including the chats waiting for "
-    "you to resume. STATUS here shows the same any time.\n\n"
+    "you to resume and any spam numbers I've stopped answering. STATUS here shows the "
+    "same any time.\n\n"
     "Text STATUS now to try it."
 )
 
