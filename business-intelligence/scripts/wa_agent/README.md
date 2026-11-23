@@ -1,5 +1,8 @@
 # goji-wa-agent: the WhatsApp assistant
 
+> **Status (23 Nov 2026):** deployed, not live, kill switch on; waiting to
+> connect Goji's number through Dualhook. Checklist: [`GO_LIVE.md`](GO_LIVE.md).
+
 Answers routine WhatsApp questions (prices, services, hours, availability,
 booking links) on Goji's number, and hands everything else to Chris. Chris
 keeps the WhatsApp Business app on her phone; the agent works the same chats
