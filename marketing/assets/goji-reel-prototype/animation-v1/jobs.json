@@ -1,0 +1,170 @@
+[
+  {
+    "name": "01-swagger",
+    "frames": 49,
+    "edit_duration": 1.8,
+    "width": 576,
+    "height": 1024,
+    "fps": 24,
+    "seed": 420,
+    "images": [
+      {
+        "path": "/Users/tidepool/Projects/goji-reel-prototype-v5/frames/01-swagger.png",
+        "frame": 0,
+        "strength": 1.0
+      }
+    ],
+    "prompt": "A continuous shot rendered as original 2004 GTA San Andreas PS2 gameplay: low-polygon characters, angular geometry, simple diffuse textures and warm baked lighting. Preserve the reference character, maroon yoga outfit, black ponytail, black purse and environment. The young woman walks forward with a loose confident swagger and alternating natural steps, her purse swinging gently. The camera follows directly behind at a constant distance. The SBS bus continues away. Her back remains toward the camera. No music, dialogue, captions, HUD or additional people."
+  },
+  {
+    "name": "02-takeover",
+    "frames": 49,
+    "edit_duration": 1.8,
+    "width": 576,
+    "height": 1024,
+    "fps": 24,
+    "seed": 421,
+    "images": [
+      {
+        "path": "/Users/tidepool/Projects/goji-reel-prototype-v5/frames/02a-door-front-hinge.png",
+        "frame": 0,
+        "strength": 1.0
+      },
+      {
+        "path": "/Users/tidepool/Projects/goji-reel-prototype-v5/frames/02b-player-pulls-driver-out.png",
+        "frame": 24,
+        "strength": 1.0
+      },
+      {
+        "path": "/Users/tidepool/Projects/goji-reel-prototype-v5/frames/02c-driver-rolls-clear.png",
+        "frame": 48,
+        "strength": 1.0
+      }
+    ],
+    "prompt": "A continuous shot rendered as original 2004 GTA San Andreas PS2 gameplay: low-polygon characters, angular geometry, simple diffuse textures and warm baked lighting. Preserve the reference character, maroon yoga outfit, black ponytail, black purse and environment. At the stopped blue taxi, the woman holds open the conventional front-hinged right driver door. She grips the seated driver by his arm, leans back and pulls him through the door; he rolls harmlessly onto the road beside it. She immediately pivots to step into the empty driver seat. The door remains attached to the front A-pillar throughout. The driver remains conscious and unharmed. The camera stays behind the woman. No music, dialogue, captions, HUD or additional people."
+  },
+  {
+    "name": "03-drive",
+    "frames": 49,
+    "edit_duration": 1.9,
+    "width": 576,
+    "height": 1024,
+    "fps": 24,
+    "seed": 422,
+    "images": [
+      {
+        "path": "/Users/tidepool/Projects/goji-reel-prototype-v5/frames/03-drive.png",
+        "frame": 0,
+        "strength": 1.0
+      }
+    ],
+    "prompt": "A continuous shot rendered as original 2004 GTA San Andreas PS2 gameplay: low-polygon characters, angular geometry, simple diffuse textures and warm baked lighting. Preserve the reference character, maroon yoga outfit, black ponytail, black purse and environment. The blue Comfort taxi accelerates quickly forward along the bend. The fixed rear chase camera follows at the same distance as the roadside slides rapidly backward. The woman remains in the right-hand driver seat. The vehicle follows the road without spinning or drifting sideways. No music, dialogue, captions, HUD or additional people."
+  },
+  {
+    "name": "04-impact",
+    "frames": 33,
+    "edit_duration": 0.9,
+    "width": 576,
+    "height": 1024,
+    "fps": 24,
+    "seed": 498,
+    "images": [
+      {
+        "path": "/Users/tidepool/Projects/goji-reel-animation/assets/04-before-impact.png",
+        "frame": 0,
+        "strength": 1
+      },
+      {
+        "path": "/Users/tidepool/Projects/goji-reel-prototype-v5/frames/04-compact-lamp-post-impact.png",
+        "frame": 32,
+        "strength": 1
+      }
+    ],
+    "prompt": "Original GTA San Andreas PS2 low-poly gameplay, rear chase camera. The blue Comfort taxi drives rapidly forward the last three metres across the kerb to the slender lamp post in front of it. The pavement gap between bumper and pole closes completely. Its front bumper makes hard contact, the taxi abruptly stops and its suspension bounces once. A few small sparks at the nose. Compact dent only, the normal taxi body stays inside its original silhouette, no swelling or giant metal folds. The woman in maroon remains seated inside the right-hand driver seat; one black purse on the passenger seat. Same camera orientation, Lentor Modern facade and golden light. No people on pavement, blood, explosion, music, text or HUD."
+  },
+  {
+    "name": "05-ejection",
+    "frames": 33,
+    "edit_duration": 1.0,
+    "width": 576,
+    "height": 1024,
+    "fps": 24,
+    "seed": 499,
+    "images": [
+      {
+        "path": "/Users/tidepool/Projects/goji-reel-prototype-v5/frames/05-ejection-compact-impact.png",
+        "frame": 0,
+        "strength": 1
+      }
+    ],
+    "prompt": "Original GTA San Andreas PS2 low-poly gameplay. The woman in maroon is ALREADY airborne well in FRONT of the taxi at the start of this shot, having just exited its front windscreen. She continues flying rapidly forward AWAY from the rear camera, body extended almost horizontal, holding one black purse. Momentum carries her farther along the pavement to the right of the lamp post; her body descends toward a harmless landing. The camera remains behind, following her slightly forward. The empty blue Comfort taxi stays motionless against the post in lower foreground, with normal proportions and compact damage. Do not animate any person inside or on the roof of the taxi; she is already ahead of it. No blood, injuries, text, HUD, speech or music."
+  },
+  {
+    "name": "06-marker",
+    "frames": 49,
+    "edit_duration": 2.0,
+    "width": 576,
+    "height": 1024,
+    "fps": 24,
+    "seed": 425,
+    "images": [
+      {
+        "path": "/Users/tidepool/Projects/goji-reel-prototype-v5/frames/06-yellow-entry-cone-reference.png",
+        "frame": 0,
+        "strength": 1.0
+      }
+    ],
+    "prompt": "A continuous shot rendered as original 2004 GTA San Andreas PS2 gameplay: low-polygon characters, angular geometry, simple diffuse textures and warm baked lighting. Preserve the reference character, maroon yoga outfit, black ponytail, black purse and environment. The woman takes quick forward steps toward the Goji glass doorway, holding her black purse. Follow from behind. She enters under the tall translucent yellow downward-pointing entry cone. The marker gently bobs in place. The camera never turns around. Keep the doorway and signage stable. No music, dialogue, captions, HUD or additional people."
+  },
+  {
+    "name": "07-entry",
+    "frames": 49,
+    "edit_duration": 1.7,
+    "width": 576,
+    "height": 1024,
+    "fps": 24,
+    "seed": 426,
+    "images": [
+      {
+        "path": "/Users/tidepool/Projects/goji-reel-prototype-v5/frames/07-calm-entry-v2.png",
+        "frame": 0,
+        "strength": 1.0
+      }
+    ],
+    "prompt": "A continuous shot rendered as original 2004 GTA San Andreas PS2 gameplay: low-polygon characters, angular geometry, simple diffuse textures and warm baked lighting. Preserve the reference character, maroon yoga outfit, black ponytail, black purse and environment. The woman walks calmly into the Goji reception toward the burgundy reception table, black purse by her side. Her shoulders relax. The camera is locked in position inside the room. Preserve the sign, checked floor, oak wall and furnishings. A calm unhurried interior cutscene, fixed camera and soft daylight. Preserve the low-polygon game style.  No music, dialogue, captions, HUD or additional people."
+  },
+  {
+    "name": "08a-reformer",
+    "frames": 89,
+    "edit_duration": 3.5,
+    "width": 576,
+    "height": 1024,
+    "fps": 24,
+    "seed": 427,
+    "images": [
+      {
+        "path": "/Users/tidepool/Projects/goji-reel-prototype-v5/frames/08a-goji-reformer.png",
+        "frame": 0,
+        "strength": 1.0
+      }
+    ],
+    "prompt": "A continuous shot rendered as original 2004 GTA San Andreas PS2 gameplay: low-polygon characters, angular geometry, simple diffuse textures and warm baked lighting. Preserve the reference character, maroon yoga outfit, black ponytail, black purse and environment. The woman lies relaxed on the actual-Goji-style cream reformer, both white-socked feet staying on its padded tubular footbar. She slowly presses the carriage a short distance away, gently extending her bent knees, then begins a controlled return. The head and shoulders remain supported. Her arms lie relaxed at her sides. The therapist calmly watches, with minimal movement. The slim cream rails, adjustment holes, shoulder blocks and curved open footbar stay rigid and correctly assembled. A calm unhurried interior cutscene, fixed camera and soft daylight. Preserve the low-polygon game style.  No music, dialogue, captions, HUD or additional people."
+  },
+  {
+    "name": "08b-mat",
+    "frames": 121,
+    "edit_duration": 5.0,
+    "width": 576,
+    "height": 1024,
+    "fps": 24,
+    "seed": 428,
+    "images": [
+      {
+        "path": "/Users/tidepool/Projects/goji-reel-prototype-v5/frames/08b-mat-side-stretch.png",
+        "frame": 0,
+        "strength": 1.0
+      }
+    ],
+    "prompt": "A continuous shot rendered as original 2004 GTA San Andreas PS2 gameplay: low-polygon characters, angular geometry, simple diffuse textures and warm baked lighting. Preserve the reference character, maroon yoga outfit, black ponytail, black purse and environment. The woman sits cross-legged on the burgundy mat, right palm resting on the mat, left arm curved overhead in a gentle side stretch. She makes a very small relaxed reach to her right and holds it while breathing softly. Both hips remain grounded. Her pose stays stable without changing exercises. The therapist kneels quietly beside her. The black purse and shoes remain beside the stool. A calm unhurried interior cutscene, fixed camera and soft daylight. Preserve the low-polygon game style.  No music, dialogue, captions, HUD or additional people."
+  }
+]

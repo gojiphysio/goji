@@ -1,0 +1,38 @@
+[
+  {
+    "name": "07-entry",
+    "refs": [
+      "goji-reel-animation-v6/assets/07-entry.png",
+      "photos/services/prenatal-physiotherapy-warm.webp",
+      "design/brand_assets/logo_light_transparent.png"
+    ],
+    "prompt": "Use case: precise-object-edit. Image 1 is the EDIT TARGET; image 2 is ONLY an outfit reference from Goji's real website, image 3 is ONLY the Goji logo. Change ONLY the Goji team member/physiotherapist's clothing in image 1: replace the navy collared/buttoned uniform and trousers with an ALL BLACK fitted short-sleeve CREW NECK athletic T-shirt and black form-fitting full-length LEGGINGS, matching the neckline, sleeve length, fabric and silhouette of the therapist in image 2. No collar, no buttons, no loose scrub trousers, no red trim. Remove EVERY rectangular name tag/badge. The only branding is a SMALL Goji wordmark printed directly on the wearer's LEFT CHEST (cream letters and maroon O from image 3), no rectangular patch, no tagline. Keep existing therapist face, short bob hair/no ponytail, gentle smile, body proportions, EXACT pose and hands. Keep the maroon PLAYER's clothing, ponytail, face and pose completely unchanged. Keep all architecture, equipment, furniture, camera, framing, warm lighting and GTA San Andreas low-poly style unchanged. Team member remains SEATED behind the table, same welcoming hand gesture. Visible legs beneath table must wear fitted black leggings."
+  },
+  {
+    "name": "08b-mat-start",
+    "refs": [
+      "goji-reel-animation-v6/assets/08b-mat-start.png",
+      "photos/services/prenatal-physiotherapy-warm.webp",
+      "design/brand_assets/logo_light_transparent.png"
+    ],
+    "prompt": "Use case: precise-object-edit. Image 1 is the EDIT TARGET; image 2 is ONLY an outfit reference from Goji's real website, image 3 is ONLY the Goji logo. Change ONLY the Goji team member/physiotherapist's clothing in image 1: replace the navy collared/buttoned uniform and trousers with an ALL BLACK fitted short-sleeve CREW NECK athletic T-shirt and black form-fitting full-length LEGGINGS, matching the neckline, sleeve length, fabric and silhouette of the therapist in image 2. No collar, no buttons, no loose scrub trousers, no red trim. Remove EVERY rectangular name tag/badge. The only branding is a SMALL Goji wordmark printed directly on the wearer's LEFT CHEST (cream letters and maroon O from image 3), no rectangular patch, no tagline. Keep existing therapist face, short bob hair/no ponytail, gentle smile, body proportions, EXACT pose and hands. Keep the maroon PLAYER's clothing, ponytail, face and pose completely unchanged. Keep all architecture, equipment, furniture, camera, framing, warm lighting and GTA San Andreas low-poly style unchanged. Preserve palm on TOP of player's raised arm and other hand at waist, exact depth of side stretch and crossed legs. Do not change the stretching pose."
+  },
+  {
+    "name": "08b-mat-end",
+    "refs": [
+      "goji-reel-animation-v6/assets/08b-mat-end.png",
+      "photos/services/prenatal-physiotherapy-warm.webp",
+      "design/brand_assets/logo_light_transparent.png"
+    ],
+    "prompt": "Use case: precise-object-edit. Image 1 is the EDIT TARGET; image 2 is ONLY an outfit reference from Goji's real website, image 3 is ONLY the Goji logo. Change ONLY the Goji team member/physiotherapist's clothing in image 1: replace the navy collared/buttoned uniform and trousers with an ALL BLACK fitted short-sleeve CREW NECK athletic T-shirt and black form-fitting full-length LEGGINGS, matching the neckline, sleeve length, fabric and silhouette of the therapist in image 2. No collar, no buttons, no loose scrub trousers, no red trim. Remove EVERY rectangular name tag/badge. The only branding is a SMALL Goji wordmark printed directly on the wearer's LEFT CHEST (cream letters and maroon O from image 3), no rectangular patch, no tagline. Keep existing therapist face, short bob hair/no ponytail, gentle smile, body proportions, EXACT pose and hands. Keep the maroon PLAYER's clothing, ponytail, face and pose completely unchanged. Keep all architecture, equipment, furniture, camera, framing, warm lighting and GTA San Andreas low-poly style unchanged. Preserve palm on TOP of player's raised arm and other hand at waist, exact depth of side stretch and crossed legs. Do not change the stretching pose."
+  },
+  {
+    "name": "09-squat",
+    "refs": [
+      "goji-reel-animation-v6/assets/09-squat.png",
+      "photos/services/prenatal-physiotherapy-warm.webp",
+      "design/brand_assets/logo_light_transparent.png"
+    ],
+    "prompt": "Use case: precise-object-edit. Image 1 is the EDIT TARGET; image 2 is ONLY an outfit reference from Goji's real website, image 3 is ONLY the Goji logo. Change ONLY the Goji team member/physiotherapist's clothing in image 1: replace the navy collared/buttoned uniform and trousers with an ALL BLACK fitted short-sleeve CREW NECK athletic T-shirt and black form-fitting full-length LEGGINGS, matching the neckline, sleeve length, fabric and silhouette of the therapist in image 2. No collar, no buttons, no loose scrub trousers, no red trim. Remove EVERY rectangular name tag/badge. The only branding is a SMALL Goji wordmark printed directly on the wearer's LEFT CHEST (cream letters and maroon O from image 3), no rectangular patch, no tagline. Keep existing therapist face, short bob hair/no ponytail, gentle smile, body proportions, EXACT pose and hands. Keep the maroon PLAYER's clothing, ponytail, face and pose completely unchanged. Keep all architecture, equipment, furniture, camera, framing, warm lighting and GTA San Andreas low-poly style unchanged. Update the therapist's MIRROR REFLECTION to the identical black crew-neck top and black leggings, with consistent small chest logo. Player reflection stays maroon. Preserve bar, rack, grip and spotting hands exactly."
+  }
+]

@@ -1,0 +1,19 @@
+[
+  {
+    "name": "09-squat",
+    "frames": 145,
+    "edit_duration": 6.0,
+    "width": 576,
+    "height": 1024,
+    "fps": 24,
+    "seed": 746,
+    "images": [
+      {
+        "path": "assets/09-squat-plain-back.png",
+        "frame": 0,
+        "strength": 1
+      }
+    ],
+    "prompt": "Calm original GTA San Andreas PS2 low-poly interior cutscene, fixed rear three-quarter camera. Maroon woman performs ONE slow controlled barbell back squat in black MATRIX rack: hips descend smoothly, knees bend tracking over toes, heels remain planted; brief pause at comfortable depth; then she presses through both feet and stands back up. Silver bar stays straight across upper back, hands stay fixed on bar, green plates stay rigid at both ends. Female physiotherapist wearing a fitted black crew-neck T-shirt and black leggings stays directly behind and slightly offset, lowers and rises WITH her as an attentive spotter, hands open close to torso without grabbing bar, ready to assist. Only these two people and their consistent mirror reflections. Left oak shelving, towels, mirror, rack uprights, safety arms and stored plates remain completely stationary. No machine movement, no extra hands, no music, no HUD. Therapist has a short dark bob with no ponytail and a gentle smile, including in her reflection. Her clothing stays solid black, with a small Goji wordmark printed directly on the left chest. No collar, buttons, name tag or badge. The foreground therapist back is plain uninterrupted BLACK fabric throughout the shot: no back logo, lettering, emblem or patch. The tiny chest logo is visible only on the FRONT of her top in the mirror. Keep this front/back distinction stable. Preserve the reference exactly."
+  }
+]

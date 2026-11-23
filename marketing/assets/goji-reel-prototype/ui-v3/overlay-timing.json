@@ -1,0 +1,25 @@
+{
+  "canvas": [
+    1080,
+    1920
+  ],
+  "duration": 29.5,
+  "layers": [
+    {
+      "file": "gameplay-hud-0852.png",
+      "in": 0,
+      "out": 10
+    },
+    {
+      "file": "gameplay-hud-0853.png",
+      "in": 10,
+      "out": 15.6
+    },
+    {
+      "file": "body-muscle-popup.png",
+      "in": 24,
+      "out": 29.5
+    }
+  ],
+  "popup_text": "Body Muscle - Upgraded. You're well-toned. Keep this up and your attacks will inflict more damage."
+}

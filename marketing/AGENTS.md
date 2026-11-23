@@ -31,3 +31,11 @@ tab, honour these:
 - **Watercolour social clips** (Reels, Stories, feed, GBP) are made in `assets/watercolor-studio/` (open `index.html`; exports MP4/PNG). Its engine is a copy of the Goji design system bundle: re-copy it when the system changes rather than editing it here.
 - The Marketing tab's WIP cards are the **seams** for live integrations; see
   `../business-intelligence/scripts/dashboard/AGENTS.md`.
+
+- **Remote-first handoffs.** Assume the user is on a phone away from Tidepool. Lead with a verified HTTPS review link; image storyboards need a GitHub-rendered Markdown page with embedded frames. Local paths, localhost and raw HTML links are supplementary. Preserve existing access controls.
+- **Generated reel continuity.** Continue linked action from the preceding clip's actual final frame, and review motion as well as keyframes. Keep HUD, text and sound separate from generated video so they can be edited without regenerating scenes.
+- **LTX moving-shot handoffs.** A shared still preserves appearance but not incoming motion. For a continuous moving shot, prefer video-tail continuation when supported and verify the seam; later image guides at strength 1 are not exact frame locks. Use motion or pose guides for precise mechanics. The project playbook lives in `assets/goji-reel-prototype/animation-v5/research/LTX_PLAYBOOK.md`.
+
+- **Exact retained-video handoffs.** Extract guide images by frame index and verify them against the retained clip's first source frame. Decimal seeking can select the following frame; matching timestamps alone does not establish an exact pose handoff.
+- **Vehicle reference checks.** Before animating a door action, check the whole vehicle in closed and open poses: separate front/rear doors, fixed centre pillar, correct seat occupancy, front hinge attachment and one mirror per side. Repairing one part can silently remove another; reject inconsistent anchors before rendering.
+- **Timecode revision edits.** Treat user timestamps as positions in the reviewed published cut. Record the source version and exact frame ranges before trimming; do not apply those timestamps directly to differently timed native generations.

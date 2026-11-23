@@ -1,0 +1,182 @@
+[
+  {
+    "time": 0.12,
+    "stem": "footsteps",
+    "label": "swagger footstep"
+  },
+  {
+    "time": 0.52,
+    "stem": "footsteps",
+    "label": "swagger footstep"
+  },
+  {
+    "time": 0.94,
+    "stem": "footsteps",
+    "label": "swagger footstep"
+  },
+  {
+    "time": 1.36,
+    "stem": "footsteps",
+    "label": "swagger footstep"
+  },
+  {
+    "time": 0,
+    "stem": "vehicles",
+    "label": "bus air-brake hiss"
+  },
+  {
+    "time": 1.83,
+    "stem": "vehicles",
+    "label": "door latch and swing"
+  },
+  {
+    "time": 2.15,
+    "stem": "vehicles",
+    "label": "door creak"
+  },
+  {
+    "time": 2.5,
+    "stem": "footsteps",
+    "label": "clothing scuffle"
+  },
+  {
+    "time": 3.04,
+    "stem": "impact",
+    "label": "harmless shoulder-roll thud"
+  },
+  {
+    "time": 3.5,
+    "stem": "vehicles",
+    "label": "taxi door closes"
+  },
+  {
+    "time": 3.6,
+    "stem": "vehicles",
+    "label": "engine accelerates"
+  },
+  {
+    "time": 5.72,
+    "stem": "vehicles",
+    "label": "short tyre squeal"
+  },
+  {
+    "time": 6.22,
+    "stem": "impact",
+    "label": "compact metal crash"
+  },
+  {
+    "time": 6.24,
+    "stem": "impact",
+    "label": "lamp-post clang"
+  },
+  {
+    "time": 6.42,
+    "stem": "impact",
+    "label": "glass fragments"
+  },
+  {
+    "time": 6.5,
+    "stem": "impact",
+    "label": "ejection whoosh"
+  },
+  {
+    "time": 7.28,
+    "stem": "impact",
+    "label": "soft landing"
+  },
+  {
+    "time": 7.48,
+    "stem": "footsteps",
+    "label": "run footstep"
+  },
+  {
+    "time": 7.73,
+    "stem": "footsteps",
+    "label": "run footstep"
+  },
+  {
+    "time": 7.98,
+    "stem": "footsteps",
+    "label": "run footstep"
+  },
+  {
+    "time": 8.23,
+    "stem": "footsteps",
+    "label": "run footstep"
+  },
+  {
+    "time": 8.48,
+    "stem": "footsteps",
+    "label": "run footstep"
+  },
+  {
+    "time": 8.73,
+    "stem": "footsteps",
+    "label": "run footstep"
+  },
+  {
+    "time": 8.98,
+    "stem": "footsteps",
+    "label": "run footstep"
+  },
+  {
+    "time": 9.23,
+    "stem": "footsteps",
+    "label": "run footstep"
+  },
+  {
+    "time": 9.28,
+    "stem": "ui",
+    "label": "entry trigger"
+  },
+  {
+    "time": 9.87,
+    "stem": "interior",
+    "label": "quiet reception door"
+  },
+  {
+    "time": 10.15,
+    "stem": "interior",
+    "label": "calm indoor step"
+  },
+  {
+    "time": 10.75,
+    "stem": "interior",
+    "label": "calm indoor step"
+  },
+  {
+    "time": 11.25,
+    "stem": "interior",
+    "label": "calm indoor step"
+  },
+  {
+    "time": 12.0,
+    "stem": "interior",
+    "label": "soft reformer carriage"
+  },
+  {
+    "time": 13.6,
+    "stem": "interior",
+    "label": "soft reformer carriage"
+  },
+  {
+    "time": 15.2,
+    "stem": "interior",
+    "label": "quiet clothing movement"
+  },
+  {
+    "time": 17.5,
+    "stem": "interior",
+    "label": "quiet clothing movement"
+  },
+  {
+    "time": 18.3,
+    "stem": "ui",
+    "label": "strength notification"
+  },
+  {
+    "time": 19.1,
+    "stem": "ui",
+    "label": "mobility notification"
+  }
+]

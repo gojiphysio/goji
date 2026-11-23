@@ -1,0 +1,1 @@
+Built-in image generator: remove only GOJI lettering from foreground therapist back; replace with matching plain black fabric. Preserve framing, identities, poses, rack, room and front chest logo in mirror. Source: animation-v8/assets/09-squat.png.

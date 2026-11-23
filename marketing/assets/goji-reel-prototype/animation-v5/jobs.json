@@ -1,0 +1,196 @@
+[
+  {
+    "name": "01-swagger",
+    "frames": 49,
+    "edit_duration": 1.8,
+    "width": 576,
+    "height": 1024,
+    "fps": 24,
+    "seed": 420,
+    "images": [
+      {
+        "path": "assets/01-swagger.png",
+        "frame": 0,
+        "strength": 1.0
+      }
+    ],
+    "prompt": "A continuous shot rendered as original 2004 GTA San Andreas PS2 gameplay: low-polygon characters, angular geometry, simple diffuse textures and warm baked lighting. Preserve the reference character, maroon yoga outfit, black ponytail, black purse and environment. The young woman walks forward with a loose confident swagger and alternating natural steps, her purse swinging gently. The camera follows directly behind at a constant distance. The SBS bus continues away. Her back remains toward the camera. No music, dialogue, captions, HUD or additional people."
+  },
+  {
+    "name": "02-takeover",
+    "frames": 169,
+    "edit_duration": 2.2,
+    "width": 576,
+    "height": 1024,
+    "fps": 24,
+    "seed": 741,
+    "images": [
+      {
+        "path": "assets/02-pull.png",
+        "frame": 0,
+        "strength": 1
+      },
+      {
+        "path": "assets/02-seated.png",
+        "frame": 168,
+        "strength": 0.9
+      }
+    ],
+    "prompt": "Original 2004 GTA San Andreas PS2 low-polygon gameplay. Angular geometry, stable simple textures, pale teal sky and green foliage, consistent daytime lighting. One uninterrupted stationary rear three-quarter gameplay camera. Woman in maroon stays standing on BOTH FEET at all times until she sits in car. His close-fitting grey polo stays against his torso with a crisp sleeve hem. Her hand contacts only bare skin, away from the sleeve. She pulls grey-shirt driver SIDEWAYS out by his BARE FOREARM below the sleeve, stepping back once but keeping torso upright. Driver alone stumbles and rolls onto pavement to the right, conscious and unhurt. She releases him, immediately pivots toward open right driver doorway, bends at hips, puts her left leg inside, sits down in empty driver seat, swings her right leg inside and pulls door closed. The driver stays visible seated on road away from door. One woman, one driver, rigid opaque taxi body throughout. DO NOT make woman fall or tumble or vanish. Her movement is upright pull, pivot, step in, sit. Correct front-hinged door. No blood, no morphing, no cuts.",
+    "source_duration": 2.2
+  },
+  {
+    "name": "03-drive",
+    "frames": 97,
+    "edit_duration": 4.0,
+    "width": 576,
+    "height": 1024,
+    "fps": 24,
+    "seed": 742,
+    "images": [
+      {
+        "path": "assets/03-drive.png",
+        "frame": 0,
+        "strength": 1.0
+      }
+    ],
+    "prompt": "Original 2004 GTA San Andreas PS2 low-polygon gameplay. Angular geometry, stable simple textures, pale teal sky and green foliage, consistent daytime lighting. Continuous rear chase camera following blue Comfort taxi at HIGH SPEED. Sparse ordinary road traffic: ONLY a silver sedan and a white van far ahead. NPC traffic travels slowly and STRAIGHT, wheels aligned with lane direction, NO drifting, NO swerving, NO sideways sliding. Only PLAYER TAXI steers aggressively: accelerate past silver sedan on its right, sharply weave back left into open lane, then dart right past distant white van. Ordinary cars briefly show brake lights and continue in their lanes. No additional cars spawn. They fall behind as taxi overtakes. Taxi body rolls lightly in fast lane changes; road lines rush backwards, roadside trees streak past with strong parallax. Rapid arcade handling but wheels stay grounded. Rear camera follows heading smoothly at constant distance, never faces the front. Finish continuing fast forward near the Lentor Modern pavement. No collision yet, no pedestrians, no slow motion, no text."
+  },
+  {
+    "name": "04-bailout",
+    "frames": 41,
+    "edit_duration": 1.8,
+    "width": 576,
+    "height": 1024,
+    "fps": 24,
+    "seed": 906,
+    "images": [
+      {
+        "path": "assets/04-bailout-start.png",
+        "frame": 0,
+        "strength": 1
+      },
+      {
+        "path": "assets/04-bail-end.png",
+        "frame": "guide_for_untrimmed_extension_end",
+        "strength": 1
+      }
+    ],
+    "prompt": "The moving blue taxi continues forward toward the rooted lamp post, its driver door already open. The young woman in a maroon sleeveless yoga top and FULL LENGTH MAROON LEGGINGS with WHITE TRAINERS launches SIDEWAYS out of the front right driver doorway, both feet leaving the car. She immediately tucks her knees and reaches her hands toward the pavement, preparing to shoulder-roll. Her whole body clears the open door before the taxi reaches the pole. The car continues rolling forward away from her with all windows intact. Camera follows her jump smoothly from the same rear three-quarter direction. Same GTA San Andreas characters, lighting and environment.",
+    "pipeline": "video_tail_extension"
+  },
+  {
+    "name": "05-recovery",
+    "frames": 145,
+    "edit_duration": 4.1,
+    "width": 576,
+    "height": 1024,
+    "fps": 24,
+    "seed": 862,
+    "images": [
+      {
+        "path": "assets/05-recovery.png",
+        "frame": 0,
+        "strength": 1
+      }
+    ],
+    "prompt": "Continuous GTA San Andreas PS2 gameplay, same camera and daylight. Start exactly with maroon woman already halfway through broken FRONT windshield of stopped blue taxi. Her forward momentum carries her torso across hood, both legs slide out through the same front windshield, she flies forward and left past lamp post onto clear pavement. She lands on hands, rolls ONCE, immediately pushes herself up with both hands, plants her feet, rises onto two feet, and RUNS away from camera toward glass mall doors on left. Black purse remains in her right hand. Clear sequence: first second fly out and tumble; second and third seconds push up and stand; final three seconds run toward mall. No pause lying down. Taxi stays completely stationary touching pole, no rotating or reversing. Two bystanders dive sideways away and stay unharmed. Camera follows woman forward from behind once she stands, leave taxi behind. One woman only, same maroon leggings and white trainers. No blood, no duplicate limbs, no flying backwards, no cuts.",
+    "pipeline": "selected_prior_clip",
+    "source_note": "v4 05-recovery beginning at 0.625s; hood/windscreen exit removed; selected ground tumble and rise retained"
+  },
+  {
+    "name": "06-marker",
+    "frames": 49,
+    "edit_duration": 2.0,
+    "width": 576,
+    "height": 1024,
+    "fps": 24,
+    "seed": 425,
+    "images": [
+      {
+        "path": "assets/06-yellow-entry-cone-reference.png",
+        "frame": 0,
+        "strength": 1.0
+      }
+    ],
+    "prompt": "A continuous shot rendered as original 2004 GTA San Andreas PS2 gameplay: low-polygon characters, angular geometry, simple diffuse textures and warm baked lighting. Preserve the reference character, maroon yoga outfit, black ponytail, black purse and environment. The woman takes quick forward steps toward the Goji glass doorway, holding her black purse. Follow from behind. She enters under the tall translucent yellow downward-pointing entry cone. The marker gently bobs in place. The camera never turns around. Keep the doorway and signage stable. No music, dialogue, captions, HUD or additional people."
+  },
+  {
+    "name": "07-entry",
+    "frames": 73,
+    "edit_duration": 2.5,
+    "width": 576,
+    "height": 1024,
+    "fps": 24,
+    "seed": 526,
+    "images": [
+      {
+        "path": "assets/07-entry.png",
+        "frame": 0,
+        "strength": 1.0
+      }
+    ],
+    "prompt": "A calm GTA San Andreas PS2 interior cutscene with fixed camera. Woman in maroon walks slowly to the burgundy Goji reception table. The navy-uniform Goji team member STAYS SEATED behind the table, smiles, gives a small friendly open-hand welcoming gesture, and nods to the arriving woman. Player relaxes her shoulders and returns a small nod. Preserve GOJI wall sign, table, chairs and checked floor. Warm quiet welcome after chaos. No music, no captions."
+  },
+  {
+    "name": "08a-warrior",
+    "frames": 145,
+    "edit_duration": 6.0,
+    "width": 576,
+    "height": 1024,
+    "fps": 24,
+    "seed": 744,
+    "images": [
+      {
+        "path": "assets/08a-warrior.png",
+        "frame": 0,
+        "strength": 1.0
+      },
+      {
+        "path": "assets/08a-warrior-end.png",
+        "frame": 144,
+        "strength": 1.0
+      }
+    ],
+    "prompt": "Calm original GTA San Andreas PS2 interior cutscene. Fixed camera; entire cream reformer stays PIXEL-STILL, locked carriage, fixed footbar, fixed frame. Maroon woman STANDS ON TOP OF THE PADDED CARRIAGE throughout, never touches floor. Begin arms straight overhead, feet on carriage. Slowly slide left foot toward left end of cushion and right foot toward right end, bend left knee, keep rear leg straight; lower both arms sideways to shoulder height into Warrior II, torso open toward camera and gaze left over fingertips. Only woman and therapist move, machine is a rigid stage. Navy therapist on floor beside her maintains one flat supporting palm on hip and gently follows her lowering pelvis. Both feet stay entirely on carriage, which NEVER translates or rocks. Preserve equipment dimensions and perspective, no new machine parts, no extra limbs, no music or text."
+  },
+  {
+    "name": "08b-mat",
+    "frames": 145,
+    "edit_duration": 6.0,
+    "width": 576,
+    "height": 1024,
+    "fps": 24,
+    "seed": 904,
+    "images": [
+      {
+        "path": "assets/08b-mat-start.png",
+        "frame": 0,
+        "strength": 1
+      },
+      {
+        "path": "assets/08b-mat-end.png",
+        "frame": 144,
+        "strength": 0.85
+      }
+    ],
+    "prompt": "A calm fixed-camera GTA San Andreas interior cutscene. The navy physiotherapist gently presses her flat upper palm DOWN AND TOWARD SCREEN LEFT on top of the maroon woman's raised upper arm. Her other hand stabilises the right side of the waist. The seated woman exhales and lowers her ribs, head and overhead fingertips down-left into a slightly deeper side bend. Her supporting elbow bends softly, both hips and crossed legs stay planted on the mat. The therapist follows the downward movement, softly straightening her upper elbow while maintaining the same palm contact. They hold the deeper position peacefully for the final two seconds."
+  },
+  {
+    "name": "09-squat",
+    "frames": 145,
+    "edit_duration": 6.0,
+    "width": 576,
+    "height": 1024,
+    "fps": 24,
+    "seed": 746,
+    "images": [
+      {
+        "path": "assets/09-squat.png",
+        "frame": 0,
+        "strength": 1
+      }
+    ],
+    "prompt": "Calm original GTA San Andreas PS2 low-poly interior cutscene, fixed rear three-quarter camera. Maroon woman performs ONE slow controlled barbell back squat in black MATRIX rack: hips descend smoothly, knees bend tracking over toes, heels remain planted; brief pause at comfortable depth; then she presses through both feet and stands back up. Silver bar stays straight across upper back, hands stay fixed on bar, green plates stay rigid at both ends. Navy female physiotherapist stays directly behind and slightly offset, lowers and rises WITH her as an attentive spotter, hands open close to torso without grabbing bar, ready to assist. Only these two people and their consistent mirror reflections. Left oak shelving, towels, mirror, rack uprights, safety arms and stored plates remain completely stationary. No machine movement, no extra hands, no music, no HUD."
+  }
+]

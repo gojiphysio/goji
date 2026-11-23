@@ -1,0 +1,47 @@
+{
+  "01-swagger": {
+    "state": "complete",
+    "seconds": 68.0,
+    "returncode": 0
+  },
+  "02-takeover": {
+    "state": "complete",
+    "seconds": 74.0,
+    "returncode": 0
+  },
+  "03-drive": {
+    "state": "complete",
+    "seconds": 59.4,
+    "returncode": 0
+  },
+  "04-impact": {
+    "state": "complete",
+    "seconds": 51.8,
+    "returncode": 0
+  },
+  "05-ejection": {
+    "state": "complete",
+    "seconds": 46.5,
+    "returncode": 0
+  },
+  "06-marker": {
+    "state": "complete",
+    "seconds": 61.4,
+    "returncode": 0
+  },
+  "07-entry": {
+    "state": "complete",
+    "seconds": 60.3,
+    "returncode": 0
+  },
+  "08a-reformer": {
+    "state": "complete",
+    "seconds": 95.1,
+    "returncode": 0
+  },
+  "08b-mat": {
+    "state": "complete",
+    "seconds": 124.4,
+    "returncode": 0
+  }
+}

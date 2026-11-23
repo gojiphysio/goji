@@ -1,0 +1,15 @@
+{
+  "version": 7,
+  "source_cut": "animation-v6, 34.3 seconds at 30 fps",
+  "edit_decision": "Remove original timeline [00:12.000,00:16.000). Cut directly from arrival to the running player. No transition, stumble or ground recovery.",
+  "arrival": {"input": "v6/edit/04-bailout.mp4", "frames": [0,27], "fps": 30, "source_timeline": [11.1,12.0]},
+  "run": {"input": "v6/edit/05-recovery.mp4", "frames": [42,114], "fps": 30, "source_timeline": [16.0,18.4], "new_timeline": [12.0,14.4]},
+  "new_duration": 30.3,
+  "uniform": "Every Goji team member wears a fitted black short-sleeve crew-neck top and full-length black leggings, with a small Goji logo and no name tag. Short bob and gentle smile retained; squat reflection updated too.",
+  "references": ["https://www.gojiphysio.com/", "https://www.gojiphysio.com/photos/services/prenatal-physiotherapy-warm.webp"],
+  "logo_reference": "Goji logo_light_transparent.png from the repository's brand assets",
+  "image_edits": "Built-in image generator; only team clothing and branding edited in v6 interior references.",
+  "animation": "Existing local LTX-2.5 Q8 MLX installation; same seeds and durations as the v6 interiors. Exterior footage retained.",
+  "mobility_popup": "Mobility – Upgraded. Cops will now find it harder to arrest you.",
+  "sound": "Approved v6 original SFX stems cut at the identical sample-accurate [12,16) interval. No music."
+}

@@ -1,0 +1,160 @@
+[
+  {
+    "name": "01-swagger",
+    "frames": 113,
+    "edit_duration": 4.3,
+    "width": 576,
+    "height": 1024,
+    "fps": 24,
+    "seed": 1001,
+    "images": [
+      {
+        "path": "assets/01-swagger.png",
+        "frame": 0,
+        "strength": 1.0
+      }
+    ],
+    "prompt": "A continuous shot rendered as original 2004 GTA San Andreas PS2 gameplay: low-polygon characters, angular geometry, simple diffuse textures and warm baked lighting. Preserve the reference character, maroon yoga outfit, black ponytail, black purse and environment. The young woman walks forward with a loose confident swagger and alternating natural steps, her purse swinging gently. The camera follows directly behind at a constant distance. The SBS bus continues away. Her back remains toward the camera. No music, dialogue, captions, HUD or additional people.",
+    "pipeline": "selected_prior_clip",
+    "source_note": "Approved 49-frame walk extended with its final 25 video frames; 8 latent frames added. Actual continued walking motion, not a freeze or slow-motion stretch."
+  },
+  {
+    "name": "02-takeover",
+    "frames": 97,
+    "edit_duration": 2.8,
+    "width": 576,
+    "height": 1024,
+    "fps": 24,
+    "seed": 1012,
+    "images": [
+      {
+        "path": "assets/02-four-door-seated.png",
+        "frame": 0,
+        "strength": 1
+      },
+      {
+        "path": "assets/02-four-door-end-clean.png",
+        "frame": 96,
+        "strength": 0.9
+      }
+    ],
+    "prompt": "A fixed rear three-quarter GTA San Andreas gameplay camera. The maroon woman grabs the CLOSED taxi door handle, plants her feet and aggressively YANKS the front driver door wide open with a forceful backward step. Her left elbow and shoulder sweep backwards with the door, and her torso twists sharply from the effort. The door rotates around its FRONT hinge, remaining attached to the taxi. As it opens, the startled grey-shirt driver tips sideways out of the seat, falls through the open doorway and rolls onto his hip on the road. She releases the handle and stays upright beside the wide-open door. The driver ends seated on the ground, unharmed. Clear large arm and body motion by the woman; same solid car and fixed camera. The taxi is a four-door sedan: the rear passenger door stays CLOSED with its separate window and handle, the fixed B-pillar stays still. Only the front driver door opens, carrying its single wing mirror. Rear seat stays empty."
+  },
+  {
+    "name": "03-drive",
+    "frames": 97,
+    "edit_duration": 4.0,
+    "width": 576,
+    "height": 1024,
+    "fps": 24,
+    "seed": 742,
+    "images": [
+      {
+        "path": "assets/03-drive.png",
+        "frame": 0,
+        "strength": 1.0
+      }
+    ],
+    "prompt": "Original 2004 GTA San Andreas PS2 low-polygon gameplay. Angular geometry, stable simple textures, pale teal sky and green foliage, consistent daytime lighting. Continuous rear chase camera following blue Comfort taxi at HIGH SPEED. Sparse ordinary road traffic: ONLY a silver sedan and a white van far ahead. NPC traffic travels slowly and STRAIGHT, wheels aligned with lane direction, NO drifting, NO swerving, NO sideways sliding. Only PLAYER TAXI steers aggressively: accelerate past silver sedan on its right, sharply weave back left into open lane, then dart right past distant white van. Ordinary cars briefly show brake lights and continue in their lanes. No additional cars spawn. They fall behind as taxi overtakes. Taxi body rolls lightly in fast lane changes; road lines rush backwards, roadside trees streak past with strong parallax. Rapid arcade handling but wheels stay grounded. Rear camera follows heading smoothly at constant distance, never faces the front. Finish continuing fast forward near the Lentor Modern pavement. No collision yet, no pedestrians, no slow motion, no text."
+  },
+  {
+    "name": "04-arrival",
+    "frames": 42,
+    "edit_duration": 1.4,
+    "width": 1080,
+    "height": 1920,
+    "fps": 30,
+    "seed": 1017,
+    "images": [],
+    "prompt": "Retain arrival through v6 00:12.500, giving the player 0.5 seconds more to exit before cutting to the same running frame.",
+    "pipeline": "selected_prior_clip",
+    "source_note": "v6 edit/04-bailout.mp4 frames [0,42), original timeline [11.1,12.5).",
+    "num_frames": 42
+  },
+  {
+    "name": "05-run",
+    "frames": 72,
+    "edit_duration": 2.4,
+    "width": 1080,
+    "height": 1920,
+    "fps": 30,
+    "seed": 862,
+    "images": [],
+    "prompt": "Retained run beginning exactly at original v6 timestamp 00:16.000.",
+    "pipeline": "selected_prior_clip",
+    "source_note": "v6 edit/05-recovery.mp4 frames [42,114), original timeline [16.0,18.4)."
+  },
+  {
+    "name": "06-marker",
+    "frames": 49,
+    "edit_duration": 2.0,
+    "width": 576,
+    "height": 1024,
+    "fps": 24,
+    "seed": 425,
+    "images": [
+      {
+        "path": "assets/06-yellow-entry-cone-reference.png",
+        "frame": 0,
+        "strength": 1.0
+      }
+    ],
+    "prompt": "A continuous shot rendered as original 2004 GTA San Andreas PS2 gameplay: low-polygon characters, angular geometry, simple diffuse textures and warm baked lighting. Preserve the reference character, maroon yoga outfit, black ponytail, black purse and environment. The woman takes quick forward steps toward the Goji glass doorway, holding her black purse. Follow from behind. She enters under the tall translucent yellow downward-pointing entry cone. The marker gently bobs in place. The camera never turns around. Keep the doorway and signage stable. No music, dialogue, captions, HUD or additional people."
+  },
+  {
+    "name": "07-entry",
+    "frames": 73,
+    "edit_duration": 2.5,
+    "width": 576,
+    "height": 1024,
+    "fps": 24,
+    "seed": 526,
+    "images": [
+      {
+        "path": "assets/07-entry.png",
+        "frame": 0,
+        "strength": 1.0
+      }
+    ],
+    "prompt": "A calm GTA San Andreas PS2 interior cutscene with fixed camera. Woman in maroon walks slowly to the burgundy Goji reception table. The Goji team member wearing a fitted black crew-neck T-shirt and black leggings STAYS SEATED behind the table, smiles, gives a small friendly open-hand welcoming gesture, and nods to the arriving woman. Player relaxes her shoulders and returns a small nod. Preserve GOJI wall sign, table, chairs and checked floor. Warm quiet welcome after chaos. No music, no captions. The seated team member has a short dark bob with no ponytail and a gentle smile. Her clothing stays solid black, with a small Goji wordmark printed directly on the left chest. No collar, buttons, name tag or badge. Preserve the outfit and logo in any mirror reflection."
+  },
+  {
+    "name": "08b-mat",
+    "frames": 121,
+    "edit_duration": 5.0,
+    "width": 576,
+    "height": 1024,
+    "fps": 24,
+    "seed": 904,
+    "images": [
+      {
+        "path": "assets/08b-mat-start.png",
+        "frame": 0,
+        "strength": 1
+      },
+      {
+        "path": "assets/08b-mat-end.png",
+        "frame": 120,
+        "strength": 0.85
+      }
+    ],
+    "prompt": "A calm fixed-camera GTA San Andreas interior cutscene. The physiotherapist in a fitted black crew-neck T-shirt and black leggings gently presses her flat upper palm DOWN AND TOWARD SCREEN LEFT on top of the maroon woman's raised upper arm. Her other hand stabilises the right side of the waist. The seated woman exhales and lowers her ribs, head and overhead fingertips down-left into a slightly deeper side bend. Her supporting elbow bends softly, both hips and crossed legs stay planted on the mat. The therapist follows the downward movement, softly straightening her upper elbow while maintaining the same palm contact. They hold the deeper position peacefully for the final two seconds. Therapist maintains her short dark bob and gentle closed-mouth smile. Her clothing stays solid black, with a small Goji wordmark printed directly on the left chest. No collar, buttons, name tag or badge. Preserve the outfit and logo in any mirror reflection."
+  },
+  {
+    "name": "09-squat",
+    "frames": 145,
+    "edit_duration": 6.0,
+    "width": 576,
+    "height": 1024,
+    "fps": 24,
+    "seed": 746,
+    "images": [
+      {
+        "path": "assets/09-squat.png",
+        "frame": 0,
+        "strength": 1
+      }
+    ],
+    "prompt": "Calm original GTA San Andreas PS2 low-poly interior cutscene, fixed rear three-quarter camera. Maroon woman performs ONE slow controlled barbell back squat in black MATRIX rack: hips descend smoothly, knees bend tracking over toes, heels remain planted; brief pause at comfortable depth; then she presses through both feet and stands back up. Silver bar stays straight across upper back, hands stay fixed on bar, green plates stay rigid at both ends. Female physiotherapist wearing a fitted black crew-neck T-shirt and black leggings stays directly behind and slightly offset, lowers and rises WITH her as an attentive spotter, hands open close to torso without grabbing bar, ready to assist. Only these two people and their consistent mirror reflections. Left oak shelving, towels, mirror, rack uprights, safety arms and stored plates remain completely stationary. No machine movement, no extra hands, no music, no HUD. Therapist has a short dark bob with no ponytail and a gentle smile, including in her reflection. Her clothing stays solid black, with a small Goji wordmark printed directly on the left chest. No collar, buttons, name tag or badge. Preserve the outfit and logo in any mirror reflection."
+  }
+]

@@ -1,0 +1,45 @@
+{
+  "runtime_commit": "747b30ef10e92a011e85b2aa0f6c4ee86ced5218",
+  "model": "LTX-2.5 distilled Q8 MLX",
+  "experiments": [
+    {
+      "id": "901",
+      "method": "25-frame-tail continuation",
+      "status": "cancelled",
+      "reason": "User replaced collision/ejection with a pre-impact door bailout."
+    },
+    {
+      "id": "902",
+      "method": "25-frame-tail continuation, no new image guide",
+      "result": "Moving road and chase-camera continuity improved; later action became slow seat exit and clothing drifted. Keep only approach prefix."
+    },
+    {
+      "id": "903",
+      "method": "short pull-only generation, one corrected opening image",
+      "result": "Rejected: driver folded back into car and disappeared."
+    },
+    {
+      "id": "904",
+      "method": "matched opening and deeper-stretch endpoint",
+      "result": "Accepted: therapist guides downward-left; player holds deeper stretch."
+    },
+    {
+      "id": "905",
+      "method": "short pull-only generation, corrected opening plus driver-out endpoint",
+      "result": "Rejected: model swapped who fell; player fell to ground."
+    },
+    {
+      "id": "906",
+      "method": "25-frame-tail continuation plus maroon-outfit bailout endpoint",
+      "status": "selected prefix",
+      "result": "Correct maroon leggings and door exit. Reject later second hop; keep full-output frames 97 through 137 and action-cut to approved ground tumble."
+    },
+    {
+      "id": "741-controlled-revision",
+      "method": "reuse earlier successful full take's seed, duration and endpoint; change opening forearm grip and related prompt only; trim before entry",
+      "status": "accepted first 2.2 seconds",
+      "result": "Driver rolls clear, player remains upright, shirt stays against torso without sleeve-to-hand fabric bridge. Cut before entry/spin and handbag appearance."
+    }
+  ],
+  "principle": "A matching still and stronger prompt are insufficient for rigid-body or multi-person mechanics. Evaluate a controlled change against approved motion, preserve good footage, and record failed trials rather than calling them fixed."
+}
