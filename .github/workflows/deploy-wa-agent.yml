@@ -1,0 +1,170 @@
+name: Deploy WhatsApp assistant
+
+# Rolls new code to goji-wa-agent (the WhatsApp assistant) on every push to main
+# that touches it, or the website content its knowledge base is built from.
+# Tests run first and gate the deploy. Auth uses Workload Identity Federation,
+# same as deploy-booking.yml (no service-account key stored; see README.md here).
+#
+# CI only ROLLS CODE. It never creates the service and never changes its
+# configuration:
+#   - The first deploy is by hand: wa_agent/setup_secrets.sh, then
+#     wa_agent/deploy.sh (creates the service account, Firestore, the events
+#     table, secret grants, the morning-summary schedule). Until the service
+#     exists this workflow exits 0 with a notice.
+#   - Env vars are carried forward untouched: no --set-env-vars or
+#     --update-env-vars here, so gcloud keeps the live block (stage, testers,
+#     WA_AGENT_BOOKING_DRY_RUN, provider transport...). Change those with
+#     deploy.sh or `gcloud run services update --update-env-vars`. The step
+#     reads the live env before and after, prints the operational switches, and
+#     fails if anything changed.
+#   - Secrets use --update-secrets with deploy.sh's list, which adds any newly
+#     required mount and keeps optional ones (WA_WEBHOOK_URL_TOKEN). The runtime
+#     SA's secretAccessor grants come from deploy.sh; this deployer SA has no
+#     Secret Manager role, so it can't grant or even check them. Do NOT add a
+#     `gcloud secrets describe` probe (see deploy-booking.yml): it always fails
+#     here. A missing secret or grant makes the deploy fail loudly instead.
+#
+# Repo variables: GCP_PROJECT, GCP_REGION, WIF_PROVIDER, DEPLOY_SERVICE_ACCOUNT
+# (existing). No new ones. Related, set after the first deploy: WA_AGENT_URL
+# (deploy-booking.yml mounts the shared internal token and calls back once it
+# is set) and WA_PHONE_NUMBER_ID (deploy-dashboard.yml, reminders job; same
+# number as the assistant's).
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "business-intelligence/scripts/wa_agent/**"
+      # The knowledge base is built from these at deploy time (kb.py), so a
+      # price or service change on the site reaches the agent on merge.
+      - "marketing/website/src/content/**"
+      - "marketing/website/public/llms.txt"
+      - ".github/workflows/deploy-wa-agent.yml"
+  workflow_dispatch: {}   # allow manual "Run workflow" from the Actions tab
+
+concurrency:
+  group: deploy-wa-agent
+  cancel-in-progress: false   # never interrupt an in-flight deploy
+
+permissions:
+  contents: read
+  id-token: write             # required for Workload Identity Federation
+
+env:
+  PROJECT: ${{ vars.GCP_PROJECT }}
+  REGION:  ${{ vars.GCP_REGION }}
+  SERVICE: goji-wa-agent
+  WA_AGENT_SA: wa-agent-sa@${{ vars.GCP_PROJECT }}.iam.gserviceaccount.com
+
+jobs:
+  # ---- 1. Tests gate the deploy (same as wa-agent-tests.yml) ---------------
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install deps
+        run: pip install -r business-intelligence/scripts/wa_agent/requirements.txt pytest
+      - name: wa_agent tests
+        working-directory: business-intelligence/scripts
+        run: python -m pytest wa_agent/ -q
+
+  # ---- 2. Deploy (only after tests pass) ----------------------------------
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build the knowledge base from the website
+        working-directory: business-intelligence/scripts
+        run: |
+          # The image needs _build/kb.json (Dockerfile checks); .gcloudignore
+          # keeps it in the upload although .gitignore excludes it.
+          python -m wa_agent.kb --site "${GITHUB_WORKSPACE}/marketing/website" \
+            --out wa_agent/_build/kb.json
+          test -s wa_agent/_build/kb.json
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.WIF_PROVIDER }}
+          service_account: ${{ vars.DEPLOY_SERVICE_ACCOUNT }}
+
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Read the live service back
+        id: live
+        run: |
+          # The deployer has run.admin, so a failed describe means the service
+          # doesn't exist yet, unless the error says otherwise.
+          if gcloud run services describe "${SERVICE}" --region "${REGION}" --project "${PROJECT}" \
+               --format=json > "${RUNNER_TEMP}/before.json" 2> "${RUNNER_TEMP}/err.txt"; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          elif grep -qiE "could not be found|not found|NOT_FOUND" "${RUNNER_TEMP}/err.txt"; then
+            echo "::notice title=goji-wa-agent not deployed yet::First deploy is by hand: setup_secrets.sh, then deploy.sh (wa_agent/README.md). Skipping."
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          else
+            cat "${RUNNER_TEMP}/err.txt"; exit 1
+          fi
+
+      - name: Deploy goji-wa-agent
+        if: steps.live.outputs.exists == 'true'
+        working-directory: business-intelligence/scripts/wa_agent
+        run: |
+          # Plain env of the live service as sorted JSON (secret refs left out).
+          # Phone-number lists are reported as counts; the rest are switches.
+          cat > "${RUNNER_TEMP}/env.py" <<'PY'
+          import json, sys
+          spec = json.load(open(sys.argv[1]))["spec"]["template"]["spec"]
+          env = {e["name"]: e.get("value", "") for e in spec["containers"][0].get("env") or []
+                 if "valueFrom" not in e}
+          if sys.argv[2] == "dump":
+              print(json.dumps(env, sort_keys=True))
+          else:
+              lists = {"WA_AGENT_STAFF", "WA_AGENT_TESTERS", "WA_AGENT_ALWAYS_HUMAN"}
+              for k in sorted(env):
+                  v = env[k]
+                  shown = f"{len([p for p in v.split(',') if p.strip()])} entries" if k in lists else repr(v)
+                  print(f"  {k} = {shown}")
+              if env.get("WA_AGENT_BOOKING_DRY_RUN", "1").lower() in ("1", "true", "yes", "on"):
+                  print("::warning::WA_AGENT_BOOKING_DRY_RUN is on (or unset): direct booking writes nothing.")
+          PY
+          echo "Live env (kept as is):"
+          python "${RUNNER_TEMP}/env.py" "${RUNNER_TEMP}/before.json" show
+          python "${RUNNER_TEMP}/env.py" "${RUNNER_TEMP}/before.json" dump > "${RUNNER_TEMP}/env_before.json"
+
+          # Same list as deploy.sh SECRETS. Keep them in step.
+          SECRETS="ANTHROPIC_API_KEY=anthropic-api-key:latest,WA_TOKEN=wa-token:latest,WA_APP_SECRET=wa-app-secret:latest,WA_VERIFY_TOKEN=wa-verify-token:latest,WA_AGENT_ADMIN_TOKEN=wa-agent-admin-token:latest,GMAIL_APP_PASSWORD=gmail-app-password:latest,WA_AGENT_INTERNAL_TOKEN=wa-agent-internal-token:latest,WA_AGENT_HASH_SALT=wa-agent-hash-salt:latest,WA_AGENT_FEEDBACK_SECRET=wa-agent-feedback-secret:latest"
+          # --max-instances=1: per-chat locks are in-process. One idle instance
+          # with CPU throttled; work runs inside Cloud Tasks requests
+          # (/tasks/run). See deploy.sh for why.
+          # No env flag on purpose (see the header).
+          gcloud run deploy "${SERVICE}" \
+            --source . --region "${REGION}" --project "${PROJECT}" \
+            --service-account "${WA_AGENT_SA}" \
+            --update-secrets="${SECRETS}" \
+            --max-instances=1 --min-instances=1 --cpu-throttling --cpu-boost --timeout=300 \
+            --allow-unauthenticated \
+            --quiet
+
+          gcloud run services describe "${SERVICE}" --region "${REGION}" --project "${PROJECT}" \
+            --format=json > "${RUNNER_TEMP}/after.json"
+          python "${RUNNER_TEMP}/env.py" "${RUNNER_TEMP}/after.json" dump > "${RUNNER_TEMP}/env_after.json"
+          if ! cmp -s "${RUNNER_TEMP}/env_before.json" "${RUNNER_TEMP}/env_after.json"; then
+            echo "::error::The deploy changed the service's env vars. Names that differ:"
+            python - "${RUNNER_TEMP}/env_before.json" "${RUNNER_TEMP}/env_after.json" <<'PY'
+          import json, sys
+          a, b = (json.load(open(p)) for p in sys.argv[1:3])
+          print(sorted(k for k in set(a) | set(b) if a.get(k) != b.get(k)))
+          PY
+            exit 1
+          fi
+          echo "Env unchanged. $(gcloud run services describe "${SERVICE}" --region "${REGION}" \
+            --project "${PROJECT}" --format='value(status.url)')"

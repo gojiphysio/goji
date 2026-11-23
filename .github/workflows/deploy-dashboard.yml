@@ -212,12 +212,22 @@ jobs:
                    --format='value(template.template.containers[0].env.filter("name:DRY_RUN").extract(value))' \
                    2>/dev/null || true)"
           dry="${dry:-true}"
-          echo "Deploying appointment-reminders with DRY_RUN=${dry}"
+          # WhatsApp reminders: preserved the same way (default off). The
+          # wa-token mount is added only when they're on, because Cloud Run
+          # fails a deploy that mounts a secret that doesn't exist yet.
+          wa="$(gcloud run jobs describe appointment-reminders \
+                   --region "${REGION}" --project "${PROJECT}" \
+                   --format='value(template.template.containers[0].env.filter("name:WA_REMINDERS_ENABLED").extract(value))' \
+                   2>/dev/null || true)"
+          wa="${wa:-0}"
+          secrets="GMAIL_APP_PASSWORD=gmail-app-password:latest"
+          if [ "${wa}" = "1" ]; then secrets="${secrets},WA_TOKEN=wa-token:latest"; fi
+          echo "Deploying appointment-reminders with DRY_RUN=${dry} WA_REMINDERS_ENABLED=${wa}"
           gcloud run jobs deploy appointment-reminders \
             --source . --region "${REGION}" --project "${PROJECT}" \
             --service-account "${DASHBOARD_SA}" \
-            --set-env-vars="BQ_PROJECT=${PROJECT},BQ_DATASET=marts,DRY_RUN=${dry}" \
-            --set-secrets=GMAIL_APP_PASSWORD=gmail-app-password:latest \
+            --set-env-vars="BQ_PROJECT=${PROJECT},BQ_DATASET=marts,DRY_RUN=${dry},WA_REMINDERS_ENABLED=${wa},WA_PHONE_NUMBER_ID=${{ vars.WA_PHONE_NUMBER_ID }}" \
+            --set-secrets="${secrets}" \
             --max-retries=0 \
             --quiet
 

@@ -1,0 +1,5 @@
+# Explicit so gcloud doesn't derive one from .gitignore, which would drop the
+# generated _build/kb.json the image needs.
+tests/
+__pycache__/
+*.pyc

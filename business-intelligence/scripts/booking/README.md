@@ -28,6 +28,10 @@ the clinic's real rules — see the plan/validation notes in the repo.
 - `POST /internal/refresh-snapshot` → re-pages the bookable window into the
   availability snapshot (below). Hit by Cloud Scheduler every 5 min; public but
   self-throttled to one Plato crawl per `SNAPSHOT_MIN_INTERVAL` (240s).
+- `POST /internal/book` → booking on behalf of the WhatsApp assistant
+  (`X-Internal-Token`; see **WhatsApp assistant** below).
+- `POST /internal/reschedule` → the WhatsApp assistant moves a patient's
+  existing appointment (same token; see **WhatsApp assistant** below).
 - `GET /healthcheck` → liveness only ("is the container up"). Never touches Plato.
 - `GET /healthcheck/deep` → **readiness**: derives real availability for the next
   14 days. `200 {"ok":true,...}` = a visitor can book; `503` = they can't, with
@@ -63,6 +67,59 @@ booking is refused.
 3. Check the funnel for `book_error` / `bot_captcha_*` the next day.
 Widget settings (hostnames, mode) are in the Cloudflare dashboard → Turnstile.
 To rotate the secret, add a new version of `turnstile-secret` and redeploy.
+
+## WhatsApp assistant (`/internal/book`, `/internal/reschedule` + booking-confirmed callback)
+The assistant (`goji-wa-agent`, its own Cloud Run service, `scripts/wa_agent/`)
+books through `POST /internal/book`, the same `create_booking` as `/api/book`.
+- **Auth:** header `X-Internal-Token` must equal `INTERNAL_TOKEN` (Secret Manager
+  `wa-agent-internal-token`, shared with the assistant). Unset → `404` (the route
+  doesn't exist); wrong/missing → `403`.
+- **Body:** `{service, date: "YYYY-MM-DD", time: "HH:MM", format: "clinic"|"home",
+  name, phone, email?, clinician_id?, physio_focus?, variant?, address? (home),
+  notes?, session_id?, source: "whatsapp", dry_run: bool}`. `source` other than
+  `whatsapp` and a non-boolean `dry_run` (e.g. `"false"`) are `400 invalid`.
+- **Differs from `/api/book`:** no bot check (honeypot/fill time/Turnstile; the
+  token replaces it); **email optional** (owner decision: WhatsApp bookings
+  needn't give one; the website still must). No email → Plato gets no address and
+  `connect:false` (no portal invite), no customer email; the admin email still
+  goes, marked "Booked via WhatsApp assistant". The Plato note says "Booked via
+  WhatsApp assistant." The per-contact daily limit is shared with the website.
+- **Response:** `200 {ok, reference, clinician_name, service, date, time, dry_run}`;
+  errors `{ok:false, error, code}`: `400`, `409 slot_taken`, `429 rate_limited`,
+  `502 plato_error`.
+- **`dry_run: true`** runs every check, the limit and the locked fresh
+  availability re-check (so the clinician is really chosen), then stops before
+  the Plato write: `reference` is `DRYRUN-XXXXXX`, no emails, no funnel row, no
+  callback, doesn't count toward the limit. Use it to test the flow against the
+  live calendar without touching it.
+- **Funnel:** real bookings log `confirmed` (detail `whatsapp`) and failures
+  `book_error` (detail `whatsapp_<code>`) under a `wa-` session id (hashed
+  phone + day, or the body's `session_id`). These have no `page_view`, so the
+  dashboard's website funnel should filter `session_id LIKE 'wa-%'` out.
+- **Callback:** after every real booking (website or WhatsApp; never a dry run),
+  if `WA_AGENT_URL` and `INTERNAL_TOKEN` are set, a background thread POSTs
+  `{phone, reference, service, date, time, clinician_name, source: "web"|"whatsapp"}`
+  to `{WA_AGENT_URL}/internal/booking-confirmed` with `X-Internal-Token` (5s
+  timeout; failures are logged and dropped). The assistant matches the phone to
+  a chat and acknowledges the booking there. `WA_AGENT_URL` is the repo variable
+  `vars.WA_AGENT_URL`; empty disables it.
+- **Rules:** any new booking entry point calls `_notify_wa_agent` after success;
+  a dry run must never reach `_create_appointments` (`test_internal_book.py`
+  runs one against a Plato stub that fails on any write; `test_reschedule.py`
+  does the same for moves).
+- **Moving a booking:** `POST /internal/reschedule` (same token) moves an
+  existing appointment, same clinician and service; a real move also fires the
+  callback above. Full contract under **`POST /internal/reschedule`** below.
+
+**Setup (once, before this deploys):** the deploy mounts the secret
+unconditionally, so a missing secret fails the deploy.
+```bash
+openssl rand -hex 32 | tr -d '\n' | gcloud secrets create wa-agent-internal-token --data-file=- --project goji-bi
+gcloud secrets add-iam-policy-binding wa-agent-internal-token --project goji-bi \
+  --member serviceAccount:dashboard-sa@goji-bi.iam.gserviceaccount.com \
+  --role roles/secretmanager.secretAccessor
+```
+Then set the repo variable `WA_AGENT_URL` to the assistant's Cloud Run URL.
 
 ## Monitoring
 `setup_monitoring.sh` (re-runnable) provisions a Cloud Monitoring uptime check on
@@ -172,13 +229,75 @@ sending) — and a `confirmed` funnel event is logged.
 > `connect:true`. If that duplicates our email in practice, drop one after a live
 > test (either set `connect:false` or remove `send_customer_booking_email`).
 
+### `POST /internal/patient-tag` (WhatsApp assistant)
+Same token as `/internal/book`. Body `{patient_id, tag, dry_run?}`; only tags in
+`ALLOWED_PATIENT_TAGS` ("Late change waiver used"). Reads the patient's
+current tags and PUTs them back with the new one (Plato replaces the tag list
+as a whole). `dry_run` reads but doesn't write. **Verify once on a test patient
+in Plato before go-live** that the tag payload shape is accepted and existing
+tags survive.
+
+### `POST /internal/reschedule` (WhatsApp assistant)
+Moves one existing appointment to a new date/time, keeping the clinician, the
+service and the length (no clinician change in this version).
+`reschedule_appointment` in `booking.py`; same token rules as `/internal/book`
+(unset `INTERNAL_TOKEN` → `404`, wrong/missing → `403`).
+- **Body:** `{phone, patient_id?, old_date: "YYYY-MM-DD", old_time: "HH:MM",
+  new_date, new_time, dry_run: bool}` (SGT wall clock). Non-boolean `dry_run`,
+  bad dates/times, a past `new_date`, or the same slot → `400 invalid`;
+  `new_date` past `MAX_ADVANCE_DAYS` → `400 too_far`.
+- **Finding the original:** Plato's appointments on `old_date`, read fresh,
+  skipping leave/unavailable entries and cancelled / void / no-show ones (same
+  rule as the BI marts), whose start is `old_time` and that belong to the
+  patient. With `patient_id`: an appointment linked to a patient must be linked
+  to that one, and an unlinked one (website/WhatsApp bookings carry the phone
+  inline, no patient link) matches on the last 8 digits of `handphone`. Without
+  `patient_id`, the phone decides. None → `404 not_found`; more than one →
+  `409 ambiguous`.
+- **Policy:** the original starting less than `RESCHEDULE_MIN_NOTICE_HOURS`
+  (24) from now → `409 late_change` (the assistant hands it to staff, who apply
+  the cancellation policy). Appointments it can't move alone → `409
+  unsupported`: home visits (three Plato appointments: travel / visit /
+  travel), and anything whose calendar isn't a known clinician or whose type +
+  length isn't a website service (`_service_for`: Physiotherapy and Mummy &
+  Baby share a type, so length decides; physio variants keep their length).
+- **New slot:** `derive_availability(..., clinician_id=…, fresh=True)` inside
+  the clinician's lock, like `create_booking`, with the appointment itself
+  hidden from the read so a same-day move that overlaps its own current slot
+  (10:00 → 10:30) isn't a clash. Not free (booked, outside online hours, day
+  off, inside `min_days`) → `409 slot_taken`.
+- **Write:** `PUT /appointment/{id}` (partial update) with only `starttime`,
+  `endtime` and, when the appointment has a `description`, the old text plus
+  `Moved via WhatsApp assistant from <old_date> <old_time>.` Patient link,
+  title, type, calendar and contact are not sent, so they stay.
+  `PlatoClient.update_appointment` clears the appointment caches and marks
+  both days dirty, like a booking. `dry_run: true` does everything but the PUT
+  and sends nothing.
+- **Response:** `200 {ok, dry_run, reference, clinician_name, service,
+  old_date, old_time, new_date, new_time}`; `reference` is `GOJI-` + the last 6
+  of the appointment id (the same reference a website/WhatsApp booking got).
+  Errors `{ok:false, error, code}`: `400 invalid|too_far`, `404 not_found`,
+  `409 ambiguous|late_change|unsupported|slot_taken`, `502 plato_error`.
+- **After a real move (never a dry run):** a short clinic email
+  "Rescheduled via WhatsApp assistant" (`send_admin_reschedule_email`, CCs the
+  clinician; best effort), and the booking-confirmed callback with the new
+  date/time and `source: "whatsapp"` so the chat's booked note updates.
+- **Verify once on a test patient in Plato before go-live** that PUT with new
+  start/end moves the appointment in the calendar and keeps the patient link
+  and notes; that the `YYYY-MM-DD HH:MM:SS` format is accepted on PUT; whether
+  `endtime` is required (we always send it); and that writing `description`
+  back doesn't mangle it (HTML/escaping).
+
 ## Config to keep in sync
 `config.py` mirrors the website's `src/lib/services.ts` + `clinicians.ts`
 (calendar `color`s, doctor codes, service→calendar/type). Source of truth is
 Plato's `onlineapptbooking/list`.
 
 ## Run / test / deploy
-- Tests: `cd scripts && python3 -m booking.test_booking && python3 -m booking.test_availability`
+- Tests: `cd scripts && python -m pytest booking/ -q` (what CI runs)
 - Probe live availability (read-only): `PLATO_API_KEY=… python3 -m booking.probe_availability 2026-07-18 physiotherapy`
-- Deploy: `bash deploy.sh` (see the header — needs `plato-api-key`, optional
-  `gmail-app-password`; add `booking_funnel_events` to `deploy_admin.sh` grants first).
+- Deploy: `bash deploy.sh` (see the header — needs `plato-api-key`,
+  `turnstile-secret`, optional `gmail-app-password`; `WA_AGENT_URL=… bash
+  deploy.sh` turns on the WhatsApp assistant's route and callback and then also
+  needs `wa-agent-internal-token`, same in CI via the `WA_AGENT_URL` repo
+  variable; add `booking_funnel_events` to `deploy_admin.sh` grants first).

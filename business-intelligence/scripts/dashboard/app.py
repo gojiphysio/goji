@@ -1572,6 +1572,8 @@ BOOKING_FUNNEL_STAGES = [
 def fetch_booking_funnel(start: date, end: date) -> dict:
     """Website /book funnel for [start, end]: distinct sessions reaching each
     stage, in order, from marts.booking_funnel_events (written by goji-booking).
+    WhatsApp-assistant bookings (session ids starting `wa-`) are left out: they
+    never visited /book, and the Agent tab counts them.
 
     Degrades to zeros if the table isn't deployed yet, like fetch_link_clicks —
     the Marketing tab must still render.
@@ -1594,7 +1596,7 @@ def fetch_booking_funnel(start: date, end: date) -> dict:
 SELECT stage, IF(stage = 'book_error', detail, NULL) AS detail,
        COUNT(DISTINCT session_id) AS sessions
 FROM `{PROJECT}.marts.booking_funnel_events`
-WHERE DATE(occurred_at) BETWEEN '{start}' AND '{end}'
+WHERE DATE(occurred_at) BETWEEN '{start}' AND '{end}' AND NOT STARTS_WITH(session_id, 'wa-')
 GROUP BY stage, detail
 """)
     except Exception as e:
@@ -1725,12 +1727,12 @@ paid AS (
 funnel AS (
   SELECT DISTINCT session_id
   FROM `{PROJECT}.marts.booking_funnel_events`
-  WHERE DATE(occurred_at) BETWEEN '{start}' AND '{end}'
+  WHERE DATE(occurred_at) BETWEEN '{start}' AND '{end}' AND NOT STARTS_WITH(session_id, 'wa-')
 ),
 booked AS (
   SELECT DISTINCT session_id
   FROM `{PROJECT}.marts.booking_funnel_events`
-  WHERE DATE(occurred_at) BETWEEN '{start}' AND '{end}' AND stage = 'confirmed'
+  WHERE DATE(occurred_at) BETWEEN '{start}' AND '{end}' AND NOT STARTS_WITH(session_id, 'wa-') AND stage = 'confirmed'
 )
 SELECT COUNT(*)                                        AS sessions,
        COUNTIF(f.session_id IS NOT NULL)               AS entered_funnel,
@@ -2138,7 +2140,7 @@ WITH bf AS (
     COUNT(DISTINCT IF(stage = 'confirmed', session_id, NULL))          AS booked,
     ARRAY_AGG(DISTINCT session_id IGNORE NULLS)                        AS sids
   FROM `{PROJECT}.marts.booking_funnel_events`
-  WHERE DATE(occurred_at) BETWEEN '{start}' AND '{end}'
+  WHERE DATE(occurred_at) BETWEEN '{start}' AND '{end}' AND NOT STARTS_WITH(session_id, 'wa-')
 ),
 wa AS (
   SELECT COUNT(DISTINCT c.session_id) AS tapped_whatsapp
@@ -2150,7 +2152,7 @@ wa AS (
     AND c.session_id NOT IN UNNEST(
       (SELECT ARRAY_AGG(DISTINCT session_id IGNORE NULLS)
        FROM `{PROJECT}.marts.booking_funnel_events`
-       WHERE DATE(occurred_at) BETWEEN '{start}' AND '{end}' AND stage = 'confirmed'))
+       WHERE DATE(occurred_at) BETWEEN '{start}' AND '{end}' AND NOT STARTS_WITH(session_id, 'wa-') AND stage = 'confirmed'))
 )
 SELECT bf.booking_sessions, bf.booked, wa.tapped_whatsapp
 FROM bf, wa
@@ -2296,6 +2298,177 @@ def _build_funnel_paths(link_clicks: dict, kpis: dict, lead_wins: dict,
     }
 
 
+# --- WhatsApp assistant (Agent tab) -----------------------------------------
+# Reads the views that sql/marts/ builds on marts.wa_agent_events. They hold no
+# message text and no phone numbers (chat_key is a salted hash), so the tab can
+# show them freely. Each fetch degrades to an empty value so the tab shows its
+# "no assistant data yet" state until the views are deployed and the agent live.
+WA_CONVERSATIONS = f"{PROJECT}.marts.wa_agent_conversations"
+WA_INTENT_AUTONOMY = f"{PROJECT}.marts.wa_agent_intent_autonomy"
+WA_AUTONOMY_MAX_ROWS = 15
+WA_WEEKLY_WEEKS = 12
+# A conversation is dated by its start, in clinic time.
+_WA_IN_RANGE = "DATE(conversation_start, 'Asia/Singapore') BETWEEN '{start}' AND '{end}'"
+
+
+def _share_pct(numerator, denominator) -> float | None:
+    """numerator / denominator as a percentage, or None with no denominator."""
+    d = _to_float(denominator)
+    return round(_to_float(numerator) / d * 100, 1) if d else None
+
+
+def _wa_agent_empty() -> dict:
+    return {
+        "conversations": 0, "ended": 0, "open": 0,
+        "agent_success": 0, "success_rate": None,
+        "rescued": 0, "rescue_rate": None,
+        "bookings": 0,
+        "median_first_reply_s": None,
+        "cost_usd": 0.0, "cost_per_conversation": None,
+        "handled_agent": 0, "handled_agent_then_human": 0, "handled_human": 0,
+        "rated_up": 0, "rated_down": 0,
+    }
+
+
+def fetch_wa_agent_summary(start: date, end: date) -> dict:
+    """Headline numbers for conversations that started in [start, end].
+
+    Pure-agent success rate = conversations that ended in success with no human
+    involved, over conversations that have ended (open ones are still live, so
+    they are neither a success nor a failure yet). Rescue rate uses the same
+    denominator. Cost is the model's estimated cost in USD.
+    """
+    empty = _wa_agent_empty()
+    try:
+        rows = _query(f"""
+SELECT
+  COUNT(*)                                                     AS conversations,
+  COUNTIF(score IS NOT NULL AND score != 'open')               AS ended,
+  COUNTIF(score = 'open')                                      AS open,
+  COUNTIF(score = 'success' AND handled_by = 'agent')          AS agent_success,
+  COUNTIF(outcome = 'rescued')                                 AS rescued,
+  COUNTIF(booked)                                              AS bookings,
+  APPROX_QUANTILES(first_reply_s, 2 IGNORE NULLS)[SAFE_OFFSET(1)] AS median_first_reply_s,
+  SUM(cost_usd)                                                AS cost_usd,
+  COUNTIF(handled_by = 'agent')                                AS handled_agent,
+  COUNTIF(handled_by = 'agent_then_human')                     AS handled_agent_then_human,
+  COUNTIF(handled_by = 'human')                                AS handled_human,
+  COUNTIF(rating = 'up')                                       AS rated_up,
+  COUNTIF(rating = 'down')                                     AS rated_down
+FROM `{WA_CONVERSATIONS}`
+WHERE {_WA_IN_RANGE.format(start=start, end=end)}
+""")
+    except Exception as e:
+        log.warning("wa_agent_conversations unavailable (deploy_all.sh run?): %s", e)
+        return empty
+    if not rows:
+        return empty
+    r = rows[0]
+    out = dict(empty)
+    for k in ("conversations", "ended", "open", "agent_success", "rescued", "bookings",
+              "handled_agent", "handled_agent_then_human", "handled_human",
+              "rated_up", "rated_down"):
+        out[k] = _to_int(r.get(k))
+    out["cost_usd"] = round(_to_float(r.get("cost_usd")), 4)
+    median = r.get("median_first_reply_s")
+    out["median_first_reply_s"] = round(_to_float(median), 1) if median is not None else None
+    out["success_rate"] = _share_pct(out["agent_success"], out["ended"])
+    out["rescue_rate"] = _share_pct(out["rescued"], out["ended"])
+    out["cost_per_conversation"] = (round(out["cost_usd"] / out["conversations"], 4)
+                                    if out["conversations"] else None)
+    return out
+
+
+def fetch_wa_agent_outcomes(start: date, end: date) -> list[dict]:
+    """How conversations that started in [start, end] ended: one row per
+    (outcome, score), most common first. The page colours each by its score."""
+    try:
+        rows = _query(f"""
+SELECT outcome, score, COUNT(*) AS conversations
+FROM `{WA_CONVERSATIONS}`
+WHERE {_WA_IN_RANGE.format(start=start, end=end)}
+GROUP BY outcome, score
+ORDER BY conversations DESC
+""")
+    except Exception as e:
+        log.warning("wa_agent_conversations unavailable (outcomes): %s", e)
+        return []
+    return [{"outcome": r.get("outcome") or "unknown",
+             "score": r.get("score") or "open",
+             "conversations": _to_int(r.get("conversations"))}
+            for r in rows if _to_int(r.get("conversations")) > 0]
+
+
+def fetch_wa_agent_weekly(today: date) -> list[dict]:
+    """Pure-agent success rate per week (Monday start, clinic time) for the last
+    WA_WEEKLY_WEEKS weeks. A week with no ended conversation has rate None."""
+    since = today - timedelta(weeks=WA_WEEKLY_WEEKS)
+    try:
+        rows = _query(f"""
+SELECT
+  DATE_TRUNC(DATE(conversation_start, 'Asia/Singapore'), WEEK(MONDAY)) AS week,
+  COUNT(*)                                             AS conversations,
+  COUNTIF(score IS NOT NULL AND score != 'open')       AS ended,
+  COUNTIF(score = 'success' AND handled_by = 'agent')  AS agent_success
+FROM `{WA_CONVERSATIONS}`
+WHERE DATE(conversation_start, 'Asia/Singapore') BETWEEN '{since}' AND '{today}'
+GROUP BY week
+ORDER BY week
+""")
+    except Exception as e:
+        log.warning("wa_agent_conversations unavailable (weekly): %s", e)
+        return []
+    return [{"week": str(r.get("week")),
+             "conversations": _to_int(r.get("conversations")),
+             "ended": _to_int(r.get("ended")),
+             "agent_success": _to_int(r.get("agent_success")),
+             "success_rate": _share_pct(r.get("agent_success"), r.get("ended"))}
+            for r in rows]
+
+
+def fetch_wa_agent_autonomy() -> list[dict]:
+    """Per intent over the last 90 days (the view's window): how often the agent
+    sends on its own vs drafts for Chris vs escalates, and whether an intent has
+    earned auto-send (ready_to_promote) or lost it (demoted). Busiest intents
+    first, capped so the table stays compact."""
+    try:
+        rows = _query(f"""
+SELECT intent, proposals, auto_sent, drafted, escalated,
+       drafts_sent_unchanged, drafts_edited, rescues,
+       auto_share, ready_to_promote, demoted
+FROM `{WA_INTENT_AUTONOMY}`
+WHERE proposals > 0
+ORDER BY proposals DESC, intent
+LIMIT {WA_AUTONOMY_MAX_ROWS}
+""")
+    except Exception as e:
+        log.warning("wa_agent_intent_autonomy unavailable (deploy_all.sh run?): %s", e)
+        return []
+    out = []
+    for r in rows:
+        proposals = _to_int(r.get("proposals"))
+        unchanged = _to_int(r.get("drafts_sent_unchanged"))
+        edited = _to_int(r.get("drafts_edited"))
+        out.append({
+            "intent":                r.get("intent") or "unknown",
+            "proposals":             proposals,
+            "auto_sent":             _to_int(r.get("auto_sent")),
+            "drafted":               _to_int(r.get("drafted")),
+            "escalated":             _to_int(r.get("escalated")),
+            "auto_pct":              _share_pct(r.get("auto_sent"), proposals),
+            "draft_pct":             _share_pct(r.get("drafted"), proposals),
+            "escalate_pct":          _share_pct(r.get("escalated"), proposals),
+            "drafts_sent_unchanged": unchanged,
+            "drafts_edited":         edited,
+            # Of the drafts Chris sent, the share she sent without changing.
+            "unchanged_pct":         _share_pct(unchanged, unchanged + edited),
+            "rescues":               _to_int(r.get("rescues")),
+            "ready_to_promote":      bool(r.get("ready_to_promote")),
+            "demoted":               bool(r.get("demoted")),
+        })
+    return out
+
+
 def build_payload() -> dict:
     """Fan all BQ queries out in parallel. ~27 queries; serial wall time was
     ~38s, parallel is limited by the slowest single query (~3-5s).
@@ -2328,6 +2501,8 @@ def build_payload() -> dict:
         f_mismatch_hist = ex.submit(fetch_mismatch_history)
         f_projection    = ex.submit(fetch_monthly_projection, today)
         f_upcoming      = ex.submit(fetch_upcoming_sessions, today)
+        f_wa_weekly     = ex.submit(fetch_wa_agent_weekly, today)
+        f_wa_autonomy   = ex.submit(fetch_wa_agent_autonomy)
 
         # Per-range fetches. Each fetch_* is independent so they all race.
         range_jobs: dict[str, dict] = {}
@@ -2357,6 +2532,8 @@ def build_payload() -> dict:
                 "referral_domains": ex.submit(fetch_referral_domains, start, end),
                 "lead_wins":        ex.submit(fetch_lead_wins, start, end),
                 "onsite_flow":      ex.submit(fetch_onsite_flow, start, end),
+                "wa_agent":          ex.submit(fetch_wa_agent_summary, start, end),
+                "wa_agent_outcomes": ex.submit(fetch_wa_agent_outcomes, start, end),
             }
             # Trend indicators compare each range against the immediately
             # preceding window of equal length (e.g. the 30 days before the
@@ -2371,6 +2548,7 @@ def build_payload() -> dict:
                 range_jobs[key]["instagram_reach_prev"] = None
                 range_jobs[key]["instagram_engagement_prev"] = None
                 range_jobs[key]["web_sessions_prev"] = None
+                range_jobs[key]["wa_agent_prev"]     = None
                 range_jobs[key]["prev_start"]        = None
                 range_jobs[key]["prev_end"]          = None
             else:
@@ -2384,6 +2562,7 @@ def build_payload() -> dict:
                 range_jobs[key]["instagram_reach_prev"] = ex.submit(fetch_instagram_reach, prev_start, prev_end)
                 range_jobs[key]["instagram_engagement_prev"] = ex.submit(fetch_instagram_engagement, prev_start, prev_end)
                 range_jobs[key]["web_sessions_prev"] = ex.submit(fetch_web_sessions, prev_start, prev_end)
+                range_jobs[key]["wa_agent_prev"]     = ex.submit(fetch_wa_agent_summary, prev_start, prev_end)
                 range_jobs[key]["prev_start"]        = prev_start.isoformat()
                 range_jobs[key]["prev_end"]          = prev_end.isoformat()
 
@@ -2431,6 +2610,9 @@ def build_payload() -> dict:
                 "web_sessions_prev": v["web_sessions_prev"].result() if v["web_sessions_prev"] else None,
                 "web_pages":         v["web_pages"].result(),
                 "onsite_flow":       v["onsite_flow"].result(),
+                "wa_agent":          v["wa_agent"].result(),
+                "wa_agent_prev":     v["wa_agent_prev"].result() if v["wa_agent_prev"] else None,
+                "wa_agent_outcomes": v["wa_agent_outcomes"].result(),
                 "funnel_paths":     _build_funnel_paths(v["link_clicks"].result(), v["kpis"].result(),
                                                         v["lead_wins"].result(),
                                                         v["web_channels"].result(),
@@ -2452,6 +2634,8 @@ def build_payload() -> dict:
             "mismatch_history":  f_mismatch_hist.result(),
             "projection":        f_projection.result(),
             "upcoming_sessions": f_upcoming.result(),
+            "wa_agent_weekly":   f_wa_weekly.result(),
+            "wa_agent_autonomy": f_wa_autonomy.result(),
         }
 
 
@@ -3653,6 +3837,9 @@ def api_range() -> Response:
         f_lc_prev   = ex.submit(fetch_link_clicks,   prev_start, prev_end)
         f_ga        = ex.submit(fetch_google_ads,    start,      end)
         f_ga_prev   = ex.submit(fetch_google_ads,    prev_start, prev_end)
+        f_wa        = ex.submit(fetch_wa_agent_summary,  start,      end)
+        f_wa_prev   = ex.submit(fetch_wa_agent_summary,  prev_start, prev_end)
+        f_wa_out    = ex.submit(fetch_wa_agent_outcomes, start,      end)
 
     result = {
         "label":            "Custom",
@@ -3672,6 +3859,9 @@ def api_range() -> Response:
         "link_clicks_prev": f_lc_prev.result(),
         "google_ads":       f_ga.result(),
         "google_ads_prev":  f_ga_prev.result(),
+        "wa_agent":          f_wa.result(),
+        "wa_agent_prev":     f_wa_prev.result(),
+        "wa_agent_outcomes": f_wa_out.result(),
     }
     return Response(json.dumps(result), mimetype="application/json")
 

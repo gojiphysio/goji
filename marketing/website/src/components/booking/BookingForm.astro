@@ -284,6 +284,13 @@ const steps = [
     {/* Cloudflare Turnstile mounts here on step 3 when a site key is set. */}
     <div class="booking__turnstile" data-turnstile></div>
     <p class="booking__error" data-error="submit" role="alert" hidden></p>
+    {/* WhatsApp opt-in, by default: Meta requires opt-in naming the business
+        before we send confirmation and reminder templates to this number. */}
+    <p class="booking__hint booking__optin">
+      By booking, you agree that Goji Women's and Family Physiotherapy may send
+      your booking confirmation and appointment reminders to your phone number
+      on WhatsApp.
+    </p>
 
     <div class="booking__nav">
       <button type="button" class="bbtn bbtn--ghost" data-nav="back">Back</button>
