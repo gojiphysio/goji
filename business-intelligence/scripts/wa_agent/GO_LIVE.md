@@ -1,4 +1,4 @@
-# Go-live runbook (status: paused 23 Nov 2026)
+# Go-live runbook (status: handoff review merged 23 Nov 2026; next is connecting the number)
 
 Where things stand, and the steps left to put the assistant on Goji's real
 number. Design detail lives in [`README.md`](README.md); this file is the
@@ -25,6 +25,14 @@ checklist. Update the status line and tick items as they're done.
   as marketing by Meta; `goji_staff_alert_v2` submitted (the code uses v2).
 - **Model:** Opus 5.5 kept (owner's call). Scenario suite: Opus 50/50,
   Sonnet 47/50 at half the cost (19 Nov).
+- **Handoff review (#257, merged and deployed 23 Nov):** evals judge at
+  stage 2; off-topic messages are answered with no ping and the number is
+  watch-listed after 3 in a row; every handover sends the customer a specific
+  holding reply and gives Chris a draft with [brackets] to fill in (pings show
+  both); the agent links the page that answers a question and adds a smiley
+  now and then; late changes are worked out from the patient record too.
+  Review doc with the owner's grades:
+  https://claude.ai/artifact/CJMz4mprhvrDin1MmNuU1i
 
 ## Next: connect Goji's number (needs Chris and the clinic phone)
 
@@ -59,6 +67,17 @@ Dualhook's pre-signup checklist, applied to Goji:
    once you're happy; redeploy.
 5. GitHub repo variable `WA_AGENT_URL` (set at merge) gives goji-booking
    the shared token for `/internal/book` and `/internal/reschedule`.
+
+## Before go-live day
+
+1. Full scenario run on Opus (the production model) through the CLI, not
+   the API key: `WA_AGENT_BACKEND=cli WA_AGENT_MODEL=claude-opus-5-5 python -m
+   wa_agent.eval.scenarios --jobs 4`. Fix anything that's a handoff decision.
+2. Show Chris one handover ping before go-live: what the customer got, and
+   her draft with [brackets] to fill in before sending.
+3. Still open from the review doc (not blockers): send-and-tell for late
+   arrivals, cancels with notice and admin requests; a house rule on bringing
+   a baby; the 0.75 confidence bar.
 
 ## Go-live day
 
