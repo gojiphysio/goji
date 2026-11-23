@@ -1,0 +1,11 @@
+{
+  "duration": 6,
+  "frames": 180,
+  "width": 1080,
+  "height": 1920,
+  "fps": 30,
+  "full_decode": "passed",
+  "scope": "Only final squat clip rendered; original reel unchanged.",
+  "popup_start": 0.5,
+  "sound": "Same original SFX slice as v8 final scene, no music"
+}
