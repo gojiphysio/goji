@@ -70,9 +70,11 @@ Dualhook's pre-signup checklist, applied to Goji:
 
 ## Before go-live day
 
-1. Full scenario run on Opus (the production model) through the CLI, not
-   the API key: `WA_AGENT_BACKEND=cli WA_AGENT_MODEL=claude-opus-5-5 python -m
-   wa_agent.eval.scenarios --jobs 4`. Fix anything that's a handoff decision.
+1. ~~Full scenario run on Opus (the production model) through the CLI~~
+   Done 23 Nov: 88/89 (the one failure was the eval checking Chris's draft
+   for length; fixed). Re-run after any prompt change:
+   `WA_AGENT_BACKEND=cli WA_AGENT_MODEL=claude-opus-5-5 python -m
+   wa_agent.eval.scenarios --jobs 4`, through the CLI, not the API key.
 2. Show Chris one handover ping before go-live: what the customer got, and
    her draft with [brackets] to fill in before sending.
 3. Still open from the review doc (not blockers): send-and-tell for late
