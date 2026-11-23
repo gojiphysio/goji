@@ -87,3 +87,12 @@ def test_persistent_off_topic_goes_quiet_after_three(monkeypatch):
     assert r.passed, r.failures
     assert [t["decision"] for t in r.turns] == ["send", "send", "send", "silent"]
     assert r.turns[3]["reason"] == "watchlist"
+
+
+
+def test_every_scenario_regex_compiles():
+    import re
+    for s in sc.SCENARIOS:
+        for e in [s.expect, *s.at.values()]:
+            for rx in (*e.must, *e.must_not, *e.holding_must, *e.holding_must_not):
+                re.compile(rx)

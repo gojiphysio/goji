@@ -259,3 +259,28 @@ def test_a_reply_with_a_placeholder_for_chris_never_reaches_the_customer():
     held = prop(intent="other", escalate=True, reply="x",
                 holding_reply="We'll send the MC by [time].")
     assert "[" not in customer_message(Decision(ESCALATE, "x"), held, NOW)
+
+
+
+def test_a_guessed_page_link_is_held(monkeypatch):
+    from wa_agent import kb
+    from wa_agent.policy import reply_problems
+    monkeypatch.setattr(kb, "_paths", frozenset({"/", "/services/clinical-pilates/"}))
+    assert reply_problems("More: https://www.gojiphysio.com/services/clinical-pilates/") == []
+    assert reply_problems("See https://www.gojiphysio.com/services/clinical-pilates.") == []
+    assert reply_problems("See https://www.gojiphysio.com/services/yoga/") == ["unknown_page"]
+
+
+
+def test_the_patient_record_makes_a_late_change_late_even_if_the_model_missed_it():
+    from wa_agent.policy import check_late_change
+    today_3pm = {"date": "2026-11-18", "time": "15:00"}          # NOW is 10am that day
+    p = prop(intent="reschedule", reply="Fee applies, sorry.", hours_to_appointment=-1)
+    check_late_change(p, today_3pm, NOW)
+    assert p.hours_to_appointment == 5 and decide(p).reason == "late_change"
+    later = prop(intent="reschedule", hours_to_appointment=2)
+    check_late_change(later, {"date": "2026-11-25", "time": "10:00"}, NOW)
+    assert later.hours_to_appointment == 2                         # the sooner one wins
+    faq = prop(intent="faq", hours_to_appointment=-1)
+    check_late_change(faq, today_3pm, NOW)
+    assert faq.hours_to_appointment == -1

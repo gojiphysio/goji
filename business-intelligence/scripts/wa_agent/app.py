@@ -58,7 +58,8 @@ from . import (agent, booking_client, config, documents, events, learning, notif
 from .policy import (AGENT, DRAFT, ESCALATE, HUMAN, LATE_CHANGE_H, OFF_TOPIC, PAUSED, SEND,
                      SGT, SILENT, WAITING, WATCHLIST, as_one_message, split_bubbles,
                      apply_idle_handback, apply_stage, handover_mode,
-                     customer_message, has_record, note_off_topic, out_of_scope,
+                     check_late_change, customer_message, has_record, note_off_topic,
+                     out_of_scope,
                      pre_golive_chat,
                      decide, gate, human_replied_since, is_acknowledgement, on_human_message,
                      reply_problems, set_mode)
@@ -822,6 +823,7 @@ def handle_inbound(ev: Inbound, received: float) -> None:
                             _booked_note(state)])))
     _schedule_warm()
     p = res.proposal
+    check_late_change(p, patient.get("next_appointment"), time.time())
     d = decide(p, intent_policy=learning.effective_policy(config.stage_policy(rollout["stage"]),
                                                           st.get_autonomy()))
     d = apply_stage(d, p, rollout["stage"])

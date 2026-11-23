@@ -230,6 +230,13 @@ def reply_problems(reply: str) -> list[str]:
                 and parsed.path.startswith("/book"):
             # Booking links must be the tracked go-link from booking_link (repo rule).
             problems.append("untracked_booking_link")
+        elif host.endswith("gojiphysio.com") and host != "go.gojiphysio.com":
+            # A page link must be a page that exists: a guessed URL is a 404.
+            from .kb import site_paths
+            known = site_paths()
+            path = (parsed.path or "/").rstrip(".,!?") or "/"
+            if known is not None and (path if path.endswith("/") else path + "/") not in known:
+                problems.append("unknown_page")
     for email in _EMAIL.findall(reply):
         if email.lower() not in ALLOWED_EMAILS:
             problems.append("email")
@@ -307,6 +314,29 @@ def note_off_topic(state: ChatState, intent: str, now: float,
         return False
     state.off_topic_strikes += 1
     return state.off_topic_strikes >= limit and set_mode(state, PAUSED, WATCHLIST, now)
+
+
+def hours_until(appointment: dict | None, now: float) -> float:
+    """Hours from `now` to a {date: YYYY-MM-DD, time: HH:MM} SGT appointment;
+    -1 if there isn't one or it can't be read."""
+    try:
+        at = datetime.strptime(f"{appointment['date']} {appointment['time']}",
+                               "%Y-%m-%d %H:%M").replace(tzinfo=SGT)
+    except (TypeError, KeyError, ValueError):
+        return -1.0
+    return max(0.0, (at.timestamp() - now) / 3600)
+
+
+def check_late_change(p: Proposal, appointment: dict | None, now: float) -> None:
+    """The 24-hour rule can't rest on the model's hours_to_appointment alone
+    (it sometimes leaves -1): for a reschedule or cancel, the patient record's
+    next appointment counts too, and the sooner of the two wins, so a late
+    change always reaches Chris (23 Nov 2026)."""
+    if p.intent not in ("reschedule", "cancel"):
+        return
+    rec = hours_until(appointment, now)
+    if rec >= 0 and (p.hours_to_appointment < 0 or rec < p.hours_to_appointment):
+        p.hours_to_appointment = rec
 
 
 def decide(proposal: Proposal, *, intent_policy: dict[str, str] = config.INTENT_POLICY,

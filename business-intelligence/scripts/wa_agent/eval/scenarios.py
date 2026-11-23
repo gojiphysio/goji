@@ -31,7 +31,7 @@ from datetime import date, timedelta
 from .. import agent, config
 from ..learning import effective_policy
 from ..policy import (AGENT, ESCALATE, HUMAN, PAUSED, SEND, SILENT, WAITING, ChatState,
-                      Proposal, apply_stage, customer_message, decide, handover_mode,
+                      Proposal, apply_stage, check_late_change, customer_message, decide, handover_mode,
                       is_acknowledgement, note_off_topic)
 
 TODAY = date.today()
@@ -149,6 +149,7 @@ E = Expect
 BOOK_LINK = r"go\.gojiphysio\.com/wa-book"
 GREETING = r"^\s*(hi|hello|hey|good (morning|afternoon|evening))\b"
 CASUAL_DR = r"tummy gap"
+PAGE = r"https://www\.gojiphysio\.com/(services|conditions|blog)/"
 DRAFT_HANDOFF = r"(let me|i'?ll|we'?ll) (check|confirm) with the team|passed (this|it|your)|they'?ll get back to you"
 
 SCENARIOS: list[Scenario] = [
@@ -163,7 +164,7 @@ SCENARIOS: list[Scenario] = [
         must_not=(r"it'?s never too late",), max_questions=1)),
     S("dr_clinic_context", "new enquiry",
       ["Can you guys fix my DR?"],
-      E(must=(r"diastasis recti",), must_not=(CASUAL_DR, r"\bdoctor\b.*\?"), max_questions=1),
+      E(must=(r"diastasis recti", PAGE), must_not=(CASUAL_DR, r"\bdoctor\b.*\?"), max_questions=1),
       note="DR means diastasis recti here; proper term, not 'tummy gap'"),
     S("dr_not_postpartum", "new enquiry",
       ["Do you treat diastasis recti? I'm a guy, I lift weights."],
@@ -178,10 +179,15 @@ SCENARIOS: list[Scenario] = [
       E(intents=("location_hours",), decisions=("send",), must=(r"lentor",))),
     S("medisave", "new enquiry",
       ["Can I use Medisave for physio?"],
-      E(decisions=("send",), must=(r"medisave",))),
+      E(decisions=("send",), must=(r"medisave", PAGE))),
+    S("vertigo_page", "new enquiry",
+      ["Do you treat vertigo? I get dizzy when I turn in bed"],
+      E(decisions=("send",), must=(r"gojiphysio\.com/(conditions/(bppv|dizziness|vertigo)|services/vestibular)",),
+        must_not=(r"you (probably|likely) have",)),
+      note="house rule (23 Nov): link the page that answers it"),
     S("packages", "new enquiry",
       ["Do you have packages for physio?"],
-      E(decisions=("send",), must_not=(r"\bpackage of \d+ physio", r"\d+[- ]session physio package")),
+      E(decisions=("send",), must=(r"gojiphysio\.com/services/",), must_not=(r"\bpackage of \d+ physio", r"\d+[- ]session physio package")),
       note="house rule: physio isn't sold as packages; answer it, don't escalate"),
     S("cancellation_policy", "new enquiry",
       ["What's your cancellation policy?"],
@@ -297,7 +303,7 @@ SCENARIOS: list[Scenario] = [
     S("late_cancel_waiver_used", "reschedule/cancel",
       ["I can't make it today, please cancel"],
       E(intents=("cancel",), decisions=("draft",), must=(r"\$50",),
-        must_not=(r"we'?ll waive", r"waive (it|the fee) this time")),
+        must_not=(r"we'?ll waive", r"(?<!not able to )(?<!can't )(?<!cannot )waive (it|the fee) this time")),
       patient=SARAH_TODAY_USED, customer_name="Sarah"),
     S("cancel", "reschedule/cancel",
       ["Please cancel my appointment next week, thanks"],
@@ -571,6 +577,7 @@ SCENARIOS: list[Scenario] = [
 # `--stage none` judges the unstaged INTENT_POLICY (drafts and all).
 DEFAULT_STAGE = config.STAGE if config.STAGE is not None else 2  # deployed: GO_LIVE.md
 THRESHOLDS = (0.5, 0.6, 0.7, 0.8, 0.9)
+_EMOJI = re.compile("[\U0001F300-\U0001FAFF\u2600-\u27BF]")
 
 
 @dataclass
@@ -632,6 +639,9 @@ def run_one(sc: Scenario, client=None, stage: int | None = DEFAULT_STAGE) -> Res
                               pending_for_chris=pending if mode == WAITING else "")
             cost += r.cost_usd
             p = r.proposal
+            m = re.search(r"next appointment (\d{4}-\d{2}-\d{2}) (\d{2}:\d{2})", sc.patient)
+            check_late_change(p, {"date": m.group(1), "time": m.group(2)} if m else None,
+                              time.time())
             d = judge(p, stage)
             sent = ""
             if d.action in (SEND, ESCALATE):
@@ -655,6 +665,9 @@ def run_one(sc: Scenario, client=None, stage: int | None = DEFAULT_STAGE) -> Res
             fails += [(f"turn {n}: " if i != last else "") + m
                       for m in check(exp, p, row["decision"], prior_agent=prior_agent,
                                      stage=stage)]
+    emoji = sum(len(_EMOJI.findall(h["text"])) for h in history if h["role"] == "agent")
+    if emoji > 2:
+        fails.append(f"{emoji} emoji in the conversation (max 2)")
     end = rows[-1]
     return Result(sc, not fails, fails, reply=end["reply"], intent=end["intent"],
                   decision=end["decision"], confidence=end["confidence"] or 0.0,

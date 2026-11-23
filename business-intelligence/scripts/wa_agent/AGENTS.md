@@ -76,8 +76,10 @@ The WhatsApp assistant. What it is and how to run it: [`README.md`](README.md).
   is a handover from stage 1. Judging with the bare `INTENT_POLICY` hid that
   every low-confidence answer reaches Chris (23 Nov 2026).
 - **Replies are checked in code** (`policy.reply_problems`): only Goji's own
-  links, email and numbers (plus 995/1767), and booking links only via the
-  `wa-book` go-link. Anything else is drafted, never sent.
+  links, email and numbers (plus 995/1767), booking links only via the
+  `wa-book` go-link, and gojiphysio.com page links only to pages the knowledge
+  base has (`kb.site_paths`; a guessed URL is a 404). The agent links the
+  page that answers a question (owner, 23 Nov 2026). Anything else is drafted, never sent.
 - **The CLI backend is temporary** (`WA_AGENT_BACKEND=cli`, local testing on
   test numbers). Production is the Messages API. Keep both backends returning
   the same Proposal, and keep the CLI isolated (`--tools ""`,

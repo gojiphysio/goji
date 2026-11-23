@@ -120,6 +120,26 @@ def load(path: str = config.KB_PATH) -> dict:
     return _loaded
 
 
+_paths: frozenset[str] | None = None
+
+
+def site_paths() -> frozenset[str] | None:
+    """Every gojiphysio.com path the knowledge base knows (pages and the URLs
+    in llms.txt), for checking links in replies; None if there's no KB."""
+    global _paths
+    if _paths is None:
+        try:
+            k = load()
+        except (OSError, ValueError):
+            return None
+        found = {"/" + pid.strip("/") + "/" for pid in k.get("pages", {})}
+        for url in re.findall(r"https://www\.gojiphysio\.com(/[^\s)>\]]*)", k.get("core", "")):
+            found.add(url if url.endswith("/") else url + "/")
+        found.add("/")
+        _paths = frozenset(found)
+    return _paths
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--site", required=True, type=Path)
