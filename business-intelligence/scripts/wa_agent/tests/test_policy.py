@@ -181,3 +181,34 @@ def test_bubbles_split_and_cap_at_three():
     assert split_bubbles("a\n<break>\nb\n<break>\n\n<break>\nc", 3) == ["a", "b", "c"]
     assert split_bubbles("a<break>b<break>c<break>d", 3) == ["a", "b", "c\n\nd"]
     assert as_one_message("a\n<break>\nb") == "a\n\nb"
+
+
+# --- off-topic: answered, never handed to Chris, watch-listed when it persists
+
+def test_off_topic_sends_whatever_the_confidence_or_escalate_flag():
+    from wa_agent import config
+    from wa_agent.policy import apply_stage
+    junk = prop(intent="off_topic", confidence=0.3, escalate=True, reply="Sorry, wrong number!")
+    d = decide(junk)
+    assert (d.action, d.reason) == (SEND, "off_topic")
+    for stage in config.STAGES:  # no stage turns it into a handover or leaves it
+        d = apply_stage(decide(junk, intent_policy=config.stage_policy(stage)), junk, stage)
+        assert d.action == SEND, stage
+    # even if repeated rescues demoted it, it never becomes a draft (a ping)
+    assert decide(junk, intent_policy={"off_topic": "draft"}).action == SEND
+
+
+def test_off_topic_reply_with_a_foreign_link_is_dropped_not_handed_over():
+    d = decide(prop(intent="off_topic", reply="Pay here: http://bit.ly/x"))
+    assert (d.action, d.reason) == (SILENT, "off_topic_unsafe_reply")
+
+
+def test_three_off_topic_in_a_row_puts_the_chat_on_the_watch_list():
+    from wa_agent.policy import WATCHLIST, note_off_topic
+    s = ChatState(wa_id="65")
+    assert not note_off_topic(s, "off_topic", NOW, limit=3)
+    assert not note_off_topic(s, "faq", NOW, limit=3)          # a real question resets it
+    assert s.off_topic_strikes == 0
+    assert [note_off_topic(s, "off_topic", NOW, limit=3) for _ in range(3)] == [False, False, True]
+    assert (s.mode, s.mode_reason) == (PAUSED, WATCHLIST)
+    assert gate(s, NOW, kill_switch=False).reason == WATCHLIST

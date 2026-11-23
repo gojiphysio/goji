@@ -77,3 +77,13 @@ def test_a_handover_waits_and_the_next_turn_knows_it(monkeypatch):
     assert seen == ["", "double charge"]
     assert r.turns[0]["sent"] == agent._escalation("x").reply  # holding reply, not the draft
     assert r.turns[1]["sweep"][0.9] == "send" and r.turns[1]["mode"] == "waiting"
+
+
+def test_persistent_off_topic_goes_quiet_after_three(monkeypatch):
+    _queue(monkeypatch, *[Proposal("Sorry, we can't help with that.", "off_topic", 0.9, False)] * 3)
+    s = sc.Scenario("x", "g", ["poem", "poem pls", "capital of France?", "hello??"],
+                    sc.Expect(silent=True))
+    r = sc.run_one(s, stage=2)
+    assert r.passed, r.failures
+    assert [t["decision"] for t in r.turns] == ["send", "send", "send", "silent"]
+    assert r.turns[3]["reason"] == "watchlist"

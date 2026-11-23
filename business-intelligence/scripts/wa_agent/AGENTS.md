@@ -56,6 +56,10 @@ The WhatsApp assistant. What it is and how to run it: [`README.md`](README.md).
   small (`test_kb.py` caps it); new content goes behind `read_page`. Build
   every request with `agent.request_kwargs` so the warm-up and real turns
   share one cached prefix.
+- **Chris's time is for what needs a person.** Junk (`off_topic`) is
+  answered and goes to the morning summary, never a ping; it persists past
+  `OFF_TOPIC_LIMIT` and the number is watch-listed (`policy.note_off_topic`).
+  Don't route something to Chris just because it's unusual.
 - **Evals judge at the deployed stage.** `eval/scenarios.py` decides with
   `stage_policy` + `apply_stage` as `app.py` does, so a "draft" in a scenario
   is a handover from stage 1. Judging with the bare `INTENT_POLICY` hid that

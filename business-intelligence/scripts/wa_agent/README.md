@@ -153,6 +153,15 @@ provider forwards Meta's signature (if not: `USE_URL_TOKEN=1`, below), and the
   Chris texts `RESUME 004` (or `PAUSE 004`) to the Goji number from her phone.
   Resuming sends the customer nothing: the assistant just answers their next
   message. The admin hand-back route does the same.
+- *Off-topic never reaches Chris* (owner, 23 Nov 2026). Wrong numbers,
+  unrelated questions, attempts to misuse the chat and cold sales pitches
+  (intent `off_topic`) get a short front-desk reply whatever the confidence,
+  and no ping: they're listed in the morning summary. After
+  `WA_AGENT_OFF_TOPIC_LIMIT` (3) off-topic messages in a row the chat is
+  paused on the watch list (`mode_reason` `watchlist`, kept 365 days like any
+  pause): no replies and no model calls. The summary lists newly watched chats
+  with their code, so `RESUME 004` brings back a real customer. Partnerships,
+  press and jobs are not off-topic; they still go to Chris.
 - *Go-live cut-off.* Go-live is a moment someone sets (`POST /admin/go-live`;
   `WA_AGENT_GO_LIVE` is the fallback). Until then a deployed service answers
   nobody and only records message times (`not_live`). At go-live, a chat with

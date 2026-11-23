@@ -11,12 +11,13 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from .policy import HUMAN, SGT, WAITING, ChatState
+from .policy import HUMAN, SGT, WAITING, WATCHLIST, ChatState
 from .staff import label
 
 ANSWERED = ("answered", "link sent", "booked", "moved")
 LEFT = ("handed over", "left", "drafted")
 FAILED = ("failed",)
+OFF_TOPIC = ("off-topic", "off-topic, no reply", "watch-listed")  # digest only, never a ping
 DAY_S = 86400
 
 
@@ -64,8 +65,11 @@ def build(chats: list[ChatState], now: float, window_s: int = DAY_S,
     """{subject, body, line, answered, left, failed, paused} for the last
     `window_s`, plus every chat still paused (whenever it was paused)."""
     since = now - window_s
-    answered, left, failed = [], [], []
+    answered, left, failed, junk = [], [], [], []
     for c in sorted(chats, key=lambda s: s.wa_id):
+        off = _in_window(c, since, OFF_TOPIC)
+        if off:
+            junk.append(_line(c, off))
         got = _in_window(c, since, ANSWERED)
         if got:
             answered.append(_line(c, got))
@@ -78,10 +82,14 @@ def build(chats: list[ChatState], now: float, window_s: int = DAY_S,
         bad = _in_window(c, since, FAILED)
         if bad:
             failed.append(_line(c, bad))
-    held = paused_labels(paused or [])
+    paused = paused or []
+    held = paused_labels([c for c in paused if c.mode_reason != WATCHLIST])
+    # Only newly watched chats: older ones stay quiet without filling the email.
+    watched = paused_labels([c for c in paused
+                             if c.mode_reason == WATCHLIST and c.mode_since >= since])
     day = datetime.fromtimestamp(now, SGT)
     subject = f"WhatsApp assistant: morning summary {day:%a %d %b}"
-    if not (answered or left or failed or held):
+    if not (answered or left or failed or held or junk or watched):
         body = "A quiet 24 hours: the assistant didn't handle any chats.\n"
     else:
         sections = []
@@ -93,6 +101,15 @@ def build(chats: list[ChatState], now: float, window_s: int = DAY_S,
         if answered:
             sections.append(f"Answered by the assistant ({len(answered)}):\n"
                             + "\n".join(answered))
+        if junk:
+            sections.append(f"Off-topic, answered without pinging you ({len(junk)}): wrong "
+                            "numbers, unrelated questions, attempts to misuse the chat.\n"
+                            + "\n".join(junk))
+        if watched:
+            sections.append(f"Stopped answering ({len(watched)}): off-topic several times in a "
+                            "row, so these numbers are on the watch list and get no replies. "
+                            "If one is a real customer, text RESUME and its number.\n"
+                            + "\n".join(f"- {w}" for w in watched))
         if held:
             sections.append(f"Paused for you ({len(held)}): the assistant stays out of these "
                             "until you hand them back. Text RESUME and the number (e.g. "
@@ -105,9 +122,10 @@ def build(chats: list[ChatState], now: float, window_s: int = DAY_S,
                 "Open them in the WhatsApp Business app.\n")
     line = (f"Goji assistant, last 24h: {len(answered)} chat(s) answered, "
             f"{len(left)} left for you, {len(failed)} failure(s)."
+            + (f" {len(junk)} off-topic, no action needed." if junk else "")
             + (f" Paused for you: {', '.join(held[:6])}{' and more' if len(held) > 6 else ''}"
                ". Text RESUME and the number to hand one back." if held else "")
             + " Details in your email.")
     return {"subject": subject, "body": body, "line": line,
             "answered": len(answered), "left": len(left), "failed": len(failed),
-            "paused": len(held)}
+            "paused": len(held), "off_topic": len(junk), "watched": len(watched)}

@@ -66,6 +66,7 @@ class ChatState:
     last_staff_at: float = 0.0     # latest business-number message from the app (echo or import)
     name: str = ""                 # WhatsApp profile name, for staff pings and the summary
     outcomes: list[dict] = field(default_factory=list)  # {at, intent, outcome}: morning summary
+    off_topic_strikes: int = 0     # off-topic messages in a row (note_off_topic)
 
     def to_dict(self) -> dict:
         return dict(self.__dict__)
@@ -188,7 +189,7 @@ def gate(state: ChatState, now: float, *, kill_switch: bool = config.KILL_SWITCH
     if state.wa_id in always_human:
         return Decision(SILENT, "always_human")
     if state.mode == PAUSED:
-        return Decision(SILENT, "paused")
+        return Decision(SILENT, WATCHLIST if state.mode_reason == WATCHLIST else "paused")
     if state.mode == HUMAN:
         return Decision(SILENT, "human_has_chat")
     if not_live:
@@ -285,6 +286,23 @@ def is_clarifying_question(reply: str) -> bool:
             and r.rstrip(" :)😊🙂").endswith("?") and not _FACTISH.search(r))
 
 
+OFF_TOPIC = "off_topic"
+WATCHLIST = "watchlist"
+
+
+def note_off_topic(state: ChatState, intent: str, now: float,
+                   limit: int = config.OFF_TOPIC_LIMIT) -> bool:
+    """Counts off-topic messages in a row; any other message resets the count.
+    At `limit` the chat is paused on the watch list: the agent answered the
+    first `limit`, and stays silent from the next one until staff resume it.
+    Returns True if this message put the chat on the watch list."""
+    if intent != OFF_TOPIC:
+        state.off_topic_strikes = 0
+        return False
+    state.off_topic_strikes += 1
+    return state.off_topic_strikes >= limit and set_mode(state, PAUSED, WATCHLIST, now)
+
+
 def decide(proposal: Proposal, *, intent_policy: dict[str, str] = config.INTENT_POLICY,
            min_confidence: float = config.MIN_CONFIDENCE) -> Decision:
     """What happens to a proposal that passed `gate`.
@@ -296,6 +314,14 @@ def decide(proposal: Proposal, *, intent_policy: dict[str, str] = config.INTENT_
     rule = intent_policy.get(proposal.intent, DRAFT)
     if rule == config.LEAVE:
         return Decision(SILENT, "stage_leave")
+    if proposal.intent == OFF_TOPIC and not proposal.failed:
+        # Not worth Chris's time (owner, 23 Nov 2026): the polite reply goes
+        # out whatever the confidence or an escalate flag, and a reply that
+        # fails the content check is dropped, never handed over. It shows in
+        # the morning summary only.
+        if not proposal.reply.strip() or reply_problems(proposal.reply):
+            return Decision(SILENT, "off_topic_unsafe_reply")
+        return Decision(SEND, "off_topic")
     if proposal.escalate and not (rule == "draft" and proposal.intent != "urgent"):
         return Decision(ESCALATE, proposal.escalation_reason or "model_escalated")
     # A draft-for-Chris intent stays a draft even if the model wanted to hand
