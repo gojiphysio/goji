@@ -58,7 +58,8 @@ from . import (agent, booking_client, config, documents, events, learning, notif
 from .policy import (AGENT, DRAFT, ESCALATE, HUMAN, LATE_CHANGE_H, OFF_TOPIC, PAUSED, SEND,
                      SGT, SILENT, WAITING, WATCHLIST, as_one_message, split_bubbles,
                      apply_idle_handback, apply_stage, handover_mode,
-                     has_record, note_off_topic, out_of_scope, pre_golive_chat,
+                     customer_message, has_record, note_off_topic, out_of_scope,
+                     pre_golive_chat,
                      decide, gate, human_replied_since, is_acknowledgement, on_human_message,
                      reply_problems, set_mode)
 from .state import ChatLocks, append_history, make_store, mark_seen, note_outcome, parse_code
@@ -890,11 +891,8 @@ def handle_inbound(ev: Inbound, received: float) -> None:
         if config.KILL_SWITCH or st.get_kill():
             events.record("silent", ev.wa_id, reason="kill_switch")
             return
-        reply = p.reply.strip()
-        if d.holding or not reply or reply_problems(reply):
-            # The model's reply wasn't written as a handover (or isn't safe):
-            # the code's holding reply goes out instead.
-            reply = agent._escalation("unsafe_or_empty").reply
+        # A handover sends the holding reply; p.reply is Chris's draft (notice).
+        reply = customer_message(d, p, time.time())
         booked, failed = None, False
         if d.action == SEND and p.confirm_booking:
             reply, booked, failed = _book_pending(state, ev, received, reply, p.booking)

@@ -60,6 +60,14 @@ The WhatsApp assistant. What it is and how to run it: [`README.md`](README.md).
   answered and goes to the morning summary, never a ping; it persists past
   `OFF_TOPIC_LIMIT` and the number is watch-listed (`policy.note_off_topic`).
   Don't route something to Chris just because it's unusual.
+- **A handover splits two messages.** The customer gets the model's
+  `holding_reply` (acknowledges the ask, apologises if they're unhappy,
+  promises nothing a person must decide); Chris's ping carries `reply`, the
+  draft answer she can send or edit (`policy.customer_message`). Only red flags
+  and sensitive topics send `reply` at once. A holding reply is checked like
+  any reply; the generic line is only the fallback. (Before 23 Nov 2026 a model
+  handover sent its holding message to the customer AND to Chris as her
+  "suggestion", so she got nothing usable.)
 - **Evals judge at the deployed stage.** `eval/scenarios.py` decides with
   `stage_policy` + `apply_stage` as `app.py` does, so a "draft" in a scenario
   is a handover from stage 1. Judging with the bare `INTENT_POLICY` hid that

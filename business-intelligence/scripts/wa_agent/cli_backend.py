@@ -144,7 +144,7 @@ def propose(history: list[dict], *, wa_id: str, now: float, customer_name: str =
             result.proposal = _escalation(f"cli_{result.stop}")
         else:
             result.proposal = Proposal(
-                reply=s.get("reply", ""),
+                reply=s.get("reply", ""), holding_reply=s.get("holding_reply", ""),
                 intent=s.get("intent") if s.get("intent") in config.INTENTS else "other",
                 confidence=float(s.get("confidence") or 0), escalate=bool(s.get("escalate")),
                 escalation_reason=s.get("escalation_reason", ""),

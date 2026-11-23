@@ -11,9 +11,10 @@ def usage(i=100, o=50, cr=0, cw=0):
 
 
 def final(reply="Hi! We're open Mon-Sat 8am-8pm.", intent="location_hours", confidence=0.95,
-          escalate=False, reason="", note="asks hours", stop="end_turn"):
+          escalate=False, reason="", note="asks hours", stop="end_turn", holding=""):
     body = json.dumps({"reply": reply, "intent": intent, "confidence": confidence,
-                       "escalate": escalate, "escalation_reason": reason, "staff_note": note})
+                       "escalate": escalate, "escalation_reason": reason, "staff_note": note,
+                       "holding_reply": holding})
     return NS(stop_reason=stop, model="served-model", usage=usage(cr=20000),
               content=[NS(type="text", text=body)])
 

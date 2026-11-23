@@ -91,6 +91,7 @@ class Proposal:
     move: dict = field(default_factory=dict)     # old/new date+time for moving an appointment
     confirm_move: bool = False
     failed: bool = False  # agent._escalation: the model or a tool failed, nothing to judge
+    holding_reply: str = ""  # the model's own handover message, sent when the code hands over
 
 
 @dataclass
@@ -374,6 +375,40 @@ def apply_stage(d: Decision, proposal: Proposal, stage: int | None) -> Decision:
     if d.action == DRAFT:
         return Decision(ESCALATE, f"handover:{d.reason}", holding=True)
     return d
+
+
+HOLDING_MAX_WORDS = 90
+GENERIC_HOLDING = {True: "Thanks for your message! I've passed it to the team and they'll "
+                         "get back to you today.",
+                   False: "Thanks for your message! I've passed it to the team and they'll "
+                          "get back to you when we open."}
+
+
+def holding_reply(p: Proposal, now: float) -> str:
+    """What the customer gets when the code hands a message over instead of
+    sending the model's reply: the model's own holding_reply (specific to what
+    they asked, no promises that need a person) if it passes the same content
+    check as any reply; else the generic line, timed to the clinic's hours."""
+    text = (p.holding_reply or "").strip()
+    if text and not p.failed and len(text.split()) <= HOLDING_MAX_WORDS \
+            and not reply_problems(text):
+        return text
+    return GENERIC_HOLDING[in_clinic_hours(now)]
+
+
+def customer_message(d: Decision, p: Proposal, now: float) -> str:
+    """What the customer gets for a proposal that is sent or handed over.
+    A handover sends the holding_reply, never `reply`: `reply` is the draft
+    answer Chris gets to send or edit (owner, 23 Nov 2026). Red flags and
+    sensitive topics are the exception: their reply (995, a warm
+    acknowledgement) goes out at once. A reply that fails the content check
+    is never sent either."""
+    reply = (p.reply or "").strip()
+    if d.action == ESCALATE and p.intent not in SILENT_HANDOVER_INTENTS:
+        return holding_reply(p, now)
+    if not reply or reply_problems(reply):
+        return holding_reply(p, now)
+    return reply
 
 
 def human_replied_since(state: ChatState, since: float) -> bool:

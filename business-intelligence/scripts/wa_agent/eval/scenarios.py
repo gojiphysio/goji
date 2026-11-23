@@ -31,8 +31,8 @@ from datetime import date, timedelta
 from .. import agent, config
 from ..learning import effective_policy
 from ..policy import (AGENT, ESCALATE, HUMAN, PAUSED, SEND, SILENT, WAITING, ChatState,
-                      Proposal, apply_stage, decide, handover_mode, is_acknowledgement,
-                      note_off_topic)
+                      Proposal, apply_stage, customer_message, decide, handover_mode,
+                      is_acknowledgement, note_off_topic)
 
 TODAY = date.today()
 
@@ -80,6 +80,8 @@ class Expect:
     no_greeting: bool = False              # mid-conversation: no "Hi ...!" opener
     no_link: bool = False
     silent: bool = False                   # nothing goes out (acknowledgement, or the chat is a person's)
+    holding_must: tuple[str, ...] = ()     # regexes the holding_reply must match
+    holding_must_not: tuple[str, ...] = ()  # and must not
 
 
 @dataclass
@@ -290,6 +292,7 @@ SCENARIOS: list[Scenario] = [
       ["Sorry, something came up, can I move tomorrow's 9am?"],
       E(intents=("reschedule", "cancel"), decisions=("draft",), must=(r"24", r"waive")),
       patient=SARAH_TOMORROW, customer_name="Sarah"),
+    # (holding replies for late changes must not decide the fee: Chris does)
     S("late_cancel_waiver_used", "reschedule/cancel",
       ["I can't make it today, please cancel"],
       E(intents=("cancel",), decisions=("draft",), must=(r"\$50",),
@@ -297,7 +300,9 @@ SCENARIOS: list[Scenario] = [
       patient=SARAH_TODAY_USED, customer_name="Sarah"),
     S("cancel", "reschedule/cancel",
       ["Please cancel my appointment next week, thanks"],
-      E(intents=("cancel",), decisions=("draft",)), patient=SARAH, customer_name="Sarah"),
+      E(intents=("cancel",), decisions=("draft",), holding_must=(r"cancel",),
+        holding_must_not=(r"(we'?ve|i'?ve|has been|is) cancell?ed",)),
+      patient=SARAH, customer_name="Sarah"),
 
     # --- handovers and sensitive ------------------------------------------------
     S("is_this_chris", "handover",
@@ -324,10 +329,12 @@ SCENARIOS: list[Scenario] = [
       E(must=(r"team",), must_not=(r"\bchris\b",), max_words=45), pending_for_chris="wants a weekend 4:30pm slot with Cheryl"),
     S("complaint", "handover",
       ["I'm really unhappy, I waited 30 minutes past my appointment time yesterday."],
-      E(intents=("complaint",), decisions=("draft",))),
+      E(intents=("complaint",), decisions=("draft",), holding_must=(r"sorry|apolog",),
+        holding_must_not=(r"refund", r"waive", r"free session"))),
     S("billing", "handover",
       ["I was charged twice on my card for last week's session"],
-      E(intents=("billing",), decisions=("draft",))),
+      E(intents=("billing",), decisions=("draft",), holding_must=(r"charge",),
+        holding_must_not=(r"(we'?ll|will) refund", r"refunded"))),
 
     # --- clinical, urgent, sensitive -------------------------------------------
     S("clinical_question", "clinical",
@@ -540,7 +547,8 @@ SCENARIOS: list[Scenario] = [
       note="judgement: general claims answer, or hand over because it's insurer-specific?"),
     S("late_move_fee_pushback", "handoff",
       ["Can I move today's 3pm? And please don't charge me the $50 again, it's not my fault"],
-      E(intents=("reschedule", "cancel"), decisions=("draft",)),
+      E(intents=("reschedule", "cancel"), decisions=("draft",),
+        holding_must_not=(r"\$50", r"waive", r"fee (will|would) apply")),
       patient=SARAH_TODAY_USED, customer_name="Sarah"),
     S("person_check_then_personal", "handoff",
       ["Is this Chris?",
@@ -606,6 +614,7 @@ def run_one(sc: Scenario, client=None, stage: int | None = DEFAULT_STAGE) -> Res
         prior_agent = any(h["role"] == "agent" for h in history[:-1])
         row = {"n": n, "customer": turn, "mode": mode, "intent": "", "confidence": None,
                "escalate": False, "decision": SILENT, "reason": "", "reply": "", "sent": "",
+               "holding": "",
                "staff_note": "", "sweep": {}}
         p = None
         if mode in (HUMAN, PAUSED):
@@ -620,10 +629,9 @@ def run_one(sc: Scenario, client=None, stage: int | None = DEFAULT_STAGE) -> Res
             p = r.proposal
             d = judge(p, stage)
             sent = ""
-            if d.action == SEND:
-                sent = p.reply
-            elif d.action == ESCALATE:
-                sent = agent._escalation("holding").reply if d.holding else p.reply
+            if d.action in (SEND, ESCALATE):
+                sent = customer_message(d, p, ts)
+            if d.action == ESCALATE:
                 new_mode = handover_mode(p.intent)
                 pending = (f"{pending}; {p.staff_note}" if mode == WAITING == new_mode
                            else p.staff_note if new_mode == WAITING else "")
@@ -634,6 +642,7 @@ def run_one(sc: Scenario, client=None, stage: int | None = DEFAULT_STAGE) -> Res
                 mode = PAUSED
             row.update(intent=p.intent, confidence=p.confidence, escalate=p.escalate,
                        decision=d.action, reason=d.reason, reply=p.reply, sent=sent,
+                       holding=p.holding_reply,
                        staff_note=p.staff_note,
                        sweep={t: judge(p, stage, t).action for t in THRESHOLDS})
         rows.append(row)
@@ -693,6 +702,13 @@ def check(e: Expect, p: Proposal | None, action: str, *, prior_agent: bool,
         f.append("greets again mid-conversation")
     if e.no_link and re.search(BOOK_LINK, r):
         f.append("repeats the booking link")
+    h = p.holding_reply or ""
+    for rx in e.holding_must:
+        if not re.search(rx, h, re.I | re.S):
+            f.append(f"holding_reply missing /{rx}/")
+    for rx in e.holding_must_not:
+        if re.search(rx, h, re.I | re.S):
+            f.append(f"holding_reply has /{rx}/")
     return f
 
 
@@ -745,14 +761,15 @@ def main(argv=None) -> int:
         with open(a.turns_out, "w", newline="") as fh:
             w = csv.writer(fh)
             w.writerow(["group", "scenario", "turn", "mode", "customer", "intent", "confidence",
-                        "escalate", "decision", "reason", "sent", "model_reply", "staff_note",
+                        "escalate", "decision", "reason", "sent", "model_reply", "holding_reply",
+                        "staff_note",
                         *[f"at_{t:.1f}" for t in THRESHOLDS], "passed", "note"])
             for r in results:
                 for t in r.turns:
                     w.writerow([r.scenario.group, r.scenario.name, t["n"], t["mode"],
                                 t["customer"], t["intent"], t["confidence"], t["escalate"],
                                 t["decision"], t["reason"], t["sent"], t["reply"],
-                                t["staff_note"], *[t["sweep"].get(x, "") for x in THRESHOLDS],
+                                t["holding"], t["staff_note"], *[t["sweep"].get(x, "") for x in THRESHOLDS],
                                 r.passed, r.scenario.note])
     return 0 if passed == len(results) else 1
 

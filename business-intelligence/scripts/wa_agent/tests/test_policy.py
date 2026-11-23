@@ -212,3 +212,38 @@ def test_three_off_topic_in_a_row_puts_the_chat_on_the_watch_list():
     assert [note_off_topic(s, "off_topic", NOW, limit=3) for _ in range(3)] == [False, False, True]
     assert (s.mode, s.mode_reason) == (PAUSED, WATCHLIST)
     assert gate(s, NOW, kill_switch=False).reason == WATCHLIST
+
+
+
+# --- holding replies: the model's own, specific one; the generic line as fallback
+
+def test_holding_reply_uses_the_models_own_when_it_is_clean():
+    from wa_agent.policy import holding_reply
+    p = prop(intent="complaint", reply="We'll refund you $50.",
+             holding_reply="So sorry about the wait yesterday, Jamie. I've passed this to the "
+                           "team and they'll get back to you today.")
+    assert holding_reply(p, NOW).startswith("So sorry about the wait")
+
+
+def test_holding_reply_falls_back_to_the_generic_line_timed_to_clinic_hours():
+    from wa_agent.policy import GENERIC_HOLDING, holding_reply
+    night = datetime(2026, 11, 18, 22, 0, tzinfo=SGT).timestamp()
+    assert holding_reply(prop(holding_reply=""), NOW) == GENERIC_HOLDING[True]
+    assert holding_reply(prop(holding_reply=""), night).endswith("when we open.")
+    bad = prop(holding_reply="Pay here http://bit.ly/x and we'll sort it")
+    assert holding_reply(bad, NOW) == GENERIC_HOLDING[True]
+    assert holding_reply(prop(holding_reply="word " * 120), NOW) == GENERIC_HOLDING[True]
+    assert holding_reply(prop(holding_reply="Fine", failed=True), NOW) == GENERIC_HOLDING[True]
+
+
+
+def test_a_handover_never_sends_the_draft_meant_for_chris():
+    from wa_agent.policy import Decision, customer_message
+    p = prop(intent="other", escalate=True, reply="Happy to discuss a partnership! What do "
+             "you have in mind?", holding_reply="Thanks! I've passed this to the team and "
+             "they'll get back to you today.")
+    assert customer_message(Decision(ESCALATE, "x"), p, NOW).startswith("Thanks! I've passed")
+    red = prop(intent="urgent", escalate=True, reply="Please call 995 now.", holding_reply="")
+    assert customer_message(Decision(ESCALATE, "x"), red, NOW) == "Please call 995 now."
+    assert customer_message(Decision(SEND, "x"), prop(reply="A session is $260."), NOW) \
+        == "A session is $260."

@@ -254,12 +254,15 @@ Drafted for Chris (escalate=false): cancelling (intent=cancel), their own \
 charges, invoices or refunds (billing; a general question about prices, \
 packages, insurance or Medisave is faq or pricing, answered from the website), their own symptoms beyond which service fits or \
 how treatment is going (clinical), complaints (complaint). Write the reply \
-you'd suggest Chris sends; she checks it before anything goes out. For \
-clinical, still never diagnose or advise treatment.
+you'd suggest Chris sends; she checks it before anything goes out, and \
+meanwhile the customer gets your holding_reply. For clinical, still never \
+diagnose or advise treatment.
 
-When to escalate (escalate=true, and write a short warm holding reply saying \
-the team will get back to them). Chris's time is the scarce thing: \
-escalate only for these, and handle everything routine yourself.
+When to escalate (escalate=true). The customer gets your holding_reply; \
+reply is your best draft of the actual answer, for Chris to send or edit \
+(for a partnership: a warm reply asking what they have in mind; for a promo \
+you can't confirm: what you'd say if it's real). Chris's time is the scarce \
+thing: escalate only for these, and handle everything routine yourself.
 - They want to speak to Chris, a person or a named clinician about something \
 you can't handle (see "Is this Chris?" above for when they've only asked who \
 this is).
@@ -303,8 +306,8 @@ as usual (hours, prices, open times, which service fits).
 it ("any update?"), say once that the team has it and will get back to them \
 (today if the clinic is open, otherwise when it opens). Don't repeat that.
 - Never send a second "we'll get back to you" message for a new topic: if \
-something new also needs Chris, set escalate=true and write a short reply \
-saying you've passed it on to the team too.
+something new also needs Chris, set escalate=true and make holding_reply a \
+short line saying you've passed it on to the team too.
 
 Urgent (intent=urgent, escalate=true)
 Heavy bleeding, chest pain, trouble breathing, severe or sudden pain in \
@@ -316,7 +319,19 @@ self-harm: Samaritans of Singapore, 1767, any time), then that the team will \
 follow up.
 
 Your final answer is the JSON object only:
-- reply: the WhatsApp message to send (or the holding reply when escalating)
+- reply: the WhatsApp message to send. When the team has to pick it up \
+(escalate=true, or a topic drafted for Chris), it's instead your best draft \
+answer for Chris to send or edit; the customer gets holding_reply. \
+Exception: for urgent and sensitive, reply is sent at once (995, a warm \
+acknowledgement), so write it for the customer.
+- holding_reply: always write it, even when you expect your reply to go out. \
+It's what the customer gets instead of reply if the team has to pick this up \
+(drafts for Chris, a late change, or anything the code doesn't send). One to \
+three short sentences: acknowledge what they asked in their terms, say sorry \
+if they're unhappy, and say the team will get back to them today (or when we \
+open, if the clinic is closed). Promise nothing a person has to decide or do: \
+no "we've cancelled it", no fee or refund decision, no clinical advice, no \
+times or prices. No greeting if this chat already has one.
 - intent: the main kind of message
 - confidence: 0 to 1, how sure you are the reply is correct and complete from \
 the knowledge base and tools. A short clarifying question you're sure is the \
@@ -346,6 +361,7 @@ PROPOSAL_SCHEMA = {
     "type": "object",
     "properties": {
         "reply": {"type": "string"},
+        "holding_reply": {"type": "string"},
         "intent": {"type": "string", "enum": list(config.INTENTS)},
         "confidence": {"type": "number"},
         "escalate": {"type": "boolean"},
@@ -373,7 +389,7 @@ PROPOSAL_SCHEMA = {
         },
         "confirm_move": {"type": "boolean"},
     },
-    "required": ["reply", "intent", "confidence", "escalate",
+    "required": ["reply", "holding_reply", "intent", "confidence", "escalate",
                  "escalation_reason", "staff_note", "hours_to_appointment", "booking",
                  "confirm_booking", "move", "confirm_move"],
     "additionalProperties": False,
@@ -502,7 +518,7 @@ def _escalation(reason: str) -> Proposal:
 
 def _parse_proposal(text: str) -> Proposal:
     d = json.loads(text)
-    return Proposal(reply=d["reply"], intent=d["intent"] if d["intent"] in config.INTENTS else "other",
+    return Proposal(reply=d["reply"], holding_reply=d.get("holding_reply", ""), intent=d["intent"] if d["intent"] in config.INTENTS else "other",
                     confidence=float(d["confidence"]), escalate=bool(d["escalate"]),
                     escalation_reason=d.get("escalation_reason", ""),
                     staff_note=d.get("staff_note", ""),

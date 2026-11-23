@@ -75,7 +75,7 @@ def test_a_handover_waits_and_the_next_turn_knows_it(monkeypatch):
     r = sc.run_one(s, stage=2)
     assert r.passed, r.failures
     assert seen == ["", "double charge"]
-    assert r.turns[0]["sent"] == agent._escalation("x").reply  # holding reply, not the draft
+    assert "team" in r.turns[0]["sent"] and r.turns[0]["sent"] != "I'll pass this on."  # holding, not the draft
     assert r.turns[1]["sweep"][0.9] == "send" and r.turns[1]["mode"] == "waiting"
 
 
