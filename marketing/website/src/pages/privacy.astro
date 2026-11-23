@@ -4,13 +4,16 @@
  * legitimate under Singapore's PDPA. Kept factually in sync with what the site
  * actually collects: booking details (to Plato + email), and first-party
  * analytics (visitor/session id + utm/gclid + pages; no name/phone/email).
+ * The WhatsApp section mirrors the assistant (business-intelligence/scripts/
+ * wa_agent): transcripts in Firestore with a 30-day TTL, no message text in
+ * analytics, model calls to Anthropic.
  * Update the "Last updated" date whenever the data practices change.
  */
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Section from "../components/Section.astro";
 import { SITE } from "../lib/site.ts";
 
-const lastUpdated = "30 October 2026";
+const lastUpdated = "19 November 2026";
 ---
 
 <BaseLayout
@@ -44,7 +47,28 @@ const lastUpdated = "30 October 2026";
         to send booking confirmations, and to contact you about your appointment.
       </p>
 
-      <h3>2. Website analytics</h3>
+      <h3>2. WhatsApp messages</h3>
+      <p>
+        When you message us on WhatsApp, your messages may first be answered by
+        our automated WhatsApp assistant, which handles common questions,
+        availability, bookings and appointment changes. Our team can see every
+        conversation and steps in whenever needed, and you can always ask to
+        speak to a person.
+      </p>
+      <p>
+        To reply, the assistant uses the messages in your conversation and, if
+        you are an existing patient, basic details linked to your phone number
+        (such as your name and upcoming appointments). The assistant keeps a copy
+        of the conversation for 30 days after your last message, then deletes it.
+        Our measurement of how well the assistant works records what kind of
+        request it was and how it was handled, never the text of your messages
+        or your phone number.
+      </p>
+      <p>
+        If you book with us, we may send your booking confirmation and
+        appointment reminders on WhatsApp to the number you gave us.
+      </p>
+      <h3>3. Website analytics</h3>
       <p>
         As you browse, we record anonymous usage data to understand which
         channels bring people to us and where our booking flow can be improved:
@@ -77,7 +101,9 @@ const lastUpdated = "30 October 2026";
         <li><strong>Google</strong> (Analytics and Ads) - website and advertising measurement.</li>
         <li><strong>Cloudflare</strong> - website hosting and delivery.</li>
         <li><strong>Stripe</strong> - payment processing for packages and gift vouchers bought on our website. We receive your name, email, phone number and what you bought, never your full card details.</li>
-        <li><strong>WhatsApp / Meta</strong> - only if you choose to message us on WhatsApp.</li>
+        <li><strong>WhatsApp / Meta</strong> and our WhatsApp messaging provider - to send and receive WhatsApp messages.</li>
+        <li><strong>Anthropic</strong> - the AI model behind our WhatsApp assistant. It processes the conversation to write a reply and does not use your messages to train its models.</li>
+        <li><strong>Google Cloud</strong> - hosting for the WhatsApp assistant and our booking system.</li>
       </ul>
       <p>We do not sell your personal data.</p>
 
@@ -85,7 +111,9 @@ const lastUpdated = "30 October 2026";
       <p>
         We keep booking and clinical records for as long as needed to provide your
         care and to meet our legal, accounting, and insurance obligations.
-        Analytics data is retained in aggregate to track trends over time.
+        The WhatsApp assistant's copy of a conversation is deleted 30 days after
+        the last message. Analytics data is retained in aggregate to track
+        trends over time.
       </p>
 
       <h2>Your choices and rights</h2>

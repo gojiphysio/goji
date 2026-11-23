@@ -1,0 +1,183 @@
+from datetime import datetime
+
+from wa_agent.policy import (AGENT, DRAFT, ESCALATE, HUMAN, PAUSED, SEND, SGT, SILENT,
+                             ChatState, Proposal, apply_idle_handback, decide, gate,
+                             human_replied_since, in_clinic_hours, is_acknowledgement, on_human_message)
+
+NOW = datetime(2026, 11, 18, 10, 0, tzinfo=SGT).timestamp()  # Wednesday 10am
+
+
+def prop(**kw):
+    base = dict(reply="hello", intent="faq", confidence=0.9, escalate=False)
+    return Proposal(**{**base, **kw})
+
+
+def test_auto_intent_with_confidence_sends():
+    assert decide(prop()).action == SEND
+
+
+def test_low_confidence_drafts_even_for_auto_intents():
+    d = decide(prop(confidence=0.5))
+    assert d.action == DRAFT and d.reason.startswith("low_confidence")
+
+
+def test_model_escalation_wins_over_intent_policy():
+    assert decide(prop(escalate=True, escalation_reason="asked for Chris")).action == ESCALATE
+
+
+def test_escalate_intents_escalate_even_if_model_did_not():
+    assert decide(prop(intent="human_requested")).action == ESCALATE
+    assert decide(prop(intent="urgent", confidence=1.0)).action == ESCALATE
+
+
+def test_draft_and_unknown_intents_draft():
+    for intent in ("cancel", "billing", "clinical", "complaint", "something_new"):
+        assert decide(prop(intent=intent)).action == DRAFT, intent
+
+
+def test_draft_intents_stay_drafts_even_if_the_model_escalates():
+    # Chris asked for complaints, billing, clinical and cancelling as drafts she checks.
+    assert decide(prop(intent="complaint", escalate=True)).action == DRAFT
+    assert decide(prop(intent="urgent", escalate=True)).action == ESCALATE
+    assert decide(prop(intent="faq", escalate=True)).action == ESCALATE   # unsure on an auto intent
+
+
+def test_booking_and_rescheduling_send_on_their_own():
+    assert decide(prop(intent="booking")).action == SEND
+    assert decide(prop(intent="existing_appointment")).action == SEND
+    assert decide(prop(intent="reschedule")).action == SEND
+
+
+def test_empty_reply_never_sends():
+    assert decide(prop(reply="  ")).action == DRAFT
+
+
+def test_gate_blocks_in_order():
+    s = ChatState(wa_id="6591234567")
+    assert gate(s, NOW, kill_switch=True, always_human=frozenset()).reason == "kill_switch"
+    assert gate(s, NOW, kill_switch=False,
+                always_human=frozenset({"6591234567"})).reason == "always_human"
+    s.mode = HUMAN
+    assert gate(s, NOW, kill_switch=False, always_human=frozenset()).action == SILENT
+    s.mode = PAUSED
+    assert gate(s, NOW, kill_switch=False, always_human=frozenset()).reason == "paused"
+    s.mode = AGENT
+    assert gate(s, NOW, kill_switch=False, always_human=frozenset()) is None
+
+
+def test_after_hours_mode_is_silent_while_clinic_is_open():
+    s = ChatState(wa_id="x")
+    assert gate(s, NOW, kill_switch=False, always_human=frozenset(),
+                agent_hours="after_hours").reason == "clinic_hours"
+    late = datetime(2026, 11, 18, 22, 0, tzinfo=SGT).timestamp()
+    assert gate(s, late, kill_switch=False, always_human=frozenset(),
+                agent_hours="after_hours") is None
+
+
+def test_clinic_hours():
+    assert in_clinic_hours(NOW)
+    assert not in_clinic_hours(datetime(2026, 11, 22, 10, 0, tzinfo=SGT).timestamp())  # Sunday
+    assert not in_clinic_hours(datetime(2026, 11, 18, 20, 0, tzinfo=SGT).timestamp())
+
+
+def test_human_message_pauses_until_resumed():
+    """Chris, 19 Nov 2026: once a person writes, the agent is fully silent
+    until she resumes the chat; no idle hand-back."""
+    s = ChatState(wa_id="x", owner="agent")
+    assert on_human_message(s, NOW)
+    assert s.mode == PAUSED and s.owner == ""
+    assert not apply_idle_handback(s, NOW + 90 * 24 * 3600, idle_s=24 * 3600)
+    assert s.mode == PAUSED
+
+
+def test_unanswered_escalation_also_hands_back():
+    s = ChatState(wa_id="x", mode=HUMAN, mode_since=NOW)  # no human ever replied
+    assert apply_idle_handback(s, NOW + 25 * 3600, idle_s=24 * 3600)
+
+
+def test_paused_never_times_out():
+    s = ChatState(wa_id="x", mode=PAUSED, mode_since=NOW)
+    assert not apply_idle_handback(s, NOW + 30 * 24 * 3600, idle_s=24 * 3600)
+
+
+def test_presend_recheck():
+    s = ChatState(wa_id="x")
+    assert not human_replied_since(s, NOW)
+    s.last_human_at = NOW + 5
+    assert human_replied_since(s, NOW)
+    s2 = ChatState(wa_id="y", mode=HUMAN)
+    assert human_replied_since(s2, NOW)
+
+
+def test_reply_content_guard():
+    from wa_agent.policy import reply_problems
+    ok = ("Book here: https://go.gojiphysio.com/wa-book?service=physiotherapy or call "
+          "+65 8377 0401, email hello@gojiphysio.com. In an emergency call 995. "
+          "It's $260 for 55 min, Mon-Sat 8am-8pm.")
+    assert reply_problems(ok) == []
+    assert reply_problems("Pay at https://evil.example/pay") == ["link:evil.example"]
+    assert reply_problems("Email charles@example.com") == ["email"]
+    assert reply_problems("Call Kristy on 9123 4567") == ["phone"]
+    # seen in the first live test: the raw /book URL instead of the tracked go-link
+    assert reply_problems("Book here: https://www.gojiphysio.com/book/") == ["untracked_booking_link"]
+
+
+def test_reply_with_foreign_link_is_drafted_not_sent():
+    d = decide(prop(reply="Pay here: https://evil.example/pay"))
+    assert d.action == DRAFT and d.reason == "content:link:evil.example"
+
+
+def test_acknowledgements():
+    from wa_agent.policy import is_acknowledgement
+    after_reply = [{"role": "agent", "text": "Here's the link"}, {"role": "customer", "text": "x"}]
+    for t in ("ok", "Okay!", "thanks", "Thank you so much!!", "👍", "noted 🙏🏻", "ty"):
+        assert is_acknowledgement(t, after_reply), t
+    for t in ("ok can I book Friday?", "thanks, how much is pilates?", "Sunday?"):
+        assert not is_acknowledgement(t, after_reply), t
+    # a first-contact "thanks" still gets an answer
+    assert not is_acknowledgement("thanks", [{"role": "customer", "text": "thanks"}])
+
+
+def test_late_reschedule_goes_to_chris_and_early_one_sends():
+    late = Proposal(reply="ok", intent="reschedule", confidence=0.95, escalate=False,
+                    hours_to_appointment=5)
+    early = Proposal(reply="ok", intent="reschedule", confidence=0.95, escalate=False,
+                     hours_to_appointment=30)
+    unknown = Proposal(reply="When is your appointment?", intent="reschedule",
+                       confidence=0.95, escalate=False)
+    assert decide(late) == decide(late).__class__(DRAFT, "late_change")
+    assert decide(early).action == SEND
+    assert decide(unknown).action == SEND   # the agent asks when it is first
+
+
+def test_multi_word_acknowledgements_need_no_reply():
+    h = [{"role": "agent"}, {"role": "customer"}]
+    for t in ("ok thanks!", "Noted, thank you 🙏", "see you then!"):
+        assert is_acknowledgement(t, h), t
+    for t in ("ok but what about sat?", "thanks, can I also ask about price"):
+        assert not is_acknowledgement(t, h), t
+
+
+def test_a_short_clarifying_question_sends_even_below_the_confidence_bar():
+    q = Proposal(reply="No worries! Just to check, is your current appointment today at 3pm?",
+                 intent="reschedule", confidence=0.6, escalate=False)
+    assert decide(q).action == SEND and decide(q).reason.startswith("clarifying_question")
+    priced = Proposal(reply="It's $260, would you like to book?", intent="pricing",
+                      confidence=0.6, escalate=False)
+    assert decide(priced).action == DRAFT            # a fact in it: still drafted
+    two = Proposal(reply="Is it today? And at 3pm?", intent="reschedule", confidence=0.6,
+                   escalate=False)
+    assert decide(two).action == DRAFT               # more than one question
+    unsure = Proposal(reply="Is it today?", intent="reschedule", confidence=0.3, escalate=False)
+    assert decide(unsure).action == DRAFT            # very unsure: still drafted
+    cancel = Proposal(reply="Which appointment?", intent="cancel", confidence=0.6, escalate=False)
+    assert decide(cancel).action == DRAFT            # draft-for-Chris intents stay drafts
+
+
+def test_bubbles_split_and_cap_at_three():
+    from wa_agent.policy import as_one_message, split_bubbles
+    assert split_bubbles("one") == ["one"]
+    assert split_bubbles("a\n<break>\nb") == ["a\n\nb"]                  # off by default
+    assert split_bubbles("a\n<break>\nb\n<break>\n\n<break>\nc", 3) == ["a", "b", "c"]
+    assert split_bubbles("a<break>b<break>c<break>d", 3) == ["a", "b", "c\n\nd"]
+    assert as_one_message("a\n<break>\nb") == "a\n\nb"

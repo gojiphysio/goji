@@ -797,6 +797,38 @@
       padding: 2px 7px; border-radius: 999px;
       background: #efe9df; color: var(--ink-soft); margin-left: 4px;
     }
+    /* ===== Agent tab (WhatsApp assistant) ===== */
+    #page-agent .kpi-row { grid-template-columns: repeat(3, 1fr); }
+    .agent-empty { text-align: center; padding: 36px 16px; color: var(--ink-soft); font-size: 14px; }
+    .agent-empty strong { display: block; color: var(--ink); font-size: 16px; margin-bottom: 6px; }
+    .agent-none { font-size: 12px; color: var(--ink-soft); font-style: italic; }
+    /* Outcome mix: one 100% stacked bar, coloured by score, legend below. */
+    .agent-mix-bar { display: flex; height: 22px; border-radius: 6px; overflow: hidden; background: var(--bg); gap: 2px; }
+    .agent-mix-bar span { display: block; height: 100%; min-width: 3px; }
+    .agent-mix-legend { display: flex; flex-wrap: wrap; gap: 10px 22px; margin-top: 14px; font-size: 12px; }
+    .agent-mix-group { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+    .agent-mix-group .grp-lbl { color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.04em; font-size: 10px; }
+    .agent-mix-item { display: inline-flex; align-items: center; gap: 6px; color: var(--ink-soft); }
+    .agent-mix-item .sw { width: 10px; height: 10px; border-radius: 2px; display: inline-block; flex-shrink: 0; }
+    .agent-mix-item b { color: var(--ink); font-variant-numeric: tabular-nums; }
+    /* Autonomy by intent: the one table on the tab (see AGENTS.md). It sits in a
+       .table-scroll and the global mobile table rule makes it swipe, not overflow. */
+    .agent-autonomy td, .agent-autonomy th { white-space: nowrap; }
+    .agent-split { display: inline-flex; width: 120px; height: 10px; border-radius: 3px; overflow: hidden; background: var(--bg); vertical-align: middle; }
+    .agent-split span { display: block; height: 100%; }
+    .agent-split-txt { margin-left: 8px; font-size: 11px; color: var(--ink-muted); font-variant-numeric: tabular-nums; }
+    .agent-badge { display: inline-block; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; padding: 2px 7px; border-radius: 999px; }
+    .agent-badge.promote { background: #e3f2e8; color: var(--good); }
+    .agent-badge.demoted { background: #fbeae7; color: var(--goji); }
+    .agent-key { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 10px; font-size: 11px; color: var(--ink-muted); }
+    .agent-key .sw { width: 9px; height: 9px; border-radius: 2px; display: inline-block; margin-right: 5px; vertical-align: middle; }
+    @media (max-width: 900px) {
+      #page-agent .kpi-row { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 640px) {
+      #page-agent .kpi-row { grid-template-columns: 1fr; }
+      .agent-split { width: 84px; }
+    }
     .callout {
       background: var(--goji-soft); border: 1px solid #e9c9c1; border-radius: 8px;
       padding: 10px 14px; font-size: 12px; color: #7a3328; margin-top: 14px;
@@ -835,11 +867,12 @@
       <button type="button" data-page="pl"><span class="nav-full">Profit &amp; Loss</span><span class="nav-short">P&amp;L</span></button>
       <button type="button" data-page="commission"><span class="nav-full">Payroll</span><span class="nav-short">Payroll</span></button>
       <button type="button" data-page="marketing">Marketing</button>
+      <button type="button" data-page="agent">Agent</button>
       <button type="button" data-page="alerts"><span class="nav-full">Alert history</span><span class="nav-short">Alerts</span></button>
       <button type="button" data-page="other">Other details</button>
     </nav>
 
-    <!-- Global date-range selector — applies to Overview, Marketing, Other Details.
+    <!-- Global date-range selector — applies to Overview, Marketing, Agent, Other Details.
          Hidden automatically when P&L or Payroll tabs are active. -->
     <div class="global-toolbar" id="global_toolbar">
       <div class="date-selector" role="tablist" aria-label="Date range">
@@ -1669,6 +1702,87 @@
     </section>
 
     </div><!-- /#page-marketing -->
+
+    <div id="page-agent" class="page" hidden>
+
+    <section class="q" id="agent_empty">
+      <div class="agent-empty"><strong>No assistant data yet.</strong>It appears once the assistant is live.</div>
+    </section>
+
+    <div id="agent_content" hidden>
+      <div class="kpi-row">
+        <div class="kpi-card">
+          <div class="kpi-label">Conversations <span class="range-label">last 30 days</span></div>
+          <div class="kpi-value" id="agent_conversations">-</div><div class="kpi-trend" id="agent_conversations_trend" hidden></div>
+          <div class="kpi-sub" id="agent_conversations_sub"></div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Pure-agent success</div>
+          <div class="kpi-value" id="agent_success">-</div><div class="kpi-trend" id="agent_success_trend" hidden></div>
+          <div class="kpi-sub" id="agent_success_sub"></div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Rescue rate</div>
+          <div class="kpi-value" id="agent_rescue">-</div><div class="kpi-trend" id="agent_rescue_trend" hidden></div>
+          <div class="kpi-sub" id="agent_rescue_sub"></div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Bookings from chats</div>
+          <div class="kpi-value" id="agent_bookings">-</div><div class="kpi-trend" id="agent_bookings_trend" hidden></div>
+          <div class="kpi-sub" id="agent_bookings_sub"></div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Median first reply</div>
+          <div class="kpi-value" id="agent_first_reply">-</div><div class="kpi-trend" id="agent_first_reply_trend" hidden></div>
+          <div class="kpi-sub">Customer message to the agent's first send. Lower is better</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Cost per conversation</div>
+          <div class="kpi-value" id="agent_cost">-</div><div class="kpi-trend" id="agent_cost_trend" hidden></div>
+          <div class="kpi-sub" id="agent_cost_sub"></div>
+        </div>
+      </div>
+
+      <section class="q">
+        <h2>How conversations ended</h2>
+        <div class="subtitle">Conversations that started <span class="range-label">last 30 days</span>, by outcome. Green is a success, grey neutral, red a failure, amber a customer who got times but didn't book.</div>
+        <div id="agent_mix"></div>
+      </section>
+
+      <section class="q">
+        <h2>Pure-agent success by week</h2>
+        <div class="subtitle">Last 12 weeks. Ended conversations the agent finished alone with a booking or an answer.</div>
+        <div class="chart-wrap small" id="agent_weekly_wrap"><canvas id="agentWeeklyChart"></canvas></div>
+        <div class="agent-none" id="agent_weekly_none" hidden>No ended conversations in the last 12 weeks.</div>
+      </section>
+
+      <section class="q">
+        <h2>Autonomy by intent</h2>
+        <div class="subtitle">Last 90 days. Which questions the agent answers on its own, drafts for Chris, or hands over. An intent is ready to promote to auto-send after 20+ drafts with 90%+ sent unchanged; demoted means the service moved it back to drafts after rescues.</div>
+        <div class="table-scroll">
+        <table class="agent-autonomy">
+          <thead>
+            <tr>
+              <th>Intent</th>
+              <th class="num">Messages</th>
+              <th>Auto · draft · escalate</th>
+              <th class="num">Drafts unchanged</th>
+              <th class="num">Rescues</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="agent_autonomy_tbody"></tbody>
+        </table>
+        </div>
+        <div class="agent-key">
+          <span><span class="sw" style="background:#2d8a4f"></span>Sent on its own</span>
+          <span><span class="sw" style="background:#9a958c"></span>Drafted for Chris</span>
+          <span><span class="sw" style="background:#c44a3a"></span>Escalated</span>
+        </div>
+      </section>
+    </div>
+
+    </div><!-- /#page-agent -->
 
     <div id="page-alerts" class="page" hidden>
 
@@ -3072,24 +3186,27 @@
       const legend = document.getElementById('mkt_funnel_legend');
       const haveSankey = !!(window.Chart && window['chartjs-chart-sankey']);
 
+      // Rebuild rather than update() in place: the sankey plugin keeps its old
+      // node/flow elements across a data swap and calls the colour callbacks
+      // with stale dataIndex values, so a shorter flow list (e.g. switching to a
+      // Custom range) crashed with "Cannot read properties of undefined
+      // (reading 'from')".
+      if (mktFunnelChart) { mktFunnelChart.destroy(); mktFunnelChart = null; }
+
       if (!haveSankey || !flows.length) {
-        if (mktFunnelChart) { mktFunnelChart.data.datasets[0].data = []; mktFunnelChart.update(); }
         legend.innerHTML = haveSankey
           ? '<div class="stat" style="color:var(--ink-muted);font-style:italic;">No arrivals or tracked taps in this period yet.</div>'
           : '';
         return;
       }
 
-      if (mktFunnelChart) {
-        mktFunnelChart.data.datasets[0].data = flows;
-        mktFunnelChart.update();
-      } else {
+      {
         mktFunnelChart = new Chart(document.getElementById('mktFunnelChart'), {
           type: 'sankey',
           data: { datasets: [{
             data: flows,
-            colorFrom: c => FUNNEL_COLOR[c.dataset.data[c.dataIndex].from] || NEUTRAL,
-            colorTo:   c => FUNNEL_COLOR[c.dataset.data[c.dataIndex].to]   || NEUTRAL,
+            colorFrom: c => FUNNEL_COLOR[(c.dataset.data[c.dataIndex] || {}).from] || NEUTRAL,
+            colorTo:   c => FUNNEL_COLOR[(c.dataset.data[c.dataIndex] || {}).to]   || NEUTRAL,
             colorMode: 'gradient',
             column: FUNNEL_COLUMN,
             priority: FUNNEL_PRIORITY,
@@ -3104,6 +3221,7 @@
               legend: { display: false },
               tooltip: { callbacks: { label: c => {
                 const d = c.dataset.data[c.dataIndex];
+                if (!d) return '';
                 const unit = d.to === 'Website'  ? ' sessions'
                            : d.to === 'Booked'   ? ' bookings'
                            : ' taps';
@@ -3171,6 +3289,208 @@
       ).join('');
     }
 
+    /* ===== Agent tab (WhatsApp assistant) =====
+       r.wa_agent / r.wa_agent_prev / r.wa_agent_outcomes are per range;
+       DATA.wa_agent_weekly and DATA.wa_agent_autonomy are fixed windows. Every
+       fetch degrades to empty, so "no data at all" shows the empty state. */
+    let agentWeeklyChart;
+    const AGENT_SCORE_ORDER = ['success', 'neutral', 'failure', 'soft_failure', 'open'];
+    const AGENT_SCORE_LABELS = { success: 'Success', neutral: 'Neutral', failure: 'Failure',
+                                 soft_failure: 'Soft failure', open: 'Open' };
+    // Shades per score: the first outcome in a group takes the strongest one.
+    const AGENT_SCORE_COLORS = {
+      success:      ['#2d8a4f', '#5aa874', '#8cc49f'],
+      neutral:      ['#8a857c', '#b2ada3', '#cfcac0'],
+      failure:      ['#c44a3a', '#d9705f', '#e89a8c', '#f2bfb5'],
+      soft_failure: ['#c98a14', '#e0ad4f'],
+      open:         ['#e3ddd2'],
+    };
+    // Any other outcome still renders: coloured by its score, labelled from its code.
+    const AGENT_OUTCOME_LABELS = {
+      booked: 'Booked', resolved: 'Resolved by agent', handover: 'Handed to Chris',
+      draft_sent: 'Draft sent as is', draft_edited: 'Draft edited',
+      rescued: 'Chris stepped in', asked_for_human: 'Asked for a person',
+      unanswered: 'Draft not answered', dropped: "Got times, didn't book", open: 'Still open',
+    };
+    const AGENT_OUTCOME_ORDER = ['booked', 'resolved', 'handover', 'draft_sent', 'draft_edited',
+                                 'rescued', 'asked_for_human', 'unanswered', 'dropped', 'open'];
+
+    function agentHasData() {
+      const all = (DATA.ranges && DATA.ranges.all && DATA.ranges.all.wa_agent) || {};
+      return (all.conversations || 0) > 0 || (DATA.wa_agent_autonomy || []).length > 0;
+    }
+    function fmtSeconds(s) {
+      if (s == null || isNaN(s)) return '—';
+      if (s < 90) return Math.round(s) + 's';
+      if (s < 5400) return (s / 60).toFixed(1) + ' min';
+      return (s / 3600).toFixed(1) + ' h';
+    }
+    function fmtUsd(v) {
+      if (v == null || isNaN(v)) return '—';
+      return 'US$' + Number(v).toFixed(v < 1 ? 3 : 2);
+    }
+    function agentOutcomeLabel(o) {
+      return AGENT_OUTCOME_LABELS[o] || String(o || 'unknown').replace(/_/g, ' ');
+    }
+    function setAgentText(id, text) {
+      const el = document.getElementById(id);
+      if (el) el.textContent = text;
+    }
+
+    function renderAgent(r) {
+      const has = agentHasData();
+      document.getElementById('agent_empty').hidden = has;
+      document.getElementById('agent_content').hidden = !has;
+      if (!has) return;
+
+      const a = r.wa_agent || {};
+      const p = r.wa_agent_prev;
+      const ps = r.prev_start, pe = r.prev_end;
+      const n = a.conversations || 0;
+
+      setAgentText('agent_conversations', fmtInt(n));
+      setAgentText('agent_conversations_sub',
+        fmtInt(a.handled_agent || 0) + ' agent only · ' + fmtInt(a.handled_agent_then_human || 0)
+        + ' with Chris · ' + fmtInt(a.handled_human || 0) + ' Chris only'
+        + (a.open ? ' · ' + fmtInt(a.open) + ' still open' : ''));
+      renderTrend('agent_conversations_trend', n, p && p.conversations, ps, pe);
+
+      setAgentText('agent_success', a.success_rate == null ? '—' : fmtPct(a.success_rate));
+      const rated = (a.rated_up || 0) + (a.rated_down || 0);
+      setAgentText('agent_success_sub',
+        a.ended ? fmtInt(a.agent_success) + ' of ' + fmtInt(a.ended) + ' ended, no person needed'
+                  + (rated ? ' · rated ' + fmtInt(a.rated_up || 0) + ' up, ' + fmtInt(a.rated_down || 0) + ' down' : '')
+                : 'No conversation has ended yet');
+      renderTrend('agent_success_trend', a.success_rate, p && p.success_rate, ps, pe);
+
+      setAgentText('agent_rescue', a.rescue_rate == null ? '—' : fmtPct(a.rescue_rate));
+      setAgentText('agent_rescue_sub',
+        fmtInt(a.rescued || 0) + ' chats Chris stepped into. Lower is better');
+      renderTrend('agent_rescue_trend', a.rescue_rate, p && p.rescue_rate, ps, pe, { lowerIsBetter: true });
+
+      setAgentText('agent_bookings', fmtInt(a.bookings || 0));
+      setAgentText('agent_bookings_sub', n
+        ? fmtPct((a.bookings || 0) / n * 100) + ' of conversations booked'
+        : 'Conversations that ended in a booking');
+      renderTrend('agent_bookings_trend', a.bookings, p && p.bookings, ps, pe);
+
+      setAgentText('agent_first_reply', fmtSeconds(a.median_first_reply_s));
+      renderTrend('agent_first_reply_trend', a.median_first_reply_s, p && p.median_first_reply_s,
+                  ps, pe, { lowerIsBetter: true });
+
+      setAgentText('agent_cost', fmtUsd(a.cost_per_conversation));
+      setAgentText('agent_cost_sub', fmtUsd(a.cost_usd || 0) + ' model cost in total. Lower is better');
+      renderTrend('agent_cost_trend', a.cost_per_conversation, p && p.cost_per_conversation,
+                  ps, pe, { lowerIsBetter: true });
+
+      renderAgentMix(r.wa_agent_outcomes || []);
+    }
+
+    function renderAgentMix(rows) {
+      const el = document.getElementById('agent_mix');
+      const total = rows.reduce((s, x) => s + (x.conversations || 0), 0);
+      if (!total) {
+        el.innerHTML = '<div class="agent-none">No conversations in this period.</div>';
+        return;
+      }
+      const rank = (list, v) => { const i = list.indexOf(v); return i < 0 ? list.length : i; };
+      const sorted = rows.slice().sort((x, y) =>
+        rank(AGENT_SCORE_ORDER, x.score) - rank(AGENT_SCORE_ORDER, y.score)
+        || rank(AGENT_OUTCOME_ORDER, x.outcome) - rank(AGENT_OUTCOME_ORDER, y.outcome)
+        || y.conversations - x.conversations);
+      const shadeIdx = {};
+      const items = sorted.map(x => {
+        const shades = AGENT_SCORE_COLORS[x.score] || AGENT_SCORE_COLORS.open;
+        const i = shadeIdx[x.score] || 0;
+        shadeIdx[x.score] = i + 1;
+        return { ...x, color: shades[Math.min(i, shades.length - 1)] };
+      });
+      const bar = '<div class="agent-mix-bar" role="img" aria-label="Outcome mix">' + items.map(x => {
+        const pct = x.conversations / total * 100;
+        return '<span style="flex:' + pct.toFixed(2) + ' 0 0;background:' + x.color + '" title="'
+          + escapeHtml(agentOutcomeLabel(x.outcome)) + ': ' + fmtInt(x.conversations) + '"></span>';
+      }).join('') + '</div>';
+      const groups = AGENT_SCORE_ORDER.concat(
+        [...new Set(items.map(x => x.score))].filter(sc => !AGENT_SCORE_ORDER.includes(sc)));
+      const legend = '<div class="agent-mix-legend">' + groups.map(sc => {
+        const g = items.filter(x => x.score === sc);
+        if (!g.length) return '';
+        return '<div class="agent-mix-group"><span class="grp-lbl">'
+          + escapeHtml(AGENT_SCORE_LABELS[sc] || String(sc).replace(/_/g, ' ')) + '</span>'
+          + g.map(x => '<span class="agent-mix-item"><span class="sw" style="background:' + x.color + '"></span>'
+              + escapeHtml(agentOutcomeLabel(x.outcome)) + ' <b>' + fmtInt(x.conversations) + '</b>'
+              + ' <small>' + fmtPct(x.conversations / total * 100) + '</small></span>').join('')
+          + '</div>';
+      }).join('') + '</div>';
+      el.innerHTML = bar + legend;
+    }
+
+    function renderAgentStatic() {
+      if (!agentHasData()) return;
+      renderAgentAutonomy(DATA.wa_agent_autonomy || []);
+      renderAgentWeekly(DATA.wa_agent_weekly || []);
+    }
+
+    function renderAgentAutonomy(rows) {
+      const tb = document.getElementById('agent_autonomy_tbody');
+      if (!rows.length) {
+        tb.innerHTML = '<tr><td colspan="6" class="agent-none">No proposals in the last 90 days.</td></tr>';
+        return;
+      }
+      const seg = (pct, color) => pct ? '<span style="width:' + Number(pct).toFixed(1) + '%;background:' + color + '"></span>' : '';
+      const r0 = v => v == null ? '–' : Math.round(v);
+      tb.innerHTML = rows.map(x => {
+        const badge = x.demoted ? '<span class="agent-badge demoted">Demoted</span>'
+                    : x.ready_to_promote ? '<span class="agent-badge promote">Ready to promote</span>' : '';
+        const sent = (x.drafts_sent_unchanged || 0) + (x.drafts_edited || 0);
+        return '<tr>'
+          + '<td>' + escapeHtml(String(x.intent).replace(/_/g, ' ')) + '</td>'
+          + '<td class="num">' + fmtInt(x.proposals) + '</td>'
+          + '<td><span class="agent-split">' + seg(x.auto_pct, '#2d8a4f') + seg(x.draft_pct, '#9a958c')
+          + seg(x.escalate_pct, '#c44a3a') + '</span><span class="agent-split-txt">'
+          + r0(x.auto_pct) + ' / ' + r0(x.draft_pct) + ' / ' + r0(x.escalate_pct) + '%</span></td>'
+          + '<td class="num">' + (x.unchanged_pct == null ? '–' : fmtPct(x.unchanged_pct))
+          + (sent ? ' <span class="agent-split-txt">of ' + fmtInt(sent) + '</span>' : '') + '</td>'
+          + '<td class="num">' + fmtInt(x.rescues || 0) + '</td>'
+          + '<td>' + badge + '</td>'
+          + '</tr>';
+      }).join('');
+    }
+
+    function renderAgentWeekly(weeks) {
+      const pts = weeks.filter(w => w.success_rate != null);
+      document.getElementById('agent_weekly_wrap').hidden = !pts.length;
+      document.getElementById('agent_weekly_none').hidden = !!pts.length;
+      if (!pts.length) return;
+      const labels = weeks.map(w => {
+        const d = new Date(w.week + 'T00:00:00');
+        return isNaN(d) ? w.week : d.getDate() + ' ' + MONTHS_SHORT[d.getMonth()];
+      });
+      if (agentWeeklyChart) agentWeeklyChart.destroy();
+      agentWeeklyChart = new Chart(document.getElementById('agentWeeklyChart'), {
+        type: 'line',
+        data: { labels, datasets: [{
+          label: 'Pure-agent success', data: weeks.map(w => w.success_rate),
+          borderColor: GREEN, backgroundColor: GREEN + '22', fill: true, tension: 0.25,
+          spanGaps: true, pointRadius: 3, pointBackgroundColor: GREEN, borderWidth: 2,
+        }] },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: { callbacks: {
+              title: items => items.length ? 'Week of ' + items[0].label : '',
+              label: ctx => {
+                const w = weeks[ctx.dataIndex];
+                return fmtPct(w.success_rate) + ' (' + w.agent_success + ' of ' + w.ended + ' ended)';
+              },
+            } },
+          },
+          scales: { y: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%' } } },
+        },
+      });
+    }
+
     function resizeMarketingCharts() {
       [mktNorthStarChart, mktPillarChart, mktSourceChart, mktFunnelChart].forEach(c => { if (c) c.resize(); });
     }
@@ -3202,6 +3522,7 @@
       renderPackages(r.packages);
       renderPackagesDeferred(r.deferred_stats, r.end);
       renderMarketingMetrics(r);
+      renderAgent(r);
     }
 
     async function init() {
@@ -3270,6 +3591,7 @@
       initUpcomingToggle();
       renderUpcoming(DATA.upcoming_sessions);
       renderMarketingStatic();
+      renderAgentStatic();
 
       initPL();
       initPageNav();
@@ -3863,12 +4185,14 @@
       document.getElementById('page-pl').hidden         = (page !== 'pl');
       document.getElementById('page-commission').hidden = (page !== 'commission');
       document.getElementById('page-marketing').hidden  = (page !== 'marketing');
+      document.getElementById('page-agent').hidden      = (page !== 'agent');
       document.getElementById('page-alerts').hidden     = (page !== 'alerts');
       document.getElementById('page-other').hidden      = (page !== 'other');
       // Charts created while their page was hidden render at 0×0; resize once
       // the marketing page is first shown so the canvases pick up real dims.
       if (page === 'marketing') resizeMarketingCharts();
       if (page === 'pl' && plChart) plChart.resize();
+      if (page === 'agent' && agentWeeklyChart) agentWeeklyChart.resize();
     }
 
     /* ===== Overview print ===== */

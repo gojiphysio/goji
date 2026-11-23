@@ -1,10 +1,12 @@
 """
 Booking-notification emails — best-effort, never break a booking.
 
-Two messages, both sent via Gmail SMTP as hello@gojiphysio.com (Google
-Workspace) using an app password from Secret Manager:
+Sent via Gmail SMTP as hello@gojiphysio.com (Google Workspace) using an app
+password from Secret Manager:
   - send_admin_booking_email:    internal heads-up to the clinic (hello@).
   - send_customer_booking_email: confirmation to the person who booked.
+  - send_admin_reschedule_email: clinic notice when the WhatsApp assistant
+    moves an appointment.
 
 The customer also gets Plato's own confirmation (connect:true). We send our own
 too so the confirmation is guaranteed and on-brand, independent of Plato's
@@ -106,9 +108,11 @@ def send_admin_booking_email(result: dict, draft: dict) -> None:
         return
     try:
         where = "Home visit" if result.get("home") else "In-clinic"
+        via_wa = result.get("source") == "whatsapp"
+        has_email = bool((draft.get("email") or "").strip())
         msg = EmailMessage()
-        msg["Subject"] = (f"New website booking — {result['service']} "
-                          f"({result['date']} {result['time']})")
+        msg["Subject"] = (f"New {'WhatsApp' if via_wa else 'website'} booking — "
+                          f"{result['service']} ({result['date']} {result['time']})")
         msg["From"] = SMTP_USER
         msg["To"] = ADMIN_TO
         # CC the matched clinician so the assigned physio sees their own booking.
@@ -116,7 +120,8 @@ def send_admin_booking_email(result: dict, draft: dict) -> None:
         if cc:
             msg["Cc"] = cc
         lines = [
-            "A new booking came in via the website:",
+            ("Booked via WhatsApp assistant." if via_wa
+             else "A new booking came in via the website:"),
             "",
             _row("Service", result['service']),
         ]
@@ -128,19 +133,58 @@ def send_admin_booking_email(result: dict, draft: dict) -> None:
             *_clinician_lines(result),
             _row("Name", draft.get('name')),
             _row("Phone", draft.get('phone')),
-            _row("Email", draft.get('email')),
+            _row("Email", draft.get('email') if has_email else "(none given)"),
         ]
         if result.get("home"):
             lines.append(_row("Address", draft.get('address')))
         if (draft.get("notes") or "").strip():
             lines.append(_row("Condition", draft.get('notes').strip()))
+        if has_email:
+            sent = "The customer has been sent Plato's confirmation."
+        else:
+            sent = ("No email was given, so Plato sent no confirmation; the "
+                    "assistant confirmed the booking in the WhatsApp chat.")
         lines += [_row("Reference", result['reference']), "",
-                  "The customer has been sent Plato's confirmation. Changes and "
-                  "cancellations are handled over WhatsApp."]
+                  f"{sent} Changes and cancellations are handled over WhatsApp."]
         msg.set_content("\n".join(lines))
         _send(msg, "admin booking", result.get("reference"))
     except Exception as e:
         log.warning("admin booking email failed: %s", e)
+
+
+def send_admin_reschedule_email(result: dict, req: dict) -> None:
+    """Short clinic notice that the WhatsApp assistant moved an appointment, so
+    there's a record outside Plato. Best-effort, like the booking email."""
+    if not SMTP_PASS:
+        log.info("SMTP not configured (no GMAIL_APP_PASSWORD); skipping reschedule email")
+        return
+    try:
+        old = f"{result['old_date']} {result['old_time']}"
+        new = f"{result['new_date']} {result['new_time']}"
+        msg = EmailMessage()
+        msg["Subject"] = (f"Rescheduled via WhatsApp assistant — {result['service']} "
+                          f"({old} → {new})")
+        msg["From"] = SMTP_USER
+        msg["To"] = ADMIN_TO
+        cc = result.get("clinician_email")
+        if cc:
+            msg["Cc"] = cc
+        lines = [
+            "Rescheduled via WhatsApp assistant.",
+            "",
+            _row("Service", result["service"]),
+            _row("Clinician", result["clinician_name"]),
+            _row("Was", f"{old} (SGT)"),
+            _row("Now", f"{new} (SGT)"),
+            _row("Phone", req.get("phone")),
+            _row("Reference", result["reference"]),
+            "",
+            "Same clinician, service and length; only the time changed in Plato.",
+        ]
+        msg.set_content("\n".join(lines))
+        _send(msg, "admin reschedule", result.get("reference"))
+    except Exception as e:
+        log.warning("admin reschedule email failed: %s", e)
 
 
 def send_customer_booking_email(result: dict, draft: dict) -> None:

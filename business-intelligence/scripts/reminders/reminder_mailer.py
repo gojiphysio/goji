@@ -164,13 +164,23 @@ def render_reminder_body(name: str | None, date_str: str, times: list[str],
 
 def render_digest_body(sent: list[dict], skipped: list[dict],
                        failed: list[dict], target_date: str,
-                       *, dry_run: bool) -> str:
+                       *, dry_run: bool, whatsapp: bool = False,
+                       notices: list[str] | None = None,
+                       preview: str | None = None) -> str:
     """The daily operations digest to hello@.
 
     Its real job is the `skipped` list: patients with no email on file, who the
     front desk still needs to reach on WhatsApp. Without this the gap would be
     invisible outside Cloud Run logs.
+
+    whatsapp=True (WA_REMINDERS_ENABLED) switches to the two-channel digest:
+    each patient's channel, and `skipped` meaning "no usable mobile AND no
+    email". With it False the output is exactly the email-only digest.
     """
+    if whatsapp:
+        return _render_two_channel_digest(sent, skipped, failed, target_date,
+                                          dry_run=dry_run, notices=notices or [],
+                                          preview=preview)
     if dry_run:
         head = "DRY RUN — no patient emails were sent."
     elif OVERRIDE_TO:
@@ -203,6 +213,66 @@ def render_digest_body(sent: list[dict], skipped: list[dict],
         lines += ["", f"{verb} to:"]
         for r in sorted(sent, key=lambda r: r.get("time") or ""):
             lines.append(f"  {_fmt_time(r.get('time') or ''):>9}  {r.get('name') or '—'}")
+    lines += ["", "— the appointment-reminders job"]
+    return "\n".join(lines)
+
+
+CHANNEL_LABELS = {"whatsapp": "WhatsApp", "email": "email"}
+
+
+def _render_two_channel_digest(sent: list[dict], skipped: list[dict],
+                               failed: list[dict], target_date: str, *,
+                               dry_run: bool, notices: list[str],
+                               preview: str | None) -> str:
+    """The digest when the WhatsApp channel is on. `sent` entries carry
+    'channel' ('whatsapp' | 'email') and optionally 'detail'; `skipped` entries
+    optionally carry 'reason' (e.g. WhatsApp failed and there was no email)."""
+    if dry_run:
+        head = "DRY RUN — no patient messages were sent."
+    elif OVERRIDE_TO:
+        head = (f"TEST MODE — {OVERRIDE_TO} received every reminder email. "
+                "No patient was messaged.")
+    else:
+        head = ""
+    verb = "Would have sent" if dry_run else "Sent"
+    n_wa = sum(1 for r in sent if r.get("channel") == "whatsapp")
+    lines = [head, ""] if head else []
+    for n in notices:
+        lines += [n, ""]
+    lines += [
+        f"Appointment reminders for {_fmt_day(target_date)}",
+        "",
+        f"{verb}: {len(sent)} reminder(s) — {n_wa} WhatsApp, "
+        f"{len(sent) - n_wa} email",
+    ]
+    if skipped:
+        lines += [
+            "",
+            f"Couldn't reach — no WhatsApp and no email ({len(skipped)}). "
+            "Please contact these by hand:",
+        ]
+        for r in sorted(skipped, key=lambda r: r.get("time") or ""):
+            phone = r.get("phone") or "no phone either"
+            line = (f"  {_fmt_time(r.get('time') or ''):>9}  "
+                    f"{r.get('name') or '—'}  {phone}")
+            if r.get("reason"):
+                line += f"  ({r['reason']})"
+            lines.append(line)
+    if failed:
+        lines += ["", f"Failed to send ({len(failed)}) — will retry next run:"]
+        for r in failed:
+            lines.append(f"  {r.get('name') or '—'}: {r.get('error') or 'unknown error'}")
+    if sent:
+        lines += ["", f"{verb} to:"]
+        for r in sorted(sent, key=lambda r: r.get("time") or ""):
+            line = (f"  {_fmt_time(r.get('time') or ''):>9}  {r.get('name') or '—'}"
+                    f"  [{CHANNEL_LABELS.get(r.get('channel'), r.get('channel') or 'email')}]")
+            if r.get("detail"):
+                line += f"  {r['detail']}"
+            lines.append(line)
+    if preview:
+        lines += ["", "First WhatsApp, as the patient would read it:", ""]
+        lines += [f"  {l}" if l else "" for l in preview.splitlines()]
     lines += ["", "— the appointment-reminders job"]
     return "\n".join(lines)
 
@@ -245,7 +315,9 @@ def send_reminder(to: str, name: str | None, date_str: str, times: list[str],
 
 
 def send_digest(sent: list[dict], skipped: list[dict], failed: list[dict],
-                target_date: str, *, dry_run: bool) -> None:
+                target_date: str, *, dry_run: bool, whatsapp: bool = False,
+                notices: list[str] | None = None,
+                preview: str | None = None) -> None:
     """Send the ops digest to the clinic. Best-effort — never fails the run."""
     try:
         msg = EmailMessage()
@@ -255,7 +327,8 @@ def send_digest(sent: list[dict], skipped: list[dict], failed: list[dict],
         msg["From"] = formataddr((FROM_NAME, SMTP_USER))
         msg["To"] = ADMIN_TO
         msg.set_content(render_digest_body(
-            sent, skipped, failed, target_date, dry_run=dry_run))
+            sent, skipped, failed, target_date, dry_run=dry_run,
+            whatsapp=whatsapp, notices=notices, preview=preview))
         _send(msg, "reminder digest", target_date)
     except Exception as e:
         log.warning("reminder digest email failed: %s", e)

@@ -9,6 +9,12 @@
 #   plato-api-key        (required)  bearer token for Plato
 #   gmail-app-password   (optional)  hello@ Google Workspace app password for the
 #                                    admin notification email; skipped if absent
+#   turnstile-secret                 Cloudflare Turnstile secret (bot check)
+#   wa-agent-internal-token          shared secret with goji-wa-agent: guards
+#                                    /internal/book and signs the booking-confirmed
+#                                    callback. mounted only when WA_AGENT_URL is
+#                                    set; create it before setting that.
+# Env: WA_AGENT_URL (optional) — goji-wa-agent's base URL; empty = no callback.
 #
 # PRIMARY PATH: pushes to `main` that touch scripts/booking/** auto-deploy via
 # .github/workflows/deploy-booking.yml (tests gate it; WIF auth, no key). This
@@ -26,6 +32,7 @@ REGION="${REGION:-asia-southeast1}"
 SERVICE="${SERVICE:-goji-booking}"
 DOMAIN="${DOMAIN:-booking.gojiphysio.com}"
 CORS_ORIGIN="${CORS_ORIGIN:-https://www.gojiphysio.com}"
+WA_AGENT_URL="${WA_AGENT_URL:-}"
 SA="dashboard-sa@${PROJECT}.iam.gserviceaccount.com"
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
@@ -38,12 +45,15 @@ gcloud config set project "${PROJECT}" >/dev/null
 # that check dropped the mount and disabled emails. Keep this matching the CI
 # workflow (.github/workflows/deploy-booking.yml).
 SECRETS="PLATO_API_KEY=plato-api-key:latest,GMAIL_APP_PASSWORD=gmail-app-password:latest,TURNSTILE_SECRET=turnstile-secret:latest"
+# The assistant's shared token, only once it's live (WA_AGENT_URL set): a
+# missing secret fails the deploy. Matches the CI workflow.
+if [[ -n "${WA_AGENT_URL}" ]]; then SECRETS+=",INTERNAL_TOKEN=wa-agent-internal-token:latest"; fi
 
 echo "==> Deploying ${SERVICE}"
 gcloud run deploy "${SERVICE}" \
   --project="${PROJECT}" --region="${REGION}" --source="${HERE}" \
   --service-account="${SA}" \
-  --set-env-vars=GCP_PROJECT=${PROJECT},PLATO_DB=gojihealth,CORS_ORIGIN=${CORS_ORIGIN},SHOP_PLATO_DOCTOR=SHP \
+  --set-env-vars=GCP_PROJECT=${PROJECT},PLATO_DB=gojihealth,CORS_ORIGIN=${CORS_ORIGIN},SHOP_PLATO_DOCTOR=SHP,WA_AGENT_URL=${WA_AGENT_URL} \
   --set-secrets="${SECRETS}" \
   --max-instances=1 --min-instances=0 \
   --allow-unauthenticated \

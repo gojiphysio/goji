@@ -5,8 +5,11 @@ no BigQuery. These gate the deploy in .github/workflows/deploy-dashboard.yml.
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
+import pytest
+
 import main
 import reminder_mailer as mailer
+import reminder_whatsapp as wa
 
 SGT = ZoneInfo("Asia/Singapore")
 
@@ -290,7 +293,22 @@ def test_no_log_line_interpolates_a_recipient_address():
             # g["email"] / r["email"] / .get("email") in a log argument.
             if "email" in flat and "no email" not in flat:
                 offenders.append(f"line {node.lineno}: log(..., {flat})")
+            # ...and the same for a phone number or a WhatsApp recipient.
+            if "phone" in flat or flat in ("to", "wa_to", "params"):
+                offenders.append(f"line {node.lineno}: log(..., {flat})")
     assert not offenders, "recipient address in a log line: " + "; ".join(offenders)
+
+
+def test_no_whatsapp_log_line_interpolates_a_recipient():
+    """Same boundary in the WhatsApp module: log the appointment, never `to`."""
+    import ast, pathlib
+    tree = ast.parse(pathlib.Path(wa.__file__).read_text())
+    for node in ast.walk(tree):
+        if (isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
+                and isinstance(node.func.value, ast.Name) and node.func.value.id == "log"):
+            for arg in node.args[1:]:
+                assert ast.unparse(arg) not in ("to", "params", "OVERRIDE_TO"), (
+                    f"line {node.lineno}: recipient in a log line")
 
 
 # --- test mode (REMINDER_OVERRIDE_TO) --------------------------------------
@@ -340,10 +358,15 @@ def test_without_override_the_patient_is_the_recipient(monkeypatch):
 
 def test_test_mode_ledgers_test_never_sent():
     """A 'sent' row would suppress the real reminder on the day, so an
-    end-to-end test would silently cost those patients their reminder."""
-    import pathlib
-    src = pathlib.Path(main.__file__).read_text()
-    assert '"test" if mailer.OVERRIDE_TO else "sent"' in src
+    end-to-end test would silently cost those patients their reminder. Holds
+    on both channels."""
+    wa_http = FakeSession()
+    out = main.dispatch(
+        [_appt("a1", phone="91234567", email=""),
+         _appt("a2", phone="", email="x@y.com")],
+        DAY, dry_run=False, wa_enabled=True, test_mode=True,
+        send_whatsapp=_wa_sender(wa_http), send_email=lambda g, d: None)
+    assert {e["status"] for e in out["ledger"]} == {"test"}
 
 
 def test_recipient_query_does_not_suppress_test_or_dry_run_rows():
@@ -362,3 +385,586 @@ def test_digest_announces_test_mode(monkeypatch):
     assert body.startswith("TEST MODE")
     assert "No patient was emailed." in body
 
+
+
+# ===========================================================================
+# WhatsApp channel
+# ===========================================================================
+
+DAY = "2026-11-26"   # a Thursday
+
+
+class FakeResponse:
+    def __init__(self, status_code=200, body=None, text=None):
+        self.status_code = status_code
+        self._body = body
+        self.text = text if text is not None else ("" if body is None else str(body))
+
+    def json(self):
+        if self._body is None:
+            raise ValueError("no json")
+        return self._body
+
+
+class FakeSession:
+    """Stands in for requests: records every POST and answers from a queue
+    (default: a 200 with a fresh wamid)."""
+
+    def __init__(self, *responses):
+        self.responses = list(responses)
+        self.calls = []
+
+    def post(self, url, json=None, headers=None, timeout=None):
+        self.calls.append({"url": url, "json": json, "headers": headers})
+        if self.responses:
+            r = self.responses.pop(0)
+            if isinstance(r, Exception):
+                raise r
+            return r
+        return FakeResponse(200, {"messaging_product": "whatsapp",
+                                  "contacts": [{"input": "x", "wa_id": "x"}],
+                                  "messages": [{"id": f"wamid.{len(self.calls)}"}]})
+
+    def sent_to(self):
+        return [c["json"]["to"] for c in self.calls]
+
+    def appointment_ids(self):
+        return [c["json"]["template"]["components"][1]["parameters"][0]["payload"]
+                .split(":", 1)[1] for c in self.calls]
+
+
+def _wa_sender(session):
+    return lambda to, params, appt_id: wa.send_template(to, params, appt_id,
+                                                        session=session)
+
+
+def _appt(appt_id, *, phone="91234567", email="sarah@example.com", time="10:00",
+          name="Sarah Tan", treatment="Physiotherapy", clinician="PCL", home=False):
+    return {"appointment_id": appt_id, "phone": phone, "email": email,
+            "time": time, "name": name, "treatment_type": treatment,
+            "clinician_id": clinician, "is_home_visit": home}
+
+
+class EmailSpy:
+    def __init__(self, fail_for=()):
+        self.groups = []
+        self.fail_for = set(fail_for)
+
+    def __call__(self, g, day):
+        if g["email"] in self.fail_for:
+            raise RuntimeError("SMTP timeout")
+        self.groups.append(g)
+
+
+def _run(rows, *, wa_enabled=True, dry_run=False, session=None, email=None):
+    session = session if session is not None else FakeSession()
+    email = email if email is not None else EmailSpy()
+    out = main.dispatch(rows, DAY, dry_run=dry_run, wa_enabled=wa_enabled,
+                        send_whatsapp=_wa_sender(session), send_email=email)
+    return out, session, email
+
+
+def _by_appt(out):
+    ledger = {e["appointment_id"]: e for e in out["ledger"]}
+    assert len(ledger) == len(out["ledger"]), "an appointment was ledgered twice"
+    return ledger
+
+
+# --- phone normalisation ---------------------------------------------------
+
+@pytest.mark.parametrize("raw, expected", [
+    ("91234567", "6591234567"),
+    ("81234567", "6581234567"),
+    ("9123 4567", "6591234567"),
+    ("9123-4567", "6591234567"),
+    ("+65 9123 4567", "6591234567"),
+    ("+6591234567", "6591234567"),
+    ("6591234567", "6591234567"),
+    ("(65) 9123-4567", "6591234567"),
+    ("0065 9123 4567", "6591234567"),
+    ("  91234567  ", "6591234567"),
+    # already international: kept
+    ("+44 7700 900123", "447700900123"),
+    ("0044 7700 900123", "447700900123"),
+    ("+60 12-345 6789", "60123456789"),
+    ("60123456789", "60123456789"),
+])
+def test_normalise_phone_usable(raw, expected):
+    assert wa.normalise_phone(raw) == expected
+
+
+@pytest.mark.parametrize("raw", [
+    None, "", "   ", "-", "n/a",
+    "61234567",          # SG landline
+    "+65 6123 4567",     # SG landline with country code
+    "31234567",          # SG VoIP
+    "9123456",           # 7 digits
+    "912345678",         # 9 digits, no country code
+    "659123456",         # 65 + 7 digits
+    "9123 4567 / 8123 4567",   # two numbers in one field
+    "+1234",
+])
+def test_normalise_phone_unusable(raw):
+    assert wa.normalise_phone(raw) is None
+
+
+# --- template params -------------------------------------------------------
+
+def test_slot_format_matches_the_template_example():
+    assert wa.fmt_slot("2026-11-26", "10:00") == "Thu 26 Nov, 10:00am"
+    assert wa.fmt_slot("2026-11-26", "14:30") == "Thu 26 Nov, 2:30pm"
+    assert wa.fmt_slot("2026-11-26", "12:00") == "Thu 26 Nov, 12:00pm"
+    assert wa.fmt_slot("2026-11-26", "00:15") == "Thu 26 Nov, 12:15am"
+    assert wa.fmt_slot("2026-12-01", "09:05") == "Tue 1 Dec, 9:05am"
+    # No time -> date only, never a dangling comma.
+    assert wa.fmt_slot("2026-11-26", None) == "Thu 26 Nov"
+
+
+def test_whatsapp_times_are_wall_clock_not_shifted():
+    """REGRESSION GUARD, same trap as the email: the view's appt_time_sgt is the
+    clinic wall clock (start_at formatted at 'UTC'). A 9am session is '9:00am',
+    not 5:00pm (+8h) or 1:00am (-8h)."""
+    params = wa.template_params(_appt("a1", time="09:00"), DAY)
+    assert params[2] == "Thu 26 Nov, 9:00am"
+
+
+def test_template_params_in_order():
+    assert wa.template_params(_appt("a1"), DAY) == [
+        "Sarah", "physiotherapy", "Thu 26 Nov, 10:00am", "Cheryl"]
+
+
+def test_service_and_clinician_fallbacks():
+    assert wa.service_word("Pilates") == "Pilates"
+    assert wa.service_word("S&C") == "strength and conditioning"
+    assert wa.service_word("Home Visit") == "home visit"
+    # Untyped/Unknown never guess a service.
+    assert wa.service_word("Untyped") == "upcoming"
+    assert wa.service_word(None) == "upcoming"
+    assert wa.clinician_first_name("PKN") == "Kristy"
+    assert wa.clinician_first_name(None) == "our team"
+    assert wa.clinician_first_name("XYZ") == "our team"
+    # Never "Hi ,".
+    assert wa.template_params(_appt("a1", name=None), DAY)[0] == "there"
+
+
+def test_every_booking_clinician_has_a_first_name():
+    """booking/config.py is where a new clinician is added. If their doctor code
+    isn't mapped here, their patients' reminders say 'with our team'."""
+    import pathlib, re
+    cfg = pathlib.Path(__file__).parent.parent / "booking" / "config.py"
+    codes = set(re.findall(r'"doctor":\s*"([A-Z]+)"', cfg.read_text()))
+    assert codes, "couldn't read doctor codes from booking/config.py"
+    assert codes <= set(wa.CLINICIAN_FIRST_NAMES), codes - set(wa.CLINICIAN_FIRST_NAMES)
+
+
+def test_every_treatment_type_has_a_service_word():
+    """stg/03_appointments.sql maps Plato type codes to treatment_type. A new
+    type there should get a word here rather than fall to 'upcoming'."""
+    import pathlib, re
+    sql = pathlib.Path(__file__).parent.parent / "sql" / "stg" / "03_appointments.sql"
+    text = sql.read_text()
+    case = text[text.index("CASE COALESCE(JSON_VALUE(payload, '$.code_Bottom')"):
+                text.index("AS treatment_type")]
+    types = set(re.findall(r"WHEN '[^']*'\s+THEN '([^']+)'", case))
+    types -= {"Untyped", "Unknown"}
+    assert types and types <= set(wa.SERVICE_WORDS), types - set(wa.SERVICE_WORDS)
+
+
+def test_preview_renders_the_approved_wording():
+    assert wa.render_preview(["Sarah", "physiotherapy", "Thu 26 Nov, 10:00am",
+                              "Cheryl"]) == (
+        "Hi Sarah, a reminder of your physiotherapy appointment on Thu 26 Nov, "
+        "10:00am with Cheryl at Goji Women's and Family Physiotherapy.\n\n"
+        "If you need to reschedule, please let us know at least 24 hours before.")
+
+
+# --- Cloud API payload + send ----------------------------------------------
+
+def test_payload_shape():
+    assert wa.build_payload("6591234567", ["Sarah", "physiotherapy",
+                                           "Thu 26 Nov, 10:00am", "Cheryl"],
+                            "appt123") == {
+        "messaging_product": "whatsapp",
+        "to": "6591234567",
+        "type": "template",
+        "template": {
+            "name": "goji_appointment_reminder",
+            "language": {"code": "en"},
+            "components": [
+                {"type": "body", "parameters": [
+                    {"type": "text", "text": "Sarah"},
+                    {"type": "text", "text": "physiotherapy"},
+                    {"type": "text", "text": "Thu 26 Nov, 10:00am"},
+                    {"type": "text", "text": "Cheryl"},
+                ]},
+                {"type": "button", "sub_type": "quick_reply", "index": "0",
+                 "parameters": [{"type": "payload",
+                                 "payload": "reminder_confirm:appt123"}]},
+                {"type": "button", "sub_type": "quick_reply", "index": "1",
+                 "parameters": [{"type": "payload",
+                                 "payload": "reminder_reschedule:appt123"}]},
+            ],
+        },
+    }
+
+
+def test_send_posts_to_the_cloud_api(monkeypatch):
+    monkeypatch.setattr(wa, "WA_API_BASE", "https://graph.facebook.com/v23.0/")
+    monkeypatch.setattr(wa, "WA_PHONE_NUMBER_ID", "1234567890")
+    monkeypatch.setattr(wa, "WA_TOKEN", "tok")
+    s = FakeSession()
+    msg_id = wa.send_template("6591234567", ["a", "b", "c", "d"], "appt1", session=s)
+    assert msg_id == "wamid.1"
+    assert s.calls[0]["url"] == "https://graph.facebook.com/v23.0/1234567890/messages"
+    assert s.calls[0]["headers"]["Authorization"] == "Bearer tok"
+    assert s.calls[0]["json"]["to"] == "6591234567"
+
+
+def test_send_through_a_provider_transport(monkeypatch):
+    """A 360dialog-style provider: its own base, /messages, a raw key header."""
+    monkeypatch.setattr(wa, "WA_API_BASE", "https://waba-v2.360dialog.io")
+    monkeypatch.setattr(wa, "WA_SEND_PATH", "/messages")
+    monkeypatch.setattr(wa, "WA_AUTH_HEADER", "D360-API-KEY")
+    monkeypatch.setattr(wa, "WA_AUTH_PREFIX", "")
+    monkeypatch.setattr(wa, "WA_PHONE_NUMBER_ID", "")
+    monkeypatch.setattr(wa, "WA_TOKEN", "key")
+    s = FakeSession()
+    wa.send_template("6591234567", ["a", "b", "c", "d"], "appt1", session=s)
+    assert s.calls[0]["url"] == "https://waba-v2.360dialog.io/messages"
+    assert s.calls[0]["headers"]["D360-API-KEY"] == "key"
+    assert "Authorization" not in s.calls[0]["headers"]
+    assert not wa.needs_phone_number_id()
+
+
+def test_provider_transport_needs_no_phone_number_id(monkeypatch):
+    monkeypatch.setattr(wa, "WA_SEND_PATH", "/messages")
+    monkeypatch.setattr(wa, "WA_TOKEN", "key")
+    monkeypatch.setattr(wa, "WA_PHONE_NUMBER_ID", "")
+    monkeypatch.setattr(wa, "OVERRIDE_TO", "")
+    monkeypatch.setattr(mailer, "OVERRIDE_TO", "")
+    ok, notes, _ = main.whatsapp_config(True, dry_run=False)
+    assert ok, notes
+    monkeypatch.setattr(wa, "WA_SEND_PATH", "/{phone_number_id}/messages")
+    ok, notes, _ = main.whatsapp_config(True, dry_run=False)
+    assert not ok and "WA_PHONE_NUMBER_ID" in notes[0]
+
+
+@pytest.mark.parametrize("response, fragment", [
+    (FakeResponse(400, {"error": {"message": "Template name does not exist in the translation",
+                                  "type": "OAuthException", "code": 132001,
+                                  "fbtrace_id": "Ab"}}), "132001"),
+    (FakeResponse(401, {"error": {"message": "Invalid OAuth access token", "code": 190}}),
+     "HTTP 401"),
+    (FakeResponse(500, None, text="<html>oops</html>"), "HTTP 500"),
+    (FakeResponse(200, {"error": {"message": "weird", "code": 1}}), "weird"),
+    (FakeResponse(200, {"messaging_product": "whatsapp", "messages": []}), "no message id"),
+    (FakeResponse(200, None, text="not json"), "not JSON"),
+])
+def test_send_raises_on_any_refusal(response, fragment):
+    with pytest.raises(wa.WhatsAppSendError, match=fragment):
+        wa.send_template("6591234567", ["a", "b", "c", "d"], "appt1",
+                         session=FakeSession(response))
+
+
+def test_send_raises_on_network_error():
+    import requests
+    s = FakeSession(requests.ConnectionError("boom"))
+    with pytest.raises(wa.WhatsAppSendError, match="network error"):
+        wa.send_template("6591234567", ["a", "b", "c", "d"], "appt1", session=s)
+
+
+def test_whatsapp_override_replaces_the_recipient_at_send(monkeypatch):
+    monkeypatch.setattr(wa, "OVERRIDE_TO", "6588887777")
+    s = FakeSession()
+    wa.send_template("6591234567", ["a", "b", "c", "d"], "appt1", session=s)
+    assert s.sent_to() == ["6588887777"]
+
+
+# --- channel choice --------------------------------------------------------
+
+def test_usable_mobile_gets_whatsapp_and_no_email():
+    out, http, email = _run([_appt("a1")])
+    assert http.sent_to() == ["6591234567"]
+    assert email.groups == []
+    e = _by_appt(out)["a1"]
+    assert (e["status"], e["channel"], e["wa_message_id"]) == ("sent", "whatsapp", "wamid.1")
+    assert out["sent"][0]["channel"] == "whatsapp"
+
+
+def test_no_usable_mobile_falls_to_email():
+    out, http, email = _run([_appt("a1", phone="61234567")])   # landline
+    assert http.calls == []
+    assert [g["email"] for g in email.groups] == ["sarah@example.com"]
+    e = _by_appt(out)["a1"]
+    assert (e["status"], e["channel"], e["wa_message_id"]) == ("sent", "email", None)
+
+
+def test_one_whatsapp_per_appointment_in_time_order():
+    """A template carries one appointment, so two sessions = two messages,
+    earliest first, even if the query returned them out of order."""
+    out, http, email = _run([_appt("pm", time="14:00"), _appt("am", time="09:00")])
+    assert http.appointment_ids() == ["am", "pm"]
+    slots = [c["json"]["template"]["components"][0]["parameters"][2]["text"]
+             for c in http.calls]
+    assert slots == ["Thu 26 Nov, 9:00am", "Thu 26 Nov, 2:00pm"]
+    assert email.groups == []
+
+
+def test_whatsapp_failure_falls_back_to_email_for_that_appointment_only():
+    fail = FakeResponse(400, {"error": {"message": "Invalid parameter", "code": 100}})
+    out, http, email = _run(
+        [_appt("am", time="09:00"), _appt("pm", time="14:00")],
+        session=FakeSession(fail))      # first send fails, second succeeds
+    assert http.appointment_ids() == ["am", "pm"]
+    # The email lists only the appointment WhatsApp didn't reach.
+    assert len(email.groups) == 1
+    assert email.groups[0]["appointment_ids"] == ["am"]
+    assert email.groups[0]["times"] == ["09:00"]
+    ledger = _by_appt(out)
+    assert (ledger["am"]["status"], ledger["am"]["channel"]) == ("sent", "email")
+    assert "whatsapp failed" in ledger["am"]["note"]
+    assert (ledger["pm"]["status"], ledger["pm"]["channel"]) == ("sent", "whatsapp")
+
+
+def test_whatsapp_failure_with_no_email_goes_on_the_by_hand_list():
+    fail = FakeResponse(500, None, text="down")
+    out, _, email = _run([_appt("a1", email="")], session=FakeSession(fail))
+    assert email.groups == []
+    assert len(out["skipped"]) == 1
+    assert "WhatsApp failed" in out["skipped"][0]["reason"]
+    e = _by_appt(out)["a1"]
+    # 'failed', not skipped: a same-day re-run tries again.
+    assert (e["status"], e["channel"]) == ("failed", "whatsapp")
+
+
+def test_neither_phone_nor_email_is_skipped_no_contact():
+    out, http, email = _run([_appt("a1", phone="", email="")])
+    assert http.calls == [] and email.groups == []
+    assert out["skipped"] == [{"name": "Sarah Tan", "phone": "", "time": "10:00"}]
+    e = _by_appt(out)["a1"]
+    assert (e["status"], e["channel"]) == ("skipped_no_contact", "none")
+
+
+def test_email_failure_after_whatsapp_failure_keeps_both_errors():
+    fail = FakeResponse(400, {"error": {"message": "bad", "code": 100}})
+    out, _, _ = _run([_appt("a1")], session=FakeSession(fail),
+                     email=EmailSpy(fail_for={"sarah@example.com"}))
+    e = _by_appt(out)["a1"]
+    assert (e["status"], e["channel"]) == ("failed", "email")
+    assert "whatsapp failed" in e["note"] and "SMTP timeout" in e["note"]
+    assert len(out["failed"]) == 1
+
+
+def test_mixed_day_ledgers_every_appointment_exactly_once():
+    fail = FakeResponse(400, {"error": {"message": "bad", "code": 100}})
+    rows = [
+        _appt("wa1", time="08:00"),
+        _appt("wafail", time="09:00", email="jo@example.com", name="Jo Lee",
+              phone="81234567"),
+        _appt("email1", time="10:00", phone="", email="amy@example.com", name="Amy"),
+        _appt("none1", time="11:00", phone="", email="", name="Bo"),
+        _appt("wa2", time="12:00", phone="+44 7700 900123", name="Cy", email=""),
+    ]
+    sess = FakeSession(FakeResponse(200, {"messages": [{"id": "wamid.A"}]}), fail)
+    out, http, email = _run(rows, session=sess)
+    ledger = _by_appt(out)
+    assert set(ledger) == {"wa1", "wafail", "email1", "none1", "wa2"}
+    assert {k: v["channel"] for k, v in ledger.items()} == {
+        "wa1": "whatsapp", "wafail": "email", "email1": "email",
+        "none1": "none", "wa2": "whatsapp"}
+    assert sorted(g["email"] for g in email.groups) == ["amy@example.com", "jo@example.com"]
+
+
+# --- DRY_RUN ---------------------------------------------------------------
+
+def test_dry_run_sends_nothing_on_either_channel():
+    out, http, email = _run(
+        [_appt("a1"), _appt("a2", phone="", email="amy@example.com", time="11:00")],
+        dry_run=True)
+    assert http.calls == []
+    assert email.groups == []
+    ledger = _by_appt(out)
+    assert {(e["status"], e["channel"]) for e in ledger.values()} == {
+        ("dry_run", "whatsapp"), ("dry_run", "email")}
+    # The template is still rendered, for the digest.
+    assert out["preview"].startswith("Hi Sarah, a reminder of your physiotherapy")
+    assert "Thu 26 Nov, 10:00am with Cheryl" in out["preview"]
+
+
+# --- disabled flag = today's job, exactly ----------------------------------
+
+def test_disabled_never_touches_whatsapp_and_groups_email_as_before():
+    rows = [_appt("a1", time="09:00"), _appt("a2", time="14:00"),
+            _appt("a3", time="11:00", email="", name="Marcus Lim")]
+    out, http, email = _run(rows, wa_enabled=False)
+    assert http.calls == []
+    # Same grouping as before: one email listing both sessions.
+    assert len(email.groups) == 1
+    assert email.groups[0]["times"] == ["09:00", "14:00"]
+    ledger = _by_appt(out)
+    assert {k: (v["status"], v["channel"]) for k, v in ledger.items()} == {
+        "a1": ("sent", "email"), "a2": ("sent", "email"),
+        "a3": ("skipped_no_email", "none")}
+    assert out["preview"] is None
+
+
+def test_disabled_digest_is_byte_identical_to_the_email_only_digest():
+    """Pinned from the digest as it was before the WhatsApp channel existed."""
+    body = mailer.render_digest_body(
+        sent=[{"name": "Sarah Tan", "time": "09:00", "email": "s@x.com", "channel": "email"},
+              {"name": "Jo Lee", "time": "14:30", "email": "j@x.com", "channel": "email"}],
+        skipped=[{"name": "Marcus Lim", "phone": "91112222", "time": "11:00"},
+                 {"name": None, "phone": None, "time": "08:00"}],
+        failed=[{"name": "Ann Ho", "time": "10:00", "error": "SMTP timeout"}],
+        target_date=DAY, dry_run=False)
+    assert body == (
+        "Appointment reminders for Thursday, 26 November 2026\n\nSent: 2 reminder(s)"
+        "\n\nCouldn't reach — no email on file (2). Please WhatsApp these:\n"
+        "    8:00 am  —  no phone either\n   11:00 am  Marcus Lim  91112222\n\n"
+        "Failed to send (1) — will retry next run:\n  Ann Ho: SMTP timeout\n\n"
+        "Sent to:\n    9:00 am  Sarah Tan\n    2:30 pm  Jo Lee\n\n"
+        "— the appointment-reminders job")
+    dry = mailer.render_digest_body(
+        sent=[{"name": "Sarah Tan", "time": "09:00"}], skipped=[], failed=[],
+        target_date=DAY, dry_run=True)
+    assert dry == (
+        "DRY RUN — no patient emails were sent.\n\nAppointment reminders for "
+        "Thursday, 26 November 2026\n\nWould have sent: 1 reminder(s)\n\n"
+        "Would have sent to:\n    9:00 am  Sarah Tan\n\n— the appointment-reminders job")
+
+
+def test_whatsapp_config_off_by_default_and_safe(monkeypatch):
+    monkeypatch.setattr(wa, "WA_TOKEN", "tok")
+    monkeypatch.setattr(wa, "WA_PHONE_NUMBER_ID", "123")
+    monkeypatch.setattr(wa, "OVERRIDE_TO", "")
+    monkeypatch.setattr(wa, "OVERRIDE_TO_RAW", "")
+    monkeypatch.setattr(mailer, "OVERRIDE_TO", "")
+    assert main.whatsapp_config(False, dry_run=False) == (False, [], None)
+    assert main.whatsapp_config(True, dry_run=False) == (True, [], None)
+
+    # Missing credentials: WhatsApp off for the run, said in the digest.
+    monkeypatch.setattr(wa, "WA_TOKEN", "")
+    on, notices, err = main.whatsapp_config(True, dry_run=False)
+    assert not on and err is None and "WA_TOKEN" in notices[0]
+    # ...but a dry run needs no credentials.
+    assert main.whatsapp_config(True, dry_run=True)[0] is True
+    monkeypatch.setattr(wa, "WA_TOKEN", "tok")
+
+    # Email test mode without a WhatsApp override: WhatsApp skipped, so the
+    # test can't message a patient.
+    monkeypatch.setattr(mailer, "OVERRIDE_TO", "hello@gojiphysio.com")
+    on, notices, err = main.whatsapp_config(True, dry_run=False)
+    assert not on and err is None and "skipped" in notices[0]
+    # Both overrides: WhatsApp on, aimed at the override number.
+    monkeypatch.setattr(wa, "OVERRIDE_TO", "6588887777")
+    monkeypatch.setattr(wa, "OVERRIDE_TO_RAW", "88887777")
+    on, notices, err = main.whatsapp_config(True, dry_run=False)
+    assert on and err is None and "+6588887777" in notices[0]
+    # WhatsApp override alone would email patients for real: refused.
+    monkeypatch.setattr(mailer, "OVERRIDE_TO", "")
+    assert main.whatsapp_config(True, dry_run=False)[2]
+    # An override that isn't a WhatsApp number: refused.
+    monkeypatch.setattr(wa, "OVERRIDE_TO", "")
+    monkeypatch.setattr(wa, "OVERRIDE_TO_RAW", "61234567")
+    monkeypatch.setattr(mailer, "OVERRIDE_TO", "hello@gojiphysio.com")
+    assert main.whatsapp_config(True, dry_run=False)[2]
+
+
+# --- idempotency -----------------------------------------------------------
+
+def test_guard_suppresses_sent_on_either_channel():
+    """The SQL guard keys on status alone. If it ever filtered on channel too,
+    switching channels would re-remind everyone."""
+    where = main.RECIPIENTS_SQL.split("WHERE", 1)[1]
+    assert "COALESCE(e.status, '') != 'sent'" in where
+    assert "channel" not in where
+
+
+def test_rerun_after_success_sends_nothing():
+    """Simulate a Cloud Run retry: apply the guard to the first run's ledger and
+    run again. Neither channel may send twice."""
+    rows = [_appt("a1"), _appt("a2", phone="", email="amy@example.com", time="11:00"),
+            _appt("a3", phone="", email="", time="12:00")]
+    first, http1, email1 = _run(rows)
+    assert len(http1.calls) == 1 and len(email1.groups) == 1
+    latest = {e["appointment_id"]: e["status"] for e in first["ledger"]}
+    remaining = [r for r in rows if latest.get(r["appointment_id"], "") != "sent"]
+    second, http2, email2 = _run(remaining)
+    assert http2.calls == [] and email2.groups == []
+    assert [e["appointment_id"] for e in second["ledger"]] == ["a3"]
+
+
+def test_ledger_insert_carries_channel_and_message_id():
+    captured = {}
+
+    class FakeJob:
+        def result(self):
+            return []
+
+    class FakeBQ:
+        def query(self, sql, job_config=None):
+            captured["sql"] = sql
+            captured["params"] = {p.name: p.value for p in job_config.query_parameters}
+            return FakeJob()
+
+    main.write_ledger(FakeBQ(), "goji-bi", "marts", [
+        main.ledger_entry("a1", "sent", "whatsapp", wa_message_id="wamid.X"),
+        main.ledger_entry("a2", "skipped_no_contact", "none"),
+    ], DAY)
+    assert "channel, wa_message_id, sent_at" in captured["sql"]
+    p = captured["params"]
+    assert (p["a0"], p["s0"], p["c0"], p["w0"]) == ("a1", "sent", "whatsapp", "wamid.X")
+    assert (p["a1"], p["c1"], p["w1"]) == ("a2", "none", None)
+
+
+def test_ledger_sql_has_the_channel_columns():
+    """The INSERT names channel / wa_message_id; the table must have them, and
+    an existing table only gets them through the ALTER (CREATE TABLE IF NOT
+    EXISTS is a no-op once it exists)."""
+    import pathlib
+    sql = (pathlib.Path(__file__).parent.parent / "sql" / "marts"
+           / "48_appointment_reminder_events.sql").read_text()
+    assert "ADD COLUMN IF NOT EXISTS channel" in sql
+    assert "ADD COLUMN IF NOT EXISTS wa_message_id" in sql
+
+
+def test_ledger_notes_never_carry_a_phone_number():
+    note = main.scrub("whatsapp failed: HTTP 400: (#131030) Recipient +65 9123 4567 "
+                      "not in allowed list (6591234567)")
+    assert "9123" not in note and "6591234567" not in note
+    assert "[phone]" in note and "131030" in note
+
+
+# --- two-channel digest ----------------------------------------------------
+
+def test_two_channel_digest_shows_channel_per_patient_and_the_by_hand_list():
+    body = mailer.render_digest_body(
+        sent=[{"name": "Sarah Tan", "time": "09:00", "channel": "whatsapp",
+               "detail": "physiotherapy with Cheryl, Thu 26 Nov, 9:00am"},
+              {"name": "Jo Lee", "time": "10:00", "channel": "email",
+               "detail": "(WhatsApp failed)"},
+              {"name": "Amy", "time": "11:00", "channel": "email"}],
+        skipped=[{"name": "Marcus Lim", "phone": "61234567", "time": "14:00"},
+                 {"name": "Bo", "phone": "91112222", "time": "15:00",
+                  "reason": "WhatsApp failed: HTTP 500"}],
+        failed=[], target_date=DAY, dry_run=False, whatsapp=True)
+    assert "Sent: 3 reminder(s) — 1 WhatsApp, 2 email" in body
+    assert "Sarah Tan  [WhatsApp]  physiotherapy with Cheryl" in body
+    assert "Jo Lee  [email]  (WhatsApp failed)" in body
+    assert "Amy  [email]" in body
+    assert "no WhatsApp and no email (2)" in body
+    assert "Marcus Lim  61234567" in body
+    assert "Bo  91112222  (WhatsApp failed: HTTP 500)" in body
+    assert "contact these by hand" in body
+
+
+def test_two_channel_dry_run_digest_previews_the_template():
+    out, _, _ = _run([_appt("a1")], dry_run=True)
+    body = mailer.render_digest_body(out["sent"], out["skipped"], out["failed"],
+                                     DAY, dry_run=True, whatsapp=True,
+                                     preview=out["preview"],
+                                     notices=["Test mode: something"])
+    assert body.startswith("DRY RUN — no patient messages were sent.")
+    assert "Test mode: something" in body
+    assert "Would have sent: 1 reminder(s) — 1 WhatsApp, 0 email" in body
+    assert "  Hi Sarah, a reminder of your physiotherapy appointment" in body
