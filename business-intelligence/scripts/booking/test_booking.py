@@ -456,12 +456,16 @@ class MinDaysPlato(StubPlato):
 
 
 def test_whatsapp_booking_can_take_a_same_day_slot_the_website_cannot():
-    same_day_now = datetime(2026, 7, 15, 9, 50)  # 10:00 is ten minutes away
-    draft = {**BASE, "clinician_id": "cheryl-long"}
+    same_day_now = datetime(2026, 7, 15, 9, 0)  # 11:00 is two hours away
+    draft = {**BASE, "clinician_id": "cheryl-long", "time": "11:00"}
     with pytest.raises(BookingError):
         create_booking(MinDaysPlato(), draft, now=same_day_now)
     res = create_booking(MinDaysPlato(), draft, now=same_day_now, source="whatsapp")
-    assert res["ok"] and res["date"] == DAY and res["time"] == "10:00"
-    with pytest.raises(BookingError):  # still never a time that has passed
-        create_booking(MinDaysPlato(), {**draft, "time": "09:30"}, now=same_day_now,
+    assert res["ok"] and res["date"] == DAY and res["time"] == "11:00"
+    # Picked within the confirm window: 90 minutes is still enough.
+    res = create_booking(MinDaysPlato(), {**draft, "time": "11:30"},
+                         now=datetime(2026, 7, 15, 9, 55), source="whatsapp")
+    assert res["ok"]
+    with pytest.raises(BookingError):  # never under 90 minutes away
+        create_booking(MinDaysPlato(), {**draft, "time": "10:00"}, now=same_day_now,
                        source="whatsapp")

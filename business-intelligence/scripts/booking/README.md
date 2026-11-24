@@ -192,8 +192,9 @@ Rules layered on top (`config.py`):
 - Clinic-wide `-all-` blocks apply to everyone.
 - Lead time follows Plato's `min_days` (1 day ahead — no same-day). The WhatsApp
   assistant alone sees today's slots: `same_day=1` on either availability route,
-  with `X-Internal-Token` (403 without it), from `SAME_DAY_LEAD_MINUTES` (60) after
-  now; `/internal/book` accepts a same-day slot that hasn't started yet.
+  with `X-Internal-Token` (403 without it), from `SAME_DAY_LEAD_MINUTES` (2 h) after
+  now; `/internal/book` takes a same-day slot at least `SAME_DAY_BOOK_LEAD_MINUTES`
+  (90 min) away, so a pick inside the assistant's 30-min confirm window still books.
 - **Booking window capped at `MAX_ADVANCE_DAYS` (60 days)** — enforced both in
   availability and as an explicit `too_far` guard in `create_booking`; the site
   calendar can't select past it either.

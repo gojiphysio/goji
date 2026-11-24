@@ -45,8 +45,8 @@ TOOL_DEFS = [
     {
         "name": "next_slots",
         "description": "The next open appointment times for a service, across the coming days, "
-                       "in one call, starting with today's remaining times (from about an hour "
-                       "from now). Use this for 'when can I come in?' style questions. For a "
+                       "in one call, starting with today's remaining times (from 2 hours from "
+                       "now; their weekday is \"Today\"). Use this for 'when can I come in?' style questions. For a "
                        "specific day the customer named, use get_times.",
         "input_schema": {
             "type": "object",
@@ -228,7 +228,9 @@ def next_slots(inp: dict, *, http=requests, today: date | None = None, **_) -> d
             for t in times:
                 by_time.setdefault(t, []).append(names.get(cid, cid))
         for t in sorted(by_time)[:NEXT_SLOTS_PER_DAY]:
-            slots.append({"date": d, "weekday": date.fromisoformat(d).strftime("%a"),
+            # Today's slots are labelled "Today" so the reply says so.
+            slots.append({"date": d, "weekday": ("Today" if d == today.isoformat()
+                                                 else date.fromisoformat(d).strftime("%a")),
                           "time": t, "clinicians": by_time[t]})
     return {"service": svc, "slots": slots,
             "note": "" if slots else "no open slots in the next two months"}

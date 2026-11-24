@@ -45,8 +45,8 @@ The WhatsApp assistant. What it is and how to run it: [`README.md`](README.md).
   `marts.wa_agent_events` (set by `deploy.sh`, not the dashboard grant loops).
 - **Same-day slots are WhatsApp-only.** Plato's online rule (`min_days`)
   hides today from the website, so the slot tools ask goji-booking for
-  `same_day=1` with the internal token (60 min lead; booking the slot only
-  rules out past times). Without that it told a customer "fully booked
+  `same_day=1` with the internal token (offered from 2 hours ahead, booked
+  if at least 90 minutes ahead: owner, 24 Nov 2026). Without that it told a customer "fully booked
   today" while the clinic had a slot free (24 Nov 2026). The public API
   refuses `same_day` without the token.
 - **Getting worse is `priority`, sent and flagged at once.** Symptoms

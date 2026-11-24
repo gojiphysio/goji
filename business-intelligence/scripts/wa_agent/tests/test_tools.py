@@ -203,3 +203,12 @@ def test_slot_tools_ask_for_same_day_slots_with_the_internal_token(monkeypatch):
     tools.run_tool("get_times", {"service": "physiotherapy", "date": "2026-11-24"},
                    wa_id="x", http=http)
     assert "same_day" not in http.calls[-1][1] and http.headers is None
+
+
+def test_next_slots_labels_todays_times_today():
+    from datetime import date
+    http = _Avail(months={"2026-11": ["2026-11-24", "2026-11-25"]},
+                  days={"2026-11-24": _day({"claire-ng": ["15:00"]}),
+                        "2026-11-25": _day({"kristy-ng": ["09:00"]})})
+    out = tools.next_slots({"service": "physiotherapy"}, http=http, today=date(2026, 11, 24))
+    assert [s["weekday"] for s in out["slots"]] == ["Today", "Wed"]

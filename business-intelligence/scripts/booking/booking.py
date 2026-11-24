@@ -27,6 +27,7 @@ from .config import (
     HOME_VISIT_TYPE_CODE,
     MAX_ADVANCE_DAYS,
     PHYSIO_FOCUS_CLINICIANS,
+    SAME_DAY_BOOK_LEAD_MINUTES,
     PHYSIO_FOCUS_LABELS,
     SERVICE_CLINICIANS,
     SERVICES,
@@ -224,10 +225,10 @@ def create_booking(plato, draft: dict, *, now: datetime | None = None,
     # reallocate as part of clinical ops. (Home visits are Cheryl-only, so
     # there's no patient "choice" to honour there.)
     # Same-day slots are offered on WhatsApp only (the website keeps Plato's
-    # min_days), so only a WhatsApp booking may take one. Its re-check only
-    # rules out past times: the lead time applies when the slot is offered, and
-    # the customer may pick it a while later.
-    same_day_lead = 0 if source == "whatsapp" else None
+    # min_days), so only a WhatsApp booking may take one. Its re-check is a
+    # little shorter than the offer's lead time: the customer may pick the slot
+    # a while after it was offered (config.SAME_DAY_BOOK_LEAD_MINUTES).
+    same_day_lead = SAME_DAY_BOOK_LEAD_MINUTES if source == "whatsapp" else None
     clinician_requested = False
     if home:
         candidates = [HOME_VISIT_CLINICIAN]
