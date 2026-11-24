@@ -269,16 +269,37 @@ def is_acknowledgement(text: str, history: list[dict]) -> bool:
 BREAK = "<break>"
 
 
-def split_bubbles(reply: str, max_bubbles: int | None = None) -> list[str]:
-    """Bubble breaks (<break> lines) the model may write. Multi-bubble replies
-    are off (19 Nov 2026: service messages may be charged per message), so by
-    default everything is one message; WA_AGENT_MAX_BUBBLES turns them back on."""
+def split_bubbles(reply: str, max_bubbles: int | None = None,
+                  min_words: int | None = None) -> list[str]:
+    """Bubble breaks (<break> lines) the model may write. Each message past
+    Meta's free 1,000 a month is billed, so a reply goes out as at most
+    MAX_BUBBLES (2) messages, and as one when it's under SPLIT_MIN_WORDS:
+    a short answer never splits, whatever the model wrote (24 Nov 2026)."""
     limit = max(1, max_bubbles if max_bubbles is not None else config.MAX_BUBBLES)
+    floor = config.SPLIT_MIN_WORDS if min_words is None else min_words
     parts = [p.strip() for p in (reply or "").split(BREAK)]
     parts = [p for p in parts if p]
+    if len(" ".join(parts).split()) < floor:
+        limit = 1
+    elif len(parts) == 1 and limit >= 2:
+        parts = _split_after_opening(parts[0])
     if len(parts) > limit:
         parts = parts[:limit - 1] + ["\n\n".join(parts[limit - 1:])]
     return parts
+
+
+OPENING_MAX_WORDS = 30  # a greeting or personal line, not the substance
+REST_MIN_WORDS = 20
+
+
+def _split_after_opening(text: str) -> list[str]:
+    """A long reply the model didn't mark: the opening paragraph (greeting or
+    personal line) goes first, the substance second, as Chris writes. Only at
+    a blank line, so a list stays with the line that introduces it."""
+    first, sep, rest = text.partition("\n\n")
+    if sep and len(first.split()) <= OPENING_MAX_WORDS and len(rest.split()) >= REST_MIN_WORDS:
+        return [first.strip(), rest.strip()]
+    return [text]
 
 
 def as_one_message(reply: str) -> str:

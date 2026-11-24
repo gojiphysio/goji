@@ -177,9 +177,8 @@ def test_a_short_clarifying_question_sends_even_below_the_confidence_bar():
 def test_bubbles_split_and_cap_at_three():
     from wa_agent.policy import as_one_message, split_bubbles
     assert split_bubbles("one") == ["one"]
-    assert split_bubbles("a\n<break>\nb") == ["a\n\nb"]                  # off by default
-    assert split_bubbles("a\n<break>\nb\n<break>\n\n<break>\nc", 3) == ["a", "b", "c"]
-    assert split_bubbles("a<break>b<break>c<break>d", 3) == ["a", "b", "c\n\nd"]
+    assert split_bubbles("a\n<break>\nb\n<break>\n\n<break>\nc", 3, 0) == ["a", "b", "c"]
+    assert split_bubbles("a<break>b<break>c<break>d", 3, 0) == ["a", "b", "c\n\nd"]
     assert as_one_message("a\n<break>\nb") == "a\n\nb"
 
 
@@ -310,3 +309,33 @@ def test_priority_reply_always_tells_them_the_team_knows():
     assert customer_message(Decision(SEND, "x"), said, NOW) == said.reply
     plain = prop(intent="faq", reply="Sorry to hear that. We open at 8am.")
     assert customer_message(Decision(SEND, "x"), plain, NOW) == plain.reply
+
+
+def test_only_long_replies_split_and_into_two_at_most():
+    # Each delivered message past Meta's free 1,000 is billed (24 Nov 2026).
+    from wa_agent.policy import split_bubbles
+    short = "Hi Sam! Thanks for reaching out.\n<break>\nWe're open Mon-Sat 8am-8pm."
+    assert split_bubbles(short) == [short.replace("\n<break>\n", "\n\n")]
+    long_ = ("Hi Sam! Sorry to hear your back has been bad. " * 4 + "\n<break>\n"
+             + "Our Musculoskeletal Physiotherapy session would suit you well. " * 4
+             + "\n<break>\nBook here.")
+    out = split_bubbles(long_)
+    assert len(out) == 2 and out[0].startswith("Hi Sam!") and out[1].endswith("Book here.")
+
+
+def test_a_long_unmarked_reply_splits_after_its_opening():
+    from wa_agent.policy import split_bubbles
+    body = ("We can't say over chat whether you need a scan. A physiotherapy assessment "
+            "is a good place to start, and you don't need a referral. Our Musculoskeletal "
+            "Physiotherapy session is 55 minutes and costs $260 in-clinic, with Kristy, "
+            "Claire or Cheryl.\n\nYou can read more about how we help here:\n"
+            "https://www.gojiphysio.com/x/")
+    opening = "Hi Sam! Thanks for reaching out. Sorry to hear your back has been worse."
+    assert split_bubbles(opening + "\n\n" + body) == [opening, body]
+    # A long first paragraph is the substance itself: left as one message.
+    long_first = ("word " * 40).strip()
+    assert len(split_bubbles(long_first + "\n\n" + body)) == 1
+    # A list stays with its intro line (no blank line between them).
+    times = "The earliest times are:\n* Today, 2:30pm\n* Wed 25 Nov, 9:00am"
+    out = split_bubbles("Sorry to hear that, Sam.\n\n" + times + "\n\n" + body)
+    assert out[0] == "Sorry to hear that, Sam." and out[1].startswith(times)
