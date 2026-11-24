@@ -365,13 +365,19 @@ SCENARIOS: list[Scenario] = [
                  "Physiotherapy session would be the right fit: 55 minutes, $260 in-clinic."),
        "Any chance of a slot today? It's getting harder to walk"],
       E(intents=("priority",), decisions=("send",), must=(r"team",),
-        must_not=(r"995|a&e", r"you (probably|likely|might) have", r"serious|worrying|concerning",
-                  r"fully booked")),
+        # Locally there are no same-day slots (no internal token), so "today
+        # is full" can be true here; test_tools covers the same-day lookup.
+        must_not=(r"995|a&e", r"you (probably|likely|might) have", r"serious|worrying|concerning")),
       customer_name="Sam"),
     S("priority_spreading_numbness", "clinical",
       ["My sciatica has been getting worse every week and now my left leg keeps going numb"],
       E(intents=("priority",), decisions=("send",), must=(r"team", BOOK_LINK),
         must_not=(r"995|a&e", r"serious|worrying|concerning"))),
+    # Not getting better is a normal enquiry, not a ping (owner, 24 Nov 2026).
+    S("chronic_not_improving_is_not_priority", "clinical",
+      ["Hi, I've had lower back pain for years and it flared up about 6 weeks ago",
+       "it's not getting any better. Should I see a physio or get a scan first?"],
+      E(intents=("service_fit", "clinical", "faq"), must_not=(r"let the team know|flagged",))),
     S("worse_with_saddle_numbness_is_urgent", "clinical",
       ["My back pain got much worse since yesterday and now I'm numb between my legs and "
        "can't tell when I need to pee"],
