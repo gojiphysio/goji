@@ -3,10 +3,10 @@
 **Correction after user review:** this proxy scene did not match Episode 1,
 resolutions differed, and guided LTX had extra inputs. Do not use it as a
 production visual-quality ranking. The local-only H3 preview was inaccessible.
-Use the [matched Episode 1 rerun](https://github.com/gojiphysio/goji/blob/codex/goji-episode1-model-comparison/marketing/video-production/local-benchmark/episode1/README.md)
+Use the [matched Episode 1 rerun](https://github.com/gojiphysio/goji/blob/9aba0d9d8e0723ffb23cc49110f0e7f7b145a87e/marketing/video-production/local-benchmark/episode1/README.md)
 for the replacement protocol and results.
 
-[Review page, source scene, commands and public videos](https://github.com/gojiphysio/goji/blob/codex/goji-video-workflow/marketing/video-production/local-benchmark/README.md).
+[Review page, source scene, commands and public videos](https://github.com/gojiphysio/goji/blob/9aba0d9d8e0723ffb23cc49110f0e7f7b145a87e/marketing/video-production/local-benchmark/README.md).
 
 This is one original low-poly proxy scene and one seed per visual recipe on
 Tidepool's M5 Pro / 64 GB Mac. It tests a woman opening a taxi door, a separate
@@ -56,7 +56,7 @@ linked benchmark. Recheck support on the installed runtime before reusing a reci
 
 ## Blender-guided chase: later controlled test
 
-The [chase protocol and take log](https://github.com/gojiphysio/goji/blob/codex/goji-episode1-model-comparison/marketing/video-production/chase-benchmark/README.md)
+The [chase protocol and take log](https://github.com/gojiphysio/goji/blob/9aba0d9d8e0723ffb23cc49110f0e7f7b145a87e/marketing/video-production/chase-benchmark/README.md)
 use an Episode 1 styled conversion of a Blender rear-follow shot with two
 overtakes. Its six stills and continuous clip share decoded pixels. The source
 master is 576×1024; every model receives the same 288×512 guide pixels with
