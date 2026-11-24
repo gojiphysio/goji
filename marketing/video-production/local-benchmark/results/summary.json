@@ -1,0 +1,74 @@
+{
+  "takes": [
+    {
+      "take": "ltx-first-01",
+      "wall_seconds": 141.962,
+      "width": 576,
+      "height": 1024,
+      "fps": "24/1",
+      "frames": "121",
+      "decision": "reject_required_action",
+      "public_media": true,
+      "input_sha256": "62acbd3b5e7541546b1a18f44ab4366c9762f2b1db2ee783ca615f2eb208f88f"
+    },
+    {
+      "take": "wan14-lightning-02",
+      "wall_seconds": 979.01,
+      "width": 480,
+      "height": 848,
+      "fps": "16/1",
+      "frames": "81",
+      "decision": "reject_required_action",
+      "public_media": true,
+      "input_sha256": "62acbd3b5e7541546b1a18f44ab4366c9762f2b1db2ee783ca615f2eb208f88f"
+    },
+    {
+      "take": "wan5-01",
+      "wall_seconds": 725.461,
+      "width": 448,
+      "height": 800,
+      "fps": "24/1",
+      "frames": "121",
+      "decision": "reject_required_action",
+      "public_media": true,
+      "input_sha256": "62acbd3b5e7541546b1a18f44ab4366c9762f2b1db2ee783ca615f2eb208f88f"
+    },
+    {
+      "take": "ltx-guided-01",
+      "wall_seconds": 158.404,
+      "width": 576,
+      "height": 1024,
+      "fps": "24/1",
+      "frames": "121",
+      "decision": "promising_control_test_not_production_pass",
+      "public_media": true,
+      "input_sha256": "62acbd3b5e7541546b1a18f44ab4366c9762f2b1db2ee783ca615f2eb208f88f"
+    },
+    {
+      "take": "h3-turbo-02",
+      "wall_seconds": 760.495,
+      "width": 544,
+      "height": 960,
+      "fps": "24/1",
+      "frames": "124",
+      "decision": "strongest_common_first_frame_take_in_this_pilot",
+      "public_media": false,
+      "input_sha256": "62acbd3b5e7541546b1a18f44ab4366c9762f2b1db2ee783ca615f2eb208f88f"
+    }
+  ],
+  "failed_launches": [
+    {
+      "take": "wan14-lightning-01",
+      "seconds": 1.572,
+      "reason": "Local directory name did not resolve Wan subtype."
+    },
+    {
+      "take": "h3-turbo-01",
+      "seconds": 0.889,
+      "reason": "Automatic adapter lookup did not find pinned-revision cache; retried with explicit file."
+    }
+  ],
+  "successful_inference_wall_seconds": 2765.332,
+  "api_spend": 0,
+  "review_scope": "Frame-based pilot, full decode checks; human normal-speed production sign-off pending."
+}

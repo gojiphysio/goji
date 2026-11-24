@@ -14,6 +14,9 @@
 - Check the resolved source-aspect canvas: Wan's rounding can reduce a target
   below the intended quality range. Label that take accordingly; requested
   dimensions alone are not the output dimensions.
+- A whole-frame "nearly static" warning is not an action verdict. H3's fixed
+  background triggered it while the foreground exit completed visibly. Inspect
+  the action region and preserve the warning alongside the visual review.
 - MLX-Gen 0.40.1's Wan backend also inspects the local folder name, even with
   `--base-model`. Use a full supported alias in a symlink/folder name. The
   first recorded Wan launch demonstrates this failure mode.

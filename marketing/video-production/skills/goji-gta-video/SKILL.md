@@ -20,6 +20,9 @@ is not proof of a coherent scene; a seed or repeated description is not an ident
   an existing job format does not already record those details.
 - Read [research-2026-11-24.md](references/research-2026-11-24.md) when comparing
   models or changing the workflow. Recheck dated capabilities on the exact runtime.
+- Read [local-pilot-2026-11-24.md](references/local-pilot-2026-11-24.md) for the
+  measured Blender/LTX/Wan/H3 taxi pilot and its limits; do not turn its single
+  seed or five-second result into a general model or long-scene guarantee.
 - Read the target repository's `AGENTS.md` and `marketing/AGENTS.md`. For
   patient-facing copy, read `marketing/strategy/03-compliance-guardrails.md`.
 

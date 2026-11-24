@@ -1,8 +1,22 @@
 # Goji: Blender versus local video models
 
-**Pilot in progress — 24 November 2026.** This page will be updated with the
-remaining renders. The three first-frame-only takes fail the required action;
-there is no production winner yet.
+**Pilot complete — 24 November 2026.** H3 produced the strongest common-first-frame
+action in this one-seed test. Blender-guided LTX held the planned layout most
+closely at much lower generation time. The proxy cast and contact animation
+still need work; no production-approved episode footage is claimed.
+
+| Recipe | Native output | Wall time | Frame-review finding |
+|---|---|---:|---|
+| LTX 2.5 distilled, first frame | 576×1024, 121 @ 24 fps | 2m 22s | Camera drift, duplicated NPC, failed driver exit |
+| Wan 2.2 14B Lightning | 480×848, 81 @ 16 fps | 16m 19s | Recognisable exit; door/prop changes and taxi moves |
+| Wan 2.2 5B, lower-res | 448×800, 121 @ 24 fps | 12m 05s | Wrong action; driver does not exit |
+| LTX 2.5, six Blender frames | 576×1024, 121 @ 24 fps | 2m 38s | Best layout control; imperfect contacts/interpolation |
+| MiniMax H3 Turbo, mixed q4/q6 | 544×960, 124 @ 24 fps | 12m 40s | Strongest common-input action; private preview in chat |
+
+These are practical local recipes, not equal-compute or maximum-quality runs.
+The guided LTX row has extra information. Total successful generation wall time
+was about **46 minutes**, excluding download/setup; both failed launches are
+retained. No paid generation API was used.
 
 [Watch the simultaneous four-panel comparison](https://github.com/gojiphysio/goji/raw/refs/heads/codex/goji-video-workflow/marketing/video-production/local-benchmark/results/comparison/side-by-side.mp4)
 
@@ -75,14 +89,37 @@ setting; do not generalise this result to the model's quality ceiling.
 
 ![Wan 5B exact frames](results/wan5-01/frames.jpg)
 
-## Remaining tests
+## MiniMax H3 — private test result
 
-| Recipe | Status |
-|---|---|
-| Wan 2.2 I2V 14B + Lightning | Complete; one earlier path-resolution failure retained |
-| LTX 2.5 + six Blender keyframes | Complete |
-| Wan 2.2 TI2V 5B | Complete |
-| MiniMax H3 Turbo 544p, mixed q4/q6 | Rendering; one cache-reference launch failure retained locally; footage stays outside this public repository |
+**12 minutes 40 seconds. Strongest common-first-frame result in this pilot.**
+Inspected frames show a stable camera and parked taxi, one handbag, separate
+characters, and a recognisable door-open → driver-exit → departure sequence.
+The driver follows different timing/direction from the guide; a single opening
+image does not lock choreography. Canonical likeness and full normal-speed
+contact quality have not been signed off. Only **5.17 seconds** was tested;
+this is not evidence for long-scene reliability.
+
+H3's footage and the six-panel comparison including it stay outside this public
+repository because its license restricts territories for outputs. They are
+available as private previews in the model-testing chat. The public
+[summary record](results/summary.json) contains timing and test settings.
+
+The runtime warned that the video was nearly static. The action is visible in
+foreground samples; the intentionally fixed background dominates the whole-frame
+motion average. Review the action region before treating that warning as failure.
+
+One initial H3 launch failed at adapter-cache lookup, before inference; the
+successful retry used the explicit pinned adapter file. The model access and
+local authentication now work.
+
+## What to carry into the next episode
+
+1. Build the reviewed cast and clean contact animation in Blender first.
+2. Keep **guided LTX** as the fast, controllable iteration route.
+3. Advance **H3** to a second seed and then a longer action test; it is the most
+   promising first-frame route from this scene, not yet a proven long-form choice.
+4. Preserve direct Blender rendering for interactions where exact geometry is
+   essential. Generated footage must be checked between supplied keyframes too.
 
 The first-frame tests share a prompt and opening image. The guided LTX test
 gets more information and is evaluated separately. Five-second comparison
