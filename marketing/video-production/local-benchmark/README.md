@@ -1,7 +1,7 @@
 # Goji: Blender versus local video models
 
 **Pilot in progress — 24 November 2026.** This page will be updated with the
-remaining renders. The first completed take already fails the required action;
+remaining renders. The first two completed takes fail the required action;
 there is no production winner yet.
 
 ## The scene
@@ -27,14 +27,45 @@ survives in sampled frames.
 
 ![LTX exact frames at 0, 1, 2, 3, 4 and 5 seconds](results/ltx-first-01/frames.jpg)
 
+## Wan 2.2 14B — Lightning, first frame only
+
+**16 minutes 19 seconds generation time. Required action rejected.** The camera
+is much steadier and the driver exit is recognisable. However, extra vehicle
+panels appear, the door changes shape, bag ownership is ambiguous, and the
+parked taxi moves away near the end. This is better action organisation in this
+seed, not a production pass.
+
+[Watch Blender and Wan side by side](https://github.com/gojiphysio/goji/raw/refs/heads/codex/goji-video-workflow/marketing/video-production/local-benchmark/results/wan14-lightning-02/with-guide.mp4)
+· [Unedited Wan output](https://github.com/gojiphysio/goji/raw/refs/heads/codex/goji-video-workflow/marketing/video-production/local-benchmark/results/wan14-lightning-02/raw.mp4)
+
+![Wan exact frames](results/wan14-lightning-02/frames.jpg)
+
+[Inspect the door and bag detail sheet](results/wan14-lightning-02/interaction-detail.jpg).
+
+## LTX 2.5 — six Blender keyframes
+
+**158 seconds generation time. Most faithful layout so far, with extra input.**
+Camera, car placement and character separation stay close to the guide. This
+also holds in inspected frames **between** the supplied images, not just at
+conditioning timestamps. The driver still stretches during emergence and the
+feet interpolate imperfectly; the source animation itself needs better contact
+mechanics. This is a promising control test, not final footage.
+
+[Watch Blender and guided LTX side by side](https://github.com/gojiphysio/goji/raw/refs/heads/codex/goji-video-workflow/marketing/video-production/local-benchmark/results/ltx-guided-01/with-guide.mp4)
+· [Unedited guided LTX](https://github.com/gojiphysio/goji/raw/refs/heads/codex/goji-video-workflow/marketing/video-production/local-benchmark/results/ltx-guided-01/raw.mp4)
+
+![Unconditioned midpoint details](results/ltx-guided-01/between-guides.jpg)
+
+[Compare guide and generated contact frames](results/ltx-guided-01/guide-contact-comparison.jpg).
+
 ## Remaining tests
 
 | Recipe | Status |
 |---|---|
-| Wan 2.2 I2V 14B + Lightning | Rendering; one earlier path-resolution failure retained |
-| LTX 2.5 + six Blender keyframes | Queued |
-| Wan 2.2 TI2V 5B | Queued |
-| MiniMax H3 Turbo 544p, mixed q4/q6 | Downloading; output will remain outside this public repository |
+| Wan 2.2 I2V 14B + Lightning | Complete; one earlier path-resolution failure retained |
+| LTX 2.5 + six Blender keyframes | Complete |
+| Wan 2.2 TI2V 5B | Rendering |
+| MiniMax H3 Turbo 544p, mixed q4/q6 | Download complete; queued; output stays outside this public repository |
 
 The first-frame tests share a prompt and opening image. The guided LTX test
 gets more information and is evaluated separately. Five-second comparison

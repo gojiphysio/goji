@@ -24,5 +24,10 @@
     "repo": "notapalindrome/ltx25-mlx-ditq8",
     "revision_from_readme_cache": "0a005c82cf3fd9c49d28dc6c13bdc509b631107f",
     "note": "Existing assembled local LTX pack; per-file HF cache metadata can differ for base components. Do not treat README revision as hash of whole folder."
+  },
+  {
+    "repo": "AbstractFramework/minimax-h3-4bit",
+    "revision": "49f35d7c06e79c3be3048e34c5d6ba875a48780f",
+    "seconds": 647.6937670829939
   }
 ]
