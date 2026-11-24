@@ -16,6 +16,11 @@ contains the shot record, test criteria and revision rules.
 The [Blender staging contract](skills/goji-gta-video/references/blender-staging.md)
 and [editable shot template](skills/goji-gta-video/assets/shot-template.yaml)
 turn those decisions into a reusable scene and export record.
+The [San Andreas reference pack](skills/goji-gta-video/references/san-andreas-reference.md)
+adds source-platform checks, timestamped game actions and proposed character,
+vehicle and camera behaviours. Its [editable presets](skills/goji-gta-video/assets/behaviour-presets.yaml)
+are ready for staging experiments; they have not been rendered or calibrated to
+PS2 handling measurements.
 
 ## What we keep and what we establish
 

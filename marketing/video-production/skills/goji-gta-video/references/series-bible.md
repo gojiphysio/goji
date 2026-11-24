@@ -3,6 +3,9 @@
 Prepared 24 November 2026. Existing choices below come from Episode 1 assets;
 camera numbers and stricter rendering guidance are proposed production defaults.
 This pack contains recovered references, not newly approved turnaround sheets.
+For actual game footage and behaviour evidence, use the
+[San Andreas reference pack](san-andreas-reference.md). Its PS2 source windows
+complement the Goji identity images below; they do not replace the cast.
 
 ## Visual standard
 
@@ -23,6 +26,11 @@ interiors are smoother: use them for identities, clothing and layout, then bring
 their people/materials toward the street standard. A warm filter cannot repair
 different character topology. A new neutral-light lineup must prove that the
 girl, therapist and NPCs belong to one game before becoming the style master.
+“PS2-style” is not satisfied by low polygon count alone. Review painted detail,
+joint animation, vehicle response and camera behaviour against the game pack.
+Do not use remaster footage, a constant orange filter or generic toy figures as
+substitutes for those checks. Capture blur and frame-rate drops are not mandatory
+effects in the finished Goji video.
 
 ## Recovered cast
 

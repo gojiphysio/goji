@@ -3,6 +3,10 @@
 Use this when making or reusing 3D assets and control exports for Goji episodes.
 The user prefers low-poly staging. The conventions below are proposed working
 defaults; they do not turn the current benchmark proxies into approved cast.
+For game-specific motion, use the [San Andreas reference pack](san-andreas-reference.md)
+and [behaviour presets](../assets/behaviour-presets.yaml). The presets are original
+Goji planning data with uncalibrated artistic starting values, not an installed
+Blender rig or imported game physics. Select only those relevant to the shot.
 
 ## Build one small production kit
 
@@ -90,6 +94,10 @@ Review foot planting, hand reach, penetration and proportion changes through
 the action at normal speed and slowly near contact changes. Do not ask the
 generator to repair a visibly invalid guide. Use deliberate coverage or direct
 3D output if the desired action cannot remain readable in one camera.
+Record the selected behaviour preset/version, reference window and any overrides
+in the shot packet. Verify foot placement against root travel, and wheel rotation
+against travelled distance and radius. Parent the follow camera to a separate
+target/rig so suspension movement need not shake or roll the whole view.
 
 ## Export a small, traceable shot packet
 

@@ -13,6 +13,9 @@ is not proof of a coherent scene; a seed or repeated description is not an ident
 
 - Read [series-bible.md](references/series-bible.md) for every episode. It contains
   existing character references, the PS2 standard, and proposed camera presets.
+- Read [san-andreas-reference.md](references/san-andreas-reference.md) for game
+  appearance, locomotion, vehicle behaviour or chase-camera work. It links
+  timestamped footage and separates observations from proposed Blender presets.
 - Read [production.md](references/production.md) when planning or making footage;
   it includes the shot record, continuity gates, and revision procedure.
 - Read [blender-staging.md](references/blender-staging.md) when building or reusing
@@ -54,6 +57,10 @@ into approved series canon.
    in the guide before paying for, or waiting on, generation.
    Keep blockout proxies distinct from reviewed cast/look assets. A first-frame
    video test inherits the proxy's appearance; it cannot establish final cast quality.
+5. For GTA-specific movement, select a relevant game reference and an explicit
+   behaviour state (walk/idle, cruise/brake/slide, entry/takeover). Keep PS2,
+   remaster and mod provenance distinct. Proposed preset values are not measured
+   game physics; preview contacts and timing before adopting them.
 
 ## Choose the control and model
 

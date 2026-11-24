@@ -63,6 +63,13 @@ timeline:
   sample_time_policy: null  # no retiming / declared resampling map
   edit_handles_frames: null
 events: []  # start/end frame, actors/objects, action, contact and end state
+behaviour:
+  presets: []  # ID, version, overrides; planning values are not measured game constants
+  game_reference_windows: []  # source URL/ID, platform provenance, start/end seconds
+  evidence_level: null  # observed / documented / Goji proposal, per claim when mixed
+  vehicle_class_surface_and_state: null
+  deliberate_adaptations: []  # e.g. right-hand driver, calmer greeting, portrait framing
+  preview_review_state: unreviewed
 state:
   start: null
   end: null
