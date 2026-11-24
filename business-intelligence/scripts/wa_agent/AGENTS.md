@@ -43,6 +43,9 @@ The WhatsApp assistant. What it is and how to run it: [`README.md`](README.md).
 - **Its own service account** (`wa-agent-sa`): it holds chat transcripts, so it
   doesn't share dashboard-sa. Its only BigQuery write grant is on
   `marts.wa_agent_events` (set by `deploy.sh`, not the dashboard grant loops).
+  A read grant on a view needs the tables it reads granted too, or every
+  query on it is denied: a new view in `tools.py` adds its tables to
+  `deploy.sh`'s read loop (go-live, 24 Nov 2026).
 - **Booking links use the `wa-book` go-link** (`dashboard/app.py` LINK_SLUGS),
   which forwards `service`/`focus` to `/book`.
 - **Disclosure: don't lead with it, never hide it.** The agent introduces
