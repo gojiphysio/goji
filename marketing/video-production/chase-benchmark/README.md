@@ -1,6 +1,7 @@
 # Episode 1 taxi chase guidance test
 
-Status: shared guide frozen, H3 paired runs in progress, 24 November 2026. No completed
+Status: H3 paired runs and LTX stills complete; Wan retries running and LTX video
+blocked on adapter download access, 24 November 2026. No completed
 model ranking yet. The user confirmed the comparison is **timed stills versus a
 styled Blender video**, with Episode 1 as the appearance authority.
 
@@ -40,10 +41,10 @@ the other models. No model receives the raw blockout as its appearance reference
 | Family | Still series | Continuous guide | Local setup |
 | --- | --- | --- | --- |
 | LTX 2.5 | Repeated images with explicit frame indices | Layout-to-Render IC-LoRA | Existing MLX runtime supports indexed images and IC-LoRA; this specific adapter needs a validation run |
-| H3 Ref2VA | Six indexed `MiniMaxH3AddGuide` stills; opening still also supplies appearance | Native reference video conditioning | ComfyUI + GGUF + Ref2VA Turbo; full conversion completed; still/video benchmark queued sequentially |
+| H3 Ref2VA | Six indexed `MiniMaxH3AddGuide` stills; opening still also supplies appearance | Native reference video conditioning | ComfyUI + GGUF + Ref2VA Turbo; full conversion and both paired benchmark takes completed |
 | Installed H3 FL2VA | First image in current MLX runtime | Unsupported | Prior attractive H3 take does not establish guided-video capability |
 | Installed Wan 2.2 A14B I2V | First/last or consecutive context, not six scattered anchors | Unsupported | Do not substitute another first-frame take |
-| Wan 2.2 VACE Fun A14B | Six known-frame mask windows | Learned video conditioning | High/low Q4_K_M + Seko V1.1 four-step LoRAs; weights staged after H3 to respect disk budget; not prior I2V weights |
+| Wan 2.2 VACE Fun A14B | Six known-frame mask windows | Learned video conditioning | High/low Q4_K_M + Seko V1.1 four-step LoRAs; weights downloaded and hash-verified after H3 to respect disk budget; not prior I2V weights |
 
 Sources checked on 24 November 2026:
 [LTX adapter card](https://huggingface.co/Lightricks/LTX-2.5-22b-IC-LoRA-Layout-To-Render),
@@ -132,10 +133,20 @@ The still/video model panels remain in progress.
 Use the newer Wan 2.2 VACE Fun A14B instead of the initial Wan 2.1 draft. The
 [official VACE Fun four-step workflow](https://github.com/aigc-apps/VideoX-Fun/blob/main/comfyui/wan2_2_vace_fun/v1/wan2.2_vace_fun_chunked_loading_workflow_subjects_4steps_lora.json)
 explicitly uses Seko T2V V1.1 adapters, CFG 1, shift 12 and boundary 0.875.
-The native Comfy adaptation uses three high-noise and one low-noise UniPC steps.
-Solver history restarts at the model boundary; this is a recorded runtime
-adaptation, not a claim of bit-identical official execution. Both control modes
-use the same adaptation. `wan22-weights.json` pins all six file hashes.
+The first native Comfy adaptation used three high-noise and one low-noise UniPC
+steps. It completed in 1,334.617 seconds but every sampled frame was colored
+noise. Its paired video run was interrupted after 121.836 seconds. These are
+configuration failures, not model-quality scores. Both original graphs remain
+in their immutable take records. `wan22-weights.json` pins all six file hashes.
+
+A 17-frame, 288×512 diagnostic using the [official Seko native-Comfy T2V
+recipe](https://huggingface.co/lightx2v/Wan2.2-Lightning/blob/main/Wan2.2-T2V-A14B-4steps-lora-rank64-Seko-V1.1/Wan2.2-T2V-A14B-4steps-lora-rank64-Seko-V1.1-NativeComfy.json)
+completed in 62.038 seconds and produced a recognizable guided chase: Euler,
+simple schedule, shift 5, CFG 1, two high-noise then two low-noise steps.
+Both full retries use that same recipe. The diagnostic is not a complete-action
+quality result. An [upstream MPS UniPC issue](https://github.com/Comfy-Org/ComfyUI/issues/16573)
+reports numerical divergence consistent with the symptom; the sampler, shift
+and split changed together here, so this experiment does not isolate its cause.
 
 This is not an independent architecture benchmark: the H3-styled master can
 favor H3 appearance. Compare sparse versus dense guidance within each family;
@@ -154,3 +165,62 @@ Native generated audio is outside this visual comparison; panel exports are sile
 Equal seed integers do not guarantee identical latent noise, including within a
 family when the number of appended reference tokens changes. Runtime totals
 include conditioning and decoding, not just the sampler.
+
+## H3 paired result (sampled review)
+
+Six indexed stills: **790.449 seconds**. Continuous styled video: **1,019.219
+seconds**. Both resolve to 576×1024, 124 frames at 24 fps and pass full decode.
+Fifteen paired samples, including between anchors, retain both overtakes, the
+passing sides, rear framing and final lane. The video guide follows van spacing
+at 2.5 seconds more closely. No clear appearance advantage is established by
+these samples. Normal-speed production acceptance remains pending.
+
+Only the two newly downloaded H3 GGUF cache files were evicted after both runs
+and verified copies of their outputs were collected. This makes room for Wan's
+29.64 GB control setup. `h3-weights.json` retains checked local digests and source
+revisions; `cache-evictions.json` records the restore command. The original MLX
+model installations, H3 VAE/adapter and all footage remain available.
+
+## Reuse the paired workflow
+
+1. Review the new Blender motion and one Episode 1 look frame before conversion.
+   Inspect the converted master against the original motion, including contacts
+   between guide timestamps. Keep model conversion separate from the paired test.
+2. Freeze the accepted master with `scripts/freeze_guides.py SOURCE
+   --guide-scale 2 --review-note 'actual checks and limits'`. This creates one
+   immutable six-still/video packet and validates lossless decoding. For a
+   different shot duration, adapt each runtime's frame grid before launching.
+3. `scripts/prepare_wan_guides.py` creates Wan's native 16fps packet and verifies
+   that all six known-frame windows survive compression. H3 uses the padded
+   124-frame reference already created by the freeze step.
+4. Run the chosen family serially with a new take suffix: `comfy_h3.py stills`
+   then `comfy_h3.py video`; `comfy_wan.py stills` then `comfy_wan.py video`;
+   or `run_control.py ltx stills` then `run_control.py ltx video`. Comfy scripts
+   submit to port 8195; `collect_comfy.py TAKE_DIRECTORY` collects and decodes
+   the completed output. Do not start a second GPU process alongside it.
+5. Review both raw takes, then use `make_pair.py LEFT RIGHT OUTPUT --title ...`.
+   The exporter requires the same guide-manifest hash, native 576×1024 output
+   and five seconds of actual coverage. It cannot pad a short failed action.
+   `make_stills_panel.py` compares the three sparse-control results with their
+   distinct indexed/window semantics labelled.
+
+These scripts are Tidepool-specific experiment tools, not a universal CLI for
+all model versions. Recheck installed API support, model files and available
+storage before another run. Keep source assets and hashes immutable under a
+running job; use a fresh benchmark directory for a new master.
+
+The per-model times exclude the common 31:08 H3 style conversion and Blender
+staging. The initial conversion is itself a candidate finished shot. The
+additional generations isolate guidance behavior for this experiment; they are
+not a mandatory production step. An accepted textured PS2 Blender render can
+serve directly as the master, avoiding this conversion altogether.
+
+## LTX six-still result (sampled review)
+
+The single-stage eight-step Q8 take completed in **259.132 seconds**, with
+576×1024, 121 frames at 24 fps and a verified full decode. Its fifteen sampled
+frames retain the two overtakes, count and final lane. Building facade detail,
+foliage and roadside shadows vary more between anchors than in the inspected
+H3 takes. The native silent review file copies the video stream and drops only
+generated audio; the untouched original remains in the take directory.
+The Layout-to-Render video cell has not run while its download access is blocked.

@@ -14,6 +14,8 @@ COMFY=Path('/Users/tidepool/Projects/goji-comfy-control')
 p=argparse.ArgumentParser()
 p.add_argument('mode',choices=['stills','video'])
 p.add_argument('--take',default='01')
+p.add_argument('--diagnostic',action='store_true',help='17 frames at 288x512; setup check, not a benchmark take')
+p.add_argument('--recipe',choices=['fun-unipc','native-euler'],default='native-euler')
 a=p.parse_args()
 m=json.loads((ROOT/'wan-guide-manifest.json').read_text())
 assert hashlib.sha256((ROOT/'guide-manifest.json').read_bytes()).hexdigest()==m['source_guide_manifest_sha256']
@@ -56,10 +58,21 @@ for kind,number in [('sparse' if a.mode=='stills' else 'dense',20)]+([('mask',22
 if a.mode=='stills':
     g['24']=node('ImageToMask',image=['23',0],channel='red')
     g['6']['inputs']['control_masks']=['24',0]
+if a.recipe=='native-euler':
+    # Official Seko V1.1 native-Comfy T2V recipe; compatibility with VACE
+    # is an experiment, not an established fix for the failed Fun adaptation.
+    for key in ['7','33']:g[key]['inputs']['shift']=5.0
+    for key in ['8','34']:g[key]['inputs']['sampler_name']='euler'
+    g['8']['inputs']['end_at_step']=2
+    g['34']['inputs']['start_at_step']=2
+if a.diagnostic:
+    g['6']['inputs'].update(width=288,height=512,length=17)
 record={'status':'submitting','mode':a.mode,'started':time.time(),'references':refs,'workflow':g,
+        'diagnostic':a.diagnostic,'recipe':a.recipe,
         'guide_manifest_sha256':m['source_guide_manifest_sha256'],
+        'weight_manifest_sha256':hashlib.sha256((ROOT/'wan22-weights.json').read_bytes()).hexdigest(),
         'runtime_commit':subprocess.check_output(['git','-C',str(COMFY),'rev-parse','HEAD'],text=True).strip(),
-        'guide_manifest':m,'notes':'Wan 2.2 VACE Fun A14B Q4_K_M high/low, Seko T2V V1.1 four-step LoRA. Native Comfy adaptation of official VACE Fun example; UniPC state restarts at high/low boundary. Not prior Wan 2.2 I2V. Six stills are held in +/-1 native-frame known windows. Dense uses all 81 control frames, full repaint mask. No image interpolation.'}
+        'guide_manifest':m,'notes':'Wan 2.2 VACE Fun A14B Q4_K_M high/low, Seko T2V V1.1 four-step LoRA. See recipe and exact workflow for sampler/shift/expert split. Not prior Wan 2.2 I2V. Six stills are held in +/-1 native-frame known windows. Dense uses all 81 control frames, full repaint mask; diagnostics truncate to the first 17. No image interpolation.'}
 (dest/'run.json').write_text(json.dumps(record,indent=2))
 try:
     request=urllib.request.Request('http://127.0.0.1:8195/prompt',data=json.dumps({'prompt':g}).encode(),headers={'Content-Type':'application/json'})

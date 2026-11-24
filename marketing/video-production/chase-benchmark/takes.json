@@ -95,6 +95,83 @@
       "purpose": "guide conversion; not benchmark",
       "wall_seconds": 589.1801779270172,
       "abort_reason": "Stopped during reference VAE encoding after per-tile time indicated approximately 28 minutes before sampling; no generated output or visual verdict."
+    },
+    {
+      "take": "ltx-stills-01",
+      "status": "generated_unreviewed",
+      "purpose": null,
+      "recipe": {
+        "pipeline": "ICLoraPipeline Python API",
+        "single_stage": true,
+        "steps": 8,
+        "width": 576,
+        "height": 1024,
+        "frames": 121,
+        "fps": 24,
+        "seed": 1017,
+        "task_adapter": null
+      },
+      "wall_seconds": 259.1320650577545,
+      "review": {
+        "status": "sampled_motion_pass_with_visual_issues",
+        "method": "15 paired frames including between indexed anchors; full decode; normal-speed playback pending",
+        "findings": [
+          "Both overtakes, vehicle count and final lane retained in sampled frames",
+          "PS2 blue-taxi appearance retained",
+          "Building facade and foliage vary more strongly between anchors than H3 in inspected samples",
+          "Soft edges and changing roadside shadows reduce visual consistency",
+          "Too little driver detail to judge canonical facial likeness"
+        ],
+        "production_approved": false
+      }
+    },
+    {
+      "take": "wan22-vace-stills-01",
+      "status": "configuration_failed",
+      "purpose": "stills",
+      "execution_wall_seconds": 1334.617,
+      "review": {
+        "verdict": "configuration_failed",
+        "note": "All 15 sampled frames are colored noise. No valid scene. Do not rank model visual quality from this failed setup.",
+        "normal_speed_playback_verified": false
+      }
+    },
+    {
+      "take": "wan22-vace-stills-02",
+      "status": "queued",
+      "purpose": "stills",
+      "diagnostic": false,
+      "recipe": "native-euler"
+    },
+    {
+      "take": "wan22-vace-video-01",
+      "status": "aborted_configuration",
+      "purpose": "video",
+      "execution_wall_seconds": 121.836,
+      "review": {
+        "verdict": "aborted_configuration",
+        "note": "Interrupted after the paired still run produced only noise. No usable output; same recipe requires a diagnostic.",
+        "normal_speed_playback_verified": false
+      }
+    },
+    {
+      "take": "wan22-vace-video-02",
+      "status": "queued",
+      "purpose": "video",
+      "diagnostic": false,
+      "recipe": "native-euler"
+    },
+    {
+      "take": "wan22-vace-video-diag-euler-01",
+      "status": "generated_unreviewed",
+      "purpose": "video",
+      "diagnostic": true,
+      "recipe": "native-euler",
+      "execution_wall_seconds": 62.038,
+      "review": {
+        "verdict": "setup_diagnostic_pass",
+        "note": "Frames 0/8/16 show recognizable three-vehicle rear-follow chase. This one-second, half-resolution diagnostic validates loading/sampling/decoding, not full action or production quality. Native Euler/shift5/split2+2 changed as a recipe; exact cause of prior UniPC failure not isolated."
+      }
     }
   ]
 }

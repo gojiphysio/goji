@@ -11,3 +11,4 @@
 - A one-image diagnostic proves loading and encoding only. Preflight full-reference memory and wall time separately before estimating production throughput.
 - Match generation topology within a still/video pair where the runtime permits it. LTX's Python ICLoraPipeline accepts empty task-LoRA/video lists, allowing the still cell to use the same full-resolution eight-step stage as the video cell. Record required adapter differences.
 - A model-styled common master can favor that model's appearance. Use it for within-model control comparisons; disclose the source model in any cross-model ranking.
+- Validate a short guided output on the exact backend before full runs. The native UniPC adaptation produced only noise on MPS; a successful file encode did not validate the recipe. Keep failed setup runs out of visual-quality rankings.

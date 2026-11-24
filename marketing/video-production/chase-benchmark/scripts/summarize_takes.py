@@ -8,7 +8,7 @@ for file in sorted((root / 'results').glob('*/run.json')):
     r = json.loads(file.read_text())
     row = {'take':file.parent.name, 'status':r.get('status'),
            'purpose':r.get('purpose',r.get('mode'))}
-    for key in ['wall_seconds','execution_wall_seconds','failure','abort_reason','review']:
+    for key in ['diagnostic','recipe','wall_seconds','execution_wall_seconds','failure','abort_reason','review']:
         if key in r:
             row[key] = r[key]
     rows.append(row)

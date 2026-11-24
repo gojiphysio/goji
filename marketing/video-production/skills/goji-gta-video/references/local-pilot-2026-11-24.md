@@ -53,3 +53,56 @@ coherence claim.
 The test used LTX runtime 0.18.0 and MLX-Gen 0.40.1. Commands, revisions,
 input hashes, raw clips, failed launches and precise review limits live in the
 linked benchmark. Recheck support on the installed runtime before reusing a recipe.
+
+## Blender-guided chase: later controlled test
+
+The [chase protocol and take log](https://github.com/gojiphysio/goji/blob/codex/goji-episode1-model-comparison/marketing/video-production/chase-benchmark/README.md)
+use an Episode 1 styled conversion of a Blender rear-follow shot with two
+overtakes. Its six stills and continuous clip share decoded pixels. The source
+master is 576×1024; every model receives the same 288×512 guide pixels with
+576×1024 requested outputs. This guide scale is a local memory choice for this test,
+not a required production resolution.
+
+Choose the checkpoint **and runtime route**, not just the model family:
+
+- H3 **Ref2VA** in Comfy supports six indexed `MiniMaxH3AddGuide` nodes and
+  native reference video. The earlier installed MLX **FL2VA** route does not
+  establish either capability. Six ordered appearance references are not the
+  same as six indexed guides. Ref2VA uses its own Turbo adapter.
+- LTX's `ICLoraPipeline` Python API accepts empty task-LoRA/video lists. That
+  permits the same full-resolution eight-step topology for indexed stills and
+  Layout-to-Render video, without a different upscale/refine stage in one cell.
+- Wan **VACE Fun** supplies frame/mask controls; the installed Wan I2V route is
+  not a substitute. Native VACE mask compression can discard isolated anchors.
+  The tested input adapter holds six distinct stills in ±1-frame windows at
+  16 fps, and verifies all six effective latent-mask anchors. Describe these as
+  windows, not exact single-frame locks.
+
+In this Comfy H3 reference node, 121 video frames silently crop to 107. Repeat
+the final frame three times to reach its 124-frame grid, then compare only the
+original five seconds. Record native cadence and padding. Verify video decoding
+against the PNGs before calling two representations the same input.
+
+H3's indexed-still and video runs took 13:10 and 16:59; both preserved the two
+overtakes in sampled review. LTX's six-still run took 4:19, preserving the action
+with more changing background detail. These are one-seed, five-second results;
+normal-speed production acceptance is pending. Wan results and the LTX video
+cell must be read from the current take log, not inferred from support claims.
+
+The styled master was made by H3 and can favor its appearance. Use this test
+primarily to compare control methods within a family. The small rear-facing
+driver cannot establish face likeness, physiotherapist identity or pedestrian
+NPC consistency. Preserve those as separate cast tests.
+
+Those per-run timings exclude the shared **31:08** H3 style conversion. That
+first conversion is already a candidate final shot; the extra generations here
+are a controlled experiment, not a required second production pass. If Blender
+already renders the accepted PS2 assets, use that render as the styled master.
+Regenerate a good converted shot only for a specific revision or comparison.
+
+The first native Wan VACE UniPC adaptation produced only colored noise despite
+a successful encode. A one-second Euler diagnostic produced a recognizable
+scene; full results still require inspection. Treat this as a setup distinction,
+not a model-quality loss. Preflight actual guided pixels on the exact backend
+before full takes; preserve failed graphs and do not silently tune one member
+of a still/video pair. The current take log records the exact replacement recipe.

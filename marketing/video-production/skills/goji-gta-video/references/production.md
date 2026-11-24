@@ -1,8 +1,8 @@
 # Production and continuity protocol
 
-This is a proposed Goji workflow. Its rules combine Episode 1 failure evidence,
-the linked research, and production judgment; no new model comparison has yet
-been rendered.
+This workflow combines Episode 1 failure evidence, linked research, production
+judgment and the dated local pilot. Read the pilot for measured results and
+review limits; proposed acceptance thresholds below are not model guarantees.
 
 ## Separate the four controls
 
