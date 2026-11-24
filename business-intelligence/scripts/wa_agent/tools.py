@@ -263,7 +263,7 @@ def read_page(inp: dict, **_) -> dict:
 _LOOKUP_SQL = """
 WITH patients AS (
   SELECT patient_id, SPLIT(TRIM(full_name), ' ')[SAFE_OFFSET(0)] AS first_name
-  FROM {contacts}
+  FROM `{project}.marts.dim_patient_contact`
   WHERE RIGHT(REGEXP_REPLACE(COALESCE(phone, ''), r'\\D', ''), 8) = @last8
 )
 SELECT p.first_name, a.appt_date,
@@ -281,59 +281,6 @@ LIMIT 6
 """
 
 
-# Who has which number. marts.dim_patient_contact is rebuilt nightly, so a
-# patient created or changed since then lives only in marts.patient_contact_live
-# (goji-booking: Plato's patient webhook, and patients /internal/book creates).
-# On 24 Nov 2026 the agent booked a new patient and, six hours later, told the
-# same number "no patient record". A live row wins for its patient (a changed
-# number), so every patient appears once. Live rows older than 3 days are in
-# the nightly table by then.
-_CONTACTS = """(
-  SELECT patient_id, full_name, phone, changed_recently FROM (
-    SELECT patient_id, full_name, phone,
-           received_at > TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 30 MINUTE) AS changed_recently
-    FROM `{project}.marts.patient_contact_live`
-    WHERE received_at > TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 3 DAY)
-    QUALIFY ROW_NUMBER() OVER (PARTITION BY patient_id ORDER BY received_at DESC) = 1)
-  UNION ALL
-  SELECT patient_id, full_name, phone, FALSE
-  FROM `{project}.marts.dim_patient_contact`
-  WHERE patient_id NOT IN (
-    SELECT patient_id FROM `{project}.marts.patient_contact_live`
-    WHERE received_at > TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 3 DAY))
-)"""
-
-
-# The nightly table alone: the fallback when the live table can't be read
-# (not created yet, a missing grant), so a problem there costs same-day
-# freshness, never recognition as a whole.
-_NIGHTLY_CONTACTS = """(
-  SELECT patient_id, full_name, phone, FALSE AS changed_recently
-  FROM `{project}.marts.dim_patient_contact`
-)"""
-
-
-def _sql(template: str, live: bool = True) -> str:
-    contacts = _CONTACTS if live else _NIGHTLY_CONTACTS
-    return template.format(project=config.PROJECT,
-                           contacts=contacts.format(project=config.PROJECT))
-
-
-def _contact_rows(bq, template: str, last8: str) -> list:
-    """Run a lookup keyed on a number's last 8 digits, over nightly + live
-    contacts, or nightly only if the live table fails."""
-    from google.cloud import bigquery as _bq
-
-    def run(live: bool) -> list:
-        return list(bq.query(_sql(template, live), job_config=_bq.QueryJobConfig(
-            query_parameters=[_bq.ScalarQueryParameter("last8", "STRING", last8)])).result())
-    try:
-        return run(True)
-    except Exception as e:
-        log.warning("live patient contacts unavailable, using the nightly table: %s", e)
-        return run(False)
-
-
 def my_appointments(inp: dict, *, wa_id: str, bq=None, **_) -> dict:
     if not config.PATIENT_LOOKUP:
         return {"enabled": False,
@@ -344,7 +291,11 @@ def my_appointments(inp: dict, *, wa_id: str, bq=None, **_) -> dict:
     if bq is None:
         from google.cloud import bigquery
         bq = bigquery.Client(project=config.PROJECT)
-    rows = _contact_rows(bq, _LOOKUP_SQL, digits[-8:])
+    from google.cloud import bigquery as _bq
+    job = bq.query(_LOOKUP_SQL.format(project=config.PROJECT),
+                   job_config=_bq.QueryJobConfig(query_parameters=[
+                       _bq.ScalarQueryParameter("last8", "STRING", digits[-8:])]))
+    rows = list(job.result())
     return {"matched": bool(rows),
             "appointments": [{"patient_first_name": r["first_name"],
                               "date": r["appt_date"].isoformat(), "time": r["time_sgt"],
@@ -359,8 +310,8 @@ def my_appointments(inp: dict, *, wa_id: str, bq=None, **_) -> dict:
 # count goes with it and the name is only a hint.
 _PATIENT_SQL = """
 WITH patients AS (
-  SELECT patient_id, SPLIT(TRIM(full_name), ' ')[SAFE_OFFSET(0)] AS first_name, changed_recently
-  FROM {contacts}
+  SELECT patient_id, SPLIT(TRIM(full_name), ' ')[SAFE_OFFSET(0)] AS first_name
+  FROM `{project}.marts.dim_patient_contact`
   WHERE RIGHT(REGEXP_REPLACE(COALESCE(phone, ''), r'\\D', ''), 8) = @last8
 ),
 appts AS (
@@ -377,11 +328,10 @@ SELECT
   (SELECT COUNT(DISTINCT patient_id) FROM patients) AS n_patients,
   (SELECT ARRAY_AGG(DISTINCT patient_id) FROM patients) AS patient_ids,
   (SELECT ARRAY_AGG(STRUCT(c.patient_id AS id, c.full_name AS name))
-     FROM {contacts} c JOIN patients p USING (patient_id)) AS records,
+     FROM `{project}.marts.dim_patient_contact` c JOIN patients p USING (patient_id)) AS records,
   (SELECT LOGICAL_OR('Late change waiver used' IN UNNEST(d.tags))
      FROM `{project}.marts.dim_patient` d JOIN patients p USING (patient_id)) AS waiver_used,
   (SELECT ANY_VALUE(first_name) FROM patients) AS first_name,
-  (SELECT LOGICAL_OR(changed_recently) FROM patients) AS changed_recently,
   (SELECT AS STRUCT appt_date, time_sgt, clinician_id, treatment_type FROM appts
     WHERE appt_date >= CURRENT_DATE('Asia/Singapore')
     ORDER BY appt_date, time_sgt LIMIT 1) AS next_appt,
@@ -404,7 +354,11 @@ def patient_context(wa_id: str, *, bq=None) -> dict:
         if bq is None:
             from google.cloud import bigquery
             bq = bigquery.Client(project=config.PROJECT)
-        row = next(iter(_contact_rows(bq, _PATIENT_SQL, digits[-8:])), None)
+        from google.cloud import bigquery as _bq
+        job = bq.query(_PATIENT_SQL.format(project=config.PROJECT),
+                       job_config=_bq.QueryJobConfig(query_parameters=[
+                           _bq.ScalarQueryParameter("last8", "STRING", digits[-8:])]))
+        row = next(iter(job.result()), None)
     except Exception as e:
         log.warning("patient lookup failed: %s", e)
         return {}
@@ -420,8 +374,7 @@ def patient_context(wa_id: str, *, bq=None) -> dict:
             "next_appointment": ({"date": nxt["appt_date"].isoformat(), "time": nxt["time_sgt"],
                                   "with": CLINICIAN_NAMES.get(nxt["clinician_id"], "the team"),
                                   "type": nxt["treatment_type"]} if nxt else None),
-            "last_visit": row["last_visit"].isoformat() if row["last_visit"] else None,
-            "changed_recently": bool(row["changed_recently"])}
+            "last_visit": row["last_visit"].isoformat() if row["last_visit"] else None}
 
 
 def record_for_booking(patient: dict, full_name: str, for_whom: str) -> str:
@@ -454,15 +407,8 @@ def describe_patient(p: dict) -> str:
         bits.append(f"{p['patients_on_number']} patients share this number (e.g. a parent "
                     "and children), so don't assume which one is writing")
     n = p.get("next_appointment")
-    if n:
-        bits.append(f"next appointment {n['date']} {n['time']} with {n['with']}")
-    elif p.get("changed_recently"):
-        # Appointments reach BigQuery every 15 minutes; a record added in the
-        # last half hour may have a booking that isn't there yet.
-        bits.append("record added or changed in the last 30 minutes, so a booking made "
-                    "just now may not show yet: don't tell them they have nothing booked")
-    else:
-        bits.append("no upcoming appointment")
+    bits.append(f"next appointment {n['date']} {n['time']} with {n['with']}" if n
+                else "no upcoming appointment")
     if p.get("last_visit"):
         bits.append(f"last visit {p['last_visit']}")
     if p.get("waiver_used"):
@@ -477,7 +423,7 @@ def describe_patient(p: dict) -> str:
 _FIND_SQL = """
 WITH p AS (
   SELECT patient_id, LOWER(TRIM(full_name)) AS name
-  FROM {contacts}
+  FROM `{project}.marts.dim_patient_contact`
   WHERE RIGHT(REGEXP_REPLACE(COALESCE(phone, ''), r'\\D', ''), 8) = @last8
 )
 SELECT a.appt_date, FORMAT_TIMESTAMP('%H:%M', a.start_at, 'UTC') AS time_sgt, a.clinician_id,
@@ -515,7 +461,10 @@ def find_booking(inp: dict, *, wa_id: str, bq=None, **_) -> dict:
     if bq is None:
         from google.cloud import bigquery
         bq = bigquery.Client(project=config.PROJECT)
-    rows = _contact_rows(bq, _FIND_SQL, digits[-8:])
+    from google.cloud import bigquery as _bq
+    rows = list(bq.query(_FIND_SQL.format(project=config.PROJECT),
+                         job_config=_bq.QueryJobConfig(query_parameters=[
+                             _bq.ScalarQueryParameter("last8", "STRING", digits[-8:])])).result())
     hits = [r for r in rows if _name_matches(name, r["name"] or "")]
     if not hits:
         return {"matched": False}

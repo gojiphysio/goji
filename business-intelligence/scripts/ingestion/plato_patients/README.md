@@ -24,11 +24,11 @@ the staff Front Desk worklist needs to call patients, so this job also writes
 only — `dim_patient` stays PII-free. If you add richer *analytics* attributes,
 follow the derive-only pattern and put them in `dim_patient`, not here.
 
-The same name + phone pair for patients created or changed **since** this job
-last ran lives in `marts.patient_contact_live`, written by goji-booking
-(`booking/patient_live.py`, Plato's patient webhook) for the WhatsApp
-assistant's same-day lookups. Its `extract_phone` copies this job's probe
-order: change both together. Its rows expire after 7 days.
+Between runs goji-booking keeps `dim_patient_contact` current
+(`booking/patient_contacts.py`: Plato's patient webhook, and patients it
+creates), using the same name/phone/email rules as this job: change both
+together. Before each rebuild this job logs `PATIENT_CONTACT_DRIFT` (counts and
+patient ids only) for any patient those writes missed; an alert emails on it.
 
 ## One-time setup
 

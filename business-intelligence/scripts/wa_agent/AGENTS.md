@@ -24,13 +24,12 @@ The WhatsApp assistant. What it is and how to run it: [`README.md`](README.md).
   booking's number to match the same patient, returns only the next
   appointment, and is capped at 3 tries per chat. A number alone or a name
   alone never reveals anything.
-- **Patients are the nightly table plus the live one.** Every lookup reads
-  `tools._CONTACTS` (`dim_patient_contact` + `patient_contact_live`, which
-  goji-booking fills from Plato's patient webhook and from patients it creates),
-  never `dim_patient_contact` alone: that missed a patient the agent itself had
-  booked that morning (24 Nov 2026). If the live table can't be read, the
-  lookup falls back to the nightly one (`_contact_rows`). "No record" is cached
-  10 minutes, a match 6 hours, and a booking clears the cache.
+- **`dim_patient_contact` is current within seconds.** goji-booking updates
+  it when staff change a patient in Plato (webhook) and when it creates one
+  (`booking/patient_contacts.py`); the nightly rebuild repairs and reports
+  drift. Read only that table. "No record" is cached 10 minutes, a match 6
+  hours, and a booking clears the cache (a 6-hour "no record" handed over a
+  booking the agent had made itself, 24 Nov 2026).
 - **No message text or phone numbers in BigQuery.** `marts.wa_agent_events`
   uses a salted hash per chat. Transcripts live only in Firestore with a 30-day
   TTL. Don't add text columns.
