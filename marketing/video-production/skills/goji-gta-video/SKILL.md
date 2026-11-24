@@ -66,6 +66,11 @@ into approved series canon.
 
 Use the existing LTX installation as an inexpensive baseline, not a mandatory
 final renderer. Compare alternatives on the same difficult shot and references.
+For visual-quality comparisons, use a reviewed episode image or look frame and
+match the conditioning budget, prompt and actual canvas. Keep extra-control
+experiments separate from model comparisons; a primitive blockout cannot test
+cast likeness or final appearance.
+
 Prefer available local/free routes first; identify paid APIs, subscriptions and
 GPU rental explicitly. Research alone does not authorise spending or publishing.
 Apply any existing user budget without asking again.

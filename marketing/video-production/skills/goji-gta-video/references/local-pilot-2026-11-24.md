@@ -1,5 +1,11 @@
 # Measured local taxi pilot — 24 November 2026
 
+**Correction after user review:** this proxy scene did not match Episode 1,
+resolutions differed, and guided LTX had extra inputs. Do not use it as a
+production visual-quality ranking. The local-only H3 preview was inaccessible.
+Use the [matched Episode 1 rerun](https://github.com/gojiphysio/goji/blob/codex/goji-episode1-model-comparison/marketing/video-production/local-benchmark/episode1/README.md)
+for the replacement protocol and results.
+
 [Review page, source scene, commands and public videos](https://github.com/gojiphysio/goji/blob/codex/goji-video-workflow/marketing/video-production/local-benchmark/README.md).
 
 This is one original low-poly proxy scene and one seed per visual recipe on
@@ -25,9 +31,8 @@ uses a q4 conditioner and q6 transformer. A cache-resolution failure was fixed
 with an explicit pinned adapter file; it was not a failed visual generation.
 
 Only about five seconds was tested (H3 124/24 = 5.17 seconds). Longer native
-shots, continuation and repeatability are still untested. The next useful
-comparison is a second H3 seed and then a longer complete action, after fixing
-the cast and guide. Do not promote a documented duration limit into a measured
+shots, continuation and repeatability are still untested. The next comparison must first restore the actual Episode 1 appearance and
+match the conditioning budget and canvas before testing more seeds or duration. Do not promote a documented duration limit into a measured
 coherence claim.
 
 ## Lessons to reuse
@@ -42,9 +47,8 @@ coherence claim.
   smaller than the intended quality target; that limits its interpretation.
 - H3 emitted a whole-frame "nearly static" warning despite visible foreground
   action. A locked background dominates that average. Inspect the action region.
-- Keep direct Blender output available for exact geometry; use guided LTX for
-  fast controlled iteration and investigate H3 for first-frame acting. Neither
-  route substitutes for reviewed character assets and motion checks.
+- Keep direct Blender output available for exact geometry; test control support separately from model quality. Neither route substitutes
+  for reviewed character assets and motion checks.
 
 The test used LTX runtime 0.18.0 and MLX-Gen 0.40.1. Commands, revisions,
 input hashes, raw clips, failed launches and precise review limits live in the

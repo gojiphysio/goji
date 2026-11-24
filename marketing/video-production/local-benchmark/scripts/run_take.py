@@ -15,9 +15,13 @@ def main():
     p=argparse.ArgumentParser()
     p.add_argument('profile',choices=['ltx-first','ltx-guided','wan14-lightning','wan5','h3-turbo'])
     p.add_argument('--take',default='01')
+    p.add_argument('--experiment',choices=['proxy','episode1'],default='proxy')
+    p.add_argument('--dry-run',action='store_true')
     a=p.parse_args()
-    dest=ROOT/'results'/f'{a.profile}-{a.take}'
-    dest.mkdir(parents=True,exist_ok=False)
+    if a.experiment=='episode1' and a.profile not in ['ltx-first','wan14-lightning','h3-turbo']:
+        p.error('Episode 1 comparison permits only the three matched first-frame profiles')
+    base=ROOT/'episode1' if a.experiment=='episode1' else ROOT
+    dest=base/'results'/f'{a.profile}-{a.take}'
     image=ROOT/'staging/frame-0001.png'
     output=dest/'raw.mp4'
     refs=[image]
@@ -40,7 +44,24 @@ def main():
             else:
                 lora=MODELS/'wan-lightning/Wan2.2-I2V-A14B-4steps-lora-rank64-Seko-V1'
                 cmd+=['--model',str(MODELS/'wan2.2-i2v-a14b-diffusers-8bit'),'--base-model','wan2.2-i2v-a14b','--frames','81','--fps','16','--steps','4','--guidance','1','--guidance-2','1','--flow-shift','5','--lora-paths',str(lora/'high_noise_model.safetensors'),str(lora/'low_noise_model.safetensors'),'--lora-scales','1','1','--lora-target-roles','high_noise_transformer','low_noise_transformer']
-    record={'profile':a.profile,'take':a.take,'prompt':PROMPT,'command':cmd,'inputs':{str(x.relative_to(ROOT)):hashlib.sha256(x.read_bytes()).hexdigest() for x in refs},'machine':platform.platform(),'started_utc':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime()),'api_spend':0,'status':'running'}
+    prompt=PROMPT
+    if a.experiment=='episode1':
+        prompt=(base/'prompt.txt').read_text().strip()
+        new_image=base/'inputs/start.png'
+        cmd=[str(new_image) if x==str(image) else x for x in cmd]
+        refs=[new_image]
+        for flag,value in [('--prompt',prompt),('--width','576'),('--height','1024')]:
+            cmd[cmd.index(flag)+1]=value
+        if '--negative-prompt' in cmd:
+            cmd[cmd.index('--negative-prompt')+1]=''
+        if a.profile=='wan14-lightning':
+            cmd+=['--canvas-policy','exact-resize','--resize-mode','resize']
+        if a.profile=='h3-turbo':
+            cmd+=['--no-audio']
+    record={'experiment':a.experiment,'profile':a.profile,'take':a.take,'prompt':prompt,'command':cmd,'inputs':{str(x.relative_to(ROOT)):hashlib.sha256(x.read_bytes()).hexdigest() for x in refs},'machine':platform.platform(),'started_utc':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime()),'api_spend':0,'status':'running'}
+    if a.dry_run:
+        print(json.dumps(record,indent=2));return
+    dest.mkdir(parents=True,exist_ok=False)
     path=dest/'run.json';path.write_text(json.dumps(record,indent=2))
     start=time.monotonic()
     with (dest/'run.log').open('w') as log:
