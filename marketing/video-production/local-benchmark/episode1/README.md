@@ -5,24 +5,39 @@ Episode 1's appearance, resolutions differed, and presenting six-frame LTX next
 to single-frame models obscured the extra control it received. It cannot support
 a production model ranking. Its raw records remain available for diagnosis.
 
-## Results in progress
+## Completed comparison
 
 | Route | Time | Appearance in sampled frames | Action finding |
 |---|---:|---|---|
 | LTX 2.5 | 127 s | Episode 1 street, textures and two identities retained | Repeated opening/closing; driver finishes lying down. Rejected endpoint. |
 | H3 Turbo | 880 s | Episode 1 street, textures and two identities retained | One opening; driver falls and recovers to a seated/reclined pose. Contact/foot motion still needs playback review. |
-| Wan 14B Lightning | Rendering | Pending | Pending |
+| Wan 14B Lightning | 1406 s | Episode 1 street, textures and two identities retained | Single opening; driver remains lying down; woman starts closing door. Rejected endpoint. |
 
-Both completed routes resolved to 576×1024. Findings use exact-frame inspection
+All three routes resolved to 576×1024. Findings use exact-frame inspection
 at 0.25-second intervals and complete decode checks; human normal-speed acceptance
 is pending. One seed is not a model ranking. H3 video and frames remain private;
-the initial local video handoff was inaccessible and a private HTTPS handoff
-is awaiting the user's choice of connected Drive account.
+the [private review page](https://chatgpt.com/space/page_99413c931d68819185504b2519a8cca0)
+now contains H3, its Episode 1 comparison and the earlier proxy output. Uploads
+and owner access are confirmed. Browser/player rendering has not been visually
+verified; the app queued opening the page in the inactive chat.
 
 [Watch Episode 1 beside the new LTX take](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-episode1-model-comparison/marketing/video-production/local-benchmark/episode1/results/ltx-first-01/with-episode1.mp4)
 · [Full unedited LTX take](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-episode1-model-comparison/marketing/video-production/local-benchmark/episode1/results/ltx-first-01/raw.mp4)
 
 ![LTX frames at native timestamps](results/ltx-first-01/frames.jpg)
+
+[Open the private four-panel comparison, including H3](https://chatgpt.com/space/page_99413c931d68819185504b2519a8cca0)
+
+[Watch LTX and Wan side by side](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-episode1-model-comparison/marketing/video-production/local-benchmark/episode1/comparison/ltx-wan.mp4)
+· [Wan beside Episode 1](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-episode1-model-comparison/marketing/video-production/local-benchmark/episode1/results/wan14-lightning-01/with-episode1.mp4)
+· [Unedited Wan take](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-episode1-model-comparison/marketing/video-production/local-benchmark/episode1/results/wan14-lightning-01/raw.mp4)
+
+![Wan frames at native timestamps](results/wan14-lightning-01/frames.jpg)
+
+All three completed on their first launch. Total local generation wall time was
+**40 minutes 13 seconds**, excluding review/export; no paid generation API was
+used. H3 is closest to the requested broad action **on this seed**. This is not
+an episode production pass or evidence for longer-scene reliability.
 
 ## The shared input
 
@@ -62,7 +77,7 @@ compute, full-precision model ceilings or long-form reliability. Wan uses an
 empty negative prompt; H3's native audio conditioning remains recorded in its
 command although the delivered visual test is silent. Native frame rates stay
 intact; comparison exports repeat frames at 48 fps without interpolation or
-retiming. Comparison panels retain the full 576×1024 source pixels; use the raw
+retiming. Comparison panels retain the full 576×1024 source resolution; use the raw
 clips for native-rate playback. No paid generation API is used.
 
 ## Review criteria
@@ -71,6 +86,10 @@ Review appearance against Episode 1 independently of action success: faces,
 human proportions, maroon/grey clothing, surface texture, palette and foliage.
 Then inspect fixed camera, rigid car and front hinge, rear door staying closed,
 woman/driver separation, hand contact, completed fall, and grounded final pose.
+The driver's trousers are hidden in the shared first image and unspecified in
+the prompt. H3 reveals darker/bluer trousers than Episode 1: record that as an
+unseen-wardrobe limitation, not a violation of supplied pixels. Production
+shot prompts and textured cast assets must carry those hidden details too.
 Preserve the entire take, including failures. Do not use a clever cut to pass a
 failed action. One seed is an initial screen, not a general model ranking.
 

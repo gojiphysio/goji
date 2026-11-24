@@ -35,3 +35,8 @@
 - Keep H3 footage out of this public repository: access was approved for a
   Singapore-based test, and its license restricts territories for outputs too.
   Never commit HF credentials, caches or weight files.
+
+- Private personal Pages can hold the H3 MP4s without a Drive-account choice.
+  Use authenticated file attachments, verify access and readback, and retain
+  ordinary download links alongside native video embeds. A saved embed alone
+  does not establish that the player renders correctly.

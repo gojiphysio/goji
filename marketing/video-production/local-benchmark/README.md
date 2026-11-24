@@ -12,7 +12,7 @@ image, same prompt, same 576×1024 canvas, one frame per model.
 | Wan 2.2 14B Lightning | 480×848, 81 @ 16 fps | 16m 19s | Recognisable exit; door/prop changes and taxi moves |
 | Wan 2.2 5B, lower-res | 448×800, 121 @ 24 fps | 12m 05s | Wrong action; driver does not exit |
 | LTX 2.5, six Blender frames | 576×1024, 121 @ 24 fps | 2m 38s | Best layout control; imperfect contacts/interpolation |
-| MiniMax H3 Turbo, mixed q4/q6 | 544×960, 124 @ 24 fps | 12m 40s | Recognisable action in sampled proxy frames; private handoff needed |
+| MiniMax H3 Turbo, mixed q4/q6 | 544×960, 124 @ 24 fps | 12m 40s | Recognisable action in sampled proxy frames; private Page now available |
 
 These are practical local recipes, not equal-compute or maximum-quality runs.
 The guided LTX row has extra information. Total successful generation wall time
@@ -102,8 +102,9 @@ this is not evidence for long-scene reliability.
 
 H3's footage and the six-panel comparison including it stay outside this public
 repository because its license restricts territories for outputs. They are
-retained locally. The original local preview was not accessible to the user;
-a private HTTPS handoff is still required. The public
+now available on the [private review page](https://chatgpt.com/space/page_99413c931d68819185504b2519a8cca0),
+alongside the corrected Episode 1 test. The original local preview was not
+accessible to the user; the Page provides an authenticated remote handoff. The public
 [summary record](results/summary.json) contains timing and test settings.
 
 The runtime warned that the video was nearly static. The action is visible in

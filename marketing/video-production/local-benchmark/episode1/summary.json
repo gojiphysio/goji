@@ -47,6 +47,53 @@
     }
   },
   {
+    "profile": "wan14-lightning",
+    "prompt": "One continuous shot in the same textured GTA San Andreas PS2 game style as the supplied image. Preserve the character faces, clothing, adult proportions, painted surface textures, Singapore street, warm daylight and colour treatment. A fixed rear three-quarter GTA San Andreas gameplay camera. The maroon woman grabs the CLOSED taxi door handle, plants her feet and aggressively YANKS the front driver door wide open with a forceful backward step. Her left elbow and shoulder sweep backwards with the door, and her torso twists sharply from the effort. The door rotates around its FRONT hinge, remaining attached to the taxi. As it opens, the startled grey-shirt driver tips sideways out of the seat, falls through the open doorway and rolls onto his hip on the road. She releases the handle and stays upright beside the wide-open door. The driver ends seated on the ground, unharmed. Clear large arm and body motion by the woman; same solid car and fixed camera. The taxi is a four-door sedan: the rear passenger door stays CLOSED with its separate window and handle, the fixed B-pillar stays still. Only the front driver door opens, carrying its single wing mirror. Rear seat stays empty. No cuts, no camera movement, no new people, no photorealistic skin, no modern glossy rendering. Complete the door opening and driver fall within five seconds.",
+    "inputs": {
+      "episode1/inputs/start.png": "77f05c4247f1cbf45d99390f6c63a9f24d0ae1f91ace0c367ffad6600054dfaf"
+    },
+    "wall_seconds": 1405.889,
+    "status": "complete",
+    "output": {
+      "width": 576,
+      "height": 1024,
+      "avg_frame_rate": "16/1",
+      "nb_frames": "81",
+      "duration": "5.062500"
+    },
+    "review": {
+      "review_basis": "Exact-frame inspection at 0.25-second intervals and native last frame; full-file decode. Not human normal-speed acceptance.",
+      "appearance": "Textured Episode 1 street, clothing treatment and two identities retained in sampled frames. Revealed driver shoes differ from the reference clip; hidden in input.",
+      "camera": "Broadly stable rear three-quarter composition; parked car remains in scene.",
+      "action_verdict": "reject requested endpoint",
+      "findings": [
+        {
+          "time_seconds": [
+            0.25,
+            1.25
+          ],
+          "finding": "Single door-opening motion; rear passenger door remains visibly closed in sampled frames."
+        },
+        {
+          "time_seconds": [
+            1.75,
+            3.75
+          ],
+          "finding": "Driver emerges, extends his legs and falls/slides sideways onto the road. Distinct from woman, but contact/body mechanics need scrutiny."
+        },
+        {
+          "time_seconds": [
+            4.0,
+            5.0
+          ],
+          "finding": "Driver remains lying down instead of recovering to seated; woman starts moving the door toward closed rather than leaving it wide open."
+        }
+      ],
+      "retained_production_range": null,
+      "limitations": "One seed of four-step Lightning at CFG 1, not Wan quality ceiling or long-scene reliability."
+    }
+  },
+  {
     "profile": "h3-turbo",
     "prompt": "One continuous shot in the same textured GTA San Andreas PS2 game style as the supplied image. Preserve the character faces, clothing, adult proportions, painted surface textures, Singapore street, warm daylight and colour treatment. A fixed rear three-quarter GTA San Andreas gameplay camera. The maroon woman grabs the CLOSED taxi door handle, plants her feet and aggressively YANKS the front driver door wide open with a forceful backward step. Her left elbow and shoulder sweep backwards with the door, and her torso twists sharply from the effort. The door rotates around its FRONT hinge, remaining attached to the taxi. As it opens, the startled grey-shirt driver tips sideways out of the seat, falls through the open doorway and rolls onto his hip on the road. She releases the handle and stays upright beside the wide-open door. The driver ends seated on the ground, unharmed. Clear large arm and body motion by the woman; same solid car and fixed camera. The taxi is a four-door sedan: the rear passenger door stays CLOSED with its separate window and handle, the fixed B-pillar stays still. Only the front driver door opens, carrying its single wing mirror. Rear seat stays empty. No cuts, no camera movement, no new people, no photorealistic skin, no modern glossy rendering. Complete the door opening and driver fall within five seconds.",
     "inputs": {
@@ -87,6 +134,13 @@
             5.125
           ],
           "finding": "Driver props himself up into a seated/reclined position beside the car; closer to requested end state than LTX."
+        },
+        {
+          "time_seconds": [
+            3.0,
+            5.125
+          ],
+          "finding": "At full resolution, the revealed driver trousers are darker/bluer than in Episode 1. They were hidden in the common opening image and not specified in the shared prompt; this illustrates an unseen-wardrobe limit, not a known-input violation. Taxi lettering also needs independent review."
         }
       ],
       "retained_production_range": null,

@@ -50,12 +50,15 @@ def composite(paths,labels,dest,columns):
 
 def main():
     parser=argparse.ArgumentParser();parser.add_argument('take',nargs='?',choices=list(LABELS))
-    parser.add_argument('--all',action='store_true');a=parser.parse_args()
+    parser.add_argument('--all',action='store_true')
+    parser.add_argument('--compose-only',action='store_true',help='Build final grids from already reviewed takes')
+    a=parser.parse_args()
+    if a.compose_only and not a.all: parser.error('--compose-only requires --all')
     takes=list(LABELS) if a.all else [a.take] if a.take else []
     if not takes: parser.error('Specify a take or --all')
     ref=BASE/'inputs/episode1-takeover.mp4'
     ref_label='EP1 CONTEXT | 2 frames\nLast frame held after 4.04s'
-    for take in takes:
+    for take in ([] if a.compose_only else takes):
         dest=BASE/'results'/take;path=dest/'raw.mp4'
         info=probe(path)
         if (info['width'],info['height'])!=(576,1024): raise ValueError(f'Unexpected canvas: {take}')
