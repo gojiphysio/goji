@@ -12,6 +12,7 @@ CORS. Endpoints:
   POST /internal/refresh-snapshot                         -> re-page Plato (Cloud Scheduler, 5 min)
   POST /internal/book                                     -> WhatsApp assistant booking (X-Internal-Token)
   POST /internal/reschedule                               -> WhatsApp assistant moves an appointment (same token)
+  POST /plato/webhook/<token>                             -> Plato patient:upsert/merge -> marts.dim_patient_contact
   GET  /healthcheck
 """
 from __future__ import annotations
@@ -32,7 +33,7 @@ from .availability import SGT, derive_availability, derive_available_days
 from .booking import BookingError, create_booking, reschedule_appointment
 from .config import CLINICIANS, MAX_ADVANCE_DAYS, SAME_DAY_LEAD_MINUTES, SERVICES
 from .plato import PlatoBusy, PlatoClient, PlatoError, PlatoThrottled
-from . import mailer
+from . import mailer, patient_contacts
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger("goji-booking")
@@ -43,6 +44,7 @@ CORS_ORIGIN = os.environ.get("CORS_ORIGIN", "https://www.gojiphysio.com")
 PROJECT = os.environ.get("GCP_PROJECT", "goji-bi")
 FUNNEL_TABLE = f"{PROJECT}.marts.booking_funnel_events"
 WEB_EVENT_TABLE = f"{PROJECT}.marts.web_session_events"
+CONTACT_TABLE = f"{PROJECT}.marts.dim_patient_contact"
 # Progress stages plus "stuck" events that make silent drop-off visible:
 #   availability_empty — picked a date with no free slots (server-side)
 #   validation_error   — bad phone/email on the form (client-side)
@@ -695,6 +697,65 @@ def internal_patient_tag():
     return jsonify({"ok": True, "added": True, "dry_run": dry_run})
 
 
+# Plato's webhook (patient:upsert, patient:merge), registered once with the URL
+# https://booking.gojiphysio.com/plato/webhook/<patient_contacts.webhook_token(...)>
+# (README "Plato patient webhook"). Plato doesn't sign deliveries, so the path
+# token is the guard, and a delivery only names patient ids: every detail is
+# read back from Plato with our own key. Plato drops a webhook after 5 failed
+# deliveries in 24h and waits 3s for an answer, so this always answers 200
+# quickly, and the Plato read runs on a thread we wait on for at most
+# PLATO_WEBHOOK_WAIT_S (CPU is only ours during a request).
+PLATO_WEBHOOK_WAIT_S = float(os.environ.get("PLATO_WEBHOOK_WAIT", "2"))
+
+
+@app.route("/plato/webhook/<token>", methods=["POST"])
+def plato_webhook(token: str):
+    expected = patient_contacts.webhook_token(INTERNAL_TOKEN)
+    if not expected or not hmac.compare_digest(token.encode(), expected.encode()):
+        return "not found", 404
+    # force: don't depend on Plato's Content-Type header.
+    ids, tokens = patient_contacts.patient_ids(request.get_json(force=True, silent=True),
+                                           os.environ.get("PLATO_DB", "gojihealth"))
+    if not ids and not tokens:
+        return "", 200
+
+    def _work():
+        for t in tokens:
+            try:
+                plato().post("webhook/activate", {"token": t})
+                log.info("plato webhook activated")
+            except Exception as e:
+                log.warning("plato webhook activation failed: %s", e)
+        if ids:
+            n = patient_contacts.refresh(plato(), bq(), CONTACT_TABLE, ids)
+            log.info("plato webhook: %d of %d patient(s) refreshed", n, len(ids))
+
+    _run_webhook_work(_work)
+    return "", 200
+
+
+def _record_new_patient(patient_id: str, draft: dict) -> None:
+    """The patient /internal/book just created, into dim_patient_contact.
+    Never fails the booking."""
+    try:
+        email = str(draft.get("email") or "").strip()
+        patient_contacts.upsert(bq(), CONTACT_TABLE, {
+            "patient_id": patient_id,
+            "full_name": " ".join(str(draft.get("name") or "").split()) or None,
+            "phone": str(draft.get("phone") or "").strip() or None,
+            "email": email or None})
+    except Exception as e:
+        log.warning("new patient contact not recorded: %s", e)
+
+
+def _run_webhook_work(fn) -> None:
+    """Start `fn` and wait briefly so it usually finishes inside the request (a
+    seam the tests replace to run inline)."""
+    t = threading.Thread(target=fn, daemon=True)
+    t.start()
+    t.join(PLATO_WEBHOOK_WAIT_S)
+
+
 @app.route("/internal/book", methods=["POST"])
 def internal_book():
     """Book on behalf of the WhatsApp assistant.
@@ -767,6 +828,11 @@ def internal_book():
         if (draft.get("email") or "").strip():
             mailer.send_customer_booking_email(result, draft)  # best-effort
         _track("confirmed", "whatsapp")
+        if result.get("patient_created"):
+            # Plato sends no webhook for API writes, so this one is ours to
+            # write (patient_contacts.py). Before we answer: on Cloud Run a
+            # thread after the response may stall.
+            _record_new_patient(result["patient_id"], draft)
         _notify_wa_agent(result, draft, "whatsapp")            # best-effort, async
     return jsonify({
         "ok": True,

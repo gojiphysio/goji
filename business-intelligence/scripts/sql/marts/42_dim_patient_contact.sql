@@ -8,8 +8,12 @@
 -- warehouse" boundary: read only by the staff worklist path, never surfaced on
 -- the financial dashboard.
 --
--- Populated by the plato-patients-ingest job (the only code that sees raw Plato
--- names), via WRITE_TRUNCATE alongside dim_patient. This file just creates an
+-- Rebuilt nightly by the plato-patients-ingest job via WRITE_TRUNCATE alongside
+-- dim_patient, and kept current between runs by goji-booking
+-- (booking/patient_contacts.py: one MERGE per patient from Plato's patient
+-- webhook and from patients /internal/book creates), so the WhatsApp assistant
+-- recognises a patient the same day. The rebuild is the repair and logs
+-- PATIENT_CONTACT_DRIFT for anything those writes missed. This file just creates an
 -- empty shell so the dashboard's LEFT JOIN works before the first ingest run.
 -- CREATE TABLE IF NOT EXISTS is idempotent — re-running deploy_all.sh never
 -- clobbers the rows the ingest job has written.

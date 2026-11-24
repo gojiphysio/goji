@@ -23,6 +23,15 @@ the only place PII lands in the warehouse; it is read solely by the staff
 worklist path and never appears on the financial dashboard. dim_patient itself
 stays PII-free. Keep these two concerns in separate tables.
 
+Between runs, goji-booking keeps dim_patient_contact current
+(booking/patient_contacts.py: Plato's patient webhook for staff actions, and
+the patients /internal/book creates), so the WhatsApp assistant recognises a
+patient the same day. This nightly rebuild stays the repair, and before it
+replaces the table it reports CONTACT DRIFT: patients Plato has that the table
+was missing, or held with a different name or number. Drift means one of
+those writers missed something (most often: Plato dropped the webhook after
+failed deliveries). Counts and patient ids only, never names or numbers.
+
 Env vars:
   PLATO_DB          Plato database name             default: gojihealth
   PLATO_API_KEY     Plato bearer token              (required, from Secret Manager)
@@ -167,6 +176,53 @@ def _looks_like_email(raw: str) -> bool:
     local, _, domain = v.partition("@")
     return bool(local) and "." in domain and not domain.startswith(".") \
         and not domain.endswith(".")
+
+
+DRIFT_MARKER = "PATIENT_CONTACT_DRIFT"
+
+
+def _last8(phone: str | None) -> str:
+    return "".join(c for c in (phone or "") if c.isdigit())[-8:]
+
+
+def _name_key(name: str | None) -> str:
+    return " ".join((name or "").lower().split())
+
+
+def contact_drift(current: dict[str, tuple[str | None, str | None]],
+                  fresh: list[dict]) -> tuple[list[str], list[str]]:
+    """(missing, changed) patient ids: in Plato but not in the table, or in
+    both with a different name or number (last 8 digits, case-insensitive
+    name). Patients only in the table are ignored: Plato has no delete event,
+    so a deleted patient is expected to linger until this rebuild."""
+    missing, changed = [], []
+    for r in fresh:
+        pid = r["patient_id"]
+        if pid not in current:
+            missing.append(pid)
+            continue
+        name, phone = current[pid]
+        if (_name_key(name), _last8(phone)) != (_name_key(r["full_name"]), _last8(r["phone"])):
+            changed.append(pid)
+    return missing, changed
+
+
+def report_drift(bq: "bigquery.Client", contact_ref: str, fresh: list[dict]) -> None:
+    """Log CONTACT DRIFT (see the module docstring) before the rebuild. Never
+    fails the job: the rebuild is the repair either way."""
+    try:
+        current = {r["patient_id"]: (r["full_name"], r["phone"]) for r in bq.query(
+            f"SELECT patient_id, full_name, phone FROM `{contact_ref}`").result()}
+    except Exception as e:
+        log.warning(f"contact drift check skipped: {e}")
+        return
+    missing, changed = contact_drift(current, fresh)
+    if missing or changed:
+        log.warning(f"{DRIFT_MARKER} missing={len(missing)} changed={len(changed)} "
+                    f"e.g. {(missing + changed)[:5]}: the nightly rebuild repairs it; "
+                    "check the Plato patient webhook (booking/README.md)")
+    else:
+        log.info("contact drift: none")
 
 
 def age_band(dob_str: str | None, today: date | None = None) -> str | None:
@@ -447,6 +503,7 @@ def main() -> None:
     # staff Front Desk dashboard and the appointment-reminder job. Same
     # WRITE_TRUNCATE snapshot pattern, separate table. WRITE_TRUNCATE replaces
     # the schema too, so adding a column here needs no migration.
+    report_drift(bq, contact_ref, contact_rows)
     log.info(f"loading {len(contact_rows)} contact rows into {contact_ref}")
     contact_job_config = bigquery.LoadJobConfig(
         source_format=bigquery.SourceFormat.NEWLINE_DELIMITED_JSON,
