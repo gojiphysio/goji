@@ -22,6 +22,7 @@ export type SearchType =
   | "Article"
   | "Press"
   | "Team"
+  | "Job"
   | "Page";
 
 export interface SearchHit {
@@ -86,7 +87,7 @@ export async function runSearch(
 }
 
 /** Display order for the result buckets — clinical intent first. */
-const TYPE_ORDER = ["Condition", "Service", "Article", "Press", "Team", "Page"];
+const TYPE_ORDER = ["Condition", "Service", "Article", "Press", "Team", "Job", "Page"];
 
 /** Group hits by type, preserving relevance order inside each bucket. */
 export function groupByType(hits: SearchHit[]): [string, SearchHit[]][] {
@@ -159,6 +160,8 @@ export function typeLabel(type: string): string {
       return "Press";
     case "Team":
       return "Our team";
+    case "Job":
+      return "Careers";
     default:
       return "Pages";
   }

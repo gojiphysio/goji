@@ -1,0 +1,88 @@
+---
+/**
+ * /careers/expression-of-interest/ — the general application form, for people
+ * when no listed role fits (or none is open). Same ApplicationForm as a
+ * vacancy, with job_id "general": filed in Drive under "General Expressions of
+ * Interest", worded as interest (not an application for a vacancy) in every
+ * email and on the confirmation.
+ */
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Section from "../../components/Section.astro";
+import ApplicationForm from "../../components/careers/ApplicationForm.astro";
+
+const origin = Astro.site ?? new URL(Astro.url.origin);
+const pageURL = new URL(Astro.url.pathname, origin).href;
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Home", item: origin.href },
+    { "@type": "ListItem", position: 2, name: "Careers", item: new URL("/careers/", origin).href },
+    { "@type": "ListItem", position: 3, name: "Express your interest", item: pageURL },
+  ],
+};
+---
+
+<BaseLayout
+  title="Express Your Interest | Careers at Goji"
+  description="Don't see a role that fits right now? Tell Goji about yourself, your experience and what you're looking for, and we'll be in touch about suitable roles."
+  schema={schema}
+  searchType="Job"
+  ogImage="/og-careers.jpg"
+  ogImageAlt="The reception at Goji's Lentor Modern clinic, with a red table, wooden chairs and the Goji sign"
+>
+  <section class="eoi-hero">
+    <div class="container container--narrow">
+      <a href="/careers/" class="eoi-back">
+        <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3L5 8l5 5"></path></svg>
+        Careers
+      </a>
+      <h1>Express your interest</h1>
+      <p class="eoi-hero__lead">
+        Don't see a role that fits you right now? We're always interested in
+        connecting with people who share our approach to care and want to be part
+        of Goji's journey.
+      </p>
+      <p class="eoi-hero__lead">
+        Tell us a little about yourself, your experience and what you're looking
+        for. This isn't an application for a particular vacancy: <a href="/careers/#vacancies">see current roles</a>
+        if you'd like to apply for one.
+      </p>
+    </div>
+  </section>
+
+  <Section tone="surface" narrow>
+    <ApplicationForm />
+  </Section>
+</BaseLayout>
+
+<style>
+  .eoi-hero {
+    background: var(--bg-page);
+    padding-block: clamp(2rem, 1.5rem + 3vw, 4.5rem);
+    border-bottom: 1px solid var(--rule);
+  }
+  .eoi-hero .container {
+    display: grid;
+    gap: var(--space-4);
+  }
+  .eoi-back {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--fs-small);
+    font-weight: var(--weight-medium);
+    color: var(--text-muted);
+    text-decoration: none;
+    justify-self: start;
+    min-height: 44px;
+  }
+  .eoi-back:hover {
+    color: var(--color-primary);
+  }
+  .eoi-hero__lead {
+    color: var(--text-muted);
+    font-size: var(--fs-lead);
+    max-width: 60ch;
+  }
+</style>

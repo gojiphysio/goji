@@ -16,6 +16,24 @@ const blogHasPosts =
   fs.existsSync(BLOG_DIR) &&
   fs.readdirSync(BLOG_DIR).some((f) => f.endsWith(".md"));
 
+// Careers: only open roles belong in the sitemap. A closed role's page stays up
+// (noindex, "applications closed"); a draft has no page. Read from the YAML
+// directly for the same reason as the blog check above.
+const CAREERS_DIR = new URL("./src/content/careers/", import.meta.url);
+const today = new Date().toISOString().slice(0, 10);
+const closedRoles = fs.existsSync(CAREERS_DIR)
+  ? fs
+      .readdirSync(CAREERS_DIR)
+      .filter((f) => f.endsWith(".yaml"))
+      .filter((f) => {
+        const y = fs.readFileSync(new URL(f, CAREERS_DIR), "utf8");
+        const status = (y.match(/^status:\s*(\w+)/m) || [])[1];
+        const closing = (y.match(/^closingDate:\s*['"]?(\d{4}-\d{2}-\d{2})/m) || [])[1];
+        return status !== "open" || (closing && closing < today);
+      })
+      .map((f) => `/careers/${f.replace(/\.yaml$/, "")}/`)
+  : [];
+
 // <lastmod> for the sitemap (Bing, which feeds ChatGPT search, uses it): the
 // last commit date of the file that holds the page's content. A content
 // collection entry (conditions, services, team, press, blog) wins over its
@@ -47,7 +65,7 @@ function lastmodFor(url) {
   const route = new URL(url).pathname.replace(/^\/|\/$/g, "");
   const [section, slug] = route.split("/");
   const candidates = [
-    ...(slug ? [`src/content/${section}/${slug}.md`] : []),
+    ...(slug ? [`src/content/${section}/${slug}.md`, `src/content/${section}/${slug}.yaml`] : []),
     `src/pages/${route || "index"}.astro`,
     `src/pages/${route}/index.astro`,
   ];
@@ -90,7 +108,8 @@ export default defineConfig({
         !page.includes("/styleguide") &&
         !page.includes("/search") &&
         !page.includes("/links") &&
-        (blogHasPosts || !page.includes("/blog")),
+        (blogHasPosts || !page.includes("/blog")) &&
+        !closedRoles.some((p) => page.endsWith(p)),
       serialize: (item) => {
         const lastmod = lastmodFor(item.url);
         return lastmod ? { ...item, lastmod } : item;

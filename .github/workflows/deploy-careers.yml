@@ -1,0 +1,99 @@
+name: Deploy careers
+
+# goji-careers (the website's job-application backend at
+# https://careers-api.gojiphysio.com). Tests run on every PR and push that
+# touches it. The deploy runs on pushes to main only once the service has been
+# stood up (repo variable CAREERS_TRACKER_ID is set), so merging this code
+# before the Google setup is done deploys nothing.
+#
+# Mirrors business-intelligence/scripts/careers/deploy.sh; keep the two in
+# sync. WIF auth, no key (same as deploy-booking.yml). The service account
+# careers-sa and its secret grants are created by deploy.sh on first run.
+#
+# Repo variables: CAREERS_GOOGLE_CLIENT_ID, CAREERS_DRIVE_ROOT_ID,
+# CAREERS_DRIVE_APPLICATIONS_ID, CAREERS_TRACKER_ID, and while testing
+# CAREERS_TEST_MODE=1 + CAREERS_TEST_RECIPIENT (clear both at go-live).
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "business-intelligence/scripts/careers/**"
+      - ".github/workflows/deploy-careers.yml"
+  pull_request:
+    paths:
+      - "business-intelligence/scripts/careers/**"
+      - ".github/workflows/deploy-careers.yml"
+  workflow_dispatch: {}
+
+concurrency:
+  group: deploy-careers-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  PROJECT: ${{ vars.GCP_PROJECT }}
+  REGION: ${{ vars.GCP_REGION }}
+  SERVICE: goji-careers
+  DOMAIN: careers-api.gojiphysio.com
+  CORS_ORIGIN: https://www.gojiphysio.com
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install deps
+        run: pip install -r business-intelligence/scripts/careers/requirements.txt pytest
+      - name: Careers tests
+        working-directory: business-intelligence/scripts
+        run: python -m pytest careers/ -q
+
+  deploy:
+    needs: test
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && vars.CAREERS_TRACKER_ID != ''
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.WIF_PROVIDER }}
+          service_account: ${{ vars.DEPLOY_SERVICE_ACCOUNT }}
+
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Deploy careers service
+        working-directory: business-intelligence/scripts/careers
+        env:
+          CLIENT_ID: ${{ vars.CAREERS_GOOGLE_CLIENT_ID }}
+          ROOT_ID: ${{ vars.CAREERS_DRIVE_ROOT_ID }}
+          APPS_ID: ${{ vars.CAREERS_DRIVE_APPLICATIONS_ID }}
+          TRACKER_ID: ${{ vars.CAREERS_TRACKER_ID }}
+          TEST_MODE: ${{ vars.CAREERS_TEST_MODE }}
+          TEST_RECIPIENT: ${{ vars.CAREERS_TEST_RECIPIENT }}
+          EXTRA_ORIGINS: ${{ vars.CAREERS_EXTRA_ORIGINS }}
+        run: |
+          SECRETS="CAREERS_GOOGLE_CLIENT_SECRET=careers-google-client-secret:latest"
+          SECRETS+=",CAREERS_GOOGLE_REFRESH_TOKEN=careers-google-refresh-token:latest"
+          SECRETS+=",GMAIL_APP_PASSWORD=gmail-app-password:latest,TURNSTILE_SECRET=turnstile-secret:latest"
+          ENV="CORS_ORIGIN=${CORS_ORIGIN}@CAREERS_GOOGLE_CLIENT_ID=${CLIENT_ID}"
+          ENV+="@CAREERS_DRIVE_ROOT_ID=${ROOT_ID}@CAREERS_DRIVE_APPLICATIONS_ID=${APPS_ID}"
+          ENV+="@CAREERS_TRACKER_ID=${TRACKER_ID}@CAREERS_TEST_MODE=${TEST_MODE}"
+          ENV+="@CAREERS_TEST_RECIPIENT=${TEST_RECIPIENT}@CAREERS_EXTRA_ORIGINS=${EXTRA_ORIGINS}"
+          gcloud run deploy "${SERVICE}" \
+            --source . --region "${REGION}" --project "${PROJECT}" \
+            --service-account "careers-sa@${PROJECT}.iam.gserviceaccount.com" \
+            --set-env-vars="^@^${ENV}" \
+            --set-secrets="${SECRETS}" \
+            --max-instances=1 --min-instances=0 --memory=512Mi --timeout=120 \
+            --allow-unauthenticated \
+            --quiet

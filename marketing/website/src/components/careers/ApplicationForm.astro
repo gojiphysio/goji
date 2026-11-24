@@ -1,0 +1,1000 @@
+---
+/**
+ * ApplicationForm — one form for both a specific vacancy and a general
+ * expression of interest (omit `vacancy`). Posts multipart to the goji-careers
+ * backend (`PUBLIC_CAREERS_API`), which validates everything again, stores the
+ * CV + summary in Goji's private Drive folder, adds the tracker row, and only
+ * then answers ok. Contract: business-intelligence/scripts/careers/README.md.
+ *
+ * Privacy: nothing typed here is kept in browser storage, sent to analytics, or
+ * captured by any replay tool (`data-pagefind-ignore` and no autocomplete on
+ * free text). A failed submit keeps the answers in memory so the candidate can
+ * retry; the same submission_id is resent, so a retry or a double-click never
+ * makes a second application.
+ */
+import Button from "../Button.astro";
+import {
+  CAREERS_API,
+  CAREERS_EMAIL,
+  CAREERS_OPTIONS as O,
+  CV_ACCEPT,
+  MAX_CV_MB,
+} from "../../lib/careers.ts";
+import { GOJI_TURNSTILE_SITE_KEY } from "../../lib/booking.ts";
+
+interface Props {
+  vacancy?: {
+    jobId: string;
+    title: string;
+    form: "physio" | "general";
+    minDaysPerWeek?: number;
+  };
+}
+const { vacancy } = Astro.props;
+const general = !vacancy;
+const kind = general ? "general" : vacancy.form;
+const minDays = vacancy?.minDaysPerWeek;
+const turnstileKey =
+  (import.meta.env.PUBLIC_TURNSTILE_SITE_KEY as string | undefined) ||
+  (CAREERS_API ? GOJI_TURNSTILE_SITE_KEY : "");
+// Dev-only stand-in for the backend so the flow can be clicked through locally.
+const devMock = import.meta.env.DEV && !CAREERS_API;
+const submitLabel = general ? "Send expression of interest" : "Submit application";
+const mail = `mailto:${CAREERS_EMAIL}`;
+---
+
+<div
+  class="apply"
+  data-apply
+  data-api={CAREERS_API}
+  data-job-id={general ? "general" : vacancy.jobId}
+  data-kind={kind}
+  data-min-days={minDays ?? ""}
+  data-turnstile-key={turnstileKey}
+  data-dev-mock={devMock ? "1" : ""}
+  data-pagefind-ignore
+>
+  <form class="apply__form" novalidate data-form>
+    <div class="apply__summary" role="alert" tabindex="-1" hidden data-summary>
+      <p class="apply__summary-title">Please check the following:</p>
+      <ul data-summary-list></ul>
+    </div>
+
+    <p class="apply__required-note">Fields marked <span aria-hidden="true">*</span><span class="visually-hidden">with an asterisk</span> are required.</p>
+
+    {/* ---- About you ---- */}
+    <fieldset class="apply__group">
+      <legend class="apply__legend">About you</legend>
+
+      <div class="apply__field" data-field="full_name">
+        <label class="apply__label" for="ap-full_name">Full name <span class="apply__req" aria-hidden="true">*</span></label>
+        <input id="ap-full_name" name="full_name" type="text" required maxlength="100" autocomplete="name" aria-describedby="ap-full_name-error" />
+        <p class="apply__error" id="ap-full_name-error" hidden></p>
+      </div>
+
+      <div class="apply__field" data-field="email">
+        <label class="apply__label" for="ap-email">Email address <span class="apply__req" aria-hidden="true">*</span></label>
+        <input id="ap-email" name="email" type="email" required maxlength="254" autocomplete="email" inputmode="email" aria-describedby="ap-email-error" />
+        <p class="apply__error" id="ap-email-error" hidden></p>
+      </div>
+
+      <div class="apply__field" data-field="phone">
+        <label class="apply__label" for="ap-phone">Mobile number <span class="apply__req" aria-hidden="true">*</span></label>
+        <p class="apply__hint" id="ap-phone-hint">Include the country code, for example +65 9123 4567.</p>
+        <input id="ap-phone" name="phone" type="tel" required maxlength="40" autocomplete="tel" inputmode="tel" aria-describedby="ap-phone-hint ap-phone-error" />
+        <p class="apply__error" id="ap-phone-error" hidden></p>
+      </div>
+    </fieldset>
+
+    {/* ---- The role ---- */}
+    <fieldset class="apply__group">
+      <legend class="apply__legend">The role</legend>
+      {
+        general ? (
+          <>
+            <div class="apply__field" data-field="role_category">
+              <label class="apply__label" for="ap-role_category">Type of role you're interested in <span class="apply__req" aria-hidden="true">*</span></label>
+              <select id="ap-role_category" name="role_category" required aria-describedby="ap-role_category-error">
+                <option value="">Choose one</option>
+                {O.roleCategories.map(([v, l]) => <option value={v}>{l}</option>)}
+              </select>
+              <p class="apply__error" id="ap-role_category-error" hidden></p>
+            </div>
+            <div class="apply__field" data-field="role_interest">
+              <label class="apply__label" for="ap-role_interest">Role or title, if you have one in mind</label>
+              <input id="ap-role_interest" name="role_interest" type="text" maxlength="120" aria-describedby="ap-role_interest-error" />
+              <p class="apply__error" id="ap-role_interest-error" hidden></p>
+            </div>
+          </>
+        ) : (
+          <p class="apply__fixed-role">
+            <span class="apply__label">Role applied for</span>
+            <span>{vacancy.title}</span>
+          </p>
+        )
+      }
+
+      <fieldset class="apply__field apply__choices" data-field="employment_pref" aria-describedby="ap-employment_pref-error">
+        <legend class="apply__label">Preferred employment arrangement <span class="apply__req" aria-hidden="true">*</span></legend>
+        {O.employment.map(([v, l]) => (
+          <label class="apply__choice">
+            <input type="radio" name="employment_pref" value={v} required />
+            <span>{l}</span>
+          </label>
+        ))}
+        <p class="apply__error" id="ap-employment_pref-error" hidden></p>
+      </fieldset>
+
+      <div class="apply__conditional" data-part-time hidden>
+        {minDays && (
+          <p class="apply__note" id="ap-min-days-note">
+            Part-time roles in this vacancy are a minimum of {minDays} days per week.
+          </p>
+        )}
+        <div class="apply__field" data-field="days_per_week">
+          <label class="apply__label" for="ap-days_per_week">Days per week you're available <span class="apply__req" aria-hidden="true">*</span></label>
+          <select id="ap-days_per_week" name="days_per_week" required disabled aria-describedby={`${minDays ? "ap-min-days-note " : ""}ap-days-below ap-days_per_week-error`}>
+            <option value="">Choose</option>
+            {[1, 2, 3, 4, 5, 6].map((n) => <option value={String(n)}>{n} {n === 1 ? "day" : "days"}</option>)}
+          </select>
+          <p class="apply__hint apply__hint--note" id="ap-days-below" hidden data-days-below>
+            That's below the {minDays}-day minimum for this role. You're still welcome to apply, and we'll talk it through with you.
+          </p>
+          <p class="apply__error" id="ap-days_per_week-error" hidden></p>
+        </div>
+        <fieldset class="apply__field apply__choices apply__choices--row" data-field="available_days">
+          <legend class="apply__label">Which days could you work?</legend>
+          {O.days.map(([v, l]) => (
+            <label class="apply__choice">
+              <input type="checkbox" name="available_days" value={v} disabled />
+              <span>{l}</span>
+            </label>
+          ))}
+        </fieldset>
+      </div>
+
+      <div class="apply__field" data-field="start_availability">
+        <label class="apply__label" for="ap-start_availability">Earliest start date or notice period <span class="apply__req" aria-hidden="true">*</span></label>
+        <p class="apply__hint" id="ap-start-hint">For example "1 March 2027" or "One month's notice".</p>
+        <input id="ap-start_availability" name="start_availability" type="text" required maxlength="120" aria-describedby="ap-start-hint ap-start_availability-error" />
+        <p class="apply__error" id="ap-start_availability-error" hidden></p>
+      </div>
+    </fieldset>
+
+    {/* ---- Experience ---- */}
+    <fieldset class="apply__group">
+      <legend class="apply__legend">Your experience</legend>
+
+      <div class="apply__field" data-field="years_experience">
+        <label class="apply__label" for="ap-years_experience">Years of relevant professional experience <span class="apply__req" aria-hidden="true">*</span></label>
+        <select id="ap-years_experience" name="years_experience" required aria-describedby="ap-years_experience-error">
+          <option value="">Choose</option>
+          {O.years.map(([v, l]) => <option value={v}>{l}</option>)}
+        </select>
+        <p class="apply__error" id="ap-years_experience-error" hidden></p>
+      </div>
+
+      <div class="apply__conditional" data-physio hidden={kind !== "physio"}>
+        <fieldset class="apply__field apply__choices" data-field="ahpc_status" aria-describedby="ap-ahpc_status-error">
+          <legend class="apply__label">AHPC registration status <span class="apply__req" aria-hidden="true">*</span></legend>
+          {O.ahpc.map(([v, l]) => (
+            <label class="apply__choice">
+              <input type="radio" name="ahpc_status" value={v} required disabled={kind !== "physio"} />
+              <span>{l}</span>
+            </label>
+          ))}
+          <p class="apply__error" id="ap-ahpc_status-error" hidden></p>
+        </fieldset>
+
+        <fieldset class="apply__field apply__choices apply__choices--grid" data-field="clinical_areas" aria-describedby="ap-clinical_areas-error">
+          <legend class="apply__label">Primary areas of clinical experience <span class="apply__req" aria-hidden="true">*</span></legend>
+          {O.clinicalAreas.map(([v, l]) => (
+            <label class="apply__choice">
+              <input type="checkbox" name="clinical_areas" value={v} disabled={kind !== "physio"} data-other={v === "other" ? "clinical_areas_other" : undefined} />
+              <span>{l}</span>
+            </label>
+          ))}
+          <p class="apply__error" id="ap-clinical_areas-error" hidden></p>
+        </fieldset>
+        <div class="apply__field apply__other" data-field="clinical_areas_other" hidden>
+          <label class="apply__label" for="ap-clinical_areas_other">Other clinical areas</label>
+          <input id="ap-clinical_areas_other" name="clinical_areas_other" type="text" maxlength="200" disabled />
+        </div>
+
+        <div class="apply__field" data-field="womens_health">
+          <label class="apply__label" for="ap-womens_health">Women's health experience or areas of interest (optional)</label>
+          <textarea id="ap-womens_health" name="womens_health" rows="3" maxlength="1000" disabled={kind !== "physio"}></textarea>
+        </div>
+      </div>
+
+      <fieldset class="apply__field apply__choices apply__choices--grid" data-field="certifications">
+        <legend class="apply__label">Relevant additional training or certifications (optional)</legend>
+        {O.certifications.map(([v, l]) => (
+          <label class="apply__choice">
+            <input type="checkbox" name="certifications" value={v} data-other={v === "other" ? "certifications_other" : undefined} />
+            <span>{l}</span>
+          </label>
+        ))}
+      </fieldset>
+      <div class="apply__field apply__other" data-field="certifications_other" hidden>
+        <label class="apply__label" for="ap-certifications_other">Other training or certifications</label>
+        <input id="ap-certifications_other" name="certifications_other" type="text" maxlength="200" disabled />
+      </div>
+    </fieldset>
+
+    {/* ---- CV and introduction ---- */}
+    <fieldset class="apply__group">
+      <legend class="apply__legend">Your CV and introduction</legend>
+
+      <div class="apply__field" data-field="cv">
+        <label class="apply__label" for="ap-cv">CV <span class="apply__req" aria-hidden="true">*</span></label>
+        <p class="apply__hint" id="ap-cv-hint">PDF, DOC or DOCX, up to {MAX_CV_MB} MB.</p>
+        <input id="ap-cv" name="cv" type="file" required accept={CV_ACCEPT} class="apply__file" aria-describedby="ap-cv-hint ap-cv-chosen ap-cv-error" data-cv />
+        <p class="apply__chosen" id="ap-cv-chosen" hidden data-cv-chosen>
+          <span data-cv-name></span>
+          <button type="button" class="apply__link-btn" data-cv-remove>Remove file</button>
+        </p>
+        <p class="apply__error" id="ap-cv-error" hidden></p>
+      </div>
+
+      <div class="apply__field" data-field="intro">
+        <label class="apply__label" for="ap-intro">A brief introduction <span class="apply__req" aria-hidden="true">*</span></label>
+        <p class="apply__hint" id="ap-intro-hint">Tell us a little about yourself, your experience and what you're looking for.</p>
+        <textarea id="ap-intro" name="intro" rows="6" required minlength="30" maxlength="3000" aria-describedby="ap-intro-hint ap-intro-count ap-intro-error"></textarea>
+        <p class="apply__count" id="ap-intro-count" aria-live="polite" data-intro-count>0 / 3000</p>
+        <p class="apply__error" id="ap-intro-error" hidden></p>
+      </div>
+
+      <div class="apply__field" data-field="linkedin">
+        <label class="apply__label" for="ap-linkedin">LinkedIn profile URL (optional)</label>
+        <input id="ap-linkedin" name="linkedin" type="url" maxlength="200" inputmode="url" placeholder="https://www.linkedin.com/in/…" aria-describedby="ap-linkedin-error" />
+        <p class="apply__error" id="ap-linkedin-error" hidden></p>
+      </div>
+
+      <div class="apply__field" data-field="how_heard">
+        <label class="apply__label" for="ap-how_heard">How did you hear about Goji? (optional)</label>
+        <select id="ap-how_heard" name="how_heard">
+          <option value="">Choose</option>
+          {O.heard.map(([v, l]) => <option value={v}>{l}</option>)}
+        </select>
+      </div>
+    </fieldset>
+
+    {/* ---- Privacy ---- */}
+    <fieldset class="apply__group apply__privacy">
+      <legend class="apply__legend">Your personal data</legend>
+      <div class="apply__notice" id="ap-privacy-notice">
+        <p>
+          By submitting this application, you acknowledge that Goji Health Pte. Ltd.
+          will collect, use and retain the personal information you provide for
+          recruitment purposes, including assessing your suitability for employment,
+          communicating with you and administering the recruitment process.
+        </p>
+        <p>
+          Your information may be stored using secure third-party service providers
+          and will only be accessible to authorised personnel for relevant
+          recruitment purposes.
+        </p>
+        <p>
+          For questions about your personal data or to request its withdrawal or
+          correction, please contact <a href={mail}>{CAREERS_EMAIL}</a>.
+        </p>
+        <p>Please refer to our <a href="/privacy/#job-applicants">Privacy Policy</a> for further information.</p>
+      </div>
+      <div class="apply__field" data-field="privacy_ack">
+        <label class="apply__choice apply__choice--consent">
+          <input type="checkbox" name="privacy_ack" value="on" required aria-describedby="ap-privacy-notice ap-privacy_ack-error" />
+          <span>I have read and acknowledge the recruitment privacy notice above. <span class="apply__req" aria-hidden="true">*</span></span>
+        </label>
+        <p class="apply__error" id="ap-privacy_ack-error" hidden></p>
+      </div>
+      <div class="apply__field">
+        <label class="apply__choice apply__choice--consent">
+          <input type="checkbox" name="talent_pool" value="on" />
+          <span>I would like Goji to retain my application and contact me about suitable future opportunities. (Optional)</span>
+        </label>
+      </div>
+    </fieldset>
+
+    {/* Honeypot: people never see or tab to it; scripts fill it. */}
+    <div class="apply__hp" aria-hidden="true">
+      <label>Company website <input type="text" name="company_url" tabindex="-1" autocomplete="off" /></label>
+    </div>
+    <div class="apply__turnstile" data-turnstile></div>
+
+    <div class="apply__status" role="alert" hidden data-status></div>
+
+    <div class="apply__progress" hidden data-progress>
+      <progress max="100" value="0" aria-label="Upload progress" data-progress-bar></progress>
+      <span class="apply__progress-text" aria-live="polite" data-progress-text>Sending…</span>
+    </div>
+
+    <div class="apply__actions">
+      <button type="submit" class="apply__submit" data-submit>{submitLabel}</button>
+      <p class="apply__fallback">
+        Having trouble with the form? Email your CV to <a href={mail}>{CAREERS_EMAIL}</a>
+        {!general && <> with "{vacancy.title}" in the subject</>}.
+      </p>
+    </div>
+  </form>
+
+  <div class="apply__done" hidden tabindex="-1" data-done>
+    <h3 class="apply__done-title">Thank you for your interest in Goji!</h3>
+    <p>We've received your {general ? "expression of interest" : "application"} and look forward to learning more about you.</p>
+    <p>Our team will be in touch should there be a suitable next step.</p>
+    <p class="apply__ref">Your application reference: <strong data-ref></strong></p>
+    <p>You should also receive an acknowledgement email from us.</p>
+    <div class="apply__done-actions">
+      <Button href="/careers/" variant="primary">Back to Careers</Button>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { campaignTags, careersEvent, MAX_CV_MB } from "../../lib/careers.ts";
+
+  type Turnstile = {
+    render(el: HTMLElement, opts: Record<string, unknown>): string;
+    reset(id: string): void;
+  };
+
+  const root = document.querySelector<HTMLElement>("[data-apply]");
+  if (root) init(root);
+
+  function init(root: HTMLElement) {
+    const form = root.querySelector<HTMLFormElement>("[data-form]")!;
+    const api = root.dataset.api || "";
+    const jobId = root.dataset.jobId || "general";
+    const kind = root.dataset.kind || "general";
+    const minDays = Number(root.dataset.minDays || 0);
+    const turnstileKey = root.dataset.turnstileKey || "";
+    const devMock = root.dataset.devMock === "1";
+    const isGeneral = jobId === "general";
+    const loadedAt = Date.now();
+    // One id per filled-in form. Resent on every retry so the backend files one
+    // application however many times Submit is pressed.
+    let submissionId = newId();
+    let busy = false;
+    let started = false;
+
+    const $ = <T extends Element = HTMLElement>(sel: string) => form.querySelector<T>(sel);
+    const summary = $<HTMLElement>("[data-summary]")!;
+    const summaryList = $<HTMLUListElement>("[data-summary-list]")!;
+    const statusEl = $<HTMLElement>("[data-status]")!;
+    const progress = $<HTMLElement>("[data-progress]")!;
+    const bar = $<HTMLProgressElement>("[data-progress-bar]")!;
+    const barText = $<HTMLElement>("[data-progress-text]")!;
+    const submitBtn = $<HTMLButtonElement>("[data-submit]")!;
+    const partTime = $<HTMLElement>("[data-part-time]")!;
+    const physio = $<HTMLElement>("[data-physio]")!;
+    const cvInput = $<HTMLInputElement>("[data-cv]")!;
+    const cvChosen = $<HTMLElement>("[data-cv-chosen]")!;
+    const intro = $<HTMLTextAreaElement>("#ap-intro")!;
+    const introCount = $<HTMLElement>("[data-intro-count]")!;
+    const daysBelow = $<HTMLElement>("[data-days-below]");
+    const done = root.querySelector<HTMLElement>("[data-done]")!;
+
+    function newId(): string {
+      if (crypto.randomUUID) return crypto.randomUUID();
+      const b = crypto.getRandomValues(new Uint8Array(16));
+      b[6] = (b[6] & 0x0f) | 0x40;
+      b[8] = (b[8] & 0x3f) | 0x80;
+      const h = [...b].map((x) => x.toString(16).padStart(2, "0")).join("");
+      return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20)}`;
+    }
+
+    // ---- conditional sections -------------------------------------------
+    function setSection(el: HTMLElement | null, on: boolean) {
+      if (!el) return;
+      el.hidden = !on;
+      el.querySelectorAll<HTMLInputElement>("input, select, textarea").forEach((c) => {
+        // "Other" text boxes stay governed by their own checkbox.
+        if (c.closest(".apply__other")) return;
+        c.disabled = !on;
+      });
+    }
+    function refreshConditionals() {
+      const pref = (form.elements.namedItem("employment_pref") as RadioNodeList).value;
+      setSection(partTime, pref === "part_time" || pref === "either");
+      let physioOn = kind === "physio";
+      if (isGeneral) physioOn = ($<HTMLSelectElement>("#ap-role_category")?.value || "") === "physiotherapy";
+      setSection(physio, physioOn);
+      form.querySelectorAll<HTMLInputElement>("input[data-other]").forEach((box) => {
+        const other = $<HTMLElement>(`[data-field="${box.dataset.other}"]`);
+        if (!other) return;
+        const on = box.checked && !box.disabled;
+        other.hidden = !on;
+        other.querySelectorAll<HTMLInputElement>("input").forEach((i) => (i.disabled = !on));
+      });
+      const days = Number(($<HTMLSelectElement>("#ap-days_per_week")?.value) || 0);
+      if (daysBelow) daysBelow.hidden = !(minDays && days && days < minDays && !partTime.hidden);
+    }
+    form.addEventListener("change", refreshConditionals);
+    refreshConditionals();
+
+    // ---- started / Turnstile (lazy) ------------------------------------
+    let tsToken = "";
+    let tsId: string | undefined;
+    let tsLoading = false;
+    function mountTurnstile() {
+      const host = $<HTMLElement>("[data-turnstile]");
+      if (!turnstileKey || !host || tsLoading) return;
+      tsLoading = true;
+      const s = document.createElement("script");
+      s.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+      s.async = true;
+      s.onload = () => {
+        const ts = (window as unknown as { turnstile?: Turnstile }).turnstile;
+        if (!ts) return;
+        tsId = ts.render(host, {
+          sitekey: turnstileKey,
+          action: "careers",
+          callback: (t: string) => (tsToken = t),
+          "expired-callback": () => (tsToken = ""),
+          "error-callback": () => (tsToken = ""),
+        });
+      };
+      s.onerror = () => (tsLoading = false);
+      document.head.appendChild(s);
+    }
+    function resetTurnstile() {
+      tsToken = "";
+      const ts = (window as unknown as { turnstile?: Turnstile }).turnstile;
+      if (ts && tsId) ts.reset(tsId);
+    }
+    const onStart = () => {
+      if (started) return;
+      started = true;
+      careersEvent("application_started", { job_id: jobId });
+      mountTurnstile();
+    };
+    form.addEventListener("focusin", onStart);
+    form.addEventListener("input", onStart);
+
+    // ---- CV picker ------------------------------------------------------
+    function fmtSize(n: number) {
+      return n >= 1024 * 1024 ? `${(n / 1024 / 1024).toFixed(1)} MB` : `${Math.max(1, Math.round(n / 1024))} KB`;
+    }
+    function showChosen() {
+      const f = cvInput.files?.[0];
+      cvChosen.hidden = !f;
+      if (f) cvChosen.querySelector("[data-cv-name]")!.textContent = `Selected: ${f.name} (${fmtSize(f.size)}). Choose a different file above to replace it.`;
+      const err = checkCv();
+      setError("cv", err);
+    }
+    cvInput.addEventListener("change", showChosen);
+    cvChosen.querySelector("[data-cv-remove]")!.addEventListener("click", () => {
+      cvInput.value = "";
+      showChosen();
+      setError("cv", "");
+      cvInput.focus();
+    });
+    function checkCv(): string {
+      const f = cvInput.files?.[0];
+      if (!f) return "";
+      const ext = (f.name.split(".").pop() || "").toLowerCase();
+      if (!["pdf", "doc", "docx"].includes(ext)) return "Please upload your CV as a PDF, DOC or DOCX file.";
+      if (f.size === 0) return "The selected file is empty.";
+      if (f.size > MAX_CV_MB * 1024 * 1024) return `Your CV must be ${MAX_CV_MB} MB or smaller. This file is ${fmtSize(f.size)}.`;
+      return "";
+    }
+
+    intro.addEventListener("input", () => {
+      introCount.textContent = `${intro.value.length} / 3000`;
+    });
+
+    // ---- errors -----------------------------------------------------------
+    function fieldEl(name: string) {
+      return $<HTMLElement>(`[data-field="${name}"]`);
+    }
+    function firstControl(name: string) {
+      return form.querySelector<HTMLElement>(`[name="${name}"]:not([disabled])`);
+    }
+    function setError(name: string, msg: string) {
+      const wrap = fieldEl(name);
+      const err = form.querySelector<HTMLElement>(`#ap-${name}-error`);
+      if (wrap) wrap.toggleAttribute("data-invalid", !!msg);
+      form.querySelectorAll<HTMLElement>(`[name="${name}"]`).forEach((c) => {
+        if (msg) c.setAttribute("aria-invalid", "true");
+        else c.removeAttribute("aria-invalid");
+      });
+      if (err) {
+        err.textContent = msg;
+        err.hidden = !msg;
+      }
+    }
+    function clearErrors() {
+      form.querySelectorAll<HTMLElement>("[data-invalid]").forEach((w) => w.removeAttribute("data-invalid"));
+      form.querySelectorAll<HTMLElement>("[aria-invalid]").forEach((c) => c.removeAttribute("aria-invalid"));
+      form.querySelectorAll<HTMLElement>(".apply__error").forEach((e) => {
+        e.hidden = true;
+        e.textContent = "";
+      });
+      summary.hidden = true;
+      summaryList.innerHTML = "";
+      statusEl.hidden = true;
+      statusEl.textContent = "";
+    }
+    function showErrors(errors: Record<string, string>) {
+      const names = Object.keys(errors);
+      for (const n of names) setError(n, errors[n]);
+      summaryList.innerHTML = "";
+      for (const n of names) {
+        const ctrl = firstControl(n);
+        const li = document.createElement("li");
+        const a = document.createElement("a");
+        a.href = ctrl?.id ? `#${ctrl.id}` : "#";
+        a.textContent = errors[n];
+        a.addEventListener("click", (e) => {
+          e.preventDefault();
+          ctrl?.focus();
+        });
+        li.appendChild(a);
+        summaryList.appendChild(li);
+      }
+      summary.hidden = names.length === 0;
+      if (names.length) summary.focus();
+    }
+    function showStatus(html: string) {
+      statusEl.innerHTML = html;
+      statusEl.hidden = false;
+      statusEl.scrollIntoView({ block: "center", behavior: "smooth" });
+    }
+
+    // ---- client-side validation (the server re-checks everything) --------
+    const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    function validate(fd: FormData): Record<string, string> {
+      const e: Record<string, string> = {};
+      const v = (n: string) => String(fd.get(n) || "").trim();
+      if (v("full_name").length < 2) e.full_name = "Please enter your full name.";
+      if (!EMAIL.test(v("email"))) e.email = "Please enter a valid email address, like name@example.com.";
+      const digits = v("phone").replace(/\D/g, "");
+      if (!/^(\+|00)/.test(v("phone")) || digits.length < 8 || digits.length > 15)
+        e.phone = "Please enter your mobile number with its country code, like +65 9123 4567.";
+      if (isGeneral && !v("role_category")) e.role_category = "Please choose the type of role you're interested in.";
+      if (!v("employment_pref")) e.employment_pref = "Please choose full-time, part-time or open to both.";
+      if (!partTime.hidden && !v("days_per_week"))
+        e.days_per_week = "Please tell us how many days a week you're available.";
+      if (v("start_availability").length < 2) e.start_availability = "Please tell us your earliest start date or notice period.";
+      if (!v("years_experience")) e.years_experience = "Please choose your years of relevant experience.";
+      if (!physio.hidden) {
+        if (!v("ahpc_status")) e.ahpc_status = "Please choose your AHPC registration status.";
+        if (!fd.getAll("clinical_areas").length) e.clinical_areas = "Please choose at least one area of clinical experience.";
+      }
+      if (!cvInput.files?.length) e.cv = `Please attach your CV (PDF, DOC or DOCX, up to ${MAX_CV_MB} MB).`;
+      else if (checkCv()) e.cv = checkCv();
+      if (v("intro").length < 30) e.intro = "Please write at least 30 characters about yourself.";
+      if (v("linkedin") && !/^https:\/\/([a-z]{2,3}\.)?linkedin\.com\//.test(v("linkedin")))
+        e.linkedin = "Please paste the full link to your LinkedIn profile, starting https://";
+      if (!fd.get("privacy_ack")) e.privacy_ack = "Please confirm you've read the recruitment privacy notice.";
+      return e;
+    }
+
+    // ---- submit -----------------------------------------------------------
+    function setBusy(on: boolean) {
+      busy = on;
+      submitBtn.disabled = on;
+      submitBtn.setAttribute("aria-busy", String(on));
+      progress.hidden = !on;
+      if (on) {
+        bar.value = 0;
+        barText.textContent = "Uploading your CV…";
+      }
+    }
+    function fail(code: string, html: string) {
+      careersEvent("application_error", { job_id: jobId, error_code: code });
+      showStatus(html);
+    }
+    const mail = `<a href="mailto:hello@gojiphysio.com">hello@gojiphysio.com</a>`;
+
+    form.addEventListener("submit", (ev) => {
+      ev.preventDefault();
+      if (busy) return;
+      clearErrors();
+      const fd = new FormData(form);
+      const errors = validate(fd);
+      if (Object.keys(errors).length) {
+        careersEvent("application_error", { job_id: jobId, error_code: "invalid_client" });
+        showErrors(errors);
+        return;
+      }
+      fd.set("submission_id", submissionId);
+      fd.set("job_id", jobId);
+      fd.set("elapsed_ms", String(Date.now() - loadedAt));
+      if (tsToken) fd.set("turnstile_token", tsToken);
+      for (const [k, val] of Object.entries(campaignTags())) fd.set(k, val);
+
+      if (!api) {
+        if (devMock) return mockSubmit();
+        return fail("offline", `Online applications aren't available just now. Please email your CV to ${mail}.`);
+      }
+
+      setBusy(true);
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", `${api.replace(/\/$/, "")}/api/apply`);
+      xhr.timeout = 120000;
+      xhr.responseType = "json";
+      xhr.upload.onprogress = (e) => {
+        if (!e.lengthComputable) return;
+        const pct = Math.min(99, Math.round((e.loaded / e.total) * 100));
+        bar.value = pct;
+        barText.textContent = pct >= 99 ? "Saving your application…" : `Uploading your CV… ${pct}%`;
+      };
+      xhr.onload = () => {
+        setBusy(false);
+        const body = (xhr.response || {}) as {
+          ok?: boolean; reference?: string; code?: string; error?: string; fields?: Record<string, string>;
+        };
+        if (xhr.status === 200 && body.ok && body.reference) return succeed(body.reference);
+        resetTurnstile();
+        const code = body.code || `http_${xhr.status}`;
+        if (body.fields && Object.keys(body.fields).length) {
+          careersEvent("application_error", { job_id: jobId, error_code: code });
+          return showErrors(body.fields);
+        }
+        if (code === "closed")
+          return fail(code, `Applications for this role have closed. You're welcome to <a href="/careers/expression-of-interest/">send us an expression of interest</a> instead.`);
+        if (code === "rate_limited") return fail(code, escapeHtml(body.error || "Too many attempts. Please try again later."));
+        if (code === "bot_check")
+          return fail(code, `We couldn't verify this submission. Please try again, or email your CV to ${mail}.`);
+        fail(code, `We couldn't save your application just now, so it hasn't been sent. Your answers are still here: please try again in a minute. If it keeps happening, email your CV to ${mail}.`);
+      };
+      const networkFail = () => {
+        setBusy(false);
+        resetTurnstile();
+        fail("network", `We couldn't reach our server, so your application hasn't been sent. Your answers are still here: check your connection and try again, or email your CV to ${mail}.`);
+      };
+      xhr.onerror = networkFail;
+      xhr.ontimeout = networkFail;
+      xhr.send(fd);
+    });
+
+    function escapeHtml(s: string) {
+      return s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
+    }
+
+    function succeed(reference: string) {
+      careersEvent(isGeneral ? "expression_of_interest_submitted" : "application_submitted", { job_id: jobId });
+      // Drop the answers from the page; nothing was ever written to storage.
+      form.reset();
+      cvInput.value = "";
+      submissionId = newId();
+      form.hidden = true;
+      done.querySelector("[data-ref]")!.textContent = reference;
+      done.hidden = false;
+      done.focus();
+      done.scrollIntoView({ block: "start", behavior: "smooth" });
+    }
+
+    function mockSubmit() {
+      setBusy(true);
+      let p = 0;
+      const t = setInterval(() => {
+        p += 20;
+        bar.value = p;
+        barText.textContent = `Uploading your CV… ${p}% (dev mock)`;
+        if (p >= 100) {
+          clearInterval(t);
+          setBusy(false);
+          succeed("GOJI-APP-DEV-0000");
+        }
+      }, 200);
+    }
+  }
+</script>
+
+<style>
+  .apply {
+    --apply-gap: var(--space-5);
+  }
+  .apply__form {
+    display: grid;
+    gap: var(--space-6);
+  }
+  .apply__form[hidden],
+  .apply__done[hidden],
+  .apply [hidden] {
+    display: none !important;
+  }
+  .apply__required-note {
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+  }
+  .apply__group {
+    border: 0;
+    margin: 0;
+    padding: 0;
+    padding-top: var(--space-5);
+    border-top: 1px solid var(--rule);
+    display: grid;
+    gap: var(--apply-gap);
+    min-width: 0;
+  }
+  .apply__legend {
+    font-family: var(--font-display);
+    font-variation-settings: var(--font-display-axes);
+    font-weight: var(--weight-display);
+    font-size: var(--fs-h3);
+    line-height: 1.15;
+    padding: 0;
+    margin-bottom: var(--space-4);
+    float: left;
+    width: 100%;
+  }
+  .apply__legend + * {
+    clear: both;
+  }
+  .apply__field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    border: 0;
+    margin: 0;
+    padding: 0;
+    min-width: 0;
+  }
+  .apply__label {
+    font-size: var(--fs-small);
+    font-weight: var(--weight-semibold);
+    color: var(--text-default);
+    padding: 0;
+  }
+  legend.apply__label {
+    margin-bottom: var(--space-2);
+  }
+  .apply__req {
+    color: var(--color-primary);
+    margin-left: 0.15em;
+  }
+  .apply__hint {
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+    margin: 0;
+  }
+  .apply__hint--note {
+    color: var(--text-default);
+    background: var(--bg-raised);
+    border-left: 3px solid var(--color-accent);
+    padding: var(--space-2) var(--space-3);
+  }
+  .apply__note {
+    font-size: var(--fs-small);
+    margin: 0 0 var(--space-2);
+  }
+  .apply__error {
+    font-size: var(--fs-small);
+    font-weight: var(--weight-medium);
+    color: var(--color-primary);
+    margin: 0;
+  }
+  .apply__field[data-invalid] input:not([type="checkbox"]):not([type="radio"]),
+  .apply__field[data-invalid] select,
+  .apply__field[data-invalid] textarea {
+    border-color: var(--color-primary);
+  }
+  .apply__fixed-role {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    margin: 0;
+  }
+  .apply__conditional {
+    display: grid;
+    gap: var(--apply-gap);
+    padding-left: var(--space-4);
+    border-left: 2px solid var(--rule);
+  }
+
+  /* Choices: radios and checkboxes. Base CSS styles every input as a full-width
+     text box, so undo that here. Rows are 44px tall for touch. */
+  .apply__choices {
+    gap: 0;
+  }
+  .apply__choices--grid,
+  .apply__choices--row {
+    display: grid;
+    grid-template-columns: 1fr;
+    column-gap: var(--space-5);
+  }
+  .apply__choices--grid > legend,
+  .apply__choices--row > legend,
+  .apply__choices--grid > .apply__error {
+    grid-column: 1 / -1;
+  }
+  @media (min-width: 560px) {
+    .apply__choices--grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .apply__choices--row {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  @media (min-width: 560px) {
+    .apply__choices--row {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+  }
+  .apply__choice {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    min-height: 44px;
+    cursor: pointer;
+    font-size: var(--fs-body);
+  }
+  .apply__choice input {
+    width: 1.25rem;
+    height: 1.25rem;
+    padding: 0;
+    margin: 0;
+    flex: none;
+    accent-color: var(--color-primary);
+    cursor: pointer;
+  }
+  .apply__choice--consent {
+    align-items: flex-start;
+    min-height: 0;
+    padding-block: var(--space-2);
+  }
+  .apply__choice--consent input {
+    margin-top: 0.2rem;
+  }
+
+  .apply__file {
+    padding: var(--space-3);
+    background: var(--bg-content);
+    cursor: pointer;
+  }
+  .apply__file::file-selector-button {
+    font: inherit;
+    font-weight: var(--weight-semibold);
+    font-size: var(--fs-small);
+    color: var(--color-primary);
+    background: var(--bg-content);
+    border: 1.5px solid var(--color-primary);
+    border-radius: var(--radius-pill);
+    min-height: 40px;
+    padding: 0 1rem;
+    margin-right: var(--space-3);
+    cursor: pointer;
+  }
+  .apply__chosen {
+    font-size: var(--fs-small);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-4);
+    align-items: center;
+    margin: 0;
+  }
+  .apply__link-btn {
+    font: inherit;
+    font-weight: var(--weight-semibold);
+    color: var(--color-primary);
+    background: none;
+    border: 0;
+    padding: var(--space-2) 0;
+    min-height: 44px;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+    cursor: pointer;
+  }
+  .apply__count {
+    font-size: var(--fs-caption);
+    color: var(--text-muted);
+    text-align: right;
+    margin: 0;
+  }
+
+  .apply__notice {
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+    background: var(--bg-raised);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-sm);
+    padding: var(--space-4);
+  }
+  .apply__notice p + p {
+    margin-top: var(--space-3);
+  }
+
+  .apply__hp {
+    position: absolute;
+    left: -10000px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
+  .apply__summary,
+  .apply__status {
+    border: 1.5px solid var(--color-primary);
+    border-radius: var(--radius-sm);
+    background: var(--bg-content);
+    padding: var(--space-4);
+    font-size: var(--fs-small);
+  }
+  .apply__summary:focus {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 3px;
+  }
+  .apply__summary-title {
+    font-weight: var(--weight-semibold);
+    margin-bottom: var(--space-2);
+  }
+  .apply__summary ul {
+    margin: 0;
+    display: grid;
+    gap: var(--space-1);
+  }
+
+  .apply__progress {
+    display: grid;
+    gap: var(--space-2);
+  }
+  .apply__progress progress {
+    width: 100%;
+    height: 8px;
+    accent-color: var(--color-primary);
+  }
+  .apply__progress-text {
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+  }
+
+  .apply__actions {
+    display: grid;
+    gap: var(--space-4);
+    justify-items: start;
+  }
+  .apply__submit {
+    font-family: var(--font-body);
+    font-weight: var(--weight-semibold);
+    font-size: var(--fs-body);
+    color: var(--cta-text);
+    background: var(--cta-bg);
+    border: 0;
+    border-radius: var(--radius-pill);
+    min-height: 52px;
+    padding: 0 1.75rem;
+    cursor: pointer;
+    transition: background-color var(--dur) var(--ease);
+  }
+  .apply__submit:hover {
+    background: var(--cta-bg-hover);
+  }
+  .apply__submit:disabled {
+    opacity: 0.6;
+    cursor: progress;
+  }
+  .apply__fallback {
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+    margin: 0;
+  }
+
+  .apply__done {
+    display: grid;
+    gap: var(--space-3);
+    padding: var(--space-6);
+    background: var(--bg-raised);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-md);
+  }
+  .apply__done:focus {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 3px;
+  }
+  .apply__done p {
+    margin: 0;
+  }
+  .apply__done-title {
+    font-size: var(--fs-h2);
+  }
+  .apply__ref strong {
+    font-weight: var(--weight-semibold);
+    letter-spacing: 0.02em;
+  }
+  .apply__done-actions {
+    margin-top: var(--space-3);
+  }
+</style>

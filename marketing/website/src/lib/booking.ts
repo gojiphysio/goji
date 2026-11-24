@@ -338,7 +338,7 @@ const mockApi: BookingApi = {
  *  mock build on localhost/previews would only show a failing widget. Override
  *  with PUBLIC_TURNSTILE_SITE_KEY (Cloudflare's always-pass test key
  *  1x00000000000000000000AA works on localhost). */
-const GOJI_TURNSTILE_SITE_KEY = "0x4AAAAAAF-VF-HZnvawjuXM";
+export const GOJI_TURNSTILE_SITE_KEY = "0x4AAAAAAF-VF-HZnvawjuXM";
 export const TURNSTILE_SITE_KEY =
   (import.meta.env.PUBLIC_TURNSTILE_SITE_KEY as string | undefined) ||
   (API ? GOJI_TURNSTILE_SITE_KEY : "");

@@ -281,6 +281,21 @@ that is `noindex` and excluded from search, and with one or more it becomes the
 real index and re-enables both. **Don't hardcode the placeholder away** — drop
 an approved `.md` into the collection and the page fixes itself.
 
+## Careers (/careers)
+How-to: `CAREERS.md`; backend: `business-intelligence/scripts/careers/README.md`.
+- **One YAML per role** in `src/content/careers/` with `status` open/closed/draft.
+  Closed roles keep their page (noindex, no form, out of the sitemap); draft has
+  no page. `jobId` = file name and never changes once live.
+- **Job wording comes from the approved job description only.** Never publish salary,
+  commission, earnings, sign-on incentives, salary reviews, "boutique" or
+  unapproved benefits. JobPosting schema carries no salary and is emitted on
+  open role pages only.
+- **Form options are mirrored** in `src/lib/careers.ts` (`CAREERS_OPTIONS`) and
+  `business-intelligence/scripts/careers/config.py`. Change both in the same PR,
+  or the backend rejects the new value.
+- **Careers analytics carry no PII**: event name, `job_id`, `error_code` only.
+- Careers is linked from the footer, not the top nav (the nav is an owner decision).
+
 ## Site search (Pagefind)
 Full-text search, built by the `pagefind` CLI over `dist/` as the second half
 of `npm run build`. Config in `pagefind.yml`; Cloudflare Pages needs no change.

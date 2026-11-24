@@ -1,0 +1,319 @@
+---
+/**
+ * /careers/<slug>/ — one page per vacancy, from src/content/careers/<slug>.yaml.
+ *
+ * open   -> full description, two Apply CTAs, the embedded application form,
+ *           JobPosting + BreadcrumbList JSON-LD.
+ * closed -> same description with an "applications closed" notice, links to
+ *           current roles and the expression-of-interest form, no form, no
+ *           JobPosting, noindex (and dropped from the sitemap in
+ *           astro.config.mjs).
+ * draft  -> no page.
+ */
+import { getCollection } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Section from "../../components/Section.astro";
+import Button from "../../components/Button.astro";
+import ApplicationForm from "../../components/careers/ApplicationForm.astro";
+import { isOpen, jobPostingSchema, type Vacancy } from "../../lib/careers.ts";
+
+export async function getStaticPaths() {
+  const roles = await getCollection("careers", (v) => v.data.status !== "draft");
+  return roles.map((v) => ({ params: { slug: v.id }, props: { vacancy: v } }));
+}
+
+const { vacancy } = Astro.props as { vacancy: Vacancy };
+const d = vacancy.data;
+const open = isOpen(vacancy);
+
+const origin = Astro.site ?? new URL(Astro.url.origin);
+const pageURL = new URL(Astro.url.pathname, origin).href;
+const breadcrumb = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Home", item: origin.href },
+    { "@type": "ListItem", position: 2, name: "Careers", item: new URL("/careers/", origin).href },
+    { "@type": "ListItem", position: 3, name: d.title, item: pageURL },
+  ],
+};
+const schema = open ? [jobPostingSchema(vacancy, pageURL, origin.href), breadcrumb] : [breadcrumb];
+
+const facts: [string, string][] = [
+  ["Department", d.department],
+  ["Location", d.location],
+  ["Employment type", d.employmentLabel],
+  ...(d.minCommitment ? ([["Minimum part-time commitment", d.minCommitment]] as [string, string][]) : []),
+  ...(d.clinicalFocus ? ([["Clinical focus", d.clinicalFocus]] as [string, string][]) : []),
+  ["Experience", d.experience],
+];
+const fmt = (dt: Date) =>
+  dt.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Singapore" });
+---
+
+<BaseLayout
+  title={d.metaTitle}
+  description={d.description}
+  schema={schema}
+  noindex={!open}
+  searchable={open}
+  searchType="Job"
+  ogImage="/og-careers.jpg"
+  ogImageAlt="The reception at Goji's Lentor Modern clinic, with a red table, wooden chairs and the Goji sign"
+>
+  <section class="job-hero">
+    <div class="container job-hero__inner">
+      <a href="/careers/" class="job-back">
+        <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3L5 8l5 5"></path></svg>
+        Careers
+      </a>
+      <h1>{d.title}</h1>
+      <p class="job-hero__lead">{d.shortDescription}</p>
+      <dl class="job-facts">
+        {facts.map(([k, v]) => (
+          <div class="job-facts__row">
+            <dt>{k}</dt>
+            <dd>{v}</dd>
+          </div>
+        ))}
+      </dl>
+      {
+        open ? (
+          <div class="job-hero__cta">
+            <a href="#apply" class="job-apply-btn" data-apply-cta>Apply now</a>
+            <p class="job-hero__posted">
+              Posted {fmt(d.datePublished)}
+              {d.closingDate && <> · Applications close {fmt(d.closingDate)}</>}
+            </p>
+          </div>
+        ) : (
+          <div class="job-closed" role="status">
+            <h2 class="job-closed__title">Applications for this role have closed</h2>
+            <p>
+              Thank you for your interest. See our <a href="/careers/#vacancies">current opportunities</a>,
+              or <a href="/careers/expression-of-interest/">send us an expression of interest</a> and
+              we'll keep you in mind for future roles.
+            </p>
+          </div>
+        )
+      }
+    </div>
+  </section>
+
+  <Section tone="surface">
+    <div class="job-body container--narrow">
+      {d.sections.map((s) => (
+        <section class="job-section">
+          <h2>{s.heading}</h2>
+          {s.paragraphs.map((p) => <p>{p}</p>)}
+          {s.items.length > 0 && (
+            <ul>
+              {s.items.map((i) => <li>{i}</li>)}
+            </ul>
+          )}
+        </section>
+      ))}
+      {open && (
+        <div class="job-body__cta">
+          <a href="#apply" class="job-apply-btn" data-apply-cta>Apply now</a>
+        </div>
+      )}
+    </div>
+  </Section>
+
+  {
+    open && (
+      <Section tone="linen" id="apply" class="job-apply">
+        <div class="container--narrow job-apply__inner">
+          <h2>Apply for this role</h2>
+          <p class="job-apply__lead">
+            You don't need an account, and you can upload your CV from your
+            phone.
+          </p>
+          <ApplicationForm
+            vacancy={{
+              jobId: d.jobId,
+              title: d.title,
+              form: d.form,
+              minDaysPerWeek: d.minDaysPerWeek,
+            }}
+          />
+        </div>
+      </Section>
+    )
+  }
+
+  <Section tone="linen" class="job-more">
+    <div class="job-more__inner">
+      <p>
+        <a href="/careers/">Back to Careers</a> · Not quite the right fit?
+        <a href="/careers/expression-of-interest/">Express your interest</a> in future roles.
+      </p>
+    </div>
+  </Section>
+</BaseLayout>
+
+<script define:vars={{ jobId: d.jobId, open }}>
+  // job_detail_view + apply_now_clicked: event name and job id only.
+  (function () {
+    function send(name) {
+      try { if (window.gtag) window.gtag("event", name, { job_id: jobId }); } catch (e) {}
+    }
+    if (open) send("job_detail_view");
+    document.querySelectorAll("[data-apply-cta]").forEach(function (a) {
+      a.addEventListener("click", function () {
+        send("apply_now_clicked");
+        // Land on the first field so keyboard and screen-reader users start there.
+        setTimeout(function () {
+          var first = document.getElementById("ap-full_name");
+          if (first) first.focus({ preventScroll: true });
+        }, 400);
+      });
+    });
+  })();
+</script>
+
+<style>
+  .job-hero {
+    background: var(--bg-page);
+    padding-block: clamp(2rem, 1.5rem + 3vw, 4.5rem);
+    border-bottom: 1px solid var(--rule);
+  }
+  .job-hero__inner {
+    display: grid;
+    gap: var(--space-5);
+    max-width: calc(var(--container-narrow) + 2 * var(--gutter));
+  }
+  .job-back {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--fs-small);
+    font-weight: var(--weight-medium);
+    color: var(--text-muted);
+    text-decoration: none;
+    justify-self: start;
+    min-height: 44px;
+  }
+  .job-back:hover {
+    color: var(--color-primary);
+  }
+  .job-hero h1 {
+    font-size: var(--fs-display);
+    line-height: 1.05;
+  }
+  .job-hero__lead {
+    font-size: var(--fs-lead);
+    color: var(--text-muted);
+    max-width: 60ch;
+  }
+  /* Facts sit on the page ground with hairlines: static info, not tappable. */
+  .job-facts {
+    display: grid;
+    margin: 0;
+    border-top: 1px solid var(--rule);
+  }
+  .job-facts__row {
+    display: grid;
+    gap: var(--space-1);
+    padding-block: var(--space-3);
+    border-bottom: 1px solid var(--rule);
+  }
+  @media (min-width: 640px) {
+    .job-facts__row {
+      grid-template-columns: 15rem 1fr;
+      gap: var(--space-4);
+    }
+  }
+  .job-facts dt {
+    font-size: var(--fs-small);
+    font-weight: var(--weight-semibold);
+    color: var(--text-muted);
+  }
+  .job-facts dd {
+    margin: 0;
+  }
+  .job-hero__cta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3) var(--space-5);
+  }
+  .job-hero__posted {
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+  }
+  .job-apply-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 52px;
+    padding: 0 1.75rem;
+    border-radius: var(--radius-pill);
+    background: var(--cta-bg);
+    color: var(--cta-text);
+    font-weight: var(--weight-semibold);
+    text-decoration: none;
+    transition: background-color var(--dur) var(--ease);
+  }
+  .job-apply-btn:hover {
+    background: var(--cta-bg-hover);
+    color: var(--cta-text);
+  }
+  .job-closed {
+    border: 1.5px solid var(--color-primary);
+    border-radius: var(--radius-sm);
+    padding: var(--space-4) var(--space-5);
+    background: var(--bg-content);
+  }
+  .job-closed__title {
+    font-family: var(--font-body);
+    font-size: var(--fs-lead);
+    font-weight: var(--weight-semibold);
+    margin-bottom: var(--space-2);
+  }
+
+  .job-section + .job-section {
+    margin-top: var(--space-7);
+  }
+  .job-section h2 {
+    margin-bottom: var(--space-4);
+  }
+  .job-section p {
+    color: var(--text-default);
+    margin-bottom: var(--space-3);
+  }
+  .job-section ul {
+    display: grid;
+    gap: var(--space-2);
+    margin: 0;
+  }
+  .job-section li::marker {
+    color: var(--berry);
+  }
+  .job-body__cta {
+    margin-top: var(--space-7);
+  }
+
+  .job-apply__inner {
+    margin-inline: auto;
+  }
+  .job-apply__inner > h2 {
+    margin-bottom: var(--space-3);
+  }
+  .job-apply__lead {
+    color: var(--text-muted);
+    margin-bottom: var(--space-6);
+  }
+  :global(.job-apply) {
+    scroll-margin-top: 80px;
+  }
+  :global(.section.job-more) {
+    padding-block: var(--space-6);
+    border-top: 1px solid var(--rule);
+  }
+  .job-more__inner {
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+  }
+</style>

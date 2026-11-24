@@ -1,0 +1,75 @@
+# Physiotherapist / Senior Physiotherapist - /careers/physiotherapist/
+# How to edit, open or close a role: marketing/website/CAREERS.md
+#
+# WORDING STATUS: the approved Google Doc ("Senior Physiotherapist - Job
+# Posting") could not be read from the connected Google account when this page
+# was built. The sections below hold ONLY the approved facts listed in the
+# implementation brief, in plain bullet form. Replace `sections` with the
+# document's own wording and section order, then set source.status: approved.
+# Don't add salary figures, commission rates or thresholds, sign-on incentives,
+# salary reviews, "boutique", or any benefit not in the approved document.
+
+jobId: physiotherapist
+status: open
+featured: true
+title: Physiotherapist / Senior Physiotherapist
+metaTitle: Physiotherapist / Senior Physiotherapist Jobs Singapore | Goji
+description: >-
+  Join Goji Physiotherapy at Lentor Modern. Full-time and part-time
+  physiotherapist roles for experienced MSK clinicians with an interest in
+  women's health.
+department: Clinical
+location: Lentor Modern, Singapore
+employmentTypes: [FULL_TIME, PART_TIME]
+employmentLabel: Full-time / Part-time
+minCommitment: 3 days per week
+minDaysPerWeek: 3
+clinicalFocus: Musculoskeletal rehabilitation and women's health
+experience: 3–5 years
+experienceMonths: 36
+shortDescription: >-
+  We're looking for an experienced physiotherapist with a strong foundation in
+  musculoskeletal rehabilitation and an interest in women's health to join our
+  growing clinical team.
+form: physio
+driveFolder: Physiotherapist
+datePublished: 2026-11-24
+source:
+  title: Senior Physiotherapist - Job Posting
+  url: https://docs.google.com/document/d/1ydDEFBnjAtjUA7ku7YQmkdigynp8JiEtmoC7vpdi-TE/edit
+  status: awaiting-approved-doc
+
+sections:
+  - heading: The role
+    items:
+      - "Position: Physiotherapist / Senior Physiotherapist"
+      - "Employment type: Full-time / Part-time"
+      - "Experience: 3–5 years"
+      - "Primary clinical focus: Musculoskeletal physiotherapy"
+      - "Secondary clinical focus: Women's health"
+      - "Location: Lentor Modern"
+  - heading: Requirements
+    items:
+      - BSc/Masters qualification in Physiotherapy
+      - Full AHPC registration and a valid Practising Certificate
+  - heading: Preferred skills
+    items:
+      - Clinical Pilates
+      - Mat or reformer Pilates
+      - Dry needling
+      - Strength and conditioning
+      - Sports rehabilitation
+      - Private practice experience
+  - heading: What we offer
+    items:
+      - Competitive base salary and revenue-based monthly commission
+      - Annual revenue-based performance bonus
+      - 21 days of annual leave for full-time employees, excluding public holidays
+      - Professional development allowance of up to S$1,000 per approved application, subject to eligibility
+      - Company-sponsored professional liability insurance
+  - heading: Working hours
+    items:
+      - "Full-time: 42 hours per week, including one weekend day"
+      - "Part-time: at least 3 days per week"
+      - "Clinic operating hours: 8am–8pm, Monday to Saturday"
+      - Rostered working hours
