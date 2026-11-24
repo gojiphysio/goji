@@ -519,7 +519,7 @@ BUBBLE_PAUSE_S = 1.2
 
 
 def _send_bubbles(client, ev: Inbound, reply: str) -> str:
-    """Send a reply as up to 3 WhatsApp bubbles, with the typing indicator
+    """Send a reply as up to 2 WhatsApp bubbles, with the typing indicator
     and a short pause between them so they read like a person typing.
     Returns the last message id."""
     bubbles = split_bubbles(reply) or [reply]

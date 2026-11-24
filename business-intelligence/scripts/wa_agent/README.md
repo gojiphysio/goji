@@ -63,11 +63,15 @@ appointment (the site's cancellation policy) is a draft, with the first-time
 fee waiver; asking for a person about something the agent can't handle,
 sensitive topics and urgent red flags escalate with a holding reply.
 
-**One message per reply.** Multi-bubble replies (`<break>` lines,
-`policy.split_bubbles`) were built and then walked back on 19 Nov 2026: Meta's
-developer pricing page says service messages are charged beyond 1,000 a month
-per number since 1 Oct 2026, so bubbles could multiply the cost.
-`WA_AGENT_MAX_BUBBLES` turns them back on once the Singapore rate card is read.
+**Long replies go out as 2 messages** (owner, 24 Nov 2026), the way Chris
+writes: the opening line (greeting, or concern) first, then the substance.
+`policy.split_bubbles` does it in code, at the first blank line, only for
+replies of `WA_AGENT_SPLIT_MIN_WORDS` (60) words or more, never more than
+`WA_AGENT_MAX_BUBBLES` (2); the prompt doesn't ask for it, so it doesn't nudge
+replies longer. Meta bills each delivered service message past 1,000 a month
+per number (since 1 Oct 2026, about US$0.016 each in Singapore), so this is
+capped: about +$15/month at the 24 Nov volume. `WA_AGENT_MAX_BUBBLES=1` turns
+it off. (Walked back on 19 Nov over the same pricing, before it was costed.)
 
 **Chris gets an email only when she has to act** (Charles, 19 Nov: "only if it
 gets escalated"): a draft to check, a handover, a red flag or sensitive

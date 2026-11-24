@@ -681,6 +681,7 @@ def test_no_closer_for_someone_already_in_a_longer_conversation(env):
 def test_a_reply_goes_out_as_bubbles_with_typing_between(env, monkeypatch):
     client, rec, notes = env
     monkeypatch.setattr(config, "MAX_BUBBLES", 3)
+    monkeypatch.setattr(config, "SPLIT_MIN_WORDS", 0)
     app_mod.claude.queue.append(final(
         reply="Hey! How can I address you?\n<break>\nCongrats on your newborn ❤️\n<break>\n"
               "Our postpartum session is 55 minutes.", intent="service_fit"))

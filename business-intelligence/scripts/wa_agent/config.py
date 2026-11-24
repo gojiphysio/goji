@@ -227,7 +227,12 @@ TEST_SHOW_DRAFTS = os.environ.get("WA_AGENT_TEST_SHOW_DRAFTS", "") == "1"
 # clinic's real number.
 CONFIRMATIONS = _env_bool("WA_AGENT_CONFIRMATIONS", False)
 CONFIRM_TEMPLATE = os.environ.get("WA_AGENT_CONFIRM_TEMPLATE", "goji_appointment_confirmed")
-MAX_BUBBLES = int(os.environ.get("WA_AGENT_MAX_BUBBLES", "1"))  # 1 = one message per reply
+# A long reply may go out as 2 WhatsApp messages, the way Chris writes (owner,
+# 24 Nov 2026). Capped because Meta bills each delivered service message past
+# 1,000 a month per number (since 1 Oct 2026); a reply under SPLIT_MIN_WORDS is
+# always one message.
+MAX_BUBBLES = int(os.environ.get("WA_AGENT_MAX_BUBBLES", "2"))  # 1 = one message per reply
+SPLIT_MIN_WORDS = int(os.environ.get("WA_AGENT_SPLIT_MIN_WORDS", "60"))
 TURBO_AT_START = os.environ.get("WA_AGENT_TURBO", "") == "1"  # local runs: start in /turbo
 TESTERS = frozenset(p.strip() for p in os.environ.get("WA_AGENT_TESTERS", "").split(",")
                     if p.strip())
