@@ -130,11 +130,14 @@ appends every new or changed patient to `marts.patient_contact_live`
 
 - **Staff actions in Plato** reach us through Plato's webhook
   (`patient:upsert`, `patient:merge`). A delivery only names patient ids; we
-  read each one back from Plato with our key (`bulk`, so the booking form keeps
-  priority), at most 20 per delivery.
+  read each one back from Plato with our key: `bulk` (the booking form keeps
+  priority), no retries, and at most `PLATO_WEBHOOK_READS_PER_MIN` (4) a
+  minute so the availability snapshot, which pages Plato from the same bulk
+  share, is never starved. A patient over the cap waits for the nightly ingest.
 - **Our own API writes** never trigger a Plato webhook (Plato's rule, to stop
   loops), so `/internal/book` writes the row itself when it creates a patient,
-  before it answers.
+  before it answers The insert is capped at about 5s (the assistant gives up
+  on a booking after 30s) and never fails the booking.
 - **Answer fast, always 200.** Plato waits 3s and drops a webhook after 5
   failed deliveries in 24h. The route answers 200 to anything with the right
   token and waits at most `PLATO_WEBHOOK_WAIT` (2s) for the Plato read; Cloud

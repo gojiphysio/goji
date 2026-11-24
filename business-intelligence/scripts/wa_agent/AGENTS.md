@@ -28,8 +28,9 @@ The WhatsApp assistant. What it is and how to run it: [`README.md`](README.md).
   `tools._CONTACTS` (`dim_patient_contact` + `patient_contact_live`, which
   goji-booking fills from Plato's patient webhook and from patients it creates),
   never `dim_patient_contact` alone: that missed a patient the agent itself had
-  booked that morning (24 Nov 2026). "No record" is cached 10 minutes, a match
-  6 hours, and a booking clears the cache.
+  booked that morning (24 Nov 2026). If the live table can't be read, the
+  lookup falls back to the nightly one (`_contact_rows`). "No record" is cached
+  10 minutes, a match 6 hours, and a booking clears the cache.
 - **No message text or phone numbers in BigQuery.** `marts.wa_agent_events`
   uses a salted hash per chat. Transcripts live only in Firestore with a 30-day
   TTL. Don't add text columns.
