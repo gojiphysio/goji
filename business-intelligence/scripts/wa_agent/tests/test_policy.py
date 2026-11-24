@@ -374,17 +374,18 @@ def test_a_long_unmarked_reply_splits_after_its_opening():
 
 
 def test_cancel_with_notice_is_the_agents_and_a_late_one_is_chris():
-    ask = Proposal(reply="That's your Thu 27 Nov, 3:00pm with Kristy. Shall I cancel it, or "
-                         "would another day suit you better?", intent="cancel",
-                   confidence=0.9, escalate=False, hours_to_appointment=72)
-    assert decide(ask).action == SEND
+    now = Proposal(reply="Hope all's well! Whenever you're ready, I'm happy to find you "
+                         "another time.", intent="cancel", confidence=0.9, escalate=False,
+                   hours_to_appointment=72, cancel={"date": "2026-11-27", "time": "15:00"})
+    assert decide(now).action == SEND
     late = Proposal(reply="No worries! As it's your first late change, we'll waive the fee.",
                     intent="cancel", confidence=0.9, escalate=False, hours_to_appointment=5)
     assert decide(late) == Decision(DRAFT, "late_change")
 
 
 def test_a_cancel_reply_that_says_its_done_is_never_sent():
-    # Only the code's confirmation, from goji-booking's answer, says it's cancelled.
+    # Only the code's confirmation, from goji-booking's answer, says it's cancelled:
+    # with no appointment for the code to cancel, a reply saying so is held.
     for reply in ("Done, I've cancelled it!", "Your appointment has been cancelled.",
                   "All cancelled 😊"):
         p = Proposal(reply=reply, intent="cancel", confidence=0.95, escalate=False,

@@ -59,9 +59,9 @@ What happens to a proposal: `config.INTENT_POLICY` maps each intent to
 auto / auto_notify / draft / escalate; below `WA_AGENT_MIN_CONFIDENCE` (0.7) it's a
 draft. Chris's routing (18-19 Nov): booking requests, appointment checks and
 routine moves and cancellations (24h+ notice) are handled by the agent end to
-end, with no email to Chris (a cancellation is stated back, then done after
-the customer's yes; the confirmation asks gently what came up and offers
-another time: owner, 24 Nov 2026); "is this Chris?" answers as the front desk
+end, with no email to Chris (a cancellation is done in the same turn, no
+"shall I?"; the confirmation asks gently what came up, or answers the reason
+they gave, and offers another time: owner, 24 Nov 2026); "is this Chris?" answers as the front desk
 and asks for a message; billing, clinical and complaints are drafts she
 checks, even if the model wanted to hand over; a reschedule or cancellation
 less than 24 hours before the appointment (the site's cancellation policy) is

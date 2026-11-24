@@ -258,20 +258,25 @@ moved yourself. No need to involve Chris.
 Cancelling (intent=cancel, escalate=false)
 - Look up their booking as for rescheduling. If they have more than one, \
 ask which (one question).
-- With 24 hours' notice or more you cancel it yourself. State it back, \
-and in the same message offer to move it instead, e.g. "No problem! That's \
-your Thu 27 Nov, 3:00pm with Kristy. Shall I cancel it, or would another \
-day suit you better?" Fill `cancel` with its date and time.
-- When they say yes in their next message, set confirm_cancel=true and fill \
-`cancel` again. The system cancels it and sends the confirmation, which \
-asks gently what came up and offers another time, so your reply is only a \
-fallback: one short line. Never say or imply it's cancelled yourself.
+- With 24 hours' notice or more you cancel it straight away, without \
+asking "shall I?": fill `cancel` with its date and time and the system \
+cancels it, then sends its confirmation ("Done, I've cancelled your \
+appointment on ... (ref ...).") followed by your reply.
+- So your reply is only the line after that confirmation, never the \
+confirmation itself: don't say it's cancelled, don't restate the \
+appointment, no greeting. If they gave no reason, ask gently what came up \
+and offer another time, e.g. "Hope all's well! If you don't mind me asking, \
+what came up? Whenever you're ready, I'm happy to find you another time \
+😊". If they did (unwell, injured, away, busy), answer it warmly and \
+briefly in their terms and offer a time when it suits, e.g. "Hope you feel \
+better soon! Once you're up to it, I'm happy to find you a new time." or \
+"Have a lovely trip! When you're back, just let me know and I'll find you a \
+time." Under 40 words.
+- Not sure which appointment (several booked, or what they said doesn't \
+match the record): leave `cancel` empty and ask which, one question.
 - If they'd rather move it, it's a reschedule (above).
-- When they tell you why (unwell, injured, away, busy): answer warmly and \
-briefly in their terms ("Hope you feel better soon!", "Have a lovely \
-trip!") and offer to find a time when it suits ("when you're back", "once \
-you're feeling better"), once. Getting worse is priority. Put the reason \
-in staff_note.
+- When they tell you why after it's cancelled: answer as above, once. \
+Getting worse is priority. Put any reason in staff_note.
 - No need to involve Chris.
 
 Late changes (rescheduling or cancelling less than 24 hours before the \
@@ -418,10 +423,8 @@ for a child, their age; else empty
 list them as "YYYY-MM-DD HH:MM" separated by commas; else empty
 - confirm_move: true only when they've just said yes to the move you stated \
 back in your previous message
-- cancel: for cancelling an existing appointment, its date (YYYY-MM-DD) and \
-time (HH:MM); empty strings otherwise
-- confirm_cancel: true only when they've just said yes to the cancellation \
-you stated back in your previous message
+- cancel: the appointment to cancel now, its date (YYYY-MM-DD) and time \
+(HH:MM); empty strings when not cancelling or not sure which
 - hours_to_appointment: for reschedule or cancel, hours from now until the \
 appointment they want to change (from my_appointments or what they told you); \
 -1 if you don't know or it doesn't apply
@@ -464,12 +467,10 @@ PROPOSAL_SCHEMA = {
             "required": ["date", "time"],
             "additionalProperties": False,
         },
-        "confirm_cancel": {"type": "boolean"},
     },
     "required": ["reply", "holding_reply", "intent", "confidence", "escalate",
                  "escalation_reason", "staff_note", "hours_to_appointment", "booking",
-                 "confirm_booking", "move", "confirm_move", "cancel",
-                 "confirm_cancel"],
+                 "confirm_booking", "move", "confirm_move", "cancel"],
     "additionalProperties": False,
 }
 
@@ -637,7 +638,7 @@ def _parse_proposal(text: str) -> Proposal:
                     booking=d.get("booking") or {},
                     confirm_booking=bool(d.get("confirm_booking")),
                     move=d.get("move") or {}, confirm_move=bool(d.get("confirm_move")),
-                    cancel=d.get("cancel") or {}, confirm_cancel=bool(d.get("confirm_cancel")))
+                    cancel=d.get("cancel") or {})
 
 
 def propose(history: list[dict], *, wa_id: str, now: float | None = None,

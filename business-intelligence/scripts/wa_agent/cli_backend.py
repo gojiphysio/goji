@@ -159,7 +159,7 @@ def propose(history: list[dict], *, wa_id: str, now: float, customer_name: str =
                 booking=s.get("booking") or {},
                 confirm_booking=bool(s.get("confirm_booking")),
                 move=s.get("move") or {}, confirm_move=bool(s.get("confirm_move")),
-                cancel=s.get("cancel") or {}, confirm_cancel=bool(s.get("confirm_cancel")))
+                cancel=s.get("cancel") or {})
     except subprocess.TimeoutExpired:
         result.proposal = _escalation("cli_timeout")
     except Exception as e:

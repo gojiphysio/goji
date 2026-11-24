@@ -192,14 +192,26 @@ def cancel(c: dict, *, wa_id: str, patient_id: str = "", http=requests) -> dict:
     return data
 
 
-def cancel_text(res: dict) -> str:
-    """The confirmation, then a gentle why (being unwell or away tells the
-    team how to follow up) and an open offer to rebook (owner, 24 Nov 2026)."""
+CANCEL_FOLLOW_UP = ("Hope all's well! If you don't mind me asking, what came up? Whenever "
+                    "you're ready, I'm happy to find you another time 😊")
+FOLLOW_UP_MAX_WORDS = 45
+
+
+def cancel_text(res: dict, follow_up: str = "") -> str:
+    """The confirmation, from goji-booking's answer, then the model's follow-up:
+    a gentle "what came up?" when they gave no reason (being away or unwell
+    shapes how we follow up), or a word on the reason they gave, and an offer
+    to rebook (owner, 24 Nov 2026). A follow-up that fails the reply check,
+    runs long or claims the cancellation itself gives way to the default."""
+    from .policy import claims_cancelled, reply_problems  # policy imports config only
     who = (res.get("clinician_name") or "").split(" ")[0]
     text = (f"Done, I've cancelled your appointment on {_when(res['date'], res['time'])}"
-            f"{' with ' + who if who else ''} (ref {res['reference']}). Hope all's well! "
-            f"If you don't mind me asking, what came up? Whenever you're ready, I'm happy "
-            f"to find you another time 😊")
+            f"{' with ' + who if who else ''} (ref {res['reference']}).")
+    f = (follow_up or "").strip()
+    if not f or len(f.split()) > FOLLOW_UP_MAX_WORDS or reply_problems(f) \
+            or claims_cancelled(f) or "cancel" in f.lower():
+        f = CANCEL_FOLLOW_UP
+    text += f"\n\n{f}"
     if res.get("dry_run"):
         text += "\n\n🧪 TEST: dry run, nothing was changed in the calendar."
     return text
