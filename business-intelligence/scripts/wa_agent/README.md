@@ -161,6 +161,14 @@ provider forwards Meta's signature (if not: `USE_URL_TOKEN=1`, below), and the
   Chris texts `RESUME 004` (or `PAUSE 004`) to the Goji number from her phone.
   Resuming sends the customer nothing: the assistant just answers their next
   message. The admin hand-back route does the same.
+- *Answer through the assistant* (owner, 24 Nov 2026). Once the team has the
+  answer, Chris swipe-replies to the ping with it (or texts `ANSWER 004 ...`).
+  The assistant writes it up, sends it, looks after the chat again and shows
+  her what it sent. If the answer only covers part of what the customer
+  asked, the chat stays waiting on the rest. Nothing is sent if it isn't an
+  answer for that chat, the write-up fails the reply check, the assistant is
+  stopped, or the customer's last message was over a day ago (only the
+  Business app can message them then).
 - *Off-topic never reaches Chris* (owner, 23 Nov 2026). Wrong numbers,
   unrelated questions, attempts to misuse the chat and cold sales pitches
   (intent `off_topic`) get a short front-desk reply whatever the confidence,

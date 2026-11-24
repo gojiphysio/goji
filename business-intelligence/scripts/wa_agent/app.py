@@ -58,7 +58,8 @@ from . import (agent, booking_client, config, documents, events, learning, notif
 from .policy import (AGENT, DRAFT, ESCALATE, HUMAN, LATE_CHANGE_H, OFF_TOPIC, PAUSED, SEND,
                      SGT, SILENT, WAITING, WATCHLIST, as_one_message, split_bubbles,
                      apply_idle_handback, apply_pause_expiry, apply_stage, handover_mode,
-                     check_late_change, customer_message, has_record, note_off_topic,
+                     check_late_change, customer_message, customer_window_open, has_record,
+                     note_off_topic,
                      out_of_scope,
                      pre_golive_chat,
                      decide, gate, human_replied_since, is_acknowledgement, on_human_message,
@@ -298,10 +299,12 @@ def _note_rescue(st, intent: str, wa_id: str) -> None:
                     suggested_reply="", reason=reason, last_message="")
 
 
-def _ping_staff(who: str, note: str) -> bool:
+def _ping_staff(who: str, note: str, wa_id: str = "") -> bool:
     """A short WhatsApp to each staff number (WA_AGENT_STAFF): free-form inside
     their 24h window, else the approved template. True if any ping went out.
-    Never a customer's full number (staff.label / staff.redact)."""
+    Never a customer's full number (staff.label / staff.redact). With the
+    chat's `wa_id`, each ping's message id is kept so a swipe-reply to it
+    finds the chat (_staff_answer)."""
     if not config.STAFF:
         return False
     st, client, _ = _deps()
@@ -309,13 +312,18 @@ def _ping_staff(who: str, note: str) -> bool:
     for number in sorted(config.STAFF):
         try:
             if staff.window_open(windows.get(number, 0.0), now):
-                client.send_text(number, staff.ping_text(who, note))
+                ping_id = client.send_text(number, staff.ping_text(who, note))
                 how = "text"
             else:
-                client.send_template(number, config.STAFF_TEMPLATE,
-                                     staff.template_params(who, note))
+                ping_id = client.send_template(number, config.STAFF_TEMPLATE,
+                                               staff.template_params(who, note))
                 how = "template"
             ok = True
+            if wa_id:
+                try:
+                    st.note_ping(ping_id, wa_id)
+                except Exception as e:  # the ping went out; only swipe-reply is lost
+                    log.warning("ping id not kept: %s", e)
             events.record("staff_ping", "", reason=how)
         except Exception as e:
             log.warning("staff ping failed: %s", e)
@@ -330,7 +338,10 @@ def _alert(kind: str, *, customer: str, wa_id: str, who: str | None = None, **kw
     if who is None:
         st, _, _ = _deps()
         who = staff.label(customer, wa_id, st.load(wa_id).code if wa_id else "")
-    pinged = _ping_staff(who, kw.get("staff_note") or kw.get("reason") or "")
+    # A ping about a chat (named) can be answered by swipe-reply; one that
+    # isn't (a demotion notice, who="") must never route an answer to a customer.
+    pinged = _ping_staff(who, kw.get("staff_note") or kw.get("reason") or "",
+                         wa_id if who else "")
     if kind in ("urgent", "sensitive", "priority") or not pinged:
         notify.send(kind, customer=customer, wa_id=wa_id, **kw)
 
@@ -343,9 +354,10 @@ def _sgt_day_start(now: float) -> float:
 
 def handle_staff(ev: Inbound) -> None:
     """A staff number wrote to the business number: never a customer (no
-    lookup, no model, no metrics). Opens their 24h window; stop / start /
-    status work even with the kill switch on."""
-    st, client, _ = _deps()
+    lookup or metrics for them). Opens their 24h window; stop / start /
+    status work even with the kill switch on. The model runs only for the
+    team's answer, on the chat it's for (_staff_answer)."""
+    st, client, model = _deps()
     now = time.time()
     with locks(ev.wa_id):
         state = st.load(ev.wa_id)  # only for webhook de-dupe
@@ -354,7 +366,19 @@ def handle_staff(ev: Inbound) -> None:
         st.save(state)
     st.note_staff_inbound(ev.wa_id, ev.ts or now)
     cmd, code = staff.parse_command(ev.text)
-    if not st.staff_welcomed(ev.wa_id) and cmd == "help":
+    answer = staff.parse_answer(ev.text)
+    pinged_chat = st.ping_chat(ev.reply_to) if ev.reply_to else ""
+    if answer is not None:  # "answer 004 ...": the code wins over a quoted ping
+        wa_id = st.find_by_code(answer[0])
+        reply = (_staff_answer(st, client, model, wa_id, answer[1]) if wa_id else
+                 f"I can't find chat #{answer[0]}. The number is in the ping or the morning summary.")
+    elif pinged_chat and staff.bare_command(ev.text) in ("resume", "pause"):
+        reply = _staff_resume_pause(st, staff.bare_command(ev.text), "", now,
+                                    wa_id=pinged_chat)
+    elif pinged_chat and not staff.bare_command(ev.text):
+        # A swipe-reply to a ping: whatever she wrote is the team's answer.
+        reply = _staff_answer(st, client, model, pinged_chat, ev.text or "")
+    elif not st.staff_welcomed(ev.wa_id) and cmd == "help":
         # Their first message: the walkthrough is the first thing they get from us.
         st.mark_staff_welcomed(ev.wa_id)
         reply = staff.WELCOME
@@ -385,10 +409,11 @@ def handle_staff(ev: Inbound) -> None:
         log.warning("staff reply failed: %s", e)
 
 
-def _staff_resume_pause(st, cmd: str, code: str, now: float) -> str:
+def _staff_resume_pause(st, cmd: str, code: str, now: float, wa_id: str = "") -> str:
     """"resume 004": the agent watches chat #004 again from the customer's next
-    message (nothing is sent to them). "pause 004": it stays out of it."""
-    wa_id = st.find_by_code(code) if code else ""
+    message (nothing is sent to them). "pause 004": it stays out of it. A
+    bare "resume" swipe-replied to a ping passes that ping's chat as `wa_id`."""
+    wa_id = wa_id or (st.find_by_code(code) if code else "")
     if not wa_id:
         return f"I can't find chat #{code}. The number is in the ping or the morning summary."
     with locks(wa_id):
@@ -409,6 +434,102 @@ def _staff_resume_pause(st, cmd: str, code: str, now: float) -> str:
         return (f"OK, I'm looking after {who} again. I won't message them now; I'll answer "
                 f"their next message.")
     return f"OK, I'll stay out of {who} until you text RESUME {state.code}."
+
+
+def _staff_answer(st, client, model, wa_id: str, answer: str) -> str:
+    """The team's answer for chat `wa_id` (Chris's swipe-reply to a ping, or
+    "answer 004 ..."): the agent writes it up in its own voice, sends it, and
+    takes the chat back, so Chris doesn't type it out and then RESUME (owner,
+    24 Nov 2026). Any mode, red flags included: it's her explicit instruction.
+    Never past the kill switch, before go-live, or outside the customer's 24h
+    window (only the Business app can write then). If the model says it isn't
+    an answer for this chat, or its write-up fails the reply check, nothing is
+    sent and Chris is told why. Returns the message for Chris."""
+    state = st.load(wa_id)
+    who = staff.label(state.name, wa_id, state.code)
+
+    def refuse(why: str, reason: str) -> str:
+        events.record("staff_answer", wa_id, reason=f"refused:{reason}")
+        return staff.answer_refused_text(who, why)
+
+    if not answer.strip():
+        return (f"What should I tell {who}? Swipe-reply to the ping with the answer, or text "
+                f"ANSWER {state.code} and the answer.")
+    if config.KILL_SWITCH or st.get_kill():
+        return refuse("the assistant is stopped (text START first)", "kill_switch")
+    if _not_live(st):
+        return refuse("the assistant isn't live yet", "not_live")
+    if wa_id in config.ALWAYS_HUMAN:
+        return refuse("this number is set to always go to you", "always_human")
+    if not any(h["role"] == "customer" for h in state.history):
+        return refuse("I no longer have this chat's messages", "no_history")
+    if not customer_window_open(state, time.time()):
+        return refuse("their last message was over a day ago, so WhatsApp only lets the "
+                      "Business app message them now", "window_closed")
+    for _attempt in range(2):
+        started = time.time()
+        history = list(state.history)
+        latest = next((h["id"] for h in reversed(history) if h["role"] == "customer"), "")
+        patient = _patient_for(st, wa_id, state)
+        res = agent.propose(history, wa_id=wa_id, now=started, customer_name=state.name,
+                            client=model, patient=tools.describe_patient(patient),
+                            team_answer=answer)
+        p = res.proposal
+        events.record("proposal", wa_id, intent=p.intent, confidence=p.confidence,
+                      escalate=p.escalate, decision="staff_answer", reason="staff_answer",
+                      agent_ms=res.total_ms, steps=[s.__dict__ for s in res.steps],
+                      tools=",".join(res.tools_used), model=res.model_served, stop=res.stop,
+                      input_tokens=res.input_tokens, output_tokens=res.output_tokens,
+                      cache_read_tokens=res.cache_read_tokens,
+                      cache_write_tokens=res.cache_write_tokens, cost_usd=round(res.cost_usd, 5))
+        reply = (p.reply or "").strip()
+        if p.failed:
+            return refuse("I couldn't write it up just now", "model_failed")
+        if p.escalate:
+            return refuse(p.escalation_reason or "it doesn't look like an answer for this chat",
+                          "not_an_answer")
+        problems = reply_problems(reply) if reply else ["empty"]
+        if problems:
+            return refuse("my write-up didn't pass the checks (" + ", ".join(problems) + ")",
+                          "reply_check")
+        with locks(wa_id):
+            state = st.load(wa_id)
+            if state.last_human_at > started:
+                return refuse("you've written in the chat yourself since", "human_replied")
+            if config.KILL_SWITCH or st.get_kill():
+                return refuse("the assistant was stopped", "kill_switch")
+            newest = next((h["id"] for h in reversed(state.history)
+                           if h["role"] == "customer"), "")
+            if newest != latest:
+                continue  # they wrote again while it was thinking: write it up again
+            try:
+                mid = _send_bubbles(client, Inbound(wa_id=wa_id, msg_id=newest,
+                                                    ts=time.time(), text=""), reply)
+            except Exception as e:
+                log.warning("staff answer send failed: %s", e)
+                events.record("send_failed", wa_id, reason=type(e).__name__)
+                return refuse("WhatsApp wouldn't send it", "send_failed")
+            sent_at = time.time()
+            append_history(state, "team", answer.strip(), sent_at)
+            append_history(state, "agent", as_one_message(reply), sent_at, mid)
+            old = state.mode
+            # Part still open: the agent keeps the chat but not that topic.
+            still_open = (p.staff_note or "").strip()
+            mode = WAITING if still_open else AGENT
+            if not set_mode(state, mode, "staff_answered", sent_at):
+                state.mode_reason, state.mode_since = "staff_answered", sent_at
+            state.pending_for_chris = still_open[:600]
+            state.owner = "agent"
+            state.off_topic_strikes = 0
+            state.pending_draft, state.last_auto = {}, {}
+            note_outcome(state, "staff_answer",
+                         summary.TEAM_PARTIAL if still_open else summary.TEAM_ANSWER, sent_at)
+            st.save(state)
+        _mode_event(state, old, sent_at)
+        events.record("staff_answer", wa_id, wa_msg_id=mid,
+                      reason="sent_partial" if still_open else "sent")
+        return staff.answer_sent_text(who, as_one_message(reply), still_open)
+    return refuse("they kept writing while I was writing it up", "superseded")
 
 
 def handle_history(chunk: HistoryChunk) -> None:

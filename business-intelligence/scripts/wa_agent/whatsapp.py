@@ -56,6 +56,7 @@ class Inbound:
     mime: str = ""
     filename: str = ""
     caption: str = ""
+    reply_to: str = ""     # the message id they swipe-replied to (context.id), if any
 
 
 @dataclass
@@ -188,7 +189,8 @@ def parse_webhook(payload: dict) -> list[Inbound | Echo | Status | HistoryChunk]
                                           media_id=media.get("id", "") if kind != "text" else "",
                                           mime=media.get("mime_type", ""),
                                           filename=media.get("filename", ""),
-                                          caption=media.get("caption", "")))
+                                          caption=media.get("caption", ""),
+                                          reply_to=(m.get("context") or {}).get("id", "")))
                 for s in value.get("statuses") or []:
                     events.append(Status(msg_id=s.get("id", ""), status=s.get("status", ""),
                                          ts=float(s.get("timestamp") or 0),

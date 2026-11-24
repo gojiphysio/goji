@@ -20,6 +20,8 @@ The flags collection (`<collection>_flags`) holds small global docs:
    kept HOLD_DAYS for paused chats, no text)
   staff             {windows: {wa_id: ts},         staff numbers' last inbound (24h window)
                      welcomed: {wa_id: ts}}        and who has had the walkthrough
+  (and <collection>_pings/{ping message id}: {wa_id, at}, kept PING_DAYS, so
+   a staff swipe-reply to a ping finds its chat; no text)
 """
 from __future__ import annotations
 
@@ -37,6 +39,9 @@ RETENTION_DAYS = 30
 # Chris, not the agent (Chris, 19 Nov 2026). A pause from Chris writing lapses
 # after 14 days (policy.apply_pause_expiry). Removed on resume/forget.
 HOLD_DAYS = 365
+# A staff ping's message id -> the chat it was about, so Chris can swipe-reply
+# to the ping with the team's answer (app._staff_answer).
+PING_DAYS = 7
 HISTORY_KEEP = 50
 SEEN_KEEP = 200
 OUTCOMES_KEEP = 20
@@ -44,7 +49,8 @@ FLAG_CACHE_S = 5  # global flags bite within 5s without a read per message
 
 
 def append_history(state: ChatState, role: str, text: str, ts: float, msg_id: str = "") -> None:
-    """role: customer | agent | staff."""
+    """role: customer | agent | staff | team (the team's answer Chris sent the
+    assistant to pass on: context for the model, never sent as written)."""
     state.history.append({"role": role, "text": text, "ts": ts, "id": msg_id})
     del state.history[:-HISTORY_KEEP]
 
@@ -174,6 +180,14 @@ class MemoryStore:
     def note_staff_inbound(self, wa_id: str, ts: float) -> None:
         self._staff_windows[wa_id] = max(ts, self._staff_windows.get(wa_id, 0.0))
 
+    def note_ping(self, msg_id: str, wa_id: str) -> None:
+        if msg_id and wa_id:
+            self.__dict__.setdefault("_pings", {})[msg_id] = (wa_id, time.time())
+
+    def ping_chat(self, msg_id: str) -> str:
+        wa_id, at = getattr(self, "_pings", {}).get(msg_id, ("", 0.0))
+        return wa_id if time.time() - at < PING_DAYS * 86400 else ""
+
     def staff_welcomed(self, wa_id: str) -> bool:
         return wa_id in getattr(self, "_welcomed", set())
 
@@ -212,6 +226,7 @@ class FirestoreStore:
         self._chats = self._db.collection(collection)
         self._flags = self._db.collection(f"{collection}_flags")
         self._holds = self._db.collection(f"{collection}_holds")
+        self._pings = self._db.collection(f"{collection}_pings")
         self._kill_cache: tuple[float, bool] = (0.0, False)
         self._rollout_cache: tuple[float, dict] = (-1e9, {})
         self._history_cache: tuple[float, bool] = (-1e9, False)
@@ -333,6 +348,22 @@ class FirestoreStore:
 
     def note_staff_inbound(self, wa_id: str, ts: float) -> None:
         self._flags.document("staff").set({"windows": {wa_id: ts}}, merge=True)
+
+    def note_ping(self, msg_id: str, wa_id: str) -> None:
+        from datetime import datetime, timedelta, timezone
+        if msg_id and wa_id:
+            self._pings.document(msg_id).set({
+                "wa_id": wa_id, "at": time.time(),
+                "expire_at": datetime.now(timezone.utc) + timedelta(days=PING_DAYS)})
+
+    def ping_chat(self, msg_id: str) -> str:
+        """The chat a ping was about; "" if unknown or older than PING_DAYS
+        (the TTL deletes it within a day or so of expire_at)."""
+        if not msg_id:
+            return ""
+        snap = self._pings.document(msg_id).get()
+        d = (snap.to_dict() or {}) if snap.exists else {}
+        return d.get("wa_id", "") if time.time() - float(d.get("at") or 0) < PING_DAYS * 86400 else ""
 
     def staff_welcomed(self, wa_id: str) -> bool:
         return wa_id in (self._flag("staff").get("welcomed") or {})

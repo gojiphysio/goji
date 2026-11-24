@@ -532,24 +532,57 @@ def context_note(now: float, customer_name: str = "", pending_for_chris: str = "
     return note + "]"
 
 
+def relay_note(team_answer: str) -> str:
+    """The instruction for a staff ANSWER turn (app._staff_answer): pass the
+    team's answer on. Sent after the cached prefix, so only these turns pay
+    for it. The code checks the reply and decides; escalate=true means "don't
+    send", and staff_note carries what is still open."""
+    return (
+        "\n\n[From the Goji team, not the customer. Chris checked with the team; "
+        f"their answer for this customer is: \"{team_answer.strip()}\"\n"
+        "This turn, write reply as your next WhatsApp message to the customer, passing "
+        "that answer on in your usual voice, as the clinic (\"we\"). Pass on only what "
+        "the team said. You may add what supports it from the knowledge base or your "
+        "tools (the address, a booking link), never clinical advice, prices, times or "
+        "promises the team didn't give. Don't repeat a greeting. If it answers only part "
+        "of what the customer is waiting for, say the team will come back on the rest, "
+        "and put that rest in staff_note; otherwise staff_note is empty. Set "
+        "escalate=true, with escalation_reason saying why in a few words, if the team's "
+        "text isn't an answer for this customer (a question or note to you, or about "
+        "something else) or you can't pass it on without guessing. No square brackets; "
+        "holding_reply empty; booking and move empty.]")
+
+
 def build_messages(history: list[dict], now: float, customer_name: str = "",
-                   pending_for_chris: str = "", patient: str = "") -> list[dict]:
+                   pending_for_chris: str = "", patient: str = "",
+                   team_answer: str = "") -> list[dict]:
     """Stored transcript -> alternating user/assistant messages. Customer lines
     are `user`; agent and staff lines are `assistant` (staff lines are labelled
     so the model knows a person already replied). Consecutive same-role lines
     are merged. The turn's context goes at the very end, after the cached
-    prefix, so it never invalidates the cache."""
+    prefix, so it never invalidates the cache. With `team_answer` (a staff
+    ANSWER) the turn is the team's: its instruction closes the messages,
+    whoever wrote last."""
     msgs: list[dict] = []
     for h in history[-config.HISTORY_MESSAGES:]:
         role = "user" if h["role"] == "customer" else "assistant"
-        text = h["text"] if h["role"] != "staff" else f"[Chris from Goji wrote]: {h['text']}"
+        text = (f"[Chris from Goji wrote]: {h['text']}" if h["role"] == "staff" else
+                f"[The team's answer, which you passed on next]: {h['text']}"
+                if h["role"] == "team" else h["text"])
         if msgs and msgs[-1]["role"] == role:
             msgs[-1]["content"] += "\n" + text
         else:
             msgs.append({"role": role, "content": text})
     while msgs and msgs[0]["role"] != "user":
         msgs.pop(0)
-    if msgs:
+    if msgs and team_answer:
+        note = context_note(now, customer_name, pending_for_chris, patient) \
+            + relay_note(team_answer)
+        if msgs[-1]["role"] == "user":
+            msgs[-1]["content"] += note
+        else:
+            msgs.append({"role": "user", "content": note.lstrip()})
+    elif msgs:
         msgs[-1]["content"] += context_note(now, customer_name, pending_for_chris, patient)
     return [{"role": m["role"], "content": [{"type": "text", "text": m["content"]}]}
             for m in msgs]
@@ -578,21 +611,24 @@ def _parse_proposal(text: str) -> Proposal:
 def propose(history: list[dict], *, wa_id: str, now: float | None = None,
             customer_name: str = "", client: anthropic.Anthropic | None = None,
             tool_deps: dict | None = None, pending_for_chris: str = "",
-            patient: str = "") -> AgentResult:
-    """Run the tool loop for the latest customer message in `history`.
+            patient: str = "", team_answer: str = "") -> AgentResult:
+    """Run the tool loop for the latest customer message in `history`, or,
+    with `team_answer`, for passing the team's answer on (relay_note).
     Never raises: any failure becomes an escalation, so a customer is never
     left with silence because the model or a tool broke."""
     now = now if now is not None else time.time()
     if config.BACKEND == "cli":
         from . import cli_backend
         return cli_backend.propose(history, wa_id=wa_id, now=now, customer_name=customer_name,
-                                   pending_for_chris=pending_for_chris, patient=patient)
+                                   pending_for_chris=pending_for_chris, patient=patient,
+                                   team_answer=team_answer)
     global last_call_at
     client = client or anthropic.Anthropic()
     last_call_at = time.time()
     result = AgentResult(proposal=_escalation("not_run"))
     t0 = time.monotonic()
-    messages = build_messages(history, now, customer_name, pending_for_chris, patient)
+    messages = build_messages(history, now, customer_name, pending_for_chris, patient,
+                              team_answer)
     if not messages:
         result.proposal = _escalation("no_customer_message")
         return result
