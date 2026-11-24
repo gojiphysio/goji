@@ -3,6 +3,7 @@ import argparse
 import hashlib
 import json
 import shutil
+import subprocess
 import time
 import urllib.request
 from pathlib import Path
@@ -39,7 +40,14 @@ if r['status'] == 'generated_unreviewed':
                 dest = a.take / source.name
                 if source.is_file():
                     shutil.copy2(source, dest)
-                    files.append({'path': str(dest.resolve()), 'sha256': hashlib.sha256(dest.read_bytes()).hexdigest()})
+                    item = {'path': str(dest.resolve()), 'sha256': hashlib.sha256(dest.read_bytes()).hexdigest()}
+                    if dest.suffix == '.mp4':
+                        item['video_probe'] = json.loads(subprocess.check_output([
+                            'ffprobe', '-v', 'error', '-select_streams', 'v:0',
+                            '-show_streams', '-of', 'json', str(dest)], text=True))['streams'][0]
+                        subprocess.run(['ffmpeg', '-v', 'error', '-i', str(dest), '-f', 'null', '-'], check=True)
+                        item['full_decode_verified'] = True
+                    files.append(item)
     r['outputs'] = files
 record_path.write_text(json.dumps(r, indent=2))
 print(json.dumps({k: v for k, v in r.items() if k in ['status', 'execution_wall_seconds', 'outputs']}))

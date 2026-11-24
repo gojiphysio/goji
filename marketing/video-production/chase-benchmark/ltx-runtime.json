@@ -1,0 +1,13 @@
+{
+  "checkpoint": {
+    "repo": "notapalindrome/ltx25-mlx-ditq8",
+    "base_pack": "notapalindrome/ltx25-mlx",
+    "file": "transformer-distilled.safetensors",
+    "revision": "0a005c82cf3fd9c49d28dc6c13bdc509b631107f",
+    "sha256": "3ec5ee0bdf03c00bcbd28e3770994267b028054991e015d1875a8e74cc0aea80",
+    "locally_verified": true
+  },
+  "python_pipeline_sha256": "ddee82e7ed3e18c4f5cf9755bfa39b2d4174dedf4e9130dfc5aacc59735e9909",
+  "pack_compatibility_adapter_sha256": "8d9c1a90abe7303b9e2cbb336e27478c7e3c29eeb1506e953dd341f7bf7bbd33",
+  "package_version": "0.18.0"
+}

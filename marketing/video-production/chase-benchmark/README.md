@@ -140,3 +140,17 @@ use the same adaptation. `wan22-weights.json` pins all six file hashes.
 This is not an independent architecture benchmark: the H3-styled master can
 favor H3 appearance. Compare sparse versus dense guidance within each family;
 report cross-family impressions with that limitation.
+
+The driver is small and rear-facing in this chase. This shot can test a stable
+game-style silhouette and wardrobe, but cannot establish face likeness, the
+physiotherapist identity, or consistency of pedestrian NPCs across scenes.
+
+Both LTX modes use the same single-stage, full-resolution eight-step distilled
+Python pipeline. Its empty task-LoRA and video-reference lists support the six
+indexed stills; video mode adds Layout-to-Render and the continuous reference.
+This avoids a different upscale/refine topology between the two LTX cells.
+Native generated audio is outside this visual comparison; panel exports are silent.
+
+Equal seed integers do not guarantee identical latent noise, including within a
+family when the number of appended reference tokens changes. Runtime totals
+include conditioning and decoding, not just the sampler.

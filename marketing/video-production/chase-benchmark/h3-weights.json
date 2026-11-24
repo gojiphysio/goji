@@ -1,0 +1,42 @@
+{
+  "hash_source": "Hugging Face download metadata; local digest verification recorded separately before cache eviction",
+  "files": [
+    {
+      "repo": "leejet/MiniMax-H3-GGUF",
+      "path": "minimax_h3_ref2va_pruned-Q4_K_M.gguf",
+      "revision": "eee1dd2f05b755b28bd1b785925cbfeebfcba9d9",
+      "sha256": "9ca1aef9f4609a56c2c751484013e1b20fe352f892122e5ab0a428fb95a7956e",
+      "size": 11420663904,
+      "local_name": "minimax_h3_ref2va_pruned-Q4_K_M.gguf",
+      "comfy_kind": "unet"
+    },
+    {
+      "repo": "leejet/MiniMax-H3-GGUF",
+      "path": "qwen3vl_32b_minimax_h3-Q4_K_M.gguf",
+      "revision": "eee1dd2f05b755b28bd1b785925cbfeebfcba9d9",
+      "sha256": "11e6efe70a57ce7f4838c47bdbd1a1c4b8ce10e2b7747f1b065990b70f4b05fc",
+      "size": 18218065024,
+      "local_name": "qwen3vl_32b_minimax_h3-Q4_K_M.gguf",
+      "comfy_kind": "clip"
+    },
+    {
+      "repo": "Comfy-Org/MiniMax-H3",
+      "path": "vae/minimax_h3_video_vae_fp16.safetensors",
+      "revision": "4b53a35191437de05370da548e59aeabe2a5a09a",
+      "sha256": "7c1f131492e7eddacaac9069a61b81bdd39de5cc96561e677c5eab1cdce5e522",
+      "size": 5207808496,
+      "local_name": "vae/minimax_h3_video_vae_fp16.safetensors",
+      "comfy_kind": "vae"
+    },
+    {
+      "repo": "lightx2v/Minimax-h3-Turbo",
+      "path": "minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors",
+      "revision": "ff0edf44b7a96e1b1b4a0c84287dfe9f6a7d133e",
+      "sha256": "5b9ab5ade15d0775676d01a907268a69a1468dc6033b3b0d3ded5502f3ebb84c",
+      "size": 1956193000,
+      "local_name": "minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors",
+      "comfy_kind": "loras"
+    }
+  ],
+  "local_digests_verified": true
+}

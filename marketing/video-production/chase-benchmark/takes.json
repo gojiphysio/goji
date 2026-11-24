@@ -55,13 +55,39 @@
     },
     {
       "take": "h3-comfy-stills-01",
-      "status": "queued",
-      "purpose": "stills"
+      "status": "generated_unreviewed",
+      "purpose": "stills",
+      "execution_wall_seconds": 790.449,
+      "review": {
+        "status": "sampled_structural_pass",
+        "method": "15 paired frames, including between supplied anchors; full decode verified, normal-speed playback pending",
+        "findings": [
+          "Three vehicles and passing sides/order retained",
+          "Sedan clears on left; van clears on right; taxi ends in middle lane",
+          "At 2.5s van distance/relative alignment differs slightly from guide",
+          "Rear camera and blue taxi remain stable at sampled times",
+          "PS2 look retained; soft tree detail; facial likeness not assessable at this scale"
+        ],
+        "production_approved": false
+      }
     },
     {
       "take": "h3-comfy-video-01",
-      "status": "queued",
-      "purpose": "video"
+      "status": "generated_unreviewed",
+      "purpose": "video",
+      "execution_wall_seconds": 1019.219,
+      "review": {
+        "status": "sampled_structural_pass",
+        "method": "15 paired frames around both overtakes; full decode verified; normal-speed playback pending",
+        "findings": [
+          "Both overtakes, vehicle count, passing sides and final lane retained",
+          "Rear camera and textured PS2 appearance retained",
+          "Van intermediate spacing at 2.5s closer to dense master than still-guided take",
+          "No clear visual-quality advantage over six stills in sampled frames; softness remains",
+          "Driver face likeness cannot be evaluated at this scale"
+        ],
+        "production_approved": false
+      }
     },
     {
       "take": "h3-guide-conversion-01",
