@@ -232,3 +232,26 @@ def test_every_lookup_reads_the_live_contacts_too():
     built = tools._sql(tools._PATIENT_SQL)
     assert "marts.patient_contact_live" in built and "marts.dim_patient_contact" in built
     assert "{" not in built                        # every placeholder filled
+
+
+def test_an_unreadable_live_table_falls_back_to_the_nightly_one(monkeypatch):
+    # Deploy order or a missing grant must cost same-day freshness only, never
+    # recognition as a whole.
+    from datetime import date as _date
+    from wa_agent import config as cfg
+    monkeypatch.setattr(cfg, "PATIENT_LOOKUP", True)
+
+    class LiveBroken:
+        def __init__(self, rows):
+            self.rows, self.sql = rows, []
+
+        def query(self, sql, job_config=None):
+            self.sql.append(sql)
+            if "patient_contact_live" in sql:
+                raise RuntimeError("Not found: Table goji-bi:marts.patient_contact_live")
+            return NS(result=lambda: self.rows)
+
+    bq = LiveBroken([{"first_name": "Sarah", "appt_date": _date(2026, 11, 26),
+                      "time_sgt": "10:00", "clinician_id": "PKN", "treatment_type": "x"}])
+    assert tools.my_appointments({}, wa_id="6591234567", bq=bq)["matched"] is True
+    assert len(bq.sql) == 2 and "dim_patient_contact" in bq.sql[1]

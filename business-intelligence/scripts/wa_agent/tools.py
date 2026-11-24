@@ -304,9 +304,34 @@ _CONTACTS = """(
 )"""
 
 
-def _sql(template: str) -> str:
+# The nightly table alone: the fallback when the live table can't be read
+# (not created yet, a missing grant), so a problem there costs same-day
+# freshness, never recognition as a whole.
+_NIGHTLY_CONTACTS = """(
+  SELECT patient_id, full_name, phone, FALSE AS changed_recently
+  FROM `{project}.marts.dim_patient_contact`
+)"""
+
+
+def _sql(template: str, live: bool = True) -> str:
+    contacts = _CONTACTS if live else _NIGHTLY_CONTACTS
     return template.format(project=config.PROJECT,
-                           contacts=_CONTACTS.format(project=config.PROJECT))
+                           contacts=contacts.format(project=config.PROJECT))
+
+
+def _contact_rows(bq, template: str, last8: str) -> list:
+    """Run a lookup keyed on a number's last 8 digits, over nightly + live
+    contacts, or nightly only if the live table fails."""
+    from google.cloud import bigquery as _bq
+
+    def run(live: bool) -> list:
+        return list(bq.query(_sql(template, live), job_config=_bq.QueryJobConfig(
+            query_parameters=[_bq.ScalarQueryParameter("last8", "STRING", last8)])).result())
+    try:
+        return run(True)
+    except Exception as e:
+        log.warning("live patient contacts unavailable, using the nightly table: %s", e)
+        return run(False)
 
 
 def my_appointments(inp: dict, *, wa_id: str, bq=None, **_) -> dict:
@@ -319,11 +344,7 @@ def my_appointments(inp: dict, *, wa_id: str, bq=None, **_) -> dict:
     if bq is None:
         from google.cloud import bigquery
         bq = bigquery.Client(project=config.PROJECT)
-    from google.cloud import bigquery as _bq
-    job = bq.query(_sql(_LOOKUP_SQL),
-                   job_config=_bq.QueryJobConfig(query_parameters=[
-                       _bq.ScalarQueryParameter("last8", "STRING", digits[-8:])]))
-    rows = list(job.result())
+    rows = _contact_rows(bq, _LOOKUP_SQL, digits[-8:])
     return {"matched": bool(rows),
             "appointments": [{"patient_first_name": r["first_name"],
                               "date": r["appt_date"].isoformat(), "time": r["time_sgt"],
@@ -383,11 +404,7 @@ def patient_context(wa_id: str, *, bq=None) -> dict:
         if bq is None:
             from google.cloud import bigquery
             bq = bigquery.Client(project=config.PROJECT)
-        from google.cloud import bigquery as _bq
-        job = bq.query(_sql(_PATIENT_SQL),
-                       job_config=_bq.QueryJobConfig(query_parameters=[
-                           _bq.ScalarQueryParameter("last8", "STRING", digits[-8:])]))
-        row = next(iter(job.result()), None)
+        row = next(iter(_contact_rows(bq, _PATIENT_SQL, digits[-8:])), None)
     except Exception as e:
         log.warning("patient lookup failed: %s", e)
         return {}
@@ -498,10 +515,7 @@ def find_booking(inp: dict, *, wa_id: str, bq=None, **_) -> dict:
     if bq is None:
         from google.cloud import bigquery
         bq = bigquery.Client(project=config.PROJECT)
-    from google.cloud import bigquery as _bq
-    rows = list(bq.query(_sql(_FIND_SQL),
-                         job_config=_bq.QueryJobConfig(query_parameters=[
-                             _bq.ScalarQueryParameter("last8", "STRING", digits[-8:])])).result())
+    rows = _contact_rows(bq, _FIND_SQL, digits[-8:])
     hits = [r for r in rows if _name_matches(name, r["name"] or "")]
     if not hits:
         return {"matched": False}

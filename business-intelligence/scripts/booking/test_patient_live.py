@@ -14,10 +14,11 @@ PATH = f"/plato/webhook/{patient_live.webhook_token(TOKEN)}"
 
 class FakeBQ:
     def __init__(self):
-        self.rows = []
+        self.rows, self.kw = [], {}
 
-    def insert_rows_json(self, table, rows):
+    def insert_rows_json(self, table, rows, **kw):
         self.rows += [(table, r) for r in rows]
+        self.kw = kw
         return []
 
 
@@ -38,6 +39,13 @@ class FakePlato:
     def post(self, path, payload):
         self.posts.append((path, payload))
         return {}
+
+
+@pytest.fixture(autouse=True)
+def _fresh_read_allowance():
+    patient_live._reads.clear()
+    yield
+    patient_live._reads.clear()
 
 
 @pytest.fixture
@@ -125,3 +133,28 @@ def test_insert_failure_never_raises():
         def insert_rows_json(self, *_):
             raise RuntimeError("bq down")
     assert patient_live.record(Broken(), "t", [{"patient_id": "p1"}]) == 0
+
+
+def test_plato_reads_are_capped_per_minute_and_never_retried(setup, monkeypatch):
+    # The availability snapshot pages Plato from the same bulk share; a burst
+    # of staff edits must not starve it. Over the cap waits for the nightly run.
+    c, plato, bq = setup
+    monkeypatch.setattr(patient_live, "READS_PER_MIN", 2)
+    _deliver(c, *[{"event": "patient:upsert", "object_id": p} for p in ("p1", "p2", "p3")])
+    assert [g[0] for g in plato.gets] == ["/patient/p1", "/patient/p2"]
+    assert all(g[1]["_retries"] == 0 and g[1]["max_wait_s"] <= 5 for g in plato.gets)
+    assert patient_live._take_read(now=10**9)               # the minute has passed
+
+
+def test_the_insert_is_time_bounded(setup):
+    # /internal/book waits on this write; the assistant gives up after 30s.
+    c, _, bq = setup
+    _deliver(c, {"event": "patient:upsert", "object_id": "p1"})
+    assert bq.kw["timeout"] <= 5 and bq.kw["retry"] is not None
+
+
+def test_a_delivery_without_a_json_content_type_is_still_read(setup):
+    c, plato, _ = setup
+    body = '{"events": [{"db": "gojihealth", "event": "patient:upsert", "object_id": "p1"}]}'
+    assert c.post(PATH, data=body, content_type="text/plain").status_code == 200
+    assert [g[0] for g in plato.gets] == ["/patient/p1"]

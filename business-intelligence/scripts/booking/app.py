@@ -713,7 +713,8 @@ def plato_webhook(token: str):
     expected = patient_live.webhook_token(INTERNAL_TOKEN)
     if not expected or not hmac.compare_digest(token.encode(), expected.encode()):
         return "not found", 404
-    ids, tokens = patient_live.patient_ids(request.get_json(silent=True),
+    # force: don't depend on Plato's Content-Type header.
+    ids, tokens = patient_live.patient_ids(request.get_json(force=True, silent=True),
                                            os.environ.get("PLATO_DB", "gojihealth"))
     if not ids and not tokens:
         return "", 200
