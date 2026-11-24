@@ -30,7 +30,7 @@ from flask import Flask, jsonify, request
 
 from .availability import SGT, derive_availability, derive_available_days
 from .booking import BookingError, create_booking, reschedule_appointment
-from .config import CLINICIANS, MAX_ADVANCE_DAYS, SERVICES
+from .config import CLINICIANS, MAX_ADVANCE_DAYS, SAME_DAY_LEAD_MINUTES, SERVICES
 from .plato import PlatoBusy, PlatoClient, PlatoError, PlatoThrottled
 from . import mailer
 
@@ -270,11 +270,27 @@ def refresh_snapshot():
         _snapshot_lock.release()
 
 
+def _same_day_lead():
+    """`same_day=1` asks for today's slots too, which only the WhatsApp
+    assistant may see (the website keeps Plato's no-same-day rule). Returns
+    (lead minutes or None, error response or None): the internal token is
+    required, so the public site can't get same-day slots by adding the param."""
+    if request.args.get("same_day", "") not in ("1", "true", "yes"):
+        return None, None
+    token = request.headers.get("X-Internal-Token", "")
+    if not (INTERNAL_TOKEN and hmac.compare_digest(token.encode(), INTERNAL_TOKEN.encode())):
+        return None, (jsonify({"error": "forbidden"}), 403)
+    return SAME_DAY_LEAD_MINUTES, None
+
+
 @app.route("/api/availability")
 def availability():
     service = request.args.get("service", "")
     if service not in SERVICES:
         return jsonify({"error": "unknown service"}), 400
+    same_day_lead, refused = _same_day_lead()
+    if refused:
+        return refused
     try:
         day = date.fromisoformat(request.args.get("date", ""))
     except ValueError:
@@ -284,7 +300,8 @@ def availability():
     focus = request.args.get("focus") or None
     variant = request.args.get("variant") or None
 
-    cache_key = (service, day.isoformat(), clinician or "", focus or "", variant or "", home)
+    cache_key = (service, day.isoformat(), clinician or "", focus or "", variant or "", home,
+                 same_day_lead)
     nowm = time.monotonic()
     with _avail_cache_lock:
         hit = _avail_cache.get(cache_key)
@@ -293,7 +310,8 @@ def availability():
 
     try:
         avail = derive_availability(plato(), service, day,
-                                    clinician_id=clinician, focus=focus, variant=variant, home=home)
+                                    clinician_id=clinician, focus=focus, variant=variant, home=home,
+                                    same_day_lead=same_day_lead)
     except Exception as e:  # Plato hiccup — serve the last answer if we have one
         with _avail_cache_lock:
             stale = _avail_cache.get(cache_key)
@@ -341,6 +359,9 @@ def availability_summary():
     service = request.args.get("service", "")
     if service not in SERVICES:
         return jsonify({"error": "unknown service"}), 400
+    same_day_lead, refused = _same_day_lead()
+    if refused:
+        return refused
     month_s = request.args.get("month", "")
     try:
         month_start = datetime.strptime(month_s, "%Y-%m").date()
@@ -361,7 +382,8 @@ def availability_summary():
     if start > end:
         return jsonify({"month": month_s, "available": []})
 
-    cache_key = (service, month_s, clinician or "", focus or "", variant or "", home)
+    cache_key = (service, month_s, clinician or "", focus or "", variant or "", home,
+                 same_day_lead)
     nowm = time.monotonic()
     with _avail_cache_lock:
         hit = _summary_cache.get(cache_key)
@@ -370,7 +392,8 @@ def availability_summary():
 
     try:
         days = derive_available_days(plato(), service, start, end,
-                                     clinician_id=clinician, focus=focus, variant=variant, home=home)
+                                     clinician_id=clinician, focus=focus, variant=variant, home=home,
+                                     same_day_lead=same_day_lead)
     except PlatoBusy as e:
         # Not a failure: the month is only part-paged because Plato's request
         # budget is 20/min and a month is ~25 pages. Progress is kept, so the

@@ -23,6 +23,7 @@ def compose(kind: str, *, customer: str, wa_id: str, staff_note: str,
             feedback: dict | None = None, sent_reply: str = "") -> EmailMessage:
     subject = {"escalated": "WhatsApp: needs you", "drafted": "WhatsApp: draft reply to check",
                "urgent": "URGENT WhatsApp: possible red flag",
+               "priority": "WhatsApp: symptoms getting worse, please check",
                "sensitive": "WhatsApp: needs you (sensitive)",
                "demoted": "WhatsApp assistant: moved a kind of message back to drafts",
                "fyi": "WhatsApp FYI: a customer asked for you",
@@ -45,6 +46,11 @@ def compose(kind: str, *, customer: str, wa_id: str, staff_note: str,
            "it on. Reply yourself in the WhatsApp Business app if you'd rather "
            "(that takes the chat over).\n"
            if kind == "fyi" else
+           "The assistant replied with concern, said it's let the team know and "
+           "offered the earliest open times (today's first), and is still in the chat so it "
+           "can book the one they pick. Reply in the WhatsApp Business app if you "
+           "want to step in (that pauses the assistant).\n"
+           if kind == "priority" else
            "Open it in the WhatsApp Business app: the assistant doesn't look at "
            "photos, and only reads the text of documents.\n"
            if kind == "media" else
@@ -69,7 +75,7 @@ def _replies(kind: str, suggested: str, sent: str) -> str:
     """The reply part of a ping. On a handover the customer got the holding
     reply (`sent`) and `suggested` is the agent's draft for Chris, with
     [brackets] for her to fill in: show both, clearly apart."""
-    if sent and kind in ("escalated", "urgent", "sensitive"):
+    if sent and kind in ("escalated", "urgent", "sensitive", "priority"):
         out = f"The customer got:\n{sent}\n\n"
         if suggested.strip() and suggested.strip() != sent.strip():
             out += ("Suggested reply for you (NOT sent; fill in anything in [brackets] "

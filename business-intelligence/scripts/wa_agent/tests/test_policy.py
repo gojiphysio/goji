@@ -284,3 +284,29 @@ def test_the_patient_record_makes_a_late_change_late_even_if_the_model_missed_it
     faq = prop(intent="faq", hours_to_appointment=-1)
     check_late_change(faq, today_3pm, NOW)
     assert faq.hours_to_appointment == -1
+
+
+def test_priority_is_sent_and_never_drafted():
+    # Getting worse: the reply goes out (app.py pings staff as it does),
+    # whatever the confidence or the escalate flag.
+    assert decide(prop(intent="priority")).action == SEND
+    assert decide(prop(intent="priority", confidence=0.4)).action == SEND
+    assert decide(prop(intent="priority", escalate=True)).action == SEND
+    # A reply that can't go out is still a handover now, never a draft.
+    d = decide(prop(intent="priority", reply="We have a slot at [time]."))
+    assert d.action == ESCALATE and d.holding
+    assert decide(prop(intent="priority", reply="  ")).action == ESCALATE
+    assert decide(prop(intent="priority", failed=True)).action == ESCALATE
+
+
+def test_priority_reply_always_tells_them_the_team_knows():
+    from wa_agent.policy import Decision, TEAM_LINE, customer_message
+    p = prop(intent="priority", reply="Sorry to hear it's getting harder to walk, Sam. The "
+             "earliest times are tomorrow:\n* Wed 25 Nov, 9:00am")
+    out = customer_message(Decision(SEND, "x"), p, NOW)
+    assert out.startswith("Sorry to hear it's getting harder to walk, Sam.\n\n" + TEAM_LINE)
+    assert out.endswith("The earliest times are tomorrow:\n* Wed 25 Nov, 9:00am")
+    said = prop(intent="priority", reply="Sorry to hear that.\n\nI've let our team know.")
+    assert customer_message(Decision(SEND, "x"), said, NOW) == said.reply
+    plain = prop(intent="faq", reply="Sorry to hear that. We open at 8am.")
+    assert customer_message(Decision(SEND, "x"), plain, NOW) == plain.reply

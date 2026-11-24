@@ -358,6 +358,17 @@ def decide(proposal: Proposal, *, intent_policy: dict[str, str] = config.INTENT_
         if not proposal.reply.strip() or reply_problems(proposal.reply):
             return Decision(SILENT, "off_topic_unsafe_reply")
         return Decision(SEND, "off_topic")
+    if rule == config.SEND_ALERT:
+        # Getting worse (owner, 24 Nov 2026): the concerned reply with the
+        # earliest slots goes out at once and staff are pinged as it does
+        # (app.py). A reply that can't go out is still a handover, never a
+        # draft: someone must hear about it now.
+        if proposal.failed or not proposal.reply.strip():
+            return Decision(ESCALATE, f"intent:{proposal.intent}:no_reply", holding=True)
+        problems = reply_problems(proposal.reply)
+        if problems:
+            return Decision(ESCALATE, "content:" + ",".join(sorted(set(problems))), holding=True)
+        return Decision(SEND, f"intent:{proposal.intent}")
     if proposal.escalate and not (rule == "draft" and proposal.intent != "urgent"):
         return Decision(ESCALATE, proposal.escalation_reason or "model_escalated")
     # A draft-for-Chris intent stays a draft even if the model wanted to hand
@@ -403,7 +414,8 @@ def apply_stage(d: Decision, proposal: Proposal, stage: int | None) -> Decision:
         return d
     if stage == 0:
         # A failure still escalates: a person must hear of it (AGENTS.md).
-        if d.action == DRAFT or (d.action == ESCALATE and proposal.intent != "urgent"
+        if d.action == DRAFT or (d.action == ESCALATE
+                                 and proposal.intent not in config.RED_FLAG_INTENTS
                                  and not proposal.failed):
             return Decision(SILENT, "stage_leave")
         return d
@@ -443,7 +455,25 @@ def customer_message(d: Decision, p: Proposal, now: float) -> str:
         return holding_reply(p, now)
     if not reply or reply_problems(reply):
         return holding_reply(p, now)
+    if p.intent == "priority":
+        return with_team_line(reply)
     return reply
+
+
+TEAM_LINE = "I've let the team know too, so they're aware."
+
+
+def with_team_line(reply: str) -> str:
+    """Getting worse: the customer is always told the team knows (they are
+    pinged as it sends). The model usually says so; if it didn't, the line
+    goes in after its opening sentence of concern."""
+    if re.search(r"\bteam\b", reply, re.I):
+        return reply
+    first, sep, rest = reply.partition("\n\n")
+    m = re.match(r"(.+?[.!])\s+(\S.*)", first, re.S)
+    if m:
+        first, rest = m.group(1), m.group(2) + (sep + rest if sep else "")
+    return f"{first}\n\n{TEAM_LINE}" + (f"\n\n{rest}" if rest else "")
 
 
 def human_replied_since(state: ChatState, since: float) -> bool:

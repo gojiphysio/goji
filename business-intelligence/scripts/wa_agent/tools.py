@@ -45,7 +45,8 @@ TOOL_DEFS = [
     {
         "name": "next_slots",
         "description": "The next open appointment times for a service, across the coming days, "
-                       "in one call. Use this for 'when can I come in?' style questions. For a "
+                       "in one call, starting with today's remaining times (from 2 hours from "
+                       "now; their weekday is \"Today\"). Use this for 'when can I come in?' style questions. For a "
                        "specific day the customer named, use get_times.",
         "input_schema": {
             "type": "object",
@@ -148,11 +149,19 @@ def _check_service(inp: dict) -> str:
     return svc
 
 
-def _booking_get(path: str, params: dict, http=requests) -> dict:
+def _booking_get(path: str, params: dict, http=requests, *, same_day: bool = False) -> dict:
+    """`same_day` asks goji-booking for today's slots too (Plato's online rule
+    hides them from the website). Only the assistant may see those, so it needs
+    the internal token; without one (local runs) it falls back to the public view."""
     params = {k: v for k, v in params.items() if v not in (None, "", False)}
     if params.get("home") is True:
         params["home"] = "1"
-    r = http.get(f"{config.BOOKING_API_BASE}{path}", params=params, timeout=20)
+    headers = {}
+    if same_day and config.INTERNAL_TOKEN:
+        params["same_day"] = "1"
+        headers["X-Internal-Token"] = config.INTERNAL_TOKEN
+    r = http.get(f"{config.BOOKING_API_BASE}{path}", params=params, timeout=20,
+                 **({"headers": headers} if headers else {}))
     if r.status_code == 503:
         raise ToolError("availability is loading; try once more, or offer the booking link")
     r.raise_for_status()
@@ -165,7 +174,7 @@ def find_available_dates(inp: dict, *, http=requests, **_) -> dict:
         raise ToolError("month must be YYYY-MM")
     data = _booking_get("/api/availability-summary",
                         {"service": svc, "month": inp["month"], "focus": inp.get("focus"),
-                         "home": inp.get("home")}, http)
+                         "home": inp.get("home")}, http, same_day=True)
     return {"service": svc, "month": inp["month"], "available_dates": data.get("available", [])}
 
 
@@ -177,7 +186,7 @@ def get_times(inp: dict, *, http=requests, **_) -> dict:
         raise ToolError("date must be YYYY-MM-DD")
     data = _booking_get("/api/availability",
                         {"service": svc, "date": inp["date"], "focus": inp.get("focus"),
-                         "home": inp.get("home")}, http)
+                         "home": inp.get("home")}, http, same_day=True)
     names = {c["id"]: c["name"] for c in data.get("clinicians", [])}
     return {"service": svc, "date": inp["date"], "times": data.get("times", []),
             "by_clinician": {names.get(cid, cid): slots
@@ -205,21 +214,23 @@ def next_slots(inp: dict, *, http=requests, today: date | None = None, **_) -> d
     month = start.replace(day=1)
     for _ in range(2):
         data = _booking_get("/api/availability-summary",
-                            {**common, "month": month.strftime("%Y-%m")}, http)
+                            {**common, "month": month.strftime("%Y-%m")}, http, same_day=True)
         dates += [d for d in data.get("available", []) if d >= start.isoformat()]
         if len(dates) >= NEXT_SLOTS_MAX_DAYS:
             break
         month = (month + timedelta(days=32)).replace(day=1)
     slots = []
     for d in sorted(dates)[:NEXT_SLOTS_MAX_DAYS]:
-        day = _booking_get("/api/availability", {**common, "date": d}, http)
+        day = _booking_get("/api/availability", {**common, "date": d}, http, same_day=True)
         names = {c["id"]: c["name"] for c in day.get("clinicians", [])}
         by_time: dict[str, list[str]] = {}
         for cid, times in (day.get("by_clinician") or {}).items():
             for t in times:
                 by_time.setdefault(t, []).append(names.get(cid, cid))
         for t in sorted(by_time)[:NEXT_SLOTS_PER_DAY]:
-            slots.append({"date": d, "weekday": date.fromisoformat(d).strftime("%a"),
+            # Today's slots are labelled "Today" so the reply says so.
+            slots.append({"date": d, "weekday": ("Today" if d == today.isoformat()
+                                                 else date.fromisoformat(d).strftime("%a")),
                           "time": t, "clinicians": by_time[t]})
     return {"service": svc, "slots": slots,
             "note": "" if slots else "no open slots in the next two months"}

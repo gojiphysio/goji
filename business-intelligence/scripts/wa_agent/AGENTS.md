@@ -43,6 +43,19 @@ The WhatsApp assistant. What it is and how to run it: [`README.md`](README.md).
 - **Its own service account** (`wa-agent-sa`): it holds chat transcripts, so it
   doesn't share dashboard-sa. Its only BigQuery write grant is on
   `marts.wa_agent_events` (set by `deploy.sh`, not the dashboard grant loops).
+- **Same-day slots are WhatsApp-only.** Plato's online rule (`min_days`)
+  hides today from the website, so the slot tools ask goji-booking for
+  `same_day=1` with the internal token (offered from 2 hours ahead, booked
+  if at least 90 minutes ahead: owner, 24 Nov 2026). Without that it told a customer "fully booked
+  today" while the clinic had a slot free (24 Nov 2026). The public API
+  refuses `same_day` without the token.
+- **Getting worse is `priority`, sent and flagged at once.** Symptoms
+  getting worse short of the 995 list (harder to walk, spreading numbness or
+  weakness): calm, proportionate concern (never "sounds serious": owner),
+  "I've let the team know", the earliest slots with today's first. The reply
+  goes out and staff are pinged in the same step (`send_alert`, every stage);
+  the chat stays with the agent so it can book. A reply that fails the check
+  is a handover, never a draft.
 - **Booking links use the `wa-book` go-link** (`dashboard/app.py` LINK_SLUGS),
   which forwards `service`/`focus` to `/book`.
 - **Disclosure: don't lead with it, never hide it.** The agent introduces
