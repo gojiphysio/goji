@@ -2,7 +2,8 @@ import pytest
 from datetime import datetime
 
 from wa_agent.policy import (AGENT, DRAFT, ESCALATE, HUMAN, PAUSED, SEND, SGT, SILENT,
-                             ChatState, Proposal, apply_idle_handback, decide, gate,
+                             ChatState, Decision, Proposal, apply_idle_handback,
+                             claims_cancelled, decide, gate,
                              human_replied_since, in_clinic_hours, is_acknowledgement, on_human_message)
 
 NOW = datetime(2026, 11, 18, 10, 0, tzinfo=SGT).timestamp()  # Wednesday 10am
@@ -32,12 +33,12 @@ def test_escalate_intents_escalate_even_if_model_did_not():
 
 
 def test_draft_and_unknown_intents_draft():
-    for intent in ("cancel", "billing", "clinical", "complaint", "something_new"):
+    for intent in ("billing", "clinical", "complaint", "something_new"):
         assert decide(prop(intent=intent)).action == DRAFT, intent
 
 
 def test_draft_intents_stay_drafts_even_if_the_model_escalates():
-    # Chris asked for complaints, billing, clinical and cancelling as drafts she checks.
+    # Chris asked for complaints, billing and clinical as drafts she checks.
     assert decide(prop(intent="complaint", escalate=True)).action == DRAFT
     assert decide(prop(intent="urgent", escalate=True)).action == ESCALATE
     assert decide(prop(intent="faq", escalate=True)).action == ESCALATE   # unsure on an auto intent
@@ -201,8 +202,8 @@ def test_a_short_clarifying_question_sends_even_below_the_confidence_bar():
     assert decide(two).action == DRAFT               # more than one question
     unsure = Proposal(reply="Is it today?", intent="reschedule", confidence=0.3, escalate=False)
     assert decide(unsure).action == DRAFT            # very unsure: still drafted
-    cancel = Proposal(reply="Which appointment?", intent="cancel", confidence=0.6, escalate=False)
-    assert decide(cancel).action == DRAFT            # draft-for-Chris intents stay drafts
+    billing = Proposal(reply="Which invoice?", intent="billing", confidence=0.6, escalate=False)
+    assert decide(billing).action == DRAFT           # draft-for-Chris intents stay drafts
 
 
 def test_bubbles_split_and_cap_at_three():
@@ -370,3 +371,23 @@ def test_a_long_unmarked_reply_splits_after_its_opening():
     times = "The earliest times are:\n* Today, 2:30pm\n* Wed 25 Nov, 9:00am"
     out = split_bubbles("Sorry to hear that, Sam.\n\n" + times + "\n\n" + body)
     assert out[0] == "Sorry to hear that, Sam." and out[1].startswith(times)
+
+
+def test_cancel_with_notice_is_the_agents_and_a_late_one_is_chris():
+    ask = Proposal(reply="That's your Thu 27 Nov, 3:00pm with Kristy. Shall I cancel it, or "
+                         "would another day suit you better?", intent="cancel",
+                   confidence=0.9, escalate=False, hours_to_appointment=72)
+    assert decide(ask).action == SEND
+    late = Proposal(reply="No worries! As it's your first late change, we'll waive the fee.",
+                    intent="cancel", confidence=0.9, escalate=False, hours_to_appointment=5)
+    assert decide(late) == Decision(DRAFT, "late_change")
+
+
+def test_a_cancel_reply_that_says_its_done_is_never_sent():
+    # Only the code's confirmation, from goji-booking's answer, says it's cancelled.
+    for reply in ("Done, I've cancelled it!", "Your appointment has been cancelled.",
+                  "All cancelled 😊"):
+        p = Proposal(reply=reply, intent="cancel", confidence=0.95, escalate=False,
+                     hours_to_appointment=72)
+        assert decide(p) == Decision(DRAFT, "claims_cancelled"), reply
+    assert not claims_cancelled("Shall I cancel it for you?")

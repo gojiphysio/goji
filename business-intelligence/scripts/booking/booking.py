@@ -622,3 +622,75 @@ def reschedule_appointment(plato, req: dict, *, now: datetime | None = None,
         "date": new_day.isoformat(),
         "time": new_time,
     }
+
+
+# --- Cancel (the WhatsApp assistant cancels an existing appointment) ----------
+
+def cancel_appointment(plato, req: dict, *, now: datetime | None = None,
+                       dry_run: bool = False) -> dict:
+    """Cancel one existing appointment with at least 24 hours' notice. Raises
+    BookingError (codes: invalid, not_found, ambiguous, late_change,
+    unsupported, plato_error).
+
+    req keys: phone, patient_id (optional, preferred), date, time (YYYY-MM-DD /
+    HH:MM, SGT wall clock).
+
+    Goji's Plato has no cancelled flag (no appointment carries `cancelled`,
+    `void` or `status`; checked 24 Nov 2026): staff cancel by deleting the
+    appointment, so this deletes it too. The clinic email is the record.
+    dry_run=True does everything but the DELETE.
+    """
+    phone = str(req.get("phone") or "").strip()
+    patient_id = str(req.get("patient_id") or "").strip()
+    _require(_PHONE_RE.match(phone), "Please give a valid phone number.")
+    _require(not patient_id or (patient_id.replace("-", "").isalnum()
+                                and len(patient_id) <= 64), "Invalid patient_id.")
+    try:
+        day = date.fromisoformat(str(req.get("date") or "").strip())
+    except ValueError:
+        raise BookingError("Dates must be YYYY-MM-DD.")
+    time_ = str(req.get("time") or "").strip()
+    _require(_TIME_RE.match(time_), "Times must be HH:MM.")
+
+    now = now or datetime.now(_SGT).replace(tzinfo=None)
+    appt = _find_appointment(plato, day, time_, patient_id, phone)
+    appt_id = str(appt.get("_id") or "")
+    start = _parse_plato_dt(appt.get("starttime"))
+    end = _parse_plato_dt(appt.get("endtime"))
+    _require(appt_id and start and end and end > start,
+             "That appointment can't be cancelled automatically.", "unsupported")
+    _require(start - now >= timedelta(hours=RESCHEDULE_MIN_NOTICE_HOURS),
+             f"Changes within {RESCHEDULE_MIN_NOTICE_HOURS} hours go to our team.",
+             "late_change")
+    # Home visits are three appointments (travel / visit / travel): deleting
+    # the visit alone would strand the travel blocks, so they stay with staff.
+    type_code = str(appt.get("code_Bottom") or "")
+    _require(type_code != HOME_VISIT_TYPE_CODE,
+             "Home visits are cancelled by our team.", "unsupported")
+    cid = clinician_by_calendar(_calendar_color_for_appointment(appt))
+    _require(cid, "That appointment can't be cancelled automatically.", "unsupported")
+    found = _service_for(type_code, int((end - start).total_seconds() // 60))
+    service = SERVICES[found[0]]["title"] if found else "Appointment"
+
+    if not dry_run:
+        with _lock_for(cid):
+            try:
+                r = plato.delete_appointment(appt_id, days=(day.isoformat(),))
+            except Exception:
+                raise BookingError("Could not cancel the appointment.", "plato_error")
+            if isinstance(r, dict) and r.get("success") is False:
+                raise BookingError("Plato did not accept the cancellation.", "plato_error")
+
+    return {
+        "ok": True,
+        "dry_run": dry_run,
+        "source": "whatsapp",
+        "reference": "GOJI-" + appt_id[-6:].upper(),
+        "appointment_id": appt_id,
+        "clinician_id": cid,
+        "clinician_name": CLINICIANS[cid]["name"],
+        "clinician_email": CLINICIANS[cid].get("email"),
+        "service": service,
+        "date": day.isoformat(),
+        "time": time_,
+    }

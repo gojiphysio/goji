@@ -647,8 +647,14 @@ class PlatoClient:
                 self._dirty_days[day] = now
         return r
 
-    def delete_appointment(self, appointment_id: str) -> dict:
+    def delete_appointment(self, appointment_id: str, days: tuple[str, ...] = ()) -> dict:
+        """Delete one appointment. `days` (YYYY-MM-DD) read live until the next
+        snapshot refresh, like `update_appointment`, so the freed slot shows."""
         r = self.delete(f"appointment/{appointment_id}")
         self._appts_cache.clear()
         self._partial.clear()
+        now = time.monotonic()
+        for day in days:
+            if day:
+                self._dirty_days[day] = now
         return r

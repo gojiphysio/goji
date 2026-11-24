@@ -161,8 +161,8 @@ now), so for "any slots today?" say what's open today, or that today is full, \
 from what they return. Write today's times as "Today, 2:00pm", never with \
 today's date. Offer at most 3 times, then give the link from booking_link so \
 they can book. Never write any \
-other booking URL (not www.gojiphysio.com/book). You can make new bookings \
-as below, but you can't change or cancel existing ones.
+other booking URL (not www.gojiphysio.com/book). You can make new bookings, \
+move existing ones and cancel them, as below.
 - Send the booking link (and a list of open times) once per conversation. If \
 they didn't take it up, don't send it again unless they ask how to book or \
 ask about times; just answer what they asked. Repeating it sounds like a bot.
@@ -255,6 +255,25 @@ moves it. Don't ask "Shall I move it?" again after they've picked. Only state \
 the move back when they named a time you hadn't offered. Never say it's been \
 moved yourself. No need to involve Chris.
 
+Cancelling (intent=cancel, escalate=false)
+- Look up their booking as for rescheduling. If they have more than one, \
+ask which (one question).
+- With 24 hours' notice or more you cancel it yourself. State it back, \
+and in the same message offer to move it instead, e.g. "No problem! That's \
+your Thu 27 Nov, 3:00pm with Kristy. Shall I cancel it, or would another \
+day suit you better?" Fill `cancel` with its date and time.
+- When they say yes in their next message, set confirm_cancel=true and fill \
+`cancel` again. The system cancels it and sends the confirmation, which \
+asks gently what came up and offers another time, so your reply is only a \
+fallback: one short line. Never say or imply it's cancelled yourself.
+- If they'd rather move it, it's a reschedule (above).
+- When they tell you why (unwell, injured, away, busy): answer warmly and \
+briefly in their terms ("Hope you feel better soon!", "Have a lovely \
+trip!") and offer to find a time when it suits ("when you're back", "once \
+you're feeling better"), once. Getting worse is priority. Put the reason \
+in staff_note.
+- No need to involve Chris.
+
 Late changes (rescheduling or cancelling less than 24 hours before the \
 appointment; Chris checks these first)
 - Firm but friendly. Mention the 24-hour policy and the $50 fee. If the \
@@ -267,7 +286,7 @@ changes. As this is your first, we'll waive it this time 😊"
 draft waives the fee (first time) or applies it (earlier late changes on \
 record since go-live).
 
-Drafted for Chris (escalate=false): cancelling (intent=cancel), their own \
+Drafted for Chris (escalate=false): their own \
 charges, invoices or refunds (billing; a general question about prices, \
 packages, insurance or Medisave is faq or pricing, answered from the website), their own symptoms beyond which service fits or \
 how treatment is going (clinical), complaints (complaint). Write the reply \
@@ -399,6 +418,10 @@ for a child, their age; else empty
 list them as "YYYY-MM-DD HH:MM" separated by commas; else empty
 - confirm_move: true only when they've just said yes to the move you stated \
 back in your previous message
+- cancel: for cancelling an existing appointment, its date (YYYY-MM-DD) and \
+time (HH:MM); empty strings otherwise
+- confirm_cancel: true only when they've just said yes to the cancellation \
+you stated back in your previous message
 - hours_to_appointment: for reschedule or cancel, hours from now until the \
 appointment they want to change (from my_appointments or what they told you); \
 -1 if you don't know or it doesn't apply
@@ -435,10 +458,18 @@ PROPOSAL_SCHEMA = {
             "additionalProperties": False,
         },
         "confirm_move": {"type": "boolean"},
+        "cancel": {
+            "type": "object",
+            "properties": {k: {"type": "string"} for k in ("date", "time")},
+            "required": ["date", "time"],
+            "additionalProperties": False,
+        },
+        "confirm_cancel": {"type": "boolean"},
     },
     "required": ["reply", "holding_reply", "intent", "confidence", "escalate",
                  "escalation_reason", "staff_note", "hours_to_appointment", "booking",
-                 "confirm_booking", "move", "confirm_move"],
+                 "confirm_booking", "move", "confirm_move", "cancel",
+                 "confirm_cancel"],
     "additionalProperties": False,
 }
 
@@ -605,7 +636,8 @@ def _parse_proposal(text: str) -> Proposal:
                     hours_to_appointment=float(d.get("hours_to_appointment", -1)),
                     booking=d.get("booking") or {},
                     confirm_booking=bool(d.get("confirm_booking")),
-                    move=d.get("move") or {}, confirm_move=bool(d.get("confirm_move")))
+                    move=d.get("move") or {}, confirm_move=bool(d.get("confirm_move")),
+                    cancel=d.get("cancel") or {}, confirm_cancel=bool(d.get("confirm_cancel")))
 
 
 def propose(history: list[dict], *, wa_id: str, now: float | None = None,

@@ -10,7 +10,15 @@ The WhatsApp assistant. What it is and how to run it: [`README.md`](README.md).
   in code (`app._book_pending` → goji-booking `/internal/book`) only after the
   customer confirms, in a later message, the details stated back to them; the
   confirmation text is built from goji-booking's answer. Dry run until go-live
-  (`WA_AGENT_BOOKING_DRY_RUN`). Changing or cancelling bookings stays with staff.
+  (`WA_AGENT_BOOKING_DRY_RUN`). Moves and cancellations with 24h+ notice go
+  the same way (`_move_pending` → `/internal/reschedule`, `_cancel_pending` →
+  `/internal/cancel`); inside 24 hours they're drafts for Chris (fee policy).
+- **Cancelling is the agent's with 24h+ notice** (owner, 24 Nov 2026: a test
+  cancel more than 24 hours out was handed to Chris). It states the booking back and
+  offers to move it instead; after the yes, the code's confirmation asks
+  gently what came up and offers another time, since "away" or "unwell"
+  shapes the follow-up. A model reply that says it's cancelled without the
+  code having done it is never sent (`policy.claims_cancelled`).
 - **Never call Plato from here.** Availability comes from goji-booking's API,
   which serves its 5-minute snapshot. Plato allows 20 requests/min for the
   whole clinic (`booking/README.md`).

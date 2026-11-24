@@ -157,6 +157,54 @@ def move_text(res: dict) -> str:
     return text
 
 
+CANCEL_FIELDS = ("date", "time")
+
+
+def cancel_complete(c: dict | None) -> bool:
+    if not c:
+        return False
+    try:
+        date.fromisoformat(c.get("date", ""))
+    except ValueError:
+        return False
+    return bool(_TIME.match(c.get("time", "")))
+
+
+def cancel(c: dict, *, wa_id: str, patient_id: str = "", http=requests) -> dict:
+    """Cancel an existing appointment through goji-booking's /internal/cancel
+    (24 hours' notice or more; goji-booking refuses later ones as late_change).
+    {ok, reference, clinician_name, service, date, time, dry_run} or BookingFailed."""
+    if config.BOOKING_SIMULATE and config.STATE_BACKEND == "memory":
+        return {"ok": True, "dry_run": True, "reference": "DRYRUN-" + secrets.token_hex(3).upper(),
+                "clinician_name": "", "service": "", **{k: c[k] for k in CANCEL_FIELDS}}
+    if not config.INTERNAL_TOKEN:
+        raise BookingFailed("cancelling isn't set up", "not_configured")
+    body = {**{k: c[k] for k in CANCEL_FIELDS}, "phone": "+" + re.sub(r"\D", "", wa_id),
+            "patient_id": patient_id, "dry_run": config.BOOKING_DRY_RUN}
+    try:
+        r = http.post(f"{config.BOOKING_API_BASE}/internal/cancel", json=body, timeout=30,
+                      headers={"X-Internal-Token": config.INTERNAL_TOKEN})
+        data = r.json()
+    except Exception as e:
+        raise BookingFailed(f"the booking system didn't answer: {e}", "unreachable")
+    if not data.get("ok"):
+        raise BookingFailed(data.get("error") or "cancel refused", data.get("code") or "error")
+    return data
+
+
+def cancel_text(res: dict) -> str:
+    """The confirmation, then a gentle why (being unwell or away tells the
+    team how to follow up) and an open offer to rebook (owner, 24 Nov 2026)."""
+    who = (res.get("clinician_name") or "").split(" ")[0]
+    text = (f"Done, I've cancelled your appointment on {_when(res['date'], res['time'])}"
+            f"{' with ' + who if who else ''} (ref {res['reference']}). Hope all's well! "
+            f"If you don't mind me asking, what came up? Whenever you're ready, I'm happy "
+            f"to find you another time 😊")
+    if res.get("dry_run"):
+        text += "\n\n🧪 TEST: dry run, nothing was changed in the calendar."
+    return text
+
+
 WAIVER_TAG = "Late change waiver used"
 
 

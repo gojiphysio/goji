@@ -56,6 +56,7 @@ class ChatState:
     pending_for_chris: str = ""  # waiting: what was handed over (the staff note)
     pending_booking: dict = field(default_factory=dict)  # stated back, awaiting the customer's yes
     pending_move: dict = field(default_factory=dict)     # same, for moving an appointment
+    pending_cancel: dict = field(default_factory=dict)   # same, for cancelling one
     closer_id: str = ""  # our reply to a bare "thanks": the next one gets silence
     booked: dict = field(default_factory=dict)  # latest booking (agent or website), for context
     patient: dict = field(default_factory=dict)  # returning-patient lookup, cached per chat
@@ -95,6 +96,8 @@ class Proposal:
     confirm_booking: bool = False                # the customer just confirmed the pending one
     move: dict = field(default_factory=dict)     # old/new date+time for moving an appointment
     confirm_move: bool = False
+    cancel: dict = field(default_factory=dict)   # date+time of the appointment to cancel
+    confirm_cancel: bool = False
     failed: bool = False  # agent._escalation: the model or a tool failed, nothing to judge
     holding_reply: str = ""  # the model's own handover message, sent when the code hands over
 
@@ -427,10 +430,16 @@ def decide(proposal: Proposal, *, intent_policy: dict[str, str] = config.INTENT_
         # "I've cancelled it"), so the code's holding reply goes out instead.
         return Decision(ESCALATE, f"intent:{proposal.intent}",
                         holding=proposal.intent not in MODEL_HANDOVER_INTENTS)
-    if proposal.intent == "reschedule" and 0 <= proposal.hours_to_appointment < LATE_CHANGE_H:
+    if proposal.intent in ("reschedule", "cancel") \
+            and 0 <= proposal.hours_to_appointment < LATE_CHANGE_H:
         # Inside the 24-hour policy: whether the $50 fee applies or is waived
         # is Chris's call, so she checks the reply first.
         return Decision(DRAFT, "late_change")
+    if proposal.intent == "cancel" and not proposal.confirm_cancel \
+            and claims_cancelled(proposal.reply):
+        # Only the code's confirmation, built from goji-booking's answer, may
+        # say it's cancelled; a model reply saying so cancelled nothing.
+        return Decision(DRAFT, "claims_cancelled")
     if not proposal.reply.strip():
         return Decision(DRAFT, "empty_reply")
     problems = reply_problems(proposal.reply)
@@ -446,6 +455,15 @@ def decide(proposal: Proposal, *, intent_policy: dict[str, str] = config.INTENT_
     if rule in ("auto", "auto_notify"):
         return Decision(SEND, f"intent:{proposal.intent}")
     return Decision(DRAFT, f"intent:{proposal.intent}")
+
+
+_CLAIMS_CANCELLED = re.compile(
+    r"\b(i'?ve|we'?ve|i have|we have|has been|have been|is now|it's|it is|all)\s+cancell?ed\b", re.I)
+
+
+def claims_cancelled(reply: str) -> bool:
+    """The reply says an appointment is cancelled ("I've cancelled it")."""
+    return bool(_CLAIMS_CANCELLED.search(reply or ""))
 
 
 # Intents the model is instructed to answer with a handover message (red flag

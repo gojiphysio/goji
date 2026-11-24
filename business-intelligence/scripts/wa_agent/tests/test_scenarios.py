@@ -43,7 +43,7 @@ def test_judge_matches_the_service_at_stage_2():
     d = sc.judge(Proposal("A session is $260.", "pricing", 0.6, False), 2)
     assert (d.action, d.holding) == ("escalate", True)
     assert sc.judge(Proposal("A session is $260.", "pricing", 0.6, False), 2, 0.5).action == "send"
-    assert sc.judge(Proposal("Noted.", "cancel", 0.95, False), 2).action == "escalate"
+    assert sc.judge(Proposal("Noted.", "billing", 0.95, False), 2).action == "escalate"
 
 
 def _queue(monkeypatch, *proposals):

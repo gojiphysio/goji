@@ -32,6 +32,8 @@ the clinic's real rules — see the plan/validation notes in the repo.
   (`X-Internal-Token`; see **WhatsApp assistant** below).
 - `POST /internal/reschedule` → the WhatsApp assistant moves a patient's
   existing appointment (same token; see **WhatsApp assistant** below).
+- `POST /internal/cancel` → the WhatsApp assistant cancels a patient's
+  existing appointment with 24h+ notice (same token; see below).
 - `GET /healthcheck` → liveness only ("is the container up"). Never touches Plato.
 - `GET /healthcheck/deep` → **readiness**: derives real availability for the next
   14 days. `200 {"ok":true,...}` = a visitor can book; `503` = they can't, with
@@ -110,6 +112,9 @@ books through `POST /internal/book`, the same `create_booking` as `/api/book`.
 - **Moving a booking:** `POST /internal/reschedule` (same token) moves an
   existing appointment, same clinician and service; a real move also fires the
   callback above. Full contract under **`POST /internal/reschedule`** below.
+- **Cancelling a booking:** `POST /internal/cancel` (same token). Contract
+  under **`POST /internal/cancel`** below; `test_cancel.py` checks a dry run
+  never deletes.
 
 **Setup (once, before this deploys):** the deploy mounts the secret
 unconditionally, so a missing secret fails the deploy.
@@ -341,6 +346,29 @@ service and the length (no clinician change in this version).
   and notes; that the `YYYY-MM-DD HH:MM:SS` format is accepted on PUT; whether
   `endtime` is required (we always send it); and that writing `description`
   back doesn't mangle it (HTML/escaping).
+
+### `POST /internal/cancel` (WhatsApp assistant)
+Cancels one existing appointment. `cancel_appointment` in `booking.py`; same
+token rules as `/internal/book`.
+- **Body:** `{phone, patient_id?, date: "YYYY-MM-DD", time: "HH:MM", dry_run:
+  bool}` (SGT wall clock). Non-boolean `dry_run` or bad values → `400 invalid`.
+- **Finding it:** same as `/internal/reschedule` (`_find_appointment`): `404
+  not_found`, `409 ambiguous`.
+- **Policy:** less than 24 hours ahead → `409 late_change` (staff apply the
+  fee policy). Home visits (three appointments) and anything not on a known
+  clinician's calendar → `409 unsupported`.
+- **Write:** `DELETE /appointment/{id}`. Goji's Plato has no cancelled flag
+  (no appointment carries `cancelled`, `void` or `status`; checked 24 Nov
+  2026): staff cancel by deleting, so this does too. The day reads live until
+  the next snapshot so the freed slot shows at once. `dry_run: true` does
+  everything but the DELETE and sends nothing.
+- **Response:** `200 {ok, dry_run, reference, clinician_name, service, date,
+  time}`. Errors `{ok:false, error, code}` with the reschedule status codes.
+- **After a real cancel:** a clinic email "Cancelled via WhatsApp assistant"
+  (`send_admin_cancel_email`, CCs the clinician). Plato keeps nothing once the
+  appointment is deleted, so this email is the record.
+- **Verify once on the test patient before relying on it** that DELETE frees
+  the slot in Plato's calendar.
 
 ## Config to keep in sync
 `config.py` mirrors the website's `src/lib/services.ts` + `clinicians.ts`

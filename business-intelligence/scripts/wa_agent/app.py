@@ -58,7 +58,8 @@ from . import (agent, booking_client, config, documents, events, learning, notif
 from .policy import (AGENT, DRAFT, ESCALATE, HUMAN, LATE_CHANGE_H, OFF_TOPIC, PAUSED, SEND,
                      SGT, SILENT, WAITING, WATCHLIST, as_one_message, split_bubbles,
                      apply_idle_handback, apply_pause_expiry, apply_stage, handover_mode,
-                     check_late_change, customer_message, customer_window_open, has_record,
+                     check_late_change, claims_cancelled, customer_message,
+                     customer_window_open, has_record,
                      note_off_topic,
                      out_of_scope,
                      pre_golive_chat,
@@ -700,6 +701,47 @@ def _move_pending(state, ev: Inbound, received: float, fallback: str,
             False)
 
 
+def _cancel_pending(state, ev: Inbound, received: float,
+                    fallback: str) -> tuple[str, bool, bool]:
+    """The customer confirmed the cancellation stated back to them in an earlier
+    message: cancel it through goji-booking. Chris is only told if it fails.
+    Returns (reply, cancelled, failed)."""
+    pending = state.pending_cancel or {}
+    if claims_cancelled(fallback):  # nothing is cancelled until goji-booking says so
+        fallback = "Sorry, just to check: which appointment would you like me to cancel?"
+    if not pending or pending.get("at", 0) >= received \
+            or received - pending.get("at", 0) > config.BOOKING_CONFIRM_WINDOW_S:
+        events.record("cancel_skipped", ev.wa_id, reason="no_pending_cancel")
+        return fallback, False, False
+    if not booking_client.cancel_complete(pending):
+        events.record("cancel_skipped", ev.wa_id, reason="details_missing")
+        return fallback, False, False
+    ids = (state.patient or {}).get("patient_ids") or []
+    state.pending_cancel = {}
+    try:
+        res = booking_client.cancel(pending, wa_id=ev.wa_id,
+                                    patient_id=ids[0] if len(ids) == 1 else "")
+    except booking_client.BookingFailed as e:
+        events.record("cancel_failed", ev.wa_id, reason=e.code)
+        _alert("escalated", customer=ev.name, wa_id=ev.wa_id,
+               staff_note=f"Couldn't cancel their appointment ({e.code}): "
+                          f"{pending.get('date')} {pending.get('time')}",
+               suggested_reply="", reason=f"cancel failed: {e}", last_message=ev.text)
+        if e.code == "late_change":
+            return ("Thanks for letting us know. As it's within 24 hours of your "
+                    "appointment, I've passed this to the team and they'll sort it out "
+                    "with you shortly."), False, True
+        return ("Sorry, I couldn't cancel it just now. I've let the team know and they'll "
+                "sort it out with you shortly."), False, True
+    events.record("cancelled", ev.wa_id, intent="cancel",
+                  reason="dry_run" if res.get("dry_run") else "agent")
+    if (state.booked or {}).get("date") == res.get("date") \
+            and (state.booked or {}).get("time") == res.get("time"):
+        state.booked = {}
+    state.patient_at = 0.0  # the record's next appointment has changed: look it up again
+    return booking_client.cancel_text(res), True, False
+
+
 def _read_document(client, ev: Inbound) -> str:
     try:
         data, mime = client.download_media(ev.media_id)
@@ -1027,8 +1069,10 @@ def handle_inbound(ev: Inbound, received: float) -> None:
             return
         # A handover sends the holding reply; p.reply is Chris's draft (notice).
         reply = customer_message(d, p, time.time())
-        booked, failed = None, False
-        if d.action == SEND and p.confirm_booking:
+        booked, failed, cancelled = None, False, False
+        if d.action == SEND and p.confirm_cancel and p.intent == "cancel":
+            reply, cancelled, failed = _cancel_pending(state, ev, received, reply)
+        elif d.action == SEND and p.confirm_booking:
             reply, booked, failed = _book_pending(state, ev, received, reply, p.booking)
         elif d.action == SEND and p.confirm_move:
             reply, booked, failed = _move_pending(state, ev, received, reply, p.move)
@@ -1061,10 +1105,16 @@ def handle_inbound(ev: Inbound, received: float) -> None:
         state.pending_draft = {}
         watched = _watch(st, state, ev.wa_id, p.intent, sent_at)
         note_outcome(state, p.intent, "watch-listed" if watched
+                     else "cancelled" if cancelled
                      else _outcome(d, p, reply, booked, failed), sent_at)
         if booked:
             state.booked, state.pending_booking, state.pending_move = booked, {}, {}
             state.patient_at = 0.0  # look again: the booking may have made a patient
+        elif d.action == SEND and p.intent == "cancel" and not p.confirm_cancel \
+                and booking_client.cancel_complete(p.cancel):
+            # Stated back; only their next message can confirm it.
+            state.pending_cancel = {**{k: p.cancel.get(k, "") for k in
+                                       booking_client.CANCEL_FIELDS}, "at": sent_at}
         elif d.action == SEND and not p.confirm_move and p.move.get("old_date") and (
                 booking_client.move_complete(p.move) or booking_client.offered(p.move.get("options", ""))):
             state.pending_move = {**{k: p.move.get(k, "") for k in booking_client.MOVE_FIELDS},
