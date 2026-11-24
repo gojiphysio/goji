@@ -34,3 +34,22 @@ index 38492e3..3043e9c 100644
          temb_key = "token_embd.weight"
          if temb_key in sd and sd[temb_key].shape == (256384, 4096):
              # non-standard Comfy-Org tokenizer
+diff --git a/nodes.py b/nodes.py
+index 4683514..d68c035 100644
+--- a/nodes.py
++++ b/nodes.py
+@@ -1,5 +1,6 @@
+ # (c) City96 || Apache-2.0 (apache.org/licenses/LICENSE-2.0)
+ import torch
++import os
+ import logging
+ import inspect
+ import collections
+@@ -238,6 +239,7 @@ class CLIPLoaderGGUF:
+             state_dicts = clip_data,
+             model_options = {
+                 "custom_operations": GGMLOps,
++                **({"load_device": torch.device("mps"), "dtype": torch.bfloat16} if os.environ.get("GOJI_TEXT_ENCODER_MPS") == "1" else {}),
+                 "initial_device": comfy.model_management.text_encoder_offload_device()
+             },
+             embedding_directory = folder_paths.get_folder_paths("embeddings"),

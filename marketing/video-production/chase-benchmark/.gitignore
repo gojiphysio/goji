@@ -4,6 +4,7 @@ staging/*.blend*
 staging/frames/
 staging/*.mp4
 inputs/styled-frames/
+inputs/styled-control-frames/
 inputs/styled-stills/
 inputs/styled*.mp4
 inputs/wan-guides/

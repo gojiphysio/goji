@@ -1,10 +1,29 @@
 {
-  "status": "preparation; no completed six-cell model comparison",
+  "status": "See individual takes; no ranking inferred from encode success",
   "takes": [
     {
       "take": "h3-comfy-conversion-01",
-      "status": "queued",
-      "purpose": "conversion"
+      "status": "setup_aborted",
+      "purpose": "conversion",
+      "wall_seconds": 812.2979011535645,
+      "abort_reason": "Reference setup took about nine minutes; first sampling step still incomplete after several further minutes, with heavy swap. Moving from default subquadratic attention to the documented MPS PyTorch SDPA path and MPS text encoder. No generated quality result."
+    },
+    {
+      "take": "h3-comfy-conversion-02",
+      "status": "generated_unreviewed",
+      "purpose": "conversion",
+      "execution_wall_seconds": 1868.078,
+      "review": {
+        "status": "guide_frozen_for_benchmark",
+        "method": "15 timed samples against Blender including overtakes; full MP4 decode; native playback pending unavailable browser",
+        "findings": [
+          "Three vehicles retained, silver pass then van pass on correct sides",
+          "Lane changes and rear camera retained in inspected samples",
+          "Textured PS2 appearance closer to Episode 1; foliage and building details soft",
+          "Driver is game-styled but identity not approved"
+        ],
+        "production_approved": false
+      }
     },
     {
       "take": "h3-comfy-smoke-01",
@@ -27,6 +46,22 @@
       "status": "generated_unreviewed",
       "purpose": "smoke",
       "execution_wall_seconds": 45.005
+    },
+    {
+      "take": "h3-comfy-smoke-05",
+      "status": "generated_unreviewed",
+      "purpose": "smoke",
+      "execution_wall_seconds": 68.092
+    },
+    {
+      "take": "h3-comfy-stills-01",
+      "status": "queued",
+      "purpose": "stills"
+    },
+    {
+      "take": "h3-comfy-video-01",
+      "status": "queued",
+      "purpose": "video"
     },
     {
       "take": "h3-guide-conversion-01",

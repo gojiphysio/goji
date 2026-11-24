@@ -1,10 +1,11 @@
 {
   "comfy_commit": "da8bd08e48deee74d9f6c3bc00aed365b00ec209",
   "gguf_commit": "ff8d48666758866bcc9e93b22e1e07cb636e084f",
-  "gguf_patch_sha256": "4eed32d9a69f777de4fe0169f113eb27f1612da124fad382ce44452307a5cff4",
+  "gguf_patch_sha256": "3c37ed7a9b605191f53871951d264f882ce11146b8e34c7809b646c7a220a85b",
   "vae_compute": "float32",
-  "attention": "upcast, subquadratic on MPS",
+  "attention": "PyTorch SDPA on MPS",
   "gpu_jobs": "one at a time; CPU guide preparation concurrent",
   "hardware": "Mac M5 Pro, 64 GB unified memory",
-  "patch_note": "Unified diff normalized to LF; apply with git apply --ignore-whitespace. No semantic change from diagnostic 04 or conversion 01."
+  "patch_note": "Normalized LF unified diff; git apply --ignore-whitespace. Used from smoke 05 onward. Earlier per-take environment records retain prior setup.",
+  "text_encoder": "MPS BF16 via GOJI_TEXT_ENCODER_MPS=1"
 }

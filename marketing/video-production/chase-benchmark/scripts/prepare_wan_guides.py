@@ -22,23 +22,28 @@ sampled = [min(120, math.floor(i * 24 / 16 + 0.5)) for i in range(81)]
 for kind in ['dense', 'sparse', 'mask']:
     (out / kind).mkdir()
 for i in range(81):
-    Image.open(ROOT / 'inputs/styled-frames' / f'{sampled[i]:04d}.png').save(out / 'dense' / f'{i:04d}.png')
+    Image.open(Path(m['control_frames_path']) / f'{sampled[i]:04d}.png').save(out / 'dense' / f'{i:04d}.png')
     if i in known:
         img = Image.open(ROOT / 'inputs/styled-stills' / f'{known[i]*24//16:04d}.png')
     else:
-        img = Image.new('RGB', (576, 1024), (128,128,128))
+        img = Image.new('RGB', tuple(m['size']), (128,128,128))
     img.save(out / 'sparse' / f'{i:04d}.png')
-    Image.new('RGB', (576, 1024), (0,0,0) if i in known else (255,255,255)).save(out / 'mask' / f'{i:04d}.png')
+    Image.new('RGB', tuple(m['size']), (0,0,0) if i in known else (255,255,255)).save(out / 'mask' / f'{i:04d}.png')
 files = {}
 for kind in ['dense', 'sparse', 'mask']:
     target = out / f'{kind}.mp4'
     subprocess.run(['ffmpeg','-v','error','-framerate','16','-i',str(out/kind/'%04d.png'),'-frames:v','81','-c:v','libx264rgb','-crf','0','-pix_fmt','rgb24',str(target)],check=True)
+    decoded = subprocess.check_output(['ffmpeg','-v','error','-i',str(target),'-f','rawvideo','-pix_fmt','rgb24','-'])
+    frame_bytes = m['size'][0] * m['size'][1] * 3
+    assert len(decoded) == 81 * frame_bytes
+    for i in range(81):
+        assert decoded[i*frame_bytes:(i+1)*frame_bytes] == Image.open(out/kind/f'{i:04d}.png').convert('RGB').tobytes()
     files[kind] = {'path':str(target.resolve()),'sha256':hashlib.sha256(target.read_bytes()).hexdigest()}
 # Exact nearest-exact source indices used by the native 81 -> 21 mask reduction.
 latent_indices = [math.floor((i + .5)*81/21) for i in range(21)]
 effective = {f:[i for i in latent_indices if i in window] for f,window in windows.items()}
 assert all(effective.values()), effective
-record = {'fps':16,'frames':81,'size':[576,1024], 'dense_source_indices':sampled,
+record = {'fps':16,'frames':81,'size':m['size'],'output_size':[576,1024], 'lossless_decode_verified':True, 'dense_source_indices':sampled,
           'sparse_native_anchor_indices':anchors,'known_windows':windows,
           'mask_polarity':'0 known/retain; 1 regenerate',
           'latent_mask_source_indices':latent_indices,'effective_anchor_mask_samples':effective,

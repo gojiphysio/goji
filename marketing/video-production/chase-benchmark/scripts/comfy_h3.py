@@ -63,14 +63,22 @@ if a.mode in ['conversion','video']:
     g['6']['inputs']['ref_videos.ref_video_0']=['22',0]
     if a.mode=='video':g['6']['inputs']['prompt']+=' Follow <Video 1> continuously, including its timing and camera path.'
 if a.mode=='stills':
+    positive=['6',0]
     for i,item in enumerate(manifest['stills']):
         name=input_link(Path(item['path']),f'goji-still-{i}.png')
         key=str(20+i);g[key]=node('LoadImage',image=name)
-        g['6']['inputs'][f'ref_images.ref_image_{i}']=[key,0]
-    g['6']['inputs']['prompt']+=' Pictures 1 through 6 are chronological guides at 0, 1, 2, 3, 4 and 5 seconds. Animate continuously through their states.'
+        # Official multiframe pattern: first image supplies appearance to the
+        # text encoder; all six images supply indexed guide latents.
+        if i==0:g['6']['inputs']['ref_images.ref_image_0']=[key,0]
+        guide_key=str(30+i)
+        g[guide_key]=node('MiniMaxH3AddGuide',positive=positive,latent=['6',1],vae=['3',0],image=[key,0],frame_idx=item['frame_index'])
+        positive=[guide_key,0]
+    g['7']['inputs']['conditioning']=positive
+    g['6']['inputs']['prompt']+=' Keep the appearance of <Picture 1>. Animate continuously through the indexed guides at 0, 1, 2, 3, 4 and 5 seconds; no shot changes.'
 record={'status':'submitting','mode':a.mode,'started':time.time(),'references':refs,'workflow':g,
+ 'guide_manifest_sha256':hashlib.sha256((ROOT/'guide-manifest.json').read_bytes()).hexdigest() if a.mode in ['stills','video'] else None,
  'runtime':{'comfy_commit':__import__('subprocess').check_output(['git','-C',str(COMFY),'rev-parse','HEAD'],text=True).strip(),'gguf_commit':__import__('subprocess').check_output(['git','-C',str(COMFY/'custom_nodes/ComfyUI-GGUF'),'rev-parse','HEAD'],text=True).strip(),'local_patch_sha256':hashlib.sha256((ROOT/'scripts/comfy-gguf-native-h3.patch').read_bytes()).hexdigest()},
- 'notes':'H3 Ref2VA pruned Q4_K_M, Qwen Q4_K_M, FP32 VAE compute, Ref2VA Turbo 4-step v0.1. Ordered still references use prompt timestamps, not hard locks. Video has three repeated final frames to meet 124-frame H3 grid.'}
+ 'notes':'H3 Ref2VA pruned Q4_K_M, Qwen Q4_K_M, FP32 VAE compute, Ref2VA Turbo 4-step v0.1. Still mode uses six MiniMaxH3AddGuide frame indices; first still also supplies appearance. Video uses native Ref2VA video conditioning, with three repeated final frames to meet the 124-frame H3 grid. Input indices do not guarantee output compliance; inspect the take.'}
 (dest/'run.json').write_text(json.dumps(record,indent=2))
 try:
  req=urllib.request.Request(URL+'/prompt',data=json.dumps({'prompt':g}).encode(),headers={'Content-Type':'application/json'})

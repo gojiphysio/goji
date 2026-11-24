@@ -15,6 +15,8 @@ ROOT=Path(__file__).resolve().parents[1]
 p=argparse.ArgumentParser()
 p.add_argument('source',type=Path)
 p.add_argument('--review-note',required=True)
+p.add_argument('--guide-scale',type=int,choices=[1,2],default=1,
+               help='Use the same full or half resolution guide pixels for every model; outputs remain 576x1024')
 a=p.parse_args()
 dest=ROOT/'inputs/styled-frames'
 source=a.source.resolve()
@@ -24,19 +26,41 @@ if probe['avg_frame_rate']!='24/1' or int(probe['nb_frames'])<121:
 if (int(probe['width']),int(probe['height'])) != (576,1024):
     raise ValueError('Review the native 576x1024 guide; do not silently resize it')
 dest.mkdir(exist_ok=False)
-subprocess.run(['ffmpeg','-v','error','-i',str(source),'-frames:v','121','-vf','scale=576:1024','-vsync','0',str(dest/'%04d.png')],check=True)
+subprocess.run(['ffmpeg','-v','error','-i',str(source),'-frames:v','121','-vf','scale=576:1024','-fps_mode','passthrough',str(dest/'%04d.png')],check=True)
 # ffmpeg filenames start at 1. Rename to explicit zero-based source indices.
 for f in sorted(dest.glob('*.png')):f.rename(dest/f'{int(f.stem)-1:04d}.png')
+control=dest
+guide_size=(576//a.guide_scale,1024//a.guide_scale)
+if a.guide_scale!=1:
+    control=ROOT/'inputs/styled-control-frames'
+    control.mkdir(exist_ok=False)
+    for f in sorted(dest.glob('*.png')):
+        Image.open(f).resize(guide_size,Image.Resampling.LANCZOS).save(control/f.name)
 stills=ROOT/'inputs/styled-stills'
 stills.mkdir(exist_ok=False)
-for f in [0,24,48,72,96,120]:shutil.copy2(dest/f'{f:04d}.png',stills/f'{f:04d}.png')
+for f in [0,24,48,72,96,120]:shutil.copy2(control/f'{f:04d}.png',stills/f'{f:04d}.png')
 video=ROOT/'inputs/styled-guide.mp4'
-subprocess.run(['ffmpeg','-v','error','-framerate','24','-i',str(dest/'%04d.png'),'-frames:v','121','-c:v','libx264rgb','-crf','0','-pix_fmt','rgb24','-movflags','+faststart',str(video)],check=True)
+subprocess.run(['ffmpeg','-v','error','-framerate','24','-i',str(control/'%04d.png'),'-frames:v','121','-c:v','libx264rgb','-crf','0','-pix_fmt','rgb24','-movflags','+faststart',str(video)],check=True)
 h3_video=ROOT/'inputs/styled-h3-124.mp4'
 subprocess.run(['ffmpeg','-v','error','-i',str(video),'-vf','tpad=stop_mode=clone:stop=3','-frames:v','124','-c:v','libx264rgb','-crf','0','-pix_fmt','rgb24',str(h3_video)],check=True)
+frame_bytes=guide_size[0]*guide_size[1]*3
+pixel_hashes=[]
+for encoded,count in [(video,121),(h3_video,124)]:
+    decoder=subprocess.Popen(['ffmpeg','-v','error','-i',str(encoded),'-f','rawvideo','-pix_fmt','rgb24','-'],stdout=subprocess.PIPE)
+    for index in range(count):
+        pixels=decoder.stdout.read(frame_bytes)
+        expected=Image.open(control/f'{min(index,120):04d}.png').convert('RGB').tobytes()
+        if pixels!=expected:
+            decoder.kill();raise ValueError(f'Guide encode changed pixels at {encoded.name} frame {index}')
+        if encoded==video:pixel_hashes.append(hashlib.sha256(pixels).hexdigest())
+    assert decoder.stdout.read(1)==b''
+    assert decoder.wait()==0
 sha=lambda path:hashlib.sha256(path.read_bytes()).hexdigest()
 record={'source':str(source),'source_sha256':sha(source),'source_probe':probe,
- 'review_note':a.review_note,'size':[576,1024],'fps':24,'frames':121,
+ 'review_note':a.review_note,'size':list(guide_size),'output_size':[576,1024],
+ 'control_frames_path':str(control.resolve()),'master_frames_path':str(dest.resolve()),
+ 'guide_downscale_factor':a.guide_scale,'fps':24,'frames':121,
+ 'rgb_frame_sha256':pixel_hashes,'lossless_decode_verified':True,
  'source_indices':list(range(121)),'stills':[{'frame_index':f,'time_seconds':f/24,'path':str(stills/f'{f:04d}.png'),'sha256':sha(stills/f'{f:04d}.png')} for f in [0,24,48,72,96,120]],
  'video_path':str(video),'video_sha256':sha(video),
  'h3_video_path':str(h3_video),'h3_video_sha256':sha(h3_video),
