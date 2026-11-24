@@ -32,9 +32,10 @@ from .policy import ChatState
 
 RETENTION_DAYS = 30
 # A paused chat stays paused after its transcript expires: a small "hold"
-# record (mode, reason, code; no text) outlives the chat doc, so a customer
-# coming back after 30 quiet days still reaches Chris, not the agent
-# (Chris, 19 Nov 2026: silent until she resumes it). Removed on resume/forget.
+# record (mode, reason, code, times; no text) outlives the chat doc, so a
+# deliberately paused customer coming back after 30 quiet days still reaches
+# Chris, not the agent (Chris, 19 Nov 2026). A pause from Chris writing lapses
+# after 14 days (policy.apply_pause_expiry). Removed on resume/forget.
 HOLD_DAYS = 365
 HISTORY_KEEP = 50
 SEEN_KEEP = 200
@@ -61,7 +62,8 @@ def mark_seen(state: ChatState, msg_id: str) -> bool:
 
 def hold_doc(state: ChatState) -> dict:
     return {"mode": state.mode, "mode_reason": state.mode_reason,
-            "mode_since": state.mode_since, "code": state.code}
+            "mode_since": state.mode_since, "last_human_at": state.last_human_at,
+            "code": state.code}
 
 
 def from_hold(wa_id: str, hold: dict | None) -> ChatState:
@@ -71,6 +73,7 @@ def from_hold(wa_id: str, hold: dict | None) -> ChatState:
     return ChatState(wa_id=wa_id, mode=hold.get("mode", "paused"),
                      mode_reason=hold.get("mode_reason", ""),
                      mode_since=float(hold.get("mode_since") or 0),
+                     last_human_at=float(hold.get("last_human_at") or 0),
                      code=hold.get("code", ""), held=True)
 
 

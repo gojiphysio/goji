@@ -58,6 +58,10 @@ WA_WEBHOOK_URL_TOKEN = os.environ.get("WA_WEBHOOK_URL_TOKEN", "")
 KILL_SWITCH = _env_bool("WA_AGENT_KILL_SWITCH", False)
 # After a human (Chris) writes in a chat, the agent stays silent this long.
 HUMAN_IDLE_HANDBACK_S = int(os.environ.get("WA_AGENT_HUMAN_IDLE_S", str(24 * 3600)))
+# A chat paused because a person wrote in it goes back to the agent on the
+# customer's first message this long after that person's last message
+# (owner, 24 Nov 2026: 2 weeks). Deliberate pauses never lapse.
+HUMAN_PAUSE_S = int(os.environ.get("WA_AGENT_HUMAN_PAUSE_S", str(14 * 86400)))
 # Wait this long before sending, then re-check whether a human replied meanwhile.
 PRE_SEND_HOLD_S = float(os.environ.get("WA_AGENT_PRE_SEND_HOLD_S", "20"))
 # Wait this long after a customer message before calling the model, so a burst

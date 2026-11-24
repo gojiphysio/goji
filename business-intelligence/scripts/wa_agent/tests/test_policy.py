@@ -1,3 +1,4 @@
+import pytest
 from datetime import datetime
 
 from wa_agent.policy import (AGENT, DRAFT, ESCALATE, HUMAN, PAUSED, SEND, SGT, SILENT,
@@ -88,6 +89,36 @@ def test_human_message_pauses_until_resumed():
     assert s.mode == PAUSED and s.owner == ""
     assert not apply_idle_handback(s, NOW + 90 * 24 * 3600, idle_s=24 * 3600)
     assert s.mode == PAUSED
+
+
+def test_human_pause_lapses_two_weeks_after_the_last_human_message():
+    """Owner, 24 Nov 2026: a chat Chris stepped into goes back to the agent on
+    the customer's first message 2 weeks after her last message."""
+    from wa_agent.policy import AGENT, apply_pause_expiry
+    two_weeks = 14 * 24 * 3600
+    s = ChatState(wa_id="x", owner="agent", off_topic_strikes=2)
+    on_human_message(s, NOW)
+    on_human_message(s, NOW + 10 * 24 * 3600)            # she wrote again on day 10
+    assert not apply_pause_expiry(s, NOW + two_weeks + 60, pause_s=two_weeks)
+    assert s.mode == PAUSED                               # clock runs from her last message
+    assert apply_pause_expiry(s, NOW + 24 * 24 * 3600, pause_s=two_weeks)
+    assert s.mode == AGENT and s.mode_reason == "pause_expired"
+    assert s.owner == "agent" and s.off_topic_strikes == 0
+
+
+@pytest.mark.parametrize("reason", ["staff_paused", "admin_pause", "watchlist", "pre_golive_chat"])
+def test_deliberate_pauses_never_lapse(reason):
+    from wa_agent.policy import apply_pause_expiry
+    s = ChatState(wa_id="x", mode=PAUSED, mode_reason=reason, mode_since=NOW)
+    assert not apply_pause_expiry(s, NOW + 365 * 24 * 3600, pause_s=14 * 24 * 3600)
+
+
+def test_chris_writing_in_a_pre_golive_chat_starts_the_clock():
+    from wa_agent.policy import apply_pause_expiry
+    s = ChatState(wa_id="x", mode=PAUSED, mode_reason="pre_golive_chat", mode_since=NOW)
+    on_human_message(s, NOW + 3600)
+    assert s.mode_reason == "human_replied"
+    assert apply_pause_expiry(s, NOW + 15 * 24 * 3600, pause_s=14 * 24 * 3600)
 
 
 def test_unanswered_escalation_also_hands_back():

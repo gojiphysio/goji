@@ -170,6 +170,49 @@ def test_chris_writing_pauses_with_no_idle_handback(env):
     assert silent_reasons(rec)[-1] == "paused" and len(app_mod.wa.sent) == 1
 
 
+def test_chris_pause_lapses_after_two_weeks_on_the_next_message(env):
+    """Owner, 24 Nov 2026: the agent stays out for 2 weeks after Chris's last
+    message, then answers the customer's next message. Nothing is sent before it."""
+    client, rec, _, _ = env
+    now = time.time()
+    app_mod.store.save(ChatState(wa_id=CUSTOMER, mode=PAUSED, mode_reason="human_replied",
+                                 mode_since=now - 20 * DAY, last_human_at=now - 13 * DAY,
+                                 code="007"))
+    post(client, inbound(ts=int(now), msg_id="wamid.a"))
+    assert silent_reasons(rec)[-1] == "paused" and app_mod.wa.sent == []
+    st = app_mod.store.load(CUSTOMER)
+    st.last_human_at = now - 15 * DAY
+    app_mod.store.save(st)
+    app_mod.claude.queue.append(final())
+    post(client, inbound(ts=int(now), msg_id="wamid.b"))
+    st = app_mod.store.load(CUSTOMER)
+    assert st.mode == AGENT and st.owner == "agent"
+    assert [to for to, _ in app_mod.wa.sent] == [CUSTOMER]
+    assert ("mode", {"mode_from": PAUSED, "mode_to": AGENT, "reason": "pause_expired"}) in rec
+
+
+def test_pause_lapse_survives_the_transcript_expiring(env):
+    """Past the 30-day transcript TTL only the hold is left; it keeps the clock."""
+    client, rec, _, _ = env
+    now = time.time()
+    app_mod.store.save(ChatState(wa_id=CUSTOMER, mode=PAUSED, mode_reason="human_replied",
+                                 mode_since=now - 40 * DAY, last_human_at=now - 35 * DAY))
+    app_mod.store.expire_chat(CUSTOMER)
+    assert app_mod.store.load(CUSTOMER).last_human_at == pytest.approx(now - 35 * DAY)
+    app_mod.claude.queue.append(final())
+    post(client, inbound(ts=int(now), msg_id="wamid.a"))
+    assert app_mod.store.load(CUSTOMER).mode == AGENT and len(app_mod.wa.sent) == 1
+
+
+def test_staff_pause_does_not_lapse(env):
+    client, rec, _, _ = env
+    now = time.time()
+    app_mod.store.save(ChatState(wa_id=CUSTOMER, mode=PAUSED, mode_reason="staff_paused",
+                                 mode_since=now - 60 * DAY, last_human_at=now - 60 * DAY))
+    post(client, inbound(ts=int(now), msg_id="wamid.a"))
+    assert silent_reasons(rec)[-1] == "paused" and app_mod.wa.sent == []
+
+
 def test_first_message_claims_chat_so_burst_passes(env):
     client, rec, _, _ = env
     now = int(time.time())

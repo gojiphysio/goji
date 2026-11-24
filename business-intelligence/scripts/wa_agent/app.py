@@ -57,7 +57,7 @@ from . import (agent, booking_client, config, documents, events, learning, notif
                summary, tasks, tools)
 from .policy import (AGENT, DRAFT, ESCALATE, HUMAN, LATE_CHANGE_H, OFF_TOPIC, PAUSED, SEND,
                      SGT, SILENT, WAITING, WATCHLIST, as_one_message, split_bubbles,
-                     apply_idle_handback, apply_stage, handover_mode,
+                     apply_idle_handback, apply_pause_expiry, apply_stage, handover_mode,
                      check_late_change, customer_message, has_record, note_off_topic,
                      out_of_scope,
                      pre_golive_chat,
@@ -250,7 +250,8 @@ def _warm_task() -> None:
 
 def handle_echo(ev: Echo) -> None:
     """A person wrote from the WhatsApp Business app: the chat pauses, and the
-    agent stays out of it until they resume it ("resume 004")."""
+    agent stays out of it until they resume it ("resume 004"), or until the
+    customer writes 14 days after the person's last message."""
     if ev.wa_id in config.STAFF:
         return  # the business number writing to a staff phone: not a customer chat
     st, _, _ = _deps()
@@ -725,6 +726,8 @@ def handle_inbound(ev: Inbound, received: float) -> None:
             if not mark_seen(state, ev.msg_id):
                 return
             prior = max(state.last_customer_at, state.last_staff_at)
+            old = state.mode
+            apply_pause_expiry(state, now)
             state.last_customer_at = max(state.last_customer_at, ev.ts or now)
             append_history(state, "customer", "Confirm", ev.ts, ev.msg_id)
             state.code = state.code or st.next_code()
@@ -732,6 +735,7 @@ def handle_inbound(ev: Inbound, received: float) -> None:
             if blocked:  # kill switch, Chris's chat, paused...: she sees the tap
                 _hold_pre_golive(state, blocked, now)
                 st.save(state)
+                _mode_event(state, old, now)
                 events.record("silent", ev.wa_id, reason=blocked.reason)
                 return
             try:
@@ -741,6 +745,7 @@ def handle_inbound(ev: Inbound, received: float) -> None:
             except Exception as e:
                 log.warning("confirm reply failed: %s", e)
             st.save(state)
+        _mode_event(state, old, now)
         events.record("reminder_confirmed", ev.wa_id, reason="button")
         return
     if ev.kind == "document" and ev.media_id:
@@ -759,6 +764,7 @@ def handle_inbound(ev: Inbound, received: float) -> None:
         prior_last_at = max(state.last_customer_at, state.last_staff_at)
         had_record = has_record(state)
         apply_idle_handback(state, now)
+        apply_pause_expiry(state, now)
         state.last_customer_at = max(state.last_customer_at, ev.ts or now)
         state.name = ev.name or state.name
         state.code = state.code or st.next_code()

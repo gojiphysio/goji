@@ -114,7 +114,9 @@ def build(chats: list[ChatState], now: float, window_s: int = DAY_S,
             sections.append(f"Paused for you ({len(held)}): the assistant stays out of these "
                             "until you hand them back. Text RESUME and the number (e.g. "
                             "RESUME 004) to the Goji number from your phone; the assistant "
-                            "won't message them, it just answers their next message.\n"
+                            "won't message them, it just answers their next message. A chat "
+                            "you wrote in comes back by itself if they write 2 weeks after "
+                            "your last message.\n"
                             + "\n".join(f"- {h}" for h in held))
         body = ("The WhatsApp assistant's last 24 hours (to "
                 f"{day:%H:%M %a %d %b} SGT).\n\n" + "\n\n".join(sections) + "\n\n"

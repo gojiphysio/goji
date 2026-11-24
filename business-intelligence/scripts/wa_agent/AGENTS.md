@@ -101,7 +101,10 @@ The WhatsApp assistant. What it is and how to run it: [`README.md`](README.md).
   this repo's one exception to "free / DIY first". Code speaks Cloud API
   payloads only, so the provider is a config change (`WA_API_BASE`, ...).
 - **Chris stays primary.** Her writing in a chat pauses it until she resumes
-  it (`RESUME <code>`); chats she had in the 30 days before go-live pause on
+  it (`RESUME <code>`), or for 14 days after her last message: the customer's
+  next message after that goes to the agent (`policy.apply_pause_expiry`;
+  owner, 24 Nov 2026). Deliberate pauses (`PAUSE <code>`, admin, watch list)
+  never lapse; chats she had in the 30 days before go-live pause on
   their next message (`policy.pre_golive_chat`). Any new path that messages a
   customer (confirmations, reminders, pings) checks the kill switch, go-live
   and the chat's mode first.

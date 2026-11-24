@@ -39,15 +39,18 @@ Each chat is in one mode: `agent`, `waiting`, `human` or `paused` (`policy.py`).
 | | `POST /admin/chats/<id>/takeover` | `POST /admin/chats/<id>/handback` |
 
 Chris writing in a chat from the app (`smb_message_echoes`) pauses it: `paused`
-never times out and only leaves when she texts `RESUME <code>` or an admin
-hands it back (see Go-live controls).
+leaves when she texts `RESUME <code>`, an admin hands it back (see Go-live
+controls), or the customer writes 14 days or more after the last person's
+message (`WA_AGENT_HUMAN_PAUSE_S`, `policy.apply_pause_expiry`; owner, 24 Nov
+2026). That message goes to the agent like any other; nothing is sent before it.
+`PAUSE <code>`, the admin pause and the watch list never lapse.
 
 While `waiting`, the model is told what's with Chris (`pending_for_chris`, the
 staff note), so it answers everything else but not that, says once that Chris
 has it if asked, and adds any new topic for Chris to the list without a second
 standby message (19 Nov 2026, Charles: a handover shouldn't stop the front desk).
 
-`paused` only leaves by hand-back. Across all chats: `POST /admin/kill` and the
+`paused` leaves by hand-back, or by the 14-day lapse above. Across all chats: `POST /admin/kill` and the
 `WA_AGENT_KILL_SWITCH` env var. Contacts in `WA_AGENT_ALWAYS_HUMAN` are never
 answered. `WA_AGENT_HOURS=after_hours` limits the agent to outside Mon-Sat
 8am-8pm.
@@ -150,8 +153,9 @@ provider forwards Meta's signature (if not: `USE_URL_TOKEN=1`, below), and the
 **Chris stays primary** (Chris, 19 Nov 2026).
 
 - *Chris writes in a chat → the assistant is fully silent there* (mode
-  `paused`, no 24h idle hand-back) until she resumes it. The idle hand-back
-  is only for handovers the assistant made that nobody answered.
+  `paused`, no 24h idle hand-back) until she resumes it, or until the
+  customer writes 14+ days after her last message (owner, 24 Nov 2026). The
+  idle hand-back is only for handovers the assistant made that nobody answered.
 - *Resume over WhatsApp.* Every chat has a short code (`#004`) shown in pings,
   the STATUS reply and the morning summary, which lists every paused chat.
   Chris texts `RESUME 004` (or `PAUSE 004`) to the Goji number from her phone.
