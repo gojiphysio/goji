@@ -1,0 +1,441 @@
+---
+/**
+ * /careers/ — the permanent careers page. Stays up with or without open roles:
+ * the vacancy list reads src/lib/vacancies.ts and falls back to the "no open
+ * positions" message on its own.
+ *
+ * Copy is the approved recruitment brief (2026-11). No JobPosting JSON-LD here
+ * (Google wants it only on a single job's page); just WebPage + BreadcrumbList.
+ * Photos are existing, consented clinic photos already on the site.
+ */
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Section from "../../components/Section.astro";
+import Button from "../../components/Button.astro";
+import VacancyList from "../../components/careers/VacancyList.astro";
+import { clinicRef } from "../../lib/schema.ts";
+
+const title = "Careers at Goji | Physiotherapy Jobs in Singapore";
+const description =
+  "Join Goji Women's & Family Physiotherapy, a growing private practice in Singapore. Clinical careers, including full-time and part-time physiotherapist roles.";
+
+const origin = Astro.site ?? new URL(Astro.url.origin);
+const pageUrl = new URL("/careers/", origin).href;
+const schema = [
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "@id": pageUrl,
+    url: pageUrl,
+    name: "Careers at Goji",
+    description,
+    about: clinicRef(origin),
+    publisher: clinicRef(origin),
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: new URL("/", origin).href },
+      { "@type": "ListItem", position: 2, name: "Careers", item: pageUrl },
+    ],
+  },
+];
+
+const reasons = [
+  {
+    title: "Meaningful clinical care",
+    body: "We believe in giving clinicians the space to deliver personalised, evidence-based care, build meaningful patient relationships and focus on long-term outcomes.",
+  },
+  {
+    title: "A collaborative team",
+    body: "Work alongside professionals who value clinical discussions, knowledge sharing and learning from one another.",
+  },
+  {
+    title: "Room to grow",
+    body: "Develop your clinical interests, contribute to new services and explore opportunities for leadership as our practice grows.",
+  },
+  {
+    title: "A rewarding career",
+    body: "We believe in recognising individual contributions, supporting professional development and building sustainable careers in healthcare.",
+  },
+];
+
+const life = [
+  {
+    src: "/photos/services/clinical-pilates",
+    w: 1440,
+    h: 950,
+    alt: "A Goji clinician guiding two clients through a Pilates exercise on reformers in the studio",
+    caption: "The reformer studio",
+  },
+  {
+    src: "/photos/space/strength-conditioning",
+    w: 1440,
+    h: 960,
+    alt: "A Goji physiotherapist supporting a client's leg during a strength exercise beside the squat rack",
+    caption: "Strength and conditioning space",
+  },
+  {
+    src: "/photos/space/community-class-warm",
+    w: 1600,
+    h: 1067,
+    alt: "Participants stretching side by side on mats during a community class at Goji",
+    caption: "Community classes",
+  },
+  {
+    src: "/photos/directions/exterior-frontage",
+    w: 1600,
+    h: 1173,
+    alt: "The Goji clinic frontage at Lentor Modern with congratulatory flower stands on opening day",
+    caption: "Opening day at Lentor Modern",
+  },
+];
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  schema={schema}
+  searchType="Career"
+  ogImage="/og/careers/careers.jpg"
+  ogImageAlt="The reception and waiting area at Goji Physiotherapy, Lentor Modern"
+>
+  {/* ---- A. Hero ---- */}
+  <section class="cr-hero">
+    <div class="container cr-hero__grid">
+      <div class="cr-hero__text">
+        <p class="cr-kicker">Careers at Goji</p>
+        <h1>Good things grow together.</h1>
+        <p class="cr-lead">
+          At Goji, we're building a practice that believes good rehabilitation goes beyond treating symptoms.
+          We're a growing team of clinicians and professionals who care deeply about the people we work with,
+          the quality of care we deliver and how we grow together.
+        </p>
+        <p class="cr-lead">
+          If you're curious, collaborative and passionate about making a meaningful difference, we'd love to
+          meet you.
+        </p>
+        <div class="cr-hero__cta">
+          <Button href="#vacancies" variant="primary" size="lg">Explore open positions</Button>
+        </div>
+      </div>
+      <figure class="cr-photo cr-hero__photo">
+        <img
+          src="/photos/space/reception-warm.webp"
+          srcset="/photos/space/reception-warm-800.webp 800w, /photos/space/reception-warm.webp 1448w"
+          sizes="(min-width: 900px) 46vw, 100vw"
+          alt="The reception at Goji Physiotherapy: a curved red table with stools, a vase of red ginger flowers and timber shelving"
+          width="1448"
+          height="1086"
+          loading="eager"
+          fetchpriority="high"
+          decoding="async"
+        />
+      </figure>
+    </div>
+  </section>
+
+  {/* ---- B. About Goji ---- */}
+  <Section tone="surface">
+    <div class="cr-split">
+      <h2 class="cr-split__heading">Building a better way to care.</h2>
+      <div class="cr-split__body">
+        <p>
+          Goji Women's &amp; Family Physiotherapy is a growing private physiotherapy practice in Singapore, with a
+          strong focus on musculoskeletal rehabilitation and women's health.
+        </p>
+        <p>
+          We believe good rehabilitation goes beyond treating symptoms. It's about understanding the whole person,
+          working collaboratively and empowering our patients to move with greater confidence through every stage
+          of life.
+        </p>
+        <p>
+          As we continue to grow, we're building a team that shares our clinical philosophy and is excited to
+          contribute to the future of our practice.
+        </p>
+        <p class="cr-links">
+          <a href="/#about">More about Goji</a>
+          <a href="/#team">Meet our team</a>
+        </p>
+      </div>
+    </div>
+  </Section>
+
+  {/* ---- C. Why join ---- */}
+  <Section tone="linen">
+    <h2 class="cr-section-title">Grow with us.</h2>
+    <ol class="cr-reasons" role="list">
+      {
+        reasons.map((r, i) => (
+          <li class="cr-reason">
+            <span class="cr-reason__num" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>
+            <h3 class="cr-reason__title">{r.title}</h3>
+            <p>{r.body}</p>
+          </li>
+        ))
+      }
+    </ol>
+  </Section>
+
+  {/* ---- D. Life at Goji ---- */}
+  <Section tone="surface">
+    <h2 class="cr-section-title">Life at Goji</h2>
+    <ul class="cr-life" role="list">
+      {
+        life.map((p) => (
+          <li>
+            <figure class="cr-photo">
+              <img
+                src={`${p.src}-800.webp`}
+                srcset={`${p.src}-800.webp 800w, ${p.src}.webp ${p.w}w`}
+                sizes="(min-width: 900px) 25vw, (min-width: 600px) 50vw, 100vw"
+                alt={p.alt}
+                width={p.w}
+                height={p.h}
+                loading="lazy"
+                decoding="async"
+              />
+              <figcaption>{p.caption}</figcaption>
+            </figure>
+          </li>
+        ))
+      }
+    </ul>
+  </Section>
+
+  {/* ---- E. Current vacancies ---- */}
+  <Section tone="linen" id="vacancies" class="cr-anchor">
+    <div class="cr-vac-head">
+      <h2 class="cr-section-title">Find your next opportunity.</h2>
+      <p class="cr-lead">
+        We're looking for people who share our approach to care and are excited to grow alongside us.
+      </p>
+    </div>
+    <VacancyList />
+  </Section>
+
+  {/* ---- F. Expressions of interest ---- */}
+  <Section tone="closing" id="interest" class="cr-anchor">
+    <div class="cr-eoi">
+      <h2>Good people are always worth meeting.</h2>
+      <p>
+        Don't see a role that fits you right now? We're always interested in connecting with people who share our
+        approach to care and want to be part of Goji's journey.
+      </p>
+      <p>Tell us a little about yourself, your experience and what you're looking for.</p>
+      <Button href="/careers/expression-of-interest/" variant="light" size="lg">Express your interest</Button>
+    </div>
+  </Section>
+</BaseLayout>
+
+<script>
+  import { careersEvent } from "../../lib/careers";
+  careersEvent("careers_page_view");
+  document.querySelectorAll<HTMLAnchorElement>("[data-apply-now]").forEach((a) =>
+    a.addEventListener("click", () => careersEvent("apply_now_clicked", { job_id: a.dataset.applyNow })),
+  );
+</script>
+
+<style>
+  :global(html) {
+    scroll-behavior: smooth;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    :global(html) {
+      scroll-behavior: auto;
+    }
+  }
+  /* Class lands on Section's root, so it needs :global (website AGENTS.md). */
+  :global(.cr-anchor) {
+    scroll-margin-top: 5rem;
+  }
+
+  .cr-hero {
+    padding-block: var(--space-7) var(--section-y);
+    background: var(--bg-page);
+  }
+  .cr-hero__grid {
+    display: grid;
+    gap: var(--space-7);
+    align-items: center;
+  }
+  @media (min-width: 900px) {
+    .cr-hero {
+      padding-top: var(--space-9);
+    }
+    .cr-hero__grid {
+      grid-template-columns: 1.05fr 1fr;
+      gap: var(--space-8);
+    }
+  }
+  .cr-hero__text {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+  .cr-hero__text h1 {
+    font-size: var(--fs-display);
+    line-height: var(--lh-tight);
+    margin: 0 0 var(--space-2);
+  }
+  .cr-kicker {
+    margin: 0;
+    font-size: var(--fs-small);
+    font-weight: var(--weight-semibold);
+    color: var(--color-primary);
+  }
+  .cr-lead {
+    font-size: var(--fs-lead);
+    margin: 0;
+    max-width: 58ch;
+  }
+  .cr-hero__cta {
+    margin-top: var(--space-3);
+  }
+
+  .cr-photo {
+    margin: 0;
+  }
+  .cr-photo img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: var(--radius-md);
+    object-fit: cover;
+    background: var(--color-linen-deep);
+  }
+  .cr-hero__photo img {
+    aspect-ratio: 4 / 3;
+    border-radius: var(--radius-lg) var(--radius-petal) var(--radius-lg) var(--radius-petal);
+  }
+  .cr-photo figcaption {
+    margin-top: var(--space-2);
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+  }
+
+  .cr-split {
+    display: grid;
+    gap: var(--space-5);
+  }
+  @media (min-width: 900px) {
+    .cr-split {
+      grid-template-columns: 1fr 1.4fr;
+      gap: var(--space-8);
+    }
+  }
+  .cr-split__heading {
+    font-size: var(--fs-h1);
+    margin: 0;
+  }
+  .cr-split__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    font-size: var(--fs-lead);
+  }
+  .cr-split__body p {
+    margin: 0;
+    max-width: 62ch;
+  }
+  .cr-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-6);
+    font-size: var(--fs-body);
+  }
+  .cr-links a {
+    color: var(--color-primary);
+    font-weight: var(--weight-semibold);
+  }
+
+  .cr-section-title {
+    font-size: var(--fs-h1);
+    margin: 0 0 var(--space-7);
+  }
+
+  .cr-reasons {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0 var(--space-8);
+  }
+  @media (min-width: 768px) {
+    .cr-reasons {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .cr-reason {
+    padding-block: var(--space-5) var(--space-6);
+    border-top: 1px solid var(--rule);
+    display: grid;
+    gap: var(--space-2);
+  }
+  .cr-reason__num {
+    font-family: var(--font-display);
+    font-variation-settings: var(--font-display-axes);
+    font-size: var(--fs-lead);
+    color: var(--color-primary);
+  }
+  .cr-reason__title {
+    font-size: var(--fs-h3);
+    margin: 0;
+  }
+  .cr-reason p {
+    margin: 0;
+    max-width: 52ch;
+  }
+
+  .cr-life {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--space-5);
+  }
+  @media (min-width: 600px) {
+    .cr-life {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  @media (min-width: 1024px) {
+    .cr-life {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+  .cr-life img {
+    aspect-ratio: 4 / 5;
+  }
+
+  .cr-vac-head {
+    margin-bottom: var(--space-7);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+  .cr-vac-head .cr-section-title {
+    margin: 0;
+  }
+
+  .cr-eoi {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    align-items: flex-start;
+    max-width: 44rem;
+  }
+  .cr-eoi h2 {
+    font-size: var(--fs-h1);
+    color: var(--text-on-dark);
+    margin: 0;
+  }
+  .cr-eoi p {
+    margin: 0;
+    font-size: var(--fs-lead);
+    color: var(--text-on-dark-soft);
+  }
+  .cr-eoi :global(.btn) {
+    margin-top: var(--space-3);
+  }
+</style>

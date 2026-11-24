@@ -1,0 +1,394 @@
+---
+/**
+ * /careers/<slug>/ — one page per role in src/lib/vacancies.ts, from a single
+ * template so the physiotherapist roles share their content and code.
+ *
+ * Open role:   full description, two Apply Now CTAs, the embedded form, and
+ *              JobPosting JSON-LD (only facts visible on the page; no salary).
+ * Closed role: the page stays (shared links don't 404) but is noindexed, shows
+ *              an "applications closed" notice, has no form and no JobPosting.
+ */
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Button from "../../components/Button.astro";
+import ApplicationForm from "../../components/careers/ApplicationForm.astro";
+import { VACANCIES, employmentLabel, isOpen, type Vacancy } from "../../lib/vacancies.ts";
+import { SITE } from "../../lib/site.ts";
+import { clinicRef } from "../../lib/schema.ts";
+
+export function getStaticPaths() {
+  return VACANCIES.map((v) => ({ params: { slug: v.slug }, props: { vacancy: v } }));
+}
+
+const { vacancy: v } = Astro.props as { vacancy: Vacancy };
+const open = isOpen(v);
+const origin = Astro.site ?? new URL(Astro.url.origin);
+const pageUrl = new URL(`/careers/${v.slug}/`, origin).href;
+
+const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+const list = (items: string[]) => `<ul>${items.map((i) => `<li>${esc(i)}</li>`).join("")}</ul>`;
+
+// JobPosting `description` must be the same text a visitor sees: built from the
+// same fields, in the same order, as the body below.
+const jdHtml = [
+  `<p>${esc(v.shortDescription)}</p>`,
+  `<h2>About the role</h2>`,
+  ...v.about.map((p) => `<p>${esc(p)}</p>`),
+  v.responsibilities.length ? `<h2>Key responsibilities</h2>${list(v.responsibilities)}` : "",
+  v.additionalResponsibilities
+    ? `<h3>${esc(v.additionalResponsibilities.heading)}</h3>${list(v.additionalResponsibilities.items)}` +
+      (v.additionalResponsibilities.note ? `<p>${esc(v.additionalResponsibilities.note)}</p>` : "")
+    : "",
+  `<h2>What we're looking for</h2>${list(v.requirements)}`,
+  `<p>${esc(v.preferred.intro)}</p>${list(v.preferred.items)}`,
+  `<h2>What we offer</h2>${list(v.benefits)}`,
+  `<h2>Working arrangements</h2>${list(v.workingArrangements)}`,
+].join("");
+
+const jobPosting = {
+  "@context": "https://schema.org",
+  "@type": "JobPosting",
+  title: v.title,
+  description: jdHtml,
+  identifier: { "@type": "PropertyValue", name: SITE.fullName, value: v.id },
+  datePosted: v.datePosted,
+  ...(v.closingDate ? { validThrough: `${v.closingDate}T23:59:59+08:00` } : {}),
+  employmentType: v.employmentTypes,
+  hiringOrganization: {
+    "@type": "Organization",
+    name: SITE.fullName,
+    sameAs: origin.href,
+    logo: new URL("/brand/logo_main_transparent.png", origin).href,
+  },
+  jobLocation: {
+    "@type": "Place",
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: SITE.address.line1,
+      addressLocality: "Singapore",
+      postalCode: "788887",
+      addressCountry: "SG",
+    },
+  },
+  directApply: true,
+  occupationalCategory: "Physiotherapist",
+  industry: "Healthcare",
+  educationRequirements: {
+    "@type": "EducationalOccupationalCredential",
+    credentialCategory: "bachelor degree",
+  },
+  experienceRequirements: {
+    "@type": "OccupationalExperienceRequirements",
+    monthsOfExperience: v.minYearsExperience * 12,
+  },
+  url: pageUrl,
+};
+
+const breadcrumb = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Home", item: new URL("/", origin).href },
+    { "@type": "ListItem", position: 2, name: "Careers", item: new URL("/careers/", origin).href },
+    { "@type": "ListItem", position: 3, name: v.title, item: pageUrl },
+  ],
+};
+const webPage = {
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": pageUrl,
+  url: pageUrl,
+  name: v.title,
+  publisher: clinicRef(origin),
+};
+const schema = open ? [jobPosting, breadcrumb] : [webPage, breadcrumb];
+
+const facts = [
+  ["Department", v.department],
+  ["Location", v.location],
+  ["Employment type", employmentLabel(v.employmentTypes)],
+  ["Minimum commitment", v.minCommitment],
+  ["Experience", v.experience],
+  ["Primary clinical focus", v.clinicalFocus.primary],
+  ...(v.clinicalFocus.secondary ? [["Secondary clinical focus", v.clinicalFocus.secondary]] : []),
+  ...(v.closingDate ? [["Applications close", new Date(`${v.closingDate}T00:00:00+08:00`).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Singapore" })]] : []),
+];
+---
+
+<BaseLayout
+  title={v.seo.title}
+  description={v.seo.description}
+  schema={schema}
+  searchType="Career"
+  searchable={open}
+  noindex={!open}
+  ogImage="/og/careers/careers.jpg"
+  ogImageAlt="The reception and waiting area at Goji Physiotherapy, Lentor Modern"
+>
+  <article class="job" data-job-id={v.id} data-open={open ? "1" : "0"}>
+    <header class="job-hero">
+      <div class="container job-hero__inner">
+        <nav class="job-crumbs" aria-label="Breadcrumb">
+          <ol>
+            <li><a href="/">Home</a></li>
+            <li><a href="/careers/">Careers</a></li>
+            <li aria-current="page">{v.title}</li>
+          </ol>
+        </nav>
+        <h1>{v.title}</h1>
+        <dl class="job-facts">
+          {
+            facts.map(([k, val]) => (
+              <div>
+                <dt>{k}</dt>
+                <dd>{val}</dd>
+              </div>
+            ))
+          }
+        </dl>
+        {
+          open ? (
+            <div class="job-hero__cta">
+              <Button href="#apply" variant="primary" size="lg" class="js-apply-now">Apply now</Button>
+            </div>
+          ) : (
+            <div class="job-closed" role="status">
+              <p class="job-closed__title">Applications for this role are now closed.</p>
+              <p>
+                Thank you for your interest. You can see our <a href="/careers/#vacancies">current opportunities</a>,
+                or <a href="/careers/expression-of-interest/">send us an expression of interest</a> and we'll keep
+                you in mind.
+              </p>
+            </div>
+          )
+        }
+      </div>
+    </header>
+
+    <div class="container job-body">
+      <div class="job-desc">
+        <p class="job-lead">{v.shortDescription}</p>
+
+        <h2>About the role</h2>
+        {v.about.map((p) => <p>{p}</p>)}
+
+        {
+          v.responsibilities.length > 0 && (
+            <Fragment>
+              <h2>Key responsibilities</h2>
+              <ul>{v.responsibilities.map((i) => <li>{i}</li>)}</ul>
+            </Fragment>
+          )
+        }
+
+        {
+          v.additionalResponsibilities && (
+            <Fragment>
+              <h3>{v.additionalResponsibilities.heading}</h3>
+              <ul>{v.additionalResponsibilities.items.map((i) => <li>{i}</li>)}</ul>
+              {v.additionalResponsibilities.note && <p>{v.additionalResponsibilities.note}</p>}
+            </Fragment>
+          )
+        }
+
+        <h2>What we're looking for</h2>
+        <ul>{v.requirements.map((i) => <li>{i}</li>)}</ul>
+        <p>{v.preferred.intro}</p>
+        <ul>{v.preferred.items.map((i) => <li>{i}</li>)}</ul>
+
+        <h2>What we offer</h2>
+        <ul>{v.benefits.map((i) => <li>{i}</li>)}</ul>
+
+        <h2>Working arrangements</h2>
+        <ul>{v.workingArrangements.map((i) => <li>{i}</li>)}</ul>
+
+        {
+          open && (
+            <Fragment>
+              <h2>How to apply</h2>
+              <p>
+                Apply online below with your CV and a short introduction. There's no account to create. If you
+                have any trouble with the form, email your CV to <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.
+              </p>
+              <div class="job-cta-end">
+                <Button href="#apply" variant="primary" size="lg" class="js-apply-now">Apply now</Button>
+              </div>
+            </Fragment>
+          )
+        }
+      </div>
+    </div>
+
+    {
+      open && (
+        <section class="job-apply" id="apply" aria-labelledby="apply-title">
+          <div class="container job-apply__inner">
+            <h2 id="apply-title" tabindex="-1">Apply for {v.title}</h2>
+            <ApplicationForm vacancy={v} />
+          </div>
+        </section>
+      )
+    }
+  </article>
+</BaseLayout>
+
+<script>
+  import { careersEvent } from "../../lib/careers";
+  const job = document.querySelector<HTMLElement>(".job");
+  const jobId = job?.dataset.jobId || "";
+  if (job?.dataset.open === "1") careersEvent("job_detail_view", { job_id: jobId });
+  document.querySelectorAll<HTMLAnchorElement>(".js-apply-now").forEach((a) =>
+    a.addEventListener("click", () => {
+      careersEvent("apply_now_clicked", { job_id: jobId });
+      // Move keyboard focus into the form, not just the scroll position.
+      setTimeout(() => document.querySelector<HTMLElement>("#apply-title")?.focus({ preventScroll: true }), 400);
+    }),
+  );
+</script>
+
+<style>
+  :global(html) {
+    scroll-behavior: smooth;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    :global(html) {
+      scroll-behavior: auto;
+    }
+  }
+  .job-hero {
+    background: var(--bg-page);
+    padding-block: var(--space-6) var(--space-8);
+    border-bottom: 1px solid var(--rule);
+  }
+  .job-hero__inner {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+  }
+  .job-hero h1 {
+    font-size: var(--fs-display);
+    line-height: var(--lh-tight);
+    margin: 0;
+  }
+  .job-crumbs ol {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin: 0;
+    padding: 0;
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+  }
+  .job-crumbs li + li::before {
+    content: "›";
+    margin-right: var(--space-2);
+    color: var(--text-muted);
+  }
+  .job-crumbs a {
+    color: var(--text-muted);
+  }
+  .job-crumbs a:hover {
+    color: var(--color-primary);
+  }
+  .job-facts {
+    display: grid;
+    gap: var(--space-3) var(--space-6);
+    margin: 0;
+    padding-block: var(--space-4);
+    border-block: 1px solid var(--rule);
+  }
+  @media (min-width: 640px) {
+    .job-facts {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 1024px) {
+    .job-facts {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+  .job-facts dt {
+    font-size: var(--fs-caption);
+    font-weight: var(--weight-semibold);
+    color: var(--text-muted);
+    letter-spacing: 0.04em;
+  }
+  .job-facts dd {
+    margin: 0;
+  }
+  .job-closed {
+    padding: var(--space-4) var(--space-5);
+    background: var(--bg-raised);
+    border-left: 3px solid var(--color-primary);
+    max-width: 44rem;
+  }
+  .job-closed p {
+    margin: 0;
+  }
+  .job-closed__title {
+    font-weight: var(--weight-semibold);
+    margin-bottom: var(--space-2) !important;
+  }
+  .job-closed a {
+    color: var(--color-primary);
+  }
+
+  .job-body {
+    padding-block: var(--space-8);
+  }
+  .job-desc {
+    max-width: var(--container-narrow);
+  }
+  .job-desc h2 {
+    font-size: var(--fs-h2);
+    margin: var(--space-7) 0 var(--space-3);
+  }
+  .job-desc h3 {
+    font-family: var(--font-body);
+    font-weight: var(--weight-semibold);
+    font-size: var(--fs-lead);
+    margin: var(--space-5) 0 var(--space-2);
+  }
+  .job-desc p,
+  .job-desc li {
+    max-width: 66ch;
+  }
+  .job-desc ul {
+    padding-left: 1.2em;
+    display: grid;
+    gap: var(--space-2);
+    margin: var(--space-3) 0;
+  }
+  .job-desc ul + p {
+    margin-top: var(--space-5);
+  }
+  .job-desc li::marker {
+    color: var(--color-primary);
+  }
+  .job-lead {
+    font-size: var(--fs-lead);
+  }
+  .job-desc a {
+    color: var(--color-accent);
+  }
+  .job-cta-end {
+    margin-top: var(--space-5);
+  }
+
+  .job-apply {
+    background: var(--bg-content);
+    padding-block: var(--section-y);
+    border-top: 1px solid var(--rule);
+    scroll-margin-top: 4rem;
+  }
+  .job-apply__inner {
+    max-width: calc(var(--container-narrow) + 2 * var(--gutter));
+  }
+  .job-apply h2 {
+    font-size: var(--fs-h1);
+    margin: 0 0 var(--space-6);
+  }
+  .job-apply h2:focus {
+    outline: none;
+  }
+</style>

@@ -1,0 +1,178 @@
+---
+/**
+ * VacancyList — the open roles on /careers, straight from src/lib/vacancies.ts.
+ * Each row is one linked card (the whole card is the link target, with the
+ * "View role & apply" text as its visible affordance). With no open roles it
+ * shows the brief's "no open positions" message and the interest CTA.
+ */
+import { openVacancies, employmentLabel } from "../../lib/vacancies.ts";
+
+const roles = openVacancies();
+---
+
+{
+  roles.length ? (
+    <ul class="vacancies" role="list">
+      {roles.map((v) => (
+        <li>
+          <a class="vacancy" href={`/careers/${v.slug}/`} data-apply-now={v.id}>
+            <div class="vacancy__head">
+              <h3 class="vacancy__title">{v.title}</h3>
+              <p class="vacancy__dept">{v.department}</p>
+            </div>
+            <dl class="vacancy__facts">
+              <div>
+                <dt>Location</dt>
+                <dd>{v.location}</dd>
+              </div>
+              <div>
+                <dt>Employment</dt>
+                <dd>{employmentLabel(v.employmentTypes)}</dd>
+              </div>
+              <div>
+                <dt>Commitment</dt>
+                <dd>{v.minCommitment}</dd>
+              </div>
+              <div>
+                <dt>Experience</dt>
+                <dd>{v.experience}</dd>
+              </div>
+              <div>
+                <dt>Clinical focus</dt>
+                <dd>
+                  {v.clinicalFocus.primary}
+                  {v.clinicalFocus.secondary && ` and ${v.clinicalFocus.secondary.toLowerCase()}`}
+                </dd>
+              </div>
+            </dl>
+            <p class="vacancy__desc">{v.shortDescription}</p>
+            <span class="vacancy__cta">
+              View role &amp; apply
+              <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M6 3l5 5-5 5" />
+              </svg>
+            </span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  ) : (
+    <div class="vacancies-empty">
+      <p>
+        We don't have any open positions at the moment, but we're always interested in meeting people who share
+        our philosophy.
+      </p>
+      <a class="vacancies-empty__link" href="/careers/expression-of-interest/">Express your interest</a>
+    </div>
+  )
+}
+
+<style>
+  .vacancies {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--space-5);
+  }
+  .vacancy {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    padding: var(--space-5);
+    background: var(--bg-content);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    color: var(--text-default);
+    text-decoration: none;
+    transition: border-color var(--dur) var(--ease);
+  }
+  @media (min-width: 768px) {
+    .vacancy {
+      padding: var(--space-6) var(--space-7);
+    }
+  }
+  .vacancy:hover {
+    border-color: var(--color-border-strong);
+  }
+  .vacancy:hover .vacancy__cta {
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+  .vacancy:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 3px;
+  }
+  .vacancy__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-1) var(--space-4);
+  }
+  .vacancy__title {
+    font-size: var(--fs-h2);
+    margin: 0;
+  }
+  .vacancy__dept {
+    margin: 0;
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+  }
+  .vacancy__facts {
+    display: grid;
+    gap: var(--space-3) var(--space-5);
+    margin: 0;
+    padding-block: var(--space-4);
+    border-block: 1px solid var(--rule);
+  }
+  @media (min-width: 640px) {
+    .vacancy__facts {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 1024px) {
+    .vacancy__facts {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+  .vacancy__facts dt {
+    font-size: var(--fs-caption);
+    font-weight: var(--weight-semibold);
+    color: var(--text-muted);
+    letter-spacing: 0.04em;
+  }
+  .vacancy__facts dd {
+    margin: 0;
+    font-size: var(--fs-small);
+  }
+  .vacancy__desc {
+    margin: 0;
+    max-width: 64ch;
+  }
+  .vacancy__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-weight: var(--weight-semibold);
+    color: var(--color-primary);
+  }
+  .vacancies-empty {
+    padding: var(--space-6);
+    background: var(--bg-raised);
+    border-radius: var(--radius-md);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    align-items: flex-start;
+  }
+  .vacancies-empty p {
+    margin: 0;
+    max-width: 60ch;
+  }
+  .vacancies-empty__link {
+    font-weight: var(--weight-semibold);
+    color: var(--color-primary);
+  }
+</style>
