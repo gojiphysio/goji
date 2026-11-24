@@ -8,6 +8,12 @@
 - Model comparisons use one GPU job at a time. Record background work that
   affects timing. Native FPS and actual resolved canvas belong in the report;
   comparison exports may repeat frames but must not retime or interpolate.
+- Review frames between conditioning timestamps, not only the supplied
+  keyframes. Compare troublesome contacts with the same source-guide frames
+  before attributing the fault to the model.
+- Check the resolved source-aspect canvas: Wan's rounding can reduce a target
+  below the intended quality range. Label that take accordingly; requested
+  dimensions alone are not the output dimensions.
 - MLX-Gen 0.40.1's Wan backend also inspects the local folder name, even with
   `--base-model`. Use a full supported alias in a symlink/folder name. The
   first recorded Wan launch demonstrates this failure mode.

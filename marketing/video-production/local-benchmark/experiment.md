@@ -34,7 +34,10 @@ test of approved face likeness from this input.
   H3 uses its 124-frame default at 24 fps. No speed-up or optical-flow
   interpolation may hide those differences in the comparison.
 - Native practical canvases: LTX 576×1024, Wan target 480×832 (actual
-  source-aspect canvas recorded by the runtime), H3 544×960. All source
+  source-aspect canvas recorded by the runtime), H3 544×960.
+  Actual Wan canvases: 14B resolves to 480×848; 5B resolves to 448×800.
+  The latter is below the runtime guide’s recommended 480×832 quality target,
+  so treat the 5B take as a lower-resolution feasibility result, not its quality ceiling. All source
   framing is preserved. This compares usable local recipes, not identical
   pixel budgets or maximum-quality full-precision models.
 - LTX distilled: 8+3 denoising steps. Wan A14B: matching high/low I2V

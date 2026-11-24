@@ -1,8 +1,12 @@
 # Goji: Blender versus local video models
 
 **Pilot in progress — 24 November 2026.** This page will be updated with the
-remaining renders. The first two completed takes fail the required action;
+remaining renders. The three first-frame-only takes fail the required action;
 there is no production winner yet.
+
+[Watch the simultaneous four-panel comparison](https://github.com/gojiphysio/goji/raw/refs/heads/codex/goji-video-workflow/marketing/video-production/local-benchmark/results/comparison/side-by-side.mp4)
+
+![Same three-second interaction crop across the first-frame baselines](results/comparison/interaction-at-3s.jpg)
 
 ## The scene
 
@@ -58,14 +62,27 @@ mechanics. This is a promising control test, not final footage.
 
 [Compare guide and generated contact frames](results/ltx-guided-01/guide-contact-comparison.jpg).
 
+## Wan 2.2 5B — lower-resolution feasibility take
+
+**12 minutes 5 seconds generation time. Required action rejected.** Camera and
+low-poly style are relatively stable, but the woman climbs into/over the car,
+vehicle panels change, and the driver does not complete the exit. The runtime
+resolved the target to **448×800**, below its recommended 480×832 quality
+setting; do not generalise this result to the model's quality ceiling.
+
+[Watch Blender and Wan 5B side by side](https://github.com/gojiphysio/goji/raw/refs/heads/codex/goji-video-workflow/marketing/video-production/local-benchmark/results/wan5-01/with-guide.mp4)
+· [Unedited Wan 5B](https://github.com/gojiphysio/goji/raw/refs/heads/codex/goji-video-workflow/marketing/video-production/local-benchmark/results/wan5-01/raw.mp4)
+
+![Wan 5B exact frames](results/wan5-01/frames.jpg)
+
 ## Remaining tests
 
 | Recipe | Status |
 |---|---|
 | Wan 2.2 I2V 14B + Lightning | Complete; one earlier path-resolution failure retained |
 | LTX 2.5 + six Blender keyframes | Complete |
-| Wan 2.2 TI2V 5B | Rendering |
-| MiniMax H3 Turbo 544p, mixed q4/q6 | Download complete; queued; output stays outside this public repository |
+| Wan 2.2 TI2V 5B | Complete |
+| MiniMax H3 Turbo 544p, mixed q4/q6 | Rendering; one cache-reference launch failure retained locally; footage stays outside this public repository |
 
 The first-frame tests share a prompt and opening image. The guided LTX test
 gets more information and is evaluated separately. Five-second comparison

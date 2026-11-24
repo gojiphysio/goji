@@ -32,7 +32,7 @@ def main():
     else:
         cmd=[str(RUNTIME/'.venv/bin/mlxgen'),'generate','--prompt',PROMPT,'--seed','1017','--metadata','--low-ram','--output',str(output)]
         if a.profile=='h3-turbo':
-            cmd+=['--model',str(MODELS/'minimax-h3-4bit'),'--base-model','minimax-h3-turbo-544p','--image-path',str(image),'--width','544','--height','960','--frames','124','--steps','8','--soundscape','Quiet Singapore street ambience, a car door opening and footsteps. No speech.','--music','No music.']
+            cmd+=['--model',str(MODELS/'minimax-h3-4bit'),'--base-model','minimax-h3-turbo-544p','--image-path',str(image),'--width','544','--height','960','--frames','124','--steps','8','--lora-paths',str(HOME/'.cache/huggingface/hub/models--lightx2v--Minimax-h3-Turbo/snapshots/ff0edf44b7a96e1b1b4a0c84287dfe9f6a7d133e/minimax_h3_fl2v_turbo_8step_v1.0_bf16.safetensors'),'--soundscape','Quiet Singapore street ambience, a car door opening and footsteps. No speech.','--music','No music.']
         else:
             cmd+=['--image',str(image),'--negative-prompt',NEGATIVE,'--width','480','--height','832','--solver','unipc']
             if a.profile=='wan5':
