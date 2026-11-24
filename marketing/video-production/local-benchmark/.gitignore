@@ -1,0 +1,13 @@
+staging/frame-*.png
+!staging/frame-0001.png
+!staging/frame-0025.png
+!staging/frame-0049.png
+!staging/frame-0073.png
+!staging/frame-0097.png
+!staging/frame-0121.png
+!staging/frame-0169.png
+!staging/frame-0193.png
+staging/*.blend1
+__pycache__/
+# H3 test is approved for Singapore; do not publish its outputs worldwide.
+results/h3-*/

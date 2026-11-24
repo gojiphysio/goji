@@ -1,0 +1,127 @@
+[
+  {
+    "repo": "lightx2v/Wan2.2-Lightning",
+    "revision": "18bccf8884ec0a078eed79785eb4ef13ea16ce1e"
+  },
+  {
+    "repo": "AbstractFramework/wan2.2-i2v-a14b-diffusers-8bit",
+    "revision": "1a17fbea2649c576de844e08e79fe56296751efa",
+    "seconds": 383.73545479774475,
+    "shared_text_encoder": false
+  },
+  {
+    "repo": "AbstractFramework/wan2.2-ti2v-5b-diffusers-8bit",
+    "revision": "6875952a110b6bdbcfc00d72b1d89a8e02ab0fc3",
+    "seconds": 72.83305191993713,
+    "shared_text_encoder": true
+  },
+  {
+    "repo": "lightx2v/Minimax-h3-Turbo",
+    "revision": "ff0edf44b7a96e1b1b4a0c84287dfe9f6a7d133e",
+    "file": "minimax_h3_fl2v_turbo_8step_v1.0_bf16.safetensors"
+  },
+  {
+    "repo": "notapalindrome/ltx25-mlx-ditq8",
+    "revision_from_readme_cache": "0a005c82cf3fd9c49d28dc6c13bdc509b631107f",
+    "note": "Existing assembled local LTX pack; per-file HF cache metadata can differ for base components. Do not treat README revision as hash of whole folder.",
+    "component_cache_metadata": {
+      ".gitattributes": {
+        "revision": "0a005c82cf3fd9c49d28dc6c13bdc509b631107f",
+        "etag": "0738a0173306ebd3b1705f66d736d90db59a7fd3"
+      },
+      "spatial_upscaler_x2_v1_1.safetensors": {
+        "revision": "38f776ef1b9485d197ddd17ce42630c239800fbd",
+        "etag": "755f69dcb8a3f9589045925eb4a2237e9969f9c026a016393bc395e65ebd5788"
+      },
+      "vae_encoder.safetensors": {
+        "revision": "38f776ef1b9485d197ddd17ce42630c239800fbd",
+        "etag": "101970a6cdc83345fa591027d0e5106ae53a1b291220f76640b58c2177e407a5"
+      },
+      "config.json": {
+        "revision": "38f776ef1b9485d197ddd17ce42630c239800fbd",
+        "etag": "ae0f8b93bcad505071e40ce0d0c3aa51dfe22662"
+      },
+      "vocoder.safetensors": {
+        "revision": "38f776ef1b9485d197ddd17ce42630c239800fbd",
+        "etag": "7316de9d2700a91497a833cb572ded629b0d2709b964917525acc22c7439a3f8"
+      },
+      "vae_decoder.safetensors": {
+        "revision": "38f776ef1b9485d197ddd17ce42630c239800fbd",
+        "etag": "edcc3294126fc3ec9f11e83088cc39026b8efdce0fd17987f2c90661da2e0ddb"
+      },
+      "embedded_config.json": {
+        "revision": "38f776ef1b9485d197ddd17ce42630c239800fbd",
+        "etag": "bb98c9925fe13a0b46942d2d72caf4e5b614e9b0"
+      },
+      "audio_vae.safetensors": {
+        "revision": "38f776ef1b9485d197ddd17ce42630c239800fbd",
+        "etag": "d5cde5980a1e27c49188c6b1a17056ec5c06d333e5ecb66ef3e09d6e9e8cc011"
+      },
+      "LICENSE.md": {
+        "revision": "0a005c82cf3fd9c49d28dc6c13bdc509b631107f",
+        "etag": "8858b299ab9f5c535d4f851a4bd96b61153e8d83"
+      },
+      "ltx-acceptable-use-policy-snapshot-2026-08-12.pdf": {
+        "revision": "0a005c82cf3fd9c49d28dc6c13bdc509b631107f",
+        "etag": "054b9e6e9d4b8632dd13abe64faded682c344cf9e514813b8d262d0ea94329f1"
+      },
+      "transformer-distilled.safetensors": {
+        "revision": "0a005c82cf3fd9c49d28dc6c13bdc509b631107f",
+        "etag": "3ec5ee0bdf03c00bcbd28e3770994267b028054991e015d1875a8e74cc0aea80"
+      },
+      "connector.safetensors": {
+        "revision": "38f776ef1b9485d197ddd17ce42630c239800fbd",
+        "etag": "028792ba757f509fef60b364a72976a86990930f29757f616a29149150476243"
+      },
+      "duration_head.safetensors": {
+        "revision": "38f776ef1b9485d197ddd17ce42630c239800fbd",
+        "etag": "6a528ee9a20d4b11c19e8f5e53bfe2a683c1c2184074fdc08b2e060494f22bd4"
+      },
+      "README.md": {
+        "revision": "0a005c82cf3fd9c49d28dc6c13bdc509b631107f",
+        "etag": "21b3c8decb711372a5e66e1d6ad01ca4340daa8d"
+      },
+      "QUANT-RECIPE.json": {
+        "revision": "0a005c82cf3fd9c49d28dc6c13bdc509b631107f",
+        "etag": "679c00d87c02a4c9e467b9a579fdde2897e29376"
+      },
+      "spatial_upscaler_x2_v1_1_config.json": {
+        "revision": "38f776ef1b9485d197ddd17ce42630c239800fbd",
+        "etag": "b36a7304dd0e3cbc4afc3bad766ab5a897759238"
+      },
+      "gemma4-12b-ltx-v1/model.safetensors": {
+        "revision": "38f776ef1b9485d197ddd17ce42630c239800fbd",
+        "etag": "9e792735ebfb76fa2c0dc8526aa1a11485a0e340da9dd2f4d90f95af140358bb"
+      },
+      "gemma4-12b-ltx-v1/tokenizer_config.json": {
+        "revision": "38f776ef1b9485d197ddd17ce42630c239800fbd",
+        "etag": "bc3271eddabd38c982a63cb086d858430150a828"
+      },
+      "gemma4-12b-ltx-v1/chat_template.jinja": {
+        "revision": "38f776ef1b9485d197ddd17ce42630c239800fbd",
+        "etag": "4741bf6e4132ba23a5537f9d6e74e9a6d613d7cd"
+      },
+      "gemma4-12b-ltx-v1/config.json": {
+        "revision": "38f776ef1b9485d197ddd17ce42630c239800fbd",
+        "etag": "0aad96d714af5620ac898cb9570574485f8259ec"
+      },
+      "gemma4-12b-ltx-v1/processor_config.json": {
+        "revision": "38f776ef1b9485d197ddd17ce42630c239800fbd",
+        "etag": "b889adcd78015bf5a0139438c5fb0b7067529a61"
+      },
+      "gemma4-12b-ltx-v1/tokenizer.json": {
+        "revision": "38f776ef1b9485d197ddd17ce42630c239800fbd",
+        "etag": "cc8d3a0ce36466ccc1278bf987df5f71db1719b9ca6b4118264f45cb627bfe0f"
+      },
+      "gemma4-12b-ltx-v1/generation_config.json": {
+        "revision": "38f776ef1b9485d197ddd17ce42630c239800fbd",
+        "etag": "2528bb46703f6abf6489b1bd15e6a724ab4525d7"
+      }
+    }
+  },
+  {
+    "repo": "AbstractFramework/minimax-h3-4bit",
+    "revision": "49f35d7c06e79c3be3048e34c5d6ba875a48780f",
+    "seconds": 647.6937670829939
+  }
+]
