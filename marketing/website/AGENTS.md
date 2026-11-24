@@ -344,6 +344,9 @@ Runbook: `CAREERS.md`. Backend: `../../business-intelligence/scripts/careers/`.
 - **The form renders only when `PUBLIC_CAREERS_API` is set**; otherwise each
   page offers "Apply by email". Keep that fallback.
 - **Careers analytics carry no personal data**: role id, error code, UTM only.
+- **Owner exception (2026-11-24):** the `/careers/` hero keeps its "Careers at
+  Goji" label and "Explore open positions" button despite the no-eyebrow and
+  no-"Explore" rules. Don't "fix" them in a cleanup pass.
 - **Initialise every `const` a form script's handlers read before the first
   call that triggers them.** A TDZ error kills the whole script, the form then
   submits natively, and a `<form>` without `method="post"` puts the fields in
