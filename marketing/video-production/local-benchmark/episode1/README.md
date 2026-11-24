@@ -7,13 +7,20 @@ a production model ranking. Its raw records remain available for diagnosis.
 
 ## Results in progress
 
-LTX completed in **127 seconds**. Its sampled frames preserve the Episode 1
-street, textured treatment and two identities, but the door opens/closes again
-and the driver finishes lying down rather than seated. The action fails the
-requested endpoint. H3 and Wan are still rendering; no winner is declared.
+| Route | Time | Appearance in sampled frames | Action finding |
+|---|---:|---|---|
+| LTX 2.5 | 127 s | Episode 1 street, textures and two identities retained | Repeated opening/closing; driver finishes lying down. Rejected endpoint. |
+| H3 Turbo | 880 s | Episode 1 street, textures and two identities retained | One opening; driver falls and recovers to a seated/reclined pose. Contact/foot motion still needs playback review. |
+| Wan 14B Lightning | Rendering | Pending | Pending |
 
-[Watch Episode 1 beside the new LTX take](results/ltx-first-01/with-episode1.mp4)
-· [Full unedited LTX take](results/ltx-first-01/raw.mp4)
+Both completed routes resolved to 576×1024. Findings use exact-frame inspection
+at 0.25-second intervals and complete decode checks; human normal-speed acceptance
+is pending. One seed is not a model ranking. H3 video and frames remain private;
+the initial local video handoff was inaccessible and a private HTTPS handoff
+is awaiting the user's choice of connected Drive account.
+
+[Watch Episode 1 beside the new LTX take](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-episode1-model-comparison/marketing/video-production/local-benchmark/episode1/results/ltx-first-01/with-episode1.mp4)
+· [Full unedited LTX take](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-episode1-model-comparison/marketing/video-production/local-benchmark/episode1/results/ltx-first-01/raw.mp4)
 
 ![LTX frames at native timestamps](results/ltx-first-01/frames.jpg)
 
@@ -32,7 +39,7 @@ recognisable faces, adult proportions, clothing and warm Episode 1 treatment.
 It has no handbag in this particular shot. Adding one only in the prompt would
 change the test and create an identity/prop conflict, so this test preserves it.
 
-[Original Episode 1 takeover clip](inputs/episode1-takeover.mp4) is a visual
+[Original Episode 1 takeover clip](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-episode1-model-comparison/marketing/video-production/local-benchmark/episode1/inputs/episode1-takeover.mp4) is a visual
 reference, **not another baseline entry**: that selected take used first and
 last images and benefited from the episode's previous iteration.
 
@@ -55,7 +62,8 @@ compute, full-precision model ceilings or long-form reliability. Wan uses an
 empty negative prompt; H3's native audio conditioning remains recorded in its
 command although the delivered visual test is silent. Native frame rates stay
 intact; comparison exports repeat frames at 48 fps without interpolation or
-retiming. No paid generation API is used.
+retiming. Comparison panels retain the full 576×1024 source pixels; use the raw
+clips for native-rate playback. No paid generation API is used.
 
 ## Review criteria
 
