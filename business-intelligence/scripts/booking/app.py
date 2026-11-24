@@ -13,6 +13,7 @@ CORS. Endpoints:
   POST /internal/book                                     -> WhatsApp assistant booking (X-Internal-Token)
   POST /internal/reschedule                               -> WhatsApp assistant moves an appointment (same token)
   POST /plato/webhook/<token>                             -> Plato patient:upsert/merge -> marts.dim_patient_contact
+  POST /internal/cancel                                   -> WhatsApp assistant cancels an appointment (same token)
   GET  /healthcheck
 """
 from __future__ import annotations
@@ -30,7 +31,7 @@ import requests
 from flask import Flask, jsonify, request
 
 from .availability import SGT, derive_availability, derive_available_days
-from .booking import BookingError, create_booking, reschedule_appointment
+from .booking import BookingError, cancel_appointment, create_booking, reschedule_appointment
 from .config import CLINICIANS, MAX_ADVANCE_DAYS, SAME_DAY_LEAD_MINUTES, SERVICES
 from .plato import PlatoBusy, PlatoClient, PlatoError, PlatoThrottled
 from . import mailer, patient_contacts
@@ -905,6 +906,54 @@ def internal_reschedule():
         "old_time": result["old_time"],
         "new_date": result["new_date"],
         "new_time": result["new_time"],
+    })
+
+
+@app.route("/internal/cancel", methods=["POST"])
+def internal_cancel():
+    """Cancel a patient's existing appointment for the WhatsApp assistant.
+
+    Body {phone, patient_id?, date, time, dry_run}. cancel_appointment finds the
+    one live appointment at date/time for the patient, refuses one within 24h
+    (late cancellations go to staff, who apply the fee policy) and home visits,
+    then deletes it in Plato. `dry_run: true` does all of that except the
+    delete and sends nothing. A real cancel emails the clinic. Same token rules
+    as /internal/book; same status codes as /internal/reschedule.
+    """
+    if not INTERNAL_TOKEN:
+        return jsonify({"ok": False, "error": "not found", "code": "not_found"}), 404
+    token = request.headers.get("X-Internal-Token", "")
+    if not hmac.compare_digest(token.encode(), INTERNAL_TOKEN.encode()):
+        return jsonify({"ok": False, "error": "forbidden", "code": "forbidden"}), 403
+    body = request.get_json(silent=True)
+    if not isinstance(body, dict):
+        return jsonify({"ok": False, "error": "Expected a JSON object.",
+                        "code": "invalid"}), 400
+    dry_run = body.get("dry_run", False)
+    if not isinstance(dry_run, bool):
+        return jsonify({"ok": False, "error": "dry_run must be true or false.",
+                        "code": "invalid"}), 400
+    try:
+        result = cancel_appointment(plato(), body, now=_sgt_now(), dry_run=dry_run)
+    except BookingError as e:
+        status = RESCHEDULE_STATUS.get(e.code, 400)
+        return jsonify({"ok": False, "error": str(e), "code": e.code}), status
+    except Exception:
+        log.exception("whatsapp cancel failed")
+        return jsonify({"ok": False, "error": "Something went wrong.",
+                        "code": "plato_error"}), 502
+
+    if not dry_run:
+        log.info("cancelled %s via WhatsApp assistant", result["reference"])
+        mailer.send_admin_cancel_email(result, body)  # best-effort
+    return jsonify({
+        "ok": True,
+        "dry_run": dry_run,
+        "reference": result["reference"],
+        "clinician_name": result["clinician_name"],
+        "service": result["service"],
+        "date": result["date"],
+        "time": result["time"],
     })
 
 

@@ -187,6 +187,39 @@ def send_admin_reschedule_email(result: dict, req: dict) -> None:
         log.warning("admin reschedule email failed: %s", e)
 
 
+def send_admin_cancel_email(result: dict, req: dict) -> None:
+    """Short clinic notice that the WhatsApp assistant cancelled an appointment.
+    Plato keeps no record of a deleted appointment, so this email is the
+    record. Best-effort, like the booking email."""
+    if not SMTP_PASS:
+        log.info("SMTP not configured (no GMAIL_APP_PASSWORD); skipping cancel email")
+        return
+    try:
+        when = f"{result['date']} {result['time']}"
+        msg = EmailMessage()
+        msg["Subject"] = f"Cancelled via WhatsApp assistant — {result['service']} ({when})"
+        msg["From"] = SMTP_USER
+        msg["To"] = ADMIN_TO
+        cc = result.get("clinician_email")
+        if cc:
+            msg["Cc"] = cc
+        lines = [
+            "Cancelled via WhatsApp assistant (24 hours' notice or more, so no fee).",
+            "",
+            _row("Service", result["service"]),
+            _row("Clinician", result["clinician_name"]),
+            _row("Was", f"{when} (SGT)"),
+            _row("Phone", req.get("phone")),
+            _row("Reference", result["reference"]),
+            "",
+            "The appointment was deleted in Plato; the slot is free again.",
+        ]
+        msg.set_content("\n".join(lines))
+        _send(msg, "admin cancel", result.get("reference"))
+    except Exception as e:
+        log.warning("admin cancel email failed: %s", e)
+
+
 def send_customer_booking_email(result: dict, draft: dict) -> None:
     """Confirmation to the person who booked. Best-effort; HTML (aligned table) with a plain-text fallback."""
     to = (draft.get("email") or "").strip()

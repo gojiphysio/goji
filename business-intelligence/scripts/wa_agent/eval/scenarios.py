@@ -41,6 +41,12 @@ def _d(days: int) -> str:
     return (TODAY + timedelta(days=days)).isoformat()
 
 
+def _when(days: int, hhmm: str) -> str:
+    d = TODAY + timedelta(days=days)
+    h, m = map(int, hhmm.split(":"))
+    return f"{d:%a} {d.day} {d:%b}, {(h % 12) or 12}:{m:02d}{'am' if h < 12 else 'pm'}"
+
+
 def _next_weekday(wd: int) -> date:  # 0 = Monday
     return TODAY + timedelta(days=(wd - TODAY.weekday()) % 7 or 7)
 
@@ -48,6 +54,7 @@ def _next_weekday(wd: int) -> date:  # 0 = Monday
 # --- the patient-record lines the service gives the model (tools.describe_patient)
 
 NEW = "no patient record for this number (likely a new enquiry)"
+_CANCEL_WHEN = _when(5, "10:00")  # SARAH's next appointment, as the agent writes it
 SARAH = (f"a patient record is linked to this number; record first name Sarah (the texter may be this patient or someone booking for them); next appointment {_d(5)} 10:00 with "
          f"Kristy; last visit {_d(-12)}; no earlier late changes on record (first-time waiver "
          "applies)")
@@ -72,6 +79,7 @@ class Expect:
     escalate: bool | None = None
     confirm_booking: bool | None = None
     confirm_move: bool | None = None
+    cancel_filled: bool | None = None      # cancel has a date and time: the code cancels now
     booking_filled: bool | None = None     # booking has date+time+name
     must: tuple[str, ...] = ()             # regexes the reply must match (case-insensitive)
     must_not: tuple[str, ...] = ()         # regexes it must not match
@@ -307,9 +315,34 @@ SCENARIOS: list[Scenario] = [
       patient=SARAH_TODAY_USED, customer_name="Sarah"),
     S("cancel", "reschedule/cancel",
       ["Please cancel my appointment next week, thanks"],
-      E(intents=("cancel",), decisions=("draft",), holding_must=(r"cancel",),
-        holding_must_not=(r"(we'?ve|i'?ve|has been|is) cancell?ed",)),
-      patient=SARAH, customer_name="Sarah"),
+      E(intents=("cancel",), decisions=("send",), cancel_filled=True,
+        must=(r"what came up|everything ok|all well|all's well", r"another time|new time|rebook"),
+        must_not=(r"(we'?ve|i'?ve|has been|is) cancell?ed", r"\$50", r"shall i")),
+      patient=SARAH, customer_name="Sarah",
+      note="5 days' notice: cancelled at once, then a gentle why + rebook (owner, 24 Nov 2026)"),
+    S("cancel_reason_away", "reschedule/cancel",
+      ["Hi, please cancel my appointment next week, I'll be overseas for 2 weeks"],
+      E(intents=("cancel",), decisions=("send",), cancel_filled=True,
+        must=(r"trip|travel|away|back",), max_questions=1,
+        must_not=(r"what came up", r"\$50", r"(we'?ve|i'?ve|has been|is) cancell?ed")),
+      patient=SARAH, customer_name="Sarah",
+      note="the reason shapes the follow-up: a good trip, a time once they're back"),
+    S("cancel_reason_unwell", "reschedule/cancel",
+      ["Need to cancel next week's session, down with a bad flu unfortunately"],
+      E(intents=("cancel",), decisions=("send",), cancel_filled=True,
+        must=(r"better|well|rest",), max_questions=1, must_not=(r"what came up",)),
+      patient=SARAH, customer_name="Sarah",
+      note="warm, brief; offers a time once they're feeling better"),
+    S("cancel_reason_after", "reschedule/cancel",
+      ["Please cancel my appointment next week",
+       ("agent", f"Done, I've cancelled your appointment on {_CANCEL_WHEN} with Kristy "
+                 "(ref GOJI-ABC123).\n\nHope all's well! If you don't mind me asking, what "
+                 "came up? Whenever you're ready, I'm happy to find you another time 😊"),
+       "I'll be overseas for 2 weeks"],
+      E(decisions=("send",), cancel_filled=False, must=(r"trip|travel|away|back",),
+        max_questions=1, must_not=(r"\$50",)),
+      patient=SARAH, customer_name="Sarah",
+      note="the reason after the cancel: a good trip, a time once they're back"),
 
     # --- handovers and sensitive ------------------------------------------------
     S("is_this_chris", "handover",
@@ -573,8 +606,10 @@ SCENARIOS: list[Scenario] = [
       note="the complaint goes to Chris; the move still gets done"),
     S("cancel_with_notice", "handoff",
       ["Please cancel my appointment, I'm feeling much better now"],
-      E(intents=("cancel",)), patient=SARAH, customer_name="Sarah",
-      note="judgement: 5 days' notice, no fee; cancels always go to Chris today"),
+      E(intents=("cancel",), decisions=("send",), cancel_filled=True,
+        must_not=(r"\$50", r"what came up")),
+      patient=SARAH, customer_name="Sarah",
+      note="5 days' notice, no fee, reason given: cancelled at once"),
     S("complaint_mild", "handoff",
       ["The lady at the front desk was a bit rude yesterday, just so you know"],
       E(intents=("complaint",), decisions=("escalate",))),
@@ -734,6 +769,10 @@ def check(e: Expect, p: Proposal | None, action: str, *, prior_agent: bool,
         f.append(f"confirm_booking={p.confirm_booking}")
     if e.confirm_move is not None and p.confirm_move != e.confirm_move:
         f.append(f"confirm_move={p.confirm_move}")
+    if e.cancel_filled is not None:
+        filled = bool(p.cancel.get("date") and p.cancel.get("time"))
+        if filled != e.cancel_filled:
+            f.append(f"cancel_filled={filled}")
     if e.booking_filled is not None:
         b = p.booking or {}
         filled = bool(b.get("date") and b.get("time") and b.get("full_name"))

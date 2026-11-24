@@ -321,7 +321,8 @@ def test_stage_presets():
     assert s0["urgent"] == "escalate"
     assert s1["billing"] == "escalate" and s1["reschedule"] == "escalate"
     assert s2["reschedule"] == "auto" and s2["existing_appointment"] == "auto"
-    assert "draft" not in set(s3.values()) and s3["cancel"] == "escalate"
+    assert s2["cancel"] == "auto" and s1["cancel"] == "escalate"
+    assert "draft" not in set(s3.values()) and s3["billing"] == "escalate"
     # Getting worse is sent and flagged in every stage, never left or drafted.
     assert {s["priority"] for s in (s0, s1, s2, s3)} == {config.SEND_ALERT}
 

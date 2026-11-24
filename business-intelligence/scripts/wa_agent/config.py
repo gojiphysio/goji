@@ -95,7 +95,10 @@ INTENT_POLICY: dict[str, str] = {
     # The agent moves the appointment itself (goji-booking /internal/reschedule)
     # after the customer confirms; Chris only hears about failures.
     "reschedule": "auto",
-    "cancel": "draft",
+    # Same for cancelling with 24 hours' notice or more (goji-booking
+    # /internal/cancel); inside 24 hours the fee is Chris's call, so
+    # policy.decide drafts it (owner, 24 Nov 2026).
+    "cancel": "auto",
     "billing": "draft",
     "clinical": "draft",
     "complaint": "draft",
@@ -139,7 +142,7 @@ RED_FLAG_INTENTS = frozenset({"urgent", "priority"})
 SAFE_INTENTS = frozenset({"greeting", "faq", "pricing", "location_hours", "availability",
                           "service_fit", "person_check", "media_received", "off_topic",
                           "booking"})  # direct booking on from day one (owner's call)
-STAGE2_EXTRA = frozenset({"existing_appointment", "reschedule"})
+STAGE2_EXTRA = frozenset({"existing_appointment", "reschedule", "cancel"})
 STAGES = (0, 1, 2, 3)
 
 

@@ -206,8 +206,8 @@ def test_urgent_notifies_as_urgent(env):
 
 def test_draft_sends_nothing_and_notifies(env):
     client, rec, notes = env
-    app_mod.claude.queue.append(final(intent="cancel"))
-    post(client, inbound(text="please cancel my Friday 3pm"))
+    app_mod.claude.queue.append(final(intent="billing"))
+    post(client, inbound(text="can you resend my invoice?"))
     assert app_mod.wa.sent == [] and notes[0][0] == "drafted"
     assert app_mod.store.load(CUSTOMER).mode == AGENT
 
@@ -317,13 +317,13 @@ def test_test_mode_shows_drafts_to_the_tester_only_locally(env, monkeypatch):
     client, _, _ = env
     monkeypatch.setattr(config, "TEST_SHOW_DRAFTS", True)
     monkeypatch.setattr(config, "STATE_BACKEND", "memory")
-    app_mod.claude.queue.append(final(reply="Draft text", intent="cancel"))
-    post(client, inbound(text="please cancel Friday 3pm"))
+    app_mod.claude.queue.append(final(reply="Draft text", intent="billing"))
+    post(client, inbound(text="can you resend my invoice?"))
     assert len(app_mod.wa.sent) == 1 and "TEST MODE" in app_mod.wa.sent[0][1]
     assert [h["role"] for h in app_mod.store.load(CUSTOMER).history] == ["customer"]
     monkeypatch.setattr(config, "STATE_BACKEND", "firestore")
-    app_mod.claude.queue.append(final(reply="Draft text", intent="cancel"))
-    post(client, inbound(msg_id="wamid.in2", text="and Saturday's too"))
+    app_mod.claude.queue.append(final(reply="Draft text", intent="billing"))
+    post(client, inbound(msg_id="wamid.in2", text="and last month's too"))
     assert len(app_mod.wa.sent) == 1                      # never on a deployed service
 
 
@@ -848,3 +848,80 @@ def test_no_record_is_looked_up_again_soon_but_a_patient_stays_cached(env, monke
     app_mod.store.save(state)
     post(client, inbound(msg_id="wamid.in4", text="thanks"))
     assert len(calls) == 2
+
+
+# --- cancelling ---------------------------------------------------------------------
+
+CANCEL = {"date": "2026-11-27", "time": "15:00"}
+
+
+def _stub_cancel(monkeypatch, calls, fail=""):
+    def cancel(c, wa_id, patient_id=""):
+        calls.append(c)
+        if fail:
+            raise app_mod.booking_client.BookingFailed("no", fail)
+        return {"ok": True, "reference": "GOJI-CX1", "dry_run": False,
+                "clinician_name": "Kristy Ng", "service": "Physiotherapy", **c}
+    monkeypatch.setattr(app_mod.booking_client, "cancel", cancel)
+
+
+def test_a_cancel_with_notice_is_done_straight_away(env, monkeypatch):
+    client, rec, notes = env
+    calls = []
+    _stub_cancel(monkeypatch, calls)
+    app_mod.claude.queue.append(_final_with(
+        "Hope all's well! If you don't mind me asking, what came up? Whenever you're ready, "
+        "I'm happy to find you another time 😊", intent="cancel", cancel=CANCEL,
+        hours_to_appointment=72))
+    post(client, inbound(text="please cancel my appointment with Kristy"))
+    assert calls == [CANCEL]                                 # no "shall I?" round trip
+    text = app_mod.wa.sent[-1][1]
+    assert text.startswith("Done, I've cancelled your appointment on Fri 27 Nov, 3:00pm "
+                           "with Kristy (ref GOJI-CX1).")
+    assert "what came up" in text and "another time" in text
+    assert notes == []                                       # Chris isn't emailed
+    assert ("cancelled", {"intent": "cancel", "reason": "agent"}) in rec
+    assert app_mod.store.load(CUSTOMER).outcomes[-1]["outcome"] == "cancelled"
+
+
+def test_a_reason_given_up_front_gets_the_models_follow_up(env, monkeypatch):
+    client, _, _ = env
+    _stub_cancel(monkeypatch, [])
+    app_mod.claude.queue.append(_final_with(
+        "Hope you feel better soon! Once you're up to it, I'm happy to find you a new time.",
+        intent="cancel", cancel=CANCEL, hours_to_appointment=72))
+    post(client, inbound(text="pls cancel friday, down with flu"))
+    text = app_mod.wa.sent[-1][1]
+    assert text.startswith("Done, I've cancelled") and "feel better soon" in text
+    assert "what came up" not in text
+
+
+def test_a_follow_up_that_repeats_the_cancellation_gives_way_to_the_default(env, monkeypatch):
+    client, _, _ = env
+    _stub_cancel(monkeypatch, [])
+    app_mod.claude.queue.append(_final_with("All cancelled for you!", intent="cancel",
+                                            cancel=CANCEL, hours_to_appointment=72))
+    post(client, inbound(text="cancel friday"))
+    text = app_mod.wa.sent[-1][1]
+    assert text.count("cancelled") == 1 and "what came up" in text
+
+
+def test_not_sure_which_one_asks_and_cancels_nothing(env, monkeypatch):
+    client, rec, _ = env
+    calls = []
+    _stub_cancel(monkeypatch, calls)
+    app_mod.claude.queue.append(_final_with(
+        "Sure! Is that Wed 25 Nov, 10:00am or Fri 27 Nov, 3:00pm?", intent="cancel",
+        cancel={"date": "", "time": ""}, hours_to_appointment=72))
+    post(client, inbound(text="cancel my appointment"))
+    assert calls == [] and app_mod.wa.sent[-1][1].startswith("Sure! Is that")
+
+
+def test_a_failed_cancel_tells_chris_and_the_customer(env, monkeypatch):
+    client, rec, notes = env
+    calls = []
+    _stub_cancel(monkeypatch, calls, fail="late_change")
+    app_mod.claude.queue.append(_final_with("Hope all's well!", intent="cancel", cancel=CANCEL))
+    post(client, inbound(text="cancel friday pls"))
+    assert calls and notes and notes[-1][0] == "escalated"
+    assert "within 24 hours" in app_mod.wa.sent[-1][1]
