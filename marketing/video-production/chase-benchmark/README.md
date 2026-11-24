@@ -1,8 +1,9 @@
 # Episode 1 taxi chase guidance test
 
-Status: H3 paired runs and LTX stills complete; Wan retries running and LTX video
-blocked on adapter download access, 24 November 2026. No completed
-model ranking yet. The user confirmed the comparison is **timed stills versus a
+Status: five of six tests complete; H3 and Wan pairs plus LTX stills, 24 November
+2026. LTX video is blocked on adapter download access. H3 is the closest look
+and motion match in sampled review; normal-speed production acceptance is pending.
+The user confirmed the comparison is **timed stills versus a
 styled Blender video**, with Episode 1 as the appearance authority.
 
 The scene is one continuous rear-follow shot. A blue Comfort taxi passes a silver
@@ -44,7 +45,7 @@ the other models. No model receives the raw blockout as its appearance reference
 | H3 Ref2VA | Six indexed `MiniMaxH3AddGuide` stills; opening still also supplies appearance | Native reference video conditioning | ComfyUI + GGUF + Ref2VA Turbo; full conversion and both paired benchmark takes completed |
 | Installed H3 FL2VA | First image in current MLX runtime | Unsupported | Prior attractive H3 take does not establish guided-video capability |
 | Installed Wan 2.2 A14B I2V | First/last or consecutive context, not six scattered anchors | Unsupported | Do not substitute another first-frame take |
-| Wan 2.2 VACE Fun A14B | Six known-frame mask windows | Learned video conditioning | High/low Q4_K_M + Seko V1.1 four-step LoRAs; weights downloaded and hash-verified after H3 to respect disk budget; not prior I2V weights |
+| Wan 2.2 VACE Fun A14B | Six known-frame mask windows | Learned video conditioning | High/low Q4_K_M + Seko V1.1; both Euler runs completed. Sparse has motion failures; dense improves motion but changes appearance. Not prior I2V weights |
 
 Sources checked on 24 November 2026:
 [LTX adapter card](https://huggingface.co/Lightricks/LTX-2.5-22b-IC-LoRA-Layout-To-Render),
@@ -117,6 +118,9 @@ video decoding must match every source PNG, including H3's endpoint padding.
 H3 uses indexed guides; Wan uses known-frame windows rather than single-frame locks. Record
 checkpoint, quantization, adapters, seed, resolved canvas, native cadence,
 steps, input hashes and wall time for every take, including setup failures.
+Times are observed sequential-job elapsed times, not cold-start throughput:
+Comfy can reuse text or guide-conditioning nodes from earlier jobs. Execution
+histories retain those cache events. LTX runs in a separate CLI process.
 No cross-model ranking can isolate model architecture when these settings differ.
 
 Inspect between guide timestamps: taxi body rigidity, NPC count/lane direction,
@@ -125,8 +129,9 @@ following, driver silhouette and PS2 appearance. Keep generated H3 footage on th
 private review Page; this public repository contains scripts and source assets.
 
 Private mobile review: [taxi chase guidance comparison](https://chatgpt.com/space/page_20b6fae76cf88191a398cb70dc0ec479).
-The Page contains source media and the private Blender/H3 conversion comparison.
-The still/video model panels remain in progress.
+The Page contains source media, the Blender/H3 conversion, the H3 still/video
+pair, Wan's still/video pair, and the three-family six-still panel;
+LTX's video result remains blocked on adapter download access.
 
 ## Wan 2.2 VACE preparation
 
@@ -143,7 +148,7 @@ A 17-frame, 288×512 diagnostic using the [official Seko native-Comfy T2V
 recipe](https://huggingface.co/lightx2v/Wan2.2-Lightning/blob/main/Wan2.2-T2V-A14B-4steps-lora-rank64-Seko-V1.1/Wan2.2-T2V-A14B-4steps-lora-rank64-Seko-V1.1-NativeComfy.json)
 completed in 62.038 seconds and produced a recognizable guided chase: Euler,
 simple schedule, shift 5, CFG 1, two high-noise then two low-noise steps.
-Both full retries use that same recipe. The diagnostic is not a complete-action
+Both full retries used that same recipe. The diagnostic is not a complete-action
 quality result. An [upstream MPS UniPC issue](https://github.com/Comfy-Org/ComfyUI/issues/16573)
 reports numerical divergence consistent with the symptom; the sampler, shift
 and split changed together here, so this experiment does not isolate its cause.
@@ -224,3 +229,38 @@ foliage and roadside shadows vary more between anchors than in the inspected
 H3 takes. The native silent review file copies the video stream and drops only
 generated audio; the untouched original remains in the take directory.
 The Layout-to-Render video cell has not run while its download access is blocked.
+
+## Wan six-still result (sampled review)
+
+The Euler retry completed in **1,347.797 seconds** at 576×1024, 81 frames and
+16 fps, with a verified full decode. It retains a recognizable PS2 taxi, driver
+and rear camera, but fails the complete action in sampled review. The silver
+car is alongside at 0.5 seconds, ahead again at 1 second, and alongside again
+at 1.75 seconds. The van is absent at 2.5 seconds and reappears at 3 seconds.
+These reversals/disappearances occur between the supplied guides. This valid
+render has structural defects; it is distinct from the earlier noise-only
+configuration failure.
+
+## Wan continuous-video result (sampled review)
+
+The paired Euler video take completed in **1,392.644 seconds**, at the same
+576×1024 / 81 frames / 16 fps, with a verified full decode. Fifteen samples
+retain both overtakes, passing sides and final lane. The obvious sparse-run
+position reversals and disappearance are absent at those inspected times.
+Appearance changes substantially: a bright clouded blue sky, glossier cyan-blue
+taxi, new facade/fence details and a windowed MPV-like replacement for the white
+panel van. This is a sampled motion improvement, not production style acceptance.
+
+## Current production implication
+
+H3 Ref2VA is the strongest candidate for this specific Episode 1 chase in the
+inspected frames. Its six-still route was sufficient for the two overtakes;
+continuous guidance followed intermediate van spacing more closely. LTX remains
+a faster draft route, with more unstable background detail. Wan's dense guide
+improves its motion over sparse windows, but needs separate appearance work.
+These are one-seed findings from a master styled by H3, not a general leaderboard.
+
+For production, keep Blender as the source of camera and vehicle motion, then
+review a single style-conversion pass as a possible finished shot. Do not add
+the benchmark's second rendering pass automatically. Cast likeness, pedestrians,
+longer takes and normal-speed production acceptance still need their own tests.

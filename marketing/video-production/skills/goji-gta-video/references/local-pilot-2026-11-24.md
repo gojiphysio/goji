@@ -86,8 +86,11 @@ against the PNGs before calling two representations the same input.
 H3's indexed-still and video runs took 13:10 and 16:59; both preserved the two
 overtakes in sampled review. LTX's six-still run took 4:19, preserving the action
 with more changing background detail. These are one-seed, five-second results;
-normal-speed production acceptance is pending. Wan results and the LTX video
-cell must be read from the current take log, not inferred from support claims.
+normal-speed production acceptance is pending. Wan’s sparse windows took 22:28
+and showed passing-position reversals/disappearances between guides. Its dense
+video took 23:13 and preserved the sampled overtakes, but changed sky, vehicle
+finish, facades and van design away from Episode 1. LTX video remains blocked
+on adapter download access, so its paired behavior is not yet measured.
 
 The styled master was made by H3 and can favor its appearance. Use this test
 primarily to compare control methods within a family. The small rear-facing
@@ -102,7 +105,7 @@ Regenerate a good converted shot only for a specific revision or comparison.
 
 The first native Wan VACE UniPC adaptation produced only colored noise despite
 a successful encode. A one-second Euler diagnostic produced a recognizable
-scene; full results still require inspection. Treat this as a setup distinction,
+scene, followed by both full Euler runs described above. Treat this as a setup distinction,
 not a model-quality loss. Preflight actual guided pixels on the exact backend
 before full takes; preserve failed graphs and do not silently tune one member
 of a still/video pair. The current take log records the exact replacement recipe.

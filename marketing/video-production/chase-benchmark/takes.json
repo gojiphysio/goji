@@ -138,10 +138,39 @@
     },
     {
       "take": "wan22-vace-stills-02",
-      "status": "queued",
+      "status": "rejected_structural",
       "purpose": "stills",
       "diagnostic": false,
-      "recipe": "native-euler"
+      "recipe": "native-euler",
+      "execution_wall_seconds": 1347.797,
+      "review": {
+        "verdict": "structural_failure_in_samples",
+        "normal_speed_playback_verified": false,
+        "sample_count": 15,
+        "preserved": [
+          "Recognizable blue taxi and rear-facing driver",
+          "Episode 1 textured PS2 appearance",
+          "Rear-follow framing and final lane"
+        ],
+        "failures": [
+          {
+            "time_seconds": [
+              0.5,
+              1.0,
+              1.75
+            ],
+            "finding": "Silver car is already alongside at 0.5s, ahead again at 1.0s, and alongside again at 1.75s. Relative passing order is inconsistent between guides."
+          },
+          {
+            "time_seconds": [
+              2.5,
+              3.0
+            ],
+            "finding": "White van is absent at 2.5s then reappears alongside at 3.0s; expected uninterrupted pass is not preserved."
+          }
+        ],
+        "note": "A valid render with motion defects, unlike the earlier pure-noise setup failure. Do not accept entire action from matching anchor frames."
+      }
     },
     {
       "take": "wan22-vace-video-01",
@@ -156,10 +185,26 @@
     },
     {
       "take": "wan22-vace-video-02",
-      "status": "queued",
+      "status": "generated_unreviewed",
       "purpose": "video",
       "diagnostic": false,
-      "recipe": "native-euler"
+      "recipe": "native-euler",
+      "execution_wall_seconds": 1392.644,
+      "review": {
+        "verdict": "sampled_motion_pass_appearance_mismatch",
+        "normal_speed_playback_verified": false,
+        "sample_count": 15,
+        "preserved": [
+          "Two overtakes, passing sides and final lane in sampled frames",
+          "Rear-follow camera and expected vehicle count"
+        ],
+        "issues": [
+          "Brighter clouded blue sky and glossier cyan-blue taxi depart from the frozen Episode 1 look",
+          "Building facades and fence design are substantially reinterpreted",
+          "White panel van becomes a different windowed MPV-like vehicle"
+        ],
+        "comparison": "Dense guidance removes the obvious relative-position reversals and disappearance seen in the sparse run at inspected times. This is not a production style acceptance."
+      }
     },
     {
       "take": "wan22-vace-video-diag-euler-01",
