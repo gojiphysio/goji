@@ -1,0 +1,36 @@
+diff --git a/loader.py b/loader.py
+index 38492e3..3043e9c 100644
+--- a/loader.py
++++ b/loader.py
+@@ -94,7 +94,16 @@ def gguf_sd_loader(path, handle_prefix="model.diffusion_model.", is_text_model=F
+     compat = None
+     arch_str = get_field(reader, "general.architecture", str)
+     type_str = get_field(reader, "general.type", str)
+-    if arch_str in [None, "pig", "cow"]:
++    # Goji local compatibility: SD.cpp H3 encoder preserves the original HF keys,
++    # including the vision tower, but has no llama.cpp architecture metadata.
++    native_h3_keys = {name for name, _ in tensors}
++    native_h3 = (is_text_model and arch_str is None and
++        {"visual.deepstack_merger_list.0.norm.weight", "model.layers.49.self_attn.q_proj.weight",
++         "model.embed_tokens.weight"}.issubset(native_h3_keys) and
++        "model.layers.50.self_attn.q_proj.weight" not in native_h3_keys)
++    if native_h3:
++        arch_str = "minimax_h3_native_keys"
++    elif arch_str in [None, "pig", "cow"]:
+         if is_text_model:
+             raise ValueError(f"This gguf file is incompatible with llama.cpp!\nConsider using safetensors or a compatible gguf file\n({path})")
+         compat = "sd.cpp" if arch_str is None else arch_str
+@@ -558,7 +567,12 @@ def gguf_gemma3_tokenizer_loader(path):
+ def gguf_clip_loader(path):
+     sd, extra = gguf_sd_loader(path, is_text_model=True)
+     arch = extra.get("arch_str", None)
+-    if arch in {"t5", "t5encoder"}:
++    if arch == "minimax_h3_native_keys":
++        sd["model.embed_tokens.weight"] = dequantize_tensor(sd["model.embed_tokens.weight"], dtype=torch.float16)
++        patch = dequantize_tensor(sd["visual.patch_embed.proj.weight"], dtype=torch.float32)
++        assert tuple(patch.shape) == (3456, 2, 16, 16)
++        sd["visual.patch_embed.proj.weight"] = patch.as_subclass(torch.Tensor).reshape(1152, 3, 2, 16, 16)
++    elif arch in {"t5", "t5encoder"}:
+         temb_key = "token_embd.weight"
+         if temb_key in sd and sd[temb_key].shape == (256384, 4096):
+             # non-standard Comfy-Org tokenizer

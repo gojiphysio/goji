@@ -1,0 +1,10 @@
+{
+  "comfy_commit": "da8bd08e48deee74d9f6c3bc00aed365b00ec209",
+  "gguf_commit": "ff8d48666758866bcc9e93b22e1e07cb636e084f",
+  "gguf_patch_sha256": "4eed32d9a69f777de4fe0169f113eb27f1612da124fad382ce44452307a5cff4",
+  "vae_compute": "float32",
+  "attention": "upcast, subquadratic on MPS",
+  "gpu_jobs": "one at a time; CPU guide preparation concurrent",
+  "hardware": "Mac M5 Pro, 64 GB unified memory",
+  "patch_note": "Unified diff normalized to LF; apply with git apply --ignore-whitespace. No semantic change from diagnostic 04 or conversion 01."
+}

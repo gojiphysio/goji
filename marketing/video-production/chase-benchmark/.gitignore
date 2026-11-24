@@ -1,0 +1,11 @@
+results/
+private-review/
+staging/*.blend*
+staging/frames/
+staging/*.mp4
+inputs/styled-frames/
+inputs/styled-stills/
+inputs/styled*.mp4
+inputs/wan-guides/
+runtime/
+__pycache__/

@@ -1,0 +1,43 @@
+{
+  "node": "WanVaceToVideo",
+  "test": "actual node with fake VAE; validates mask path only, not model inference",
+  "latent_mask_values": [
+    0.0,
+    1.0,
+    1.0,
+    1.0,
+    0.0,
+    1.0,
+    1.0,
+    1.0,
+    0.0,
+    1.0,
+    1.0,
+    1.0,
+    0.0,
+    1.0,
+    1.0,
+    1.0,
+    0.0,
+    1.0,
+    1.0,
+    1.0,
+    0.0
+  ],
+  "known_latent_indices": [
+    0,
+    4,
+    8,
+    12,
+    16,
+    20
+  ],
+  "expected_known_latent_indices": [
+    0,
+    4,
+    8,
+    12,
+    16,
+    20
+  ]
+}
