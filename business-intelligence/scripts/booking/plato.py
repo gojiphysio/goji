@@ -164,6 +164,15 @@ def _normalise_booking_config(payload):
     return None
 
 
+def one_record(payload) -> dict | None:
+    """The record in Plato's answer to a read by id (`GET /patient/{id}`),
+    or None unless the answer holds exactly one record. Plato wraps the
+    record in a one-item list; a bare record is accepted too."""
+    if isinstance(payload, list):
+        payload = payload[0] if len(payload) == 1 else None
+    return payload if isinstance(payload, dict) else None
+
+
 class _RateLimiter:
     """Sliding-window limiter that keeps us under Plato's 20 req/min cap.
 
