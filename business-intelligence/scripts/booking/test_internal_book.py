@@ -445,3 +445,30 @@ def test_create_patient_failure_is_a_booking_error():
         assert e.code == "plato_error"
     else:
         raise AssertionError("expected BookingError")
+
+
+def test_a_new_patient_is_recorded_live_for_the_assistant(client, monkeypatch):
+    """Plato sends no webhook for API writes, so /internal/book records the
+    patient it created itself; an existing patient or a dry run adds nothing."""
+    rows = []
+    monkeypatch.setattr(app_mod.patient_live, "record",
+                        lambda bq, table, r: rows.extend(r) or len(r))
+    monkeypatch.setattr(app_mod, "bq", lambda: None)
+    monkeypatch.setattr(app_mod, "create_booking", lambda _p, d, **kw: {
+        **RESULT, "dry_run": kw["dry_run"], "patient_id": "" if kw["dry_run"] else "NEW1",
+        "patient_created": kw["create_patient"] and not kw["dry_run"]})
+    assert _ibook(client, create_patient=True).status_code == 200
+    assert [(r["patient_id"], r["full_name"], r["phone"], r["source"]) for r in rows] == [
+        ("NEW1", "Jane Tan", "+65 9123 4567", "whatsapp_booking")]
+    _ibook(client, create_patient=False)
+    _ibook(client, create_patient=True, dry_run=True)
+    assert len(rows) == 1
+
+
+def test_a_failed_live_record_never_fails_the_booking(client, monkeypatch):
+    def boom():
+        raise RuntimeError("no bigquery")
+    monkeypatch.setattr(app_mod, "bq", boom)
+    monkeypatch.setattr(app_mod, "create_booking", lambda _p, d, **kw: {
+        **RESULT, "patient_id": "NEW1", "patient_created": True})
+    assert _ibook(client, create_patient=True).get_json()["ok"] is True

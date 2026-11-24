@@ -263,7 +263,7 @@ def read_page(inp: dict, **_) -> dict:
 _LOOKUP_SQL = """
 WITH patients AS (
   SELECT patient_id, SPLIT(TRIM(full_name), ' ')[SAFE_OFFSET(0)] AS first_name
-  FROM `{project}.marts.dim_patient_contact`
+  FROM {contacts}
   WHERE RIGHT(REGEXP_REPLACE(COALESCE(phone, ''), r'\\D', ''), 8) = @last8
 )
 SELECT p.first_name, a.appt_date,
@@ -281,6 +281,34 @@ LIMIT 6
 """
 
 
+# Who has which number. marts.dim_patient_contact is rebuilt nightly, so a
+# patient created or changed since then lives only in marts.patient_contact_live
+# (goji-booking: Plato's patient webhook, and patients /internal/book creates).
+# On 24 Nov 2026 the agent booked a new patient and, six hours later, told the
+# same number "no patient record". A live row wins for its patient (a changed
+# number), so every patient appears once. Live rows older than 3 days are in
+# the nightly table by then.
+_CONTACTS = """(
+  SELECT patient_id, full_name, phone, changed_recently FROM (
+    SELECT patient_id, full_name, phone,
+           received_at > TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 30 MINUTE) AS changed_recently
+    FROM `{project}.marts.patient_contact_live`
+    WHERE received_at > TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 3 DAY)
+    QUALIFY ROW_NUMBER() OVER (PARTITION BY patient_id ORDER BY received_at DESC) = 1)
+  UNION ALL
+  SELECT patient_id, full_name, phone, FALSE
+  FROM `{project}.marts.dim_patient_contact`
+  WHERE patient_id NOT IN (
+    SELECT patient_id FROM `{project}.marts.patient_contact_live`
+    WHERE received_at > TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 3 DAY))
+)"""
+
+
+def _sql(template: str) -> str:
+    return template.format(project=config.PROJECT,
+                           contacts=_CONTACTS.format(project=config.PROJECT))
+
+
 def my_appointments(inp: dict, *, wa_id: str, bq=None, **_) -> dict:
     if not config.PATIENT_LOOKUP:
         return {"enabled": False,
@@ -292,7 +320,7 @@ def my_appointments(inp: dict, *, wa_id: str, bq=None, **_) -> dict:
         from google.cloud import bigquery
         bq = bigquery.Client(project=config.PROJECT)
     from google.cloud import bigquery as _bq
-    job = bq.query(_LOOKUP_SQL.format(project=config.PROJECT),
+    job = bq.query(_sql(_LOOKUP_SQL),
                    job_config=_bq.QueryJobConfig(query_parameters=[
                        _bq.ScalarQueryParameter("last8", "STRING", digits[-8:])]))
     rows = list(job.result())
@@ -310,8 +338,8 @@ def my_appointments(inp: dict, *, wa_id: str, bq=None, **_) -> dict:
 # count goes with it and the name is only a hint.
 _PATIENT_SQL = """
 WITH patients AS (
-  SELECT patient_id, SPLIT(TRIM(full_name), ' ')[SAFE_OFFSET(0)] AS first_name
-  FROM `{project}.marts.dim_patient_contact`
+  SELECT patient_id, SPLIT(TRIM(full_name), ' ')[SAFE_OFFSET(0)] AS first_name, changed_recently
+  FROM {contacts}
   WHERE RIGHT(REGEXP_REPLACE(COALESCE(phone, ''), r'\\D', ''), 8) = @last8
 ),
 appts AS (
@@ -328,10 +356,11 @@ SELECT
   (SELECT COUNT(DISTINCT patient_id) FROM patients) AS n_patients,
   (SELECT ARRAY_AGG(DISTINCT patient_id) FROM patients) AS patient_ids,
   (SELECT ARRAY_AGG(STRUCT(c.patient_id AS id, c.full_name AS name))
-     FROM `{project}.marts.dim_patient_contact` c JOIN patients p USING (patient_id)) AS records,
+     FROM {contacts} c JOIN patients p USING (patient_id)) AS records,
   (SELECT LOGICAL_OR('Late change waiver used' IN UNNEST(d.tags))
      FROM `{project}.marts.dim_patient` d JOIN patients p USING (patient_id)) AS waiver_used,
   (SELECT ANY_VALUE(first_name) FROM patients) AS first_name,
+  (SELECT LOGICAL_OR(changed_recently) FROM patients) AS changed_recently,
   (SELECT AS STRUCT appt_date, time_sgt, clinician_id, treatment_type FROM appts
     WHERE appt_date >= CURRENT_DATE('Asia/Singapore')
     ORDER BY appt_date, time_sgt LIMIT 1) AS next_appt,
@@ -355,7 +384,7 @@ def patient_context(wa_id: str, *, bq=None) -> dict:
             from google.cloud import bigquery
             bq = bigquery.Client(project=config.PROJECT)
         from google.cloud import bigquery as _bq
-        job = bq.query(_PATIENT_SQL.format(project=config.PROJECT),
+        job = bq.query(_sql(_PATIENT_SQL),
                        job_config=_bq.QueryJobConfig(query_parameters=[
                            _bq.ScalarQueryParameter("last8", "STRING", digits[-8:])]))
         row = next(iter(job.result()), None)
@@ -374,7 +403,8 @@ def patient_context(wa_id: str, *, bq=None) -> dict:
             "next_appointment": ({"date": nxt["appt_date"].isoformat(), "time": nxt["time_sgt"],
                                   "with": CLINICIAN_NAMES.get(nxt["clinician_id"], "the team"),
                                   "type": nxt["treatment_type"]} if nxt else None),
-            "last_visit": row["last_visit"].isoformat() if row["last_visit"] else None}
+            "last_visit": row["last_visit"].isoformat() if row["last_visit"] else None,
+            "changed_recently": bool(row["changed_recently"])}
 
 
 def record_for_booking(patient: dict, full_name: str, for_whom: str) -> str:
@@ -407,8 +437,15 @@ def describe_patient(p: dict) -> str:
         bits.append(f"{p['patients_on_number']} patients share this number (e.g. a parent "
                     "and children), so don't assume which one is writing")
     n = p.get("next_appointment")
-    bits.append(f"next appointment {n['date']} {n['time']} with {n['with']}" if n
-                else "no upcoming appointment")
+    if n:
+        bits.append(f"next appointment {n['date']} {n['time']} with {n['with']}")
+    elif p.get("changed_recently"):
+        # Appointments reach BigQuery every 15 minutes; a record added in the
+        # last half hour may have a booking that isn't there yet.
+        bits.append("record added or changed in the last 30 minutes, so a booking made "
+                    "just now may not show yet: don't tell them they have nothing booked")
+    else:
+        bits.append("no upcoming appointment")
     if p.get("last_visit"):
         bits.append(f"last visit {p['last_visit']}")
     if p.get("waiver_used"):
@@ -423,7 +460,7 @@ def describe_patient(p: dict) -> str:
 _FIND_SQL = """
 WITH p AS (
   SELECT patient_id, LOWER(TRIM(full_name)) AS name
-  FROM `{project}.marts.dim_patient_contact`
+  FROM {contacts}
   WHERE RIGHT(REGEXP_REPLACE(COALESCE(phone, ''), r'\\D', ''), 8) = @last8
 )
 SELECT a.appt_date, FORMAT_TIMESTAMP('%H:%M', a.start_at, 'UTC') AS time_sgt, a.clinician_id,
@@ -462,7 +499,7 @@ def find_booking(inp: dict, *, wa_id: str, bq=None, **_) -> dict:
         from google.cloud import bigquery
         bq = bigquery.Client(project=config.PROJECT)
     from google.cloud import bigquery as _bq
-    rows = list(bq.query(_FIND_SQL.format(project=config.PROJECT),
+    rows = list(bq.query(_sql(_FIND_SQL),
                          job_config=_bq.QueryJobConfig(query_parameters=[
                              _bq.ScalarQueryParameter("last8", "STRING", digits[-8:])])).result())
     hits = [r for r in rows if _name_matches(name, r["name"] or "")]

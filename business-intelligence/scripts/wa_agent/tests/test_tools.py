@@ -212,3 +212,23 @@ def test_next_slots_labels_todays_times_today():
                         "2026-11-25": _day({"kristy-ng": ["09:00"]})})
     out = tools.next_slots({"service": "physiotherapy"}, http=http, today=date(2026, 11, 24))
     assert [s["weekday"] for s in out["slots"]] == ["Today", "Wed"]
+
+
+def test_a_record_added_just_now_never_reads_as_nothing_booked():
+    # Appointments reach BigQuery every 15 minutes, so a brand-new patient's
+    # booking may be missing for a while (24 Nov 2026).
+    p = {"returning": True, "first_name": "Sarah", "patients_on_number": 1,
+         "next_appointment": None, "changed_recently": True}
+    text = tools.describe_patient(p)
+    assert "no upcoming appointment" not in text
+    assert "don't tell them they have nothing booked" in text
+    assert "no upcoming appointment" in tools.describe_patient({**p, "changed_recently": False})
+
+
+def test_every_lookup_reads_the_live_contacts_too():
+    # The nightly table alone missed patients created since the last run.
+    for sql in (tools._PATIENT_SQL, tools._LOOKUP_SQL, tools._FIND_SQL):
+        assert "{contacts}" in sql and "dim_patient_contact" not in sql
+    built = tools._sql(tools._PATIENT_SQL)
+    assert "marts.patient_contact_live" in built and "marts.dim_patient_contact" in built
+    assert "{" not in built                        # every placeholder filled

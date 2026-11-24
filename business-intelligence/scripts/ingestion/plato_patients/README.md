@@ -24,6 +24,12 @@ the staff Front Desk worklist needs to call patients, so this job also writes
 only — `dim_patient` stays PII-free. If you add richer *analytics* attributes,
 follow the derive-only pattern and put them in `dim_patient`, not here.
 
+The same name + phone pair for patients created or changed **since** this job
+last ran lives in `marts.patient_contact_live`, written by goji-booking
+(`booking/patient_live.py`, Plato's patient webhook) for the WhatsApp
+assistant's same-day lookups. Its `extract_phone` copies this job's probe
+order: change both together. Its rows expire after 7 days.
+
 ## One-time setup
 
 ### 1. Create the marts table

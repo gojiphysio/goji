@@ -516,6 +516,7 @@ def test_booking_needs_a_yes_in_a_later_message(env, monkeypatch):
     assert "dry run" in sent
     state = app_mod.store.load(CUSTOMER)
     assert state.booked["reference"] == "GOJI-AB12CD" and state.pending_booking == {}
+    assert state.patient_at == 0.0          # look the number up again: it may be a patient now
     assert ("booked", {"intent": "booking", "reason": "dry_run"}) in rec
 
 
@@ -822,3 +823,28 @@ def test_a_handed_over_complaint_gets_the_agents_specific_holding_reply(env, mon
     assert app_mod.wa.sent[-1][1].startswith("I'm so sorry about the wait")
     assert "free session" not in app_mod.wa.sent[-1][1]
     assert notes and "free session" in notes[0][1]["suggested_reply"]   # Chris sees the draft
+
+
+def test_no_record_is_looked_up_again_soon_but_a_patient_stays_cached(env, monkeypatch):
+    # A number with no record can become a patient minutes later; a 6-hour
+    # "no record" made the agent hand over a booking it had just made itself.
+    client, _, _ = env
+    answers = [{"returning": False},
+               {"returning": True, "first_name": "Sarah", "patients_on_number": 1}]
+    calls = []
+    monkeypatch.setattr(app_mod.tools, "patient_context",
+                        lambda wa_id: calls.append(wa_id) or answers[len(calls) - 1])
+    app_mod.claude.queue.extend([final(), final(), final(), final()])
+    post(client, inbound())
+    post(client, inbound(msg_id="wamid.in2", text="hello?"))
+    assert len(calls) == 1                                   # cached for a few minutes
+    state = app_mod.store.load(CUSTOMER)
+    state.patient_at -= app_mod.NO_RECORD_CACHE_S + 1
+    app_mod.store.save(state)
+    post(client, inbound(msg_id="wamid.in3", text="it's me"))
+    assert len(calls) == 2                                   # now a patient
+    state = app_mod.store.load(CUSTOMER)
+    state.patient_at -= app_mod.NO_RECORD_CACHE_S + 1        # well inside 6 hours
+    app_mod.store.save(state)
+    post(client, inbound(msg_id="wamid.in4", text="thanks"))
+    assert len(calls) == 2

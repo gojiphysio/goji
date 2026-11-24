@@ -107,6 +107,7 @@ grant_editor booking_funnel_events      "website booking-funnel tracking (goji-b
 grant_editor web_session_events         "website landing/attribution beacon (goji-booking)"
 grant_editor mismatch_dismissal_events  "provider-attribution alert dismissals"
 grant_editor appointment_reminder_events "48-hour appointment reminder send ledger"
+grant_editor patient_contact_live        "same-day patient contacts for the WhatsApp assistant (goji-booking)"
 
 # --- Step 4: refresh patient names ------------------------------------------
 # Names + phones now come from BigQuery (marts.dim_patient_contact), filled by

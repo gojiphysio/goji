@@ -121,6 +121,49 @@ gcloud secrets add-iam-policy-binding wa-agent-internal-token --project goji-bi 
 ```
 Then set the repo variable `WA_AGENT_URL` to the assistant's Cloud Run URL.
 
+## Plato patient webhook (`/plato/webhook/<token>`)
+The WhatsApp assistant recognises a chat by its number in
+`marts.dim_patient_contact`, which is rebuilt once a night, so a patient created
+today was a stranger to it until tomorrow (24 Nov 2026). goji-booking now
+appends every new or changed patient to `marts.patient_contact_live`
+(`patient_live.py`), and the assistant reads both tables.
+
+- **Staff actions in Plato** reach us through Plato's webhook
+  (`patient:upsert`, `patient:merge`). A delivery only names patient ids; we
+  read each one back from Plato with our key (`bulk`, so the booking form keeps
+  priority), at most 20 per delivery.
+- **Our own API writes** never trigger a Plato webhook (Plato's rule, to stop
+  loops), so `/internal/book` writes the row itself when it creates a patient,
+  before it answers.
+- **Answer fast, always 200.** Plato waits 3s and drops a webhook after 5
+  failed deliveries in 24h. The route answers 200 to anything with the right
+  token and waits at most `PLATO_WEBHOOK_WAIT` (2s) for the Plato read; Cloud
+  Run only gives us CPU during a request, so slower work finishes on the next
+  request (the 5-minute snapshot refresh). A lost row only means waiting for
+  the nightly ingest.
+- **The URL token** is derived from `INTERNAL_TOKEN`
+  (`patient_live.webhook_token`), so there is no second secret. Rotating
+  `wa-agent-internal-token` changes the URL: register again.
+- **Activation is automatic:** Plato posts a `webhook:token` event on
+  registration and the route calls `POST webhook/activate` with it. People
+  logged in to Plato must log out and in again before their actions fire it.
+
+**Register (once, and after a token rotation or if Plato drops it):**
+```bash
+KEY=$(gcloud secrets versions access latest --secret=plato-api-key --project goji-bi)
+TOK=$(gcloud secrets versions access latest --secret=wa-agent-internal-token --project goji-bi)
+URL_TOKEN=$(printf 'plato-webhook' | openssl dgst -sha256 -hmac "$TOK" | awk '{print $NF}' | cut -c1-32)
+curl -sS -X POST https://clinic.platomedical.com/api/gojihealth/webhook \
+  -H "Authorization: Bearer $KEY" -H 'Content-Type: application/json' \
+  -d "{\"url\": \"https://booking.gojiphysio.com/plato/webhook/$URL_TOKEN\",
+       \"events\": [\"patient:upsert\", \"patient:merge\"],
+       \"notification_email\": \"hello@gojiphysio.com\"}"
+# Check: the logs show "plato webhook activated", and
+curl -sS https://clinic.platomedical.com/api/gojihealth/webhook -H "Authorization: Bearer $KEY"
+```
+Plato allows 5 webhooks per database: add events to this one rather than
+registering another URL.
+
 ## Monitoring
 `setup_monitoring.sh` (re-runnable) provisions a Cloud Monitoring uptime check on
 `/healthcheck/deep` every 5 min plus an alert policy emailing

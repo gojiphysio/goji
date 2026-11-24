@@ -116,7 +116,7 @@ bq add-iam-policy-binding --member="serviceAccount:${SA}" \
 # Read: returning-patient recognition and "my appointments", by the chat's own
 # number only (tools.py). Writes to the calendar go through goji-booking's
 # /internal/book (shared token), never to BigQuery or Plato directly.
-for t in marts.dim_patient_contact marts.dim_patient stg.appointments; do
+for t in marts.dim_patient_contact marts.patient_contact_live marts.dim_patient stg.appointments; do
   bq add-iam-policy-binding --member="serviceAccount:${SA}" \
     --role=roles/bigquery.dataViewer "${PROJECT}:${t}" >/dev/null
 done
