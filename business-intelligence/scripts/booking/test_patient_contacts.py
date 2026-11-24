@@ -45,8 +45,9 @@ class FakePlato:
             "p3": {"_id": "p3", "name": "No Phone"}}
 
     def get(self, path, **kw):
+        # Like Plato: GET /patient/{id} is a one-item list, not the record.
         self.gets.append((path, kw))
-        return self.patients[path.rsplit("/", 1)[-1]]
+        return [self.patients[path.rsplit("/", 1)[-1]]]
 
     def post(self, path, payload):
         self.posts.append((path, payload))
@@ -179,3 +180,10 @@ def test_webhook_token_is_derived_and_not_the_internal_token():
     t = pc.webhook_token(TOKEN)
     assert len(t) == 32 and TOKEN not in t and t == pc.webhook_token(TOKEN)
     assert pc.webhook_token("") == ""
+
+
+def test_an_unexpected_patient_response_is_skipped_not_written(setup):
+    c, plato, bq = setup
+    plato.get = lambda path, **kw: []
+    assert _deliver(c, {"event": "patient:upsert", "object_id": "p1"}).status_code == 200
+    assert bq.writes == []

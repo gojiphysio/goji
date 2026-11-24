@@ -182,11 +182,17 @@ def refresh(plato, bq, table: str, ids: list[str]) -> int:
             continue
         try:
             p = plato.get(f"/patient/{pid}", bulk=True, max_wait_s=READ_MAX_WAIT_S,
-                          _retries=0) or {}
+                          _retries=0)
         except Exception as e:
             log.warning("plato webhook: patient read failed: %s", e)
             continue
-        if isinstance(p, dict) and upsert(bq, table, from_plato(pid, p)):
+        # Plato answers GET /patient/{id} with a one-item list (24 Nov 2026).
+        if isinstance(p, list):
+            p = p[0] if len(p) == 1 else None
+        if not isinstance(p, dict):
+            log.warning("plato webhook: unexpected patient response (%s)", type(p).__name__)
+            continue
+        if upsert(bq, table, from_plato(pid, p)):
             written += 1
     if skipped:
         log.info("plato webhook: %d patient(s) over the read cap, left to the nightly rebuild",
