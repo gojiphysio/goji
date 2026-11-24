@@ -17,6 +17,9 @@ SLOT_MINUTES = 30
 SATURDAY_SLOT_MINUTES = 60  # Saturdays: on-the-hour slots only (no :30 slots)
 HOME_TRAVEL_MINUTES = 30  # travel block before AND after a home visit
 MAX_ADVANCE_DAYS = 60  # bookings are capped at 60 days into the future
+# Same-day slots, for the WhatsApp assistant only (website keeps Plato's
+# min_days): the earliest start is this far from now, so the patient can get here.
+SAME_DAY_LEAD_MINUTES = 60
 
 # Plato "Space Requirement" (`code_Left`) = "Reformer needed", validated against
 # GET /appointment/codes on 2026-10-23. The studio has ONE reformer, shared by

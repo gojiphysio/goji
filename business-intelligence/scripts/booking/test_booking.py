@@ -445,3 +445,23 @@ def test_a_plain_less_than_in_notes_still_books():
     res = create_booking(p, {**BASE, "clinician_id": "cheryl-long",
                              "notes": "knee pain < 3 weeks, worse on stairs"}, now=NOW)
     assert res["ok"]
+
+
+class MinDaysPlato(StubPlato):
+    """Plato's real online-booking rule: min_days=1, no same-day."""
+
+    def online_booking_config(self):
+        return {"calendars": [{"id": "dDIjWJp", "rules": [
+            {**r, "min_days": 1} for r in CFG["calendars"][0]["rules"]]}]}
+
+
+def test_whatsapp_booking_can_take_a_same_day_slot_the_website_cannot():
+    same_day_now = datetime(2026, 7, 15, 9, 50)  # 10:00 is ten minutes away
+    draft = {**BASE, "clinician_id": "cheryl-long"}
+    with pytest.raises(BookingError):
+        create_booking(MinDaysPlato(), draft, now=same_day_now)
+    res = create_booking(MinDaysPlato(), draft, now=same_day_now, source="whatsapp")
+    assert res["ok"] and res["date"] == DAY and res["time"] == "10:00"
+    with pytest.raises(BookingError):  # still never a time that has passed
+        create_booking(MinDaysPlato(), {**draft, "time": "09:30"}, now=same_day_now,
+                       source="whatsapp")

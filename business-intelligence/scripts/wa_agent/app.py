@@ -330,7 +330,7 @@ def _alert(kind: str, *, customer: str, wa_id: str, who: str | None = None, **kw
         st, _, _ = _deps()
         who = staff.label(customer, wa_id, st.load(wa_id).code if wa_id else "")
     pinged = _ping_staff(who, kw.get("staff_note") or kw.get("reason") or "")
-    if kind in ("urgent", "sensitive") or not pinged:
+    if kind in ("urgent", "sensitive", "priority") or not pinged:
         notify.send(kind, customer=customer, wa_id=wa_id, **kw)
 
 
@@ -953,6 +953,11 @@ def handle_inbound(ev: Inbound, received: float) -> None:
                   intent=p.intent, reason=d.reason,
                   e2e_ms=int((sent_at - received) * 1000))
     _mode_event(state, old, sent_at)
+    if d.action == SEND and p.intent == "priority":
+        # Sent and flagged at once: Chris hears as the customer gets the reply.
+        _alert("priority", **{**notice, "sent_reply": as_one_message(reply),
+                              "staff_note": f"Priority, getting worse: {p.staff_note}"})
+        _test_show(client, ev.wa_id, f"Chris is pinged now (priority): {p.staff_note}")
     if d.action == SEND and config.INTENT_POLICY.get(p.intent) == "auto_notify":
         notify.send("fyi", **notice)
         _test_show(client, ev.wa_id, f"Chris would get an FYI email: {p.staff_note}")
@@ -983,6 +988,8 @@ def _outcome(d, p, reply: str, booked: dict | None, failed: bool) -> str:
         return "off-topic"
     if d.action == ESCALATE:
         return "handed over"
+    if p.intent == "priority":
+        return "booked, flagged" if booked else "flagged, times offered"
     if booked:
         return "moved" if p.confirm_move else "booked"
     return "link sent" if "wa-book" in reply else "answered"

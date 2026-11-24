@@ -348,7 +348,7 @@ The sheet has `ai_grade`/`ai_note` (first pass) and `grade`/`notes` (Chris).
 
 ### Scenario suite (behaviour tests)
 
-`eval/scenarios.py`: 84 scripted conversations against the real model with
+`eval/scenarios.py`: 92 scripted conversations against the real model with
 automatic pass/fail checks (intent, policy decision, required and forbidden
 phrases, one question per message, no repeat greeting or booking link, word
 caps). Groups: new enquiry, returning patient, booking, reschedule/cancel,

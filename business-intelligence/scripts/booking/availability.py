@@ -149,6 +149,7 @@ def derive_availability(
     home: bool = False,
     now: datetime | None = None,
     fresh: bool = False,
+    same_day_lead: int | None = None,
 ) -> dict[str, list[str]]:
     """Return {clinician_id: ["HH:MM", ...]} of free 30-min starts for `day`.
 
@@ -168,7 +169,8 @@ def derive_availability(
     raw_appts = plato.appointments(day.isoformat(), day.isoformat(), fresh=fresh)
     booked = _booked_by_calendar(raw_appts)
     return _derive_day(cfg, booked, service_id, day, clinician_id=clinician_id,
-                       focus=focus, variant=variant, home=home, now=now, _raw_appointments=raw_appts if _DIAG else None)
+                       focus=focus, variant=variant, home=home, now=now, same_day_lead=same_day_lead,
+                       _raw_appointments=raw_appts if _DIAG else None)
 
 
 def derive_available_days(
@@ -182,6 +184,7 @@ def derive_available_days(
     variant: str | None = None,
     home: bool = False,
     now: datetime | None = None,
+    same_day_lead: int | None = None,
 ) -> list[str]:
     """Return the sorted ISO dates in [start, end] with at least one free slot.
 
@@ -202,7 +205,8 @@ def derive_available_days(
     while day <= end:
         avail = _derive_day(cfg, booked, service_id, day,
                             clinician_id=clinician_id, focus=focus, variant=variant, home=home,
-                            now=now, _raw_appointments=raw_appts if _DIAG else None)
+                            now=now, same_day_lead=same_day_lead,
+                            _raw_appointments=raw_appts if _DIAG else None)
         if any(avail.values()):
             out.append(day.isoformat())
         day += timedelta(days=1)
@@ -220,6 +224,7 @@ def _derive_day(
     variant: str | None = None,
     home: bool = False,
     now: datetime | None = None,
+    same_day_lead: int | None = None,
     _raw_appointments: list[dict] | None = None,
 ) -> dict[str, list[str]]:
     """The per-day core of derive_availability, on pre-fetched Plato data.
@@ -277,6 +282,9 @@ def _derive_day(
     step = timedelta(minutes=slot_minutes)
     _now = now if now is not None else datetime.now(SGT).replace(tzinfo=None)
     today = _now.date()
+    # Earliest start today: now, or now + the lead time for a same-day slot.
+    same_day = same_day_lead is not None
+    earliest = _now + timedelta(minutes=same_day_lead or 0)
 
     def at(hhmm: str) -> datetime:
         h, m = (int(x) for x in hhmm.split(":"))
@@ -317,8 +325,9 @@ def _derive_day(
 
         # Booking must be at least `min_days` ahead (Plato's rule; 1 = no same-day)
         # and within `max_days`.
+        # `same_day_lead` lifts that for today only (the WhatsApp assistant).
         delta = (day - today).days
-        if delta < (rule.get("min_days") or 0):
+        if delta < (rule.get("min_days") or 0) and not (same_day and delta == 0):
             if _DIAG:
                 log.info(f"  {cid}: outside min_days window (delta={delta}, min={rule.get('min_days', 0)})")
             continue
@@ -376,7 +385,7 @@ def _derive_day(
             occ_start, occ_end = t - pad, t + dur + pad
             free = occ_start >= win_start  # travel-before must fit the working day
             exclusion = None
-            if free and day == today and t <= _now:
+            if free and day == today and t <= earliest:
                 free = False  # no past slots (same-day is also gated by min_days)
                 exclusion = "past"
             if free and any(_overlaps(occ_start, occ_end, bs, be) for bs, be in blocks):

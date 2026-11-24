@@ -279,6 +279,8 @@ def test_stage_presets():
     assert s1["billing"] == "escalate" and s1["reschedule"] == "escalate"
     assert s2["reschedule"] == "auto" and s2["existing_appointment"] == "auto"
     assert "draft" not in set(s3.values()) and s3["cancel"] == "escalate"
+    # Getting worse is sent and flagged in every stage, never left or drafted.
+    assert {s["priority"] for s in (s0, s1, s2, s3)} == {config.SEND_ALERT}
 
 
 def P(intent, **kw):
@@ -294,6 +296,8 @@ def test_apply_stage():
     assert up.action == ESCALATE and up.holding
     urgent = Decision(ESCALATE, "model_escalated")
     assert apply_stage(urgent, P("urgent", escalate=True), 0).action == ESCALATE
+    assert apply_stage(Decision(ESCALATE, "content:x", holding=True), P("priority"),
+                       0).action == ESCALATE  # a priority reply that can't go out
     failed = P("other", escalate=True, failed=True)
     assert apply_stage(Decision(ESCALATE, "x"), failed, 0).action == ESCALATE
     assert apply_stage(Decision(ESCALATE, "x"), P("human_requested", escalate=True), 0).action == SILENT
@@ -644,3 +648,26 @@ def test_off_topic_is_answered_quietly_then_watch_listed(env, with_staff):
     post(client, inbound(wa_id=CHRIS, text=f"resume {st.code}", ts=now, msg_id="s1"))
     st = app_mod.store.load(CUSTOMER)
     assert st.mode == AGENT and st.off_topic_strikes == 0
+
+
+def test_priority_sends_concern_and_slots_and_pings_staff_at_once(env, with_staff):
+    # Worse for weeks, harder to walk, asks for a slot today (24 Nov 2026).
+    # The reply goes out AND Chris is pinged, and the chat stays with the
+    # assistant so it can book the slot they pick.
+    client, rec, notes, _ = env
+    app_mod.store.save_rollout({"stage": 2})
+    app_mod.store.note_staff_inbound(CHRIS, time.time() - 60)
+    reply = ("Sorry to hear it's getting harder to walk, Sam.\n\nI've let our team "
+             "know too.\n\nWe have these open today:\n"
+             "* Today, 2:00pm with Claire\n* Today, 2:30pm with Claire")
+    app_mod.claude.queue.append(final(reply=reply, intent="priority", confidence=0.9,
+                                      note="back pain worse 6 wks, harder to walk; offered 2pm"))
+    post(client, inbound(text="any slot today? it's getting harder to walk",
+                         ts=int(time.time())))
+    to_customer = [m for m in app_mod.wa.sent if m[0] == CUSTOMER]
+    assert to_customer and "let our team know" in to_customer[-1][1]
+    pings = [m for m in app_mod.wa.sent if m[0] == CHRIS]
+    assert pings and "Priority, getting worse" in pings[-1][1]
+    assert [k for k, _ in notes] == ["priority"]  # email backup too
+    assert "let our team know" in notes[0][1]["sent_reply"]
+    assert app_mod.store.load(CUSTOMER).mode == AGENT

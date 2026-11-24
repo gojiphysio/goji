@@ -148,3 +148,48 @@ def test_a_refresh_plato_cannot_serve_is_a_503(client, snap):
     r = client.post("/internal/refresh-snapshot")
     assert r.status_code == 503
     assert r.get_json()["ok"] is False
+
+
+# --- same-day slots: the WhatsApp assistant only --------------------------------
+
+TOKEN = "s3cret-token"
+
+
+def _capture(seen, value):
+    def fake(*_a, **kw):
+        seen.append(kw.get("same_day_lead"))
+        return value
+    return fake
+
+
+def test_same_day_needs_the_internal_token(client, monkeypatch):
+    monkeypatch.setattr(app_mod, "INTERNAL_TOKEN", TOKEN)
+    monkeypatch.setattr(app_mod, "derive_availability", lambda *a, **k: {})
+    monkeypatch.setattr(app_mod, "derive_available_days", lambda *a, **k: [])
+    assert client.get(DAY + "&same_day=1").status_code == 403
+    assert client.get(MONTH + "&same_day=1").status_code == 403
+    assert client.get(DAY + "&same_day=1",
+                      headers={"X-Internal-Token": "wrong"}).status_code == 403
+
+
+def test_same_day_refused_when_no_token_is_configured(client, monkeypatch):
+    monkeypatch.setattr(app_mod, "INTERNAL_TOKEN", "")
+    monkeypatch.setattr(app_mod, "derive_availability", lambda *a, **k: {})
+    assert client.get(DAY + "&same_day=1", headers={"X-Internal-Token": ""}).status_code == 403
+
+
+def test_same_day_with_token_passes_the_lead_and_caches_apart(client, monkeypatch):
+    monkeypatch.setattr(app_mod, "INTERNAL_TOKEN", TOKEN)
+    seen: list = []
+    monkeypatch.setattr(app_mod, "derive_availability",
+                        _capture(seen, {"claire-ng": ["14:00"]}))
+    hdr = {"X-Internal-Token": TOKEN}
+    assert client.get(DAY + "&same_day=1", headers=hdr).get_json()["times"] == ["14:00"]
+    client.get(DAY)  # the website's call is not served from the same-day cache entry
+    assert seen == [app_mod.SAME_DAY_LEAD_MINUTES, None]
+
+    seen.clear()
+    monkeypatch.setattr(app_mod, "derive_available_days", _capture(seen, ["2026-11-24"]))
+    assert client.get(MONTH + "&same_day=1", headers=hdr).get_json()["available"] == ["2026-11-24"]
+    client.get(MONTH)
+    assert seen == [app_mod.SAME_DAY_LEAD_MINUTES, None]

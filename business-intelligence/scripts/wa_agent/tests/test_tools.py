@@ -32,8 +32,9 @@ class _Http:
     def __init__(self, status=200, payload=None):
         self.status, self.payload, self.calls = status, payload or {}, []
 
-    def get(self, url, params, timeout):
+    def get(self, url, params, timeout, headers=None):
         self.calls.append((url, params))
+        self.headers = headers
         def boom():
             raise RuntimeError(self.status)
         return NS(status_code=self.status, json=lambda: self.payload,
@@ -85,7 +86,7 @@ class _Avail:
     def __init__(self, months, days):
         self.months, self.days, self.calls = months, days, []
 
-    def get(self, url, params, timeout):
+    def get(self, url, params, timeout, headers=None):
         self.calls.append((url.rsplit("/", 1)[-1], dict(params)))
         if url.endswith("availability-summary"):
             payload = {"available": self.months.get(params["month"], [])}
@@ -188,3 +189,17 @@ def test_record_for_booking_never_uses_the_texters_record_for_someone_else():
     assert tools.record_for_booking(family, "Ethan Lim", "son") == "KID"
     assert tools.record_for_booking(family, "Ethan", "son") == ""          # one word isn't enough
     assert tools.record_for_booking({}, "Jamie Lee", "self") == ""
+
+
+def test_slot_tools_ask_for_same_day_slots_with_the_internal_token(monkeypatch):
+    # Today's slots are hidden from the website (Plato's min_days); the
+    # assistant sees them with the internal token (24 Nov 2026).
+    http = _Http(payload={"times": [], "by_clinician": {}, "clinicians": []})
+    monkeypatch.setattr(tools.config, "INTERNAL_TOKEN", "tok")
+    tools.run_tool("get_times", {"service": "physiotherapy", "date": "2026-11-24"},
+                   wa_id="x", http=http)
+    assert http.calls[-1][1]["same_day"] == "1" and http.headers == {"X-Internal-Token": "tok"}
+    monkeypatch.setattr(tools.config, "INTERNAL_TOKEN", "")
+    tools.run_tool("get_times", {"service": "physiotherapy", "date": "2026-11-24"},
+                   wa_id="x", http=http)
+    assert "same_day" not in http.calls[-1][1] and http.headers is None

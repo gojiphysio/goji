@@ -96,6 +96,13 @@ INTENT_POLICY: dict[str, str] = {
     "clinical": "draft",
     "complaint": "draft",
     "urgent": "escalate",
+    # Symptoms getting worse that need seeing soon, short of a 995 red flag
+    # (harder to walk, spreading numbness or weakness): the agent shows calm,
+    # proportionate concern, says it's let the team know and offers the
+    # earliest slots, today's first, and
+    # Chris is pinged as it sends. The chat stays with the agent so it can book
+    # the slot they pick (owner, 24 Nov 2026).
+    "priority": "send_alert",
     "sensitive": "escalate",  # pregnancy loss, birth trauma, crises: agent goes quiet
     "human_requested": "escalate",
     "other": "draft",
@@ -122,6 +129,9 @@ INTENTS = tuple(INTENT_POLICY)
 # Unset stage: today's INTENT_POLICY above, drafts and all, so tests and local
 # runs behave as before. A deployed service sets a stage.
 LEAVE = "leave"
+SEND_ALERT = "send_alert"  # reply goes out at once AND staff are pinged
+# Health flags: never left for Chris silently or drafted, in any stage.
+RED_FLAG_INTENTS = frozenset({"urgent", "priority"})
 SAFE_INTENTS = frozenset({"greeting", "faq", "pricing", "location_hours", "availability",
                           "service_fit", "person_check", "media_received", "off_topic",
                           "booking"})  # direct booking on from day one (owner's call)
@@ -138,7 +148,7 @@ def stage_policy(stage: int | None) -> dict[str, str]:
         return {i: ("escalate" if r == "draft" else r) for i, r in INTENT_POLICY.items()}
     auto = SAFE_INTENTS | (STAGE2_EXTRA if stage == 2 else frozenset())
     off_list = LEAVE if stage == 0 else "escalate"
-    return {i: ("auto" if i in auto else "escalate" if i == "urgent" else off_list)
+    return {i: ("auto" if i in auto else INTENT_POLICY[i] if i in RED_FLAG_INTENTS else off_list)
             for i in INTENT_POLICY}
 
 

@@ -223,6 +223,11 @@ def create_booking(plato, draft: dict, *, now: datetime | None = None,
     # clinician or we auto-assigned the earliest available one, so the clinic can
     # reallocate as part of clinical ops. (Home visits are Cheryl-only, so
     # there's no patient "choice" to honour there.)
+    # Same-day slots are offered on WhatsApp only (the website keeps Plato's
+    # min_days), so only a WhatsApp booking may take one. Its re-check only
+    # rules out past times: the lead time applies when the slot is offered, and
+    # the customer may pick it a while later.
+    same_day_lead = 0 if source == "whatsapp" else None
     clinician_requested = False
     if home:
         candidates = [HOME_VISIT_CLINICIAN]
@@ -244,7 +249,7 @@ def create_booking(plato, draft: dict, *, now: datetime | None = None,
         # (e.g. a scoliosis booking must never land on someone who isn't Cheryl).
         avail = derive_availability(plato, service_id, day,
                                     focus=focus_id or None, variant=variant or None, home=home, now=now,
-                                    fresh=True)
+                                    fresh=True, same_day_lead=same_day_lead)
         candidates = [cid for cid, slots in avail.items() if time_ in slots]
         _require(candidates, "That time is no longer available.", "slot_taken")
         # Walk the clinic's preferred order (Kristy -> Claire -> Cheryl) so a
@@ -259,7 +264,7 @@ def create_booking(plato, draft: dict, *, now: datetime | None = None,
         with _lock_for(cid):
             avail = derive_availability(plato, service_id, day,
                                        clinician_id=cid, variant=variant or None, home=home, now=now,
-                                       fresh=True)
+                                       fresh=True, same_day_lead=same_day_lead)
             if time_ not in avail.get(cid, []):
                 last_err = BookingError("That time is no longer available.", "slot_taken")
                 continue

@@ -575,3 +575,35 @@ def test_month_shading_skips_days_before_start_date(monkeypatch):
     days = derive_available_days(StubPlato([], _camille_cfg()), "private-pilates",
                                  date(2026, 7, 13), date(2026, 7, 17), now=NOW)
     assert days == ["2026-07-16", "2026-07-17"]
+
+
+def test_same_day_lead_opens_today_for_whatsapp_only():
+    # Plato's min_days=1 hides today from the website; the WhatsApp assistant
+    # (same_day_lead) sees today's slots from `lead` minutes after now.
+    now = datetime(2026, 7, 15, 9, 10)  # 09:10 on WED
+    plato = StubPlato([], CFG)
+    assert derive_availability(plato, "physiotherapy", WED, now=now).get("cheryl-long", []) == []
+    out = derive_availability(plato, "physiotherapy", WED, now=now, same_day_lead=60)
+    assert out["cheryl-long"] == ["10:30", "11:00"]  # 10:00 is under an hour away
+    out = derive_availability(plato, "physiotherapy", WED, now=now, same_day_lead=0)
+    assert out["cheryl-long"][0] == "09:30"  # booking re-check: only past times are out
+
+
+def test_same_day_lead_only_lifts_today():
+    # min_days still applies to other days (here min_days=2 hides tomorrow).
+    cfg = {"calendars": [{"id": "dDIjWJp", "rules": [{
+        "name": "Cheryl Long", "book_calendar": "blue", "starttime": "09:00",
+        "endtime": "12:00", "min_days": 2, "max_days": 365,
+        "restricted_days": [], "restricted_blocks": []}]}]}
+    out = derive_availability(StubPlato([], cfg), "physiotherapy", WED,
+                              now=NOW, same_day_lead=60)  # NOW is the day before WED
+    assert out.get("cheryl-long", []) == []
+
+
+def test_same_day_lead_in_the_month_summary():
+    now = datetime(2026, 7, 15, 9, 10)
+    plato = StubPlato([], CFG)
+    days = derive_available_days(plato, "physiotherapy", WED, WED, now=now)
+    assert days == []
+    days = derive_available_days(plato, "physiotherapy", WED, WED, now=now, same_day_lead=60)
+    assert days == [WED.isoformat()]
