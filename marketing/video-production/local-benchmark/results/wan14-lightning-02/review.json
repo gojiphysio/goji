@@ -1,0 +1,43 @@
+{
+  "review_method": "Exact full frames at 0,1,2,3,4,5 seconds, plus interaction crops at 0.5-second intervals from 1.5 to 5.0. Full MP4 decode checked; human normal-speed acceptance pending.",
+  "decision": "reject_required_action",
+  "accepted_complete_actions": 0,
+  "positive": "Camera/background substantially steadier than LTX first-frame take; visible open-door, seated-driver, stand-up sequence; distinct lead and driver through most of the exit. Broad low-poly human appearance persists.",
+  "failures": [
+    {
+      "time_seconds": 1.5,
+      "finding": "Additional raised/open vehicle panel appears on the far side; the single-door/rigid-body requirement is not preserved."
+    },
+    {
+      "time_seconds": 2.5,
+      "finding": "Door opening changes size/shape. Two black bag-like props appear beside the woman rather than one clear left-hand bag."
+    },
+    {
+      "time_seconds": 4.5,
+      "finding": "Parked taxi begins changing position; by 5.0 seconds it moves away while the door is still open. Woman also starts following instead of remaining in place."
+    }
+  ],
+  "limits": "One seed, Lightning/quantized recipe, proxy cast; not an overall Wan ranking. Canonical face fidelity not assessed.",
+  "detail_sheet": {
+    "source_frame_indices": [
+      24,
+      32,
+      40,
+      48,
+      56,
+      64,
+      72,
+      80
+    ],
+    "crop_xyxy": [
+      0,
+      340,
+      400,
+      600
+    ],
+    "display_size": [
+      500,
+      325
+    ]
+  }
+}

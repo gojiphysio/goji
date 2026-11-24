@@ -121,6 +121,56 @@ gcloud secrets add-iam-policy-binding wa-agent-internal-token --project goji-bi 
 ```
 Then set the repo variable `WA_AGENT_URL` to the assistant's Cloud Run URL.
 
+## Patient contacts kept current (`/plato/webhook/<token>`)
+The WhatsApp assistant recognises a chat by its number in
+`marts.dim_patient_contact`. The nightly `plato-patients-ingest` rebuild alone
+left a patient created today a stranger until tomorrow (24 Nov 2026), so
+everywhere a patient is created or changed now updates that one table at once
+(`patient_contacts.py`, a `MERGE` per patient):
+
+- **Staff in Plato:** Plato's webhook (`patient:upsert`, `patient:merge`). A
+  delivery only names patient ids; we read each one back from Plato with our
+  key: `bulk` (the booking form keeps priority), no retries, at most
+  `PLATO_WEBHOOK_READS_PER_MIN` (4) a minute so the availability snapshot,
+  which pages Plato from the same share, is never starved.
+- **goji-booking itself:** Plato sends no webhook for API writes, so
+  `/internal/book` writes the patient it creates before it answers. The wait
+  is capped at 5s (the assistant gives up on a booking after 30s) and never
+  fails the booking. Website bookings create no patient (staff register them
+  in Plato, which fires the webhook).
+- **The nightly rebuild is the repair and the check.** Plato doesn't store or
+  replay webhook events and drops a webhook after 5 failed deliveries in a
+  day, so the rebuild stays, and first logs `PATIENT_CONTACT_DRIFT` for any
+  patient the writers above missed. `setup_monitoring.sh` emails on it.
+- **Answer fast, always 200.** Plato waits 3s. The route answers 200 to
+  anything with the right token and waits at most `PLATO_WEBHOOK_WAIT` (2s)
+  for its work; Cloud Run only gives us CPU during a request, so slower work
+  finishes on the next request (the 5-minute snapshot refresh).
+- **The URL token** is derived from `INTERNAL_TOKEN`
+  (`patient_contacts.webhook_token`), so there is no second secret. Rotating
+  `wa-agent-internal-token` changes the URL: register again.
+- **Activation is automatic:** Plato posts a `webhook:token` event on
+  registration and the route calls `POST webhook/activate` with it. People
+  logged in to Plato must log out and in again before their actions fire it.
+- **Field rules match the nightly job** (`test_patient_contacts.py` checks):
+  change name/phone/email extraction in both places.
+
+**Register (once, and after a token rotation or if Plato drops it):**
+```bash
+KEY=$(gcloud secrets versions access latest --secret=plato-api-key --project goji-bi)
+TOK=$(gcloud secrets versions access latest --secret=wa-agent-internal-token --project goji-bi)
+URL_TOKEN=$(printf 'plato-webhook' | openssl dgst -sha256 -hmac "$TOK" | awk '{print $NF}' | cut -c1-32)
+curl -sS -X POST https://clinic.platomedical.com/api/gojihealth/webhook \
+  -H "Authorization: Bearer $KEY" -H 'Content-Type: application/json' \
+  -d "{\"url\": \"https://booking.gojiphysio.com/plato/webhook/$URL_TOKEN\",
+       \"events\": [\"patient:upsert\", \"patient:merge\"],
+       \"notification_email\": \"hello@gojiphysio.com\"}"
+# Check: the logs show "plato webhook activated", and
+curl -sS https://clinic.platomedical.com/api/gojihealth/webhook -H "Authorization: Bearer $KEY"
+```
+Plato allows 5 webhooks per database: add events to this one rather than
+registering another URL.
+
 ## Monitoring
 `setup_monitoring.sh` (re-runnable) provisions a Cloud Monitoring uptime check on
 `/healthcheck/deep` every 5 min plus an alert policy emailing

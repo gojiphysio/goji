@@ -1,0 +1,106 @@
+{
+  "researched_on": "2026-11-24",
+  "target": "original PlayStation 2 San Andreas rendering and behaviour",
+  "sources": [
+    {
+      "id": "A",
+      "url": "https://www.youtube.com/watch?v=Z9cD9uj1fb8",
+      "title": "GTA San Andreas (PS2) - Free Roam",
+      "creator": "Paulo Cassiano",
+      "upload_date": "20260518",
+      "duration_seconds": 2761,
+      "inspection_windows": [
+        [
+          0,
+          150,
+          "overview only; platform boot"
+        ],
+        [
+          200,
+          380,
+          "overview: 0.1 fps"
+        ],
+        [
+          238,
+          256,
+          "2 fps"
+        ],
+        [
+          254,
+          264,
+          "4 fps"
+        ],
+        [
+          284,
+          300,
+          "2 fps"
+        ],
+        [
+          364,
+          376,
+          "2 fps"
+        ]
+      ],
+      "review_method": "sampled frames, not continuous playback",
+      "limitations": "Creator reports real PS2 and release 1.03; boot screen observed; mods, cheats, capture processing unverified."
+    },
+    {
+      "id": "B",
+      "url": "https://www.youtube.com/watch?v=3YtFVP1QhOk",
+      "title": "GTA San Andreas (PS2) : Driving School [4K]",
+      "creator": "Zodiac",
+      "upload_date": "20250813",
+      "duration_seconds": 1799,
+      "inspection_windows": [
+        [
+          70,
+          230,
+          "overview: 0.1 fps"
+        ],
+        [
+          150,
+          160,
+          "4 fps"
+        ]
+      ],
+      "review_method": "sampled frames, not continuous playback",
+      "limitations": "Title says PS2 and 4K; hardware/emulator and modifications unspecified; supporting action source only."
+    },
+    {
+      "id": "C",
+      "url": "https://www.youtube.com/watch?v=UgUiICN8E7I",
+      "title": "GTA San Andreas Remaster PS3 vs Xbox 360 vs Original PS2 Frame-Rate Test",
+      "creator": "Digital Foundry",
+      "upload_date": "20151207",
+      "duration_seconds": 206,
+      "inspection_windows": [
+        [
+          0,
+          40,
+          "0.2 fps"
+        ]
+      ],
+      "review_method": "sampled frames, not continuous playback",
+      "limitations": "First-hand labelled comparison; only PS2 panels are target references; no independent frame-pacing measurement."
+    }
+  ],
+  "technical_sources": [
+    {
+      "url": "https://projectcerbera.com/gta/sa/tutorials/handling",
+      "role": "original community handling experiments; preserve author uncertainty; not verified PS2 constants"
+    },
+    {
+      "url": "https://wiki.multitheftauto.com/wiki/Animation_Groups",
+      "role": "MTA project animation taxonomy; PC modding documentation, not PS2 motion calibration"
+    },
+    {
+      "url": "https://wiki.multitheftauto.com/wiki/GetOriginalHandling",
+      "role": "MTA project original handling API; no direct Blender conversion"
+    },
+    {
+      "url": "https://www.rockstargames.com/GTATrilogy",
+      "role": "publisher description establishes Definitive Edition changes"
+    }
+  ],
+  "licensing": "Links and original analysis only; no game models, textures, animation files or gameplay clips included."
+}

@@ -589,6 +589,10 @@ def _read_document(client, ev: Inbound) -> str:
 
 
 PATIENT_CACHE_S = 6 * 3600
+# "No record" is kept only briefly: the number may become a patient minutes
+# later (booked here, on the website or at the desk), and a 6-hour "no record"
+# made the agent hand over a booking it had made itself (24 Nov 2026).
+NO_RECORD_CACHE_S = 10 * 60
 
 
 def _booked_note(state) -> str:
@@ -615,7 +619,8 @@ def _late_change_note(changes: list[dict], tagged: bool = False) -> str:
 def _patient_for(st, wa_id: str, state) -> dict:
     """Who this number is (returning-patient recognition), looked up in code by
     the chat's own number and cached on the chat for a few hours."""
-    if state.patient_at and time.time() - state.patient_at < PATIENT_CACHE_S:
+    ttl = PATIENT_CACHE_S if (state.patient or {}).get("returning") else NO_RECORD_CACHE_S
+    if state.patient_at and time.time() - state.patient_at < ttl:
         return state.patient
     patient = tools.patient_context(wa_id)
     if patient:
@@ -938,6 +943,7 @@ def handle_inbound(ev: Inbound, received: float) -> None:
                      else _outcome(d, p, reply, booked, failed), sent_at)
         if booked:
             state.booked, state.pending_booking, state.pending_move = booked, {}, {}
+            state.patient_at = 0.0  # look again: the booking may have made a patient
         elif d.action == SEND and not p.confirm_move and p.move.get("old_date") and (
                 booking_client.move_complete(p.move) or booking_client.offered(p.move.get("options", ""))):
             state.pending_move = {**{k: p.move.get(k, "") for k in booking_client.MOVE_FIELDS},

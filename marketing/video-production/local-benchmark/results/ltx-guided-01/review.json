@@ -1,0 +1,34 @@
+{
+  "review_method": "Full frames at conditioning times plus unconditioned midpoints 0.5,1.5,2.5,3.5,4.5 seconds. Direct source/generated crops at 1.5 and 2.5 seconds. Full MP4 decoded; human normal-speed acceptance pending.",
+  "decision": "promising_control_test_not_production_pass",
+  "accepted_complete_actions": 0,
+  "positive": "Camera, vehicle placement, scene layout and distinct main characters stay close to the Blender guide, including inspected frames between conditioning images.",
+  "failures": [
+    {
+      "time_seconds": 1.5,
+      "finding": "Generated driver leans/stretches differently from source during emergence; sparse images do not enforce exact contact mechanics."
+    },
+    {
+      "time_seconds": 2.5,
+      "finding": "Foot positions and leg transition differ from guide, with visible soft/ghosted edges in the crop."
+    }
+  ],
+  "inherited_guide_limits": "Proxy cast, stretched/approximate reaching arm and simplified seat-to-standing animation. Correct those before claiming a production-quality guided action.",
+  "limits": "Extra conditioning relative to other models. Canonical likeness and full normal-speed motion acceptance not assessed.",
+  "detail_sheet": {
+    "source_frame_indices": [
+      12,
+      36,
+      60,
+      84,
+      108,
+      120
+    ],
+    "crop_xyxy": [
+      0,
+      430,
+      400,
+      630
+    ]
+  }
+}

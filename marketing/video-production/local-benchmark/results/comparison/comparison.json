@@ -1,0 +1,32 @@
+{
+  "entries": [
+    {
+      "label": "Blender guide",
+      "source": "staging/guide.mp4"
+    },
+    {
+      "label": "LTX first frame",
+      "source": "results/ltx-first-01/raw.mp4"
+    },
+    {
+      "label": "Wan 14B Lightning",
+      "source": "results/wan14-lightning-02/raw.mp4"
+    },
+    {
+      "label": "Wan 5B 448x800",
+      "source": "results/wan5-01/raw.mp4"
+    }
+  ],
+  "trim_seconds": 5,
+  "display_fps": 48,
+  "retimed": false,
+  "motion_interpolation": false,
+  "audio": "omitted from grid; raw sources retained",
+  "detail_frame_time": 3,
+  "detail_crop_on_576x1024": [
+    0,
+    400,
+    576,
+    800
+  ]
+}

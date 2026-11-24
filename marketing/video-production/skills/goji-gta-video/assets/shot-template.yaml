@@ -1,0 +1,94 @@
+# Planning template. Copy per shot; fill from the scene/export.
+# Null means unknown. This is not a renderer config or a supported-control claim.
+shot_id: null
+status: planned
+intent: null
+continuous_take: true
+required_action_seconds: null
+
+scene:
+  blend_path: null
+  sha256: null
+  blender_version: null
+  build_script_revision: null
+  role: motion_blockout  # motion_blockout / look_reference / production
+  units: metres
+  up_axis: Z
+  origin_description: null
+  location_id: null
+  location_revision: null
+  geography_basis: null  # photo-derived / illustrative / measured
+
+assets: []  # id, revision, path/hash, forward_axis, role, reference, review_state
+lighting:
+  preset_revision: null
+  world: null
+  lights: []  # IDs, transforms and settings; may refer to frozen scene
+look:
+  reference_version: null
+  render_engine: null
+  display_device: null
+  view_transform: null
+  look: null
+  exposure: null
+  gamma: null
+  white_balance: null
+  motion_blur: null
+  final_grade_applied: false
+camera:
+  object_id: null
+  preset: null
+  projection: null
+  transform_or_animation: null
+  target_object: null
+  lens_mm: null
+  sensor_width_mm: null
+  sensor_height_mm: null
+  sensor_fit: null
+  shift_xy: null
+  horizontal_fov_degrees: null
+  resolution_wh: null
+  pixel_aspect_xy: null
+  screen_direction: null
+  action_axis_and_camera_side: null
+
+timeline:
+  fps: null
+  fps_base: 1
+  blender_first_frame: null
+  blender_last_frame_inclusive: null
+  output_frame_count: null
+  output_duration_seconds: null
+  index_mapping: null  # e.g. video index 0 corresponds to Blender frame 1
+  sample_time_policy: null  # no retiming / declared resampling map
+  edit_handles_frames: null
+events: []  # start/end frame, actors/objects, action, contact and end state
+behaviour:
+  presets: []  # ID, version, overrides; planning values are not measured game constants
+  game_reference_windows: []  # source URL/ID, platform provenance, start/end seconds
+  evidence_level: null  # observed / documented / Goji proposal, per claim when mixed
+  vehicle_class_surface_and_state: null
+  deliberate_adaptations: []  # e.g. right-hand driver, calmer greeting, portrait framing
+  preview_review_state: unreviewed
+state:
+  start: null
+  end: null
+  prop_ownership_changes: []
+  planned_occlusions: []
+
+exports: []  # path, sha256, role, encoding, frame range, dimensions, fps
+conditioning:
+  track: null  # common_first_frame / native_controls / direct_3d
+  runtime_and_version: null
+  supported_mode: null
+  actually_supplied_inputs: []
+  control_conventions: null  # range/polarity/axes/crop/time mapping, if used
+review:
+  reference_authority: null
+  proxy_limitations: []
+  canonical_cast_fidelity: not_assessed
+  normal_speed_reviewed: false
+  contact_frames_reviewed: false
+  guide_geometry_passed: null
+  issues: []  # source frame/timecode, severity, description
+# Add the production protocol's generation/evaluation fields for rendered takes.

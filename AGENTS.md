@@ -40,7 +40,9 @@ you're working in (`scripts/dashboard/`, `scripts/ingestion/`, `scripts/wa_agent
 - **SQL is idempotent.** Every `.sql` is `CREATE OR REPLACE` (views) or
   `CREATE TABLE IF NOT EXISTS` (tables); `deploy_all.sh` re-runs them safely.
 - **Least privilege.** The dashboard service account is read-only on BigQuery
-  except table-level `dataEditor` grants on the append-only event tables.
+  except table-level `dataEditor` grants on the append-only event tables, plus
+  `dim_patient_contact`, which goji-booking (same account) keeps current
+  between nightly rebuilds (`booking/patient_contacts.py`).
 - **Capture rules as you learn them.** When a build surfaces a new rule of
   thumb, add it to the nearest `AGENTS.md` in the same PR.
 

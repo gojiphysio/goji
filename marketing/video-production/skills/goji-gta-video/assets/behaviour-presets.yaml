@@ -1,0 +1,103 @@
+# Original Goji animation design; not extracted Rockstar data or executable Blender config.
+version: 1
+status: proposed_unrendered
+reference_pack: ../references/san-andreas-reference.md
+parameter_basis: artistic_starting_values_not_measured_PS2_constants
+units: {distance: metres, time: seconds, angle: degrees}
+conventions:
+  actor_forward: local_positive_Y
+  up: local_positive_Z
+  pitch: semantic_nose_up_positive_map_to_rig_axis
+  roll: semantic_outside_of_turn_map_to_rig_axis
+  time: seconds_independent_of_output_fps
+  root_motion: one_owner_only_do_not_double_apply_action_and_path_translation
+  contacts: evaluate_in_world_space_after_constraints
+  review: compare_normal_speed_and_contacts_before_promoting_to_approved
+presets:
+  GG-WALK:
+    status: proposed_needs_neutral_walk_reference
+    duration: loop
+    cycle_seconds: 1.0
+    root_speed_mps: 1.25
+    start_stop_blend_seconds: 0.18
+    body: restrained_hip_and_shoulder_counter_rotation
+    feet: alternate_planted_stance_and_swing_fit_stride_to_actual_root_distance
+    bag: left_hand_anchor_reduced_left_arm_swing
+    turn: separate_turn_state_with_replanted_feet
+    authority: Goji_identity_bible_not_CJ_likeness
+  NPC-AMBIENT:
+    status: proposed_needs_reaction_reference
+    cycle_seconds: 1.15
+    root_speed_mps: 1.0
+    start_phase: choose_and_record_per_actor
+    states: [walk, idle, look, step_aside, resume]
+    trigger: shot_specific_event_not_random_every_frame
+  GP-GREETING:
+    status: original_Goji_proposal
+    duration_seconds: 3.0
+    phases:
+      - {seconds: [0.0, 0.8], state: attentive_hold}
+      - {seconds: [0.8, 1.3], state: head_and_torso_turn}
+      - {seconds: [1.3, 2.2], state: single_greeting_gesture}
+      - {seconds: [2.2, 3.0], state: return_to_idle}
+  SEDAN-CRUISE-STOP:
+    status: proposed_not_PS2_handling_data
+    duration_seconds: 6.0
+    speed_keys_seconds_mps: [[0.0, 0.0], [0.8, 4.0], [3.8, 4.0], [4.6, 0.0], [6.0, 0.0]]
+    speed_interpolation: monotonic_smooth_no_negative_overshoot
+    root_position: integrate_speed_along_path
+    wheel_spin_radians: signed_distance_over_measured_wheel_radius
+    wheel_axis_sign: calibrate_so_contact_patch_velocity_opposes_root_travel
+    body_pitch_limit_degrees: 3.0
+    body_roll_limit_degrees: 4.0
+    event_heave_limit_metres: 0.04
+    event_settle_seconds: 0.6
+    body_response: acceleration_and_contact_driven_not_periodic_sine
+    parked: zero_wheel_spin_no_chassis_oscillation_after_settle
+  SEDAN-SLIDE:
+    status: proposed_requires_staged_path_preview
+    reference: 'B: 02:27-02:49, supporting PS2-labelled capture'
+    duration_seconds: 4.0
+    phases:
+      - {seconds: [0.0, 0.8], state: approach_with_grip}
+      - {seconds: [0.8, 2.0], state: grip_loss_and_heading_change}
+      - {seconds: [2.0, 3.2], state: regain_grip_and_align}
+      - {seconds: [3.2, 4.0], state: depart_or_settle_as_scripted}
+    controls: [path_translation, independent_body_yaw, wheel_steer, wheel_spin, chassis_roll]
+    direction: choose_left_or_right_per_shot
+    yaw_curve: fit_to_shot_path_not_automatic_fixed_angle
+    effects: tyre_marks_and_smoke_only_when_slipping
+  VEHICLE-ENTRY:
+    status: proposed_ordinary_entry_timing_not_measured
+    side: right_for_Singapore_driver
+    required_anchors: [door_hinge, door_handle, sill, seat_pelvis, footwell, steering_wheel]
+    phase_basis: fractions_of_chosen_action_duration
+    phases:
+      - {range: [0.0, 0.15], state: align_at_door}
+      - {range: [0.15, 0.35], state: reach_handle_and_open}
+      - {range: [0.35, 0.75], state: transfer_body_to_seat}
+      - {range: [0.75, 0.95], state: release_and_close}
+      - {range: [0.95, 1.0], state: seated_settle}
+    door_angle: fit_to_vehicle_sweep_and_actor_clearance
+    bag: resolve_and_record_before_entry_do_not_drop_or_duplicate_implicitly
+  VEHICLE-TAKEOVER:
+    status: observed_sequence_original_Goji_timing_required
+    reference: 'A: 04:14-04:24'
+    actors: [instigator, occupant]
+    states: [align, open, remove_occupant, clear_doorway, enter, seated]
+    dependency: occupant_clears_seat_and_doorway_before_instigator_seats
+    voluntary_handover: use_exit_then_entry_instead_of_removal_animation
+    exit_reference_limit: normal_exit_not_yet_visually_calibrated
+  CAMERA-FOLLOW:
+    status: proposed_not_recovered_game_camera_settings
+    distance_metres: 6.0
+    height_metres: 2.2
+    horizontal_fov_degrees: 55.0
+    sensor_fit: HORIZONTAL
+    sensor_width_mm: 36.0
+    position_response_seconds: 0.25
+    heading_response_seconds: 0.35
+    target: separate_vehicle_root_or_actor_target_not_sprung_chassis
+    horizon: level_except_deliberate_shot_design
+    on_foot: use_PLAYER_A_bible_preset_and_reframe_for_vertical
+    obstruction: plan_clear_path_or_intentional_occlusion_no_unmotivated_teleport

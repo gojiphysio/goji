@@ -31,3 +31,16 @@ tab, honour these:
 - **Watercolour social clips** (Reels, Stories, feed, GBP) are made in `assets/watercolor-studio/` (open `index.html`; exports MP4/PNG). Its engine is a copy of the Goji design system bundle: re-copy it when the system changes rather than editing it here.
 - The Marketing tab's WIP cards are the **seams** for live integrations; see
   `../business-intelligence/scripts/dashboard/AGENTS.md`.
+
+- **Goji GTA episodes.** Use `video-production/skills/goji-gta-video/SKILL.md`
+  for the recurring PS2/Singapore series. Preserve cast and location references;
+  all people, including background NPCs and reflections, share the same PS2
+  rendering standard. A matched last still does not preserve motion: use the
+  runtime's supported video context and review the seam. Model capability claims
+  must be checked on the exact runtime; record complete usable actions and all
+  retries before choosing a renderer. The skill's bible distinguishes inherited
+  choices from proposed camera/style defaults. Keep its installed copy in sync.
+  For San Andreas-specific appearance or behaviour, use the skill's
+  `references/san-andreas-reference.md`: retain source-platform provenance and
+  distinguish inspected footage, documented mechanics and proposed Goji values.
+  Do not present an unrendered motion preset as measured PS2 physics.

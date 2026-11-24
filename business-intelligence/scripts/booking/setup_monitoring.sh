@@ -173,6 +173,60 @@ else
   echo "    created"
 fi
 
+# --- 4. Patient contact drift (the Plato patient webhook) ---------------------
+# goji-booking keeps marts.dim_patient_contact current between nightly rebuilds
+# (patient_contacts.py). The nightly plato-patients-ingest job logs
+# PATIENT_CONTACT_DRIFT when it finds patients those writers missed: usually
+# Plato dropped the webhook after failed deliveries. One email a day at most.
+echo
+echo "==> Patient contact drift alert"
+DRIFT_POLICY_NAME="Patient contacts drifted (Plato patient webhook)"
+EXISTING_DRIFT="$(gcloud alpha monitoring policies list \
+  --project="${PROJECT}" --format="value(name,displayName)" \
+  | awk -F'\t' -v n="${DRIFT_POLICY_NAME}" '$2 == n {print $1; exit}')"
+DRIFT_FILE="$(mktemp)"
+trap 'rm -f "${POLICY_FILE}" "${DRIFT_FILE}"' EXIT
+cat > "${DRIFT_FILE}" <<POLICY
+displayName: "${DRIFT_POLICY_NAME}"
+documentation:
+  mimeType: text/markdown
+  content: |
+    **The nightly patient rebuild found patients the same-day updates missed.**
+    The WhatsApp assistant didn't recognise them until the rebuild, which has
+    now repaired the table.
+
+    1. Is the webhook still registered? Plato drops it after 5 failed
+       deliveries in a day. List it as in booking/README.md ("Plato patient
+       webhook") and register it again if it's gone.
+    2. goji-booking errors:
+       \`gcloud logging read 'resource.labels.service_name=goji-booking AND textPayload:"patient contact"' --project=${PROJECT} --freshness=1d\`
+    3. Once, right after go-live (patients changed before the webhook
+       existed): no action needed.
+combiner: OR
+conditions:
+  - displayName: "PATIENT_CONTACT_DRIFT in plato-patients-ingest"
+    conditionMatchedLog:
+      filter: >-
+        resource.type="cloud_run_job"
+        AND resource.labels.job_name="plato-patients-ingest"
+        AND textPayload:"PATIENT_CONTACT_DRIFT"
+notificationChannels:
+  - ${CHANNEL}
+alertStrategy:
+  notificationRateLimit:
+    period: 86400s
+  autoClose: 86400s
+POLICY
+if [[ -n "${EXISTING_DRIFT}" ]]; then
+  gcloud alpha monitoring policies update "${EXISTING_DRIFT}" \
+    --project="${PROJECT}" --policy-from-file="${DRIFT_FILE}" --quiet
+  echo "    updated ${EXISTING_DRIFT}"
+else
+  gcloud alpha monitoring policies create \
+    --project="${PROJECT}" --policy-from-file="${DRIFT_FILE}" --quiet
+  echo "    created"
+fi
+
 echo
 echo "============================================================"
 echo " Done. Verify the probe right now:"
