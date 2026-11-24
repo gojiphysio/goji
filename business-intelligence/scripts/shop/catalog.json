@@ -1,0 +1,145 @@
+{
+  "_comment": "plato_item = the Plato inventory code the order is invoiced as (verified against Plato search/inventory 2026-11-05). Website shop catalogue -> Stripe Products, Prices and Payment Links (stripe_catalog.py). Amounts are SGD cents. `inferred: true` = not published on the site yet; confirm before running against the live key. `enabled: false` items are skipped. Prices follow the owner's price card (2026-11-05). Private Pilates PP1:1-* / PP2:1-* Plato items were created for these prices on 2026-11-05.",
+  "items": [
+    {
+      "key": "pp-1to1-1",
+      "plato_item": "PP1:1-1",
+      "name": "Private Pilates 1:1 single session",
+      "description": "One 55-minute Private Pilates session with a STOTT PILATES certified instructor at Goji, Lentor.",
+      "kind": "package",
+      "amount": 16000
+    },
+    {
+      "key": "pp-1to1-5",
+      "plato_item": "PP1:1-5",
+      "name": "Private Pilates 1:1 x 5 sessions Package",
+      "description": "Five 55-minute Private Pilates sessions with a STOTT PILATES certified instructor at Goji, Lentor.",
+      "kind": "package",
+      "amount": 75000
+    },
+    {
+      "key": "pp-1to1-10",
+      "plato_item": "PP1:1-10",
+      "name": "Private Pilates 1:1 x 10 sessions Package",
+      "description": "Ten 55-minute Private Pilates sessions with a STOTT PILATES certified instructor at Goji, Lentor.",
+      "kind": "package",
+      "amount": 140000
+    },
+    {
+      "key": "pp-2to1-1",
+      "plato_item": "PP2:1-1",
+      "name": "Private Pilates 2:1 single session",
+      "description": "One 55-minute Private Pilates session with a STOTT PILATES certified instructor at Goji, Lentor. Shared by two people; the price covers both.",
+      "kind": "package",
+      "amount": 21000
+    },
+    {
+      "key": "pp-2to1-5",
+      "plato_item": "PP2:1-5",
+      "name": "Private Pilates 2:1 x 5 sessions Package",
+      "description": "Five 55-minute Private Pilates sessions with a STOTT PILATES certified instructor at Goji, Lentor. Shared by two people; the price covers both.",
+      "kind": "package",
+      "amount": 100000
+    },
+    {
+      "key": "pp-2to1-10",
+      "plato_item": "PP2:1-10",
+      "name": "Private Pilates 2:1 x 10 sessions Package",
+      "description": "Ten 55-minute Private Pilates sessions with a STOTT PILATES certified instructor at Goji, Lentor. Shared by two people; the price covers both.",
+      "kind": "package",
+      "amount": 190000
+    },
+    {
+      "key": "cpsc-1to1-1",
+      "name": "Clinical Pilates | Strength & Conditioning 1:1 single session",
+      "description": "One 55-minute Clinical Pilates or Strength & Conditioning session with an AHPC-licensed physiotherapist at Goji, Lentor. Sessions are interchangeable.",
+      "kind": "package",
+      "amount": 18000,
+      "plato_item": "GJCPSC_1:1_AC"
+    },
+    {
+      "key": "cpsc-1to1-5",
+      "name": "Clinical Pilates | Strength & Conditioning 1:1 x 5 sessions Package",
+      "description": "Five 55-minute Clinical Pilates or Strength & Conditioning sessions with an AHPC-licensed physiotherapist at Goji, Lentor. Sessions are interchangeable.",
+      "kind": "package",
+      "amount": 85000,
+      "plato_item": "GJCPSC_1:1_5P"
+    },
+    {
+      "key": "cpsc-1to1-10",
+      "name": "Clinical Pilates | Strength & Conditioning 1:1 x 10 sessions Package",
+      "description": "Ten 55-minute Clinical Pilates or Strength & Conditioning sessions with an AHPC-licensed physiotherapist at Goji, Lentor. Sessions are interchangeable.",
+      "kind": "package",
+      "amount": 160000,
+      "plato_item": "GJCPSC_1:1_10P"
+    },
+    {
+      "key": "cpsc-2to1-1",
+      "name": "Clinical Pilates | Strength & Conditioning 2:1 single session",
+      "description": "One 55-minute Clinical Pilates or Strength & Conditioning session with an AHPC-licensed physiotherapist at Goji, Lentor. Sessions are interchangeable. Shared by two people; the price covers both.",
+      "kind": "package",
+      "amount": 23000,
+      "plato_item": "GJCPSC_2:1_AC"
+    },
+    {
+      "key": "cpsc-2to1-5",
+      "name": "Clinical Pilates | Strength & Conditioning 2:1 x 5 sessions Package",
+      "description": "Five 55-minute Clinical Pilates or Strength & Conditioning sessions with an AHPC-licensed physiotherapist at Goji, Lentor. Sessions are interchangeable. Shared by two people; the price covers both.",
+      "kind": "package",
+      "amount": 110000,
+      "plato_item": "GJCPSC_2:1_5P"
+    },
+    {
+      "key": "cpsc-2to1-10",
+      "name": "Clinical Pilates | Strength & Conditioning 2:1 x 10 sessions Package",
+      "description": "Ten 55-minute Clinical Pilates or Strength & Conditioning sessions with an AHPC-licensed physiotherapist at Goji, Lentor. Sessions are interchangeable. Shared by two people; the price covers both.",
+      "kind": "package",
+      "amount": 210000,
+      "plato_item": "GJCPSC_2:1_10P"
+    },
+    {
+      "key": "gift-voucher",
+      "plato_item": "Voucher",
+      "name": "Goji gift voucher",
+      "description": "A Goji gift voucher, valid for 12 months on any Goji service.",
+      "kind": "voucher",
+      "custom_amount": {
+        "preset": 10000,
+        "minimum": 5000,
+        "maximum": 200000
+      }
+    },
+    {
+      "key": "socks-girl-grip",
+      "plato_item": "GJGL-G-001",
+      "name": "Goji Girl Socks (Grip)",
+      "description": "One pair of Goji Girl Socks with grip soles, collected at the clinic.",
+      "kind": "merch",
+      "amount": 2000
+    },
+    {
+      "key": "socks-girl-nongrip",
+      "plato_item": "GJGL-NG-001",
+      "name": "Goji Girl Socks (Non-grip)",
+      "description": "One pair of Goji Girl Socks with non-grip soles, collected at the clinic.",
+      "kind": "merch",
+      "amount": 2000
+    },
+    {
+      "key": "socks-gang-grip",
+      "plato_item": "GJGG-G-001",
+      "name": "Goji Gang Socks (Grip)",
+      "description": "One pair of Goji Gang Socks with grip soles, collected at the clinic.",
+      "kind": "merch",
+      "amount": 2000
+    },
+    {
+      "key": "socks-gang-nongrip",
+      "plato_item": "GJGG-NG-001",
+      "name": "Goji Gang Socks (Non-grip)",
+      "description": "One pair of Goji Gang Socks with non-grip soles, collected at the clinic.",
+      "kind": "merch",
+      "amount": 2000
+    }
+  ]
+}

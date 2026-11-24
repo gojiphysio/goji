@@ -1,0 +1,645 @@
+---
+/**
+ * /shop — packages, gift vouchers and merch, as curated collections
+ * (catalogue: lib/shop.ts). A `buy` option goes in the cart (localStorage
+ * `goji_cart`); Checkout posts the cart to the booking service, which prices it
+ * from Stripe and returns a Stripe Checkout URL. `ask` and `soon` options route
+ * to WhatsApp. (The per-item `web-pay-*` Payment Links still exist for sharing a
+ * single item elsewhere, e.g. Instagram.)
+ * Packages of existing services, physio-containing ones included, are allowed
+ * under the AHPC floor in marketing/strategy/03-compliance-guardrails.md: plain
+ * prices, no outcome claims, no pressure framing. Deliberately not a product
+ * grid: one photo-led block per collection, options as a quiet price list.
+ * The exception is merch with product shots (options with `photos`): those
+ * render as product cards, at the top, with a thumbnail switcher.
+ */
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Section from "../../components/Section.astro";
+import Button from "../../components/Button.astro";
+import PetalPhoto from "../../components/watercolor/PetalPhoto.astro";
+import Bloom from "../../components/watercolor/Bloom.astro";
+import { SHOP, VOUCHER_AMOUNTS, priceCents, shopBackend } from "../../lib/shop.ts";
+
+const { api, sandbox } = shopBackend();
+
+const buyable = SHOP.flatMap((c) =>
+  c.options.flatMap((o) =>
+    (o.variants ?? [o]).filter((v) => v.status === "buy").map((v) => ({ c, o: v === o ? o : { ...v, name: `${o.name}, ${v.label}` } })),
+  ),
+);
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "OfferCatalog",
+  name: "Goji shop",
+  url: "https://www.gojiphysio.com/shop/",
+  itemListElement: buyable.map(({ c, o }) => ({
+    "@type": "Offer",
+    name: `${c.title}: ${o.name}`,
+    priceCurrency: "SGD",
+    ...(priceCents(o.price) ? { price: String(priceCents(o.price)! / 100) } : {}),
+    url: `https://www.gojiphysio.com/shop/#${c.id}`,
+  })),
+};
+---
+
+<BaseLayout
+  title="Shop: Pilates packages and gift vouchers | Goji Physiotherapy"
+  description="Goji Girl and Goji Gang grip socks, Pilates packages and Goji gift vouchers, online by card or PayNow."
+  schema={schema}
+>
+  <section class="shop-hero">
+    <div class="container shop-hero__grid">
+      <div class="shop-hero__text">
+        <h1>Shop</h1>
+        <p class="shop-hero__lead">
+          Pilates sessions and packs, gift vouchers and a little Goji merch. Pay
+          online by card or PayNow, and we'll WhatsApp you within one working day
+          to arrange your first session.
+        </p>
+        <nav class="shop-jump" aria-label="Shop collections">
+          {SHOP.map((c) => <a href={`#${c.id}`}>{c.title}</a>)}
+        </nav>
+      </div>
+      <div class="shop-hero__sprig">
+        <Bloom preset="sprig" seed={7} speed={2.25} class="shop-hero__bloom" />
+      </div>
+    </div>
+  </section>
+
+  {SHOP.map((c, i) => {
+    const soon = c.options.every((o) => o.status === "soon");
+    if (c.options.some((o) => o.photos)) return (
+      <section id={c.id} class:list={["shop-coll", i % 2 ? "shop-coll--linen" : "shop-coll--surface"]}>
+        <div class="container">
+          <div class="shop-prods__head">
+            <h2>{c.title}</h2>
+            <p class="shop-coll__lead">{c.lead}</p>
+          </div>
+          <div class="shop-prods">
+            {c.options.map((o, j) => (
+              <article class="shop-prod" data-shop-gallery>
+                <div class:list={["gj-frame gj-frame--petal shop-prod__frame", j % 2 === 1 && "gj-frame--flip"]}>
+                  <img
+                    src={o.photos![0].src}
+                    alt={o.photos![0].alt}
+                    width="800"
+                    height="800"
+                    loading={i === 0 ? "eager" : "lazy"}
+                    decoding="async"
+                    data-shop-main
+                  />
+                </div>
+                <div class="shop-prod__thumbs" role="group" aria-label={`${o.name} photos`}>
+                  {o.photos!.map((ph, k) => (
+                    <button type="button" class="shop-prod__thumb" aria-pressed={k === 0 ? "true" : "false"} data-src={ph.src} data-alt={ph.alt}>
+                      <img src={ph.src} alt="" width="64" height="64" loading="lazy" decoding="async" />
+                      <span class="visually-hidden">Photo {k + 1}</span>
+                    </button>
+                  ))}
+                </div>
+                <h3 class="shop-prod__name">{o.name}</h3>
+                {o.blurb && <p class="shop-prod__blurb">{o.blurb}</p>}
+                {o.variants && (
+                  <fieldset class="shop-prod__variants">
+                    <legend class="visually-hidden">{o.name}: choose a sole</legend>
+                    {o.variants.map((v, k) => (
+                      <label class="shop-prod__variant">
+                        <input type="radio" name={`${o.key}-variant`} value={v.key} checked={k === 0} />
+                        <span>{v.label}</span>
+                      </label>
+                    ))}
+                  </fieldset>
+                )}
+                {(o.variants ?? [{ ...o, label: "" }]).map((v, k) => (
+                  <div class="shop-prod__buy" data-variant={o.variants ? v.key : undefined} hidden={k > 0}>
+                    <div>
+                      <p class="shop-opt__price">{v.price ?? "Coming soon"}</p>
+                      {o.detail && <p class="shop-opt__detail">{o.detail}</p>}
+                    </div>
+                    {v.status === "buy" && (
+                      <Button as="button" data-add={v.key} data-name={o.variants ? `${o.name}, ${v.label}` : o.name}
+                        data-cents={priceCents(v.price)}>Add to cart</Button>
+                    )}
+                    {v.status !== "buy" && <Button slug="web-wa" variant="secondary">Ask us</Button>}
+                  </div>
+                ))}
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+    return (
+      <section id={c.id} class:list={["shop-coll", i % 2 ? "shop-coll--linen" : "shop-coll--surface"]}>
+        <div class:list={["container shop-coll__grid", i % 2 && "shop-coll__grid--flip"]}>
+          <div class="shop-coll__media">
+            {c.photo ? (
+              <PetalPhoto src={c.photo.src} alt={c.photo.alt} position={c.photo.position} flip={i % 2 === 1} paint class="shop-coll__frame" />
+            ) : (
+              <figure class:list={["gj-frame gj-frame--petal shop-coll__frame shop-art", i % 2 === 1 && "gj-frame--flip"]}>
+                <Bloom preset={c.bloom ?? "berry"} seed={i + 4} speed={2.3} class="shop-art__bloom" />
+                {c.artCaption && <figcaption class="shop-art__caption">{c.artCaption}</figcaption>}
+              </figure>
+            )}
+          </div>
+          <div class="shop-coll__body">
+            <h2>{c.title}</h2>
+            <p class="shop-coll__lead">{c.lead}</p>
+            {c.note && <p class="shop-coll__note">{c.note}</p>}
+            {c.groups && (
+              <div class="shop-group" data-group-switch>
+                <fieldset class="shop-prod__variants shop-group__pick">
+                  <legend class="visually-hidden">{c.title}: session type</legend>
+                  {c.groups.map((g, k) => (
+                    <label class="shop-prod__variant">
+                      <input type="radio" name={`${c.id}-group`} value={g.id} checked={k === 0} />
+                      <span>{g.label}</span>
+                    </label>
+                  ))}
+                </fieldset>
+                {c.groups.map((g, k) => g.hint && <p class="shop-group__hint" data-group={g.id} hidden={k > 0}>{g.hint}</p>)}
+              </div>
+            )}
+            <ul class="shop-opts">
+              {c.options.map((o) => (
+                <li class="shop-opt" data-group={o.group} hidden={!!o.group && o.group !== c.groups?.[0]?.id}>
+                  <div class="shop-opt__text">
+                    <h3 class="shop-opt__name">{o.name}</h3>
+                    {o.detail && <p class="shop-opt__detail">{o.detail}</p>}
+                  </div>
+                  {o.key !== "gift-voucher" && (
+                    <p class:list={["shop-opt__price", !o.price && "shop-opt__price--muted"]}>
+                      {o.price ?? (o.status === "ask" ? "Price on request" : "Coming soon")}
+                    </p>
+                  )}
+                  <div class="shop-opt__action">
+                    {o.status === "buy" && o.key === "gift-voucher" && (
+                      <div class="shop-voucher">
+                        <label class="visually-hidden" for="voucher-amount">Voucher amount</label>
+                        <select id="voucher-amount" class="shop-voucher__amount" data-voucher-amount>
+                          {VOUCHER_AMOUNTS.map((a) => <option value={a} selected={a === 100}>${a}</option>)}
+                        </select>
+                        <Button as="button" data-add={o.key} data-name={o.name} data-voucher>Add to cart</Button>
+                      </div>
+                    )}
+                    {o.status === "buy" && o.key !== "gift-voucher" && (
+                      <Button as="button" data-add={o.key} data-name={o.cartName ?? o.name} data-cents={priceCents(o.price)}>Add to cart</Button>
+                    )}
+                    {o.status === "ask" && <Button slug="web-wa" variant="secondary">Ask us</Button>}
+                  </div>
+                </li>
+              ))}
+            </ul>
+            {soon && (
+              <div class="shop-coll__interest">
+                <Button slug="web-wa" variant="whatsapp">Register your interest</Button>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+    );
+  })}
+
+  <div class="cart-bar" data-cart-bar hidden>
+    <div class="container cart-bar__inner">
+      <p class="cart-bar__summary"><span data-cart-count></span> · <strong data-cart-total></strong></p>
+      <Button as="button" data-cart-open>View cart</Button>
+    </div>
+  </div>
+
+  <dialog class="cart" data-cart data-api={api} aria-labelledby="cart-title">
+    <div class="cart__head">
+      <h2 id="cart-title" class="cart__title">Your cart</h2>
+      <button type="button" class="cart__close" data-cart-close aria-label="Close cart">×</button>
+    </div>
+    {sandbox && (
+      <p class="cart__sandbox">
+        Test shop: no real money moves. Pay with card 4242 4242 4242 4242, any future date and any CVC.
+      </p>
+    )}
+    <ul class="cart__lines" data-cart-lines></ul>
+    <p class="cart__empty" data-cart-empty>Your cart is empty.</p>
+    <div class="cart__foot">
+      <p class="cart__total"><span>Total</span> <strong data-cart-total></strong></p>
+      <p class="cart__note">Pay by card or PayNow. Socks are collected at the clinic.</p>
+      <p class="cart__error" data-cart-error hidden>
+        Checkout didn't open. Please try again, or message us on WhatsApp and we'll sort it out.
+      </p>
+      <Button as="button" size="lg" class="cart__checkout" data-cart-checkout>Checkout</Button>
+    </div>
+  </dialog>
+
+  <Section tone="linen" narrow>
+    <div class="shop-help">
+      <h2>Not sure which to choose?</h2>
+      <p>
+        Tell us what you'd like to work on and we'll suggest a package, or help
+        you pick a gift.
+      </p>
+      <Button slug="web-wa" variant="whatsapp">Message us on WhatsApp</Button>
+    </div>
+  </Section>
+</BaseLayout>
+
+<script>
+  // --- Cart: a list of {key, name, cents, qty, amount?} in localStorage. Only
+  // key/qty/amount go to the server, which prices the order from Stripe.
+  type Line = { key: string; name: string; cents: number; qty: number; amount?: number };
+  const STORE = "goji_cart";
+  const dlg = document.querySelector<HTMLDialogElement>("[data-cart]")!;
+  const bar = document.querySelector<HTMLElement>("[data-cart-bar]")!;
+  const money = (c: number) => `$${(c / 100).toLocaleString("en-SG", { minimumFractionDigits: c % 100 ? 2 : 0 })}`;
+  const load = (): Line[] => {
+    try { return JSON.parse(localStorage.getItem(STORE) || "[]"); } catch { return []; }
+  };
+  let cart: Line[] = load();
+  const save = () => {
+    try { localStorage.setItem(STORE, JSON.stringify(cart)); } catch {}
+    render();
+  };
+  const same = (a: Line, key: string, amount?: number) => a.key === key && a.amount === amount;
+
+  function render() {
+    const count = cart.reduce((n, l) => n + l.qty, 0);
+    const total = cart.reduce((n, l) => n + l.cents * l.qty, 0);
+    bar.hidden = count === 0;
+    document.querySelectorAll("[data-cart-count]").forEach((el) => (el.textContent = `${count} item${count === 1 ? "" : "s"}`));
+    document.querySelectorAll("[data-cart-total]").forEach((el) => (el.textContent = money(total)));
+    dlg.querySelector<HTMLElement>("[data-cart-empty]")!.hidden = count > 0;
+    dlg.querySelector<HTMLElement>(".cart__foot")!.hidden = count === 0;
+    const ul = dlg.querySelector("[data-cart-lines]")!;
+    ul.innerHTML = "";
+    cart.forEach((l, i) => {
+      const li = document.createElement("li");
+      li.className = "cart__line";
+      li.innerHTML = `
+        <div class="cart__item"><p class="cart__name"></p><p class="cart__unit"></p></div>
+        <div class="cart__qty" role="group">
+          <button type="button" data-dec aria-label="One fewer">−</button>
+          <span aria-live="polite"></span>
+          <button type="button" data-inc aria-label="One more">+</button>
+        </div>
+        <p class="cart__sum"></p>
+        <button type="button" class="cart__remove" data-remove>Remove</button>`;
+      li.querySelector(".cart__name")!.textContent = l.amount ? `${l.name} (${money(l.cents)})` : l.name;
+      li.querySelector(".cart__unit")!.textContent = `${money(l.cents)} each`;
+      li.querySelector(".cart__qty span")!.textContent = String(l.qty);
+      li.querySelector(".cart__sum")!.textContent = money(l.cents * l.qty);
+      li.querySelector("[data-dec]")!.addEventListener("click", () => { l.qty > 1 ? l.qty-- : cart.splice(i, 1); save(); });
+      li.querySelector("[data-inc]")!.addEventListener("click", () => { if (l.qty < 10) l.qty++; save(); });
+      li.querySelector("[data-remove]")!.addEventListener("click", () => { cart.splice(i, 1); save(); });
+      ul.appendChild(li);
+    });
+  }
+
+  document.querySelectorAll<HTMLButtonElement>("[data-add]").forEach((btn) =>
+    btn.addEventListener("click", () => {
+      const key = btn.dataset.add!;
+      let amount: number | undefined;
+      let cents = Number(btn.dataset.cents);
+      if (btn.hasAttribute("data-voucher")) {
+        amount = Number(btn.closest(".shop-voucher")?.querySelector<HTMLSelectElement>("[data-voucher-amount]")?.value || 100);
+        cents = amount * 100;
+      }
+      if (!cents) return;
+      const hit = cart.find((l) => same(l, key, amount));
+      if (hit) hit.qty = Math.min(10, hit.qty + 1);
+      else cart.push({ key, name: btn.dataset.name || key, cents, qty: 1, amount });
+      save();
+      // Confirm in place (the cart bar's count updates too); don't open the cart.
+      const label = btn.querySelector<HTMLElement>(".btn__label");
+      if (label) {
+        clearTimeout(Number(btn.dataset.timer));
+        label.textContent = "Added ✓";
+        btn.classList.add("is-added");
+        btn.dataset.timer = String(window.setTimeout(() => {
+          label.textContent = "Add to cart";
+          btn.classList.remove("is-added");
+        }, 1600));
+      }
+      bar.classList.remove("is-bumped");
+      void bar.offsetWidth; // restart the animation
+      bar.classList.add("is-bumped");
+    }),
+  );
+  document.querySelector("[data-cart-open]")?.addEventListener("click", () => dlg.showModal());
+  dlg.querySelector("[data-cart-close]")?.addEventListener("click", () => dlg.close());
+  dlg.addEventListener("click", (e) => { if (e.target === dlg) dlg.close(); }); // backdrop
+
+  const checkout = dlg.querySelector<HTMLButtonElement>("[data-cart-checkout]")!;
+  checkout.addEventListener("click", async () => {
+    const err = dlg.querySelector<HTMLElement>("[data-cart-error]")!;
+    err.hidden = true;
+    checkout.disabled = true;
+    try {
+      let ref: string | undefined;
+      try { ref = localStorage.getItem("goji_vid") || undefined; } catch {}
+      const r = await fetch(`${dlg.dataset.api}/api/shop/checkout`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ items: cart.map(({ key, qty, amount }) => ({ key, qty, amount })), ref }),
+      });
+      const d = await r.json();
+      if (!r.ok || !d.url) throw new Error(d.code || "checkout");
+      location.href = d.url;
+    } catch {
+      err.hidden = false;
+      checkout.disabled = false;
+    }
+  });
+  render();
+
+  // 1:1 / 2:1 switch: show that group's price rows (and its hint).
+  document.querySelectorAll<HTMLElement>("[data-group-switch]").forEach((sw) => {
+    const coll = sw.closest("section")!;
+    sw.querySelectorAll<HTMLInputElement>("input").forEach((r) =>
+      r.addEventListener("change", () => {
+        coll.querySelectorAll<HTMLElement>("[data-group]").forEach((el) => {
+          if (el.dataset.group) el.hidden = el.dataset.group !== r.value;
+        });
+      }),
+    );
+  });
+
+  // Thumbnails swap the main shot; the sole picker swaps the price and Buy link
+  // (photos stay the same). Without JS the first shot and first variant show.
+  document.querySelectorAll<HTMLElement>("[data-shop-gallery]").forEach((card) => {
+    const main = card.querySelector<HTMLImageElement>("[data-shop-main]");
+    const thumbs = card.querySelectorAll<HTMLButtonElement>(".shop-prod__thumb");
+    const show = (t: HTMLButtonElement) => {
+      if (!main || main.getAttribute("src") === t.dataset.src) return;
+      main.src = t.dataset.src!;
+      main.alt = t.dataset.alt!;
+      main.classList.remove("is-swapped");
+      void main.offsetWidth; // restart the fade
+      main.classList.add("is-swapped");
+      thumbs.forEach((x) => x.setAttribute("aria-pressed", String(x === t)));
+    };
+    thumbs.forEach((t) => t.addEventListener("click", () => show(t)));
+    card.querySelectorAll<HTMLInputElement>(".shop-prod__variant input").forEach((r) =>
+      r.addEventListener("change", () => {
+        card.querySelectorAll<HTMLElement>(".shop-prod__buy[data-variant]").forEach((el) => {
+          el.hidden = el.dataset.variant !== r.value;
+        });
+      }),
+    );
+  });
+</script>
+
+<style>
+  /* Hero: same shape as the postpartum pathway hero. */
+  .shop-hero {
+    background: var(--bg-page);
+    padding-block: clamp(2.5rem, 1.5rem + 4vw, 5rem);
+    border-bottom: 1px solid var(--color-border);
+    overflow: hidden;
+  }
+  .shop-hero__grid { display: grid; gap: clamp(var(--space-5), 4vw, var(--space-7)); align-items: center; }
+  .shop-hero__text { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-3); }
+  .shop-hero__lead { color: var(--text-muted); line-height: var(--lh-body); max-width: 54ch; }
+  .shop-hero__sprig { display: none; justify-self: center; width: min(100%, 380px); }
+  .shop-jump { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-3); }
+  .shop-jump a {
+    font-size: var(--fs-small);
+    font-weight: var(--weight-medium);
+    color: var(--text-default);
+    text-decoration: none;
+    padding: 6px 14px;
+    border-radius: var(--radius-pill);
+    background: var(--bg-content);
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-sm);
+  }
+  .shop-jump a:hover { border-color: var(--color-primary); }
+
+  /* Collections: photo-led blocks, alternating sides and surfaces. */
+  .shop-coll { padding-block: var(--section-y); scroll-margin-top: 80px; }
+  .shop-coll--surface { background: var(--bg-content); }
+  .shop-coll--linen { background: var(--bg-page); }
+  .shop-coll__grid { display: grid; gap: clamp(var(--space-5), 4vw, var(--space-8)); align-items: center; }
+  .shop-coll__media { max-width: 420px; width: 100%; }
+  /* Landscape on a phone so the prices aren't a screen below the photo. */
+  .shop-coll :global(.shop-coll__frame) { aspect-ratio: 3 / 2; width: 100%; }
+  .shop-art :global(.shop-art__bloom) { width: 48%; }
+  .shop-art { margin: 0; display: grid; place-items: center; background: var(--blush); }
+  .shop-art__caption {
+    position: absolute;
+    bottom: var(--space-5);
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+  }
+  .shop-coll__body h2 { margin-bottom: var(--space-3); }
+  .shop-coll__lead { color: var(--text-muted); line-height: var(--lh-body); max-width: 54ch; }
+  .shop-coll__note { color: var(--text-muted); font-size: var(--fs-small); margin-top: var(--space-2); }
+
+  /* Options: a quiet price list on the page ground, not cards. */
+  .shop-opts { list-style: none; padding: 0; margin-top: var(--space-5); border-top: 1px solid var(--rule); }
+  /* Phone: name over price on the left, Add to cart beside them. */
+  .shop-opt {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-areas: "text action" "price action";
+    gap: 2px var(--space-4);
+    align-items: center;
+    padding-block: var(--space-3);
+    border-bottom: 1px solid var(--rule);
+  }
+  .shop-opt__text { grid-area: text; }
+  .shop-opt__name { font-family: var(--font-body); font-weight: var(--weight-semibold); font-size: var(--fs-body); }
+  .shop-opt__detail { color: var(--text-muted); font-size: var(--fs-small); margin-top: 2px; }
+  .shop-opt__price { grid-area: price; margin: 0; font-family: var(--font-body); font-weight: var(--weight-semibold); font-size: var(--fs-lead); white-space: nowrap; }
+  .shop-opt__price--muted { font-size: var(--fs-small); font-weight: var(--weight-medium); color: var(--text-muted); }
+  .shop-opt__action { grid-area: action; display: flex; justify-content: flex-end; }
+  .shop-opt__action:empty { display: none; }
+  .shop-coll__interest { margin-top: var(--space-5); }
+
+  /* Merch: product cards; shots sit on a light clay backdrop (#CC8D81), edge to edge. */
+  .shop-prods__head { max-width: 60ch; margin-bottom: var(--space-6); }
+  .shop-prods__head h2 { margin-bottom: var(--space-3); }
+  /* Capped so each shot tops out around 420px, like the other collections' media. */
+  .shop-prods { display: grid; gap: var(--space-7) clamp(var(--space-5), 4vw, var(--space-8)); max-width: 900px; }
+  .shop-prod { display: flex; flex-direction: column; min-width: 0; }
+  .shop-prod__frame { aspect-ratio: 1 / 1; width: 100%; background: var(--clay); }
+  .shop-prod__frame img { width: 100%; height: 100%; object-fit: cover; }
+  /* Switching photos: a very quick fade in (the thumbnails share the files, so
+     the new shot is already cached). */
+  .shop-prod__frame img.is-swapped { animation: shot-fade 160ms ease-out; }
+  @keyframes shot-fade { from { opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .shop-prod__frame img.is-swapped { animation: none; } }
+  .shop-prod__thumbs { display: flex; gap: var(--space-2); margin-top: var(--space-3); }
+  .shop-prod__thumb {
+    width: 64px;
+    height: 64px;
+    padding: 0;
+    overflow: hidden;
+    border-radius: var(--radius-md);
+    background: var(--clay);
+    border: 2px solid transparent;
+    cursor: pointer;
+  }
+  .shop-prod__thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .shop-prod__thumb[aria-pressed="true"] { border-color: var(--color-primary); }
+  .shop-prod__thumb:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+  .shop-prod__name { font-family: var(--font-body); font-weight: var(--weight-semibold); font-size: var(--fs-lead); margin-top: var(--space-4); }
+  .shop-prod__blurb { color: var(--text-muted); line-height: var(--lh-body); margin-top: var(--space-2); margin-bottom: var(--space-4); }
+  .shop-prod__buy {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    margin-top: auto;
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--rule);
+  }
+  .shop-prod__buy .shop-opt__price { text-align: left; }
+  .shop-prod__buy[hidden] { display: none; }
+  .shop-prod__variants { display: flex; gap: var(--space-2); border: 0; padding: 0; margin: auto 0 var(--space-4); }
+  .shop-prod__variant span {
+    display: inline-block;
+    padding: 6px 14px;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--color-border);
+    background: var(--bg-content);
+    font-size: var(--fs-small);
+    font-weight: var(--weight-medium);
+    cursor: pointer;
+  }
+  .shop-prod__variant { position: relative; }
+  /* Visually hidden but focusable; the global input width must not leak out. */
+  .shop-prod__variant input { position: absolute; inset: 0; width: 1px; height: 1px; margin: 0; opacity: 0; pointer-events: none; }
+  .shop-prod__variant input:checked + span { border-color: var(--color-primary); background: var(--blush); color: var(--color-primary); }
+  .shop-prod__variant input:focus-visible + span { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+
+  /* 1:1 / 2:1 switch above a grouped price list. */
+  .shop-group { margin-top: var(--space-5); }
+  .shop-group :global(.shop-group__pick) { margin: 0; }
+  .shop-group__hint { margin: var(--space-2) 0 0; font-size: var(--fs-small); color: var(--text-muted); }
+  .shop-group__hint[hidden], .shop-opt[hidden] { display: none; }
+  .shop-group + .shop-opts { margin-top: var(--space-4); }
+
+  /* Voucher: amount picker beside Add to cart. */
+  .shop-voucher { display: flex; gap: var(--space-2); align-items: center; }
+  /* Phone: the voucher's picker + button get their own line under the name. */
+  .shop-opt:has(.shop-voucher) { grid-template-columns: 1fr; grid-template-areas: "text" "action"; }
+  .shop-opt:has(.shop-voucher) .shop-opt__action { justify-content: flex-start; margin-top: var(--space-2); }
+  .shop-voucher__amount {
+    width: auto;
+    padding: 10px 12px;
+    border-radius: var(--radius-pill);
+    font-weight: var(--weight-semibold);
+  }
+
+  /* Cart: a bar pinned to the bottom of the shop while it has items. */
+  .cart-bar {
+    position: sticky;
+    bottom: 0;
+    z-index: 20;
+    background: var(--bg-content);
+    border-top: 1px solid var(--color-border);
+    box-shadow: 0 -6px 20px rgb(60 30 31 / 0.08);
+    padding-block: var(--space-3);
+  }
+  .cart-bar[hidden] { display: none; }
+  .cart-bar.is-bumped .cart-bar__summary { animation: cart-bump 0.5s var(--ease); }
+  @keyframes cart-bump { 30% { transform: scale(1.08); } }
+  @media (prefers-reduced-motion: reduce) { .cart-bar.is-bumped .cart-bar__summary { animation: none; } }
+  /* "Added ✓": the button briefly turns to the outline look. */
+  :global(.btn.btn--primary.is-added) { background: var(--bg-content); color: var(--color-primary); border-color: var(--color-primary); }
+  .cart-bar__inner { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); }
+  .cart-bar__summary { margin: 0; color: var(--text-default); }
+
+  .cart {
+    margin: auto;
+    width: min(100% - 32px, 520px);
+    max-height: min(100dvh - 32px, 760px);
+    padding: var(--space-5);
+    border: none;
+    border-radius: var(--radius-lg);
+    background: var(--bg-page);
+    color: var(--text-default);
+    box-shadow: var(--shadow-lg, 0 20px 60px rgb(60 30 31 / 0.25));
+  }
+  .cart::backdrop {
+    background: rgb(60 30 31 / 0.3);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+  }
+  /* A very brief fade as the cart opens (panel and blurred backdrop together). */
+  .cart[open], .cart[open]::backdrop { animation: cart-fade 140ms ease-out; }
+  @keyframes cart-fade { from { opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) {
+    .cart[open], .cart[open]::backdrop { animation: none; }
+  }
+  .cart__head { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-3); }
+  .cart__title { margin: 0; }
+  .cart__close { background: none; border: 0; font-size: 1.75rem; line-height: 1; cursor: pointer; color: var(--text-muted); padding: 4px 8px; }
+  .cart__sandbox {
+    background: var(--blush);
+    border-radius: var(--radius-md);
+    padding: var(--space-3);
+    font-size: var(--fs-small);
+    margin-bottom: var(--space-3);
+  }
+  .cart__lines { list-style: none; padding: 0; margin: 0; border-top: 1px solid var(--rule); }
+  .cart :global(.cart__line) {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    grid-template-areas: "item qty sum" "item remove remove";
+    gap: var(--space-1) var(--space-3);
+    align-items: center;
+    padding-block: var(--space-3);
+    border-bottom: 1px solid var(--rule);
+  }
+  .cart :global(.cart__item) { grid-area: item; min-width: 0; }
+  .cart :global(.cart__name) { margin: 0; font-weight: var(--weight-semibold); }
+  .cart :global(.cart__unit) { margin: 2px 0 0; font-size: var(--fs-small); color: var(--text-muted); }
+  .cart :global(.cart__qty) { grid-area: qty; display: inline-flex; align-items: center; gap: var(--space-2); }
+  .cart :global(.cart__qty button) {
+    width: 32px; height: 32px; border-radius: 50%;
+    border: 1px solid var(--color-border-strong); background: var(--bg-content);
+    font-size: 1.1rem; line-height: 1; cursor: pointer; color: var(--text-default);
+  }
+  .cart :global(.cart__qty span) { min-width: 1.5ch; text-align: center; font-weight: var(--weight-semibold); }
+  .cart :global(.cart__sum) { grid-area: sum; margin: 0; font-weight: var(--weight-semibold); text-align: right; min-width: 64px; }
+  .cart :global(.cart__remove) {
+    grid-area: remove; justify-self: end; background: none; border: 0; padding: 0;
+    font-size: var(--fs-small); color: var(--text-muted); text-decoration: underline; cursor: pointer;
+  }
+  .cart__empty { color: var(--text-muted); margin: var(--space-4) 0; }
+  .cart__empty[hidden], .cart__foot[hidden], .cart__error[hidden] { display: none; }
+  .cart__total { display: flex; justify-content: space-between; font-size: var(--fs-lead); margin: var(--space-4) 0 var(--space-1); }
+  .cart__note { font-size: var(--fs-small); color: var(--text-muted); margin: 0 0 var(--space-4); }
+  .cart__error { font-size: var(--fs-small); color: var(--color-primary); margin: 0 0 var(--space-3); }
+  .cart :global(.cart__checkout) { width: 100%; }
+  .cart :global(.cart__checkout:disabled) { opacity: 0.6; cursor: progress; }
+  .cart :global(.cart__qty button:focus-visible), .cart__close:focus-visible, .cart :global(.cart__remove:focus-visible) {
+    outline: 2px solid var(--focus-ring); outline-offset: 2px;
+  }
+
+  .shop-help { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-3); }
+  .shop-help p { color: var(--text-muted); line-height: var(--lh-body); }
+
+  @media (min-width: 640px) {
+    .shop-opt { grid-template-columns: 1fr auto auto; grid-template-areas: "text price action"; padding-block: var(--space-4); }
+    .shop-opt:has(.shop-voucher) { grid-template-columns: 1fr auto; grid-template-areas: "text action"; }
+    .shop-opt:has(.shop-voucher) .shop-opt__action { margin-top: 0; }
+    .shop-opt__price { text-align: right; }
+    .shop-opt__action { min-width: 92px; }
+  }
+  @media (min-width: 760px) {
+    .shop-prods { grid-template-columns: 1fr 1fr; }
+  }
+  @media (min-width: 860px) {
+    .shop-hero__grid { grid-template-columns: 1.1fr 0.9fr; }
+    .shop-hero__sprig { display: block; }
+    .shop-coll__grid { grid-template-columns: 0.85fr 1.15fr; }
+    .shop-coll :global(.shop-coll__frame) { aspect-ratio: 4 / 5; }
+    .shop-art :global(.shop-art__bloom) { width: 78%; }
+    .shop-coll__grid--flip { grid-template-columns: 1.15fr 0.85fr; }
+    .shop-coll__grid--flip .shop-coll__media { order: 2; justify-self: end; }
+  }
+</style>

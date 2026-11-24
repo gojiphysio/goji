@@ -53,7 +53,7 @@ echo "==> Deploying ${SERVICE}"
 gcloud run deploy "${SERVICE}" \
   --project="${PROJECT}" --region="${REGION}" --source="${HERE}" \
   --service-account="${SA}" \
-  --set-env-vars=GCP_PROJECT=${PROJECT},PLATO_DB=gojihealth,CORS_ORIGIN=${CORS_ORIGIN},WA_AGENT_URL=${WA_AGENT_URL} \
+  --set-env-vars=GCP_PROJECT=${PROJECT},PLATO_DB=gojihealth,CORS_ORIGIN=${CORS_ORIGIN},SHOP_PLATO_DOCTOR=SHP,WA_AGENT_URL=${WA_AGENT_URL} \
   --set-secrets="${SECRETS}" \
   --max-instances=1 --min-instances=0 \
   --allow-unauthenticated \

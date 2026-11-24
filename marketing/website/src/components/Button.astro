@@ -10,10 +10,14 @@
  *   outline and text, so the Book CTA stands out on linen next to WhatsApp).
  * - `berry` prepends the signature berry dot (ignored on the whatsapp variant,
  *   which shows the WhatsApp icon instead).
+ * - `as="button"` renders a <button> with the same look, for in-page actions
+ *   (shop "Add to cart", "Checkout"); other attributes (data-*, aria-*,
+ *   type) pass through.
  */
 import { cta, type CtaSlug } from "../lib/links.ts";
 
 interface Props {
+  as?: "a" | "button";
   slug?: CtaSlug;
   href?: string;
   variant?: "primary" | "secondary" | "ghost" | "whatsapp" | "light" | "book";
@@ -23,23 +27,27 @@ interface Props {
 }
 
 const {
+  as = "a",
   slug,
   href,
   variant = "primary",
   size = "md",
   berry = false,
   class: className = "",
-} = Astro.props;
+  ...rest
+} = Astro.props as Props & Record<string, unknown>;
 
 const url = slug ? cta(slug) : (href ?? "#");
 const external = url.startsWith("http");
 const isWhatsApp = variant === "whatsapp";
+const Tag = as;
+const linkAttrs = as === "a" ? { href: url, ...(external ? { target: "_blank", rel: "noopener" } : {}) } : { type: "button" };
 ---
 
-<a
+<Tag
   class:list={["btn", `btn--${variant}`, `btn--${size}`, className]}
-  href={url}
-  {...external ? { target: "_blank", rel: "noopener" } : {}}
+  {...linkAttrs}
+  {...rest}
 >
   {isWhatsApp && (
     <svg class="btn__wa-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -48,7 +56,7 @@ const isWhatsApp = variant === "whatsapp";
   )}
   {berry && !isWhatsApp && <span class="btn__berry" aria-hidden="true"></span>}
   <span class="btn__label"><slot /></span>
-</a>
+</Tag>
 
 <style>
   .btn {
