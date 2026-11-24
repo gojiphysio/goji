@@ -712,14 +712,14 @@ def check(e: Expect, p: Proposal | None, action: str, *, prior_agent: bool,
     for rx in e.must_not:
         if re.search(rx, r, re.I | re.S | re.M):
             f.append(f"has /{rx}/")
-    if e.max_questions is not None and r.count("?") > e.max_questions:
-        f.append(f"{r.count('?')} questions (max {e.max_questions})")
-    if e.max_words is not None and len(r.split()) > e.max_words:
-        f.append(f"{len(r.split())} words (max {e.max_words})")
-    # The greeting check reads what the customer gets: on a handover that's the
-    # holding reply, not the draft for Chris (a person joining may say hi).
+    # Length, question and greeting checks read what the customer gets: on a
+    # handover that's the holding reply, not the draft for Chris.
     to_customer = (p.holding_reply or "") if action == ESCALATE \
         and p.intent not in ("urgent", "sensitive") else r
+    if e.max_questions is not None and to_customer.count("?") > e.max_questions:
+        f.append(f"{to_customer.count('?')} questions (max {e.max_questions})")
+    if e.max_words is not None and len(to_customer.split()) > e.max_words:
+        f.append(f"{len(to_customer.split())} words (max {e.max_words})")
     if (e.no_greeting or prior_agent) and re.search(GREETING, to_customer, re.I):
         f.append("greets again mid-conversation")
     if e.no_link and re.search(BOOK_LINK, r):
