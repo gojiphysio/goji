@@ -13,6 +13,9 @@ preserves the existing girl and therapist, and tightens the PS2 standard for
 all NPCs. The [research and model comparison](skills/goji-gta-video/references/research-2026-11-24.md)
 includes Reddit reports and official model sources. The [production protocol](skills/goji-gta-video/references/production.md)
 contains the shot record, test criteria and revision rules.
+The [Blender staging contract](skills/goji-gta-video/references/blender-staging.md)
+and [editable shot template](skills/goji-gta-video/assets/shot-template.yaml)
+turn those decisions into a reusable scene and export record.
 
 ## What we keep and what we establish
 
@@ -25,6 +28,35 @@ character scale, reusable location layouts and camera marks. Every person must
 look like a character from the same PS2 game. The older interior reference has
 smoother rendering than the street scene; its character/clothing information is
 useful, but it is not an exemption from the stricter shared style.
+
+## Blender workflow now chosen
+
+The user prefers low-poly 3D staging. Build a small recurring cast and set kit,
+then animate each scene from those assets. The model comparison runs separately
+in `local-benchmark/`; a taxi interaction there is a technical test inspired by
+Episode 1, not the chosen Episode 2 story. Its proxy characters do not establish
+new canonical faces, and this workflow document does not claim benchmark results.
+
+The first asset pass should solve appearance and reuse in this order:
+
+1. **Cast lineup:** GG-01, GP-01 and one needed NPC together under neutral light.
+   Match the inherited identities, relative scale, painted detail and PS2 shading.
+   Save front, rear and three-quarter views from the same assets.
+2. **One exterior set:** reusable road, kerb, sheltered walkway and entrance;
+   establish camera marks and a reverse view of the same layout. Extend it only
+   as shots require. Keep illustrative geography labelled.
+3. **One interaction:** stage the full action with visible contact and release,
+   fixed prop ownership and a settled endpoint. Validate its timing before
+   building a longer sequence around it.
+4. **Look and export preset:** record the actual camera projection, light,
+   materials and colour transform. Produce a clean opening look frame and only
+   the aligned control passes supported by the selected renderer.
+
+Review gates are quality checks, not repeated permission requests. A motion
+blockout can proceed with clearly labelled proxies; final identity/style review
+needs the reviewed cast. Keep direct Blender output available for interactions
+whose rigid geometry remains unreliable in generation. Model choice can change
+without rebuilding the cast, set or timed action.
 
 ## Working Episode 2 concept
 
@@ -46,7 +78,8 @@ force a 32-second single take or pad an action to meet a model's duration ceilin
 
 ## Pilot before episode production
 
-No pilot results exist yet. These are the next measurable experiments.
+The original chat owns the current local-model pilot and its take log. The tests
+below are proposed follow-on coverage; no passing results are asserted here.
 
 **T01 — 8-second walk and occlusion.** Girl, two differently dressed NPCs,
 fixed rear-follow camera, then stop. All faces, bodies and extras retain the
@@ -67,17 +100,22 @@ Record longest usable take, total attempts, wall time, hands-on repair and cost
 per accepted second. Two initial takes per candidate expose some repeatability;
 they are a pilot, not statistically conclusive benchmarking.
 
-## Candidate order and practical constraints
+## Model testing and practical constraints
 
-1. **LTX-2.5** is the installed local baseline. Recover exact runtime/settings;
-   do not assume official ComfyUI controls exist in the MLX adapter.
-2. **MiniMax H3** is the first local alternative to inspect. Verify memory,
-   model weights and reference modes on this machine before large downloads.
-3. **Seedance 2.5 or Kling 3.0 Omni** is the paid comparison if the local route
-   fails the required continuity/style test. Seedance's documented longer
-   duration makes it the first long-scene candidate; Kling's cast/storyboard
-   controls make it a useful two-character candidate. Confirm actual access and
-   an experiment cost cap before rendering. No paid run is authorised by this plan.
+The active local comparison covers LTX-2.5, Wan and MiniMax H3 subject to verified
+runtime feasibility. The model-testing chat owns downloads, credentials, exact
+profiles, inference and measured results; this workflow chat should not duplicate
+those jobs. H3 access has been enabled for the approved Singapore-based test.
+
+Keep a common-first-frame baseline separate from each model's native-control
+track. Start with a complete action inside the practical shared native duration,
+then test longer scenes and continuation. Record exact model/runtime revisions,
+resolution, native FPS and supplied controls. A proxy-based pilot measures
+structural feasibility and appearance stability, not final cast fidelity.
+
+Paid models remain possible later if local results fail the required action;
+no paid generation is authorised by this plan. Use the research as a dated
+candidate list and verify current access, controls and cost before any such run.
 
 Do not run every model in the catalogue. If no candidate preserves rigid
 geometry, use a small reusable low-poly 3D scene and render that action directly
@@ -87,9 +125,10 @@ shot requirement, not build an entire virtual city.
 ## Ready now / still to do
 
 - Ready: research, reusable skill, recovered reference PNGs with hashes, cast and
-  world bible, proposed cameras, test scenarios and acceptance criteria.
+  world bible, proposed cameras, Blender staging/export contract, editable shot
+  record, test scenarios and acceptance criteria.
 - Still to do: final Episode 2 premise; reviewed turnarounds/NPC lineup and set
-  masters; timed animatic; access/memory checks and actual model tests; final footage.
+  masters; episode-specific timed animatic; completed model comparison and final footage.
 - Nothing has been posted to Instagram. No video-generation credit was spent.
 
 The source skill lives in `marketing/video-production/skills/goji-gta-video/`.

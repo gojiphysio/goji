@@ -15,6 +15,9 @@ is not proof of a coherent scene; a seed or repeated description is not an ident
   existing character references, the PS2 standard, and proposed camera presets.
 - Read [production.md](references/production.md) when planning or making footage;
   it includes the shot record, continuity gates, and revision procedure.
+- Read [blender-staging.md](references/blender-staging.md) when building or reusing
+  3D assets, cameras, animatics or control exports. Copy its shot template when
+  an existing job format does not already record those details.
 - Read [research-2026-11-24.md](references/research-2026-11-24.md) when comparing
   models or changing the workflow. Recheck dated capabilities on the exact runtime.
 - Read the target repository's `AGENTS.md` and `marketing/AGENTS.md`. For
@@ -46,6 +49,8 @@ into approved series canon.
 4. Make a timed animatic. For difficult contacts, vehicles or exact camera paths,
    use a simple 3D blockout or driving performance. Validate geometry and motion
    in the guide before paying for, or waiting on, generation.
+   Keep blockout proxies distinct from reviewed cast/look assets. A first-frame
+   video test inherits the proxy's appearance; it cannot establish final cast quality.
 
 ## Choose the control and model
 

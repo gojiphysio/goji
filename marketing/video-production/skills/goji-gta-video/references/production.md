@@ -15,12 +15,13 @@ been rendered.
 4. **Look:** how everything is rendered and graded. Validate every person and
    material against the series look, not only the lead's face.
 
-For this series, a small reusable Blender set and rigged low-poly characters
-are a credible long-term investment. They can supply exact camera/pose/depth
-guides, or finished shots when geometry must stay exact. This is a proposed
-hybrid approach, not an existing asset library. Start with the hard set/action,
-not a full model of Singapore. Check installed tools and asset licences before
-implementation. Use original or appropriately licensed assets.
+The user has chosen low-poly Blender staging as the preferred foundation.
+Use a small reusable set and rigged characters to supply camera/pose/depth guides,
+or finished shots when geometry must stay exact. A benchmark blockout is not a
+reviewed cast library. The [Blender staging contract](blender-staging.md) defines
+asset versions, camera calibration, action contacts and export records. Start
+with the repeated hard set/action, not a full model of Singapore. Use original
+or appropriately licensed assets.
 
 ## Stage gates
 
@@ -41,6 +42,9 @@ include cuts, which does not meet a single-take test.
 
 Store a record alongside every rendered take, using JSON/YAML or the existing
 job format. Unknown values remain explicit rather than being invented.
+For Blender work, start with the [shot template](../assets/shot-template.yaml)
+and add the generation/evaluation fields below. It is a planning record, not
+a renderer command or a claim that listed controls are supported.
 
 ```yaml
 shot_id: EP02-T01
@@ -141,12 +145,20 @@ models. Disable or inspect prompt enhancement when it adds modern realism.
 
 ## Model comparison that measures production value
 
-Use identical approved assets and action requirements, but native controls for
-each candidate. Record unsupported inputs instead of simulating them with prose.
-First run a common 8-second single-take test. Then test 15 seconds, and 20–30
-seconds only on models/modes that support it (native and extended results must
-be labelled separately). Keep framing and comparable output resolution stable;
-retain native FPS and compare in seconds. Do not hide discarded attempts.
+Separate two questions: how models perform on the same inputs, and how well each
+can use our production controls. For the common-input track, use the same staged
+opening frame, action and camera requirement. For the controlled track, use each
+runtime's supported guides and record the extra inputs. A guided take must not
+be presented as an equal-input win over an unguided take. Record unsupported
+inputs instead of simulating them with prose.
+
+Use the shortest practical shared native duration for the baseline (for example,
+about five seconds); choose a complete action that fits. Do not stretch a model
+beyond its recommended native window just to reach eight seconds. Then test a
+longer action and continuation on passing modes. Label native generation and
+extension separately, keep framing and comparable output resolution stable,
+retain native FPS and compare in seconds. A small draft canvas is a feasibility
+test; do not generalise its ranking to presentation-quality output. Keep all takes.
 
 Default pilot: at most three candidates, two takes per candidate for the first
 test, then advance only those passing the style gate. The next tests cover
@@ -169,6 +181,9 @@ Proposed acceptance: at least 10/12, with 2/2 for cast, all-human style and
 structure; also the **entire required action** must be usable. An 8-second file
 with 2 good seconds fails an 8-second take requirement. These are project
 thresholds, not a scientific benchmark. Log human judgment and failure timecodes.
+If the source uses unreviewed proxy characters, mark canonical cast fidelity
+as **not assessed** and do not report a final production-pass score. Appearance
+stability relative to a proxy is still useful diagnostic evidence.
 
 Track usable seconds / generated seconds, longest coherent take, attempts per
 accepted shot, total wall time and hands-on repair time. Cost per accepted second

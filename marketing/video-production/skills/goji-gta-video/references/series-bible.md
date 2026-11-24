@@ -74,6 +74,8 @@ of feeding contradictory faces into the renderer. No such new sheets exist yet.
 For each reused place: empty set master, useful reverse angle, simple top-down
 layout, entrances, furniture, prop positions, sun/light direction, and camera
 marks. Define what is actual-photo-derived and what is fictional staging.
+The [Blender staging contract](blender-staging.md) records these as reusable,
+versioned assets and separates motion proxies from reviewed appearance references.
 
 ## Singapore world and colour
 
