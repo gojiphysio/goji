@@ -1,8 +1,28 @@
-# Go-live runbook (status: handoff review merged 23 Nov 2026; next is connecting the number)
+# Go-live runbook (status: LIVE since 24 Nov 2026, 09:50 SGT)
 
 Where things stand, and the steps left to put the assistant on Goji's real
 number. Design detail lives in [`README.md`](README.md); this file is the
 checklist. Update the status line and tick items as they're done.
+
+## Live (24 Nov 2026)
+
+- Number connected through Dualhook (`WA_API_BASE=https://api.dualhook.com/v25.0`,
+  phone number id `1010651355469604`), history shared and imported, payment
+  method on the WhatsApp account. Booking dry run off, stage 2.
+- Echo test passed (Chris's Business-app message arrived in 2.7 s and paused
+  the chat). Rehearsal from a non-staff phone: greeting, service fit,
+  packages, a real booking and "is Chris around?", all answered.
+- Templates submitted on the real account 24 Nov, pending at go-live. Until
+  `goji_staff_alert_v2` is approved, pings reach staff only inside the 24 h
+  window: each staff phone texts the Goji number once a day.
+- Learned on the day: a tester number does NOT bypass the kill switch or
+  "not live" (it only unlocks `/reset` and `/turbo`), so the real-number
+  rehearsal happens after go-live. Staff numbers are never customers, so
+  rehearse from a phone that isn't in `WA_AGENT_STAFF`. Commands only count
+  from a staff phone to the Goji number.
+- Open: Meta sends history in phases and `progress` reaches 100 per phase;
+  `handle_history` marks the import done at the first 100. Wait for the
+  history traffic to stop before go-live until that's fixed.
 
 ## Done
 
