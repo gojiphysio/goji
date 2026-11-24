@@ -1,0 +1,26 @@
+[
+  {
+    "asset": "../assets/ep01-street.png",
+    "sha256": "396698cd2396bf7897d95fae1bb572b5ca67b41d17cfcae2a06c1496dd8d53e9",
+    "source_repository": "https://github.com/gojiphysio/goji",
+    "source_commit": "779152daf04317c762331d19827d62da3e0e2315",
+    "source_path": "marketing/assets/goji-reel-prototype/animation-v6/assets/01-swagger.png",
+    "role": "recovered Episode 1 reference; not a new approved turnaround"
+  },
+  {
+    "asset": "../assets/ep01-reception.png",
+    "sha256": "fc4c68ddc41bb6f73092de7e5e743271b78d757433b10a885a423708caaa83f5",
+    "source_repository": "https://github.com/gojiphysio/goji",
+    "source_commit": "779152daf04317c762331d19827d62da3e0e2315",
+    "source_path": "marketing/assets/goji-reel-prototype/animation-v8/assets/07-entry.png",
+    "role": "recovered Episode 1 reference; not a new approved turnaround"
+  },
+  {
+    "asset": "../assets/ep01-therapist-back.png",
+    "sha256": "b69e2e40d1f86b6f00c0e0ff490377d83da82f2a216b6cf5184eef954e0dd6a2",
+    "source_repository": "https://github.com/gojiphysio/goji",
+    "source_commit": "779152daf04317c762331d19827d62da3e0e2315",
+    "source_path": "marketing/assets/goji-reel-prototype/final-scene-v9/assets/09-squat-plain-back.png",
+    "role": "recovered Episode 1 reference; not a new approved turnaround"
+  }
+]
