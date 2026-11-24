@@ -14,7 +14,10 @@ from datetime import datetime
 from .policy import HUMAN, SGT, WAITING, WATCHLIST, ChatState
 from .staff import label
 
-ANSWERED = ("answered", "link sent", "booked", "moved")
+# Chris sent the team's answer through the assistant (app._staff_answer). A
+# full answer counts as the team replying; a partial one leaves the chat waiting.
+TEAM_ANSWER, TEAM_PARTIAL = "team's answer passed on", "team's answer passed on, part still open"
+ANSWERED = ("answered", "link sent", "booked", "moved", TEAM_ANSWER, TEAM_PARTIAL)
 LEFT = ("handed over", "left", "drafted")
 FAILED = ("failed",)
 OFF_TOPIC = ("off-topic", "off-topic, no reply", "watch-listed")  # digest only, never a ping
@@ -42,7 +45,9 @@ def left_for_chris(state: ChatState, since: float) -> bool:
     latest = max((o["at"] for o in left), default=0.0)
     if _waiting(state):
         latest = max(latest, state.mode_since)
-    return bool(latest) and state.last_staff_at < latest
+    replied = max([state.last_staff_at] + [o.get("at", 0) for o in state.outcomes
+                                           if o.get("outcome") == TEAM_ANSWER])
+    return bool(latest) and replied < latest
 
 
 def waiting_for_chris(chats: list[ChatState], since: float) -> list[str]:

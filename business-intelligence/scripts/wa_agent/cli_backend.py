@@ -45,17 +45,21 @@ hello@gojiphysio.com.
 """
 
 ROLE_LABELS = {"customer": "Customer", "agent": "Goji assistant (you)",
-               "staff": "Chris from Goji (a person)"}
+               "staff": "Chris from Goji (a person)",
+               "team": "The team's answer, which you passed on next (not seen by the customer)"}
 
 
 def render_transcript(history: list[dict], now: float, customer_name: str = "",
-                      pending_for_chris: str = "", patient: str = "") -> str:
-    from .agent import context_note
+                      pending_for_chris: str = "", patient: str = "",
+                      team_answer: str = "") -> str:
+    from .agent import context_note, relay_note
     lines = [f"{ROLE_LABELS.get(h['role'], h['role'])}: {h['text']}"
              for h in history[-config.HISTORY_MESSAGES:]]
-    return ("WhatsApp conversation so far (oldest first). Write the next reply to the "
-            "customer's latest message.\n\n" + "\n".join(lines) +
-            context_note(now, customer_name, pending_for_chris, patient))
+    return ("WhatsApp conversation so far (oldest first). "
+            + ("Write your next message to the customer." if team_answer else
+               "Write the next reply to the customer's latest message.") + "\n\n"
+            + "\n".join(lines) + context_note(now, customer_name, pending_for_chris, patient)
+            + (relay_note(team_answer) if team_answer else ""))
 
 
 def build_command(prompt: str, sys_prompt_file: str, mcp_config_file: str,
@@ -106,7 +110,8 @@ def parse_stream(stdout: str) -> dict:
 
 
 def propose(history: list[dict], *, wa_id: str, now: float, customer_name: str = "",
-            runner=subprocess.run, pending_for_chris: str = "", patient: str = ""):
+            runner=subprocess.run, pending_for_chris: str = "", patient: str = "",
+            team_answer: str = ""):
     """Same contract as agent.propose: never raises, failures escalate."""
     from .agent import INSTRUCTIONS, PROPOSAL_SCHEMA, AgentResult, Step, _escalation
     from .tools import TOOL_DEFS
@@ -121,7 +126,8 @@ def propose(history: list[dict], *, wa_id: str, now: float, customer_name: str =
             mcp_file = os.path.join(tmp, "mcp.json")
             Path(mcp_file).write_text(json.dumps(mcp_config(wa_id)))
             cmd = build_command(render_transcript(history, now, customer_name,
-                                                  pending_for_chris, patient), sys_file,
+                                                  pending_for_chris, patient, team_answer),
+                                sys_file,
                                 mcp_file, PROPOSAL_SCHEMA, [t["name"] for t in TOOL_DEFS])
             proc = runner(cmd, cwd=tmp, stdin=subprocess.DEVNULL, capture_output=True,
                           text=True, timeout=config.CLI_TIMEOUT_S)

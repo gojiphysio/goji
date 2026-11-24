@@ -1,6 +1,12 @@
 """
 Staff on their personal WhatsApp: short pings when a chat needs them, and
-text commands: stop / start / status, and resume / pause <chat code>.
+text commands: stop / start / status, resume / pause <chat code>, and
+answer <chat code> <the team's answer>.
+
+The team's answer (owner, 24 Nov 2026): Chris swipe-replies to a ping with
+the answer, or texts "answer 004 ...". The agent writes it up in its own
+voice, sends it, hands the chat back to itself and shows her what it sent
+(app._staff_answer). Any chat, any mode: it is her explicit instruction.
 
 Every chat has a short code ("004") shown in pings, the status reply and the
 morning summary. Chris writing in a chat pauses the agent there; "resume 004"
@@ -23,7 +29,9 @@ import re
 STAFF_WINDOW_S = 23 * 3600  # Meta's window is 24h; keep a margin
 PARAM_MAX = 150             # the template's one parameter
 
-HELP = ("Goji assistant: RESUME 004 hands chat #004 back to the assistant (it won't "
+HELP = ("Goji assistant: swipe-reply to one of my pings with the team's answer (or text "
+        "ANSWER 004 and the answer) and I'll pass it on and look after the chat again. "
+        "RESUME 004 hands chat #004 back to the assistant (it won't "
         "message them, it just answers their next message; a chat you wrote in comes back "
         "by itself if they write 2 weeks after your last message), PAUSE 004 silences it in "
         "that chat for good, STOP pauses it in every chat, START turns it back on, STATUS "
@@ -40,13 +48,16 @@ WELCOME = (
     "2. When a chat needs you, I message you here, e.g. \"Mei (#004) needs you: ...\". "
     "I've already told them the team will get back to them. The email has my suggested "
     "reply: fill in anything in [brackets], then send it from the WhatsApp Business app.\n"
-    "3. As soon as you write in a chat, I go quiet there until you hand it back. If the "
-    "customer writes again 2 weeks or more after your last message, I pick it up.\n"
-    "4. To hand a chat back, text RESUME and its number, e.g. RESUME 004. I won't "
-    "message the customer; I'll just answer their next message.\n"
-    "5. PAUSE 004 keeps me out of one chat for good. STOP pauses me in every chat, START turns me "
-    "back on.\n"
-    "6. Every morning at 7:30 there's an email summary, including the chats waiting for "
+    "3. Once you have the answer, swipe-reply to my ping with it (or text ANSWER 004 and "
+    "the answer). I'll write it up, send it to the customer, show you what I sent and "
+    "look after the chat again.\n"
+    "4. As soon as you write in a chat yourself, I go quiet there until you hand it back. "
+    "If the customer writes again 2 weeks or more after your last message, I pick it up.\n"
+    "5. To hand a chat back without a message, text RESUME and its number, e.g. RESUME "
+    "004. I won't message the customer; I'll just answer their next message.\n"
+    "6. PAUSE 004 keeps me out of one chat for good. STOP pauses me in every chat, START "
+    "turns me back on.\n"
+    "7. Every morning at 7:30 there's an email summary, including the chats waiting for "
     "you to resume and any spam numbers I've stopped answering. STATUS here shows the "
     "same any time.\n\n"
     "Text STATUS now to try it."
@@ -107,6 +118,38 @@ def parse_command(text: str) -> tuple[str, str]:
         digits = next((w for w in words[1:] if w.isdigit()), "")
         return (word, f"{int(digits):03d}") if digits else ("help", "")
     return (word if word in ("stop", "start", "status") else "help"), ""
+
+
+_ANSWER = re.compile(r"^\s*answer\s*(?:chat\s*)?#?\s*(\d+)\b[\s:,.\-]*(.*)$", re.I | re.S)
+_ONE_WORD = re.compile(r"^\s*(stop|start|status|help|resume|pause)\s*[.!]*\s*$", re.I)
+
+
+def parse_answer(text: str) -> tuple[str, str] | None:
+    """"ANSWER 004 yes, Sat 10am is fine" -> ("004", "yes, Sat 10am is fine"),
+    keeping the answer exactly as written. None if it isn't an answer command;
+    ("004", "") for an answer with no text."""
+    m = _ANSWER.match(text or "")
+    return (f"{int(m.group(1)):03d}", m.group(2).strip()) if m else None
+
+
+def bare_command(text: str) -> str:
+    """A swipe-reply to a ping that is just a command word ("resume", "stop")
+    is that command, not an answer to pass on: the word, lowercased, or ""."""
+    m = _ONE_WORD.match(text or "")
+    return m.group(1).lower() if m else ""
+
+
+def answer_sent_text(who: str, reply: str, still_open: str = "") -> str:
+    head = f"Sent to {who}:\n\n{reply}\n\n"
+    if still_open:
+        return head + (f"They're still waiting on: {redact(still_open)}. I'll keep answering "
+                       f"everything else; swipe-reply again when you have it.")
+    return head + "I'm looking after the chat again."
+
+
+def answer_refused_text(who: str, why: str) -> str:
+    return (f"I didn't send anything to {who}: {why.rstrip('. ')}. Please reply in the "
+            f"Business app, or send the answer again.")
 
 
 def status_text(*, kill: bool, rollout: dict, waiting: list[str],

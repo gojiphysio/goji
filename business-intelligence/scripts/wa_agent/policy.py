@@ -524,6 +524,15 @@ def with_team_line(reply: str) -> str:
     return f"{first}\n\n{TEAM_LINE}" + (f"\n\n{rest}" if rest else "")
 
 
+CUSTOMER_WINDOW_S = 23 * 3600  # Meta's free-form window is 24h; keep a margin
+
+
+def customer_window_open(state: ChatState, now: float) -> bool:
+    """May the API send this customer free-form text? Only within 24h of their
+    last message; after that only a template, or Chris in the Business app."""
+    return bool(state.last_customer_at) and now - state.last_customer_at < CUSTOMER_WINDOW_S
+
+
 def human_replied_since(state: ChatState, since: float) -> bool:
     """The pre-send re-check: did a human write in this chat after `since`?
     (`waiting` doesn't count: Chris hasn't written yet.)"""

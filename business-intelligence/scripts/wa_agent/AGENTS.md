@@ -114,6 +114,18 @@ The WhatsApp assistant. What it is and how to run it: [`README.md`](README.md).
   their next message (`policy.pre_golive_chat`). Any new path that messages a
   customer (confirmations, reminders, pings) checks the kill switch, go-live
   and the chat's mode first.
+- **The team's answer goes through the agent.** Chris swipe-replies to a
+  ping with the answer (the ping's message id maps to the chat for 7 days,
+  `<collection>_pings`), or texts `ANSWER 004 ...`. The agent passes it on in
+  its own voice (`agent.relay_note`), sends it and takes the chat back, then
+  shows her what it sent (`app._staff_answer`; owner, 24 Nov 2026). Any mode,
+  red flags included: it's her explicit call. Never past the kill switch,
+  before go-live, or outside the customer's 24h window. Nothing is sent if
+  the model says it isn't an answer for that chat or the write-up fails
+  `reply_problems`; a partial answer leaves the rest `waiting`. Only pings
+  about a named chat are mapped, so a swipe-reply can't reach the wrong
+  customer. The answer is kept as a `team` history line for follow-ups.
+  Check prompt changes with `python -m wa_agent.eval.relay` on the CLI.
 - **Staff numbers are never customers.** `WA_AGENT_STAFF` messages go to
   `handle_staff` before any lookup, model call or metric; the numbers live in
   a private env file, never the repo. Pings name customers by first name or
