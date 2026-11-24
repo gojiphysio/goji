@@ -26,6 +26,8 @@ import threading
 import time
 from collections import deque
 
+from .plato import one_record
+
 log = logging.getLogger("goji-booking")
 
 # At most this many patients per webhook delivery: a staff action is one
@@ -186,13 +188,11 @@ def refresh(plato, bq, table: str, ids: list[str]) -> int:
         except Exception as e:
             log.warning("plato webhook: patient read failed: %s", e)
             continue
-        # Plato answers GET /patient/{id} with a one-item list (24 Nov 2026).
-        if isinstance(p, list):
-            p = p[0] if len(p) == 1 else None
-        if not isinstance(p, dict):
+        patient = one_record(p)
+        if patient is None:
             log.warning("plato webhook: unexpected patient response (%s)", type(p).__name__)
             continue
-        if upsert(bq, table, from_plato(pid, p)):
+        if upsert(bq, table, from_plato(pid, patient)):
             written += 1
     if skipped:
         log.info("plato webhook: %d patient(s) over the read cap, left to the nightly rebuild",

@@ -17,7 +17,7 @@ class FakePlato:
 
     def get(self, path, params=None, **_):
         assert path == "/patient/p1"
-        return self.patient
+        return [self.patient]  # Plato wraps a read by id in a one-item list
 
     def put(self, path, payload):
         self.puts.append((path, payload))
@@ -75,3 +75,21 @@ def test_a_write_plato_drops_is_an_error(monkeypatch):
     monkeypatch.setattr(app_mod, "plato", lambda: fake)
     r = _tag(app_mod.app.test_client())
     assert r.status_code == 502 and r.get_json()["code"] == "tag_not_saved"
+
+
+@pytest.mark.parametrize("answer", [[], [{"_id": "p1"}, {"_id": "p2"}], None, "oops"])
+def test_an_unexpected_read_is_an_error_not_a_crash(setup, answer):
+    c, fake = setup
+    fake.get = lambda path, params=None, **_: answer
+    r = _tag(c)
+    assert r.status_code == 502 and r.get_json()["code"] == "plato_error"
+    assert fake.puts == []
+
+
+def test_an_unexpected_read_back_is_an_error(setup):
+    c, fake = setup
+    answers = iter([[fake.patient], []])
+    fake.get = lambda path, params=None, **_: next(answers)
+    r = _tag(c)
+    assert r.status_code == 502 and r.get_json()["code"] == "plato_error"
+    assert len(fake.puts) == 1

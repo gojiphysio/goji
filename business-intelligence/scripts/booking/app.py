@@ -32,7 +32,7 @@ from flask import Flask, jsonify, request
 from .availability import SGT, derive_availability, derive_available_days
 from .booking import BookingError, create_booking, reschedule_appointment
 from .config import CLINICIANS, MAX_ADVANCE_DAYS, SAME_DAY_LEAD_MINUTES, SERVICES
-from .plato import PlatoBusy, PlatoClient, PlatoError, PlatoThrottled
+from .plato import PlatoBusy, PlatoClient, PlatoError, PlatoThrottled, one_record
 from . import mailer, patient_contacts
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
@@ -672,11 +672,15 @@ def internal_patient_tag():
     if not isinstance(dry_run, bool):
         return jsonify({"ok": False, "error": "dry_run must be a boolean.", "code": "invalid"}), 400
     try:
-        patient = plato().get(f"/patient/{patient_id}")
+        patient = one_record(plato().get(f"/patient/{patient_id}"))
     except Exception as e:
         log.warning("patient-tag: read failed for patient: %s", e)
         return jsonify({"ok": False, "error": "Couldn't read the patient.", "code": "plato_error"}), 502
-    current = _plato_tags((patient or {}).get("tag"))
+    if patient is None:
+        log.warning("patient-tag: unexpected patient response from Plato")
+        return jsonify({"ok": False, "error": "Couldn't read the patient.",
+                        "code": "plato_error"}), 502
+    current = _plato_tags(patient.get("tag"))
     if tag in current:
         return jsonify({"ok": True, "added": False, "dry_run": dry_run})
     if not dry_run:
@@ -685,12 +689,16 @@ def internal_patient_tag():
                         {"tag": [{"tag": t} for t in current + [tag]]})
             # Read back: on 19 Nov 2026 Plato answered this PUT without error
             # but kept no tags, so a write only counts once it's visible.
-            saved = _plato_tags((plato().get(f"/patient/{patient_id}") or {}).get("tag"))
+            saved = one_record(plato().get(f"/patient/{patient_id}"))
         except Exception as e:
             log.warning("patient-tag: write failed: %s", e)
             return jsonify({"ok": False, "error": "Couldn't update the patient.",
                             "code": "plato_error"}), 502
-        if tag not in saved:
+        if saved is None:
+            log.warning("patient-tag: unexpected patient response from Plato on read-back")
+            return jsonify({"ok": False, "error": "Couldn't confirm the tag was saved.",
+                            "code": "plato_error"}), 502
+        if tag not in _plato_tags(saved.get("tag")):
             log.warning("patient-tag: Plato accepted the write but the tag isn't there")
             return jsonify({"ok": False, "error": "Plato didn't save the tag.",
                             "code": "tag_not_saved"}), 502
