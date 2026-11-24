@@ -1,0 +1,21 @@
+{
+  "review_method": "Exact frames at 0,1,2,3,4,5 seconds. Full MP4 decoded and paired with the guide. Human normal-speed acceptance remains pending.",
+  "decision": "reject_required_action",
+  "accepted_complete_actions": 0,
+  "failures": [
+    {
+      "time_seconds": 1,
+      "finding": "Camera and relative building/car placement move despite locked-camera instruction."
+    },
+    {
+      "time_seconds": 2,
+      "finding": "Grey-clad person appears on pavement away from the door; the seated figure remains. Staged driver exit is not established."
+    },
+    {
+      "time_seconds": 5,
+      "finding": "Door/body/window geometry changes; two orange-clad figures are visible instead of one."
+    }
+  ],
+  "positive": "Broad low-poly human rendering persists in sampled frames.",
+  "limits": "Proxy faces; no claim about canonical cast likeness or long-clip capability."
+}

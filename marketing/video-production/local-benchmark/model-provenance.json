@@ -1,0 +1,28 @@
+[
+  {
+    "repo": "lightx2v/Wan2.2-Lightning",
+    "revision": "18bccf8884ec0a078eed79785eb4ef13ea16ce1e"
+  },
+  {
+    "repo": "AbstractFramework/wan2.2-i2v-a14b-diffusers-8bit",
+    "revision": "1a17fbea2649c576de844e08e79fe56296751efa",
+    "seconds": 383.73545479774475,
+    "shared_text_encoder": false
+  },
+  {
+    "repo": "AbstractFramework/wan2.2-ti2v-5b-diffusers-8bit",
+    "revision": "6875952a110b6bdbcfc00d72b1d89a8e02ab0fc3",
+    "seconds": 72.83305191993713,
+    "shared_text_encoder": true
+  },
+  {
+    "repo": "lightx2v/Minimax-h3-Turbo",
+    "revision": "ff0edf44b7a96e1b1b4a0c84287dfe9f6a7d133e",
+    "file": "minimax_h3_fl2v_turbo_8step_v1.0_bf16.safetensors"
+  },
+  {
+    "repo": "notapalindrome/ltx25-mlx-ditq8",
+    "revision_from_readme_cache": "0a005c82cf3fd9c49d28dc6c13bdc509b631107f",
+    "note": "Existing assembled local LTX pack; per-file HF cache metadata can differ for base components. Do not treat README revision as hash of whole folder."
+  }
+]

@@ -1,0 +1,43 @@
+{
+  "profile": "ltx-first",
+  "take": "01",
+  "prompt": "One continuous fixed-camera shot in a low-poly 2004 PlayStation 2 game, GTA San Andreas visual style, in Singapore. Preserve the supplied scene, its angular human meshes, simple painted faces, diffuse materials and warm hazy colour. The blue four-door taxi stays parked and rigid. The adult woman beside the taxi wears a maroon tank top and leggings, white trainers, a long black ponytail, and carries one black handbag in her left hand. She opens the taxi's near-side front driver door with her right hand and takes one step back while holding the door open. A separate adult male driver with short black hair, a grey shirt and grey trousers rises from that front seat, steps out through the open doorway, and walks forward alongside the car. The woman stays outside beside the open door. In the background the bob-haired woman in black stands at the yellow clinic entrance marker, and the orange-clad pedestrian walks along the pavement. Every foreground and background person keeps the same low-poly PS2 game appearance. All four people remain distinct with unchanged clothing. The car door rotates around its front hinge and stays open after the driver exits. Static elevated rear-right camera, constant focal length, stable sunlight and buildings, no cut, no camera motion, no photorealistic humans.",
+  "command": [
+    "/Users/tidepool/Projects/goji-video-engine/.venv/bin/python",
+    "/Users/tidepool/Projects/goji-reel-animation-v6/scripts/ltx25_community_adapter.py",
+    "generate",
+    "--model",
+    "/Users/tidepool/Models/ltx-2.5-mlx-q8",
+    "--distilled",
+    "--prompt",
+    "One continuous fixed-camera shot in a low-poly 2004 PlayStation 2 game, GTA San Andreas visual style, in Singapore. Preserve the supplied scene, its angular human meshes, simple painted faces, diffuse materials and warm hazy colour. The blue four-door taxi stays parked and rigid. The adult woman beside the taxi wears a maroon tank top and leggings, white trainers, a long black ponytail, and carries one black handbag in her left hand. She opens the taxi's near-side front driver door with her right hand and takes one step back while holding the door open. A separate adult male driver with short black hair, a grey shirt and grey trousers rises from that front seat, steps out through the open doorway, and walks forward alongside the car. The woman stays outside beside the open door. In the background the bob-haired woman in black stands at the yellow clinic entrance marker, and the orange-clad pedestrian walks along the pavement. Every foreground and background person keeps the same low-poly PS2 game appearance. All four people remain distinct with unchanged clothing. The car door rotates around its front hinge and stays open after the driver exits. Static elevated rear-right camera, constant focal length, stable sunlight and buildings, no cut, no camera motion, no photorealistic humans.",
+    "--width",
+    "576",
+    "--height",
+    "1024",
+    "--frames",
+    "121",
+    "--frame-rate",
+    "24",
+    "--seed",
+    "1017",
+    "--no-audio",
+    "--output",
+    "/Users/tidepool/.codex/worktrees/goji-video-workflow/goji/marketing/video-production/local-benchmark/results/ltx-first-01/raw.mp4",
+    "--image",
+    "/Users/tidepool/.codex/worktrees/goji-video-workflow/goji/marketing/video-production/local-benchmark/staging/frame-0001.png",
+    "0",
+    "1"
+  ],
+  "inputs": {
+    "staging/frame-0001.png": "62acbd3b5e7541546b1a18f44ab4366c9762f2b1db2ee783ca615f2eb208f88f"
+  },
+  "machine": "macOS-27.0-arm64-arm-64bit-Mach-O",
+  "started_utc": "2026-11-24T07:04:37Z",
+  "api_spend": 0,
+  "status": "complete",
+  "exit_code": 0,
+  "wall_seconds": 141.962,
+  "max_rss_bytes": 20456013824,
+  "output_sha256": "0c8b95c18e0d31112e997ae7331e714b08e6468765a27c93f537985f86d5b92d"
+}
