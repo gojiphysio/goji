@@ -39,8 +39,9 @@ const jdHtml = [
       (v.additionalResponsibilities.note ? `<p>${esc(v.additionalResponsibilities.note)}</p>` : "")
     : "",
   `<h2>What we're looking for</h2>${list(v.requirements)}`,
-  `<p>${esc(v.preferred.intro)}</p>${list(v.preferred.items)}`,
-  `<h2>What we offer</h2>${list(v.benefits)}`,
+  `<h3>Preferred skills and experience</h3><p>${esc(v.preferred.intro)}</p>${list(v.preferred.items)}`,
+  `<h2>What we offer</h2><h3>Compensation and benefits</h3>${list(v.benefits)}`,
+  `<h3>Clinical and career development</h3>${list(v.development)}`,
   `<h2>Working arrangements</h2>${list(v.workingArrangements)}`,
 ].join("");
 
@@ -192,11 +193,15 @@ const facts = [
 
         <h2>What we're looking for</h2>
         <ul>{v.requirements.map((i) => <li>{i}</li>)}</ul>
+        <h3>Preferred skills and experience</h3>
         <p>{v.preferred.intro}</p>
         <ul>{v.preferred.items.map((i) => <li>{i}</li>)}</ul>
 
         <h2>What we offer</h2>
+        <h3>Compensation and benefits</h3>
         <ul>{v.benefits.map((i) => <li>{i}</li>)}</ul>
+        <h3>Clinical and career development</h3>
+        <ul>{v.development.map((i) => <li>{i}</li>)}</ul>
 
         <h2>Working arrangements</h2>
         <ul>{v.workingArrangements.map((i) => <li>{i}</li>)}</ul>
@@ -205,6 +210,10 @@ const facts = [
           open && (
             <Fragment>
               <h2>How to apply</h2>
+              <p>
+                If you are passionate about delivering excellent clinical care and excited to be part of a growing,
+                collaborative practice, we would love to hear from you.
+              </p>
               <p>
                 Apply online below with your CV and a short introduction. There's no account to create. If you
                 have any trouble with the form, email your CV to <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.

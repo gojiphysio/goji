@@ -51,7 +51,10 @@ export interface Vacancy {
   additionalResponsibilities?: { heading: string; items: string[]; note?: string };
   requirements: string[];
   preferred: { intro: string; items: string[] };
+  /** "Compensation & Benefits" in the doc. */
   benefits: string[];
+  /** "Clinical & Career Development" in the doc. */
+  development: string[];
   workingArrangements: string[];
   /** ISO date the role was first published (JobPosting datePosted). */
   datePosted: string;
@@ -77,47 +80,66 @@ export interface Vacancy {
 // (title, minimum experience, introduction, senior responsibilities) lives on
 // each entry below.
 
-/** Core responsibilities: PENDING the approved Google Doc.
- *  The doc (1ydDEFBnjAtjUA7ku7YQmkdigynp8JiEtmoC7vpdi-TE) could not be opened
- *  from the connected Drive account when this page was built. Paste its
- *  "Responsibilities" bullets here verbatim before launch. The section is
- *  hidden while the list is empty; we do not publish a substitute. */
-const PHYSIO_RESPONSIBILITIES: string[] = [];
+/** Core responsibilities, verbatim from the approved job description
+ *  (Google Doc 1ydDEFBnjAtjUA7ku7YQmkdigynp8JiEtmoC7vpdi-TE, text supplied by
+ *  the owner 2026-11-24). Shared by both seniority levels. */
+const PHYSIO_RESPONSIBILITIES: string[] = [
+  "Conduct comprehensive physiotherapy assessments and deliver individualised, evidence-based treatment and rehabilitation programmes.",
+  "Independently manage and develop a patient caseload, with a primary focus on musculoskeletal conditions.",
+  "Deliver patient education, manual therapy, exercise prescription and other appropriate treatment modalities.",
+  "Conduct home visits where clinically appropriate.",
+  "Maintain accurate and timely clinical documentation.",
+  "Collaborate with fellow clinicians, referring doctors and other healthcare professionals to optimise patient outcomes.",
+  "Participate in regular clinical discussions, case reviews and knowledge-sharing sessions.",
+  "Contribute to the growth of the practice through service development, professional networking, educational workshops and community initiatives.",
+  "Uphold high standards of clinical care, professionalism and patient experience.",
+];
 
+/** The doc says "Minimum 3-5 years"; the amendment splits it by level. */
 const physioRequirements = (minYears: number): string[] => [
-  "BSc or Masters qualification in Physiotherapy",
-  "Full AHPC registration and a valid Practising Certificate",
-  `A minimum of ${minYears} years of post-qualification clinical physiotherapy experience`,
-  "Strong competency in musculoskeletal physiotherapy",
-  "Clinical experience or interest in women's health",
+  "BSc/Masters qualification in Physiotherapy.",
+  "Full registration with the Allied Health Professions Council (AHPC), Singapore, and a valid Practising Certificate.",
+  `Minimum ${minYears} years of post-qualification clinical physiotherapy experience.`,
+  "Strong clinical competency in musculoskeletal assessment, treatment and rehabilitation.",
+  "Ability to independently manage and develop a patient caseload.",
+  "Excellent communication and interpersonal skills.",
+  "A collaborative, proactive and patient-centred approach to care.",
+  "Commitment to continuous professional development.",
 ];
 
 const PHYSIO_PREFERRED = {
-  intro: "Advantageous, but not required:",
+  intro: "The following would be advantageous but are not mandatory:",
   items: [
-    "Clinical Pilates training",
-    "Mat or reformer Pilates training",
-    "Dry needling",
-    "Strength and conditioning",
-    "Sports rehabilitation",
-    "Private practice experience",
+    "Clinical experience or a keen interest in women's health, including pre- and post-natal rehabilitation and pelvic health.",
+    "Training or certification in Clinical Pilates, mat or reformer Pilates.",
+    "Training and experience in dry needling.",
+    "Training in strength and conditioning or sports rehabilitation.",
+    "Previous experience in private practice.",
   ],
 };
 
 const PHYSIO_BENEFITS = [
-  "Competitive base salary and revenue-based monthly commission",
-  "Annual revenue-based performance bonus",
-  "21 days of annual leave for full-time employees, excluding public holidays",
-  "Professional development allowance of up to S$1,000 per approved application, subject to eligibility",
-  "Company-sponsored professional liability insurance",
+  "Competitive base salary and revenue-based monthly commission.",
+  "Annual revenue-based performance bonus.",
+  "21 days of annual leave for full-time employees, excluding public holidays.",
+  "Professional development allowance of up to S$1,000 per approved application, subject to eligibility.",
+  "Company-sponsored professional liability insurance.",
+];
+
+const PHYSIO_DEVELOPMENT = [
+  "Clinical autonomy and opportunities to develop your areas of specialisation.",
+  "A collaborative clinical environment with regular case discussions and peer learning.",
+  "Well-equipped facilities with private treatment rooms, Pilates equipment and a dedicated rehabilitation and exercise space.",
+  "Opportunities to contribute to new clinical services, corporate programmes and community initiatives.",
+  "Opportunities for career progression and leadership responsibilities as the practice expands.",
 ];
 
 const PHYSIO_WORKING = [
-  "Full-time: 42 hours per week, including one weekend day",
-  "Part-time: at least three days per week",
-  "Clinic operating hours: 8am to 8pm, Monday to Saturday",
-  "Rostered working hours",
-  "Location: Lentor Modern, a 1-minute walk from Lentor MRT",
+  "Full-time: 42 hours per week, including one weekend day.",
+  "Part-time: Minimum commitment of 3 days per week, with working days and hours to be mutually agreed.",
+  "Clinic operating hours: 8am to 8pm, Monday to Saturday.",
+  "Working hours are rostered within clinic operating hours, taking into consideration operational requirements and individual availability.",
+  "Conveniently located at Lentor Modern, directly connected to Lentor MRT.",
 ];
 
 const LOCATION = "Lentor Modern, Singapore";
@@ -140,11 +162,13 @@ export const VACANCIES: Vacancy[] = [
     about: [
       "We are seeking a Physiotherapist with a minimum of three years of post-qualification clinical experience and a strong foundation in musculoskeletal physiotherapy.",
       "The ideal candidate is a confident, independent clinician with strong clinical reasoning, a patient-centred approach and an interest in further developing their expertise in women's health.",
+      "We welcome candidates seeking either full-time or part-time commitments.",
     ],
     responsibilities: PHYSIO_RESPONSIBILITIES,
     requirements: physioRequirements(3),
     preferred: PHYSIO_PREFERRED,
     benefits: PHYSIO_BENEFITS,
+    development: PHYSIO_DEVELOPMENT,
     workingArrangements: PHYSIO_WORKING,
     // Set to the real go-live date when the page is published.
     datePosted: "2026-11-24",
@@ -177,6 +201,7 @@ export const VACANCIES: Vacancy[] = [
     about: [
       "We are seeking a Senior Physiotherapist with a minimum of five years of post-qualification clinical experience and a strong foundation in musculoskeletal physiotherapy.",
       "The ideal candidate is a confident and independent clinician with excellent clinical reasoning, a patient-centred approach and an interest in women's health. Beyond delivering high-quality patient care, the candidate should be excited to contribute to the clinical and professional development of our growing practice.",
+      "We welcome candidates seeking either full-time or part-time commitments.",
     ],
     responsibilities: PHYSIO_RESPONSIBILITIES,
     additionalResponsibilities: {
@@ -192,6 +217,7 @@ export const VACANCIES: Vacancy[] = [
     requirements: physioRequirements(5),
     preferred: PHYSIO_PREFERRED,
     benefits: PHYSIO_BENEFITS,
+    development: PHYSIO_DEVELOPMENT,
     workingArrangements: PHYSIO_WORKING,
     // Set to the real go-live date when the page is published.
     datePosted: "2026-11-24",
