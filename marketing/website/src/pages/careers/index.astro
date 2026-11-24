@@ -13,6 +13,11 @@ import Section from "../../components/Section.astro";
 import Button from "../../components/Button.astro";
 import VacancyList from "../../components/careers/VacancyList.astro";
 import { clinicRef } from "../../lib/schema.ts";
+import { SITE } from "../../lib/site.ts";
+
+/** Instagram's page for the team hashtag. A plain outbound link: no embed,
+ *  so the page makes no third-party request. */
+const LIFE_TAG_URL = "https://www.instagram.com/explore/tags/lifeatgoji/";
 
 const title = "Careers at Goji | Physiotherapy Jobs in Singapore";
 const description =
@@ -105,7 +110,7 @@ const life = [
     <div class="container cr-hero__grid">
       <div class="cr-hero__text">
         <p class="cr-kicker">Careers at Goji</p>
-        <h1>Good things grow together.</h1>
+        <h1>Let's grow together!</h1>
         <p class="cr-lead">
           At Goji, we're building a practice that believes good rehabilitation goes beyond treating symptoms.
           We're a growing team of clinicians and professionals who care deeply about the people we work with,
@@ -135,35 +140,9 @@ const life = [
     </div>
   </section>
 
-  {/* ---- B. About Goji ---- */}
-  <Section tone="surface">
-    <div class="cr-split">
-      <h2 class="cr-split__heading">Building a better way to care.</h2>
-      <div class="cr-split__body">
-        <p>
-          Goji Women's &amp; Family Physiotherapy is a growing private physiotherapy practice in Singapore, with a
-          strong focus on musculoskeletal rehabilitation and women's health.
-        </p>
-        <p>
-          We believe good rehabilitation goes beyond treating symptoms. It's about understanding the whole person,
-          working collaboratively and empowering our patients to move with greater confidence through every stage
-          of life.
-        </p>
-        <p>
-          As we continue to grow, we're building a team that shares our clinical philosophy and is excited to
-          contribute to the future of our practice.
-        </p>
-        <p class="cr-links">
-          <a href="/#about">More about Goji</a>
-          <a href="/#team">Meet our team</a>
-        </p>
-      </div>
-    </div>
-  </Section>
-
   {/* ---- C. Why join ---- */}
   <Section tone="linen">
-    <h2 class="cr-section-title">Grow with us.</h2>
+    <h2 class="cr-section-title">Grow with us</h2>
     <ol class="cr-reasons" role="list">
       {
         reasons.map((r, i) => (
@@ -179,7 +158,15 @@ const life = [
 
   {/* ---- D. Life at Goji ---- */}
   <Section tone="surface">
-    <h2 class="cr-section-title">Life at Goji</h2>
+    <div class="cr-life-head">
+      <h2 class="cr-section-title">Life at Goji</h2>
+      <p class="cr-insta">
+        See more of the team on Instagram:
+        <a href={LIFE_TAG_URL} target="_blank" rel="noopener noreferrer">#lifeatgoji</a>
+        <span aria-hidden="true">·</span>
+        <a href={SITE.instagram} target="_blank" rel="noopener noreferrer">Follow @gojiphysio</a>
+      </p>
+    </div>
     <ul class="cr-life" role="list">
       {
         life.map((p) => (
@@ -206,7 +193,7 @@ const life = [
   {/* ---- E. Current vacancies ---- */}
   <Section tone="linen" id="vacancies" class="cr-anchor">
     <div class="cr-vac-head">
-      <h2 class="cr-section-title">Find your next opportunity.</h2>
+      <h2 class="cr-section-title">Find your next opportunity</h2>
       <p class="cr-lead">
         We're looking for people who share our approach to care and are excited to grow alongside us.
       </p>
@@ -217,7 +204,7 @@ const life = [
   {/* ---- F. Expressions of interest ---- */}
   <Section tone="closing" id="interest" class="cr-anchor">
     <div class="cr-eoi">
-      <h2>Good people are always worth meeting.</h2>
+      <h2>We're always open for a chat!</h2>
       <p>
         Don't see a role that fits you right now? We're always interested in connecting with people who share our
         approach to care and want to be part of Goji's journey.
@@ -314,41 +301,6 @@ const life = [
     color: var(--text-muted);
   }
 
-  .cr-split {
-    display: grid;
-    gap: var(--space-5);
-  }
-  @media (min-width: 900px) {
-    .cr-split {
-      grid-template-columns: 1fr 1.4fr;
-      gap: var(--space-8);
-    }
-  }
-  .cr-split__heading {
-    font-size: var(--fs-h1);
-    margin: 0;
-  }
-  .cr-split__body {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-4);
-    font-size: var(--fs-lead);
-  }
-  .cr-split__body p {
-    margin: 0;
-    max-width: 62ch;
-  }
-  .cr-links {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-2) var(--space-6);
-    font-size: var(--fs-body);
-  }
-  .cr-links a {
-    color: var(--color-primary);
-    font-weight: var(--weight-semibold);
-  }
-
   .cr-section-title {
     font-size: var(--fs-h1);
     margin: 0 0 var(--space-7);
@@ -406,6 +358,27 @@ const life = [
   }
   .cr-life img {
     aspect-ratio: 4 / 5;
+  }
+
+  .cr-life-head {
+    margin-bottom: var(--space-7);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+  .cr-life-head .cr-section-title {
+    margin: 0;
+  }
+  .cr-insta {
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-3);
+    align-items: baseline;
+  }
+  .cr-insta a {
+    color: var(--color-primary);
+    font-weight: var(--weight-semibold);
   }
 
   .cr-vac-head {

@@ -45,13 +45,15 @@ const roles = openVacancies();
                 </dd>
               </div>
             </dl>
-            <p class="vacancy__desc">{v.shortDescription}</p>
-            <span class="vacancy__cta">
+            <div class="vacancy__foot">
+              <p class="vacancy__desc">{v.shortDescription}</p>
+              <span class="vacancy__cta">
               View role &amp; apply
               <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <path d="M6 3l5 5-5 5" />
               </svg>
-            </span>
+              </span>
+            </div>
           </a>
         </li>
       ))}
@@ -97,8 +99,7 @@ const roles = openVacancies();
     border-color: var(--color-border-strong);
   }
   .vacancy:hover .vacancy__cta {
-    text-decoration: underline;
-    text-underline-offset: 0.2em;
+    background-color: var(--cta-bg-hover);
   }
   .vacancy:focus-visible {
     outline: 2px solid var(--focus-ring);
@@ -151,12 +152,42 @@ const roles = openVacancies();
     margin: 0;
     max-width: 64ch;
   }
+  /* Description left, apply button right; stacked on a phone with the
+     button still on the right. The card is one link, so the button is a span
+     dressed as the primary Button (a real <a> can't sit inside another). */
+  .vacancy__foot {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+  @media (min-width: 768px) {
+    .vacancy__foot {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-6);
+    }
+  }
   .vacancy__cta {
+    align-self: flex-end;
+    flex-shrink: 0;
     display: inline-flex;
     align-items: center;
     gap: var(--space-2);
+    min-height: 48px;
+    padding: 0 1.5rem;
+    border-radius: var(--radius-pill);
+    background-color: var(--cta-bg);
+    color: var(--cta-text);
     font-weight: var(--weight-semibold);
-    color: var(--color-primary);
+    line-height: 1.2;
+    white-space: nowrap;
+    transition: background-color var(--dur) var(--ease);
+  }
+  @media (min-width: 768px) {
+    .vacancy__cta {
+      align-self: center;
+    }
   }
   .vacancies-empty {
     padding: var(--space-6);
