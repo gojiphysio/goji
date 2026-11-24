@@ -24,8 +24,10 @@ STAFF_WINDOW_S = 23 * 3600  # Meta's window is 24h; keep a margin
 PARAM_MAX = 150             # the template's one parameter
 
 HELP = ("Goji assistant: RESUME 004 hands chat #004 back to the assistant (it won't "
-        "message them, it just answers their next message), PAUSE 004 silences it in that "
-        "chat, STOP pauses it in every chat, START turns it back on, STATUS for a summary.")
+        "message them, it just answers their next message; a chat you wrote in comes back "
+        "by itself if they write 2 weeks after your last message), PAUSE 004 silences it in "
+        "that chat for good, STOP pauses it in every chat, START turns it back on, STATUS "
+        "for a summary.")
 
 # The first message a staff number gets from the assistant: the walkthrough
 # (Charles, 19 Nov 2026: bake the go-live briefing into it). Free-form needs an
@@ -38,10 +40,11 @@ WELCOME = (
     "2. When a chat needs you, I message you here, e.g. \"Mei (#004) needs you: ...\". "
     "I've already told them the team will get back to them. The email has my suggested "
     "reply: fill in anything in [brackets], then send it from the WhatsApp Business app.\n"
-    "3. As soon as you write in a chat, I go quiet there until you hand it back.\n"
+    "3. As soon as you write in a chat, I go quiet there until you hand it back. If the "
+    "customer writes again 2 weeks or more after your last message, I pick it up.\n"
     "4. To hand a chat back, text RESUME and its number, e.g. RESUME 004. I won't "
     "message the customer; I'll just answer their next message.\n"
-    "5. PAUSE 004 keeps me out of one chat. STOP pauses me in every chat, START turns me "
+    "5. PAUSE 004 keeps me out of one chat for good. STOP pauses me in every chat, START turns me "
     "back on.\n"
     "6. Every morning at 7:30 there's an email summary, including the chats waiting for "
     "you to resume and any spam numbers I've stopped answering. STATUS here shows the "

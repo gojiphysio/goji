@@ -13,12 +13,16 @@ A chat is in one of four modes:
 
 Ways into `human`: Chris writes in the chat (echo), the agent escalates, an
 admin takes over. Ways back to `agent`: HUMAN_IDLE_HANDBACK_S with no human
-message, or an admin hands back. `paused` only leaves by admin hand-back.
+message, or an admin hands back. `paused` leaves by hand-back, or, for a pause
+that came from a person writing in the chat, by `apply_pause_expiry`.
 
 Chris writing in a chat (an echo) pauses it: the agent is fully silent there
-until she resumes it ("resume 004" on WhatsApp, or the admin hand-back). The
-24h idle hand-back only applies to handovers the agent made that no person
-answered (Chris, 19 Nov 2026).
+until she resumes it ("resume 004" on WhatsApp, or the admin hand-back), or
+until HUMAN_PAUSE_S (14 days) pass after the last person's message, when the
+customer's next message goes to the agent (owner, 24 Nov 2026). The 24h idle
+hand-back only applies to handovers the agent made that no person answered
+(Chris, 19 Nov 2026). A deliberate pause (PAUSE 004, the admin pause, the
+watch list) never lapses.
 
 The go-live cut-off: at go-live, a chat with a message either way in the
 GOLIVE_LOOKBACK_DAYS (30) before go-live is Chris's (`pre_golive_chat`); its
@@ -39,6 +43,7 @@ SGT = timezone(timedelta(hours=8))
 AGENT, HUMAN, PAUSED, WAITING = "agent", "human", "paused", "waiting"
 LATE_CHANGE_H = 24  # the cancellation policy's notice period (gojiphysio.com/services/#faq)
 SEND, DRAFT, ESCALATE, SILENT = "send", "draft", "escalate", "silent"
+HUMAN_REPLIED = "human_replied"  # mode_reason: a person wrote in the chat (on_human_message)
 
 
 @dataclass
@@ -134,8 +139,30 @@ def on_human_message(state: ChatState, now: float) -> bool:
     state.last_human_at = now
     state.pending_for_chris = ""
     state.owner = ""
-    # Fully silent until she resumes it: no idle hand-back (Chris, 19 Nov 2026).
-    return set_mode(state, PAUSED, "human_replied", now)
+    if state.mode == PAUSED and state.mode_reason == "pre_golive_chat":
+        state.mode_reason = HUMAN_REPLIED  # she has stepped in: the 14-day clock applies
+    # Fully silent until she resumes it, or HUMAN_PAUSE_S after her last
+    # message (apply_pause_expiry); no 24h idle hand-back (Chris, 19 Nov 2026).
+    return set_mode(state, PAUSED, HUMAN_REPLIED, now)
+
+
+def apply_pause_expiry(state: ChatState, now: float,
+                       pause_s: int = config.HUMAN_PAUSE_S) -> bool:
+    """A chat paused because a person wrote in it goes back to the agent
+    `pause_s` after that person's last message (owner, 24 Nov 2026: 2 weeks).
+    Called on the customer's next message, so the customer is sent nothing
+    until they write. The clock runs from the latest person's message, so a
+    conversation Chris is still having never lapses mid-way. Deliberate pauses
+    (PAUSE 004, admin pause, watch list) and pre-go-live chats she hasn't
+    written in don't lapse. Returns True if the chat was handed back."""
+    if state.mode != PAUSED or state.mode_reason != HUMAN_REPLIED:
+        return False
+    if now - max(state.last_human_at, state.mode_since) < pause_s:
+        return False
+    state.owner = "agent"
+    state.off_topic_strikes = 0
+    state.pending_for_chris, state.pending_draft, state.last_auto = "", {}, {}
+    return set_mode(state, AGENT, "pause_expired", now)
 
 
 # Handovers after which the agent goes fully quiet rather than waiting: a red

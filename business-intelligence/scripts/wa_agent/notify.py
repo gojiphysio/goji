@@ -61,7 +61,8 @@ def compose(kind: str, *, customer: str, wa_id: str, staff_note: str,
            if kind == "reschedule" else
            "Reply to them in the WhatsApp Business app. Until you do, the assistant "
            "keeps answering their routine questions, but not this. Once you reply it "
-           "stays out of the chat until you text RESUME and the chat number.\n"
+           "stays out of the chat until you text RESUME and the chat number, or until "
+           "they write 2 weeks after your last message.\n"
            if kind == "escalated" else
            "Reply to them in the WhatsApp Business app. The assistant stays out of "
            "this chat until you hand it back or 24 hours pass with no reply from you.\n")
