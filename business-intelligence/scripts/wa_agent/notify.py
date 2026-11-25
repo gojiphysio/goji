@@ -28,6 +28,7 @@ def compose(kind: str, *, customer: str, wa_id: str, staff_note: str,
                "demoted": "WhatsApp assistant: moved a kind of message back to drafts",
                "fyi": "WhatsApp FYI: a customer asked for you",
                "media": "WhatsApp: a customer sent a photo or document",
+               "reaction": "WhatsApp: a customer reacted to a message",
                "reschedule": "WhatsApp: please move an appointment"}.get(kind, f"WhatsApp: {kind}")
     msg = EmailMessage()
     msg["Subject"] = f"{subject} - {customer or wa_id}"

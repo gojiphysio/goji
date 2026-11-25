@@ -4,7 +4,8 @@ from datetime import datetime
 from wa_agent.policy import (AGENT, DRAFT, ESCALATE, HUMAN, PAUSED, SEND, SGT, SILENT,
                              ChatState, Decision, Proposal, apply_idle_handback,
                              claims_cancelled, decide, gate,
-                             human_replied_since, in_clinic_hours, is_acknowledgement, on_human_message)
+                             human_replied_since, in_clinic_hours, is_acknowledgement,
+                             mask_customer_emails, on_human_message, reply_problems)
 
 NOW = datetime(2026, 11, 18, 10, 0, tzinfo=SGT).timestamp()  # Wednesday 10am
 
@@ -392,6 +393,15 @@ def test_a_cancel_reply_that_says_its_done_is_never_sent():
                      hours_to_appointment=72)
         assert decide(p) == Decision(DRAFT, "claims_cancelled"), reply
     assert not claims_cancelled("Shall I cancel it for you?")
+
+
+def test_the_customers_own_email_written_back_is_not_a_foreign_contact():
+    history = [{"role": "customer", "text": "Jamie Lee, Jamie.Lee@example.com"}]
+    reply = mask_customer_emails("Thanks! Sending it to jamie.lee@example.com", history)
+    assert reply == "Thanks! Sending it to your email" and not reply_problems(reply)
+    # Anyone else's address still fails the check.
+    other = mask_customer_emails("Email bob@example.com", history)
+    assert reply_problems(other) == ["email"]
 
 
 def test_two_page_links_per_conversation():

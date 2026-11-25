@@ -245,6 +245,17 @@ _PHONE = re.compile(r"(?<![\w$.])(?:\+?65[\s-]?)?(\d{4}[\s-]?\d{4})(?![\w])")
 _PLACEHOLDER = re.compile(r"\[[^\[\]\n]{1,80}\]")
 
 
+def mask_customer_emails(reply: str, history: list[dict]) -> str:
+    """The customer's own email, written back to them, reads as "your email":
+    the contact check would otherwise hand the chat over for it."""
+    theirs = {e.lower() for h in history if h.get("role") == "customer"
+              for e in _EMAIL.findall(h.get("text") or "")} - ALLOWED_EMAILS
+    if not theirs:
+        return reply
+    return _EMAIL.sub(lambda m: "your email" if m.group(0).lower() in theirs else m.group(0),
+                      reply)
+
+
 def reply_problems(reply: str) -> list[str]:
     """Links, emails or phone numbers in a reply that aren't Goji's own, and
     [placeholders] left for Chris."""
@@ -336,6 +347,19 @@ def is_acknowledgement(text: str, history: list[dict]) -> bool:
     t = text.strip()
     prior_role = history[-2]["role"] if len(history) >= 2 else ""
     return bool(t) and bool(_ACK.fullmatch(t)) and prior_role in ("agent", "staff")
+
+
+# Reactions that need nobody (owner, 25 Nov 2026). Anything else, negative
+# or neutral (👎 😡 😢 😮 🤔 😅), pings staff. Skin tones and the emoji
+# variation selector are ignored, so 👍🏽 and ❤️ count.
+POSITIVE_REACTIONS = frozenset(
+    "👍 👌 🙏 🙌 👏 💪 🤝 🫶 ❤ ♥ 🧡 💛 💚 💙 💜 🤍 🤎 🩷 🩵 💕 💖 💗 💓 💞 💝 "
+    "😊 🙂 ☺ 😀 😃 😄 😁 😆 😂 🤣 🥰 😍 😘 🤗 😇 🤩 🥳 😻 🎉 ✨ ⭐ 🌟 💯 ✅ ✔ 🔥".split())
+_EMOJI_MODIFIERS = re.compile("[\U0001F3FB-\U0001F3FF\uFE0F]")
+
+
+def is_positive_reaction(emoji: str) -> bool:
+    return _EMOJI_MODIFIERS.sub("", emoji or "") in POSITIVE_REACTIONS
 
 
 BREAK = "<break>"
