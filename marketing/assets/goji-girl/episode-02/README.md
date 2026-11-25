@@ -1,262 +1,255 @@
 # Goji Girl · Episode 02 — TAP OUT
 
-**Creative draft v1 · 24 November 2026 · 45 seconds · vertical 9:16**
+**Creative draft v2 · 25 November 2026 · proposed 45 seconds · vertical 9:16**
 
-A work call overruns into Goji Girl's Pilates appointment. She steals a bus,
-survives an absurd crash, remembers to tap out, and reaches the one place where
-the outside world's chaos cannot follow her.
+A frustrating work call sends Goji Girl rushing to Pilates. She steals a bus,
+crashes outside Lentor Modern, remembers to tap out, and reaches the calm of
+Goji while the police get stuck running against the glass.
 
-**The central joke:** she has absolutely no respect for the laws of physics,
-but she still pays her bus fare. The final reward is a peaceful Pilates session
-while the police get stuck on the clinic's invisible game boundary.
+**Revision direction:** outdoor action now plays from the third-person player
+camera. The home and clinic use cutscene framing. The story, EZ-Link beep and
+final police gag stay intact. This is a script and illustrated concept board;
+no footage or timed animatic has been rendered.
 
-This is a creative script and concept storyboard. Runtime is a proposed edit,
-not an existing video. The image boards establish mood and composition; the
-written directions below govern exact action and continuity.
+## Revised storyboard
 
-## Storyboard at a glance
+Read left to right, then down. Each sheet has four panels. Panel numbers map
+to the timed sequences below; a panel is a story moment, not necessarily a cut.
 
-Read each sheet left to right, then down. The twelve panels correspond to the
-twelve sequences below; some sequences contain more than one shot.
+![01–04: PS2-style home cutscene, headset and laptop slam, rear-follow door exit and rear-follow approach to the busy bus.](storyboards/v2/01-call-and-player.png)
 
-![Panels 01–06: frustrating video call, laptop slam, swaggering exit, busy bus stop, driver takeover and police-lit bus chase.](storyboards/01-call-to-chase.png)
+[Open panels 01–04](storyboards/v2/01-call-and-player.png)
 
-[Open sheet 1 at full size](storyboards/01-call-to-chase.png)
+![05–08: takeover viewed behind the player, rear bus chase, rear-view rollover with level horizon, and player-camera tap from the overturned bus.](storyboards/v2/02-takeover-and-bus.png)
 
-![Panels 07–12: bus crash at Lentor Modern, transit-card tap, dust-off, police foot chase, calm clinic entrance and reformer session with police and burning bus outside.](storyboards/02-crash-to-calm-v2.png)
+[Open panels 05–08](storyboards/v2/02-takeover-and-bus.png)
 
-[Open sheet 2 at full size](storyboards/02-crash-to-calm-v2.png)
+![09–12: rear-view dust-off, player-centred sprint with pursuers at frame edges, reception cutscene and quiet reformer session with police stuck outside.](storyboards/v2/03-player-and-clinic.png)
 
-## Timed script and shot direction
+[Open panels 09–12](storyboards/v2/03-player-and-clinic.png)
 
-### 01 · 00:00–00:03 — This meeting could have been an email
+## Camera and look
 
-**Picture:** Start already inside the call, over Goji Girl's shoulder at her
-home desk. A little headset with a visible boom mic; the laptop shows a grid of
-people and call controls. Her smile has become a fixed, angry stare. One finger
-taps the desk. Her phone lights up: **“Goji Pilates · Starts in 5 min.”**
+**On foot:** the camera follows Goji Girl from behind at an ordinary gameplay
+height. Keep her full body in the lower middle of the frame, her back toward
+us and the route ahead readable. Small interaction-driven yaw is allowed;
+low hero angles, face inserts and sweeping orbits are removed outdoors.
 
-**Sound:** Thin laptop-speaker voice: **“Just one more thing…”** The appointment
-notification cuts through the meeting chatter.
+**Driving:** camera control transfers to the bus. Its rear grille and taillights
+face us; the road ahead remains visible above it. Follow position and heading
+with a little lag. The bus can yaw, lean and roll independently of the camera;
+the horizon stays level. Scale follow distance to the bus rather than copying
+the skill's sedan distances literally. These are framing proposals, not measured
+PS2 camera constants.
 
-**Cut:** Close on her eyes moving from the reminder back to the laptop. No
-spoken response. The viewer understands both her frustration and the deadline.
+**Indoors:** simple, deliberately staged San Andreas cutscenes. Medium shots,
+fixed cameras, readable gestures. The clinic's quiet comes from pacing and sound,
+while its people and materials remain in the same PS2 game as the street.
+
+**Original PS2 target:** painted low-resolution surfaces, economical faces and
+hair meshes, simple joint deformation, broad diffuse lighting, restrained
+highlights, textured foliage and moderate distance haze. Every commuter, driver,
+police officer and video-call participant follows the same standard. Avoid
+modern glossy materials, photographic NPCs, toy-like faces and bare faceted
+geometry. The cyan sky and warm concrete follow the selected daylight reference;
+a heavy orange filter is not the definition of the look.
+
+## Timed script
+
+### 01 · 00:00–00:03 — Just one more thing
+
+**Home cutscene.** Over her shoulder: headset with a visible boom microphone,
+laptop full of meeting tiles. Her finger taps the desk. Her phone lights up:
+**“Goji Pilates · Starts in 5 min.”** A colleague drones, **“Just one more thing…”**
+She looks from the reminder to the call. The black handbag sits beside the desk.
+
+Sound: flat laptop voice, notification ping, impatient finger tapping. Keep the
+meeting faces as simple game characters too.
 
 ### 02 · 00:03–00:05 — Tap out of the call
 
-**Picture:** In two sharp actions she angrily rips off the headset, then SLAMS
-the laptop shut. Hold a fraction on the shut lid. Her black handbag is ready
-beside the desk.
+**Home cutscene.** Medium view: she angrily rips off the headset, then slams
+the laptop shut. The colleague is cut off mid-word. A tiny hold on the closed
+lid. She takes the handbag in her left hand on the exit transition.
 
-**Sound:** Headset clatter. Laptop **CLACK** cuts the colleague off mid-word.
-
-**Performance:** This is her one obvious flash of anger. From here on, she
-treats the chaos as a routine commute.
+Sound: headset clatter, sharp **CLACK**, silence. This is her obvious burst of
+anger; the rest is played with absurdly routine confidence.
 
 ### 03 · 00:05–00:08 — Player control resumes
 
-**Picture:** Hard cut to a low third-person camera behind her. Bag over her
-shoulder, she shoves the front door open with outrageous force, strides out
-with her familiar GTA swagger, then accelerates toward the street. Let the
-door bang against its stop behind her.
+**PLAYER follow.** Cut behind her, at normal gameplay height. She shoves the
+front door open with her right hand, swaggers through, then accelerates toward
+the street. Full-body player stays below centre; we see where she is going.
+The camera follows through the doorway without dropping to shoe height.
 
-**Sound:** Door **BANG**, two heavy swaggering footsteps, then running steps.
-Small mission cue. Brief objective: **“Get to Goji.”**
-
-**Camera:** Follow her down the path into the street. No lengthy home-exit
-montage; the gait is the episode-one callback.
+Sound: door **BANG**, two heavy swagger steps, running feet. Brief objective:
+**“Get to Goji.”** Bag stays in her left hand.
 
 ### 04 · 00:08–00:11 — Public transport, technically
 
-**Picture:** Wide enough to read a busy Singapore bus stop. A single-deck bus
-waits with its left-side passenger doors open. Commuters stream off. Goji Girl
-arrives at a run, ignores the boarding queue, and rounds the front of the bus
-toward the right-hand driver's cab.
+**Same PLAYER follow.** She reaches a busy Singapore bus stop. A white/purple
+single-deck bus with a red roof band has its left passenger doors open and
+commuters alighting. She runs around the nose toward the right-hand driver's
+cab. The camera follows her route; the bus appears ahead and beside her.
 
-**Sound:** Bus idle, pneumatic door hiss, commuter chatter.
+Sound: idle engine, air hiss, chatter. Show the last passenger step clear before
+the takeover. The bus looks busy on arrival, but nobody remains aboard for the
+crash. Keep traffic on the left and the driver's seat on the right.
 
-**Blocking:** The last passenger steps clear before the takeover; the crowd
-stays behind on the pavement. The bus looks busy on arrival, with no passengers
-aboard for the crash. Maintain the same bus body and livery throughout.
+### 05 · 00:11–00:15 — One star, zero hesitation
 
-### 05 · 00:11–00:14 — One star, zero hesitation
+**PLAYER interaction view.** The camera settles modestly behind her right
+shoulder at full-body distance, with both people readable. She hooks the bag
+over her left forearm, smashes the driver's window, pulls the driver out,
+lets him clear the cab, then climbs into the seat. He lands upright, alive
+and indignant. Keep the separate removal, clearance and entry states.
 
-**Picture:** Tight on the driver's side window. One exaggerated game-animation
-smash breaks the glass. She grabs the driver and pulls him out in a single
-absurd motion. He lands seated, upright and indignant; he throws his hands up
-as she takes the wheel. No blood or injury detail.
+Sound: **CRASH**, surprised yelp, wanted sting. **One star lights up.** She places
+the bag in the cab footwell as she gets in. Transfer to the vehicle camera only
+once she is seated. This gets four seconds, borrowing one from the chase;
+final contact timing still needs an animatic.
 
-**Sound:** Glass **CRASH**, a short surprised yelp, then the wanted-level sting.
-**Exactly one star lights up.** Engine rev and air-brake release.
+### 06 · 00:15–00:20 — The least relaxing commute
 
-**Cut:** The bus jerks away before the driver has finished protesting.
+**BUS rear chase, one sustained view.** The bus accelerates away from us,
+threads between traffic, then swerves toward the junction. The rear stays our
+anchor while road markings, traffic and buildings pass around it. Suspension
+reacts to steering; the chassis remains rigid. No front-quarter beauty shot,
+cab insert or roadside tracking cut.
 
-### 06 · 00:14–00:20 — The least relaxing commute
-
-**Picture:** Three escalating shots, about two seconds each:
-
-1. Low front three-quarter: the enormous bus threads an absurdly narrow gap
-   between traffic, its suspension heaving.
-2. Cab insert: Goji Girl yanks the wheel with complete conviction; street
-   scenery whips past. Red and blue flashes sweep across her and the cab.
-3. Exterior tracking: the bus clips roadside bollards and swerves through a
-   junction. Lentor Modern comes into view ahead.
-
-**Sound:** Diesel roar, horn, tyre squeal, rattling fittings. Police sirens
-approach from behind. The pursuit vehicles remain just out of sight; reflected
-red/blue lighting tells us they are there.
-
-**HUD:** Keep the single wanted star. No escalating stars, weapon display or
-extra joke captions competing with the action.
+Sound: diesel, horn, tyre squeal and rattling fittings. Police remain behind
+the camera, out of sight. Red and blue flashes hit the bus's rear and nearby
+surfaces; sirens tell us the pursuit is getting closer. Keep the single star.
 
 ### 07 · 00:20–00:25 — Arrival is a strong word
 
-**Picture:** Establish Lentor Modern and an empty bus shelter in the same
-wide shot. She takes a left turn much too sharply. The bus leans onto its
-right/driver's side, fully tips over, and slides broadside across the road.
-Sparks trail along the body before it hits the empty shelter with an enormous
-metallic crunch. Its left passenger-door side now faces upward.
+**Continue the BUS chase camera.** Lentor Modern and an empty shelter appear
+ahead. The bus takes a left turn too sharply, rolls onto its right/driver's
+side and slides into the shelter. The camera follows its travelling centre
+with heading lag, so its side can come into view as it slides. The camera itself
+does not roll, orbit to the front or cut to an impact close-up.
 
-**Sound:** Long tyre squeal → metal scraping → shelter **CRUNCH**.
-
-**Camera:** Keep the rollover and slide readable in one wide view, with a brief
-impact insert if needed. The wreck remains recognisably the same bus; no
-explosion obscures the next joke.
+Sound: squeal → scrape → enormous **CRUNCH**. Sparks start at road contact.
+Keep the bus recognisable and the left passenger side upward. No explosion
+covers the recovery. The shelter is empty.
 
 ### 08 · 00:25–00:29 — Still must tap out
 
-**Picture, 00:25–00:26:** Locked shot of the motionless wreck. A small piece of
-shelter drops off. Nothing else happens. Hold the full second.
+**Recovery camera transfers back to PLAYER.** First hold on the settled wreck
+for one full second. A little piece of shelter drops. Then the camera settles
+behind her as she climbs up through the upward-facing front passenger doorway.
+A modest rise/offset keeps her and the reader visible, as an interaction camera
+avoiding obstruction would; it does not become an aerial shot.
 
-**Picture, 00:26–00:29:** Goji Girl climbs halfway out through the upward-facing
-passenger doorway. She pauses, remembers something, and casually reaches back
-to tap her EZ-Link card on the reader still attached inside the doorway.
-Close enough to see card meet reader. Its green light flashes. She completes
-the climb out.
+Halfway out, she remembers. She reaches back down and taps her EZ-Link card
+on the reader attached just inside the doorway. Green light. **BEEP.** She
+finishes climbing out, bringing the bag from the cab with her. No hand insert,
+face close-up or caption explains the joke: the reach, green flash and isolated
+beep do the work at gameplay distance.
 
-**Sound:** A last settling rattle. Then a clean, isolated **BEEP**. Give the
-beep a brief pocket of silence; no dialogue, music accent or caption explains
-the joke. The distant sirens can return after it.
-
-**Spatial rule:** The reader rotates with the bus. Her body climbs against
-gravity; the doorway must not magically become an upright street-level door.
+Keep the reader and its pole rotated with the bus. The opening faces upward;
+it is not an upright door on the bus's rear. Protect the silence around the beep.
 
 ### 09 · 00:29–00:31 — Nothing to see here
 
-**Picture:** She lands on the pavement, straightens, dusts off both shoulders
-and adjusts her handbag. A small plume of smoke begins at the rear engine.
-She looks toward the mall and breaks into a sprint.
-
-**Sound:** Two deliberate brushing sounds. Sirens grow louder again.
-
-**Performance:** No limp, panic, victory pose or look back at the wreck.
+**PLAYER follow, behind her.** She drops to the pavement, dusts her shoulders,
+settles the handbag back into her left hand and sets off. Her back stays toward
+us; no front-facing reaction shot. The wreck smokes off to one side and the
+mall route is ahead. Sound: two brushing sounds, then returning sirens.
 
 ### 10 · 00:31–00:35 — Same appointment, new entourage
 
-**Picture:** Return to the familiar third-person sprint toward the mall.
-Exactly two police officers enter frame behind her on foot. Match cut through
-the mall approach to the Goji shopfront. They are close enough to remain a
-comic threat as she charges for the entrance.
+**PLAYER sprint.** Follow her toward the mall and Goji shopfront. Two officers
+catch up from behind, their bodies only partly entering the lower frame edges.
+She remains the centred, readable player; the camera never changes allegiance
+to the pursuers. An intentional route-compression cut is allowed if needed,
+but match rear view, gait and screen direction across it.
 
-**Sound:** Her footsteps, two heavier sets behind, radio chatter, a brief
-**“Oi!”** from one officer. The single wanted star remains visible.
-
-**Continuity:** Reuse episode one's established entrance-marker language if
-shown; do not introduce a differently coloured marker as a new series rule.
+Sound: her feet, two heavier sets, radio chatter, one **“Oi!”** Keep one star.
+If an entrance marker is used, retain episode one's established marker design.
 
 ### 11 · 00:35–00:37 — Safe zone
 
-**Picture:** From inside the clinic, she barrels across the threshold. At the
-exact crossing, her posture relaxes. The two officers abruptly stop at the
-boundary outside. The wanted star vanishes. The doorway has no visible force
-field; it simply behaves like a game interior they cannot enter.
+**Clinic cutscene begins at the threshold.** Cut to the fixed interior camera
+as she enters. Her posture relaxes instantly. The officers stop outside;
+the star and other gameplay HUD disappear. All sirens, shouting and running
+sound cut dead on the threshold. Quiet room tone and a soft arrival chime.
 
-**Sound:** Hard cut all sirens, shouting, running and impact sound on the
-threshold. Soft room tone and a gentle arrival chime replace them immediately.
-No fade, because the sudden change is the punchline.
-
-**Performance:** She is instantly composed. The Goji instructor greets her as
-though this is entirely ordinary.
+Preserve the reference reception: warm timber, red/cream floor, deep-red table,
+short-bobbed therapist in black. The officers' feet remain on exterior pavement.
+The therapist greets her without acknowledging the pursuit.
 
 ### 12 · 00:37–00:45 — And… breathe out
 
-**Picture, 00:37–00:40:** Elliptical cut to Goji Girl already on the reformer.
-Her white shoes and handbag rest together on a bench; she wears grip socks.
-A black-clad instructor guides one slow footwork repetition. Frame her face
-and the smooth carriage movement first.
+**Fixed clinic cutscene.** Elliptical cut to her on the reformer, doing one slow
+footwork repetition in grip socks. White shoes and the single handbag sit on
+a bench. Therapist in a black crew-neck top and leggings, white shoes, small
+left-chest mark only; plain black back, no name tag.
 
-**Sound:** Instructor, gently: **“And… breathe out.”** Soft exhale and the
-quiet reformer mechanism. No outside chase audio returns.
+Instructor: **“And… breathe out.”** Quiet breath and reformer mechanism.
 
-**Picture, 00:40–00:45:** Ease wider, revealing the clear shopfront glass. The
-two officers are now running endlessly into it: full running animations,
-alternating knees and pumping arms, but zero forward progress. One is slightly
-out of sync with the other. Beyond them, the overturned bus has begun burning.
+Hold the same medium-wide composition for the whole eight seconds. Her movement
+draws the eye first; the background is already there to discover, without a
+cinematic pullback. Through the clear glass, two police face inward and run
+against it—alternating knees, pumping arms, no forward progress, slightly out
+of phase. Beyond them, the overturned bus burns. Nobody inside reacts.
 
-Goji Girl completes her slow repetition without looking up. The instructor
-doesn't react. Hold the composition so viewers discover the background gag
-for themselves. No close-up of the officers and no explanatory reaction shot.
+Small final-two-second copy: **“Pilates at Goji · Lentor Modern.”** Keep it clear
+of the background gag. End on the moving tableau.
 
-**End copy:** During only the final two seconds, small and clear without
-covering the gag: **“Pilates at Goji · Lentor Modern.”** End on the living
-tableau rather than cutting away to a full-screen logo card.
+## Continuity and review notes
 
-## Creative decisions to preserve
+- **Approved direction:** the user accepted the story intent and requested
+  predominantly third-person outdoor gameplay with indoor cutscenes. The new
+  illustrations, exact camera offsets and 45-second timing remain proposals.
+- **Retain the comedy:** crash pause, isolated tap beep, hard audio boundary,
+  slow reformer action and police with broken pathing. No blood or deaths;
+  driver is visibly okay, passengers clear the bus, shelter is empty.
+- **Prop ownership:** desk → left hand → left forearm during takeover → cab
+  footwell → recovered during exit → left hand → bench in the Pilates cut.
+  Do not silently change hands, add a shoulder strap or duplicate the bag.
+- **Geography:** this is a fictional compressed Lentor Modern game set, allowing
+  the bus to be visible through the clinic glass. The boards are not a surveyed
+  route, verified transit service or faithful reconstruction of every frontage.
+- **Concept limitations:** panel 08 conveys the upward exit and rear player
+  view, but still simplifies/misplaces the bus doorway and reader near the rear.
+  It is not a final geometry guide. Build the front passenger-door/reader layout
+  in Blender before footage. Panel 07 shows the roll beginning; the full slide
+  and shelter contact are specified by the script. Stills cannot validate the
+  pursuit, contacts, camera lag or police running loop.
+- **Service framing:** Pilates/studio experience, no medical or treatment claim.
+  Her unhurt state is cartoon continuity, not recovery attributed to a session.
+- **Future motion handoff:** the new skill's Blender staging and H3 continuous
+  video guidance apply to these complex outdoor actions; simpler fixed-camera
+  scenes can use H3 still guides. This creative revision does not launch renders
+  or reopen the workflow comparison.
 
-- **Two pauses matter more than extra stunts.** Protect the one-second crash
-  silence, the isolated tap beep, and at least five seconds to discover the
-  police in the final frame. If tightening later, cut chase coverage first.
-- **The clinic changes the film's rhythm.** Outside: rough third-person
-  tracking, sharp cuts, angular game movement and loud mechanical sound.
-  Inside: steady camera, warm light, slow movement and quiet room tone. Keep
-  the same retro game rendering on both sides of the door.
-- **The cops stop pursuing but their animation keeps running.** The threshold
-  ends the chase; the final window view reveals the broken pathing. They must
-  jog against the glass, not bang on it, stand with raised hands, or enter.
-- **The final frame has three readable depths.** Reformer in front, two police
-  at the glass, burning wreck farther away. No curtains hiding the joke.
-  This deliberately compresses the geography into a fictional game version
-  of Lentor Modern; it is not a claim about the real clinic's road sightline.
-- **Character continuity:** adult woman, black ponytail, maroon athleisure,
-  white sneakers outside, small black handbag. Instructor in black top and
-  black leggings, plain black back, no name tag.
-- **Series tone:** nobody dies; no blood, casualties or prolonged beating.
-  Driver is visibly okay, commuters have cleared the bus, impact shelter is
-  empty. Destruction reads as absurd game physics.
-- **Service framing:** Pilates and the studio experience, with no claim that
-  a session treats stress, injury or a medical condition. Her unhurt state is
-  cartoon continuity, not recovery attributed to treatment.
-- **Sound carries the edit.** The script works with dialogue and original
-  effects alone. Optional instrumental backing must drop fully for the tap
-  and the clinic transition; no specific song is required by this concept.
+## References used
 
-## Concept-board limitations
+Applied the new [Goji GTA video skill](https://github.com/gojiphysio/goji/blob/a4cb40ee89d6baa9ca027785fca71abe56b65cb8/marketing/video-production/skills/goji-gta-video/SKILL.md),
+[series bible](https://github.com/gojiphysio/goji/blob/a4cb40ee89d6baa9ca027785fca71abe56b65cb8/marketing/video-production/skills/goji-gta-video/references/series-bible.md)
+and [San Andreas reference pack](https://github.com/gojiphysio/goji/blob/a4cb40ee89d6baa9ca027785fca71abe56b65cb8/marketing/video-production/skills/goji-gta-video/references/san-andreas-reference.md).
 
-The boards communicate the twelve story beats, not final animation blocking.
-Before final keyframes, follow the script for the right-hand driving position,
-the rotated doorway/card reader and the officers' running loop. Do not carry
-over generated route numbers as verified transport information. Architecture
-and road sightlines are illustrative; real location references belong in the
-later production pass. Preserve the actual episode-one character reference.
+- **Identity/style:** the skill's recovered `ep01-street.png` (Episode 1 v6),
+  plus `ep01-reception.png` for therapist identity, wardrobe and reception layout.
+  The smoother reception rendering is simplified toward the street/PS2 standard.
+- **Game-camera/look:** inspected cached samples from
+  [Paulo Cassiano's reported original-hardware PS2 capture](https://www.youtube.com/watch?v=Z9cD9uj1fb8&t=240s),
+  including the rear player view near 04:04 and rear driving view near 04:46.
+  Also inspected the reference pack's takeover and turn contact sheets. These
+  were still-frame inspections, not new normal-speed playback or measured physics.
+  Source capture processing and cheats remain unverified, as recorded in the pack.
+- **Generation:** built-in image generator, with identity and game-camera
+  references assigned separate roles. Exact prompts, edits and reference hashes
+  are in [v2 generation records](storyboard-prompts-v2.json).
+- **Planned shot states:** [camera and continuity record](camera-plan-v2.json).
+- **Earlier draft:** [v1 script and boards](creative-v1.md), retained for comparison.
 
-## Optional post caption
+## Optional caption
 
 > She took public transport. Technically.
 >
 > Goji Girl, Episode 02: TAP OUT.
 
-The closing service label and caption deliberately make no booking offer.
-Any later booking/message CTA must use an existing verified
-`go.gojiphysio.com/<slug>` redirect, following the repository convention.
-
-## Reference and provenance
-
-- [Episode-one review cut](https://github.com/gojiphysio/goji/blob/codex/goji-reel-mobile-handoff/marketing/assets/goji-reel-prototype/animation-v8/README.md)
-- [Episode-one character reference](https://github.com/gojiphysio/goji/blob/codex/goji-reel-mobile-handoff/marketing/assets/goji-reel-prototype/v5/frames/01-swagger.png)
-- [Earlier reformer-room reference](https://github.com/gojiphysio/goji/blob/codex/goji-reel-mobile-handoff/marketing/assets/goji-reel-prototype/v5/frames/08a-goji-reformer.png) — used for room/reformer mood, not its superseded staff uniform.
-- [Final episode-one plain-black-back correction](https://github.com/gojiphysio/goji/blob/codex/goji-reel-mobile-handoff/marketing/assets/goji-reel-prototype/final-scene-v9/README.md)
-- Storyboard illustrations: built-in image generation, using the references
-  above. [Exact storyboard prompt set](storyboard-prompts.json).
-
-Scope: creative direction only. No video generation, workflow redesign,
-Instagram publication or main-branch merge is part of this draft.
+Any later customer CTA must use a verified `go.gojiphysio.com/<slug>` redirect.
+No Instagram publication or main-branch merge is included in this revision.
