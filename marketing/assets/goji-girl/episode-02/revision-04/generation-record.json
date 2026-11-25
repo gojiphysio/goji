@@ -1,0 +1,68 @@
+{
+  "revision": 4,
+  "provider": "built-in image_gen",
+  "mode": "precise-object-edit",
+  "inputs": [
+    {
+      "path": "../revision-03/frames/05-08-bus-and-geometry.png",
+      "sha256": "e2e58293de9bfd5520a075e977f5c19763d7f41d20a968a7736d9c591df7ae1c"
+    },
+    {
+      "path": "../revision-03/frames/01-04-sos-brand.png",
+      "sha256": "09d05188023aa4ad9289fc7d32792806095d5b124807d38812b4e09b43903e52"
+    },
+    {
+      "path": "../revision-03/references/lentor-drive-canopy.webp",
+      "sha256": "9f6e6d4430ce2556fb6a34e707b6de994a5ebbc16081fb9045d56e5e66c66f93"
+    },
+    {
+      "path": "../revision-03/blender/geometry-overview.png",
+      "sha256": "24d8a335c351d586a7aba28de689f4a68a2b0513fc6a2159576cd6c4fda7d392"
+    },
+    {
+      "path": "../revision-03/frames/12-coaching-clean.png",
+      "role": "unchanged final art under native overlay",
+      "sha256": "f1e36734badaf8efb76f3edccc5f070f6b26a2a53680aa180315c8871b531184"
+    },
+    {
+      "path": "../revision-03/frames/09-12-facade-and-coaching.png",
+      "role": "unchanged clinic sheet under native overlay",
+      "sha256": "d97e35b461a03a1d96d44d8a31b7d834388f3d50a0d2f8e6e31d5ff1b32871f2"
+    },
+    {
+      "path": "../revision-03/overlays/mobility-popup.svg",
+      "role": "inherited box style, superseded text",
+      "sha256": "8fb915a136296774a963036906a44cdb0f6d17b11711f56f7eb2d85501d2756e"
+    }
+  ],
+  "generations": [
+    {
+      "id": "attempt-01",
+      "prompt": "Use case: precise-object-edit. Revise image 1, the four-panel PS2 GTA San Andreas storyboard numbered 05,06,07,08. Preserve its four-panel layout, character identities, clothing, SOS Transit livery and single wanted star in each panel. Original PS2 low-resolution painted textures and simple game shading, not modern photorealism.\nImage 2 (panels01-04) is the LOCKED preceding shot; use its panel04 bus stop, parked bus design, roof color and front face as continuity reference. Image3 is actual Lentor Modern architecture reference only (ignore finger and video text). Image4 is the authoritative toppled bus geometry; use its right-side-down roll and front passenger opening ahead of the front axle, NOT its primitive character appearance.\n05: Correct the reverse viewpoint. Same parked bus as04, identical world position and heading. Girl has run around the nose to the DRIVER'S RIGHT SIDE. Front windscreen/nose must now be at the LEFT of this panel, the long driver's side receding to the RIGHT. The broken driver window is immediately behind that nose, no passenger door on this visible side. Girl seen from behind pulls purple-shirted driver through this window; same black handbag on her LEFT forearm. Bus remains stationary parallel to the original curb. Original silver bus-stop canopy and green bin remain on the FAR PASSENGER SIDE, partially visible behind the bus, not on the roadway beside her. Daylight and HDB/tropical setting match04. Do not mirror the whole image or the SOS lettering.\n06: Keep the rear chase view. Remove the two symmetric red/blue luminous points from bus body COMPLETELY. These were mistaken for bus-mounted police lights. Bus only has normal red/amber tail lamps. Police cars are BEHIND THE CAMERA and unseen. Show one broad faint cool blue wash unevenly across the LEFT rear quarter and adjacent road, plus an offset faint red spill on the RIGHT roadside railing/road farther out. Irregular large diffuse reflected illumination, NO point glow on body, NO blue lamp, NO perfect red-blue pair. Sunlight dominates. Bus does not emit police light.\n07 and08 are the SAME final crash position at Lentor Modern. Stage a level road running parallel to the facade, a low curb, silver canopy with square posts and yellow-black chevron bollards. Mall facade on vehicle's original RIGHT, with dark vertical cladding and stepped balconies exactly inspired by photo. Same damaged front canopy post, same green bin alongside mid-bus, same short glass/debris patch beside front bumper in BOTH views.\n07: Rear vehicle gameplay camera, level horizon, looking forward along bus. Show END OF SLIDE: bus already fully on its driver's RIGHT side, 90-degree roll, motion almost stopped, last scrape sparks low. Rear ENGINE GRILLE and RED TAIL LAMPS closest to us, nose points into distance. In this rear-facing view the WHEELS/UNDERBODY are along SCREEN LEFT; red ROOF edge is SCREEN RIGHT. Passenger side faces UP. The mall and silver canopy are on SCREEN RIGHT (the roof side). Show dark Lentor Modern cladding and lettering, vertical tower balconies. Front of bus rests against a bent square canopy post farther into the frame. Keep bus on ground, not balancing on wheels.\n08: Player recovery camera near FRONT of that SAME stopped bus, looking back along its length. It is a deliberate reverse angle, not a relocated wreck. FRONT WINDSCREEN (rotated 90 degrees) and headlamps nearest us; rear end recedes. Now red roof edge on SCREEN LEFT and wheels on SCREEN RIGHT. The SAME Lentor facade and silver canopy are on SCREEN LEFT, because viewpoint reversed. The SAME bent canopy post is right beside front bumper, green bin recedes alongside bus. Replace the old generic HDB hillside background with the actual matching mall/canopy. Girl viewed from behind, torso emerging through the front LEFT PASSENGER DOOR (upward-facing opening directly behind windscreen, before front axle). Right hand taps the green fare reader rigidly attached just inside the door jamb; left hand braces. Preserve the correct aperture and rotated bus geometry from image4. No roof hatch, no bus standing upright, no new doorway. Empty shelter, no injuries. No captions except panel numbers and SOS Transit branding.",
+      "output": "frames/05-08-attempt-01.png",
+      "decision": "superseded: lighting and 05 viewpoint improved; 07 mall remained on incorrect side and bag changed sides",
+      "sha256": "c28dce8f4de81adeb631ba55bd022f11d813c56e56214fcbd75f9d93fa4ddacd"
+    },
+    {
+      "id": "attempt-02",
+      "prompt": "Edit this four-panel storyboard with a very precise continuity correction. Preserve panel06 and panel08 EXACTLY. Keep the bus geometry, roof edge, wheels, SOS lettering and rear camera in panel07 unchanged. Correct only its ENVIRONMENT: the crash site must agree with the reverse view in08. In07 put the Lentor Modern building, glass frontage, silver canopy, bent front post, green bin, curb and chevron bollards ENTIRELY ALONG THE RIGHT SIDE OF THE BUS, on the RED ROOF SIDE. The mall facade should occupy the RIGHT side of panel07 and recede towards the distant CENTER, facing out towards the road on the LEFT. The road/open traffic lanes must be on the LEFT of07 beside its wheels. Do not place mall storefronts or curb to left of bus. Do not mirror the bus or text. This is the same world space seen backwards in08: mall LEFT in08 but RIGHT in07. Bent canopy post is by the FRONT end of bus (far end in07, near end in08). Green bin halfway along roof side. No background relocation of bus.\nOne small prop fix in05: woman must have her single small black handbag hanging from her anatomical LEFT forearm, with NO shoulder strap. She reaches with her RIGHT hand to pull the driver's arm, with her left arm carrying the bag. Keep her back to us, same ponytail, maroon outfit and sneakers, same driver window and bus curb position, same canopy behind the bus. This is the original PS2 San Andreas game look. Keep all four panel numbers and one wanted star each, no other alterations.",
+      "input": "frames/05-08-attempt-01.png",
+      "output": "frames/05-08-attempt-02.png",
+      "decision": "superseded: 07 location corrected; bag still on right arm",
+      "sha256": "b77a928762ffb11c548f939fc288f194376f3ed31feee32ae70ed1a2919dcbe7"
+    },
+    {
+      "id": "attempt-03",
+      "prompt": "Edit ONLY the small handbag location in panel05 (top left) of this image. The existing handbag is incorrectly on the far RIGHT side of the woman's body. Remove it there and place the SAME single short-handled black handbag hanging from the crook of her LEFT elbow, the arm currently reaching TOWARD THE DRIVER on the LEFT side of her body, near the bus wheel. The elbow with the bag is the bent raised arm near image x250 y350. The arm on the far right of her body must be empty. No shoulder strap, no second bag. Preserve absolutely every other pixel/feature as closely as possible: all bus positions, backgrounds, the corrected mall-right setting in07, all of06/07/08, driver, hand contact, wardrobe, daylight, PS2 look, panel numbering and SOS text. Do not mirror anything.",
+      "input": "frames/05-08-attempt-02.png",
+      "output": "frames/05-08-continuity.png",
+      "decision": "selected: 05 viewpoint and left-forearm bag, ambient 06 spill, same roof-to-mall / wheels-to-road pose in reverse 07/08 views",
+      "sha256": "8b705d6a8bef733b4c3cb127c3c257937665f9f28eac761b0da9bc5dfa3a894d"
+    }
+  ],
+  "review": {
+    "type": "concept still review",
+    "motion_rendered": false,
+    "remaining": "Generated panels establish concept continuity, not measured identical geometry. Reuse revision-03 Blender bus asset and fixed world transforms for animation."
+  }
+}

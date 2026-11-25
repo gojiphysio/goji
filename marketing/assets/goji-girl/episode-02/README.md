@@ -1,6 +1,6 @@
 # Goji Girl · Episode 02 — TAP OUT
 
-**Creative draft v3 · 25 November 2026 · proposed 47 seconds · vertical 9:16**
+**Creative draft v4 · 25 November 2026 · proposed 47 seconds · vertical 9:16**
 
 A frustrating work call sends Goji Girl rushing to Pilates. She steals a bus,
 crashes outside Lentor Modern, remembers to tap out, and reaches the calm of
@@ -11,7 +11,27 @@ camera. The home and clinic use cutscene framing. The story, EZ-Link beep and
 final police gag stay intact. This is a script and illustrated concept board, now accompanied by a six-second
 Blender exit blockout. No final episode animation has been generated.
 
-## Revision 3 — geometry, real frontages and the ending
+## Revision 4 — safehouse, chase lighting and bus continuity
+
+**Safehouse unlocked. Save your game. Lose the heat. Repeat as necessary.**
+
+The new popup is an original San Andreas-style tutorial joke, with no appointment
+or treatment reference. It keeps the lowered y=360 placement and episode-one box
+styling. Shot 06 now shows broad, uneven reflected light from unseen chase cars,
+not a symmetrical pair of lights attached to the bus.
+
+**04 → 05:** the bus stays parked at the same curb, facing the same way. The
+player runs around its nose from the passenger side to the driver's side. The
+front changes screen sides because the camera follows her, not because the bus
+turns around. The original shelter stays on the far passenger side in 05.
+
+**07 → 08:** the revised 07 panel shows the end of the slide, fully on the driver's
+side. Its exact settled pose carries into 08. From the rear, the mall/canopy is
+on screen right and the wheels on screen left; the front recovery view reverses
+those screen positions. The bent post remains by the front bumper and the bin
+beside the middle of the bus. [Revision notes and continuity record](revision-04/README.md).
+
+### Retained staging and references
 
 The bus is now **SOS Transit**, keeping the red/purple italic logo treatment and
 livery. Lentor Modern follows the real dark cladding, balcony towers and silver
@@ -36,18 +56,16 @@ proposed episode from 45 to **47 seconds**.
 [Contact frames](revision-03/blender/contact-sheet.jpg) ·
 [Geometry and source notes](revision-03/README.md)
 
-The exact episode-one popup is reused below: **“Mobility – Upgraded. Cops will
-now find it harder to arrest you.”** Its box moves from **y=180 to y=360** on the
-1080×1920 canvas, with its font, colours, line breaks and size retained. The
-popup appears at 41.5s and leaves at 46s. It clears the proposed top/right/bottom
-UI reserves in the review mask; actual Instagram chrome varies by view/device.
+The **safehouse popup** appears at 41.5s and leaves at 46s. Its box remains at
+**y=360** on a 1080×1920 canvas, retaining the same font, colours and dimensions.
+It clears the proposed UI reserves; actual Instagram chrome varies by device.
 
-![Revised final frame: therapist actively coaching, police stuck outside, SOS bus burning, and original Mobility popup lowered.](revision-03/frames/12-mobility-preview.png)
+![Final frame with the new safehouse tutorial, actively coaching therapist and police stuck outside.](revision-04/frames/12-safehouse-preview.png)
 
-[Full-size ending](revision-03/frames/12-mobility-preview.png) ·
-[UI clearance review](revision-03/frames/12-ui-clearance-check.png) ·
-[Editable SVG popup](revision-03/overlays/mobility-popup.svg) ·
-[Transparent PNG popup](revision-03/overlays/mobility-popup.png)
+[Full-size ending](revision-04/frames/12-safehouse-preview.png) ·
+[UI clearance review](revision-04/frames/12-ui-clearance-check.png) ·
+[Editable SVG popup](revision-04/overlays/safehouse-popup.svg) ·
+[Transparent PNG popup](revision-04/overlays/safehouse-popup.png)
 
 ## Revised storyboard
 
@@ -58,13 +76,13 @@ to the timed sequences below; a panel is a story moment, not necessarily a cut.
 
 [Open panels 01–04](revision-03/frames/01-04-sos-brand.png)
 
-![05–08: takeover viewed behind the player, rear bus chase, rear-view rollover with level horizon, and player-camera tap from the overturned bus.](revision-03/frames/05-08-bus-and-geometry.png)
+![05–08: takeover viewed behind the player, rear bus chase, rear-view settled rollover with level horizon, and player-camera tap from the overturned bus.](revision-04/frames/05-08-continuity.png)
 
-[Open panels 05–08](revision-03/frames/05-08-bus-and-geometry.png)
+[Open panels 05–08](revision-04/frames/05-08-continuity.png)
 
-![09–12: rear-view dust-off, player-centred sprint with pursuers at frame edges, reception cutscene and quiet reformer session with police stuck outside.](revision-03/frames/09-12-with-popup.png)
+![09–12: rear-view dust-off, player-centred sprint with pursuers at frame edges, reception cutscene and quiet reformer session with police stuck outside.](revision-04/frames/09-12-with-popup.png)
 
-[Open panels 09–12](revision-03/frames/09-12-with-popup.png)
+[Open panels 09–12](revision-04/frames/09-12-with-popup.png)
 
 ## Camera and look
 
@@ -128,7 +146,9 @@ Sound: door **BANG**, two heavy swagger steps, running feet. Brief objective:
 **Same PLAYER follow.** She reaches a busy Singapore bus stop. A white/purple
 **SOS Transit** single-deck bus with the familiar italic red/purple logo and a red roof band has its left passenger doors open and
 commuters alighting. She runs around the nose toward the right-hand driver's
-cab. The camera follows her route; the bus appears ahead and beside her.
+cab. The camera follows her route around the nose; the bus remains stationary
+and parallel to the same curb through shot 05. Finish 04 at the nose with both
+the front windscreen and her crossing direction readable before the view changes.
 
 Sound: idle engine, air hiss, chatter. Show the last passenger step clear before
 the takeover. The bus looks busy on arrival, but nobody remains aboard for the
@@ -141,6 +161,10 @@ shoulder at full-body distance, with both people readable. She hooks the bag
 over her left forearm, smashes the driver's window, pulls the driver out,
 lets him clear the cab, then climbs into the seat. He lands upright, alive
 and indignant. Keep the separate removal, clearance and entry states.
+
+The front now occupies screen left, with the driver's side receding to screen
+right. This is the reverse side of the same stationary bus from 04. The shelter
+and bin remain beyond its passenger side. No heading, curb or wheel-position jump.
 
 Sound: **CRASH**, surprised yelp, wanted sting. **One star lights up.** She places
 the bag in the cab footwell as she gets in. Transfer to the vehicle camera only
@@ -156,8 +180,11 @@ reacts to steering; the chassis remains rigid. No front-quarter beauty shot,
 cab insert or roadside tracking cut.
 
 Sound: diesel, horn, tyre squeal and rattling fittings. Police remain behind
-the camera, out of sight. Red and blue flashes hit the bus's rear and nearby
-surfaces; sirens tell us the pursuit is getting closer. Keep the single star.
+the camera, out of sight. Broad blue/red spill sweeps unevenly over the road, railing and bus body.
+The sources belong to the unseen chasing cars, behind and offset from the camera,
+with staggered pulses and different falloff. No paired glowing points, blue bus
+lamps or symmetric red/blue patches. Normal bus tail lamps remain red/amber.
+Sirens tell us the pursuit is getting closer. Keep the single star.
 
 ### 07 · 00:20–00:25 — Arrival is a strong word
 
@@ -169,12 +196,19 @@ does not roll, orbit to the front or cut to an impact close-up.
 
 Sound: squeal → scrape → enormous **CRUNCH**. Sparks start at road contact.
 Keep the bus recognisable and the left passenger side upward. No explosion
-covers the recovery. The shelter is empty.
+covers the recovery. The shelter is empty. The storyboard shows the final sliding/settled pose:
+right side down, passenger side upward, roof toward the mall, wheels toward the
+road. From this rear view, the mall/canopy is screen right. The front bumper
+stops at the damaged post. Freeze that chassis transform at the end of 07.
 
 ### 08 · 00:25–00:31 — Still must tap out
 
 **Recovery camera transfers back to PLAYER.** First hold on the settled wreck
-for one full second. A little piece of shelter drops. Then the camera settles
+for one full second, preserving the exact end-of-07 bus transform, curb,
+bent post and bin. A little piece of shelter drops. Use a deliberate recovery
+camera cut from the rear vehicle view to the front passenger doorway, with the
+same wreck still at rest; never rotate or relocate the bus to fit the new view.
+The mall is now screen left and the wheels screen right. Then the camera settles
 behind her as she climbs up through the upward-facing front passenger doorway.
 A modest rise/offset keeps her and the reader visible, as an interaction camera
 avoiding obstruction would; it does not become an aerial shot.
@@ -237,9 +271,15 @@ cinematic pullback. Through the clear glass, two police face inward and run
 against it—alternating knees, pumping arms, no forward progress, slightly out
 of phase. Beyond them, the overturned bus burns. Nobody inside reacts.
 
-At **41.5s**, bring in the original **Mobility – Upgraded. Cops will now find it
-harder to arrest you.** popup at its revised y=360 position. Hold until **46s**.
-It is a fictional game notification, not a treatment-outcome promise.
+At **41.5s**, show the tutorial box at y=360. Hold until **46s**:
+
+> **Safehouse unlocked.**<br>
+> **Save your game.**<br>
+> **Lose the heat.**<br>
+> **Repeat as necessary.**
+
+This is original San Andreas-style parody copy, not a verbatim game quote.
+The joke stays entirely in the fictional game; no appointment or treatment claim.
 
 Small final-two-second copy: **“Pilates at Goji · Lentor Modern.”** Keep it clear
 of the background gag. End on the moving tableau.
@@ -291,9 +331,10 @@ and [San Andreas reference pack](https://github.com/gojiphysio/goji/blob/a4cb40e
 - **Generation:** built-in image generator, with identity and game-camera
   references assigned separate roles. Exact prompts, edits and reference hashes
   are in [v2 generation records](storyboard-prompts-v2.json).
-- **Current shot states:** [camera and continuity record](camera-plan-v3.json).
-- **This revision:** [source photos, Blender records and exact prompts](revision-03/README.md).
-- **Earlier drafts:** [v1](creative-v1.md) and [v2](creative-v2.md), retained for comparison.
+- **Current shot states:** [camera and continuity record](camera-plan-v4.json).
+- **This revision:** [safehouse overlay, lighting and continuity notes](revision-04/README.md).
+- **Retained staging:** [source photos and Blender records](revision-03/README.md).
+- **Earlier drafts:** [v1](creative-v1.md), [v2](creative-v2.md) and [v3](creative-v3.md), retained for comparison.
 
 ## Optional caption
 

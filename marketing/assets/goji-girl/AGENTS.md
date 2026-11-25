@@ -21,9 +21,12 @@
 - Use the actual Goji frontage and Lentor Drive canopy photo references for
   exterior landmarks. Preserve the approved interior and explicitly label
   fictional geography needed for the gag.
-- The episode-one Mobility popup is reusable verbatim. Episode 2 moves its
-  1080×1920 box from y=180 to y=360; retain an editable overlay and review its
-  clearance instead of baking generated lettering into the art.
+- Episode 2's current popup is the safehouse tutorial in its script, superseding
+  Mobility. Keep the episode-one box styling at y=360 on 1080×1920; retain editable
+  text and review clearance rather than baking generated lettering into art.
+- Police flashes are diffuse spill from offscreen chase vehicles, never paired
+  emitters attached to the bus. Across reverse angles, lock vehicle world pose
+  and landmarks; screen-left/right changes with the camera, not the set.
 - The comedy uses exaggerated game physics and deadpan reactions. Preserve the
   series' no-blood/no-deaths rule; incidental characters remain visibly unharmed.
 - Label concept boards as concepts. The script controls timing, spatial logic
