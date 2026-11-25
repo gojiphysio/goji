@@ -187,7 +187,7 @@ SCENARIOS: list[Scenario] = [
     S("new_postpartum", "new enquiry",
       ["Hi! I gave birth 5 weeks ago and want to get my core checked, when can I come in?"],
       E(intents=("service_fit", "availability", "booking"), decisions=("send",),
-        must_not=(r"it'?s never too late",), max_questions=1)),
+        must_not=(r"it'?s never too late",), max_questions=2)),  # times + name/email
     S("dr_clinic_context", "new enquiry",
       ["Can you guys fix my DR?"],
       E(must=(r"diastasis recti", PAGE), must_not=(CASUAL_DR, r"\bdoctor\b.*\?"), max_questions=1),
@@ -825,8 +825,9 @@ def check(e: Expect, p: Proposal | None, action: str, *, prior_agent: bool,
     # handover that's the holding reply, not the draft for Chris.
     to_customer = (p.holding_reply or "") if action == ESCALATE \
         and p.intent not in ("urgent", "sensitive") else r
-    if e.max_questions is not None and to_customer.count("?") > e.max_questions:
-        f.append(f"{to_customer.count('?')} questions (max {e.max_questions})")
+    asked = re.sub(r"https?://\S+", "", to_customer).count("?")  # a link's ?query isn't one
+    if e.max_questions is not None and asked > e.max_questions:
+        f.append(f"{asked} questions (max {e.max_questions})")
     if e.max_words is not None and len(to_customer.split()) > e.max_words:
         f.append(f"{len(to_customer.split())} words (max {e.max_words})")
     if (e.no_greeting or prior_agent) and re.search(GREETING, to_customer, re.I):
