@@ -62,8 +62,9 @@ from .policy import (AGENT, DRAFT, ESCALATE, HUMAN, LATE_CHANGE_H, OFF_TOPIC, PA
                      note_off_topic,
                      out_of_scope,
                      pre_golive_chat,
-                     decide, gate, human_replied_since, is_acknowledgement, on_human_message,
-                     mask_customer_emails, reply_problems, set_mode)
+                     decide, gate, human_replied_since, is_acknowledgement, is_positive_reaction,
+                     mask_customer_emails, on_human_message,
+                     reply_problems, set_mode)
 from .state import ChatLocks, append_history, make_store, mark_seen, note_outcome, parse_code
 from .whatsapp import (Echo, HistoryChunk, Inbound, Status, WhatsAppClient, parse_webhook,
                        verify_signature)
@@ -595,23 +596,26 @@ def _book_pending(state, ev: Inbound, received: float, fallback: str,
     pending = state.pending_booking or {}
     if not pending or pending.get("at", 0) >= received \
             or received - pending.get("at", 0) > config.BOOKING_CONFIRM_WINDOW_S:
-        events.record("book_skipped", ev.wa_id, reason="no_pending_booking")
-        return fallback, None, False
+        return _book_skipped(state, ev, "no_pending_booking", pending)
     # The customer either said yes to the booking stated back, or picked one of
     # the times offered in that earlier message. Nothing else gets booked.
     pick = (chosen.get("date", ""), chosen.get("time", ""))
     if pick != (pending.get("date"), pending.get("time")):
         if pick not in booking_client.offered(pending.get("options", "")):
-            events.record("book_skipped", ev.wa_id, reason="time_not_offered")
-            return fallback, None, False
-        pending = {**pending, "date": pick[0], "time": pick[1],
-                   "full_name": pending.get("full_name") or chosen.get("full_name", "")}
-    # An email given with the pick (or as the corrected one) counts too.
+            return _book_skipped(state, ev, "time_not_offered", pending)
+        pending = {**pending, "date": pick[0], "time": pick[1]}
+    # Details given in the confirming message itself fill what's missing: the
+    # usual case is a customer who picked a time, was asked their name, and
+    # sent it. The time stays the one confirmed above.
+    pending = {**pending, **{k: chosen[k].strip() for k in ("full_name", "email", "address")
+                             if not (pending.get(k) or "").strip()
+                             and (chosen.get(k) or "").strip()}}
+    # A different email in the confirming message wins: it's their word (or
+    # the corrected one after _ask_email_again).
     if (chosen.get("email") or "").strip():
         pending = {**pending, "email": chosen["email"].strip()}
     if not booking_client.complete(pending):
-        events.record("book_skipped", ev.wa_id, reason="details_missing")
-        return fallback, None, False
+        return _book_skipped(state, ev, "details_missing", pending)
     patient_id = tools.record_for_booking(state.patient or {}, pending.get("full_name", ""),
                                           pending.get("for_whom", ""))
     check = booking_client.email_check(pending.get("email", ""))
@@ -669,6 +673,26 @@ def _ask_email_again(state, ev: Inbound, pending: dict, question: str):
     events.record("book_skipped", ev.wa_id, reason="email_check")
     return question, None, False
 
+
+
+BOOK_HELD_REPLY = ("Thanks! I'm just getting the team to confirm this booking, and "
+                   "they'll message you shortly.")
+
+
+def _book_skipped(state, ev: Inbound, reason: str, pending: dict
+                  ) -> tuple[str, dict | None, bool]:
+    """The model said the customer confirmed a booking, but the code can't
+    make it. The customer must not be left thinking it's booked (the model's
+    own reply may say so), so they get a holding line and Chris is told."""
+    events.record("book_skipped", ev.wa_id, reason=reason)
+    what = " ".join(x for x in (pending.get("service", ""), pending.get("date", ""),
+                                pending.get("time", ""), pending.get("clinician", ""))
+                    if x)
+    _alert("escalated", customer=ev.name, wa_id=ev.wa_id,
+           staff_note=f"They confirmed a booking but it didn't go through ({reason}). "
+                      f"Please book and confirm with them: {what or 'see the chat'}",
+           suggested_reply="", reason=f"booking skipped: {reason}", last_message=ev.text)
+    return BOOK_HELD_REPLY, None, True
 
 BUBBLE_PAUSE_S = 1.2
 
@@ -896,7 +920,44 @@ def _hold_pre_golive(state, blocked, now: float) -> None:
         set_mode(state, PAUSED, "pre_golive_chat", now)
 
 
+def _customer_reaction(ev: Inbound) -> None:
+    """An emoji reaction is never a question: no model call, no reply, no
+    history line (one landing after a text would supersede that text's run).
+    A positive one (👍 😊 🙏) needs nobody; a negative or neutral one pings
+    staff, when the chat is the agent's (in Chris's own chats she sees it in
+    the Business app). Owner, 25 Nov 2026, after a 👍 pinged her."""
+    if not ev.emoji or is_positive_reaction(ev.emoji):
+        events.record("silent", ev.wa_id, reason="reaction")
+        return
+    st, _, _ = _deps()
+    with locks(ev.wa_id):
+        state = st.load(ev.wa_id)
+        if not mark_seen(state, ev.msg_id):
+            return
+        st.save(state)
+    blocked = gate(state, time.time(), kill_switch=config.KILL_SWITCH or st.get_kill(),
+                   agent_hours=config.resolve_rollout(st.get_rollout())["hours"],
+                   not_live=_not_live(st))
+    if state.owner != "agent" or blocked:
+        events.record("silent", ev.wa_id, reason="reaction")
+        return
+    target = next((h for h in state.history if ev.reply_to and h.get("id") == ev.reply_to), None)
+    on = ""
+    if target:
+        words = target["text"].split()
+        quote = " ".join(words[:12]).rstrip(".!?") + ("…" if len(words) > 12 else "")
+        on = f' to "{quote}"'
+    events.record("escalated", ev.wa_id, reason="reaction")
+    _alert("reaction", customer=state.name, wa_id=ev.wa_id, suggested_reply="",
+           staff_note=f"reacted {ev.emoji}{on}", reason="a negative or neutral reaction",
+           last_message=ev.text)
+
+
 def handle_inbound(ev: Inbound, received: float) -> None:
+    if ev.kind == "reaction":  # staff reacting to a ping: nothing to do
+        if ev.wa_id not in config.STAFF:
+            _customer_reaction(ev)
+        return
     if ev.wa_id in config.STAFF:
         handle_staff(ev)
         return

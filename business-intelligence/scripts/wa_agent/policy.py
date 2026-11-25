@@ -305,6 +305,19 @@ def is_acknowledgement(text: str, history: list[dict]) -> bool:
     return bool(t) and bool(_ACK.fullmatch(t)) and prior_role in ("agent", "staff")
 
 
+# Reactions that need nobody (owner, 25 Nov 2026). Anything else, negative
+# or neutral (👎 😡 😢 😮 🤔 😅), pings staff. Skin tones and the emoji
+# variation selector are ignored, so 👍🏽 and ❤️ count.
+POSITIVE_REACTIONS = frozenset(
+    "👍 👌 🙏 🙌 👏 💪 🤝 🫶 ❤ ♥ 🧡 💛 💚 💙 💜 🤍 🤎 🩷 🩵 💕 💖 💗 💓 💞 💝 "
+    "😊 🙂 ☺ 😀 😃 😄 😁 😆 😂 🤣 🥰 😍 😘 🤗 😇 🤩 🥳 😻 🎉 ✨ ⭐ 🌟 💯 ✅ ✔ 🔥".split())
+_EMOJI_MODIFIERS = re.compile("[\U0001F3FB-\U0001F3FF\uFE0F]")
+
+
+def is_positive_reaction(emoji: str) -> bool:
+    return _EMOJI_MODIFIERS.sub("", emoji or "") in POSITIVE_REACTIONS
+
+
 BREAK = "<break>"
 
 

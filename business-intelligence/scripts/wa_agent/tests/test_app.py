@@ -14,7 +14,7 @@ from wa_agent.state import MemoryStore
 from wa_agent.whatsapp import parse_webhook
 
 from .fakes import FakeClaude, FakeWhatsApp, final
-from .payloads import echo, inbound, status
+from .payloads import echo, inbound, reaction, status
 
 CUSTOMER = "6591234567"
 
@@ -153,6 +153,66 @@ def test_first_thanks_gets_one_warm_closer_then_silence(env):
     post(client, inbound(msg_id="wamid.in3", text="ok thanks!"))
     assert len(app_mod.claude.requests) == 2 and len(app_mod.wa.sent) == 2   # loop ends
     assert ("silent", {"reason": "acknowledgement"}) in rec
+
+
+@pytest.mark.parametrize("emoji", ["👍", "👍🏽", "❤️", "😊", "🙏", "😂", ""])
+def test_positive_reaction_gets_no_reply_and_no_ping(env, emoji):
+    client, rec, notes = env
+    app_mod.claude.queue.append(final())
+    post(client, inbound())
+    sent, history = len(app_mod.wa.sent), len(app_mod.store.load(CUSTOMER).history)
+    post(client, reaction(emoji=emoji))
+    assert len(app_mod.claude.requests) == 1 and len(app_mod.wa.sent) == sent
+    assert notes == [] and ("silent", {"reason": "reaction"}) in rec
+    assert len(app_mod.store.load(CUSTOMER).history) == history
+
+
+@pytest.mark.parametrize("emoji", ["👎", "😡", "😢", "😮", "🤔"])
+def test_negative_or_neutral_reaction_pings_staff(env, emoji):
+    client, rec, notes = env
+    app_mod.claude.queue.append(final(reply="We open at 8am."))
+    post(client, inbound())   # our reply is wamid.out1, the message reacted to
+    post(client, reaction(emoji=emoji))
+    post(client, reaction(emoji=emoji))   # Meta's retry: one ping only
+    assert len(app_mod.claude.requests) == 1 and len(app_mod.wa.sent) == 1
+    [(kind, kw)] = notes      # no staff number set: the email is the ping
+    assert kind == "reaction" and kw["staff_note"] == f'reacted {emoji} to "We open at 8am"'
+    assert ("escalated", {"reason": "reaction"}) in rec
+
+
+def test_negative_reaction_in_chrises_chat_pings_nobody(env):
+    client, rec, notes = env
+    app_mod.claude.queue.append(final())
+    post(client, inbound())
+    post(client, echo())      # Chris has the chat now
+    post(client, reaction(emoji="😡"))
+    assert notes == [] and ("silent", {"reason": "reaction"}) in rec
+
+
+def test_reaction_after_a_text_does_not_supersede_it(env, monkeypatch):
+    client, rec, _ = env
+    app_mod.claude.queue.append(final(reply="We open at 8am."))
+    def react():
+        ev = parse_webhook(reaction())[0]
+        app_mod.handle_inbound(ev, ev.ts)
+    monkeypatch.setattr(app_mod, "_sleep", on_nth_sleep(1, react))
+    post(client, inbound())
+    assert app_mod.wa.sent == [(CUSTOMER, "We open at 8am.")]
+
+
+def test_staff_reaction_to_a_ping_gets_no_reply(env, monkeypatch):
+    client, rec, notes = env
+    monkeypatch.setattr(config, "STAFF", frozenset({"6591110000"}))
+    post(client, reaction(wa_id="6591110000"))
+    assert app_mod.wa.sent == [] and app_mod.claude.requests == [] and rec == []
+
+
+def test_business_app_reaction_does_not_pause_the_chat(env):
+    client, rec, _ = env
+    app_mod.claude.queue.append(final())
+    post(client, inbound())
+    post(client, reaction(echoed=True))
+    assert app_mod.store.load(CUSTOMER).mode == AGENT and "echo" not in names(rec)
 
 
 def test_thanks_after_a_booking_needs_no_reply(env):
@@ -780,6 +840,44 @@ def test_a_bad_email_on_file_books_without_it(env, monkeypatch):
     post(client, inbound(msg_id="wamid.in2", text="yes"))
     assert [c["email"] for c in calls] == ["ct@gmail.con", ""]
     assert app_mod.wa.sent[-1][1].startswith("You're booked, Charles!") and not notes
+
+
+def test_a_name_sent_after_picking_a_time_books_it(env, monkeypatch):
+    # Picked an offered time, was asked their name, sent it: the name comes in
+    # the confirming message, for the same time already pending.
+    client, rec, notes = env
+    calls = []
+    monkeypatch.setattr(app_mod.booking_client, "book", lambda b, wa_id, patient_id="": calls.append(dict(b)) or
+                        {"ok": True, "reference": "GOJI-N4", "clinician_name": "Kristy",
+                         "service": "Physiotherapy", "date": b["date"], "time": b["time"],
+                         "dry_run": True})
+    picked = {**BOOK, "full_name": "", "options": "2026-11-26 10:00"}
+    app_mod.claude.queue.append(_final_with("Lovely! Could I have your full name?",
+                                            booking=picked))
+    post(client, inbound(text="10am tomorrow"))
+    assert calls == [] and app_mod.store.load(CUSTOMER).pending_booking["full_name"] == ""
+    app_mod.claude.queue.append(_final_with("Booking you in now.", confirm_booking=True,
+                                            booking={**picked, "full_name": "Charles Tan"}))
+    post(client, inbound(msg_id="wamid.in2", text="Charles Tan"))
+    assert len(calls) == 1 and calls[0]["full_name"] == "Charles Tan"
+    assert calls[0]["time"] == "10:00"
+    assert app_mod.wa.sent[-1][1].startswith("You're booked, Charles!")
+    assert notes == []
+
+
+def test_a_confirmed_booking_that_cant_be_made_holds_and_tells_chris(env, monkeypatch):
+    client, rec, notes = env
+    monkeypatch.setattr(app_mod.booking_client, "book",
+                        lambda b, wa_id, patient_id="": pytest.fail("booked without a name"))
+    picked = {**BOOK, "full_name": "", "options": "2026-11-26 10:00"}
+    app_mod.claude.queue.append(_final_with("Could I have your full name?", booking=picked))
+    post(client, inbound(text="10am tomorrow"))
+    app_mod.claude.queue.append(_final_with("Booking you in now.", confirm_booking=True,
+                                            booking=picked))
+    post(client, inbound(msg_id="wamid.in2", text="ok"))
+    assert ("book_skipped", {"reason": "details_missing"}) in rec
+    assert app_mod.wa.sent[-1][1] == app_mod.BOOK_HELD_REPLY      # never "booking you in now"
+    assert notes[-1][0] == "escalated"
 
 
 def test_no_closer_for_someone_already_in_a_longer_conversation(env):
