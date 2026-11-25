@@ -624,15 +624,30 @@ def test_forget_deletes_chat_and_late_changes(env):
     assert "forgotten" in names(rec)
 
 
-def test_summary_lists_paused_chats_with_resume_hint():
+def test_summary_groups_paused_chats_like_status():
+    """25 Nov 2026: the morning summary groups paused chats the way STATUS does,
+    instead of listing all of them (the WhatsApp line cut them at 6)."""
     now = 1_800_000_000.0
     p1 = ChatState(wa_id="6500000011", name="Ann", code="004", mode=PAUSED, mode_since=now - DAY)
     p2 = ChatState(wa_id="6500000012", name="", code="007", mode=PAUSED, mode_since=now - 9 * DAY)
-    s = summary.build([], now, paused=[p1, p2])
-    assert s["paused"] == 2
-    assert "ending 0012 (#007)" in s["body"] and "Ann (#004)" in s["body"]
-    assert s["body"].index("#004") < s["body"].index("#007")      # latest first
-    assert "RESUME 004" in s["body"] and "RESUME" in s["line"]
+    back = ChatState(wa_id="6500000013", name="Bo", code="027", mode=PAUSED,
+                     mode_since=now - 3600, last_customer_at=now - 7200,
+                     history=[{"role": "customer"}, {"role": "agent"}, {"role": "staff"}])
+    asks = ChatState(wa_id="6500000014", name="Cy", code="009", mode=PAUSED,
+                     mode_since=now - DAY, last_customer_at=now - 5 * 3600,
+                     history=[{"role": "customer"}, {"role": "staff"}, {"role": "customer"}])
+    s = summary.build([], now, paused=[p1, p2, back, asks])
+    assert s["paused"] == 4 and s["unanswered"] == 1 and s["hand_back"] == 1
+    body = s["body"]
+    assert "Waiting on a reply (1)" in body and "Cy (#009) 5h ago" in body
+    assert "Ready to hand back (1)" in body and "RESUME 004" in body and "Bo (#027)" in body
+    assert "You're handling 2 more yourself" in body
+    assert body.index("Ann (#004)") < body.index("ending 0012 (#007)")    # latest first
+    line = s["line"]
+    assert "Waiting on a reply: Cy (#009) 5h ago." in line
+    assert "Ready to hand back, text RESUME and the number: Bo (#027)." in line
+    assert "You're handling 2 more yourself (STATUS ALL lists them)." in line
+    assert "#004" not in line and "and more" not in line
 
 
 def test_status_groups_paused_chats_by_what_chris_can_do():
