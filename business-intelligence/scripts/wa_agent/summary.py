@@ -124,7 +124,14 @@ def build(chats: list[ChatState], now: float, window_s: int = DAY_S,
         if bad:
             failed.append(_line(c, bad))
     paused = paused or []
-    held = paused_labels([c for c in paused if c.mode_reason != WATCHLIST])
+    # Paused chats in the same groups as STATUS (owner, 25 Nov 2026): a flat list
+    # of 26 was too long to act on. A chat already under "Left for you" isn't
+    # repeated as waiting.
+    held = [c for c in paused if c.mode_reason != WATCHLIST]
+    groups = status_groups(held, now)
+    unanswered = [u for u in groups["unanswered"]
+                  if not any(u[:u.index(")") + 1] in l for l in left)]
+    hand_back, rest = groups["hand_back"], groups["rest"]
     # Only newly watched chats: older ones stay quiet without filling the email.
     watched = paused_labels([c for c in paused
                              if c.mode_reason == WATCHLIST and c.mode_since >= since])
@@ -136,9 +143,19 @@ def build(chats: list[ChatState], now: float, window_s: int = DAY_S,
         sections = []
         if left:
             sections.append(f"Left for you ({len(left)}):\n" + "\n".join(left))
+        if unanswered:
+            sections.append(f"Waiting on a reply ({len(unanswered)}): paused chats where the "
+                            "customer wrote last, in the last 24 hours.\n"
+                            + "\n".join(f"- {u}" for u in unanswered))
         if failed:
             sections.append(f"Failures ({len(failed)}), please check these chats:\n"
                             + "\n".join(failed))
+        if hand_back:
+            sections.append(f"Ready to hand back ({len(hand_back)}): the assistant was in these "
+                            "chats until you stepped in. Text RESUME and the number (e.g. "
+                            "RESUME 004) to the Goji number from your phone; the assistant "
+                            "won't message them, it just answers their next message.\n"
+                            + "\n".join(f"- {h}" for h in hand_back))
         if answered:
             sections.append(f"Answered by the assistant ({len(answered)}):\n"
                             + "\n".join(answered))
@@ -151,24 +168,25 @@ def build(chats: list[ChatState], now: float, window_s: int = DAY_S,
                             "row, so these numbers are on the watch list and get no replies. "
                             "If one is a real customer, text RESUME and its number.\n"
                             + "\n".join(f"- {w}" for w in watched))
-        if held:
-            sections.append(f"Paused for you ({len(held)}): the assistant stays out of these "
-                            "until you hand them back. Text RESUME and the number (e.g. "
-                            "RESUME 004) to the Goji number from your phone; the assistant "
-                            "won't message them, it just answers their next message. A chat "
-                            "you wrote in comes back by itself if they write 2 weeks after "
-                            "your last message.\n"
-                            + "\n".join(f"- {h}" for h in held))
+        if rest:
+            sections.append(f"You're handling {len(rest)} more yourself: the assistant stays "
+                            "out of these until you text RESUME and the number. A chat you "
+                            "wrote in comes back by itself if they write 2 weeks after your "
+                            "last message.\n" + "\n".join(f"- {r}" for r in rest))
         body = ("The WhatsApp assistant's last 24 hours (to "
                 f"{day:%H:%M %a %d %b} SGT).\n\n" + "\n\n".join(sections) + "\n\n"
-                "Only the chats under \"Left for you\" and \"Failures\" need you. "
-                "Open them in the WhatsApp Business app.\n")
+                "Only the chats under \"Left for you\", \"Waiting on a reply\" and "
+                "\"Failures\" need you. Open them in the WhatsApp Business app.\n")
     line = (f"Goji assistant, last 24h: {len(answered)} chat(s) answered, "
             f"{len(left)} left for you, {len(failed)} failure(s)."
             + (f" {len(junk)} off-topic, no action needed." if junk else "")
-            + (f" Paused for you: {', '.join(held[:6])}{' and more' if len(held) > 6 else ''}"
-               ". Text RESUME and the number to hand one back." if held else "")
+            + (f" Waiting on a reply: {', '.join(unanswered)}." if unanswered else "")
+            + (f" Ready to hand back, text RESUME and the number: {', '.join(hand_back)}."
+               if hand_back else "")
+            + (f" You're handling {len(rest)} more yourself (STATUS ALL lists them)."
+               if rest else "")
             + " Details in your email.")
     return {"subject": subject, "body": body, "line": line,
             "answered": len(answered), "left": len(left), "failed": len(failed),
-            "paused": len(held), "off_topic": len(junk), "watched": len(watched)}
+            "paused": len(held), "unanswered": len(unanswered), "hand_back": len(hand_back),
+            "off_topic": len(junk), "watched": len(watched)}
