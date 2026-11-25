@@ -60,6 +60,40 @@ def _line(state: ChatState, outcomes: list[dict]) -> str:
     return f"- {_who(state)}: {', '.join(parts)}"
 
 
+# STATUS groups (owner, 25 Nov 2026). Past Meta's 24h window Chris can't write
+# free-form, so an older unanswered chat isn't "waiting"; a chat the agent was in
+# stays "ready to hand back" for 2 days of quiet.
+UNANSWERED_S = DAY_S
+HAND_BACK_S = 2 * DAY_S
+
+
+def _latest(c: ChatState) -> float:
+    return max(c.last_customer_at, c.last_staff_at, c.mode_since)
+
+
+def _customer_wrote_last(c: ChatState) -> bool:
+    said = [h for h in c.history if h.get("role") in ("customer", "agent", "staff")]
+    return bool(said) and said[-1].get("role") == "customer"
+
+
+def status_groups(paused: list[ChatState], now: float) -> dict:
+    """Paused chats sorted by what Chris can do with them, newest first:
+    unanswered (the customer wrote last, inside 24h; label + age), hand_back
+    (the agent had been in the chat, active in the last 2 days: RESUME them)
+    and rest (her own conversations: the agent never spoke, or gone quiet)."""
+    out: dict[str, list[str]] = {"unanswered": [], "hand_back": [], "rest": []}
+    for c in sorted(paused, key=_latest, reverse=True):
+        if _customer_wrote_last(c) and now - c.last_customer_at < UNANSWERED_S:
+            hours = max(1, round((now - c.last_customer_at) / 3600))
+            out["unanswered"].append(f"{_who(c)} {hours}h ago")
+        elif (any(h.get("role") == "agent" for h in c.history)
+              and now - _latest(c) < HAND_BACK_S):
+            out["hand_back"].append(_who(c))
+        else:
+            out["rest"].append(_who(c))
+    return out
+
+
 def paused_labels(paused: list[ChatState]) -> list[str]:
     """Chats the agent stays out of until someone resumes them, the one the
     customer wrote in most recently first (that's the one Chris is looking for)."""
