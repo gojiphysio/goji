@@ -17,9 +17,12 @@ The WhatsApp assistant. What it is and how to run it: [`README.md`](README.md).
 - **Bookings ask for an email** (owner, 25 Nov 2026): with one on the
   booking, Plato sends its own confirmation (with the clinic's registration
   form) and goji-booking sends Goji's. The agent asks once, with the times,
-  or before booking if a time was picked first; a no books without it. A
-  returning patient's email on file (`dim_patient_contact`) goes with the
-  booking and is never shown to the model. A malformed or mistyped email
+  or before booking if a time was picked first; a no books without it. Only
+  numbers with no email on file are asked: otherwise the booking takes the
+  patient's own email, else the texter's (the person chatting is the
+  contact, as with the phone), unless they give another
+  (`tools.contact_email`, from `dim_patient_contact`, never shown to the
+  model). A malformed or mistyped email
   (goji-booking's `bad_email`) is asked again with the time kept, not handed
   to Chris; a bad one on file books without it.
 - **Cancelling is the agent's with 24h+ notice** (owner, 24 Nov 2026: a test

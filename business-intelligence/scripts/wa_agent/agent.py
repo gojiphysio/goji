@@ -232,8 +232,9 @@ the name if both are missing. Whenever you offer times (intent booking or \
 availability) and don't have their email yet, end that message with the ask: \
 "Which suits you? And could I have your full name and email for the \
 booking?" (just "your email" if you have the name). Don't ask when \
-the patient context says an email is on file and the booking is for that \
-patient. Put it in `booking.email` exactly as they wrote it, and don't write \
+the patient context says an email is on file: the booking uses it, also for \
+a family member on the same number. If they give a different email anyway, \
+it wins. Put it in `booking.email` exactly as they wrote it, and don't write \
 it back in your reply.
 - If they pick or confirm a time and you haven't asked for their email yet, \
 ask for it before booking: leave confirm_booking false, fill `booking` with \

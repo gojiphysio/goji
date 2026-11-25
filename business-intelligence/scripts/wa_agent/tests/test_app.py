@@ -740,6 +740,30 @@ def test_an_email_that_isnt_one_is_asked_again_before_booking(env, monkeypatch):
     assert calls == [] and "doesn't look quite right" in app_mod.wa.sent[-1][1]
 
 
+def test_booking_for_a_new_family_member_uses_the_texters_email(env, monkeypatch):
+    client, rec, _ = env
+    monkeypatch.setattr(app_mod.tools, "patient_context", lambda wa_id: {
+        "returning": True, "first_name": "Charles", "patients_on_number": 1,
+        "patient_ids": ["CHARLES"],
+        "records": [{"id": "CHARLES", "name": "Charles Tan", "email": "ct@example.com"}]})
+    calls = []
+    monkeypatch.setattr(app_mod.booking_client, "book", _booker(calls))
+    wife = {**BOOK, "full_name": "Mei Tan", "for_whom": "wife", "booked_by": "Charles"}
+    app_mod.claude.queue.append(_final_with("Shall I book it for Mei?", booking=wife))
+    post(client, inbound(text="book my wife Mei Tan in Thursday 10am"))
+    app_mod.claude.queue.append(_final_with("Booking!", booking=wife, confirm_booking=True))
+    post(client, inbound(msg_id="wamid.in2", text="yes"))
+    assert calls[0]["_pid"] == "" and calls[0]["email"] == "ct@example.com"
+    # Unless they give another one: theirs wins.
+    app_mod.store.save(app_mod.store.load(CUSTOMER).__class__(wa_id=CUSTOMER))
+    app_mod.claude.queue.append(_final_with("Shall I book it for Mei?", booking=wife))
+    post(client, inbound(msg_id="wamid.in3", text="book my wife Mei Tan in Thursday 10am"))
+    app_mod.claude.queue.append(_final_with("Booking!", confirm_booking=True,
+                                            booking={**wife, "email": "mei@example.com"}))
+    post(client, inbound(msg_id="wamid.in4", text="yes, send it to mei@example.com"))
+    assert calls[-1]["email"] == "mei@example.com"
+
+
 def test_a_bad_email_on_file_books_without_it(env, monkeypatch):
     client, rec, notes = env
     monkeypatch.setattr(app_mod.tools, "patient_context", lambda wa_id: {

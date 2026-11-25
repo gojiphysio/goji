@@ -620,9 +620,10 @@ def _book_pending(state, ev: Inbound, received: float, fallback: str,
         # time so their answer books it.
         return _ask_email_again(state, ev, pending, check)
     on_file = "" if (pending.get("email") or "").strip() else \
-        tools.record_email(state.patient or {}, patient_id)
-    # A returning patient's email on file, so Plato's confirmation (and the
-    # registration form) still goes out.
+        tools.contact_email(state.patient or {}, patient_id,
+                            pending.get("booked_by") or ev.name)
+    # The email on file (the patient's, else the texter's), so Plato's
+    # confirmation (and the registration form) still goes out.
     sent = {**pending, "email": on_file} if on_file else pending
     try:
         try:

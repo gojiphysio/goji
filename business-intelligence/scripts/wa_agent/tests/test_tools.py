@@ -217,10 +217,22 @@ def test_next_slots_labels_todays_times_today():
 def test_an_email_on_file_goes_to_the_booking_never_to_the_model():
     p = {"returning": True, "first_name": "Sarah", "patients_on_number": 1,
          "records": [{"id": "S1", "name": "Sarah Lim", "email": "sarah@example.com"}]}
-    assert tools.record_email(p, "S1") == "sarah@example.com"
-    assert tools.record_email(p, "") == ""                                  # a new record: none
+    assert tools.contact_email(p, "S1") == "sarah@example.com"
     line = tools.describe_patient(p)
     assert "an email is on file" in line and "sarah@example.com" not in line
-    family = {**p, "records": [*p["records"], {"id": "K1", "name": "Lim Ethan", "email": ""}]}
-    assert "email is on file" not in tools.describe_patient(family)        # not for everyone
-    assert "no email on file" in tools.describe_patient(family)
+    assert "no email on file" in tools.describe_patient({**p, "records": [
+        {"id": "S1", "name": "Sarah Lim", "email": ""}]})
+
+
+def test_a_family_member_without_an_email_gets_the_texters():
+    # Owner, 25 Nov 2026: the person chatting is the contact, unless they say otherwise.
+    family = {"returning": True, "first_name": "Mei Ling", "patients_on_number": 3, "records": [
+        {"id": "MUM", "name": "Lim Mei Ling", "email": "mum@example.com"},
+        {"id": "DAD", "name": "Tan Wei Ming", "email": "dad@example.com"},
+        {"id": "KID", "name": "Lim Ethan", "email": ""}]}
+    assert tools.contact_email(family, "KID", "Wei Ming") == "dad@example.com"   # the texter's
+    assert tools.contact_email(family, "KID", "") == "mum@example.com"           # first on file
+    assert tools.contact_email(family, "MUM", "Wei Ming") == "mum@example.com"   # the patient's own
+    assert tools.contact_email(family, "", "Wei Ming") == "dad@example.com"      # a new patient
+    assert tools.contact_email({}, "", "Jamie") == ""
+    assert "don't ask" in tools.describe_patient(family)

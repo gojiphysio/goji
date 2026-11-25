@@ -54,6 +54,8 @@ def _next_weekday(wd: int) -> date:  # 0 = Monday
 # --- the patient-record lines the service gives the model (tools.describe_patient)
 
 NEW = "no patient record for this number (likely a new enquiry)"
+ON_FILE = ("; an email is on file for this number (bookings use it, also for family members: "
+           "don't ask for one)")
 _CANCEL_WHEN = _when(5, "10:00")  # SARAH's next appointment, as the agent writes it
 SARAH = (f"a patient record is linked to this number; record first name Sarah (the texter may be this patient or someone booking for them); next appointment {_d(5)} 10:00 with "
          f"Kristy; last visit {_d(-12)}; no earlier late changes on record (first-time waiver "
@@ -304,8 +306,13 @@ SCENARIOS: list[Scenario] = [
     S("booking_email_on_file", "booking",
       ["Any physio slots next week? I'd like to come in again"],
       E(intents=("booking", "availability"), must_not=(r"e-?mail",)),
-      patient=SARAH + "; an email is on file (no need to ask for one when booking for this patient)",
+      patient=SARAH + ON_FILE,
       customer_name="Sarah", note="returning patient with an email on file: not asked"),
+    S("booking_for_wife_texter_email", "booking",
+      ["want to book a postnatal physio session for my wife Mei Tan, any slot next week"],
+      E(intents=("booking", "availability"), must_not=(r"e-?mail",)),
+      patient=SARAH.replace("Sarah", "Charles") + ON_FILE, customer_name="Charles",
+      note="family member, texter's email on file: not asked, the booking uses the texter's"),
     S("booking_returning_no_email", "booking",
       ["Any physio slots next week? I'd like to come in again"],
       E(intents=("booking", "availability"), must=(r"e-?mail",)),

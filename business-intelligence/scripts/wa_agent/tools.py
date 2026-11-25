@@ -397,13 +397,20 @@ def record_for_booking(patient: dict, full_name: str, for_whom: str) -> str:
     return ""
 
 
-def record_email(patient: dict, patient_id: str) -> str:
-    """The email on file for the record a booking goes to, or "". Never shown
-    to the model: it only goes to Plato with that patient's own booking."""
-    for r in (patient or {}).get("records") or []:
-        if patient_id and r.get("id") == patient_id:
-            return (r.get("email") or "").strip()
-    return ""
+def contact_email(patient: dict, patient_id: str, texter: str = "") -> str:
+    """The email a booking's confirmation goes to when the customer gave none,
+    or "": the booked patient's own on file, else the texter's (owner, 25 Nov
+    2026: the person chatting is the contact, as with the phone number).
+    `texter` is the name they go by (booked_by or the WhatsApp profile name);
+    when it fits no record, the first email on the number. Never shown to the
+    model: it only goes to Plato with the booking."""
+    records = [r for r in (patient or {}).get("records") or []
+               if (r.get("email") or "").strip()]
+    own = [r for r in records if patient_id and r.get("id") == patient_id]
+    words = set(re.findall(r"[a-z]+", (texter or "").lower()))
+    theirs = [r for r in records if words & set(re.findall(r"[a-z]+", r["name"].lower()))]
+    pick = (own or theirs or records or [{}])[0]
+    return (pick.get("email") or "").strip()
 
 
 def describe_patient(p: dict) -> str:
@@ -424,8 +431,9 @@ def describe_patient(p: dict) -> str:
     if p.get("last_visit"):
         bits.append(f"last visit {p['last_visit']}")
     records = p.get("records") or []
-    if records and all((r.get("email") or "").strip() for r in records):
-        bits.append("an email is on file (no need to ask for one when booking for this patient)")
+    if any((r.get("email") or "").strip() for r in records):
+        bits.append("an email is on file for this number (bookings use it, also for family "
+                    "members: don't ask for one)")
     elif records:
         bits.append("no email on file (ask for one when booking)")
     if p.get("waiver_used"):
