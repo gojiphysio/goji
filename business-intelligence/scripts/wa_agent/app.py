@@ -786,6 +786,34 @@ def _cancel_now(state, ev: Inbound, cancel: dict, follow_up: str) -> tuple[str, 
     return booking_client.cancel_text(res, follow_up), True, False
 
 
+IMAGE_TYPES = frozenset({"image/jpeg", "image/png", "image/webp", "image/gif"})
+IMAGE_MAX_BYTES = 5 * 1024 * 1024  # the Messages API's per-image limit
+IMAGES_PER_TURN = 3
+
+
+def _batch_images(client, history: list[dict]) -> dict:
+    """The photos in the customer's latest messages (since the last reply),
+    {history line id: (bytes, mime)}, for the model to look at this turn
+    only; never stored. One that can't be fetched stays a "[sent a photo]"
+    line, and the model hands it to the team."""
+    out: dict = {}
+    for h in reversed(history):
+        if h["role"] != "customer" or len(out) >= IMAGES_PER_TURN:
+            break
+        media = h.get("media") or {}
+        if not media.get("id") or media.get("mime") not in IMAGE_TYPES:
+            continue
+        try:
+            data, mime = client.download_media(media["id"])
+        except Exception as e:
+            log.warning("photo download failed: %s", e)
+            continue
+        mime = mime if mime in IMAGE_TYPES else media["mime"]
+        if data and len(data) <= IMAGE_MAX_BYTES:
+            out[h["id"]] = (data, mime)
+    return out
+
+
 def _read_document(client, ev: Inbound) -> str:
     try:
         data, mime = client.download_media(ev.media_id)
@@ -1018,6 +1046,8 @@ def handle_inbound(ev: Inbound, received: float) -> None:
         state.name = ev.name or state.name
         state.code = state.code or st.next_code()
         append_history(state, "customer", ev.text, ev.ts, ev.msg_id)
+        if ev.kind == "image" and ev.media_id:  # the id only: the photo is never stored
+            state.history[-1]["media"] = {"id": ev.media_id, "mime": ev.mime}
         blocked = _gate_now(st, state, now, rollout, prior_last_at=prior_last_at,
                             had_record=had_record, patient=scope_patient)
         _hold_pre_golive(state, blocked, now)
@@ -1070,7 +1100,7 @@ def handle_inbound(ev: Inbound, received: float) -> None:
     earlier_late = st.get_late_changes(key)
     waiver_used = bool(earlier_late) or bool(patient.get("waiver_used"))
     res = agent.propose(history, wa_id=ev.wa_id, now=now, customer_name=ev.name,
-                        client=model,
+                        client=model, images=_batch_images(client, history),
                         pending_for_chris=state.pending_for_chris if state.mode == WAITING else "",
                         patient="; ".join(filter(None, [
                             tools.describe_patient(patient),
@@ -1219,13 +1249,13 @@ def handle_inbound(ev: Inbound, received: float) -> None:
         _alert("priority", **{**notice, "sent_reply": as_one_message(reply),
                               "staff_note": f"Priority, getting worse: {p.staff_note}"})
         _test_show(client, ev.wa_id, f"Chris is pinged now (priority): {p.staff_note}")
-    if d.action == SEND and media_ping_due(state.history, ev.msg_id, sent_at):
+    if d.action == SEND and p.intent == "media_received" and media_ping_due(history):
         # The reply says the team will look at it, so someone is told (a
         # handover pings below anyway). WhatsApp ping only; email just if
         # the ping fails (_alert).
         _alert("media", **{**notice, "sent_reply": as_one_message(reply),
-                           "staff_note": f"sent {ev.text.split(']')[0][len('[sent '):]}"
-                                         f" for the team to look at. {p.staff_note}".strip()})
+                           "staff_note": f"sent something the assistant couldn't use, "
+                                         f"for the team to look at. {p.staff_note}".strip()})
         _test_show(client, ev.wa_id, f"Chris is pinged now (media): {p.staff_note}")
     if d.action == SEND and config.INTENT_POLICY.get(p.intent) == "auto_notify":
         notify.send("fyi", **notice)
