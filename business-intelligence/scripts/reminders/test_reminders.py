@@ -343,7 +343,10 @@ def test_override_body_is_identical_to_the_real_thing(monkeypatch):
     monkeypatch.setattr(mailer, "OVERRIDE_TO", "hello@gojiphysio.com")
     msgs = _sent_messages(monkeypatch)
     mailer.send_reminder("patient@example.com", *args, **kw)
-    assert msgs[0].get_content().rstrip("\n") == real.rstrip("\n")
+    text = msgs[0].get_body(preferencelist=("plain",)).get_content()
+    assert text.rstrip("\n") == real.rstrip("\n")
+    html = msgs[0].get_body(preferencelist=("html",)).get_content()
+    assert html.strip() == mailer.render_reminder_html(*args, **kw).strip()
 
 
 def test_without_override_the_patient_is_the_recipient(monkeypatch):
@@ -968,3 +971,61 @@ def test_two_channel_dry_run_digest_previews_the_template():
     assert "Test mode: something" in body
     assert "Would have sent: 1 reminder(s) — 1 WhatsApp, 0 email" in body
     assert "  Hi Sarah, a reminder of your physiotherapy appointment" in body
+
+
+# --- Plato's Confirm Appointment link ------------------------------------------
+
+def test_confirm_url_matches_plato_and_the_booking_confirmation():
+    # Copied from a real Plato reminder email (30 Oct 2026).
+    assert mailer.confirm_url("5e8cd7cdcfb94ef586a66764e84b308d") == (
+        "https://clinic.platomedical.com/appointment_confirm/Z29qaWhlYWx0aA==/"
+        "5e8cd7cdcfb94ef586a66764e84b308d")
+
+
+def test_one_session_gets_one_confirm_link():
+    body = mailer.render_reminder_body(
+        "Sarah", "2026-09-09", ["09:00"], has_clinic=True, has_home_visit=False,
+        confirm_links=[("09:00", mailer.confirm_url("a1"))])
+    assert "Please confirm you're coming:\n  https://clinic.platomedical.com/" in body
+
+
+def test_several_sessions_get_a_link_each_by_time():
+    body = mailer.render_reminder_body(
+        "Sarah", "2026-09-09", ["09:00", "14:00"], has_clinic=True, has_home_visit=False,
+        confirm_links=[("09:00", "https://x/a1"), ("14:00", "https://x/a2")])
+    assert "  9:00 am: https://x/a1\n  2:00 pm: https://x/a2" in body
+
+
+def test_no_confirm_links_keeps_the_old_body():
+    kw = dict(has_clinic=True, has_home_visit=False)
+    assert "confirm" not in mailer.render_reminder_body("Sarah", "2026-09-09", ["09:00"], **kw)
+
+
+def test_group_carries_a_confirm_entry_per_appointment():
+    groups, _ = main.group_by_recipient([
+        {"appointment_id": "b", "email": "s@x.com", "name": "S", "time": "14:00"},
+        {"appointment_id": "a", "email": "S@x.com", "name": "S", "time": "09:00"},
+    ])
+    assert groups[0]["confirm"] == [("09:00", "a"), ("14:00", "b")]
+
+
+def test_maps_link_is_the_clinic_choice():
+    assert mailer.MAPS_LINK == "https://maps.app.goo.gl/Mm3eYLNMUwwx8USv8"
+
+
+def test_html_reminder_has_a_confirm_button_and_the_same_words():
+    kw = dict(has_clinic=True, has_home_visit=False)
+    url = mailer.confirm_url("a1")
+    html = mailer.render_reminder_html("Sarah <b>", "2026-09-09", ["09:00"],
+                                       confirm_links=[("09:00", url)], **kw)
+    assert f'href="{url}"' in html and "Confirm I&#39;m coming" in html
+    assert "<b>" not in html  # the name is escaped
+    assert 'href="https://go.gojiphysio.com/reminder-wa"' in html
+    assert "$50 fee" in html and "Lentor Modern" in html
+
+
+def test_html_reminder_one_button_per_session():
+    html = mailer.render_reminder_html(
+        "Sarah", "2026-09-09", ["09:00", "14:00"], has_clinic=True, has_home_visit=False,
+        confirm_links=[("09:00", "https://x/a1"), ("14:00", "https://x/a2")])
+    assert "Confirm 9:00 am" in html and "Confirm 2:00 pm" in html

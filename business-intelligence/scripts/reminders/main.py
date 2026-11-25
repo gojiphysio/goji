@@ -195,10 +195,12 @@ def group_by_recipient(rows: list[dict]) -> tuple[list[dict], list[dict]]:
             "phone": r.get("phone"),
             "appointment_ids": [],
             "times": [],
+            "confirm": [],   # (time, appointment_id): one Confirm link per session
             "has_clinic": False,
             "has_home_visit": False,
         })
         g["appointment_ids"].append(r["appointment_id"])
+        g["confirm"].append((r.get("time") or "", r["appointment_id"]))
         if r.get("time"):
             g["times"].append(r["time"])
         if r.get("is_home_visit"):
@@ -210,6 +212,7 @@ def group_by_recipient(rows: list[dict]) -> tuple[list[dict], list[dict]]:
             g["name"] = r.get("name")
     for g in groups.values():
         g["times"] = sorted(set(g["times"]))
+        g["confirm"].sort()
     # Stable, human order: earliest session first.
     ordered = sorted(groups.values(), key=lambda g: g["times"][0] if g["times"] else "")
     return ordered, unreachable
@@ -485,7 +488,8 @@ def main() -> int:
         mailer.send_reminder(
             g["email"], g["name"], day, g["times"],
             has_clinic=g["has_clinic"], has_home_visit=g["has_home_visit"],
-            ref=g["appointment_ids"][0])
+            ref=g["appointment_ids"][0],
+            confirm_links=[(t, mailer.confirm_url(aid)) for t, aid in g.get("confirm", [])])
 
     out = dispatch(rows, day, dry_run=dry_run, wa_enabled=wa_on,
                    send_whatsapp=wa.send_template, send_email=send_email,

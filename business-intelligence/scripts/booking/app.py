@@ -34,7 +34,7 @@ from .availability import SGT, derive_availability, derive_available_days
 from .booking import BookingError, cancel_appointment, create_booking, reschedule_appointment
 from .config import CLINICIANS, MAX_ADVANCE_DAYS, SAME_DAY_LEAD_MINUTES, SERVICES
 from .plato import PlatoBusy, PlatoClient, PlatoError, PlatoThrottled, one_record
-from . import mailer, patient_contacts
+from . import confirmations, mailer, patient_contacts
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger("goji-booking")
@@ -239,6 +239,28 @@ def healthcheck_deep():
 
 @app.route("/internal/refresh-snapshot", methods=["POST"])
 def refresh_snapshot():
+    """The 5-minute Cloud Scheduler tick: refresh the availability snapshot,
+    then run the confirmation-email sweep (confirmations.py), which throttles
+    itself and catches staff bookings the Plato webhook missed. Riding this
+    tick saves a second scheduler job and its auth; the sweep never changes
+    the snapshot's answer."""
+    resp = _refresh_snapshot()
+    _confirmations_sweep()
+    return resp
+
+
+def _confirmations_sweep() -> None:
+    if not confirmations.enabled():
+        return
+    try:
+        stats = confirmations.sweep(plato(), bq())
+        if stats.get("candidates"):
+            log.info("confirmations sweep: %s", stats)
+    except Exception as e:
+        log.warning("confirmations sweep failed: %s", e)
+
+
+def _refresh_snapshot():
     """Re-page the bookable window into the availability snapshot.
 
     Called by Cloud Scheduler (`booking-snapshot-refresh`, every 5 min, off the
@@ -562,7 +584,7 @@ def book():
                         "error": "Something went wrong. Please try again or message us."}), 502
     _hit(*(f"ok:{k}" for k in _contact_keys(draft)))
     mailer.send_admin_booking_email(result, draft)     # best-effort
-    mailer.send_customer_booking_email(result, draft)  # best-effort
+    _confirm_customer(result, draft, "web")            # best-effort
     _track_async("confirmed", draft.get("session_id"), draft.get("service"),
                  ua, ref, attribution=attribution)
     _notify_wa_agent(result, draft, "web")             # best-effort, async
@@ -578,6 +600,17 @@ INTERNAL_TOKEN = os.environ.get("INTERNAL_TOKEN", "").strip()
 WA_AGENT_URL = os.environ.get("WA_AGENT_URL", "").strip()
 WA_CALLBACK_TIMEOUT_S = float(os.environ.get("WA_CALLBACK_TIMEOUT", "5"))
 INTERNAL_BOOK_UA = "goji-wa-agent"
+
+
+def _confirm_customer(result: dict, draft: dict, source: str) -> None:
+    """The patient's confirmation email. confirmations.py builds the one email
+    every booking gets; until CONFIRMATIONS_MODE=live the old mailer email
+    still goes to the patient (test mode sends the new one to a test inbox).
+    Best effort, like every booking email."""
+    if confirmations.legacy_customer_email() and (draft.get("email") or "").strip():
+        mailer.send_customer_booking_email(result, draft)
+    if confirmations.enabled():
+        confirmations.on_booking(plato(), bq(), result, draft, source=source)
 
 
 def _run_async(fn) -> None:
@@ -723,9 +756,13 @@ def plato_webhook(token: str):
     if not expected or not hmac.compare_digest(token.encode(), expected.encode()):
         return "not found", 404
     # force: don't depend on Plato's Content-Type header.
-    ids, tokens = patient_contacts.patient_ids(request.get_json(force=True, silent=True),
-                                           os.environ.get("PLATO_DB", "gojihealth"))
-    if not ids and not tokens:
+    payload = request.get_json(force=True, silent=True)
+    db = os.environ.get("PLATO_DB", "gojihealth")
+    ids, tokens = patient_contacts.patient_ids(payload, db)
+    # appointment:upsert from staff: the confirmation email (confirmations.py).
+    appt_ids = confirmations.webhook_appointment_ids(payload, db) \
+        if confirmations.enabled() else []
+    if not ids and not tokens and not appt_ids:
         return "", 200
 
     def _work():
@@ -738,6 +775,10 @@ def plato_webhook(token: str):
         if ids:
             n = patient_contacts.refresh(plato(), bq(), CONTACT_TABLE, ids)
             log.info("plato webhook: %d of %d patient(s) refreshed", n, len(ids))
+        if appt_ids:
+            n = confirmations.handle_webhook(plato(), bq(), appt_ids)
+            log.info("plato webhook: %d confirmation(s) sent for %d appointment(s)",
+                     n, len(appt_ids))
 
     _run_webhook_work(_work)
     return "", 200
@@ -834,8 +875,7 @@ def internal_book():
     if not dry_run:
         _hit(*(f"ok:{k}" for k in _contact_keys(draft)))
         mailer.send_admin_booking_email(result, draft)         # best-effort
-        if (draft.get("email") or "").strip():
-            mailer.send_customer_booking_email(result, draft)  # best-effort
+        _confirm_customer(result, draft, "whatsapp")           # best-effort
         _track("confirmed", "whatsapp")
         if result.get("patient_created"):
             # Plato sends no webhook for API writes, so this one is ours to
@@ -903,6 +943,8 @@ def internal_reschedule():
     if not dry_run:
         log.info("rescheduled %s via WhatsApp assistant", result["reference"])
         mailer.send_admin_reschedule_email(result, body)  # best-effort
+        if confirmations.enabled():  # the "moved" email; API writes fire no webhook
+            confirmations.on_reschedule(plato(), bq(), result)
         _notify_wa_agent(result, body, "whatsapp")         # best-effort, async
     return jsonify({
         "ok": True,

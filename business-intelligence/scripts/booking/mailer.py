@@ -35,7 +35,7 @@ FROM_NAME = os.environ.get("BOOKING_FROM_NAME", "Goji Physiotherapy")
 # Tracked WhatsApp CTA (goes through the go.gojiphysio.com redirector).
 WHATSAPP_LINK = os.environ.get("BOOKING_WA_LINK", "https://go.gojiphysio.com/web-wa")
 # Clinic Google Maps listing, included in the confirmation for easy directions.
-MAPS_LINK = os.environ.get("BOOKING_MAPS_LINK", "https://maps.app.goo.gl/fUnkD6QwYD8o5qnx9")
+MAPS_LINK = os.environ.get("BOOKING_MAPS_LINK", "https://maps.app.goo.gl/Mm3eYLNMUwwx8USv8")
 
 
 def _send(msg: EmailMessage, what: str, ref: str | None) -> None:

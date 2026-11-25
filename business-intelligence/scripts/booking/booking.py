@@ -271,7 +271,8 @@ def create_booking(plato, draft: dict, *, now: datetime | None = None,
                 continue
             if dry_run:
                 # Everything above ran for real; stop before the only write.
-                ids, reference = [], "DRYRUN-" + uuid.uuid4().hex[:6].upper()
+                ids, visit_id = [], ""
+                reference = "DRYRUN-" + uuid.uuid4().hex[:6].upper()
             else:
                 # WhatsApp bookings are linked to the patient's own record: the
                 # one the assistant matched by name AND number, or a new record
@@ -294,6 +295,10 @@ def create_booking(plato, draft: dict, *, now: datetime | None = None,
                 "dry_run": dry_run,
                 "source": source,
                 "appointment_ids": ids,
+                # The patient's own appointment (not a home visit's travel
+                # legs): what the confirmation email and its invite key on.
+                "visit_id": visit_id,
+                "duration_min": _duration_min(svc, variant),
                 "clinician_id": cid,
                 "clinician_name": CLINICIANS[cid]["name"],
                 # Matched clinician's inbox, so the admin email can CC them.
@@ -310,6 +315,13 @@ def create_booking(plato, draft: dict, *, now: datetime | None = None,
                 "patient_created": (not dry_run) and created_patient,
             }
     raise last_err or BookingError("That time is no longer available.", "slot_taken")
+
+
+def _duration_min(svc: dict, variant: str = "") -> int:
+    """Session length: the variant's when it has one, else the service's."""
+    if variant and svc.get("variants", {}).get(variant):
+        return svc["variants"][variant]["duration_min"]
+    return svc["duration_min"]
 
 
 def _create_patient(plato, name: str, phone: str, email: str = "") -> str:
@@ -344,10 +356,7 @@ def _create_appointments(plato, svc, cid, day, time_, home, name, phone, email,
     clin = CLINICIANS[cid]
     color, doctor = clin["calendar"], clin["doctor"]
     # Duration: use variant duration if provided and available, else base service duration.
-    duration_min = svc["duration_min"]
-    if variant and svc.get("variants", {}).get(variant):
-        duration_min = svc["variants"][variant]["duration_min"]
-    dur = duration_min
+    dur = _duration_min(svc, variant)
     # Physiotherapy sub-type, so the clinic sees what the session is for (the
     # Plato type is the same for every physio booking).
     focus_line = f"\nType: {focus_label}" if focus_label else ""

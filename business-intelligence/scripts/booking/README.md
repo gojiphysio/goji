@@ -176,6 +176,58 @@ curl -sS https://clinic.platomedical.com/api/gojihealth/webhook -H "Authorizatio
 Plato allows 5 webhooks per database: add events to this one rather than
 registering another URL.
 
+## Confirmation email (`confirmations.py`)
+One email per appointment, however it was booked (website, WhatsApp assistant,
+staff in Plato), decided with the clinic on 25 Nov 2026. It carries the
+details, Plato's Confirm Appointment link (built from the appointment id:
+`appointment_confirm/<base64 db>/<id>`), the clinic address or the home-visit
+note, the $50 policy, the tracked `confirm-wa` WhatsApp link, Plato's
+registration form on a **first visit only**, and a calendar invite.
+
+- **Triggers.** `/api/book` and `/internal/book` call it after the Plato write;
+  `/internal/reschedule` sends the "moved" email (Plato sends no webhook for
+  our own API writes). Staff bookings and moves arrive on the Plato webhook
+  (`appointment:upsert`, read back from Plato, at most
+  `CONFIRMATIONS_READS_PER_MIN` a minute) and, as the safety net, the sweep
+  that rides the 5-minute snapshot tick and reads `stg.appointments` (15-minute
+  ingestion). Deletes send nothing (clinic decision).
+- **Once only.** `marts.appointment_confirmation_events` is the ledger: same
+  start time = nothing, new start time = "moved" with the invite's SEQUENCE + 1
+  (same UID `<appointment id>@gojiphysio.com`, so the calendar entry moves).
+- **Calendar invite.** `METHOD:REQUEST` inline plus an `.ics` attachment, clinic
+  wall clock with `TZID=Asia/Singapore`, no alarm, `RSVP=FALSE` (the clinic
+  wants the entry in the patient's calendar and no calendar notifications).
+- **First visit.** No earlier appointment for the profile (or, unlinked, for the
+  phone or email) and no profile matching them. Unlinked appointments get
+  Plato's pre-registration link (`GET appointment/{id}/prereg`, which Plato
+  refuses for linked ones); linked ones, e.g. a patient the assistant just
+  created, get the profile's update form (`GET patient/{id}/updatelink`).
+- **Modes** (`CONFIRMATIONS_MODE`, repo variables read by deploy-booking.yml):
+  `off` (default) = the old `mailer.send_customer_booking_email` only; `test` =
+  the new email for every appointment goes to `CONFIRMATIONS_TEST_TO`, patients
+  keep the old one; `live` = patients get the new one, the old one stops.
+  `CONFIRMATIONS_SINCE` (`YYYY-MM-DDTHH:MM`, clinic time) is the creation
+  cutoff for the webhook and sweep: unset, they send nothing, so switching on
+  never mails the existing diary. The `ZZ` test patient only ever mails the test
+  inbox.
+
+**Go-live checklist**
+1. Repo variables `CONFIRMATIONS_MODE=test`, `CONFIRMATIONS_TEST_TO=<inbox>`,
+   `CONFIRMATIONS_SINCE=<now>`; redeploy.
+2. Add `appointment:upsert` to the Plato webhook. Plato has no update call:
+   `GET webhook` for its id, `DELETE webhook/{id}`, then register the same URL
+   with `["patient:upsert", "patient:merge", "appointment:upsert"]` (the
+   register command above). Activation is automatic; staff log out and in.
+3. Gmail filter on hello@: invitation replies (`Accepted:` / `Declined:` /
+   `Tentative:` with an invite) skip the inbox.
+4. On the ZZ test patient: a staff booking, a move, a website booking. Check the
+   test inbox (invite added, Confirm link works, form on a first visit) and
+   what a Confirm click shows in Plato.
+5. Go-live, all on one day: `CONFIRMATIONS_MODE=live`,
+   `CONFIRMATIONS_SINCE=<go-live time>`; staff stop sending Plato's
+   confirmation by hand; Plato's automatic 48-hour reminder off and the
+   `appointment-reminders` job unpaused with `DRY_RUN=false` (never both).
+
 ## Monitoring
 `setup_monitoring.sh` (re-runnable) provisions a Cloud Monitoring uptime check on
 `/healthcheck/deep` every 5 min plus an alert policy emailing

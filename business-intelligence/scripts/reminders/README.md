@@ -6,10 +6,14 @@ Wednesday. **WhatsApp first** for anyone with a usable mobile, **email** as the
 fallback. The WhatsApp channel is **off until `WA_REMINDERS_ENABLED=1`**; off,
 the job is the email-only job, unchanged.
 
-Replaces a daily manual chore: Plato's reminder template can only be fired by
-hand from its UI — the Plato API exposes appointments, webhooks, PlatoPay and
-invoices, but **no notification or template endpoint** — so someone had to log in
-every day and click it for the sessions ~48h out.
+Plato also sends a 48-hour reminder email on its own (confirmed by the clinic,
+25 Nov 2026; earlier notes here said it could only be fired by hand). This job
+replaces it: same copy, plus the parts Plato's can't do (one email per patient
+per day, only the directions that apply, a tracked WhatsApp link, WhatsApp
+first). **Never run both:** the clinic turns Plato's reminder off the same day
+this job is unpaused with `DRY_RUN=false`. Every email carries Plato's own
+Confirm Appointment link for each session (`reminder_mailer.confirm_url`, the
+same link booking/confirmations.py puts in the booking confirmation).
 
 Not an ingestion job (it ingests nothing), hence `scripts/reminders/` rather than
 `scripts/ingestion/`. It reads marts, sends WhatsApp templates via the Cloud API
