@@ -398,11 +398,13 @@ def handle_staff(ev: Inbound) -> None:
         chats = [c for c in st.recent_chats(day) if c.wa_id not in config.STAFF]
         paused = [c for c in st.paused_chats() if c.wa_id not in config.STAFF
                   and c.mode_reason != WATCHLIST]  # the watch list is in the summary
+        groups = summary.status_groups(paused, now)
         reply = staff.status_text(kill=config.KILL_SWITCH or st.get_kill(),
                                   rollout=config.resolve_rollout(st.get_rollout()),
                                   waiting=summary.waiting_for_chris(chats, day),
-                                  paused=summary.paused_labels(paused),
-                                  live=not _not_live(st))
+                                  unanswered=groups["unanswered"],
+                                  hand_back=groups["hand_back"], others=groups["rest"],
+                                  show_all=code == "all", live=not _not_live(st))
     else:
         reply = staff.HELP
     try:

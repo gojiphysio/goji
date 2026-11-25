@@ -35,7 +35,7 @@ HELP = ("Goji assistant: swipe-reply to one of my pings with the team's answer (
         "message them, it just answers their next message; a chat you wrote in comes back "
         "by itself if they write 2 weeks after your last message), PAUSE 004 silences it in "
         "that chat for good, STOP pauses it in every chat, START turns it back on, STATUS "
-        "for a summary.")
+        "for a summary, STATUS ALL to list every chat you're handling yourself.")
 
 # The first message a staff number gets from the assistant: the walkthrough
 # (Charles, 19 Nov 2026: bake the go-live briefing into it). Free-form needs an
@@ -111,17 +111,20 @@ def window_open(last_inbound_at: float, now: float) -> bool:
 
 def parse_command(text: str) -> tuple[str, str]:
     """(command, chat code): stop | start | status | resume | pause | help.
-    "resume 004", "Resume chat #4" -> ("resume", "004")."""
+    "resume 004", "Resume chat #4" -> ("resume", "004"); "status all" ->
+    ("status", "all")."""
     words = re.sub(r"[^\w\s]", " ", (text or "").lower()).split()
     word = words[0] if words else ""
     if word in ("resume", "pause"):
         digits = next((w for w in words[1:] if w.isdigit()), "")
         return (word, f"{int(digits):03d}") if digits else ("help", "")
-    return (word if word in ("stop", "start", "status") else "help"), ""
+    if word == "status":
+        return "status", "all" if "all" in words[1:] else ""
+    return (word if word in ("stop", "start") else "help"), ""
 
 
 _ANSWER = re.compile(r"^\s*answer\s*(?:chat\s*)?#?\s*(\d+)\b[\s:,.\-]*(.*)$", re.I | re.S)
-_ONE_WORD = re.compile(r"^\s*(stop|start|status|help|resume|pause)\s*[.!]*\s*$", re.I)
+_ONE_WORD = re.compile(r"^\s*(stop|start|status(?:\s+all)?|help|resume|pause)\s*[.!]*\s*$", re.I)
 
 
 def parse_answer(text: str) -> tuple[str, str] | None:
@@ -153,7 +156,12 @@ def answer_refused_text(who: str, why: str) -> str:
 
 
 def status_text(*, kill: bool, rollout: dict, waiting: list[str],
-                paused: list[str] | None = None, live: bool = True) -> str:
+                unanswered: list[str] | None = None, hand_back: list[str] | None = None,
+                others: list[str] | None = None, show_all: bool = False,
+                live: bool = True) -> str:
+    """STATUS: chats waiting on a reply, chats to hand back to the agent, and a
+    count of the ones Chris is handling herself (STATUS ALL lists those). A flat
+    list of every paused chat ran to 26 and hid the newest (25 Nov 2026)."""
     stage = rollout.get("stage")
     lines = [
         "Goji assistant: " + ("STOPPED (kill switch on), text START to resume."
@@ -162,12 +170,19 @@ def status_text(*, kill: bool, rollout: dict, waiting: list[str],
         f"Stage {stage if stage is not None else 'default (Phase 0 policy)'}, contacts: "
         f"{rollout.get('contact_scope')}, hours: {rollout.get('hours')}.",
     ]
-    if waiting:
-        shown = ", ".join(waiting[:5]) + (f" and {len(waiting) - 5} more" if len(waiting) > 5 else "")
-        lines.append(f"Waiting for you today: {len(waiting)} ({shown}).")
+    unanswered, hand_back, others = unanswered or [], hand_back or [], others or []
+    # A handed-over chat can also be a paused one; show it once, with its age.
+    replies = [w for w in waiting if not any(u.startswith(w) for u in unanswered)] + unanswered
+    if replies:
+        lines.append(f"Waiting on a reply ({len(replies)}): {', '.join(replies)}.")
     else:
-        lines.append("Nothing waiting for you today.")
-    if paused:
-        shown = ", ".join(paused[:8]) + (f" and {len(paused) - 8} more" if len(paused) > 8 else "")
-        lines.append(f"Paused for you: {shown}. Text RESUME and the number to hand one back.")
+        lines.append("Nothing waiting on a reply.")
+    if hand_back:
+        lines.append(f"Ready to hand back, text RESUME and the number ({len(hand_back)}): "
+                     f"{', '.join(hand_back)}.")
+    if others and show_all:
+        lines.append(f"You're handling these yourself ({len(others)}): {', '.join(others)}.")
+    elif others:
+        lines.append(f"You're handling {len(others)} more yourself. Text STATUS ALL to "
+                     f"list them.")
     return "\n".join(lines)

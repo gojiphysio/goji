@@ -631,8 +631,55 @@ def test_summary_lists_paused_chats_with_resume_hint():
     s = summary.build([], now, paused=[p1, p2])
     assert s["paused"] == 2
     assert "ending 0012 (#007)" in s["body"] and "Ann (#004)" in s["body"]
-    assert s["body"].index("#007") < s["body"].index("#004")      # oldest first
+    assert s["body"].index("#004") < s["body"].index("#007")      # latest first
     assert "RESUME 004" in s["body"] and "RESUME" in s["line"]
+
+
+def test_status_groups_paused_chats_by_what_chris_can_do():
+    """25 Nov 2026: a flat list of 26 paused chats was too long and hid the
+    newest. STATUS shows unanswered ones and ones to hand back; the rest
+    (Chris's own conversations) are a count, listed by STATUS ALL."""
+    now = 1_800_000_000.0
+    H = 3600
+
+    def chat(code, hist, last_cust, last_staff=0.0, paused=30):
+        return ChatState(wa_id=f"6500000{code}", name=f"C{code}", code=code, mode=PAUSED,
+                         mode_since=now - paused * H, last_customer_at=now - last_cust * H,
+                         last_staff_at=now - last_staff * H if last_staff else 0.0,
+                         history=[{"role": r} for r in hist])
+    paused = [
+        chat("009", ["customer", "staff", "customer"], 7),               # unanswered
+        chat("014", ["customer", "staff", "customer"], 25),              # unanswered, window shut
+        chat("027", ["customer", "agent", "team", "staff"], 0.5, 0.3),   # agent was in it
+        chat("011", ["customer", "agent", "staff"], 50, 50, paused=50),             # agent, quiet 2 days
+        chat("013", ["customer", "staff"], 3, 3),                         # Chris's own chat
+    ]
+    g = summary.status_groups(paused, now)
+    assert g["unanswered"] == ["C009 (#009) 7h ago"]
+    assert g["hand_back"] == ["C027 (#027)"]
+    assert g["rest"] == ["C013 (#013)", "C014 (#014)", "C011 (#011)"]   # newest first
+
+    text = staff.status_text(kill=False, rollout={"stage": 2}, waiting=["C009 (#009)"],
+                             unanswered=g["unanswered"], hand_back=g["hand_back"],
+                             others=g["rest"])
+    assert "Waiting on a reply (1): C009 (#009) 7h ago." in text
+    assert "Ready to hand back, text RESUME and the number (1): C027 (#027)." in text
+    assert "You're handling 3 more yourself. Text STATUS ALL" in text
+    assert "#013" not in text
+    full = staff.status_text(kill=False, rollout={"stage": 2}, waiting=[],
+                             unanswered=g["unanswered"], hand_back=g["hand_back"],
+                             others=g["rest"], show_all=True)
+    assert "You're handling these yourself (3): C013 (#013), C014 (#014), C011 (#011)." in full
+    assert staff.parse_command("STATUS ALL") == ("status", "all")
+    assert staff.parse_command("status") == ("status", "")
+    assert staff.bare_command("status all") == "status all"
+
+
+def test_revoke_echo_does_not_take_the_chat_over():
+    body = {"entry": [{"changes": [{"field": "smb_message_echoes", "value": {
+        "message_echoes": [{"from": "6590000000", "to": "6593000000", "id": "wamid.x",
+                            "timestamp": "1800000000", "type": "revoke"}]}}]}]}
+    assert parse_webhook(body) == []
 
 
 def test_welcome_covers_the_walkthrough():
