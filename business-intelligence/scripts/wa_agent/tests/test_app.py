@@ -155,8 +155,8 @@ def test_first_thanks_gets_one_warm_closer_then_silence(env):
     assert ("silent", {"reason": "acknowledgement"}) in rec
 
 
-@pytest.mark.parametrize("emoji", ["👍", "😊", "😡", ""])
-def test_reaction_gets_no_reply_and_no_ping(env, emoji):
+@pytest.mark.parametrize("emoji", ["👍", "👍🏽", "❤️", "😊", "🙏", "😂", ""])
+def test_positive_reaction_gets_no_reply_and_no_ping(env, emoji):
     client, rec, notes = env
     app_mod.claude.queue.append(final())
     post(client, inbound())
@@ -165,6 +165,28 @@ def test_reaction_gets_no_reply_and_no_ping(env, emoji):
     assert len(app_mod.claude.requests) == 1 and len(app_mod.wa.sent) == sent
     assert notes == [] and ("silent", {"reason": "reaction"}) in rec
     assert len(app_mod.store.load(CUSTOMER).history) == history
+
+
+@pytest.mark.parametrize("emoji", ["👎", "😡", "😢", "😮", "🤔"])
+def test_negative_or_neutral_reaction_pings_staff(env, emoji):
+    client, rec, notes = env
+    app_mod.claude.queue.append(final(reply="We open at 8am."))
+    post(client, inbound())   # our reply is wamid.out1, the message reacted to
+    post(client, reaction(emoji=emoji))
+    post(client, reaction(emoji=emoji))   # Meta's retry: one ping only
+    assert len(app_mod.claude.requests) == 1 and len(app_mod.wa.sent) == 1
+    [(kind, kw)] = notes      # no staff number set: the email is the ping
+    assert kind == "reaction" and kw["staff_note"] == f'reacted {emoji} to "We open at 8am"'
+    assert ("escalated", {"reason": "reaction"}) in rec
+
+
+def test_negative_reaction_in_chrises_chat_pings_nobody(env):
+    client, rec, notes = env
+    app_mod.claude.queue.append(final())
+    post(client, inbound())
+    post(client, echo())      # Chris has the chat now
+    post(client, reaction(emoji="😡"))
+    assert notes == [] and ("silent", {"reason": "reaction"}) in rec
 
 
 def test_reaction_after_a_text_does_not_supersede_it(env, monkeypatch):

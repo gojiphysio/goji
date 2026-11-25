@@ -56,7 +56,8 @@ class Inbound:
     mime: str = ""
     filename: str = ""
     caption: str = ""
-    reply_to: str = ""     # the message id they swipe-replied to (context.id), if any
+    reply_to: str = ""     # the message id they swipe-replied to (context.id), or reacted to
+    emoji: str = ""        # a reaction's emoji; "" when they removed one
 
 
 @dataclass
@@ -186,6 +187,7 @@ def parse_webhook(payload: dict) -> list[Inbound | Echo | Status | HistoryChunk]
                 for m in value.get("messages") or []:
                     text, kind = _message_text(m)
                     media = m.get(kind) if isinstance(m.get(kind), dict) else {}
+                    react = (m.get("reaction") or {}) if kind == "reaction" else {}
                     events.append(Inbound(wa_id=m.get("from", ""), msg_id=m.get("id", ""),
                                           ts=float(m.get("timestamp") or 0), text=text,
                                           name=names.get(m.get("from"), ""), kind=kind,
@@ -193,7 +195,9 @@ def parse_webhook(payload: dict) -> list[Inbound | Echo | Status | HistoryChunk]
                                           mime=media.get("mime_type", ""),
                                           filename=media.get("filename", ""),
                                           caption=media.get("caption", ""),
-                                          reply_to=(m.get("context") or {}).get("id", "")))
+                                          reply_to=react.get("message_id") or
+                                          (m.get("context") or {}).get("id", ""),
+                                          emoji=react.get("emoji", "")))
                 for s in value.get("statuses") or []:
                     events.append(Status(msg_id=s.get("id", ""), status=s.get("status", ""),
                                          ts=float(s.get("timestamp") or 0),

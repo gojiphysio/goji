@@ -62,7 +62,8 @@ from .policy import (AGENT, DRAFT, ESCALATE, HUMAN, LATE_CHANGE_H, OFF_TOPIC, PA
                      note_off_topic,
                      out_of_scope,
                      pre_golive_chat,
-                     decide, gate, human_replied_since, is_acknowledgement, on_human_message,
+                     decide, gate, human_replied_since, is_acknowledgement, is_positive_reaction,
+                     on_human_message,
                      reply_problems, set_mode)
 from .state import ChatLocks, append_history, make_store, mark_seen, note_outcome, parse_code
 from .whatsapp import (Echo, HistoryChunk, Inbound, Status, WhatsAppClient, parse_webhook,
@@ -885,14 +886,43 @@ def _hold_pre_golive(state, blocked, now: float) -> None:
         set_mode(state, PAUSED, "pre_golive_chat", now)
 
 
+def _customer_reaction(ev: Inbound) -> None:
+    """An emoji reaction is never a question: no model call, no reply, no
+    history line (one landing after a text would supersede that text's run).
+    A positive one (👍 😊 🙏) needs nobody; a negative or neutral one pings
+    staff, when the chat is the agent's (in Chris's own chats she sees it in
+    the Business app). Owner, 25 Nov 2026, after a 👍 pinged her."""
+    if not ev.emoji or is_positive_reaction(ev.emoji):
+        events.record("silent", ev.wa_id, reason="reaction")
+        return
+    st, _, _ = _deps()
+    with locks(ev.wa_id):
+        state = st.load(ev.wa_id)
+        if not mark_seen(state, ev.msg_id):
+            return
+        st.save(state)
+    blocked = gate(state, time.time(), kill_switch=config.KILL_SWITCH or st.get_kill(),
+                   agent_hours=config.resolve_rollout(st.get_rollout())["hours"],
+                   not_live=_not_live(st))
+    if state.owner != "agent" or blocked:
+        events.record("silent", ev.wa_id, reason="reaction")
+        return
+    target = next((h for h in state.history if ev.reply_to and h.get("id") == ev.reply_to), None)
+    on = ""
+    if target:
+        words = target["text"].split()
+        quote = " ".join(words[:12]).rstrip(".!?") + ("…" if len(words) > 12 else "")
+        on = f' to "{quote}"'
+    events.record("escalated", ev.wa_id, reason="reaction")
+    _alert("reaction", customer=state.name, wa_id=ev.wa_id, suggested_reply="",
+           staff_note=f"reacted {ev.emoji}{on}", reason="a negative or neutral reaction",
+           last_message=ev.text)
+
+
 def handle_inbound(ev: Inbound, received: float) -> None:
-    if ev.kind == "reaction":
-        # An emoji reaction is never a question, from a customer or from staff
-        # on a ping: no model call, no ping, no reply, no history line (one
-        # landing after a text would supersede that text's run). Chris sees it
-        # in the Business app. A customer's 👍 pinged her (owner, 25 Nov 2026).
+    if ev.kind == "reaction":  # staff reacting to a ping: nothing to do
         if ev.wa_id not in config.STAFF:
-            events.record("silent", ev.wa_id, reason="reaction")
+            _customer_reaction(ev)
         return
     if ev.wa_id in config.STAFF:
         handle_staff(ev)
