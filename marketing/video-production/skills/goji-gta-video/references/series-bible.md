@@ -113,7 +113,7 @@ their design from a text description or use superseded versions.
 - **SOS Transit bus — SOS-BUS-01 v1:** user-approved orange-red/purple/white
   double-decker with three axles (one front, tandem rear), rounded body/roof,
   inset glazing, fitted lamps/bumpers and italic SOS Transit wordmark/swoosh.
-  [Approved image](https://github.com/gojiphysio/goji/blob/codex/save-sos-transit-reference/marketing/assets/goji-girl/references/sos-bus-01/canonical.png).
+  [Approved image](https://github.com/gojiphysio/goji/blob/2f9f6fc/marketing/assets/goji-girl/references/sos-bus-01/canonical.png).
   Local authority: `marketing/assets/goji-girl/references/sos-bus-01/`,
   including the original approval quote and image SHA-256 in `reference.json`.
   Preserve left-front passenger entry, dark charcoal door frames without a
