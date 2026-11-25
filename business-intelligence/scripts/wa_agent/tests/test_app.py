@@ -572,7 +572,7 @@ def test_booking_needs_a_yes_in_a_later_message(env, monkeypatch):
     post(client, inbound(msg_id="wamid.in2", text="yes please"))
     assert len(calls) == 1 and calls[0]["full_name"] == "Charles Tan"
     sent = app_mod.wa.sent[-1][1]
-    assert sent.startswith("You're booked, Charles! Thu 26 Nov, 10:00am with Kristy (ref GOJI-AB12CD)")
+    assert sent.startswith("All booked! Thu 26 Nov, 10:00am with Kristy (ref GOJI-AB12CD)")
     assert "dry run" in sent
     state = app_mod.store.load(CUSTOMER)
     assert state.booked["reference"] == "GOJI-AB12CD" and state.pending_booking == {}
@@ -789,7 +789,7 @@ def test_a_mistyped_email_is_asked_again_and_the_answer_books(env, monkeypatch):
         **BOOK, "date": "2026-11-26", "time": "11:00", "email": "charles@gmail.com"}))
     post(client, inbound(msg_id="wamid.in3", text="yes sorry"))
     assert calls[-1]["email"] == "charles@gmail.com"
-    assert app_mod.wa.sent[-1][1].startswith("You're booked, Charles!")
+    assert app_mod.wa.sent[-1][1].startswith("All booked!")
 
 
 def test_an_email_that_isnt_one_is_asked_again_before_booking(env, monkeypatch):
@@ -839,7 +839,7 @@ def test_a_bad_email_on_file_books_without_it(env, monkeypatch):
     app_mod.claude.queue.append(_final_with("Booking!", booking=BOOK, confirm_booking=True))
     post(client, inbound(msg_id="wamid.in2", text="yes"))
     assert [c["email"] for c in calls] == ["ct@gmail.con", ""]
-    assert app_mod.wa.sent[-1][1].startswith("You're booked, Charles!") and not notes
+    assert app_mod.wa.sent[-1][1].startswith("All booked!") and not notes
 
 
 def test_a_name_sent_after_picking_a_time_books_it(env, monkeypatch):
@@ -861,7 +861,7 @@ def test_a_name_sent_after_picking_a_time_books_it(env, monkeypatch):
     post(client, inbound(msg_id="wamid.in2", text="Charles Tan"))
     assert len(calls) == 1 and calls[0]["full_name"] == "Charles Tan"
     assert calls[0]["time"] == "10:00"
-    assert app_mod.wa.sent[-1][1].startswith("You're booked, Charles!")
+    assert app_mod.wa.sent[-1][1].startswith("All booked!")
     assert notes == []
 
 
@@ -926,7 +926,8 @@ def test_booking_for_a_wife_never_lands_on_the_husbands_record(env, monkeypatch)
     app_mod.claude.queue.append(_final_with("Booking!", booking=wife, confirm_booking=True))
     post(client, inbound(msg_id="wamid.in2", text="yes"))
     assert calls and calls[0][1] == ""                    # a new record in Mei's name
-    assert app_mod.wa.sent[-1][1].startswith("Mei is booked!")
+    assert app_mod.wa.sent[-1][1].startswith("All booked!")
+    assert "Mei" not in app_mod.wa.sent[-1][1]
 
 
 def test_reset_from_whatsapp_starts_the_chat_fresh_for_testers_only(env, monkeypatch):

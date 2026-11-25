@@ -278,17 +278,16 @@ def _simulate(b: dict, http) -> dict:
             "time": b["time"]}
 
 
-def confirmation_text(res: dict, *, first_name: str = "", patient: str = "",
-                      emailed: bool = False) -> str:
+def confirmation_text(res: dict, *, emailed: bool = False) -> str:
     """What the customer sees once it's booked. Composed in code from the
-    booking system's answer, so it can't claim a booking that didn't happen."""
+    booking system's answer, so it can't claim a booking that didn't happen.
+    It names no one: a couple sharing one session is booked under one of
+    them, so a name greeted the wrong person (owner, 25 Nov 2026)."""
     d = date.fromisoformat(res["date"])
     h, m = map(int, res["time"].split(":"))
     when = f"{d:%a} {d.day} {d:%b}, {(h % 12) or 12}:{m:02d}{'am' if h < 12 else 'pm'}"
     who = (res.get("clinician_name") or "").split(" ")[0]
-    head = (f"{patient} is booked!" if patient
-            else f"You're booked{', ' + first_name if first_name else ''}!")
-    text = (f"{head} {when}"
+    text = (f"All booked! {when}"
             f"{' with ' + who if who else ''} (ref {res['reference']}).\n\n"
             + ("A confirmation email is on its way too. "
                if emailed and not res.get("dry_run") else "")
