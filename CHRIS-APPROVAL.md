@@ -28,13 +28,13 @@ The test sent seven emails, in five designs. The samples below use made-up patie
 | --- | --- | --- |
 | 1 | Booking confirmation | Right after any booking: website, WhatsApp or front desk |
 | 2 | Appointment moved | When the time changes |
-| 3 | Booking confirmation, first visit | A new patient's first booking; adds Plato's registration form |
+| 3 | Booking confirmation, first visit | Any booking where the patient hasn't yet filled in Plato's registration form; adds the form |
 | 4, 5 | 48-hour reminder, not yet confirmed | 12:00, two days before |
 | 6, 7 | 48-hour reminder, already confirmed | Same, once they've confirmed |
 
 Every booking confirmation also adds the appointment to the patient's calendar, with no alert. If the time moves, that calendar entry moves with it.
 
-**New since the test:** if a new patient still hasn't filled in Plato's registration form, the 48-hour reminder email asks again, with the form button under the Confirm button. It stops asking once the form is done or the front desk completes their profile. The WhatsApp reminder can't carry the form link, because its wording is fixed by Meta.
+**New since the test:** if the patient still hasn't filled in Plato's registration form, the 48-hour reminder email asks again, with the form button under the Confirm button. "Filled in" means the patient has signed the Clinic Consent Form at the end of Plato's form, which Plato records on their profile. Both emails stop asking once that's signed. The WhatsApp reminder can't carry the form link, because its wording is fixed by Meta.
 
 ### Email 1: booking confirmation
 ![Email 1](email-1.png)
@@ -42,7 +42,7 @@ Every booking confirmation also adds the appointment to the patient's calendar, 
 ### Email 2: appointment moved
 ![Email 2](email-2.png)
 
-### Email 3: booking confirmation, first visit
+### Email 3: booking confirmation, registration form not yet filled in
 ![Email 3](email-3.png)
 
 ### Emails 4 and 5: 48-hour reminder, not yet confirmed
