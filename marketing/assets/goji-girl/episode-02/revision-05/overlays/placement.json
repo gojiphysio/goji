@@ -3,7 +3,7 @@
     1080,
     1920
   ],
-  "text": "You can save your game and lose your wanted level at a safehouse. Try to stay out of trouble this time.",
+  "text": "You can save your game and lose the police at a safehouse.",
   "previous_box": {
     "x": 56,
     "y": 360,
@@ -32,6 +32,6 @@
     "bottom_start_y": 1540
   },
   "actual_instagram_ui_verified": false,
-  "copy_provenance": "Original San Andreas-style parody tutorial, not a verbatim Rockstar quote.",
+  "copy_provenance": "Exact user-provided sentence in the established tutorial style.",
   "note": "Proposed inset and review mask. Instagram chrome varies by device/view. Box clears stated reserves and all faces in supplied preview."
 }

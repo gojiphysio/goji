@@ -11,6 +11,6 @@ func text(_ s:String,_ x:CGFloat,_ y:CGFloat,_ size:CGFloat,_ c:String="ECEDE3",
 func render(_ name:String,_ draw:()->Void)throws{svg="<svg xmlns='http://www.w3.org/2000/svg' width='1080' height='1920' viewBox='0 0 1080 1920'>";let rep=NSBitmapImageRep(bitmapDataPlanes:nil,pixelsWide:1080,pixelsHigh:1920,bitsPerSample:8,samplesPerPixel:4,hasAlpha:true,isPlanar:false,colorSpaceName:.deviceRGB,bytesPerRow:0,bitsPerPixel:0)!;let ctx=NSGraphicsContext(bitmapImageRep:rep)!;NSGraphicsContext.saveGraphicsState();NSGraphicsContext.current=ctx;NSColor.clear.setFill();NSRect(x:0,y:0,width:1080,height:1920).fill(using:.copy);draw();ctx.flushGraphics();NSGraphicsContext.restoreGraphicsState();try rep.representation(using:.png,properties:[:])!.write(to:root.appendingPathComponent("overlays/\(name).png"));svg+="</svg>";try svg.write(to:root.appendingPathComponent("overlays/\(name).svg"),atomically:true,encoding:.utf8)}
 try render("safehouse-popup"){
  rect(56,360,658,250,"142725",0.84)
- let lines=["You can save your game","and lose your wanted level","at a safehouse. Try to stay","out of trouble this time."]
+ let lines=["You can save your game","and lose the police at a","safehouse."]
  for (i,s) in lines.enumerated(){text(s,80,379+CGFloat(i)*51,42,"E1E4D9","Arial-Black")}
 }

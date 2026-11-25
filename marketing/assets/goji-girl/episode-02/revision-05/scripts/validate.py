@@ -7,9 +7,11 @@ assert shots['07']['bus_matrix_world']==shots['08']['bus_matrix_world']==shots['
 for s in shots.values():
  assert s['bus_bounds']['max'][0]<0 and s['bus_bounds']['min'][0]>=-5.22
  assert s['matrix_determinant']>0 and abs(s['forward_world'][1]-1)<.0001
+assert record['driver_window']['width_y']==1.10 and record['driver_window']['height_z']==.82
+assert record['driver_window']['centre_y']==5.15
 root=ET.parse(R/'overlays/safehouse-popup.svg').getroot()
 lines=[e.text for e in root if e.tag.endswith('text')]
-assert ' '.join(lines)=='You can save your game and lose your wanted level at a safehouse. Try to stay out of trouble this time.'
+assert ' '.join(lines)=='You can save your game and lose the police at a safehouse.'
 assert root[0].attrib=={'x':'56.0','y':'360.0','width':'658.0','height':'250.0','fill':'#142725','opacity':'0.84'}
 for i,e in enumerate(list(root)[1:]):
  assert e.attrib['font-family']=='Arial-Black' and float(e.attrib['font-size'])==42

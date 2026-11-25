@@ -1,6 +1,6 @@
 # Goji Girl · Episode 02 — TAP OUT
 
-**Creative draft v5 · 25 November 2026 · proposed 47 seconds · vertical 9:16**
+**Creative draft v5.1 · 25 November 2026 · proposed 47 seconds · vertical 9:16**
 
 A frustrating work call sends Goji Girl rushing to Pilates. She steals a bus,
 crashes outside Lentor Modern, remembers to tap out, and reaches the calm of
@@ -33,9 +33,12 @@ of a fixed layout.
 [Parked-bus overhead](revision-05/frames/plan-parked.png) ·
 [Wreck overhead](revision-05/frames/plan-wreck.png)
 
+The driver window has been reduced and moved forward beside the windscreen;
+the driver seat and takeover pose are aligned with it.
+
 ## Revised popup
 
-> You can save your game and lose your wanted level at a safehouse. Try to stay out of trouble this time.
+> You can save your game and lose the police at a safehouse.
 
 This is a continuous tutorial paragraph, with visual line wrapping inside the
 existing lower box. It retains y=360, the inherited font/colours and the
@@ -243,7 +246,7 @@ of phase. Beyond them, the overturned bus burns. Nobody inside reacts.
 
 At **41.5s**, show the tutorial box at y=360. Hold until **46s**:
 
-> You can save your game and lose your wanted level at a safehouse. Try to stay out of trouble this time.
+> You can save your game and lose the police at a safehouse.
 
 This is original San Andreas-style parody copy, not a verbatim game quote.
 The joke stays entirely in the fictional game; no appointment or treatment claim.

@@ -12,6 +12,11 @@ not a finished PS2 appearance pass.
 [Editable Blender master](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-girl-episode-2/marketing/assets/goji-girl/episode-02/revision-05/blender/continuity-master.blend) ·
 [Build script](scripts/build_continuity.py) · [Exported scene record](blender/continuity-record.json)
 
+The driver window is now a compact 1.10m × 0.82m opening, with its centre
+moved forward from local y=4.47 to y=5.15. Its front edge sits 0.30m behind
+the nose. The driver seat and takeover marks follow the revised opening.
+These are staging dimensions, not a manufacturer specification.
+
 ## World rules and verified poses
 
 Northbound is +Y. Its left lane is x<0, with the centreline at x=0 and west curb
@@ -54,7 +59,7 @@ leaving bus and street transforms unchanged.
 
 ## Flowing tutorial copy
 
-> You can save your game and lose your wanted level at a safehouse. Try to stay out of trouble this time.
+> You can save your game and lose the police at a safehouse.
 
 The previous episode's Body Muscle and Mobility overlays are the tone and styling
 reference: clear sentences, with line breaks used for typesetting. This new text

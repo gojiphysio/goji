@@ -78,7 +78,7 @@ class Person:
    shoe=self.parts[(side,'shoe')];shoe.location=(ankle[0],ankle[1]+.07,ankle[2]-.035);shoe.keyframe_insert('location',frame=f)
    shoulder=(side*.235,0,1.35);elbow=(side*.285,-swing*.5+.15*seated,1.08);wrist=(side*.30,-swing*.9+.35*seated,.86+.18*seated)
    if reach is not None and side==1:
-    wrist=reach;elbow=((shoulder[0]+wrist[0])*.5,(shoulder[1]+wrist[1])*.5-.09,1.17)
+    wrist=reach;elbow=((shoulder[0]+wrist[0])*.5,(shoulder[1]+wrist[1])*.5-.09,(shoulder[2]+wrist[2])*.5)
    move_segment(self.parts[(side,'upperarm')],shoulder,elbow,f);move_segment(self.parts[(side,'forearm')],elbow,wrist,f)
    hand=self.parts[(side,'hand')];hand.location=(wrist[0],wrist[1],wrist[2]-.035);hand.keyframe_insert('location',frame=f)
    if side==-1 and self.bag:
@@ -118,9 +118,9 @@ for yy in [5.37,5.49]:
  cube('folded front door glass',(-.92,yy,1.7),(.55,.045,2.1),'glass',bus)
  for zz in [.66,2.74]:cube('folded door frame',(-.92,yy,zz),(.60,.07,.055),'yellow',bus)
 # Cabin and reader are all children of chassis, with local transforms fixed.
-cube('right driver seat',(.64,4.30,.92),(.6,.7,.55),'navy',bus)
-cube('driver seat back',(.64,3.96,1.47),(.6,.15,.8),'navy',bus)
-cube('front dash',(0,5.5,1.42),(2.15,.45,.35),'navy',bus)
+cube('right driver seat',(.64,5.15,.92),(.6,.7,.55),'navy',bus)
+cube('driver seat back',(.64,4.81,1.47),(.6,.15,.8),'navy',bus)
+cube('front dash',(0,5.80,1.42),(2.15,.30,.35),'navy',bus)
 for y in [-4.8,-3,-1.2,.6,2.3]:
  for x in [-.65,.65]:cube('passenger seat',(x,y,.92),(.65,.6,.45),'navy',bus)
 reader_pole=segment('front entrance reader pole',(-1.08,3.95,.58),(-1.08,3.95,2.74),.035,.035,'yellow',bus)
@@ -198,9 +198,14 @@ for name,p,rot,size in [('left',(-1.33,-.8,1.42),(math.pi/2,0,-math.pi/2),.38),(
  logo=empty('LOGO '+name,p,bus);logo.rotation_euler=rot
  for word,dx,color in [('SOS',-.72,'red'),('Transit',.13,'purple')]:
   o=text(name+' '+word,word,(0,0,0),size,color,(0,0,0));o.parent=logo;o.location=(dx,0,0);o.rotation_euler=(0,0,0);o.data.align_x='LEFT';o.data.shear=.15
-driver_pane=cube('intact driver side glass',(1.31,4.47,2.2),(.04,1.64,.98),'glass',bus)
-for y in [3.60,5.34]:cube('driver window jamb',(1.3,y,2.22),(.1,.075,1.2),'black',bus)
-cube('driver window sill',(1.30,4.47,1.66),(.12,1.82,.08),'black',bus)
+# Compact driver's opening directly beside the windscreen. All dimensions local.
+DRIVER_WINDOW={'centre_y':5.15,'width_y':1.10,'height_z':.82,'bottom_z':1.78,'front_gap_to_nose':.30}
+driver_pane=cube('intact driver side glass',(1.31,5.15,2.19),(.04,1.10,.82),'glass',bus)
+for y in [4.60,5.70]:cube('driver window jamb',(1.3,y,2.19),(.1,.075,.94),'black',bus)
+for z in [1.74,2.64]:cube('driver window horizontal frame',(1.30,5.15,z),(.12,1.18,.08),'black',bus)
+cube('cab panel behind driver window',(1.25,4.09,2.15),(.10,.94,1.0),'white',bus)
+cube('front driver corner pillar',(1.25,5.88,2.15),(.10,.24,1.0),'white',bus)
+cube('driver sill infill',(1.25,5.15,1.695),(.10,1.18,.09),'white',bus)
 
 # Fixed world: northbound +Y uses WEST/left lane x<0. No camera-based geometry.
 CURB=-5.2;PARK=(-3.65,-28,0);WRECK=(-5.1,0,1.45)
@@ -260,8 +265,8 @@ for y in range(-35,-20,2):
 # Reuse the validated exit pose in the new world by ONE translation.
 exit_root=empty('EXIT world offset',(WRECK[0],0,0));girl.root.parent=exit_root;card.parent=exit_root
 approach=Person('GG04 approach proxy');approach.pose(1,(-5.85,-22.6,.13),-math.pi/2,walk=.5)
-takeover=Person('GG05 takeover proxy');takeover.pose(1,(-2.02,-23.55,0),math.pi/2,reach=(.1,.58,1.3))
-driver=Person('DRIVER purple proxy',outfit='purple',hair='short');driver.pose(1,(-2.72,-23.50,.63),-math.pi/2,seated=1)
+takeover=Person('GG05 takeover proxy');takeover.pose(1,(-2.02,-22.85,0),math.pi/2,reach=(.1,.35,1.77))
+driver=Person('DRIVER purple proxy',outfit='purple',hair='short');driver.pose(1,(-2.72,-22.85,.63),-math.pi/2,seated=1)
 depart=Person('GG09 departure proxy');depart.pose(1,(-6.3,5.4,.13),0,walk=.3)
 def descendants(root):return [root]+list(root.children_recursive)
 groups={'04':descendants(approach.root),'05':descendants(takeover.root)+descendants(driver.root),'08':descendants(girl.root)+[card],'09':descendants(depart.root)}
@@ -278,13 +283,13 @@ for name,p,c,e in [('offscreen blue pursuer',(-6,-26,1.6),(.07,.16,1),6000),('of
  bpy.ops.object.light_add(type='POINT',location=p);o=bpy.context.object;o.name=name;o.data.color=c;o.data.energy=e;o.data.shadow_soft_size=3;police.append(o)
 shots=[
  ('04',1,PARK,0,(-8.2,-18.5,2.7),(-4.3,-24.8,1.4),52),
- ('05',10,PARK,0,(1.0,-20,2.8),(-2.85,-23.5,1.4),49),
+ ('05',10,PARK,0,(1.0,-20,2.8),(-2.85,-22.85,1.4),49),
  ('06',20,(-3.65,-12,0),0,(-3.65,-24,4.5),(-3.65,-10,1.8),52),
  ('07',30,WRECK,90,(-1.7,-13,6.0),(-3.5,0,1.45),52),
  ('08',35,WRECK,90,(-5.05,9.0,5.6),(-3.2,4.0,2.45),52),
  ('09',80,WRECK,90,(-6.7,1.3,2.0),(-6.1,5.4,1.25),52),
 ]
-record={'role':'direct Blender continuity proof; proxy cast, not final appearance','world':{'forward':'+Y','road_bounds_x':[-5.2,5.2],'centreline_x':0,'northbound_lane':'x<0','mall_and_passenger_curb':'west, x< -5.2','bus_driver_side':'+X','bus_passenger_side':'-X'},'bus_materials':{'roof':'red','body':'white','skirt':'purple','floor_and_chassis':'charcoal black','windows':'smoked neutral grey'},'shots':[]}
+record={'role':'direct Blender continuity proof; proxy cast, not final appearance','world':{'forward':'+Y','road_bounds_x':[-5.2,5.2],'centreline_x':0,'northbound_lane':'x<0','mall_and_passenger_curb':'west, x< -5.2','bus_driver_side':'+X','bus_passenger_side':'-X'},'bus_materials':{'roof':'red','body':'white','skirt':'purple','floor_and_chassis':'charcoal black','windows':'smoked neutral grey'},'driver_window':DRIVER_WINDOW,'shots':[]}
 for sid,f,pos,roll,cp,target,hfov in shots:
  scene.frame_set(f);bus.location=pos;bus.rotation_euler=(0,math.radians(roll),0)
  for prop in ['location','rotation_euler']:bus.keyframe_insert(prop,frame=f)

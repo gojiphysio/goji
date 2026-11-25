@@ -2,7 +2,7 @@
   "revision": 5,
   "proposed_duration_seconds": 47,
   "user_direction": "outdoor third-person player POV, indoor cutscenes, original GTA San Andreas PS2 look",
-  "approved": "User direction retained. Earlier generated bus geometry rejected; current direct Blender staging and fluid popup copy proposed.",
+  "approved": "User accepted shared Blender bus layout. Driver window reduced and shifted forward; popup uses exact user-provided sentence.",
   "video_rendered": "six-second Blender exit blockout only",
   "reference_manifest": "revision-05/blender/continuity-record.json",
   "known_board_limitation": "Direct Blender proxy board establishes shared geometry. Final PS2 cast/look and clinic background bus replacement remain pending.",
@@ -439,7 +439,7 @@
         "status": "not motion tested"
       },
       "popup": {
-        "text": "You can save your game and lose your wanted level at a safehouse. Try to stay out of trouble this time.",
+        "text": "You can save your game and lose the police at a safehouse.",
         "source": "revision-05/overlays/safehouse-popup.svg",
         "box": [
           56,
@@ -449,9 +449,10 @@
         ],
         "in_seconds": 41.5,
         "out_seconds": 46,
-        "provenance": "Original continuous tutorial prose; line breaks are typesetting only."
+        "provenance": "Exact user-provided sentence; line breaks are typesetting only."
       }
     }
   ],
-  "bus_brand": "SOS Transit; established logo treatment and livery retained"
+  "bus_brand": "SOS Transit; established logo treatment and livery retained",
+  "popup_copy_source": "user-provided"
 }

@@ -19,6 +19,13 @@
     "floor_and_chassis": "charcoal black",
     "windows": "smoked neutral grey"
   },
+  "driver_window": {
+    "centre_y": 5.15,
+    "width_y": 1.1,
+    "height_z": 0.82,
+    "bottom_z": 1.78,
+    "front_gap_to_nose": 0.3
+  },
   "shots": [
     {
       "id": "04",
@@ -166,9 +173,9 @@
           2.799999952316284
         ],
         "rotation": [
-          1.3079524040222168,
-          2.99248625879045e-09,
-          2.3086113929748535
+          1.2864465713500977,
+          8.182331256989528e-09,
+          2.2080347537994385
         ],
         "horizontal_fov_degrees": 49,
         "lens_mm": 39.49739456176758,
