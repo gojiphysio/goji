@@ -273,6 +273,16 @@ SCENARIOS: list[Scenario] = [
       ["Who's your most senior physio? And what are your opening hours?"],
       E(decisions=("send",), must_not=(r"www\.gojiphysio\.com/",)),
       note="owner (25 Nov): a reply that answers it needs no 'read more here' link"),
+    S("no_clinician_ranking", "new enquiry",
+      ["Can I see your most senior physio?",
+       ("agent", "Sure! The next open slots are:\n* Tue 1 Dec, 12:00pm\n* Tue 1 Dec, 3:00pm"),
+       "Is Kristy the next most senior?"],
+      E(decisions=("send",), no_greeting=True, must=(r"kristy",),
+        must_not=(r"only one", r"\bmost (qualified|senior|experienced)\b", r"next most",
+                  r"more (qualified|experienced|senior)", r"\byep\b", r"\byes\b",
+                  r"same level", r"\bafter (cheryl|claire|chris)\b", r"\b(cheryl|claire|camille)\b")),
+      note="owner (25 Nov): never rank clinicians or say 'the only one with an MSc'; "
+           "say what Kristy brings, not where she sits"),
     S("page_link_not_every_answer", "new enquiry",
       ["Do you treat tennis elbow?",
        ("agent", "Yes, we do! Our Musculoskeletal & Sports Physiotherapy covers it.\n\n"

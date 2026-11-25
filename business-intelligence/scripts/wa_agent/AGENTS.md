@@ -101,6 +101,11 @@ The WhatsApp assistant. What it is and how to run it: [`README.md`](README.md).
   further page link and its "read more here:" line out of the reply before
   it's sent. Booking links don't count and aren't touched: the prompt's
   once-per-conversation rule covers them.
+- **Never rank clinicians.** Asked who's most senior or whether someone is
+  "next most senior", the agent says what that clinician brings and never
+  confirms a ranking or contrasts the team ("she's the only one with an MSc"
+  read as discrediting the others: owner, 25 Nov 2026). Recommend by fit and
+  availability, not by who's "better". Eval: `no_clinician_ranking`.
 - **Disclosure: don't lead with it, never hide it.** The agent introduces
   itself as Goji's front desk; asked whether it's a person, a bot or Chris, it
   says it's Goji's WhatsApp assistant. It never claims to be a named person.
