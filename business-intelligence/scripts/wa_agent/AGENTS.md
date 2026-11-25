@@ -9,7 +9,9 @@ The WhatsApp assistant. What it is and how to run it: [`README.md`](README.md).
 - **The model never writes.** Its tools are read-only. Direct booking happens
   in code (`app._book_pending` → goji-booking `/internal/book`) only after the
   customer confirms, in a later message, the details stated back to them; the
-  confirmation text is built from goji-booking's answer. Dry run until go-live
+  confirmation text is built from goji-booking's answer and names no one (a
+  couple sharing one session is booked under one of them, so a name greeted
+  the wrong person: owner, 25 Nov 2026). Dry run until go-live
   (`WA_AGENT_BOOKING_DRY_RUN`). Moves with 24h+ notice go the same way
   (`_move_pending` → `/internal/reschedule`); cancellations with 24h+ notice
   go out in the same turn (`_cancel_now` → `/internal/cancel`). Inside 24

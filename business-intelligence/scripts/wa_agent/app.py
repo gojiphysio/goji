@@ -656,11 +656,8 @@ def _book_pending(state, ev: Inbound, received: float, fallback: str,
                 "know and they'll sort it out with you shortly."), None, True
     events.record("booked", ev.wa_id, intent="booking",
                   reason="dry_run" if res.get("dry_run") else "agent")
-    first = (pending.get("full_name") or "").split(" ")[0]
-    for_other = (pending.get("for_whom") or "self").strip().lower() not in ("", "self")
-    return (booking_client.confirmation_text(res, first_name="" if for_other else first,
-                                             patient=first if for_other else "",
-                                             emailed=bool((sent.get("email") or "").strip())),
+    return (booking_client.confirmation_text(
+                res, emailed=bool((sent.get("email") or "").strip())),
             {"reference": res["reference"], "date": res["date"], "time": res["time"],
              "with": res.get("clinician_name", ""), "service": res.get("service", ""),
              "dry_run": bool(res.get("dry_run")), "at": time.time(), "source": "whatsapp"},
@@ -1511,9 +1508,8 @@ def booking_confirmed():
         if (not quiet and not chris_has_it and b.get("source") != "whatsapp"
                 and state.mode in (AGENT, WAITING) and in_window
                 and b.get("date") and b.get("time")):
-            text = booking_client.confirmation_text(
-                {**b, "dry_run": False}, first_name="").replace(
-                "You're booked!", "Thanks for booking! You're all set for", 1)
+            text = booking_client.confirmation_text({**b, "dry_run": False}).replace(
+                "All booked!", "Thanks for booking! You're all set for", 1)
             try:
                 msg_id = client.send_text(wa_id, text)
                 append_history(state, "agent", text, time.time(), msg_id)
