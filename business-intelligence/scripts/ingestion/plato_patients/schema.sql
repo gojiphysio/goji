@@ -36,6 +36,8 @@ CREATE TABLE IF NOT EXISTS `goji-bi.marts.dim_patient` (
     OPTIONS(description = "Date the patient record was first created in Plato. Used for acquisition cohort analysis."),
   referred_by STRING
     OPTIONS(description = "patient_id of the existing patient who referred this one (word-of-mouth graph). NULL when blank — Plato has no field for external sources like Google/Instagram/walk-in."),
+  consent_signed_at TIMESTAMP
+    OPTIONS(description = 'When the patient signed Plato\'s "Clinic Consent Form", the last step of the registration form (others.consents). NULL = registration form not done. The booking emails ask for the form until this is set.'),
   _updated_at TIMESTAMP NOT NULL
     OPTIONS(description = "UTC timestamp this row was last refreshed from Plato.")
 )

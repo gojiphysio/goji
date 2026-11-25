@@ -309,6 +309,25 @@ def tag_list(tag_field: object) -> list[str]:
     return out
 
 
+# The last step of Plato's registration form: the patient signs this consent,
+# and Plato stores it on the profile as others.consents[] {title, created_on}.
+# Its presence is the "registration form done" flag the booking emails use
+# (scripts/reminders/registration.py, booking/confirmations.py).
+CONSENT_TITLE = "Clinic Consent Form"
+
+
+def consent_signed_at(others: object) -> str | None:
+    """When the patient signed the Clinic Consent Form, as an ISO UTC
+    timestamp, or None if they never did. The latest signing wins."""
+    consents = others.get("consents") if isinstance(others, dict) else None
+    stamps = [c.get("created_on") for c in consents or []
+              if isinstance(c, dict) and c.get("title") == CONSENT_TITLE
+              and isinstance(c.get("created_on"), (int, float)) and c["created_on"] > 0]
+    if not stamps:
+        return None
+    return datetime.fromtimestamp(max(stamps), tz=timezone.utc).isoformat()
+
+
 def created_on_date(created_on_str: object) -> str | None:
     """Extract the date portion of Plato's `created_on` ("YYYY-MM-DD HH:MM:SS").
 
@@ -431,6 +450,7 @@ def main() -> None:
             row_primary_doc   = primary_doctor(p.get("doctor"))
             row_created_on    = created_on_date(p.get("created_on"))
             row_referred_by   = referred_by_id(p.get("referred_by"))
+            row_consent       = consent_signed_at(p.get("others"))
 
             rows.append({
                 "patient_id":       patient_id,
@@ -442,6 +462,7 @@ def main() -> None:
                 "primary_doctor":   row_primary_doc,
                 "created_on":       row_created_on,
                 "referred_by":      row_referred_by,
+                "consent_signed_at": row_consent,
                 "_updated_at":      updated_at_iso,
             })
 
@@ -487,6 +508,7 @@ def main() -> None:
             bigquery.SchemaField("primary_doctor",   "STRING"),
             bigquery.SchemaField("created_on",       "DATE"),
             bigquery.SchemaField("referred_by",      "STRING"),
+            bigquery.SchemaField("consent_signed_at", "TIMESTAMP"),
             bigquery.SchemaField("_updated_at",      "TIMESTAMP", mode="REQUIRED"),
         ],
     )

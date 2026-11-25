@@ -1101,51 +1101,63 @@ def _plato(**kw):
     return registration.Plato(key="k", session=FakePlatoHTTP(**kw))
 
 
+SIGNED = {"others": {"consents": [{"title": "Clinic Consent Form", "name": "consent.html",
+                                    "created_on": 1793000000}]}}
+
+
 def test_no_profile_gets_the_prereg_form():
     p = _plato()
-    url = registration.form_link(p, {"appointment_id": "a1", "patient_id": None,
-                                     "needs_form_check": True})
+    url = registration.form_link(p, {"appointment_id": "a1", "profile_id": None,
+                                     "consent_signed": False})
     assert url.endswith("/prereg/x") and p.http.paths == ["appointment/a1/prereg"]
 
 
-def test_profile_without_a_date_of_birth_gets_the_update_form():
-    p = _plato(patient={"name": "Jo", "created_by": "api", "dob": ""})
-    url = registration.form_link(p, {"appointment_id": "a1", "patient_id": "p1",
-                                     "needs_form_check": True})
+def test_unsigned_profile_gets_its_update_form():
+    p = _plato(patient={"name": "Jo", "created_by": "api"})
+    url = registration.form_link(p, {"appointment_id": "a1", "profile_id": "p1",
+                                     "consent_signed": False})
     assert url.endswith("/regupdate/x")
     assert p.http.paths == ["patient/p1", "patient/p1/updatelink"]
 
 
-@pytest.mark.parametrize("patient", [
-    {"created_by": "terminal", "dob": "1990-02-03"},               # registered through the form
-    {"created_by": "api", "last_edited_by": "Kristy.ng", "dob": "1985-04-12"},  # completed at the desk
-])
-def test_profile_with_a_date_of_birth_gets_no_form(patient):
-    p = _plato(patient=patient)
-    assert registration.form_link(p, {"appointment_id": "a1", "patient_id": "p1",
-                                      "needs_form_check": True}) is None
-
-
-def test_placeholder_date_of_birth_counts_as_missing():
-    assert not registration.has_dob({"dob": "0000-00-00"})
-
-
-def test_no_check_needed_means_no_plato_read():
+def test_signed_last_night_means_no_read_and_no_form():
     p = _plato()
-    assert registration.form_link(p, {"appointment_id": "a1", "needs_form_check": False}) is None
+    assert registration.form_link(p, {"appointment_id": "a1", "profile_id": "p1",
+                                      "consent_signed": True}) is None
     assert p.http.paths == []
+
+
+def test_signed_since_last_night_is_caught_live():
+    p = _plato(patient=SIGNED)
+    assert registration.form_link(p, {"appointment_id": "a1", "profile_id": "p1",
+                                      "consent_signed": False}) is None
+    assert p.http.paths == ["patient/p1"]
+
+
+@pytest.mark.parametrize("patient", [
+    {}, {"others": {}}, {"others": {"consents": []}},
+    {"others": {"consents": [{"title": "Another Form", "created_on": 1793000000}]}},
+    {"others": {"consents": [{"title": "Clinic Consent Form", "created_on": 0}]}},
+])
+def test_anything_but_a_signed_clinic_consent_is_unsigned(patient):
+    assert not registration.consent_signed(patient)
 
 
 def test_plato_failure_means_no_form_line():
     assert registration.form_link(_plato(fail=True), {"appointment_id": "a1",
-                                                      "needs_form_check": True}) is None
+                                                      "consent_signed": False}) is None
 
 
 def test_read_cap(monkeypatch):
     monkeypatch.setattr(registration, "MAX_READS", 1)
     p = _plato()
-    row = {"appointment_id": "a1", "needs_form_check": True}
+    row = {"appointment_id": "a1", "consent_signed": False}
     assert registration.form_link(p, row) and registration.form_link(p, row) is None
+
+
+def test_consent_title_matches_the_nightly_import():
+    src = open("../ingestion/plato_patients/main.py").read()
+    assert f'CONSENT_TITLE = "{registration.CONSENT_TITLE}"' in src
 
 
 def test_reminder_asks_for_the_form_in_text_and_html():

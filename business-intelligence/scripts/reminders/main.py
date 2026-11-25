@@ -230,6 +230,7 @@ def group_by_recipient(rows: list[dict]) -> tuple[list[dict], list[dict]]:
 # --- BigQuery --------------------------------------------------------------
 
 RECIPIENTS_SQL = """
+WITH due AS (
 SELECT
   r.appointment_id,
   r.appt_date,
@@ -254,33 +255,49 @@ SELECT
   -- Confirm link, a WhatsApp Confirm tap, or staff). No Confirm ask then.
   COALESCE(JSON_VALUE(a.payload, '$.code_Right'), '') = 'qK8x'  AS confirmed,
   r.patient_id,
-  -- First pass at "still owes Plato's registration form" (registration.py
-  -- checks Plato live before asking). No profile and none matching the phone
-  -- or email (a match is a returning patient: the form would duplicate them),
-  -- or a profile with no date of birth as of last night (age_band is derived
-  -- from it): every profile made through the form has one, and the bare ones
-  -- the WhatsApp assistant creates don't.
-  CASE
-    WHEN r.patient_id IS NULL THEN NOT EXISTS (
-      SELECT 1 FROM `{project}.{dataset}.dim_patient_contact` m
-      WHERE (COALESCE(JSON_VALUE(a.payload, '$.handphone'), '') != ''
-             AND RIGHT(REGEXP_REPLACE(COALESCE(m.phone, ''), r'\\D', ''), 8) =
-                 RIGHT(REGEXP_REPLACE(JSON_VALUE(a.payload, '$.handphone'), r'\\D', ''), 8))
-         OR (COALESCE(JSON_VALUE(a.payload, '$.email'), '') != ''
-             AND LOWER(m.email) = LOWER(JSON_VALUE(a.payload, '$.email'))))
-    ELSE p.patient_id IS NOT NULL AND p.age_band IS NULL
-  END                                                           AS needs_form_check
+  -- For matching a profile-less booking to an existing profile (below).
+  RIGHT(REGEXP_REPLACE(COALESCE(JSON_VALUE(a.payload, '$.handphone'), ''), r'\\D', ''), 8)
+                                                                AS appt_phone8,
+  LOWER(COALESCE(JSON_VALUE(a.payload, '$.email'), ''))         AS appt_email
 FROM `{project}.{dataset}.fct_appointment_reminders` r
 LEFT JOIN `{project}.stg.appointments`                a USING (appointment_id)
 LEFT JOIN `{project}.{dataset}.dim_patient_contact`   c ON r.patient_id = c.patient_id
-LEFT JOIN `{project}.{dataset}.dim_patient`           p ON r.patient_id = p.patient_id
 LEFT JOIN `{project}.{dataset}.appointment_reminder_latest` e USING (appointment_id)
 -- Idempotency guard: never re-send. 'sent' on EITHER channel suppresses (the
 -- guard keys on status only, never on channel). 'failed' and 'dry_run' fall
 -- through on purpose so a failure retries next run and a dry run doesn't block
 -- go-live.
 WHERE COALESCE(e.status, '') != 'sent'
-ORDER BY r.appt_time_sgt
+),
+-- A profile-less booking by a returning patient (website, before staff link
+-- the appointment): their profile, matched by phone or email. Several
+-- matches: prefer one that has signed.
+matched AS (
+  SELECT due.appointment_id,
+         ARRAY_AGG(m.patient_id ORDER BY d.consent_signed_at IS NULL, m.patient_id
+                   LIMIT 1)[SAFE_OFFSET(0)] AS patient_id
+  FROM due
+  JOIN `{project}.{dataset}.dim_patient_contact` m
+    ON due.patient_id IS NULL
+   AND ((due.appt_phone8 != ''
+         AND RIGHT(REGEXP_REPLACE(COALESCE(m.phone, ''), r'\\D', ''), 8) = due.appt_phone8)
+        OR (due.appt_email != '' AND LOWER(m.email) = due.appt_email))
+  LEFT JOIN `{project}.{dataset}.dim_patient` d ON d.patient_id = m.patient_id
+  GROUP BY due.appointment_id
+)
+SELECT
+  due.* EXCEPT (appt_phone8, appt_email),
+  -- The patient's Plato profile: the one on the appointment, else the match.
+  COALESCE(due.patient_id, matched.patient_id)                   AS profile_id,
+  -- The registration-form flag: the profile carries a signed "Clinic Consent
+  -- Form", the last step of Plato's registration form (dim_patient, from last
+  -- night's import). registration.py rechecks Plato live before asking.
+  COALESCE(d.consent_signed_at IS NOT NULL, FALSE)               AS consent_signed
+FROM due
+LEFT JOIN matched USING (appointment_id)
+LEFT JOIN `{project}.{dataset}.dim_patient` d
+  ON d.patient_id = COALESCE(due.patient_id, matched.patient_id)
+ORDER BY due.time
 """
 
 

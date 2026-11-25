@@ -26,9 +26,10 @@ PLATO_APPT = {
 class FakeBQ:
     """Answers the module's queries by what they ask for; records inserts."""
 
-    def __init__(self, last=None, failures=0, contact=None, earlier=0, profiles=0):
-        self.last, self.failures, self.contact = last, failures, contact
-        self.earlier, self.profiles = earlier, profiles
+    def __init__(self, last=None, failures=0, contact=None, profile=("p0", True)):
+        """profile: (patient_id, consent signed) for the registration lookup,
+        or None for "no profile matches"."""
+        self.last, self.failures, self.contact, self.profile = last, failures, contact, profile
         self.inserts: list[dict] = []
         self.queries: list[str] = []
 
@@ -38,8 +39,9 @@ class FakeBQ:
         if sql.lstrip().startswith("INSERT"):
             self.inserts.append(params)
             rows = []
-        elif "AS earlier" in sql:
-            rows = [{"earlier": self.earlier, "profiles": self.profiles}]
+        elif "AS signed" in sql:
+            rows = ([{"patient_id": self.profile[0], "signed": self.profile[1]}]
+                    if self.profile else [])
         elif "COUNT(*) AS n" in sql:
             rows = [{"n": self.failures}]
         elif "start_key, sequence" in sql:
@@ -56,8 +58,8 @@ class FakeBQ:
 
 
 class FakePlato:
-    def __init__(self, record=None):
-        self.record = record
+    def __init__(self, record=None, patient=None):
+        self.record, self.patient = record, patient or {}
         self.gets: list[str] = []
 
     def get(self, path, **kw):
@@ -66,6 +68,8 @@ class FakePlato:
             return {"url": "https://clinic.platomedical.com/prereg/abc/def"}
         if path.endswith("/updatelink"):
             return {"url": "https://clinic.platomedical.com/secure/regupdate/abc/def"}
+        if path.startswith("/patient/"):
+            return [self.patient]
         return [self.record]  # Plato answers GET /appointment/{id} with a list
 
 
@@ -204,7 +208,7 @@ def test_off_by_default_sends_nothing(sent, monkeypatch):
 
 def test_test_mode_sends_to_the_test_inbox_only(sent, monkeypatch):
     monkeypatch.setenv("CONFIRMATIONS_MODE", "test")
-    bq = FakeBQ(earlier=1)
+    bq = FakeBQ()
     assert c.on_booking(FakePlato(), bq, RESULT, DRAFT, source="web") == "test"
     assert sent[0]["To"] == "inbox@example.com"
     assert bq.inserts[0]["status"] == "test" and bq.inserts[0]["source"] == "web"
@@ -219,7 +223,7 @@ def test_test_mode_without_an_inbox_stays_off(sent, monkeypatch):
 
 def test_live_sends_to_the_patient_and_ledgers_no_address(sent, monkeypatch):
     live(monkeypatch)
-    bq = FakeBQ(earlier=1)
+    bq = FakeBQ()
     assert c.on_booking(FakePlato(), bq, RESULT, DRAFT, source="whatsapp") == "sent"
     assert sent[0]["To"] == "sarah@example.com"
     row = bq.inserts[0]
@@ -230,7 +234,7 @@ def test_live_sends_to_the_patient_and_ledgers_no_address(sent, monkeypatch):
 
 def test_live_test_patient_only_mails_the_test_inbox(sent, monkeypatch):
     live(monkeypatch)
-    c.on_booking(FakePlato(), FakeBQ(earlier=1), RESULT,
+    c.on_booking(FakePlato(), FakeBQ(), RESULT,
                  {**DRAFT, "name": "ZZ Goji Shop Test"}, source="whatsapp")
     assert sent[0]["To"] == "inbox@example.com"
 
@@ -248,48 +252,85 @@ def test_failed_send_is_ledgered_without_the_address(sent, monkeypatch):
     def boom(msg):
         raise RuntimeError("550 rejected sarah@example.com")
     monkeypatch.setattr(c, "_send", boom)
-    bq = FakeBQ(earlier=1)
+    bq = FakeBQ()
     assert c.on_booking(FakePlato(), bq, RESULT, DRAFT, source="web") == "failed"
     assert bq.inserts[0]["status"] == "failed"
     assert "sarah@example.com" not in bq.inserts[0]["note"]
 
 
-# --- first visit: Plato's registration form -------------------------------------------
+# --- registration form: until the Clinic Consent Form is signed -----------------
 
 def _body(msg):
     return msg.get_body(preferencelist=("plain",)).get_content()
 
 
-def test_first_visit_unlinked_gets_the_prereg_form(sent, monkeypatch):
+SIGNED = {"others": {"consents": [{"title": "Clinic Consent Form", "name": "consent.html",
+                                    "created_on": 1793000000}]}}
+
+
+def test_no_profile_gets_the_prereg_form(sent, monkeypatch):
     live(monkeypatch)
     plato = FakePlato()
-    c.on_booking(plato, FakeBQ(earlier=0, profiles=0), RESULT, DRAFT, source="web")
+    c.on_booking(plato, FakeBQ(profile=None), RESULT, DRAFT, source="web")
     assert plato.gets == ["/appointment/abcdef123456/prereg"]
     assert "prereg/abc/def" in _body(sent[0])
 
 
-def test_new_whatsapp_patient_gets_the_profile_form(sent, monkeypatch):
+def test_unsigned_profile_gets_its_update_form(sent, monkeypatch):
     live(monkeypatch)
-    plato = FakePlato()
-    c.on_booking(plato, FakeBQ(), {**RESULT, "patient_id": "p123", "patient_created": True},
-                 DRAFT, source="whatsapp")
-    assert plato.gets == ["/patient/p123/updatelink"]
+    plato = FakePlato(patient={"name": "Sarah Tan", "created_by": "api"})
+    c.on_booking(plato, FakeBQ(profile=("p123", False)),
+                 {**RESULT, "patient_id": "p123", "patient_created": True}, DRAFT,
+                 source="whatsapp")
+    assert plato.gets == ["/patient/p123", "/patient/p123/updatelink"]
     assert "regupdate" in _body(sent[0])
 
 
-@pytest.mark.parametrize("earlier,profiles", [(1, 0), (0, 1)])
-def test_returning_patient_gets_no_form(sent, monkeypatch, earlier, profiles):
+def test_signed_patient_gets_no_form_and_no_plato_read(sent, monkeypatch):
     live(monkeypatch)
     plato = FakePlato()
-    c.on_booking(plato, FakeBQ(earlier=earlier, profiles=profiles), RESULT, DRAFT, source="web")
+    c.on_booking(plato, FakeBQ(profile=("p9", True)), RESULT, DRAFT, source="web")
     assert plato.gets == [] and "registration form" not in _body(sent[0])
+
+
+def test_signed_since_last_night_is_caught_live(sent, monkeypatch):
+    live(monkeypatch)
+    plato = FakePlato(patient=SIGNED)
+    c.on_booking(plato, FakeBQ(profile=("p9", False)), RESULT, DRAFT, source="web")
+    assert plato.gets == ["/patient/p9"] and "registration form" not in _body(sent[0])
+
+
+def test_lookup_failure_means_no_form(sent, monkeypatch):
+    live(monkeypatch)
+
+    class BrokenBQ(FakeBQ):
+        def query(self, sql, job_config=None):
+            if "AS signed" in sql:
+                raise RuntimeError("no such column")
+            return super().query(sql, job_config)
+    plato = FakePlato()
+    c.on_booking(plato, BrokenBQ(), RESULT, DRAFT, source="web")
+    assert plato.gets == [] and "registration form" not in _body(sent[0])
+
+
+def test_moved_email_never_carries_the_form(sent, monkeypatch):
+    live(monkeypatch)
+    plato = FakePlato()
+    c.on_plato_appointment(plato, FakeBQ(last=("2026-12-02 10:00", 0), profile=None),
+                           PLATO_APPT, source="staff", now=NOW)
+    assert "registration form" not in _body(sent[0])
+
+
+def test_consent_title_matches_the_nightly_import():
+    src = open("ingestion/plato_patients/main.py").read()
+    assert f'CONSENT_TITLE = "{c.CONSENT_TITLE}"' in src
 
 
 # --- staff bookings: webhook, sweep, moves ---------------------------------------------
 
 def test_staff_booking_confirmed_once(sent, monkeypatch):
     live(monkeypatch)
-    bq = FakeBQ(earlier=1)
+    bq = FakeBQ()
     assert c.on_plato_appointment(FakePlato(), bq, PLATO_APPT, source="staff",
                                   now=NOW) == "sent"
     assert bq.inserts[0]["start"] == "2026-12-03 10:00"
@@ -332,7 +373,7 @@ def test_staff_path_off_without_a_cutoff(sent, monkeypatch):
 def test_linked_patient_email_comes_from_the_profile(sent, monkeypatch):
     live(monkeypatch)
     rec = {**PLATO_APPT, "email": "", "patient_id": "p9", "title": "S Tan"}
-    bq = FakeBQ(contact={"full_name": "Sarah Tan", "email": "sarah@example.com"}, earlier=1)
+    bq = FakeBQ(contact={"full_name": "Sarah Tan", "email": "sarah@example.com"})
     assert c.on_plato_appointment(FakePlato(), bq, rec, source="staff", now=NOW) == "sent"
     assert sent[0]["To"] == "sarah@example.com" and "Hi Sarah," in _body(sent[0])
 
@@ -370,7 +411,7 @@ def test_handle_webhook_reads_back_and_confirms(sent, monkeypatch):
     monkeypatch.setattr(c, "_take_read", lambda: True)
     future = {**PLATO_APPT, "starttime": "2030-01-02 10:00:00", "endtime": "2030-01-02 11:00:00"}
     plato = FakePlato(record=future)
-    assert c.handle_webhook(plato, FakeBQ(earlier=1), ["5e8cd7cd"]) == 1
+    assert c.handle_webhook(plato, FakeBQ(), ["5e8cd7cd"]) == 1
     assert plato.gets == ["/appointment/5e8cd7cd"]
 
 

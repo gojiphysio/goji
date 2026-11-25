@@ -15,8 +15,9 @@ appointment with an email gets the same email, sent once:
 
 What the email carries (decided with the clinic, 25 Nov 2026): the details,
 Plato's Confirm Appointment link, the address or home-visit note, the
-cancellation policy, the WhatsApp link, Plato's registration form on a first
-visit only, and a calendar invite that lands in the patient's calendar with no
+cancellation policy, the WhatsApp link, Plato's registration form until the
+patient has signed it (the "Clinic Consent Form" on their profile), and a
+calendar invite that lands in the patient's calendar with no
 alert and no RSVP traffic. A deleted appointment sends nothing.
 
 The ledger (marts.appointment_confirmation_events) is the guard against a second
@@ -61,6 +62,7 @@ PLATO_DB = os.environ.get("PLATO_DB", "gojihealth")
 LEDGER_TABLE = f"{PROJECT}.marts.appointment_confirmation_events"
 APPOINTMENTS_VIEW = f"{PROJECT}.stg.appointments"
 CONTACT_TABLE = f"{PROJECT}.marts.dim_patient_contact"
+PATIENT_TABLE = f"{PROJECT}.marts.dim_patient"
 
 SMTP_HOST = os.environ.get("SMTP_HOST", "smtp.gmail.com")
 SMTP_PORT = int(os.environ.get("SMTP_PORT", "587"))
@@ -270,17 +272,42 @@ def confirm_url(appointment_id: str, db: str = PLATO_DB) -> str:
     return f"https://clinic.platomedical.com/appointment_confirm/{token}/{appointment_id}"
 
 
-def registration_link(plato, appt: Appointment) -> str | None:
-    """Plato's form for a new patient. An appointment with no patient profile
-    gets the pre-registration form (it creates the profile); one linked to a
-    profile gets the profile's update form (Plato refuses prereg for those).
-    None if Plato doesn't give one. Never raises."""
-    path = (f"/patient/{appt.patient_id}/updatelink" if appt.patient_id
-            else f"/appointment/{appt.appointment_id}/prereg")
+# The last step of Plato's registration form: the patient signs this consent,
+# stored on the profile as others.consents[]. Signed = registration done.
+# Same flag as the 48-hour reminder (reminders/registration.py) and the
+# nightly import (dim_patient.consent_signed_at).
+CONSENT_TITLE = "Clinic Consent Form"
+
+
+def consent_signed(patient: dict) -> bool:
+    others = patient.get("others")
+    consents = others.get("consents") if isinstance(others, dict) else None
+    return any(isinstance(c, dict) and c.get("title") == CONSENT_TITLE
+               and isinstance(c.get("created_on"), (int, float)) and c["created_on"] > 0
+               for c in consents or [])
+
+
+def registration_link(plato, bq, appt: Appointment) -> str | None:
+    """Plato's registration form if this patient hasn't signed it, else None.
+    No profile at all: the pre-registration form (it creates one). A profile
+    without a signed consent: that profile's update form (never prereg, which
+    would duplicate them). Last night's flag first, then a live Plato read,
+    so someone who signed today isn't asked. Never raises; any doubt = no form."""
     try:
+        profile, signed = profile_and_consent(bq, appt)
+        if signed:
+            return None
+        if not profile:
+            path = f"/appointment/{appt.appointment_id}/prereg"
+        else:
+            patient = one_record(plato.get(f"/patient/{profile}", bulk=True,
+                                           max_wait_s=READ_MAX_WAIT_S, _retries=0))
+            if patient is None or consent_signed(patient):
+                return None
+            path = f"/patient/{profile}/updatelink"
         r = plato.get(path, bulk=True, max_wait_s=READ_MAX_WAIT_S, _retries=0)
     except Exception as e:
-        log.warning("registration link not fetched (%s): %s", appt.appointment_id, e)
+        log.warning("registration link skipped (%s): %s", appt.appointment_id, e)
         return None
     url = r.get("url") if isinstance(r, dict) else None
     return url if isinstance(url, str) and url.startswith("https://") else None
@@ -525,34 +552,25 @@ def hydrate(bq, appt: Appointment) -> None:
         appt.name = (rows[0].get("full_name") or "").strip() or appt.name
 
 
-def is_first_visit(bq, appt: Appointment) -> bool:
-    """No earlier session for this patient: by profile when linked, else by
-    phone or email, so a returning patient booking on the website isn't asked
-    to register again (that would make a duplicate profile). A failed lookup
-    counts as not first: better no form than a duplicate."""
+def profile_and_consent(bq, appt: Appointment) -> tuple[str, bool]:
+    """(the patient's profile id or '', whether it has a signed consent as of
+    last night). The profile is the appointment's own, else one matching the
+    phone or email (a returning patient booking on the website); several
+    matches prefer one that has signed. Raises on a failed query."""
     digits = "".join(ch for ch in appt.phone if ch.isdigit())[-8:]
-    try:
-        rows = _rows(bq, f"""
-            SELECT
-              (SELECT COUNT(*) FROM `{APPOINTMENTS_VIEW}` a
-               WHERE a.appointment_id != @aid
-                 AND a.start_at < TIMESTAMP(@start)
-                 AND ((@pid != '' AND a.patient_id = @pid)
-                   OR (@pid = '' AND @digits != '' AND RIGHT(REGEXP_REPLACE(
-                         COALESCE(JSON_VALUE(a.payload, '$.handphone'), ''), r'\\D', ''), 8) = @digits)
-                   OR (@pid = '' AND @email != '' AND LOWER(JSON_VALUE(a.payload, '$.email')) = @email))
-              ) AS earlier,
-              (SELECT COUNT(*) FROM `{CONTACT_TABLE}` c
-               WHERE @pid = ''
-                 AND ((@digits != '' AND RIGHT(REGEXP_REPLACE(COALESCE(c.phone, ''), r'\\D', ''), 8) = @digits)
-                   OR (@email != '' AND LOWER(c.email) = @email))
-              ) AS profiles""",
-                     aid=appt.appointment_id, start=appt.start.strftime("%Y-%m-%d %H:%M:%S"),
-                     pid=appt.patient_id, digits=digits, email=appt.email.lower())
-    except Exception as e:
-        log.warning("first-visit check failed (%s): %s", appt.appointment_id, e)
-        return False
-    return bool(rows) and int(rows[0]["earlier"]) == 0 and int(rows[0]["profiles"]) == 0
+    rows = _rows(bq, f"""
+        SELECT m.patient_id, d.consent_signed_at IS NOT NULL AS signed
+        FROM `{CONTACT_TABLE}` m
+        LEFT JOIN `{PATIENT_TABLE}` d USING (patient_id)
+        WHERE (@pid != '' AND m.patient_id = @pid)
+           OR (@pid = '' AND ((@digits != '' AND RIGHT(REGEXP_REPLACE(
+                 COALESCE(m.phone, ''), r'\\D', ''), 8) = @digits)
+              OR (@email != '' AND LOWER(m.email) = @email)))
+        ORDER BY signed DESC, m.patient_id
+        LIMIT 1""", pid=appt.patient_id, digits=digits, email=appt.email.lower())
+    if rows:
+        return rows[0]["patient_id"], bool(rows[0]["signed"])
+    return appt.patient_id, False
 
 
 def record(bq, appt: Appointment, *, status: str, kind: str, sequence: int,
@@ -579,7 +597,7 @@ _send_lock = threading.Lock()
 
 
 def deliver(plato, bq, appt: Appointment, *, kind: str, sequence: int, source: str,
-            new_patient: bool = False, now: datetime | None = None) -> str:
+            now: datetime | None = None) -> str:
     """Send this appointment's email and ledger it. Returns the status."""
     if mode() == "live":
         to = appt.email
@@ -591,9 +609,7 @@ def deliver(plato, bq, appt: Appointment, *, kind: str, sequence: int, source: s
         status = "skipped_no_email"
         record(bq, appt, status=status, kind=kind, sequence=sequence, source=source)
         return status
-    form = None
-    if kind == "booked" and (new_patient or is_first_visit(bq, appt)):
-        form = registration_link(plato, appt)
+    form = registration_link(plato, bq, appt) if kind == "booked" else None
     try:
         if not SMTP_PASS:
             raise RuntimeError("SMTP not configured (no GMAIL_APP_PASSWORD)")
@@ -620,8 +636,7 @@ def on_booking(plato, bq, result: dict, draft: dict, *, source: str) -> str | No
             log.warning("confirmation: booking result has no visit id (%s)", result.get("reference"))
             return None
         with _send_lock:
-            return deliver(plato, bq, appt, kind="booked", sequence=0, source=source,
-                           new_patient=bool(result.get("patient_created")))
+            return deliver(plato, bq, appt, kind="booked", sequence=0, source=source)
     except Exception as e:
         log.warning("confirmation for booking %s failed: %s", result.get("reference"), e)
         return None

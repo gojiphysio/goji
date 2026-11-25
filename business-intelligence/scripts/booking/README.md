@@ -197,11 +197,17 @@ registration form on a **first visit only**, and a calendar invite.
 - **Calendar invite.** `METHOD:REQUEST` inline plus an `.ics` attachment, clinic
   wall clock with `TZID=Asia/Singapore`, no alarm, `RSVP=FALSE` (the clinic
   wants the entry in the patient's calendar and no calendar notifications).
-- **First visit.** No earlier appointment for the profile (or, unlinked, for the
-  phone or email) and no profile matching them. Unlinked appointments get
-  Plato's pre-registration link (`GET appointment/{id}/prereg`, which Plato
-  refuses for linked ones); linked ones, e.g. a patient the assistant just
-  created, get the profile's update form (`GET patient/{id}/updatelink`).
+- **Registration form.** Shown until the patient has signed Plato's "Clinic
+  Consent Form", the last step of Plato's registration form, which Plato
+  stores on the profile (`others.consents`). That record is the flag, not a
+  guess from other fields: the nightly import writes it to
+  `dim_patient.consent_signed_at`, and a live Plato read confirms before
+  asking. No profile at all (none on the appointment, none matching the phone
+  or email): the pre-registration link (`GET appointment/{id}/prereg`). A
+  profile without the signed consent: its update form
+  (`GET patient/{id}/updatelink`), never prereg, which would duplicate them.
+  The 48-hour reminder (`reminders/registration.py`) asks again on the same
+  rule.
 - **Modes** (`CONFIRMATIONS_MODE`, repo variables read by deploy-booking.yml):
   `off` (default) = the old `mailer.send_customer_booking_email` only; `test` =
   the new email for every appointment goes to `CONFIRMATIONS_TEST_TO`, patients
@@ -212,6 +218,9 @@ registration form on a **first visit only**, and a calendar invite.
   inbox.
 
 **Go-live checklist**
+0. After the merge, run `plato-patients-ingest` once (it adds
+   `dim_patient.consent_signed_at`). Until it has, the registration-form
+   lookup fails safe: no form is offered.
 1. Repo variables `CONFIRMATIONS_MODE=test`, `CONFIRMATIONS_TEST_TO=<inbox>`,
    `CONFIRMATIONS_SINCE=<now>`; redeploy.
 2. Add `appointment:upsert` to the Plato webhook. Plato has no update call:

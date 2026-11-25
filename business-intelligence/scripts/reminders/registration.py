@@ -1,26 +1,22 @@
 """Has the patient filled in Plato's registration form? If not, the 48-hour
 reminder asks again, with a fresh link (clinic decision, 25 Nov 2026).
 
-Two cases:
-  - NO PROFILE: the appointment isn't linked to a Plato patient. Plato's
-    pre-registration form creates the profile and links the appointment; in
-    every case since Sep 2026 the submitted form left the appointment linked
-    (last edited by "Self Registration"). So unlinked = not registered,
-    unless a profile already matches the phone or email (a returning patient
-    who booked on the website; the reminder query checks that), because the
-    form would make a duplicate profile.
-  - A PROFILE WITH NO DATE OF BIRTH: every profile made or completed through
-    the form has one (checked on the self-registered profiles, 25 Nov 2026);
-    the bare profiles the WhatsApp assistant creates (name and number) don't.
-    These get the profile's update form. The rule looks at what the profile
-    holds, not at who edited it last, so staff completing it at the desk also
-    counts. The query's first pass uses last night's data (age_band is derived
-    from the date of birth); the live read here catches anyone who filled it
-    in since.
+THE FLAG: the form's last step is the patient signing the "Clinic Consent
+Form", which Plato stores on the profile (others.consents, with the time).
+Signed = registration done. Every self-registered profile carries it; the
+bare profiles the WhatsApp assistant creates don't. The nightly import puts it
+in dim_patient.consent_signed_at; this module rechecks Plato live before
+asking, so someone who signed today isn't asked.
 
-Plato reads use the job's Plato key on the non-urgent path, no retries, and at
-most MAX_READS a run: the clinic shares 20 requests a minute. Any failure
-means "don't ask": a missing reminder line is better than a wrong one.
+  - No profile (not on the appointment, none matching the phone or email):
+    Plato's pre-registration form, which creates the profile.
+  - A profile without a signed consent: that profile's update form. Never the
+    pre-registration form, which would duplicate them.
+  - A signed consent: nothing.
+
+Plato reads use the job's Plato key, no retries, and at most MAX_READS a run:
+the clinic shares 20 requests a minute. Any failure means "don't ask": a
+missing reminder line is better than a wrong one.
 """
 from __future__ import annotations
 
@@ -64,23 +60,30 @@ def _url(payload) -> str | None:
     return url if isinstance(url, str) and url.startswith("https://") else None
 
 
-def has_dob(patient: dict) -> bool:
-    dob = str(patient.get("dob") or "").strip()
-    return bool(dob) and not dob.startswith("0000")
+CONSENT_TITLE = "Clinic Consent Form"  # same as ingestion/plato_patients
+
+
+def consent_signed(patient: dict) -> bool:
+    """The profile carries a signed Clinic Consent Form."""
+    others = patient.get("others")
+    consents = others.get("consents") if isinstance(others, dict) else None
+    return any(isinstance(c, dict) and c.get("title") == CONSENT_TITLE
+               and isinstance(c.get("created_on"), (int, float)) and c["created_on"] > 0
+               for c in consents or [])
 
 
 def form_link(plato: Plato, row: dict) -> str | None:
-    """The registration form link if this appointment's patient still owes it,
-    else None. `row` carries appointment_id, patient_id and needs_form_check
-    (the query's cheap first pass). Never raises."""
-    if not row.get("needs_form_check"):
+    """The registration form link if this patient hasn't signed, else None.
+    `row` carries appointment_id, profile_id and consent_signed (last night's
+    flag). Never raises."""
+    if row.get("consent_signed"):
         return None
     try:
-        pid = row.get("patient_id") or ""
+        pid = row.get("profile_id") or ""
         if not pid:
             return _url(plato.get(f"appointment/{row['appointment_id']}/prereg"))
         patient = _one(plato.get(f"patient/{pid}"))
-        if patient is None or has_dob(patient):
+        if patient is None or consent_signed(patient):
             return None
         return _url(plato.get(f"patient/{pid}/updatelink"))
     except Exception as e:
