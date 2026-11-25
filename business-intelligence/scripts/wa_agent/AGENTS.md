@@ -78,6 +78,12 @@ The WhatsApp assistant. What it is and how to run it: [`README.md`](README.md).
   is a handover, never a draft.
 - **Booking links use the `wa-book` go-link** (`dashboard/app.py` LINK_SLUGS),
   which forwards `service`/`focus` to `/book`.
+- **One website page link per conversation.** A link at the end of every
+  answer read as a bot (owner, 25 Nov 2026). Once a link (page or booking)
+  has gone out in the last day, `policy.drop_repeat_page_links` takes a page
+  link and its "read more here:" line out of the reply before it's sent.
+  The booking link isn't touched: the prompt's once-per-conversation rule
+  covers it.
 - **Disclosure: don't lead with it, never hide it.** The agent introduces
   itself as Goji's front desk; asked whether it's a person, a bot or Chris, it
   says it's Goji's WhatsApp assistant. It never claims to be a named person.

@@ -392,3 +392,37 @@ def test_a_cancel_reply_that_says_its_done_is_never_sent():
                      hours_to_appointment=72)
         assert decide(p) == Decision(DRAFT, "claims_cancelled"), reply
     assert not claims_cancelled("Shall I cancel it for you?")
+
+
+def test_one_page_link_per_conversation():
+    from wa_agent.policy import BREAK, drop_repeat_page_links
+    now = 1_800_000_000.0
+    page = "https://www.gojiphysio.com/getting-here/"
+    reply = ("Yes, that's right! We're just above Lentor MRT.\n\n"
+             f"Here's how to get here by MRT, car or taxi:\n{page}")
+    linked = [{"role": "customer", "text": "Do you treat X?", "ts": now - 600},
+              {"role": "agent", "text": "Yes!\n\nRead more here:\n"
+                                        "https://www.gojiphysio.com/services/x/", "ts": now - 500},
+              {"role": "customer", "text": "Near the MRT?", "ts": now - 10}]
+    # The first page link of a conversation goes out as written.
+    assert drop_repeat_page_links(reply, linked[:1], now) == reply
+    # After one, the link and its intro line come out; the answer stays.
+    assert drop_repeat_page_links(reply, linked, now) == \
+        "Yes, that's right! We're just above Lentor MRT."
+    # A booking link sent earlier counts as a link too; Chris's links count.
+    booked = [{"role": "staff", "text": "Book here: https://go.gojiphysio.com/wa-book?x=1",
+               "ts": now - 60}]
+    assert drop_repeat_page_links(reply, booked, now).endswith("Lentor MRT.")
+    # A link sent over a day ago is a past conversation.
+    old = [dict(linked[1], ts=now - 90_000)]
+    assert drop_repeat_page_links(reply, old, now) == reply
+    # Intro and link on one line, and a bubble break left dangling.
+    same_line = f"We're open 8am to 8pm.\n{BREAK}\nMore about Cheryl here: {page}"
+    assert drop_repeat_page_links(same_line, linked, now) == "We're open 8am to 8pm."
+    # The booking go-link is never dropped here (when to send it is the prompt's rule).
+    book = "Here are the times.\n\nYou can also book here:\nhttps://go.gojiphysio.com/wa-book?s=1"
+    assert drop_repeat_page_links(book, linked, now) == book
+    # A link in the middle of a long sentence is left rather than cut mid-thought.
+    inline = ("Our Pilates page at " + page + " explains the classes, the instructors, "
+              "the equipment we use and how the first session works in some detail.")
+    assert drop_repeat_page_links(inline, linked, now) == inline
