@@ -62,7 +62,9 @@ from .policy import (AGENT, DRAFT, ESCALATE, HUMAN, LATE_CHANGE_H, OFF_TOPIC, PA
                      note_off_topic,
                      out_of_scope,
                      pre_golive_chat,
-                     decide, gate, human_replied_since, is_acknowledgement, on_human_message,
+                     decide, drop_repeat_page_links, gate, human_replied_since,
+                     is_acknowledgement, is_positive_reaction, mask_customer_emails,
+                     on_human_message,
                      reply_problems, set_mode)
 from .state import ChatLocks, append_history, make_store, mark_seen, note_outcome, parse_code
 from .whatsapp import (Echo, HistoryChunk, Inbound, Status, WhatsAppClient, parse_webhook,
@@ -482,7 +484,7 @@ def _staff_answer(st, client, model, wa_id: str, answer: str) -> str:
                       input_tokens=res.input_tokens, output_tokens=res.output_tokens,
                       cache_read_tokens=res.cache_read_tokens,
                       cache_write_tokens=res.cache_write_tokens, cost_usd=round(res.cost_usd, 5))
-        reply = (p.reply or "").strip()
+        reply = drop_repeat_page_links((p.reply or "").strip(), history, time.time())
         if p.failed:
             return refuse("I couldn't write it up just now", "model_failed")
         if p.escalate:
@@ -609,12 +611,37 @@ def _book_pending(state, ev: Inbound, received: float, fallback: str,
     pending = {**pending, **{k: chosen[k].strip() for k in ("full_name", "email", "address")
                              if not (pending.get(k) or "").strip()
                              and (chosen.get(k) or "").strip()}}
+    # A different email in the confirming message wins: it's their word (or
+    # the corrected one after _ask_email_again).
+    if (chosen.get("email") or "").strip():
+        pending = {**pending, "email": chosen["email"].strip()}
     if not booking_client.complete(pending):
         return _book_skipped(state, ev, "details_missing", pending)
     patient_id = tools.record_for_booking(state.patient or {}, pending.get("full_name", ""),
                                           pending.get("for_whom", ""))
+    check = booking_client.email_check(pending.get("email", ""))
+    if check:
+        # A mistyped email would bounce the confirmation: ask, and keep the
+        # time so their answer books it.
+        return _ask_email_again(state, ev, pending, check)
+    on_file = "" if (pending.get("email") or "").strip() else \
+        tools.contact_email(state.patient or {}, patient_id,
+                            pending.get("booked_by") or ev.name)
+    # The email on file (the patient's, else the texter's), so Plato's
+    # confirmation (and the registration form) still goes out.
+    sent = {**pending, "email": on_file} if on_file else pending
     try:
-        res = booking_client.book(pending, wa_id=ev.wa_id, patient_id=patient_id)
+        try:
+            res = booking_client.book(sent, wa_id=ev.wa_id, patient_id=patient_id)
+        except booking_client.BookingFailed as e:
+            if e.code != "bad_email":
+                raise
+            if on_file:   # Plato's own copy is off: book without it, ask nobody
+                sent = pending
+                res = booking_client.book(sent, wa_id=ev.wa_id, patient_id=patient_id)
+            else:
+                return _ask_email_again(state, ev, pending, booking_client.email_check(
+                    pending.get("email", ""), str(e)))
     except booking_client.BookingFailed as e:
         state.pending_booking = {}
         events.record("book_failed", ev.wa_id, reason=e.code)
@@ -632,11 +659,20 @@ def _book_pending(state, ev: Inbound, received: float, fallback: str,
     first = (pending.get("full_name") or "").split(" ")[0]
     for_other = (pending.get("for_whom") or "self").strip().lower() not in ("", "self")
     return (booking_client.confirmation_text(res, first_name="" if for_other else first,
-                                             patient=first if for_other else ""),
+                                             patient=first if for_other else "",
+                                             emailed=bool((sent.get("email") or "").strip())),
             {"reference": res["reference"], "date": res["date"], "time": res["time"],
              "with": res.get("clinician_name", ""), "service": res.get("service", ""),
              "dry_run": bool(res.get("dry_run")), "at": time.time(), "source": "whatsapp"},
             False)
+
+
+def _ask_email_again(state, ev: Inbound, pending: dict, question: str):
+    """The email given wouldn't reach them: ask again and keep the time, so the
+    answer books it (the pick is already their yes). Not a failure: no alert."""
+    state.pending_booking = {**pending, "email": "", "options": "", "at": time.time()}
+    events.record("book_skipped", ev.wa_id, reason="email_check")
+    return question, None, False
 
 
 
@@ -885,7 +921,44 @@ def _hold_pre_golive(state, blocked, now: float) -> None:
         set_mode(state, PAUSED, "pre_golive_chat", now)
 
 
+def _customer_reaction(ev: Inbound) -> None:
+    """An emoji reaction is never a question: no model call, no reply, no
+    history line (one landing after a text would supersede that text's run).
+    A positive one (👍 😊 🙏) needs nobody; a negative or neutral one pings
+    staff, when the chat is the agent's (in Chris's own chats she sees it in
+    the Business app). Owner, 25 Nov 2026, after a 👍 pinged her."""
+    if not ev.emoji or is_positive_reaction(ev.emoji):
+        events.record("silent", ev.wa_id, reason="reaction")
+        return
+    st, _, _ = _deps()
+    with locks(ev.wa_id):
+        state = st.load(ev.wa_id)
+        if not mark_seen(state, ev.msg_id):
+            return
+        st.save(state)
+    blocked = gate(state, time.time(), kill_switch=config.KILL_SWITCH or st.get_kill(),
+                   agent_hours=config.resolve_rollout(st.get_rollout())["hours"],
+                   not_live=_not_live(st))
+    if state.owner != "agent" or blocked:
+        events.record("silent", ev.wa_id, reason="reaction")
+        return
+    target = next((h for h in state.history if ev.reply_to and h.get("id") == ev.reply_to), None)
+    on = ""
+    if target:
+        words = target["text"].split()
+        quote = " ".join(words[:12]).rstrip(".!?") + ("…" if len(words) > 12 else "")
+        on = f' to "{quote}"'
+    events.record("escalated", ev.wa_id, reason="reaction")
+    _alert("reaction", customer=state.name, wa_id=ev.wa_id, suggested_reply="",
+           staff_note=f"reacted {ev.emoji}{on}", reason="a negative or neutral reaction",
+           last_message=ev.text)
+
+
 def handle_inbound(ev: Inbound, received: float) -> None:
+    if ev.kind == "reaction":  # staff reacting to a ping: nothing to do
+        if ev.wa_id not in config.STAFF:
+            _customer_reaction(ev)
+        return
     if ev.wa_id in config.STAFF:
         handle_staff(ev)
         return
@@ -1008,6 +1081,7 @@ def handle_inbound(ev: Inbound, received: float) -> None:
                             _booked_note(state)])))
     _schedule_warm()
     p = res.proposal
+    p.reply = mask_customer_emails(p.reply, history)
     check_late_change(p, patient.get("next_appointment"), time.time())
     d = decide(p, intent_policy=learning.effective_policy(config.stage_policy(rollout["stage"]),
                                                           st.get_autonomy()))
@@ -1079,7 +1153,8 @@ def handle_inbound(ev: Inbound, received: float) -> None:
             events.record("silent", ev.wa_id, reason="kill_switch")
             return
         # A handover sends the holding reply; p.reply is Chris's draft (notice).
-        reply = customer_message(d, p, time.time())
+        reply = drop_repeat_page_links(customer_message(d, p, time.time()), state.history,
+                                       time.time())
         booked, failed, cancelled = None, False, False
         if d.action == SEND and p.intent == "cancel" and booking_client.cancel_complete(p.cancel):
             reply, cancelled, failed = _cancel_now(state, ev, p.cancel, reply)

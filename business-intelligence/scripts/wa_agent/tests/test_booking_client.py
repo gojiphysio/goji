@@ -72,3 +72,22 @@ def test_booking_for_someone_else_names_the_patient_and_notes_who_booked(monkeyp
     t = booking_client.confirmation_text({"reference": "R", "date": "2026-11-23", "time": "08:00",
                                           "clinician_name": "Kristy"}, patient="Mei")
     assert t.startswith("Mei is booked! Mon 23 Nov, 8:00am with Kristy")
+
+
+def test_email_check_asks_only_about_an_email_that_wont_arrive():
+    assert booking_client.email_check("") == ""                            # never required
+    assert booking_client.email_check("jamie@example.com") == ""
+    assert "doesn't look quite right" in booking_client.email_check("jamie at gmail")
+    ask = booking_client.email_check(
+        "jamie@gmail.con", "That email looks like a typo — did you mean jamie@gmail.com? "
+                           "Please correct it so we can send your confirmation.")
+    assert "did you mean jamie@gmail.com?" in ask
+
+
+def test_confirmation_mentions_the_email_only_when_one_went_out():
+    res = {"date": "2026-11-26", "time": "10:00", "clinician_name": "Kristy Ng",
+           "reference": "GOJI-1"}
+    assert "confirmation email" in booking_client.confirmation_text(res, emailed=True)
+    assert "confirmation email" not in booking_client.confirmation_text(res)
+    assert "confirmation email" not in booking_client.confirmation_text(
+        {**res, "dry_run": True}, emailed=True)                            # nothing was sent

@@ -327,7 +327,7 @@ appts AS (
 SELECT
   (SELECT COUNT(DISTINCT patient_id) FROM patients) AS n_patients,
   (SELECT ARRAY_AGG(DISTINCT patient_id) FROM patients) AS patient_ids,
-  (SELECT ARRAY_AGG(STRUCT(c.patient_id AS id, c.full_name AS name))
+  (SELECT ARRAY_AGG(STRUCT(c.patient_id AS id, c.full_name AS name, c.email AS email))
      FROM `{project}.marts.dim_patient_contact` c JOIN patients p USING (patient_id)) AS records,
   (SELECT LOGICAL_OR('Late change waiver used' IN UNNEST(d.tags))
      FROM `{project}.marts.dim_patient` d JOIN patients p USING (patient_id)) AS waiver_used,
@@ -369,7 +369,10 @@ def patient_context(wa_id: str, *, bq=None) -> dict:
             "patients_on_number": row["n_patients"],
             # internal: for tagging in Plato, never shown to the model
             "patient_ids": list(row["patient_ids"] or []),
-            "records": [{"id": r["id"], "name": r["name"] or ""} for r in (row["records"] or [])],
+            # email: internal, for the booking only (Plato's confirmation goes
+            # to it); the model is told only whether one is on file
+            "records": [{"id": r["id"], "name": r["name"] or "", "email": r["email"] or ""}
+                        for r in (row["records"] or [])],
             "waiver_used": bool(row["waiver_used"]),
             "next_appointment": ({"date": nxt["appt_date"].isoformat(), "time": nxt["time_sgt"],
                                   "with": CLINICIAN_NAMES.get(nxt["clinician_id"], "the team"),
@@ -394,6 +397,22 @@ def record_for_booking(patient: dict, full_name: str, for_whom: str) -> str:
     return ""
 
 
+def contact_email(patient: dict, patient_id: str, texter: str = "") -> str:
+    """The email a booking's confirmation goes to when the customer gave none,
+    or "": the booked patient's own on file, else the texter's (owner, 25 Nov
+    2026: the person chatting is the contact, as with the phone number).
+    `texter` is the name they go by (booked_by or the WhatsApp profile name);
+    when it fits no record, the first email on the number. Never shown to the
+    model: it only goes to Plato with the booking."""
+    records = [r for r in (patient or {}).get("records") or []
+               if (r.get("email") or "").strip()]
+    own = [r for r in records if patient_id and r.get("id") == patient_id]
+    words = set(re.findall(r"[a-z]+", (texter or "").lower()))
+    theirs = [r for r in records if words & set(re.findall(r"[a-z]+", r["name"].lower()))]
+    pick = (own or theirs or records or [{}])[0]
+    return (pick.get("email") or "").strip()
+
+
 def describe_patient(p: dict) -> str:
     """The patient context as one line for the model."""
     if not p:
@@ -411,6 +430,12 @@ def describe_patient(p: dict) -> str:
                 else "no upcoming appointment")
     if p.get("last_visit"):
         bits.append(f"last visit {p['last_visit']}")
+    records = p.get("records") or []
+    if any((r.get("email") or "").strip() for r in records):
+        bits.append("an email is on file for this number (bookings use it, also for family "
+                    "members: don't ask for one)")
+    elif records:
+        bits.append("no email on file (ask for one when booking)")
     if p.get("waiver_used"):
         bits.append("first-time late-change waiver already used (tagged in Plato)")
     return "; ".join(bits)

@@ -14,6 +14,17 @@ The WhatsApp assistant. What it is and how to run it: [`README.md`](README.md).
   (`_move_pending` → `/internal/reschedule`); cancellations with 24h+ notice
   go out in the same turn (`_cancel_now` → `/internal/cancel`). Inside 24
   hours both are drafts for Chris (fee policy).
+- **Bookings ask for an email** (owner, 25 Nov 2026): with one on the
+  booking, Plato sends its own confirmation (with the clinic's registration
+  form) and goji-booking sends Goji's. The agent asks once, with the times,
+  or before booking if a time was picked first; a no books without it. Only
+  numbers with no email on file are asked: otherwise the booking takes the
+  patient's own email, else the texter's (the person chatting is the
+  contact, as with the phone), unless they give another
+  (`tools.contact_email`, from `dim_patient_contact`, never shown to the
+  model). A malformed or mistyped email
+  (goji-booking's `bad_email`) is asked again with the time kept, not handed
+  to Chris; a bad one on file books without it.
 - **Cancelling is the agent's with 24h+ notice** (owner, 24 Nov 2026: a test
   cancel more than 24 hours out was handed to Chris). No "shall I?" first:
   when it knows which appointment, it fills `cancel` and the code cancels in
@@ -78,6 +89,12 @@ The WhatsApp assistant. What it is and how to run it: [`README.md`](README.md).
   is a handover, never a draft.
 - **Booking links use the `wa-book` go-link** (`dashboard/app.py` LINK_SLUGS),
   which forwards `service`/`focus` to `/book`.
+- **At most two website page links per conversation.** A link at the end
+  of every answer read as a bot (owner, 25 Nov 2026). Once two page links
+  have gone out in the last day, `policy.drop_repeat_page_links` takes any
+  further page link and its "read more here:" line out of the reply before
+  it's sent. Booking links don't count and aren't touched: the prompt's
+  once-per-conversation rule covers them.
 - **Disclosure: don't lead with it, never hide it.** The agent introduces
   itself as Goji's front desk; asked whether it's a person, a bot or Chris, it
   says it's Goji's WhatsApp assistant. It never claims to be a named person.
@@ -93,6 +110,12 @@ The WhatsApp assistant. What it is and how to run it: [`README.md`](README.md).
   answered and goes to the morning summary, never a ping; it persists past
   `OFF_TOPIC_LIMIT` and the number is watch-listed (`policy.note_off_topic`).
   Don't route something to Chris just because it's unusual.
+- **An emoji reaction is never a message.** A customer's reaction gets no
+  model call or reply and isn't added to history. A positive one (👍 😊 🙏,
+  `policy.POSITIVE_REACTIONS`) pings nobody; a negative or neutral one
+  pings staff when the chat is the agent's (owner, 25 Nov 2026, after a 👍
+  pinged Chris). A staff reaction to a ping gets no reply; Chris reacting in
+  the Business app isn't an echo, so it doesn't pause the chat.
 - **A handover splits two messages.** The customer gets the model's
   `holding_reply` (acknowledges the ask, apologises if they're unhappy,
   promises nothing a person must decide); Chris's ping carries `reply`, the

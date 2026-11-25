@@ -245,6 +245,17 @@ _PHONE = re.compile(r"(?<![\w$.])(?:\+?65[\s-]?)?(\d{4}[\s-]?\d{4})(?![\w])")
 _PLACEHOLDER = re.compile(r"\[[^\[\]\n]{1,80}\]")
 
 
+def mask_customer_emails(reply: str, history: list[dict]) -> str:
+    """The customer's own email, written back to them, reads as "your email":
+    the contact check would otherwise hand the chat over for it."""
+    theirs = {e.lower() for h in history if h.get("role") == "customer"
+              for e in _EMAIL.findall(h.get("text") or "")} - ALLOWED_EMAILS
+    if not theirs:
+        return reply
+    return _EMAIL.sub(lambda m: "your email" if m.group(0).lower() in theirs else m.group(0),
+                      reply)
+
+
 def reply_problems(reply: str) -> list[str]:
     """Links, emails or phone numbers in a reply that aren't Goji's own, and
     [placeholders] left for Chris."""
@@ -276,6 +287,50 @@ def reply_problems(reply: str) -> list[str]:
     return problems
 
 
+PAGE_LINK_WINDOW_S = 86400  # one conversation, as for the greeting
+MAX_PAGE_LINKS = 2  # per conversation; the booking link doesn't count (owner)
+# www.gojiphysio.com pages, not the go.gojiphysio.com booking link.
+_PAGE_URL = re.compile(
+    r"(?:https?://(?:www\.)?|(?<![\w./-])(?:www\.)?)gojiphysio\.com/[^\s)>\]]*", re.I)
+_LINK_INTRO_MAX_WORDS = 15
+
+
+def drop_repeat_page_links(reply: str, history: list[dict], now: float) -> str:
+    """At most two website page links per conversation. Every answer ending
+    "You can read more here: <link>" reads as a bot (owner, 25 Nov 2026: a
+    link after every message in a live chat). Once we, or Chris, have sent
+    MAX_PAGE_LINKS page links in the last day, a further page link (with its
+    "read more here:" line) comes out of the reply. The booking go-link
+    neither counts nor is touched: when to send it is the prompt's rule. A
+    link inside a longer sentence is left alone rather than cut mid-thought."""
+    if not _PAGE_URL.search(reply or ""):
+        return reply
+    since = now - PAGE_LINK_WINDOW_S
+    left = MAX_PAGE_LINKS - sum(
+        len(_PAGE_URL.findall(h.get("text", ""))) for h in history
+        if h["role"] in ("agent", "staff") and h.get("ts", 0) >= since)
+    lines = reply.split("\n")
+    keep = [True] * len(lines)
+    for i, line in enumerate(lines):
+        if not _PAGE_URL.search(line):
+            continue
+        if left > 0:
+            left -= len(_PAGE_URL.findall(line))
+            continue
+        rest = _PAGE_URL.sub("", line).strip()
+        if len(rest.split()) > _LINK_INTRO_MAX_WORDS:
+            continue
+        keep[i] = False
+        j = i - 1  # the "You can read more here:" line above it
+        if not rest and j >= 0 and lines[j].rstrip().endswith(":") \
+                and len(lines[j].split()) <= _LINK_INTRO_MAX_WORDS:
+            keep[j] = False
+    out = "\n".join(line for line, k in zip(lines, keep) if k)
+    out = re.sub(r"\n{3,}", "\n\n", out).strip()
+    out = re.sub(rf"(\s*{re.escape(BREAK)}\s*)+$", "", out).strip()
+    return out or reply
+
+
 _ACK_WORD = (r"(ok+(ay)?|k+|thanks?( you)?( so much)?|thank u|thx|ty|tq|noted|alright|sure|"
              r"great|cool|got it|will do|see you( then| soon)?|perfect|nice|awesome)")
 # One or more acknowledgement words ("ok thanks!", "noted, thank you"), then
@@ -292,6 +347,19 @@ def is_acknowledgement(text: str, history: list[dict]) -> bool:
     t = text.strip()
     prior_role = history[-2]["role"] if len(history) >= 2 else ""
     return bool(t) and bool(_ACK.fullmatch(t)) and prior_role in ("agent", "staff")
+
+
+# Reactions that need nobody (owner, 25 Nov 2026). Anything else, negative
+# or neutral (👎 😡 😢 😮 🤔 😅), pings staff. Skin tones and the emoji
+# variation selector are ignored, so 👍🏽 and ❤️ count.
+POSITIVE_REACTIONS = frozenset(
+    "👍 👌 🙏 🙌 👏 💪 🤝 🫶 ❤ ♥ 🧡 💛 💚 💙 💜 🤍 🤎 🩷 🩵 💕 💖 💗 💓 💞 💝 "
+    "😊 🙂 ☺ 😀 😃 😄 😁 😆 😂 🤣 🥰 😍 😘 🤗 😇 🤩 🥳 😻 🎉 ✨ ⭐ 🌟 💯 ✅ ✔ 🔥".split())
+_EMOJI_MODIFIERS = re.compile("[\U0001F3FB-\U0001F3FF\uFE0F]")
+
+
+def is_positive_reaction(emoji: str) -> bool:
+    return _EMOJI_MODIFIERS.sub("", emoji or "") in POSITIVE_REACTIONS
 
 
 BREAK = "<break>"

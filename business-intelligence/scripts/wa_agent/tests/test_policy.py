@@ -4,7 +4,8 @@ from datetime import datetime
 from wa_agent.policy import (AGENT, DRAFT, ESCALATE, HUMAN, PAUSED, SEND, SGT, SILENT,
                              ChatState, Decision, Proposal, apply_idle_handback,
                              claims_cancelled, decide, gate,
-                             human_replied_since, in_clinic_hours, is_acknowledgement, on_human_message)
+                             human_replied_since, in_clinic_hours, is_acknowledgement,
+                             mask_customer_emails, on_human_message, reply_problems)
 
 NOW = datetime(2026, 11, 18, 10, 0, tzinfo=SGT).timestamp()  # Wednesday 10am
 
@@ -392,3 +393,53 @@ def test_a_cancel_reply_that_says_its_done_is_never_sent():
                      hours_to_appointment=72)
         assert decide(p) == Decision(DRAFT, "claims_cancelled"), reply
     assert not claims_cancelled("Shall I cancel it for you?")
+
+
+def test_the_customers_own_email_written_back_is_not_a_foreign_contact():
+    history = [{"role": "customer", "text": "Jamie Lee, Jamie.Lee@example.com"}]
+    reply = mask_customer_emails("Thanks! Sending it to jamie.lee@example.com", history)
+    assert reply == "Thanks! Sending it to your email" and not reply_problems(reply)
+    # Anyone else's address still fails the check.
+    other = mask_customer_emails("Email bob@example.com", history)
+    assert reply_problems(other) == ["email"]
+
+
+def test_two_page_links_per_conversation():
+    from wa_agent.policy import BREAK, drop_repeat_page_links
+    now = 1_800_000_000.0
+    page = "https://www.gojiphysio.com/getting-here/"
+    reply = ("Yes, that's right! We're just above Lentor MRT.\n\n"
+             f"Here's how to get here by MRT, car or taxi:\n{page}")
+    one = [{"role": "customer", "text": "Do you treat X?", "ts": now - 600},
+           {"role": "agent", "text": "Yes!\n\nRead more here:\n"
+                                     "https://www.gojiphysio.com/services/x/", "ts": now - 500}]
+    # Chris's page links count too.
+    two = one + [{"role": "staff", "text": "About Cheryl: https://www.gojiphysio.com/team/c/",
+                  "ts": now - 300}]
+    # The first and second page links of a conversation go out as written.
+    assert drop_repeat_page_links(reply, one[:1], now) == reply
+    assert drop_repeat_page_links(reply, one, now) == reply
+    # A third: the link and its intro line come out; the answer stays.
+    assert drop_repeat_page_links(reply, two, now) == \
+        "Yes, that's right! We're just above Lentor MRT."
+    # Booking links don't count towards the two.
+    booked = one + [{"role": "agent", "text": "Book here: https://go.gojiphysio.com/wa-book?x=1",
+                     "ts": now - 60}] * 3
+    assert drop_repeat_page_links(reply, booked, now) == reply
+    # A link sent over a day ago is a past conversation.
+    old = [dict(m, ts=now - 90_000) for m in two]
+    assert drop_repeat_page_links(reply, old, now) == reply
+    # Two page links in one reply with one slot left: the first stays.
+    both = f"Pilates:\nhttps://www.gojiphysio.com/services/p/\n\nGetting here:\n{page}"
+    assert drop_repeat_page_links(both, one, now) == \
+        "Pilates:\nhttps://www.gojiphysio.com/services/p/"
+    # Intro and link on one line, and a bubble break left dangling.
+    same_line = f"We're open 8am to 8pm.\n{BREAK}\nMore about Cheryl here: {page}"
+    assert drop_repeat_page_links(same_line, two, now) == "We're open 8am to 8pm."
+    # The booking go-link is never dropped here (when to send it is the prompt's rule).
+    book = "Here are the times.\n\nYou can also book here:\nhttps://go.gojiphysio.com/wa-book?s=1"
+    assert drop_repeat_page_links(book, two, now) == book
+    # A link in the middle of a long sentence is left rather than cut mid-thought.
+    inline = ("Our Pilates page at " + page + " explains the classes, the instructors, "
+              "the equipment we use and how the first session works in some detail.")
+    assert drop_repeat_page_links(inline, two, now) == inline

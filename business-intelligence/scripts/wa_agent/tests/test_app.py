@@ -14,7 +14,7 @@ from wa_agent.state import MemoryStore
 from wa_agent.whatsapp import parse_webhook
 
 from .fakes import FakeClaude, FakeWhatsApp, final
-from .payloads import echo, inbound, status
+from .payloads import echo, inbound, reaction, status
 
 CUSTOMER = "6591234567"
 
@@ -153,6 +153,66 @@ def test_first_thanks_gets_one_warm_closer_then_silence(env):
     post(client, inbound(msg_id="wamid.in3", text="ok thanks!"))
     assert len(app_mod.claude.requests) == 2 and len(app_mod.wa.sent) == 2   # loop ends
     assert ("silent", {"reason": "acknowledgement"}) in rec
+
+
+@pytest.mark.parametrize("emoji", ["👍", "👍🏽", "❤️", "😊", "🙏", "😂", ""])
+def test_positive_reaction_gets_no_reply_and_no_ping(env, emoji):
+    client, rec, notes = env
+    app_mod.claude.queue.append(final())
+    post(client, inbound())
+    sent, history = len(app_mod.wa.sent), len(app_mod.store.load(CUSTOMER).history)
+    post(client, reaction(emoji=emoji))
+    assert len(app_mod.claude.requests) == 1 and len(app_mod.wa.sent) == sent
+    assert notes == [] and ("silent", {"reason": "reaction"}) in rec
+    assert len(app_mod.store.load(CUSTOMER).history) == history
+
+
+@pytest.mark.parametrize("emoji", ["👎", "😡", "😢", "😮", "🤔"])
+def test_negative_or_neutral_reaction_pings_staff(env, emoji):
+    client, rec, notes = env
+    app_mod.claude.queue.append(final(reply="We open at 8am."))
+    post(client, inbound())   # our reply is wamid.out1, the message reacted to
+    post(client, reaction(emoji=emoji))
+    post(client, reaction(emoji=emoji))   # Meta's retry: one ping only
+    assert len(app_mod.claude.requests) == 1 and len(app_mod.wa.sent) == 1
+    [(kind, kw)] = notes      # no staff number set: the email is the ping
+    assert kind == "reaction" and kw["staff_note"] == f'reacted {emoji} to "We open at 8am"'
+    assert ("escalated", {"reason": "reaction"}) in rec
+
+
+def test_negative_reaction_in_chrises_chat_pings_nobody(env):
+    client, rec, notes = env
+    app_mod.claude.queue.append(final())
+    post(client, inbound())
+    post(client, echo())      # Chris has the chat now
+    post(client, reaction(emoji="😡"))
+    assert notes == [] and ("silent", {"reason": "reaction"}) in rec
+
+
+def test_reaction_after_a_text_does_not_supersede_it(env, monkeypatch):
+    client, rec, _ = env
+    app_mod.claude.queue.append(final(reply="We open at 8am."))
+    def react():
+        ev = parse_webhook(reaction())[0]
+        app_mod.handle_inbound(ev, ev.ts)
+    monkeypatch.setattr(app_mod, "_sleep", on_nth_sleep(1, react))
+    post(client, inbound())
+    assert app_mod.wa.sent == [(CUSTOMER, "We open at 8am.")]
+
+
+def test_staff_reaction_to_a_ping_gets_no_reply(env, monkeypatch):
+    client, rec, notes = env
+    monkeypatch.setattr(config, "STAFF", frozenset({"6591110000"}))
+    post(client, reaction(wa_id="6591110000"))
+    assert app_mod.wa.sent == [] and app_mod.claude.requests == [] and rec == []
+
+
+def test_business_app_reaction_does_not_pause_the_chat(env):
+    client, rec, _ = env
+    app_mod.claude.queue.append(final())
+    post(client, inbound())
+    post(client, reaction(echoed=True))
+    assert app_mod.store.load(CUSTOMER).mode == AGENT and "echo" not in names(rec)
 
 
 def test_thanks_after_a_booking_needs_no_reply(env):
@@ -665,6 +725,121 @@ def test_picking_an_offered_booking_time_books_it(env, monkeypatch):
     post(client, inbound(msg_id="wamid.in2", text="11 please"))
     assert calls and calls[0]["time"] == "11:00" and calls[0]["full_name"] == "Charles Tan"
 
+
+def _booker(calls, refuse=None):
+    """A fake booking_client.book: records each call; `refuse` maps an email to
+    the BookingFailed it raises."""
+    def book(b, wa_id, patient_id=""):
+        calls.append({**b, "_pid": patient_id})
+        if refuse and b.get("email") in refuse:
+            raise app_mod.booking_client.BookingFailed(*refuse[b["email"]])
+        return {"ok": True, "reference": "GOJI-E1", "clinician_name": "Kristy",
+                "service": "Physiotherapy", "date": b["date"], "time": b["time"]}
+    return book
+
+
+def _offer_then_pick(client, email_with_pick):
+    offer = {**BOOK, "date": "", "time": "", "options": "2026-11-26 10:00, 2026-11-26 11:00"}
+    app_mod.claude.queue.append(_final_with("Thu 10am or 11am, Charles?", booking=offer))
+    post(client, inbound(text="any thursday morning? I'm Charles Tan"))
+    app_mod.claude.queue.append(_final_with("Booking!", confirm_booking=True, booking={
+        **offer, "date": "2026-11-26", "time": "11:00", "email": email_with_pick}))
+    post(client, inbound(msg_id="wamid.in2", text="11 please, " + email_with_pick))
+
+
+def test_an_email_given_with_the_pick_goes_to_the_booking(env, monkeypatch):
+    client, rec, _ = env
+    calls = []
+    monkeypatch.setattr(app_mod.booking_client, "book", _booker(calls))
+    _offer_then_pick(client, "charles@example.com")
+    assert calls[0]["email"] == "charles@example.com"
+    assert "confirmation email is on its way" in app_mod.wa.sent[-1][1]
+
+
+def test_a_returning_patient_is_booked_with_the_email_on_file(env, monkeypatch):
+    client, rec, _ = env
+    monkeypatch.setattr(app_mod.tools, "patient_context", lambda wa_id: {
+        "returning": True, "first_name": "Charles", "patients_on_number": 1,
+        "patient_ids": ["CHARLES"],
+        "records": [{"id": "CHARLES", "name": "Charles Tan", "email": "ct@example.com"}]})
+    calls = []
+    monkeypatch.setattr(app_mod.booking_client, "book", _booker(calls))
+    app_mod.claude.queue.append(_final_with("Shall I book it?", booking=BOOK))
+    post(client, inbound(text="book me Thursday 10am"))
+    assert "an email is on file" in str(app_mod.claude.requests[-1])
+    assert "ct@example.com" not in str(app_mod.claude.requests[-1])     # the model never sees it
+    app_mod.claude.queue.append(_final_with("Booking!", booking=BOOK, confirm_booking=True))
+    post(client, inbound(msg_id="wamid.in2", text="yes"))
+    assert calls[0]["email"] == "ct@example.com" and calls[0]["_pid"] == "CHARLES"
+
+
+def test_a_mistyped_email_is_asked_again_and_the_answer_books(env, monkeypatch):
+    client, rec, notes = env
+    calls = []
+    typo = ("bad_email", "That email looks like a typo — did you mean charles@gmail.com? "
+                         "Please correct it so we can send your confirmation.")
+    monkeypatch.setattr(app_mod.booking_client, "book",
+                        _booker(calls, refuse={"charles@gmail.con": (typo[1], typo[0])}))
+    _offer_then_pick(client, "charles@gmail.con")
+    assert "did you mean charles@gmail.com?" in app_mod.wa.sent[-1][1]
+    assert ("book_skipped", {"reason": "email_check"}) in rec and not notes   # Chris not told
+    kept = app_mod.store.load(CUSTOMER).pending_booking
+    assert (kept["date"], kept["time"], kept["email"]) == ("2026-11-26", "11:00", "")
+    app_mod.claude.queue.append(_final_with("Booking!", confirm_booking=True, booking={
+        **BOOK, "date": "2026-11-26", "time": "11:00", "email": "charles@gmail.com"}))
+    post(client, inbound(msg_id="wamid.in3", text="yes sorry"))
+    assert calls[-1]["email"] == "charles@gmail.com"
+    assert app_mod.wa.sent[-1][1].startswith("You're booked, Charles!")
+
+
+def test_an_email_that_isnt_one_is_asked_again_before_booking(env, monkeypatch):
+    client, rec, _ = env
+    calls = []
+    monkeypatch.setattr(app_mod.booking_client, "book", _booker(calls))
+    _offer_then_pick(client, "charles at gmail")
+    assert calls == [] and "doesn't look quite right" in app_mod.wa.sent[-1][1]
+
+
+def test_booking_for_a_new_family_member_uses_the_texters_email(env, monkeypatch):
+    client, rec, _ = env
+    monkeypatch.setattr(app_mod.tools, "patient_context", lambda wa_id: {
+        "returning": True, "first_name": "Charles", "patients_on_number": 1,
+        "patient_ids": ["CHARLES"],
+        "records": [{"id": "CHARLES", "name": "Charles Tan", "email": "ct@example.com"}]})
+    calls = []
+    monkeypatch.setattr(app_mod.booking_client, "book", _booker(calls))
+    wife = {**BOOK, "full_name": "Mei Tan", "for_whom": "wife", "booked_by": "Charles"}
+    app_mod.claude.queue.append(_final_with("Shall I book it for Mei?", booking=wife))
+    post(client, inbound(text="book my wife Mei Tan in Thursday 10am"))
+    app_mod.claude.queue.append(_final_with("Booking!", booking=wife, confirm_booking=True))
+    post(client, inbound(msg_id="wamid.in2", text="yes"))
+    assert calls[0]["_pid"] == "" and calls[0]["email"] == "ct@example.com"
+    # Unless they give another one: theirs wins.
+    app_mod.store.save(app_mod.store.load(CUSTOMER).__class__(wa_id=CUSTOMER))
+    app_mod.claude.queue.append(_final_with("Shall I book it for Mei?", booking=wife))
+    post(client, inbound(msg_id="wamid.in3", text="book my wife Mei Tan in Thursday 10am"))
+    app_mod.claude.queue.append(_final_with("Booking!", confirm_booking=True,
+                                            booking={**wife, "email": "mei@example.com"}))
+    post(client, inbound(msg_id="wamid.in4", text="yes, send it to mei@example.com"))
+    assert calls[-1]["email"] == "mei@example.com"
+
+
+def test_a_bad_email_on_file_books_without_it(env, monkeypatch):
+    client, rec, notes = env
+    monkeypatch.setattr(app_mod.tools, "patient_context", lambda wa_id: {
+        "returning": True, "first_name": "Charles", "patients_on_number": 1,
+        "patient_ids": ["CHARLES"],
+        "records": [{"id": "CHARLES", "name": "Charles Tan", "email": "ct@gmail.con"}]})
+    calls = []
+    monkeypatch.setattr(app_mod.booking_client, "book",
+                        _booker(calls, refuse={"ct@gmail.con": ("did you mean ct@gmail.com?",
+                                                                "bad_email")}))
+    app_mod.claude.queue.append(_final_with("Shall I book it?", booking=BOOK))
+    post(client, inbound(text="book me Thursday 10am"))
+    app_mod.claude.queue.append(_final_with("Booking!", booking=BOOK, confirm_booking=True))
+    post(client, inbound(msg_id="wamid.in2", text="yes"))
+    assert [c["email"] for c in calls] == ["ct@gmail.con", ""]
+    assert app_mod.wa.sent[-1][1].startswith("You're booked, Charles!") and not notes
 
 
 def test_a_name_sent_after_picking_a_time_books_it(env, monkeypatch):
