@@ -88,7 +88,7 @@ versioned assets and separates motion proxies from reviewed appearance reference
 ## Singapore world and colour
 
 Recurring exterior cues: sheltered walkways and bus stops, HDB surroundings,
-tropical roadside trees, concrete kerbs, warm humid haze, SBS-like buses and
+tropical roadside trees, concrete kerbs, warm humid haze, SOS Transit buses and
 blue CONFRONT taxis and green/white GRIP private-hire cars where needed. Traffic travels on the left; cars have
 right-hand driving positions. Distinguish vehicle/world direction from screen
 direction. Check signage deliberately; don't invent a claim of surveyed geography.
@@ -107,9 +107,18 @@ new source images. Retain ungraded originals. Grain is optional and subtle.
 ## Approved recurring vehicles
 
 User-approved on 25 November 2026 for reuse in the next episode. Use these
-selected appearance references when either vehicle appears; do not regenerate
+selected appearance references when any of these vehicles appears; do not regenerate
 their design from a text description or use superseded versions.
 
+- **SOS Transit bus — SOS-BUS-01 v1:** user-approved orange-red/purple/white
+  double-decker with three axles (one front, tandem rear), rounded body/roof,
+  inset glazing, fitted lamps/bumpers and italic SOS Transit wordmark/swoosh.
+  [Approved image](https://github.com/gojiphysio/goji/blob/2f9f6fc/marketing/assets/goji-girl/references/sos-bus-01/canonical.png).
+  Local authority: `marketing/assets/goji-girl/references/sos-bus-01/`,
+  including the original approval quote and image SHA-256 in `reference.json`.
+  Preserve left-front passenger entry, dark charcoal door frames without a
+  yellow outline and an intact front corner. Blender controls pose, camera and
+  contacts; the canonical image controls appearance, not extra approved views.
 - **CONFRONT cab — v3:** blue unbadged sedan; 2006-style red open-ring emblem,
   orange underline and narrow italic white Confront lettering on the front door
   and taxi roof sign. Fictional plate **S7K9X2Q**.
@@ -119,7 +128,7 @@ their design from a text description or use superseded versions.
   private-hire windscreen decal. Fictional plate **S4N8V6R**.
   [Approved image](https://github.com/gojiphysio/goji/blob/7e563f0/marketing/assets/goji-girl/vehicle-references/grip-car-v2.png).
 
-Both have plain wheel caps and no real manufacturer/model badges. Preserve
+The two cars have plain wheel caps and no real manufacturer/model badges. Preserve
 the exact plates, logos, paint, silhouettes and shared SOS Transit game look
 across new angles and motion. Keep left-side traffic and right-hand driving.
 These are approved appearance stills, not validated rigs: stage doors, seats
