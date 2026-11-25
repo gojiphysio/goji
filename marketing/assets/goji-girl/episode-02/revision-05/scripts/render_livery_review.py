@@ -14,4 +14,4 @@ bpy.ops.object.camera_add(location=(-12,-38,4.8));c=bpy.context.object;c.name='L
 c.rotation_euler=(Vector((-3.65,-28,1.4))-c.location).to_track_quat('-Z','Y').to_euler()
 c.data.sensor_fit='HORIZONTAL';c.data.sensor_width=36;c.data.lens=36/(2*math.tan(math.radians(58)/2));s.camera=c
 s.render.resolution_x=960;s.render.resolution_y=640
-s.render.filepath=str(R/'frames/bus-livery-v52.png');bpy.ops.render.render(write_still=True)
+s.render.filepath=str(R/'frames/bus-livery-v53.png');bpy.ops.render.render(write_still=True)

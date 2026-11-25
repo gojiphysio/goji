@@ -18,7 +18,8 @@
     "skirt": "deep purple aft / white forward",
     "rear": "orange-red upper / deep-purple lower / white SOS Transit text",
     "floor_and_chassis": "charcoal black",
-    "windows": "dark neutral glazing"
+    "windows": "dark neutral glazing",
+    "door_frames": "charcoal black; no yellow outline"
   },
   "driver_window": {
     "centre_y": 5.15,

@@ -98,8 +98,8 @@ for name,lo,hi in [('aft wall',-6,3.80),('front corner',5.30,6)]:
  cube('left '+name,(-1.25,(lo+hi)/2,1.55),(.10,hi-lo,2.0),'white',bus)
  cube('left skirt '+name,(-1.31,(lo+hi)/2,.83),(.035,hi-lo,.55),'purple',bus)
 cube('front passenger door header',(-1.25,4.55,2.84),(.12,1.5,.32),'white',bus)
-cube('front passenger door sill',(-1.25,4.55,.56),(.12,1.5,.13),'yellow',bus)
-for yy in [3.80,5.30]:cube('door jamb',(-1.26,yy,1.70),(.14,.10,2.25),'yellow',bus)
+cube('front passenger door sill',(-1.25,4.55,.56),(.12,1.5,.13),'black',bus)
+for yy in [3.80,5.30]:cube('door jamb',(-1.26,yy,1.70),(.14,.10,2.25),'black',bus)
 for y in [-5.2,-3.8,-2.4,-1,.4,1.8,3.0]:
  for x in [-1.31,1.31]:cube('side window',(x,y,2.20),(.025,1.15,.98),'glass',bus)
 # Explicit front windscreen and rear engine, distinguishable after rollover.
@@ -116,7 +116,7 @@ for x in [-.85,.85]:
 # Open door leaves folded INSIDE the front jamb, not removed/teleported.
 for yy in [5.37,5.49]:
  cube('folded front door glass',(-.92,yy,1.7),(.55,.045,2.1),'glass',bus)
- for zz in [.66,2.74]:cube('folded door frame',(-.92,yy,zz),(.60,.07,.055),'yellow',bus)
+ for zz in [.66,2.74]:cube('folded door frame',(-.92,yy,zz),(.60,.07,.055),'black',bus)
 # Cabin and reader are all children of chassis, with local transforms fixed.
 cube('right driver seat',(.64,5.15,.92),(.6,.7,.55),'navy',bus)
 cube('driver seat back',(.64,4.81,1.47),(.6,.15,.8),'navy',bus)
@@ -322,7 +322,7 @@ shots=[
  ('08',35,WRECK,90,(-5.05,9.0,5.6),(-3.2,4.0,2.45),52),
  ('09',80,WRECK,90,(-6.7,1.3,2.0),(-6.1,5.4,1.25),52),
 ]
-record={'role':'direct Blender continuity proof; proxy cast, not final appearance','world':{'forward':'+Y','road_bounds_x':[-5.2,5.2],'centreline_x':0,'northbound_lane':'x<0','mall_and_passenger_curb':'west, x< -5.2','bus_driver_side':'+X','bus_passenger_side':'-X'},'bus_materials':{'roof':'orange-red','body':'white forward with purple diagonal aft panels','skirt':'deep purple aft / white forward','rear':'orange-red upper / deep-purple lower / white SOS Transit text','floor_and_chassis':'charcoal black','windows':'dark neutral glazing'},'driver_window':DRIVER_WINDOW,'shots':[]}
+record={'role':'direct Blender continuity proof; proxy cast, not final appearance','world':{'forward':'+Y','road_bounds_x':[-5.2,5.2],'centreline_x':0,'northbound_lane':'x<0','mall_and_passenger_curb':'west, x< -5.2','bus_driver_side':'+X','bus_passenger_side':'-X'},'bus_materials':{'roof':'orange-red','body':'white forward with purple diagonal aft panels','skirt':'deep purple aft / white forward','rear':'orange-red upper / deep-purple lower / white SOS Transit text','floor_and_chassis':'charcoal black','windows':'dark neutral glazing','door_frames':'charcoal black; no yellow outline'},'driver_window':DRIVER_WINDOW,'shots':[]}
 for sid,f,pos,roll,cp,target,hfov in shots:
  scene.frame_set(f);bus.location=pos;bus.rotation_euler=(0,math.radians(roll),0)
  for prop in ['location','rotation_euler']:bus.keyframe_insert(prop,frame=f)

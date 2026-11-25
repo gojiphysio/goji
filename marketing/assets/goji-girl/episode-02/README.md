@@ -1,6 +1,6 @@
 # Goji Girl · Episode 02 — TAP OUT
 
-**Creative draft v5.2 · 25 November 2026 · proposed 47 seconds · vertical 9:16**
+**Creative draft v5.3 · 25 November 2026 · proposed 47 seconds · vertical 9:16**
 
 A frustrating work call sends Goji Girl rushing to Pilates. She steals a bus,
 crashes outside Lentor Modern, remembers to tap out, and reaches the calm of
@@ -12,9 +12,9 @@ The supplied double-decker photograph now guides the **orange-red upper body,
 deep-purple rear/lower panels, white diagonal sections and dark glazing**.
 The paint is adapted to the current single-decker; SOS Transit branding remains.
 
-![Current bus livery from a rear passenger-side reference angle](revision-05/frames/bus-livery-v52.png)
+![Current bus livery from a rear passenger-side reference angle](revision-05/frames/bus-livery-v53.png)
 
-[Scene 05 at full size](revision-05/frames/05-livery-v52.png) ·
+[Scene 05 at full size](revision-05/frames/05-livery-v53.png) ·
 [Driver-window before/after](revision-05/frames/05-window-comparison-v52.png)
 
 
@@ -34,17 +34,18 @@ of a fixed layout.
   SOS Transit lettering attached to the bus. No negative scale or mirrored panel.
 - **06:** the red/blue sources belong to offscreen pursuers behind the camera.
 
-[**Download the editable Blender master**](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-girl-episode-2/marketing/assets/goji-girl/episode-02/revision-05/blender/continuity-livery-v52.blend) ·
+[**Download the editable Blender master**](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-girl-episode-2/marketing/assets/goji-girl/episode-02/revision-05/blender/continuity-livery-v53.blend) ·
 [Scene records and checks](revision-05/blender/continuity-record.json) ·
 [Detailed revision notes](revision-05/README.md)
 
-![Direct Blender staging for04–09. Proxy cast and simplified sets; one shared bus mesh and materials.](revision-05/frames/04-09-livery-v52.png)
+![Direct Blender staging for04–09. Proxy cast and simplified sets; one shared bus mesh and materials.](revision-05/frames/04-09-livery-v53.png)
 
 [Parked-bus overhead](revision-05/frames/plan-parked.png) ·
 [Wreck overhead](revision-05/frames/plan-wreck.png)
 
 The driver window has been reduced and moved forward beside the windscreen;
-the driver seat and takeover pose are aligned with it.
+the driver seat and takeover pose are aligned with it. The passenger doorway
+now has dark charcoal trim, with the yellow outline removed.
 
 ## Revised popup
 
