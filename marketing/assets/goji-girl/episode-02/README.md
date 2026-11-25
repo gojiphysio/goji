@@ -1,70 +1,63 @@
 # Goji Girl · Episode 02 — TAP OUT
 
-**Creative draft v5.3 · 25 November 2026 · proposed 47 seconds · vertical 9:16**
+**Creative draft v6 · 25 November 2026 · proposed 47 seconds · vertical 9:16**
 
 A frustrating work call sends Goji Girl rushing to Pilates. She steals a bus,
 crashes outside Lentor Modern, remembers to tap out, and reaches the calm of
 Goji while the police get stuck running against the glass.
 
-## Revision 5 — one Blender scene for the bus sequence
+## Storyboard from the top
 
-The supplied double-decker photograph now guides the **orange-red upper body,
-deep-purple rear/lower panels, white diagonal sections and dark glazing**.
-The paint is adapted to the current single-decker; SOS Transit branding remains.
+The bus is now a **three-axle double-decker**, with two passenger decks and two
+rows of glazing. It retains the supplied photo’s orange-red, deep-purple and
+white livery, SOS Transit branding, smaller forward driver window and charcoal
+door trim without a yellow outline.
 
-![Current bus livery from a rear passenger-side reference angle](revision-05/frames/bus-livery-v53.png)
+**Panels 04–09 are direct Blender geometry blockouts**, with proxy people and
+simplified buildings. The other panels are appearance concepts. Final PS2
+finishing and continuous action animation remain production work.
 
-[Scene 05 at full size](revision-05/frames/05-livery-v53.png) ·
-[Driver-window before/after](revision-05/frames/05-window-comparison-v52.png)
+### 01–04 · The call, the exit, the bus
 
+![Storyboard 01–04](revision-06/frames/01-04-storyboard.png)
 
-The previous generated bus panels are superseded: their road placement,
-heading and livery did not agree. The six views below are **direct Blender
-staging renders from one shared bus and street scene**, with proxy people and
-simplified architecture. They establish the geometry; final PS2 appearance is
-still to be applied. No independently generated bus panel is presented as proof
-of a fixed layout.
+### 05–08 · Takeover, chase, crash, tap
 
-- **04–05:** same parked transform in the left lane, with the passenger door
-  beside the left curb and the driver's side toward the centreline.
-- **07–09:** exactly the same wreck transform, heading +Y, driver's side down.
-  The red roof faces the road centre; the wheels and charcoal undercarriage face
-  the mall-side curb. Only cameras and the player change between these views.
-- **Livery:** one set of orange-red, white and deep-purple paint materials, with
-  SOS Transit lettering attached to the bus. No negative scale or mirrored panel.
-- **06:** the red/blue sources belong to offscreen pursuers behind the camera.
+![Storyboard 05–08](revision-06/frames/05-08-storyboard.png)
 
-[**Download the editable Blender master**](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-girl-episode-2/marketing/assets/goji-girl/episode-02/revision-05/blender/continuity-livery-v53.blend) ·
-[Scene records and checks](revision-05/blender/continuity-record.json) ·
-[Detailed revision notes](revision-05/README.md)
+### 09–12 · Dust off, sprint, safehouse, Pilates
 
-![Direct Blender staging for04–09. Proxy cast and simplified sets; one shared bus mesh and materials.](revision-05/frames/04-09-livery-v53.png)
+![Storyboard 09–12](revision-06/frames/09-12-storyboard.png)
 
-[Parked-bus overhead](revision-05/frames/plan-parked.png) ·
-[Wreck overhead](revision-05/frames/plan-wreck.png)
+[01–04 full size](revision-06/frames/01-04-storyboard.png) ·
+[05–08 full size](revision-06/frames/05-08-storyboard.png) ·
+[09–12 full size](revision-06/frames/09-12-storyboard.png)
 
-The driver window has been reduced and moved forward beside the windscreen;
-the driver seat and takeover pose are aligned with it. The passenger doorway
-now has dark charcoal trim, with the yellow outline removed.
+## Double-decker continuity
 
-## Revised popup
+One shared chassis supplies all six bus-action views. Shots 04/05 retain the
+same parked pose in the left lane. Shots 07/08/09 retain exactly the same wreck
+pose and heading, with the driver’s side down and passenger doorway facing up.
+The reader remains inside that lower-deck doorway. The upper deck and rear
+axle pair were added to that asset; the bus was not mirrored between cameras.
+
+![Double-decker livery and geometry](revision-06/frames/bus-double-decker.png)
+
+[Editable Blender master](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-girl-episode-2/marketing/assets/goji-girl/episode-02/revision-06/blender/double-decker-master.blend) ·
+[Scene records](revision-06/blender/continuity-record.json) ·
+[Revision notes](revision-06/README.md)
+
+## Safehouse popup
 
 > You can save your game and lose the police at a safehouse.
 
-This is a continuous tutorial paragraph, with visual line wrapping inside the
-existing lower box. It retains y=360, the inherited font/colours and the
-41.5–46.0s display interval. Original parody copy, not a verbatim game quote.
+Exact user-provided copy, retaining the lower y=360 placement and 41.5–46.0s
+interval. The clinic concept now uses the double-decker wreck reference while
+preserving the engaged therapist, interior and two officers against the glass.
 
-![New popup over the retained clinic look reference. Its background bus is older concept art, not the revised geometry authority.](revision-05/frames/12-safehouse-preview.png)
-
-[Editable SVG](revision-05/overlays/safehouse-popup.svg) ·
-[Transparent PNG](revision-05/overlays/safehouse-popup.png) ·
-[UI reserve check](revision-05/frames/12-ui-clearance-check.png)
-
-The clinic image above is retained for therapist/interior appearance and popup
-placement. Its earlier background-bus illustration still needs to be replaced
-from the shared Blender scene in the appearance pass. The direct staging board
-controls the bus geometry throughout the episode.
+[Full clinic panel](revision-06/frames/12-safehouse-preview.png) ·
+[Editable popup](revision-06/overlays/safehouse-popup.svg) ·
+[UI reserve check](revision-06/frames/12-ui-clearance-check.png)
 
 ## Camera and look
 
@@ -126,7 +119,7 @@ Sound: door **BANG**, two heavy swagger steps, running feet. Brief objective:
 ### 04 · 00:08–00:11 — Public transport, technically
 
 **Same PLAYER follow.** She reaches a busy Singapore bus stop. A white/purple
-**SOS Transit** single-deck bus with the familiar italic red/purple logo and a red roof band has its left passenger doors open and
+**SOS Transit** double-decker bus with the familiar italic red/purple logo and a red roof band has its left passenger doors open and
 commuters alighting. She runs around the nose toward the right-hand driver's
 cab. The camera follows her route around the nose; the bus remains stationary
 and parallel to the same curb through shot 05. Finish 04 at the nose with both
@@ -285,14 +278,14 @@ of the background gag. End on the moving tableau.
   clearance are checked. The six-second blockout uses a procedural proxy and
   neutral surroundings, not approved final cast or a full accident simulation.
   Contact frames were inspected; the final PS2 motion and exit-to-ground cut still
-  need production review. The earlier generated bus panels are superseded. The revision-05 `.blend`
+  need production review. The earlier generated bus panels are superseded. The revision-06 `.blend`
   and its direct views are the geometry authority; the old revision-03 isolated
   exit motion remains a contact study, not the current street layout.
 - **Service framing:** Pilates/studio experience, no medical or treatment claim.
   Her unhurt state is cartoon continuity, not recovery attributed to a session.
 - **Future motion handoff:** the new skill's Blender staging and H3 continuous
   video guidance apply to these complex outdoor actions; simpler fixed-camera
-  scenes can use H3 still guides. This revision adds the requested Blender exit blockout, without launching
+  scenes can use H3 still guides. This revision updates the shared double-decker and all twelve storyboard panels, without launching
   a new H3 benchmark or rendering the full episode.
 
 ## References used
@@ -313,10 +306,10 @@ and [San Andreas reference pack](https://github.com/gojiphysio/goji/blob/a4cb40e
 - **Generation:** built-in image generator, with identity and game-camera
   references assigned separate roles. Exact prompts, edits and reference hashes
   are in [v2 generation records](storyboard-prompts-v2.json).
-- **Current shot states:** [camera and continuity record](camera-plan-v5.json).
-- **This revision:** [shared Blender geometry and flowing tutorial copy](revision-05/README.md).
+- **Current shot states:** [camera and continuity record](camera-plan-v6.json).
+- **This revision:** [double-decker geometry and full storyboard](revision-06/README.md).
 - **Retained staging:** [source photos and Blender records](revision-03/README.md).
-- **Earlier drafts:** [v1](creative-v1.md), [v2](creative-v2.md) and [v3](creative-v3.md) and [v4](creative-v4.md), retained for comparison.
+- **Earlier drafts:** [v1](creative-v1.md), [v2](creative-v2.md) and [v3](creative-v3.md) and [v4](creative-v4.md) and [v5](creative-v5.md), retained for comparison.
 
 ## Optional caption
 

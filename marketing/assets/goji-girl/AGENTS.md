@@ -15,7 +15,9 @@
   shading across every human and environment, not just the lead character.
 - Episode 2 uses **SOS Transit**, retaining the established red/purple italic
   logo treatment and livery. Apply it to every visible bus wordmark.
-  Passenger-door frames are dark charcoal, without a yellow outline.
+  Episode 2 now uses a three-axle double-decker, with two glazing rows, following
+  the supplied bus photograph. Passenger-door frames are dark charcoal, without
+  a yellow outline. Preserve both decks in every parked, chase and wreck view.
 - Vehicle door, reader and pole share the chassis transform. Validate the
   rotated entrance in Blender before stylising; reject a styled roof hatch or
   rear-door substitution even when the image otherwise looks good.
