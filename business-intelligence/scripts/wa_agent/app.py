@@ -62,8 +62,9 @@ from .policy import (AGENT, DRAFT, ESCALATE, HUMAN, LATE_CHANGE_H, OFF_TOPIC, PA
                      note_off_topic,
                      out_of_scope,
                      pre_golive_chat,
-                     decide, gate, human_replied_since, is_acknowledgement, is_positive_reaction,
-                     mask_customer_emails, on_human_message,
+                     decide, drop_repeat_page_links, gate, human_replied_since,
+                     is_acknowledgement, is_positive_reaction, mask_customer_emails,
+                     on_human_message,
                      reply_problems, set_mode)
 from .state import ChatLocks, append_history, make_store, mark_seen, note_outcome, parse_code
 from .whatsapp import (Echo, HistoryChunk, Inbound, Status, WhatsAppClient, parse_webhook,
@@ -483,7 +484,7 @@ def _staff_answer(st, client, model, wa_id: str, answer: str) -> str:
                       input_tokens=res.input_tokens, output_tokens=res.output_tokens,
                       cache_read_tokens=res.cache_read_tokens,
                       cache_write_tokens=res.cache_write_tokens, cost_usd=round(res.cost_usd, 5))
-        reply = (p.reply or "").strip()
+        reply = drop_repeat_page_links((p.reply or "").strip(), history, time.time())
         if p.failed:
             return refuse("I couldn't write it up just now", "model_failed")
         if p.escalate:
@@ -1152,7 +1153,8 @@ def handle_inbound(ev: Inbound, received: float) -> None:
             events.record("silent", ev.wa_id, reason="kill_switch")
             return
         # A handover sends the holding reply; p.reply is Chris's draft (notice).
-        reply = customer_message(d, p, time.time())
+        reply = drop_repeat_page_links(customer_message(d, p, time.time()), state.history,
+                                       time.time())
         booked, failed, cancelled = None, False, False
         if d.action == SEND and p.intent == "cancel" and booking_client.cancel_complete(p.cancel):
             reply, cancelled, failed = _cancel_now(state, ev, p.cancel, reply)
