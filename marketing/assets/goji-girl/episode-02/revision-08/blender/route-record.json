@@ -1,0 +1,86 @@
+{
+  "source_scene": "revision-07/blender/double-decker-master.blend",
+  "world_forward": "+Y",
+  "sidewalk": "west x<-5.2",
+  "wreck_matrix": [
+    [
+      -0.0,
+      0.0,
+      1.0,
+      -5.1
+    ],
+    [
+      0.0,
+      1.0,
+      0.0,
+      0.0
+    ],
+    [
+      -1.0,
+      0.0,
+      -0.0,
+      1.45
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ]
+  ],
+  "girl09": [
+    -6.300000190734863,
+    5.400000095367432,
+    0.12999999523162842
+  ],
+  "girl10": [
+    -7.150000095367432,
+    22.100000381469727,
+    0.12999999523162842
+  ],
+  "clinic_door": [
+    -9.579999923706055,
+    25.299999237060547,
+    0.12999999523162842
+  ],
+  "cameras": {
+    "09": {
+      "position": [
+        -6.699999809265137,
+        1.2999999523162842,
+        2.0
+      ],
+      "rotation": [
+        1.3917359113693237,
+        4.5627821521065925e-09,
+        -0.1453099548816681
+      ],
+      "horizontal_fov_degrees": 52
+    },
+    "10": {
+      "position": [
+        -6.5,
+        17.299999237060547,
+        2.0999999046325684
+      ],
+      "rotation": [
+        1.4778168201446533,
+        1.6183427931082406e-08,
+        0.23528587818145752
+      ],
+      "horizontal_fov_degrees": 52
+    }
+  },
+  "wreck_depth_from_camera10": {
+    "min": -24.050397358834743,
+    "max": -11.023526921868324
+  },
+  "checks": {
+    "same_frozen_wreck": true,
+    "girl_moves_positive_Y": true,
+    "distance_from_wreck_increases": true,
+    "distance_to_clinic_decreases": true,
+    "entire_wreck_behind_camera10": true
+  },
+  "interpretation": "09 looks forward past wreck edge;10 continues farther along same pavement toward Goji. Wreck is behind camera and cannot appear ahead of player. Geography is fictional compressed staging."
+}

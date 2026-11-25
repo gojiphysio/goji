@@ -1,0 +1,66 @@
+[
+  {
+    "shot": "02",
+    "prompt": "Edit ONLY the woman's facial expression and small head reaction. She has just read that her Goji appointment is in ONLY FIVE MINUTES. Replace the smile with clear SURPRISE and sudden urgency: raised eyebrows, widened eyes, lips slightly parted in an 'oh!' expression, gaze fixed on phone. Keep believable original GTA San Andreas PS2 economical facial geometry, same adult identity and maroon outfit, no exaggerated cartoon bulging eyes or huge mouth. Do not change phone, hands, closed laptop, headset on desk, handbag, desk, background, lighting, framing or body position. No text or UI added; the calendar overlay is added separately. Exact same image apart from expression.",
+    "inputs": [
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-07/frames/02-look-clean.png"
+    ],
+    "output_hint": "Generated images are saved to /Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b as /Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b/exec-3355570d-64bc-424b-beb9-9815682b38f0.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+    "tool": "built-in image_gen",
+    "status": "selected; visually reviewed",
+    "model_version": "not exposed",
+    "input_hashes": {
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-07/frames/02-look-clean.png": "e0ee94d0be5015ec7f7e757e027df9f2229ffad622905ee0b43bb501265fdab1"
+    }
+  },
+  {
+    "shot": "04",
+    "prompt": "Edit ONLY Goji Girl's pose from walking to clearly RUNNING toward the bus nose. Preserve exact approved SOS double-decker model, doors, wheels, logo, livery, bus stop, commuters, bin, road, camera and lighting. Same adult girl maroon top/leggings, ponytail, white trainers, black handbag LEFT hand. She is caught mid-run, torso leaning forward, rear leg bent and heel kicked up, opposite knee advancing, right arm pumping, bag swinging naturally from left hand. Running stride should be unmistakable, not a longer walking stride. Her BACK remains to the third-person player camera. Keep her ground position and size in frame, she heads forward along sidewalk toward front of bus. Original GTA SA PS2 appearance remains. No stars, wanted indicators, HUD, captions or new UI.",
+    "inputs": [
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-07/frames/04-look-clean.png"
+    ],
+    "output_hint": "Generated images are saved to /Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b as /Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b/exec-528d90a1-45e0-4277-8193-99b73502c1ea.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+    "tool": "built-in image_gen",
+    "status": "selected; visually reviewed",
+    "model_version": "not exposed",
+    "input_hashes": {
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-07/frames/04-look-clean.png": "5e53e9232def81530e20a98bba75d09aa0531d9d317e83c6cd5c792a6ec93d94"
+    }
+  },
+  {
+    "shot": "09",
+    "prompt": "Make ONLY one small landmark addition to image1. Keep the girl dusting herself off, left-hand bag, camera, entire canopy, tilted post, pavement, road and narrow charcoal wreck edge at extreme right exactly as they are. Image2 is the same Blender view showing the fixed route: Goji clinic is FARTHER AHEAD on this SAME LEFT storefront row. Add a small distant burgundy/red round projecting GOJI shop sign at the matching position on the left facade from image2, above the far doorway before the tree, about 20metres ahead. It should be small and naturally foreshortened, visible as a destination down the pavement, not an enormous nearby sign. The word GOJI may be tiny at this distance. Do not add/move the wreck or change viewpoint, do not put a bus ahead, do not alter character or pose. NO stars or gameplay UI anywhere. Preserve PS2 GTA SA look. This is a tiny continuity landmark edit only.",
+    "inputs": [
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-07/frames/09-look-clean.png",
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-08/frames/09-route-direct.png"
+    ],
+    "output_hint": "Generated images are saved to /Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b as /Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b/exec-4039c25a-5330-4a1b-9782-79f4cd8111ba.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+    "tool": "built-in image_gen",
+    "status": "selected; visually reviewed",
+    "model_version": "not exposed",
+    "input_hashes": {
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-07/frames/09-look-clean.png": "b0aa4ae411af5bf445a469f3edcb256663113d6e6dbe78486df6cc7ffef7b4ac",
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-08/frames/09-route-direct.png": "760023387a2c0f72d9883a43d0321cdd149552c6459a12f1283f00f3aca673c3"
+    }
+  },
+  {
+    "shot": "10",
+    "prompt": "Create scene10 as a finished original GTA San Andreas PS2 gameplay storyboard. STRICT INPUT ROLES:\n1. Blender image is the AUTHORITATIVE same-street camera, player/NPC marks and clinic position. Keep this forward view: building/Goji frontage on LEFT, pavement straight ahead, road on RIGHT. Camera follows the girl from behind as she advances forward along the west pavement toward the Goji entrance just ahead-left. TWO chasing police partly cropped at the left/right near foreground edges. Their backs face camera too; Goji Girl remains the controlled player in lower centre. Change primitive people into detailed PS2 game characters, and make all three clearly RUNNING: dynamic bent-knee strides, forward torso, pumping arms. The girl angles slightly left toward the entrance at the existing bay, not backward.\n2. PREVIOUS SHOT09 is continuity/look reference ONLY: girl has just left the wreck and is moving forward along this same pavement. This shot10 is farther ALONG THAT SAME ROUTE. The wreck is NOW BEHIND THE CAMERA and must be COMPLETELY ABSENT from this image. NO BUS, NO WRECK, NO FIRE OR SMOKE ahead or to either side. Do not copy the previous shot's bus edge, bent post or exact foreground.\n3. Actual Goji frontage PHOTO is architectural/branding reference ONLY: black slim glass door/window frames, grey fascia, red round projecting Goji sign, white/red Goji Physiotherapy window logo and metal rail. Adapt those details to the LEFT facade angle and bay fixed in image1. Do not copy grand-opening flowers, balloons or the photo's front-on camera.\n4. Goji Girl identity/PS2 texture reference ONLY: adult woman, black ponytail, maroon sleeveless athletic top/leggings, white sneakers and a single black handbag in LEFT hand. Do not copy any bus or SBS text from it.\nWhole scene original 2004 GTA SA game graphics: convincing economical meshes, painted low-resolution materials and garment folds, restrained shading, textured tropical foliage, Singapore pavement, cyan daylight haze. No primitive toy humans, no photoreal/PBR, no cinematic lens/DOF. The storefront entrance ahead-left must be readable as where she is going. This is continuation away from the wreck; neither camera nor girl reverses direction. IMPORTANT NO WANTED STAR, NO HUD, NO UI, NO CAPTIONS OR PANEL NUMBERS. Single vertical9:16 frame.",
+    "inputs": [
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-08/frames/10-route-direct.png",
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-07/frames/09-look-clean.png",
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-03/references/goji-frontage.webp",
+      "/Users/tidepool/.codex/skills/goji-gta-video/assets/ep01-street.png"
+    ],
+    "output_hint": "Generated images are saved to /Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b as /Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b/exec-0666421d-c984-468d-a73f-68c84e3b194f.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+    "tool": "built-in image_gen",
+    "status": "selected; visually reviewed",
+    "model_version": "not exposed",
+    "input_hashes": {
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-08/frames/10-route-direct.png": "354cdd032a0dceffc32f2bda44ef0e70bd79c9cee3d0a5bad3b9f4592c5fa760",
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-07/frames/09-look-clean.png": "b0aa4ae411af5bf445a469f3edcb256663113d6e6dbe78486df6cc7ffef7b4ac",
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-03/references/goji-frontage.webp": "0933ceb34ccd964030baba3dd9cf017ef9e0ebb06d40b096bbf96e14e336f138",
+      "/Users/tidepool/.codex/skills/goji-gta-video/assets/ep01-street.png": "396698cd2396bf7897d95fae1bb572b5ca67b41d17cfcae2a06c1496dd8d53e9"
+    }
+  }
+]

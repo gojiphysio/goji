@@ -1,0 +1,89 @@
+[
+  {
+    "shot": "07",
+    "prompt": "Use case: precise-object-edit. Image1 is the EXACT approved storyboard to edit. Image2 is ONLY a Blender crowd-location guide, never copy its primitive bus or humans. Add alarmed adult Singapore pedestrians on the protected SHOPFRONT side of the pavement, screen left, beyond the bus front: a short-haired man in a muted blue short-sleeve shirt and charcoal trousers at the closer shop bay, hands lifted in alarm; a bob-haired woman in a cream blouse and dark trousers several metres farther ahead turning and scrambling toward the storefront. Two very small passersby may be visible much farther down the pavement. They are clearly reacting to the crash. Match original PS2 GTA San Andreas game NPCs, painted clothing textures, economical faces, simple low-poly joints. ALL remain upright, unharmed, and several metres from the bus and debris with obvious empty pavement between them and the vehicle. No one in the road, bus shelter impact zone or touching bus. Preserve EVERY detail of the original image's bus, livery, orientation, wheels, logos, canopy, camera, road and lighting. Add people only. Do not change the bus design or move it. No stars, HUD, text, injuries, ragdolls or blood. Preserve original portrait composition.",
+    "original_output": "/Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b/exec-d81be74d-c5a5-4167-88b8-c91b122aeace.png",
+    "inputs": [
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-08/frames/07-before-crowd.png",
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-08/frames/07-crowd-direct.png"
+    ],
+    "status": "rejected; crowd too close to bus",
+    "tool": "built-in image_gen",
+    "model_version": "not exposed",
+    "saved_output": "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-08/attempts/exec-d81be74d-c5a5-4167-88b8-c91b122aeace.png",
+    "input_hashes": {
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-08/frames/07-before-crowd.png": "bf4cbe2da9ed61e3ff3b4027ef351ded70db37baa70449b2fedc8d80930d8f4a",
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-08/frames/07-crowd-direct.png": "06a923a62631aba730d23c1aae8911a26e39a812c193ac5f64f4630348385ddf"
+    }
+  },
+  {
+    "shot": "07",
+    "prompt": "Edit only the two nearest pedestrians in image1. Move BOTH much farther AWAY from camera along the LEFT storefront pavement, to the positions of the blue and cream figures in image2's Blender spatial guide. They must be BEYOND THE FRONT TIP OF THE BUS (beyond the topmost wheel in image), not beside its rear or middle wheels. Blue shirt man is at the canopy's far end; cream blouse woman another four metres beyond him. Reduce their on-screen sizes with perspective. Maintain their readable recoiling/running gestures and empty space around them. Match economical GTA SA PS2 faces, not cartoon characters. The bus and every other original pixel of environment remain unchanged. No HUD or stars. No contact with anyone. Third distant figure should be teal shirt, not red.",
+    "original_output": "/Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b/exec-b7bcfdc7-f3d3-4b38-a5c1-23f292cf23e1.png",
+    "inputs": [
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-08/attempts/exec-d81be74d-c5a5-4167-88b8-c91b122aeace.png",
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-08/frames/07-crowd-direct.png"
+    ],
+    "status": "selected",
+    "tool": "built-in image_gen",
+    "model_version": "not exposed",
+    "saved_output": "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-08/frames/07-look.png",
+    "input_hashes": {
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-08/attempts/exec-d81be74d-c5a5-4167-88b8-c91b122aeace.png": "e56d0ffe720a3fceefa663f6e59740e8a742b147f5192d71be7848195a734022",
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-08/frames/07-crowd-direct.png": "06a923a62631aba730d23c1aae8911a26e39a812c193ac5f64f4630348385ddf"
+    }
+  },
+  {
+    "shot": "09",
+    "prompt": "Use case: precise-object-edit. Image1 is exact edit target; image2 ONLY provides Blender NPC positions; image3 provides same pedestrians' clothing/identity at previous crash angle. Add startled adult PS2 GTA San Andreas pedestrians, changing nothing else. Closest two on LEFT pavement tight to storefront glass at guide positions: short-haired blue shirt man charcoal trousers recoils with palms raised looking toward girl/wreck; a bob-haired cream blouse woman dark trousers farther ahead turning and hurrying away while looking back. The same people as image3, with original PS2 economical facial geometry and painted clothes, NOT photoreal or cartoon smooth faces. Farther away near tree/Goji approach include tiny teal-shirt man and white-shirt woman. Leave a broad empty running corridor in front of Goji Girl. Nobody touches girl, handbag, bus, debris, damaged pole or anyone else. Nobody falls, gets hit, enters road or blocks her route. Preserve exact hero identity, pose, camera, left-hand bag, wreck edge RIGHT, storefront LEFT, small distant Goji sign, damaged post, framing and lighting. No stars, UI, captions. Match portrait image1.",
+    "original_output": "/Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b/exec-d71be3bf-713c-4774-aae1-fbfe33771b54.png",
+    "inputs": [
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-08/frames/09-before-crowd.png",
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-08/frames/09-crowd-direct.png",
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-08/frames/07-look.png"
+    ],
+    "status": "selected",
+    "tool": "built-in image_gen",
+    "model_version": "not exposed",
+    "saved_output": "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-08/frames/09-look.png",
+    "input_hashes": {
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-08/frames/09-before-crowd.png": "8fce828ffd853d321eb78ddca62c9030eeff472fb69826c0ac677dce3275de1a",
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-08/frames/09-crowd-direct.png": "8f0854ec348f4d53f2d61f5ec8393996329e7de2f81b709c1208aa250fd1199b",
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-08/frames/07-look.png": "13aa6ab2256b81ad2794dab3a31c170288236c3cd173d53908c4b017e7198869"
+    }
+  },
+  {
+    "shot": "10",
+    "prompt": "Use case: precise-object-edit. Image1 is EXACT approved storyboard edit target. Image2 is ONLY Blender positions for two passersby farther ahead; image3 is continuity reference for their clothing. Add two alarmed adult PS2 GTA San Andreas NPCs AHEAD of Goji Girl, several metres BEYOND the clinic entrance: muted teal short sleeve shirt man dark trousers by storefront LEFT, startled sideways/backward step with one raised hand, looking at approaching runner; white/light blouse woman dark trousers farther ahead on outer sidewalk by tree RIGHT, turning to hurry farther away and looking back. Keep them apart, no synchronized identical poses. Both are visibly healthy and unharmed. Leave wide empty central sprint corridor, Goji entrance unobstructed, no one touching player, police or anyone else. Original PS2 low-poly mesh faces and painted coarse clothing textures, same rendering language as hero and police. Keep EXACT hero running pose, left handbag, two pursuing officers at lower frame edges, clinic facade/sign/text, road, tree, camera, direction, lighting. Do not show the wreck, which is BEHIND camera. No crowd in road, injuries, falls, contact, HUD or wanted stars. Only insert two background people; preserve original composition and all existing objects.",
+    "original_output": "/Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b/exec-33c13edd-f979-4cf8-b39c-6e498aafdb0e.png",
+    "inputs": [
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-08/frames/10-before-crowd.png",
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-08/frames/10-crowd-direct.png",
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-08/frames/09-look.png"
+    ],
+    "status": "rejected; pedestrian too close to doorway",
+    "tool": "built-in image_gen",
+    "model_version": "not exposed",
+    "saved_output": "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-08/attempts/exec-33c13edd-f979-4cf8-b39c-6e498aafdb0e.png",
+    "input_hashes": {
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-08/frames/10-before-crowd.png": "ec9214921835653a48cab2fbd7c26dc7696957f3324b7683a4605817875c80a6",
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-08/frames/10-crowd-direct.png": "fe732d09ae224b095537e62cb0411c3dd37ff4eb5f2a7361584c474db699fac0",
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-08/frames/09-look.png": "15d56b6df76125acee73cf37ae1f4b69bbf11874504fceaa6d7ff5fc07a33577"
+    }
+  },
+  {
+    "shot": "10",
+    "prompt": "Precise single-object reposition edit: move ONLY the teal-shirt male pedestrian farther down the sidewalk, AWAY from camera, along the glass storefront. Place him beside the LAST distant glass bays near the tree, several metres beyond the GOJI doorway, and make him smaller with perspective. He must not stand beside or in front of the GOJI entrance; the full doorway and near glass bay should be empty. Keep his same startled over-shoulder reaction, teal shirt, dark trousers. Keep EVERYTHING else unchanged: Goji Girl running, both cops, white-shirt woman, building, tree, sign, lighting, camera, no bus, no HUD. Original PS2 GTA SA game appearance.",
+    "original_output": "/Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b/exec-196738c1-ca93-4c57-a444-5d7e2e5dc328.png",
+    "inputs": [
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-08/attempts/exec-33c13edd-f979-4cf8-b39c-6e498aafdb0e.png"
+    ],
+    "status": "selected",
+    "tool": "built-in image_gen",
+    "model_version": "not exposed",
+    "saved_output": "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-08/frames/10-look.png",
+    "input_hashes": {
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-08/attempts/exec-33c13edd-f979-4cf8-b39c-6e498aafdb0e.png": "970b8513cb73874c8d0098b59e204fd48771af1167aec764d5b1a860fbd9239a"
+    }
+  }
+]

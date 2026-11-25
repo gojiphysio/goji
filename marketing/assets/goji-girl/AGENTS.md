@@ -54,3 +54,13 @@
   them; reject front-face cutouts, additional axles and upright wreck fragments.
 - Keep bus wordmarks attached to painted bodywork. The front SOS decal and swoosh
   must fit below the lower windscreen, without lettering on glazing.
+
+- Keep wanted-level stars and gameplay HUD out of Episode2 storyboard art; they
+  will be added in post. Calendar reminder lines use one font size.
+- Ground route cuts in the same Blender world. Across09–10 the player continues
+  forward away from the wreck toward Goji; the whole wreck is behind camera10.
+  A background gag is not a reason to move the wreck in front of the player.
+
+- Pedestrian panic is non-contact: keep extras outside the bus/debris envelope,
+  player and police running corridor, and clinic doorway. Use recurring wardrobe
+  and fixed crowd marks across cuts; no impacts, falls or ragdolls.
