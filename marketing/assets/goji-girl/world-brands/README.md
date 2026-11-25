@@ -1,6 +1,8 @@
-# Singapore fictional brands — shape revision
+# Singapore fictional brands — reusable asset library
 
-Seven proposed identities for the Goji GTA-style Singapore world. The user-selected names and familiar colour/lettering cues are retained; the principal symbols have new silhouettes. These are review concepts, not approved series canon.
+Six user-approved identities for the Goji GTA-style Singapore world, accepted on 25 November 2026. Approval: “kpkb is a bit too far, the rest are good”. KPKB is excluded from the approved library and retained below only as a rejected draft.
+
+[Approved asset manifest and checksums](approved-assets.json) · [Reusable skill](../../../video-production/skills/goji-gta-brands/SKILL.md)
 
 Selected masters are white-background PNGs. Original corporate logos were visual research references; they are not production assets.
 
@@ -30,13 +32,13 @@ Three bent red horizontal bars; blue bold lettering.
 
 [Download PNG](oops.png) · [Visual reference: UOB](https://www.uob.com.my/about/story/our-logo.page)
 
-## KPKB
+## KPKB — rejected draft, do not reuse
 
-Red hexagonal speech badge containing three ascending blocks; red bold lettering.
+The user found this hexagonal badge too far from the reference. A future revision should preserve more of the red circular nautical character while changing the main mark shape. No KPKB logo is approved.
 
-![KPKB](kpkb.png)
+![KPKB](drafts/kpkb-hexagon-rejected.png)
 
-[Download PNG](kpkb.png) · [Visual reference: OCBC](https://brandripe.com/blog/88/the-principle-of-design-behind-8-of-southeast-asias-top-banks-logos)
+[Download PNG](drafts/kpkb-hexagon-rejected.png) · [Visual reference: OCBC](https://brandripe.com/blog/88/the-principle-of-design-behind-8-of-southeast-asias-top-banks-logos)
 
 ## Single
 
