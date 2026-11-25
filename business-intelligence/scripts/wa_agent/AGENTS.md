@@ -93,6 +93,12 @@ The WhatsApp assistant. What it is and how to run it: [`README.md`](README.md).
   answered and goes to the morning summary, never a ping; it persists past
   `OFF_TOPIC_LIMIT` and the number is watch-listed (`policy.note_off_topic`).
   Don't route something to Chris just because it's unusual.
+- **An emoji reaction is never a message.** A customer's reaction gets no
+  model call or reply and isn't added to history. A positive one (👍 😊 🙏,
+  `policy.POSITIVE_REACTIONS`) pings nobody; a negative or neutral one
+  pings staff when the chat is the agent's (owner, 25 Nov 2026, after a 👍
+  pinged Chris). A staff reaction to a ping gets no reply; Chris reacting in
+  the Business app isn't an echo, so it doesn't pause the chat.
 - **A handover splits two messages.** The customer gets the model's
   `holding_reply` (acknowledges the ask, apologises if they're unhappy,
   promises nothing a person must decide); Chris's ping carries `reply`, the

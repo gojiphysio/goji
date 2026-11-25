@@ -3,7 +3,7 @@ import hmac
 
 from wa_agent.whatsapp import Echo, Inbound, Status, WhatsAppClient, parse_webhook, verify_signature
 
-from .payloads import echo, inbound, status
+from .payloads import echo, inbound, reaction, status
 
 
 def sign(body: bytes, secret="test-secret"):
@@ -28,6 +28,17 @@ def test_parse_inbound_with_name():
 def test_non_text_becomes_placeholder():
     [ev] = parse_webhook(inbound(kind="audio"))
     assert ev.text == "[sent a voice note]" and ev.kind == "audio"
+
+
+def test_reaction_shows_its_emoji():
+    [ev] = parse_webhook(reaction(emoji="😊"))
+    assert (ev.kind, ev.text) == ("reaction", "[reacted 😊]")
+    [ev] = parse_webhook(reaction(emoji=""))
+    assert ev.text == "[removed a reaction]"
+
+
+def test_business_app_reaction_is_not_an_echo():
+    assert parse_webhook(reaction(echoed=True)) == []
 
 
 def test_parse_echo_is_keyed_on_the_customer():

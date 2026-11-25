@@ -56,7 +56,8 @@ class Inbound:
     mime: str = ""
     filename: str = ""
     caption: str = ""
-    reply_to: str = ""     # the message id they swipe-replied to (context.id), if any
+    reply_to: str = ""     # the message id they swipe-replied to (context.id), or reacted to
+    emoji: str = ""        # a reaction's emoji; "" when they removed one
 
 
 @dataclass
@@ -107,6 +108,9 @@ def _message_text(m: dict) -> tuple[str, str]:
         return reply.get("title", "[tapped a button]"), kind
     if kind == "button":
         return (m.get("button") or {}).get("text", "[tapped a button]"), kind
+    if kind == "reaction":
+        emoji = (m.get("reaction") or {}).get("emoji", "")
+        return (f"[reacted {emoji}]" if emoji else "[removed a reaction]"), kind
     caption = (m.get(kind) or {}).get("caption") if isinstance(m.get(kind), dict) else None
     text = NON_TEXT_PLACEHOLDERS.get(kind, f"[sent a {kind} message]")
     return (f"{text} {caption}" if caption else text), kind
@@ -183,6 +187,7 @@ def parse_webhook(payload: dict) -> list[Inbound | Echo | Status | HistoryChunk]
                 for m in value.get("messages") or []:
                     text, kind = _message_text(m)
                     media = m.get(kind) if isinstance(m.get(kind), dict) else {}
+                    react = (m.get("reaction") or {}) if kind == "reaction" else {}
                     events.append(Inbound(wa_id=m.get("from", ""), msg_id=m.get("id", ""),
                                           ts=float(m.get("timestamp") or 0), text=text,
                                           name=names.get(m.get("from"), ""), kind=kind,
@@ -190,13 +195,17 @@ def parse_webhook(payload: dict) -> list[Inbound | Echo | Status | HistoryChunk]
                                           mime=media.get("mime_type", ""),
                                           filename=media.get("filename", ""),
                                           caption=media.get("caption", ""),
-                                          reply_to=(m.get("context") or {}).get("id", "")))
+                                          reply_to=react.get("message_id") or
+                                          (m.get("context") or {}).get("id", ""),
+                                          emoji=react.get("emoji", "")))
                 for s in value.get("statuses") or []:
                     events.append(Status(msg_id=s.get("id", ""), status=s.get("status", ""),
                                          ts=float(s.get("timestamp") or 0),
                                          wa_id=s.get("recipient_id", "")))
             elif field_name == "smb_message_echoes":
                 for m in value.get("message_echoes") or []:
+                    if m.get("type") == "reaction":
+                        continue  # a 👍 from the Business app isn't taking the chat over
                     text, _ = _message_text(m)
                     events.append(Echo(wa_id=m.get("to", ""), msg_id=m.get("id", ""),
                                        ts=float(m.get("timestamp") or 0), text=text))
