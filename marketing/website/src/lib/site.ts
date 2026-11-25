@@ -17,7 +17,7 @@ export const SITE = {
   /** Month the published prices were last confirmed. Shown as "Prices as of
    *  <month>" next to prices (answer engines weight dated facts). Update it in
    *  the same PR as any price change, or when re-confirming prices. */
-  pricesAsOf: "October 2026",
+  pricesAsOf: "November 2026",
   phone: "+65 8377 0401",
   phoneE164: "+6583770401",
   instagram: "https://www.instagram.com/gojiphysio/",

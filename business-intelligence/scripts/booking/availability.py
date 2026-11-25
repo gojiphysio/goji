@@ -155,7 +155,7 @@ def derive_availability(
 
     `clinician_id` restricts to one clinician; `focus` (a physiotherapy sub-type)
     restricts to the clinicians who offer it (e.g. scoliosis -> Cheryl only);
-    `variant` specifies a duration variant (e.g. "30min" for paediatric physio);
+    `variant` specifies a duration variant (e.g. "40min" for paediatric physio);
     `home` restricts to the home-visit clinician and pads each slot with travel
     time on both sides. `now` (naive SGT) is injectable for testing; defaults to
     the current SGT time. `fresh` reads the day straight from Plato instead of
@@ -192,7 +192,7 @@ def derive_available_days(
     pick), so a visitor never has to click through empty dates. One appointments
     fetch covers the whole range — per-day fetches would blow Plato's 20 req/min
     budget for a single month view. `variant` specifies a duration variant if
-    applicable (e.g. "30min" for paediatric physio).
+    applicable (e.g. "40min" for paediatric physio).
     """
     # Config first — see derive_availability. It matters more here: a month is
     # 10+ paginated pages, so failing after that crawl wastes half of Plato's
@@ -231,7 +231,7 @@ def _derive_day(
 
     `booked` may span more days than `day` (the range derivation fetches a whole
     month at once) — overlap checks only ever match same-day times. `variant`
-    specifies a duration variant if applicable (e.g. "30min" for paediatric physio).
+    specifies a duration variant if applicable (e.g. "40min" for paediatric physio).
 
     `_raw_appointments` is optionally passed for diagnostic logging only.
     """
