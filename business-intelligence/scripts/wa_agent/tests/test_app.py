@@ -666,6 +666,45 @@ def test_picking_an_offered_booking_time_books_it(env, monkeypatch):
     assert calls and calls[0]["time"] == "11:00" and calls[0]["full_name"] == "Charles Tan"
 
 
+
+def test_a_name_sent_after_picking_a_time_books_it(env, monkeypatch):
+    # Picked an offered time, was asked their name, sent it: the name comes in
+    # the confirming message, for the same time already pending.
+    client, rec, notes = env
+    calls = []
+    monkeypatch.setattr(app_mod.booking_client, "book", lambda b, wa_id, patient_id="": calls.append(dict(b)) or
+                        {"ok": True, "reference": "GOJI-N4", "clinician_name": "Kristy",
+                         "service": "Physiotherapy", "date": b["date"], "time": b["time"],
+                         "dry_run": True})
+    picked = {**BOOK, "full_name": "", "options": "2026-11-26 10:00"}
+    app_mod.claude.queue.append(_final_with("Lovely! Could I have your full name?",
+                                            booking=picked))
+    post(client, inbound(text="10am tomorrow"))
+    assert calls == [] and app_mod.store.load(CUSTOMER).pending_booking["full_name"] == ""
+    app_mod.claude.queue.append(_final_with("Booking you in now.", confirm_booking=True,
+                                            booking={**picked, "full_name": "Charles Tan"}))
+    post(client, inbound(msg_id="wamid.in2", text="Charles Tan"))
+    assert len(calls) == 1 and calls[0]["full_name"] == "Charles Tan"
+    assert calls[0]["time"] == "10:00"
+    assert app_mod.wa.sent[-1][1].startswith("You're booked, Charles!")
+    assert notes == []
+
+
+def test_a_confirmed_booking_that_cant_be_made_holds_and_tells_chris(env, monkeypatch):
+    client, rec, notes = env
+    monkeypatch.setattr(app_mod.booking_client, "book",
+                        lambda b, wa_id, patient_id="": pytest.fail("booked without a name"))
+    picked = {**BOOK, "full_name": "", "options": "2026-11-26 10:00"}
+    app_mod.claude.queue.append(_final_with("Could I have your full name?", booking=picked))
+    post(client, inbound(text="10am tomorrow"))
+    app_mod.claude.queue.append(_final_with("Booking you in now.", confirm_booking=True,
+                                            booking=picked))
+    post(client, inbound(msg_id="wamid.in2", text="ok"))
+    assert ("book_skipped", {"reason": "details_missing"}) in rec
+    assert app_mod.wa.sent[-1][1] == app_mod.BOOK_HELD_REPLY      # never "booking you in now"
+    assert notes[-1][0] == "escalated"
+
+
 def test_no_closer_for_someone_already_in_a_longer_conversation(env):
     client, rec, _ = env
     import time as _t
