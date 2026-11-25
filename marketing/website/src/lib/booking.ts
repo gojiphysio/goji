@@ -19,7 +19,7 @@ export interface BookingDraft {
   /** Physiotherapy sub-type (null for non-physio services). Narrows clinicians
    *  and tells the clinic what the physio session is for. */
   physioFocus: PhysioFocusId | null;
-  /** Duration variant (e.g., "30min" or "55min"), when the sub-type offers
+  /** Duration variant (e.g., "40min" or "55min"), when the sub-type offers
    *  multiple durations. Null for services/sub-types without variants. */
   variant: string | null;
   format: BookingFormat;
@@ -40,7 +40,7 @@ export interface AvailabilityQuery {
   /** Physio sub-type, when the service is physiotherapy. Lets the backend
    *  restrict availability to the mapped clinicians. */
   focus?: PhysioFocusId;
-  /** Duration variant (e.g., "30min"), when the sub-type offers variants. */
+  /** Duration variant (e.g., "40min"), when the sub-type offers variants. */
   variant?: string;
   clinicianId: string;
   date: string;
@@ -50,7 +50,7 @@ export interface AvailabilityQuery {
 export interface AvailableDaysQuery {
   service: ServiceId;
   focus?: PhysioFocusId;
-  /** Duration variant (e.g., "30min"), when the sub-type offers variants. */
+  /** Duration variant (e.g., "40min"), when the sub-type offers variants. */
   variant?: string;
   clinicianId: string;
   /** Calendar month, YYYY-MM. */

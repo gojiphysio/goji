@@ -18,7 +18,7 @@ faqs:
   - q: "What happens at the first appointment?"
     a: "Your physiotherapist will discuss your medical history, symptoms, activity levels and goals, then carry out a physical assessment focused on your concerns. Treatment may begin in the same session and may include manual therapy, exercise and rehabilitation, and guidance on activity and returning to work, exercise or sport."
   - q: "How much does a session cost, and do you offer home visits?"
-    a: "A 55-minute session is $260 at our Lentor clinic, or $380 as a home visit."
+    a: "The 55-minute initial consultation is $260 at our Lentor clinic. Review sessions are $230 for 40 minutes, $260 for 55 minutes or $390 for 85 minutes. A home visit adds $120 (a 55-minute home visit is $380)."
   - q: "Do you offer dry needling?"
     a: "Yes, dry needling is one of the treatments that may be used, but it is only available in sessions with Cheryl Long."
   - q: "Do I need a scan before starting physiotherapy?"

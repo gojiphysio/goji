@@ -206,7 +206,7 @@ def create_booking(plato, draft: dict, *, now: datetime | None = None,
     focus_label = PHYSIO_FOCUS_LABELS.get(focus_id, "")
     focus_clinicians = PHYSIO_FOCUS_CLINICIANS.get(focus_id)
 
-    # Duration variant (e.g., "30min" or "55min" for paediatric physiotherapy).
+    # Duration variant (e.g., "40min" or "55min" for paediatric physiotherapy).
     # Only meaningful for services that define variants. Extracted from draft for
     # availability calculations and used when creating the Plato appointment.
     variant = (draft.get("variant") or "").strip() if svc.get("variants") else ""

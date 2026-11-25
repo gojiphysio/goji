@@ -221,6 +221,7 @@ def test_service_is_read_from_type_and_length():
     assert _service_for("hDWW", 60) == ("physiotherapy", "")
     assert _service_for("hDWW", 55) == ("physiotherapy", "55min")
     assert _service_for("hDWW", 85) == ("mummy-baby", "")
+    assert _service_for("hDWW", 40) == ("physiotherapy", "40min")
     assert _service_for("qLbH", 60) == ("strength-conditioning", "")
     assert _service_for("hDWW", 90) is None
 

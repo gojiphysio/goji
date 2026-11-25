@@ -60,7 +60,7 @@ CLINICIANS: dict[str, dict] = {
 # duration_min: appointment length used for slot occupancy (clinic books hourly;
 #   confirm 55 vs 60 with the clinic — using 60 to match observed real bookings).
 # variants: optional duration variants (e.g., paediatric physio offers 30-min and
-#   55-min options with different pricing). Keyed by variant id (e.g., "30min").
+#   55-min options with different pricing). Keyed by variant id (e.g., "40min").
 SERVICES: dict[str, dict] = {
     "physiotherapy": {
         "title": "Physiotherapy",
@@ -69,9 +69,10 @@ SERVICES: dict[str, dict] = {
         "duration_min": 60,
         "supports_home": True,
         "variants": {
-            "30min": {"duration_min": 30, "price": 160, "description": "Only if prescribed by physio"},
-            "45min": {"duration_min": 45, "price": 230, "description": "Review session"},
-            "55min": {"duration_min": 55, "price": 260, "description": "Initial consultation"},
+            # Price sheet 25 Nov 2026. The 85-min review ($390) isn't offered online:
+            # 85 min on this type reads back as Mummy & Baby (_service_for).
+            "40min": {"duration_min": 40, "price": 230, "description": "Review session"},
+            "55min": {"duration_min": 55, "price": 260, "description": "Initial consultation or review"},
         },
         "variant_focus": "paediatrics",  # variants only apply to this physio sub-type
     },

@@ -1,7 +1,7 @@
 /**
  * DurationVariant represents an alternative duration and price for a service
- * or physiotherapy sub-type (e.g., paediatric physio offers 45-min review and
- * 55-min initial options).
+ * or physiotherapy sub-type (e.g., paediatric physio offers 40-min review and
+ * 55-min initial or review options).
  */
 export interface DurationVariant {
   durationMin: number;
