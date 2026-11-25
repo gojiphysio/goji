@@ -16,6 +16,11 @@ The WhatsApp assistant. What it is and how to run it: [`README.md`](README.md).
   (`_move_pending` → `/internal/reschedule`); cancellations with 24h+ notice
   go out in the same turn (`_cancel_now` → `/internal/cancel`). Inside 24
   hours both are drafts for Chris (fee policy).
+- **Offered times stay open for a day** (`BOOKING_CONFIRM_WINDOW_S`), and
+  the team's answer restarts the clock on any offer or move still pending
+  (`_staff_answer`). It was 30 minutes: a customer waiting on a clinical
+  answer picked their time 32 minutes later and wasn't booked (25 Nov 2026).
+  goji-booking checks the slot live, so a stale pick is `slot_taken`.
 - **Bookings ask for an email** (owner, 25 Nov 2026): with one on the
   booking, Plato sends its own confirmation (with the clinic's registration
   form) and goji-booking sends Goji's. The agent asks once, with the times,

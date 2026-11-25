@@ -526,6 +526,11 @@ def _staff_answer(st, client, model, wa_id: str, answer: str) -> str:
             state.owner = "agent"
             state.off_topic_strikes = 0
             state.pending_draft, state.last_auto = {}, {}
+            # Times offered before the handover are still on the table: the
+            # write-up usually asks which one suits, so the clock restarts.
+            for kind in ("pending_booking", "pending_move"):
+                if getattr(state, kind):
+                    setattr(state, kind, {**getattr(state, kind), "at": sent_at})
             note_outcome(state, "staff_answer",
                          summary.TEAM_PARTIAL if still_open else summary.TEAM_ANSWER, sent_at)
             st.save(state)
