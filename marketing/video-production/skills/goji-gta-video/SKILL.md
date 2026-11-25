@@ -11,6 +11,10 @@ is not proof of a coherent scene; a seed or repeated description is not an ident
 
 ## Load only the context needed
 
+- For fictional corporate logos on signs, storefronts or aircraft, use the
+  `goji-gta-brands` skill and the repository's
+  `marketing/assets/goji-girl/world-brands/approved-assets.json`. Reuse the six
+  accepted masters; KPKB remains unapproved and must not be used from drafts.
 - Read [series-bible.md](references/series-bible.md) for every episode. It contains
   existing character references, the PS2 standard, and proposed camera presets.
 - Read [san-andreas-reference.md](references/san-andreas-reference.md) for game
