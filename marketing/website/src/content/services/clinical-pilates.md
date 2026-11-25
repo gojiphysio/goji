@@ -26,7 +26,7 @@ faqs:
   - q: "Can I do Clinical Pilates with a friend or partner?"
     a: "Yes. Sessions run as private 1:1 sessions or 2:1 sessions, so you can exercise alongside a friend, partner or family member."
   - q: "How much does Clinical Pilates cost?"
-    a: "A 55-minute Clinical Pilates session is $180 at the clinic. Packages are $850 for 5 sessions and $1,600 for 10 sessions, and each session in a package can be either Clinical Pilates or Strength & Conditioning."
+    a: "A 55-minute 1:1 Clinical Pilates session is $180 at the clinic, with packages of $850 for 5 sessions and $1,600 for 10. A 2:1 session is $230 for the whole session shared by two participants, with packages of $1,100 for 5 and $2,100 for 10. Each session in a package can be either Clinical Pilates or Strength & Conditioning."
 order: 2
 draft: false
 ---
@@ -107,8 +107,15 @@ If you experience new pain or significant changes in your symptoms, your physiot
 
 ## How much does clinical Pilates cost, and how do I book?
 
-A 55-minute Clinical Pilates session at our Lentor clinic is $180. Sessions run in the clinic only, not as home visits.
+A 55-minute 1:1 Clinical Pilates session at our Lentor clinic is $180, and a 2:1 session is $230. Sessions run in the clinic only, not as home visits.
 
-Clinical Pilates is available as a single a la carte session or in 5-session and 10-session packages. Your package can be used interchangeably across Clinical Pilates and [Strength & Conditioning](/services/strength-conditioning/) sessions, so your exercise programme can change as your goals do. A 5-session package is $850 and a 10-session package is $1,600.
+Clinical Pilates is available as a single a la carte session or in 5-session and 10-session packages. Your package can be used interchangeably across Clinical Pilates and [Strength & Conditioning](/services/strength-conditioning/) sessions, so your exercise programme can change as your goals do.
+
+| Clinical Pilates or Strength & Conditioning | Single session | 5 sessions | 10 sessions |
+| --- | --- | --- | --- |
+| 1:1 | $180 | $850 | $1,600 |
+| 2:1 | $230 | $1,100 | $2,100 |
+
+2:1 prices are for the entire session shared by two participants, not per participant.
 
 To book, use the Book an appointment button on this page. If you'd like help choosing between Clinical Pilates, Private Pilates and Strength & Conditioning, message us on WhatsApp.

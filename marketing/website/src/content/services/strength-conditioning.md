@@ -22,7 +22,7 @@ faqs:
   - q: "How is Strength & Conditioning different from Clinical Pilates?"
     a: "Strength & Conditioning is physiotherapist-led strength training, including resistance exercises for the upper body, lower body, back and core. Clinical Pilates is reformer or mat-based Pilates led by an AHPC-registered physiotherapist. Packages can be used across both, so your programme can adapt as your goals change."
   - q: "How much does Strength & Conditioning cost?"
-    a: "A 55-minute session is $180 at the clinic. Packs are $850 for 5 sessions and $1,600 for 10 sessions, and each session in a pack can be either Strength & Conditioning or Clinical Pilates."
+    a: "A 55-minute 1:1 session is $180 at the clinic, with packs of $850 for 5 sessions and $1,600 for 10. A 2:1 session is $230 for the whole session shared by two participants, with packs of $1,100 for 5 and $2,100 for 10. Each session in a pack can be either Strength & Conditioning or Clinical Pilates."
 order: 1
 draft: false
 ---
@@ -74,4 +74,11 @@ You will receive:
 
 ## Packages
 
-Strength & Conditioning sessions are available as a single a la carte session, or in 5-session and 10-session packs. A 5-session pack is $850 and a 10-session pack is $1,600. Your package can be used interchangeably across Strength & Conditioning and Clinical Pilates sessions, so your programme can adapt as your goals change.
+Strength & Conditioning sessions are available as a single a la carte session, or in 5-session and 10-session packs. Your package can be used interchangeably across Strength & Conditioning and Clinical Pilates sessions, so your programme can adapt as your goals change.
+
+| Strength & Conditioning or Clinical Pilates | Single session | 5 sessions | 10 sessions |
+| --- | --- | --- | --- |
+| 1:1 | $180 | $850 | $1,600 |
+| 2:1 | $230 | $1,100 | $2,100 |
+
+2:1 prices are for the entire session shared by two participants, not per participant.
