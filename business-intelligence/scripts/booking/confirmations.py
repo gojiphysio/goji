@@ -52,6 +52,7 @@ from email.message import EmailMessage
 from email.utils import formataddr, make_msgid
 from html import escape
 
+from . import formlink
 from .config import CLINICIANS, HOME_VISIT_TYPE_CODE, SERVICES, clinician_by_calendar
 from .plato import one_record
 
@@ -164,6 +165,7 @@ class Appointment:
     address: str = ""
     created_on: str = ""       # 'YYYY-MM-DD HH:MM:SS' clinic time, '' if unknown
     confirmed: bool = False    # Plato code_Right 'qK8x': don't ask them to confirm again
+    form_url: str = ""         # set by deliver when the registration form is owed
 
     @property
     def start_key(self) -> str:
@@ -288,29 +290,59 @@ def consent_signed(patient: dict) -> bool:
 
 
 def registration_link(plato, bq, appt: Appointment) -> str | None:
-    """Plato's registration form if this patient hasn't signed it, else None.
-    No profile at all: the pre-registration form (it creates one). A profile
-    without a signed consent: that profile's update form (never prereg, which
-    would duplicate them). Last night's flag first, then a live Plato read,
-    so someone who signed today isn't asked. Never raises; any doubt = no form."""
+    """Our form link (formlink.py) if this patient hasn't signed Plato's
+    registration form, else None. No profile at all: owed. A profile: owed
+    unless its consent is signed, by last night's flag or, failing that, a
+    live Plato read so someone who signed today isn't asked. Which Plato form
+    they get is decided when they tap it (form_destination). Never raises;
+    any doubt = no form."""
+    if not INTERNAL_TOKEN:
+        return None
     try:
         profile, signed = profile_and_consent(bq, appt)
         if signed:
             return None
-        if not profile:
-            path = f"/appointment/{appt.appointment_id}/prereg"
-        else:
+        if profile:
             patient = one_record(plato.get(f"/patient/{profile}", bulk=True,
                                            max_wait_s=READ_MAX_WAIT_S, _retries=0))
             if patient is None or consent_signed(patient):
                 return None
-            path = f"/patient/{profile}/updatelink"
-        r = plato.get(path, bulk=True, max_wait_s=READ_MAX_WAIT_S, _retries=0)
     except Exception as e:
-        log.warning("registration link skipped (%s): %s", appt.appointment_id, e)
+        log.warning("registration check skipped (%s): %s", appt.appointment_id, e)
         return None
+    return formlink.url(appt.appointment_id, INTERNAL_TOKEN) or None
+
+
+def form_destination(plato, appointment_id: str) -> tuple[str, str | None]:
+    """Where a tap on the form link goes: ('form', Plato URL), ('done', None)
+    when the patient has already signed, or ('gone', None) when the
+    appointment no longer exists. Raises on a Plato failure."""
+    appt = one_record(plato.get(f"/appointment/{appointment_id}", max_wait_s=READ_MAX_WAIT_S,
+                                _retries=1))
+    if not appt:
+        return "gone", None
+    pid = str(appt.get("patient_id") or "").strip()
+    if not pid:
+        r = plato.get(f"/appointment/{appointment_id}/prereg", max_wait_s=READ_MAX_WAIT_S,
+                      _retries=1)
+        url = r.get("url") if isinstance(r, dict) else None
+        if isinstance(url, str) and url.startswith("https://"):
+            return "form", url
+        # Plato refuses prereg once the appointment is linked: read it again.
+        appt = one_record(plato.get(f"/appointment/{appointment_id}",
+                                    max_wait_s=READ_MAX_WAIT_S, _retries=1)) or {}
+        pid = str(appt.get("patient_id") or "").strip()
+        if not pid:
+            raise RuntimeError("no pre-registration link")
+    patient = one_record(plato.get(f"/patient/{pid}", max_wait_s=READ_MAX_WAIT_S,
+                                   _retries=1))
+    if patient is not None and consent_signed(patient):
+        return "done", None
+    r = plato.get(f"/patient/{pid}/updatelink", max_wait_s=READ_MAX_WAIT_S, _retries=1)
     url = r.get("url") if isinstance(r, dict) else None
-    return url if isinstance(url, str) and url.startswith("https://") else None
+    if not (isinstance(url, str) and url.startswith("https://")):
+        raise RuntimeError("no profile update link")
+    return "form", url
 
 
 # --- rendering -----------------------------------------------------------------
@@ -611,6 +643,7 @@ def deliver(plato, bq, appt: Appointment, *, kind: str, sequence: int, source: s
     emailed, form, err = None, None, None
     if to:
         form = registration_link(plato, bq, appt) if kind == "booked" else None
+        appt.form_url = form or ""
         try:
             if not SMTP_PASS:
                 raise RuntimeError("SMTP not configured (no GMAIL_APP_PASSWORD)")
@@ -620,6 +653,10 @@ def deliver(plato, bq, appt: Appointment, *, kind: str, sequence: int, source: s
         except Exception as e:
             log.warning("confirmation email failed (%s): %s", appt.appointment_id, e)
             emailed, err = False, "email failed: " + str(e).replace(to, "<to>")
+    if whatsapp and kind == "booked" and not to:
+        # No email went out, so the form check hasn't run: the WhatsApp
+        # confirmation still needs to know whether to carry the form button.
+        appt.form_url = registration_link(plato, bq, appt) or ""
     whatsapped = bool(whatsapp) and notify_whatsapp(appt)
     if emailed or whatsapped:
         status = delivered_status()
@@ -627,7 +664,7 @@ def deliver(plato, bq, appt: Appointment, *, kind: str, sequence: int, source: s
         status = "failed" if emailed is False else "skipped_no_email"
     channel = ("both" if emailed and whatsapped else "email" if emailed
                else "whatsapp" if whatsapped else "none")
-    notes = [n for n in (err, "registration form" if form and emailed else None) if n]
+    notes = [n for n in (err, "registration form" if appt.form_url else None) if n]
     record(bq, appt, status=status, kind=kind, sequence=sequence, source=source,
            channel=channel, note="; ".join(notes) or None)
     log.info("confirmation %s (%s, %s, %s, %s)", status, appt.appointment_id, kind, source,
@@ -652,7 +689,10 @@ def notify_whatsapp(appt: Appointment) -> bool:
     body = {"phone": appt.phone, "reference": appt.reference, "service": appt.service,
             "date": appt.start.date().isoformat(), "time": appt.start.strftime("%H:%M"),
             "clinician_name": appt.clinician, "source": "staff",
-            "first_name": appt.first_name if appt.name else "", "send_template": True}
+            "first_name": appt.first_name if appt.name else "", "send_template": True,
+            # The registration-form button, when the form is still owed.
+            "form_token": formlink.token(appt.appointment_id, INTERNAL_TOKEN)
+            if appt.form_url else ""}
     try:
         r = requests.post(WA_AGENT_URL.rstrip("/") + "/internal/booking-confirmed", json=body,
                           timeout=WA_CALLBACK_TIMEOUT_S,
@@ -673,7 +713,12 @@ def on_booking(plato, bq, result: dict, draft: dict, *, source: str) -> str | No
             log.warning("confirmation: booking result has no visit id (%s)", result.get("reference"))
             return None
         with _send_lock:
-            return deliver(plato, bq, appt, kind="booked", sequence=0, source=source)
+            status = deliver(plato, bq, appt, kind="booked", sequence=0, source=source)
+        # The WhatsApp callback (app._notify_wa_agent) carries the form button
+        # when the email found the form owed.
+        if appt.form_url:
+            result["form_token"] = formlink.token(appt.appointment_id, INTERNAL_TOKEN)
+        return status
     except Exception as e:
         log.warning("confirmation for booking %s failed: %s", result.get("reference"), e)
         return None

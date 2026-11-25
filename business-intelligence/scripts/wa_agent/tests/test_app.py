@@ -1208,3 +1208,55 @@ def test_a_failed_cancel_tells_chris_and_the_customer(env, monkeypatch):
     post(client, inbound(text="cancel friday pls"))
     assert calls and notes and notes[-1][0] == "escalated"
     assert "within 24 hours" in app_mod.wa.sent[-1][1]
+
+
+FORM_TOKEN = "4b1e9c0d2a7f4e3b8c6d5a4f3e2d1c0b.a1b2c3d4e5f6a7b8c9d0"
+
+
+def _confirm_body(**kw):
+    return {"phone": "+6590003333", "reference": "GOJI-3", "service": "Physiotherapy",
+            "date": "2026-11-27", "time": "19:00", "clinician_name": "Kristy Ng",
+            "source": "web", "first_name": "Mei", "send_template": True, **kw}
+
+
+def test_owed_form_uses_the_form_template_once_approved(env, monkeypatch):
+    client, rec, _ = env
+    monkeypatch.setattr(config, "INTERNAL_TOKEN", "t")
+    monkeypatch.setattr(config, "CONFIRMATIONS", True)
+    monkeypatch.setattr(config, "CONFIRM_FORM_TEMPLATE", "goji_appointment_confirmed_form")
+    sent = []
+    app_mod.wa.send_template = lambda wa_id, name, params, language="en", url_buttons=None: \
+        sent.append((name, url_buttons)) or "wamid.f1"
+    client.post("/internal/booking-confirmed", headers={"X-Internal-Token": "t"},
+                json=_confirm_body(form_token=FORM_TOKEN))
+    assert sent == [("goji_appointment_confirmed_form", {0: FORM_TOKEN})]
+
+
+@pytest.mark.parametrize("form_template, token", [
+    ("", FORM_TOKEN),                                   # form template not approved yet
+    ("goji_appointment_confirmed_form", ""),            # nothing owed
+    ("goji_appointment_confirmed_form", "../evil"),     # not a token
+])
+def test_plain_template_otherwise(env, monkeypatch, form_template, token):
+    client, rec, _ = env
+    monkeypatch.setattr(config, "INTERNAL_TOKEN", "t")
+    monkeypatch.setattr(config, "CONFIRMATIONS", True)
+    monkeypatch.setattr(config, "CONFIRM_FORM_TEMPLATE", form_template)
+    sent = []
+    app_mod.wa.send_template = lambda wa_id, name, params, language="en", url_buttons=None: \
+        sent.append((name, url_buttons)) or "wamid.f2"
+    client.post("/internal/booking-confirmed", headers={"X-Internal-Token": "t"},
+                json=_confirm_body(form_token=token))
+    assert sent == [("goji_appointment_confirmed", None)]
+
+
+def test_send_template_url_button_payload():
+    from wa_agent.whatsapp import WhatsAppClient
+    posted = []
+    c = WhatsAppClient.__new__(WhatsAppClient)
+    c._post = lambda body: posted.append(body) or {"messages": [{"id": "x"}]}
+    c.send_template("6591234567", "goji_appointment_confirmed_form", ["a", "b", "c", "d"],
+                    url_buttons={0: FORM_TOKEN})
+    comps = posted[0]["template"]["components"]
+    assert comps[1] == {"type": "button", "sub_type": "url", "index": "0",
+                        "parameters": [{"type": "text", "text": FORM_TOKEN}]}

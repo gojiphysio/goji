@@ -197,18 +197,23 @@ registration form on a **first visit only**, and a calendar invite.
 - **Calendar invite.** `METHOD:REQUEST` inline plus an `.ics` attachment, clinic
   wall clock with `TZID=Asia/Singapore`, no alarm, `RSVP=FALSE` (the clinic
   wants the entry in the patient's calendar and no calendar notifications).
-- **Registration form.** Shown until the patient has signed Plato's "Clinic
-  Consent Form", the last step of Plato's registration form, which Plato
-  stores on the profile (`others.consents`). That record is the flag, not a
-  guess from other fields: the nightly import writes it to
+- **Registration form.** Asked for until the patient has signed Plato's
+  "Clinic Consent Form", the last step of Plato's registration form, stored on
+  the profile (`others.consents`): the nightly import writes it to
   `dim_patient.consent_signed_at`, and a live Plato read confirms before
   asking. No profile at all (none on the appointment, none matching the phone
-  or email): the pre-registration link (`GET appointment/{id}/prereg`). A
-  profile without the signed consent: its update form
-  (`GET patient/{id}/updatelink`), never prereg, which would duplicate them.
-  The 48-hour reminder (`reminders/registration.py`) asks again on the same
+  or email) = owed. Every message carries one stable link,
+  `booking.gojiphysio.com/form/<appointment id>.<signature>` (`formlink.py`,
+  signed with the internal token so ids can't be walked). Tapping it runs
+  `form_destination`: no profile -> Plato's pre-registration form, a profile
+  -> its update form, already signed -> a "you're all set" page. WhatsApp's
+  URL buttons take one variable at the end of a fixed URL, which is why the
+  link is ours and not Plato's. The 48-hour reminder asks again on the same
   rule.
-- **WhatsApp.** The same switch starts the WhatsApp confirmation: the
+- **WhatsApp.** A patient who owes the form gets
+  `goji_appointment_confirmed_form` (adds a "Registration form" button) once
+  Meta approves it and the agent's `WA_AGENT_CONFIRM_FORM_TEMPLATE` is set;
+  the callback carries `form_token`. The same switch starts the WhatsApp confirmation: the
   booking-confirmed callback to the assistant carries `send_template: true`
   only in live mode. Front-desk bookings, which no other path tells the
   assistant about, are handed to it from here (`notify_whatsapp`), so a

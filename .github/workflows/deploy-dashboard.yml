@@ -221,13 +221,14 @@ jobs:
           # to email-only, and says so in the digest, if they aren't).
           wa="${{ vars.WA_REMINDERS_ENABLED || '1' }}"
           # PLATO_API_KEY: the registration-form check (reminders/registration.py).
-          secrets="GMAIL_APP_PASSWORD=gmail-app-password:latest,PLATO_API_KEY=plato-api-key:latest"
+          # INTERNAL_TOKEN: signs the registration-form link, as goji-booking does.
+          secrets="GMAIL_APP_PASSWORD=gmail-app-password:latest,PLATO_API_KEY=plato-api-key:latest,INTERNAL_TOKEN=wa-agent-internal-token:latest"
           if [ "${wa}" = "1" ]; then secrets="${secrets},WA_TOKEN=wa-token:latest"; fi
           echo "Deploying appointment-reminders with DRY_RUN=${dry} WA_REMINDERS_ENABLED=${wa}"
           gcloud run jobs deploy appointment-reminders \
             --source . --region "${REGION}" --project "${PROJECT}" \
             --service-account "${DASHBOARD_SA}" \
-            --set-env-vars="BQ_PROJECT=${PROJECT},BQ_DATASET=marts,DRY_RUN=${dry},WA_REMINDERS_ENABLED=${wa},WA_PHONE_NUMBER_ID=${{ vars.WA_PHONE_NUMBER_ID }},WA_API_BASE=${{ vars.WA_API_BASE }}" \
+            --set-env-vars="BQ_PROJECT=${PROJECT},BQ_DATASET=marts,DRY_RUN=${dry},WA_REMINDERS_ENABLED=${wa},WA_PHONE_NUMBER_ID=${{ vars.WA_PHONE_NUMBER_ID }},WA_API_BASE=${{ vars.WA_API_BASE }},WA_REMINDER_FORM_TEMPLATE=${{ vars.WA_REMINDER_FORM_TEMPLATE }}" \
             --set-secrets="${secrets}" \
             --max-retries=0 \
             --quiet

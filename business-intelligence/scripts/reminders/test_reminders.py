@@ -1105,33 +1105,34 @@ SIGNED = {"others": {"consents": [{"title": "Clinic Consent Form", "name": "cons
                                     "created_on": 1793000000}]}}
 
 
-def test_no_profile_gets_the_prereg_form():
+LINK = "https://booking.gojiphysio.com/form/"
+
+
+def test_no_profile_owes_the_form_without_a_plato_read():
     p = _plato()
-    url = registration.form_link(p, {"appointment_id": "a1", "profile_id": None,
-                                     "consent_signed": False})
-    assert url.endswith("/prereg/x") and p.http.paths == ["appointment/a1/prereg"]
+    url = registration.form_link(p, {"appointment_id": "a1b2c3d4e5f6a7b8", "profile_id": None,
+                                     "consent_signed": False}, secret="s")
+    assert url.startswith(LINK + "a1b2c3d4e5f6a7b8.") and p.http.paths == []
 
 
-def test_unsigned_profile_gets_its_update_form():
+def test_unsigned_profile_owes_the_form():
     p = _plato(patient={"name": "Jo", "created_by": "api"})
-    url = registration.form_link(p, {"appointment_id": "a1", "profile_id": "p1",
-                                     "consent_signed": False})
-    assert url.endswith("/regupdate/x")
-    assert p.http.paths == ["patient/p1", "patient/p1/updatelink"]
+    assert registration.form_link(p, {"appointment_id": "a1", "profile_id": "p1",
+                                      "consent_signed": False}, secret="s")
+    assert p.http.paths == ["patient/p1"]
 
 
 def test_signed_last_night_means_no_read_and_no_form():
     p = _plato()
     assert registration.form_link(p, {"appointment_id": "a1", "profile_id": "p1",
-                                      "consent_signed": True}) is None
+                                      "consent_signed": True}, secret="s") is None
     assert p.http.paths == []
 
 
 def test_signed_since_last_night_is_caught_live():
     p = _plato(patient=SIGNED)
     assert registration.form_link(p, {"appointment_id": "a1", "profile_id": "p1",
-                                      "consent_signed": False}) is None
-    assert p.http.paths == ["patient/p1"]
+                                      "consent_signed": False}, secret="s") is None
 
 
 @pytest.mark.parametrize("patient", [
@@ -1143,16 +1144,57 @@ def test_anything_but_a_signed_clinic_consent_is_unsigned(patient):
     assert not registration.consent_signed(patient)
 
 
-def test_plato_failure_means_no_form_line():
-    assert registration.form_link(_plato(fail=True), {"appointment_id": "a1",
-                                                      "consent_signed": False}) is None
+def test_plato_failure_or_no_secret_means_no_form():
+    row = {"appointment_id": "a1", "profile_id": "p1", "consent_signed": False}
+    assert registration.form_link(_plato(fail=True), row, secret="s") is None
+    assert registration.form_link(_plato(), {**row, "profile_id": None}, secret="") is None
 
 
-def test_read_cap(monkeypatch):
-    monkeypatch.setattr(registration, "MAX_READS", 1)
-    p = _plato()
-    row = {"appointment_id": "a1", "consent_signed": False}
-    assert registration.form_link(p, row) and registration.form_link(p, row) is None
+def test_attach_sets_link_and_token(monkeypatch):
+    monkeypatch.setattr(registration, "FORM_SECRET", "s")
+    rows = [{"appointment_id": "a1b2c3d4e5f6a7b8", "profile_id": None, "consent_signed": False},
+            {"appointment_id": "b2", "profile_id": "p", "consent_signed": True}]
+    registration.attach(rows, _plato())
+    assert rows[0]["form_url"] == LINK + rows[0]["form_token"]
+    assert rows[1]["form_url"] is None and rows[1]["form_token"] == ""
+
+
+def test_form_token_matches_goji_booking():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("formlink", "../booking/formlink.py")
+    formlink = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(formlink)
+    aid = "4b1e9c0d2a7f4e3b8c6d5a4f3e2d1c0b"
+    assert registration.form_token(aid, "sec") == formlink.token(aid, "sec")
+    assert formlink.verify(registration.form_token(aid, "sec"), "sec") == aid
+
+
+def test_whatsapp_uses_the_form_template_when_owed_and_approved(monkeypatch):
+    monkeypatch.setattr(wa, "FORM_TEMPLATE", "goji_appointment_reminder_form")
+    body = wa.build_payload("6591234567", ["a", "b", "c", "d"], "a1", form_token="a1.tok")
+    t = body["template"]
+    assert t["name"] == "goji_appointment_reminder_form"
+    assert t["components"][-1] == {"type": "button", "sub_type": "url", "index": "2",
+                                   "parameters": [{"type": "text", "text": "a1.tok"}]}
+    assert [c["index"] for c in t["components"][1:3]] == ["0", "1"]  # Confirm, Reschedule
+
+
+def test_whatsapp_plain_template_until_approved_or_not_owed(monkeypatch):
+    monkeypatch.setattr(wa, "FORM_TEMPLATE", "")
+    assert wa.build_payload("659", ["a"], "a1", form_token="a1.tok")["template"]["name"] == \
+        wa.TEMPLATE
+    monkeypatch.setattr(wa, "FORM_TEMPLATE", "goji_appointment_reminder_form")
+    assert wa.build_payload("659", ["a"], "a1")["template"]["name"] == wa.TEMPLATE
+
+
+def test_dispatch_passes_the_form_token_to_whatsapp():
+    calls = []
+    main.dispatch([{**_appt("a1"), "form_token": "a1.tok"}, _appt("a2", time="11:00")], DAY,
+                  dry_run=False, wa_enabled=True,
+                  send_whatsapp=lambda to, params, ref, form_token="": calls.append(
+                      (ref, form_token)) or "wamid.x",
+                  send_email=EmailSpy())
+    assert calls == [("a1", "a1.tok"), ("a2", "")]
 
 
 def test_consent_title_matches_the_nightly_import():

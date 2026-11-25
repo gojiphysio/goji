@@ -47,6 +47,7 @@ import hmac
 import json
 from datetime import datetime
 import logging
+import re
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
@@ -1458,6 +1459,9 @@ def morning_summary():
                    | {"staff_pinged": pinged})
 
 
+_FORM_TOKEN = re.compile(r"^[0-9a-f]{16,64}\.[0-9a-f]{20}$")
+
+
 def _send_confirmation_template(client, wa_id: str, b: dict) -> str:
     """A booking made outside this chat (website or front desk) for someone
     outside the 24-hour window: the approved confirmation template (the
@@ -1471,8 +1475,15 @@ def _send_confirmation_template(client, wa_id: str, b: dict) -> str:
     when = booking_client._when(b["date"], b["time"])
     params = [b.get("first_name") or "there", (b.get("service") or "physiotherapy").lower(),
               when, (b.get("clinician_name") or "our team").split(" ")[0]]
+    # Still owes the registration form: the version with a form button, once
+    # approved. The token is goji-booking's signed form link (booking/formlink.py).
+    form = str(b.get("form_token") or "")
+    name, buttons = config.CONFIRM_TEMPLATE, None
+    if config.CONFIRM_FORM_TEMPLATE and _FORM_TOKEN.match(form):
+        name, buttons = config.CONFIRM_FORM_TEMPLATE, {0: form}
     try:
-        msg_id = client.send_template(wa_id, config.CONFIRM_TEMPLATE, params)
+        msg_id = client.send_template(wa_id, name, params, url_buttons=buttons) if buttons \
+            else client.send_template(wa_id, name, params)
     except Exception as e:
         log.warning("confirmation template failed: %s", e)
         events.record("confirmation_failed", wa_id, reason=type(e).__name__)

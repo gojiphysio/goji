@@ -498,6 +498,14 @@ and Reschedule quick replies), `goji_referral_received`, `goji_staff_alert_v2`.
   `gcloud run services update goji-wa-agent --update-env-vars
   WA_AGENT_CONFIRM_TEMPLATE=goji_appointment_confirmed_v2` (the deploy carries
   env vars forward). Same four parameters, so no code change.
+- **Registration-form versions pending:** `goji_appointment_confirmed_form`
+  and `goji_appointment_reminder_form` (submitted 25 Nov 2026) add a
+  "Registration form" URL button for patients who haven't filled in Plato's
+  form; its URL ends in goji-booking's signed form token. Once approved: set
+  `WA_AGENT_CONFIRM_FORM_TEMPLATE=goji_appointment_confirmed_form` on the
+  agent (`gcloud run services update ... --update-env-vars`) and the repo
+  variable `WA_REMINDER_FORM_TEMPLATE=goji_appointment_reminder_form` (read at
+  the reminder job's deploy).
 - **Confirmations** go live with goji-booking's confirmation email: goji-booking
   puts `send_template: true` on the booking-confirmed callback only when
   `CONFIRMATIONS_MODE=live`, and the agent sends the template only then

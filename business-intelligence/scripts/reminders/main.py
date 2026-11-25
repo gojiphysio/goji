@@ -404,7 +404,9 @@ def dispatch(rows: list[dict], day: str, *, dry_run: bool, wa_enabled: bool,
             wa_ok[ref] = None
             continue
         try:
-            wa_ok[ref] = send_whatsapp(to, params, ref)
+            # The registration-form button, when the form is still owed.
+            wa_ok[ref] = (send_whatsapp(to, params, ref, form_token=r["form_token"])
+                          if r.get("form_token") else send_whatsapp(to, params, ref))
             sent.append(summary)
         except Exception as e:
             log.warning("whatsapp for appointment %s failed: %s", ref, scrub(str(e)))

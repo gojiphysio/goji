@@ -246,13 +246,18 @@ class WhatsAppClient:
         return ((resp.get("messages") or [{}])[0]).get("id", "")
 
     def send_template(self, wa_id: str, name: str, params: list[str],
-                      language: str = "en") -> str:
+                      language: str = "en", url_buttons: dict[int, str] | None = None) -> str:
         """Send an approved template (the only way to message someone outside
-        the 24-hour window). Body parameters in order. Returns the message id."""
+        the 24-hour window). Body parameters in order; `url_buttons` maps a URL
+        button's index to the text filling its {{1}}. Returns the message id."""
+        components = [{"type": "body", "parameters": [
+            {"type": "text", "text": p} for p in params]}]
+        for index, text in sorted((url_buttons or {}).items()):
+            components.append({"type": "button", "sub_type": "url", "index": str(index),
+                               "parameters": [{"type": "text", "text": text}]})
         resp = self._post({"messaging_product": "whatsapp", "to": wa_id, "type": "template",
                            "template": {"name": name, "language": {"code": language},
-                                        "components": [{"type": "body", "parameters": [
-                                            {"type": "text", "text": p} for p in params]}]}})
+                                        "components": components}})
         return ((resp.get("messages") or [{}])[0]).get("id", "")
 
     def download_media(self, media_id: str) -> tuple[bytes, str]:

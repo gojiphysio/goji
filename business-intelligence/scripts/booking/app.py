@@ -28,14 +28,14 @@ import uuid
 from datetime import date, datetime, timedelta, timezone
 
 import requests
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, redirect, request
 
 from .availability import SGT, derive_availability, derive_available_days
 from .booking import (BookingError, cancel_appointment, confirm_appointment,
                       create_booking, reschedule_appointment)
 from .config import CLINICIANS, MAX_ADVANCE_DAYS, SAME_DAY_LEAD_MINUTES, SERVICES
 from .plato import PlatoBusy, PlatoClient, PlatoError, PlatoThrottled, one_record
-from . import confirmations, mailer, patient_contacts
+from . import confirmations, formlink, mailer, patient_contacts
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger("goji-booking")
@@ -248,6 +248,38 @@ def refresh_snapshot():
     resp = _refresh_snapshot()
     _confirmations_sweep()
     return resp
+
+
+_FORM_PAGE = """<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>Goji Physiotherapy</title></head>
+<body style="font-family:Arial,Helvetica,sans-serif;max-width:480px;margin:48px auto;padding:0 20px;color:#222;line-height:1.5">
+<h1 style="font-size:20px;color:#1f5f4a">Goji Physiotherapy</h1><p>{message}</p>
+<p>Questions? <a href="https://go.gojiphysio.com/confirm-wa">WhatsApp us on +65 8377 0401</a>.</p></body></html>"""
+
+
+@app.route("/form/<token>")
+def registration_form(token: str):
+    """The registration-form link in every booking message (formlink.py):
+    forwards to the right Plato form for this appointment, worked out now, so
+    the link never goes stale. Already registered: a "you're all set" page."""
+    aid = formlink.verify(token, INTERNAL_TOKEN)
+    if not aid:
+        return _FORM_PAGE.format(message="This link isn't valid. Please WhatsApp us and "
+                                         "we'll send you the registration form."), 404
+    try:
+        state, url = confirmations.form_destination(plato(), aid)
+    except Exception as e:
+        log.warning("registration form link failed: %s", e)
+        return _FORM_PAGE.format(message="We couldn't open your registration form just now. "
+                                         "Please try again in a minute."), 503
+    log.info("registration form link opened (%s)", state)
+    if state == "form":
+        return redirect(url, 302)
+    if state == "done":
+        return _FORM_PAGE.format(message="You're all set: we already have your registration "
+                                         "form. See you soon!")
+    return _FORM_PAGE.format(message="We couldn't find this appointment. If you still need "
+                                     "the registration form, please WhatsApp us."), 404
 
 
 def _confirmations_sweep() -> None:
@@ -639,6 +671,8 @@ def _notify_wa_agent(result: dict, draft: dict, source: str) -> None:
         # The go-ahead for the WhatsApp confirmation template: only once the
         # confirmation email is live, so both channels start together.
         "send_template": confirmations.mode() == "live",
+        # The registration-form button (formlink.py), when the form is owed.
+        "form_token": result.get("form_token", ""),
     }
 
     def _post():

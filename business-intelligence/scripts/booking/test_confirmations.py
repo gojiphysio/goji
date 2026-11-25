@@ -80,6 +80,7 @@ def sent(monkeypatch):
     monkeypatch.setattr(c, "_send", out.append)
     monkeypatch.setenv("CONFIRMATIONS_TEST_TO", "inbox@example.com")
     monkeypatch.setenv("CONFIRMATIONS_SINCE", "2026-11-26 08:00")
+    monkeypatch.setattr(c, "INTERNAL_TOKEN", "tok")  # signs the form link
     return out
 
 
@@ -268,29 +269,37 @@ SIGNED = {"others": {"consents": [{"title": "Clinic Consent Form", "name": "cons
                                     "created_on": 1793000000}]}}
 
 
-def test_no_profile_gets_the_prereg_form(sent, monkeypatch):
+FORM = "https://booking.gojiphysio.com/form/"
+
+
+def test_no_profile_gets_the_form_link_without_a_plato_read(sent, monkeypatch):
     live(monkeypatch)
     plato = FakePlato()
-    c.on_booking(plato, FakeBQ(profile=None), RESULT, DRAFT, source="web")
-    assert plato.gets == ["/appointment/abcdef123456/prereg"]
-    assert "prereg/abc/def" in _body(sent[0])
+    result = dict(RESULT)
+    c.on_booking(plato, FakeBQ(profile=None), result, DRAFT, source="web")
+    assert plato.gets == []
+    assert FORM + "abcdef123456." in _body(sent[0])
+    # The WhatsApp callback carries the same link's token.
+    assert result["form_token"].startswith("abcdef123456.")
 
 
-def test_unsigned_profile_gets_its_update_form(sent, monkeypatch):
+def test_unsigned_profile_gets_the_form_link(sent, monkeypatch):
     live(monkeypatch)
     plato = FakePlato(patient={"name": "Sarah Tan", "created_by": "api"})
     c.on_booking(plato, FakeBQ(profile=("p123", False)),
                  {**RESULT, "patient_id": "p123", "patient_created": True}, DRAFT,
                  source="whatsapp")
-    assert plato.gets == ["/patient/p123", "/patient/p123/updatelink"]
-    assert "regupdate" in _body(sent[0])
+    assert plato.gets == ["/patient/p123"]
+    assert FORM in _body(sent[0])
 
 
 def test_signed_patient_gets_no_form_and_no_plato_read(sent, monkeypatch):
     live(monkeypatch)
     plato = FakePlato()
-    c.on_booking(plato, FakeBQ(profile=("p9", True)), RESULT, DRAFT, source="web")
+    result = dict(RESULT)
+    c.on_booking(plato, FakeBQ(profile=("p9", True)), result, DRAFT, source="web")
     assert plato.gets == [] and "registration form" not in _body(sent[0])
+    assert "form_token" not in result
 
 
 def test_signed_since_last_night_is_caught_live(sent, monkeypatch):
@@ -298,6 +307,13 @@ def test_signed_since_last_night_is_caught_live(sent, monkeypatch):
     plato = FakePlato(patient=SIGNED)
     c.on_booking(plato, FakeBQ(profile=("p9", False)), RESULT, DRAFT, source="web")
     assert plato.gets == ["/patient/p9"] and "registration form" not in _body(sent[0])
+
+
+def test_no_secret_means_no_form(sent, monkeypatch):
+    live(monkeypatch)
+    monkeypatch.setattr(c, "INTERNAL_TOKEN", "")
+    c.on_booking(FakePlato(), FakeBQ(profile=None), RESULT, DRAFT, source="web")
+    assert "registration form" not in _body(sent[0])
 
 
 def test_lookup_failure_means_no_form(sent, monkeypatch):
@@ -533,3 +549,61 @@ def test_web_callback_carries_the_go_ahead_only_when_live(monkeypatch):
                             headers=None: posts.append(json) or FakeResp())
         app_mod._notify_wa_agent({"reference": "GOJI-1"}, {"phone": "+6591234567"}, "web")
         assert posts[0]["send_template"] is expected, mode
+
+
+# --- the form link and where it goes --------------------------------------------
+
+from booking import formlink
+
+
+def test_form_token_round_trip_and_tamper():
+    t = formlink.token("4b1e9c0d2a7f4e3b8c6d5a4f3e2d1c0b", "sec")
+    assert formlink.verify(t, "sec") == "4b1e9c0d2a7f4e3b8c6d5a4f3e2d1c0b"
+    assert formlink.verify(t, "other") is None
+    assert formlink.verify("4b1e9c0d2a7f4e3b8c6d5a4f3e2d1c0c" + t[32:], "sec") is None
+    assert formlink.verify("../../etc", "sec") is None and formlink.token("a", "") == ""
+
+
+class DestPlato:
+    def __init__(self, appt, patient=None, prereg=True):
+        self.appt, self.patient, self.prereg = appt, patient or {}, prereg
+
+    def get(self, path, **kw):
+        if path.endswith("/prereg"):
+            return {"url": "https://clinic.platomedical.com/prereg/a/b"} if self.prereg else \
+                {"error": "Appointment is already linked with a patient profile."}
+        if path.endswith("/updatelink"):
+            return {"url": "https://clinic.platomedical.com/secure/regupdate/a/b"}
+        if path.startswith("/patient/"):
+            return [self.patient]
+        return [self.appt] if self.appt else []
+
+
+def test_destination_no_profile_is_prereg():
+    assert c.form_destination(DestPlato({"_id": "a1", "patient_id": ""}), "a1") == (
+        "form", "https://clinic.platomedical.com/prereg/a/b")
+
+
+def test_destination_profile_is_its_update_form_or_done():
+    assert c.form_destination(DestPlato({"_id": "a1", "patient_id": "p1"}), "a1")[1] \
+        .endswith("/regupdate/a/b")
+    assert c.form_destination(DestPlato({"_id": "a1", "patient_id": "p1"}, SIGNED), "a1") == (
+        "done", None)
+
+
+def test_destination_gone():
+    assert c.form_destination(DestPlato(None), "a1") == ("gone", None)
+
+
+def test_form_route(monkeypatch):
+    monkeypatch.setattr(app_mod, "INTERNAL_TOKEN", "tok")
+    client = app_mod.app.test_client()
+    t = formlink.token("4b1e9c0d2a7f4e3b8c6d5a4f3e2d1c0b", "tok")
+    monkeypatch.setattr(app_mod, "plato", lambda: DestPlato({"_id": "x", "patient_id": ""}))
+    r = client.get("/form/" + t)
+    assert r.status_code == 302 and r.headers["Location"].endswith("/prereg/a/b")
+    monkeypatch.setattr(app_mod, "plato", lambda: DestPlato({"_id": "x", "patient_id": "p"},
+                                                            SIGNED))
+    r = client.get("/form/" + t)
+    assert r.status_code == 200 and b"all set" in r.data
+    assert client.get("/form/" + t[:-1] + "0").status_code == 404

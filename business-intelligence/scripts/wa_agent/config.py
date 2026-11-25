@@ -237,6 +237,12 @@ TEST_SHOW_DRAFTS = os.environ.get("WA_AGENT_TEST_SHOW_DRAFTS", "") == "1"
 # together. This flag stays as the agent-side off switch.
 CONFIRMATIONS = _env_bool("WA_AGENT_CONFIRMATIONS", True)
 CONFIRM_TEMPLATE = os.environ.get("WA_AGENT_CONFIRM_TEMPLATE", "goji_appointment_confirmed")
+# The same confirmation with a "Registration form" button (button 0, its URL
+# ends in goji-booking's form token), for a patient who still owes Plato's
+# registration form. Empty = off: set it to goji_appointment_confirmed_form
+# once Meta approves it (submitted 25 Nov 2026). Until then those patients get
+# CONFIRM_TEMPLATE, and the form link in their email.
+CONFIRM_FORM_TEMPLATE = os.environ.get("WA_AGENT_CONFIRM_FORM_TEMPLATE", "")
 # A long reply may go out as 2 WhatsApp messages, the way Chris writes (owner,
 # 24 Nov 2026). Capped because Meta bills each delivered service message past
 # 1,000 a month per number (since 1 Oct 2026); a reply under SPLIT_MIN_WORDS is
