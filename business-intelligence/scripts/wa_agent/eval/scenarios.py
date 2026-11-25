@@ -183,6 +183,17 @@ def build_couple_pick():
             f"{_nice(a).split(', ')[0]} {_nice(a).split(', ')[1]} please"]
 
 
+def build_declined_times():
+    fri = _next_weekday(4)
+    return [f"Hello, do you have a physio slot this Friday morning?",
+            ("agent", f"Friday morning is fully booked, I'm afraid. The earliest times that day "
+                      f"are in the afternoon:\n* Fri {fri.day} {fri:%b}, 2:00pm with Kristy\n"
+                      f"* Fri {fri.day} {fri:%b}, 3:00pm with Kristy\n\n"
+                      "Would one of these work for you?"),
+            "Oh that won't work for me, it's ok I'll check in again when I have another free "
+            "day. Thanks!"]
+
+
 def build_move_pick():
     a, b = _open_slots(2, min_days=2)
     return ["Can I move my appointment to another day?",
@@ -397,6 +408,21 @@ SCENARIOS: list[Scenario] = [
       patient=SARAH, customer_name="Sarah",
       note="picking an offered time is the yes: no second 'Shall I move it?'",
       build=build_move_pick),
+    S("declined_times_one_more_offer", "booking",
+      ["(built at run time)"],
+      E(intents=("availability", "booking"), decisions=("send",), max_questions=1,
+        must=(r"\d(:\d\d)?\s?am\b",),
+        must_not=(r"(drop|send) us a message whenever", r"whenever you('re| are) (free|ready)")),
+      note="turned down the offered times: one more like-for-like offer (mornings) before "
+           "letting them go (owner, 25 Nov 2026)",
+      build=build_declined_times),
+    S("declined_times_with_a_reason", "booking",
+      ["Hi, any physio slots this week?",
+       ("agent", "This week I have Thu, 2:00pm with Kristy or Fri, 11:00am with Claire. "
+                 "Would one of these work?"),
+       "Actually I'm flying out tomorrow for three weeks, I'll message when I'm back!"],
+      E(decisions=("send",), must_not=(r"\d(:\d\d)?\s?(am|pm)\b",), max_questions=1),
+      note="a clear reason they can't book now: close warmly, no more times"),
     S("booking_pick_confirms", "booking",
       ["(built at run time from live open slots)"],
       E(intents=("booking",), confirm_booking=True, must_not=(r"shall i", r"would you like me to")),
