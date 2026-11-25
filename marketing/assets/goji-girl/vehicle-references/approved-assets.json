@@ -1,0 +1,17 @@
+{
+  "status": "user-approved",
+  "approved_on": "2026-11-25",
+  "intended_use": "Recurring appearance references for the next Goji GTA episode",
+  "assets": [
+    {
+      "file": "confront-cab-v3.png",
+      "plate": "S7K9X2Q",
+      "sha256": "f6ef2afb9d18d83c4c9e9b626256c056c50e2688ebbd0f3b77578d2d878ddee9"
+    },
+    {
+      "file": "grip-car-v2.png",
+      "plate": "S4N8V6R",
+      "sha256": "444691b27ab5a14748bb92caf93efbb168ce95e947fb64945760035e3dd27133"
+    }
+  ]
+}

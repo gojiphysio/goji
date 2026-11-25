@@ -1,6 +1,6 @@
 # Singapore vehicle references — CONFRONT / GRIP
 
-Generated 25 November 2026 using the built-in image-generation tool. These are proposed vehicle appearance references for the Goji GTA series, matching the accepted SOS Transit bus look; they are not rigged 3D assets or motion/geometry validation.
+Generated 25 November 2026 using the built-in image-generation tool. **Approved by the user on 25 November 2026 for reuse in the next episode.** These are the selected vehicle appearance references for the Goji GTA series, matching the accepted SOS Transit bus look; they are not rigged 3D assets or motion/geometry validation.
 
 ## CONFRONT cab
 
@@ -25,7 +25,8 @@ White compact liftback with green door/rear-quarter wrap and white double-line G
 - Match angular game geometry, painted wear, subdued reflections and the tropical parking-lot setting.
 - Singapore vehicles use right-hand driving positions. Before door-entry or driving animation, confirm seat/door anchors in the 3D asset; a single still is not a geometry test.
 - Visual review of current revisions: real maker emblems removed from grilles and wheel caps; GRIP fender badge removed; both plates match the recorded strings. Full vehicles, accepted service branding and common rendering style remain visible.
-- User approved the 2006-style Confront logo direction, then requested manufacturer anonymisation and jumbled plates starting with S. The current revisions implement that request; no episode frames were replaced.
+- User approved the completed CONFRONT v3 and GRIP v2 references on 25 November 2026 and requested that they be saved for the next episode. Use these versions as the vehicle appearance masters; no episode frames were replaced.
+- [Approved asset manifest](approved-assets.json) records the selected files, plates and SHA-256 hashes.
 - Use unbadged generic vehicle descriptions in future generation, not real manufacturer/model names. Keep the same fictional plates across reverse views and motion.
 - Full generation prompts: [prompts.json](prompts.json).
 
