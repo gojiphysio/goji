@@ -223,3 +223,4 @@ def test_an_email_on_file_goes_to_the_booking_never_to_the_model():
     assert "an email is on file" in line and "sarah@example.com" not in line
     family = {**p, "records": [*p["records"], {"id": "K1", "name": "Lim Ethan", "email": ""}]}
     assert "email is on file" not in tools.describe_patient(family)        # not for everyone
+    assert "no email on file" in tools.describe_patient(family)

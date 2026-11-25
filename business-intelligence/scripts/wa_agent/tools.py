@@ -426,6 +426,8 @@ def describe_patient(p: dict) -> str:
     records = p.get("records") or []
     if records and all((r.get("email") or "").strip() for r in records):
         bits.append("an email is on file (no need to ask for one when booking for this patient)")
+    elif records:
+        bits.append("no email on file (ask for one when booking)")
     if p.get("waiver_used"):
         bits.append("first-time late-change waiver already used (tagged in Plato)")
     return "; ".join(bits)
