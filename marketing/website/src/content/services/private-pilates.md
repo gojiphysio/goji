@@ -24,7 +24,7 @@ faqs:
   - q: "Can I do Private Pilates with a friend?"
     a: "Yes. Choose a private 2:1 session to exercise alongside a friend, partner or family member, or a 1:1 session for individual attention."
   - q: "How much does Private Pilates cost?"
-    a: "Private Pilates is currently offered at introductory prices, and the intro offer ends on 30 Nov 2026. A 55-minute 1:1 session is $149 (usual price $160) and a 55-minute 2:1 session is $199 (usual price $210); the 2:1 price is for the whole session shared by two participants, not per participant. 5-session packages are $669 for 1:1 and $899 for 2:1, and 10-session packages are $1,229 for 1:1 and $1,649 for 2:1."
+    a: "Private Pilates is currently offered at introductory prices, and the intro offer ends on 30 Nov 2026. A 55-minute 1:1 session is $149 (usual price $160) and a 55-minute 2:1 session is $199 (usual price $210); the 2:1 price is for the whole session shared by two participants, not per participant. 5-session packages are $669 for 1:1 (usual price $750) and $899 for 2:1 (usual price $1,000), and 10-session packages are $1,229 for 1:1 (usual price $1,400) and $1,649 for 2:1 (usual price $1,900). From 1 Dec 2026 the usual prices apply."
   - q: "Can I do Private Pilates if I have an injury?"
     a: "Private Pilates is an exercise service and does not include physiotherapy assessment, diagnosis or treatment. If you have an injury or medical concern that needs assessment or treatment, a physiotherapy consultation may be recommended first. If new pain comes up, your instructor may modify or pause the session and recommend a physiotherapy assessment."
 draft: false
@@ -94,8 +94,8 @@ Private Pilates is available as a single a la carte session or in 5-session and 
 
 | Private Pilates | Single session | 5 sessions | 10 sessions |
 | --- | --- | --- | --- |
-| 1:1 | $149 (usual price $160) | $669 | $1,229 |
-| 2:1 | $199 (usual price $210) | $899 | $1,649 |
+| 1:1 | $149 (usual price $160) | $669 (usual price $750) | $1,229 (usual price $1,400) |
+| 2:1 | $199 (usual price $210) | $899 (usual price $1,000) | $1,649 (usual price $1,900) |
 
 2:1 prices are for the entire session shared by two participants, not per participant.
 
