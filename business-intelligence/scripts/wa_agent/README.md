@@ -491,6 +491,13 @@ All four templates are approved on Goji's number (checked 25 Nov 2026):
 "Get directions" button), `goji_appointment_reminder` (same fields, Confirm
 and Reschedule quick replies), `goji_referral_received`, `goji_staff_alert_v2`.
 
+- **New Maps link pending:** `goji_appointment_confirmed_v2` (same wording,
+  "Get directions" to the clinic's chosen Maps link,
+  https://maps.app.goo.gl/Mm3eYLNMUwwx8USv8) was submitted to Meta on
+  25 Nov 2026. Once approved, switch with
+  `gcloud run services update goji-wa-agent --update-env-vars
+  WA_AGENT_CONFIRM_TEMPLATE=goji_appointment_confirmed_v2` (the deploy carries
+  env vars forward). Same four parameters, so no code change.
 - **Confirmations** go live with goji-booking's confirmation email: goji-booking
   puts `send_template: true` on the booking-confirmed callback only when
   `CONFIRMATIONS_MODE=live`, and the agent sends the template only then
