@@ -595,20 +595,22 @@ def _book_pending(state, ev: Inbound, received: float, fallback: str,
     pending = state.pending_booking or {}
     if not pending or pending.get("at", 0) >= received \
             or received - pending.get("at", 0) > config.BOOKING_CONFIRM_WINDOW_S:
-        events.record("book_skipped", ev.wa_id, reason="no_pending_booking")
-        return fallback, None, False
+        return _book_skipped(state, ev, "no_pending_booking", pending)
     # The customer either said yes to the booking stated back, or picked one of
     # the times offered in that earlier message. Nothing else gets booked.
     pick = (chosen.get("date", ""), chosen.get("time", ""))
     if pick != (pending.get("date"), pending.get("time")):
         if pick not in booking_client.offered(pending.get("options", "")):
-            events.record("book_skipped", ev.wa_id, reason="time_not_offered")
-            return fallback, None, False
-        pending = {**pending, "date": pick[0], "time": pick[1],
-                   "full_name": pending.get("full_name") or chosen.get("full_name", "")}
+            return _book_skipped(state, ev, "time_not_offered", pending)
+        pending = {**pending, "date": pick[0], "time": pick[1]}
+    # Details given in the confirming message itself fill what's missing: the
+    # usual case is a customer who picked a time, was asked their name, and
+    # sent it. The time stays the one confirmed above.
+    pending = {**pending, **{k: chosen[k].strip() for k in ("full_name", "email", "address")
+                             if not (pending.get(k) or "").strip()
+                             and (chosen.get(k) or "").strip()}}
     if not booking_client.complete(pending):
-        events.record("book_skipped", ev.wa_id, reason="details_missing")
-        return fallback, None, False
+        return _book_skipped(state, ev, "details_missing", pending)
     patient_id = tools.record_for_booking(state.patient or {}, pending.get("full_name", ""),
                                           pending.get("for_whom", ""))
     try:
@@ -636,6 +638,26 @@ def _book_pending(state, ev: Inbound, received: float, fallback: str,
              "dry_run": bool(res.get("dry_run")), "at": time.time(), "source": "whatsapp"},
             False)
 
+
+
+BOOK_HELD_REPLY = ("Thanks! I'm just getting the team to confirm this booking, and "
+                   "they'll message you shortly.")
+
+
+def _book_skipped(state, ev: Inbound, reason: str, pending: dict
+                  ) -> tuple[str, dict | None, bool]:
+    """The model said the customer confirmed a booking, but the code can't
+    make it. The customer must not be left thinking it's booked (the model's
+    own reply may say so), so they get a holding line and Chris is told."""
+    events.record("book_skipped", ev.wa_id, reason=reason)
+    what = " ".join(x for x in (pending.get("service", ""), pending.get("date", ""),
+                                pending.get("time", ""), pending.get("clinician", ""))
+                    if x)
+    _alert("escalated", customer=ev.name, wa_id=ev.wa_id,
+           staff_note=f"They confirmed a booking but it didn't go through ({reason}). "
+                      f"Please book and confirm with them: {what or 'see the chat'}",
+           suggested_reply="", reason=f"booking skipped: {reason}", last_message=ev.text)
+    return BOOK_HELD_REPLY, None, True
 
 BUBBLE_PAUSE_S = 1.2
 
