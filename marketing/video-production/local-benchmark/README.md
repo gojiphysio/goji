@@ -1,9 +1,10 @@
 # Goji: Blender versus local video models
 
-**Pilot complete — 24 November 2026.** H3 produced the strongest common-first-frame
-action in this one-seed test. Blender-guided LTX held the planned layout most
-closely at much lower generation time. The proxy cast and contact animation
-still need work; no production-approved episode footage is claimed.
+**Superseded as a production comparison.** The user rejected this proxy look
+and the presentation of unmatched controls. These records diagnose the local
+runtimes; they do not establish Episode 1 visual quality or a model winner.
+See the [corrected Episode 1 comparison](episode1/README.md): same actual episode
+image, same prompt, same 576×1024 canvas, one frame per model.
 
 | Recipe | Native output | Wall time | Frame-review finding |
 |---|---|---:|---|
@@ -11,7 +12,7 @@ still need work; no production-approved episode footage is claimed.
 | Wan 2.2 14B Lightning | 480×848, 81 @ 16 fps | 16m 19s | Recognisable exit; door/prop changes and taxi moves |
 | Wan 2.2 5B, lower-res | 448×800, 121 @ 24 fps | 12m 05s | Wrong action; driver does not exit |
 | LTX 2.5, six Blender frames | 576×1024, 121 @ 24 fps | 2m 38s | Best layout control; imperfect contacts/interpolation |
-| MiniMax H3 Turbo, mixed q4/q6 | 544×960, 124 @ 24 fps | 12m 40s | Strongest common-input action; private preview in chat |
+| MiniMax H3 Turbo, mixed q4/q6 | 544×960, 124 @ 24 fps | 12m 40s | Recognisable action in sampled proxy frames; private Page now available |
 
 These are practical local recipes, not equal-compute or maximum-quality runs.
 The guided LTX row has extra information. Total successful generation wall time
@@ -101,7 +102,9 @@ this is not evidence for long-scene reliability.
 
 H3's footage and the six-panel comparison including it stay outside this public
 repository because its license restricts territories for outputs. They are
-available as private previews in the model-testing chat. The public
+now available on the [private review page](https://chatgpt.com/space/page_99413c931d68819185504b2519a8cca0),
+alongside the corrected Episode 1 test. The original local preview was not
+accessible to the user; the Page provides an authenticated remote handoff. The public
 [summary record](results/summary.json) contains timing and test settings.
 
 The runtime warned that the video was nearly static. The action is visible in
@@ -112,19 +115,17 @@ One initial H3 launch failed at adapter-cache lookup, before inference; the
 successful retry used the explicit pinned adapter file. The model access and
 local authentication now work.
 
-## What to carry into the next episode
+## Correction after user review
 
-1. Build the reviewed cast and clean contact animation in Blender first.
-2. Keep **guided LTX** as the fast, controllable iteration route.
-3. Advance **H3** to a second seed and then a longer action test; it is the most
-   promising first-frame route from this scene, not yet a proven long-form choice.
-4. Preserve direct Blender rendering for interactions where exact geometry is
-   essential. Generated footage must be checked between supplied keyframes too.
+The common first-frame rows used the same image and prompt, but different
+resolved canvases. The six-frame LTX row received much more information and
+should never have appeared as a competing model-quality result. The primitive
+cast could not answer whether a model preserves the textured Episode 1 look.
+The local-only H3 preview also failed the remote handoff requirement.
 
-The first-frame tests share a prompt and opening image. The guided LTX test
-gets more information and is evaluated separately. Five-second comparison
-exports retain source speed, repeat frames onto a 48-fps display cadence, and
-do not use motion interpolation. Raw takes preserve native cadence and length.
+The [Episode 1 rerun](episode1/README.md) replaces those claims with a matched
+visual-input comparison. Do not use this proxy pilot's relative findings to
+select the production renderer. Keep the extra-control experiment separate.
 
 ## Review limits and reproducibility
 

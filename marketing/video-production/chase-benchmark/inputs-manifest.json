@@ -1,0 +1,31 @@
+{
+  "source": {
+    "episode": "v8 driving scene",
+    "paths": [
+      "animation-v8/assets/03-drive.png",
+      "animation-v8/clips/03-drive.mp4"
+    ]
+  },
+  "files": {
+    "inputs/episode1-drive.mp4": {
+      "sha256": "3a683ce01b9c481a5ca36d5df521ac67577b28319291aa53ca95937c186faa5b",
+      "bytes": 2266105
+    },
+    "inputs/episode1-drive.png": {
+      "sha256": "be674454b8daa382cb92b49af0319edd738be937a25eb061fd4dbd8d8991099c",
+      "bytes": 1975137
+    },
+    "inputs/look-start-v1.png": {
+      "sha256": "b6b062afa17d077a27d33fc08bfe25cc97756ab73d7c5f8eef2598a4d4fee695",
+      "bytes": 2063515
+    },
+    "staging/layout-v1.mp4": {
+      "sha256": "b10126b8e3cee27e6d9ccdbbd5de1899b914d6f482c32d9af8119b31d3197078",
+      "bytes": 1250223
+    },
+    "staging/stage.json": {
+      "sha256": "6f56a18c0049d417a7c7149796165a16c5910e2b3962f228820b7fa3783acf13",
+      "bytes": 44269
+    }
+  }
+}

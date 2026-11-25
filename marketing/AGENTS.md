@@ -40,6 +40,8 @@ tab, honour these:
   must be checked on the exact runtime; record complete usable actions and all
   retries before choosing a renderer. The skill's bible distinguishes inherited
   choices from proposed camera/style defaults. Keep its installed copy in sync.
+  The user's selected renderer is H3 with video reference; H3 indexed still
+  guides can suit simpler scenes. Apply the skill's per-shot guidance routing.
   For San Andreas-specific appearance or behaviour, use the skill's
   `references/san-andreas-reference.md`: retain source-platform provenance and
   distinguish inspected footage, documented mechanics and proposed Goji values.

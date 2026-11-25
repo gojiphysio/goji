@@ -11,3 +11,5 @@ staging/*.blend1
 __pycache__/
 # H3 test is approved for Singapore; do not publish its outputs worldwide.
 results/h3-*/
+episode1/results/h3-*/
+episode1/private-review/

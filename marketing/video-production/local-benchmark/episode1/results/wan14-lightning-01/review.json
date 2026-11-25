@@ -1,0 +1,31 @@
+{
+  "review_basis": "Exact-frame inspection at 0.25-second intervals and native last frame; full-file decode. Not human normal-speed acceptance.",
+  "appearance": "Textured Episode 1 street, clothing treatment and two identities retained in sampled frames. Revealed driver shoes differ from the reference clip; hidden in input.",
+  "camera": "Broadly stable rear three-quarter composition; parked car remains in scene.",
+  "action_verdict": "reject requested endpoint",
+  "findings": [
+    {
+      "time_seconds": [
+        0.25,
+        1.25
+      ],
+      "finding": "Single door-opening motion; rear passenger door remains visibly closed in sampled frames."
+    },
+    {
+      "time_seconds": [
+        1.75,
+        3.75
+      ],
+      "finding": "Driver emerges, extends his legs and falls/slides sideways onto the road. Distinct from woman, but contact/body mechanics need scrutiny."
+    },
+    {
+      "time_seconds": [
+        4.0,
+        5.0
+      ],
+      "finding": "Driver remains lying down instead of recovering to seated; woman starts moving the door toward closed rather than leaving it wide open."
+    }
+  ],
+  "retained_production_range": null,
+  "limitations": "One seed of four-step Lightning at CFG 1, not Wan quality ceiling or long-scene reliability."
+}

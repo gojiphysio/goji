@@ -24,6 +24,19 @@
   retain labels separately from raw takes.
 - These procedural people are blockout proxies, not approved Goji cast assets.
   Judge stability separately from resemblance to the canonical cast.
+- A production-look comparison starts from an actual reviewed episode asset or
+  an explicitly reviewed look frame. Primitive blockouts cannot rank visual quality.
+- Compare the same conditioning budget in the main panel: same image hash,
+  prompt, requested canvas and action duration. Extra sparse keyframes are a
+  separate control experiment, never evidence of a stronger model. Record native
+  cadence and sampler differences; equal seed numbers do not equal latent noise.
+- Verify a usable remote video handoff for every model before calling a review
+  deliverable complete. A local-only H3 path is not a mobile handoff.
 - Keep H3 footage out of this public repository: access was approved for a
   Singapore-based test, and its license restricts territories for outputs too.
   Never commit HF credentials, caches or weight files.
+
+- Private personal Pages can hold the H3 MP4s without a Drive-account choice.
+  Use authenticated file attachments, verify access and readback, and retain
+  ordinary download links alongside native video embeds. A saved embed alone
+  does not establish that the player renders correctly.

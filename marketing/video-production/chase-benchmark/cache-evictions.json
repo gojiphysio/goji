@@ -1,0 +1,25 @@
+{
+  "time": 1795522550.915066,
+  "reason": "Reproducible task-only H3 GGUF cache evicted after both H3 runs to stage Wan controls; original installed model caches untouched",
+  "files": [
+    {
+      "repo": "leejet/MiniMax-H3-GGUF",
+      "path": "minimax_h3_ref2va_pruned-Q4_K_M.gguf",
+      "revision": "eee1dd2f05b755b28bd1b785925cbfeebfcba9d9",
+      "sha256": "9ca1aef9f4609a56c2c751484013e1b20fe352f892122e5ab0a428fb95a7956e",
+      "size": 11420663904,
+      "local_name": "minimax_h3_ref2va_pruned-Q4_K_M.gguf",
+      "comfy_kind": "unet"
+    },
+    {
+      "repo": "leejet/MiniMax-H3-GGUF",
+      "path": "qwen3vl_32b_minimax_h3-Q4_K_M.gguf",
+      "revision": "eee1dd2f05b755b28bd1b785925cbfeebfcba9d9",
+      "sha256": "11e6efe70a57ce7f4838c47bdbd1a1c4b8ce10e2b7747f1b065990b70f4b05fc",
+      "size": 18218065024,
+      "local_name": "qwen3vl_32b_minimax_h3-Q4_K_M.gguf",
+      "comfy_kind": "clip"
+    }
+  ],
+  "restore": "python scripts/download_wan22.py --manifest h3-weights.json --destination /Users/tidepool/Models/goji-chase-h3-ref"
+}

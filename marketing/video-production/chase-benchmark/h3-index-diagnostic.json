@@ -1,0 +1,14 @@
+{
+  "node": "MiniMaxH3AddGuide",
+  "test": "actual node chained six times with fake VAE; validates indexing only, not inference or visual adherence",
+  "resolved_frame_count": 124,
+  "indices": [
+    0,
+    24,
+    48,
+    72,
+    96,
+    120
+  ],
+  "guide_latent_count": 6
+}
