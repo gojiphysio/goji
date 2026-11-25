@@ -632,6 +632,48 @@ def test_booking_needs_a_yes_in_a_later_message(env, monkeypatch):
     assert ("booked", {"intent": "booking", "reason": "dry_run"}) in rec
 
 
+def _age_pending_booking(seconds):
+    state = app_mod.store.load(CUSTOMER)
+    state.pending_booking = {**state.pending_booking,
+                             "at": state.pending_booking["at"] - seconds}
+    app_mod.store.save(state)
+
+
+def test_a_pick_hours_after_the_offer_still_books(env, monkeypatch):
+    """25 Nov 2026: a customer picked a time 32 minutes after it was offered
+    (waiting on the team's answer) and the 30-minute window had closed. The
+    offer now stays open for a day; goji-booking checks the slot live."""
+    client, rec, _ = env
+    calls = []
+    monkeypatch.setattr(app_mod.booking_client, "book", lambda b, wa_id, patient_id="": calls.append(b) or
+                        {"ok": True, "reference": "GOJI-AB12CD", "clinician_name": "Kristy Ng",
+                         "service": "Physiotherapy", "date": b["date"], "time": b["time"],
+                         "dry_run": True})
+    app_mod.claude.queue.append(_final_with(
+        "Shall I book Thu 26 Nov, 10:00am with Kristy for Charles Tan?", booking=BOOK))
+    post(client, inbound(text="book me Thursday 10am with Kristy, I'm Charles Tan"))
+    _age_pending_booking(2 * 3600)
+    app_mod.claude.queue.append(_final_with("Booking that now!", booking=BOOK,
+                                            confirm_booking=True))
+    post(client, inbound(msg_id="wamid.in2", text="yes please"))
+    assert len(calls) == 1
+    assert app_mod.store.load(CUSTOMER).booked["reference"] == "GOJI-AB12CD"
+
+
+def test_a_yes_more_than_a_day_after_the_offer_does_not_book(env, monkeypatch):
+    client, rec, _ = env
+    monkeypatch.setattr(app_mod.booking_client, "book",
+                        lambda b, wa_id, patient_id="": pytest.fail("booked a day-old offer"))
+    app_mod.claude.queue.append(_final_with(
+        "Shall I book Thu 26 Nov, 10:00am with Kristy for Charles Tan?", booking=BOOK))
+    post(client, inbound(text="book me Thursday 10am with Kristy, I'm Charles Tan"))
+    _age_pending_booking(25 * 3600)
+    app_mod.claude.queue.append(_final_with("Booking that now!", booking=BOOK,
+                                            confirm_booking=True))
+    post(client, inbound(msg_id="wamid.in2", text="yes please"))
+    assert ("book_skipped", {"reason": "no_pending_booking"}) in rec
+
+
 def test_the_model_cannot_book_in_the_same_turn_it_states_the_details(env, monkeypatch):
     client, rec, _ = env
     monkeypatch.setattr(app_mod.booking_client, "book",

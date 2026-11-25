@@ -207,3 +207,22 @@ def test_relay_turn_labels_the_team_answer_and_closes_with_the_instruction():
     msgs = agent.build_messages(history, 6)
     assert "[The team's answer, which you passed on next]: " + ANSWER in msgs[1]["content"][0]["text"]
     assert "From the Goji team" not in msgs[-1]["content"][0]["text"]
+
+
+def test_the_teams_answer_keeps_offered_times_open(env, with_staff):
+    """Times offered before the handover are still the customer's to pick
+    once the team's answer goes out ("which time suits?"), however long
+    the team took (25 Nov 2026)."""
+    client, _, _, _ = env
+    now = int(time.time())
+    ping = handover(client, now - 3 * 3600)
+    st = app_mod.store.load(CUSTOMER)
+    st.pending_booking = {"service": "physiotherapy", "date": "2026-11-26", "time": "",
+                          "options": "2026-11-26 10:00, 2026-11-26 10:30",
+                          "at": now - 3 * 3600}
+    app_mod.store.save(st)
+    app_mod.claude.queue.append(final(reply=RELAYED, intent="other", note=""))
+    post(client, swipe(ANSWER, ping, now))
+    kept = app_mod.store.load(CUSTOMER).pending_booking
+    assert kept["options"] == "2026-11-26 10:00, 2026-11-26 10:30"
+    assert kept["at"] >= now - 5
