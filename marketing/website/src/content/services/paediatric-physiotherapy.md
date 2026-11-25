@@ -23,7 +23,7 @@ faqs:
   - q: "How long is a session?"
     a: "We offer 30-minute, 45-minute and 55-minute sessions. For children aged 0-2 years, a 30-minute session may be a good fit; 45 minutes suits many school-age children; the full 55-minute appointment works best for complete assessments."
   - q: "How much does paediatric physiotherapy cost, and can you come to our home?"
-    a: "A 55-minute session is $260 at our Lentor clinic, or $380 as a home visit. Shorter sessions start from $160."
+    a: "A 55-minute session is $260 at our Lentor clinic, or $380 as a home visit."
   - q: "Do I need a doctor's referral?"
     a: "No referral is needed - you can book directly. If your child's assessment suggests input from another healthcare professional would help, we will let you know."
 order: 1
