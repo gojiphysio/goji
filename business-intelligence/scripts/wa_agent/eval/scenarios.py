@@ -66,9 +66,17 @@ SARAH_TOMORROW = (f"a patient record is linked to this number; record first name
 SARAH_TODAY_USED = (f"a patient record is linked to this number; record first name Sarah (the texter may be this patient or someone booking for them); next appointment {_d(0)} 15:00 "
                     f"with Claire; last visit {_d(-20)}; first-time late-change waiver already "
                     "used (tagged in Plato)")
-SHARED = (f"a patient record is linked to this number; record first name Ethan; 2 patients share this number (e.g. a "
-          f"parent and children), so don't assume which one is writing; next appointment "
-          f"{_d(3)} 16:30 with Cheryl")
+_ON_FILE = ("(use one only for someone the customer has named or who is writing; never "
+            "mention the others)")
+SHARED = (f"a patient record is linked to this number (the texter may be this patient or "
+          f"someone booking for them); full names on file: Ethan Ong, Mel Ong {_ON_FILE}; "
+          f"2 patients share this number (e.g. a parent and children), so don't assume which "
+          f"one is writing; next appointment {_d(3)} 16:30 with Cheryl")
+COUPLE = (f"a patient record is linked to this number (the texter may be this patient or "
+          f"someone booking for them); full names on file: Ben Lim, Ana Koh {_ON_FILE}; "
+          f"2 patients share this number (e.g. a parent and children), so don't assume which "
+          f"one is writing; no upcoming appointment; last visit {_d(-40)}; an email is on "
+          f"file for this number (bookings use it, also for family members: don't ask for one)")
 TODAY_LATER = (f"a patient record is linked to this number; record first name Sarah (the texter may be this patient or someone booking for them); next appointment {_d(0)} 15:00 "
                f"with Kristy; last visit {_d(-7)}; no earlier late changes on record "
                "(first-time waiver applies)")
@@ -165,6 +173,14 @@ def build_booking_pick_email_declined():
                       "Which would you like? And could I have your email for the booking?"),
             f"{_nice(b).split(', ')[0]} {_nice(b).split(', ')[1]} please. I'd rather not "
             "give my email"]
+
+
+def build_couple_pick():
+    a, b = _open_slots(2)
+    return ["Hi, any physio slots coming up for Ben?",
+            ("agent", f"I have {_nice(a)} with {_who(a)} or {_nice(b)} with {_who(b)}. "
+                      "Which would suit Ben?"),
+            f"{_nice(a).split(', ')[0]} {_nice(a).split(', ')[1]} please"]
 
 
 def build_move_pick():
@@ -385,6 +401,13 @@ SCENARIOS: list[Scenario] = [
       ["(built at run time from live open slots)"],
       E(intents=("booking",), confirm_booking=True, must_not=(r"shall i", r"would you like me to")),
       note="picking an offered time is the yes", build=build_booking_pick),
+    S("booking_name_on_file", "booking",
+      ["(built at run time from live open slots)"],
+      E(intents=("booking",), confirm_booking=True, booking_filled=True,
+        must_not=(r"full name",)),
+      patient=COUPLE, customer_name="Ana",
+      note="the name is on file for this number: book under it, don't ask (owner, 25 Nov 2026)",
+      build=build_couple_pick),
     S("late_reschedule_first_waiver", "reschedule/cancel",
       ["Sorry, something came up, can I move tomorrow's 9am?"],
       E(intents=("reschedule", "cancel"), decisions=("draft",), must=(r"24", r"waive")),

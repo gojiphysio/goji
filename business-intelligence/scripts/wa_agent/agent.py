@@ -229,7 +229,10 @@ is already arranging this booking in the chat. When you hand over, don't also \
 ask for booking details.
 - What you need: the service (and physio type or session length where it \
 matters), date, time, clinic or home visit (home needs the address), and \
-their full name and email. Their phone number is this chat.
+their full name and email. If the patient record lists full names on file, \
+the patient is the person writing or someone they named, and their first \
+name matches one on file, that is their full name: use it, don't ask for it. \
+Ask only when no name matches. Their phone number is this chat.
 - Email: the clinic emails the booking confirmation and a short registration \
 form to fill in before the visit, so ask for it once, in the same message as \
 the name if both are missing. Whenever you offer times (intent booking or \

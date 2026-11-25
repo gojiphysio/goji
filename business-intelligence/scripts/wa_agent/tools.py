@@ -413,15 +413,25 @@ def contact_email(patient: dict, patient_id: str, texter: str = "") -> str:
     return (pick.get("email") or "").strip()
 
 
+# Full names on the chat's own number, so the agent books a returning patient
+# without asking for a name it already has (owner, 25 Nov 2026: a returning
+# couple was asked for both full names). A family number rarely has more.
+NAMES_SHOWN = 4
+
+
 def describe_patient(p: dict) -> str:
     """The patient context as one line for the model."""
     if not p:
         return ""
     if not p.get("returning"):
         return "no patient record for this number (likely a new enquiry)"
-    bits = [f"a patient record is linked to this number; record first name "
-            f"{p.get('first_name') or 'unknown'} (the texter may be this patient or "
-            f"someone booking for them)"]
+    names = [r["name"].strip() for r in p.get("records") or [] if (r.get("name") or "").strip()]
+    bits = ["a patient record is linked to this number (the texter may be this patient "
+            "or someone booking for them)"]
+    bits.append(f"full name{'s' if len(names) > 1 else ''} on file: "
+                f"{', '.join(names[:NAMES_SHOWN])} (use one only for someone the customer "
+                "has named or who is writing; never mention the others)" if names
+                else f"record first name {p.get('first_name') or 'unknown'}")
     if (p.get("patients_on_number") or 1) > 1:
         bits.append(f"{p['patients_on_number']} patients share this number (e.g. a parent "
                     "and children), so don't assume which one is writing")
