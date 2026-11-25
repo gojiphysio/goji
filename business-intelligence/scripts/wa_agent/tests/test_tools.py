@@ -139,14 +139,28 @@ def test_describe_patient_keeps_it_to_name_and_dates():
     one = tools.describe_patient({"returning": True, "first_name": "Sarah",
                                   "patients_on_number": 1, "next_appointment": None,
                                   "last_visit": "2026-10-02"})
-    assert one == ("a patient record is linked to this number; record first name Sarah (the "
-                   "texter may be this patient or someone booking for them); no upcoming "
+    assert one == ("a patient record is linked to this number (the texter may be this "
+                   "patient or someone booking for them); record first name Sarah; no upcoming "
                    "appointment; last visit 2026-10-02")
     shared = tools.describe_patient({"returning": True, "first_name": "Ghazal",
                                      "patients_on_number": 2,
                                      "next_appointment": {"date": "2026-11-21", "time": "16:30",
                                                           "with": "Cheryl"}})
     assert "2 patients share this number" in shared and "with Cheryl" in shared
+
+
+def test_describe_patient_gives_the_full_names_on_the_number():
+    # A returning couple was asked for both full names the record already had
+    # (owner, 25 Nov 2026).
+    two = tools.describe_patient({"returning": True, "first_name": "Ben",
+                                  "patients_on_number": 2,
+                                  "records": [{"id": "a", "name": "Ben Lim"},
+                                              {"id": "b", "name": " Ana Koh "}]})
+    assert "full names on file: Ben Lim, Ana Koh (use one only for someone" in two
+    assert "record first name" not in two
+    many = tools.describe_patient({"returning": True, "patients_on_number": 6, "records": [
+        {"id": str(i), "name": f"Kid{i} Tan"} for i in range(6)]})
+    assert "Kid3 Tan" in many and "Kid4 Tan" not in many
 
 
 class _Rows:

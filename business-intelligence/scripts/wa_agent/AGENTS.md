@@ -46,6 +46,10 @@ The WhatsApp assistant. What it is and how to run it: [`README.md`](README.md).
   fixed on the site, not in the prompt. A practice Chris confirms that doesn't
   belong on the site (physio isn't sold as packages) goes in `house_rules.md`,
   one dated line each. Service ids mirror `booking/config.py` (`test_tools.py` checks).
+- **The full names on the chat's own number reach the model**
+  (`tools.describe_patient`), so it books a returning patient under the name
+  on file instead of asking (owner, 25 Nov 2026). It uses one only for
+  someone the customer named or who is writing, and never mentions the others.
 - **Patient lookup is keyed on the chat's own number.** The one exception,
   `find_booking` (no record for this number), needs the full name AND the
   booking's number to match the same patient, returns only the next
