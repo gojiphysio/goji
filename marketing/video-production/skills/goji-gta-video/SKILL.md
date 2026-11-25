@@ -64,8 +64,16 @@ into approved series canon.
 
 ## Choose the control and model
 
-Use the existing LTX installation as an inexpensive baseline, not a mandatory
-final renderer. Compare alternatives on the same difficult shot and references.
+**User-selected default, 25 November 2026:** use **H3 Ref2VA with a continuous
+video reference** for this series, especially complex action, interactions,
+occlusions or camera movement. Keep Blender as the motion and camera foundation.
+**H3 with indexed still guides can be the better choice for simpler scenes**;
+choose it when sparse anchors are sufficient and review motion between them.
+See [production.md](references/production.md#choose-h3-guidance-per-shot) for routing.
+This preference supersedes treating LTX as the default starting renderer.
+
+Use LTX or Wan for a specific draft, fallback or requested comparison when useful;
+do not rerun a model comparison automatically for every episode.
 For visual-quality comparisons, use a reviewed episode image or look frame and
 match the conditioning budget, prompt and actual canvas. Keep extra-control
 experiments separate from model comparisons; a primitive blockout cannot test

@@ -56,6 +56,13 @@ linked benchmark. Recheck support on the installed runtime before reusing a reci
 
 ## Blender-guided chase: later controlled test
 
+**User decision, 25 November 2026:** “H3 with video reference is the winner,
+though h3 with stills can win on simpler scenes.” This establishes the future
+series preference: H3 video guidance by default, with H3 indexed still guides
+as a scene-dependent choice for simpler action. It supersedes the provisional
+renderer recommendation below; the recorded measurements and review limits
+remain unchanged. See [production routing](production.md#choose-h3-guidance-per-shot).
+
 The [chase protocol and take log](https://github.com/gojiphysio/goji/blob/9aba0d9d8e0723ffb23cc49110f0e7f7b145a87e/marketing/video-production/chase-benchmark/README.md)
 use an Episode 1 styled conversion of a Blender rear-follow shot with two
 overtakes. Its six stills and continuous clip share decoded pixels. The source

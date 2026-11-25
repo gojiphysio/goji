@@ -38,6 +38,29 @@ where useful. Longer scenes can contain planned coverage; an uninterrupted take
 must pass as an uninterrupted take. A multi-shot model's “30-second video” may
 include cuts, which does not meet a single-take test.
 
+## Choose H3 guidance per shot
+
+The user selected H3 with video reference as the winner on 25 November 2026,
+while noting that H3 still guides can win on simpler scenes. Apply that preference
+to future Goji GTA episodes; it is a production choice, not a universal leaderboard.
+
+- Default to **H3 Ref2VA with continuous video guidance** when the path or timing
+  between poses matters: chases, interacting subjects, contacts, occlusions or
+  coordinated camera movement. Stage those relationships in Blender first.
+- Consider **H3 with indexed still guides** for a simple action, modest movement
+  and a fixed or uncomplicated camera when the intermediate motion can be left
+  to the model. Select anchors for that shot; six is the benchmark's count, not
+  a universal requirement.
+- If a still-guided take loses trajectory, timing, contacts or camera continuity
+  between anchors, move to the continuous guide. Do not rescue the required
+  action through cuts solely to keep the cheaper control route.
+
+Record the chosen route and reason in the shot record. Use the tested Ref2VA
+runtime route from the local pilot; the old FL2VA installation is not equivalent.
+Review the first usable style-conversion pass as a possible finished shot rather
+than automatically adding the benchmark's second rendering pass. Cast, all-NPC
+PS2 style and complete-action checks still apply whichever guidance route wins.
+
 ## Minimum shot/take record
 
 Store a record alongside every rendered take, using JSON/YAML or the existing
