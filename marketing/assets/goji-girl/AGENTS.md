@@ -33,3 +33,10 @@
   and sound; generated frames are not proof of actual location geography.
 - Hand off through a rendered GitHub Markdown page with embedded storyboard
   images and direct image links, following the Tidepool remote-first rules.
+
+- Bus continuity corrections require one shared Blender asset and street layout,
+  with transform/material checks across cameras. Use direct renders as the
+  geometry review when stylised frames contradict them. Do not describe prompt
+  edits as a solved 3D layout. For northbound +Y here, left traffic is x<0.
+- Write game tutorials as clear, connected prose. Line wrapping is typesetting,
+  not a sequence of short slogans; follow the earlier popups' natural cadence.

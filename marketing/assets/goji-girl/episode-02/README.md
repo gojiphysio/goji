@@ -1,88 +1,56 @@
 # Goji Girl · Episode 02 — TAP OUT
 
-**Creative draft v4 · 25 November 2026 · proposed 47 seconds · vertical 9:16**
+**Creative draft v5 · 25 November 2026 · proposed 47 seconds · vertical 9:16**
 
 A frustrating work call sends Goji Girl rushing to Pilates. She steals a bus,
 crashes outside Lentor Modern, remembers to tap out, and reaches the calm of
 Goji while the police get stuck running against the glass.
 
-**Revision direction:** outdoor action now plays from the third-person player
-camera. The home and clinic use cutscene framing. The story, EZ-Link beep and
-final police gag stay intact. This is a script and illustrated concept board, now accompanied by a six-second
-Blender exit blockout. No final episode animation has been generated.
+## Revision 5 — one Blender scene for the bus sequence
 
-## Revision 4 — safehouse, chase lighting and bus continuity
+The previous generated bus panels are superseded: their road placement,
+heading and livery did not agree. The six views below are **direct Blender
+staging renders from one shared bus and street scene**, with proxy people and
+simplified architecture. They establish the geometry; final PS2 appearance is
+still to be applied. No independently generated bus panel is presented as proof
+of a fixed layout.
 
-**Safehouse unlocked. Save your game. Lose the heat. Repeat as necessary.**
+- **04–05:** same parked transform in the left lane, with the passenger door
+  beside the left curb and the driver's side toward the centreline.
+- **07–09:** exactly the same wreck transform, heading +Y, driver's side down.
+  The red roof faces the road centre; the wheels and charcoal undercarriage face
+  the mall-side curb. Only cameras and the player change between these views.
+- **Livery:** one set of red roof, white body and purple skirt materials, with
+  SOS Transit lettering attached to the bus. No negative scale or mirrored panel.
+- **06:** the red/blue sources belong to offscreen pursuers behind the camera.
 
-The new popup is an original San Andreas-style tutorial joke, with no appointment
-or treatment reference. It keeps the lowered y=360 placement and episode-one box
-styling. Shot 06 now shows broad, uneven reflected light from unseen chase cars,
-not a symmetrical pair of lights attached to the bus.
+[**Download the editable Blender master**](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-girl-episode-2/marketing/assets/goji-girl/episode-02/revision-05/blender/continuity-master.blend) ·
+[Scene records and checks](revision-05/blender/continuity-record.json) ·
+[Detailed revision notes](revision-05/README.md)
 
-**04 → 05:** the bus stays parked at the same curb, facing the same way. The
-player runs around its nose from the passenger side to the driver's side. The
-front changes screen sides because the camera follows her, not because the bus
-turns around. The original shelter stays on the far passenger side in 05.
+![Direct Blender staging for04–09. Proxy cast and simplified sets; one shared bus mesh and materials.](revision-05/frames/04-09-direct-board.png)
 
-**07 → 08:** the revised 07 panel shows the end of the slide, fully on the driver's
-side. Its exact settled pose carries into 08. From the rear, the mall/canopy is
-on screen right and the wheels on screen left; the front recovery view reverses
-those screen positions. The bent post remains by the front bumper and the bin
-beside the middle of the bus. [Revision notes and continuity record](revision-04/README.md).
+[Parked-bus overhead](revision-05/frames/plan-parked.png) ·
+[Wreck overhead](revision-05/frames/plan-wreck.png)
 
-### Retained staging and references
+## Revised popup
 
-The bus is now **SOS Transit**, keeping the red/purple italic logo treatment and
-livery. Lentor Modern follows the real dark cladding, balcony towers and silver
-Lentor Drive canopy; Goji follows the actual black-framed glass shopfront,
-left entrance, burgundy round projecting sign and walkway handrail. The approved
-interior remains. The therapist now leans into the exercise, watches knee alignment
-and gives an active extension cue.
+> You can save your game and lose your wanted level at a safehouse. Try to stay out of trouble this time.
 
-**The bus exit is staged in Blender.** The front-left passenger doorway is ahead
-of the front axle and immediately behind the windscreen. The reader sits on its
-inside aft jamb. Chassis, doorway, folded door leaves, pole and reader rotate
-together onto the driver's side; the passenger opening faces upward. She braces,
-rises, taps, then brings her legs out onto the upward-facing side panel. The next
-shot covers her drop to the pavement. Allowing that action to finish changes the
-proposed episode from 45 to **47 seconds**.
+This is a continuous tutorial paragraph, with visual line wrapping inside the
+existing lower box. It retains y=360, the inherited font/colours and the
+41.5–46.0s display interval. Original parody copy, not a verbatim game quote.
 
-[**Watch/download the six-second exit blockout**](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-girl-episode-2/marketing/assets/goji-girl/episode-02/revision-03/blender/bus-exit-blockout.mp4)
+![New popup over the retained clinic look reference. Its background bus is older concept art, not the revised geometry authority.](revision-05/frames/12-safehouse-preview.png)
 
-![Blender exit blockout: rise through front passenger opening, tap the fixed reader, then climb clear. Proxy geometry, not final character art.](revision-03/blender/bus-exit-preview.gif)
+[Editable SVG](revision-05/overlays/safehouse-popup.svg) ·
+[Transparent PNG](revision-05/overlays/safehouse-popup.png) ·
+[UI reserve check](revision-05/frames/12-ui-clearance-check.png)
 
-[Blender scene](revision-03/blender/bus-exit.blend) ·
-[Contact frames](revision-03/blender/contact-sheet.jpg) ·
-[Geometry and source notes](revision-03/README.md)
-
-The **safehouse popup** appears at 41.5s and leaves at 46s. Its box remains at
-**y=360** on a 1080×1920 canvas, retaining the same font, colours and dimensions.
-It clears the proposed UI reserves; actual Instagram chrome varies by device.
-
-![Final frame with the new safehouse tutorial, actively coaching therapist and police stuck outside.](revision-04/frames/12-safehouse-preview.png)
-
-[Full-size ending](revision-04/frames/12-safehouse-preview.png) ·
-[UI clearance review](revision-04/frames/12-ui-clearance-check.png) ·
-[Editable SVG popup](revision-04/overlays/safehouse-popup.svg) ·
-[Transparent PNG popup](revision-04/overlays/safehouse-popup.png)
-
-## Revised storyboard
-
-Read left to right, then down. Each sheet has four panels. Panel numbers map
-to the timed sequences below; a panel is a story moment, not necessarily a cut.
-
-![01–04: PS2-style home cutscene, headset and laptop slam, rear-follow door exit and rear-follow approach to the busy bus.](revision-03/frames/01-04-sos-brand.png)
-
-[Open panels 01–04](revision-03/frames/01-04-sos-brand.png)
-
-![05–08: takeover viewed behind the player, rear bus chase, rear-view settled rollover with level horizon, and player-camera tap from the overturned bus.](revision-04/frames/05-08-continuity.png)
-
-[Open panels 05–08](revision-04/frames/05-08-continuity.png)
-
-![09–12: rear-view dust-off, player-centred sprint with pursuers at frame edges, reception cutscene and quiet reformer session with police stuck outside.](revision-04/frames/09-12-with-popup.png)
-
-[Open panels 09–12](revision-04/frames/09-12-with-popup.png)
+The clinic image above is retained for therapist/interior appearance and popup
+placement. Its earlier background-bus illustration still needs to be replaced
+from the shared Blender scene in the appearance pass. The direct staging board
+controls the bus geometry throughout the episode.
 
 ## Camera and look
 
@@ -162,9 +130,10 @@ over her left forearm, smashes the driver's window, pulls the driver out,
 lets him clear the cab, then climbs into the seat. He lands upright, alive
 and indignant. Keep the separate removal, clearance and entry states.
 
-The front now occupies screen left, with the driver's side receding to screen
-right. This is the reverse side of the same stationary bus from 04. The shelter
-and bin remain beyond its passenger side. No heading, curb or wheel-position jump.
+The bus remains in the same left lane and the same parked transform as04.
+The player is now on its road-centre/driver side; the shelter and bin remain
+beyond the opposite passenger side. Camera screen positions follow the Blender
+view rather than a mirrored image.
 
 Sound: **CRASH**, surprised yelp, wanted sting. **One star lights up.** She places
 the bag in the cab footwell as she gets in. Transfer to the vehicle camera only
@@ -197,8 +166,8 @@ does not roll, orbit to the front or cut to an impact close-up.
 Sound: squeal → scrape → enormous **CRUNCH**. Sparks start at road contact.
 Keep the bus recognisable and the left passenger side upward. No explosion
 covers the recovery. The shelter is empty. The storyboard shows the final sliding/settled pose:
-right side down, passenger side upward, roof toward the mall, wheels toward the
-road. From this rear view, the mall/canopy is screen right. The front bumper
+right side down, passenger side upward, roof toward the road centre, wheels
+toward the mall-side curb. From this rear view, the mall/canopy is screen left. The front bumper
 stops at the damaged post. Freeze that chassis transform at the end of 07.
 
 ### 08 · 00:25–00:31 — Still must tap out
@@ -208,7 +177,8 @@ for one full second, preserving the exact end-of-07 bus transform, curb,
 bent post and bin. A little piece of shelter drops. Use a deliberate recovery
 camera cut from the rear vehicle view to the front passenger doorway, with the
 same wreck still at rest; never rotate or relocate the bus to fit the new view.
-The mall is now screen left and the wheels screen right. Then the camera settles
+The mall is now screen right in the front recovery view. The bus still points
+in exactly the same world direction; the camera changes, not its heading. Then the camera settles
 behind her as she climbs up through the upward-facing front passenger doorway.
 A modest rise/offset keeps her and the reader visible, as an interaction camera
 avoiding obstruction would; it does not become an aerial shot.
@@ -273,10 +243,7 @@ of phase. Beyond them, the overturned bus burns. Nobody inside reacts.
 
 At **41.5s**, show the tutorial box at y=360. Hold until **46s**:
 
-> **Safehouse unlocked.**<br>
-> **Save your game.**<br>
-> **Lose the heat.**<br>
-> **Repeat as necessary.**
+> You can save your game and lose your wanted level at a safehouse. Try to stay out of trouble this time.
 
 This is original San Andreas-style parody copy, not a verbatim game quote.
 The joke stays entirely in the fictional game; no appointment or treatment claim.
@@ -304,8 +271,9 @@ of the background gag. End on the moving tableau.
   clearance are checked. The six-second blockout uses a procedural proxy and
   neutral surroundings, not approved final cast or a full accident simulation.
   Contact frames were inspected; the final PS2 motion and exit-to-ground cut still
-  need production review. The generated panel is a look concept; the `.blend`
-  and direct renders are the geometry authority.
+  need production review. The earlier generated bus panels are superseded. The revision-05 `.blend`
+  and its direct views are the geometry authority; the old revision-03 isolated
+  exit motion remains a contact study, not the current street layout.
 - **Service framing:** Pilates/studio experience, no medical or treatment claim.
   Her unhurt state is cartoon continuity, not recovery attributed to a session.
 - **Future motion handoff:** the new skill's Blender staging and H3 continuous
@@ -331,10 +299,10 @@ and [San Andreas reference pack](https://github.com/gojiphysio/goji/blob/a4cb40e
 - **Generation:** built-in image generator, with identity and game-camera
   references assigned separate roles. Exact prompts, edits and reference hashes
   are in [v2 generation records](storyboard-prompts-v2.json).
-- **Current shot states:** [camera and continuity record](camera-plan-v4.json).
-- **This revision:** [safehouse overlay, lighting and continuity notes](revision-04/README.md).
+- **Current shot states:** [camera and continuity record](camera-plan-v5.json).
+- **This revision:** [shared Blender geometry and flowing tutorial copy](revision-05/README.md).
 - **Retained staging:** [source photos and Blender records](revision-03/README.md).
-- **Earlier drafts:** [v1](creative-v1.md), [v2](creative-v2.md) and [v3](creative-v3.md), retained for comparison.
+- **Earlier drafts:** [v1](creative-v1.md), [v2](creative-v2.md) and [v3](creative-v3.md) and [v4](creative-v4.md), retained for comparison.
 
 ## Optional caption
 

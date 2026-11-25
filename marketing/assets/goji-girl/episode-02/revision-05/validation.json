@@ -1,0 +1,36 @@
+{
+  "checks": {
+    "04_05_same_bus_transform": true,
+    "07_08_09_same_bus_transform": true,
+    "all_bus_bounds_in_left_lane": true,
+    "reader_chassis_parent": true,
+    "one_shared_livery_mesh": true,
+    "positive_determinant_no_mirroring": true,
+    "new_motion_animation": false
+  },
+  "popup": "continuous prose, inherited styling at y360",
+  "duration_seconds": 47,
+  "review": "Direct stills, road/livery views and popup inspected; no new continuous animation reviewed",
+  "art_status": "proxy geometry staging; PS2 appearance pass and clinic background bus replacement pending",
+  "hashes": {
+    "overlays/safehouse-popup.png": "7d8f0c4cbd8744943d8d9f31b672edb97bfc11f8046a055cc37d5c6c3b4062aa",
+    "overlays/safehouse-popup.svg": "8cfcaeb7f4bb9260f5bdd3c7503c0678743aa25f0e4c7a835017c5e405843254",
+    "frames/04-direct.png": "3310a43ee9854b6ec8ac654ba4a3751c1d4f4b1fbca4dc52a989931f14d53aae",
+    "frames/09-direct.png": "d69dc18764a1be99c23f84400b44b8ceb4fa62de1fb1efc14d22a98ae5f64bf9",
+    "frames/12-safehouse-preview.png": "87032844ffff64a5756dd5ecbbb2f2a37c8a16b3ef31da7152d5335341ebe5fd",
+    "frames/06-direct.png": "243a0407ae46de4053414b24860ae90cf1c45ef923a9b96e1a03532e5da9e700",
+    "frames/plan-wreck.png": "f893f30730a8b81f7398a849c035e27092e1863cb7e54817c6a5812c77d887c7",
+    "frames/05-direct.png": "42805b2a6383b622e613052fcdaccda54bb29f33dd456f398cacbcaee4403bcc",
+    "frames/04-09-direct-board.png": "5eebb3e2c1686ff89dd6241cbebb6662122beec26d1f24d7e07bec0950e6f35b",
+    "frames/08-direct.png": "d89f837b8b340d650a3705045834faf831fc1fe34245ef0e461b3759192c3859",
+    "frames/plan-parked.png": "d90446529ac719a83477149f34c850bbbae38ba784f2802c10e1d76feddcb7a7",
+    "frames/12-ui-clearance-check.png": "ae3acdb48eef38621960b3be07d73063f01541ce7ee38921202ca9fe6d0e5be5",
+    "frames/07-direct.png": "ba237025d6625ab4810bb2f886e29134d4d60726d87932ba38b1c4b31b920fb1",
+    "scripts/compose_previews.py": "2f8b18ae38aa45e45a554ca1656e8231e764023a5e56fbb2e8c8aa0ddd8537ee",
+    "scripts/build_continuity.py": "edd1a922ce7e8d7644c9d13b23003662e44c0793bbac9a6c26a5fc63e9017222",
+    "scripts/compose_board.swift": "ea5f416ec68e50de5a699757f40854926b8b1122379f1f1dc7a128e5e16b281b",
+    "scripts/validate.py": "d3c749da87ef70d21f3a82985630b8abcc84938fb674f2f414513bb3a075bc33",
+    "scripts/draw_safehouse.swift": "fadae4f8921cc62c84507f8d39cf709158a3f01c15e8fc3d1a52bfb08d6ed1a4",
+    "blender/continuity-master.blend": "a5710a4afe886666b567282382741d5d26c8cbeaeb48ecc2600729d5f2464bdf"
+  }
+}
