@@ -63,7 +63,7 @@ from .policy import (AGENT, DRAFT, ESCALATE, HUMAN, LATE_CHANGE_H, OFF_TOPIC, PA
                      out_of_scope,
                      pre_golive_chat,
                      decide, gate, human_replied_since, is_acknowledgement, on_human_message,
-                     reply_problems, set_mode)
+                     mask_customer_emails, reply_problems, set_mode)
 from .state import ChatLocks, append_history, make_store, mark_seen, note_outcome, parse_code
 from .whatsapp import (Echo, HistoryChunk, Inbound, Status, WhatsAppClient, parse_webhook,
                        verify_signature)
@@ -606,13 +606,36 @@ def _book_pending(state, ev: Inbound, received: float, fallback: str,
             return fallback, None, False
         pending = {**pending, "date": pick[0], "time": pick[1],
                    "full_name": pending.get("full_name") or chosen.get("full_name", "")}
+    # An email given with the pick (or as the corrected one) counts too.
+    if (chosen.get("email") or "").strip():
+        pending = {**pending, "email": chosen["email"].strip()}
     if not booking_client.complete(pending):
         events.record("book_skipped", ev.wa_id, reason="details_missing")
         return fallback, None, False
     patient_id = tools.record_for_booking(state.patient or {}, pending.get("full_name", ""),
                                           pending.get("for_whom", ""))
+    check = booking_client.email_check(pending.get("email", ""))
+    if check:
+        # A mistyped email would bounce the confirmation: ask, and keep the
+        # time so their answer books it.
+        return _ask_email_again(state, ev, pending, check)
+    on_file = "" if (pending.get("email") or "").strip() else \
+        tools.record_email(state.patient or {}, patient_id)
+    # A returning patient's email on file, so Plato's confirmation (and the
+    # registration form) still goes out.
+    sent = {**pending, "email": on_file} if on_file else pending
     try:
-        res = booking_client.book(pending, wa_id=ev.wa_id, patient_id=patient_id)
+        try:
+            res = booking_client.book(sent, wa_id=ev.wa_id, patient_id=patient_id)
+        except booking_client.BookingFailed as e:
+            if e.code != "bad_email":
+                raise
+            if on_file:   # Plato's own copy is off: book without it, ask nobody
+                sent = pending
+                res = booking_client.book(sent, wa_id=ev.wa_id, patient_id=patient_id)
+            else:
+                return _ask_email_again(state, ev, pending, booking_client.email_check(
+                    pending.get("email", ""), str(e)))
     except booking_client.BookingFailed as e:
         state.pending_booking = {}
         events.record("book_failed", ev.wa_id, reason=e.code)
@@ -630,11 +653,20 @@ def _book_pending(state, ev: Inbound, received: float, fallback: str,
     first = (pending.get("full_name") or "").split(" ")[0]
     for_other = (pending.get("for_whom") or "self").strip().lower() not in ("", "self")
     return (booking_client.confirmation_text(res, first_name="" if for_other else first,
-                                             patient=first if for_other else ""),
+                                             patient=first if for_other else "",
+                                             emailed=bool((sent.get("email") or "").strip())),
             {"reference": res["reference"], "date": res["date"], "time": res["time"],
              "with": res.get("clinician_name", ""), "service": res.get("service", ""),
              "dry_run": bool(res.get("dry_run")), "at": time.time(), "source": "whatsapp"},
             False)
+
+
+def _ask_email_again(state, ev: Inbound, pending: dict, question: str):
+    """The email given wouldn't reach them: ask again and keep the time, so the
+    answer books it (the pick is already their yes). Not a failure: no alert."""
+    state.pending_booking = {**pending, "email": "", "options": "", "at": time.time()}
+    events.record("book_skipped", ev.wa_id, reason="email_check")
+    return question, None, False
 
 
 BUBBLE_PAUSE_S = 1.2
@@ -986,6 +1018,7 @@ def handle_inbound(ev: Inbound, received: float) -> None:
                             _booked_note(state)])))
     _schedule_warm()
     p = res.proposal
+    p.reply = mask_customer_emails(p.reply, history)
     check_late_change(p, patient.get("next_appointment"), time.time())
     d = decide(p, intent_policy=learning.effective_policy(config.stage_policy(rollout["stage"]),
                                                           st.get_autonomy()))

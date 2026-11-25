@@ -44,6 +44,25 @@ def booking_note(b: dict) -> str:
                 f"number is theirs. " + note).strip()
     return note
 _TIME = re.compile(r"^\d{2}:\d{2}$")
+# goji-booking's own format check (booking.py _EMAIL_RE). It also refuses a
+# one-letter miss of a big webmail domain (code bad_email, "did you mean ...?").
+_EMAIL = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+_DID_YOU_MEAN = re.compile(r"did you mean (\S+@\S+?)\?", re.I)
+
+
+def email_check(email: str, refusal: str = "") -> str:
+    """The question to send when an email given for a booking won't work, or
+    "" when it's fine (or there is none: email is never required). `refusal`
+    is goji-booking's bad_email message, which names the likely fix."""
+    email = (email or "").strip()
+    fix = _DID_YOU_MEAN.search(refusal or "")
+    if fix:
+        return (f"Just checking your email before I book: did you mean {fix.group(1)}? "
+                "The confirmation and registration form go there.")
+    if email and not _EMAIL.match(email):
+        return ("That email doesn't look quite right. Could you send it again? The "
+                "confirmation and registration form go there.")
+    return ""
 
 
 class BookingFailed(Exception):
@@ -259,7 +278,8 @@ def _simulate(b: dict, http) -> dict:
             "time": b["time"]}
 
 
-def confirmation_text(res: dict, *, first_name: str = "", patient: str = "") -> str:
+def confirmation_text(res: dict, *, first_name: str = "", patient: str = "",
+                      emailed: bool = False) -> str:
     """What the customer sees once it's booked. Composed in code from the
     booking system's answer, so it can't claim a booking that didn't happen."""
     d = date.fromisoformat(res["date"])
@@ -270,7 +290,9 @@ def confirmation_text(res: dict, *, first_name: str = "", patient: str = "") -> 
             else f"You're booked{', ' + first_name if first_name else ''}!")
     text = (f"{head} {when}"
             f"{' with ' + who if who else ''} (ref {res['reference']}).\n\n"
-            "We'll send a reminder before your appointment. See you then 😊")
+            + ("A confirmation email is on its way too. "
+               if emailed and not res.get("dry_run") else "")
+            + "We'll send a reminder before your appointment. See you then 😊")
     if res.get("dry_run"):
         text += "\n\n🧪 TEST: dry run, nothing was booked in the calendar."
     return text

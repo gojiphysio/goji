@@ -212,3 +212,14 @@ def test_next_slots_labels_todays_times_today():
                         "2026-11-25": _day({"kristy-ng": ["09:00"]})})
     out = tools.next_slots({"service": "physiotherapy"}, http=http, today=date(2026, 11, 24))
     assert [s["weekday"] for s in out["slots"]] == ["Today", "Wed"]
+
+
+def test_an_email_on_file_goes_to_the_booking_never_to_the_model():
+    p = {"returning": True, "first_name": "Sarah", "patients_on_number": 1,
+         "records": [{"id": "S1", "name": "Sarah Lim", "email": "sarah@example.com"}]}
+    assert tools.record_email(p, "S1") == "sarah@example.com"
+    assert tools.record_email(p, "") == ""                                  # a new record: none
+    line = tools.describe_patient(p)
+    assert "an email is on file" in line and "sarah@example.com" not in line
+    family = {**p, "records": [*p["records"], {"id": "K1", "name": "Lim Ethan", "email": ""}]}
+    assert "email is on file" not in tools.describe_patient(family)        # not for everyone

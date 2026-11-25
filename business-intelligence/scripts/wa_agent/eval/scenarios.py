@@ -135,16 +135,34 @@ def build_booking_confirm():
     s = _open_slots(1)[0]
     return [f"Can I book physio {_nice(s)} with {_who(s)}? I'm Jamie Lee.",
             ("agent", f"{_nice(s)} with {_who(s)} is open! Shall I book physiotherapy on "
-                      f"{_nice(s)} with {_who(s)} for Jamie Lee?"),
-            "Yes please"]
+                      f"{_nice(s)} with {_who(s)} for Jamie Lee? And could I have your email "
+                      "for the confirmation?"),
+            "Yes please, jamie.lee@example.com"]
 
 
 def build_booking_pick():
     a, b = _open_slots(2)
     return ["Any physio slots coming up? I'm Jamie Lee",
             ("agent", f"I have {_nice(a)} with {_who(a)} or {_nice(b)} with {_who(b)}. "
+                      "Which would you like? And could I have your email for the booking?"),
+            f"{_nice(b).split(', ')[0]} {_nice(b).split(', ')[1]} please, jamie.lee@example.com"]
+
+
+def build_booking_pick_no_email_asked():
+    a, b = _open_slots(2)
+    return ["Any physio slots coming up? I'm Jamie Lee",
+            ("agent", f"I have {_nice(a)} with {_who(a)} or {_nice(b)} with {_who(b)}. "
                       "Which would you like?"),
             f"{_nice(b).split(', ')[0]} {_nice(b).split(', ')[1]} please"]
+
+
+def build_booking_pick_email_declined():
+    a, b = _open_slots(2)
+    return ["Any physio slots coming up? I'm Jamie Lee",
+            ("agent", f"I have {_nice(a)} with {_who(a)} or {_nice(b)} with {_who(b)}. "
+                      "Which would you like? And could I have your email for the booking?"),
+            f"{_nice(b).split(', ')[0]} {_nice(b).split(', ')[1]} please. I'd rather not "
+            "give my email"]
 
 
 def build_move_pick():
@@ -251,8 +269,9 @@ SCENARIOS: list[Scenario] = [
       [f"Can I book physio with Kristy on {_next_weekday(1).isoformat()}? Any morning time. "
        "My name is Jamie Lee."],
       E(intents=("booking", "availability"), decisions=("send",), confirm_booking=False,
-        must_not=(r"you'?re booked", r"booked in", r"it is\b"), max_questions=1),
-      note="either states a specific open time back (booking filled) or offers times"),
+        must_not=(r"you'?re booked", r"booked in", r"it is\b"), max_questions=2),
+      note="either states a specific open time back (booking filled) or offers times; "
+           "the email ask may ride along (2 questions)"),
     S("booking_confirm", "booking",
       ["(built at run time from live open slots)"],
       E(intents=("booking",), confirm_booking=True, must_not=(r"you'?re booked",)),
@@ -269,7 +288,7 @@ SCENARIOS: list[Scenario] = [
       ["want to book a postnatal physio session for my wife",
        ("agent", "Lovely! Would Mon 23 Nov 8:00am or Tue 24 Nov 8:30am with Kristy work for her?"),
        "monday works"],
-      E(must=(r"name",), must_not=(r"charles (tan|wong)", r"you're booked"), max_questions=1),
+      E(must=(r"name",), must_not=(r"charles (tan|wong)", r"you're booked"), max_questions=2),
       patient=SARAH.replace("Sarah", "Charles"), customer_name="Charles",
       note="asks for the wife's full name; never books her under the texter's name"),
     S("chatted_before_not_patient", "returning patient",
@@ -277,9 +296,27 @@ SCENARIOS: list[Scenario] = [
        "Hi again! Is there parking nearby?"],
       E(must_not=(r"last visit", r"your (last|previous) (appointment|session)")),
       note="has chatted before but no patient record: warm, not treated as a patient"),
-    S("booking_no_email_required", "booking",
-      ["Book me in for physio Friday 9am please, I'm Jamie Lee"],
-      E(must_not=(r"(need|require)\w* (your )?email", r"what('?s| is) your email"))),
+    S("booking_asks_email", "booking",
+      ["Any physio slots next week for my sore lower back? I'm Jamie Lee"],
+      E(intents=("booking", "availability"), must=(r"e-?mail",),
+        must_not=(r"(need|require|must)\w* (your |an )?e-?mail",)),
+      note="asks for the email once, alongside the times (Plato's confirmation + form)"),
+    S("booking_email_on_file", "booking",
+      ["Any physio slots next week? I'd like to come in again"],
+      E(intents=("booking", "availability"), must_not=(r"e-?mail",)),
+      patient=SARAH + "; an email is on file (no need to ask for one when booking for this patient)",
+      customer_name="Sarah", note="returning patient with an email on file: not asked"),
+    S("booking_pick_asks_email_first", "booking",
+      ["(built at run time from live open slots)"],
+      E(intents=("booking",), confirm_booking=False, booking_filled=True, must=(r"e-?mail",),
+        must_not=(r"you'?re booked",), max_questions=1),
+      note="picked a time before being asked for an email: ask once, then book on the answer",
+      build=build_booking_pick_no_email_asked),
+    S("booking_email_declined_books", "booking",
+      ["(built at run time from live open slots)"],
+      E(intents=("booking",), confirm_booking=True, must_not=(r"e-?mail\?",)),
+      note="asked once and declined: book without it, don't ask again",
+      build=build_booking_pick_email_declined),
     S("booking_link_once", "booking",
       ["Any physio slots on Saturday?",
        ("agent", "Saturday has 9:00am and 11:00am with Kristy. You can grab one here: "

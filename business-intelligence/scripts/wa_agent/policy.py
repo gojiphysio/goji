@@ -245,6 +245,17 @@ _PHONE = re.compile(r"(?<![\w$.])(?:\+?65[\s-]?)?(\d{4}[\s-]?\d{4})(?![\w])")
 _PLACEHOLDER = re.compile(r"\[[^\[\]\n]{1,80}\]")
 
 
+def mask_customer_emails(reply: str, history: list[dict]) -> str:
+    """The customer's own email, written back to them, reads as "your email":
+    the contact check would otherwise hand the chat over for it."""
+    theirs = {e.lower() for h in history if h.get("role") == "customer"
+              for e in _EMAIL.findall(h.get("text") or "")} - ALLOWED_EMAILS
+    if not theirs:
+        return reply
+    return _EMAIL.sub(lambda m: "your email" if m.group(0).lower() in theirs else m.group(0),
+                      reply)
+
+
 def reply_problems(reply: str) -> list[str]:
     """Links, emails or phone numbers in a reply that aren't Goji's own, and
     [placeholders] left for Chris."""
