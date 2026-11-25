@@ -7,3 +7,4 @@
 - Keep each generation prompt and provenance with the images; save revisions as new versions.
 - User-approved on 25 November 2026 for the next episode: CONFRONT v3 and GRIP v2. Use these appearance masters and approved-assets.json; archived revisions are superseded. Both have no real manufacturer emblems, wheel-cap logos, or model/trim badges. Describe them as generic unbadged vehicles.
 - Keep fictional jumbled plates starting with S consistent: CONFRONT S7K9X2Q; GRIP S4N8V6R. Do not restore archived plate strings.
+- The approved vehicle index also includes SOS-BUS-01 v1 at ../references/sos-bus-01/. Use its canonical image and reference.json; do not substitute the Blender blockout for appearance.

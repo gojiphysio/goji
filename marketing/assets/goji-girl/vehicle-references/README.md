@@ -1,6 +1,14 @@
-# Singapore vehicle references — CONFRONT / GRIP
+# Singapore vehicle references — SOS Transit / CONFRONT / GRIP
 
 Generated 25 November 2026 using the built-in image-generation tool. **Approved by the user on 25 November 2026 for reuse in the next episode.** These are the selected vehicle appearance references for the Goji GTA series, matching the accepted SOS Transit bus look; they are not rigged 3D assets or motion/geometry validation.
+
+## SOS Transit bus — SOS-BUS-01
+
+**User-approved version 1**, saved for recurring use. Two-deck, three-axle bus with orange-red/purple/white livery and SOS Transit wordmark/swoosh.
+
+![SOS Transit bus](../references/sos-bus-01/canonical.png)
+
+[Bus continuity and approval record](../references/sos-bus-01/README.md) · [Full-size image](../references/sos-bus-01/canonical.png)
 
 ## CONFRONT cab
 
