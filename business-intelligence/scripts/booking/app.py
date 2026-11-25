@@ -31,7 +31,8 @@ import requests
 from flask import Flask, jsonify, request
 
 from .availability import SGT, derive_availability, derive_available_days
-from .booking import BookingError, cancel_appointment, create_booking, reschedule_appointment
+from .booking import (BookingError, cancel_appointment, confirm_appointment,
+                      create_booking, reschedule_appointment)
 from .config import CLINICIANS, MAX_ADVANCE_DAYS, SAME_DAY_LEAD_MINUTES, SERVICES
 from .plato import PlatoBusy, PlatoClient, PlatoError, PlatoThrottled, one_record
 from . import confirmations, mailer, patient_contacts
@@ -957,6 +958,45 @@ def internal_reschedule():
         "new_date": result["new_date"],
         "new_time": result["new_time"],
     })
+
+
+# BookingError code -> HTTP status for /internal/confirm (anything else 400).
+CONFIRM_STATUS = {"not_found": 404, "past": 409, "plato_error": 502}
+
+
+@app.route("/internal/confirm", methods=["POST"])
+def internal_confirm():
+    """Mark an appointment Confirmed in Plato for the WhatsApp assistant, when a
+    patient taps Confirm on the 48-hour reminder. Body {appointment_id, phone,
+    dry_run}. confirm_appointment checks the number owns the appointment. Same
+    token rules as /internal/book. The patient's Confirm link in our emails sets
+    the same Plato status, so the reminder and confirmation emails stop asking
+    once either is used."""
+    if not INTERNAL_TOKEN:
+        return jsonify({"ok": False, "error": "not found", "code": "not_found"}), 404
+    token = request.headers.get("X-Internal-Token", "")
+    if not hmac.compare_digest(token.encode(), INTERNAL_TOKEN.encode()):
+        return jsonify({"ok": False, "error": "forbidden", "code": "forbidden"}), 403
+    body = request.get_json(silent=True)
+    if not isinstance(body, dict):
+        return jsonify({"ok": False, "error": "Expected a JSON object.",
+                        "code": "invalid"}), 400
+    dry_run = body.get("dry_run", False)
+    if not isinstance(dry_run, bool):
+        return jsonify({"ok": False, "error": "dry_run must be true or false.",
+                        "code": "invalid"}), 400
+    try:
+        result = confirm_appointment(plato(), body, now=_sgt_now(), dry_run=dry_run)
+    except BookingError as e:
+        return jsonify({"ok": False, "error": str(e), "code": e.code}), \
+            CONFIRM_STATUS.get(e.code, 400)
+    except Exception:
+        log.exception("whatsapp confirm failed")
+        return jsonify({"ok": False, "error": "Something went wrong.",
+                        "code": "plato_error"}), 502
+    log.info("confirmed %s via WhatsApp reminder (already=%s, dry_run=%s)",
+             result["reference"], result["already"], dry_run)
+    return jsonify(result)
 
 
 @app.route("/internal/cancel", methods=["POST"])

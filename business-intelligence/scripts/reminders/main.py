@@ -17,12 +17,13 @@ FLOW
      the same hydration join fetch_new_patient_welcome uses in dashboard/app.py.
      Anything already 'sent' in the ledger (on either channel) is suppressed in
      SQL. The D+2 window lives in the view's WHERE clause and nowhere else.
-  2. WhatsApp first (only when WA_REMINDERS_ENABLED): every appointment whose
+  2. WhatsApp (only when WA_REMINDERS_ENABLED): every appointment whose
      phone normalises to a WhatsApp number gets the approved template, ONE
-     MESSAGE PER APPOINTMENT (a template holds one date/time), in time order.
-     See reminder_whatsapp.py.
-  3. Email for everyone else, and for any appointment whose WhatsApp send
-     failed. Grouped by recipient email: ONE email per patient per day, listing
+     MESSAGE PER APPOINTMENT (a template holds one date/time), in time order,
+     except one already confirmed in Plato whose patient has an email (the
+     template asks them to confirm). See reminder_whatsapp.py.
+  3. Email for everyone with an address, in parallel with WhatsApp (clinic
+     decision, 25 Nov 2026). Grouped by recipient email: ONE email per patient per day, listing
      every session they have that day — a home visit is three Plato appointments
      (travel/visit/travel), and back-to-back bookings (physio then Pilates)
      shouldn't produce two emails. With WhatsApp off this is the whole job, and
@@ -196,11 +197,15 @@ def group_by_recipient(rows: list[dict]) -> tuple[list[dict], list[dict]]:
             "appointment_ids": [],
             "times": [],
             "confirm": [],   # (time, appointment_id): one Confirm link per session
+            "confirmed": False,  # at least one session already confirmed in Plato
             "has_clinic": False,
             "has_home_visit": False,
         })
         g["appointment_ids"].append(r["appointment_id"])
-        g["confirm"].append((r.get("time") or "", r["appointment_id"]))
+        if r.get("confirmed"):
+            g["confirmed"] = True
+        else:
+            g["confirm"].append((r.get("time") or "", r["appointment_id"]))
         if r.get("time"):
             g["times"].append(r["time"])
         if r.get("is_home_visit"):
@@ -240,7 +245,10 @@ SELECT
   COALESCE(NULLIF(TRIM(JSON_VALUE(a.payload, '$.email')), ''),
            NULLIF(TRIM(c.email), ''))                           AS email,
   COALESCE(NULLIF(TRIM(JSON_VALUE(a.payload, '$.handphone')), ''),
-           NULLIF(TRIM(c.phone), ''))                           AS phone
+           NULLIF(TRIM(c.phone), ''))                           AS phone,
+  -- Already confirmed in Plato (code_Right 'qK8x' = "Confirmed": the patient's
+  -- Confirm link, a WhatsApp Confirm tap, or staff). No Confirm ask then.
+  COALESCE(JSON_VALUE(a.payload, '$.code_Right'), '') = 'qK8x'  AS confirmed
 FROM `{project}.{dataset}.fct_appointment_reminders` r
 LEFT JOIN `{project}.stg.appointments`                a USING (appointment_id)
 LEFT JOIN `{project}.{dataset}.dim_patient_contact`   c ON r.patient_id = c.patient_id
@@ -308,32 +316,40 @@ def write_ledger(bq: bigquery.Client, project: str, dataset: str,
 
 def dispatch(rows: list[dict], day: str, *, dry_run: bool, wa_enabled: bool,
              send_whatsapp, send_email, test_mode: bool = False) -> dict:
-    """Decide each appointment's channel, send, and say what to ledger/digest.
+    """Send each appointment's reminder on every channel it has, and say what
+    to ledger/digest.
 
     send_whatsapp(to, params, appointment_id) -> wamid, raises on failure.
     send_email(group, day) -> None, raises on failure.
 
-    WhatsApp first for every appointment with a usable mobile (wa_enabled only),
-    one message per appointment in time order. Email for the rest, plus any
-    appointment whose WhatsApp failed, grouped one email per patient. An
-    appointment never gets both unless its WhatsApp failed.
+    The channels run in parallel (clinic decision, 25 Nov 2026):
+      - EMAIL goes to everyone with an address, confirmed or not, grouped one
+        email per patient per day. A confirmed session gets no Confirm button.
+      - WHATSAPP (wa_enabled only) goes to every appointment with a usable
+        mobile, one message per appointment in time order, EXCEPT an
+        appointment already confirmed in Plato whose patient has an email: the
+        template's first button asks them to confirm, and the clinic doesn't
+        want to keep asking. With no email, WhatsApp is their only reminder,
+        so it still goes.
 
     Returns {"ledger", "sent", "skipped", "failed", "preview"}; the ledger holds
-    exactly one entry per appointment.
+    exactly one entry per appointment: 'sent' when any channel got through,
+    channel 'both' | 'whatsapp' | 'email' | 'none', and the other channel's
+    error in `note`.
     """
     ok_status = "test" if test_mode else "sent"
-    ledger: list[dict] = []
     sent: list[dict] = []
     failed: list[dict] = []
     skipped: list[dict] = []
     preview: str | None = None
-    email_rows: list[dict] = []
-    wa_error: dict[str, str] = {}      # appointment_id -> why WhatsApp failed
+    wa_ok: dict[str, str | None] = {}   # appointment_id -> wamid (None in a dry run)
+    wa_error: dict[str, str] = {}       # appointment_id -> why WhatsApp failed
+    email_ok: set[str] = set()
+    email_error: dict[str, str] = {}
 
     for r in sorted(rows, key=lambda r: r.get("time") or ""):
         to = wa.normalise_phone(r.get("phone")) if wa_enabled else None
-        if not to:
-            email_rows.append(r)
+        if not to or (r.get("confirmed") and (r.get("email") or "").strip()):
             continue
         ref = r["appointment_id"]
         params = wa.template_params(r, day)
@@ -346,20 +362,16 @@ def dispatch(rows: list[dict], day: str, *, dry_run: bool, wa_enabled: bool,
             log.info("DRY RUN would WhatsApp appointment %s", ref)
             preview = preview or wa.render_preview(params)
             sent.append(summary)
-            ledger.append(ledger_entry(ref, "dry_run", "whatsapp"))
+            wa_ok[ref] = None
             continue
         try:
-            msg_id = send_whatsapp(to, params, ref)
+            wa_ok[ref] = send_whatsapp(to, params, ref)
             sent.append(summary)
-            ledger.append(ledger_entry(ref, ok_status, "whatsapp",
-                                       wa_message_id=msg_id))
         except Exception as e:
-            log.warning("whatsapp for appointment %s failed, trying email: %s",
-                        ref, scrub(str(e)))
+            log.warning("whatsapp for appointment %s failed: %s", ref, scrub(str(e)))
             wa_error[ref] = scrub(str(e)) or "unknown error"
-            email_rows.append(r)
 
-    groups, unreachable = group_by_recipient(email_rows)
+    groups, unreachable = group_by_recipient(rows)
     for g in groups:
         # Log lines key on appointment_id, never on the recipient address.
         # Cloud Logging is a different surface from BigQuery but the same PII
@@ -368,51 +380,53 @@ def dispatch(rows: list[dict], day: str, *, dry_run: bool, wa_enabled: bool,
         # digest to hello@ carries the human-readable list.
         ids = g["appointment_ids"]
         ref = ids[0]
-        fell_back = any(i in wa_error for i in ids)
         summary = {"name": g["name"], "time": g["times"][0] if g["times"] else "",
                    "email": g["email"], "channel": "email"}
-        if fell_back:
-            summary["detail"] = "(WhatsApp failed)"
-
-        def note(i, extra=None):
-            parts = [f"whatsapp failed: {wa_error[i]}"] if i in wa_error else []
-            if extra:
-                parts.append(extra)
-            return scrub("; ".join(parts)) if parts else None
-
         if dry_run:
             log.info("DRY RUN would send to appointment %s (%d appt)", ref, len(ids))
             sent.append(summary)
-            ledger += [ledger_entry(i, "dry_run", "email") for i in ids]
+            email_ok.update(ids)
             continue
         try:
             send_email(g, day)
             sent.append(summary)
-            # TEST MODE writes 'test', never 'sent' — otherwise a test run would
-            # suppress the real reminder on the actual day, and these patients
-            # would silently never hear from us. Only a genuine send is 'sent'.
-            ledger += [ledger_entry(i, ok_status, "email", note=note(i)) for i in ids]
+            email_ok.update(ids)
         except Exception as e:
-            # One bad address must not stop the rest of the list. 'failed' rows
-            # aren't 'sent', so the next run retries them.
+            # One bad address must not stop the rest of the list.
             log.warning("reminder for appointment %s failed: %s", ref, scrub(str(e)))
             failed.append({**summary, "error": str(e)})
-            ledger += [ledger_entry(i, "failed", "email", note=note(i, scrub(str(e))))
-                       for i in ids]
+            for i in ids:
+                email_error[i] = scrub(str(e)) or "unknown error"
 
-    for r in unreachable:
+    ledger: list[dict] = []
+    status_ok = "dry_run" if dry_run else ok_status
+    for r in rows:
         i = r["appointment_id"]
-        entry = {"name": r.get("name"), "phone": r.get("phone"), "time": r.get("time")}
-        if i in wa_error:
-            # WhatsApp failed and there's no email to fall back to: nobody was
-            # reached, so it goes on the by-hand list. 'failed' (not skipped) so
-            # a same-day re-run tries WhatsApp again.
-            entry["reason"] = f"WhatsApp failed: {wa_error[i]}"
-            ledger.append(ledger_entry(i, "failed", "whatsapp",
-                                       note=scrub(f"whatsapp failed: {wa_error[i]}")))
+        by_wa, by_email = i in wa_ok, i in email_ok
+        notes = ([f"whatsapp failed: {wa_error[i]}"] if i in wa_error else []) + \
+                ([f"email failed: {email_error[i]}"] if i in email_error else [])
+        note = scrub("; ".join(notes)) if notes else None
+        if by_wa or by_email:
+            channel = "both" if by_wa and by_email else ("whatsapp" if by_wa else "email")
+            # TEST MODE writes 'test', never 'sent' — otherwise a test run would
+            # suppress the real reminder on the actual day.
+            ledger.append(ledger_entry(i, status_ok, channel, note=note,
+                                       wa_message_id=wa_ok.get(i)))
+        elif i in wa_error or i in email_error:
+            # Nothing got through: 'failed' (not skipped) so a re-run retries.
+            ledger.append(ledger_entry(i, "failed", "email" if i in email_error else "whatsapp",
+                                       note=note))
         else:
             ledger.append(ledger_entry(
                 i, "skipped_no_contact" if wa_enabled else "skipped_no_email", "none"))
+
+    for r in unreachable:
+        i = r["appointment_id"]
+        if i in wa_ok:
+            continue  # no email, but WhatsApp reached them
+        entry = {"name": r.get("name"), "phone": r.get("phone"), "time": r.get("time")}
+        if i in wa_error:
+            entry["reason"] = f"WhatsApp failed: {wa_error[i]}"
         skipped.append(entry)
 
     return {"ledger": ledger, "sent": sent, "skipped": skipped,
@@ -489,7 +503,8 @@ def main() -> int:
             g["email"], g["name"], day, g["times"],
             has_clinic=g["has_clinic"], has_home_visit=g["has_home_visit"],
             ref=g["appointment_ids"][0],
-            confirm_links=[(t, mailer.confirm_url(aid)) for t, aid in g.get("confirm", [])])
+            confirm_links=[(t, mailer.confirm_url(aid)) for t, aid in g.get("confirm", [])],
+            confirmed=g.get("confirmed", False))
 
     out = dispatch(rows, day, dry_run=dry_run, wa_enabled=wa_on,
                    send_whatsapp=wa.send_template, send_email=send_email,

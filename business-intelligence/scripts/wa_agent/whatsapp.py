@@ -58,6 +58,7 @@ class Inbound:
     caption: str = ""
     reply_to: str = ""     # the message id they swipe-replied to (context.id), or reacted to
     emoji: str = ""        # a reaction's emoji; "" when they removed one
+    payload: str = ""      # a template quick-reply's payload, e.g. reminder_confirm:<appointment id>
 
 
 @dataclass
@@ -197,7 +198,9 @@ def parse_webhook(payload: dict) -> list[Inbound | Echo | Status | HistoryChunk]
                                           caption=media.get("caption", ""),
                                           reply_to=react.get("message_id") or
                                           (m.get("context") or {}).get("id", ""),
-                                          emoji=react.get("emoji", "")))
+                                          emoji=react.get("emoji", ""),
+                                          payload=(m.get("button") or {}).get("payload", "")
+                                          if kind == "button" else ""))
                 for s in value.get("statuses") or []:
                     events.append(Status(msg_id=s.get("id", ""), status=s.get("status", ""),
                                          ts=float(s.get("timestamp") or 0),

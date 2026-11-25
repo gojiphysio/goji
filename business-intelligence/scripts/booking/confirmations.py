@@ -87,6 +87,10 @@ for _svc in SERVICES.values():
     SERVICE_WORDS.setdefault(_svc.get("type_code") or "", _svc["title"])
 SERVICE_WORDS.pop("", None)
 
+# Plato's "Confirmed" appointment code (code_Right). Set by the patient's Confirm
+# link, a WhatsApp Confirm tap (confirm_appointment) or staff.
+CONFIRMED_CODE = "qK8x"
+
 # Plato status text that marks an appointment as not happening (booking.py and
 # the BI marts use the same set).
 _DEAD_STATUSES = {"cancelled", "canceled", "no_show", "noshow", "no-show"}
@@ -157,6 +161,7 @@ class Appointment:
     patient_id: str = ""
     address: str = ""
     created_on: str = ""       # 'YYYY-MM-DD HH:MM:SS' clinic time, '' if unknown
+    confirmed: bool = False    # Plato code_Right 'qK8x': don't ask them to confirm again
 
     @property
     def start_key(self) -> str:
@@ -231,7 +236,8 @@ def from_plato(appt: dict) -> Appointment | None:
         name=" ".join(str(appt.get("title") or "").split()),
         email=email, phone=phone, patient_id=pid,
         address=_address_from(str(appt.get("description") or "")),
-        created_on=str(appt.get("created_on") or "").strip())
+        created_on=str(appt.get("created_on") or "").strip(),
+        confirmed=str(appt.get("code_Right") or "").strip() == CONFIRMED_CODE)
 
 
 def from_booking(result: dict, draft: dict) -> Appointment | None:
@@ -321,7 +327,10 @@ def _where_lines(appt: Appointment) -> list[str]:
 def render_text(appt: Appointment, kind: str, form_url: str | None) -> str:
     lines = [f"Hi {appt.first_name},", "", _intro(appt, kind), ""]
     lines += [f"{label + ':':<11}{value}" for label, value in _details(appt)]
-    lines += ["", "Please confirm you're coming:", confirm_url(appt.appointment_id), ""]
+    if appt.confirmed:
+        lines += ["", "You've confirmed this appointment. Thank you!", ""]
+    else:
+        lines += ["", "Please confirm you're coming:", confirm_url(appt.appointment_id), ""]
     if form_url:
         lines += ["New to Goji? Please fill in your registration form before your visit:",
                   form_url, ""]
@@ -344,7 +353,13 @@ def render_html(appt: Appointment, kind: str, form_url: str | None) -> str:
         f'white-space:nowrap">{escape(label)}</td><td style="padding:3px 0;'
         f'vertical-align:top">{escape(value)}</td></tr>'
         for label, value in _details(appt))
-    confirm = escape(confirm_url(appt.appointment_id))
+    if appt.confirmed:
+        confirm_block = ('<p style="margin:20px 0 0">You\'ve confirmed this appointment. '
+                         'Thank you!</p>')
+    else:
+        confirm_block = (f'<p style="margin:20px 0 0"><a href="'
+                         f'{escape(confirm_url(appt.appointment_id))}" style="{_BTN}'
+                         f'background:#1f5f4a;color:#fff">Confirm I\'m coming</a></p>')
     form = ""
     if form_url:
         form = (f'<p style="margin:20px 0 6px">New to Goji? Please fill in your '
@@ -366,8 +381,7 @@ def render_html(appt: Appointment, kind: str, form_url: str | None) -> str:
         f"<p>Hi {escape(appt.first_name)},</p><p>{escape(_intro(appt, kind))}</p>"
         f'<table role="presentation" cellspacing="0" cellpadding="0" '
         f'style="border-collapse:collapse;font-size:14px">{rows}</table>'
-        f'<p style="margin:20px 0 0"><a href="{confirm}" style="{_BTN}background:#1f5f4a;'
-        f'color:#fff">Confirm I\'m coming</a></p>{form}'
+        f"{confirm_block}{form}"
         f'<p style="margin:24px 0 4px;font-weight:bold">{where_title}</p><p style="margin:0">{where}</p>'
         f'<p style="margin:24px 0 4px;font-weight:bold">Changes and cancellations</p>'
         f'<p style="margin:0">{escape(POLICY)}<br>To change or cancel, WhatsApp us on '

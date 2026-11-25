@@ -703,3 +703,58 @@ def cancel_appointment(plato, req: dict, *, now: datetime | None = None,
         "date": day.isoformat(),
         "time": time_,
     }
+
+
+# --- Confirm (a WhatsApp reminder's Confirm tap) -------------------------------
+
+# Plato's "Confirmed" appointment code (code_Right, from GET appointment/codes).
+# Plato's own Confirm link sets it too, so every channel shares one status.
+CONFIRMED_CODE = "qK8x"
+
+
+def confirm_appointment(plato, req: dict, *, now: datetime | None = None,
+                        dry_run: bool = False) -> dict:
+    """Mark an appointment Confirmed in Plato for the patient who tapped Confirm
+    on their WhatsApp reminder. req keys: appointment_id (from the template's
+    button payload, which we wrote), phone (the WhatsApp number that tapped).
+
+    The number must be the appointment's own (inline handphone, else the linked
+    patient's profile), so a tap can only ever confirm the tapper's appointment.
+    Already confirmed -> ok, nothing written. Raises BookingError."""
+    from .plato import one_record
+    from .patient_contacts import from_plato as contact_from_plato
+
+    aid = str(req.get("appointment_id") or "").strip()
+    _require(aid and aid.isalnum() and len(aid) <= 64, "Invalid appointment_id.")
+    phone = _last8(req.get("phone"))
+    _require(len(phone) == 8, "Invalid phone.")
+    try:
+        appt = one_record(plato.get(f"/appointment/{aid}", _retries=1))
+    except Exception as e:
+        raise BookingError("Could not read the appointment.", "plato_error") from e
+    if not appt or not _is_live_booking(appt):
+        raise BookingError("No such appointment.", "not_found")
+    owner = _last8(appt.get("handphone"))
+    if not owner and appt.get("patient_id"):
+        try:
+            patient = one_record(plato.get(f"/patient/{appt['patient_id']}", _retries=1))
+        except Exception as e:
+            raise BookingError("Could not read the patient.", "plato_error") from e
+        owner = _last8((contact_from_plato(appt["patient_id"], patient or {}) or {}).get("phone"))
+    if owner != phone:
+        # Same answer as a missing appointment: don't confirm that it exists.
+        raise BookingError("No such appointment.", "not_found")
+    start = _parse_plato_dt(appt.get("starttime"))
+    clinic_now = now or datetime.now(_SGT).replace(tzinfo=None)
+    _require(start is not None and start > clinic_now,
+             "That appointment has already started.", "past")
+    already = str(appt.get("code_Right") or "").strip() == CONFIRMED_CODE
+    if not already and not dry_run:
+        try:
+            r = plato.update_appointment(aid, {"code_Right": CONFIRMED_CODE})
+        except Exception as e:
+            raise BookingError("Could not confirm the appointment.", "plato_error") from e
+        if isinstance(r, dict) and r.get("success") is False:
+            raise BookingError("Plato did not accept the change.", "plato_error")
+    return {"ok": True, "already": already, "dry_run": dry_run,
+            "appointment_id": aid, "reference": "GOJI-" + aid[-6:].upper()}

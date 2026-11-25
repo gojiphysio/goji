@@ -415,3 +415,11 @@ def test_webhook_route_hands_appointments_to_confirmations(monkeypatch):
     r = app_mod.app.test_client().post(path, json={"events": [
         {"db": "gojihealth", "event": "appointment:upsert", "object_id": "a1"}]})
     assert r.status_code == 200 and got == [["a1"]]
+
+
+def test_confirmed_appointment_is_thanked_not_asked():
+    a = c.from_plato({**PLATO_APPT, "code_Right": "qK8x"})
+    assert a.confirmed
+    for body in (c.render_text(a, "moved", None), c.render_html(a, "moved", None)):
+        assert "confirmed this appointment" in body
+        assert c.confirm_url(a.appointment_id) not in body

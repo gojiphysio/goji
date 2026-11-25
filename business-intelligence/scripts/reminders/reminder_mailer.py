@@ -128,7 +128,8 @@ def first_name(full_name: str | None) -> str:
 
 def render_reminder_body(name: str | None, date_str: str, times: list[str],
                          *, has_clinic: bool, has_home_visit: bool,
-                         confirm_links: list[tuple[str, str]] | None = None) -> str:
+                         confirm_links: list[tuple[str, str]] | None = None,
+                         confirmed: bool = False) -> str:
     """The full plain-text reminder body.
 
     has_clinic / has_home_visit select the location block. Normally exactly one
@@ -151,6 +152,8 @@ def render_reminder_body(name: str | None, date_str: str, times: list[str],
     elif confirm_links:
         lines += ["Please confirm each session:",
                   *(f"  {_fmt_time(t)}: {url}" for t, url in confirm_links), ""]
+    if confirmed and not confirm_links:
+        lines += ["Thank you for confirming. We look forward to seeing you.", ""]
     lines += [
         "Should you need to reschedule or cancel, please let us know at least "
         "24 hours in advance. A $50 fee will apply for cancellations made "
@@ -318,12 +321,14 @@ _URL_RE = re.compile(r"(https?://[^\s<]+)")
 
 def render_reminder_html(name: str | None, date_str: str, times: list[str],
                          *, has_clinic: bool, has_home_visit: bool,
-                         confirm_links: list[tuple[str, str]] | None = None) -> str:
+                         confirm_links: list[tuple[str, str]] | None = None,
+                         confirmed: bool = False) -> str:
     """HTML twin of render_reminder_body, built from the same words (the text
     body without its Confirm lines) so the two can't drift, with the Confirm
     link as a button per session instead of a long raw URL."""
     text = render_reminder_body(name, date_str, times, has_clinic=has_clinic,
-                                has_home_visit=has_home_visit)
+                                has_home_visit=has_home_visit,
+                                confirmed=confirmed and not confirm_links)
     paras = [
         "<br>".join(_URL_RE.sub(r'<a href="\1">\1</a>', escape(line.strip()))
                     for line in block.splitlines())
@@ -343,7 +348,8 @@ def render_reminder_html(name: str | None, date_str: str, times: list[str],
 def send_reminder(to: str, name: str | None, date_str: str, times: list[str],
                   *, has_clinic: bool, has_home_visit: bool,
                   ref: str | None = None,
-                  confirm_links: list[tuple[str, str]] | None = None) -> None:
+                  confirm_links: list[tuple[str, str]] | None = None,
+                  confirmed: bool = False) -> None:
     """Send one patient reminder. Raises on failure so the caller can ledger it.
 
     With REMINDER_OVERRIDE_TO set, the body is byte-identical to the patient's
@@ -364,11 +370,11 @@ def send_reminder(to: str, name: str | None, date_str: str, times: list[str],
     msg.set_content(render_reminder_body(
         name, date_str, times,
         has_clinic=has_clinic, has_home_visit=has_home_visit,
-        confirm_links=confirm_links))
+        confirm_links=confirm_links, confirmed=confirmed))
     msg.add_alternative(render_reminder_html(
         name, date_str, times,
         has_clinic=has_clinic, has_home_visit=has_home_visit,
-        confirm_links=confirm_links), subtype="html")
+        confirm_links=confirm_links, confirmed=confirmed), subtype="html")
     _send(msg, "appointment reminder", ref)
 
 

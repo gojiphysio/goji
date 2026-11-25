@@ -951,6 +951,24 @@ def _customer_reaction(ev: Inbound) -> None:
            last_message=ev.text)
 
 
+def _confirm_in_plato(ev) -> None:
+    """Record a reminder's Confirm tap in Plato (code_Right "Confirmed"), the same
+    status Plato's own Confirm link sets, so the reminder and confirmation
+    emails stop asking. The appointment id rides the button payload
+    (reminder_confirm:<id>, set by scripts/reminders). Best effort: the patient
+    already has their thank-you, and staff see an unconfirmed slot at worst."""
+    prefix = "reminder_confirm:"
+    if not (ev.payload or "").startswith(prefix):
+        return
+    try:
+        res = booking_client.confirm(ev.payload[len(prefix):], wa_id=ev.wa_id)
+        events.record("reminder_confirmed_in_plato", ev.wa_id,
+                      already=bool(res.get("already")), dry_run=bool(res.get("dry_run")))
+    except booking_client.BookingFailed as e:
+        log.warning("plato confirm failed (%s)", e.code)
+        events.record("reminder_confirm_failed", ev.wa_id, reason=e.code)
+
+
 def handle_inbound(ev: Inbound, received: float) -> None:
     if ev.kind == "reaction":  # staff reacting to a ping: nothing to do
         if ev.wa_id not in config.STAFF:
@@ -996,6 +1014,7 @@ def handle_inbound(ev: Inbound, received: float) -> None:
             st.save(state)
         _mode_event(state, old, now)
         events.record("reminder_confirmed", ev.wa_id, reason="button")
+        _confirm_in_plato(ev)
         return
     if ev.kind == "document" and ev.media_id:
         ev.text = documents.as_message(_read_document(client, ev), ev.filename, ev.caption)

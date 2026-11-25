@@ -685,13 +685,31 @@ def test_whatsapp_override_replaces_the_recipient_at_send(monkeypatch):
 
 # --- channel choice --------------------------------------------------------
 
-def test_usable_mobile_gets_whatsapp_and_no_email():
+def test_usable_mobile_and_email_get_both_channels():
+    """Clinic decision (25 Nov 2026): the email goes out anyway, in parallel
+    with WhatsApp."""
     out, http, email = _run([_appt("a1")])
     assert http.sent_to() == ["6591234567"]
-    assert email.groups == []
+    assert [g["email"] for g in email.groups] == ["sarah@example.com"]
     e = _by_appt(out)["a1"]
-    assert (e["status"], e["channel"], e["wa_message_id"]) == ("sent", "whatsapp", "wamid.1")
-    assert out["sent"][0]["channel"] == "whatsapp"
+    assert (e["status"], e["channel"], e["wa_message_id"]) == ("sent", "both", "wamid.1")
+    assert sorted(x["channel"] for x in out["sent"]) == ["email", "whatsapp"]
+
+
+def test_confirmed_with_email_gets_the_email_but_no_whatsapp():
+    """The template's first button asks them to confirm; they already have."""
+    out, http, email = _run([{**_appt("a1"), "confirmed": True}])
+    assert http.calls == []
+    assert len(email.groups) == 1 and email.groups[0]["confirmed"] is True
+    assert email.groups[0]["confirm"] == []
+    assert (_by_appt(out)["a1"]["channel"]) == "email"
+
+
+def test_confirmed_without_email_still_gets_whatsapp():
+    out, http, email = _run([{**_appt("a1", email=""), "confirmed": True}])
+    assert http.sent_to() == ["6591234567"] and email.groups == []
+    assert out["skipped"] == []
+    assert _by_appt(out)["a1"]["channel"] == "whatsapp"
 
 
 def test_no_usable_mobile_falls_to_email():
@@ -704,29 +722,34 @@ def test_no_usable_mobile_falls_to_email():
 
 def test_one_whatsapp_per_appointment_in_time_order():
     """A template carries one appointment, so two sessions = two messages,
-    earliest first, even if the query returned them out of order."""
+    earliest first, even if the query returned them out of order. The email
+    lists both."""
     out, http, email = _run([_appt("pm", time="14:00"), _appt("am", time="09:00")])
     assert http.appointment_ids() == ["am", "pm"]
     slots = [c["json"]["template"]["components"][0]["parameters"][2]["text"]
              for c in http.calls]
     assert slots == ["Thu 26 Nov, 9:00am", "Thu 26 Nov, 2:00pm"]
-    assert email.groups == []
+    assert len(email.groups) == 1 and email.groups[0]["times"] == ["09:00", "14:00"]
 
 
-def test_whatsapp_failure_falls_back_to_email_for_that_appointment_only():
+def test_whatsapp_failure_is_noted_and_the_email_still_counts():
     fail = FakeResponse(400, {"error": {"message": "Invalid parameter", "code": 100}})
     out, http, email = _run(
         [_appt("am", time="09:00"), _appt("pm", time="14:00")],
         session=FakeSession(fail))      # first send fails, second succeeds
     assert http.appointment_ids() == ["am", "pm"]
-    # The email lists only the appointment WhatsApp didn't reach.
-    assert len(email.groups) == 1
-    assert email.groups[0]["appointment_ids"] == ["am"]
-    assert email.groups[0]["times"] == ["09:00"]
+    assert len(email.groups) == 1 and email.groups[0]["appointment_ids"] == ["am", "pm"]
     ledger = _by_appt(out)
     assert (ledger["am"]["status"], ledger["am"]["channel"]) == ("sent", "email")
     assert "whatsapp failed" in ledger["am"]["note"]
-    assert (ledger["pm"]["status"], ledger["pm"]["channel"]) == ("sent", "whatsapp")
+    assert (ledger["pm"]["status"], ledger["pm"]["channel"]) == ("sent", "both")
+
+
+def test_email_failure_is_noted_when_whatsapp_got_through():
+    out, _, _ = _run([_appt("a1")], email=EmailSpy(fail_for={"sarah@example.com"}))
+    e = _by_appt(out)["a1"]
+    assert (e["status"], e["channel"]) == ("sent", "whatsapp")
+    assert "email failed" in e["note"]
 
 
 def test_whatsapp_failure_with_no_email_goes_on_the_by_hand_list():
@@ -762,8 +785,7 @@ def test_mixed_day_ledgers_every_appointment_exactly_once():
     fail = FakeResponse(400, {"error": {"message": "bad", "code": 100}})
     rows = [
         _appt("wa1", time="08:00"),
-        _appt("wafail", time="09:00", email="jo@example.com", name="Jo Lee",
-              phone="81234567"),
+        _appt("wafail", time="09:00", email="jo@example.com", name="Jo Lee"),
         _appt("email1", time="10:00", phone="", email="amy@example.com", name="Amy"),
         _appt("none1", time="11:00", phone="", email="", name="Bo"),
         _appt("wa2", time="12:00", phone="+44 7700 900123", name="Cy", email=""),
@@ -773,9 +795,10 @@ def test_mixed_day_ledgers_every_appointment_exactly_once():
     ledger = _by_appt(out)
     assert set(ledger) == {"wa1", "wafail", "email1", "none1", "wa2"}
     assert {k: v["channel"] for k, v in ledger.items()} == {
-        "wa1": "whatsapp", "wafail": "email", "email1": "email",
+        "wa1": "both", "wafail": "email", "email1": "email",
         "none1": "none", "wa2": "whatsapp"}
-    assert sorted(g["email"] for g in email.groups) == ["amy@example.com", "jo@example.com"]
+    assert sorted(g["email"] for g in email.groups) == [
+        "amy@example.com", "jo@example.com", "sarah@example.com"]
 
 
 # --- DRY_RUN ---------------------------------------------------------------
@@ -788,7 +811,7 @@ def test_dry_run_sends_nothing_on_either_channel():
     assert email.groups == []
     ledger = _by_appt(out)
     assert {(e["status"], e["channel"]) for e in ledger.values()} == {
-        ("dry_run", "whatsapp"), ("dry_run", "email")}
+        ("dry_run", "both"), ("dry_run", "email")}
     # The template is still rendered, for the digest.
     assert out["preview"].startswith("Hi Sarah, a reminder of your physiotherapy")
     assert "Thu 26 Nov, 10:00am with Cheryl" in out["preview"]
@@ -889,7 +912,7 @@ def test_rerun_after_success_sends_nothing():
     rows = [_appt("a1"), _appt("a2", phone="", email="amy@example.com", time="11:00"),
             _appt("a3", phone="", email="", time="12:00")]
     first, http1, email1 = _run(rows)
-    assert len(http1.calls) == 1 and len(email1.groups) == 1
+    assert len(http1.calls) == 1 and len(email1.groups) == 2
     latest = {e["appointment_id"]: e["status"] for e in first["ledger"]}
     remaining = [r for r in rows if latest.get(r["appointment_id"], "") != "sent"]
     second, http2, email2 = _run(remaining)
@@ -969,7 +992,7 @@ def test_two_channel_dry_run_digest_previews_the_template():
                                      notices=["Test mode: something"])
     assert body.startswith("DRY RUN — no patient messages were sent.")
     assert "Test mode: something" in body
-    assert "Would have sent: 1 reminder(s) — 1 WhatsApp, 0 email" in body
+    assert "Would have sent: 2 reminder(s) — 1 WhatsApp, 1 email" in body
     assert "  Hi Sarah, a reminder of your physiotherapy appointment" in body
 
 
@@ -1029,3 +1052,19 @@ def test_html_reminder_one_button_per_session():
         "Sarah", "2026-09-09", ["09:00", "14:00"], has_clinic=True, has_home_visit=False,
         confirm_links=[("09:00", "https://x/a1"), ("14:00", "https://x/a2")])
     assert "Confirm 9:00 am" in html and "Confirm 2:00 pm" in html
+
+
+def test_confirmed_reminder_thanks_instead_of_asking():
+    kw = dict(has_clinic=True, has_home_visit=False)
+    body = mailer.render_reminder_body("Sarah", "2026-09-09", ["09:00"], confirmed=True, **kw)
+    assert "Thank you for confirming" in body and "Please confirm" not in body
+    html = mailer.render_reminder_html("Sarah", "2026-09-09", ["09:00"], confirmed=True, **kw)
+    assert "Thank you for confirming" in html and "Confirm I&#39;m coming" not in html
+
+
+def test_mixed_day_asks_only_for_the_unconfirmed_session():
+    groups, _ = main.group_by_recipient([
+        {**_row("a", "s@x.com", "09:00"), "confirmed": True},
+        _row("b", "s@x.com", "14:00"),
+    ])
+    assert groups[0]["confirm"] == [("14:00", "b")] and groups[0]["confirmed"]

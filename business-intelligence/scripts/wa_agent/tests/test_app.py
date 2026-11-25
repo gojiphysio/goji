@@ -1002,6 +1002,44 @@ def test_reminder_confirm_tap_is_thanked_without_the_model(env):
     assert ("reminder_confirmed", {"reason": "button"}) in rec
 
 
+def test_reminder_confirm_tap_marks_plato_confirmed(env, monkeypatch):
+    client, rec, _ = env
+    calls = []
+    monkeypatch.setattr(app_mod.booking_client, "confirm",
+                        lambda aid, wa_id: calls.append((aid, wa_id)) or {"ok": True,
+                                                                          "already": False})
+    body = inbound(kind="button")
+    msg = body["entry"][0]["changes"][0]["value"]["messages"][0]
+    msg["button"] = {"text": "Confirm", "payload": "reminder_confirm:abc123"}
+    post(client, body)
+    assert calls == [("abc123", msg["from"])]
+    assert any(e[0] == "reminder_confirmed_in_plato" for e in rec)
+
+
+def test_reminder_confirm_tap_without_payload_writes_nothing(env, monkeypatch):
+    client, rec, _ = env
+    monkeypatch.setattr(app_mod.booking_client, "confirm",
+                        lambda *a, **k: pytest.fail("no appointment id to confirm"))
+    body = inbound(kind="button")
+    body["entry"][0]["changes"][0]["value"]["messages"][0]["button"] = {"text": "Confirm",
+                                                                       "payload": "Confirm"}
+    post(client, body)
+    assert app_mod.wa.sent[-1][1].startswith("Thanks for confirming!")
+
+
+def test_plato_confirm_failure_is_recorded_not_raised(env, monkeypatch):
+    client, rec, _ = env
+
+    def boom(aid, wa_id):
+        raise app_mod.booking_client.BookingFailed("nope", "not_found")
+    monkeypatch.setattr(app_mod.booking_client, "confirm", boom)
+    body = inbound(kind="button")
+    body["entry"][0]["changes"][0]["value"]["messages"][0]["button"] = {
+        "text": "Confirm", "payload": "reminder_confirm:abc123"}
+    post(client, body)
+    assert ("reminder_confirm_failed", {"reason": "not_found"}) in rec
+
+
 def test_secret_link_url_handshake_and_post(env, monkeypatch):
     client, rec, _ = env
     monkeypatch.setattr(config, "WA_WEBHOOK_URL_TOKEN", "s3cret-link")
