@@ -207,6 +207,39 @@ cube('cab panel behind driver window',(1.25,4.09,2.15),(.10,.94,1.0),'white',bus
 cube('front driver corner pillar',(1.25,5.88,2.15),(.10,.24,1.0),'white',bus)
 cube('driver sill infill',(1.25,5.15,1.695),(.10,1.18,.09),'white',bus)
 
+# User-provided double-decker photo: palette/livery reference on the approved single-decker.
+# These are local materials and paint polygons, not mirrored screen-space edits.
+mat('transit orange red',(.72,.045,.018))
+mat('transit deep purple',(.22,.025,.13))
+mat('transit white',(.82,.83,.78))
+mat('transit dark glazing',(.025,.038,.035))
+mat('logo burgundy',(.35,.015,.025))
+mat('logo purple',(.17,.025,.13))
+paint={'red':'transit orange red','purple':'transit deep purple','white':'transit white','glass':'transit dark glazing'}
+for o in bus.children_recursive:
+ if o.type not in ['MESH','FONT']:continue
+ for slot in o.material_slots:
+  if slot.material and slot.material.name in paint:slot.material=M[paint[slot.material.name]]
+# Remove the uniform purple side skirt: white forward with a diagonal purple aft section.
+for o in list(bus.children_recursive):
+ if 'skirt' in o.name or o.name=='front purple bumper' or o.name.startswith('front purple bumper.'):
+  o.data.materials.clear();o.data.materials.append(M['transit white'])
+def paint_face(name,x,yz,material):
+ verts=[(x,y,z) for y,z in yz];mesh=bpy.data.meshes.new(name);mesh.from_pydata(verts,[],[tuple(range(len(verts)))]);mesh.update()
+ o=bpy.data.objects.new(name,mesh);bpy.context.collection.objects.link(o);finish(o,name,material,bus);return o
+for x in [-1.345,1.345]:
+ paint_face('purple diagonal body livery',x,[(-6,.56),(3.40,.56),(1.0,1.65),(-6,1.65)],'transit deep purple')
+ cube('orange red upper cantrail',(x,0,2.84),(.025,12,.30),'transit orange red',bus)
+# The rear is orange-red above purple; white italic lettering sits on the purple field.
+bpy.data.objects['rear bulkhead'].data.materials.clear();bpy.data.objects['rear bulkhead'].data.materials.append(M['transit orange red'])
+cube('purple rear body panel',(0,-6.076,1.15),(2.50,.015,1.70),'transit deep purple',bus)
+for side,y in [('left',2.65),('right',2.30)]:bpy.data.objects['LOGO '+side].location.y=y
+for o in bus.children_recursive:
+ if o.type=='FONT':
+  o.data.materials.clear()
+  o.data.materials.append(M['transit white'] if o.name.startswith('rear ') else M['logo burgundy' if o.name.endswith('SOS') else 'logo purple'])
+bus['livery_reference']='User-supplied double-decker photograph; colour and diagonal paint adapted to single-decker; SOS branding retained.'
+
 # Fixed world: northbound +Y uses WEST/left lane x<0. No camera-based geometry.
 CURB=-5.2;PARK=(-3.65,-28,0);WRECK=(-5.1,0,1.45)
 cube('two-way asphalt',(0,10,-.12),(10.4,100,.24),'road')
@@ -289,7 +322,7 @@ shots=[
  ('08',35,WRECK,90,(-5.05,9.0,5.6),(-3.2,4.0,2.45),52),
  ('09',80,WRECK,90,(-6.7,1.3,2.0),(-6.1,5.4,1.25),52),
 ]
-record={'role':'direct Blender continuity proof; proxy cast, not final appearance','world':{'forward':'+Y','road_bounds_x':[-5.2,5.2],'centreline_x':0,'northbound_lane':'x<0','mall_and_passenger_curb':'west, x< -5.2','bus_driver_side':'+X','bus_passenger_side':'-X'},'bus_materials':{'roof':'red','body':'white','skirt':'purple','floor_and_chassis':'charcoal black','windows':'smoked neutral grey'},'driver_window':DRIVER_WINDOW,'shots':[]}
+record={'role':'direct Blender continuity proof; proxy cast, not final appearance','world':{'forward':'+Y','road_bounds_x':[-5.2,5.2],'centreline_x':0,'northbound_lane':'x<0','mall_and_passenger_curb':'west, x< -5.2','bus_driver_side':'+X','bus_passenger_side':'-X'},'bus_materials':{'roof':'orange-red','body':'white forward with purple diagonal aft panels','skirt':'deep purple aft / white forward','rear':'orange-red upper / deep-purple lower / white SOS Transit text','floor_and_chassis':'charcoal black','windows':'dark neutral glazing'},'driver_window':DRIVER_WINDOW,'shots':[]}
 for sid,f,pos,roll,cp,target,hfov in shots:
  scene.frame_set(f);bus.location=pos;bus.rotation_euler=(0,math.radians(roll),0)
  for prop in ['location','rotation_euler']:bus.keyframe_insert(prop,frame=f)

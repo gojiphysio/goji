@@ -7,15 +7,37 @@ from **one bus asset, one fixed street layout and six saved cameras**. The
 people and architecture are blocking proxies; these are geometry-review frames,
 not a finished PS2 appearance pass.
 
-![Shared Blender staging](frames/04-09-direct-board.png)
+![Shared Blender staging](frames/04-09-livery-v52.png)
 
-[Editable Blender master](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-girl-episode-2/marketing/assets/goji-girl/episode-02/revision-05/blender/continuity-master.blend) ·
+[Editable Blender master](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-girl-episode-2/marketing/assets/goji-girl/episode-02/revision-05/blender/continuity-livery-v52.blend) ·
 [Build script](scripts/build_continuity.py) · [Exported scene record](blender/continuity-record.json)
 
 The driver window is now a compact 1.10m × 0.82m opening, with its centre
 moved forward from local y=4.47 to y=5.15. Its front edge sits 0.30m behind
 the nose. The driver seat and takeover marks follow the revised opening.
 These are staging dimensions, not a manufacturer specification.
+
+## Supplied colour reference
+
+The isolated full-bus view hides the street set for paint inspection; story cameras remain fixed.
+
+The user-provided double-decker photo is used for its orange-red upper paint,
+deep-purple lower/rear panels, white diagonal fields, dark glass and white rear
+wordmark. These are adapted onto the accepted single-decker mesh, retaining
+**SOS Transit**. Deck count and vehicle transforms are unchanged.
+
+![Full-bus livery review](frames/bus-livery-v52.png)
+
+The current driver-window change is shown separately below using the same old
+paint on both sides, so the livery change does not obscure the smaller opening.
+The before render comes from commit 1d223b6; the revised render from 8833a2c.
+The published scene05 image was verified byte-for-byte against the revised
+local render. A stale client view was not confirmed; the new preview filenames
+make this update explicit.
+
+![Before and revised driver window](frames/05-window-comparison-v52.png)
+
+[Current scene05 with new livery](frames/05-livery-v52.png)
 
 ## World rules and verified poses
 

@@ -453,6 +453,7 @@
       }
     }
   ],
-  "bus_brand": "SOS Transit; established logo treatment and livery retained",
-  "popup_copy_source": "user-provided"
+  "bus_brand": "SOS Transit; orange-red / deep-purple / diagonal white livery adapted from user-provided double-decker photograph onto current single-decker",
+  "popup_copy_source": "user-provided",
+  "livery_reference": "User-supplied bus photograph in chat; colour/layout reference, not a requested deck-count change."
 }

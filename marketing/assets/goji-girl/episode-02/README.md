@@ -1,12 +1,22 @@
 # Goji Girl · Episode 02 — TAP OUT
 
-**Creative draft v5.1 · 25 November 2026 · proposed 47 seconds · vertical 9:16**
+**Creative draft v5.2 · 25 November 2026 · proposed 47 seconds · vertical 9:16**
 
 A frustrating work call sends Goji Girl rushing to Pilates. She steals a bus,
 crashes outside Lentor Modern, remembers to tap out, and reaches the calm of
 Goji while the police get stuck running against the glass.
 
 ## Revision 5 — one Blender scene for the bus sequence
+
+The supplied double-decker photograph now guides the **orange-red upper body,
+deep-purple rear/lower panels, white diagonal sections and dark glazing**.
+The paint is adapted to the current single-decker; SOS Transit branding remains.
+
+![Current bus livery from a rear passenger-side reference angle](revision-05/frames/bus-livery-v52.png)
+
+[Scene 05 at full size](revision-05/frames/05-livery-v52.png) ·
+[Driver-window before/after](revision-05/frames/05-window-comparison-v52.png)
+
 
 The previous generated bus panels are superseded: their road placement,
 heading and livery did not agree. The six views below are **direct Blender
@@ -20,15 +30,15 @@ of a fixed layout.
 - **07–09:** exactly the same wreck transform, heading +Y, driver's side down.
   The red roof faces the road centre; the wheels and charcoal undercarriage face
   the mall-side curb. Only cameras and the player change between these views.
-- **Livery:** one set of red roof, white body and purple skirt materials, with
+- **Livery:** one set of orange-red, white and deep-purple paint materials, with
   SOS Transit lettering attached to the bus. No negative scale or mirrored panel.
 - **06:** the red/blue sources belong to offscreen pursuers behind the camera.
 
-[**Download the editable Blender master**](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-girl-episode-2/marketing/assets/goji-girl/episode-02/revision-05/blender/continuity-master.blend) ·
+[**Download the editable Blender master**](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-girl-episode-2/marketing/assets/goji-girl/episode-02/revision-05/blender/continuity-livery-v52.blend) ·
 [Scene records and checks](revision-05/blender/continuity-record.json) ·
 [Detailed revision notes](revision-05/README.md)
 
-![Direct Blender staging for04–09. Proxy cast and simplified sets; one shared bus mesh and materials.](revision-05/frames/04-09-direct-board.png)
+![Direct Blender staging for04–09. Proxy cast and simplified sets; one shared bus mesh and materials.](revision-05/frames/04-09-livery-v52.png)
 
 [Parked-bus overhead](revision-05/frames/plan-parked.png) ·
 [Wreck overhead](revision-05/frames/plan-wreck.png)

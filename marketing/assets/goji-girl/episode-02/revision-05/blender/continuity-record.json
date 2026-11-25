@@ -13,11 +13,12 @@
     "bus_passenger_side": "-X"
   },
   "bus_materials": {
-    "roof": "red",
-    "body": "white",
-    "skirt": "purple",
+    "roof": "orange-red",
+    "body": "white forward with purple diagonal aft panels",
+    "skirt": "deep purple aft / white forward",
+    "rear": "orange-red upper / deep-purple lower / white SOS Transit text",
     "floor_and_chassis": "charcoal black",
-    "windows": "smoked neutral grey"
+    "windows": "dark neutral glazing"
   },
   "driver_window": {
     "centre_y": 5.15,
