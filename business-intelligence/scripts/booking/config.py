@@ -69,10 +69,11 @@ SERVICES: dict[str, dict] = {
         "duration_min": 60,
         "supports_home": True,
         "variants": {
-            # Price sheet 25 Nov 2026. The 85-min review ($390) isn't offered online:
-            # 85 min on this type reads back as Mummy & Baby (_service_for).
+            # Price sheet 25 Nov 2026. 85 min on this type is also Mummy & Baby:
+            # _service_for tells them apart by the appointment's description.
             "40min": {"duration_min": 40, "price": 230, "description": "Review session"},
             "55min": {"duration_min": 55, "price": 260, "description": "Initial consultation or review"},
+            "85min": {"duration_min": 85, "price": 390, "description": "Extended review"},
         },
         "variant_focus": "paediatrics",  # variants only apply to this physio sub-type
     },

@@ -57,6 +57,7 @@ export const physioCategories: PhysioCategory[] = [
     variants: {
       "40min": { durationMin: 40, price: "230", description: "Review session" },
       "55min": { durationMin: 55, price: "260", description: "Initial consultation or review" },
+      "85min": { durationMin: 85, price: "390", description: "Extended review" },
     },
   },
   {

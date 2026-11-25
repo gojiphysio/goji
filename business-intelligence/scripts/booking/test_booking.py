@@ -285,6 +285,17 @@ def test_40min_paediatric_review_duration():
     assert payload["endtime"] == "2026-07-15 10:40:00"  # 40 mins later
 
 
+def test_85min_paediatric_review_duration():
+    # The 85-min extended review (price sheet 25 Nov 2026) books 85 minutes.
+    p = StubPlato()
+    res = create_booking(p, {**BASE, "clinician_id": "cheryl-long",
+                             "physio_focus": "paediatrics", "variant": "85min"}, now=NOW)
+    assert res["ok"]
+    payload = p.created[0][0]
+    assert payload["endtime"] == "2026-07-15 11:25:00"  # 85 mins after 10:00
+    assert payload["description"].startswith("Physiotherapy.")
+
+
 def test_55min_paediatric_variant_duration():
     # Paediatric physiotherapy with 55-min variant should create a 55-min slot.
     p = StubPlato()

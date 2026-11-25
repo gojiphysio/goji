@@ -461,18 +461,30 @@ def _parse_plato_dt(value) -> datetime | None:
         return None
 
 
-def _service_for(type_code: str, minutes: int) -> tuple[str, str] | None:
+def _service_for(type_code: str, minutes: int,
+                 description: str | None = "") -> tuple[str, str] | None:
     """(service_id, variant) for an appointment's Plato type + length, or None.
-    Physiotherapy and Mummy & Baby share a type, so the length decides."""
+    Physiotherapy and Mummy & Baby share a type, so the length decides. An
+    85-minute paediatric review and Mummy & Baby share a length too: an online
+    booking's description starts with its service title ("Physiotherapy.
+    Booked via ..."), which settles it; anything else reads as the service
+    whose own length it is (Mummy & Baby), as before."""
+    found = []
     for sid, svc in SERVICES.items():
         if svc["type_code"] != type_code:
             continue
         if svc["duration_min"] == minutes:
-            return sid, ""
+            found.append((sid, ""))
         for vid, v in (svc.get("variants") or {}).items():
             if v["duration_min"] == minutes:
-                return sid, vid
-    return None
+                found.append((sid, vid))
+    if not found:
+        return None
+    desc = description.lstrip() if isinstance(description, str) else ""
+    for sid, vid in found:
+        if desc.startswith(SERVICES[sid]["title"] + "."):
+            return sid, vid
+    return next((f for f in found if not f[1]), found[0])
 
 
 class _WithoutAppointment:
@@ -577,7 +589,7 @@ def reschedule_appointment(plato, req: dict, *, now: datetime | None = None,
              "Home visits are moved by our team.", "unsupported")
     cid = clinician_by_calendar(_calendar_color_for_appointment(appt))
     minutes = int((end - start).total_seconds() // 60)
-    found = _service_for(type_code, minutes)
+    found = _service_for(type_code, minutes, appt.get("description"))
     _require(cid and found, "That appointment can't be moved automatically.",
              "unsupported")
     service_id, variant = found
@@ -669,7 +681,8 @@ def cancel_appointment(plato, req: dict, *, now: datetime | None = None,
              "Home visits are cancelled by our team.", "unsupported")
     cid = clinician_by_calendar(_calendar_color_for_appointment(appt))
     _require(cid, "That appointment can't be cancelled automatically.", "unsupported")
-    found = _service_for(type_code, int((end - start).total_seconds() // 60))
+    found = _service_for(type_code, int((end - start).total_seconds() // 60),
+                         appt.get("description"))
     service = SERVICES[found[0]]["title"] if found else "Appointment"
 
     if not dry_run:
