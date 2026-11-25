@@ -277,6 +277,7 @@ def reply_problems(reply: str) -> list[str]:
 
 
 PAGE_LINK_WINDOW_S = 86400  # one conversation, as for the greeting
+MAX_PAGE_LINKS = 2  # per conversation; the booking link doesn't count (owner)
 # www.gojiphysio.com pages, not the go.gojiphysio.com booking link.
 _PAGE_URL = re.compile(
     r"(?:https?://(?:www\.)?|(?<![\w./-])(?:www\.)?)gojiphysio\.com/[^\s)>\]]*", re.I)
@@ -284,23 +285,26 @@ _LINK_INTRO_MAX_WORDS = 15
 
 
 def drop_repeat_page_links(reply: str, history: list[dict], now: float) -> str:
-    """One website page link per conversation. Every answer ending "You can
-    read more here: <link>" reads as a bot (owner, 25 Nov 2026: a link after
-    every message in a live chat). Once we, or Chris, have sent a link in the
-    last day, a page link (with its "read more here:" line) comes out of the
-    reply. The booking go-link isn't a page link and stays: when to send it
-    is the prompt's rule. A link inside a longer sentence is left alone
-    rather than cut mid-thought."""
+    """At most two website page links per conversation. Every answer ending
+    "You can read more here: <link>" reads as a bot (owner, 25 Nov 2026: a
+    link after every message in a live chat). Once we, or Chris, have sent
+    MAX_PAGE_LINKS page links in the last day, a further page link (with its
+    "read more here:" line) comes out of the reply. The booking go-link
+    neither counts nor is touched: when to send it is the prompt's rule. A
+    link inside a longer sentence is left alone rather than cut mid-thought."""
     if not _PAGE_URL.search(reply or ""):
         return reply
     since = now - PAGE_LINK_WINDOW_S
-    if not any(h["role"] in ("agent", "staff") and h.get("ts", 0) >= since
-               and _URL.search(h.get("text", "")) for h in history):
-        return reply
+    left = MAX_PAGE_LINKS - sum(
+        len(_PAGE_URL.findall(h.get("text", ""))) for h in history
+        if h["role"] in ("agent", "staff") and h.get("ts", 0) >= since)
     lines = reply.split("\n")
     keep = [True] * len(lines)
     for i, line in enumerate(lines):
         if not _PAGE_URL.search(line):
+            continue
+        if left > 0:
+            left -= len(_PAGE_URL.findall(line))
             continue
         rest = _PAGE_URL.sub("", line).strip()
         if len(rest.split()) > _LINK_INTRO_MAX_WORDS:

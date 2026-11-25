@@ -201,7 +201,7 @@ SCENARIOS: list[Scenario] = [
       ["Who's your most senior physio? And what are your opening hours?"],
       E(decisions=("send",), must_not=(r"www\.gojiphysio\.com/",)),
       note="owner (25 Nov): a reply that answers it needs no 'read more here' link"),
-    S("page_link_once", "new enquiry",
+    S("page_link_not_every_answer", "new enquiry",
       ["Do you treat tennis elbow?",
        ("agent", "Yes, we do! Our Musculoskeletal & Sports Physiotherapy covers it.\n\n"
                  "You can read more here:\n"
@@ -209,7 +209,7 @@ SCENARIOS: list[Scenario] = [
        "Ok. You're near the MRT right?"],
       E(decisions=("send",), no_greeting=True, must=(r"lentor",),
         must_not=(r"www\.gojiphysio\.com/",)),
-      note="owner (25 Nov): one page link per conversation, not one per answer"),
+      note="owner (25 Nov): at most 2 page links per conversation, none on a follow-up the reply answers"),
     S("cancellation_policy", "new enquiry",
       ["What's your cancellation policy?"],
       E(decisions=("send",), must=(r"24", r"\$50"))),
