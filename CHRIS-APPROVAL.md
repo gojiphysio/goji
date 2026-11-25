@@ -34,6 +34,8 @@ The test sent seven emails, in five designs. The samples below use made-up patie
 
 Every booking confirmation also adds the appointment to the patient's calendar, with no alert. If the time moves, that calendar entry moves with it.
 
+**New since the test:** if a new patient still hasn't filled in Plato's registration form, the 48-hour reminder email asks again, with the form button under the Confirm button. It stops asking once the form is done or the front desk completes their profile. The WhatsApp reminder can't carry the form link, because its wording is fixed by Meta.
+
 ### Email 1: booking confirmation
 ![Email 1](email-1.png)
 
@@ -69,7 +71,7 @@ Reply to Charles on each point:
 - [ ] The "moved" email (email 2)
 - [ ] The 48-hour reminder: today's Plato wording, plus a Confirm button or a thank-you (emails 4 to 7)
 - [ ] Reminders go out by email and WhatsApp together, and confirmed patients get no WhatsApp reminder
-- [ ] Cancellations send nothing to the patient
+- [ ] Cancellations send nothing to the patient, and the reminder asks again for a missing registration form
 - [ ] Go-live date: _______
 
 On go-live day, the front desk stops sending Plato's confirmation by hand. Plato's own 48-hour reminder is switched off the same day ours starts.
