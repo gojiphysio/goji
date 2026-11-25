@@ -6,6 +6,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 # destination. Without it Docker fails with "the destination must be a
 # directory and end with a /" — the sibling jobs copy a single file, so their
 # `COPY main.py .` is fine and this doesn't carry over.
-COPY main.py reminder_mailer.py reminder_whatsapp.py ./
+COPY main.py reminder_mailer.py reminder_whatsapp.py registration.py ./
 # Cloud Run Jobs invoke the container's entrypoint; no HTTP server needed.
 ENTRYPOINT ["python", "-u", "main.py"]

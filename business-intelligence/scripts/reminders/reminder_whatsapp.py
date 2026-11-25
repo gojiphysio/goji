@@ -45,7 +45,8 @@ log = logging.getLogger("reminders.whatsapp")
 # header; the payload stays Cloud API shaped. E.g. 360dialog:
 #   WA_API_BASE=https://waba-v2.360dialog.io WA_SEND_PATH=/messages
 #   WA_AUTH_HEADER=D360-API-KEY WA_AUTH_PREFIX=   (set, but empty)
-WA_API_BASE = os.environ.get("WA_API_BASE", "https://graph.facebook.com/v23.0")
+# `or`: the deploy passes an empty value when the repo variable is unset.
+WA_API_BASE = os.environ.get("WA_API_BASE") or "https://graph.facebook.com/v23.0"
 WA_PHONE_NUMBER_ID = os.environ.get("WA_PHONE_NUMBER_ID", "")
 # Meta: /{phone_number_id}/messages. 360dialog-style providers: /messages.
 WA_SEND_PATH = os.environ.get("WA_SEND_PATH", "/{phone_number_id}/messages")

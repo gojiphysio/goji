@@ -87,6 +87,7 @@ from zoneinfo import ZoneInfo
 
 from google.cloud import bigquery
 
+import registration
 import reminder_mailer as mailer
 import reminder_whatsapp as wa
 
@@ -198,10 +199,13 @@ def group_by_recipient(rows: list[dict]) -> tuple[list[dict], list[dict]]:
             "times": [],
             "confirm": [],   # (time, appointment_id): one Confirm link per session
             "confirmed": False,  # at least one session already confirmed in Plato
+            "form_url": None,    # Plato's registration form, if they still owe it
             "has_clinic": False,
             "has_home_visit": False,
         })
         g["appointment_ids"].append(r["appointment_id"])
+        if r.get("form_url") and not g["form_url"]:
+            g["form_url"] = r["form_url"]
         if r.get("confirmed"):
             g["confirmed"] = True
         else:
@@ -248,10 +252,28 @@ SELECT
            NULLIF(TRIM(c.phone), ''))                           AS phone,
   -- Already confirmed in Plato (code_Right 'qK8x' = "Confirmed": the patient's
   -- Confirm link, a WhatsApp Confirm tap, or staff). No Confirm ask then.
-  COALESCE(JSON_VALUE(a.payload, '$.code_Right'), '') = 'qK8x'  AS confirmed
+  COALESCE(JSON_VALUE(a.payload, '$.code_Right'), '') = 'qK8x'  AS confirmed,
+  r.patient_id,
+  -- First pass at "still owes Plato's registration form" (registration.py
+  -- checks Plato live before asking). No profile and none matching the phone
+  -- or email (a match is a returning patient: the form would duplicate them),
+  -- or a profile with no date of birth as of last night (age_band is derived
+  -- from it): every profile made through the form has one, and the bare ones
+  -- the WhatsApp assistant creates don't.
+  CASE
+    WHEN r.patient_id IS NULL THEN NOT EXISTS (
+      SELECT 1 FROM `{project}.{dataset}.dim_patient_contact` m
+      WHERE (COALESCE(JSON_VALUE(a.payload, '$.handphone'), '') != ''
+             AND RIGHT(REGEXP_REPLACE(COALESCE(m.phone, ''), r'\\D', ''), 8) =
+                 RIGHT(REGEXP_REPLACE(JSON_VALUE(a.payload, '$.handphone'), r'\\D', ''), 8))
+         OR (COALESCE(JSON_VALUE(a.payload, '$.email'), '') != ''
+             AND LOWER(m.email) = LOWER(JSON_VALUE(a.payload, '$.email'))))
+    ELSE p.patient_id IS NOT NULL AND p.age_band IS NULL
+  END                                                           AS needs_form_check
 FROM `{project}.{dataset}.fct_appointment_reminders` r
 LEFT JOIN `{project}.stg.appointments`                a USING (appointment_id)
 LEFT JOIN `{project}.{dataset}.dim_patient_contact`   c ON r.patient_id = c.patient_id
+LEFT JOIN `{project}.{dataset}.dim_patient`           p ON r.patient_id = p.patient_id
 LEFT JOIN `{project}.{dataset}.appointment_reminder_latest` e USING (appointment_id)
 -- Idempotency guard: never re-send. 'sent' on EITHER channel suppresses (the
 -- guard keys on status only, never on channel). 'failed' and 'dry_run' fall
@@ -484,6 +506,9 @@ def main() -> int:
     try:
         bq = bigquery.Client(project=project)
         rows = fetch_recipients(bq, project, dataset)
+        # Who still owes the registration form (a Plato read each; skipped
+        # without a Plato key, and in a dry run nothing is sent anyway).
+        registration.attach(rows, registration.Plato() if registration.PLATO_API_KEY else None)
     except Exception as e:
         log.error("BigQuery read failed: %s", e)
         return 2
@@ -504,7 +529,7 @@ def main() -> int:
             has_clinic=g["has_clinic"], has_home_visit=g["has_home_visit"],
             ref=g["appointment_ids"][0],
             confirm_links=[(t, mailer.confirm_url(aid)) for t, aid in g.get("confirm", [])],
-            confirmed=g.get("confirmed", False))
+            confirmed=g.get("confirmed", False), form_url=g.get("form_url"))
 
     out = dispatch(rows, day, dry_run=dry_run, wa_enabled=wa_on,
                    send_whatsapp=wa.send_template, send_email=send_email,

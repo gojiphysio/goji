@@ -220,13 +220,14 @@ jobs:
                    --format='value(template.template.containers[0].env.filter("name:WA_REMINDERS_ENABLED").extract(value))' \
                    2>/dev/null || true)"
           wa="${wa:-0}"
-          secrets="GMAIL_APP_PASSWORD=gmail-app-password:latest"
+          # PLATO_API_KEY: the registration-form check (reminders/registration.py).
+          secrets="GMAIL_APP_PASSWORD=gmail-app-password:latest,PLATO_API_KEY=plato-api-key:latest"
           if [ "${wa}" = "1" ]; then secrets="${secrets},WA_TOKEN=wa-token:latest"; fi
           echo "Deploying appointment-reminders with DRY_RUN=${dry} WA_REMINDERS_ENABLED=${wa}"
           gcloud run jobs deploy appointment-reminders \
             --source . --region "${REGION}" --project "${PROJECT}" \
             --service-account "${DASHBOARD_SA}" \
-            --set-env-vars="BQ_PROJECT=${PROJECT},BQ_DATASET=marts,DRY_RUN=${dry},WA_REMINDERS_ENABLED=${wa},WA_PHONE_NUMBER_ID=${{ vars.WA_PHONE_NUMBER_ID }}" \
+            --set-env-vars="BQ_PROJECT=${PROJECT},BQ_DATASET=marts,DRY_RUN=${dry},WA_REMINDERS_ENABLED=${wa},WA_PHONE_NUMBER_ID=${{ vars.WA_PHONE_NUMBER_ID }},WA_API_BASE=${{ vars.WA_API_BASE }}" \
             --set-secrets="${secrets}" \
             --max-retries=0 \
             --quiet

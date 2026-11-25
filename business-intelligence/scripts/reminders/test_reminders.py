@@ -901,7 +901,7 @@ def test_whatsapp_config_off_by_default_and_safe(monkeypatch):
 def test_guard_suppresses_sent_on_either_channel():
     """The SQL guard keys on status alone. If it ever filtered on channel too,
     switching channels would re-remind everyone."""
-    where = main.RECIPIENTS_SQL.split("WHERE", 1)[1]
+    where = main.RECIPIENTS_SQL.rsplit("WHERE", 1)[1]  # the guard, not a subquery
     assert "COALESCE(e.status, '') != 'sent'" in where
     assert "channel" not in where
 
@@ -1068,3 +1068,99 @@ def test_mixed_day_asks_only_for_the_unconfirmed_session():
         _row("b", "s@x.com", "14:00"),
     ])
     assert groups[0]["confirm"] == [("14:00", "b")] and groups[0]["confirmed"]
+
+
+# --- registration form still owed -------------------------------------------------
+
+import registration
+
+
+class FakePlatoHTTP:
+    def __init__(self, patient=None, fail=False):
+        self.patient, self.fail, self.paths = patient or {}, fail, []
+
+    def get(self, url, timeout=None, headers=None):
+        self.paths.append(url.split("/gojihealth/")[1])
+        fail, patient = self.fail, self.patient
+
+        class R:
+            def raise_for_status(self):
+                if fail:
+                    raise RuntimeError("boom")
+
+            def json(self):
+                if url.endswith("/prereg"):
+                    return {"url": "https://clinic.platomedical.com/prereg/x"}
+                if url.endswith("/updatelink"):
+                    return {"url": "https://clinic.platomedical.com/secure/regupdate/x"}
+                return [patient]
+        return R()
+
+
+def _plato(**kw):
+    return registration.Plato(key="k", session=FakePlatoHTTP(**kw))
+
+
+def test_no_profile_gets_the_prereg_form():
+    p = _plato()
+    url = registration.form_link(p, {"appointment_id": "a1", "patient_id": None,
+                                     "needs_form_check": True})
+    assert url.endswith("/prereg/x") and p.http.paths == ["appointment/a1/prereg"]
+
+
+def test_profile_without_a_date_of_birth_gets_the_update_form():
+    p = _plato(patient={"name": "Jo", "created_by": "api", "dob": ""})
+    url = registration.form_link(p, {"appointment_id": "a1", "patient_id": "p1",
+                                     "needs_form_check": True})
+    assert url.endswith("/regupdate/x")
+    assert p.http.paths == ["patient/p1", "patient/p1/updatelink"]
+
+
+@pytest.mark.parametrize("patient", [
+    {"created_by": "terminal", "dob": "1990-02-03"},               # registered through the form
+    {"created_by": "api", "last_edited_by": "Kristy.ng", "dob": "1985-04-12"},  # completed at the desk
+])
+def test_profile_with_a_date_of_birth_gets_no_form(patient):
+    p = _plato(patient=patient)
+    assert registration.form_link(p, {"appointment_id": "a1", "patient_id": "p1",
+                                      "needs_form_check": True}) is None
+
+
+def test_placeholder_date_of_birth_counts_as_missing():
+    assert not registration.has_dob({"dob": "0000-00-00"})
+
+
+def test_no_check_needed_means_no_plato_read():
+    p = _plato()
+    assert registration.form_link(p, {"appointment_id": "a1", "needs_form_check": False}) is None
+    assert p.http.paths == []
+
+
+def test_plato_failure_means_no_form_line():
+    assert registration.form_link(_plato(fail=True), {"appointment_id": "a1",
+                                                      "needs_form_check": True}) is None
+
+
+def test_read_cap(monkeypatch):
+    monkeypatch.setattr(registration, "MAX_READS", 1)
+    p = _plato()
+    row = {"appointment_id": "a1", "needs_form_check": True}
+    assert registration.form_link(p, row) and registration.form_link(p, row) is None
+
+
+def test_reminder_asks_for_the_form_in_text_and_html():
+    kw = dict(has_clinic=True, has_home_visit=False, form_url="https://clinic.platomedical.com/prereg/x")
+    body = mailer.render_reminder_body("Sarah", "2026-09-09", ["09:00"], **kw)
+    assert "registration form yet" in body and "prereg/x" in body
+    html = mailer.render_reminder_html("Sarah", "2026-09-09", ["09:00"],
+                                       confirm_links=[("09:00", "https://x/c")], **kw)
+    assert html.index("Confirm I&#39;m coming") < html.index(">Registration form</a>")
+    assert html.count("prereg/x") == 1
+
+
+def test_group_carries_the_form_link():
+    groups, _ = main.group_by_recipient([
+        {**_row("a", "s@x.com", "09:00"), "form_url": None},
+        {**_row("b", "s@x.com", "14:00"), "form_url": "https://f"},
+    ])
+    assert groups[0]["form_url"] == "https://f"

@@ -129,7 +129,7 @@ def first_name(full_name: str | None) -> str:
 def render_reminder_body(name: str | None, date_str: str, times: list[str],
                          *, has_clinic: bool, has_home_visit: bool,
                          confirm_links: list[tuple[str, str]] | None = None,
-                         confirmed: bool = False) -> str:
+                         confirmed: bool = False, form_url: str | None = None) -> str:
     """The full plain-text reminder body.
 
     has_clinic / has_home_visit select the location block. Normally exactly one
@@ -154,6 +154,8 @@ def render_reminder_body(name: str | None, date_str: str, times: list[str],
                   *(f"  {_fmt_time(t)}: {url}" for t, url in confirm_links), ""]
     if confirmed and not confirm_links:
         lines += ["Thank you for confirming. We look forward to seeing you.", ""]
+    if form_url:
+        lines += [FORM_LINE, f"  {form_url}", ""]
     lines += [
         "Should you need to reschedule or cancel, please let us know at least "
         "24 hours in advance. A $50 fee will apply for cancellations made "
@@ -313,16 +315,22 @@ def _send(msg: EmailMessage, what: str, ref: str | None) -> None:
     log.info("%s email sent (ref %s)", what, ref)
 
 
+FORM_LINE = ("We don't have your registration form yet. Please fill it in before "
+             "your visit, it takes a few minutes:")
+
 _BTN = ("display:inline-block;padding:10px 18px;border-radius:6px;font-weight:bold;"
         "text-decoration:none;font-size:14px;background:#1f5f4a;color:#fff;"
         "margin:0 8px 8px 0")
+_FORM_BTN = ("display:inline-block;padding:10px 18px;border-radius:6px;font-weight:bold;"
+             "text-decoration:none;font-size:14px;background:#fff;color:#1f5f4a;"
+             "border:1px solid #1f5f4a")
 _URL_RE = re.compile(r"(https?://[^\s<]+)")
 
 
 def render_reminder_html(name: str | None, date_str: str, times: list[str],
                          *, has_clinic: bool, has_home_visit: bool,
                          confirm_links: list[tuple[str, str]] | None = None,
-                         confirmed: bool = False) -> str:
+                         confirmed: bool = False, form_url: str | None = None) -> str:
     """HTML twin of render_reminder_body, built from the same words (the text
     body without its Confirm lines) so the two can't drift, with the Confirm
     link as a button per session instead of a long raw URL."""
@@ -340,6 +348,10 @@ def render_reminder_html(name: str | None, date_str: str, times: list[str],
             f'{escape("Confirm " + _fmt_time(t)) if many else "Confirm I&#39;m coming"}</a>'
             for t, url in confirm_links)
         paras.insert(2, buttons)
+    if form_url:
+        at = 3 if confirm_links or confirmed else 2
+        paras[at:at] = [escape(FORM_LINE),
+                        f'<a href="{escape(form_url)}" style="{_FORM_BTN}">Registration form</a>']
     body = "".join(f'<p style="margin:0 0 16px">{p}</p>' for p in paras)
     return ('<div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;'
             f'line-height:1.5;color:#222;max-width:560px">{body}</div>')
@@ -349,7 +361,7 @@ def send_reminder(to: str, name: str | None, date_str: str, times: list[str],
                   *, has_clinic: bool, has_home_visit: bool,
                   ref: str | None = None,
                   confirm_links: list[tuple[str, str]] | None = None,
-                  confirmed: bool = False) -> None:
+                  confirmed: bool = False, form_url: str | None = None) -> None:
     """Send one patient reminder. Raises on failure so the caller can ledger it.
 
     With REMINDER_OVERRIDE_TO set, the body is byte-identical to the patient's
@@ -370,11 +382,11 @@ def send_reminder(to: str, name: str | None, date_str: str, times: list[str],
     msg.set_content(render_reminder_body(
         name, date_str, times,
         has_clinic=has_clinic, has_home_visit=has_home_visit,
-        confirm_links=confirm_links, confirmed=confirmed))
+        confirm_links=confirm_links, confirmed=confirmed, form_url=form_url))
     msg.add_alternative(render_reminder_html(
         name, date_str, times,
         has_clinic=has_clinic, has_home_visit=has_home_visit,
-        confirm_links=confirm_links, confirmed=confirmed), subtype="html")
+        confirm_links=confirm_links, confirmed=confirmed, form_url=form_url), subtype="html")
     _send(msg, "appointment reminder", ref)
 
 
