@@ -1,63 +1,71 @@
 # Goji Girl · Episode 02 — TAP OUT
 
-**Creative draft v6 · 25 November 2026 · proposed 47 seconds · vertical 9:16**
+**Creative draft v7 · 25 November 2026 · proposed 47 seconds · vertical 9:16**
 
-A frustrating work call sends Goji Girl rushing to Pilates. She steals a bus,
-crashes outside Lentor Modern, remembers to tap out, and reaches the calm of
-Goji while the police get stuck running against the glass.
+After ending a frustrating work call, Goji Girl gets her Goji calendar reminder,
+smiles, and rushes out. A stolen bus, a crash and a conscientious EZ-Link tap
+later, she reaches Pilates while the police get stuck running against the glass.
 
 ## Storyboard from the top
 
-The bus is now a **three-axle double-decker**, with two passenger decks and two
-rows of glazing. It retains the supplied photo’s orange-red, deep-purple and
-white livery, SOS Transit branding, smaller forward driver window and charcoal
-door trim without a yellow outline.
+The six Blender bus panels now have an original GTA San Andreas appearance pass.
+The user-approved **SOS-BUS-01** is the recurring vehicle reference: shaped body
+and roof, inset glazing, wheel arches, detailed rims, lamps and fitted bumpers.
+Blender continues to control the road side, vehicle pose and interaction anchors.
+These are storyboard look frames; the full episode has not been animated.
 
-**Panels 04–09 are direct Blender geometry blockouts**, with proxy people and
-simplified buildings. The other panels are appearance concepts. Final PS2
-finishing and continuous action animation remain production work.
+### 01–04 · Call ends → reminder → smile → rush out
 
-### 01–04 · The call, the exit, the bus
+![Storyboard 01–04](revision-07/frames/01-04-storyboard.png)
 
-![Storyboard 01–04](revision-06/frames/01-04-storyboard.png)
+### 05–08 · Takeover → chase → crash → tap out
 
-### 05–08 · Takeover, chase, crash, tap
+![Storyboard 05–08](revision-07/frames/05-08-storyboard.png)
 
-![Storyboard 05–08](revision-06/frames/05-08-storyboard.png)
+### 09–12 · Dust off → sprint → safehouse → Pilates
 
-### 09–12 · Dust off, sprint, safehouse, Pilates
+![Storyboard 09–12](revision-07/frames/09-12-storyboard.png)
 
-![Storyboard 09–12](revision-06/frames/09-12-storyboard.png)
+[01–04 full size](revision-07/frames/01-04-storyboard.png) ·
+[05–08 full size](revision-07/frames/05-08-storyboard.png) ·
+[09–12 full size](revision-07/frames/09-12-storyboard.png)
 
-[01–04 full size](revision-06/frames/01-04-storyboard.png) ·
-[05–08 full size](revision-06/frames/05-08-storyboard.png) ·
-[09–12 full size](revision-06/frames/09-12-storyboard.png)
+## Approved bus reference
 
-## Double-decker continuity
+![SOS-BUS-01 canonical appearance](../references/sos-bus-01/canonical.png)
 
-One shared chassis supplies all six bus-action views. Shots 04/05 retain the
-same parked pose in the left lane. Shots 07/08/09 retain exactly the same wreck
-pose and heading, with the driver’s side down and passenger doorway facing up.
-The reader remains inside that lower-deck doorway. The upper deck and rear
-axle pair were added to that asset; the bus was not mirrored between cameras.
+[Canonical reference and approval record](../references/sos-bus-01/README.md).
+Use it alongside Goji Girl’s character reference in every bus shot. Its rounded
+forms and authored vehicle details supersede the old primitive shell as the
+appearance target. Two decks, three axles, SOS Transit branding, orange-red /
+purple / white livery and dark charcoal doorway trim stay fixed.
 
-![Double-decker livery and geometry](revision-06/frames/bus-double-decker.png)
+## Corrected passenger exit
 
-[Editable Blender master](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-girl-episode-2/marketing/assets/goji-girl/episode-02/revision-06/blender/double-decker-master.blend) ·
-[Scene records](revision-06/blender/continuity-record.json) ·
-[Revision notes](revision-06/README.md)
+The opening is confined to the upward-facing **side passenger doorway**. A solid
+white front-corner panel separates it from the intact front facade. The shared
+Blender doorway ends at local y=5.30; the front plane is y=6.00, leaving a 0.70 m
+corner. The reader and its pole rotate with the chassis; Goji Girl faces away
+from the camera with her bag on her left forearm.
+
+[Full exit frame](revision-07/frames/08-look.png) ·
+[Colour-coded door boundary guide](revision-07/frames/08-door-control.png) ·
+[Direct geometry frame](revision-07/frames/08-direct.png)
+
+[Editable Blender master](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-girl-episode-2/marketing/assets/goji-girl/episode-02/revision-07/blender/double-decker-master.blend) ·
+[Transform records](revision-07/blender/continuity-record.json) ·
+[Prompts and review notes](revision-07/README.md)
 
 ## Safehouse popup
 
 > You can save your game and lose the police at a safehouse.
 
-Exact user-provided copy, retaining the lower y=360 placement and 41.5–46.0s
-interval. The clinic concept now uses the double-decker wreck reference while
-preserving the engaged therapist, interior and two officers against the glass.
+Exact copy, unchanged y=360 placement, shown at 41.5–46.0s. The active therapist,
+quiet interior and police running against the glass remain the ending.
 
-[Full clinic panel](revision-06/frames/12-safehouse-preview.png) ·
-[Editable popup](revision-06/overlays/safehouse-popup.svg) ·
-[UI reserve check](revision-06/frames/12-ui-clearance-check.png)
+[Full clinic panel](revision-07/frames/12-safehouse-preview.png) ·
+[Editable popup](revision-07/overlays/safehouse-popup.svg) ·
+[UI reserve check](revision-07/frames/12-ui-clearance-check.png)
 
 ## Camera and look
 
@@ -90,31 +98,32 @@ a heavy orange filter is not the definition of the look.
 ### 01 · 00:00–00:03 — Just one more thing
 
 **Home cutscene.** Over her shoulder: headset with a visible boom microphone,
-laptop full of meeting tiles. Her finger taps the desk. Her phone lights up:
-**“Goji Pilates · Starts in 5 min.”** A colleague drones, **“Just one more thing…”**
-She looks from the reminder to the call. The black handbag sits beside the desk.
+laptop full of meeting tiles. Her finger taps the desk. A colleague drones,
+**“Just one more thing…”** The black handbag and phone sit beside the laptop.
+The Goji appointment reminder has not arrived yet.
 
-Sound: flat laptop voice, notification ping, impatient finger tapping. Keep the
-meeting faces as simple game characters too.
+Sound: flat laptop voice and impatient finger tapping.
 
-### 02 · 00:03–00:05 — Tap out of the call
+### 02 · 00:03–00:05 — Call over. Something to smile about.
 
-**Home cutscene.** Medium view: she angrily rips off the headset, then slams
-the laptop shut. The colleague is cut off mid-word. A tiny hold on the closed
-lid. She takes the handbag in her left hand on the exit transition.
+**Home cutscene.** At 03–04s she angrily rips off the headset and slams the laptop
+shut, cutting the colleague off mid-word. At **04–05s**, her phone pings with a
+calendar reminder: **“Goji Pilates — Appointment in 5 minutes.”** She looks at it
+and **smiles**, switching from irritation to eager anticipation. She grabs the
+black handbag in her left hand and gets up. The storyboard shows this second
+beat; the headset removal and laptop slam remain the preceding action.
 
-Sound: headset clatter, sharp **CLACK**, silence. This is her obvious burst of
-anger; the rest is played with absurdly routine confidence.
+Sound: headset clatter → sharp **CLACK** → calendar ping. Let the smile register
+before the cut; final motion timing still needs an animatic.
 
-### 03 · 00:05–00:08 — Player control resumes
+### 03 · 00:05–00:08 — Rush out for Goji
 
-**PLAYER follow.** Cut behind her, at normal gameplay height. She shoves the
-front door open with her right hand, swaggers through, then accelerates toward
-the street. Full-body player stays below centre; we see where she is going.
-The camera follows through the doorway without dropping to shoe height.
+**PLAYER follow.** Cut behind her at normal gameplay height. She pushes the
+front door wide with her right hand and immediately **runs out of the house**.
+Her movement is eager and purposeful. Full-body player stays below centre;
+we see where she is going. Her back remains toward us, bag in her left hand.
 
-Sound: door **BANG**, two heavy swagger steps, running feet. Brief objective:
-**“Get to Goji.”** Bag stays in her left hand.
+Sound: door **BANG**, quick running footsteps. Brief objective: **“Get to Goji.”**
 
 ### 04 · 00:08–00:11 — Public transport, technically
 
@@ -261,8 +270,9 @@ of the background gag. End on the moving tableau.
 ## Continuity and review notes
 
 - **Approved direction:** the user accepted the story intent and requested
-  predominantly third-person outdoor gameplay with indoor cutscenes. The new
-  illustrations, exact camera offsets and 47-second timing remain proposals.
+  predominantly third-person outdoor gameplay with indoor cutscenes. The user approved SOS-BUS-01 as the canonical bus appearance reference and
+  confirmed the reminder/smile after the call. Other revised illustrations and
+  exact 47-second motion timing remain proposals.
 - **Retain the comedy:** crash pause, isolated tap beep, hard audio boundary,
   slow reformer action and police with broken pathing. No blood or deaths;
   driver is visibly okay, passengers clear the bus, shelter is empty.
@@ -278,8 +288,9 @@ of the background gag. End on the moving tableau.
   clearance are checked. The six-second blockout uses a procedural proxy and
   neutral surroundings, not approved final cast or a full accident simulation.
   Contact frames were inspected; the final PS2 motion and exit-to-ground cut still
-  need production review. The earlier generated bus panels are superseded. The revision-06 `.blend`
-  and its direct views are the geometry authority; the old revision-03 isolated
+  need production review. The earlier generated bus panels are superseded. The revision-07 `.blend`
+  and its direct views remain the spatial authority; styled panels are look frames,
+  with projection/material interpretation rather than exact 3D proof; the old revision-03 isolated
   exit motion remains a contact study, not the current street layout.
 - **Service framing:** Pilates/studio experience, no medical or treatment claim.
   Her unhurt state is cartoon continuity, not recovery attributed to a session.
@@ -306,10 +317,10 @@ and [San Andreas reference pack](https://github.com/gojiphysio/goji/blob/a4cb40e
 - **Generation:** built-in image generator, with identity and game-camera
   references assigned separate roles. Exact prompts, edits and reference hashes
   are in [v2 generation records](storyboard-prompts-v2.json).
-- **Current shot states:** [camera and continuity record](camera-plan-v6.json).
-- **This revision:** [double-decker geometry and full storyboard](revision-06/README.md).
+- **Current shot states:** [camera and continuity record](camera-plan-v7.json).
+- **This revision:** [canonical bus, corrected doorway and styled storyboard](revision-07/README.md).
 - **Retained staging:** [source photos and Blender records](revision-03/README.md).
-- **Earlier drafts:** [v1](creative-v1.md), [v2](creative-v2.md) and [v3](creative-v3.md) and [v4](creative-v4.md) and [v5](creative-v5.md), retained for comparison.
+- **Earlier drafts:** [v1](creative-v1.md), [v2](creative-v2.md) and [v3](creative-v3.md) and [v4](creative-v4.md) and [v5](creative-v5.md) and [v6](creative-v6.md), retained for comparison.
 
 ## Optional caption
 

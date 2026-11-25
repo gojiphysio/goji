@@ -1,0 +1,25 @@
+{
+  "asset_id": "SOS-BUS-01",
+  "version": 1,
+  "status": "user-approved appearance authority",
+  "approval_date": "2026-11-25",
+  "approval_quote": "that bus looks great. use it as a character reference, just like we hold reference for the goji girl",
+  "image": "canonical.png",
+  "sha256": "6aee1b7ce4088bb619c3ce7f2d6fff5a15b2293c4db30f5b3d8a740fe7e2cf3f",
+  "role": "Appearance identity, detailing, body curves, glazing, wheels, trim, livery and logo. Blender governs world pose, camera and interaction anchors.",
+  "source": "Built-in image generation informed by user-supplied GTA SA coach screenshot and prior Singapore livery reference. Original generated double-decker, not extracted game asset.",
+  "constraints": [
+    "two decks",
+    "three axles: single front and tandem rear",
+    "Singapore right-hand drive",
+    "left front passenger doorway with intact front corner",
+    "SOS Transit wordmark and swoosh",
+    "orange-red / purple / white livery",
+    "no yellow doorway outline"
+  ],
+  "not_approved": [
+    "other unshown angles",
+    "exact manufacturer dimensions",
+    "complete animation"
+  ]
+}

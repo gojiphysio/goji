@@ -1,0 +1,408 @@
+[
+  {
+    "id": "r7_04",
+    "prompt": "Edit target image 1 into a finished GTA San Andreas ORIGINAL PS2 gameplay storyboard still, vertical 9:16. This is an APPEARANCE PASS over a locked Blender camera/layout. Preserve image 1's projection, bus silhouette, wheel count, glazing divisions, road, curb, camera perspective and all structural anchors exactly. Do not flip, mirror, move or redesign the bus. Image 2 is ONLY Goji Girl identity and PS2 surface style: maroon sleeveless top and leggings, long black ponytail, white sneakers, one black handbag. Do NOT copy image 2's single-decker bus or SBS branding. Our bus is the image 1 THREE-AXLE DOUBLE-DECKER with TWO passenger decks, orange-red upper roof/body, deep-purple lower/rear, diagonal white panels, charcoal undercarriage and door trim, SOS Transit italic logo. Surface finish: authored low-resolution painted textures, coarse asphalt, weathered concrete, flat game shadows, economical adult faces/hair, simple garment folds, cyan daylight sky and light distance haze. Original 2004 PS2 game screenshot, not modern remaster, not glossy PBR, not photographic, not plastic blockout or toy figurines. Textured tropical foliage and Singapore buildings can complete the sparse background without changing road or existing structures. Keep every human in that same game style. No cinematic lens, no DOF/bokeh, no added HUD, no panel numbers, no captions. Exact transport lettering: SOS Transit only. Keep ALL structural geometry from image 1; material texture detail can improve.SCENE04 parked bus. Exact image1 composition and camera. Player is on pavement beside front LEFT passenger doorway, moving around bus nose, back/three-quarter back to camera, handbag LEFT hand. Preserve three wheels per side, tall two-deck bus, small open front passenger doorway below shelter. The bus faces camera-left near foreground and extends into upper right; NEVER reverse. Keep existing shelter posts and green bin. Add 3 adult PS2 commuters who have just alighted, safely on the sidewalk BEHIND protagonist near right background; nobody overlaps her or bus. No wanted star yet. No yellow doorway trim.",
+    "inputs": [
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-06/frames/04-direct.png",
+      "/Users/tidepool/.codex/skills/goji-gta-video/assets/ep01-street.png"
+    ],
+    "tool": "built-in image_gen",
+    "model_version": "not exposed",
+    "cost": "not reported by tool",
+    "runtime": "not separately recorded per image in parallel calls",
+    "output_hint": "Generated images are saved to /Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b as /Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b/exec-37ba4c88-f175-4e67-ba70-089c34ab7055.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+    "status": "superseded or rejected; see review notes",
+    "input_hashes": {
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-06/frames/04-direct.png": "e2575b9a23a9a5d13e26c5269393bf4c3f87dd421f3311f40e4b252b997527bf",
+      "/Users/tidepool/.codex/skills/goji-gta-video/assets/ep01-street.png": "396698cd2396bf7897d95fae1bb572b5ca67b41d17cfcae2a06c1496dd8d53e9"
+    }
+  },
+  {
+    "id": "r7_05",
+    "prompt": "Edit target image 1 into a finished GTA San Andreas ORIGINAL PS2 gameplay storyboard still, vertical 9:16. This is an APPEARANCE PASS over a locked Blender camera/layout. Preserve image 1's projection, bus silhouette, wheel count, glazing divisions, road, curb, camera perspective and all structural anchors exactly. Do not flip, mirror, move or redesign the bus. Image 2 is ONLY Goji Girl identity and PS2 surface style: maroon sleeveless top and leggings, long black ponytail, white sneakers, one black handbag. Do NOT copy image 2's single-decker bus or SBS branding. Our bus is the image 1 THREE-AXLE DOUBLE-DECKER with TWO passenger decks, orange-red upper roof/body, deep-purple lower/rear, diagonal white panels, charcoal undercarriage and door trim, SOS Transit italic logo. Surface finish: authored low-resolution painted textures, coarse asphalt, weathered concrete, flat game shadows, economical adult faces/hair, simple garment folds, cyan daylight sky and light distance haze. Original 2004 PS2 game screenshot, not modern remaster, not glossy PBR, not photographic, not plastic blockout or toy figurines. Textured tropical foliage and Singapore buildings can complete the sparse background without changing road or existing structures. Keep every human in that same game style. No cinematic lens, no DOF/bokeh, no added HUD, no panel numbers, no captions. Exact transport lettering: SOS Transit only. Keep ALL structural geometry from image 1; material texture detail can improve.SCENE05 driver takeover. Exact image1 parked pose and road markings; camera on driver's RIGHT side near front, white bus nose at right, bus length extends left, road-centre side of same bus as04. Preserve SMALL FORWARD DRIVER WINDOW opening: existing width/height/location must not grow or move backwards. Upper-deck glass remains full row ABOVE cab. Adult woman with maroon athletic outfit, back to camera, one black handbag hooked LEFT forearm; right hand reaches toward driver's purple shirt sleeve through the just-broken window. Driver remains distinct adult male low-poly Singapore NPC, purple short-sleeve shirt, short dark hair, readable surprised face, seated within opening, no blood. Subtle broken-glass shards at sill. No enlarged doorway, no front passenger door added on this side. Materials and detailed human replace proxies only. Exactly one driver and protagonist.",
+    "inputs": [
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-06/frames/05-direct.png",
+      "/Users/tidepool/.codex/skills/goji-gta-video/assets/ep01-street.png"
+    ],
+    "tool": "built-in image_gen",
+    "model_version": "not exposed",
+    "cost": "not reported by tool",
+    "runtime": "not separately recorded per image in parallel calls",
+    "output_hint": "Generated images are saved to /Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b as /Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b/exec-2ca1ad87-366b-452f-bc19-86760989c5f4.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+    "status": "superseded or rejected; see review notes",
+    "input_hashes": {
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-06/frames/05-direct.png": "0fc46d53ed690945e89c0d11e3bd6d185cdf4d18735136aa0c49cf31f5000e74",
+      "/Users/tidepool/.codex/skills/goji-gta-video/assets/ep01-street.png": "396698cd2396bf7897d95fae1bb572b5ca67b41d17cfcae2a06c1496dd8d53e9"
+    }
+  },
+  {
+    "id": "r7_06",
+    "prompt": "Edit target image 1 into a finished GTA San Andreas ORIGINAL PS2 gameplay storyboard still, vertical 9:16. This is an APPEARANCE PASS over a locked Blender camera/layout. Preserve image 1's projection, bus silhouette, wheel count, glazing divisions, road, curb, camera perspective and all structural anchors exactly. Do not flip, mirror, move or redesign the bus. Image 2 is ONLY Goji Girl identity and PS2 surface style: maroon sleeveless top and leggings, long black ponytail, white sneakers, one black handbag. Do NOT copy image 2's single-decker bus or SBS branding. Our bus is the image 1 THREE-AXLE DOUBLE-DECKER with TWO passenger decks, orange-red upper roof/body, deep-purple lower/rear, diagonal white panels, charcoal undercarriage and door trim, SOS Transit italic logo. Surface finish: authored low-resolution painted textures, coarse asphalt, weathered concrete, flat game shadows, economical adult faces/hair, simple garment folds, cyan daylight sky and light distance haze. Original 2004 PS2 game screenshot, not modern remaster, not glossy PBR, not photographic, not plastic blockout or toy figurines. Textured tropical foliage and Singapore buildings can complete the sparse background without changing road or existing structures. Keep every human in that same game style. No cinematic lens, no DOF/bokeh, no added HUD, no panel numbers, no captions. Exact transport lettering: SOS Transit only. Keep ALL structural geometry from image 1; material texture detail can improve.SCENE06 vehicle rear chase camera. Exact rear-centered tall double-decker pose in left lane. Keep single upper REAR window, orange-red engine panel with dark horizontal vents, purple lower rear, white italic SOS Transit. This is a two-deck bus but the lower rear is engine panel, NOT a second rear window. Two long side-window rows visible only along narrow side edges if present. Rebuild existing polygon trees as simple textured tropical tree foliage. No new foreground characters. Faint asymmetric RED spill on road off one side and BLUE spill from behind camera off the opposite side, diffuse passing bands, no bilateral coloured lamps on bus. Bus rear lamps are RED/AMBER only; no blue/pink/emissive strips on side. Police cars stay behind camera OUT OF FRAME. Existing building geometry on left gets painted Lentor-like facade texture. No smoke or fire yet.",
+    "inputs": [
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-06/frames/06-direct.png",
+      "/Users/tidepool/.codex/skills/goji-gta-video/assets/ep01-street.png"
+    ],
+    "tool": "built-in image_gen",
+    "model_version": "not exposed",
+    "cost": "not reported by tool",
+    "runtime": "not separately recorded per image in parallel calls",
+    "output_hint": "Generated images are saved to /Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b as /Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b/exec-89f00921-6b3b-46b9-9e9b-3f77f9afd5da.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+    "status": "superseded or rejected; see review notes",
+    "input_hashes": {
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-06/frames/06-direct.png": "302007871ff3ca355629e4e49caaab104750614fa27a6beb0b6ce8b4f1f5b3da",
+      "/Users/tidepool/.codex/skills/goji-gta-video/assets/ep01-street.png": "396698cd2396bf7897d95fae1bb572b5ca67b41d17cfcae2a06c1496dd8d53e9"
+    }
+  },
+  {
+    "id": "r7_08",
+    "prompt": "Edit target image 1 into a finished GTA San Andreas ORIGINAL PS2 gameplay storyboard still, vertical 9:16. This is an APPEARANCE PASS over a locked Blender camera/layout. Preserve image 1's projection, bus silhouette, wheel count, glazing divisions, road, curb, camera perspective and all structural anchors exactly. Do not flip, mirror, move or redesign the bus. Image 2 is ONLY Goji Girl identity and PS2 surface style: maroon sleeveless top and leggings, long black ponytail, white sneakers, one black handbag. Do NOT copy image 2's single-decker bus or SBS branding. Our bus is the image 1 THREE-AXLE DOUBLE-DECKER with TWO passenger decks, orange-red upper roof/body, deep-purple lower/rear, diagonal white panels, charcoal undercarriage and door trim, SOS Transit italic logo. Surface finish: authored low-resolution painted textures, coarse asphalt, weathered concrete, flat game shadows, economical adult faces/hair, simple garment folds, cyan daylight sky and light distance haze. Original 2004 PS2 game screenshot, not modern remaster, not glossy PBR, not photographic, not plastic blockout or toy figurines. Textured tropical foliage and Singapore buildings can complete the sparse background without changing road or existing structures. Keep every human in that same game style. No cinematic lens, no DOF/bokeh, no added HUD, no panel numbers, no captions. Exact transport lettering: SOS Transit only. Keep ALL structural geometry from image 1; material texture detail can improve. SCENE 08: the bus has rolled exactly 90 degrees onto its RIGHT DRIVER SIDE. Its LEFT PASSENGER SIDE faces UP. The near end is the FRONT of the bus; two front windshields and TWO long side-window rows are visible in their existing orientation. Near lower-deck doorway is the rectangular hole at top-right of near end, ahead of the first axle. Replace proxy woman only with canonical adult Goji girl in same half-emerged position, BACK to camera. Left hand braces charcoal doorway; right hand reaches DOWN to the green reader on the separate yellow pole INSIDE that opening. A small EZ-Link card meets reader. Black bag on left forearm inside opening. Legs remain inside. Do not create roof hatch, upright doorway, rear exit or second door. Preserve exact orange-red long roof edge on left, purple wheel strip on right, TWO rear wheels far right and single front wheel near right. Bent shelter post and curb remain right. No yellow outline around door. No fire yet. Moderate rising smoke can be distant only. Finish bus textures and world, maintain geometry rigorously.",
+    "inputs": [
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-06/frames/08-direct.png",
+      "/Users/tidepool/.codex/skills/goji-gta-video/assets/ep01-street.png"
+    ],
+    "tool": "built-in image_gen",
+    "model_version": "not exposed",
+    "cost": "not reported by tool",
+    "runtime": "not separately recorded per image in parallel calls",
+    "output_hint": "Generated images are saved to /Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b as /Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b/exec-3292ee29-33fe-497a-b4a2-5f135ca3c543.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+    "status": "superseded or rejected; see review notes",
+    "input_hashes": {
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-06/frames/08-direct.png": "87b8c27218bc2f27ec2d923041becfe8fa5005f47b079af8438cd10dce807587",
+      "/Users/tidepool/.codex/skills/goji-gta-video/assets/ep01-street.png": "396698cd2396bf7897d95fae1bb572b5ca67b41d17cfcae2a06c1496dd8d53e9"
+    }
+  },
+  {
+    "id": "r7vehicle",
+    "prompt": "Create a single full vehicle reference image of our fictional SOS Transit Singapore DOUBLE-DECKER bus, as if it is an actual custom vehicle asset rendered inside the ORIGINAL 2004 PS2 GTA San Andreas engine. The attached image supplied by the user is the PRIMARY GEOMETRY-DETAIL AND RENDERING benchmark, not a livery or deck-count reference. Study its rounded roof shoulders, subtle body curvature, inset windscreen and side glazing, slim fitted black gaskets, pressed metal panel seams, layered bumper, individually recessed headlamp lenses, contoured wheel arches, rubber tyres with rims, mirrors and authentic modest polygon budget. Match that convincing authored game vehicle complexity. Do NOT create a rectangular Blender blockout covered with gritty noise; no voxel or cuboid shell, no excessive bevel blobs, no modern PBR or photorealistic materials. Clean subtly weathered low-resolution painted textures and broad 2004 game shading, not uniform heavy grunge.\nOur vehicle is a TWO-DECK, THREE-AXLE Singapore right-hand-drive bus, 12m long, 2.5m wide, 4.6m high. Long upper and lower passenger window rows, two separate front windshields with softly curved corners. Tall believable bus proportions, rounded roof cap and gently curved front/rear corners, wheels set naturally into CUT-OUT contoured arches, rear tandem wheels. The entire upper roof/cantrail and aft upper body are orange-red, lower aft body and rear deep purple, white forward body and white diagonal wedge between red/purple, charcoal dark glazing. Use the wordmark 'SOS Transit' in italic red/purple on the broad white middle side band; white SOS Transit on purple rear. No SBS, no Canny. Logo has the small red/purple swoosh above the lettering. Passenger door on LEFT side at front, ahead of front axle, dark charcoal slim door frame no yellow border. Driver's cab on RIGHT with compact small side window directly alongside lower front windshield.\nView from front LEFT passenger-side three-quarter at normal standing height, ENTIRE bus and all three left wheels visible, facing toward camera-left with length extending right, clean Singapore asphalt yard and unobtrusive neutral background, daylight cyan sky. Vehicle asset presentation only, no people, no HUD, no big labels. This image will guide the improved 3D asset's vehicle detailing and subsequent storyboards. Preserve the credible PS2 coach manufacturing details from the reference while adapting to TWO decks and requested Singapore livery.",
+    "inputs": [
+      "user-attached GTA SA coach screenshot; num_last_images_to_include=1"
+    ],
+    "tool": "built-in image_gen",
+    "model_version": "not exposed",
+    "cost": "not reported by tool",
+    "runtime": "not separately recorded per image in parallel calls",
+    "output_hint": "Generated images are saved to /Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b as /Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b/exec-94360d11-dfa4-4350-8b36-cfab2d838d92.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+    "status": "user-approved canonical reference",
+    "input_hashes": {}
+  },
+  {
+    "id": "r7_02",
+    "prompt": "Edit this Goji Girl home scene into the NEXT MOMENT after she has slammed the laptop shut. Keep the exact same adult woman identity, maroon athleisure, black ponytail, desk, window, handbag and original PS2 GTA San Andreas cutscene look. The laptop is CLOSED on desk, headset with boom microphone rests on desk beside it. She has picked up her smartphone in right hand, gazes down at the screen, and gives a small warm relieved SMILE on seeing her Goji calendar appointment reminder. Clear change from frustration to delight; no teeth-baring grin. Camera same side of desk, medium three-quarter face and upper body, phone and closed laptop visible, handbag still on desk ready to grab. Phone display softly lit with a simple calendar icon, no generated small writing needed. Leave top fifth of image as simple wall/window for later editable reminder overlay. Original PS2-era economical face geometry, coarse painted clothing textures and broad diffuse shading; match existing identity, not photoreal or Pixar. No title, panel number, HUD or captions. Single vertical 9:16 frame.",
+    "inputs": [
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-06/frames/02-look.png"
+    ],
+    "tool": "built-in image_gen",
+    "model_version": "not exposed",
+    "cost": "not reported by tool",
+    "runtime": "not separately recorded per image in parallel calls",
+    "output_hint": "Generated images are saved to /Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b as /Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b/exec-49ac46e5-eaef-48f6-b239-ed00e151ca6b.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+    "status": "selected for current storyboard",
+    "input_hashes": {
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-06/frames/02-look.png": "468d3b6e6e20f1554667004c1fb67ac991e3c09c5525a418ba431c9ccf436a4d"
+    }
+  },
+  {
+    "id": "r7_03",
+    "prompt": "Edit this exact shot to show Goji Girl RUSHING eagerly out of her house after a calendar reminder. Preserve third-person rear gameplay camera, same maroon top and leggings, adult woman, ponytail, white shoes, LEFT hand holding single black handbag, same front door and Singapore street set. Replace slow swagger pose with a clear forward RUNNING stride: torso slightly forward, rear heel raised, opposite leg moving through doorway, right arm leaving the door after pushing it wide. Her head looks toward street, back remains toward camera. The door is already open. Keep full body, normal gameplay eye height and same environment. Render like actual original PS2 GTA San Andreas gameplay: economical adult mesh, painted folds, simple low-resolution environmental textures, flat game shadow, no toy blockout and no modern glossy realism. Remove panel number 03 and any text. One vertical9:16 frame, not a sheet.",
+    "inputs": [
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-06/frames/03-look.png"
+    ],
+    "tool": "built-in image_gen",
+    "model_version": "not exposed",
+    "cost": "not reported by tool",
+    "runtime": "not separately recorded per image in parallel calls",
+    "output_hint": "Generated images are saved to /Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b as /Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b/exec-64b711c6-5362-4ec4-b8bf-24c45d9f2ba1.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+    "status": "selected for current storyboard",
+    "input_hashes": {
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-06/frames/03-look.png": "2d526b9408797ca03dfafa62bcddd4e00bd2a0d2155cde0069241fca843d6575"
+    }
+  },
+  {
+    "id": "r7b_04",
+    "prompt": "Render a finished storyboard still in original GTA San Andreas PS2 game graphics, using the supplied guides with STRICT SEPARATE ROLES.\nIMAGE1: shared Blender CAMERA/PLACEMENT/CONTINUITY guide. Keep its exact vehicle world orientation, deck count, axle positions, front vs rear, open-door location, driver-window location, road markings, sidewalk and main architecture positions. It is a staging guide, NOT the quality ceiling for vehicle surfacing.\nIMAGE2: VEHICLE ASSET DETAIL AND RENDERING benchmark based on the user's GTA SA bus example. This is the target manufacturing detail: softly rounded roof shoulders and body corners, inset slightly curved windscreens with slim rubber seals, shaped wheel arches, believable profiled tyres and recessed metal rims, flush twin round headlamps, indicators, fitted continuous bumpers, mirrors, fine restrained body panel seams. Use clean low-resolution painted surfaces and modest environmental reflection like the ORIGINAL game. Do NOT preserve crude box slabs or giant blank panels from an earlier Blender proxy. Do NOT cover the bus in heavy tiled grunge; the original game has authored textured parts, not gritty noise pasted over cubes. Preserve the livery from image1, refining its contours like image2.\nIMAGE3: ONLY adult Goji Girl identity, ponytail, maroon sleeveless athletic top/leggings, white shoes, black handbag in LEFT hand/forearm, Singapore environment flavour. Its old SINGLE-DECKER SBS bus MUST NOT be copied. The VEHICLE QUALITY in image2 takes priority over image3.\nOur shared bus is a RIGHT-HAND DRIVE, THREE-AXLE DOUBLE-DECKER, with two window rows, orange-red roof/upper aft paint, white forward and diagonal middle panels, purple lower aft/rear, charcoal undercarriage, DARK CHARCOAL passenger-door trim, SOS Transit italic wordmark and small red/purple swoosh. No SBS or Canny text.\nAll people and surroundings should have the believable authored PS2 GTA SA game asset detail, not bare faceted mannequin shapes, Lego, mobile-game cartoon, modern PBR or photography. Economical adult faces, painted clothes, alpha-textured trees, coarse but specific concrete/asphalt textures, simple daylight shadows and cyan hazy sky. No bokeh, cinematic camera, added captions or HUD. Single vertical 9:16 frame, no borders.\nSCENE04 parked bus. Exact image1 composition and camera. Player is on pavement beside front LEFT passenger doorway, moving around bus nose, back/three-quarter back to camera, handbag LEFT hand. Preserve three wheels per side, tall two-deck bus, small open front passenger doorway below shelter. The bus faces camera-left near foreground and extends into upper right; NEVER reverse. Keep existing shelter posts and green bin. Add 3 adult PS2 commuters who have just alighted, safely on the sidewalk BEHIND protagonist near right background; nobody overlaps her or bus. No wanted star yet. No yellow doorway trim.",
+    "inputs": [
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-07/conditioning/04-direct.png",
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-07/frames/vehicle-style-reference.png",
+      "/Users/tidepool/.codex/skills/goji-gta-video/assets/ep01-street.png"
+    ],
+    "tool": "built-in image_gen",
+    "model_version": "not exposed",
+    "cost": "not reported by tool",
+    "runtime": "not separately recorded per image in parallel calls",
+    "output_hint": "Generated images are saved to /Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b as /Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b/exec-2b6f27f3-0f7b-4e87-9cd4-a39150036e49.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+    "status": "selected for current storyboard",
+    "input_hashes": {
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-07/frames/vehicle-style-reference.png": "6aee1b7ce4088bb619c3ce7f2d6fff5a15b2293c4db30f5b3d8a740fe7e2cf3f",
+      "/Users/tidepool/.codex/skills/goji-gta-video/assets/ep01-street.png": "396698cd2396bf7897d95fae1bb572b5ca67b41d17cfcae2a06c1496dd8d53e9",
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-07/conditioning/04-direct.png": "e81113e04badc595b33f6606b015b214518425240aad86b20b338078b6212e95"
+    }
+  },
+  {
+    "id": "r7b_05",
+    "prompt": "Render a finished storyboard still in original GTA San Andreas PS2 game graphics, using the supplied guides with STRICT SEPARATE ROLES.\nIMAGE1: shared Blender CAMERA/PLACEMENT/CONTINUITY guide. Keep its exact vehicle world orientation, deck count, axle positions, front vs rear, open-door location, driver-window location, road markings, sidewalk and main architecture positions. It is a staging guide, NOT the quality ceiling for vehicle surfacing.\nIMAGE2: VEHICLE ASSET DETAIL AND RENDERING benchmark based on the user's GTA SA bus example. This is the target manufacturing detail: softly rounded roof shoulders and body corners, inset slightly curved windscreens with slim rubber seals, shaped wheel arches, believable profiled tyres and recessed metal rims, flush twin round headlamps, indicators, fitted continuous bumpers, mirrors, fine restrained body panel seams. Use clean low-resolution painted surfaces and modest environmental reflection like the ORIGINAL game. Do NOT preserve crude box slabs or giant blank panels from an earlier Blender proxy. Do NOT cover the bus in heavy tiled grunge; the original game has authored textured parts, not gritty noise pasted over cubes. Preserve the livery from image1, refining its contours like image2.\nIMAGE3: ONLY adult Goji Girl identity, ponytail, maroon sleeveless athletic top/leggings, white shoes, black handbag in LEFT hand/forearm, Singapore environment flavour. Its old SINGLE-DECKER SBS bus MUST NOT be copied. The VEHICLE QUALITY in image2 takes priority over image3.\nOur shared bus is a RIGHT-HAND DRIVE, THREE-AXLE DOUBLE-DECKER, with two window rows, orange-red roof/upper aft paint, white forward and diagonal middle panels, purple lower aft/rear, charcoal undercarriage, DARK CHARCOAL passenger-door trim, SOS Transit italic wordmark and small red/purple swoosh. No SBS or Canny text.\nAll people and surroundings should have the believable authored PS2 GTA SA game asset detail, not bare faceted mannequin shapes, Lego, mobile-game cartoon, modern PBR or photography. Economical adult faces, painted clothes, alpha-textured trees, coarse but specific concrete/asphalt textures, simple daylight shadows and cyan hazy sky. No bokeh, cinematic camera, added captions or HUD. Single vertical 9:16 frame, no borders.\nSCENE05 driver takeover. Exact image1 parked pose and road markings; camera on driver's RIGHT side near front, white bus nose at right, bus length extends left, road-centre side of same bus as04. Preserve SMALL FORWARD DRIVER WINDOW opening: existing width/height/location must not grow or move backwards. Upper-deck glass remains full row ABOVE cab. Adult woman with maroon athletic outfit, back to camera, one black handbag hooked LEFT forearm; right hand reaches toward driver's purple shirt sleeve through the just-broken window. Driver remains distinct adult male low-poly Singapore NPC, purple short-sleeve shirt, short dark hair, readable surprised face, seated within opening, no blood. Subtle broken-glass shards at sill. No enlarged doorway, no front passenger door added on this side. Materials and detailed human replace proxies only. Exactly one driver and protagonist.",
+    "inputs": [
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-07/conditioning/05-direct.png",
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-07/frames/vehicle-style-reference.png",
+      "/Users/tidepool/.codex/skills/goji-gta-video/assets/ep01-street.png"
+    ],
+    "tool": "built-in image_gen",
+    "model_version": "not exposed",
+    "cost": "not reported by tool",
+    "runtime": "not separately recorded per image in parallel calls",
+    "output_hint": "Generated images are saved to /Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b as /Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b/exec-71f8c1a2-95c4-417b-a31d-cbdfc5837efa.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+    "status": "superseded or rejected; see review notes",
+    "input_hashes": {
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-07/frames/vehicle-style-reference.png": "6aee1b7ce4088bb619c3ce7f2d6fff5a15b2293c4db30f5b3d8a740fe7e2cf3f",
+      "/Users/tidepool/.codex/skills/goji-gta-video/assets/ep01-street.png": "396698cd2396bf7897d95fae1bb572b5ca67b41d17cfcae2a06c1496dd8d53e9",
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-07/conditioning/05-direct.png": "3bc4e6c266aaf026e642f1ca1f8577f5364a5722efdcf377fa86236e24236faf"
+    }
+  },
+  {
+    "id": "r7b_06",
+    "prompt": "Render a finished storyboard still in original GTA San Andreas PS2 game graphics, using the supplied guides with STRICT SEPARATE ROLES.\nIMAGE1: shared Blender CAMERA/PLACEMENT/CONTINUITY guide. Keep its exact vehicle world orientation, deck count, axle positions, front vs rear, open-door location, driver-window location, road markings, sidewalk and main architecture positions. It is a staging guide, NOT the quality ceiling for vehicle surfacing.\nIMAGE2: VEHICLE ASSET DETAIL AND RENDERING benchmark based on the user's GTA SA bus example. This is the target manufacturing detail: softly rounded roof shoulders and body corners, inset slightly curved windscreens with slim rubber seals, shaped wheel arches, believable profiled tyres and recessed metal rims, flush twin round headlamps, indicators, fitted continuous bumpers, mirrors, fine restrained body panel seams. Use clean low-resolution painted surfaces and modest environmental reflection like the ORIGINAL game. Do NOT preserve crude box slabs or giant blank panels from an earlier Blender proxy. Do NOT cover the bus in heavy tiled grunge; the original game has authored textured parts, not gritty noise pasted over cubes. Preserve the livery from image1, refining its contours like image2.\nIMAGE3: ONLY adult Goji Girl identity, ponytail, maroon sleeveless athletic top/leggings, white shoes, black handbag in LEFT hand/forearm, Singapore environment flavour. Its old SINGLE-DECKER SBS bus MUST NOT be copied. The VEHICLE QUALITY in image2 takes priority over image3.\nOur shared bus is a RIGHT-HAND DRIVE, THREE-AXLE DOUBLE-DECKER, with two window rows, orange-red roof/upper aft paint, white forward and diagonal middle panels, purple lower aft/rear, charcoal undercarriage, DARK CHARCOAL passenger-door trim, SOS Transit italic wordmark and small red/purple swoosh. No SBS or Canny text.\nAll people and surroundings should have the believable authored PS2 GTA SA game asset detail, not bare faceted mannequin shapes, Lego, mobile-game cartoon, modern PBR or photography. Economical adult faces, painted clothes, alpha-textured trees, coarse but specific concrete/asphalt textures, simple daylight shadows and cyan hazy sky. No bokeh, cinematic camera, added captions or HUD. Single vertical 9:16 frame, no borders.\nSCENE06 vehicle rear chase camera. Exact rear-centered tall double-decker pose in left lane. Keep single upper REAR window, orange-red engine panel with dark horizontal vents, purple lower rear, white italic SOS Transit. This is a two-deck bus but the lower rear is engine panel, NOT a second rear window. Two long side-window rows visible only along narrow side edges if present. Rebuild existing polygon trees as simple textured tropical tree foliage. No new foreground characters. Faint asymmetric RED spill on road off one side and BLUE spill from behind camera off the opposite side, diffuse passing bands, no bilateral coloured lamps on bus. Bus rear lamps are RED/AMBER only; no blue/pink/emissive strips on side. Police cars stay behind camera OUT OF FRAME. Existing building geometry on left gets painted Lentor-like facade texture. No smoke or fire yet.",
+    "inputs": [
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-07/conditioning/06-direct.png",
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-07/frames/vehicle-style-reference.png",
+      "/Users/tidepool/.codex/skills/goji-gta-video/assets/ep01-street.png"
+    ],
+    "tool": "built-in image_gen",
+    "model_version": "not exposed",
+    "cost": "not reported by tool",
+    "runtime": "not separately recorded per image in parallel calls",
+    "output_hint": "Generated images are saved to /Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b as /Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b/exec-34421f0c-72d4-4cd5-87c2-cf7513056aa0.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+    "status": "selected for current storyboard",
+    "input_hashes": {
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-07/frames/vehicle-style-reference.png": "6aee1b7ce4088bb619c3ce7f2d6fff5a15b2293c4db30f5b3d8a740fe7e2cf3f",
+      "/Users/tidepool/.codex/skills/goji-gta-video/assets/ep01-street.png": "396698cd2396bf7897d95fae1bb572b5ca67b41d17cfcae2a06c1496dd8d53e9",
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-07/conditioning/06-direct.png": "0761bd171d5c856f12f7fb88c5c48bd418eeef7f38719b31a2cb85a26420215f"
+    }
+  },
+  {
+    "id": "r7b_07",
+    "prompt": "Render a finished storyboard still in original GTA San Andreas PS2 game graphics, using the supplied guides with STRICT SEPARATE ROLES.\nIMAGE1: shared Blender CAMERA/PLACEMENT/CONTINUITY guide. Keep its exact vehicle world orientation, deck count, axle positions, front vs rear, open-door location, driver-window location, road markings, sidewalk and main architecture positions. It is a staging guide, NOT the quality ceiling for vehicle surfacing.\nIMAGE2: VEHICLE ASSET DETAIL AND RENDERING benchmark based on the user's GTA SA bus example. This is the target manufacturing detail: softly rounded roof shoulders and body corners, inset slightly curved windscreens with slim rubber seals, shaped wheel arches, believable profiled tyres and recessed metal rims, flush twin round headlamps, indicators, fitted continuous bumpers, mirrors, fine restrained body panel seams. Use clean low-resolution painted surfaces and modest environmental reflection like the ORIGINAL game. Do NOT preserve crude box slabs or giant blank panels from an earlier Blender proxy. Do NOT cover the bus in heavy tiled grunge; the original game has authored textured parts, not gritty noise pasted over cubes. Preserve the livery from image1, refining its contours like image2.\nIMAGE3: ONLY adult Goji Girl identity, ponytail, maroon sleeveless athletic top/leggings, white shoes, black handbag in LEFT hand/forearm, Singapore environment flavour. Its old SINGLE-DECKER SBS bus MUST NOT be copied. The VEHICLE QUALITY in image2 takes priority over image3.\nOur shared bus is a RIGHT-HAND DRIVE, THREE-AXLE DOUBLE-DECKER, with two window rows, orange-red roof/upper aft paint, white forward and diagonal middle panels, purple lower aft/rear, charcoal undercarriage, DARK CHARCOAL passenger-door trim, SOS Transit italic wordmark and small red/purple swoosh. No SBS or Canny text.\nAll people and surroundings should have the believable authored PS2 GTA SA game asset detail, not bare faceted mannequin shapes, Lego, mobile-game cartoon, modern PBR or photography. Economical adult faces, painted clothes, alpha-textured trees, coarse but specific concrete/asphalt textures, simple daylight shadows and cyan hazy sky. No bokeh, cinematic camera, added captions or HUD. Single vertical 9:16 frame, no borders.\nSCENE07 settled crash pose: same bus has rolled exactly 90 degrees onto DRIVER RIGHT SIDE. The NEAR END is the REAR, orange-red engine louvres now VERTICAL in screen, purple rear body with white SOS Transit lettering ROTATED 90 degrees. Roof is road-centre on RIGHT, charcoal underbody toward LEFT sidewalk. The side facing UP must have TWO window rows, purple skirt with THREE wheels (tandem at near rear, lone front far away). Image1 locks this pose and heading, left lane and left mall facade. Finish as same canonical refined bus with rounded rear roof corners, fitted bumper, gaskets, detailed wheels. A little dust/sparks at ground and slight smoke, no huge fire yet. Image4 is actual Lentor Modern canopy reference: carry its dark vertical cladding, silver canopy, glazing and LENTOR MODERN lettering into existing architecture on LEFT only; do not copy its overlaid phone-video captions or hand. Keep camera as rear vehicle follow, horizon level, not cinematic roadside. No girl outside yet.",
+    "inputs": [
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-07/conditioning/07-direct.png",
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-07/frames/vehicle-style-reference.png",
+      "/Users/tidepool/.codex/skills/goji-gta-video/assets/ep01-street.png",
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-03/references/lentor-drive-canopy.webp"
+    ],
+    "tool": "built-in image_gen",
+    "model_version": "not exposed",
+    "cost": "not reported by tool",
+    "runtime": "not separately recorded per image in parallel calls",
+    "output_hint": "Generated images are saved to /Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b as /Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b/exec-dc7b23e4-3f08-41a4-b3e8-ea9cdcde138d.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+    "status": "superseded or rejected; see review notes",
+    "input_hashes": {
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-07/frames/vehicle-style-reference.png": "6aee1b7ce4088bb619c3ce7f2d6fff5a15b2293c4db30f5b3d8a740fe7e2cf3f",
+      "/Users/tidepool/.codex/skills/goji-gta-video/assets/ep01-street.png": "396698cd2396bf7897d95fae1bb572b5ca67b41d17cfcae2a06c1496dd8d53e9",
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-03/references/lentor-drive-canopy.webp": "9f6e6d4430ce2556fb6a34e707b6de994a5ebbc16081fb9045d56e5e66c66f93",
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-07/conditioning/07-direct.png": "dcf8bd96163cac53cbcb55031c618c483b3d140d13f0d64eb2b79751ac9e0097"
+    }
+  },
+  {
+    "id": "r7b_08",
+    "prompt": "Render a finished storyboard still in original GTA San Andreas PS2 game graphics, using the supplied guides with STRICT SEPARATE ROLES.\nIMAGE1: shared Blender CAMERA/PLACEMENT/CONTINUITY guide. Keep its exact vehicle world orientation, deck count, axle positions, front vs rear, open-door location, driver-window location, road markings, sidewalk and main architecture positions. It is a staging guide, NOT the quality ceiling for vehicle surfacing.\nIMAGE2: VEHICLE ASSET DETAIL AND RENDERING benchmark based on the user's GTA SA bus example. This is the target manufacturing detail: softly rounded roof shoulders and body corners, inset slightly curved windscreens with slim rubber seals, shaped wheel arches, believable profiled tyres and recessed metal rims, flush twin round headlamps, indicators, fitted continuous bumpers, mirrors, fine restrained body panel seams. Use clean low-resolution painted surfaces and modest environmental reflection like the ORIGINAL game. Do NOT preserve crude box slabs or giant blank panels from an earlier Blender proxy. Do NOT cover the bus in heavy tiled grunge; the original game has authored textured parts, not gritty noise pasted over cubes. Preserve the livery from image1, refining its contours like image2.\nIMAGE3: ONLY adult Goji Girl identity, ponytail, maroon sleeveless athletic top/leggings, white shoes, black handbag in LEFT hand/forearm, Singapore environment flavour. Its old SINGLE-DECKER SBS bus MUST NOT be copied. The VEHICLE QUALITY in image2 takes priority over image3.\nOur shared bus is a RIGHT-HAND DRIVE, THREE-AXLE DOUBLE-DECKER, with two window rows, orange-red roof/upper aft paint, white forward and diagonal middle panels, purple lower aft/rear, charcoal undercarriage, DARK CHARCOAL passenger-door trim, SOS Transit italic wordmark and small red/purple swoosh. No SBS or Canny text.\nAll people and surroundings should have the believable authored PS2 GTA SA game asset detail, not bare faceted mannequin shapes, Lego, mobile-game cartoon, modern PBR or photography. Economical adult faces, painted clothes, alpha-textured trees, coarse but specific concrete/asphalt textures, simple daylight shadows and cyan hazy sky. No bokeh, cinematic camera, added captions or HUD. Single vertical 9:16 frame, no borders.\nSCENE08:  the bus has rolled exactly 90 degrees onto its RIGHT DRIVER SIDE. Its LEFT PASSENGER SIDE faces UP. The near end is the FRONT of the bus; two front windshields and TWO long side-window rows are visible in their existing orientation. Near lower-deck doorway is the rectangular hole at top-right of near end, ahead of the first axle. Replace proxy woman only with canonical adult Goji girl in same half-emerged position, BACK to camera. Left hand braces charcoal doorway; right hand reaches DOWN to the green reader on the separate yellow pole INSIDE that opening. A small EZ-Link card meets reader. Black bag on left forearm inside opening. Legs remain inside. Do not create roof hatch, upright doorway, rear exit or second door. Preserve exact orange-red long roof edge on left, purple wheel strip on right, TWO rear wheels far right and single front wheel near right. Bent shelter post and curb remain right. No yellow outline around door. No fire yet. Moderate rising smoke can be distant only. Finish bus textures and world, maintain geometry rigorously.",
+    "inputs": [
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-07/conditioning/08-direct.png",
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-07/frames/vehicle-style-reference.png",
+      "/Users/tidepool/.codex/skills/goji-gta-video/assets/ep01-street.png"
+    ],
+    "tool": "built-in image_gen",
+    "model_version": "not exposed",
+    "cost": "not reported by tool",
+    "runtime": "not separately recorded per image in parallel calls",
+    "output_hint": "Generated images are saved to /Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b as /Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b/exec-81d9cdbc-17b8-4a79-807a-1e0a1cd0246d.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+    "status": "superseded or rejected; see review notes",
+    "input_hashes": {
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-07/frames/vehicle-style-reference.png": "6aee1b7ce4088bb619c3ce7f2d6fff5a15b2293c4db30f5b3d8a740fe7e2cf3f",
+      "/Users/tidepool/.codex/skills/goji-gta-video/assets/ep01-street.png": "396698cd2396bf7897d95fae1bb572b5ca67b41d17cfcae2a06c1496dd8d53e9",
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-07/conditioning/08-direct.png": "e95c738542917facc73115241553733726654a21e603005dc3eb454952c26075"
+    }
+  },
+  {
+    "id": "r7b_09",
+    "prompt": "Render a finished storyboard still in original GTA San Andreas PS2 game graphics, using the supplied guides with STRICT SEPARATE ROLES.\nIMAGE1: shared Blender CAMERA/PLACEMENT/CONTINUITY guide. Keep its exact vehicle world orientation, deck count, axle positions, front vs rear, open-door location, driver-window location, road markings, sidewalk and main architecture positions. It is a staging guide, NOT the quality ceiling for vehicle surfacing.\nIMAGE2: VEHICLE ASSET DETAIL AND RENDERING benchmark based on the user's GTA SA bus example. This is the target manufacturing detail: softly rounded roof shoulders and body corners, inset slightly curved windscreens with slim rubber seals, shaped wheel arches, believable profiled tyres and recessed metal rims, flush twin round headlamps, indicators, fitted continuous bumpers, mirrors, fine restrained body panel seams. Use clean low-resolution painted surfaces and modest environmental reflection like the ORIGINAL game. Do NOT preserve crude box slabs or giant blank panels from an earlier Blender proxy. Do NOT cover the bus in heavy tiled grunge; the original game has authored textured parts, not gritty noise pasted over cubes. Preserve the livery from image1, refining its contours like image2.\nIMAGE3: ONLY adult Goji Girl identity, ponytail, maroon sleeveless athletic top/leggings, white shoes, black handbag in LEFT hand/forearm, Singapore environment flavour. Its old SINGLE-DECKER SBS bus MUST NOT be copied. The VEHICLE QUALITY in image2 takes priority over image3.\nOur shared bus is a RIGHT-HAND DRIVE, THREE-AXLE DOUBLE-DECKER, with two window rows, orange-red roof/upper aft paint, white forward and diagonal middle panels, purple lower aft/rear, charcoal undercarriage, DARK CHARCOAL passenger-door trim, SOS Transit italic wordmark and small red/purple swoosh. No SBS or Canny text.\nAll people and surroundings should have the believable authored PS2 GTA SA game asset detail, not bare faceted mannequin shapes, Lego, mobile-game cartoon, modern PBR or photography. Economical adult faces, painted clothes, alpha-textured trees, coarse but specific concrete/asphalt textures, simple daylight shadows and cyan hazy sky. No bokeh, cinematic camera, added captions or HUD. Single vertical 9:16 frame, no borders.\nSCENE09 camera back behind Goji Girl on the same LEFT sidewalk. Exactly image1 composition: plain black shop glazing and silver canopy on left, bent post right of player, edge of overturned bus intrudes at FAR RIGHT. Do NOT move or show an entire new bus. The narrow bus edge at right is the same refined charcoal undercarriage/front edge with realistic panel detail, not blue and not mirrored. Player full-body back to camera, black handbag LEFT hand, white sneakers, maroon outfit, dark ponytail, dusting shoulder with right hand before setting off. Image4 is real Lentor canopy material/structure reference only; no hand or overlaid captions. Finish current set as original GTA SA PS2: dark cladding, glass shops, metal canopy, chevron bollards and street beyond. Exactly two layers of bus glass only if visible in original crop; no invented giant bus side blocking route.",
+    "inputs": [
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-07/conditioning/09-direct.png",
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-07/frames/vehicle-style-reference.png",
+      "/Users/tidepool/.codex/skills/goji-gta-video/assets/ep01-street.png",
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-03/references/lentor-drive-canopy.webp"
+    ],
+    "tool": "built-in image_gen",
+    "model_version": "not exposed",
+    "cost": "not reported by tool",
+    "runtime": "not separately recorded per image in parallel calls",
+    "output_hint": "Generated images are saved to /Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b as /Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b/exec-81abc2de-7f7d-425b-a9b7-1d2ddc83b151.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+    "status": "superseded or rejected; see review notes",
+    "input_hashes": {
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-07/frames/vehicle-style-reference.png": "6aee1b7ce4088bb619c3ce7f2d6fff5a15b2293c4db30f5b3d8a740fe7e2cf3f",
+      "/Users/tidepool/.codex/skills/goji-gta-video/assets/ep01-street.png": "396698cd2396bf7897d95fae1bb572b5ca67b41d17cfcae2a06c1496dd8d53e9",
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-03/references/lentor-drive-canopy.webp": "9f6e6d4430ce2556fb6a34e707b6de994a5ebbc16081fb9045d56e5e66c66f93",
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-07/conditioning/09-direct.png": "ec1caecdc660b1d1dd2946244bbf09314960994c3e385085b16d22310a9a0d10"
+    }
+  },
+  {
+    "id": "r7c_05",
+    "prompt": "Edit ONLY the incorrect EXTRA WHEEL at far left of this image. The smaller wheel visible immediately to the left of the big front wheel is impossible: remove that entire smaller wheel AND its arch, restoring uninterrupted purple/white lower side bodywork and matching asphalt shadow. Keep the LARGE front wheel at x~180 y~960 exactly unchanged. The real tandem rear axles are much farther back and OUTSIDE this crop. There must be ONLY ONE visible wheel in this tightly cropped front-driver-side shot. Preserve everything else exactly: girl and bag, small driver's window, driver, bus shape/glazing/livery, camera and background. No new wheels, no redesign. PS2 GTA SA look unchanged.",
+    "inputs": [
+      "/Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b/exec-71f8c1a2-95c4-417b-a31d-cbdfc5837efa.png"
+    ],
+    "tool": "built-in image_gen",
+    "model_version": "not exposed",
+    "cost": "not reported by tool",
+    "runtime": "not separately recorded per image in parallel calls",
+    "output_hint": "Generated images are saved to /Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b as /Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b/exec-cf80ed13-a84a-4a76-9792-8f1cff229134.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+    "status": "selected for current storyboard",
+    "input_hashes": {
+      "/Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b/exec-71f8c1a2-95c4-417b-a31d-cbdfc5837efa.png": "a2462cce9b195fedef6002baa57e6049ff43d0c44578ca9ac9740cba1621c750"
+    }
+  },
+  {
+    "id": "r7c_07",
+    "prompt": "Edit ONLY the fourth, extra wheel in this overturned bus image. This bus has exactly THREE wheels along the upward-facing passenger side: two tandem rear wheels near camera at approximately x270 y895 and x305 y850, and ONE front wheel far away at x540 y690. REMOVE the spurious wheel around x435 y720 between those groups, restoring the white side bodywork/arch-free panel under it. Do not remove either near rear wheel or the farthest front wheel. Preserve everything else, including 90degree rolled chassis, rear lettering, two window rows, livery, road, Lentor Modern facade and camera. No additional redesign. Authentic PS2 GTA SA finish unchanged.",
+    "inputs": [
+      "/Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b/exec-dc7b23e4-3f08-41a4-b3e8-ea9cdcde138d.png"
+    ],
+    "tool": "built-in image_gen",
+    "model_version": "not exposed",
+    "cost": "not reported by tool",
+    "runtime": "not separately recorded per image in parallel calls",
+    "output_hint": "Generated images are saved to /Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b as /Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b/exec-fcfd0f07-718e-4fbf-8a46-3a37d4a92723.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+    "status": "selected for current storyboard",
+    "input_hashes": {
+      "/Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b/exec-dc7b23e4-3f08-41a4-b3e8-ea9cdcde138d.png": "f9f260d8b9f7a49cd1d5f88f66de193b77a700cdf1ab790d09e32622a75b3263"
+    }
+  },
+  {
+    "id": "r7c_08",
+    "prompt": "PRECISE GEOMETRY CORRECTION to image1. Image2 is the authoritative Blender door geometry. Image3 is the USER APPROVED canonical bus appearance. Keep image1's GTA SA look, two-deck bus, livery, girl and same rear-player camera. Correct ONLY the front passenger doorway and attached interaction:\nThe current opening extends too far forward into the FRONT FACADE. SHRINK its front-to-rear length and move its FRONT EDGE BACK toward the front wheel, restoring a broad, solid WHITE FRONT CORNER body panel between opening and bus nose. The bus front plane with BOTH windshields, logo, lamps and bumper MUST stay a COMPLETE CONTINUOUS INTACT FACE. The entire door hole is in the upward-facing LEFT SIDE panel, 0.70 metres BEHIND the front face. It must not share an edge with either windshield or cut through the front plane. Render that visibly substantial 0.70m solid corner bridge with rounded outside corner. Copy the door footprint from image2 exactly: door runs from localy3.8 to5.3, frontnosey6.0, not throughy6.0. Match the front-wheel-to-door relationship; door just ahead of front wheel, not a hatch in the nose. Move girl slightly aft with the corrected opening, same half-emerged pose; one black bag left forearm, right hand tapping reader inside.\nThe reader pole also rotates WITH the bus: replace the incorrectly upright gold pole inside the hole with a yellow pole running ACROSS the rotated doorway as in image2, in the bus's original local up direction, now sideways in world coordinates. Mount reader to that pole just inside aft jamb, and rotate reader body/screen with it. Her hand follows its corrected position. Preserve DARK CHARCOAL thin door frame; no yellow door border. No new holes, no changing deck count, no mirrored bus, no front window removal, no upright floating card reader. Preserve the rest of the image and PS2 vehicle detail.",
+    "inputs": [
+      "/Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b/exec-81d9cdbc-17b8-4a79-807a-1e0a1cd0246d.png",
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-07/conditioning/08-direct.png",
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-07/frames/vehicle-style-reference.png"
+    ],
+    "tool": "built-in image_gen",
+    "model_version": "not exposed",
+    "cost": "not reported by tool",
+    "runtime": "not separately recorded per image in parallel calls",
+    "output_hint": "Generated images are saved to /Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b as /Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b/exec-ea802388-655a-42f6-835f-a13cb0d3133e.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+    "status": "superseded or rejected; see review notes",
+    "input_hashes": {
+      "/Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b/exec-81d9cdbc-17b8-4a79-807a-1e0a1cd0246d.png": "2ae216f35da1837877f39e287fcb7cf28a84553697f493a29d7d461626145c23",
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-07/frames/vehicle-style-reference.png": "6aee1b7ce4088bb619c3ce7f2d6fff5a15b2293c4db30f5b3d8a740fe7e2cf3f",
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-07/conditioning/08-direct.png": "e95c738542917facc73115241553733726654a21e603005dc3eb454952c26075"
+    }
+  },
+  {
+    "id": "r7c_09",
+    "prompt": "Correct ONLY the narrow vehicle strip at the FAR RIGHT of this image. It wrongly shows an UPRIGHT double-decker front. The bus is overturned on its right side, and this view from the sidewalk only sees its CHARCOAL UNDERCARRIAGE very close to camera. Replace ALL the visible orange roof, upright front windows, cream facade and amber lamp at the extreme right with the narrow charcoal-black UNDERBODY EDGE of the rolled bus, with restrained dark grey frame rails, mechanical panel seams and modest grime. It is the same fixed crop, width and perspective, NOT a new full bus, no upright windshields or bright body colours. Preserve girl dusting shoulder, left-hand bag, pavement, tilted shelter post, canopy, shops and the rest exactly. No other changes. Original GTA SA PS2 game look.",
+    "inputs": [
+      "/Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b/exec-81abc2de-7f7d-425b-a9b7-1d2ddc83b151.png"
+    ],
+    "tool": "built-in image_gen",
+    "model_version": "not exposed",
+    "cost": "not reported by tool",
+    "runtime": "not separately recorded per image in parallel calls",
+    "output_hint": "Generated images are saved to /Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b as /Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b/exec-694f6831-3619-4451-ad39-83074142f8f8.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+    "status": "selected for current storyboard",
+    "input_hashes": {
+      "/Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b/exec-81abc2de-7f7d-425b-a9b7-1d2ddc83b151.png": "0b256786ce182f20ac74dc63a978758be82b5df05cad205cb3b0fc01b4dd5288"
+    }
+  },
+  {
+    "id": "r7d_08",
+    "prompt": "Render a finished storyboard still in original GTA San Andreas PS2 game graphics, using the supplied guides with STRICT SEPARATE ROLES.\nIMAGE1: shared Blender CAMERA/PLACEMENT/CONTINUITY guide. Keep its exact vehicle world orientation, deck count, axle positions, front vs rear, open-door location, driver-window location, road markings, sidewalk and main architecture positions. It is a staging guide, NOT the quality ceiling for vehicle surfacing.\nIMAGE2: VEHICLE ASSET DETAIL AND RENDERING benchmark based on the user's GTA SA bus example. This is the target manufacturing detail: softly rounded roof shoulders and body corners, inset slightly curved windscreens with slim rubber seals, shaped wheel arches, believable profiled tyres and recessed metal rims, flush twin round headlamps, indicators, fitted continuous bumpers, mirrors, fine restrained body panel seams. Use clean low-resolution painted surfaces and modest environmental reflection like the ORIGINAL game. Do NOT preserve crude box slabs or giant blank panels from an earlier Blender proxy. Do NOT cover the bus in heavy tiled grunge; the original game has authored textured parts, not gritty noise pasted over cubes. Preserve the livery from image1, refining its contours like image2.\nIMAGE3: ONLY adult Goji Girl identity, ponytail, maroon sleeveless athletic top/leggings, white shoes, black handbag in LEFT hand/forearm, Singapore environment flavour. Its old SINGLE-DECKER SBS bus MUST NOT be copied. The VEHICLE QUALITY in image2 takes priority over image3.\nOur shared bus is a RIGHT-HAND DRIVE, THREE-AXLE DOUBLE-DECKER, with two window rows, orange-red roof/upper aft paint, white forward and diagonal middle panels, purple lower aft/rear, charcoal undercarriage, DARK CHARCOAL passenger-door trim, SOS Transit italic wordmark and small red/purple swoosh. No SBS or Canny text.\nAll people and surroundings should have the believable authored PS2 GTA SA game asset detail, not bare faceted mannequin shapes, Lego, mobile-game cartoon, modern PBR or photography. Economical adult faces, painted clothes, alpha-textured trees, coarse but specific concrete/asphalt textures, simple daylight shadows and cyan hazy sky. No bokeh, cinematic camera, added captions or HUD. Single vertical 9:16 frame, no borders.\n SCENE08 door geometry is explicitly colour-coded in IMAGE1. The MAGENTA rectangle marks the ONLY area to replace with the OPEN PASSENGER DOORWAY. The LIME GREEN rectangle marks a SOLID METAL FRONT CORNER that MUST stay solid and become WHITE bus bodywork. It is NOT part of the opening. Preserve its FULL visible width/depth: a broad white flat side panel between the front windshields and doorway. Do not merge magenta and lime into one hole. Do not cut through the front facade. Image4 shows the same scene without colour labels and with the intended emerging girl/reader. Recreate her half-emerged pose INSIDE ONLY THE MAGENTA FOOTPRINT, backed away from the front facade behind the restored WHITE corner bridge. Her left hand braces the dark aft side rim; handbag left forearm; right hand taps green reader just inside doorway, yellow pole rotated sideways with bus and stretched across inside opening. Both front windshields are INTACT and the complete near front facade retains its normal curved shape, headlights, bumper, SOS Transit and white corner. Bus is exactly 90degree rolled on driver's side, UP face is LEFT passenger side with TWO window rows and THREE wheels: two far rear + one front next to doorway. Keep all geometry and camera of image1, make detailed surfaces like image2. Remove all magenta/lime control colours; magenta becomes hole, lime becomes solid WHITE. Top of girl reaches out from the magenta footprint with head/shoulders only, lower body inside. This is a passenger exit, not a front windshield or roof hatch.",
+    "inputs": [
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-07/frames/08-door-control.png",
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-07/frames/vehicle-style-reference.png",
+      "/Users/tidepool/.codex/skills/goji-gta-video/assets/ep01-street.png",
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-07/conditioning/08-direct.png"
+    ],
+    "tool": "built-in image_gen",
+    "model_version": "not exposed",
+    "cost": "not reported by tool",
+    "runtime": "not separately recorded per image in parallel calls",
+    "output_hint": "Generated images are saved to /Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b as /Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b/exec-db4b03af-2346-40a7-900b-7d94d33dd992.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+    "status": "superseded or rejected; see review notes",
+    "input_hashes": {
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-07/frames/08-door-control.png": "424d7f921a31166f4f51ef5f45776321f28aacf94d2736c5ce670db2e24d8fe9",
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-07/frames/vehicle-style-reference.png": "6aee1b7ce4088bb619c3ce7f2d6fff5a15b2293c4db30f5b3d8a740fe7e2cf3f",
+      "/Users/tidepool/.codex/skills/goji-gta-video/assets/ep01-street.png": "396698cd2396bf7897d95fae1bb572b5ca67b41d17cfcae2a06c1496dd8d53e9",
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-07/conditioning/08-direct.png": "e95c738542917facc73115241553733726654a21e603005dc3eb454952c26075"
+    }
+  },
+  {
+    "id": "r7e_08",
+    "prompt": "Make a very small LOCAL CHARACTER POSE correction only. Keep the bus, doorway size and location, solid white front-corner bridge, all windows/wheels/panels, camera, livery, road and bent post PIXEL-ALIGNED and unchanged. The woman must have her BACK to this third-person player camera as she climbs out. Rotate only her torso and head to face into the distance/away from camera; long black ponytail visible down her back, same maroon sleeveless top, same adult proportions. Left hand braces the LEFT dark doorway rim with single black handbag on LEFT forearm. Right hand taps the card reader mounted on the RIGHT end of the existing yellow cross-pole INSIDE the doorway (move reader along same pole to that right end, no change to pole direction). Lower body remains inside. DO NOT enlarge or move the hole, and DO NOT cut into the solid white panel in front of it. Preserve that exact white bodywork bridge separating the opening from the front facade. One other small correction: remove the steering-wheel shape visible in the LEFT/UPPER-deck front windshield (wrong deck); that upper deck has passenger seats only. Keep everything else unchanged. No full-scene restaging.",
+    "inputs": [
+      "/Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b/exec-db4b03af-2346-40a7-900b-7d94d33dd992.png"
+    ],
+    "tool": "built-in image_gen",
+    "model_version": "not exposed",
+    "cost": "not reported by tool",
+    "runtime": "not separately recorded per image in parallel calls",
+    "output_hint": "Generated images are saved to /Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b as /Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b/exec-b50cc225-0c2c-4650-a6f5-86c850dc4b1b.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+    "status": "doorway approved by user; front logo rejected and corrected in r7f_08",
+    "input_hashes": {
+      "/Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b/exec-db4b03af-2346-40a7-900b-7d94d33dd992.png": "7757e8412e5cbd367ede50d669917f75a5cf76e7c21af99733a7743c4fc775b4"
+    }
+  },
+  {
+    "id": "r7_10",
+    "prompt": "Edit ONLY the small overturned BUS in the far-left background of image1. Preserve Goji Girl, two police clipped at frame edges, the actual Goji facade and Lentor architecture, road, smoke, framing and wanted star exactly. Replace the blocky bus with the USER APPROVED detailed SOS Transit double-decker from image2, rolled exactly90degrees like image3. Image3 is the SAME REAR camera side: purple rear LEFT, orange-red engine vents VERTICAL at centre, upper rear window on RIGHT; white SOS Transit lettering rotated90degrees; passenger side facing UP with two window rows and THREE wheels, roof toward roadway. Match the current bus's small size, location and heading; only refine its detail and body shape. Rounded corners, inset glazing, shaped wheel arches, fitted rear bumper and detailed rims, authentic GTA SA PS2 game rendering. Do not make bus upright, do not enlarge it or move it. Do not change other pixels. Remove little panel number 10 at top-left; keep one wanted star.",
+    "inputs": [
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-06/frames/10-look.png",
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-07/frames/vehicle-style-reference.png",
+      "/Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b/exec-fcfd0f07-718e-4fbf-8a46-3a37d4a92723.png"
+    ],
+    "tool": "built-in image_gen",
+    "model_version": "not exposed",
+    "cost": "not reported by tool",
+    "runtime": "not separately recorded per image in parallel calls",
+    "output_hint": "Generated images are saved to /Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b as /Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b/exec-1790ec99-1e52-49b6-9b1b-139cc42b1984.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+    "status": "selected for current storyboard",
+    "input_hashes": {
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-06/frames/10-look.png": "1da61dc62edae17a543c2c632e616dfa0d59875a278940e50046c4d6ae5c2d0c",
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-07/frames/vehicle-style-reference.png": "6aee1b7ce4088bb619c3ce7f2d6fff5a15b2293c4db30f5b3d8a740fe7e2cf3f",
+      "/Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b/exec-fcfd0f07-718e-4fbf-8a46-3a37d4a92723.png": "bf4cbe2da9ed61e3ff3b4027ef351ded70db37baa70449b2fedc8d80930d8f4a"
+    }
+  },
+  {
+    "id": "r7_12",
+    "prompt": "Edit ONLY the distant burning bus visible through the upper-right shop glass in image1. Keep clinic interior, reformer, Goji Girl exercise, actively coaching therapist, shoes/black bag on bench, two stuck police, exterior trees, fire, smoke and window mullions exactly unchanged. Image2 is USER APPROVED canonical SOS Transit double-decker detail; image3 is exact rolled bus geometry and viewing direction. Replace old blocky bus with that more believable authored GTA SA PS2 bus: rounded body corners and roof, fitted gaskets/bumpers, detailed tyres/rims, fine panels. The long face toward us is CHARCOAL UNDERCARRIAGE with chassis rails; rear at RIGHT is purple and orange-red with vertical engine vents and SOS Transit white lettering rotated90degrees. TWO passenger window rows face UP, NOT toward camera; exactly three wheels on the exposed passenger side. Keep same small background position, scale and90degree roll; never erect bus, never add side-facing windows on charcoal underbody. Preserve ALL other content. No popup/text overlay; leave upper wall blank for native overlay.",
+    "inputs": [
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-06/frames/12-coaching-clean.png",
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-07/frames/vehicle-style-reference.png",
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-07/frames/wreck-clinic-angle.png"
+    ],
+    "tool": "built-in image_gen",
+    "model_version": "not exposed",
+    "cost": "not reported by tool",
+    "runtime": "not separately recorded per image in parallel calls",
+    "output_hint": "Generated images are saved to /Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b as /Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b/exec-353adac1-c60a-4cfe-b4eb-264a4f1dc4e8.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+    "status": "selected for current storyboard",
+    "input_hashes": {
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-06/frames/12-coaching-clean.png": "8c3ae9ba8b6ed91a200e2bbf17d27a0e1845a1a8165a174dd02ec22cd9503fdd",
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-07/frames/vehicle-style-reference.png": "6aee1b7ce4088bb619c3ce7f2d6fff5a15b2293c4db30f5b3d8a740fe7e2cf3f",
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-07/frames/wreck-clinic-angle.png": "c4c30ce711379a6a1a2e1f9b5c0f39d3dd0296aee2516187d06592713adfe988"
+    }
+  },
+  {
+    "id": "r7f_08",
+    "prompt": "SURGICAL LOGO PLACEMENT FIX ONLY. The user has APPROVED this exact doorway, body shape, player pose, reader placement, camera and all other content. Preserve all of them unchanged.\nOn the near FRONT FACE of the rolled bus, the red/purple 'SOS Transit' wordmark and swoosh currently overlap/float inside the lower front WINDSCREEN. REMOVE ALL of that existing front wordmark/swoosh from the dark glass and restore clean uninterrupted dark glazing with the same reflections. Do not change the windscreen shape or its black rubber frame.\nRepaint that same SOS Transit wordmark with small swoosh ONLY on the SOLID WHITE FRONT BODY FASCIA to the RIGHT of that windscreen in this rotated image \u2014 the narrow white nose panel BETWEEN the windscreen's right black edge and the headlights/bumper. Reduce the logo enough that every letter and swoosh fits entirely within white metal, clear of glass, rubber gasket, lights and doorway. It follows the surface perspective, rotated90degrees WITH the bus, like paint/decal physically attached to the nose, never floating. Leave visible white margin around it. In upright bus coordinates this is the white panel BELOW the lower windscreen and ABOVE the bumper; bus is rolled90degrees so that panel is on the right here.\nAbsolutely no other edits: do not move/resize the door or the approved solid white corner bridge, girl or bag, reader/pole, lamps, windows, wheels, livery, post or street. Same PS2 GTA SA rendering.",
+    "inputs": [
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-07/conditioning/08-before-logo-fix.png"
+    ],
+    "tool": "built-in image_gen",
+    "model_version": "not exposed",
+    "output_hint": "Generated images are saved to /Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b as /Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b/exec-88bf9234-bc85-4760-b559-45fbaf712865.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+    "status": "selected: logo moved to solid front fascia; user-approved doorway retained",
+    "input_hashes": {
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-07/conditioning/08-before-logo-fix.png": "9d434d02891b630b45b9883a251535c34b2a617aa988823c10612dabdce6d599"
+    },
+    "input_original_source": "/Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b/exec-b50cc225-0c2c-4650-a6f5-86c850dc4b1b.png",
+    "original_tool_input_paths": [
+      "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-07/frames/08-look-clean.png"
+    ]
+  }
+]

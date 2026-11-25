@@ -43,3 +43,14 @@
   edits as a solved 3D layout. For northbound +Y here, left traffic is x<0.
 - Write game tutorials as clear, connected prose. Line wrapping is typesetting,
   not a sequence of short slogans; follow the earlier popups' natural cadence.
+
+- **SOS-BUS-01 is the user-approved vehicle appearance reference**, stored in
+  `references/sos-bus-01/`. Condition every bus look frame on it alongside the
+  lead character. Blender controls spatial pose and contacts; primitive boxes
+  are not the vehicle appearance target. Preserve formed corners, inset glazing,
+  arches, rims and fitted lamps/bumpers, not just paint over blockout shapes.
+- On the rolled bus, preserve a solid front corner between the side entrance
+  and front facade. Use the colour-coded side-door guide when generation merges
+  them; reject front-face cutouts, additional axles and upright wreck fragments.
+- Keep bus wordmarks attached to painted bodywork. The front SOS decal and swoosh
+  must fit below the lower windscreen, without lettering on glazing.
