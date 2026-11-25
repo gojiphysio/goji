@@ -464,3 +464,72 @@ def test_confirmed_appointment_is_thanked_not_asked():
     for body in (c.render_text(a, "moved", None), c.render_html(a, "moved", None)):
         assert "confirmed this appointment" in body
         assert c.confirm_url(a.appointment_id) not in body
+
+
+# --- WhatsApp: front-desk bookings and the go-ahead -------------------------------
+
+class FakeResp:
+    status_code = 200
+
+
+def test_front_desk_booking_is_confirmed_on_whatsapp_too(sent, monkeypatch):
+    live(monkeypatch)
+    monkeypatch.setattr(c, "WA_AGENT_URL", "https://wa.example")
+    monkeypatch.setattr(c, "INTERNAL_TOKEN", "tok")
+    posts = []
+    import requests
+    monkeypatch.setattr(requests, "post", lambda url, json=None, timeout=None, headers=None:
+                        posts.append((url, json)) or FakeResp())
+    bq = FakeBQ()
+    assert c.on_plato_appointment(FakePlato(), bq, PLATO_APPT, source="staff", now=NOW) == "sent"
+    url, body = posts[0]
+    assert url == "https://wa.example/internal/booking-confirmed"
+    assert body["send_template"] is True and body["source"] == "staff"
+    assert (body["date"], body["time"], body["first_name"]) == ("2026-12-03", "10:00", "Sarah")
+    assert bq.inserts[0]["channel"] == "both"
+
+
+def test_front_desk_booking_without_email_goes_on_whatsapp_only(sent, monkeypatch):
+    live(monkeypatch)
+    monkeypatch.setattr(c, "WA_AGENT_URL", "https://wa.example")
+    monkeypatch.setattr(c, "INTERNAL_TOKEN", "tok")
+    import requests
+    monkeypatch.setattr(requests, "post", lambda *a, **k: FakeResp())
+    bq = FakeBQ()
+    rec = {**PLATO_APPT, "email": ""}
+    assert c.on_plato_appointment(FakePlato(), bq, rec, source="staff", now=NOW) == "sent"
+    assert not sent and bq.inserts[0]["channel"] == "whatsapp"
+
+
+def test_staff_move_is_email_only(sent, monkeypatch):
+    live(monkeypatch)
+    monkeypatch.setattr(c, "WA_AGENT_URL", "https://wa.example")
+    monkeypatch.setattr(c, "INTERNAL_TOKEN", "tok")
+    import requests
+    monkeypatch.setattr(requests, "post", lambda *a, **k: pytest.fail("no WhatsApp for a move"))
+    c.on_plato_appointment(FakePlato(), FakeBQ(last=("2026-12-02 10:00", 0)), PLATO_APPT,
+                           source="staff", now=NOW)
+    assert sent[0]["Subject"].startswith("Moved:")
+
+
+def test_test_mode_never_whatsapps(sent, monkeypatch):
+    monkeypatch.setenv("CONFIRMATIONS_MODE", "test")
+    monkeypatch.setattr(c, "WA_AGENT_URL", "https://wa.example")
+    monkeypatch.setattr(c, "INTERNAL_TOKEN", "tok")
+    import requests
+    monkeypatch.setattr(requests, "post", lambda *a, **k: pytest.fail("WhatsApp in test mode"))
+    c.on_plato_appointment(FakePlato(), FakeBQ(), PLATO_APPT, source="staff", now=NOW)
+    assert sent[0]["To"] == "inbox@example.com"
+
+
+def test_web_callback_carries_the_go_ahead_only_when_live(monkeypatch):
+    for mode, expected in (("off", False), ("test", False), ("live", True)):
+        monkeypatch.setenv("CONFIRMATIONS_MODE", mode)
+        monkeypatch.setattr(app_mod, "WA_AGENT_URL", "https://wa.example")
+        monkeypatch.setattr(app_mod, "INTERNAL_TOKEN", "tok")
+        monkeypatch.setattr(app_mod, "_run_async", lambda fn: fn())
+        posts = []
+        monkeypatch.setattr(app_mod.requests, "post", lambda url, json=None, timeout=None,
+                            headers=None: posts.append(json) or FakeResp())
+        app_mod._notify_wa_agent({"reference": "GOJI-1"}, {"phone": "+6591234567"}, "web")
+        assert posts[0]["send_template"] is expected, mode

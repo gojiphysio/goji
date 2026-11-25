@@ -33,6 +33,10 @@
 --   'failed'           — the send raised. Retried by the sweep up to 3 times
 --                        per start time, then left for someone to look at.
 -- source: web | whatsapp | staff (Plato webhook) | sweep.
+-- channel: email | whatsapp | both | none. WhatsApp here means goji-booking
+--   handed a front-desk booking to the WhatsApp assistant with the go-ahead to
+--   send the confirmation template (website and WhatsApp bookings reach the
+--   assistant through their own callback and are always channel 'email').
 -- kind:   booked | moved.
 
 CREATE TABLE IF NOT EXISTS `goji-bi.marts.appointment_confirmation_events` (
@@ -43,6 +47,12 @@ CREATE TABLE IF NOT EXISTS `goji-bi.marts.appointment_confirmation_events` (
   kind           STRING    NOT NULL OPTIONS(description="booked | moved"),
   status         STRING    NOT NULL OPTIONS(description="sent | test | skipped_no_email | failed"),
   source         STRING    OPTIONS(description="web | whatsapp | staff | sweep"),
+  channel        STRING    OPTIONS(description="email | whatsapp | both | none: what went out"),
   note           STRING    OPTIONS(description="Operational note. Never PII"),
   sent_at        TIMESTAMP NOT NULL OPTIONS(description="When the send was attempted")
 );
+
+-- ADDING A COLUMN: CREATE TABLE IF NOT EXISTS is a no-op once the table exists.
+ALTER TABLE `goji-bi.marts.appointment_confirmation_events`
+  ADD COLUMN IF NOT EXISTS channel STRING
+    OPTIONS(description="email | whatsapp | both | none: what went out");

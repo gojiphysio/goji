@@ -191,9 +191,9 @@ jobs:
           # 12:00 SGT; we deliberately do NOT `gcloud run jobs execute` here —
           # a deploy must never mail patients.
           #
-          # DRY_RUN ships as 'true' and is flipped by hand once the front desk
-          # has stopped clicking the reminder button in Plato (otherwise every
-          # patient gets two reminders). To go live:
+          # DRY_RUN ships as 'true' and is flipped by hand on go-live day, the
+          # same day Plato's own automatic 48-hour reminder is turned off
+          # (otherwise every patient gets two reminders). To go live:
           #   gcloud run jobs update appointment-reminders --region asia-southeast1 \
           #     --update-env-vars DRY_RUN=false
           # Use --update-env-vars, never --set-env-vars, which replaces the whole
@@ -212,14 +212,14 @@ jobs:
                    --format='value(template.template.containers[0].env.filter("name:DRY_RUN").extract(value))' \
                    2>/dev/null || true)"
           dry="${dry:-true}"
-          # WhatsApp reminders: preserved the same way (default off). The
-          # wa-token mount is added only when they're on, because Cloud Run
-          # fails a deploy that mounts a secret that doesn't exist yet.
-          wa="$(gcloud run jobs describe appointment-reminders \
-                   --region "${REGION}" --project "${PROJECT}" \
-                   --format='value(template.template.containers[0].env.filter("name:WA_REMINDERS_ENABLED").extract(value))' \
-                   2>/dev/null || true)"
-          wa="${wa:-0}"
+          # WhatsApp reminders: ON (clinic decision, 25 Nov 2026: email and
+          # WhatsApp in parallel; Meta approved goji_appointment_reminder). They
+          # still send nothing until DRY_RUN is false and the scheduler is
+          # resumed on go-live day. Repo variable WA_REMINDERS_ENABLED=0 turns
+          # them off. Sends go through Dualhook: repo variables
+          # WA_PHONE_NUMBER_ID and WA_API_BASE must be set (the job falls back
+          # to email-only, and says so in the digest, if they aren't).
+          wa="${{ vars.WA_REMINDERS_ENABLED || '1' }}"
           # PLATO_API_KEY: the registration-form check (reminders/registration.py).
           secrets="GMAIL_APP_PASSWORD=gmail-app-password:latest,PLATO_API_KEY=plato-api-key:latest"
           if [ "${wa}" = "1" ]; then secrets="${secrets},WA_TOKEN=wa-token:latest"; fi

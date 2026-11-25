@@ -1459,10 +1459,14 @@ def morning_summary():
 
 
 def _send_confirmation_template(client, wa_id: str, b: dict) -> str:
-    """A website booking from someone outside the 24-hour window: the
-    approved confirmation template (the booking form carries the opt-in).
-    Returns the message id, or "" when off or it failed."""
-    if not (config.CONFIRMATIONS and b.get("date") and b.get("time")):
+    """A booking made outside this chat (website or front desk) for someone
+    outside the 24-hour window: the approved confirmation template (the
+    booking form carries the opt-in; front-desk bookings are existing
+    patients). Only when goji-booking asks for it (`send_template: true`,
+    set once its confirmation email is live) and the agent's own switch is
+    on. Returns the message id, or "" when off or it failed."""
+    if not (config.CONFIRMATIONS and b.get("send_template") is True
+            and b.get("date") and b.get("time")):
         return ""
     when = booking_client._when(b["date"], b["time"])
     params = [b.get("first_name") or "there", (b.get("service") or "physiotherapy").lower(),
@@ -1523,6 +1527,7 @@ def booking_confirmed():
             pass
         elif b.get("source") != "whatsapp" and not in_window:
             # An old chat, outside the 24-hour window: free-form isn't allowed.
+            # (source "web" or "staff": a booking made outside this chat.)
             acked = bool(_send_confirmation_template(client, wa_id, b))
         if (not quiet and not chris_has_it and b.get("source") != "whatsapp"
                 and state.mode in (AGENT, WAITING) and in_window

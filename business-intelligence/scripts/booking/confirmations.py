@@ -541,14 +541,15 @@ def failures(bq, appointment_id: str, start_key: str) -> int:
 
 
 def hydrate(bq, appt: Appointment) -> None:
-    """Fill a linked appointment's name and email from the patient's profile
-    (staff often leave them off the appointment itself)."""
-    if not appt.patient_id or (appt.email and appt.name):
+    """Fill a linked appointment's name, email and phone from the patient's
+    profile (staff often leave them off the appointment itself)."""
+    if not appt.patient_id or (appt.email and appt.name and appt.phone):
         return
-    rows = _rows(bq, f"SELECT full_name, email FROM `{CONTACT_TABLE}` WHERE patient_id = @pid",
-                 pid=appt.patient_id)
+    rows = _rows(bq, f"SELECT full_name, email, phone FROM `{CONTACT_TABLE}` "
+                     "WHERE patient_id = @pid", pid=appt.patient_id)
     if rows:
         appt.email = appt.email or (rows[0].get("email") or "").strip()
+        appt.phone = appt.phone or (rows[0].get("phone") or "").strip()
         appt.name = (rows[0].get("full_name") or "").strip() or appt.name
 
 
@@ -574,17 +575,17 @@ def profile_and_consent(bq, appt: Appointment) -> tuple[str, bool]:
 
 
 def record(bq, appt: Appointment, *, status: str, kind: str, sequence: int,
-           source: str, note: str | None = None) -> None:
+           source: str, channel: str = "email", note: str | None = None) -> None:
     """One ledger row. Never raises; never writes an address or a name."""
     try:
         bq.query(f"""
             INSERT INTO `{LEDGER_TABLE}` (event_id, appointment_id, start_key, sequence,
-              kind, status, source, note, sent_at)
-            VALUES (@eid, @aid, @start, @seq, @kind, @status, @source, @note,
+              kind, status, source, channel, note, sent_at)
+            VALUES (@eid, @aid, @start, @seq, @kind, @status, @source, @channel, @note,
                     CURRENT_TIMESTAMP())""",
                  job_config=_params(eid=str(uuid.uuid4()), aid=appt.appointment_id,
                                     start=appt.start_key, seq=sequence, kind=kind,
-                                    status=status, source=source,
+                                    status=status, source=source, channel=channel,
                                     note=(note or "")[:300])).result(timeout=BQ_WAIT_S)
     except Exception as e:
         log.error("confirmation ledger write failed (%s, %s): %s",
@@ -597,33 +598,69 @@ _send_lock = threading.Lock()
 
 
 def deliver(plato, bq, appt: Appointment, *, kind: str, sequence: int, source: str,
-            now: datetime | None = None) -> str:
-    """Send this appointment's email and ledger it. Returns the status."""
+            now: datetime | None = None, whatsapp: bool = False) -> str:
+    """Send this appointment's email and, with `whatsapp` (a front-desk
+    booking: no other path tells the assistant), ask the WhatsApp assistant to
+    confirm it there too. One ledger row either way. Returns the status."""
     if mode() == "live":
         to = appt.email
         if appt.is_test_patient:
             to = test_to()  # the ZZ test patient only ever mails the test inbox
     else:
         to = test_to()
-    if not to:
-        status = "skipped_no_email"
-        record(bq, appt, status=status, kind=kind, sequence=sequence, source=source)
-        return status
-    form = registration_link(plato, bq, appt) if kind == "booked" else None
-    try:
-        if not SMTP_PASS:
-            raise RuntimeError("SMTP not configured (no GMAIL_APP_PASSWORD)")
-        _send(build_message(appt, to=to, kind=kind, sequence=sequence, form_url=form, now=now))
-    except Exception as e:
-        log.warning("confirmation email failed (%s): %s", appt.appointment_id, e)
-        record(bq, appt, status="failed", kind=kind, sequence=sequence, source=source,
-               note=str(e).replace(to, "<to>"))
-        return "failed"
-    status = delivered_status()
+    emailed, form, err = None, None, None
+    if to:
+        form = registration_link(plato, bq, appt) if kind == "booked" else None
+        try:
+            if not SMTP_PASS:
+                raise RuntimeError("SMTP not configured (no GMAIL_APP_PASSWORD)")
+            _send(build_message(appt, to=to, kind=kind, sequence=sequence, form_url=form,
+                                now=now))
+            emailed = True
+        except Exception as e:
+            log.warning("confirmation email failed (%s): %s", appt.appointment_id, e)
+            emailed, err = False, "email failed: " + str(e).replace(to, "<to>")
+    whatsapped = bool(whatsapp) and notify_whatsapp(appt)
+    if emailed or whatsapped:
+        status = delivered_status()
+    else:
+        status = "failed" if emailed is False else "skipped_no_email"
+    channel = ("both" if emailed and whatsapped else "email" if emailed
+               else "whatsapp" if whatsapped else "none")
+    notes = [n for n in (err, "registration form" if form and emailed else None) if n]
     record(bq, appt, status=status, kind=kind, sequence=sequence, source=source,
-           note="registration form" if form else None)
-    log.info("confirmation %s (%s, %s, %s)", status, appt.appointment_id, kind, source)
+           channel=channel, note="; ".join(notes) or None)
+    log.info("confirmation %s (%s, %s, %s, %s)", status, appt.appointment_id, kind, source,
+             channel)
     return status
+
+
+WA_AGENT_URL = os.environ.get("WA_AGENT_URL", "").strip()
+INTERNAL_TOKEN = os.environ.get("INTERNAL_TOKEN", "").strip()
+WA_CALLBACK_TIMEOUT_S = 5.0
+
+
+def notify_whatsapp(appt: Appointment) -> bool:
+    """Tell the WhatsApp assistant about a front-desk booking, with the
+    go-ahead to send the approved confirmation template (its kill switch,
+    go-live and Chris's paused chats still apply there). Live mode only: in
+    test mode nothing reaches a patient. Same callback and body as
+    app._notify_wa_agent. True when the assistant took it."""
+    if mode() != "live" or not (WA_AGENT_URL and INTERNAL_TOKEN and appt.phone):
+        return False
+    import requests
+    body = {"phone": appt.phone, "reference": appt.reference, "service": appt.service,
+            "date": appt.start.date().isoformat(), "time": appt.start.strftime("%H:%M"),
+            "clinician_name": appt.clinician, "source": "staff",
+            "first_name": appt.first_name if appt.name else "", "send_template": True}
+    try:
+        r = requests.post(WA_AGENT_URL.rstrip("/") + "/internal/booking-confirmed", json=body,
+                          timeout=WA_CALLBACK_TIMEOUT_S,
+                          headers={"X-Internal-Token": INTERNAL_TOKEN})
+        return r.status_code < 300
+    except Exception as e:
+        log.warning("whatsapp confirmation callback failed (%s): %s", appt.appointment_id, e)
+        return False
 
 
 def on_booking(plato, bq, result: dict, draft: dict, *, source: str) -> str | None:
@@ -668,9 +705,15 @@ def on_plato_appointment(plato, bq, record_: dict, *, source: str,
         if failures(bq, appt.appointment_id, appt.start_key) >= MAX_FAILURES:
             return None
         hydrate(bq, appt)
-        if not appt.email:
+        # A front-desk booking (the webhook or the sweep found it) is the one
+        # path where nothing else tells the WhatsApp assistant. Moves by staff
+        # get the email only.
+        whatsapp = (kind == "booked" and source in ("staff", "sweep") and mode() == "live"
+                    and bool(WA_AGENT_URL and INTERNAL_TOKEN))
+        if not appt.email and not (whatsapp and appt.phone):
             return None  # nobody to write to; nothing to ledger
-        return deliver(plato, bq, appt, kind=kind, sequence=seq, source=source)
+        return deliver(plato, bq, appt, kind=kind, sequence=seq, source=source,
+                       whatsapp=whatsapp)
 
 
 def on_reschedule(plato, bq, result: dict) -> str | None:
@@ -764,7 +807,8 @@ LEFT JOIN `{contacts}` c ON c.patient_id = a.patient_id AND a.patient_id != ''
 WHERE a._loaded_at >= f.min_loaded_at
   AND a.created_on >= TIMESTAMP(@since)
   AND a.start_at > TIMESTAMP(@now)
-  AND (COALESCE(JSON_VALUE(a.payload, '$.email'), '') != '' OR COALESCE(c.email, '') != '')
+  AND (COALESCE(JSON_VALUE(a.payload, '$.email'), '') != '' OR COALESCE(c.email, '') != ''
+       OR COALESCE(JSON_VALUE(a.payload, '$.handphone'), '') != '' OR COALESCE(c.phone, '') != '')
   AND (s.appointment_id IS NULL OR s.l.start_key != FORMAT_TIMESTAMP('%Y-%m-%d %H:%M', a.start_at, 'UTC'))
 ORDER BY a.start_at
 LIMIT @limit

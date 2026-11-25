@@ -636,6 +636,9 @@ def _notify_wa_agent(result: dict, draft: dict, source: str) -> None:
         "source": source,
         # First name only: the assistant greets with it in the confirmation.
         "first_name": (str(draft.get("name") or "").strip().split() or [""])[0],
+        # The go-ahead for the WhatsApp confirmation template: only once the
+        # confirmation email is live, so both channels start together.
+        "send_template": confirmations.mode() == "live",
     }
 
     def _post():

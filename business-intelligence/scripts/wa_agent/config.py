@@ -229,10 +229,13 @@ FEEDBACK_SECRET = os.environ.get("WA_AGENT_FEEDBACK_SECRET", "")
 TEST_SHOW_DRAFTS = os.environ.get("WA_AGENT_TEST_SHOW_DRAFTS", "") == "1"
 # Numbers allowed to send /reset from WhatsApp (E.164 digits, comma-separated).
 # Any number may on a local run (WA_AGENT_STATE=memory); never anyone else.
-# Appointment confirmations for website bookings, as an approved template
-# (goji_appointment_confirmed). Off until the template is approved on the
-# clinic's real number.
-CONFIRMATIONS = _env_bool("WA_AGENT_CONFIRMATIONS", False)
+# Appointment confirmations as an approved template (goji_appointment_confirmed,
+# approved on the clinic's number by 25 Nov 2026). On by default; what turns a
+# send on is goji-booking's `send_template: true` on the booking-confirmed
+# callback, which it sets only once its confirmation email is live
+# (CONFIRMATIONS_MODE=live), so the WhatsApp and email confirmations go live
+# together. This flag stays as the agent-side off switch.
+CONFIRMATIONS = _env_bool("WA_AGENT_CONFIRMATIONS", True)
 CONFIRM_TEMPLATE = os.environ.get("WA_AGENT_CONFIRM_TEMPLATE", "goji_appointment_confirmed")
 # A long reply may go out as 2 WhatsApp messages, the way Chris writes (owner,
 # 24 Nov 2026). Capped because Meta bills each delivered service message past

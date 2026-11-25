@@ -208,6 +208,12 @@ registration form on a **first visit only**, and a calendar invite.
   (`GET patient/{id}/updatelink`), never prereg, which would duplicate them.
   The 48-hour reminder (`reminders/registration.py`) asks again on the same
   rule.
+- **WhatsApp.** The same switch starts the WhatsApp confirmation: the
+  booking-confirmed callback to the assistant carries `send_template: true`
+  only in live mode. Front-desk bookings, which no other path tells the
+  assistant about, are handed to it from here (`notify_whatsapp`), so a
+  patient with no email still gets a confirmation. Moves by staff are email
+  only. The ledger's `channel` says what went out.
 - **Modes** (`CONFIRMATIONS_MODE`, repo variables read by deploy-booking.yml):
   `off` (default) = the old `mailer.send_customer_booking_email` only; `test` =
   the new email for every appointment goes to `CONFIRMATIONS_TEST_TO`, patients

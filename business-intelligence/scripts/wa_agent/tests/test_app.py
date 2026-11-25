@@ -973,11 +973,40 @@ def test_website_booking_from_a_new_number_gets_the_confirmation_template(env, m
     r = client.post("/internal/booking-confirmed", headers={"X-Internal-Token": "t"},
                     json={"phone": "+6590001111", "reference": "GOJI-1", "service": "Physiotherapy",
                           "date": "2026-11-26", "time": "10:00", "clinician_name": "Kristy Ng",
-                          "source": "web", "first_name": "Sam"})
+                          "source": "web", "first_name": "Sam", "send_template": True})
     assert r.get_json() == {"matched": False, "template_sent": True}
     assert sent == [("6590001111", "goji_appointment_confirmed",
                      ["Sam", "physiotherapy", "Thu 26 Nov, 10:00am", "Kristy"])]
     assert app_mod.store.load("6590001111").booked["reference"] == "GOJI-1"
+
+
+@pytest.mark.parametrize("flag", [None, False, "true"])
+def test_confirmation_template_waits_for_goji_booking_to_ask(env, monkeypatch, flag):
+    """goji-booking sets send_template: true only once its confirmation email
+    is live, so both channels go live together. Anything else sends nothing."""
+    client, rec, _ = env
+    monkeypatch.setattr(config, "INTERNAL_TOKEN", "t")
+    monkeypatch.setattr(config, "CONFIRMATIONS", True)
+    app_mod.wa.send_template = lambda *a, **k: pytest.fail("sent without the go-ahead")
+    body = {"phone": "+6590001111", "reference": "GOJI-1", "date": "2026-11-26",
+            "time": "10:00", "source": "staff"}
+    if flag is not None:
+        body["send_template"] = flag
+    r = client.post("/internal/booking-confirmed", headers={"X-Internal-Token": "t"}, json=body)
+    assert r.get_json() == {"matched": False, "template_sent": False}
+
+
+def test_front_desk_booking_gets_the_template_too(env, monkeypatch):
+    client, rec, _ = env
+    monkeypatch.setattr(config, "INTERNAL_TOKEN", "t")
+    monkeypatch.setattr(config, "CONFIRMATIONS", True)
+    sent = []
+    app_mod.wa.send_template = lambda wa_id, name, params, language="en": sent.append(name) or "wamid.tpl2"
+    r = client.post("/internal/booking-confirmed", headers={"X-Internal-Token": "t"},
+                    json={"phone": "+6590002222", "reference": "GOJI-2", "service": "Pilates",
+                          "date": "2026-11-27", "time": "09:00", "clinician_name": "Claire Ng",
+                          "source": "staff", "first_name": "Ann", "send_template": True})
+    assert r.get_json()["template_sent"] and sent == ["goji_appointment_confirmed"]
 
 
 def test_confirmation_template_is_off_until_enabled(env, monkeypatch):
@@ -987,7 +1016,7 @@ def test_confirmation_template_is_off_until_enabled(env, monkeypatch):
     app_mod.wa.send_template = lambda *a, **k: pytest.fail("sent while off")
     r = client.post("/internal/booking-confirmed", headers={"X-Internal-Token": "t"},
                     json={"phone": "+6590001111", "reference": "GOJI-1", "date": "2026-11-26",
-                          "time": "10:00", "source": "web"})
+                          "time": "10:00", "source": "web", "send_template": True})
     assert r.get_json() == {"matched": False, "template_sent": False}
 
 
