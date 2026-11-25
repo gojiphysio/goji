@@ -116,6 +116,12 @@ The WhatsApp assistant. What it is and how to run it: [`README.md`](README.md).
   answered and goes to the morning summary, never a ping; it persists past
   `OFF_TOPIC_LIMIT` and the number is watch-listed (`policy.note_off_topic`).
   Don't route something to Chris just because it's unusual.
+- **"The team will take a look" means staff are pinged.** A photo, video,
+  voice note or document the agent answers pings staff on WhatsApp (email
+  only if the ping fails); several within 10 minutes get one ping
+  (`policy.media_ping_due`). The chat stays with the agent. Before this the
+  agent promised a customer the team would look at her referral photos and
+  nobody was told (25 Nov 2026).
 - **An emoji reaction is never a message.** A customer's reaction gets no
   model call or reply and isn't added to history. A positive one (👍 😊 🙏,
   `policy.POSITIVE_REACTIONS`) pings nobody; a negative or neutral one

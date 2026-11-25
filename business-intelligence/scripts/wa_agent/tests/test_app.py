@@ -4,6 +4,7 @@ Handlers run inline (no thread pool) and the pre-send hold is instant, so a
 import hashlib
 import hmac
 import json
+import time
 
 import pytest
 
@@ -527,16 +528,42 @@ def test_a_document_is_read_into_the_chat_without_an_email(env):
     post(client, body)
     stored = app_mod.store.load(CUSTOMER).history[0]["text"]
     assert "[sent a document: referral.txt]" in stored and "scoliosis" in stored
-    assert notes == []                    # Chris sees the file in the app; no email
+    [(kind, kw)] = notes      # no staff number set: the email is the ping
+    assert kind == "media" and kw["staff_note"].startswith("sent a document: referral.txt")
 
 
-def test_a_photo_is_left_for_the_team(env):
-    client, _, notes = env
+def test_a_photo_is_left_for_the_team_and_staff_are_pinged(env, monkeypatch):
+    # 25 Nov 2026: the agent told a customer "the team will take a look" at her
+    # referral photos and nobody was told.
+    client, rec, notes = env
+    monkeypatch.setattr(config, "STAFF", frozenset({"6591110000"}))
+    app_mod.store.note_staff_inbound("6591110000", time.time() - 60)  # her 24h window
     app_mod.claude.queue.append(final(reply="Thanks! The team will take a look.",
                                       intent="media_received"))
     post(client, inbound(kind="image"))
     assert app_mod.store.load(CUSTOMER).history[0]["text"] == "[sent a photo]"
-    assert app_mod.wa.sent[-1][1] == "Thanks! The team will take a look."
+    [to_customer] = [s for s in app_mod.wa.sent if s[0] == CUSTOMER]
+    assert to_customer[1] == "Thanks! The team will take a look."
+    [ping] = [s for s in app_mod.wa.sent if s[0] == "6591110000"]
+    assert "sent a photo for the team to look at" in ping[1]
+    assert notes == []                    # the WhatsApp ping, no email
+    assert app_mod.store.load(CUSTOMER).mode == AGENT   # the agent keeps the chat
+
+
+def test_photos_sent_together_get_one_ping(env):
+    client, _, notes = env
+    for i in range(2):
+        app_mod.claude.queue.append(final(reply="Thanks! The team will take a look.",
+                                          intent="media_received"))
+        post(client, inbound(kind="image", msg_id=f"wamid.img{i}", ts=1763431200 + 60 * i))
+    assert len([s for s in app_mod.wa.sent if s[0] == CUSTOMER]) == 2
+    assert [k for k, _ in notes] == ["media"]
+
+
+def test_a_text_message_pings_nobody(env):
+    client, _, notes = env
+    app_mod.claude.queue.append(final(reply="We open at 8am."))
+    post(client, inbound())
     assert notes == []
 
 

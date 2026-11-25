@@ -443,3 +443,18 @@ def test_two_page_links_per_conversation():
     inline = ("Our Pilates page at " + page + " explains the classes, the instructors, "
               "the equipment we use and how the first session works in some detail.")
     assert drop_repeat_page_links(inline, two, now) == inline
+
+
+def test_media_ping_due_once_per_batch():
+    from wa_agent.policy import media_ping_due
+    h = [{"role": "customer", "text": "I have a referral", "ts": 0, "id": "t"},
+         {"role": "customer", "text": "[sent a photo]", "ts": 100, "id": "p1"},
+         {"role": "agent", "text": "Thanks! The team will take a look.", "ts": 120, "id": "a"},
+         {"role": "customer", "text": "[sent a photo]", "ts": 160, "id": "p2"},
+         {"role": "customer", "text": "[sent a document: x.pdf] (couldn't be read)", "ts": 2000,
+          "id": "d"}]
+    assert not media_ping_due(h, "t", 0)        # text
+    assert media_ping_due(h, "p1", 100)         # first photo
+    assert not media_ping_due(h, "p2", 160)     # same batch
+    assert media_ping_due(h, "d", 2000)         # 30 min later: a new one
+    assert not media_ping_due(h, "missing", 0)

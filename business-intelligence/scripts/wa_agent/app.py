@@ -64,7 +64,7 @@ from .policy import (AGENT, DRAFT, ESCALATE, HUMAN, LATE_CHANGE_H, OFF_TOPIC, PA
                      pre_golive_chat,
                      decide, drop_repeat_page_links, gate, human_replied_since,
                      is_acknowledgement, is_positive_reaction, mask_customer_emails,
-                     on_human_message,
+                     media_ping_due, on_human_message,
                      reply_problems, set_mode)
 from .state import ChatLocks, append_history, make_store, mark_seen, note_outcome, parse_code
 from .whatsapp import (Echo, HistoryChunk, Inbound, Status, WhatsAppClient, parse_webhook,
@@ -1219,6 +1219,14 @@ def handle_inbound(ev: Inbound, received: float) -> None:
         _alert("priority", **{**notice, "sent_reply": as_one_message(reply),
                               "staff_note": f"Priority, getting worse: {p.staff_note}"})
         _test_show(client, ev.wa_id, f"Chris is pinged now (priority): {p.staff_note}")
+    if d.action == SEND and media_ping_due(state.history, ev.msg_id, sent_at):
+        # The reply says the team will look at it, so someone is told (a
+        # handover pings below anyway). WhatsApp ping only; email just if
+        # the ping fails (_alert).
+        _alert("media", **{**notice, "sent_reply": as_one_message(reply),
+                           "staff_note": f"sent {ev.text.split(']')[0][len('[sent '):]}"
+                                         f" for the team to look at. {p.staff_note}".strip()})
+        _test_show(client, ev.wa_id, f"Chris is pinged now (media): {p.staff_note}")
     if d.action == SEND and config.INTENT_POLICY.get(p.intent) == "auto_notify":
         notify.send("fyi", **notice)
         _test_show(client, ev.wa_id, f"Chris would get an FYI email: {p.staff_note}")
