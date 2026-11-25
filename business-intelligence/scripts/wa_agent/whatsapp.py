@@ -107,6 +107,9 @@ def _message_text(m: dict) -> tuple[str, str]:
         return reply.get("title", "[tapped a button]"), kind
     if kind == "button":
         return (m.get("button") or {}).get("text", "[tapped a button]"), kind
+    if kind == "reaction":
+        emoji = (m.get("reaction") or {}).get("emoji", "")
+        return (f"[reacted {emoji}]" if emoji else "[removed a reaction]"), kind
     caption = (m.get(kind) or {}).get("caption") if isinstance(m.get(kind), dict) else None
     text = NON_TEXT_PLACEHOLDERS.get(kind, f"[sent a {kind} message]")
     return (f"{text} {caption}" if caption else text), kind
@@ -197,6 +200,8 @@ def parse_webhook(payload: dict) -> list[Inbound | Echo | Status | HistoryChunk]
                                          wa_id=s.get("recipient_id", "")))
             elif field_name == "smb_message_echoes":
                 for m in value.get("message_echoes") or []:
+                    if m.get("type") == "reaction":
+                        continue  # a 👍 from the Business app isn't taking the chat over
                     text, _ = _message_text(m)
                     events.append(Echo(wa_id=m.get("to", ""), msg_id=m.get("id", ""),
                                        ts=float(m.get("timestamp") or 0), text=text))

@@ -14,7 +14,7 @@ from wa_agent.state import MemoryStore
 from wa_agent.whatsapp import parse_webhook
 
 from .fakes import FakeClaude, FakeWhatsApp, final
-from .payloads import echo, inbound, status
+from .payloads import echo, inbound, reaction, status
 
 CUSTOMER = "6591234567"
 
@@ -153,6 +153,44 @@ def test_first_thanks_gets_one_warm_closer_then_silence(env):
     post(client, inbound(msg_id="wamid.in3", text="ok thanks!"))
     assert len(app_mod.claude.requests) == 2 and len(app_mod.wa.sent) == 2   # loop ends
     assert ("silent", {"reason": "acknowledgement"}) in rec
+
+
+@pytest.mark.parametrize("emoji", ["👍", "😊", "😡", ""])
+def test_reaction_gets_no_reply_and_no_ping(env, emoji):
+    client, rec, notes = env
+    app_mod.claude.queue.append(final())
+    post(client, inbound())
+    sent, history = len(app_mod.wa.sent), len(app_mod.store.load(CUSTOMER).history)
+    post(client, reaction(emoji=emoji))
+    assert len(app_mod.claude.requests) == 1 and len(app_mod.wa.sent) == sent
+    assert notes == [] and ("silent", {"reason": "reaction"}) in rec
+    assert len(app_mod.store.load(CUSTOMER).history) == history
+
+
+def test_reaction_after_a_text_does_not_supersede_it(env, monkeypatch):
+    client, rec, _ = env
+    app_mod.claude.queue.append(final(reply="We open at 8am."))
+    def react():
+        ev = parse_webhook(reaction())[0]
+        app_mod.handle_inbound(ev, ev.ts)
+    monkeypatch.setattr(app_mod, "_sleep", on_nth_sleep(1, react))
+    post(client, inbound())
+    assert app_mod.wa.sent == [(CUSTOMER, "We open at 8am.")]
+
+
+def test_staff_reaction_to_a_ping_gets_no_reply(env, monkeypatch):
+    client, rec, notes = env
+    monkeypatch.setattr(config, "STAFF", frozenset({"6591110000"}))
+    post(client, reaction(wa_id="6591110000"))
+    assert app_mod.wa.sent == [] and app_mod.claude.requests == [] and rec == []
+
+
+def test_business_app_reaction_does_not_pause_the_chat(env):
+    client, rec, _ = env
+    app_mod.claude.queue.append(final())
+    post(client, inbound())
+    post(client, reaction(echoed=True))
+    assert app_mod.store.load(CUSTOMER).mode == AGENT and "echo" not in names(rec)
 
 
 def test_thanks_after_a_booking_needs_no_reply(env):

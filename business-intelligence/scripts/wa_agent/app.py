@@ -886,6 +886,14 @@ def _hold_pre_golive(state, blocked, now: float) -> None:
 
 
 def handle_inbound(ev: Inbound, received: float) -> None:
+    if ev.kind == "reaction":
+        # An emoji reaction is never a question, from a customer or from staff
+        # on a ping: no model call, no ping, no reply, no history line (one
+        # landing after a text would supersede that text's run). Chris sees it
+        # in the Business app. A customer's 👍 pinged her (owner, 25 Nov 2026).
+        if ev.wa_id not in config.STAFF:
+            events.record("silent", ev.wa_id, reason="reaction")
+        return
     if ev.wa_id in config.STAFF:
         handle_staff(ev)
         return
