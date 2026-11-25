@@ -210,6 +210,27 @@ STAFF = frozenset(
 # (goji_staff_alert, one parameter) was recategorised as marketing by Meta.
 STAFF_TEMPLATE = os.environ.get("WA_AGENT_STAFF_TEMPLATE", "goji_staff_alert_v2")
 
+
+def _referrers(raw: str) -> dict[str, str]:
+    """"6580000001=Dr Ong,6580000002=Dr Tan" -> {number: label}. A bare number
+    is labelled "a referring doctor"."""
+    out = {}
+    for part in raw.split(","):
+        number, _, label = part.strip().partition("=")
+        if number.strip():
+            out[number.strip()] = label.strip() or "a referring doctor"
+    return out
+
+
+# Referring doctors' WhatsApp numbers (private env file, never the repo). Their
+# photos are read for the patient's name and number and forwarded to
+# REFERRAL_TO (referral.py); the agent never replies to them, Chris does.
+REFERRERS = _referrers(os.environ.get("WA_AGENT_REFERRERS", ""))
+# Who gets referral forwards: staff numbers (so their 24h window is tracked).
+# Defaults to every staff number.
+REFERRAL_TO = tuple(p.strip() for p in os.environ.get("WA_AGENT_REFERRAL_TO", "").split(",")
+                    if p.strip()) or tuple(sorted(STAFF))
+
 # Contacts the agent never answers (family, partners, VIP patients). E.164
 # digits, comma-separated. Phase 1 moves this to a portal-editable store.
 ALWAYS_HUMAN = frozenset(

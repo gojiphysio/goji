@@ -53,8 +53,8 @@ from concurrent.futures import ThreadPoolExecutor
 
 from flask import Flask, jsonify, request
 
-from . import (agent, booking_client, config, documents, events, learning, notify, staff,
-               summary, tasks, tools)
+from . import (agent, booking_client, config, documents, events, learning, notify, referral,
+               staff, summary, tasks, tools)
 from .policy import (AGENT, DRAFT, ESCALATE, HUMAN, LATE_CHANGE_H, OFF_TOPIC, PAUSED, SEND,
                      SGT, SILENT, WAITING, WATCHLIST, as_one_message, split_bubbles,
                      apply_idle_handback, apply_pause_expiry, apply_stage, handover_mode,
@@ -367,6 +367,7 @@ def handle_staff(ev: Inbound) -> None:
             return
         st.save(state)
     st.note_staff_inbound(ev.wa_id, ev.ts or now)
+    _send_held_referrals(st, client, ev.wa_id)
     cmd, code = staff.parse_command(ev.text)
     answer = staff.parse_answer(ev.text)
     pinged_chat = st.ping_chat(ev.reply_to) if ev.reply_to else ""
@@ -411,6 +412,98 @@ def handle_staff(ev: Inbound) -> None:
         client.send_text(ev.wa_id, reply)
     except Exception as e:
         log.warning("staff reply failed: %s", e)
+
+
+REFERRAL_FOLLOWUP_S = 30 * 60  # a no-patient photo this soon after a forward is part of it
+
+
+def handle_referrer(ev: Inbound) -> None:
+    """A referring doctor (WA_AGENT_REFERRERS) wrote. The agent never replies:
+    Chris answers them in the Business app. A photo or PDF is read for the
+    patient's name and number, which go to REFERRAL_TO (referral.py)."""
+    st, client, model = _deps()
+    now = time.time()
+    with locks(ev.wa_id):
+        state = st.load(ev.wa_id)
+        if not mark_seen(state, ev.msg_id):
+            return
+        state.last_customer_at = max(state.last_customer_at, ev.ts or now)
+        state.name = ev.name or state.name
+        state.code = state.code or st.next_code()
+        append_history(state, "customer", ev.text, ev.ts, ev.msg_id)
+        st.save(state)
+    events.record("inbound", ev.wa_id, kind=ev.kind, reason="referrer")
+    if ev.kind not in ("image", "document") or not ev.media_id:
+        return
+    who = config.REFERRERS.get(ev.wa_id) or ev.name or "a referring doctor"
+    caption = " ".join((ev.caption or "").split())
+    sender_key = referral.key(name=f"from:{ev.wa_id}")
+    try:
+        data, mime = client.download_media(ev.media_id)
+        found = referral.extract(model, data, mime or ev.mime)
+    except Exception as e:  # can't fetch or read it: Chris checks the photo herself
+        log.warning("referral read failed: %s", type(e).__name__)
+        events.record("referral_failed", ev.wa_id, reason=type(e).__name__)
+        _send_referral(st, client, who, referral.unreadable_text(who, caption))
+        return
+    patients = [p for p in found["patients"] if p["phone"]]
+    if not patients:  # an insurance card, the letter's second page, ...
+        if now - st.referral_seen(sender_key) >= REFERRAL_FOLLOWUP_S:
+            _send_referral(st, client, who, referral.unreadable_text(who, caption))
+            events.record("referral_unread", ev.wa_id)
+        elif caption:
+            _send_referral(st, client, who, referral.extra_photo_text(who, caption))
+        return
+    for p in patients:
+        k = referral.key(p["phone"])
+        if st.referral_seen(k):  # the same letter again, or its other page
+            events.record("referral_duplicate", ev.wa_id)
+            if caption:
+                _send_referral(st, client, who, referral.extra_photo_text(who, caption))
+            continue
+        _send_referral(st, client, who, referral.forward_text(who, p, found["doctor"], caption))
+        st.note_referral(k)
+        events.record("referral_forwarded", ev.wa_id)
+    st.note_referral(sender_key)
+
+
+def _send_referral(st, client, who: str, text: str) -> None:
+    """Free text to each REFERRAL_TO number inside its 24h window. Outside
+    it, the staff template asks them to reply and the text is held until
+    they do (_send_held_referrals): a template can't carry it."""
+    windows, now = st.get_staff_windows(), time.time()
+    for number in config.REFERRAL_TO:
+        try:
+            if staff.window_open(windows.get(number, 0.0), now):
+                client.send_text(number, text)
+                events.record("staff_ping", "", reason="referral_text")
+            else:
+                st.hold_referral(number, text)
+                client.send_template(number, config.STAFF_TEMPLATE, staff.template_params(
+                    f"with {who}", "new patient referral. Reply here to get the name and number"))
+                events.record("staff_ping", "", reason="referral_template")
+        except Exception as e:
+            log.warning("referral forward failed: %s", type(e).__name__)
+            events.record("staff_ping_failed", "", reason=type(e).__name__)
+            notify.send("escalated", customer=who, wa_id="",
+                        staff_note="A referral came in on WhatsApp but couldn't be forwarded "
+                                   "to you. Please check the chat.",
+                        suggested_reply="", reason="referral forward failed", last_message="")
+
+
+def _send_held_referrals(st, client, number: str) -> None:
+    """A staff number wrote, so its window is open: held referrals go now."""
+    try:
+        held = st.pop_held_referrals(number)
+    except Exception as e:
+        log.warning("held referrals not read: %s", e)
+        return
+    for text in held:
+        try:
+            client.send_text(number, text)
+        except Exception as e:
+            log.warning("held referral not sent: %s", type(e).__name__)
+            st.hold_referral(number, text)
 
 
 def _staff_resume_pause(st, cmd: str, code: str, now: float, wa_id: str = "") -> str:
@@ -988,11 +1081,14 @@ def _customer_reaction(ev: Inbound) -> None:
 
 def handle_inbound(ev: Inbound, received: float) -> None:
     if ev.kind == "reaction":  # staff reacting to a ping: nothing to do
-        if ev.wa_id not in config.STAFF:
+        if ev.wa_id not in config.STAFF and ev.wa_id not in config.REFERRERS:
             _customer_reaction(ev)
         return
     if ev.wa_id in config.STAFF:
         handle_staff(ev)
+        return
+    if ev.wa_id in config.REFERRERS:
+        handle_referrer(ev)
         return
     st, client, model = _deps()
     now = time.time()

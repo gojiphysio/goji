@@ -192,6 +192,15 @@ The WhatsApp assistant. What it is and how to run it: [`README.md`](README.md).
   about a named chat are mapped, so a swipe-reply can't reach the wrong
   customer. The answer is kept as a `team` history line for follow-ups.
   Check prompt changes with `python -m wa_agent.eval.relay` on the CLI.
+- **Referring doctors are never customers either.** `WA_AGENT_REFERRERS`
+  messages go to `handle_referrer`: no model reply, ever (Chris answers
+  them). Their photos are read for the patient's name and number and sent
+  to `WA_AGENT_REFERRAL_TO`. That forward is the one ping with a full name
+  and number (owner, 25 Nov 2026: she needs both to send the referral
+  template); it goes only to staff numbers, is never logged, and
+  de-duplication keys are hashes. Store an inbound media id when it
+  arrives if you'll need the file later: Dualhook keeps no history, so
+  the first referrer's two photos (25 Nov 2026) were unrecoverable.
 - **Staff numbers are never customers.** `WA_AGENT_STAFF` messages go to
   `handle_staff` before any lookup, model call or metric; the numbers live in
   a private env file, never the repo. Pings name customers by first name or

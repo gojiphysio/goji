@@ -1,0 +1,16 @@
+{
+  "name": "goji_referral_followup",
+  "language": "en",
+  "category": "UTILITY",
+  "components": [
+    {
+      "type": "BODY",
+      "text": "Dear {{1}},\n\nGreetings from Goji Physiotherapy. We've received a referral from Dr {{2}} regarding your physio care.\n\nWe're happy to assist you and arrange a suitable time with you.\n\nLocation: 📍Lentor Modern\nhttps://maps.app.goo.gl/pQQCYNfHSGa5wNuw8\nOpening hours:\nMon - Fri 8am to 8pm\nSat 8-5pm\n\nOr know your preferred time?\nSimply book online: https://go.gojiphysio.com/referral-book\n\nBest wishes,\nChris from Team Goji",
+      "example": {"body_text": [["Lim Mei Ling", "Lim"]]}
+    },
+    {
+      "type": "FOOTER",
+      "text": "Follow-up to your doctor's referral to Goji"
+    }
+  ]
+}

@@ -484,6 +484,35 @@ Plato deletes cancellations, so late-change history is built from go-live:
 - Dry run while bookings are (`WA_AGENT_BOOKING_DRY_RUN`): goji-booking reads
   the patient but doesn't write the tag.
 
+## Doctor referrals (built 25 Nov 2026)
+
+Referring doctors send a photo of the referral to the clinic number. Their
+numbers go in `WA_AGENT_REFERRERS` (private env file, `number=Label` pairs,
+e.g. `65XXXXXXXX=Dr Ong`). The agent never replies to them; Chris does.
+Each photo or PDF they send is read by Claude (`referral.extract`) for the
+patient's name and phone number, and `app.handle_referrer` WhatsApps it to
+`WA_AGENT_REFERRAL_TO` (default: every staff number):
+
+    New referral from Dr Ong:
+    Name: Lim Mei Ling
+    HP: 9123 4567
+    Doctor: Dr Lim
+    Note: has insurance        <- the photo's caption
+
+- A second photo of the same patient isn't forwarded again (hashed key, 7
+  days); its caption is. A photo with no number right after a forward (an
+  insurance card) sends only its caption. Otherwise "couldn't find a name and
+  number, please check the chat".
+- Outside the recipient's 24h window the staff template asks them to reply,
+  and the details are held (`wa_chats_referrals`, 7-day TTL) until they do.
+- Media ids are only in the webhook and expire after 7 days; Dualhook keeps
+  no history, so a photo sent before this was deployed can't be read later.
+
+Chris then sends the patient `goji_referral_followup` (UTILITY; name and the
+referring doctor as `{{1}}`, `{{2}}`; booking link `go.gojiphysio.com/referral-book`).
+The template lives in `templates/`; submit or check it with
+`python -m wa_agent.templates.submit goji_referral_followup --waba <WABA_ID>`.
+
 ## Appointment confirmations and reminders on WhatsApp (19 Nov 2026)
 
 Templates submitted to Meta on the test account (UTILITY, pending review):
