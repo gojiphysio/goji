@@ -116,6 +116,19 @@ The WhatsApp assistant. What it is and how to run it: [`README.md`](README.md).
   answered and goes to the morning summary, never a ping; it persists past
   `OFF_TOPIC_LIMIT` and the number is watch-listed (`policy.note_off_topic`).
   Don't route something to Chris just because it's unusual.
+- **The agent looks at photos.** A photo in the customer's latest messages
+  (since the last reply, up to 3) is downloaded and sent to the model with
+  that turn only (`app._batch_images`); history keeps "[sent a photo]" and the
+  media id, never the image. Like documents, it's used only to see what they
+  need: named by what it is, no clinical details read back, no comment on
+  how an injury looks. Before this the agent asked what a referral was for
+  after the customer had sent a photo of it (25 Nov 2026).
+- **"The team will take a look" means staff are pinged.** When the agent
+  can't use what was sent (a photo it couldn't fetch, an unreadable
+  document, a video or voice note) it says so with `media_received`, and
+  staff get a WhatsApp ping (email only if the ping fails); several within
+  10 minutes get one ping (`policy.media_ping_due`). The chat stays with the
+  agent. Before this the promise told nobody (25 Nov 2026).
 - **An emoji reaction is never a message.** A customer's reaction gets no
   model call or reply and isn't added to history. A positive one (👍 😊 🙏,
   `policy.POSITIVE_REACTIONS`) pings nobody; a negative or neutral one

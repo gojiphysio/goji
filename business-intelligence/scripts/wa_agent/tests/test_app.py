@@ -1,9 +1,11 @@
 """The whole flow through the webhook, with fakes for Claude and WhatsApp.
 Handlers run inline (no thread pool) and the pre-send hold is instant, so a
 'person replies during the hold' is simulated by an echo inside _sleep."""
+import base64
 import hashlib
 import hmac
 import json
+import time
 
 import pytest
 
@@ -527,16 +529,65 @@ def test_a_document_is_read_into_the_chat_without_an_email(env):
     post(client, body)
     stored = app_mod.store.load(CUSTOMER).history[0]["text"]
     assert "[sent a document: referral.txt]" in stored and "scoliosis" in stored
-    assert notes == []                    # Chris sees the file in the app; no email
+    assert notes == []                    # read and used: nothing for the team to do
 
 
-def test_a_photo_is_left_for_the_team(env):
+def _photo(msg_id="wamid.in1", ts=1763431200):
+    body = inbound(kind="image", msg_id=msg_id, ts=ts)
+    body["entry"][0]["changes"][0]["value"]["messages"][0]["image"]["mime_type"] = "image/jpeg"
+    return body
+
+
+def test_the_model_sees_the_photo(env):
     client, _, notes = env
+    app_mod.wa.media = (b"\xff\xd8jpeg", "image/jpeg")
+    app_mod.claude.queue.append(final(reply="Thanks for sending Dr Lim's referral!",
+                                      intent="service_fit"))
+    post(client, _photo())
+    [req] = app_mod.claude.requests
+    [img] = [b for m in req["messages"] for b in m["content"] if b["type"] == "image"]
+    assert img["source"] == {"type": "base64", "media_type": "image/jpeg",
+                             "data": base64.b64encode(b"\xff\xd8jpeg").decode()}
+    line = app_mod.store.load(CUSTOMER).history[0]
+    assert line["text"] == "[sent a photo]" and line["media"] == {"id": "media1",
+                                                                  "mime": "image/jpeg"}
+    assert notes == []                    # used it: no ping
+
+
+def test_a_photo_it_cant_use_pings_staff(env, monkeypatch):
+    # 25 Nov 2026: the agent told a customer "the team will take a look" at her
+    # referral photos and nobody was told.
+    client, rec, notes = env
+    monkeypatch.setattr(config, "STAFF", frozenset({"6591110000"}))
+    app_mod.store.note_staff_inbound("6591110000", time.time() - 60)  # her 24h window
+    app_mod.wa.download_media = lambda media_id: (_ for _ in ()).throw(OSError("expired"))
     app_mod.claude.queue.append(final(reply="Thanks! The team will take a look.",
                                       intent="media_received"))
-    post(client, inbound(kind="image"))
-    assert app_mod.store.load(CUSTOMER).history[0]["text"] == "[sent a photo]"
-    assert app_mod.wa.sent[-1][1] == "Thanks! The team will take a look."
+    post(client, _photo())
+    req = app_mod.claude.requests[0]
+    assert not [b for m in req["messages"] for b in m["content"] if b["type"] == "image"]
+    [to_customer] = [s for s in app_mod.wa.sent if s[0] == CUSTOMER]
+    assert to_customer[1] == "Thanks! The team will take a look."
+    [ping] = [s for s in app_mod.wa.sent if s[0] == "6591110000"]
+    assert "for the team to look at" in ping[1]
+    assert notes == []                    # the WhatsApp ping, no email
+    assert app_mod.store.load(CUSTOMER).mode == AGENT   # the agent keeps the chat
+
+
+def test_photos_sent_together_get_one_ping(env):
+    client, _, notes = env
+    for i in range(2):
+        app_mod.claude.queue.append(final(reply="Thanks! The team will take a look.",
+                                          intent="media_received"))
+        post(client, _photo(msg_id=f"wamid.img{i}", ts=1763431200 + 60 * i))
+    assert len([s for s in app_mod.wa.sent if s[0] == CUSTOMER]) == 2
+    assert [k for k, _ in notes] == ["media"]
+
+
+def test_a_text_message_pings_nobody(env):
+    client, _, notes = env
+    app_mod.claude.queue.append(final(reply="We open at 8am."))
+    post(client, inbound())
     assert notes == []
 
 

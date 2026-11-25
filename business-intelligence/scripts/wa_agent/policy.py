@@ -433,6 +433,33 @@ def note_off_topic(state: ChatState, intent: str, now: float,
     return state.off_topic_strikes >= limit and set_mode(state, PAUSED, WATCHLIST, now)
 
 
+# Customer messages that carry something for the team to look at. When the
+# agent can't use one it says the team will take a look (media_received) and
+# staff are pinged (owner, 25 Nov 2026: the agent told a customer "the team
+# will take a look" at her referral photos and no one was told).
+TEAM_LOOKS_AT = ("[sent a photo", "[sent a video", "[sent a voice note", "[sent a document")
+MEDIA_PING_WINDOW_S = 10 * 60
+
+
+def media_ping_due(history: list[dict], window_s: float = MEDIA_PING_WINDOW_S) -> bool:
+    """Whether the customer's latest messages (since the last reply) hold a
+    photo, video, voice note or document staff haven't heard about. Several
+    sent together get one ping: none if another came in the `window_s`
+    before the first of these."""
+    def is_media(h: dict) -> bool:
+        return h["role"] == "customer" and (h.get("text") or "").startswith(TEAM_LOOKS_AT)
+
+    start = len(history)
+    while start and history[start - 1]["role"] == "customer":
+        start -= 1
+    batch = [h for h in history[start:] if is_media(h)]
+    if not batch:
+        return False
+    first = batch[0].get("ts") or 0
+    return not any(is_media(h) and 0 <= first - (h.get("ts") or 0) <= window_s
+                   for h in history[:start])
+
+
 def hours_until(appointment: dict | None, now: float) -> float:
     """Hours from `now` to a {date: YYYY-MM-DD, time: HH:MM} SGT appointment;
     -1 if there isn't one or it can't be read."""

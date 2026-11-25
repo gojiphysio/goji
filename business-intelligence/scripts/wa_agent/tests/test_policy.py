@@ -443,3 +443,19 @@ def test_two_page_links_per_conversation():
     inline = ("Our Pilates page at " + page + " explains the classes, the instructors, "
               "the equipment we use and how the first session works in some detail.")
     assert drop_repeat_page_links(inline, two, now) == inline
+
+
+def test_media_ping_due_once_per_batch():
+    from wa_agent.policy import media_ping_due
+    h = [{"role": "customer", "text": "I have a referral", "ts": 0, "id": "t"}]
+    assert not media_ping_due(h)                                         # text
+    h.append({"role": "customer", "text": "[sent a photo]", "ts": 100, "id": "p1"})
+    assert media_ping_due(h)                                             # first photo
+    h += [{"role": "agent", "text": "The team will take a look.", "ts": 120, "id": "a"},
+          {"role": "customer", "text": "[sent a photo]", "ts": 160, "id": "p2"}]
+    assert not media_ping_due(h)                                         # same batch
+    h += [{"role": "agent", "text": "The team will take a look.", "ts": 180, "id": "b"},
+          {"role": "customer", "text": "[sent a document: x.pdf] (couldn't be read)",
+           "ts": 2000, "id": "d"},
+          {"role": "customer", "text": "is that ok?", "ts": 2010, "id": "q"}]
+    assert media_ping_due(h)                     # 30 min later, a text after it too
