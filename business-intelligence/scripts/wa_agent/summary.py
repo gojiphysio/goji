@@ -61,8 +61,10 @@ def _line(state: ChatState, outcomes: list[dict]) -> str:
 
 
 def paused_labels(paused: list[ChatState]) -> list[str]:
-    """Chats the agent stays out of until someone resumes them, oldest first."""
-    return [_who(c) for c in sorted(paused, key=lambda c: c.mode_since)]
+    """Chats the agent stays out of until someone resumes them, the one the
+    customer wrote in most recently first (that's the one Chris is looking for)."""
+    return [_who(c) for c in sorted(paused, key=lambda c: max(c.last_customer_at, c.mode_since),
+                                    reverse=True)]
 
 
 def build(chats: list[ChatState], now: float, window_s: int = DAY_S,

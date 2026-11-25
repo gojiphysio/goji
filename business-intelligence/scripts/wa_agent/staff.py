@@ -168,6 +168,9 @@ def status_text(*, kill: bool, rollout: dict, waiting: list[str],
     else:
         lines.append("Nothing waiting for you today.")
     if paused:
-        shown = ", ".join(paused[:8]) + (f" and {len(paused) - 8} more" if len(paused) > 8 else "")
-        lines.append(f"Paused for you: {shown}. Text RESUME and the number to hand one back.")
+        # Every paused chat, newest first: a chat cut to "and 15 more" has no code
+        # Chris can RESUME (25 Nov 2026). One per line stays readable at ~50.
+        lines.append(f"Paused for you ({len(paused)}), latest first. Text RESUME and the "
+                     f"number to hand one back:")
+        lines += [f"- {p}" for p in paused]
     return "\n".join(lines)

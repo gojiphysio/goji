@@ -631,8 +631,30 @@ def test_summary_lists_paused_chats_with_resume_hint():
     s = summary.build([], now, paused=[p1, p2])
     assert s["paused"] == 2
     assert "ending 0012 (#007)" in s["body"] and "Ann (#004)" in s["body"]
-    assert s["body"].index("#007") < s["body"].index("#004")      # oldest first
+    assert s["body"].index("#004") < s["body"].index("#007")      # latest first
     assert "RESUME 004" in s["body"] and "RESUME" in s["line"]
+
+
+def test_status_lists_every_paused_chat_latest_first():
+    """25 Nov 2026: 23 paused chats showed as 8 + "and 15 more", so the newest
+    one (#027) had no code Chris could RESUME."""
+    now = 1_800_000_000.0
+    paused = [ChatState(wa_id=f"65000{i:05d}", name=f"C{i}", code=f"{i:03d}", mode=PAUSED,
+                        mode_since=now - DAY, last_customer_at=now - i * 60)
+              for i in range(1, 24)]
+    text = staff.status_text(kill=False, rollout={"stage": 2}, waiting=[],
+                             paused=summary.paused_labels(paused[::-1]))
+    assert "more" not in text
+    assert all(f"(#{i:03d})" in text for i in range(1, 24))
+    assert text.index("(#001)") < text.index("(#023)")            # latest customer message first
+    assert "Paused for you (23)" in text
+
+
+def test_revoke_echo_does_not_take_the_chat_over():
+    body = {"entry": [{"changes": [{"field": "smb_message_echoes", "value": {
+        "message_echoes": [{"from": "6590000000", "to": "6593000000", "id": "wamid.x",
+                            "timestamp": "1800000000", "type": "revoke"}]}}]}]}
+    assert parse_webhook(body) == []
 
 
 def test_welcome_covers_the_walkthrough():
