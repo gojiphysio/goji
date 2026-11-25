@@ -1,0 +1,23 @@
+{
+  "episode_seconds": 47,
+  "sequences": 12,
+  "all_current_relative_links": "passed",
+  "popup_exact_text_and_style": "passed",
+  "popup_y_translation_px": 180,
+  "geometry_reader_ahead_of_front_axle": "passed",
+  "card_reader_contact": "passed within 5mm at tap hold",
+  "limb_reach_and_wheel_ground": "build assertions passed",
+  "video": {
+    "seconds": 6,
+    "frames": 72,
+    "fps": 12,
+    "size": [
+      432,
+      768
+    ],
+    "full_decode": "passed"
+  },
+  "visual_review": "selected stills and contact frames inspected",
+  "normal_speed_playback_reviewed": false,
+  "final_ps2_animation": "not generated"
+}

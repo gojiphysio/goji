@@ -1,6 +1,6 @@
 # Goji Girl · Episode 02 — TAP OUT
 
-**Creative draft v2 · 25 November 2026 · proposed 45 seconds · vertical 9:16**
+**Creative draft v3 · 25 November 2026 · proposed 47 seconds · vertical 9:16**
 
 A frustrating work call sends Goji Girl rushing to Pilates. She steals a bus,
 crashes outside Lentor Modern, remembers to tap out, and reaches the calm of
@@ -8,25 +8,63 @@ Goji while the police get stuck running against the glass.
 
 **Revision direction:** outdoor action now plays from the third-person player
 camera. The home and clinic use cutscene framing. The story, EZ-Link beep and
-final police gag stay intact. This is a script and illustrated concept board;
-no footage or timed animatic has been rendered.
+final police gag stay intact. This is a script and illustrated concept board, now accompanied by a six-second
+Blender exit blockout. No final episode animation has been generated.
+
+## Revision 3 — geometry, real frontages and the ending
+
+The bus is now **SOS Transit**, keeping the red/purple italic logo treatment and
+livery. Lentor Modern follows the real dark cladding, balcony towers and silver
+Lentor Drive canopy; Goji follows the actual black-framed glass shopfront,
+left entrance, burgundy round projecting sign and walkway handrail. The approved
+interior remains. The therapist now leans into the exercise, watches knee alignment
+and gives an active extension cue.
+
+**The bus exit is staged in Blender.** The front-left passenger doorway is ahead
+of the front axle and immediately behind the windscreen. The reader sits on its
+inside aft jamb. Chassis, doorway, folded door leaves, pole and reader rotate
+together onto the driver's side; the passenger opening faces upward. She braces,
+rises, taps, then brings her legs out onto the upward-facing side panel. The next
+shot covers her drop to the pavement. Allowing that action to finish changes the
+proposed episode from 45 to **47 seconds**.
+
+[**Watch/download the six-second exit blockout**](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-girl-episode-2/marketing/assets/goji-girl/episode-02/revision-03/blender/bus-exit-blockout.mp4)
+
+![Blender exit blockout: rise through front passenger opening, tap the fixed reader, then climb clear. Proxy geometry, not final character art.](revision-03/blender/bus-exit-preview.gif)
+
+[Blender scene](revision-03/blender/bus-exit.blend) ·
+[Contact frames](revision-03/blender/contact-sheet.jpg) ·
+[Geometry and source notes](revision-03/README.md)
+
+The exact episode-one popup is reused below: **“Mobility – Upgraded. Cops will
+now find it harder to arrest you.”** Its box moves from **y=180 to y=360** on the
+1080×1920 canvas, with its font, colours, line breaks and size retained. The
+popup appears at 41.5s and leaves at 46s. It clears the proposed top/right/bottom
+UI reserves in the review mask; actual Instagram chrome varies by view/device.
+
+![Revised final frame: therapist actively coaching, police stuck outside, SOS bus burning, and original Mobility popup lowered.](revision-03/frames/12-mobility-preview.png)
+
+[Full-size ending](revision-03/frames/12-mobility-preview.png) ·
+[UI clearance review](revision-03/frames/12-ui-clearance-check.png) ·
+[Editable SVG popup](revision-03/overlays/mobility-popup.svg) ·
+[Transparent PNG popup](revision-03/overlays/mobility-popup.png)
 
 ## Revised storyboard
 
 Read left to right, then down. Each sheet has four panels. Panel numbers map
 to the timed sequences below; a panel is a story moment, not necessarily a cut.
 
-![01–04: PS2-style home cutscene, headset and laptop slam, rear-follow door exit and rear-follow approach to the busy bus.](storyboards/v2/01-call-and-player.png)
+![01–04: PS2-style home cutscene, headset and laptop slam, rear-follow door exit and rear-follow approach to the busy bus.](revision-03/frames/01-04-sos-brand.png)
 
-[Open panels 01–04](storyboards/v2/01-call-and-player.png)
+[Open panels 01–04](revision-03/frames/01-04-sos-brand.png)
 
-![05–08: takeover viewed behind the player, rear bus chase, rear-view rollover with level horizon, and player-camera tap from the overturned bus.](storyboards/v2/02-takeover-and-bus.png)
+![05–08: takeover viewed behind the player, rear bus chase, rear-view rollover with level horizon, and player-camera tap from the overturned bus.](revision-03/frames/05-08-bus-and-geometry.png)
 
-[Open panels 05–08](storyboards/v2/02-takeover-and-bus.png)
+[Open panels 05–08](revision-03/frames/05-08-bus-and-geometry.png)
 
-![09–12: rear-view dust-off, player-centred sprint with pursuers at frame edges, reception cutscene and quiet reformer session with police stuck outside.](storyboards/v2/03-player-and-clinic.png)
+![09–12: rear-view dust-off, player-centred sprint with pursuers at frame edges, reception cutscene and quiet reformer session with police stuck outside.](revision-03/frames/09-12-with-popup.png)
 
-[Open panels 09–12](storyboards/v2/03-player-and-clinic.png)
+[Open panels 09–12](revision-03/frames/09-12-with-popup.png)
 
 ## Camera and look
 
@@ -88,7 +126,7 @@ Sound: door **BANG**, two heavy swagger steps, running feet. Brief objective:
 ### 04 · 00:08–00:11 — Public transport, technically
 
 **Same PLAYER follow.** She reaches a busy Singapore bus stop. A white/purple
-single-deck bus with a red roof band has its left passenger doors open and
+**SOS Transit** single-deck bus with the familiar italic red/purple logo and a red roof band has its left passenger doors open and
 commuters alighting. She runs around the nose toward the right-hand driver's
 cab. The camera follows her route; the bus appears ahead and beside her.
 
@@ -133,7 +171,7 @@ Sound: squeal → scrape → enormous **CRUNCH**. Sparks start at road contact.
 Keep the bus recognisable and the left passenger side upward. No explosion
 covers the recovery. The shelter is empty.
 
-### 08 · 00:25–00:29 — Still must tap out
+### 08 · 00:25–00:31 — Still must tap out
 
 **Recovery camera transfers back to PLAYER.** First hold on the settled wreck
 for one full second. A little piece of shelter drops. Then the camera settles
@@ -143,21 +181,23 @@ avoiding obstruction would; it does not become an aerial shot.
 
 Halfway out, she remembers. She reaches back down and taps her EZ-Link card
 on the reader attached just inside the doorway. Green light. **BEEP.** She
-finishes climbing out, bringing the bag from the cab with her. No hand insert,
+finishes climbing onto the upward-facing side panel, bringing the bag from the cab
+with her. The geometry blockout allocates one second to the pause and five to the
+rise, tap and climb clear; the pavement drop follows in shot 09. No hand insert,
 face close-up or caption explains the joke: the reach, green flash and isolated
 beep do the work at gameplay distance.
 
 Keep the reader and its pole rotated with the bus. The opening faces upward;
 it is not an upright door on the bus's rear. Protect the silence around the beep.
 
-### 09 · 00:29–00:31 — Nothing to see here
+### 09 · 00:31–00:33 — Nothing to see here
 
 **PLAYER follow, behind her.** She drops to the pavement, dusts her shoulders,
 settles the handbag back into her left hand and sets off. Her back stays toward
 us; no front-facing reaction shot. The wreck smokes off to one side and the
 mall route is ahead. Sound: two brushing sounds, then returning sirens.
 
-### 10 · 00:31–00:35 — Same appointment, new entourage
+### 10 · 00:33–00:37 — Same appointment, new entourage
 
 **PLAYER sprint.** Follow her toward the mall and Goji shopfront. Two officers
 catch up from behind, their bodies only partly entering the lower frame edges.
@@ -168,7 +208,7 @@ but match rear view, gait and screen direction across it.
 Sound: her feet, two heavier sets, radio chatter, one **“Oi!”** Keep one star.
 If an entrance marker is used, retain episode one's established marker design.
 
-### 11 · 00:35–00:37 — Safe zone
+### 11 · 00:37–00:39 — Safe zone
 
 **Clinic cutscene begins at the threshold.** Cut to the fixed interior camera
 as she enters. Her posture relaxes instantly. The officers stop outside;
@@ -179,12 +219,15 @@ Preserve the reference reception: warm timber, red/cream floor, deep-red table,
 short-bobbed therapist in black. The officers' feet remain on exterior pavement.
 The therapist greets her without acknowledging the pursuit.
 
-### 12 · 00:37–00:45 — And… breathe out
+### 12 · 00:39–00:47 — And… breathe out
 
 **Fixed clinic cutscene.** Elliptical cut to her on the reformer, doing one slow
 footwork repetition in grip socks. White shoes and the single handbag sit on
 a bench. Therapist in a black crew-neck top and leggings, white shoes, small
-left-chest mark only; plain black back, no name tag.
+left-chest mark only; plain black back, no name tag. She leans toward the footbar,
+watches the near knee and cues alignment with one open hand while her other hand
+demonstrates the extension direction. She follows the repetition attentively;
+there is no passive hands-clasped pose.
 
 Instructor: **“And… breathe out.”** Quiet breath and reformer mechanism.
 
@@ -194,6 +237,10 @@ cinematic pullback. Through the clear glass, two police face inward and run
 against it—alternating knees, pumping arms, no forward progress, slightly out
 of phase. Beyond them, the overturned bus burns. Nobody inside reacts.
 
+At **41.5s**, bring in the original **Mobility – Upgraded. Cops will now find it
+harder to arrest you.** popup at its revised y=360 position. Hold until **46s**.
+It is a fictional game notification, not a treatment-outcome promise.
+
 Small final-two-second copy: **“Pilates at Goji · Lentor Modern.”** Keep it clear
 of the background gag. End on the moving tableau.
 
@@ -201,7 +248,7 @@ of the background gag. End on the moving tableau.
 
 - **Approved direction:** the user accepted the story intent and requested
   predominantly third-person outdoor gameplay with indoor cutscenes. The new
-  illustrations, exact camera offsets and 45-second timing remain proposals.
+  illustrations, exact camera offsets and 47-second timing remain proposals.
 - **Retain the comedy:** crash pause, isolated tap beep, hard audio boundary,
   slow reformer action and police with broken pathing. No blood or deaths;
   driver is visibly okay, passengers clear the bus, shelter is empty.
@@ -211,18 +258,20 @@ of the background gag. End on the moving tableau.
 - **Geography:** this is a fictional compressed Lentor Modern game set, allowing
   the bus to be visible through the clinic glass. The boards are not a surveyed
   route, verified transit service or faithful reconstruction of every frontage.
-- **Concept limitations:** panel 08 conveys the upward exit and rear player
-  view, but still simplifies/misplaces the bus doorway and reader near the rear.
-  It is not a final geometry guide. Build the front passenger-door/reader layout
-  in Blender before footage. Panel 07 shows the roll beginning; the full slide
-  and shelter contact are specified by the script. Stills cannot validate the
-  pursuit, contacts, camera lag or police running loop.
+- **Geometry review:** the Blender asset fixes the previous rear-door/roof-hatch
+  ambiguity. The reader and pole retain their chassis-local coordinates; the
+  card meets the front-door reader. Constant-length limb solves and wheel/ground
+  clearance are checked. The six-second blockout uses a procedural proxy and
+  neutral surroundings, not approved final cast or a full accident simulation.
+  Contact frames were inspected; the final PS2 motion and exit-to-ground cut still
+  need production review. The generated panel is a look concept; the `.blend`
+  and direct renders are the geometry authority.
 - **Service framing:** Pilates/studio experience, no medical or treatment claim.
   Her unhurt state is cartoon continuity, not recovery attributed to a session.
 - **Future motion handoff:** the new skill's Blender staging and H3 continuous
   video guidance apply to these complex outdoor actions; simpler fixed-camera
-  scenes can use H3 still guides. This creative revision does not launch renders
-  or reopen the workflow comparison.
+  scenes can use H3 still guides. This revision adds the requested Blender exit blockout, without launching
+  a new H3 benchmark or rendering the full episode.
 
 ## References used
 
@@ -242,8 +291,9 @@ and [San Andreas reference pack](https://github.com/gojiphysio/goji/blob/a4cb40e
 - **Generation:** built-in image generator, with identity and game-camera
   references assigned separate roles. Exact prompts, edits and reference hashes
   are in [v2 generation records](storyboard-prompts-v2.json).
-- **Planned shot states:** [camera and continuity record](camera-plan-v2.json).
-- **Earlier draft:** [v1 script and boards](creative-v1.md), retained for comparison.
+- **Current shot states:** [camera and continuity record](camera-plan-v3.json).
+- **This revision:** [source photos, Blender records and exact prompts](revision-03/README.md).
+- **Earlier drafts:** [v1](creative-v1.md) and [v2](creative-v2.md), retained for comparison.
 
 ## Optional caption
 
