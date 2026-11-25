@@ -187,3 +187,83 @@ def test_an_unexpected_patient_response_is_skipped_not_written(setup):
     plato.get = lambda path, **kw: []
     assert _deliver(c, {"event": "patient:upsert", "object_id": "p1"}).status_code == 200
     assert bq.writes == []
+
+
+# --- catch-up: patients the webhook never told us about ------------------------
+
+TABLE = "goji-bi.marts.dim_patient_contact"
+
+
+class ListPlato:
+    """GET /patient?modified_since=... pages, 20 a page like Plato."""
+
+    def __init__(self, patients, fail=None):
+        self.patients, self.fail, self.calls = patients, fail, []
+
+    def get(self, path, params=None, **kw):
+        self.calls.append((path, dict(params or {}), kw))
+        if self.fail:
+            raise self.fail
+        page = params["current_page"]
+        return self.patients[(page - 1) * 20: page * 20]
+
+
+@pytest.fixture
+def fresh_cursor(monkeypatch):
+    monkeypatch.setattr(pc, "_caught_up_to", None)
+    monkeypatch.setattr(pc, "_written_edit", {})
+
+
+def _patient(pid, edited="2026-11-25 16:33:25", **kw):
+    return {"_id": pid, "name": "Mei Tan", "telephone": "+6582823628",
+            "last_edited": edited, "created_by": "terminal", **kw}
+
+
+def test_catch_up_writes_patients_the_webhook_missed(fresh_cursor):
+    """25 Nov 2026: a self-registered patient, a staff edit and our own API
+    writes all changed in Plato and none fired the webhook."""
+    plato, bq = ListPlato([_patient("t1"), _patient("s1", created_by="Claire.ng")]), FakeBQ()
+    out = pc.catch_up(plato, bq, TABLE, now=1_800_000_000)
+    assert out == {"written": 2, "unchanged": 0, "failed": 0}
+    assert [w["patient_id"] for w in bq.writes] == ["t1", "s1"]
+    assert bq.writes[0]["phone"] == "+6582823628" and bq.writes[0]["full_name"] == "Mei Tan"
+    (path, params, kw), = plato.calls
+    assert path == "patient" and params["modified_since"] == 1_800_000_000 - pc.CATCH_UP_FIRST_LOOKBACK_S
+    assert kw["bulk"] is True and kw["_retries"] == 0
+
+
+def test_the_next_pass_overlaps_and_skips_rows_already_written(fresh_cursor):
+    plato, bq = ListPlato([_patient("t1")]), FakeBQ()
+    pc.catch_up(plato, bq, TABLE, now=1000.0)
+    out = pc.catch_up(plato, bq, TABLE, now=1300.0)
+    assert plato.calls[1][1]["modified_since"] == 1000 - pc.CATCH_UP_OVERLAP_S
+    assert out == {"written": 0, "unchanged": 1, "failed": 0} and len(bq.writes) == 1
+    plato.patients = [_patient("t1", edited="2026-11-25 17:00:00")]
+    assert pc.catch_up(plato, bq, TABLE, now=1600.0)["written"] == 1
+
+
+def test_a_full_page_reads_the_next_one(fresh_cursor):
+    plato, bq = ListPlato([_patient(f"p{i}") for i in range(25)]), FakeBQ()
+    assert pc.catch_up(plato, bq, TABLE, now=1000.0)["written"] == 25
+    assert [c[1]["current_page"] for c in plato.calls] == [1, 2]
+    assert pc._caught_up_to == 1000.0
+
+
+def test_too_many_pages_keep_the_cursor(fresh_cursor):
+    plato, bq = ListPlato([_patient(f"p{i}") for i in range(20 * pc.CATCH_UP_MAX_PAGES)]), FakeBQ()
+    pc.catch_up(plato, bq, TABLE, now=1000.0)
+    assert len(plato.calls) == pc.CATCH_UP_MAX_PAGES and pc._caught_up_to is None
+
+
+def test_a_failed_write_keeps_the_cursor_so_the_next_pass_retries(fresh_cursor):
+    plato = ListPlato([_patient("t1")])
+    assert pc.catch_up(plato, FakeBQ(fail=True), TABLE, now=1000.0)["failed"] == 1
+    assert pc._caught_up_to is None
+    bq = FakeBQ()
+    assert pc.catch_up(plato, bq, TABLE, now=1300.0)["written"] == 1
+
+
+def test_a_plato_error_propagates_and_keeps_the_cursor(fresh_cursor):
+    with pytest.raises(RuntimeError):
+        pc.catch_up(ListPlato([], fail=RuntimeError("429")), FakeBQ(), TABLE, now=1000.0)
+    assert pc._caught_up_to is None

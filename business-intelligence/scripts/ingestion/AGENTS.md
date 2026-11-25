@@ -61,7 +61,12 @@ source (Instagram, Search Console, GBP, …).
   :00/:30 slots and off each other's minutes, and never re-page what they don't
   need. Check a Plato filter actually filters before relying on it:
   `modified_since` on `/invoice` is ignored, so `plato_invoices` stops by
-  invoice date instead (2026-10-27).
+  invoice date instead (2026-10-27). `modified_since` on `/patient` does
+  filter (Unix seconds; a date string is ignored), checked 2026-11-25.
+- **A Plato patient's number is `telephone`**; `handphone` is the
+  appointment's field and Plato silently drops it from a patient write
+  (every patient goji-booking created had no number until 2026-11-26).
+  Read a record back after any new Plato write shape.
 - Wire into `.github/workflows/deploy-dashboard.yml`: add the path, a change-detect
   output, a test step, and a gated `gcloud run jobs deploy` step (copy the
   `plato_patients` block). Tests gate the deploy.

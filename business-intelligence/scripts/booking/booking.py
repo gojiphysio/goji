@@ -314,8 +314,13 @@ def create_booking(plato, draft: dict, *, now: datetime | None = None,
 
 def _create_patient(plato, name: str, phone: str, email: str = "") -> str:
     """A new Plato patient for a WhatsApp booking (the patient may not be the
-    person texting; the texter's number is the contact). Returns its id."""
-    payload = {"name": name, "handphone": phone, **({"email": email} if email else {})}
+    person texting; the texter's number is the contact). Returns its id.
+
+    The patient's number is `telephone`. `handphone` is the appointment's
+    field: Plato drops it from a patient without an error, so until 26 Nov
+    2026 every patient made here had no number in Plato, and the nightly
+    rebuild then blanked the one we had written to dim_patient_contact."""
+    payload = {"name": name, "telephone": phone, **({"email": email} if email else {})}
     try:
         r = plato.post("patient", payload) or {}
     except Exception as e:

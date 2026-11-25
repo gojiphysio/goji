@@ -24,13 +24,14 @@ worklist path and never appears on the financial dashboard. dim_patient itself
 stays PII-free. Keep these two concerns in separate tables.
 
 Between runs, goji-booking keeps dim_patient_contact current
-(booking/patient_contacts.py: Plato's patient webhook for staff actions, and
-the patients /internal/book creates), so the WhatsApp assistant recognises a
+(booking/patient_contacts.py: Plato's patient webhook for staff actions, a
+5-minute modified_since catch-up for anything it misses, and the patients
+/internal/book creates), so the WhatsApp assistant recognises a
 patient the same day. This nightly rebuild stays the repair, and before it
 replaces the table it reports CONTACT DRIFT: patients Plato has that the table
 was missing, or held with a different name or number. Drift means one of
-those writers missed something (most often: Plato dropped the webhook after
-failed deliveries). Counts and patient ids only, never names or numbers.
+those writers missed something (the catch-up couldn't reach Plato or
+BigQuery for a while, or a write sent a field Plato ignores). Counts and patient ids only, never names or numbers.
 
 Env vars:
   PLATO_DB          Plato database name             default: gojihealth
@@ -220,7 +221,7 @@ def report_drift(bq: "bigquery.Client", contact_ref: str, fresh: list[dict]) -> 
     if missing or changed:
         log.warning(f"{DRIFT_MARKER} missing={len(missing)} changed={len(changed)} "
                     f"e.g. {(missing + changed)[:5]}: the nightly rebuild repairs it; "
-                    "check the Plato patient webhook (booking/README.md)")
+                    "check goji-booking's patient catch-up and webhook (booking/README.md)")
     else:
         log.info("contact drift: none")
 
