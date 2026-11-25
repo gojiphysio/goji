@@ -26,7 +26,7 @@ faqs:
   - q: "Can I do Clinical Pilates with a friend or partner?"
     a: "Yes. Sessions run as private 1:1 sessions or 2:1 sessions, so you can exercise alongside a friend, partner or family member."
   - q: "How much does Clinical Pilates cost?"
-    a: "A 55-minute Clinical Pilates session is $180 at the clinic. Sessions are available as a single session or in 5-session and 10-session packages, which can be used across Clinical Pilates and Strength & Conditioning; contact us for package prices."
+    a: "A 55-minute Clinical Pilates session is $180 at the clinic. Packages are $850 for 5 sessions and $1,600 for 10 sessions, and each session in a package can be either Clinical Pilates or Strength & Conditioning."
 order: 2
 draft: false
 ---
@@ -109,6 +109,6 @@ If you experience new pain or significant changes in your symptoms, your physiot
 
 A 55-minute Clinical Pilates session at our Lentor clinic is $180. Sessions run in the clinic only, not as home visits.
 
-Clinical Pilates is available as a single a la carte session or in 5-session and 10-session packages. Your package can be used interchangeably across Clinical Pilates and [Strength & Conditioning](/services/strength-conditioning/) sessions, so your exercise programme can change as your goals do. Enquire today for package prices.
+Clinical Pilates is available as a single a la carte session or in 5-session and 10-session packages. Your package can be used interchangeably across Clinical Pilates and [Strength & Conditioning](/services/strength-conditioning/) sessions, so your exercise programme can change as your goals do. A 5-session package is $850 and a 10-session package is $1,600.
 
 To book, use the Book an appointment button on this page. If you'd like help choosing between Clinical Pilates, Private Pilates and Strength & Conditioning, message us on WhatsApp.

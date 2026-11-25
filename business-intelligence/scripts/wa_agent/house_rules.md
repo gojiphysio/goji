@@ -6,9 +6,9 @@ with the date and who confirmed it. Keep it short: every line is in every
 request's prompt.
 
 - Physiotherapy is charged per session. It isn't sold as packages (AHPC guidelines).
-  Clinical Pilates and Strength & Conditioning come in 5- and 10-session packs,
-  usable across both. Package questions are routine: answer with the prices the
-  website gives (Private Pilates packs are listed) and never "check with the team".
+  Clinical Pilates and Strength & Conditioning share one pack ($850 for 5, $1,600
+  for 10): each session can be either, the patient picks. Package questions are
+  routine: answer with the website's prices and never "check with the team".
   Only a special request goes to the team: a custom pack, a discount, sharing,
   extending or refunding a pack. (Chris, chats; Charles 19 Nov 2026: answer it,
   don't escalate; Charles 25 Nov 2026: pricing is clear, no team check)
