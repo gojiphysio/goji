@@ -257,6 +257,9 @@ Rules layered on top (`config.py`):
   service before their start date — for a new starter whose Plato calendar is
   live early (Camille: 2026-11-01). Delete the entry once the date has passed.
 - Home visits: **Cheryl only**, ±30-min travel padding.
+- One-off extra days (`CLINICIAN_EXTRA_DAYS`): open a clinician on a date their
+  Plato rule keeps closed, with set hours; the all-day "Working from …" note block
+  on that date is ignored, real bookings still block. Remove entries once past.
 - **One shared reformer** (Camille's Private Pilates, Claire's Clinical Pilates).
   Plato has no resource model, so while any appointment, on any calendar, carries
   Space Requirement `code_Left` = `REFORMER_CODE` (`YS06`, "Reformer needed";

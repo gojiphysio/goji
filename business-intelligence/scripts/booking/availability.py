@@ -24,6 +24,7 @@ from zoneinfo import ZoneInfo
 
 from .config import (
     CLINICIAN_AVAILABLE_FROM,
+    CLINICIAN_EXTRA_DAYS,
     CLINICIAN_RESTRICTED_BLOCKS,
     CLINICIANS,
     HOME_TRAVEL_MINUTES,
@@ -318,7 +319,9 @@ def _derive_day(
             if _DIAG:
                 log.info(f"  {cid}: not yet started (available from {CLINICIAN_AVAILABLE_FROM[cid]})")
             continue
-        if dow in (rule.get("restricted_days") or []):
+        extra = next((e for e in CLINICIAN_EXTRA_DAYS.get(cid, [])
+                      if e["date"] == day), None)
+        if extra is None and dow in (rule.get("restricted_days") or []):
             if _DIAG:
                 log.info(f"  {cid}: day-off ({dow})")
             continue
@@ -350,6 +353,8 @@ def _derive_day(
                         at(meta["online_start"]) if meta.get("online_start") else at("00:00"))
         win_end = min(at(rule.get("endtime", "18:00")),
                       at(meta["online_end"]) if meta.get("online_end") else at("23:59"))
+        if extra is not None:  # one-off extra day: its hours replace the rule's
+            win_start, win_end = at(extra["starttime"]), at(extra["endtime"])
         # Merge Plato-provided restricted blocks with hard-coded clinician blocks
         blocks = [
             (at(b["starttime"]), at(b["endtime"]))
@@ -363,7 +368,13 @@ def _derive_day(
             for b in hard_blocks
             if b.get("day") == dow
         ])
-        taken = booked.get(color, []) + clinic_wide
+        own = booked.get(color, [])
+        if extra is not None:
+            # Drop the all-day note block that marks the extra day in Plato.
+            day_start = at("00:00")
+            own = [(s, e) for s, e in own
+                   if not (s <= day_start and e >= day_start + timedelta(days=1))]
+        taken = own + clinic_wide
         if cid in REFORMER_CLINICIANS:
             taken = taken + reformer_busy
 

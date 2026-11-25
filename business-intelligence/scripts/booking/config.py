@@ -171,6 +171,18 @@ CLINICIAN_AVAILABLE_FROM: dict[str, date] = {
     "camille-tan": date(2026, 11, 1),  # first week of work is in November
 }
 
+# One-off extra working days: open a clinician online on a date their Plato rule
+# keeps closed (a day off in `restricted_days`). On that date the given hours
+# replace the rule hours, and any all-day patient-less block on their calendar is
+# ignored (the clinic notes these days as an all-day "Working from 1-6pm" block).
+# Real bookings, restricted blocks and the min/max lead time still apply.
+# Remove an entry once its date has passed.
+CLINICIAN_EXTRA_DAYS: dict[str, list[dict]] = {
+    "claire-ng": [
+        {"date": date(2026, 12, 17), "starttime": "13:00", "endtime": "18:00"},  # Thu
+    ],
+}
+
 # Home visits: Cheryl only, typed "Home Visit" in Plato regardless of service.
 HOME_VISIT_CLINICIAN = "cheryl-long"
 HOME_VISIT_TYPE_CODE = "sCla"
