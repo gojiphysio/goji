@@ -48,6 +48,9 @@ Every booking confirmation also adds the appointment to the patient's calendar, 
 ### Emails 4 and 5: 48-hour reminder, not yet confirmed
 ![Emails 4 and 5](email-4.png)
 
+### 48-hour reminder, registration form not yet filled in
+![48-hour reminder with registration form](email-5-form.png)
+
 ### Emails 6 and 7: 48-hour reminder, already confirmed
 ![Emails 6 and 7](email-6.png)
 
@@ -63,6 +66,20 @@ It goes out with the confirmation email for website and front-desk bookings. Boo
 >
 > [Get directions]
 
+### WhatsApp confirmation, registration form not yet filled in (with Meta for approval)
+
+Same as above, with a form line and a button. Until Meta approves it, these patients get the version above, and the form comes in their email.
+
+> Hi Sarah, your physiotherapy appointment at Goji Women's and Family Physiotherapy is confirmed for Fri 27 Nov, 7:00pm with Kristy.
+>
+> Please fill in your registration form before your visit, using the button below.
+>
+> Reply here if you need to change it.
+>
+> 📍 Lentor Modern
+>
+> [Registration form] [Get directions]
+
 ### WhatsApp reminder (approved by Meta)
 
 It goes out at the same time as the reminder email:
@@ -72,6 +89,18 @@ It goes out at the same time as the reminder email:
 > If you need to reschedule, please let us know at least 24 hours before.
 >
 > [Confirm] [Reschedule]
+
+### WhatsApp reminder, registration form not yet filled in (with Meta for approval)
+
+> Hi Sarah, a reminder of your physiotherapy appointment on Fri 27 Nov, 7:00pm with Kristy at Goji Women's and Family Physiotherapy.
+>
+> We don't have your registration form yet. Please fill it in before your visit, using the button below.
+>
+> If you need to reschedule, please let us know at least 24 hours before.
+>
+> [Confirm] [Reschedule] [Registration form]
+
+Every message asks for the registration form until the patient has filled it in: the confirmation email and WhatsApp, and the 48-hour reminder email and WhatsApp. "Filled in" means they've signed the Clinic Consent Form at the end of Plato's form. The form button always opens the right Plato form for that patient. If they've already done it, it shows "You're all set".
 
 Patients who have already confirmed and have an email don't get the WhatsApp reminder. Tapping Confirm marks them confirmed in Plato. Tapping Reschedule starts a reschedule in the chat. The wording of both WhatsApp messages is fixed by Meta's approval: changing it means resubmitting the message for approval, which takes a few days. Both were test-sent to Charles's phone on 25 Nov.
 
@@ -83,7 +112,8 @@ Reply to Charles on each point:
 - [ ] The "moved" email (email 2), and the WhatsApp confirmation going out alongside the confirmation email
 - [ ] The 48-hour reminder: today's Plato wording, plus a Confirm button or a thank-you (emails 4 to 7)
 - [ ] Reminders go out by email and WhatsApp together, and confirmed patients get no WhatsApp reminder
-- [ ] Cancellations send nothing to the patient, and the reminder asks again for a missing registration form
+- [ ] Cancellations send nothing to the patient
+- [ ] Every message, email and WhatsApp, asks for the registration form until it's filled in
 - [ ] Go-live date: _______
 
 On go-live day, the front desk stops sending Plato's confirmation by hand, and Plato's own 48-hour reminder is switched off. Our emails and both WhatsApp messages start that same day.
