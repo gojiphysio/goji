@@ -1,10 +1,10 @@
-# Booking emails: for Chris to approve
+# Booking emails and WhatsApp messages: for Chris to approve
 
 25 Nov 2026 · prepared by Charles
 
 ![How the emails work](flow.png)
 
-Every booking gets one confirmation email, whether it was made on the website, on WhatsApp or by the front desk. A patient counts as confirmed once they tap Confirm in an email or on WhatsApp, or the front desk marks them confirmed in Plato. A cancellation sends nothing. Today's Plato confirmation and Plato's own 48-hour reminder both stop on go-live day.
+Every booking gets one confirmation by email and one on WhatsApp, whether it was made on the website, on WhatsApp or by the front desk. Two days before, the patient gets the reminder email and a WhatsApp reminder, unless they've already confirmed. A patient counts as confirmed once they tap Confirm in an email or on WhatsApp, or the front desk marks them confirmed in Plato. A cancellation sends nothing. Today's Plato confirmation and Plato's own 48-hour reminder both stop on go-live day, the same day all of this starts.
 
 ## What the test did
 
@@ -20,7 +20,7 @@ On 25 Nov we ran the new emails for real, with two test bookings on Fri 27 Nov w
 
 We also checked that the same booking never gets a second confirmation, and that only new patients get the registration form.
 
-## The emails
+## The messages
 
 The test sent seven emails, in five designs. The samples below use made-up patient names.
 
@@ -51,9 +51,21 @@ Every booking confirmation also adds the appointment to the patient's calendar, 
 ### Emails 6 and 7: 48-hour reminder, already confirmed
 ![Emails 6 and 7](email-6.png)
 
-### WhatsApp reminder (waiting for Meta's approval)
+### WhatsApp confirmation (approved by Meta)
 
-This goes out at the same time as the reminder email:
+It goes out with the confirmation email for website and front-desk bookings. Bookings made in a WhatsApp chat are confirmed in that chat instead. Patients who don't have an email on file still get this message.
+
+> Hi Sarah, your physiotherapy appointment at Goji Women's and Family Physiotherapy is confirmed for Fri 27 Nov, 7:00pm with Kristy.
+>
+> Reply here if you need to change it.
+>
+> 📍 Lentor Modern
+>
+> [Get directions]
+
+### WhatsApp reminder (approved by Meta)
+
+It goes out at the same time as the reminder email:
 
 > Hi Sarah, a reminder of your physiotherapy appointment on Fri 27 Nov, 7:00pm with Kristy at Goji Women's and Family Physiotherapy.
 >
@@ -61,20 +73,20 @@ This goes out at the same time as the reminder email:
 >
 > [Confirm] [Reschedule]
 
-Patients who have already confirmed and have an email don't get the WhatsApp reminder.
+Patients who have already confirmed and have an email don't get the WhatsApp reminder. Tapping Confirm marks them confirmed in Plato. Tapping Reschedule starts a reschedule in the chat. The wording of both WhatsApp messages is fixed by Meta's approval: changing it means resubmitting the message for approval, which takes a few days. Both were test-sent to Charles's phone on 25 Nov.
 
 ## Please approve
 
 Reply to Charles on each point:
 
 - [ ] The booking confirmation wording and layout (emails 1 and 3)
-- [ ] The "moved" email (email 2)
+- [ ] The "moved" email (email 2), and the WhatsApp confirmation going out alongside the confirmation email
 - [ ] The 48-hour reminder: today's Plato wording, plus a Confirm button or a thank-you (emails 4 to 7)
 - [ ] Reminders go out by email and WhatsApp together, and confirmed patients get no WhatsApp reminder
 - [ ] Cancellations send nothing to the patient, and the reminder asks again for a missing registration form
 - [ ] Go-live date: _______
 
-On go-live day, the front desk stops sending Plato's confirmation by hand. Plato's own 48-hour reminder is switched off the same day ours starts.
+On go-live day, the front desk stops sending Plato's confirmation by hand, and Plato's own 48-hour reminder is switched off. Our emails and both WhatsApp messages start that same day.
 
 ---
 
