@@ -14,12 +14,11 @@
     "review": "Surprised reaction, closed laptop/headset and left-hand bag pickup retained."
   },
   "03": {
-    "path": "takes/03-01/raw_00001_.mp4",
+    "path": "takes/03-02/raw_00001_.mp4",
     "start": 0,
     "duration": 3,
-    "status": "draft selection; sampled-frame review",
-    "review": "Forward rear-camera run; bystanders step clear with no observed contact.",
-    "pending_revision": "03-02: closer original GTA SA running cycle requested by user; keep current take in checkpoint01 until replacement review."
+    "status": "draft selection; 8fps stride and 2fps route review",
+    "review": "Compared with 03-01 and sampled original PS2 gait reference. Firmer bent-elbow pump and regular half-second stride, left bag retained, forward rear camera and safe bystanders. H3 still softens the original rig poses; closer approximation, not exact game animation. Normal-speed playback pending Mac unlock."
   },
   "04": {
     "path": "takes/04-02/raw_00001_.mp4",
