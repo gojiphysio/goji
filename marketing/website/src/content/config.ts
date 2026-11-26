@@ -244,4 +244,71 @@ const press = defineCollection({
   }),
 });
 
-export const collections = { conditions, services, team, blog, press };
+/** Job vacancies (/careers). One YAML file per role: the filename is the URL
+ *  slug (/careers/<file>/). Management edits these to open, close or change a
+ *  role; how-to in ../CAREERS.md. The careers backend reads the built
+ *  /careers/vacancies.json (from this collection) to decide which roles can be
+ *  applied for, so `status` here is the single switch. */
+const careers = defineCollection({
+  type: "data",
+  schema: z.object({
+    /** Stable id sent with every application and stored on its record. Never
+     *  change it once a role has applications; make a new file instead. */
+    jobId: z.string().regex(/^[a-z0-9-]+$/),
+    /** open = listed on /careers and accepting applications.
+     *  closed = page stays up with an "applications closed" notice, no
+     *  JobPosting schema, noindex, out of the sitemap.
+     *  draft = no page at all (prepare a future role without publishing it). */
+    status: z.enum(["open", "closed", "draft"]),
+    /** Pinned first on /careers. */
+    featured: z.boolean().default(false),
+    title: z.string(),
+    /** Full <title> (verbatim) and meta description (<= 160 chars). */
+    metaTitle: z.string().max(65),
+    description: z.string().max(160),
+    department: z.string(),
+    location: z.string(),
+    /** Schema.org employmentType values for JobPosting. */
+    employmentTypes: z.array(z.enum(["FULL_TIME", "PART_TIME", "CONTRACTOR", "TEMPORARY"])),
+    /** How the employment type reads on the page ("Full-time / Part-time"). */
+    employmentLabel: z.string(),
+    /** e.g. "3 days per week" - shown on the card and beside the part-time question. */
+    minCommitment: z.string().optional(),
+    /** The same minimum as a number, so the form can say it and the tracker can
+     *  flag (never reject) a lower answer. */
+    minDaysPerWeek: z.number().int().min(1).max(6).optional(),
+    clinicalFocus: z.string().optional(),
+    experience: z.string(),
+    /** Minimum experience in months, for JobPosting experienceRequirements. */
+    experienceMonths: z.number().int().optional(),
+    /** One or two sentences for the vacancy card and the page intro. */
+    shortDescription: z.string(),
+    /** "physio" adds the AHPC + clinical-experience questions to the form. */
+    form: z.enum(["physio", "general"]),
+    /** Role folder name in Drive: Goji Recruitment/Applications/<year>/<this>. */
+    driveFolder: z.string(),
+    /** Real dates only: the day the role went live and, if any, the closing date. */
+    datePublished: z.coerce.date(),
+    closingDate: z.coerce.date().optional(),
+    /** The full job description, in the approved document's order. Each section
+     *  is a heading with optional paragraphs and bullet items. */
+    sections: z.array(
+      z.object({
+        heading: z.string(),
+        paragraphs: z.array(z.string()).default([]),
+        items: z.array(z.string()).default([]),
+      }),
+    ),
+    /** Where the approved wording came from, for whoever edits it next. */
+    source: z
+      .object({
+        title: z.string(),
+        url: z.string().url(),
+        /** "approved" once the wording above matches the approved document. */
+        status: z.enum(["approved", "awaiting-approved-doc"]),
+      })
+      .optional(),
+  }),
+});
+
+export const collections = { conditions, services, team, blog, press, careers };
