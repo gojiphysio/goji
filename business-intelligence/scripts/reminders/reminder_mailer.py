@@ -148,7 +148,7 @@ def render_reminder_body(name: str | None, date_str: str, times: list[str],
     ]
     # Plato's Confirm Appointment link, one per session: (time, url) pairs.
     if confirm_links and len(confirm_links) == 1:
-        lines += ["Please confirm you're coming:", f"  {confirm_links[0][1]}", ""]
+        lines += ["Please confirm your appointment:", f"  {confirm_links[0][1]}", ""]
     elif confirm_links:
         lines += ["Please confirm each session:",
                   *(f"  {_fmt_time(t)}: {url}" for t, url in confirm_links), ""]
@@ -345,7 +345,7 @@ def render_reminder_html(name: str | None, date_str: str, times: list[str],
         many = len(confirm_links) > 1
         buttons = "".join(
             f'<a href="{escape(url)}" style="{_BTN}">'
-            f'{escape("Confirm " + _fmt_time(t)) if many else "Confirm I&#39;m coming"}</a>'
+            f'{escape("Confirm " + _fmt_time(t)) if many else "Confirm appointment"}</a>'
             for t, url in confirm_links)
         paras.insert(2, buttons)
     if form_url:

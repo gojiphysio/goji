@@ -389,7 +389,7 @@ def render_text(appt: Appointment, kind: str, form_url: str | None) -> str:
     if appt.confirmed:
         lines += ["", "You've confirmed this appointment. Thank you!", ""]
     else:
-        lines += ["", "Please confirm you're coming:", confirm_url(appt.appointment_id), ""]
+        lines += ["", "Please confirm your appointment:", confirm_url(appt.appointment_id), ""]
     if form_url:
         lines += ["New to Goji? Please fill in your registration form before your visit:",
                   form_url, ""]
@@ -418,7 +418,7 @@ def render_html(appt: Appointment, kind: str, form_url: str | None) -> str:
     else:
         confirm_block = (f'<p style="margin:20px 0 0"><a href="'
                          f'{escape(confirm_url(appt.appointment_id))}" style="{_BTN}'
-                         f'background:#1f5f4a;color:#fff">Confirm I\'m coming</a></p>')
+                         f'background:#1f5f4a;color:#fff">Confirm appointment</a></p>')
     form = ""
     if form_url:
         form = (f'<p style="margin:20px 0 6px">New to Goji? Please fill in your '
@@ -482,7 +482,7 @@ def build_ics(appt: Appointment, *, sequence: int, now: datetime | None = None) 
     desc = [f"Reference: {appt.reference}"]
     if appt.clinician:
         desc.insert(0, f"With {appt.clinician}")
-    desc += [f"Confirm you're coming: {confirm_url(appt.appointment_id)}",
+    desc += [f"Confirm your appointment: {confirm_url(appt.appointment_id)}",
              f"Changes or cancellations: WhatsApp {WHATSAPP_NUMBER} ({WHATSAPP_LINK})",
              POLICY]
     attendee = appt.email or "patient@invalid"

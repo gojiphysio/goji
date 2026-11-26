@@ -1009,7 +1009,7 @@ def test_one_session_gets_one_confirm_link():
     body = mailer.render_reminder_body(
         "Sarah", "2026-09-09", ["09:00"], has_clinic=True, has_home_visit=False,
         confirm_links=[("09:00", mailer.confirm_url("a1"))])
-    assert "Please confirm you're coming:\n  https://clinic.platomedical.com/" in body
+    assert "Please confirm your appointment:\n  https://clinic.platomedical.com/" in body
 
 
 def test_several_sessions_get_a_link_each_by_time():
@@ -1041,7 +1041,7 @@ def test_html_reminder_has_a_confirm_button_and_the_same_words():
     url = mailer.confirm_url("a1")
     html = mailer.render_reminder_html("Sarah <b>", "2026-09-09", ["09:00"],
                                        confirm_links=[("09:00", url)], **kw)
-    assert f'href="{url}"' in html and "Confirm I&#39;m coming" in html
+    assert f'href="{url}"' in html and "Confirm appointment" in html
     assert "<b>" not in html  # the name is escaped
     assert 'href="https://go.gojiphysio.com/reminder-wa"' in html
     assert "$50 fee" in html and "Lentor Modern" in html
@@ -1059,7 +1059,7 @@ def test_confirmed_reminder_thanks_instead_of_asking():
     body = mailer.render_reminder_body("Sarah", "2026-09-09", ["09:00"], confirmed=True, **kw)
     assert "Thank you for confirming" in body and "Please confirm" not in body
     html = mailer.render_reminder_html("Sarah", "2026-09-09", ["09:00"], confirmed=True, **kw)
-    assert "Thank you for confirming" in html and "Confirm I&#39;m coming" not in html
+    assert "Thank you for confirming" in html and "Confirm appointment" not in html
 
 
 def test_mixed_day_asks_only_for_the_unconfirmed_session():
@@ -1208,7 +1208,7 @@ def test_reminder_asks_for_the_form_in_text_and_html():
     assert "registration form yet" in body and "prereg/x" in body
     html = mailer.render_reminder_html("Sarah", "2026-09-09", ["09:00"],
                                        confirm_links=[("09:00", "https://x/c")], **kw)
-    assert html.index("Confirm I&#39;m coming") < html.index(">Registration form</a>")
+    assert html.index("Confirm appointment") < html.index(">Registration form</a>")
     assert html.count("prereg/x") == 1
 
 
