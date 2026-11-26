@@ -26,7 +26,7 @@
 #
 # ENVIRONMENT VARIABLES: set in the shell = applied; unset = the live value is
 # kept. This script never resets a value you didn't pass. Personal numbers
-# (WA_AGENT_STAFF, WA_AGENT_TESTERS) live in a private env file on the
+# (WA_AGENT_STAFF, WA_AGENT_TESTERS, WA_AGENT_REFERRERS) live in a private env file on the
 # operator's machine, never in the repo; source it first:
 #   set -a; . ~/.config/goji-wa-agent/prod.env; set +a
 #   First deploy only: WA_PHONE_NUMBER_ID is required (unless WA_SEND_PATH has
@@ -38,6 +38,8 @@
 #     WA_AGENT_STAGE WA_AGENT_CONTACT_SCOPE WA_AGENT_GO_LIVE
 #     WA_AGENT_STAFF_TEMPLATE WA_AGENT_CONFIRMATIONS WA_AGENT_PUBLIC_URL
 #     WA_AGENT_BOOKING_DRY_RUN WA_AGENT_HOURS WA_AGENT_PATIENT_LOOKUP
+#     WA_AGENT_REFERRERS WA_AGENT_REFERRAL_TO (referring doctors / who gets
+#     their referrals: private numbers, kept in the env file like STAFF)
 #   Defaults, used only when neither the shell nor the live service has a value:
 #     WA_AGENT_HOURS=all  WA_AGENT_PATIENT_LOOKUP=1  WA_AGENT_BOOKING_DRY_RUN=0
 #     (direct booking is on from day one: owner's decision, 19 Nov 2026)
@@ -111,6 +113,9 @@ gcloud firestore fields ttls update expire_at --collection-group=wa_chats_holds 
 gcloud firestore fields ttls update expire_at --collection-group=wa_chats_pings \
   --enable-ttl --async --quiet >/dev/null 2>&1 || echo "    (pings TTL policy already set)"
 
+gcloud firestore fields ttls update expire_at --collection-group=wa_chats_referrals \
+  --enable-ttl --async --quiet >/dev/null 2>&1 || echo "    (referrals TTL policy already set)"
+
 echo "==> 4/7 Events table + write grant"
 bq query --use_legacy_sql=false --quiet \
   < "${ROOT}/business-intelligence/scripts/sql/marts/62_wa_agent_events.sql" >/dev/null
@@ -165,12 +170,13 @@ PASSTHROUGH = [
     "WA_AGENT_STAGE", "WA_AGENT_CONTACT_SCOPE", "WA_AGENT_GO_LIVE",
     "WA_AGENT_STAFF_TEMPLATE", "WA_AGENT_CONFIRMATIONS", "WA_AGENT_PUBLIC_URL",
     "WA_AGENT_BOOKING_DRY_RUN", "WA_AGENT_HOURS", "WA_AGENT_PATIENT_LOOKUP",
-    "WA_AGENT_TASKS_QUEUE",
+    "WA_AGENT_TASKS_QUEUE", "WA_AGENT_REFERRERS", "WA_AGENT_REFERRAL_TO",
 ]
 DEFAULTS = {"WA_AGENT_HOURS": "all", "WA_AGENT_PATIENT_LOOKUP": "1",
             "WA_AGENT_BOOKING_DRY_RUN": "0"}
 # Phone-number lists: report a count, not the numbers.
-LISTS = {"WA_AGENT_STAFF", "WA_AGENT_TESTERS", "WA_AGENT_ALWAYS_HUMAN"}
+LISTS = {"WA_AGENT_STAFF", "WA_AGENT_TESTERS", "WA_AGENT_ALWAYS_HUMAN",
+         "WA_AGENT_REFERRERS", "WA_AGENT_REFERRAL_TO"}
 
 live = {}
 raw = os.environ.get("LIVE_JSON", "").strip()

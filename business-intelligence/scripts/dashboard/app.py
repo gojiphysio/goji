@@ -225,6 +225,10 @@ LINK_SLUGS: dict[str, dict] = {
     # Booking links the WhatsApp assistant (scripts/wa_agent) sends in chat.
     # They carry ?service=&focus= so /book opens on the right option.
     "wa-book":  {"kind": "book", "label": "WhatsApp assistant"},
+    # The booking link in the goji_referral_followup WhatsApp template Chris
+    # sends a patient a doctor referred (wa_agent/templates/), so referral
+    # bookings are separable in the link-click stats.
+    "referral-book": {"kind": "book", "label": "Doctor referral"},
     # --- Legacy Plato-booking slugs (retired; alias to the native /book form
     #     below so old published links never dead-end) ---
     "web-plato": {"kind": "book", "label": "Web"},

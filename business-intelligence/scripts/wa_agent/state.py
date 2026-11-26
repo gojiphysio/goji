@@ -42,6 +42,9 @@ HOLD_DAYS = 365
 # A staff ping's message id -> the chat it was about, so Chris can swipe-reply
 # to the ping with the team's answer (app._staff_answer).
 PING_DAYS = 7
+# Referral de-dupe marks and forwards held for a staff number whose 24h window
+# was shut (<collection>_referrals, TTL on expire_at).
+REFERRAL_DAYS = 7
 HISTORY_KEEP = 50
 SEEN_KEEP = 200
 OUTCOMES_KEEP = 20
@@ -188,6 +191,18 @@ class MemoryStore:
         wa_id, at = getattr(self, "_pings", {}).get(msg_id, ("", 0.0))
         return wa_id if time.time() - at < PING_DAYS * 86400 else ""
 
+    def referral_seen(self, key: str) -> float:
+        return getattr(self, "_referrals", {}).get(key, 0.0)
+
+    def note_referral(self, key: str) -> None:
+        self.__dict__.setdefault("_referrals", {})[key] = time.time()
+
+    def hold_referral(self, number: str, text: str) -> None:
+        self.__dict__.setdefault("_referral_held", {}).setdefault(number, []).append(text)
+
+    def pop_held_referrals(self, number: str) -> list[str]:
+        return self.__dict__.setdefault("_referral_held", {}).pop(number, [])
+
     def staff_welcomed(self, wa_id: str) -> bool:
         return wa_id in getattr(self, "_welcomed", set())
 
@@ -227,6 +242,7 @@ class FirestoreStore:
         self._flags = self._db.collection(f"{collection}_flags")
         self._holds = self._db.collection(f"{collection}_holds")
         self._pings = self._db.collection(f"{collection}_pings")
+        self._referrals = self._db.collection(f"{collection}_referrals")
         self._kill_cache: tuple[float, bool] = (0.0, False)
         self._rollout_cache: tuple[float, dict] = (-1e9, {})
         self._history_cache: tuple[float, bool] = (-1e9, False)
@@ -364,6 +380,34 @@ class FirestoreStore:
         snap = self._pings.document(msg_id).get()
         d = (snap.to_dict() or {}) if snap.exists else {}
         return d.get("wa_id", "") if time.time() - float(d.get("at") or 0) < PING_DAYS * 86400 else ""
+
+    def _referral_expiry(self):
+        from datetime import datetime, timedelta, timezone
+        return datetime.now(timezone.utc) + timedelta(days=REFERRAL_DAYS)
+
+    def referral_seen(self, key: str) -> float:
+        """When this patient (a hash) was last forwarded; 0 if never or expired."""
+        snap = self._referrals.document(key).get()
+        at = float(((snap.to_dict() or {}) if snap.exists else {}).get("at") or 0)
+        return at if time.time() - at < REFERRAL_DAYS * 86400 else 0.0
+
+    def note_referral(self, key: str) -> None:
+        self._referrals.document(key).set({"at": time.time(),
+                                           "expire_at": self._referral_expiry()})
+
+    def hold_referral(self, number: str, text: str) -> None:
+        from google.cloud import firestore
+        self._referrals.document(f"held_{number}").set(
+            {"texts": firestore.ArrayUnion([text]), "expire_at": self._referral_expiry()},
+            merge=True)
+
+    def pop_held_referrals(self, number: str) -> list[str]:
+        ref = self._referrals.document(f"held_{number}")
+        snap = ref.get()
+        if not snap.exists:
+            return []
+        ref.delete()
+        return list((snap.to_dict() or {}).get("texts") or [])
 
     def staff_welcomed(self, wa_id: str) -> bool:
         return wa_id in (self._flag("staff").get("welcomed") or {})
