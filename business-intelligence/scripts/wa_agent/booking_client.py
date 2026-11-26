@@ -29,7 +29,14 @@ log = logging.getLogger("wa_agent.booking")
 CLINICIAN_IDS = {"cheryl": "cheryl-long", "claire": "claire-ng", "kristy": "kristy-ng",
                  "camille": "camille-tan"}
 FIELDS = ("service", "date", "time", "clinician", "physio_focus", "variant", "format",
-          "full_name", "email", "address", "notes", "for_whom", "booked_by", "patient_age")
+          "full_name", "email", "address", "notes", "arranged", "for_whom", "booked_by",
+          "patient_age")
+# Session lengths goji-booking knows (booking/config.py, physiotherapy
+# variants). Anything else books the service's usual length: on 26 Nov 2026
+# the model wrote "40 min postpartum, Bifrost/FM billing $190" here.
+VARIANTS = ("40min", "55min", "85min")
+# Times offered earlier in the chat stay pickable, newest first, up to this many.
+MAX_OPTIONS = 12
 
 
 def booking_note(b: dict) -> str:
@@ -71,14 +78,49 @@ class BookingFailed(Exception):
         self.code = code
 
 
-def offered(options: str) -> set[tuple[str, str]]:
-    """'2026-11-27 14:00, 2026-11-28 09:00' -> {(date, time), ...}"""
-    out = set()
+def _entries(options: str) -> list[tuple[str, str, str]]:
+    """'2026-11-27 14:00 Kristy, 2026-11-28 09:00' -> [(date, time, clinician)]:
+    the clinician the time was offered with, or "" (whoever's free)."""
+    out = []
     for part in (options or "").split(","):
         bits = part.strip().split()
-        if len(bits) == 2 and _TIME.match(bits[1]):
-            out.add((bits[0], bits[1]))
+        if len(bits) in (2, 3) and _TIME.match(bits[1]):
+            out.append((bits[0], bits[1], bits[2].lower() if len(bits) == 3 else ""))
     return out
+
+
+def offered(options: str) -> set[tuple[str, str]]:
+    """'2026-11-27 14:00, 2026-11-28 09:00 Kristy' -> {(date, time), ...}"""
+    return {(d, t) for d, t, _ in _entries(options)}
+
+
+def offered_with(options: str, day: str, time_: str, wanted: str = "") -> str | None:
+    """The clinician to book a pick from `options` with: `wanted` if the time
+    was offered with them, else the one it was offered with (newest offer
+    first), else `wanted` when it was offered with no one named. None when
+    the time wasn't offered."""
+    names = [c for d, t, c in _entries(options) if (d, t) == (day, time_)]
+    if not names:
+        return None
+    want = (wanted or "").strip().split(" ")[0].lower()
+    named = [c for c in names if c]
+    if not named or want in named:
+        return want
+    return named[0]
+
+
+def merge_options(new: str, earlier: str) -> str:
+    """The times just offered, then the ones offered before that aren't
+    repeated: a customer who asks about another clinician can still pick
+    from the first list (26 Nov 2026: 'Monday 5:00 with Claire', offered
+    before Kristy's times, wasn't booked)."""
+    seen, out = set(), []
+    for d, t, c in _entries(new) + _entries(earlier):
+        if (d, t, c) in seen:
+            continue
+        seen.add((d, t, c))
+        out.append(f"{d} {t} {c.capitalize()}".strip())
+    return ", ".join(out[:MAX_OPTIONS])
 
 
 def complete(b: dict | None) -> bool:
@@ -92,6 +134,32 @@ def complete(b: dict | None) -> bool:
     return bool(b.get("service") and _TIME.match(b.get("time", "")) and
                 (b.get("full_name") or "").strip() and
                 (b.get("format") != "home" or (b.get("address") or "").strip()))
+
+
+def missing_details(b: dict) -> list[str]:
+    """What only the customer can still give for a booking whose time is
+    settled: "full_name", "address". [] when something else is missing."""
+    try:
+        date.fromisoformat(b.get("date", ""))
+    except ValueError:
+        return []
+    if not (b.get("service") and _TIME.match(b.get("time", ""))):
+        return []
+    out = [] if (b.get("full_name") or "").strip() else ["full_name"]
+    if b.get("format") == "home" and not (b.get("address") or "").strip():
+        out.append("address")
+    return out
+
+
+def details_question(b: dict, missing: list[str]) -> str:
+    """Ask for what's missing, naming the time so it's clear it's held for
+    them but not booked yet."""
+    whom = "the patient's" if (b.get("for_whom") or "self").strip().lower() != "self" else "your"
+    what = " and ".join(x for x in (
+        f"{whom} full name" if "full_name" in missing else "",
+        "the address for the home visit" if "address" in missing else "") if x)
+    with_ = f" with {b['clinician'].strip().capitalize()}" if (b.get("clinician") or "").strip() else ""
+    return f"Lovely! Could I have {what}? Then I'll book {_when(b['date'], b['time'])}{with_} for you."
 
 
 def _clinician_id(name: str) -> str:
@@ -108,8 +176,10 @@ def book(b: dict, *, wa_id: str, patient_id: str = "", http=requests) -> dict:
             "format": b.get("format") or "clinic", "name": b["full_name"].strip(),
             "phone": "+" + re.sub(r"\D", "", wa_id), "email": (b.get("email") or "").strip(),
             "clinician_id": _clinician_id(b.get("clinician", "")),
-            "physio_focus": b.get("physio_focus", ""), "variant": b.get("variant", ""),
+            "physio_focus": b.get("physio_focus", ""),
+            "variant": b.get("variant", "") if b.get("variant", "") in VARIANTS else "",
             "address": b.get("address", ""), "notes": booking_note(b),
+            "arranged": (b.get("arranged") or "").strip(),
             "source": "whatsapp", "dry_run": config.BOOKING_DRY_RUN,
             # The patient's own record (matched by name and number), or a new
             # one: the texter may be booking for someone on the same number.
@@ -283,9 +353,7 @@ def confirmation_text(res: dict, *, emailed: bool = False) -> str:
     booking system's answer, so it can't claim a booking that didn't happen.
     It names no one: a couple sharing one session is booked under one of
     them, so a name greeted the wrong person (owner, 25 Nov 2026)."""
-    d = date.fromisoformat(res["date"])
-    h, m = map(int, res["time"].split(":"))
-    when = f"{d:%a} {d.day} {d:%b}, {(h % 12) or 12}:{m:02d}{'am' if h < 12 else 'pm'}"
+    when = _when(res['date'], res['time'])
     who = (res.get("clinician_name") or "").split(" ")[0]
     text = (f"All booked! {when}"
             f"{' with ' + who if who else ''} (ref {res['reference']}).\n\n"

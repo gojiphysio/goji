@@ -459,3 +459,19 @@ def test_media_ping_due_once_per_batch():
            "ts": 2000, "id": "d"},
           {"role": "customer", "text": "is that ok?", "ts": 2010, "id": "q"}]
     assert media_ping_due(h)                     # 30 min later, a text after it too
+
+
+def test_the_booking_link_goes_after_the_times_once():
+    from wa_agent.policy import add_booking_link
+    url = "https://go.gojiphysio.com/wa-book?service=physiotherapy"
+    reply = "Next open times:\n* Mon 30 Nov, 5:00pm\n* Tue 1 Dec, 8:00am\n\nWhich suits you?"
+    out = add_booking_link(reply, [], url, 1000.0)
+    assert out == ("Next open times:\n* Mon 30 Nov, 5:00pm\n* Tue 1 Dec, 8:00am\n\n"
+                   f"Or book any open time yourself here: {url}\n\nWhich suits you?")
+    sent = [{"role": "agent", "text": out, "ts": 900.0}]
+    assert add_booking_link(reply, sent, url, 1000.0) == reply            # once
+    assert add_booking_link(reply, sent, url, 900.0 + 86401) != reply    # a new conversation
+    assert add_booking_link("Our hours are 8 to 8.", [], url, 1000.0) == "Our hours are 8 to 8."
+    own = f"{reply}\n\nBook here: {url}"
+    assert add_booking_link(own, [], url, 1000.0) == own                  # model already did
+    assert add_booking_link(reply, [], "", 1000.0) == reply

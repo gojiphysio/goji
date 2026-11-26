@@ -175,6 +175,16 @@ def build_booking_pick_email_declined():
             "give my email"]
 
 
+def build_pick_from_earlier_list():
+    a, b, c = _open_slots(3)
+    return ["Any physio slots coming up? I'm Jamie Lee, jamie.lee@example.com",
+            ("agent", f"The next open times:\n* {_nice(a)} with {_who(a)}\n\nWhich suits you?"),
+            "Anything else?",
+            ("agent", f"Also open:\n* {_nice(b)} with {_who(b)}\n* {_nice(c)} with {_who(c)}"
+                      "\n\nWhich suits you?"),
+            f"Actually the first one please, {_nice(a)} with {_who(a)}"]
+
+
 def build_couple_pick():
     a, b = _open_slots(2)
     return ["Hi, any physio slots coming up for Ben?",
@@ -442,6 +452,11 @@ SCENARIOS: list[Scenario] = [
       ["(built at run time from live open slots)"],
       E(intents=("booking",), confirm_booking=True, must_not=(r"shall i", r"would you like me to")),
       note="picking an offered time is the yes", build=build_booking_pick),
+    S("booking_pick_from_earlier_list", "booking",
+      ["(built at run time from live open slots)"],
+      E(intents=("booking",), confirm_booking=True, must_not=(r"shall i", r"would you like me to")),
+      note="a time from an earlier list is still a pick (26 Nov 2026)",
+      build=build_pick_from_earlier_list),
     S("booking_name_on_file", "booking",
       ["(built at run time from live open slots)"],
       E(intents=("booking",), confirm_booking=True, booking_filled=True,

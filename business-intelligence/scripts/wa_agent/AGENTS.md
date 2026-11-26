@@ -21,6 +21,25 @@ The WhatsApp assistant. What it is and how to run it: [`README.md`](README.md).
   (`_staff_answer`). It was 30 minutes: a customer waiting on a clinical
   answer picked their time 32 minutes later and wasn't booked (25 Nov 2026).
   goji-booking checks the slot live, so a stale pick is `slot_taken`.
+  Every list offered in that day stays pickable, not only the latest
+  (`booking_client.merge_options`, same service, format and patient),
+  and each time carries the clinician it was offered with ("2026-11-30
+  17:00 Claire"), which the booking takes (`offered_with`): a customer
+  picked Claire's Monday from the first list after asking for Kristy's
+  times and wasn't booked (26 Nov 2026).
+- **A pick with no name is asked for, once** (`_ask_details`), with the
+  time held; a second confirmation still without it goes to Chris.
+- **The first times offered come with the booking link** (owner, 26 Nov
+  2026; `policy.add_booking_link`), in its own paragraph after the list so
+  the question stays last, once per conversation. The email question had
+  pushed it out of the prompt's layout and a chat went three rounds of
+  times without it.
+- **Terms the team agreed go on the booking as `arranged`** (billing to a
+  company or insurer, a custom price or length), written to Plato as
+  "Agreed with the clinic: ...", apart from the patient's condition note.
+  Taken only when someone from the clinic has written in the chat
+  (`_team_spoke`); goji-booking accepts it from `/internal/book` only.
+  `variant` is only goji-booking's codes (`booking_client.VARIANTS`).
 - **Bookings ask for an email** (owner, 25 Nov 2026): with one on the
   booking, Plato sends its own confirmation (with the clinic's registration
   form) and goji-booking sends Goji's. The agent asks once, with the times,

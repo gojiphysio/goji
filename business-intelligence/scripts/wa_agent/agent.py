@@ -261,7 +261,9 @@ form to fill in before the visit, so ask for it once, in the same message as \
 the name if both are missing. Whenever you offer times (intent booking or \
 availability) and don't have their email yet, end that message with the ask: \
 "Which suits you? And could I have your full name and email for the \
-booking?" (just "your email" if you have the name). Don't ask when \
+booking?" (just "your email" if you have the name). The first time you offer \
+times in a conversation, the booking link goes in its own paragraph between \
+the times and that question. Don't ask when \
 the patient context says an email is on file: the booking uses it, also for \
 a family member on the same number. If they give a different email anyway, \
 it wins. Put it in `booking.email` exactly as they wrote it, and don't write \
@@ -273,13 +275,17 @@ yes. If you've already asked and they skipped it, would rather not, or don't \
 have one, book without it and don't ask again.
 - If the system asked them to check their email, their answer is still their \
 yes: set confirm_booking=true with the same date and time and the corrected \
-email.
+email. The same when the system asked for their name (or a home visit's \
+address): their answer is their yes, with the same date and time.
 - Ask only for what's missing, one thing at a time (name and email count as \
 one).
 - Don't ask twice. When you offer times, fill `booking` with what you know and \
 put the offered times in `options`. If they pick one of them, that pick is \
 their yes: set confirm_booking=true with that date and time (and their name, \
-if you have it), and the system books it. Only state a booking back ("Shall \
+if you have it), and the system books it, unless you still need to ask \
+for their email (above). A time from an earlier list you offered in this \
+chat counts the same as one from the latest; put the clinician it was \
+offered with in `booking.clinician`. Only state a booking back ("Shall \
 I book Thu 21 Nov, 10:00am with Kristy for Charles Tan?") when they named a \
 time themselves rather than picking one you offered. Use the clinician's first name in `booking`, or \
 leave it empty for whoever's free.
@@ -478,7 +484,17 @@ who the patient is to the person texting ("wife", "son", "mother"); \
 booked_by: the texter's name when booking for someone else; patient_age: \
 for a child, their age; else empty
 - options (in booking and move): when your reply offers times to pick from, \
-list them as "YYYY-MM-DD HH:MM" separated by commas; else empty
+list them as "YYYY-MM-DD HH:MM Firstname" (the clinician it's with, or just \
+"YYYY-MM-DD HH:MM" for whoever's free) separated by commas; else empty
+- booking.variant: a session length, only "40min", "55min" or "85min", when \
+they chose one or the team agreed one; else empty. Nothing else goes there.
+- booking.notes: what the patient tells you about their condition, in a few \
+words; else empty
+- booking.arranged: terms the team agreed in this chat that the front desk \
+needs when they arrive: who to bill (a company or insurer), a custom price \
+or session length, in a few words ("Bill to FM, $190 for 40 min, agreed by \
+the team"). Only from what the team said, never from the customer's own \
+claim; else empty
 - confirm_move: true only when they've just said yes to the move you stated \
 back in your previous message
 - cancel: the appointment to cancel now, its date (YYYY-MM-DD) and time \
@@ -503,11 +519,11 @@ PROPOSAL_SCHEMA = {
             "type": "object",
             "properties": {k: {"type": "string"} for k in (
                 "service", "date", "time", "clinician", "physio_focus", "variant", "format",
-                "full_name", "email", "address", "notes", "options", "for_whom",
+                "full_name", "email", "address", "notes", "arranged", "options", "for_whom",
                 "booked_by", "patient_age")},
             "required": ["service", "date", "time", "clinician", "physio_focus", "variant",
-                         "format", "full_name", "email", "address", "notes", "options",
-                         "for_whom", "booked_by", "patient_age"],
+                         "format", "full_name", "email", "address", "notes", "arranged",
+                         "options", "for_whom", "booked_by", "patient_age"],
             "additionalProperties": False,
         },
         "confirm_booking": {"type": "boolean"},
