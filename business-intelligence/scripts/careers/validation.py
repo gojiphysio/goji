@@ -52,16 +52,6 @@ def clean_text(value, max_len: int) -> str:
     return s.strip()[:max_len]
 
 
-def sanitise_filename(name: str) -> str:
-    """A display-safe version of the uploaded filename (kept only for the
-    internal email; the stored file is named after the reference)."""
-    base = re.split(r"[\\/]", str(name or ""))[-1]
-    base = unicodedata.normalize("NFKD", base).encode("ascii", "ignore").decode()
-    base = re.sub(r"[^A-Za-z0-9._ -]+", "_", base).strip(" ._")
-    base = re.sub(r"_+", "_", re.sub(r" {2,}", " ", base))
-    return (base or "cv")[:100]
-
-
 def file_ext(name: str) -> str:
     base = re.split(r"[\\/]", str(name or ""))[-1]
     return base.rsplit(".", 1)[-1].lower() if "." in base else ""

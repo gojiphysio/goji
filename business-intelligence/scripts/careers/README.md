@@ -70,9 +70,20 @@ privacy notice and the retention periods (`RETENTION.md`).
 
 - `PUBLIC_CAREERS_API` turns the form on. The Turnstile widget uses the same
   site key as booking, and its hostname list must include every site the form
-  runs on (`www.gojiphysio.com`, plus `goji.pages.dev` for preview testing).
+  runs on: `www.gojiphysio.com`, plus `goji-bgb.pages.dev` (which covers the
+  `<branch>.goji-bgb.pages.dev` previews) for preview testing. Not
+  `goji.pages.dev`: that is another account's project.
 - Testing on a Cloudflare Pages preview also needs that preview's origin added
   to `CORS_ORIGIN` in the workflow.
+
+## Domain
+
+`careers-api.gojiphysio.com` is a Cloud Run domain mapping (the workflow keeps
+it). It needs one DNS record, `careers-api CNAME ghs.googlehosted.com.`, added
+in **Squarespace Domains**, where gojiphysio.com's DNS lives (not Cloudflare,
+not Cloud DNS; see the root `AGENTS.md`). Google issues the certificate within
+about an hour of the record resolving; then
+`curl https://careers-api.gojiphysio.com/healthcheck` returns `ok`.
 
 ## Running locally
 

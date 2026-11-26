@@ -102,7 +102,7 @@ jobs:
             echo "domain mapping ${DOMAIN} already exists"
           elif gcloud beta run domain-mappings create --service="${SERVICE}" \
                  --domain="${DOMAIN}" --platform=managed --region "${REGION}" --project "${PROJECT}" --quiet; then
-            echo ">> One-time DNS: add  careers-api  CNAME  ghs.googlehosted.com.  (DNS only) on gojiphysio.com."
+            echo ">> One-time DNS (Squarespace Domains, not Cloudflare): careers-api  CNAME  ghs.googlehosted.com."
           else
             echo "!! Could not create the ${DOMAIN} mapping. Continuing."
           fi

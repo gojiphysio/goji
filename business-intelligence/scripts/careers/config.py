@@ -1,8 +1,8 @@
 """
 goji-careers configuration: env vars, form option lists, tracker layout.
 
-Everything that differs between test and production is an environment variable
-(set by .github/workflows/deploy-careers.yml from repo variables), so the same
+Everything that differs between test and production is an environment variable,
+set from the env block of .github/workflows/deploy-careers.yml, so the same
 code runs against the TEST folder/tracker until go-live.
 """
 from __future__ import annotations
