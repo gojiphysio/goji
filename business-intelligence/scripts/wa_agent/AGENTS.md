@@ -175,6 +175,13 @@ The WhatsApp assistant. What it is and how to run it: [`README.md`](README.md).
   any reply; the generic line is only the fallback. (Before 23 Nov 2026 a model
   handover sent its holding message to the customer AND to Chris as her
   "suggestion", so she got nothing usable.)
+- **A scripted turn must be the whole history.** In a scenario, each plain
+  string is a customer message the model answers, and its real reply joins
+  the history before the next scripted line. A scenario that needs the agent
+  NOT to have said something (no email ask yet) scripts the earlier customer
+  lines as `("customer", ...)` tuples: the model's own first reply asked for
+  the email, so `booking_pick_asks_email_first` "failed" every run for a
+  correct booking (26 Nov 2026).
 - **Evals judge at the deployed stage.** `eval/scenarios.py` decides with
   `stage_policy` + `apply_stage` as `app.py` does, so a "draft" in a scenario
   is a handover from stage 1. Judging with the bare `INTENT_POLICY` hid that
