@@ -607,3 +607,20 @@ def test_form_route(monkeypatch):
     r = client.get("/form/" + t)
     assert r.status_code == 200 and b"all set" in r.data
     assert client.get("/form/" + t[:-1] + "0").status_code == 404
+
+
+def test_staff_path_reads_use_the_priority_share(sent, monkeypatch):
+    """The 5-minute availability refresh can hold Plato's whole bulk share; the
+    first staff booking after go-live failed its bulk read (26 Nov 2026)."""
+    live(monkeypatch)
+    monkeypatch.setattr(c, "_take_read", lambda: True)
+    future = {**PLATO_APPT, "starttime": "2030-01-02 10:00:00", "endtime": "2030-01-02 11:00:00"}
+    calls = []
+
+    class Rec(FakePlato):
+        def get(self, path, **kw):
+            calls.append(kw.get("bulk", False))
+            return super().get(path, **kw)
+    c.handle_webhook(Rec(record=future, patient={"created_by": "api"}),
+                     FakeBQ(profile=("p1", False)), ["5e8cd7cd"])
+    assert calls and not any(calls)

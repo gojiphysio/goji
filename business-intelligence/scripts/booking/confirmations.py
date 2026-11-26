@@ -303,7 +303,9 @@ def registration_link(plato, bq, appt: Appointment) -> str | None:
         if signed:
             return None
         if profile:
-            patient = one_record(plato.get(f"/patient/{profile}", bulk=True,
+            # Priority share, not bulk: one read per booking, and the 5-minute
+            # availability refresh can hold the whole bulk share (26 Nov 2026).
+            patient = one_record(plato.get(f"/patient/{profile}",
                                            max_wait_s=READ_MAX_WAIT_S, _retries=0))
             if patient is None or consent_signed(patient):
                 return None
@@ -820,7 +822,11 @@ def handle_webhook(plato, bq, ids: list[str]) -> int:
             log.info("confirmations: appointment %s over the read cap, left to the sweep", aid)
             continue
         try:
-            rec = one_record(plato.get(f"/appointment/{aid}", bulk=True,
+            # Priority share, not bulk: the first staff booking after go-live
+            # (26 Nov 2026) failed here because the availability refresh held
+            # the bulk share. READS_PER_MIN keeps these from crowding the
+            # website's own reads.
+            rec = one_record(plato.get(f"/appointment/{aid}",
                                        max_wait_s=READ_MAX_WAIT_S, _retries=0))
         except Exception as e:
             log.warning("confirmations: appointment read failed: %s", e)
