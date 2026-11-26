@@ -49,5 +49,15 @@
       "inspection": "4fps full route samples; bypasses fixed bin and shelter post before crossing ahead of bus nose. Earlier v3 guide rejected before generation for obstacle contact."
     }
   ],
-  "route_notes": "Hero route and camera retained. Officers follow the same path 3.2/3.5 metres behind along its length, keeping them outside the facade at the turn. Shot04 follows the same collision-free nose route at uniform path speed, with its camera outside the bus."
+  "route_notes": "Hero route and camera retained. Officers follow the same path 3.2/3.5 metres behind along its length, keeping them outside the facade at the turn. Shot04 follows the same collision-free nose route at uniform path speed, with its camera outside the bus.",
+  "shot04_clearance_check": {
+    "method": "linear interpolation of exported root marks, 100 substeps per frame",
+    "assumed_body_radius_metres": 0.35,
+    "minimum_root_clearance_metres": {
+      "bin": 0.63,
+      "shelter_posts": 0.735,
+      "bus_footprint": 0.55
+    },
+    "limits": "Horizontal proxy body clearance, not a guarantee of final H3 limb contact or avoidance."
+  }
 }

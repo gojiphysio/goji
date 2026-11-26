@@ -1,7 +1,9 @@
-import argparse,json,subprocess,hashlib
+import argparse,json,subprocess,hashlib,re
 from pathlib import Path
-R=Path(__file__).resolve().parents[1];p=argparse.ArgumentParser();p.add_argument('--animatic',action='store_true');p.add_argument('--review',action='store_true');a=p.parse_args();shots=json.loads((R/'shots.json').read_text())
-name='timing-animatic' if a.animatic else ('review-checkpoint-01' if a.review else 'episode-02-first-cut-v1');tmp=R/'deliverables'/('edit-'+name);tmp.mkdir(exist_ok=True)
+R=Path(__file__).resolve().parents[1];p=argparse.ArgumentParser();p.add_argument('--animatic',action='store_true');p.add_argument('--review',action='store_true');p.add_argument('--review-name',default='review-checkpoint-01');a=p.parse_args();shots=json.loads((R/'shots.json').read_text())
+assert re.fullmatch(r'review-checkpoint-\d+',a.review_name),'Use a numbered review-checkpoint name'
+name='timing-animatic' if a.animatic else (a.review_name if a.review else 'episode-02-first-cut-v1');tmp=R/'deliverables'/('edit-'+name);tmp.mkdir(exist_ok=True)
+if a.review and (R/'deliverables'/(name+'.mp4')).exists():raise RuntimeError('Keep published review checkpoints unchanged; choose a new --review-name')
 selected={} if a.animatic else json.loads((R/'selected.json').read_text());records=[]
 for sid,job in shots.items():
  out=tmp/(sid+'.mp4');duration=job['duration']

@@ -18,20 +18,20 @@ for t in [.4,.85,1.2]:add('foley',t,hit(.08,450),.10,label='impatient desk tap')
 add('foley',2.0,hit(.4,400),.25,label='headset clatter');add('foley',2.7,hit(.25,100),.60,label='laptop shut')
 add('ui',3.2,tone(.12,880)*np.linspace(1,0,int(.12*SR)),.25,label='calendar ping');add('ui',3.34,tone(.18,1320)*np.linspace(1,0,int(.18*SR)),.17,label='calendar second tone')
 add('foley',5.15,hit(.35,75),.45,label='front door bang')
-for start,end,step in [(5.4,11,.28),(31.6,37,.26)]:
+for start,end,step in [(5.25,11,.25),(33.0,36.9,.25)]:
  for k,t in enumerate(np.arange(start,end,step)):add('foley',float(t),hit(.13,85+(k%2)*15),.16,(-.12 if k%2 else .12),label='player running')
 for off,pan in [(.1,-.5),(.23,.5)]:
- for t in np.arange(33+off,37,.3):add('foley',float(t),hit(.14,65),.14,pan,label='pursuer footsteps')
+ for t in np.arange(33+off,36.85,.25):add('foley',float(t),hit(.14,65),.14,pan,label='pursuer footsteps')
 t=np.arange(int(15*SR))/SR;engine=(np.sin(2*np.pi*(44*t+2.1*t*t))+.35*np.sin(2*np.pi*88*t)+.15*noise(15))*.09
 add('vehicles',10,engine,label='diesel idle and acceleration')
 add('vehicles',11.4,noise(.18),.10,label='bus air hiss')
-add('foley',11.7,noise(.5)*np.exp(-np.arange(int(.5*SR))/SR*8)+tone(.5,3200)*np.exp(-np.arange(int(.5*SR))/SR*15),.22,label='driver window break')
+add('foley',11.4,noise(.5)*np.exp(-np.arange(int(.5*SR))/SR*8)+tone(.5,3200)*np.exp(-np.arange(int(.5*SR))/SR*15),.22,label='driver window break')
 for start,sec,gain in [(16,8.7,.055),(31.4,5.6,.065)]:
  t=np.arange(int(sec*SR))/SR;freq=850+380*np.sin(2*np.pi*.8*t);sig=np.sin(2*np.pi*np.cumsum(freq)/SR)+.22*np.sin(4*np.pi*np.cumsum(freq)/SR)
  add('vehicles',start,sig,gain,-.3,label='offscreen police siren')
 add('vehicles',19.1,tone(.5,190)+.4*tone(.5,260),.10,label='bus horn')
-t=np.arange(int(3.4*SR))/SR;add('vehicles',20.1,noise(3.4)*.5+np.sin(2*np.pi*(1300*t+80*np.sin(t*3)))*.2,.14,label='tyre squeal and scrape')
-add('foley',24.0,hit(.8,40),.72,label='bus shelter crash');add('foley',24.12,noise(.8)*np.exp(-np.arange(int(.8*SR))/SR*5),.30,label='metal and debris rattle')
+t=np.arange(int(4.6*SR))/SR;add('vehicles',20.1,noise(4.6)*.5+np.sin(2*np.pi*(1300*t+80*np.sin(t*3)))*.2,.14,label='tyre squeal and scrape')
+add('foley',22.4,hit(.8,40),.72,label='bus body hits road');add('foley',24.0,hit(.5,55),.32,label='wreck comes to rest');add('foley',22.52,noise(.8)*np.exp(-np.arange(int(.8*SR))/SR*5),.30,label='metal and debris rattle')
 add('foley',25.6,hit(.18,750),.12,label='small shelter piece falls')
 add('ui',28.0,tone(.115,1100),.28,label='isolated EZ-Link BEEP')
 for t in [31.2,31.5]:add('foley',t,noise(.14),.17,label='dust off')

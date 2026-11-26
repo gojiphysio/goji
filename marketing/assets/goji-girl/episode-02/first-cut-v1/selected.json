@@ -21,12 +21,11 @@
     "review": "Compared with 03-01 and sampled original PS2 gait reference. Firmer bent-elbow pump and regular half-second stride, left bag retained, forward rear camera and safe bystanders. H3 still softens the original rig poses; closer approximation, not exact game animation. Normal-speed playback pending Mac unlock."
   },
   "04": {
-    "path": "takes/04-02/raw_00001_.mp4",
+    "path": "takes/04-04/raw_00001_.mp4",
     "start": 0,
     "duration": 3,
-    "status": "draft selection; sampled-frame review",
-    "review": "Corrected take runs past passenger door around front nose to driver side. Approved formed bus and compact driver opening retained. Six sampled frames inspected; full continuous motion not claimed.",
-    "pending_revision": "04-04: same GTA SA gait revision extended to bus approach, clearing bin and posts; retain reviewed 04-02 until replacement review."
+    "status": "draft selection; 8fps stride and obstacle review",
+    "review": "Stronger running stride through the turn, passes passenger entrance without boarding and arrives at small driver window. Sampled route clears fixed bin, front corner and bystanders; brief natural shelter-post occlusion. Finished bus mesh stays formed, not proxy boxes. Normal-speed playback pending Mac unlock."
   },
   "05": {
     "path": "takes/05-02/raw_00001_.mp4",

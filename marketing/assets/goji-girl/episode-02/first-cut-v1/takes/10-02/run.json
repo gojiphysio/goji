@@ -244,8 +244,19 @@
   "audio": "Separate original procedural SFX in edit; video VAE only",
   "runtime_commit": "da8bd08e48deee74d9f6c3bc00aed365b00ec209",
   "receipt": {
-    "prompt_id": "cd4e4888-a866-4328-b12c-4328fdac7b6e",
-    "number": 10.0,
+    "prompt_id": "6913c3d8-cb57-4a70-a646-53987a7e43cd",
+    "number": 7.5,
     "node_errors": {}
-  }
+  },
+  "superseded_receipts": [
+    {
+      "receipt": {
+        "prompt_id": "cd4e4888-a866-4328-b12c-4328fdac7b6e",
+        "number": 10.0,
+        "node_errors": {}
+      },
+      "reason": "Prioritize user-requested clinic running revision immediately after current bus approach. Same frozen inputs/workflow.",
+      "at": 1795668032.099838
+    }
+  ]
 }

@@ -2,7 +2,7 @@
 
 **Render in progress · 26 November 2026 · 8 provisional shot selections; running revisions queued; bus-action takes being revised.**
 
-**Running revision:** scene03 now has a reviewed replacement; scenes04 and10 are rendering/queued. All use an original rig cycle informed by sampled [PS2 running footage](https://www.youtube.com/watch?v=Z9cD9uj1fb8&t=248s): flared bent elbows, stronger heel recovery and forward lean. The current checkpoint preserves the version being reviewed. [Reference and retarget notes](guides/sa-gait-reference.json).
+**Running revision:** scenes03 and04 now have reviewed replacements; scene10 is rendering. All use an original rig cycle informed by sampled [PS2 running footage](https://www.youtube.com/watch?v=Z9cD9uj1fb8&t=248s): flared bent elbows, stronger heel recovery and forward lean. The current checkpoint preserves the version being reviewed. [Reference and retarget notes](guides/sa-gait-reference.json).
 
 [**Watch review checkpoint 01 — full 47-second timeline with SFX**](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-girl-episode-2/marketing/assets/goji-girl/episode-02/first-cut-v1/deliverables/review-checkpoint-01.mp4)
 
@@ -11,6 +11,8 @@ This checkpoint combines **22 seconds of selected animation** (01–04, 06, 08) 
 [Revised departure run — scene03, silent](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-girl-episode-2/marketing/assets/goji-girl/episode-02/first-cut-v1/takes/03-02/raw_00001_.mp4)
 
 This take has a firmer bent-elbow pump and a regular stride. H3 still softens the rig poses; it is a closer approximation, not the exact game animation. The published checkpoint01 keeps the earlier run.
+
+[Revised run around the bus — scene04, silent](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-girl-episode-2/marketing/assets/goji-girl/episode-02/first-cut-v1/takes/04-04/raw_00001_.mp4)
 
 [Newer driver-interaction take — scene05, silent, rough motion](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-girl-episode-2/marketing/assets/goji-girl/episode-02/first-cut-v1/takes/05-02/raw_00001_.mp4)
 
