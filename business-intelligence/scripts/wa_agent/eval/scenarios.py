@@ -159,8 +159,11 @@ def build_booking_pick():
 
 
 def build_booking_pick_no_email_asked():
+    # The opening line is scripted, not answered: a plain string goes to the
+    # model, whose real reply asks for the email, so the pick came after an
+    # ask and booking without one was right (26 Nov 2026).
     a, b = _open_slots(2)
-    return ["Any physio slots coming up? I'm Jamie Lee",
+    return [("customer", "Any physio slots coming up? I'm Jamie Lee"),
             ("agent", f"I have {_nice(a)} with {_who(a)} or {_nice(b)} with {_who(b)}. "
                       "Which would you like?"),
             f"{_nice(b).split(', ')[0]} {_nice(b).split(', ')[1]} please"]
