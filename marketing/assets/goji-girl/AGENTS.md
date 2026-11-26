@@ -52,6 +52,9 @@
 - Inspect the full Blender camera path around rigid props. A rear follow offset
   can enter a bus on a tight turn; keep the camera outside its footprint and
   the complete player action visible before using the guide in H3.
+- Scope appearance instructions to what is visible in each shot. An unseen
+  driver needs no on-foot outfit/bag block; a cropped wreck edge needs no full
+  bus reconstruction. On the reformer, her shoes and bag stay on the bench.
 - On the rolled bus, preserve a solid front corner between the side entrance
   and front facade. Use the colour-coded side-door guide when generation merges
   them; reject front-face cutouts, additional axles and upright wreck fragments.

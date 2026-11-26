@@ -38,6 +38,8 @@ if job.get('anchors'):
 r={'shot':a.shot,'take':a.take,'status':'submitting','started':time.time(),'recipe':'H3 Ref2VA GGUF Q4 + native Turbo 4-step; 576x1024 24fps','native_frames':n,'edit_seconds':job['duration'],'guidance':job['mode'],'prompt':job['prompt'],'workflow':g,'inputs':[{'path':str(f),'sha256':hashlib.sha256(f.read_bytes()).hexdigest()} for f in refs],'audio':'Separate original procedural SFX in edit; video VAE only','runtime_commit':subprocess.check_output(['git','-C','/Users/tidepool/Projects/goji-comfy-control','rev-parse','HEAD'],text=True).strip()}
 (D/'run.json').write_text(json.dumps(r,indent=2))
 try:
- req=urllib.request.Request(URL+'/prompt',data=json.dumps({'prompt':g}).encode(),headers={'Content-Type':'application/json'});r['receipt']=json.load(urllib.request.urlopen(req,timeout=60));r['status']='queued'
+ payload={'prompt':g}
+ if 'queue_number' in job:payload['number']=job['queue_number']
+ req=urllib.request.Request(URL+'/prompt',data=json.dumps(payload).encode(),headers={'Content-Type':'application/json'});r['receipt']=json.load(urllib.request.urlopen(req,timeout=60));r['status']='queued'
 except urllib.error.HTTPError as e:r.update(status='validation_failed',error=e.read().decode())
 (D/'run.json').write_text(json.dumps(r,indent=2));print(json.dumps({k:r[k] for k in ['shot','status','receipt','error'] if k in r}))

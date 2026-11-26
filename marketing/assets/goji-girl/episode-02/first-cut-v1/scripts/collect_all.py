@@ -1,6 +1,6 @@
 """Collect completed local takes without declaring them visually accepted."""
 from pathlib import Path
-import json,time,urllib.request,subprocess,hashlib
+import json,time,urllib.request,subprocess,hashlib,math
 R=Path(__file__).resolve().parents[1]
 for p in sorted((R/'takes').glob('*/run.json')):
  r=json.loads(p.read_text())
@@ -21,7 +21,8 @@ for p in sorted((R/'takes').glob('*/run.json')):
     probe=json.loads(subprocess.check_output(['ffprobe','-v','error','-show_streams','-show_format','-of','json',str(video)],text=True));subprocess.run(['ffmpeg','-v','error','-i',str(video),'-f','null','-'],check=True)
     r['videos'].append({'path':str(video.relative_to(R)),'sha256':hashlib.sha256(video.read_bytes()).hexdigest(),'probe':probe,'full_decode_verified':True})
     q=p.parent/'review';q.mkdir(exist_ok=True)
-    subprocess.run(['ffmpeg','-v','error','-i',str(video),'-vf','fps=2,scale=180:320,tile=6x3','-frames:v','1',str(q/'contact-sheet.png')],check=True)
+    count=max(1,round(float(probe['format']['duration'])*2));cols=min(6,count);rows=math.ceil(count/cols)
+    subprocess.run(['ffmpeg','-v','error','-i',str(video),'-vf',f'fps=2,scale=180:320,tile={cols}x{rows}','-frames:v','1',str(q/'contact-sheet.png')],check=True)
   assert r['videos'],'Success without output video'
  p.write_text(json.dumps(r,indent=2)+'\n');print(r['shot'],r['take'],r['status'],flush=True)
 state=[]

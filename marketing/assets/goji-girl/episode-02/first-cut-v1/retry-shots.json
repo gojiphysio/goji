@@ -2,14 +2,14 @@
   "04": {
     "duration": 3,
     "mode": "video",
-    "prompt": "One uninterrupted three-second third-person gameplay run AROUND the FRONT NOSE of the parked double-decker, from passenger side to driver side. Start with the girl on the sidewalk. She runs PAST the open passenger entrance without entering it, continues in front of the windscreen, then rounds the other front corner onto the road and stops beside the compact DRIVER WINDOW. The bus stays parked, completely stationary. The girl never boards during this shot. The corrected Video1 gives the full route and collision-free camera, and the supplied final frame anchors her arrival at the driver window. Preserve the full continuous turn; no cut or teleport. Use Picture1 for the exact finished bus and woman appearance: formed rounded sheet-metal corners, inset dark glazing, detailed wheel arches/rims/lamps, orange-red/purple/white SOS Transit livery, maroon clothing and black bag in LEFT hand. Video1 contains crude planning blocks ONLY: use their positions, timing and camera, NEVER their boxy silhouettes, flat toy surfaces or primitive faces as the finished geometry. Original PS2 GTA San Andreas painted textures and economical but properly formed vehicle mesh. Camera follows the whole run around the nose without entering the bus. Pedestrians remain clear on pavement; nobody is touched. No extra characters, HUD, captions or stars.",
+    "prompt": "One uninterrupted three-second third-person gameplay run AROUND the FRONT NOSE of the parked double-decker, from passenger side to driver side. Start with the girl on the sidewalk. She runs PAST the open passenger entrance without entering it, continues in front of the windscreen, then rounds the other front corner onto the road and stops beside the compact DRIVER WINDOW. The bus stays parked, completely stationary. The girl never boards during this shot. The corrected <Video 1> gives the full route and collision-free camera, and the supplied final frame anchors her arrival at the driver window. Preserve the full continuous turn; no cut or teleport. Use <Picture 1> for the exact finished bus and woman appearance: formed rounded sheet-metal corners, inset dark glazing, detailed wheel arches/rims/lamps, orange-red/purple/white SOS Transit livery, maroon clothing and black bag in LEFT hand. <Video 1> contains crude planning blocks ONLY: use their positions, timing and camera, NEVER their boxy silhouettes, flat toy surfaces or primitive faces as the finished geometry. Original PS2 GTA San Andreas painted textures and economical but properly formed vehicle mesh. Camera follows the whole run around the nose without entering the bus. Pedestrians remain clear on pavement; nobody is touched. No extra characters, HUD, captions or stars. Blender primitives govern ONLY world positions, motion, contacts and camera. Reconstruct the FINISHED MESH SHAPES from the approved appearance image: formed rounded bus corners, inset glazing, detailed wheel arches, rims, lamps and bumpers, and the approved human anatomy. Never merely paint textures onto the guide boxes or reproduce their blocky silhouettes or primitive faces.",
     "guide_filename": "04-guide-v2.mp4",
     "end_guide": "04-end-v2.png"
   },
   "05": {
     "duration": 4,
     "mode": "video",
-    "prompt": "One continuous four-second fixed rear interaction camera in original GTA San Andreas PS2 graphics. The girl smashes the SMALL DRIVER WINDOW with her right hand, pulls the purple-shirt driver through that same SMALL WINDOW, he lands on his feet unharmed and steps left, then she lifts herself head-first and climbs through the SAME SMALL WINDOW into the driver seat. Follow the supplied guide and timed still anchors, completing the action. THE SOLID WHITE BODY PANEL BELOW THE WINDOW NEVER CHANGES. This is a high small driver window, NEVER a passenger door. Both bodies cross the side of the bus at WINDOW HEIGHT above the sill; no one walks through the body panel. Driver and girl remain distinct. Bus remains rigid and stationary, no panel movement or resizing. Use Picture1 and the anchors for all FINISHED SHAPES AND TEXTURES: formed rounded bus body, inset dark glazing, detailed lamps, wheel arches and rims, exact orange-red/purple/white SOS Transit livery, maroon-clad woman with ponytail and white shoes. Video1 is primitive choreography ONLY, never copy its boxy mesh, faceted primitive faces or toy surfaces. Girl keeps handbag on LEFT forearm while climbing, then places it inside cab. Keep small black structured handbag, no extra bags. Driver walks away upright with no injury, blood or impact. No other people, doors, HUD, stars, cuts or captions. Camera does not move.",
+    "prompt": "One continuous four-second fixed rear interaction camera in original GTA San Andreas PS2 graphics. The girl smashes the SMALL DRIVER WINDOW with her right hand, pulls the purple-shirt driver through that same SMALL WINDOW, he lands on his feet unharmed and steps left, then she lifts herself head-first and climbs through the SAME SMALL WINDOW into the driver seat. Follow the supplied guide and timed still anchors, completing the action. THE SOLID WHITE BODY PANEL BELOW THE WINDOW NEVER CHANGES. This is a high small driver window, NEVER a passenger door. Both bodies cross the side of the bus at WINDOW HEIGHT above the sill; no one walks through the body panel. Driver and girl remain distinct. Bus remains rigid and stationary, no panel movement or resizing. Use <Picture 1> and the anchors for all FINISHED SHAPES AND TEXTURES: formed rounded bus body, inset dark glazing, detailed lamps, wheel arches and rims, exact orange-red/purple/white SOS Transit livery, maroon-clad woman with ponytail and white shoes. <Video 1> is primitive choreography ONLY, never copy its boxy mesh, faceted primitive faces or toy surfaces. Girl keeps handbag on LEFT forearm while climbing, then places it inside cab. Keep small black structured handbag, no extra bags. Driver walks away upright with no injury, blood or impact. No other people, doors, HUD, stars, cuts or captions. Camera does not move. Blender primitives govern ONLY world positions, motion, contacts and camera. Reconstruct the FINISHED MESH SHAPES from the approved appearance image: formed rounded bus corners, inset glazing, detailed wheel arches, rims, lamps and bumpers, and the approved human anatomy. Never merely paint textures onto the guide boxes or reproduce their blocky silhouettes or primitive faces.",
     "guide_filename": "05-guide-v2.mp4",
     "anchors": [
       {
@@ -27,6 +27,50 @@
       {
         "frame": 96,
         "image": "05-end-v2.png"
+      }
+    ]
+  },
+  "06": {
+    "duration": 5,
+    "mode": "video",
+    "prompt": "A continuous five-second rear VEHICLE chase camera, starting exactly at the still anchor. Follow the rear of the SAME SOS Transit double-decker speeding along the LEFT lane and weaving as in <Video 1>. Three axles, two decks, orange-red upper rear and purple lower rear with white SOS Transit logo, no change to vehicle design. Road wheels turn and chassis leans slightly. Red and blue flashes come as UNEVEN diffuse ambient spill from unseen chase vehicles behind camera, independently timed and spatially offset. No police-light emitters on the bus. Camera stays behind the moving bus; never cuts or orbits. The visible road is EMPTY of people throughout. No pedestrians, runners, cyclists or characters between camera and bus or alongside it. No collision. Use <Picture 1> and still anchors for the finished vehicle mesh and paint: rounded formed sheet metal, inset glazing, fitted lamps and bumper, detailed arches and rims. <Video 1> gives ONLY trajectory, timing and camera; never copy its primitive box shapes, toy surfaces or flat block faces. Original GTA San Andreas PS2 graphics, low-resolution painted textures and restrained diffuse shading. No modern glossy rendering, no HUD, captions, stars or cuts. The sole driver is hidden INSIDE the bus and NEVER visible outside it. No on-foot player character or person following the bus.",
+    "queue_number": 7,
+    "anchors": [
+      {
+        "frame": 0,
+        "image": "06-appearance.png"
+      }
+    ]
+  },
+  "07": {
+    "duration": 5,
+    "mode": "video",
+    "prompt": "One continuous five-second rear VEHICLE crash shot. Start with the SAME SOS Transit double-decker UPRIGHT on wheels at Lentor Modern, as first anchor. Follow <Video 1>: sharp steering, rigid bus rolls onto RIGHT/driver side, then slides forward and stops against an EMPTY canopy support. End exactly in the last anchor: passenger side faces UP, wheels toward left mall curb, front pointing forward away from camera, unchanged orange-red/purple/white livery. Camera remains BEHIND the vehicle and horizon stays level throughout the roll. No person is on the road or immediately beside the bus. Only two small pedestrians, blue-shirt man and cream-shirt woman, recoil along the far LEFT storefront, always metres clear of bus and debris; nobody is hit, falls or crosses the road. Metal sparks/dust at road contact, bent shelter post, no explosion. Bus is empty except hidden driver. Final wreck stops rigidly and stays on its side. Use <Picture 1> and still anchors for the finished vehicle mesh and paint: rounded formed sheet metal, inset glazing, fitted lamps and bumper, detailed arches and rims. <Video 1> gives ONLY trajectory, timing and camera; never copy its primitive box shapes, toy surfaces or flat block faces. Original GTA San Andreas PS2 graphics, low-resolution painted textures and restrained diffuse shading. No modern glossy rendering, no HUD, captions, stars or cuts. The sole driver is hidden INSIDE the bus and NEVER visible outside it. No on-foot player character or person following the bus.",
+    "queue_number": 8,
+    "anchors": [
+      {
+        "frame": 0,
+        "image": "07-start-v2.png"
+      },
+      {
+        "frame": 119,
+        "image": "07-appearance.png"
+      }
+    ]
+  },
+  "09": {
+    "duration": 2,
+    "mode": "video",
+    "prompt": "One continuous two-second rear player shot. Start exactly in first anchor, finish in last anchor. Maroon-clad Goji Girl brushes dust off her right shoulder with her right hand during first second, then lowers that hand and takes one brisk step FORWARD away from camera along the same pavement toward the red Goji sign. Black structured bag stays in LEFT hand. Same ponytail, white shoes, maroon top and leggings, same PS2 painted textures and economical human mesh. The two nearest startled pedestrians recoil at the LEFT storefront, safely clear of her path. Preserve the fixed canopy, damaged diagonal support, road on RIGHT and shops on LEFT. At the extreme RIGHT is ONLY a cropped black riveted metal underside panel from the overturned wreck. Keep that edge frozen and identical to anchors; the rest of the wreck is OFFSCREEN. No upright bus, front facade, windshield, headlights, livery or new vehicle enters the image. Nothing rolls, rotates or stands upright. <Video 1> gives motion/layout only; <Picture 1> and anchors define all finished shapes, textures and framing. No proxy block shapes, no camera reversal, no cut, HUD or text. No contact between people or with debris.",
+    "queue_number": 9,
+    "anchors": [
+      {
+        "frame": 0,
+        "image": "09-appearance.png"
+      },
+      {
+        "frame": 47,
+        "image": "09-end-v2.png"
       }
     ]
   }
