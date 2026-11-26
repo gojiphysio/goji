@@ -16,6 +16,10 @@
  *   projected earnings, sign-on incentives, salary reviews, differences in pay
  *   between seniority levels, or unapproved benefits. Never call Goji
  *   "boutique".
+ * - Keep employment terms flexible (owner's amendment, 2026-11-26): no
+ *   incentive or bonus mechanism or payout frequency, no number of leave days,
+ *   no development allowance amount, no weekly hours or fixed schedule, and no
+ *   named future clinic locations or expansion timelines.
  * - British English, regular dashes, no emojis.
  */
 
@@ -56,6 +60,8 @@ export interface Vacancy {
   /** "Clinical & Career Development" in the doc. */
   development: string[];
   workingArrangements: string[];
+  /** Paragraph shown after the working-arrangements list. */
+  workingArrangementsNote?: string;
   /** ISO date the role was first published (JobPosting datePosted). */
   datePosted: string;
   /** ISO date applications close, if there is one (JobPosting validThrough). */
@@ -118,11 +124,13 @@ const PHYSIO_PREFERRED = {
   ],
 };
 
+/** Kept deliberately non-specific (owner's amendment, 2026-11-26): no pay
+ *  structure, incentive mechanism or payout frequency, no leave days, no
+ *  development allowance amount. Individual terms are set in the offer. */
 const PHYSIO_BENEFITS = [
-  "Competitive base salary and revenue-based monthly commission.",
-  "Annual revenue-based performance bonus.",
-  "21 days of annual leave for full-time employees, excluding public holidays.",
-  "Professional development allowance of up to S$1,000 per approved application, subject to eligibility.",
+  "Competitive remuneration package with performance-based incentives.",
+  "Attractive annual leave entitlement.",
+  "Professional development and continuing education support.",
   "Company-sponsored professional liability insurance.",
 ];
 
@@ -134,15 +142,20 @@ const PHYSIO_DEVELOPMENT = [
   "Opportunities for career progression and leadership responsibilities as the practice expands.",
 ];
 
+/** No weekly hours or fixed schedule (owner's amendment, 2026-11-26), and no
+ *  named future locations or timelines. The clinic's opening hours live on the
+ *  patient-facing pages, not here. */
 const PHYSIO_WORKING = [
-  "Full-time: 42 hours per week, including one weekend day.",
-  "Part-time: Minimum commitment of 3 days per week, with working days and hours to be mutually agreed.",
-  "Clinic operating hours: 8am to 8pm, Monday to Saturday.",
-  "Working hours are rostered within clinic operating hours, taking into consideration operational requirements and individual availability.",
-  "Conveniently located at Lentor Modern, directly connected to Lentor MRT.",
+  "Full-time positions with rostered working hours, including weekend commitments.",
+  "Part-time positions with a minimum commitment of three days per week.",
+  "Working arrangements are subject to mutual agreement and operational requirements.",
+  "Currently based at our Lentor Modern clinic, conveniently connected to Lentor MRT.",
 ];
 
-const LOCATION = "Lentor Modern, Singapore";
+const PHYSIO_WORKING_NOTE =
+  "As Goji continues to grow, there may be opportunities to work across future clinic locations. The designated workplace may be subject to change in line with business expansion and operational requirements.";
+
+const LOCATION = "Singapore (currently based at Lentor Modern)";
 
 export const VACANCIES: Vacancy[] = [
   {
@@ -170,6 +183,7 @@ export const VACANCIES: Vacancy[] = [
     benefits: PHYSIO_BENEFITS,
     development: PHYSIO_DEVELOPMENT,
     workingArrangements: PHYSIO_WORKING,
+    workingArrangementsNote: PHYSIO_WORKING_NOTE,
     // Set to the real go-live date when the page is published.
     datePosted: "2026-11-24",
     active: true,
@@ -178,7 +192,7 @@ export const VACANCIES: Vacancy[] = [
     seo: {
       title: "Physiotherapist Jobs Singapore | Goji",
       description:
-        "Join Goji Physiotherapy at Lentor Modern. Full-time and part-time physiotherapist role for MSK clinicians with an interest in women's health.",
+        "Physiotherapist role at Goji, Singapore (currently at Lentor Modern). Full-time or part-time, for MSK clinicians with an interest in women's health.",
     },
     form: "physio",
     alsoConsiderFor: ["senior-physiotherapist"],
@@ -219,6 +233,7 @@ export const VACANCIES: Vacancy[] = [
     benefits: PHYSIO_BENEFITS,
     development: PHYSIO_DEVELOPMENT,
     workingArrangements: PHYSIO_WORKING,
+    workingArrangementsNote: PHYSIO_WORKING_NOTE,
     // Set to the real go-live date when the page is published.
     datePosted: "2026-11-24",
     active: true,
@@ -227,7 +242,7 @@ export const VACANCIES: Vacancy[] = [
     seo: {
       title: "Senior Physiotherapist Jobs Singapore | Goji",
       description:
-        "Senior physiotherapist role at Goji Physiotherapy, Lentor Modern. Full-time or part-time, for experienced MSK clinicians with an interest in women's health.",
+        "Senior physiotherapist at Goji, Singapore (currently Lentor Modern). Full-time or part-time, for experienced MSK clinicians with an interest in women's health.",
     },
     form: "physio",
     alsoConsiderFor: ["physiotherapist"],

@@ -46,6 +46,12 @@ creates it on first use), `minYearsExperience`, `form: "physio"` for a clinical 
 
 - No salary figures, commission or earnings, and no difference in pay between
   levels, anywhere: copy, schema (no `baseSalary`), emails.
+- Keep employment terms non-prescriptive: no incentive or bonus mechanism or
+  payout frequency, no number of leave days, no development allowance amount,
+  no weekly hours or fixed schedule, and no named future clinic or expansion
+  timeline. Individual terms are agreed in the offer. The JobPosting
+  `jobLocation` stays the real clinic address (Google needs one); the visible
+  label is "Singapore (currently based at Lentor Modern)".
 - Copy follows the site voice rules in `AGENTS.md` (British English, never
   "boutique").
 - The form is rendered only when `PUBLIC_CAREERS_API` is set at build time.
