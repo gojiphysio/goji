@@ -211,6 +211,9 @@ LINK_SLUGS: dict[str, dict] = {
     # mostly reschedules and cancellations — is separable from inbound enquiry
     # channels in the link-click stats.
     "reminder-wa": {"kind": "whatsapp", "label": "Reminder", "text": "Hi Goji! I have a question about my upcoming appointment."},
+    # Booking confirmation email (booking/confirmations.py): the one email every
+    # appointment gets, however it was booked. Changes and cancellations.
+    "confirm-wa": {"kind": "whatsapp", "label": "Confirmation", "text": "Hi Goji! I have a question about my booking."},
     "wa":     {"kind": "whatsapp", "label": "Social",   "text": "Hi Goji! I have a question about physio."},  # generic fallback
     # --- Website /book form (current booking CTA) ---
     "web-book": {"kind": "book", "label": "Web"},

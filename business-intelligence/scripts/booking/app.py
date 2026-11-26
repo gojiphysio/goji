@@ -28,13 +28,14 @@ import uuid
 from datetime import date, datetime, timedelta, timezone
 
 import requests
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, redirect, request
 
 from .availability import SGT, derive_availability, derive_available_days
-from .booking import BookingError, cancel_appointment, create_booking, reschedule_appointment
+from .booking import (BookingError, cancel_appointment, confirm_appointment,
+                      create_booking, reschedule_appointment)
 from .config import CLINICIANS, MAX_ADVANCE_DAYS, SAME_DAY_LEAD_MINUTES, SERVICES
 from .plato import PlatoBusy, PlatoClient, PlatoError, PlatoThrottled, one_record
-from . import mailer, patient_contacts
+from . import confirmations, formlink, mailer, patient_contacts
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger("goji-booking")
@@ -239,6 +240,60 @@ def healthcheck_deep():
 
 @app.route("/internal/refresh-snapshot", methods=["POST"])
 def refresh_snapshot():
+    """The 5-minute Cloud Scheduler tick: refresh the availability snapshot,
+    then run the confirmation-email sweep (confirmations.py), which throttles
+    itself and catches staff bookings the Plato webhook missed. Riding this
+    tick saves a second scheduler job and its auth; the sweep never changes
+    the snapshot's answer."""
+    resp = _refresh_snapshot()
+    _confirmations_sweep()
+    return resp
+
+
+_FORM_PAGE = """<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>Goji Physiotherapy</title></head>
+<body style="font-family:Arial,Helvetica,sans-serif;max-width:480px;margin:48px auto;padding:0 20px;color:#222;line-height:1.5">
+<h1 style="font-size:20px;color:#1f5f4a">Goji Physiotherapy</h1><p>{message}</p>
+<p>Questions? <a href="https://go.gojiphysio.com/confirm-wa">WhatsApp us on +65 8377 0401</a>.</p></body></html>"""
+
+
+@app.route("/form/<token>")
+def registration_form(token: str):
+    """The registration-form link in every booking message (formlink.py):
+    forwards to the right Plato form for this appointment, worked out now, so
+    the link never goes stale. Already registered: a "you're all set" page."""
+    aid = formlink.verify(token, INTERNAL_TOKEN)
+    if not aid:
+        return _FORM_PAGE.format(message="This link isn't valid. Please WhatsApp us and "
+                                         "we'll send you the registration form."), 404
+    try:
+        state, url = confirmations.form_destination(plato(), aid)
+    except Exception as e:
+        log.warning("registration form link failed: %s", e)
+        return _FORM_PAGE.format(message="We couldn't open your registration form just now. "
+                                         "Please try again in a minute."), 503
+    log.info("registration form link opened (%s)", state)
+    if state == "form":
+        return redirect(url, 302)
+    if state == "done":
+        return _FORM_PAGE.format(message="You're all set: we already have your registration "
+                                         "form. See you soon!")
+    return _FORM_PAGE.format(message="We couldn't find this appointment. If you still need "
+                                     "the registration form, please WhatsApp us."), 404
+
+
+def _confirmations_sweep() -> None:
+    if not confirmations.enabled():
+        return
+    try:
+        stats = confirmations.sweep(plato(), bq())
+        if stats.get("candidates"):
+            log.info("confirmations sweep: %s", stats)
+    except Exception as e:
+        log.warning("confirmations sweep failed: %s", e)
+
+
+def _refresh_snapshot():
     """Re-page the bookable window into the availability snapshot.
 
     Called by Cloud Scheduler (`booking-snapshot-refresh`, every 5 min, off the
@@ -570,7 +625,7 @@ def book():
                         "error": "Something went wrong. Please try again or message us."}), 502
     _hit(*(f"ok:{k}" for k in _contact_keys(draft)))
     mailer.send_admin_booking_email(result, draft)     # best-effort
-    mailer.send_customer_booking_email(result, draft)  # best-effort
+    _confirm_customer(result, draft, "web")            # best-effort
     _track_async("confirmed", draft.get("session_id"), draft.get("service"),
                  ua, ref, attribution=attribution)
     _notify_wa_agent(result, draft, "web")             # best-effort, async
@@ -586,6 +641,17 @@ INTERNAL_TOKEN = os.environ.get("INTERNAL_TOKEN", "").strip()
 WA_AGENT_URL = os.environ.get("WA_AGENT_URL", "").strip()
 WA_CALLBACK_TIMEOUT_S = float(os.environ.get("WA_CALLBACK_TIMEOUT", "5"))
 INTERNAL_BOOK_UA = "goji-wa-agent"
+
+
+def _confirm_customer(result: dict, draft: dict, source: str) -> None:
+    """The patient's confirmation email. confirmations.py builds the one email
+    every booking gets; until CONFIRMATIONS_MODE=live the old mailer email
+    still goes to the patient (test mode sends the new one to a test inbox).
+    Best effort, like every booking email."""
+    if confirmations.legacy_customer_email() and (draft.get("email") or "").strip():
+        mailer.send_customer_booking_email(result, draft)
+    if confirmations.enabled():
+        confirmations.on_booking(plato(), bq(), result, draft, source=source)
 
 
 def _run_async(fn) -> None:
@@ -610,6 +676,11 @@ def _notify_wa_agent(result: dict, draft: dict, source: str) -> None:
         "source": source,
         # First name only: the assistant greets with it in the confirmation.
         "first_name": (str(draft.get("name") or "").strip().split() or [""])[0],
+        # The go-ahead for the WhatsApp confirmation template: only once the
+        # confirmation email is live, so both channels start together.
+        "send_template": confirmations.mode() == "live",
+        # The registration-form button (formlink.py), when the form is owed.
+        "form_token": result.get("form_token", ""),
     }
 
     def _post():
@@ -731,9 +802,13 @@ def plato_webhook(token: str):
     if not expected or not hmac.compare_digest(token.encode(), expected.encode()):
         return "not found", 404
     # force: don't depend on Plato's Content-Type header.
-    ids, tokens = patient_contacts.patient_ids(request.get_json(force=True, silent=True),
-                                           os.environ.get("PLATO_DB", "gojihealth"))
-    if not ids and not tokens:
+    payload = request.get_json(force=True, silent=True)
+    db = os.environ.get("PLATO_DB", "gojihealth")
+    ids, tokens = patient_contacts.patient_ids(payload, db)
+    # appointment:upsert from staff: the confirmation email (confirmations.py).
+    appt_ids = confirmations.webhook_appointment_ids(payload, db) \
+        if confirmations.enabled() else []
+    if not ids and not tokens and not appt_ids:
         return "", 200
 
     def _work():
@@ -746,6 +821,10 @@ def plato_webhook(token: str):
         if ids:
             n = patient_contacts.refresh(plato(), bq(), CONTACT_TABLE, ids)
             log.info("plato webhook: %d of %d patient(s) refreshed", n, len(ids))
+        if appt_ids:
+            n = confirmations.handle_webhook(plato(), bq(), appt_ids)
+            log.info("plato webhook: %d confirmation(s) sent for %d appointment(s)",
+                     n, len(appt_ids))
 
     _run_webhook_work(_work)
     return "", 200
@@ -842,8 +921,7 @@ def internal_book():
     if not dry_run:
         _hit(*(f"ok:{k}" for k in _contact_keys(draft)))
         mailer.send_admin_booking_email(result, draft)         # best-effort
-        if (draft.get("email") or "").strip():
-            mailer.send_customer_booking_email(result, draft)  # best-effort
+        _confirm_customer(result, draft, "whatsapp")           # best-effort
         _track("confirmed", "whatsapp")
         if result.get("patient_created"):
             # Plato sends no webhook for API writes, so this one is ours to
@@ -911,6 +989,8 @@ def internal_reschedule():
     if not dry_run:
         log.info("rescheduled %s via WhatsApp assistant", result["reference"])
         mailer.send_admin_reschedule_email(result, body)  # best-effort
+        if confirmations.enabled():  # the "moved" email; API writes fire no webhook
+            confirmations.on_reschedule(plato(), bq(), result)
         _notify_wa_agent(result, body, "whatsapp")         # best-effort, async
     return jsonify({
         "ok": True,
@@ -923,6 +1003,45 @@ def internal_reschedule():
         "new_date": result["new_date"],
         "new_time": result["new_time"],
     })
+
+
+# BookingError code -> HTTP status for /internal/confirm (anything else 400).
+CONFIRM_STATUS = {"not_found": 404, "past": 409, "plato_error": 502}
+
+
+@app.route("/internal/confirm", methods=["POST"])
+def internal_confirm():
+    """Mark an appointment Confirmed in Plato for the WhatsApp assistant, when a
+    patient taps Confirm on the 48-hour reminder. Body {appointment_id, phone,
+    dry_run}. confirm_appointment checks the number owns the appointment. Same
+    token rules as /internal/book. The patient's Confirm link in our emails sets
+    the same Plato status, so the reminder and confirmation emails stop asking
+    once either is used."""
+    if not INTERNAL_TOKEN:
+        return jsonify({"ok": False, "error": "not found", "code": "not_found"}), 404
+    token = request.headers.get("X-Internal-Token", "")
+    if not hmac.compare_digest(token.encode(), INTERNAL_TOKEN.encode()):
+        return jsonify({"ok": False, "error": "forbidden", "code": "forbidden"}), 403
+    body = request.get_json(silent=True)
+    if not isinstance(body, dict):
+        return jsonify({"ok": False, "error": "Expected a JSON object.",
+                        "code": "invalid"}), 400
+    dry_run = body.get("dry_run", False)
+    if not isinstance(dry_run, bool):
+        return jsonify({"ok": False, "error": "dry_run must be true or false.",
+                        "code": "invalid"}), 400
+    try:
+        result = confirm_appointment(plato(), body, now=_sgt_now(), dry_run=dry_run)
+    except BookingError as e:
+        return jsonify({"ok": False, "error": str(e), "code": e.code}), \
+            CONFIRM_STATUS.get(e.code, 400)
+    except Exception:
+        log.exception("whatsapp confirm failed")
+        return jsonify({"ok": False, "error": "Something went wrong.",
+                        "code": "plato_error"}), 502
+    log.info("confirmed %s via WhatsApp reminder (already=%s, dry_run=%s)",
+             result["reference"], result["already"], dry_run)
+    return jsonify(result)
 
 
 @app.route("/internal/cancel", methods=["POST"])

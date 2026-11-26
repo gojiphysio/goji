@@ -1068,11 +1068,40 @@ def test_website_booking_from_a_new_number_gets_the_confirmation_template(env, m
     r = client.post("/internal/booking-confirmed", headers={"X-Internal-Token": "t"},
                     json={"phone": "+6590001111", "reference": "GOJI-1", "service": "Physiotherapy",
                           "date": "2026-11-26", "time": "10:00", "clinician_name": "Kristy Ng",
-                          "source": "web", "first_name": "Sam"})
+                          "source": "web", "first_name": "Sam", "send_template": True})
     assert r.get_json() == {"matched": False, "template_sent": True}
     assert sent == [("6590001111", "goji_appointment_confirmed",
                      ["Sam", "physiotherapy", "Thu 26 Nov, 10:00am", "Kristy"])]
     assert app_mod.store.load("6590001111").booked["reference"] == "GOJI-1"
+
+
+@pytest.mark.parametrize("flag", [None, False, "true"])
+def test_confirmation_template_waits_for_goji_booking_to_ask(env, monkeypatch, flag):
+    """goji-booking sets send_template: true only once its confirmation email
+    is live, so both channels go live together. Anything else sends nothing."""
+    client, rec, _ = env
+    monkeypatch.setattr(config, "INTERNAL_TOKEN", "t")
+    monkeypatch.setattr(config, "CONFIRMATIONS", True)
+    app_mod.wa.send_template = lambda *a, **k: pytest.fail("sent without the go-ahead")
+    body = {"phone": "+6590001111", "reference": "GOJI-1", "date": "2026-11-26",
+            "time": "10:00", "source": "staff"}
+    if flag is not None:
+        body["send_template"] = flag
+    r = client.post("/internal/booking-confirmed", headers={"X-Internal-Token": "t"}, json=body)
+    assert r.get_json() == {"matched": False, "template_sent": False}
+
+
+def test_front_desk_booking_gets_the_template_too(env, monkeypatch):
+    client, rec, _ = env
+    monkeypatch.setattr(config, "INTERNAL_TOKEN", "t")
+    monkeypatch.setattr(config, "CONFIRMATIONS", True)
+    sent = []
+    app_mod.wa.send_template = lambda wa_id, name, params, language="en": sent.append(name) or "wamid.tpl2"
+    r = client.post("/internal/booking-confirmed", headers={"X-Internal-Token": "t"},
+                    json={"phone": "+6590002222", "reference": "GOJI-2", "service": "Pilates",
+                          "date": "2026-11-27", "time": "09:00", "clinician_name": "Claire Ng",
+                          "source": "staff", "first_name": "Ann", "send_template": True})
+    assert r.get_json()["template_sent"] and sent == ["goji_appointment_confirmed"]
 
 
 def test_confirmation_template_is_off_until_enabled(env, monkeypatch):
@@ -1082,7 +1111,7 @@ def test_confirmation_template_is_off_until_enabled(env, monkeypatch):
     app_mod.wa.send_template = lambda *a, **k: pytest.fail("sent while off")
     r = client.post("/internal/booking-confirmed", headers={"X-Internal-Token": "t"},
                     json={"phone": "+6590001111", "reference": "GOJI-1", "date": "2026-11-26",
-                          "time": "10:00", "source": "web"})
+                          "time": "10:00", "source": "web", "send_template": True})
     assert r.get_json() == {"matched": False, "template_sent": False}
 
 
@@ -1095,6 +1124,44 @@ def test_reminder_confirm_tap_is_thanked_without_the_model(env):
     assert app_mod.wa.sent[-1][1].startswith("Thanks for confirming!")
     assert app_mod.claude.requests == []
     assert ("reminder_confirmed", {"reason": "button"}) in rec
+
+
+def test_reminder_confirm_tap_marks_plato_confirmed(env, monkeypatch):
+    client, rec, _ = env
+    calls = []
+    monkeypatch.setattr(app_mod.booking_client, "confirm",
+                        lambda aid, wa_id: calls.append((aid, wa_id)) or {"ok": True,
+                                                                          "already": False})
+    body = inbound(kind="button")
+    msg = body["entry"][0]["changes"][0]["value"]["messages"][0]
+    msg["button"] = {"text": "Confirm", "payload": "reminder_confirm:abc123"}
+    post(client, body)
+    assert calls == [("abc123", msg["from"])]
+    assert any(e[0] == "reminder_confirmed_in_plato" for e in rec)
+
+
+def test_reminder_confirm_tap_without_payload_writes_nothing(env, monkeypatch):
+    client, rec, _ = env
+    monkeypatch.setattr(app_mod.booking_client, "confirm",
+                        lambda *a, **k: pytest.fail("no appointment id to confirm"))
+    body = inbound(kind="button")
+    body["entry"][0]["changes"][0]["value"]["messages"][0]["button"] = {"text": "Confirm",
+                                                                       "payload": "Confirm"}
+    post(client, body)
+    assert app_mod.wa.sent[-1][1].startswith("Thanks for confirming!")
+
+
+def test_plato_confirm_failure_is_recorded_not_raised(env, monkeypatch):
+    client, rec, _ = env
+
+    def boom(aid, wa_id):
+        raise app_mod.booking_client.BookingFailed("nope", "not_found")
+    monkeypatch.setattr(app_mod.booking_client, "confirm", boom)
+    body = inbound(kind="button")
+    body["entry"][0]["changes"][0]["value"]["messages"][0]["button"] = {
+        "text": "Confirm", "payload": "reminder_confirm:abc123"}
+    post(client, body)
+    assert ("reminder_confirm_failed", {"reason": "not_found"}) in rec
 
 
 def test_secret_link_url_handshake_and_post(env, monkeypatch):
@@ -1238,6 +1305,56 @@ def test_a_failed_cancel_tells_chris_and_the_customer(env, monkeypatch):
     assert "within 24 hours" in app_mod.wa.sent[-1][1]
 
 
+FORM_TOKEN = "4b1e9c0d2a7f4e3b8c6d5a4f3e2d1c0b.a1b2c3d4e5f6a7b8c9d0"
+
+
+def _confirm_body(**kw):
+    return {"phone": "+6590003333", "reference": "GOJI-3", "service": "Physiotherapy",
+            "date": "2026-11-27", "time": "19:00", "clinician_name": "Kristy Ng",
+            "source": "web", "first_name": "Mei", "send_template": True, **kw}
+
+
+def test_owed_form_uses_the_form_template_once_approved(env, monkeypatch):
+    client, rec, _ = env
+    monkeypatch.setattr(config, "INTERNAL_TOKEN", "t")
+    monkeypatch.setattr(config, "CONFIRMATIONS", True)
+    monkeypatch.setattr(config, "CONFIRM_FORM_TEMPLATE", "goji_appointment_confirmed_form")
+    sent = []
+    app_mod.wa.send_template = lambda wa_id, name, params, language="en", url_buttons=None: \
+        sent.append((name, url_buttons)) or "wamid.f1"
+    client.post("/internal/booking-confirmed", headers={"X-Internal-Token": "t"},
+                json=_confirm_body(form_token=FORM_TOKEN))
+    assert sent == [("goji_appointment_confirmed_form", {0: FORM_TOKEN})]
+
+
+@pytest.mark.parametrize("form_template, token", [
+    ("", FORM_TOKEN),                                   # form template not approved yet
+    ("goji_appointment_confirmed_form", ""),            # nothing owed
+    ("goji_appointment_confirmed_form", "../evil"),     # not a token
+])
+def test_plain_template_otherwise(env, monkeypatch, form_template, token):
+    client, rec, _ = env
+    monkeypatch.setattr(config, "INTERNAL_TOKEN", "t")
+    monkeypatch.setattr(config, "CONFIRMATIONS", True)
+    monkeypatch.setattr(config, "CONFIRM_FORM_TEMPLATE", form_template)
+    sent = []
+    app_mod.wa.send_template = lambda wa_id, name, params, language="en", url_buttons=None: \
+        sent.append((name, url_buttons)) or "wamid.f2"
+    client.post("/internal/booking-confirmed", headers={"X-Internal-Token": "t"},
+                json=_confirm_body(form_token=token))
+    assert sent == [("goji_appointment_confirmed", None)]
+
+
+def test_send_template_url_button_payload():
+    from wa_agent.whatsapp import WhatsAppClient
+    posted = []
+    c = WhatsAppClient.__new__(WhatsAppClient)
+    c._post = lambda body: posted.append(body) or {"messages": [{"id": "x"}]}
+    c.send_template("6591234567", "goji_appointment_confirmed_form", ["a", "b", "c", "d"],
+                    url_buttons={0: FORM_TOKEN})
+    comps = posted[0]["template"]["components"]
+    assert comps[1] == {"type": "button", "sub_type": "url", "index": "0",
+                        "parameters": [{"type": "text", "text": FORM_TOKEN}]}
 def _offer(clinician, options, text):
     return _final_with(text, booking={**BOOK, "date": "", "time": "", "clinician": clinician,
                                       "options": options})

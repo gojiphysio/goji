@@ -47,6 +47,7 @@ import hmac
 import json
 from datetime import datetime
 import logging
+import re
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
@@ -1033,6 +1034,24 @@ def _customer_reaction(ev: Inbound) -> None:
            last_message=ev.text)
 
 
+def _confirm_in_plato(ev) -> None:
+    """Record a reminder's Confirm tap in Plato (code_Right "Confirmed"), the same
+    status Plato's own Confirm link sets, so the reminder and confirmation
+    emails stop asking. The appointment id rides the button payload
+    (reminder_confirm:<id>, set by scripts/reminders). Best effort: the patient
+    already has their thank-you, and staff see an unconfirmed slot at worst."""
+    prefix = "reminder_confirm:"
+    if not (ev.payload or "").startswith(prefix):
+        return
+    try:
+        res = booking_client.confirm(ev.payload[len(prefix):], wa_id=ev.wa_id)
+        events.record("reminder_confirmed_in_plato", ev.wa_id,
+                      already=bool(res.get("already")), dry_run=bool(res.get("dry_run")))
+    except booking_client.BookingFailed as e:
+        log.warning("plato confirm failed (%s)", e.code)
+        events.record("reminder_confirm_failed", ev.wa_id, reason=e.code)
+
+
 def handle_inbound(ev: Inbound, received: float) -> None:
     if ev.kind == "reaction":  # staff reacting to a ping: nothing to do
         if ev.wa_id not in config.STAFF:
@@ -1078,6 +1097,7 @@ def handle_inbound(ev: Inbound, received: float) -> None:
             st.save(state)
         _mode_event(state, old, now)
         events.record("reminder_confirmed", ev.wa_id, reason="button")
+        _confirm_in_plato(ev)
         return
     if ev.kind == "document" and ev.media_id:
         ev.text = documents.as_message(_read_document(client, ev), ev.filename, ev.caption)
@@ -1546,17 +1566,31 @@ def morning_summary():
                    | {"staff_pinged": pinged})
 
 
+_FORM_TOKEN = re.compile(r"^[0-9a-f]{16,64}\.[0-9a-f]{20}$")
+
+
 def _send_confirmation_template(client, wa_id: str, b: dict) -> str:
-    """A website booking from someone outside the 24-hour window: the
-    approved confirmation template (the booking form carries the opt-in).
-    Returns the message id, or "" when off or it failed."""
-    if not (config.CONFIRMATIONS and b.get("date") and b.get("time")):
+    """A booking made outside this chat (website or front desk) for someone
+    outside the 24-hour window: the approved confirmation template (the
+    booking form carries the opt-in; front-desk bookings are existing
+    patients). Only when goji-booking asks for it (`send_template: true`,
+    set once its confirmation email is live) and the agent's own switch is
+    on. Returns the message id, or "" when off or it failed."""
+    if not (config.CONFIRMATIONS and b.get("send_template") is True
+            and b.get("date") and b.get("time")):
         return ""
     when = booking_client._when(b["date"], b["time"])
     params = [b.get("first_name") or "there", (b.get("service") or "physiotherapy").lower(),
               when, (b.get("clinician_name") or "our team").split(" ")[0]]
+    # Still owes the registration form: the version with a form button, once
+    # approved. The token is goji-booking's signed form link (booking/formlink.py).
+    form = str(b.get("form_token") or "")
+    name, buttons = config.CONFIRM_TEMPLATE, None
+    if config.CONFIRM_FORM_TEMPLATE and _FORM_TOKEN.match(form):
+        name, buttons = config.CONFIRM_FORM_TEMPLATE, {0: form}
     try:
-        msg_id = client.send_template(wa_id, config.CONFIRM_TEMPLATE, params)
+        msg_id = client.send_template(wa_id, name, params, url_buttons=buttons) if buttons \
+            else client.send_template(wa_id, name, params)
     except Exception as e:
         log.warning("confirmation template failed: %s", e)
         events.record("confirmation_failed", wa_id, reason=type(e).__name__)
@@ -1611,6 +1645,7 @@ def booking_confirmed():
             pass
         elif b.get("source") != "whatsapp" and not in_window:
             # An old chat, outside the 24-hour window: free-form isn't allowed.
+            # (source "web" or "staff": a booking made outside this chat.)
             acked = bool(_send_confirmation_template(client, wa_id, b))
         if (not quiet and not chris_has_it and b.get("source") != "whatsapp"
                 and state.mode in (AGENT, WAITING) and in_window

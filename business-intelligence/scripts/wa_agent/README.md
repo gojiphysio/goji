@@ -484,26 +484,48 @@ Plato deletes cancellations, so late-change history is built from go-live:
 - Dry run while bookings are (`WA_AGENT_BOOKING_DRY_RUN`): goji-booking reads
   the patient but doesn't write the tag.
 
-## Appointment confirmations and reminders on WhatsApp (19 Nov 2026)
+## Appointment confirmations and reminders on WhatsApp
 
-Templates submitted to Meta on the test account (UTILITY, pending review):
+All four templates are approved on Goji's number (checked 25 Nov 2026):
 `goji_appointment_confirmed` (name, service, date and time, clinician, plus a
-directions button) and `goji_appointment_reminder` (same fields, Confirm and
-Reschedule quick replies). `goji_referral_received` for referrals. All need
-resubmitting on Goji's real number once it's connected.
+"Get directions" button), `goji_appointment_reminder` (same fields, Confirm
+and Reschedule quick replies), `goji_referral_received`, `goji_staff_alert_v2`.
 
-- **Confirmations:** a website booking from a number with no chat in the last
-  24 hours gets `goji_appointment_confirmed` (`WA_AGENT_CONFIRMATIONS=1`, off
-  until the template is approved on the real number). Inside the window the
-  agent's free-form acknowledgement covers it; chat bookings are confirmed in
-  the chat. goji-booking's callback now carries the patient's first name.
-- **Reminders:** the reminders job (see `reminders/README.md`) sends
-  `goji_appointment_reminder` first and email as the fallback. A Confirm tap
-  gets a thank-you with no model call; Reschedule goes to the agent's move flow.
+- **New Maps link pending:** `goji_appointment_confirmed_v2` (same wording,
+  "Get directions" to the clinic's chosen Maps link,
+  https://maps.app.goo.gl/Mm3eYLNMUwwx8USv8) was submitted to Meta on
+  25 Nov 2026. Once approved, switch with
+  `gcloud run services update goji-wa-agent --update-env-vars
+  WA_AGENT_CONFIRM_TEMPLATE=goji_appointment_confirmed_v2` (the deploy carries
+  env vars forward). Same four parameters, so no code change.
+- **Registration-form versions pending:** `goji_appointment_confirmed_form`
+  and `goji_appointment_reminder_form` (submitted 25 Nov 2026) add a
+  "Registration form" URL button for patients who haven't filled in Plato's
+  form; its URL ends in goji-booking's signed form token. Once approved: set
+  `WA_AGENT_CONFIRM_FORM_TEMPLATE=goji_appointment_confirmed_form` on the
+  agent (`gcloud run services update ... --update-env-vars`) and the repo
+  variable `WA_REMINDER_FORM_TEMPLATE=goji_appointment_reminder_form` (read at
+  the reminder job's deploy).
+- **Confirmations** go live with goji-booking's confirmation email: goji-booking
+  puts `send_template: true` on the booking-confirmed callback only when
+  `CONFIRMATIONS_MODE=live`, and the agent sends the template only then
+  (`WA_AGENT_CONFIRMATIONS`, default on, is the agent-side off switch). It
+  covers website bookings and, since 25 Nov 2026, front-desk bookings
+  (`source: "staff"`, from goji-booking's Plato webhook and sweep), for a
+  number with no chat in the last 24 hours. Inside the window a website or
+  front-desk booking gets the free-form acknowledgement; chat bookings are
+  confirmed in the chat. Kill switch, go-live and Chris's paused chats stop
+  all of it.
+- **Reminders:** the reminders job (`reminders/README.md`) sends
+  `goji_appointment_reminder` alongside the reminder email, except to a
+  patient who has already confirmed and has an email. A Confirm tap gets a
+  thank-you with no model call and marks the appointment Confirmed in Plato
+  (goji-booking `/internal/confirm`); Reschedule goes to the agent's move flow.
 - **Opt-in:** the website booking form says, by default, that Goji may send
   the confirmation and reminders on WhatsApp (Meta needs opt-in naming the
   business). Chat bookings: the customer messaged us, and the confirmation
-  says a reminder will follow.
+  says a reminder will follow. Front-desk bookings: existing patients who
+  gave the clinic their number.
 
 ## Returning-patient recognition (built 19 Nov 2026)
 

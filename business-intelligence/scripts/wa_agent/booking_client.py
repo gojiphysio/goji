@@ -196,6 +196,29 @@ def book(b: dict, *, wa_id: str, patient_id: str = "", http=requests) -> dict:
     return data
 
 
+def confirm(appointment_id: str, *, wa_id: str, http=requests) -> dict:
+    """Mark the appointment Confirmed in Plato through goji-booking's
+    /internal/confirm, after a Confirm tap on the 48-hour reminder. goji-booking
+    checks this number owns the appointment. {ok, already, reference} or
+    BookingFailed."""
+    if config.BOOKING_SIMULATE and config.STATE_BACKEND == "memory":
+        return {"ok": True, "already": False, "dry_run": True,
+                "reference": "DRYRUN-" + secrets.token_hex(3).upper()}
+    if not config.INTERNAL_TOKEN:
+        raise BookingFailed("confirming isn't set up", "not_configured")
+    body = {"appointment_id": appointment_id, "phone": "+" + re.sub(r"\D", "", wa_id),
+            "dry_run": config.BOOKING_DRY_RUN}
+    try:
+        r = http.post(f"{config.BOOKING_API_BASE}/internal/confirm", json=body, timeout=15,
+                      headers={"X-Internal-Token": config.INTERNAL_TOKEN})
+        data = r.json()
+    except Exception as e:
+        raise BookingFailed(f"the booking system didn't answer: {e}", "unreachable")
+    if not data.get("ok"):
+        raise BookingFailed(data.get("error") or "confirm refused", data.get("code") or "error")
+    return data
+
+
 MOVE_FIELDS = ("old_date", "old_time", "new_date", "new_time")
 
 

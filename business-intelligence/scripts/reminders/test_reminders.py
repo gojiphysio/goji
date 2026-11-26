@@ -343,7 +343,10 @@ def test_override_body_is_identical_to_the_real_thing(monkeypatch):
     monkeypatch.setattr(mailer, "OVERRIDE_TO", "hello@gojiphysio.com")
     msgs = _sent_messages(monkeypatch)
     mailer.send_reminder("patient@example.com", *args, **kw)
-    assert msgs[0].get_content().rstrip("\n") == real.rstrip("\n")
+    text = msgs[0].get_body(preferencelist=("plain",)).get_content()
+    assert text.rstrip("\n") == real.rstrip("\n")
+    html = msgs[0].get_body(preferencelist=("html",)).get_content()
+    assert html.strip() == mailer.render_reminder_html(*args, **kw).strip()
 
 
 def test_without_override_the_patient_is_the_recipient(monkeypatch):
@@ -682,13 +685,31 @@ def test_whatsapp_override_replaces_the_recipient_at_send(monkeypatch):
 
 # --- channel choice --------------------------------------------------------
 
-def test_usable_mobile_gets_whatsapp_and_no_email():
+def test_usable_mobile_and_email_get_both_channels():
+    """Clinic decision (25 Nov 2026): the email goes out anyway, in parallel
+    with WhatsApp."""
     out, http, email = _run([_appt("a1")])
     assert http.sent_to() == ["6591234567"]
-    assert email.groups == []
+    assert [g["email"] for g in email.groups] == ["sarah@example.com"]
     e = _by_appt(out)["a1"]
-    assert (e["status"], e["channel"], e["wa_message_id"]) == ("sent", "whatsapp", "wamid.1")
-    assert out["sent"][0]["channel"] == "whatsapp"
+    assert (e["status"], e["channel"], e["wa_message_id"]) == ("sent", "both", "wamid.1")
+    assert sorted(x["channel"] for x in out["sent"]) == ["email", "whatsapp"]
+
+
+def test_confirmed_with_email_gets_the_email_but_no_whatsapp():
+    """The template's first button asks them to confirm; they already have."""
+    out, http, email = _run([{**_appt("a1"), "confirmed": True}])
+    assert http.calls == []
+    assert len(email.groups) == 1 and email.groups[0]["confirmed"] is True
+    assert email.groups[0]["confirm"] == []
+    assert (_by_appt(out)["a1"]["channel"]) == "email"
+
+
+def test_confirmed_without_email_still_gets_whatsapp():
+    out, http, email = _run([{**_appt("a1", email=""), "confirmed": True}])
+    assert http.sent_to() == ["6591234567"] and email.groups == []
+    assert out["skipped"] == []
+    assert _by_appt(out)["a1"]["channel"] == "whatsapp"
 
 
 def test_no_usable_mobile_falls_to_email():
@@ -701,29 +722,34 @@ def test_no_usable_mobile_falls_to_email():
 
 def test_one_whatsapp_per_appointment_in_time_order():
     """A template carries one appointment, so two sessions = two messages,
-    earliest first, even if the query returned them out of order."""
+    earliest first, even if the query returned them out of order. The email
+    lists both."""
     out, http, email = _run([_appt("pm", time="14:00"), _appt("am", time="09:00")])
     assert http.appointment_ids() == ["am", "pm"]
     slots = [c["json"]["template"]["components"][0]["parameters"][2]["text"]
              for c in http.calls]
     assert slots == ["Thu 26 Nov, 9:00am", "Thu 26 Nov, 2:00pm"]
-    assert email.groups == []
+    assert len(email.groups) == 1 and email.groups[0]["times"] == ["09:00", "14:00"]
 
 
-def test_whatsapp_failure_falls_back_to_email_for_that_appointment_only():
+def test_whatsapp_failure_is_noted_and_the_email_still_counts():
     fail = FakeResponse(400, {"error": {"message": "Invalid parameter", "code": 100}})
     out, http, email = _run(
         [_appt("am", time="09:00"), _appt("pm", time="14:00")],
         session=FakeSession(fail))      # first send fails, second succeeds
     assert http.appointment_ids() == ["am", "pm"]
-    # The email lists only the appointment WhatsApp didn't reach.
-    assert len(email.groups) == 1
-    assert email.groups[0]["appointment_ids"] == ["am"]
-    assert email.groups[0]["times"] == ["09:00"]
+    assert len(email.groups) == 1 and email.groups[0]["appointment_ids"] == ["am", "pm"]
     ledger = _by_appt(out)
     assert (ledger["am"]["status"], ledger["am"]["channel"]) == ("sent", "email")
     assert "whatsapp failed" in ledger["am"]["note"]
-    assert (ledger["pm"]["status"], ledger["pm"]["channel"]) == ("sent", "whatsapp")
+    assert (ledger["pm"]["status"], ledger["pm"]["channel"]) == ("sent", "both")
+
+
+def test_email_failure_is_noted_when_whatsapp_got_through():
+    out, _, _ = _run([_appt("a1")], email=EmailSpy(fail_for={"sarah@example.com"}))
+    e = _by_appt(out)["a1"]
+    assert (e["status"], e["channel"]) == ("sent", "whatsapp")
+    assert "email failed" in e["note"]
 
 
 def test_whatsapp_failure_with_no_email_goes_on_the_by_hand_list():
@@ -759,8 +785,7 @@ def test_mixed_day_ledgers_every_appointment_exactly_once():
     fail = FakeResponse(400, {"error": {"message": "bad", "code": 100}})
     rows = [
         _appt("wa1", time="08:00"),
-        _appt("wafail", time="09:00", email="jo@example.com", name="Jo Lee",
-              phone="81234567"),
+        _appt("wafail", time="09:00", email="jo@example.com", name="Jo Lee"),
         _appt("email1", time="10:00", phone="", email="amy@example.com", name="Amy"),
         _appt("none1", time="11:00", phone="", email="", name="Bo"),
         _appt("wa2", time="12:00", phone="+44 7700 900123", name="Cy", email=""),
@@ -770,9 +795,10 @@ def test_mixed_day_ledgers_every_appointment_exactly_once():
     ledger = _by_appt(out)
     assert set(ledger) == {"wa1", "wafail", "email1", "none1", "wa2"}
     assert {k: v["channel"] for k, v in ledger.items()} == {
-        "wa1": "whatsapp", "wafail": "email", "email1": "email",
+        "wa1": "both", "wafail": "email", "email1": "email",
         "none1": "none", "wa2": "whatsapp"}
-    assert sorted(g["email"] for g in email.groups) == ["amy@example.com", "jo@example.com"]
+    assert sorted(g["email"] for g in email.groups) == [
+        "amy@example.com", "jo@example.com", "sarah@example.com"]
 
 
 # --- DRY_RUN ---------------------------------------------------------------
@@ -785,7 +811,7 @@ def test_dry_run_sends_nothing_on_either_channel():
     assert email.groups == []
     ledger = _by_appt(out)
     assert {(e["status"], e["channel"]) for e in ledger.values()} == {
-        ("dry_run", "whatsapp"), ("dry_run", "email")}
+        ("dry_run", "both"), ("dry_run", "email")}
     # The template is still rendered, for the digest.
     assert out["preview"].startswith("Hi Sarah, a reminder of your physiotherapy")
     assert "Thu 26 Nov, 10:00am with Cheryl" in out["preview"]
@@ -875,7 +901,7 @@ def test_whatsapp_config_off_by_default_and_safe(monkeypatch):
 def test_guard_suppresses_sent_on_either_channel():
     """The SQL guard keys on status alone. If it ever filtered on channel too,
     switching channels would re-remind everyone."""
-    where = main.RECIPIENTS_SQL.split("WHERE", 1)[1]
+    where = main.RECIPIENTS_SQL.rsplit("WHERE", 1)[1]  # the guard, not a subquery
     assert "COALESCE(e.status, '') != 'sent'" in where
     assert "channel" not in where
 
@@ -886,7 +912,7 @@ def test_rerun_after_success_sends_nothing():
     rows = [_appt("a1"), _appt("a2", phone="", email="amy@example.com", time="11:00"),
             _appt("a3", phone="", email="", time="12:00")]
     first, http1, email1 = _run(rows)
-    assert len(http1.calls) == 1 and len(email1.groups) == 1
+    assert len(http1.calls) == 1 and len(email1.groups) == 2
     latest = {e["appointment_id"]: e["status"] for e in first["ledger"]}
     remaining = [r for r in rows if latest.get(r["appointment_id"], "") != "sent"]
     second, http2, email2 = _run(remaining)
@@ -966,5 +992,229 @@ def test_two_channel_dry_run_digest_previews_the_template():
                                      notices=["Test mode: something"])
     assert body.startswith("DRY RUN — no patient messages were sent.")
     assert "Test mode: something" in body
-    assert "Would have sent: 1 reminder(s) — 1 WhatsApp, 0 email" in body
+    assert "Would have sent: 2 reminder(s) — 1 WhatsApp, 1 email" in body
     assert "  Hi Sarah, a reminder of your physiotherapy appointment" in body
+
+
+# --- Plato's Confirm Appointment link ------------------------------------------
+
+def test_confirm_url_matches_plato_and_the_booking_confirmation():
+    # Copied from a real Plato reminder email (30 Oct 2026).
+    assert mailer.confirm_url("5e8cd7cdcfb94ef586a66764e84b308d") == (
+        "https://clinic.platomedical.com/appointment_confirm/Z29qaWhlYWx0aA==/"
+        "5e8cd7cdcfb94ef586a66764e84b308d")
+
+
+def test_one_session_gets_one_confirm_link():
+    body = mailer.render_reminder_body(
+        "Sarah", "2026-09-09", ["09:00"], has_clinic=True, has_home_visit=False,
+        confirm_links=[("09:00", mailer.confirm_url("a1"))])
+    assert "Please confirm your appointment:\n  https://clinic.platomedical.com/" in body
+
+
+def test_several_sessions_get_a_link_each_by_time():
+    body = mailer.render_reminder_body(
+        "Sarah", "2026-09-09", ["09:00", "14:00"], has_clinic=True, has_home_visit=False,
+        confirm_links=[("09:00", "https://x/a1"), ("14:00", "https://x/a2")])
+    assert "  9:00 am: https://x/a1\n  2:00 pm: https://x/a2" in body
+
+
+def test_no_confirm_links_keeps_the_old_body():
+    kw = dict(has_clinic=True, has_home_visit=False)
+    assert "confirm" not in mailer.render_reminder_body("Sarah", "2026-09-09", ["09:00"], **kw)
+
+
+def test_group_carries_a_confirm_entry_per_appointment():
+    groups, _ = main.group_by_recipient([
+        {"appointment_id": "b", "email": "s@x.com", "name": "S", "time": "14:00"},
+        {"appointment_id": "a", "email": "S@x.com", "name": "S", "time": "09:00"},
+    ])
+    assert groups[0]["confirm"] == [("09:00", "a"), ("14:00", "b")]
+
+
+def test_maps_link_is_the_clinic_choice():
+    assert mailer.MAPS_LINK == "https://maps.app.goo.gl/Mm3eYLNMUwwx8USv8"
+
+
+def test_html_reminder_has_a_confirm_button_and_the_same_words():
+    kw = dict(has_clinic=True, has_home_visit=False)
+    url = mailer.confirm_url("a1")
+    html = mailer.render_reminder_html("Sarah <b>", "2026-09-09", ["09:00"],
+                                       confirm_links=[("09:00", url)], **kw)
+    assert f'href="{url}"' in html and "Confirm appointment" in html
+    assert "<b>" not in html  # the name is escaped
+    assert 'href="https://go.gojiphysio.com/reminder-wa"' in html
+    assert "$50 fee" in html and "Lentor Modern" in html
+
+
+def test_html_reminder_one_button_per_session():
+    html = mailer.render_reminder_html(
+        "Sarah", "2026-09-09", ["09:00", "14:00"], has_clinic=True, has_home_visit=False,
+        confirm_links=[("09:00", "https://x/a1"), ("14:00", "https://x/a2")])
+    assert "Confirm 9:00 am" in html and "Confirm 2:00 pm" in html
+
+
+def test_confirmed_reminder_thanks_instead_of_asking():
+    kw = dict(has_clinic=True, has_home_visit=False)
+    body = mailer.render_reminder_body("Sarah", "2026-09-09", ["09:00"], confirmed=True, **kw)
+    assert "Thank you for confirming" in body and "Please confirm" not in body
+    html = mailer.render_reminder_html("Sarah", "2026-09-09", ["09:00"], confirmed=True, **kw)
+    assert "Thank you for confirming" in html and "Confirm appointment" not in html
+
+
+def test_mixed_day_asks_only_for_the_unconfirmed_session():
+    groups, _ = main.group_by_recipient([
+        {**_row("a", "s@x.com", "09:00"), "confirmed": True},
+        _row("b", "s@x.com", "14:00"),
+    ])
+    assert groups[0]["confirm"] == [("14:00", "b")] and groups[0]["confirmed"]
+
+
+# --- registration form still owed -------------------------------------------------
+
+import registration
+
+
+class FakePlatoHTTP:
+    def __init__(self, patient=None, fail=False):
+        self.patient, self.fail, self.paths = patient or {}, fail, []
+
+    def get(self, url, timeout=None, headers=None):
+        self.paths.append(url.split("/gojihealth/")[1])
+        fail, patient = self.fail, self.patient
+
+        class R:
+            def raise_for_status(self):
+                if fail:
+                    raise RuntimeError("boom")
+
+            def json(self):
+                if url.endswith("/prereg"):
+                    return {"url": "https://clinic.platomedical.com/prereg/x"}
+                if url.endswith("/updatelink"):
+                    return {"url": "https://clinic.platomedical.com/secure/regupdate/x"}
+                return [patient]
+        return R()
+
+
+def _plato(**kw):
+    return registration.Plato(key="k", session=FakePlatoHTTP(**kw))
+
+
+SIGNED = {"others": {"consents": [{"title": "Clinic Consent Form", "name": "consent.html",
+                                    "created_on": 1793000000}]}}
+
+
+LINK = "https://booking.gojiphysio.com/form/"
+
+
+def test_no_profile_owes_the_form_without_a_plato_read():
+    p = _plato()
+    url = registration.form_link(p, {"appointment_id": "a1b2c3d4e5f6a7b8", "profile_id": None,
+                                     "consent_signed": False}, secret="s")
+    assert url.startswith(LINK + "a1b2c3d4e5f6a7b8.") and p.http.paths == []
+
+
+def test_unsigned_profile_owes_the_form():
+    p = _plato(patient={"name": "Jo", "created_by": "api"})
+    assert registration.form_link(p, {"appointment_id": "a1", "profile_id": "p1",
+                                      "consent_signed": False}, secret="s")
+    assert p.http.paths == ["patient/p1"]
+
+
+def test_signed_last_night_means_no_read_and_no_form():
+    p = _plato()
+    assert registration.form_link(p, {"appointment_id": "a1", "profile_id": "p1",
+                                      "consent_signed": True}, secret="s") is None
+    assert p.http.paths == []
+
+
+def test_signed_since_last_night_is_caught_live():
+    p = _plato(patient=SIGNED)
+    assert registration.form_link(p, {"appointment_id": "a1", "profile_id": "p1",
+                                      "consent_signed": False}, secret="s") is None
+
+
+@pytest.mark.parametrize("patient", [
+    {}, {"others": {}}, {"others": {"consents": []}},
+    {"others": {"consents": [{"title": "Another Form", "created_on": 1793000000}]}},
+    {"others": {"consents": [{"title": "Clinic Consent Form", "created_on": 0}]}},
+])
+def test_anything_but_a_signed_clinic_consent_is_unsigned(patient):
+    assert not registration.consent_signed(patient)
+
+
+def test_plato_failure_or_no_secret_means_no_form():
+    row = {"appointment_id": "a1", "profile_id": "p1", "consent_signed": False}
+    assert registration.form_link(_plato(fail=True), row, secret="s") is None
+    assert registration.form_link(_plato(), {**row, "profile_id": None}, secret="") is None
+
+
+def test_attach_sets_link_and_token(monkeypatch):
+    monkeypatch.setattr(registration, "FORM_SECRET", "s")
+    rows = [{"appointment_id": "a1b2c3d4e5f6a7b8", "profile_id": None, "consent_signed": False},
+            {"appointment_id": "b2", "profile_id": "p", "consent_signed": True}]
+    registration.attach(rows, _plato())
+    assert rows[0]["form_url"] == LINK + rows[0]["form_token"]
+    assert rows[1]["form_url"] is None and rows[1]["form_token"] == ""
+
+
+def test_form_token_matches_goji_booking():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("formlink", "../booking/formlink.py")
+    formlink = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(formlink)
+    aid = "4b1e9c0d2a7f4e3b8c6d5a4f3e2d1c0b"
+    assert registration.form_token(aid, "sec") == formlink.token(aid, "sec")
+    assert formlink.verify(registration.form_token(aid, "sec"), "sec") == aid
+
+
+def test_whatsapp_uses_the_form_template_when_owed_and_approved(monkeypatch):
+    monkeypatch.setattr(wa, "FORM_TEMPLATE", "goji_appointment_reminder_form")
+    body = wa.build_payload("6591234567", ["a", "b", "c", "d"], "a1", form_token="a1.tok")
+    t = body["template"]
+    assert t["name"] == "goji_appointment_reminder_form"
+    assert t["components"][-1] == {"type": "button", "sub_type": "url", "index": "2",
+                                   "parameters": [{"type": "text", "text": "a1.tok"}]}
+    assert [c["index"] for c in t["components"][1:3]] == ["0", "1"]  # Confirm, Reschedule
+
+
+def test_whatsapp_plain_template_until_approved_or_not_owed(monkeypatch):
+    monkeypatch.setattr(wa, "FORM_TEMPLATE", "")
+    assert wa.build_payload("659", ["a"], "a1", form_token="a1.tok")["template"]["name"] == \
+        wa.TEMPLATE
+    monkeypatch.setattr(wa, "FORM_TEMPLATE", "goji_appointment_reminder_form")
+    assert wa.build_payload("659", ["a"], "a1")["template"]["name"] == wa.TEMPLATE
+
+
+def test_dispatch_passes_the_form_token_to_whatsapp():
+    calls = []
+    main.dispatch([{**_appt("a1"), "form_token": "a1.tok"}, _appt("a2", time="11:00")], DAY,
+                  dry_run=False, wa_enabled=True,
+                  send_whatsapp=lambda to, params, ref, form_token="": calls.append(
+                      (ref, form_token)) or "wamid.x",
+                  send_email=EmailSpy())
+    assert calls == [("a1", "a1.tok"), ("a2", "")]
+
+
+def test_consent_title_matches_the_nightly_import():
+    src = open("../ingestion/plato_patients/main.py").read()
+    assert f'CONSENT_TITLE = "{registration.CONSENT_TITLE}"' in src
+
+
+def test_reminder_asks_for_the_form_in_text_and_html():
+    kw = dict(has_clinic=True, has_home_visit=False, form_url="https://clinic.platomedical.com/prereg/x")
+    body = mailer.render_reminder_body("Sarah", "2026-09-09", ["09:00"], **kw)
+    assert "registration form yet" in body and "prereg/x" in body
+    html = mailer.render_reminder_html("Sarah", "2026-09-09", ["09:00"],
+                                       confirm_links=[("09:00", "https://x/c")], **kw)
+    assert html.index("Confirm appointment") < html.index(">Registration form</a>")
+    assert html.count("prereg/x") == 1
+
+
+def test_group_carries_the_form_link():
+    groups, _ = main.group_by_recipient([
+        {**_row("a", "s@x.com", "09:00"), "form_url": None},
+        {**_row("b", "s@x.com", "14:00"), "form_url": "https://f"},
+    ])
+    assert groups[0]["form_url"] == "https://f"

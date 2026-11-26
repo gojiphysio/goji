@@ -33,6 +33,12 @@ SERVICE="${SERVICE:-goji-booking}"
 DOMAIN="${DOMAIN:-booking.gojiphysio.com}"
 CORS_ORIGIN="${CORS_ORIGIN:-https://www.gojiphysio.com}"
 WA_AGENT_URL="${WA_AGENT_URL:-}"
+# Confirmation email (confirmations.py): off | test | live, the creation cutoff
+# (YYYY-MM-DDTHH:MM, clinic time) and the test inbox. Keep in step with the
+# repo variables deploy-booking.yml reads, or the next CI deploy undoes these.
+CONFIRMATIONS_MODE="${CONFIRMATIONS_MODE:-off}"
+CONFIRMATIONS_SINCE="${CONFIRMATIONS_SINCE:-}"
+CONFIRMATIONS_TEST_TO="${CONFIRMATIONS_TEST_TO:-}"
 SA="dashboard-sa@${PROJECT}.iam.gserviceaccount.com"
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
@@ -53,7 +59,7 @@ echo "==> Deploying ${SERVICE}"
 gcloud run deploy "${SERVICE}" \
   --project="${PROJECT}" --region="${REGION}" --source="${HERE}" \
   --service-account="${SA}" \
-  --set-env-vars=GCP_PROJECT=${PROJECT},PLATO_DB=gojihealth,CORS_ORIGIN=${CORS_ORIGIN},WA_AGENT_URL=${WA_AGENT_URL} \
+  --set-env-vars=GCP_PROJECT=${PROJECT},PLATO_DB=gojihealth,CORS_ORIGIN=${CORS_ORIGIN},WA_AGENT_URL=${WA_AGENT_URL},CONFIRMATIONS_MODE=${CONFIRMATIONS_MODE},CONFIRMATIONS_SINCE=${CONFIRMATIONS_SINCE},CONFIRMATIONS_TEST_TO=${CONFIRMATIONS_TEST_TO} \
   --set-secrets="${SECRETS}" \
   --max-instances=1 --min-instances=0 \
   --allow-unauthenticated \

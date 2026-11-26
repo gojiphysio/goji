@@ -590,7 +590,9 @@ def test_reminder_confirm_respects_kill_switch(env):
 def booking_body(**kw):
     return {"phone": CUSTOMER, "reference": "GJ1", "date": "2026-11-24", "time": "10:00",
             "service": "Physiotherapy", "clinician_name": "Kristy Lim", "first_name": "Mei",
-            "source": "web", **kw}
+            # goji-booking's go-ahead is on, so these tests show the kill switch
+            # and go-live gates alone stopping the send.
+            "source": "web", "send_template": True, **kw}
 
 
 def test_booking_confirmed_sends_nothing_with_kill_switch(env, monkeypatch):

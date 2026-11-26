@@ -133,3 +133,27 @@ def test_drift_is_logged_with_the_marker_and_no_names_or_numbers(caplog):
     main.report_drift(Rows(), "p.d.t", [_fresh("pid1", "Sarah Tan", "91234567")])
     assert main.DRIFT_MARKER in caplog.text and "missing=1" in caplog.text
     assert "Sarah" not in caplog.text and "91234567" not in caplog.text
+
+
+# --- registration-form flag ------------------------------------------------------
+
+def test_consent_signed_at_reads_the_clinic_consent_form():
+    others = {"consents": [{"title": "Clinic Consent Form", "name": "consent.html",
+                            "passcode": "x", "created_on": 1793000000}]}
+    assert main.consent_signed_at(others) == "2026-10-26T07:33:20+00:00"
+
+
+@pytest.mark.parametrize("others", [
+    None, {}, {"consents": []},
+    {"consents": [{"title": "Some Other Form", "created_on": 1793000000}]},
+    {"consents": [{"title": "Clinic Consent Form", "created_on": 0}]},
+    {"consents": "junk"},
+])
+def test_no_signed_consent_is_none(others):
+    assert main.consent_signed_at(others) is None
+
+
+def test_latest_signing_wins():
+    others = {"consents": [{"title": "Clinic Consent Form", "created_on": 1700000000},
+                           {"title": "Clinic Consent Form", "created_on": 1793000000}]}
+    assert main.consent_signed_at(others).startswith("2026-10-26")
