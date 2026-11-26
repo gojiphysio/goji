@@ -83,15 +83,23 @@ include `www.gojiphysio.com` (it already does for booking).
 2. Run `deploy.sh` once (it creates `careers-sa`), then add
    `careers-sa@goji-bi.iam.gserviceaccount.com` to the Shared Drive as
    **Content manager**.
-3. Create the tree and tracker (from Cloud Shell, impersonating careers-sa or
-   as a drive member with ADC):
+3. Create the tree and tracker as careers-sa. Google blocks gcloud's default
+   OAuth client from asking for Drive/Sheets scopes, so don't log in ADC with
+   `--scopes=...drive`; impersonate instead (needs `serviceAccountTokenCreator`
+   on careers-sa for the person running it, and the Drive API enabled in
+   goji-bi: `gcloud services enable drive.googleapis.com`):
 
    ```bash
+   gcloud iam service-accounts add-iam-policy-binding careers-sa@goji-bi.iam.gserviceaccount.com \
+     --member=user:<you> --role=roles/iam.serviceAccountTokenCreator
+   gcloud auth application-default login --impersonate-service-account=careers-sa@goji-bi.iam.gserviceaccount.com
    cd business-intelligence/scripts
    python3 -m careers.setup_workspace --parent <SHARED_DRIVE_ID> --test
    ```
 
    Run it again without `--test` for production. It prints the two IDs.
+   Afterwards, `gcloud auth application-default login` (no flags) to get your
+   own ADC back, and remove the token-creator binding once setup is done.
 4. Re-run `deploy.sh` with those IDs.
 
 **Fallback: hello@'s My Drive (`GOOGLE_AUTH_MODE=oauth`).** Only if a Shared

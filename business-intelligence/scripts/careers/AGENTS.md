@@ -25,5 +25,7 @@ testing matrix are in `README.md`; data retention in `RETENTION.md`. Rules:
   `VACANCIES` fixture is the only copy.
 - `--max-instances=1` keeps the reference lock and rate limits correct. Moving
   to more instances means moving both to a shared store first.
+- **`deploy.sh` env delimiter is `|`.** `--set-env-vars` values hold `@`
+  (emails) and `,` (CORS list), so neither can be the gcloud list delimiter.
 - Tests run with `uv run -q --with-requirements careers/requirements.txt
   --with pytest python -m pytest careers/ -q` from `business-intelligence/scripts`.
