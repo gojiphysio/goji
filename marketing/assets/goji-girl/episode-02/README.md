@@ -6,6 +6,9 @@ Goji Girl ends a frustrating call, sees that her Goji appointment is in only fiv
 minutes, reacts in surprise and rushes out. The stolen-bus commute ends in a crash,
 a conscientious EZ-Link tap, and a sprint forward to the calm of Pilates.
 
+**First cut:** [render status, revised popup and audio plan](first-cut-v1/README.md).
+The boards below retain the previous popup artwork; the render uses the revised sentence above.
+
 ## Storyboard from the top
 
 Calendar text is now **33 px throughout**. Scene02 shows surprise, scene04 shows
@@ -75,13 +78,13 @@ logo are retained. The reader/pole rotate with the bus; the windscreen stays cle
 
 ## Safehouse popup
 
-> You can save your game and lose the police at a safehouse.
+> You can save your game, improve your stats, and lose the police at a safehouse.
 
-Exact copy and y=360 placement retained, shown at41.5–46.0s. The active therapist,
+Revised copy; y=360 placement retained, shown at41.5–46.0s. The active therapist,
 quiet interior and officers running against the glass remain the ending.
 
 [Full clinic panel](revision-08/frames/12-safehouse-preview.png) ·
-[Editable safehouse overlay](revision-08/overlays/safehouse-popup.svg) ·
+[Editable safehouse overlay](first-cut-v1/overlays/safehouse-popup.svg) ·
 [Editable calendar overlay](revision-08/overlays/calendar-reminder.svg)
 
 ## Camera and look
@@ -293,7 +296,7 @@ of phase. Beyond them, the overturned bus burns. Nobody inside reacts.
 
 At **41.5s**, show the tutorial box at y=360. Hold until **46s**:
 
-> You can save your game and lose the police at a safehouse.
+> You can save your game, improve your stats, and lose the police at a safehouse.
 
 This is original San Andreas-style parody copy, not a verbatim game quote.
 The joke stays entirely in the fictional game; no appointment or treatment claim.

@@ -1,0 +1,23 @@
+import argparse,json,subprocess,hashlib
+from pathlib import Path
+R=Path(__file__).resolve().parents[1];p=argparse.ArgumentParser();p.add_argument('--animatic',action='store_true');a=p.parse_args();shots=json.loads((R/'shots.json').read_text())
+name='timing-animatic' if a.animatic else 'episode-02-first-cut-v1';tmp=R/'deliverables'/('edit-'+name);tmp.mkdir(exist_ok=True)
+selected={} if a.animatic else json.loads((R/'selected.json').read_text());records=[]
+for sid,job in shots.items():
+ out=tmp/(sid+'.mp4');duration=job['duration']
+ if a.animatic:
+  src=R/'inputs'/f'{sid}-appearance.png';args=['-loop','1','-i',str(src)]
+ else:
+  item=selected[sid];src=R/item['path'];args=['-ss',str(item.get('start',0)),'-i',str(src)]
+ if not out.exists():subprocess.run(['ffmpeg','-v','error',*args,'-t',str(duration),'-vf','scale=576:1024:force_original_aspect_ratio=decrease,pad=576:1024:(ow-iw)/2:(oh-ih)/2,setsar=1,fps=24','-an','-c:v','libx264','-preset','fast','-crf','20','-pix_fmt','yuv420p',str(out)],check=True)
+ records.append({'shot':sid,'source':str(src.relative_to(R)),'start_seconds':sum(x['duration'] for x in records),'duration':duration,'sha256':hashlib.sha256(src.read_bytes()).hexdigest()})
+listing=tmp/'concat.txt';listing.write_text(''.join("file '"+str((tmp/(sid+'.mp4')).resolve())+"'\n" for sid in shots))
+base=tmp/'picture.mp4'
+subprocess.run(['ffmpeg','-y','-v','error','-f','concat','-safe','0','-i',str(listing),'-c','copy',str(base)],check=True)
+out=R/'deliverables'/(name+'.mp4')
+filters="[1:v]scale=576:1024[cal];[2:v]scale=576:1024[safe];[0:v][cal]overlay=0:0:enable='between(t,3,5)'[v1];[v1][safe]overlay=0:0:enable='between(t,41.5,46)'[v]"
+subprocess.run(['ffmpeg','-y','-v','error','-i',str(base),'-i',str(R/'overlays/calendar-reminder.png'),'-i',str(R/'overlays/safehouse-popup.png'),'-i',str(R/'audio/sfx-mix.wav'),'-filter_complex',filters,'-map','[v]','-map','3:a','-t','47','-c:v','libx264','-preset','fast','-crf','20','-pix_fmt','yuv420p','-c:a','aac','-b:a','192k','-movflags','+faststart',str(out)],check=True)
+probe=json.loads(subprocess.check_output(['ffprobe','-v','error','-show_format','-show_streams','-of','json',str(out)],text=True))
+subprocess.run(['ffmpeg','-v','error','-i',str(out),'-f','null','-'],check=True)
+(R/'deliverables'/(name+'-record.json')).write_text(json.dumps({'kind':'static storyboard timing animatic' if a.animatic else 'first animated cut','shot_ranges':records,'overlays':{'calendar':[3,5],'safehouse':[41.5,46]},'audio':'SFX only, original procedural synthesis','probe':probe,'sha256':hashlib.sha256(out.read_bytes()).hexdigest(),'full_decode_verified':True},indent=2)+'\n')
+print(out)

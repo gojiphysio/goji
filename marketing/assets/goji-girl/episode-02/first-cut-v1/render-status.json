@@ -1,0 +1,96 @@
+{
+  "updated": 1795658223.745846,
+  "takes": [
+    {
+      "shot": "01",
+      "take": "01",
+      "status": "queued",
+      "started": 1795658187.641192,
+      "videos": []
+    },
+    {
+      "shot": "02",
+      "take": "01",
+      "status": "queued",
+      "started": 1795658187.7654479,
+      "videos": []
+    },
+    {
+      "shot": "03",
+      "take": "01",
+      "status": "queued",
+      "started": 1795658187.829665,
+      "videos": []
+    },
+    {
+      "shot": "04",
+      "take": "01",
+      "status": "queued",
+      "started": 1795658187.9621959,
+      "videos": []
+    },
+    {
+      "shot": "05",
+      "take": "01",
+      "status": "queued",
+      "started": 1795658188.0770361,
+      "videos": []
+    },
+    {
+      "shot": "06",
+      "take": "01",
+      "status": "queued",
+      "started": 1795658188.138711,
+      "videos": []
+    },
+    {
+      "shot": "07",
+      "take": "01",
+      "status": "queued",
+      "started": 1795658188.1989162,
+      "videos": []
+    },
+    {
+      "shot": "08",
+      "take": "01",
+      "status": "failed",
+      "started": 1795657707.0797188,
+      "videos": []
+    },
+    {
+      "shot": "08",
+      "take": "02",
+      "status": "queued",
+      "started": 1795658067.471802,
+      "videos": []
+    },
+    {
+      "shot": "09",
+      "take": "01",
+      "status": "queued",
+      "started": 1795658188.2594528,
+      "videos": []
+    },
+    {
+      "shot": "10",
+      "take": "01",
+      "status": "queued",
+      "started": 1795658188.319367,
+      "videos": []
+    },
+    {
+      "shot": "11",
+      "take": "01",
+      "status": "queued",
+      "started": 1795658188.379203,
+      "videos": []
+    },
+    {
+      "shot": "12",
+      "take": "01",
+      "status": "queued",
+      "started": 1795658188.4376361,
+      "videos": []
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+guides/*-frames/
+**/*.blend1
+**/*.blend2
+logs/
+inputs/*-appearance-clean.png
+deliverables/edit-*/
