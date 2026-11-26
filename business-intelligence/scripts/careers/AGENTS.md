@@ -12,7 +12,10 @@ are in `README.md`; data retention in `RETENTION.md`. Rules:
 - **No sharing permissions and no read endpoint.** Access to applications is
   the Shared Drive's membership; the service only accepts submissions.
 - **Tracker writes are RAW + INSERT_ROWS.** `TRACKER_COLUMNS` in `config.py`
-  is the sheet's header order; a new column goes at the end of both.
+  is the sheet's header order; a new column goes at the end of both. Rows are
+  written by position, so removing or reordering a column means changing the
+  live production and TEST trackers right after that deploy lands, or rows
+  shift into the wrong columns.
 - **No auto-rejection or scoring.** Below-minimum days or years are recorded,
   never refused.
 - **Test mode fails closed.** Never email the address on the form while

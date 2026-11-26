@@ -148,7 +148,6 @@ def tracker_row(ref: str, received: datetime, role: dict, d: dict, cv_id: str) -
         "Date and time received (Asia/Singapore)": ts,
         "Application type": "Expression of interest" if general else "Job application",
         "Role applied for": role["title"],
-        "Open to alternative seniority level": d.get("also_consider", ""),
         "Assessed seniority level": "",
         "Interest area (general)": interest,
         "Clinic location": "" if general else "Lentor Modern",

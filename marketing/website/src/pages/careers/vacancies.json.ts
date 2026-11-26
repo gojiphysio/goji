@@ -19,7 +19,6 @@ export const GET: APIRoute = () => {
       form: v.form,
       min_days_per_week: v.minDaysPerWeek ?? null,
       closing_date: v.closingDate ?? null,
-      also_consider_for: v.alsoConsiderFor ?? [],
       drive_folder: v.driveFolder,
     })),
   };

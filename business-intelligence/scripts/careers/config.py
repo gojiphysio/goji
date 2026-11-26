@@ -63,13 +63,13 @@ EMPLOYMENT = {"full-time": "Full-time", "part-time": "Part-time", "either": "Ope
 # ---- tracker layout ----------------------------------------------------------------
 # The live sheet's header row, in order. "manual" columns are written blank
 # (or with a starting value) and then belong to the reviewers. Add new columns
-# at the END, here and in the sheet, in the same change.
+# at the END, here and in the sheet, in the same change. Removing one means
+# deleting it from the live sheets as the deploy lands (rows are positional).
 TRACKER_COLUMNS = [
     "Application ID",
     "Date and time received (Asia/Singapore)",
     "Application type",
     "Role applied for",
-    "Open to alternative seniority level",
     "Assessed seniority level",            # manual
     "Interest area (general)",
     "Clinic location",

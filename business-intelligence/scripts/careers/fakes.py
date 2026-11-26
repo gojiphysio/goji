@@ -9,13 +9,11 @@ from .workspace import WorkspaceError
 
 VACANCIES = {
     "physiotherapist": {"id": "physiotherapist", "title": "Physiotherapist", "open": True,
-                        "form": "physio", "closing_date": None,
-                        "also_consider_for": ["senior-physiotherapist"]},
+                        "form": "physio", "closing_date": None},
     "senior-physiotherapist": {"id": "senior-physiotherapist", "title": "Senior Physiotherapist",
-                               "open": True, "form": "physio", "closing_date": None,
-                               "also_consider_for": ["physiotherapist"]},
+                               "open": True, "form": "physio", "closing_date": None},
     "old-role": {"id": "old-role", "title": "Old role", "open": False, "form": "physio",
-                 "closing_date": None, "also_consider_for": []},
+                 "closing_date": None},
 }
 
 PDF = b"%PDF-1.4\n1 0 obj<<>>endobj\ntrailer<<>>\n%%EOF\n"

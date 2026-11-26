@@ -12,7 +12,7 @@ from dataclasses import dataclass, field
 from . import config
 
 EMAIL_RE = re.compile(r"^[^\s@<>(),;:\"\\\[\]]+@[^\s@<>(),;:\"\\\[\]]+\.[A-Za-z]{2,63}$")
-PHONE_RE = re.compile(r"^\+[\d\s()\-]{7,24}$")
+PHONE_CHARS = re.compile(r"^\+?[\d\s().\-]+$")
 _CONTROL = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f​-‏‪-‮⁦-⁩]")
 
 CONTENT_TYPES = {
@@ -50,6 +50,21 @@ def clean_text(value, max_len: int) -> str:
     s = _CONTROL.sub("", s)
     s = re.sub(r"\n{3,}", "\n\n", s)
     return s.strip()[:max_len]
+
+
+def normalise_phone(raw: str) -> str:
+    """Singapore numbers may skip +65: eight digits (or 65 + eight) become
+    "+65 9123 4567". Anything else with 8 to 15 digits is kept as typed, so
+    overseas applicants can enter their own format. Returns "" if invalid."""
+    if not PHONE_CHARS.match(raw):
+        return ""
+    digits = re.sub(r"\D", "", raw)
+    if not raw.startswith("+"):
+        if len(digits) == 10 and digits.startswith("65"):
+            digits = digits[2:]
+        if len(digits) == 8:
+            return f"+65 {digits[:4]} {digits[4:]}"
+    return raw if 8 <= len(digits) <= 15 else ""
 
 
 def file_ext(name: str) -> str:
@@ -106,11 +121,10 @@ def validate_form(form, vacancy: dict | None, general: bool) -> Result:
         r.fail("email", "Enter a valid email address, like name@example.com.")
     d["email"] = email
 
-    phone = g("phone", 25)
-    digits = re.sub(r"\D", "", phone)
-    if not PHONE_RE.match(phone) or not 8 <= len(digits) <= 15:
-        r.fail("phone", "Enter a valid mobile number with the country code, for example +65 9123 4567.")
-    d["phone"] = phone
+    phone = normalise_phone(g("phone", 25))
+    if not phone:
+        r.fail("phone", "Enter a valid mobile number, for example 9123 4567.")
+    d["phone"] = phone or ""
 
     emp = g("employment", 20)
     if emp not in config.EMPLOYMENT:
@@ -177,11 +191,8 @@ def validate_form(form, vacancy: dict | None, general: bool) -> Result:
         if not d["interest_area"]:
             r.fail("interest_area", "Choose the kind of role you're interested in.")
         d["interest_detail"] = g("interest_detail", 200)
-        d["also_consider"] = ""
     else:
         d["interest_area"] = d["interest_detail"] = ""
-        also_ok = bool(vacancy.get("also_consider_for"))
-        d["also_consider"] = "Yes" if also_ok and form.get("also_consider") == "yes" else "No"
 
     # Non-identifying campaign attribution, for the tracker's source column.
     d["utm"] = {k: g(k, 100) for k in ("utm_source", "utm_medium", "utm_campaign", "utm_content")

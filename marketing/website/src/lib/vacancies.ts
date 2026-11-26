@@ -74,9 +74,6 @@ export interface Vacancy {
   order: number;
   seo: { title: string; description: string };
   form: FormKind;
-  /** Other roles a candidate can ask to be considered for in the same
-   *  application (e.g. Physiotherapist <-> Senior Physiotherapist). */
-  alsoConsiderFor?: string[];
   /** Drive sub-folder the applications for this role are filed under. */
   driveFolder: string;
 }
@@ -195,7 +192,6 @@ export const VACANCIES: Vacancy[] = [
         "Physiotherapist role at Goji, Singapore (currently at Lentor Modern). Full-time or part-time, for MSK clinicians with an interest in women's health.",
     },
     form: "physio",
-    alsoConsiderFor: ["senior-physiotherapist"],
     driveFolder: "Physiotherapist",
   },
   {
@@ -245,7 +241,6 @@ export const VACANCIES: Vacancy[] = [
         "Senior physiotherapist at Goji, Singapore (currently Lentor Modern). Full-time or part-time, for experienced MSK clinicians with an interest in women's health.",
     },
     form: "physio",
-    alsoConsiderFor: ["physiotherapist"],
     driveFolder: "Senior Physiotherapist",
   },
 ];

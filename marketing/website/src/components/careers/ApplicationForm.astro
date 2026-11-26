@@ -45,10 +45,6 @@ const roleMeta = Object.fromEntries(
       title: r.title,
       form: r.form,
       minDays: r.minDaysPerWeek ?? 0,
-      also: (r.alsoConsiderFor ?? [])
-        .map((id) => roles.find((x) => x.id === id))
-        .filter(Boolean)
-        .map((x) => ({ id: x!.id, title: x!.title })),
     },
   ]),
 );
@@ -122,12 +118,6 @@ const formId = general ? "interest-form" : "application-form";
                   </select>
                   <p class="fld__error" id="e-role" hidden />
                 </div>
-                <div class="chk" data-also-wrap hidden={!(vacancy!.alsoConsiderFor ?? []).length}>
-                  <input id="f-also_consider" name="also_consider" type="checkbox" value="yes" />
-                  <label for="f-also_consider" data-also-label>
-                    Please also consider me for the other physiotherapist role
-                  </label>
-                </div>
               </Fragment>
             )}
           </fieldset>
@@ -147,9 +137,9 @@ const formId = general ? "interest-form" : "application-form";
                 <p class="fld__error" id="e-email" hidden />
               </div>
               <div class="fld" data-field="phone">
-                <label class="fld__label" for="f-phone">Mobile number, with country code <span class="apply__req" aria-hidden="true">*</span></label>
-                <input id="f-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" required maxlength="25" placeholder="+65 9123 4567" aria-describedby="h-phone e-phone" />
-                <p class="fld__hint" id="h-phone">For example +65 9123 4567</p>
+                <label class="fld__label" for="f-phone">Mobile number <span class="apply__req" aria-hidden="true">*</span></label>
+                <input id="f-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" required maxlength="25" placeholder="9123 4567" aria-describedby="h-phone e-phone" />
+                <p class="fld__hint" id="h-phone">Outside Singapore? Start with your country code, like +44.</p>
                 <p class="fld__error" id="e-phone" hidden />
               </div>
             </div>
@@ -464,14 +454,11 @@ const formId = general ? "interest-form" : "application-form";
     gap: var(--space-2);
     min-width: 0;
   }
-  .fld[hidden],
-  [data-physio-only][hidden],
-  [data-part-time][hidden],
-  .apply__summary[hidden],
-  .apply__progress[hidden],
-  .apply__done[hidden],
-  .chk[hidden] {
-    display: none;
+  /* Every element in the form sets its own display, which beats the browser's
+     [hidden] rule; this puts it back for all of them (the form itself after
+     success, the CV Remove button with no file, the progress bar...). */
+  .apply [hidden] {
+    display: none !important;
   }
   [data-physio-only],
   [data-part-time] {
@@ -710,6 +697,8 @@ const formId = general ? "interest-form" : "application-form";
     flex-direction: column;
     gap: var(--space-3);
     align-items: flex-start;
+    /* Clear the sticky header when the success message scrolls into view. */
+    scroll-margin-top: 7rem;
   }
   .apply__done p {
     margin: 0;
@@ -724,6 +713,7 @@ const formId = general ? "interest-form" : "application-form";
   .apply__ref strong {
     font-variant-numeric: tabular-nums;
     letter-spacing: 0.02em;
+    white-space: nowrap;
   }
   .apply__button--link {
     margin-top: var(--space-3);
@@ -784,9 +774,6 @@ const formId = general ? "interest-form" : "application-form";
     );
 
     // ---- Role-dependent bits ----
-    const alsoWrap = $("[data-also-wrap]");
-    const alsoLabel = $("[data-also-label]");
-    const alsoBox = $<HTMLInputElement>("#f-also_consider");
     const physioOnly = $("[data-physio-only]");
     const minDaysEl = $("[data-min-days]");
     const minNote = $("[data-min-days-note]");
@@ -794,10 +781,6 @@ const formId = general ? "interest-form" : "application-form";
       if (general) return;
       const r = roles[jobId()];
       if (!r) return;
-      const other = r.also[0];
-      if (alsoWrap) alsoWrap.hidden = !other;
-      if (other && alsoLabel) alsoLabel.textContent = `Please also consider me for the ${other.title} role`;
-      if (!other && alsoBox) alsoBox.checked = false;
       if (physioOnly) physioOnly.hidden = r.form !== "physio";
       if (minDaysEl) minDaysEl.textContent = String(r.minDays || 3);
       if (minNote) minNote.hidden = !r.minDays;
@@ -898,12 +881,12 @@ const formId = general ? "interest-form" : "application-form";
           if (!v) return "Enter your email address.";
           return EMAIL_RE.test(v) ? "" : "Enter a valid email address, like name@example.com.";
         case "phone": {
-          if (!v) return "Enter your mobile number, including the country code.";
+          // Singapore numbers can skip +65; anyone else types their country code.
+          if (!v) return "Enter your mobile number.";
           const digits = v.replace(/\D/g, "");
-          if (!v.startsWith("+")) return "Start the number with your country code, for example +65.";
-          return digits.length >= 8 && digits.length <= 15 && /^[+\d\s()-]+$/.test(v)
+          return digits.length >= 8 && digits.length <= 15 && /^\+?[\d\s().-]+$/.test(v)
             ? ""
-            : "Enter a valid mobile number, for example +65 9123 4567.";
+            : "Enter a valid mobile number, for example 9123 4567.";
         }
         case "years_experience": {
           if (v === "") return "Enter your years of experience (0 is fine).";
@@ -1087,7 +1070,6 @@ const formId = general ? "interest-form" : "application-form";
 
       const fd = new FormData(form);
       // Normalise what the form can't express on its own.
-      fd.set("also_consider", alsoBox?.checked ? "yes" : "no");
       fd.set("privacy_ack", val("privacy_ack") ? "yes" : "no");
       fd.set("talent_pool", val("talent_pool") ? "yes" : "no");
       if (!physioActive()) {
