@@ -1,0 +1,51 @@
+{
+  "commit": "a982f27",
+  "checked_at": 1795685555.494101,
+  "rendered_review_page": {
+    "url": "https://github.com/gojiphysio/goji/blob/a982f27/marketing/assets/goji-girl/episode-02/first-cut-v2/README.md",
+    "http_status": 200,
+    "video_and_poster_links_present": true
+  },
+  "assets": [
+    {
+      "path": "README.md",
+      "http_status": 200,
+      "content_type": "text/plain; charset=utf-8",
+      "bytes": 21902,
+      "sha256": "ae68e56fec88671ccff6cde6532b1eab37e63f8fe978b02714a9d17f8c4c7468",
+      "matches_local": true
+    },
+    {
+      "path": "first-cut-v2/README.md",
+      "http_status": 200,
+      "content_type": "text/plain; charset=utf-8",
+      "bytes": 4456,
+      "sha256": "8554ac68904379618eb5ae5a419d78d538c08518ded485411b1cc119bd4b5e19",
+      "matches_local": true
+    },
+    {
+      "path": "first-cut-v2/deliverables/episode-02-first-cut-v2.mp4",
+      "http_status": 200,
+      "content_type": "application/octet-stream",
+      "bytes": 14002289,
+      "sha256": "8dca522644b67bb215ce6b06410b7d84df527e61a6c461b32425bcfe972c7fc2",
+      "matches_local": true
+    },
+    {
+      "path": "first-cut-v2/deliverables/first-cut-v2-poster.jpg",
+      "http_status": 200,
+      "content_type": "image/jpeg",
+      "bytes": 89886,
+      "sha256": "2f008c03a79fbef3162d96f924d900f24161f0c8128dee03ca33ca16a8c070c8",
+      "matches_local": true
+    },
+    {
+      "path": "first-cut-v2/deliverables/revised-cut-overview.jpg",
+      "http_status": 200,
+      "content_type": "image/jpeg",
+      "bytes": 187155,
+      "sha256": "570ef01716ac446f3f8fceffdd4289d7e2d6dd14d9b19eb80f7e0ad6d39ba4bc",
+      "matches_local": true
+    }
+  ]
+}
