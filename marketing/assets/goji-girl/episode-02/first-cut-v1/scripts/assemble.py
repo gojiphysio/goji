@@ -17,7 +17,7 @@ for sid,job in shots.items():
   filtering=['-filter_complex',f'[0:v]{vf}[base];[1:v]scale=576:1024[badge];[base][badge]overlay=0:0[v]','-map','[v]']
  else:filtering=['-vf',vf]
  if not out.exists():subprocess.run(['ffmpeg','-v','error',*args,'-t',str(duration),*filtering,'-an','-c:v','libx264','-preset','fast','-crf','20','-pix_fmt','yuv420p',str(out)],check=True)
- records.append({'shot':sid,'source':str(src.relative_to(R)),'kind':'storyboard hold' if board else 'animated take','start_seconds':sum(x['duration'] for x in records),'duration':duration,'video_filter':extra,'sha256':hashlib.sha256(src.read_bytes()).hexdigest()})
+ records.append({'shot':sid,'source':str(src.relative_to(R)),'kind':'storyboard hold' if board else 'animated take','start_seconds':sum(x['duration'] for x in records),'duration':duration,'source_start_frame':0 if board else round(item.get('start',0)*24),'source_frames_used':1 if board else round(duration*24),'source_fps':None if board else 24,'video_filter':extra,'sha256':hashlib.sha256(src.read_bytes()).hexdigest()})
 listing=tmp/'concat.txt';listing.write_text(''.join("file '"+str((tmp/(sid+'.mp4')).resolve())+"'\n" for sid in shots))
 base=tmp/'picture.mp4'
 subprocess.run(['ffmpeg','-y','-v','error','-f','concat','-safe','0','-i',str(listing),'-c','copy',str(base)],check=True)

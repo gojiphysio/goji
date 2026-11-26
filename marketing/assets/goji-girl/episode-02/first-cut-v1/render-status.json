@@ -1,5 +1,5 @@
 {
-  "updated": 1795667236.241305,
+  "updated": 1795667364.9186969,
   "takes": [
     {
       "shot": "01",
@@ -923,9 +923,101 @@
     {
       "shot": "07",
       "take": "02",
-      "status": "queued",
+      "status": "generated_unreviewed",
       "started": 1795663169.6977978,
-      "videos": []
+      "videos": [
+        {
+          "path": "takes/07-02/raw_00001_.mp4",
+          "sha256": "ae0db8b7324f5bc6598dfd359614a982a44505b58c74733e534fa160518be385",
+          "probe": {
+            "streams": [
+              {
+                "index": 0,
+                "codec_name": "h264",
+                "codec_long_name": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+                "profile": "High",
+                "codec_type": "video",
+                "codec_tag_string": "avc1",
+                "codec_tag": "0x31637661",
+                "mime_codec_string": "avc1.64001f",
+                "width": 576,
+                "height": 1024,
+                "coded_width": 576,
+                "coded_height": 1024,
+                "has_b_frames": 2,
+                "pix_fmt": "yuv420p",
+                "level": 31,
+                "color_range": "tv",
+                "color_space": "bt709",
+                "color_transfer": "iec61966-2-1",
+                "color_primaries": "bt709",
+                "chroma_location": "left",
+                "field_order": "progressive",
+                "is_avc": "true",
+                "nal_length_size": "4",
+                "id": "0x1",
+                "r_frame_rate": "24/1",
+                "avg_frame_rate": "24/1",
+                "time_base": "1/12288",
+                "start_pts": 0,
+                "start_time": "0.000000",
+                "duration_ts": 63488,
+                "duration": "5.166667",
+                "bit_rate": "3187966",
+                "bits_per_raw_sample": "8",
+                "nb_frames": "124",
+                "extradata_size": 48,
+                "disposition": {
+                  "default": 1,
+                  "dub": 0,
+                  "original": 0,
+                  "comment": 0,
+                  "lyrics": 0,
+                  "karaoke": 0,
+                  "forced": 0,
+                  "hearing_impaired": 0,
+                  "visual_impaired": 0,
+                  "clean_effects": 0,
+                  "attached_pic": 0,
+                  "timed_thumbnails": 0,
+                  "non_diegetic": 0,
+                  "captions": 0,
+                  "descriptions": 0,
+                  "metadata": 0,
+                  "dependent": 0,
+                  "still_image": 0,
+                  "multilayer": 0
+                },
+                "tags": {
+                  "language": "und",
+                  "handler_name": "VideoHandler"
+                }
+              }
+            ],
+            "format": {
+              "filename": "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/first-cut-v1/takes/07-02/raw_00001_.mp4",
+              "nb_streams": 1,
+              "nb_programs": 0,
+              "nb_stream_groups": 0,
+              "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+              "format_long_name": "QuickTime / MOV",
+              "start_time": "0.000000",
+              "duration": "5.166667",
+              "size": "2065612",
+              "bit_rate": "3198366",
+              "probe_score": 100,
+              "tags": {
+                "major_brand": "isom",
+                "minor_version": "512",
+                "compatible_brands": "isomiso2avc1mp41",
+                "prompt": "{\"1\": {\"class_type\": \"UnetLoaderGGUF\", \"inputs\": {\"unet_name\": \"minimax_h3_ref2va_pruned-Q4_K_M.gguf\"}}, \"2\": {\"class_type\": \"CLIPLoaderGGUF\", \"inputs\": {\"clip_name\": \"qwen3vl_32b_minimax_h3-Q4_K_M.gguf\", \"type\": \"minimax\"}}, \"3\": {\"class_type\": \"VAELoader\", \"inputs\": {\"vae_name\": \"minimax_h3_video_vae_fp16.safetensors\"}}, \"4\": {\"class_type\": \"LoraLoaderModelOnly\", \"inputs\": {\"model\": [\"1\", 0], \"lora_name\": \"minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors\", \"strength_model\": 1.0}}, \"5\": {\"class_type\": \"MiniMaxH3SigmaShift\", \"inputs\": {\"model\": [\"4\", 0], \"shift_video\": 12.0, \"shift_audio\": 3.0}}, \"6\": {\"class_type\": \"MiniMaxH3ReferenceToVideo\", \"inputs\": {\"clip\": [\"2\", 0], \"vae\": [\"3\", 0], \"prompt\": \"One continuous five-second rear VEHICLE crash shot. Start with the SAME SOS Transit double-decker UPRIGHT on wheels at Lentor Modern, as first anchor. Follow <Video 1>: sharp steering, rigid bus rolls onto RIGHT/driver side, then slides forward and stops against an EMPTY canopy support. End exactly in the last anchor: passenger side faces UP, wheels toward left mall curb, front pointing forward away from camera, unchanged orange-red/purple/white livery. Camera remains BEHIND the vehicle and horizon stays level throughout the roll. No person is on the road or immediately beside the bus. Only two small pedestrians, blue-shirt man and cream-shirt woman, recoil along the far LEFT storefront, always metres clear of bus and debris; nobody is hit, falls or crosses the road. Metal sparks/dust at road contact, bent shelter post, no explosion. Bus is empty except hidden driver. Final wreck stops rigidly and stays on its side. Use <Picture 1> and still anchors for the finished vehicle mesh and paint: rounded formed sheet metal, inset glazing, fitted lamps and bumper, detailed arches and rims. <Video 1> gives ONLY trajectory, timing and camera; never copy its primitive box shapes, toy surfaces or flat block faces. Original GTA San Andreas PS2 graphics, low-resolution painted textures and restrained diffuse shading. No modern glossy rendering, no HUD, captions, stars or cuts. The sole driver is hidden INSIDE the bus and NEVER visible outside it. No on-foot player character or person following the bus.\", \"width\": 576, \"height\": 1024, \"length\": 124, \"ref_image_size\": \"match\", \"ref_images.ref_image_0\": [\"20\", 0], \"ref_videos.ref_video_0\": [\"22\", 0]}}, \"7\": {\"class_type\": \"BasicGuider\", \"inputs\": {\"model\": [\"5\", 0], \"conditioning\": [\"43\", 0]}}, \"8\": {\"class_type\": \"RandomNoise\", \"inputs\": {\"noise_seed\": 2026112807}}, \"9\": {\"class_type\": \"KSamplerSelect\", \"inputs\": {\"sampler_name\": \"euler\"}}, \"10\": {\"class_type\": \"BasicScheduler\", \"inputs\": {\"model\": [\"5\", 0], \"scheduler\": \"simple\", \"steps\": 4, \"denoise\": 1.0}}, \"11\": {\"class_type\": \"SamplerCustomAdvanced\", \"inputs\": {\"noise\": [\"8\", 0], \"guider\": [\"7\", 0], \"sampler\": [\"9\", 0], \"sigmas\": [\"10\", 0], \"latent_image\": [\"6\", 1]}}, \"12\": {\"class_type\": \"VAEDecodeTiled\", \"inputs\": {\"samples\": [\"11\", 0], \"vae\": [\"3\", 0], \"tile_size\": 256, \"overlap\": 64, \"temporal_size\": 64, \"temporal_overlap\": 8}}, \"13\": {\"class_type\": \"CreateVideo\", \"inputs\": {\"images\": [\"12\", 0], \"fps\": 24.0}}, \"14\": {\"class_type\": \"SaveVideo\", \"inputs\": {\"video\": [\"13\", 0], \"filename_prefix\": \"07-02/raw\", \"format\": \"mp4\", \"format.codec\": \"h264\"}}, \"20\": {\"class_type\": \"LoadImage\", \"inputs\": {\"image\": \"07-appearance.png\"}, \"is_changed\": [\"13aa6ab2256b81ad2794dab3a31c170288236c3cd173d53908c4b017e7198869\"]}, \"21\": {\"class_type\": \"LoadVideo\", \"inputs\": {\"file\": \"07-guide.mp4\"}, \"is_changed\": [1795658085.8349426]}, \"22\": {\"class_type\": \"GetVideoComponents\", \"inputs\": {\"video\": [\"21\", 0]}}, \"40\": {\"class_type\": \"LoadImage\", \"inputs\": {\"image\": \"07-start-v2.png\"}, \"is_changed\": [\"560b57b81811f74a73abfa269f17df76313920c35d59eb128e34177f33d3593a\"]}, \"41\": {\"class_type\": \"MiniMaxH3AddGuide\", \"inputs\": {\"positive\": [\"6\", 0], \"latent\": [\"6\", 1], \"vae\": [\"3\", 0], \"image\": [\"40\", 0], \"frame_idx\": 0}}, \"42\": {\"class_type\": \"LoadImage\", \"inputs\": {\"image\": \"07-appearance.png\"}, \"is_changed\": [\"13aa6ab2256b81ad2794dab3a31c170288236c3cd173d53908c4b017e7198869\"]}, \"43\": {\"class_type\": \"MiniMaxH3AddGuide\", \"inputs\": {\"positive\": [\"41\", 0], \"latent\": [\"6\", 1], \"vae\": [\"3\", 0], \"image\": [\"42\", 0], \"frame_idx\": 119}}}",
+                "encoder": "Lavf63.1.102"
+              }
+            }
+          },
+          "full_decode_verified": true
+        }
+      ]
     },
     {
       "shot": "08",

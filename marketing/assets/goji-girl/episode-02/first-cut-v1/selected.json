@@ -44,6 +44,13 @@
     "status": "draft selection; sampled-frame review",
     "review": "No outside runner. Bus shape/livery and rear vehicle camera retained. Diffuse staggered police spill, no emitters on bus. Fixed crop excludes brief pursuit-car edge; inspected 8fps around intrusion. Vehicle swerves near centreline; no collision or person in roadway. Normal-speed QuickTime playback completed with start/end observations after unlock."
   },
+  "07": {
+    "path": "takes/07-02/raw_00001_.mp4",
+    "start": 0,
+    "duration": 5,
+    "status": "provisional rough-cut selection; turn/impact staging needs polish",
+    "review": "2fps full-take samples preserve same rigid double-decker, right-side-down roll and slide, level rear camera and pedestrians clear. Steering before roll and contact with shelter are weakly expressed; not a finished crash-performance pass. Normal-speed playback pending Mac unlock."
+  },
   "08": {
     "path": "takes/08-02/raw_00001_.mp4",
     "start": 0,
