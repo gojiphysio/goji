@@ -422,6 +422,37 @@ def test_staff_helpers():
     assert staff.parse_command("Resume chat #12") == ("resume", "012")
     assert staff.parse_command("resume") == ("help", "")
     assert staff.label("Mei", CUSTOMER, "004") == "Mei (#004)"
+    assert staff.template_params("Mei", "knee worse", "priority")[1] == \
+        "Symptoms getting worse: knee worse"
+
+
+def test_ping_text_layout():
+    """One line per part, bold header, no run-on sentence (owner, 26 Nov 2026)."""
+    ping = staff.ping_text("escalated", "Mei (#004)", "wants to move Thu 10am, 18h notice",
+                           last_message="can I move tmr's appt? call 9123 4567",
+                           sent_reply="I've passed this to the team.",
+                           draft="Hi Mei, we can move it to [time].")
+    assert ping.split("\n") == [
+        "🔔 *Mei (#004) needs you*",
+        "Wants to move Thu 10am, 18h notice.",
+        "",
+        "*They said:* “can I move tmr's appt? call [number]”",
+        "*I told them:* “I've passed this to the team.”",
+        "*Draft for you:* “Hi Mei, we can move it to [time].”",
+        "",
+        staff._HANDOVER_FOOT,
+    ]
+    # the same reply sent and drafted shows once; a long quote is clipped
+    p = staff.ping_text("priority", "Mei (#004)", "", last_message="x" * 999,
+                        sent_reply="same", draft="same")
+    assert p.count("same") == 1 and "Draft for you" not in p and "…" in p
+    # nothing about a chat: no swipe-reply footer, nothing quoted
+    d = staff.ping_text("demoted", "", "'price' messages now come to you as drafts")
+    assert d == "⚙️ *Assistant setting changed*\n'price' messages now come to you as drafts."
+    r = staff.ping_text("reaction", "the customer ending 4567 (#009)", 'reacted 👎 to "hi"',
+                        last_message="👎")
+    assert r.startswith("💬 *The customer ending 4567 (#009): a reaction to check*\n"
+                        "Reacted 👎 to \"hi\".") and "They said" not in r
 
 
 def test_staff_message_is_never_a_customer(env, with_staff):
@@ -468,7 +499,9 @@ def test_ping_is_free_text_inside_window_and_urgent_still_emails(env, with_staff
     app_mod.claude.queue.append(final(reply="Please call 995", intent="urgent", escalate=True,
                                       reason="red flag", note="chest pain"))
     post(client, inbound(text="chest pain", ts=int(time.time())))
-    assert (CHRIS, staff.ping_text("Mei (#001)", "chest pain")) in app_mod.wa.sent
+    ping = next(t for to, t in app_mod.wa.sent if to == CHRIS)
+    assert ping.startswith("🚨 *URGENT: Mei (#001), possible red flag*\nChest pain.")
+    assert "*They said:* “chest pain”" in ping and "*I told them:* “Please call 995”" in ping
     assert app_mod.wa.templates == []
     assert [k for k, _ in notes] == ["urgent"]
 
@@ -773,7 +806,7 @@ def test_priority_sends_concern_and_slots_and_pings_staff_at_once(env, with_staf
     to_customer = [m for m in app_mod.wa.sent if m[0] == CUSTOMER]
     assert to_customer and "let our team know" in to_customer[-1][1]
     pings = [m for m in app_mod.wa.sent if m[0] == CHRIS]
-    assert pings and "Priority, getting worse" in pings[-1][1]
+    assert pings and "*Mei (#001): symptoms getting worse*" in pings[-1][1]
     assert [k for k, _ in notes] == ["priority"]  # email backup too
     assert "let our team know" in notes[0][1]["sent_reply"]
     assert app_mod.store.load(CUSTOMER).mode == AGENT

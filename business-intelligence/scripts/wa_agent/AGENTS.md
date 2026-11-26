@@ -192,6 +192,13 @@ The WhatsApp assistant. What it is and how to run it: [`README.md`](README.md).
   about a named chat are mapped, so a swipe-reply can't reach the wrong
   customer. The answer is kept as a `team` history line for follow-ups.
   Check prompt changes with `python -m wa_agent.eval.relay` on the CLI.
+- **A ping is laid out, not one sentence.** `staff.ping_text`: a bold header
+  by kind (🚨 red flag, ⚠️ getting worse, 🔔 needs you, ...), the one-line
+  summary, then "They said" / "I told them" / "Draft for you" on their own
+  lines, then what to do. Put the kind in the header, not in `staff_note`.
+  The one-line run-on read as word salad on a phone (owner, 26 Nov 2026).
+  Outside her 24h window the template takes one line, so the kind goes in
+  front of the reason (`template_params`).
 - **Staff numbers are never customers.** `WA_AGENT_STAFF` messages go to
   `handle_staff` before any lookup, model call or metric; the numbers live in
   a private env file, never the repo. Pings name customers by first name or

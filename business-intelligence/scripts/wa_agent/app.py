@@ -301,12 +301,13 @@ def _note_rescue(st, intent: str, wa_id: str) -> None:
                     suggested_reply="", reason=reason, last_message="")
 
 
-def _ping_staff(who: str, note: str, wa_id: str = "") -> bool:
+def _ping_staff(kind: str, who: str, note: str, wa_id: str = "", **quotes) -> bool:
     """A short WhatsApp to each staff number (WA_AGENT_STAFF): free-form inside
     their 24h window, else the approved template. True if any ping went out.
     Never a customer's full number (staff.label / staff.redact). With the
     chat's `wa_id`, each ping's message id is kept so a swipe-reply to it
-    finds the chat (_staff_answer)."""
+    finds the chat (_staff_answer). `quotes` (last_message, sent_reply,
+    draft) go in the free-form ping only: the template has one line."""
     if not config.STAFF:
         return False
     st, client, _ = _deps()
@@ -314,11 +315,11 @@ def _ping_staff(who: str, note: str, wa_id: str = "") -> bool:
     for number in sorted(config.STAFF):
         try:
             if staff.window_open(windows.get(number, 0.0), now):
-                ping_id = client.send_text(number, staff.ping_text(who, note))
+                ping_id = client.send_text(number, staff.ping_text(kind, who, note, **quotes))
                 how = "text"
             else:
                 ping_id = client.send_template(number, config.STAFF_TEMPLATE,
-                                               staff.template_params(who, note))
+                                               staff.template_params(who, note, kind))
                 how = "template"
             ok = True
             if wa_id:
@@ -342,8 +343,10 @@ def _alert(kind: str, *, customer: str, wa_id: str, who: str | None = None, **kw
         who = staff.label(customer, wa_id, st.load(wa_id).code if wa_id else "")
     # A ping about a chat (named) can be answered by swipe-reply; one that
     # isn't (a demotion notice, who="") must never route an answer to a customer.
-    pinged = _ping_staff(who, kw.get("staff_note") or kw.get("reason") or "",
-                         wa_id if who else "")
+    pinged = _ping_staff(kind, who, kw.get("staff_note") or kw.get("reason") or "",
+                         wa_id if who else "", last_message=kw.get("last_message") or "",
+                         sent_reply=kw.get("sent_reply") or "",
+                         draft=kw.get("suggested_reply") or "")
     if kind in ("urgent", "sensitive", "priority") or not pinged:
         notify.send(kind, customer=customer, wa_id=wa_id, **kw)
 
@@ -1254,15 +1257,14 @@ def handle_inbound(ev: Inbound, received: float) -> None:
     if d.action == SEND and p.intent == "priority":
         # Sent and flagged at once: Chris hears as the customer gets the reply.
         _alert("priority", **{**notice, "sent_reply": as_one_message(reply),
-                              "staff_note": f"Priority, getting worse: {p.staff_note}"})
+                              "staff_note": p.staff_note})
         _test_show(client, ev.wa_id, f"Chris is pinged now (priority): {p.staff_note}")
     if d.action == SEND and p.intent == "media_received" and media_ping_due(history):
         # The reply says the team will look at it, so someone is told (a
         # handover pings below anyway). WhatsApp ping only; email just if
         # the ping fails (_alert).
         _alert("media", **{**notice, "sent_reply": as_one_message(reply),
-                           "staff_note": f"sent something the assistant couldn't use, "
-                                         f"for the team to look at. {p.staff_note}".strip()})
+                           "staff_note": p.staff_note or "for the team to look at"})
         _test_show(client, ev.wa_id, f"Chris is pinged now (media): {p.staff_note}")
     if d.action == SEND and config.INTENT_POLICY.get(p.intent) == "auto_notify":
         notify.send("fyi", **notice)

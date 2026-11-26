@@ -569,7 +569,7 @@ def test_a_photo_it_cant_use_pings_staff(env, monkeypatch):
     [to_customer] = [s for s in app_mod.wa.sent if s[0] == CUSTOMER]
     assert to_customer[1] == "Thanks! The team will take a look."
     [ping] = [s for s in app_mod.wa.sent if s[0] == "6591110000"]
-    assert "for the team to look at" in ping[1]
+    assert "sent something I couldn't use*" in ping[1]
     assert notes == []                    # the WhatsApp ping, no email
     assert app_mod.store.load(CUSTOMER).mode == AGENT   # the agent keeps the chat
 
