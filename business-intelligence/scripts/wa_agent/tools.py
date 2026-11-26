@@ -265,12 +265,26 @@ WITH patients AS (
   SELECT patient_id, SPLIT(TRIM(full_name), ' ')[SAFE_OFFSET(0)] AS first_name
   FROM `{project}.marts.dim_patient_contact`
   WHERE RIGHT(REGEXP_REPLACE(COALESCE(phone, ''), r'\\D', ''), 8) = @last8
+),
+mine AS (
+  -- Appointments on this number's patient records...
+  SELECT p.first_name, a.*
+  FROM `{project}.stg.appointments` a
+  JOIN patients p USING (patient_id)
+  UNION ALL
+  -- ...and ones with no record yet that carry this number: website bookings
+  -- and new patients the assistant booked, until they fill in Plato's
+  -- pre-registration form (26 Nov 2026).
+  SELECT SPLIT(TRIM(JSON_VALUE(a.payload, '$.title')), ' ')[SAFE_OFFSET(0)] AS first_name, a.*
+  FROM `{project}.stg.appointments` a
+  WHERE COALESCE(a.patient_id, '') = ''
+    AND RIGHT(REGEXP_REPLACE(COALESCE(JSON_VALUE(a.payload, '$.handphone'), ''),
+                             r'\\D', ''), 8) = @last8
 )
-SELECT p.first_name, a.appt_date,
+SELECT a.first_name, a.appt_date,
        FORMAT_TIMESTAMP('%H:%M', a.start_at, 'UTC') AS time_sgt,  -- wall clock, see fct_appointment_reminders
        a.clinician_id, a.treatment_type
-FROM `{project}.stg.appointments` a
-JOIN patients p USING (patient_id)
+FROM mine a
 WHERE a.appt_date >= CURRENT_DATE('Asia/Singapore')
   AND COALESCE(SAFE_CAST(JSON_VALUE(a.payload, '$.cancelled') AS INT64), 0) = 0
   AND COALESCE(SAFE_CAST(JSON_VALUE(a.payload, '$.void') AS INT64), 0) = 0

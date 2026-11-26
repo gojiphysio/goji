@@ -27,6 +27,12 @@ The WhatsApp assistant. What it is and how to run it: [`README.md`](README.md).
   17:00 Claire"), which the booking takes (`offered_with`): a customer
   picked Claire's Monday from the first list after asking for Kristy's
   times and wasn't booked (26 Nov 2026).
+- **New patients are booked without a Plato record** (owner, 26 Nov
+  2026), like the website: goji-booking's confirmation and 48-hour reminder
+  send them Plato's pre-registration form, which creates the profile.
+  Existing records are never sent a form (gaps are fixed in person), so a
+  bare record made by the agent would have left a new patient unregistered.
+  `my_appointments` also finds unlinked bookings by the number on them.
 - **A pick with no name is asked for, once** (`_ask_details`), with the
   time held; a second confirmation still without it goes to Chris.
 - **The first times offered come with the booking link** (owner, 26 Nov

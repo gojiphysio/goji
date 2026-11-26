@@ -250,3 +250,25 @@ def test_a_family_member_without_an_email_gets_the_texters():
     assert tools.contact_email(family, "", "Wei Ming") == "dad@example.com"      # a new patient
     assert tools.contact_email({}, "", "Jamie") == ""
     assert "don't ask" in tools.describe_patient(family)
+
+
+def test_new_patient_is_booked_without_a_plato_record(monkeypatch):
+    """Owner, 26 Nov 2026: new patients get Plato's pre-registration form, which
+    only works on a booking with no record; existing records are never sent it."""
+    from wa_agent import booking_client, config
+    monkeypatch.setattr(config, "BOOKING_SIMULATE", False)
+    monkeypatch.setattr(config, "INTERNAL_TOKEN", "t")
+    sent = {}
+
+    class R:
+        def json(self):
+            return {"ok": True, "reference": "GOJI-1", "clinician_name": "Kristy Ng",
+                    "service": "Physiotherapy", "date": "2026-12-01", "time": "10:00"}
+
+    class Http:
+        def post(self, url, json=None, timeout=None, headers=None):
+            sent.update(json)
+            return R()
+    booking_client.book({"service": "physiotherapy", "date": "2026-12-01", "time": "10:00",
+                         "full_name": "Mei Lim"}, wa_id="6591234567", http=Http())
+    assert sent["create_patient"] is False and sent["patient_id"] == ""
