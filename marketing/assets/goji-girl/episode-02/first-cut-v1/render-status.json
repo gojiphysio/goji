@@ -1,5 +1,5 @@
 {
-  "updated": 1795670319.686496,
+  "updated": 1795671262.283602,
   "takes": [
     {
       "shot": "01",
@@ -1715,8 +1715,15 @@
     {
       "shot": "12",
       "take": "01",
-      "status": "queued",
+      "status": "interrupted_no_output",
       "started": 1795658188.4376361,
+      "videos": []
+    },
+    {
+      "shot": "12",
+      "take": "02",
+      "status": "queued",
+      "started": 1795671233.581433,
       "videos": []
     }
   ]

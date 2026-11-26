@@ -1,7 +1,7 @@
 {
   "shot": "12",
   "take": "01",
-  "status": "queued",
+  "status": "interrupted_no_output",
   "started": 1795658188.4376361,
   "recipe": "H3 Ref2VA GGUF Q4 + native Turbo 4-step; 576x1024 24fps",
   "native_frames": 192,
@@ -220,5 +220,7 @@
     "number": 12,
     "node_errors": {}
   },
-  "prop_steering_applied_at": 1795663190.726293
+  "prop_steering_applied_at": 1795663190.726293,
+  "interruption_reason": "Tool-session interruption stopped dedicated render server at 3/4 sampling steps. No MP4 was written. Retry uses same inputs/workflow/seed.",
+  "interrupted_at": 1795671214.146134
 }
