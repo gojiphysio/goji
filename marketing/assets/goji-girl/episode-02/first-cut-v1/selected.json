@@ -55,5 +55,12 @@
     "duration": 6,
     "status": "draft selection; sampled-frame review",
     "review": "QuickTime normal-speed playback completed with start/end observations, plus 2fps contact sheet and tap/end close inspection. Frozen bus/intact front corner preserved; reader reach then climb complete. Small early body dip and rounder handbag silhouette need polish; do not claim a frame-perfect motion pass."
+  },
+  "10": {
+    "path": "takes/10-02/raw_00001_.mp4",
+    "start": 0,
+    "duration": 4,
+    "status": "draft selection; 8fps stride, pedestrian pass and arrival review",
+    "review": "Regular high-heel-recovery run and bent arm pump for girl and two officers. Wreck stays absent, storefront left/road right, forward route turns into Goji. White-shirt pedestrian remains clear with no visible impact. Brief foreground-officer occlusion around 3.0\u20133.25s needs framing polish. H3 gait is an approximation, not exact game animation. Normal-speed playback pending Mac unlock."
   }
 }

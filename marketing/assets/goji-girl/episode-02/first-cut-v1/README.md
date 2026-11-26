@@ -1,26 +1,26 @@
 # Episode 2 — first cut v1
 
-**Render in progress · 26 November 2026 · 8 provisional shot selections; running revisions queued; bus-action takes being revised.**
+**Render in progress · 26 November 2026 · 9 provisional selections covering 35 seconds.**
 
-**Running revision:** scenes03 and04 now have reviewed replacements; scene10 is rendering. All use an original rig cycle informed by sampled [PS2 running footage](https://www.youtube.com/watch?v=Z9cD9uj1fb8&t=248s): flared bent elbows, stronger heel recovery and forward lean. The current checkpoint preserves the version being reviewed. [Reference and retarget notes](guides/sa-gait-reference.json).
+[**Watch review checkpoint 02 — 47 seconds with SFX**](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-girl-episode-2/marketing/assets/goji-girl/episode-02/first-cut-v1/deliverables/review-checkpoint-02.mp4)
 
-[**Watch review checkpoint 01 — full 47-second timeline with SFX**](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-girl-episode-2/marketing/assets/goji-girl/episode-02/first-cut-v1/deliverables/review-checkpoint-01.mp4)
+This checkpoint has **35 seconds of animation and 12 seconds of labelled storyboard holds**. Scenes09,11 and12 are still rendering. Checkpoint01 remains unchanged for earlier comments.
 
-This checkpoint combines **22 seconds of selected animation** (01–04, 06, 08) with **25 seconds of clearly labelled storyboard holds** (05, 07, 09–12). It is ready for initial comments while rendering continues. Use the video timestamps when reviewing.
+**Running revision:** the departure, bus approach and clinic sprint now use an original rig cycle informed by sampled [PS2 running footage](https://www.youtube.com/watch?v=Z9cD9uj1fb8&t=248s): bent elbows, firmer arm pumping, stronger heel recovery and forward lean. The bag stays in her left hand. H3 still softens the poses; this is a closer approximation, not the exact game animation. [Reference and retarget notes](guides/sa-gait-reference.json).
 
-[Revised departure run — scene03, silent](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-girl-episode-2/marketing/assets/goji-girl/episode-02/first-cut-v1/takes/03-02/raw_00001_.mp4)
+[Departure run — scene03](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-girl-episode-2/marketing/assets/goji-girl/episode-02/first-cut-v1/takes/03-02/raw_00001_.mp4) · [Run around the bus — scene04](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-girl-episode-2/marketing/assets/goji-girl/episode-02/first-cut-v1/takes/04-04/raw_00001_.mp4) · [Clinic sprint — scene10](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-girl-episode-2/marketing/assets/goji-girl/episode-02/first-cut-v1/takes/10-02/raw_00001_.mp4)
 
-This take has a firmer bent-elbow pump and a regular stride. H3 still softens the rig poses; it is a closer approximation, not the exact game animation. The published checkpoint01 keeps the earlier run.
+The clinic sprint keeps the wreck behind camera and both officers following. A foreground officer briefly obscures her near the turn; that framing needs polish. Samples show no impact with the passing pedestrian.
 
-[Revised run around the bus — scene04, silent](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-girl-episode-2/marketing/assets/goji-girl/episode-02/first-cut-v1/takes/04-04/raw_00001_.mp4)
+Normal-speed playback checks for the latest revisions are pending because the Mac has locked. The new shots were reviewed with full-route samples and denser 8fps stride/contact samples; the assembled MP4 passes a strict full-decode check.
 
 [Newer driver-interaction take — scene05, silent, rough motion](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-girl-episode-2/marketing/assets/goji-girl/episode-02/first-cut-v1/takes/05-02/raw_00001_.mp4)
 
-The driver window and white panel now remain fixed. The pull-out and climb still look floaty and need contact-animation polish. This newer take is not in checkpoint01.
+The driver window and white panel now remain fixed. The pull-out and climb still look floaty and need contact-animation polish. This take is included in checkpoint02.
 
 [Newer crash take — scene07, silent, rough impact](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-girl-episode-2/marketing/assets/goji-girl/episode-02/first-cut-v1/takes/07-02/raw_00001_.mp4)
 
-The bus rolls onto the correct side and pedestrians stay clear. The sharp turn and shelter impact need stronger motion/contact. This take is also newer than checkpoint01.
+The bus rolls onto the correct side and pedestrians stay clear. The sharp turn and shelter impact need stronger motion/contact. This take is included in checkpoint02.
 
 The run around the bus now reaches the driver side. The chase has no outside runner; a fixed crop keeps the pursuit car offscreen. The exit still has a small initial body dip and a rounder handbag silhouette to polish.
 
