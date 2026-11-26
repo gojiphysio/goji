@@ -191,11 +191,8 @@ def validate_form(form, vacancy: dict | None, general: bool) -> Result:
         if not d["interest_area"]:
             r.fail("interest_area", "Choose the kind of role you're interested in.")
         d["interest_detail"] = g("interest_detail", 200)
-        d["also_consider"] = ""
     else:
         d["interest_area"] = d["interest_detail"] = ""
-        also_ok = bool(vacancy.get("also_consider_for"))
-        d["also_consider"] = "Yes" if also_ok and form.get("also_consider") == "yes" else "No"
 
     # Non-identifying campaign attribution, for the tracker's source column.
     d["utm"] = {k: g(k, 100) for k in ("utm_source", "utm_medium", "utm_campaign", "utm_content")

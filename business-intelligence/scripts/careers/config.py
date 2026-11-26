@@ -69,7 +69,7 @@ TRACKER_COLUMNS = [
     "Date and time received (Asia/Singapore)",
     "Application type",
     "Role applied for",
-    "Open to alternative seniority level",
+    "Open to alternative seniority level",  # no longer asked; written blank
     "Assessed seniority level",            # manual
     "Interest area (general)",
     "Clinic location",

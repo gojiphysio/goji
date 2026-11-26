@@ -45,10 +45,6 @@ const roleMeta = Object.fromEntries(
       title: r.title,
       form: r.form,
       minDays: r.minDaysPerWeek ?? 0,
-      also: (r.alsoConsiderFor ?? [])
-        .map((id) => roles.find((x) => x.id === id))
-        .filter(Boolean)
-        .map((x) => ({ id: x!.id, title: x!.title })),
     },
   ]),
 );
@@ -121,12 +117,6 @@ const formId = general ? "interest-form" : "application-form";
                     ))}
                   </select>
                   <p class="fld__error" id="e-role" hidden />
-                </div>
-                <div class="chk" data-also-wrap hidden={!(vacancy!.alsoConsiderFor ?? []).length}>
-                  <input id="f-also_consider" name="also_consider" type="checkbox" value="yes" />
-                  <label for="f-also_consider" data-also-label>
-                    Please also consider me for the other physiotherapist role
-                  </label>
                 </div>
               </Fragment>
             )}
@@ -784,9 +774,6 @@ const formId = general ? "interest-form" : "application-form";
     );
 
     // ---- Role-dependent bits ----
-    const alsoWrap = $("[data-also-wrap]");
-    const alsoLabel = $("[data-also-label]");
-    const alsoBox = $<HTMLInputElement>("#f-also_consider");
     const physioOnly = $("[data-physio-only]");
     const minDaysEl = $("[data-min-days]");
     const minNote = $("[data-min-days-note]");
@@ -794,10 +781,6 @@ const formId = general ? "interest-form" : "application-form";
       if (general) return;
       const r = roles[jobId()];
       if (!r) return;
-      const other = r.also[0];
-      if (alsoWrap) alsoWrap.hidden = !other;
-      if (other && alsoLabel) alsoLabel.textContent = `Please also consider me for the ${other.title} role`;
-      if (!other && alsoBox) alsoBox.checked = false;
       if (physioOnly) physioOnly.hidden = r.form !== "physio";
       if (minDaysEl) minDaysEl.textContent = String(r.minDays || 3);
       if (minNote) minNote.hidden = !r.minDays;
@@ -1087,7 +1070,6 @@ const formId = general ? "interest-form" : "application-form";
 
       const fd = new FormData(form);
       // Normalise what the form can't express on its own.
-      fd.set("also_consider", alsoBox?.checked ? "yes" : "no");
       fd.set("privacy_ack", val("privacy_ack") ? "yes" : "no");
       fd.set("talent_pool", val("talent_pool") ? "yes" : "no");
       if (!physioActive()) {

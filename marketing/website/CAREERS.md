@@ -31,8 +31,8 @@ they can't disagree.
 
 Copy an entry and give it a new `id` (this is the URL slug and the value
 stored in the tracker; never change it after launch). Set `order`,
-`driveFolder`, `minYearsExperience`, `form: "physio"` for a clinical role, and
-`alsoConsiderFor` if there is a sibling level. Then:
+`driveFolder`, `minYearsExperience` and `form: "physio"` for a clinical role.
+Then:
 
 - add the page to `public/llms.txt` (`check_dist.py` fails otherwise);
 - add the id to `VACANCIES` in `business-intelligence/scripts/careers/fakes.py`
