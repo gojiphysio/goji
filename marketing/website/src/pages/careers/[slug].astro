@@ -3,7 +3,7 @@
  * /careers/<slug>/ — one page per role in src/lib/vacancies.ts, from a single
  * template so the physiotherapist roles share their content and code.
  *
- * Open role:   full description, two Apply Now CTAs, the embedded form, and
+ * Open role:   full description, one Apply Now CTA, the embedded form, and
  *              JobPosting JSON-LD (only facts visible on the page; no salary).
  * Closed role: the page stays (shared links don't 404) but is noindexed, shows
  *              an "applications closed" notice, has no form and no JobPosting.
@@ -220,9 +220,6 @@ const facts = [
                 Apply online below with your CV and a short introduction. There's no account to create. If you
                 have any trouble with the form, email your CV to <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.
               </p>
-              <div class="job-cta-end">
-                <Button href="#apply" variant="primary" size="lg" class="js-apply-now">Apply now</Button>
-              </div>
             </Fragment>
           )
         }
@@ -382,10 +379,6 @@ const facts = [
   .job-desc a {
     color: var(--color-accent);
   }
-  .job-cta-end {
-    margin-top: var(--space-5);
-  }
-
   .job-apply {
     background: var(--bg-content);
     padding-block: var(--section-y);

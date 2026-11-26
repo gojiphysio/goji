@@ -9,7 +9,7 @@ import pytest
 from careers import app as app_module
 from careers import config, mailer, vacancies
 from careers.fakes import DOCX, PDF, VACANCIES, FakeWorkspace
-from careers.validation import FileRejected, check_cv
+from careers.validation import FileRejected, check_cv, normalise_phone
 
 ORIGIN = "https://www.gojiphysio.com"
 
@@ -167,3 +167,25 @@ def test_storage_failure_sends_nothing(env):
     r = post(env["client"], form())
     assert r.status_code == 503 and r.json["code"] == "storage_failed"
     assert env["sent"] == []
+
+
+# ---- phone numbers -----------------------------------------------------------------
+
+@pytest.mark.parametrize("raw,stored", [
+    ("91234567", "+65 9123 4567"),          # Singapore, no country code
+    ("9123 4567", "+65 9123 4567"),
+    ("6591234567", "+65 9123 4567"),
+    ("+65 9123 4567", "+65 9123 4567"),
+    ("+44 7911 123456", "+44 7911 123456"),  # overseas, kept as typed
+    ("0447911123456", "0447911123456"),
+    ("1234567", ""),                         # too short
+    ("call me", ""),
+])
+def test_phone_numbers(raw, stored):
+    assert normalise_phone(raw) == stored
+
+
+def test_local_number_is_stored_with_plus_65(env):
+    assert post(env["client"], form(phone="9123 4567")).status_code == 200
+    assert col(env["ws"].rows[-1], "Mobile number") == "+65 9123 4567"
+

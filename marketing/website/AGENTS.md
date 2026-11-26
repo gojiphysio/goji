@@ -312,9 +312,12 @@ of `npm run build`. Config in `pagefind.yml`; Cloudflare Pages needs no change.
   any new top-level section.
 - **A `display` declaration beats `[hidden]`.** The UA rule is
   `[hidden] { display: none }`, so any element you toggle with the `hidden`
-  attribute *and* style with `display: flex/grid` needs an explicit
-  `.thing[hidden] { display: none }`. Hit by the booking form and again by the
-  search panes.
+  attribute *and* style with `display: flex/grid` gets shown anyway. Put one
+  container-wide rule in the component (`.apply [hidden] { display: none
+  !important; }`) rather than listing elements: a per-element list missed the
+  careers form itself and its CV Remove button, so the success message showed
+  under a stuck progress bar. Hit by the booking form, the search panes and the
+  careers form.
 - **Astro frontmatter can't `export type`.** Shared types live in `src/lib/*`
   and are imported with `import type` (esbuild fails on the union otherwise).
 - **White fill + `--color-border` + `--shadow-sm` is the *interactive* recipe.**
