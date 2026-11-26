@@ -566,9 +566,12 @@ def test_form_token_round_trip_and_tamper():
 
 class DestPlato:
     def __init__(self, appt, patient=None, prereg=True):
-        self.appt, self.patient, self.prereg = appt, patient or {}, prereg
+        self.appt, self.prereg = appt, prereg
+        self.patient = {"email": "sarah@example.com"} if patient is None else patient
+        self.params = []
 
     def get(self, path, **kw):
+        self.params.append(kw.get("params"))
         if path.endswith("/prereg"):
             return {"url": "https://clinic.platomedical.com/prereg/a/b"} if self.prereg else \
                 {"error": "Appointment is already linked with a patient profile."}
@@ -589,6 +592,23 @@ def test_destination_profile_is_its_update_form_or_done():
         .endswith("/regupdate/a/b")
     assert c.form_destination(DestPlato({"_id": "a1", "patient_id": "p1"}, SIGNED), "a1") == (
         "done", None)
+
+
+def test_update_form_is_shared_with_the_patients_email():
+    p = DestPlato({"_id": "a1", "patient_id": "p1"})
+    c.form_destination(p, "a1")
+    assert {"email": "sarah@example.com"} in p.params
+
+
+def test_update_form_falls_back_to_the_appointment_email():
+    p = DestPlato({"_id": "a1", "patient_id": "p1", "email": "appt@example.com"}, patient={})
+    c.form_destination(p, "a1")
+    assert {"email": "appt@example.com"} in p.params
+
+
+def test_no_email_anywhere_says_so():
+    assert c.form_destination(DestPlato({"_id": "a1", "patient_id": "p1"}, patient={}),
+                              "a1") == ("no_email", None)
 
 
 def test_destination_gone():
