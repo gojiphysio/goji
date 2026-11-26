@@ -1,10 +1,10 @@
 # Episode 2 — first cut v1
 
-**Render in progress · 26 November 2026 · 9 provisional selections covering 35 seconds.**
+**Render in progress · 26 November 2026 · 11 provisional selections covering 39 seconds.**
 
 [**Watch review checkpoint 02 — 47 seconds with SFX**](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-girl-episode-2/marketing/assets/goji-girl/episode-02/first-cut-v1/deliverables/review-checkpoint-02.mp4)
 
-This checkpoint has **35 seconds of animation and 12 seconds of labelled storyboard holds**. Scenes09,11 and12 are still rendering. Checkpoint01 remains unchanged for earlier comments.
+This checkpoint has **35 seconds of animation and 12 seconds of labelled storyboard holds**. Scene12 is still rendering; newer recovery and arrival takes are linked below. Checkpoint01 remains unchanged for earlier comments.
 
 **Running revision:** the departure, bus approach and clinic sprint now use an original rig cycle informed by sampled [PS2 running footage](https://www.youtube.com/watch?v=Z9cD9uj1fb8&t=248s): bent elbows, firmer arm pumping, stronger heel recovery and forward lean. The bag stays in her left hand. H3 still softens the poses; this is a closer approximation, not the exact game animation. [Reference and retarget notes](guides/sa-gait-reference.json).
 
@@ -13,6 +13,10 @@ This checkpoint has **35 seconds of animation and 12 seconds of labelled storybo
 The clinic sprint keeps the wreck behind camera and both officers following. A foreground officer briefly obscures her near the turn; that framing needs polish. Samples show no impact with the passing pedestrian.
 
 Normal-speed playback checks for the latest revisions are pending because the Mac has locked. The new shots were reviewed with full-route samples and denser 8fps stride/contact samples; the assembled MP4 passes a strict full-decode check.
+
+[New recovery take — scene09](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-girl-episode-2/marketing/assets/goji-girl/episode-02/first-cut-v1/takes/09-02/raw_00001_.mp4) · [New clinic arrival — scene11](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-girl-episode-2/marketing/assets/goji-girl/episode-02/first-cut-v1/takes/11-01/raw_00001_.mp4)
+
+These two takes are newer than checkpoint02. The recovery keeps the wreck on its side at the edge and continues forward. The arrival settles into calm with an attentive therapist and both officers outside. The bag appears in the near/right hand at reception, a small continuity issue for polish.
 
 [Newer driver-interaction take — scene05, silent, rough motion](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-girl-episode-2/marketing/assets/goji-girl/episode-02/first-cut-v1/takes/05-02/raw_00001_.mp4)
 

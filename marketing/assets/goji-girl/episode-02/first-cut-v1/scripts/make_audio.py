@@ -35,6 +35,7 @@ add('foley',22.4,hit(.8,40),.72,label='bus body hits road');add('foley',24.0,hit
 add('foley',25.6,hit(.18,750),.12,label='small shelter piece falls')
 add('ui',28.0,tone(.115,1100),.28,label='isolated EZ-Link BEEP')
 for t in [31.2,31.5]:add('foley',t,noise(.14),.17,label='dust off')
+for t in [32.35,32.72]:add('foley',t,hit(.13,90),.13,label='recovery steps toward Goji')
 # All pursuit effects end before37.0s, an abrupt calm threshold.
 add('ui',37.1,tone(.4,660)*np.exp(-np.arange(int(.4*SR))/SR*7),.055,label='soft clinic chime')
 add('clinic',37,noise(10),.008,label='quiet room tone')
