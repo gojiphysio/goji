@@ -26,7 +26,8 @@
     "start": 0,
     "duration": 3,
     "status": "draft selection; sampled-frame review",
-    "review": "Corrected take runs past passenger door around front nose to driver side. Approved formed bus and compact driver opening retained. Six sampled frames inspected; full continuous motion not claimed."
+    "review": "Corrected take runs past passenger door around front nose to driver side. Approved formed bus and compact driver opening retained. Six sampled frames inspected; full continuous motion not claimed.",
+    "pending_revision": "04-04: same GTA SA gait revision extended to bus approach, clearing bin and posts; retain reviewed 04-02 until replacement review."
   },
   "05": {
     "path": "takes/05-02/raw_00001_.mp4",

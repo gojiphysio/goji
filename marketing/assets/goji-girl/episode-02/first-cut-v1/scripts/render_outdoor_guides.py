@@ -3,7 +3,7 @@ import bpy,math,json,sys
 from pathlib import Path
 from mathutils import Vector,Matrix
 R=Path(__file__).resolve().parents[1];E=R.parent
-sid=sys.argv[-1];variant='-sa-v3' if sid in ['03','10'] else ('-v2' if sid in ['04','05'] else '');dur={'03':3,'04':3,'05':4,'06':5,'07':5,'09':2,'10':4}[sid];N=dur*12+1
+sid=sys.argv[-1];variant='-sa-v4' if sid=='04' else ('-sa-v3' if sid in ['03','10'] else ('-v2' if sid=='05' else ''));dur={'03':3,'04':3,'05':4,'06':5,'07':5,'09':2,'10':4}[sid];N=dur*12+1
 exec((R/'scripts/sa_gait.py').read_text())
 bpy.ops.wm.open_mainfile(filepath=str(E/'revision-08/blender/route-with-pedestrians.blend'))
 s=bpy.context.scene;s.timeline_markers.clear();s.frame_set(1)
@@ -49,6 +49,12 @@ def lerp(a,b,u):return Vector(a).lerp(Vector(b),u)
 def ease(u):return u*u*(3-2*u)
 def path(points,u):
  v=min(len(points)-1.00001,max(0,u)*(len(points)-1));i=int(v);return lerp(points[i],points[i+1],v-i)
+def arc_path(points,u):
+ lengths=[(Vector(b)-Vector(a)).length for a,b in zip(points,points[1:])];distance=max(0,min(1,u))*sum(lengths)
+ for a,b,length in zip(points,points[1:],lengths):
+  if distance<=length:return lerp(a,b,distance/length)
+  distance-=length
+ return Vector(points[-1])
 def face(v):return math.atan2(-v.x,v.y)
 def window_pose(actor,f,centre,tilt,facing,seated=0,reach=None):
  rot=Matrix.Rotation(tilt,3,'Y')@Matrix.Rotation(facing,3,'Z')
@@ -63,7 +69,9 @@ for f in range(1,N+1):
   p=Vector((-6.55,-47.7+3.75*t,.13));sa_run_pose(hero,f,p,0,t,move_segment)
   distance=1.5+1.3*ease(min(1,t/.6));cp=p+Vector((0,-distance,1.95));target=p+Vector((0,.4,1.1))
  elif sid=='04':
-  pts=[(-6.55,-27.5,.13),(-6.55,-23.0,.13),(-5.6,-21.0,.13),(-3.7,-20.9,.13),(-1.85,-22.85,.13)];p=path(pts,u);d=path(pts,min(1,u+.02))-path(pts,max(0,u-.02));angle=face(d);hero.pose(f,p,angle,walk=t*12)
+  pts=[(-6.55,-27.5,.13),(-7.3,-24.5,.13),(-7.3,-22,.13),(-6.8,-20.2,.13),(-5,-20.2,.13),(-3.7,-20.9,.13),(-1.8,-20.9,.13),(-1.85,-22.85,.13)];p=arc_path(pts,u);d=arc_path(pts,min(1,u+.02))-arc_path(pts,max(0,u-.02));angle=face(d)
+  speed=sum((Vector(b)-Vector(a)).length for a,b in zip(pts,pts[1:]))/dur
+  sa_run_pose(hero,f,p,angle,t,move_segment,speed=speed)
   # A naive rear offset enters the bus during the tight turn. Stage the chase
   # camera outside the rigid vehicle footprint throughout the nose crossing.
   cp=path([(-7.8,-31,2.8),(-8.5,-24,2.8),(-6,-17,2.8),(-1.2,-17.5,2.8),(1.9,-20.4,2.8)],u)

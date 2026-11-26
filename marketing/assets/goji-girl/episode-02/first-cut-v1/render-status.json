@@ -1,5 +1,5 @@
 {
-  "updated": 1795666263.3883169,
+  "updated": 1795667236.241305,
   "takes": [
     {
       "shot": "01",
@@ -299,6 +299,13 @@
       ]
     },
     {
+      "shot": "03",
+      "take": "02",
+      "status": "queued",
+      "started": 1795666406.560811,
+      "videos": []
+    },
+    {
       "shot": "04",
       "take": "01",
       "status": "generated_unreviewed",
@@ -495,6 +502,20 @@
           "full_decode_verified": true
         }
       ]
+    },
+    {
+      "shot": "04",
+      "take": "03",
+      "status": "superseded_before_render",
+      "started": 1795667042.647688,
+      "videos": []
+    },
+    {
+      "shot": "04",
+      "take": "04",
+      "status": "queued",
+      "started": 1795667236.156632,
+      "videos": []
     },
     {
       "shot": "05",
@@ -1121,8 +1142,15 @@
     {
       "shot": "10",
       "take": "01",
-      "status": "queued",
+      "status": "superseded_before_render",
       "started": 1795658188.319367,
+      "videos": []
+    },
+    {
+      "shot": "10",
+      "take": "02",
+      "status": "queued",
+      "started": 1795666483.637814,
       "videos": []
     },
     {

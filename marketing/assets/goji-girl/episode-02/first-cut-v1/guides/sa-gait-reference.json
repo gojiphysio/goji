@@ -41,7 +41,13 @@
       "shot": "10",
       "path": "inputs/10-guide-sa-v3.mp4",
       "sha256": "33161888b0a826d4809baab42c5f02c13a64a7930b2e19b9c6a51350d776fee0"
+    },
+    {
+      "shot": "04",
+      "path": "inputs/04-guide-sa-v4.mp4",
+      "sha256": "07f2ab840417891b7e0b390dc2ad4272a58abfef1715ad3e110e4c238ccdbc3b",
+      "inspection": "4fps full route samples; bypasses fixed bin and shelter post before crossing ahead of bus nose. Earlier v3 guide rejected before generation for obstacle contact."
     }
   ],
-  "route_notes": "Hero route and camera retained. Officers follow the same path 3.2/3.5 metres behind along its length, keeping them outside the facade at the turn."
+  "route_notes": "Hero route and camera retained. Officers follow the same path 3.2/3.5 metres behind along its length, keeping them outside the facade at the turn. Shot04 follows the same collision-free nose route at uniform path speed, with its camera outside the bus."
 }

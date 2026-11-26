@@ -2,7 +2,7 @@
 
 **Render in progress · 26 November 2026 · 7 provisional shot selections; running revisions queued; bus-action takes being revised.**
 
-**Next revision:** scenes03 and10 are queued with an original rig cycle informed by sampled [PS2 running footage](https://www.youtube.com/watch?v=Z9cD9uj1fb8&t=248s): flared bent elbows, stronger heel recovery and forward lean. The current checkpoint preserves the version being reviewed. [Reference and retarget notes](guides/sa-gait-reference.json).
+**Next revision:** scenes03 and10 are queued; the short bus approach in04 is being updated too. All use an original rig cycle informed by sampled [PS2 running footage](https://www.youtube.com/watch?v=Z9cD9uj1fb8&t=248s): flared bent elbows, stronger heel recovery and forward lean. The current checkpoint preserves the version being reviewed. [Reference and retarget notes](guides/sa-gait-reference.json).
 
 [**Watch review checkpoint 01 — full 47-second timeline with SFX**](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-girl-episode-2/marketing/assets/goji-girl/episode-02/first-cut-v1/deliverables/review-checkpoint-01.mp4)
 

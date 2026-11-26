@@ -52,6 +52,10 @@
 - Inspect the full Blender camera path around rigid props. A rear follow offset
   can enter a bus on a tight turn; keep the camera outside its footprint and
   the complete player action visible before using the guide in H3.
+- Retarget running from original PS2 footage, with the source and approximate
+  gait settings recorded. Inspect several phases per stride, plus clearance
+  around bins, posts and vehicle corners; half-second samples can hide a
+  half-second gait cycle. Keep the bag-carrying arm constrained.
 - Scope appearance instructions to what is visible in each shot. An unseen
   driver needs no on-foot outfit/bag block; a cropped wreck edge needs no full
   bus reconstruction. On the reformer, her shoes and bag stay on the bench.
