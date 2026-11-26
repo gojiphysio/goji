@@ -1,166 +1,88 @@
-# goji-careers: job-application backend
+# goji-careers
 
-The backend for the careers form on gojiphysio.com (`/careers/<role>/` and
-`/careers/expression-of-interest/`). One endpoint, `POST /api/applications`,
-which:
+The website's job-application backend: Cloud Run service `goji-careers` at
+`https://careers-api.gojiphysio.com`, called by the careers form
+(`marketing/website/src/components/careers/ApplicationForm.astro`).
 
-1. checks the request came from our site (Origin allowlist + the
-   `X-Goji-Careers: 1` header, which forces a CORS preflight),
-2. rate-limits (6 submissions per IP per hour, 3 per email per day) and runs
-   the bot checks (honeypot `company_url`, minimum fill time, Turnstile),
-3. confirms the role is open against the site's `/careers/vacancies.json`,
-4. validates the fields and the CV (PDF/DOC/DOCX, 10MB, extension + MIME +
-   file signature, active-content rejection),
-5. allocates `GOJI-APP-YYYY-NNNN` and creates
-   `Applications/<year>/<role folder>/<reference>/` in the recruitment Shared
-   Drive, uploads `<reference>-CV.<ext>` and `<reference>-application.json`,
-6. appends one row to **Goji Recruitment — Applicant Tracker** (RAW values,
-   so nothing an applicant types is evaluated as a formula),
-7. emails the clinic (links only, no attachment) and acknowledges the applicant.
+What one submission does:
 
-There is no read or list endpoint. The service never creates sharing
-permissions: who can see applications is decided by the Shared Drive's
-membership. No AI screening, no scoring, no auto-rejection.
+1. Accepts it only from `www.gojiphysio.com` (origin plus the `X-Goji-Careers`
+   header), then runs the bot checks: a hidden honeypot field, a minimum fill
+   time, and Cloudflare Turnstile.
+2. Checks the role is still open, against the site's `/careers/vacancies.json`.
+3. Validates the fields and the CV (PDF, DOC or DOCX, 10 MB max, real file
+   signature). Google Drive virus-scans the upload itself.
+4. Uploads the CV to the `Applications` folder in the **Goji Recruitment**
+   Shared Drive as `<reference> - <name> - CV.<ext>`, then appends a row to the
+   applicant tracker sheet. The reference is `GOJI-APP-<year>-NNNN`.
+5. Emails hello@ (with links, never the CV), then sends the applicant a
+   confirmation.
+
+There is no endpoint that reads or lists applications. Reviewers use Drive and
+Sheets with their own Goji accounts.
 
 ## Files
 
-| File | What it holds |
+| File | What |
 |---|---|
-| `app.py` | Flask app, the submission flow, CORS/origin check, rate limits, bot checks |
-| `validation.py` | Field rules and the CV safety checks |
-| `store.py` | Reference numbers, folder/file/tracker writes, idempotency |
-| `workspace.py` | Thin Drive v3 / Sheets v4 REST client (google-auth) |
-| `vacancies.py` | Reads the site's vacancy list (TTL cache, last good copy) |
-| `mailer.py` | The two emails, wording from the brief |
-| `config.py` | Every env var, the option lists, the tracker columns |
-| `setup_workspace.py` | One-time creation of the folder tree and tracker |
-| `dev_server.py` | Local harness: real app, fake Drive/Sheets, printed emails |
-| `deploy.sh` | Manual Cloud Run deploy |
+| `app.py` | The endpoint, bot checks, reference numbers, the tracker row |
+| `validation.py` | Field rules and the CV check |
+| `workspace.py` | The two Google calls: upload to Drive, append to Sheets |
+| `mailer.py` | The internal email and the applicant confirmation |
+| `vacancies.py` | Reads which roles are open from the website |
+| `config.py` | Env vars, form option lists, tracker columns |
+| `fakes.py`, `dev_server.py`, `test_careers.py` | Local and test only (not in the image) |
 
-## Idempotency and partial failure
+## Deploy
 
-The browser sends an `idempotency_key` (UUID, one per page load). Every Drive
-object the service writes carries it in `appProperties`, and the application
-folder records which steps finished (`goji_tracker`, `goji_notified`,
-`goji_acked`). A retry with the same key finds the folder, skips what is done,
-finishes what is not, and returns the same reference. So a network drop after
-upload never makes a second folder, a second tracker row or a second email.
-If Drive or Sheets fails, the applicant sees "we couldn't send your
-application" with the email fallback, and nothing is half-reported as success.
+`.github/workflows/deploy-careers.yml`: pull requests run the tests; a merge to
+`main` that touches `careers/` runs the tests and deploys. Nothing is deployed
+by hand.
 
-## Environment
+The service runs as `careers-sa@goji-bi.iam.gserviceaccount.com`, which has no
+project roles. It can read two secrets (`gmail-app-password`,
+`turnstile-secret`) and is a **Content manager** on the Goji Recruitment Shared
+Drive. A service account has no Drive storage of its own, so the CV folder must
+be inside a Shared Drive, not a My Drive folder shared with it.
 
-| Variable | Default | Notes |
-|---|---|---|
-| `RECRUITMENT_APPLICATIONS_FOLDER_ID` | (required) | The `Applications` folder, printed by `setup_workspace` |
-| `RECRUITMENT_TRACKER_SHEET_ID` | (required) | The tracker spreadsheet |
-| `RECRUITMENT_TRACKER_TAB` | `Applicants` | |
-| `GOOGLE_AUTH_MODE` | `service_account` | or `oauth` (see below) |
-| `GOOGLE_OAUTH_CLIENT_JSON` | | secret `google-oauth-client`, oauth mode only |
-| `CORS_ORIGIN` | `https://www.gojiphysio.com` | comma-separated |
-| `VACANCIES_URL` | site `/careers/vacancies.json` | |
-| `GMAIL_APP_PASSWORD` | | secret `gmail-app-password` |
-| `CAREERS_ADMIN_EMAIL` | `hello@gojiphysio.com` | internal notification |
-| `CAREERS_TEST_MODE` / `CAREERS_TEST_EMAIL` | off / empty | see Test mode |
-| `TURNSTILE_SECRET` | | secret `turnstile-secret`; empty skips the check |
-| `CAREERS_MIN_FILL_MS` | `8000` | faster submissions are treated as bots |
-| `PRIVACY_NOTICE_VERSION` | `2026-11-draft` | written to every tracker row; bump when the notice changes |
-| `RETENTION_REVIEW_DAYS` | `180` | provisional review date, see `RETENTION.md` |
+## Test mode and going live
 
-Website side: Cloudflare Pages needs `PUBLIC_CAREERS_API` (the service URL).
-Without it the form is not rendered and each page shows "Apply by email"
-instead, so the site can ship before the backend is live. Turnstile reuses the
-booking form's `PUBLIC_TURNSTILE_SITE_KEY`; the widget's hostname list must
-include `www.gojiphysio.com` (it already does for booking).
+The workflow's `env:` block is the switch, so going live is a reviewed PR.
 
-## Google Workspace setup
+- **Now (test):** it points at the "Goji Recruitment (TEST)" folder and tracker,
+  with `CAREERS_TEST_MODE: "1"`. Applicant confirmations go to
+  `CAREERS_TEST_EMAIL` instead of the applicant; with no test address, no
+  confirmation is sent at all.
+- **Go live:**
+  1. In the Shared Drive, make a copy of the TEST tracker (it has the header row
+     and dropdowns), name it "Goji Recruitment — Applicant Tracker", clear its
+     rows, and create an `Applications` folder beside it.
+  2. In a PR, put their IDs in the workflow and set `CAREERS_TEST_MODE: "0"`.
+  3. Set `PUBLIC_CAREERS_API=https://careers-api.gojiphysio.com` on the
+     Cloudflare Pages production environment and rebuild the site. Until then
+     the site shows "apply by email" instead of the form.
 
-**Preferred: Shared Drive + service account.**
+Before going live: a test submission per role and one expression of interest;
+check the tracker row, the CV and both emails; management approves the
+privacy notice and the retention periods (`RETENTION.md`).
 
-1. In Google Workspace, create a Shared Drive called **Goji Recruitment**.
-   Members: management and the people who review applications only. Check that
-   link sharing outside the organisation is off for this drive.
-2. Run `deploy.sh` once (it creates `careers-sa`), then add
-   `careers-sa@goji-bi.iam.gserviceaccount.com` to the Shared Drive as
-   **Content manager**.
-3. Create the tree and tracker as careers-sa. Google blocks gcloud's default
-   OAuth client from asking for Drive/Sheets scopes, so don't log in ADC with
-   `--scopes=...drive`; impersonate instead (needs `serviceAccountTokenCreator`
-   on careers-sa for the person running it, and the Drive API enabled in
-   goji-bi: `gcloud services enable drive.googleapis.com`):
+## Website side
 
-   ```bash
-   gcloud iam service-accounts add-iam-policy-binding careers-sa@goji-bi.iam.gserviceaccount.com \
-     --member=user:<you> --role=roles/iam.serviceAccountTokenCreator
-   gcloud auth application-default login --impersonate-service-account=careers-sa@goji-bi.iam.gserviceaccount.com
-   cd business-intelligence/scripts
-   python3 -m careers.setup_workspace --parent <SHARED_DRIVE_ID> --test
-   ```
-
-   Run it again without `--test` for production. It prints the two IDs.
-   Afterwards, `gcloud auth application-default login` (no flags) to get your
-   own ADC back, and remove the token-creator binding once setup is done.
-4. Re-run `deploy.sh` with those IDs.
-
-**Fallback: hello@'s My Drive (`GOOGLE_AUTH_MODE=oauth`).** Only if a Shared
-Drive isn't possible on the current Workspace plan. Create an OAuth client
-(Desktop) in the goji-bi project, authorise it once as hello@ with the
-`drive` and `spreadsheets` scopes, and store
-`{"client_id","client_secret","refresh_token"}` in Secret Manager as
-`google-oauth-client`. Never use a personal account.
-
-## Test mode
-
-`CAREERS_TEST_MODE=1` sends the applicant acknowledgement to
-`CAREERS_TEST_EMAIL` instead of the address on the form. With no test address
-it sends no acknowledgement at all (fails closed). `deploy.sh` defaults to test
-mode on. Point it at the `(TEST)` folder and tracker while testing.
+- `PUBLIC_CAREERS_API` turns the form on. The Turnstile widget uses the same
+  site key as booking, and its hostname list must include every site the form
+  runs on (`www.gojiphysio.com`, plus `goji.pages.dev` for preview testing).
+- Testing on a Cloudflare Pages preview also needs that preview's origin added
+  to `CORS_ORIGIN` in the workflow.
 
 ## Running locally
 
 ```bash
 cd business-intelligence/scripts
 uv run -q --with-requirements careers/requirements.txt --with pytest python -m pytest careers/ -q
-uv run --with-requirements careers/requirements.txt --with pytest python -m careers.dev_server
+uv run --with-requirements careers/requirements.txt python -m careers.dev_server
 ```
 
-Then start the site with `PUBLIC_CAREERS_API=http://localhost:8090` (the
-`website-careers-dev` entry in `.claude/launch.json`). `DEV_FAIL=upload` (or
-`append`, `create_folder`) makes the fake Drive/Sheets fail, to see the error paths.
-`GET /dev/state` shows what the fake now holds. Use synthetic data only.
-
-## Testing matrix
-
-Automated (`pytest careers/`, 71 tests, CI: `careers-tests.yml`):
-
-- valid full-time, part-time, either; part-time below the 3-day minimum is
-  accepted with the days recorded (never auto-rejected)
-- every required field missing; bad email (incl. header injection), phone,
-  LinkedIn URL; options outside the lists dropped or refused
-- general expression of interest skips the physio questions
-- CV: PDF/DOC/DOCX accepted; wrong extension, double extension, signature or
-  MIME mismatch, empty, over 10MB, PDF JavaScript/Launch/embedded files (also
-  hex-escaped and inside compressed streams), DOCX macros/ActiveX/embeddings/
-  remote templates, DOC macros: all refused
-- closed role (409), unknown role, vacancy list unavailable (503 for roles; interest still accepted)
-- an email failure still returns success and is not re-sent on retry
-- origin and header checks, honeypot, too-fast fill, Turnstile, per-IP rate limit (retries not counted)
-- retry with the same key: one folder, one CV, one row, one set of emails;
-  retry after an upload or tracker failure completes the missing steps
-- reference numbers continue from the tracker and Drive, per year
-- test mode redirects or suppresses the acknowledgement
-- formula-looking input is stored as text; logs carry no names or emails
-
-Manual, before go-live (record the result in the PR):
-
-- [ ] test-mode deploy against the `(TEST)` tree; one submission per role,
-      one EOI, one part-time, one DOCX, one rejected file
-- [ ] folder, CV, JSON and tracker row look right; links in the internal email
-      open for a drive member and **not** for an outside account
-- [ ] acknowledgement arrives at the test address only
-- [ ] same submission retried (double-click, refresh during upload)
-- [ ] keyboard-only and screen-reader pass on a phone
-- [ ] management approves the privacy notice and retention periods
-
-Only after every box is ticked: production IDs, `CAREERS_TEST_MODE=0`, set
-`PUBLIC_CAREERS_API` on Cloudflare Pages, set the roles' `datePosted`.
+The dev server uses in-memory Drive/Sheets and prints emails instead of sending
+them. Start the site with `PUBLIC_CAREERS_API=http://localhost:8090` (the
+`website-careers-dev` entry in `.claude/launch.json`). `DEV_FAIL=upload` or
+`DEV_FAIL=append` shows the storage error path. Use made-up data only.

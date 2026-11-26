@@ -1,24 +1,12 @@
 """
-Server-side validation for applications and CV files.
-
-Everything from the browser is untrusted: the form's own checks are a
-convenience, these are the rules. Pure functions (no Flask, no Google) so they
-are unit-testable on their own.
-
-File safety (recruitment brief §6): the extension, the declared MIME type and
-the file's real signature must all agree on PDF, DOC or DOCX, and the file
-must not carry active content (PDF JavaScript/launch actions/embedded files,
-Office macros, ActiveX, OLE embeddings, remote templates). Anything else is
-rejected, never "cleaned". Google Drive additionally virus-scans every upload,
-and CVs are only ever opened by signed-in reviewers in Drive's viewer.
+Server-side validation for applications and CVs. Everything from the browser
+is untrusted: the form's own checks are a convenience, these are the rules.
+Pure functions (no Flask, no Google), so they are easy to test.
 """
 from __future__ import annotations
 
-import io
 import re
 import unicodedata
-import zipfile
-import zlib
 from dataclasses import dataclass, field
 
 from . import config
@@ -27,18 +15,11 @@ EMAIL_RE = re.compile(r"^[^\s@<>(),;:\"\\\[\]]+@[^\s@<>(),;:\"\\\[\]]+\.[A-Za-z]
 PHONE_RE = re.compile(r"^\+[\d\s()\-]{7,24}$")
 _CONTROL = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f​-‏‪-‮⁦-⁩]")
 
-ALLOWED = {
-    "pdf": {"application/pdf", "application/x-pdf", "application/octet-stream"},
-    "doc": {"application/msword", "application/octet-stream"},
-    "docx": {"application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-             "application/zip", "application/octet-stream"},
-}
 CONTENT_TYPES = {
     "pdf": "application/pdf",
     "doc": "application/msword",
     "docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
 }
-OLE_MAGIC = b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1"
 
 
 class FileRejected(ValueError):
@@ -73,7 +54,7 @@ def clean_text(value, max_len: int) -> str:
 
 def sanitise_filename(name: str) -> str:
     """A display-safe version of the uploaded filename (kept only for the
-    summary; the stored file is always named <application id>-CV.<ext>)."""
+    internal email; the stored file is named after the reference)."""
     base = re.split(r"[\\/]", str(name or ""))[-1]
     base = unicodedata.normalize("NFKD", base).encode("ascii", "ignore").decode()
     base = re.sub(r"[^A-Za-z0-9._ -]+", "_", base).strip(" ._")
@@ -86,119 +67,29 @@ def file_ext(name: str) -> str:
     return base.rsplit(".", 1)[-1].lower() if "." in base else ""
 
 
-# ---- file checks -----------------------------------------------------------------
-
-_PDF_BAD_NAMES = {b"javascript", b"js", b"launch", b"embeddedfile", b"embeddedfiles",
-                  b"richmedia", b"submitform", b"importdata", b"gotoe"}
-_PDF_NAME = re.compile(rb"/([A-Za-z0-9#]{2,40})")
-_PDF_STREAM = re.compile(rb"stream\r?\n(.*?)\r?\nendstream", re.S)
-
-
-def _pdf_names(blob: bytes):
-    for m in _PDF_NAME.finditer(blob):
-        raw = m.group(1)
-        # Undo #xx hex escapes, the classic way to hide /JavaScript as /J#61vaScript.
-        try:
-            name = re.sub(rb"#([0-9A-Fa-f]{2})", lambda h: bytes([int(h.group(1), 16)]), raw)
-        except ValueError:
-            name = raw
-        yield name.lower()
+# ---- file check ------------------------------------------------------------------
+# Extension, size and the file's real signature must agree on PDF, DOC or DOCX.
+# Deeper content scanning is left to Google Drive, which virus-scans uploads,
+# and CVs are only opened by signed-in reviewers in Drive's viewer.
+_MAGIC = {"pdf": b"%PDF-", "docx": b"PK\x03\x04",
+          "doc": b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1"}
 
 
-def _check_pdf(data: bytes) -> None:
-    if b"%PDF-" not in data[:1024]:
-        raise FileRejected("This doesn't look like a valid PDF file.")
-    if b"%%EOF" not in data[-2048:]:
-        raise FileRejected("This PDF appears to be incomplete. Please export it again.")
-    chunks = [data]
-    # Dictionaries can hide inside compressed object streams; inflate them
-    # (bounded, so a decompression bomb can't exhaust memory).
-    budget = 60 * 1024 * 1024
-    for m in _PDF_STREAM.finditer(data):
-        if budget <= 0:
-            break
-        try:
-            d = zlib.decompressobj()
-            out = d.decompress(m.group(1), min(budget, 20 * 1024 * 1024))
-            budget -= len(out)
-            if b"/" in out:
-                chunks.append(out)
-        except zlib.error:
-            continue
-    for chunk in chunks:
-        for name in _pdf_names(chunk):
-            if name in _PDF_BAD_NAMES:
-                raise FileRejected("This PDF contains interactive or embedded content we can't accept. "
-                                   "Please save it as a plain PDF (Print to PDF works) and try again.")
-
-
-_DOCX_BAD_PARTS = ("vbaproject.bin", "/activex/", "vbadata.xml", "/embeddings/")
-_EXTERNAL_REL = re.compile(rb"<Relationship\b[^>]*TargetMode=\"External\"[^>]*>", re.I)
-_REL_TYPE = re.compile(rb"Type=\"([^\"]+)\"", re.I)
-
-
-def _check_docx(data: bytes) -> None:
-    if not data.startswith(b"PK\x03\x04"):
-        raise FileRejected("This doesn't look like a valid DOCX file.")
-    try:
-        zf = zipfile.ZipFile(io.BytesIO(data))
-        infos = zf.infolist()
-    except zipfile.BadZipFile:
-        raise FileRejected("This DOCX file appears to be damaged. Please export it again.")
-    if len(infos) > 2000 or sum(i.file_size for i in infos) > 150 * 1024 * 1024:
-        raise FileRejected("This DOCX file is unusually large inside. Please save it as a PDF instead.")
-    names = [i.filename.lower() for i in infos]
-    if "[content_types].xml" not in names or "word/document.xml" not in names:
-        raise FileRejected("This doesn't look like a Word document.")
-    for n in names:
-        if any(bad in "/" + n for bad in _DOCX_BAD_PARTS):
-            raise FileRejected("This document contains macros or embedded objects we can't accept. "
-                               "Please save it as a PDF or a plain .docx and try again.")
-    ctypes = zf.read("[Content_Types].xml").lower()
-    if b"macroenabled" in ctypes or b"vbaproject" in ctypes:
-        raise FileRejected("Macro-enabled documents can't be accepted. Please save it as a PDF.")
-    # External relationships: hyperlinks are fine (a LinkedIn link in a CV);
-    # anything else external (remote templates, OLE links, frames) is a known
-    # way to make Word fetch and run content when the file is opened.
-    for n in names:
-        if not n.endswith(".rels"):
-            continue
-        for rel in _EXTERNAL_REL.findall(zf.read(n)):
-            t = _REL_TYPE.search(rel)
-            if not t or not t.group(1).lower().endswith(b"/hyperlink"):
-                raise FileRejected("This document links to external content we can't accept. "
-                                   "Please save it as a PDF and try again.")
-
-
-def _check_doc(data: bytes) -> None:
-    if not data.startswith(OLE_MAGIC):
-        raise FileRejected("This doesn't look like a valid DOC file.")
-    # OLE directory entry names are UTF-16LE. A macro project lives in a
-    # "Macros" (Word) or "_VBA_PROJECT" storage; embedded objects in "ObjectPool".
-    # Directory names are NUL-terminated, which keeps a CV that merely
-    # mentions "macros" in its (UTF-16) text from matching.
-    for marker in ("Macros", "_VBA_PROJECT", "ObjectPool"):
-        if (marker.encode("utf-16-le") + b"\x00\x00") in data:
-            raise FileRejected("This document contains macros or embedded objects we can't accept. "
-                               "Please save it as a PDF and try again.")
-    if b"W\x00o\x00r\x00d\x00D\x00o\x00c\x00u\x00m\x00e\x00n\x00t" not in data:
-        raise FileRejected("This doesn't look like a Word document.")
-
-
-def check_cv(filename: str, declared_type: str, data: bytes) -> str:
-    """Validate an uploaded CV. Returns the canonical extension, or raises
-    FileRejected with a message that is safe to show the candidate."""
+def check_cv(filename: str, data: bytes) -> str:
+    """Validate an uploaded CV. Returns the extension, or raises FileRejected
+    with a message that is safe to show the candidate."""
     ext = file_ext(filename)
-    if ext not in ALLOWED:
+    if ext not in _MAGIC:
         raise FileRejected("Upload your CV as a PDF, DOC or DOCX file.")
     if not data:
         raise FileRejected("This file is empty. Please choose another.")
     if len(data) > config.MAX_CV_BYTES:
         raise FileRejected("Please upload a CV of 10MB or less.")
-    mime = (declared_type or "").split(";")[0].strip().lower()
-    if mime and mime not in ALLOWED[ext]:
-        raise FileRejected("The file type doesn't match its name. Please upload a PDF, DOC or DOCX.")
-    {"pdf": _check_pdf, "docx": _check_docx, "doc": _check_doc}[ext](data)
+    # PDFs may carry a few junk bytes before the header; Office files may not.
+    ok = _MAGIC["pdf"] in data[:1024] if ext == "pdf" else data.startswith(_MAGIC[ext])
+    if not ok:
+        raise FileRejected("This file doesn't look like a valid "
+                           f"{ext.upper()}. Please export it again or upload a PDF.")
     return ext
 
 

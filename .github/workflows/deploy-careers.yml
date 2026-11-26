@@ -1,0 +1,108 @@
+name: Deploy careers
+
+# Tests and deploys goji-careers, the website's job-application backend
+# (https://careers-api.gojiphysio.com). Pull requests run the tests only; a
+# push to main that touches careers/ runs the tests and then deploys. Auth to
+# Google Cloud is Workload Identity Federation (no stored key), as for booking.
+#
+# Test vs production is the env block below: it is versioned on purpose, so
+# going live is a reviewed PR that swaps the TEST folder/tracker IDs for the
+# production ones and sets CAREERS_TEST_MODE to "0".
+# --max-instances=1 keeps the reference-number lock authoritative.
+
+on:
+  pull_request:
+    paths:
+      - "business-intelligence/scripts/careers/**"
+      - ".github/workflows/deploy-careers.yml"
+  push:
+    branches: [main]
+    paths:
+      - "business-intelligence/scripts/careers/**"
+      - ".github/workflows/deploy-careers.yml"
+  workflow_dispatch: {}
+
+concurrency:
+  group: deploy-careers-${{ github.event_name }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  PROJECT: ${{ vars.GCP_PROJECT }}
+  REGION: ${{ vars.GCP_REGION }}
+  SERVICE: goji-careers
+  DOMAIN: careers-api.gojiphysio.com
+  RUNTIME_SA: careers-sa@${{ vars.GCP_PROJECT }}.iam.gserviceaccount.com
+  # ---- test / production switch (Goji Recruitment Shared Drive) ----
+  # TEST: "Goji Recruitment (TEST)" > Applications, and its Applicant Tracker.
+  APPLICATIONS_FOLDER_ID: 13JNhXXqT_qLRaj7Tw9h-Gyr1wzv8Eaiq
+  TRACKER_SHEET_ID: 1Lx6vPpgMV29-0GBovwjmkoUWfGXvhQaZFtIAa5ZHlnQ
+  CAREERS_TEST_MODE: "1"
+  CAREERS_TEST_EMAIL: hello@gojiphysio.com
+  CORS_ORIGIN: https://www.gojiphysio.com
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install deps
+        run: pip install -r business-intelligence/scripts/careers/requirements.txt pytest
+      - name: Careers tests
+        working-directory: business-intelligence/scripts
+        run: python -m pytest careers/ -q
+
+  deploy:
+    needs: test
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.WIF_PROVIDER }}
+          service_account: ${{ vars.DEPLOY_SERVICE_ACCOUNT }}
+
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Deploy careers service
+        working-directory: business-intelligence/scripts/careers
+        run: |
+          # '^|^' makes '|' the list delimiter: values contain ',' (CORS list)
+          # and '@' (email addresses), so neither can separate the variables.
+          ENV="^|^CORS_ORIGIN=${CORS_ORIGIN}"
+          ENV+="|RECRUITMENT_APPLICATIONS_FOLDER_ID=${APPLICATIONS_FOLDER_ID}"
+          ENV+="|RECRUITMENT_TRACKER_SHEET_ID=${TRACKER_SHEET_ID}"
+          ENV+="|CAREERS_TEST_MODE=${CAREERS_TEST_MODE}|CAREERS_TEST_EMAIL=${CAREERS_TEST_EMAIL}"
+          gcloud run deploy "${SERVICE}" \
+            --source . --region "${REGION}" --project "${PROJECT}" \
+            --service-account "${RUNTIME_SA}" \
+            --set-env-vars="${ENV}" \
+            --set-secrets="GMAIL_APP_PASSWORD=gmail-app-password:latest,TURNSTILE_SECRET=turnstile-secret:latest" \
+            --max-instances=1 --min-instances=0 \
+            --memory=512Mi --timeout=120 \
+            --allow-unauthenticated \
+            --quiet
+
+      - name: Ensure careers-api.gojiphysio.com domain mapping
+        run: |
+          # Non-fatal: a mapping hiccup must not fail the code roll.
+          gcloud components install beta --quiet || true
+          if gcloud beta run domain-mappings describe --domain="${DOMAIN}" \
+               --platform=managed --region "${REGION}" --project "${PROJECT}" --quiet >/dev/null 2>&1; then
+            echo "domain mapping ${DOMAIN} already exists"
+          elif gcloud beta run domain-mappings create --service="${SERVICE}" \
+                 --domain="${DOMAIN}" --platform=managed --region "${REGION}" --project "${PROJECT}" --quiet; then
+            echo ">> One-time DNS: add  careers-api  CNAME  ghs.googlehosted.com.  (DNS only) on gojiphysio.com."
+          else
+            echo "!! Could not create the ${DOMAIN} mapping. Continuing."
+          fi
