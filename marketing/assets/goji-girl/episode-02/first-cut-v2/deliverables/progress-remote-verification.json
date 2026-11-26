@@ -1,0 +1,25 @@
+{
+  "commit": "206583a",
+  "assets": [
+    {
+      "path": "README.md",
+      "http_status": 200,
+      "sha256": "e29112b079be904e6640074c8e93dc9634fccb312dd6d35d5c48cf5bb5a07eb7"
+    },
+    {
+      "path": "inputs/03-full-left-pump.png",
+      "http_status": 200,
+      "sha256": "81237b6715a7479140886b3134a396796a3b94bbaeb64e9a0c89c0b37661c38d"
+    },
+    {
+      "path": "inputs/07-impact-end.png",
+      "http_status": 200,
+      "sha256": "53aa86e33048d3f911d2ae8fc2c80864932248eb7f30d15c1eec404e87df586b"
+    },
+    {
+      "path": "inputs/08-contact-look.png",
+      "http_status": 200,
+      "sha256": "14b3570075e46d88407035e76e3e3cd4ea488f4e425af0e7dcafdb8f89b3af0b"
+    }
+  ]
+}

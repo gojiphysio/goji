@@ -33,5 +33,12 @@
     "duration": 8,
     "status": "draft selection; full-take 2fps and dense 8fps detail review",
     "review": "One extension/return repetition; therapist actively follows and cues knees. Two officers pump arms/knees in place outside glass, burning wreck stays on its side, shoes/bag remain on bench and girl wears socks. Slight foot/bar contact drift remains for polish. Fixed camera and required gag preserved in samples. Normal-speed playback pending Mac unlock."
+  },
+  "06": {
+    "path": "takes/06-01/raw_00001_.mp4",
+    "start": 0,
+    "duration": 5,
+    "status": "provisional motion revision; sampled-frame review",
+    "review": "Full 4fps review supports more aggressive weaving and faster road travel; no visible exterior character or bus-mounted police emitters. Normal-speed playback still pending."
   }
 }
