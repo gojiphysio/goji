@@ -90,3 +90,65 @@ def test_confirmation_mentions_the_email_only_when_one_went_out():
     assert "confirmation email" not in booking_client.confirmation_text(res)
     assert "confirmation email" not in booking_client.confirmation_text(
         {**res, "dry_run": True}, emailed=True)                            # nothing was sent
+
+
+def test_offered_times_can_carry_the_clinician():
+    opts = "2026-11-30 17:00 Claire, 2026-12-01 08:00 Kristy, 2026-12-02 09:00"
+    assert booking_client.offered(opts) == {("2026-11-30", "17:00"), ("2026-12-01", "08:00"),
+                                            ("2026-12-02", "09:00")}
+    assert booking_client.offered_with(opts, "2026-11-30", "17:00") == "claire"
+    # The model's clinician can't move a time to someone it wasn't offered with.
+    assert booking_client.offered_with(opts, "2026-11-30", "17:00", "Kristy") == "claire"
+    assert booking_client.offered_with(opts, "2026-12-02", "09:00", "Kristy Ng") == "kristy"
+    assert booking_client.offered_with(opts, "2026-12-02", "09:00") == ""
+    assert booking_client.offered_with(opts, "2026-12-03", "09:00") is None
+
+
+def test_the_same_time_with_two_clinicians_books_the_one_they_named():
+    opts = "2026-11-30 17:00 Kristy, 2026-11-30 17:00 Claire"
+    assert booking_client.offered_with(opts, "2026-11-30", "17:00", "Claire") == "claire"
+    assert booking_client.offered_with(opts, "2026-11-30", "17:00") == "kristy"   # newest
+
+
+def test_earlier_offers_are_kept_behind_the_new_ones():
+    merged = booking_client.merge_options(
+        "2026-12-01 08:00 Kristy, 2026-12-01 08:30 Kristy",
+        "2026-11-30 17:00 Claire, 2026-12-01 08:00 Kristy")
+    assert merged == ("2026-12-01 08:00 Kristy, 2026-12-01 08:30 Kristy, "
+                      "2026-11-30 17:00 Claire")
+    many = ", ".join(f"2026-12-{d:02d} 09:00" for d in range(1, 20))
+    assert len(booking_client.offered(booking_client.merge_options(many, ""))) == \
+        booking_client.MAX_OPTIONS
+
+
+def test_only_known_session_lengths_reach_the_booking(monkeypatch):
+    """26 Nov 2026: the model put '40 min postpartum, Bifrost/FM billing $190'
+    in variant. Only goji-booking's own codes go through; terms the team
+    agreed go in `arranged`."""
+    monkeypatch.setattr(config, "INTERNAL_TOKEN", "t")
+    monkeypatch.setattr(config, "BOOKING_SIMULATE", False)
+    seen = []
+
+    class Http:
+        def post(self, url, json, timeout, headers):
+            seen.append(json)
+            return NS(json=lambda: {"ok": True, "reference": "R", "date": json["date"],
+                                    "time": json["time"]})
+    booking_client.book({**B, "variant": "40 min postpartum, FM billing $190",
+                         "arranged": " Bill to FM, $190 for 40 min "}, wa_id="65", http=Http())
+    booking_client.book({**B, "variant": "40min"}, wa_id="65", http=Http())
+    assert seen[0]["variant"] == "" and seen[0]["arranged"] == "Bill to FM, $190 for 40 min"
+    assert seen[1]["variant"] == "40min" and seen[1]["arranged"] == ""
+
+
+def test_a_missing_name_is_asked_for_with_the_time_held():
+    b = {**B, "full_name": "", "date": "2026-11-30", "time": "17:00", "clinician": "claire"}
+    assert booking_client.missing_details(b) == ["full_name"]
+    assert booking_client.details_question(b, ["full_name"]) == (
+        "Lovely! Could I have your full name? Then I'll book Mon 30 Nov, 5:00pm with Claire "
+        "for you.")
+    home = {**b, "format": "home", "for_whom": "son"}
+    assert booking_client.missing_details(home) == ["full_name", "address"]
+    assert "the patient's full name and the address for the home visit" in \
+        booking_client.details_question(home, ["full_name", "address"])
+    assert booking_client.missing_details({**b, "time": ""}) == []

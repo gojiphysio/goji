@@ -197,6 +197,14 @@ def create_booking(plato, draft: dict, *, now: datetime | None = None,
     notes = (draft.get("notes") or "").strip()[:1000]
     _require(not _TAG_RE.search(notes) and not _TAG_RE.search(address),
              "Please remove the < and > characters from your note.")
+    # Terms the clinic agreed in a WhatsApp chat (billing to a company or
+    # insurer, a custom price or length): the assistant passes on what the
+    # team said, so it's written apart from the patient's own note. Only the
+    # internal route sends it; the website form can't set it.
+    arranged = ((draft.get("arranged") or "").strip()[:300]
+                if source == "whatsapp" else "")
+    _require(not _TAG_RE.search(arranged),
+             "Please remove the < and > characters from your note.")
 
     # Physiotherapy sub-type the patient chose (website's "What type of
     # physiotherapy?" step). Only meaningful for physiotherapy. `focus_label` is
@@ -286,7 +294,8 @@ def create_booking(plato, draft: dict, *, now: datetime | None = None,
                 ids, visit_id = _create_appointments(
                     plato, svc, cid, day, time_, home, name, phone, email, address,
                     notes, clinician_requested, focus_label, variant,
-                    booked_via=BOOKED_VIA.get(source, "website"), patient_id=patient_id)
+                    booked_via=BOOKED_VIA.get(source, "website"), patient_id=patient_id,
+                    arranged=arranged)
                 reference = "GOJI-" + visit_id[-6:].upper()
             return {
                 "ok": True,
@@ -343,7 +352,8 @@ def _post(plato, payload: dict) -> str:
 def _create_appointments(plato, svc, cid, day, time_, home, name, phone, email,
                          address, notes="", clinician_requested=False,
                          focus_label="", variant="",
-                         booked_via="website", patient_id: str = "") -> tuple[list[str], str]:
+                         booked_via="website", patient_id: str = "",
+                         arranged: str = "") -> tuple[list[str], str]:
     """Create the appointment(s). Returns (all_ids, visit_id). Rolls back on any
     failure so a partial home visit never lingers."""
     clin = CLINICIANS[cid]
@@ -358,6 +368,9 @@ def _create_appointments(plato, svc, cid, day, time_, home, name, phone, email,
     focus_line = f"\nType: {focus_label}" if focus_label else ""
     # Patient's condition note, appended to the visit description when present.
     note_line = f"\nCondition: {notes}" if notes else ""
+    # What the clinic agreed with them in the chat (WhatsApp only).
+    if arranged:
+        note_line += f"\nAgreed with the clinic: {arranged}"
     # Flag how the clinician was assigned so the clinic can reallocate. Home
     # visits are Cheryl-only, so the basis line only applies in-clinic.
     clin_line = ""

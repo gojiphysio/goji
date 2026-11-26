@@ -62,7 +62,8 @@ from .policy import (AGENT, DRAFT, ESCALATE, HUMAN, LATE_CHANGE_H, OFF_TOPIC, PA
                      note_off_topic,
                      out_of_scope,
                      pre_golive_chat,
-                     decide, drop_repeat_page_links, gate, human_replied_since,
+                     add_booking_link, decide, drop_repeat_page_links, gate,
+                     human_replied_since,
                      is_acknowledgement, is_positive_reaction, mask_customer_emails,
                      media_ping_due, on_human_message,
                      reply_problems, set_mode)
@@ -612,9 +613,18 @@ def _book_pending(state, ev: Inbound, received: float, fallback: str,
     # the times offered in that earlier message. Nothing else gets booked.
     pick = (chosen.get("date", ""), chosen.get("time", ""))
     if pick != (pending.get("date"), pending.get("time")):
-        if pick not in booking_client.offered(pending.get("options", "")):
+        # Any time offered in the chat in the last day, with the clinician it
+        # was offered with (the latest offer may have been someone else's).
+        who = booking_client.offered_with(pending.get("options", ""), *pick,
+                                          wanted=chosen.get("clinician", ""))
+        if who is None:
             return _book_skipped(state, ev, "time_not_offered", pending)
-        pending = {**pending, "date": pick[0], "time": pick[1]}
+        pending = {**pending, "date": pick[0], "time": pick[1], "clinician": who.capitalize()}
+    # Terms the team agreed (billing, a custom price or length) are only
+    # taken when a person from the clinic has written in this chat: a
+    # customer's own say-so never reaches the Plato note as agreed.
+    arranged = (chosen.get("arranged") or pending.get("arranged") or "").strip()
+    pending = {**pending, "arranged": arranged if _team_spoke(state) else ""}
     # Details given in the confirming message itself fill what's missing: the
     # usual case is a customer who picked a time, was asked their name, and
     # sent it. The time stays the one confirmed above.
@@ -626,6 +636,9 @@ def _book_pending(state, ev: Inbound, received: float, fallback: str,
     if (chosen.get("email") or "").strip():
         pending = {**pending, "email": chosen["email"].strip()}
     if not booking_client.complete(pending):
+        missing = booking_client.missing_details(pending)
+        if missing and not pending.get("details_asked"):
+            return _ask_details(state, ev, pending, missing)
         return _book_skipped(state, ev, "details_missing", pending)
     patient_id = tools.record_for_booking(state.patient or {}, pending.get("full_name", ""),
                                           pending.get("for_whom", ""))
@@ -681,6 +694,37 @@ def _ask_email_again(state, ev: Inbound, pending: dict, question: str):
     events.record("book_skipped", ev.wa_id, reason="email_check")
     return question, None, False
 
+
+
+def _offer_link(ev: Inbound, p) -> str:
+    """The booking link for the service a reply offers times for, or "" when
+    the reply offers none."""
+    b = p.booking or {}
+    if not booking_client.offered(b.get("options", "")):
+        return ""
+    focus = b.get("physio_focus") if b.get("service") == "physiotherapy" else ""
+    try:
+        return tools.booking_link({"service": b.get("service"),
+                                   **({"focus": focus} if focus else {})},
+                                  wa_id=ev.wa_id)["url"]
+    except tools.ToolError:
+        return ""
+
+
+def _team_spoke(state) -> bool:
+    """Has someone from the clinic written in this chat (in the Business app,
+    or an answer the assistant passed on)?"""
+    return any(h.get("role") in ("staff", "team") for h in state.history)
+
+
+def _ask_details(state, ev: Inbound, pending: dict, missing: list[str]):
+    """They picked a time but we don't have their name (or a home visit's
+    address): ask, and keep the time so their answer books it. 26 Nov 2026:
+    a pick with no name was handed to the team instead. Asked once: a second
+    confirmation still without it goes to the team."""
+    state.pending_booking = {**pending, "details_asked": True, "at": time.time()}
+    events.record("book_skipped", ev.wa_id, reason="details_asked")
+    return booking_client.details_question(pending, missing), None, False
 
 
 BOOK_HELD_REPLY = ("Thanks! I'm just getting the team to confirm this booking, and "
@@ -1192,6 +1236,8 @@ def handle_inbound(ev: Inbound, received: float) -> None:
         # A handover sends the holding reply; p.reply is Chris's draft (notice).
         reply = drop_repeat_page_links(customer_message(d, p, time.time()), state.history,
                                        time.time())
+        if d.action == SEND and not p.confirm_booking and not p.confirm_move:
+            reply = add_booking_link(reply, state.history, _offer_link(ev, p), time.time())
         booked, failed, cancelled = None, False, False
         if d.action == SEND and p.intent == "cancel" and booking_client.cancel_complete(p.cancel):
             reply, cancelled, failed = _cancel_now(state, ev, p.cancel, reply)
@@ -1235,14 +1281,28 @@ def handle_inbound(ev: Inbound, received: float) -> None:
             state.patient_at = 0.0  # look again: the booking may have made a patient
         elif d.action == SEND and not p.confirm_move and p.move.get("old_date") and (
                 booking_client.move_complete(p.move) or booking_client.offered(p.move.get("options", ""))):
+            prev = state.pending_move or {}
+            same = (sent_at - prev.get("at", 0) <= config.BOOKING_CONFIRM_WINDOW_S and all(
+                prev.get(k, "") == p.move.get(k, "") for k in ("old_date", "old_time")))
             state.pending_move = {**{k: p.move.get(k, "") for k in booking_client.MOVE_FIELDS},
-                                  "options": p.move.get("options", ""), "at": sent_at}
+                                  "options": booking_client.merge_options(
+                                      p.move.get("options", ""),
+                                      prev.get("options", "") if same else ""),
+                                  "at": sent_at}
         elif d.action == SEND and not p.confirm_booking and (
                 booking_client.complete(p.booking)
                 or (p.booking.get("service") and booking_client.offered(p.booking.get("options", "")))):
             # Stated back, or times offered; only their next message can confirm.
+            # Times offered earlier for the same service stay pickable.
+            prev = state.pending_booking or {}
+            same = (sent_at - prev.get("at", 0) <= config.BOOKING_CONFIRM_WINDOW_S and all(
+                prev.get(k, "") == p.booking.get(k, "")
+                for k in ("service", "format", "for_whom")))
             state.pending_booking = {**{k: p.booking.get(k, "") for k in booking_client.FIELDS},
-                                     "options": p.booking.get("options", ""), "at": sent_at}
+                                     "options": booking_client.merge_options(
+                                         p.booking.get("options", ""),
+                                         prev.get("options", "") if same else ""),
+                                     "at": sent_at}
         st.save(state)
     if d.action == SEND:
         with _autonomy_lock:

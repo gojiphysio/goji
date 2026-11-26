@@ -339,6 +339,32 @@ def test_whatsapp_booking_with_email_keeps_the_invite():
     assert payload["email"] == "jane@example.com" and payload["connect"] is True
 
 
+def test_terms_agreed_in_a_whatsapp_chat_go_on_their_own_line():
+    """26 Nov 2026: the team agreed a 40-min session billed to the patient's
+    employer's insurer at $190. It goes in the Plato note apart from the
+    patient's own note, so the front desk bills it right."""
+    p = StubPlato()
+    create_booking(p, {**BASE, "clinician_id": "cheryl-long", "notes": "postpartum",
+                       "arranged": "Bill to FM (company insurance), $190 for 40 min"},
+                   now=NOW, email_required=False, source="whatsapp")
+    desc = p.created[0][0]["description"]
+    assert "\nCondition: postpartum" in desc
+    assert "\nAgreed with the clinic: Bill to FM (company insurance), $190 for 40 min" in desc
+
+
+def test_the_website_cannot_set_agreed_terms():
+    p = StubPlato()
+    create_booking(p, {**BASE, "clinician_id": "cheryl-long", "arranged": "free session"},
+                   now=NOW)
+    assert "Agreed with the clinic" not in p.created[0][0]["description"]
+
+
+def test_agreed_terms_refuse_tags():
+    with pytest.raises(BookingError):
+        create_booking(StubPlato(), {**BASE, "arranged": "<script>x</script>"}, now=NOW,
+                       email_required=False, source="whatsapp")
+
+
 def test_website_note_is_unchanged():
     p = StubPlato()
     create_booking(p, {**BASE, "clinician_id": "cheryl-long"}, now=NOW)
