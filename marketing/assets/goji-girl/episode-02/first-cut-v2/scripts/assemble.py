@@ -24,7 +24,7 @@ listing=tmp/'concat.txt';listing.write_text(''.join("file '"+str((tmp/(sid+'.mp4
 base=tmp/'picture.mp4'
 subprocess.run(['ffmpeg','-y','-v','error','-f','concat','-safe','0','-i',str(listing),'-c','copy',str(base)],check=True)
 out=R/'deliverables'/(name+'.mp4')
-filters="[1:v]scale=576:1024[cal];[2:v]scale=576:1024[safe];[0:v][cal]overlay=0:0:enable='between(t,3,5)'[v1];[v1][safe]overlay=0:0:enable='between(t,43.5,48)'[v]"
+filters="[1:v]scale=576:1024[cal];[2:v]scale=576:1024[safe];[0:v][cal]overlay=0:0:enable='gte(t,3)*lt(t,5)'[v1];[v1][safe]overlay=0:0:enable='gte(t,43.5)*lt(t,48)'[v]"
 subprocess.run(['ffmpeg','-y','-v','error','-i',str(base),'-loop','1','-framerate','24','-t','49','-i',str(R/'overlays/calendar-reminder.png'),'-loop','1','-framerate','24','-t','49','-i',str(R/'overlays/safehouse-popup.png'),'-i',str(R/'audio/sfx-mix.wav'),'-filter_complex_threads','1','-filter_complex',filters,'-map','[v]','-map','3:a','-t','49','-c:v','libx264','-preset','fast','-crf','20','-pix_fmt','yuv420p','-c:a','aac','-b:a','192k','-movflags','+faststart',str(out)],check=True)
 probe=json.loads(subprocess.check_output(['ffprobe','-v','error','-show_format','-show_streams','-of','json',str(out)],text=True))
 subprocess.run(['ffmpeg','-v','error','-xerror','-err_detect','explode','-i',str(out),'-f','null','-'],check=True)

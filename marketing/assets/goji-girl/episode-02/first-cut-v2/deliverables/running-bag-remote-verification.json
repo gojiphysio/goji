@@ -1,0 +1,18 @@
+{
+  "commit": "e456e58",
+  "checked_at": 1795681973.990869,
+  "assets": [
+    {
+      "url": "https://raw.githubusercontent.com/gojiphysio/goji/e456e58/marketing/assets/goji-girl/episode-02/first-cut-v2/README.md",
+      "http_status": 200,
+      "sha256": "c106779bffae7c26bcfce8f98170e1d13b31e182ab314c46352608ef1cee2b6b",
+      "matches_local": true
+    },
+    {
+      "url": "https://raw.githubusercontent.com/gojiphysio/goji/e456e58/marketing/assets/goji-girl/episode-02/first-cut-v2/deliverables/running-bag-motion-test.mp4",
+      "http_status": 200,
+      "sha256": "7be4741188768cac2bb08187450fb8fae9164271857a21ba0b5097b60358d672",
+      "matches_local": true
+    }
+  ]
+}

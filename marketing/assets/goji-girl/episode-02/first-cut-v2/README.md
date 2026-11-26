@@ -1,39 +1,67 @@
-# Episode 2: motion revision
+# Episode 2: revised first cut
 
-This pass is in production. The previous cut remains available in [first-cut-v1](../first-cut-v1/README.md).
+**49 seconds · vertical 9:16 · original SFX · creative review draft**
 
-The revision covers the running scenes, bus chase, rollover, exit and the dust-off transition. Both arms pump through the full running cycle, with the handbag attached as a rigid prop. Its long side runs alongside her body; it follows her grip instead of presenting its broad face to the camera. The bus carries speed through a sharp turn, a roll onto its side and a slide into the mall-side canopy. Goji Girl climbs through the passenger doorway with visible hand and foot support, taps the reader while braced, then climbs down and lands on the pavement.
+[**Watch the revised cut with sound**](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-girl-episode-2/marketing/assets/goji-girl/episode-02/first-cut-v2/deliverables/episode-02-first-cut-v2.mp4)
 
-The exit gets eight seconds, bringing the planned cut to 49 seconds. The safehouse message stays exactly as approved: “You can save your game, improve your stats, and lose the police at a safehouse.”
+[![Play the revised cut](deliverables/first-cut-v2-poster.jpg)](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-girl-episode-2/marketing/assets/goji-girl/episode-02/first-cut-v2/deliverables/episode-02-first-cut-v2.mp4)
 
-[Watch the new chase and crash motion test with SFX](deliverables/chase-crash-motion-test.mp4). This ten-second test is provisional and has been reviewed in frame samples. The impact still has some livery drift; the full revision is rendering. The [earlier chase-only test](deliverables/chase-motion-test.mp4) remains unchanged.
+The running uses both arms, with the rigid handbag moving through the left-arm swing. Its long side sits alongside her body, so the rear view mostly shows its narrow end. The bus approach carries that movement through the turn around the nose.
 
-[Watch the supported bus-exit test with SFX](deliverables/exit-motion-test.mp4). She climbs across the sill, lowers herself down and lands on the pavement. The card tap is still small in this wide view.
+The chase has faster road travel and sharper steering. At Lentor, the bus turns hard, topples, strikes the road and slides into the canopy supports. Goji Girl braces through the passenger doorway, pulls her legs across, taps while supported, then lowers herself down and lands on the pavement. The exit now gets eight seconds.
 
-## Bag orientation correction
+The safehouse message is exactly:
 
-The revised references turn the bag alongside her body, with its narrow end visible from behind. The grip transform has the same correction in the running and exit guides. The rendered departure test now keeps both arms pumping across the full shot and shows the narrow bag end from behind in 8fps review. Normal-speed playback remains pending. The bus-approach and clinic-sprint renders are using this selected movement as an additional reference.
+> You can save your game, improve your stats, and lose the police at a safehouse.
 
-[Watch the revised running and bag motion with SFX](deliverables/running-bag-motion-test.mp4).
+The calendar uses one font size. Wanted stars and other gameplay HUD remain for later post-production.
 
-| Previous reference | Revised reference |
+## Timing
+
+| Time | Action |
 | --- | --- |
-| ![Previous broad bag face](inputs/03-full-left-pump.png) | ![Revised narrow bag end](inputs/03-grip-side-on.png) |
+| 00:00–00:05 | End the call; five-minute reminder and surprise |
+| 00:05–00:08 | Run out of the house |
+| 00:08–00:11 | Run around the bus to the driver window |
+| 00:11–00:15 | Take over the bus |
+| 00:15–00:20 | High-speed weave with offscreen police lights |
+| 00:20–00:25 | Sharp turn, roll, slide and canopy impact |
+| 00:25–00:33 | Supported climb, tap, descent and landing |
+| 00:33–00:35 | Dust off and move away from the wreck |
+| 00:35–00:39 | Sprint toward Goji with police behind |
+| 00:39–00:41 | Enter the calm clinic |
+| 00:41–00:49 | Reformer session and police pathing gag |
 
-## New appearance references
+The safehouse box appears at 00:43.5–00:48, in the lowered position agreed for Instagram.
 
-These are still references for rendering, not proof that the animation passes review.
+![Frames from the revised cut](deliverables/revised-cut-overview.jpg)
 
-| Full arm pump | Braced exit |
+## Remaining roughness
+
+- The retained driver pull and cab entry still have floaty contacts.
+- The bus side livery changes near the final impact.
+- The card tap is small and partly hidden in the wide exit view. The beep marks it.
+- The dust-off render needed a gradual crop to counter its camera pullback.
+- The retained reception shot has a bag-hand continuity detail; the reformer shot has slight foot/bar contact drift.
+
+## Review and sources
+
+The export passes a strict full-decode check. Frame review covers complete revised shots, including samples within each stride and close checks of the exit contacts. Full normal-speed playback and audio audition remain pending because the Mac relocked; file checks and contact sheets do not replace that review.
+
+[Selected takes and per-shot notes](selected.json) · [Edit record](deliverables/episode-02-first-cut-v2-record.json) · [Production notes](production-notes.md) · [Render status](render-status.json)
+
+[Blender motion and clearance checks](guides/motion-audit.json) · [Bag grip checks](guides/bag-grip-audit.json) · [Render prompts](revision-jobs.json)
+
+The Blender checks apply to the guides. Approved character, SOS-BUS-01 and facade references define the finished appearance. Raw attempts, rejected running tests, source hashes, editable overlays and separate sound stems are retained.
+
+## Short motion tests
+
+[Running and bag](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-girl-episode-2/marketing/assets/goji-girl/episode-02/first-cut-v2/deliverables/running-bag-motion-test.mp4) · [Chase and crash](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-girl-episode-2/marketing/assets/goji-girl/episode-02/first-cut-v2/deliverables/chase-crash-motion-test.mp4) · [Supported exit](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-girl-episode-2/marketing/assets/goji-girl/episode-02/first-cut-v2/deliverables/exit-motion-test.mp4)
+
+## Bag reference correction
+
+| Earlier reference | Side-on reference |
 | --- | --- |
-| ![Running pose](inputs/03-grip-side-on.png) | ![Braced passenger-door exit](inputs/08-contact-look.png) |
+| ![Earlier broad bag face](inputs/03-full-left-pump.png) | ![Side-on bag](inputs/03-grip-side-on.png) |
 
-![Mall-side impact](inputs/07-impact-end.png)
-
-## Motion and continuity
-
-[Geometry check record](guides/motion-audit.json) · [Render status](render-status.json) · [Selected takes](selected.json) · [Render prompts](revision-jobs.json)
-
-The Blender guide covers 110 metres in five seconds for the chase. The crash separates steering, weight transfer, ground contact, sliding and impact. The exit checks limb reach and carries the same wreck transform into the next shot. These are original staging choices, not measurements of GTA or a real bus. Generated footage needs its own contact and continuity review.
-
-The retained scenes are 01, 02, 05, 11 and 12. Scene 05's earlier driver-window contact roughness remains documented in the previous cut. No wanted stars or other gameplay HUD are baked into the new footage.
+[Previous 47-second cut](../first-cut-v1/README.md) · [Storyboards and timed script](../README.md) · [Draft PR #265](https://github.com/gojiphysio/goji/pull/265)
