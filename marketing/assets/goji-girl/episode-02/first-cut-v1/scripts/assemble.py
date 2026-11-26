@@ -9,8 +9,10 @@ for sid,job in shots.items():
   src=R/'inputs'/f'{sid}-appearance.png';args=['-loop','1','-i',str(src)]
  else:
   item=selected[sid];src=R/item['path'];args=['-ss',str(item.get('start',0)),'-i',str(src)]
- if not out.exists():subprocess.run(['ffmpeg','-v','error',*args,'-t',str(duration),'-vf','scale=576:1024:force_original_aspect_ratio=decrease,pad=576:1024:(ow-iw)/2:(oh-ih)/2,setsar=1,fps=24','-an','-c:v','libx264','-preset','fast','-crf','20','-pix_fmt','yuv420p',str(out)],check=True)
- records.append({'shot':sid,'source':str(src.relative_to(R)),'start_seconds':sum(x['duration'] for x in records),'duration':duration,'sha256':hashlib.sha256(src.read_bytes()).hexdigest()})
+ extra='' if a.animatic else item.get('video_filter','')
+ vf=(extra+',' if extra else '')+'scale=576:1024:force_original_aspect_ratio=decrease,pad=576:1024:(ow-iw)/2:(oh-ih)/2,setsar=1,fps=24'
+ if not out.exists():subprocess.run(['ffmpeg','-v','error',*args,'-t',str(duration),'-vf',vf,'-an','-c:v','libx264','-preset','fast','-crf','20','-pix_fmt','yuv420p',str(out)],check=True)
+ records.append({'shot':sid,'source':str(src.relative_to(R)),'start_seconds':sum(x['duration'] for x in records),'duration':duration,'video_filter':extra,'sha256':hashlib.sha256(src.read_bytes()).hexdigest()})
 listing=tmp/'concat.txt';listing.write_text(''.join("file '"+str((tmp/(sid+'.mp4')).resolve())+"'\n" for sid in shots))
 base=tmp/'picture.mp4'
 subprocess.run(['ffmpeg','-y','-v','error','-f','concat','-safe','0','-i',str(listing),'-c','copy',str(base)],check=True)

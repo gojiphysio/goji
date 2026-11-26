@@ -1,8 +1,10 @@
 # Episode 2 — first cut v1
 
-**Render in progress · 26 November 2026 · 4 shots held for the edit; bus-action takes being revised.**
+**Render in progress · 26 November 2026 · 5 shots held for the edit; bus-action takes being revised.**
 
 [Play the animated opening with SFX — scenes 01–03](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-girl-episode-2/marketing/assets/goji-girl/episode-02/first-cut-v1/deliverables/opening-pass.mp4)
+
+[Chase motion preview with SFX — scene 06](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-girl-episode-2/marketing/assets/goji-girl/episode-02/first-cut-v1/deliverables/chase-pass.mp4)
 
 [Exit motion take — scene 08, silent](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-girl-episode-2/marketing/assets/goji-girl/episode-02/first-cut-v1/takes/08-02/raw_00001_.mp4)
 
