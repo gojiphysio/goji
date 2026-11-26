@@ -1,7 +1,7 @@
 {
   "shot": "10",
   "take": "01",
-  "status": "queued",
+  "status": "superseded_before_render",
   "started": 1795658188.319367,
   "recipe": "H3 Ref2VA GGUF Q4 + native Turbo 4-step; 576x1024 24fps",
   "native_frames": 107,
@@ -244,5 +244,8 @@
     "node_errors": {}
   },
   "steering_applied_at": 1795662516.596714,
-  "start_anchor_added_at": 1795663746.27186
+  "start_anchor_added_at": 1795663746.27186,
+  "superseded_by": "10-02",
+  "reason": "User requested closer GTA SA running animation; new original gait guide replaces the old loop.",
+  "updated_at": 1795666483.719148
 }

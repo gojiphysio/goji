@@ -3,7 +3,8 @@ import bpy,math,json,sys
 from pathlib import Path
 from mathutils import Vector,Matrix
 R=Path(__file__).resolve().parents[1];E=R.parent
-sid=sys.argv[-1];variant='-v2' if sid in ['04','05'] else '';dur={'04':3,'05':4,'06':5,'07':5,'09':2,'10':4}[sid];N=dur*12+1
+sid=sys.argv[-1];variant='-sa-v3' if sid in ['03','10'] else ('-v2' if sid in ['04','05'] else '');dur={'03':3,'04':3,'05':4,'06':5,'07':5,'09':2,'10':4}[sid];N=dur*12+1
+exec((R/'scripts/sa_gait.py').read_text())
 bpy.ops.wm.open_mainfile(filepath=str(E/'revision-08/blender/route-with-pedestrians.blend'))
 s=bpy.context.scene;s.timeline_markers.clear();s.frame_set(1)
 source=(E/'revision-07/scripts/build_continuity.py').read_text();exec(source[source.index('M={}'):source.index('# +Y is vehicle forward')])
@@ -15,7 +16,21 @@ bus=bpy.data.objects['BUS-SOS-01 chassis transform'];bus.location=(-3.65,-28,0);
 def reveal(p):
  for o in [p.root]+list(p.root.children_recursive):o.hide_render=False
 hero=None;driver=None;cops=[]
-if sid in ['04','05','09','10']:hero=Person('CUT'+sid+' GG01');reveal(hero)
+if sid in ['03','04','05','09','10']:hero=Person('CUT'+sid+' GG01');reveal(hero)
+if sid=='03':
+ for surface in ['west sidewalk','two-way asphalt']:
+  ob=bpy.data.objects[surface];ob.location.y=-5;ob.scale.y=130
+ for ty in [-44,-34]:
+  segment('home tree trunk',(-8.9,ty,.12),(-8.9,ty,5.8),.22,.14,'trunk')
+  ico('home tree crown',(-8.9,ty,6),(2.1,2.2,1.8),'leaf',sub=2)
+ for ob in [bus]+list(bus.children_recursive):ob.hide_render=True
+ for ob in bpy.data.objects:
+  if ob.name.startswith(('neighbourhood shelter','neighbourhood green bin')):ob.hide_render=True
+ cube('home doorway left',(-7.6,-48,1.5),(.18,.2,3),'cream')
+ cube('home doorway right',(-5.5,-48,1.5),(.18,.2,3),'cream')
+ cube('home doorway lintel',(-6.55,-48,3),(2.3,.2,.22),'cream')
+ for k,(x,y) in enumerate([(-8.2,-43),(-5.65,-37),(-8.4,-34)]):
+  extra=Person('HOME passerby'+str(k),outfit=['cream','teal','blue'][k],hair='short');extra.pose(1,(x,y,.13),0)
 if sid=='05':driver=Person('CUT05 driver',outfit='purple',hair='short');reveal(driver)
 if sid=='10':
  for k in range(2):
@@ -26,7 +41,7 @@ if sid=='04':
 # Crowd remains in protected storefront pockets; pose gestures are already present.
 # Roadside crash debris is only visible after impact.
 for ob in bpy.data.objects:
- if ob.name.startswith(('fixed crash debris','damaged canopy post')):ob.hide_render=sid in ['04','05','06']
+ if ob.name.startswith(('fixed crash debris','damaged canopy post')):ob.hide_render=sid in ['03','04','05','06']
 bpy.ops.object.camera_add();cam=bpy.context.object;cam.name='CUT'+sid+' follow';cam.data.sensor_fit='HORIZONTAL';cam.data.sensor_width=36;cam.data.lens=36/(2*math.tan(math.radians(52)/2));s.camera=cam
 s.render.resolution_x=288;s.render.resolution_y=512;s.cycles.samples=8;s.render.fps=12;s.frame_start=1;s.frame_end=N
 out=R/'guides'/f'{sid}{variant}-frames';out.mkdir(exist_ok=True)
@@ -44,7 +59,10 @@ def window_pose(actor,f,centre,tilt,facing,seated=0,reach=None):
 marks=[]
 for f in range(1,N+1):
  t=(f-1)/12;u=t/dur
- if sid=='04':
+ if sid=='03':
+  p=Vector((-6.55,-47.7+3.75*t,.13));sa_run_pose(hero,f,p,0,t,move_segment)
+  distance=1.5+1.3*ease(min(1,t/.6));cp=p+Vector((0,-distance,1.95));target=p+Vector((0,.4,1.1))
+ elif sid=='04':
   pts=[(-6.55,-27.5,.13),(-6.55,-23.0,.13),(-5.6,-21.0,.13),(-3.7,-20.9,.13),(-1.85,-22.85,.13)];p=path(pts,u);d=path(pts,min(1,u+.02))-path(pts,max(0,u-.02));angle=face(d);hero.pose(f,p,angle,walk=t*12)
   # A naive rear offset enters the bus during the tight turn. Stage the chase
   # camera outside the rigid vehicle footprint throughout the nose crossing.
@@ -84,8 +102,19 @@ for f in range(1,N+1):
  elif sid=='09':
   bus.location=(-5.1,0,1.45);bus.rotation_euler=(0,math.pi/2,0);p=Vector((-6.3,5.4+max(0,t-1.3)*2,.13));hero.pose(f,p,0,walk=0 if t<1.3 else t*12,reach=(.05,-.07,1.45) if t<1.3 else None);cp=p+Vector((-.4,-4.1,1.87));target=p+Vector((.2,0,1.12))
  else:
-  bus.location=(-5.1,0,1.45);bus.rotation_euler=(0,math.pi/2,0);pts=[(-6.55,14,.13),(-7.15,22.1,.13),(-9.58,25.3,.13)];p=path(pts,u);d=path(pts,min(1,u+.02))-path(pts,max(0,u-.02));hero.pose(f,p,face(d),walk=t*12)
-  for k,c in enumerate(cops):c.pose(f,p+Vector((-.8 if k==0 else 1.25,-3.2-k*.3,0)),face(d),walk=t*12+k*2)
+  bus.location=(-5.1,0,1.45);bus.rotation_euler=(0,math.pi/2,0);pts=[(-6.55,14,.13),(-7.15,22.1,.13),(-9.58,25.3,.13)];p=path(pts,u);d=path(pts,min(1,u+.02))-path(pts,max(0,u-.02));speed=d.length/((min(1,u+.02)-max(0,u-.02))*dur)
+  sa_run_pose(hero,f,p,face(d),t,move_segment,speed=speed)
+  lengths=[(Vector(pts[i+1])-Vector(pts[i])).length for i in range(2)]
+  hero_distance=lengths[0]*u*2 if u<.5 else lengths[0]+lengths[1]*(u*2-1)
+  for k,c in enumerate(cops):
+   follow=hero_distance-3.2-k*.3
+   if follow<0:chase=Vector(pts[0])+(Vector(pts[1])-Vector(pts[0])).normalized()*follow
+   elif follow<lengths[0]:chase=lerp(pts[0],pts[1],follow/lengths[0])
+   else:chase=lerp(pts[1],pts[2],(follow-lengths[0])/lengths[1])
+   tangent=(p-chase).normalized();sideways=Vector((tangent.y,-tangent.x,0))
+   chase+=sideways*(-.55 if k==0 else .55)
+   chase_direction=p-chase
+   sa_run_pose(c,f,chase,face(chase_direction),t,move_segment,speed=speed,phase_offset=k*.3)
   cp=p+Vector((.65,-4.8,1.97));target=p+Vector((-1.1,2.5,1.27))
  if sid in ['04','05','06','07']:
   for prop in ['location','rotation_euler']:bus.keyframe_insert(prop,frame=f)

@@ -18,7 +18,8 @@
     "start": 0,
     "duration": 3,
     "status": "draft selection; sampled-frame review",
-    "review": "Forward rear-camera run; bystanders step clear with no observed contact."
+    "review": "Forward rear-camera run; bystanders step clear with no observed contact.",
+    "pending_revision": "03-02: closer original GTA SA running cycle requested by user; keep current take in checkpoint01 until replacement review."
   },
   "04": {
     "path": "takes/04-02/raw_00001_.mp4",
@@ -26,6 +27,13 @@
     "duration": 3,
     "status": "draft selection; sampled-frame review",
     "review": "Corrected take runs past passenger door around front nose to driver side. Approved formed bus and compact driver opening retained. Six sampled frames inspected; full continuous motion not claimed."
+  },
+  "05": {
+    "path": "takes/05-02/raw_00001_.mp4",
+    "start": 0.125,
+    "duration": 4,
+    "status": "provisional rough-cut selection; contact animation needs polish",
+    "review": "Small driver window and solid lower panel remain fixed; distinct driver clears bus and girl enters cab. Pull-out and entry look floaty, with imperfect hand/body contact. Not a finished motion pass."
   },
   "06": {
     "path": "takes/06-02/raw_00001_.mp4",

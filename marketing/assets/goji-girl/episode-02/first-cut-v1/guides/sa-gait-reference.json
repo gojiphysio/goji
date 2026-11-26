@@ -1,0 +1,47 @@
+{
+  "source_url": "https://www.youtube.com/watch?v=Z9cD9uj1fb8&t=248s",
+  "source_creator": "Paulo Cassiano",
+  "source_title": "GTA San Andreas (PS2) - Free Roam",
+  "platform_evidence": "Reference pack records creator claim of real PS2 release1.03; hardware/capture processing not independently verified.",
+  "inspection": {
+    "source_window_seconds": [
+      238,
+      254
+    ],
+    "overview_fps": 2,
+    "dense_stride_window_seconds": [
+      248,
+      249.5
+    ],
+    "dense_stride_samples_per_second": 8,
+    "method": "sampled frames; not continuous playback"
+  },
+  "observed": [
+    "Flared bent elbows",
+    "Pronounced heel recovery",
+    "Forward-pitched upper body",
+    "Repeatable brisk stride rhythm"
+  ],
+  "goji_retarget_proposal": {
+    "cycle_seconds": 0.5,
+    "torso_lean_degrees": 11,
+    "root_bob_amplitude_metres": 0.022,
+    "left_arm": "Reduced swing for handbag",
+    "source_game_data_extracted": false,
+    "note": "Original procedural retarget, approximate rhythm; not a claim of exact Rockstar animation timing."
+  },
+  "public_distribution": "Only original Goji rig guides are included; source game footage stays in local temporary analysis cache.",
+  "guides": [
+    {
+      "shot": "03",
+      "path": "inputs/03-guide-sa-v3.mp4",
+      "sha256": "a4fb020c30435c522454ac3b3a27dc1394690f4f06177c5c903b2e4911b7d308"
+    },
+    {
+      "shot": "10",
+      "path": "inputs/10-guide-sa-v3.mp4",
+      "sha256": "33161888b0a826d4809baab42c5f02c13a64a7930b2e19b9c6a51350d776fee0"
+    }
+  ],
+  "route_notes": "Hero route and camera retained. Officers follow the same path 3.2/3.5 metres behind along its length, keeping them outside the facade at the turn."
+}

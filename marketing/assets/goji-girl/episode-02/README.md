@@ -15,7 +15,7 @@ Use timestamps from this video for comments:
 | Time | Scene | Current state |
 | --- | --- | --- |
 | 00:00–00:11 | 01–04 · Call, reminder, run around bus | Animated |
-| 00:11–00:15 | 05 · Driver takeover | Storyboard; geometry repair rendering |
+| 00:11–00:15 | 05 · Driver takeover | Storyboard here; newer rough take on the individual-clips page |
 | 00:15–00:20 | 06 · Bus chase | Animated |
 | 00:20–00:25 | 07 · Crash | Storyboard; render pending |
 | 00:25–00:31 | 08 · Tap and exit | Animated; climb hesitation and handbag shape need polish |

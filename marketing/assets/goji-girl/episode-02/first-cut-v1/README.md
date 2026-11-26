@@ -1,12 +1,16 @@
 # Episode 2 — first cut v1
 
-**Render in progress · 26 November 2026 · 6 shots held for the edit; bus-action takes being revised.**
+**Render in progress · 26 November 2026 · 7 provisional shot selections; running revisions queued; bus-action takes being revised.**
 
-**Next revision:** bring the running beats closer to the GTA San Andreas run cycle; the current checkpoint preserves the version being reviewed.
+**Next revision:** scenes03 and10 are queued with an original rig cycle informed by sampled [PS2 running footage](https://www.youtube.com/watch?v=Z9cD9uj1fb8&t=248s): flared bent elbows, stronger heel recovery and forward lean. The current checkpoint preserves the version being reviewed. [Reference and retarget notes](guides/sa-gait-reference.json).
 
 [**Watch review checkpoint 01 — full 47-second timeline with SFX**](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-girl-episode-2/marketing/assets/goji-girl/episode-02/first-cut-v1/deliverables/review-checkpoint-01.mp4)
 
 This checkpoint combines **22 seconds of selected animation** (01–04, 06, 08) with **25 seconds of clearly labelled storyboard holds** (05, 07, 09–12). It is ready for initial comments while rendering continues. Use the video timestamps when reviewing.
+
+[Newer driver-interaction take — scene05, silent, rough motion](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-girl-episode-2/marketing/assets/goji-girl/episode-02/first-cut-v1/takes/05-02/raw_00001_.mp4)
+
+The driver window and white panel now remain fixed. The pull-out and climb still look floaty and need contact-animation polish. This newer take is not in checkpoint01.
 
 The run around the bus now reaches the driver side. The chase has no outside runner; a fixed crop keeps the pursuit car offscreen. The exit still has a small initial body dip and a rounder handbag silhouette to polish.
 

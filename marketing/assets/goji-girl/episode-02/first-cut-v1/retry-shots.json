@@ -73,5 +73,31 @@
         "image": "09-end-v2.png"
       }
     ]
+  },
+  "03": {
+    "duration": 3,
+    "mode": "video",
+    "prompt": "One continuous three-second original GTA San Andreas PS2 rear-player sprint. Start exactly in the first-frame anchor as Goji Girl bursts through her open front doorway; then run FORWARD along this Singapore pavement away from camera. Match the repeated locomotion cycle in <Video 1>: a slight forward body lean, squared and flared BENT elbows, strong forward/back arm pumping, pronounced heel recovery, long push-off and a firm regular quick rhythm. Follow the guide timing rather than inventing a smooth fashion jog. Keep ONE structured black handbag attached to LEFT hand; the left arm has a smaller swing to carry it, the right arm pumps freely. Camera follows behind at ordinary player height with the same heading, no cut, orbit or reversal. Background passersby step clear without contact. <Picture 1> and the first anchor define the finished woman, maroon top/leggings, ponytail, white shoes, bag and neighbourhood appearance. <Video 1> is ONLY original rig motion, path and camera reference: never reproduce its blocks, primitive face or building silhouettes as final shapes. Painted low-resolution PS2 textures and economical but properly formed anatomy for every person. No photographic humans, extra limbs, bag swaps, HUD, stars, captions or new vehicles.",
+    "guide_filename": "03-guide-sa-v3.mp4",
+    "queue_number": 7.3,
+    "anchors": [
+      {
+        "frame": 0,
+        "image": "03-appearance.png"
+      }
+    ]
+  },
+  "10": {
+    "duration": 4,
+    "mode": "video",
+    "prompt": "A continuous four-second third-person rear player SPRINT, beginning exactly at the supplied first-frame anchor. Match the original-PS2 sprint cycle staged in <Video 1>: slight forward lean, flared bent elbows, a firm repetitive arm pump, pronounced heel recovery and long push-off. Keep the regular quick game-animation rhythm throughout, including both officers, with staggered phases. Goji Girl runs FORWARD down this SAME pavement and veers left to the Goji entrance as shown in <Video 1>. Camera follows from behind without reversing or orbiting. Storefronts stay LEFT, road RIGHT. Two navy-uniform police pursue from BEHIND, partly visible at lower frame edges. Teal-shirt passerby beyond entrance recoils against shopfront; white-shirt passerby hurries clear near tree. Keep central route and doorway empty of bystanders. Girl and police never touch anyone. End as she reaches the clinic doorway. The wreck remains BEHIND CAMERA and completely invisible for the whole shot. No bus or vehicle appears anywhere in frame. Preserve the exact girl, maroon athleisure, ponytail, white shoes and ONE structured black handbag carried in her LEFT hand. All people have original GTA San Andreas PS2 economical anatomy, painted textures and diffuse shading. <Picture 1> supplies finished characters, architecture and colours; <Video 1> supplies only trajectory, timing and camera, never literal proxy block shapes or primitive faces. No extra cops, cuts, teleports, captions, HUD or stars.",
+    "anchors": [
+      {
+        "frame": 0,
+        "image": "10-appearance.png"
+      }
+    ],
+    "guide_filename": "10-guide-sa-v3.mp4",
+    "queue_number": 10
   }
 }
