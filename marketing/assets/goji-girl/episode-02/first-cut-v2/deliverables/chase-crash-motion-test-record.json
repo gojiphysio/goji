@@ -1,0 +1,18 @@
+{
+  "sources": [
+    "takes/06-01/raw_00001_.mp4",
+    "takes/07-01/raw_00001_.mp4"
+  ],
+  "source_frames_per_shot": [
+    0,
+    120
+  ],
+  "duration": 10,
+  "audio_range_seconds": [
+    15,
+    25
+  ],
+  "full_decode_verified": true,
+  "review": "Sampled-frame review only. Livery drift near impact remains. Normal-speed playback and audio audition blocked by locked Mac.",
+  "sha256": "dbcc772b80a718caa02f6ccf759aed1fc3029cce98b63b395f413eac7b21f2f8"
+}

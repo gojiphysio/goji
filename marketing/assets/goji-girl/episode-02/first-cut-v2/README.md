@@ -6,7 +6,7 @@ The revision covers the running scenes, bus chase, rollover, exit and the dust-o
 
 The exit gets eight seconds, bringing the planned cut to 49 seconds. The safehouse message stays exactly as approved: “You can save your game, improve your stats, and lose the police at a safehouse.”
 
-[Watch the new five-second chase test with SFX](deliverables/chase-motion-test.mp4). This is a provisional take reviewed in frame samples; the full revision is still rendering.
+[Watch the new chase and crash motion test with SFX](deliverables/chase-crash-motion-test.mp4). This ten-second test is provisional and has been reviewed in frame samples. The impact still has some livery drift; the full revision is rendering. The [earlier chase-only test](deliverables/chase-motion-test.mp4) remains unchanged.
 
 ## Bag orientation correction
 

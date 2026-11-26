@@ -22,7 +22,7 @@ for start,end,step in [(5.25,11,.25),(35.0,38.9,.25)]:
  for k,t in enumerate(np.arange(start,end,step)):add('foley',float(t),hit(.13,85+(k%2)*15),.16,(-.12 if k%2 else .12),label='player running')
 for off,pan in [(.1,-.5),(.23,.5)]:
  for t in np.arange(35+off,38.85,.25):add('foley',float(t),hit(.14,65),.14,pan,label='pursuer footsteps')
-t=np.arange(int(15*SR))/SR;engine=(np.sin(2*np.pi*(44*t+2.1*t*t))+.35*np.sin(2*np.pi*88*t)+.15*noise(15))*.09
+t=np.arange(int(13.6*SR))/SR;engine=(np.sin(2*np.pi*(44*t+2.1*t*t))+.35*np.sin(2*np.pi*88*t)+.15*noise(13.6))*.09
 add('vehicles',10,engine,label='diesel idle and acceleration')
 add('vehicles',11.4,noise(.18),.10,label='bus air hiss')
 add('foley',11.4,noise(.5)*np.exp(-np.arange(int(.5*SR))/SR*8)+tone(.5,3200)*np.exp(-np.arange(int(.5*SR))/SR*15),.22,label='driver window break')
@@ -30,8 +30,8 @@ for start,sec,gain in [(16,8.7,.055),(33.4,5.6,.065)]:
  t=np.arange(int(sec*SR))/SR;freq=850+380*np.sin(2*np.pi*.8*t);sig=np.sin(2*np.pi*np.cumsum(freq)/SR)+.22*np.sin(4*np.pi*np.cumsum(freq)/SR)
  add('vehicles',start,sig,gain,-.3,label='offscreen police siren')
 add('vehicles',19.1,tone(.5,190)+.4*tone(.5,260),.10,label='bus horn')
-t=np.arange(int(4.6*SR))/SR;add('vehicles',20.1,noise(4.6)*.5+np.sin(2*np.pi*(1300*t+80*np.sin(t*3)))*.2,.14,label='tyre squeal and scrape')
-add('foley',21.95,hit(.8,40),.72,label='bus body hits road');add('foley',23.15,hit(.5,55),.32,label='wreck comes to rest');add('foley',22.05,noise(.8)*np.exp(-np.arange(int(.8*SR))/SR*5),.30,label='metal and debris rattle')
+t=np.arange(int(3.2*SR))/SR;add('vehicles',21.1,noise(3.2)*.5+np.sin(2*np.pi*(1300*t+80*np.sin(t*3)))*.2,.14,label='tyre squeal and scrape')
+add('foley',21.95,hit(.8,40),.72,label='bus body hits road');add('foley',23.3,hit(.5,55),.32,label='wreck comes to rest');add('foley',22.05,noise(.8)*np.exp(-np.arange(int(.8*SR))/SR*5),.30,label='metal and debris rattle')
 add('foley',25.6,hit(.18,750),.12,label='small shelter piece falls')
 add('ui',28.0,tone(.115,1100),.28,label='isolated EZ-Link BEEP')
 add('foley',31.58,hit(.22,80),.25,label='two feet land after supported descent')

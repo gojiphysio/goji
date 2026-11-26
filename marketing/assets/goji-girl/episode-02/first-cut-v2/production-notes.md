@@ -36,3 +36,5 @@ The user rejected the broad bag face pointing at the rear camera. The grip trans
 Run test 03-02 also fails: the first raised-arm pose decays into the old low carry. The next attempt adds alternating indexed pose anchors through the whole three-second stride sequence, alongside the continuous Blender guide. It stays on the same H3 model and seed.
 
 The clinic chase camera moves closer and rotates through the turn. The officers follow continuous flanking arcs, keeping the player visible. The left runner stays clear of the tree. These changes still need generated-footage review.
+
+The latest scene 10 guide has been inspected across the full route at 3fps. Both officers remain beside the camera edges and the player stays visible through the turn. The scene 07 render establishes the fast roll and slide but changes some side livery as it reaches the final anchor; it is a provisional rough-cut selection with that defect retained in the review record.

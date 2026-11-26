@@ -5,7 +5,7 @@
   "source": "original procedural synthesis",
   "music": false,
   "dialogue": false,
-  "peak_before_normalization": 0.6343045830726624,
+  "peak_before_normalization": 0.5846455693244934,
   "gain": 1,
   "events": [
     {
@@ -473,7 +473,7 @@
     {
       "stem": "vehicles",
       "start": 10,
-      "duration": 15.0,
+      "duration": 13.6,
       "label": "diesel idle and acceleration"
     },
     {
@@ -508,8 +508,8 @@
     },
     {
       "stem": "vehicles",
-      "start": 20.1,
-      "duration": 4.5999791666666665,
+      "start": 21.1,
+      "duration": 3.2,
       "label": "tyre squeal and scrape"
     },
     {
@@ -520,7 +520,7 @@
     },
     {
       "stem": "foley",
-      "start": 23.15,
+      "start": 23.3,
       "duration": 0.5,
       "label": "wreck comes to rest"
     },

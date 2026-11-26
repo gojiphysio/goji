@@ -1,10 +1,12 @@
 # Goji Girl · Episode 02 — TAP OUT
 
+**Motion revision in progress:** [corrected bag references, chase test and render status](first-cut-v2/README.md). The running, crash and exit in the first cut below are being replaced following review.
+
 **First animated cut · 26 November 2026 · 47 seconds · vertical 9:16 · with SFX**
 
 [**Watch the full animated first cut**](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-girl-episode-2/marketing/assets/goji-girl/episode-02/first-cut-v1/deliverables/episode-02-first-cut-v1.mp4)
 
-All twelve scenes are animated. The departure run at **00:05–00:08** and clinic sprint at **00:33–00:37** use the revised GTA SA-informed gait; the bus approach at **00:08–00:11** uses it too. The running is a closer approximation, not an exact copy of the game animation.
+All twelve scenes are animated in this earlier cut. Review identified a restrained bag arm in the running scenes, a slow crash and an unsupported bus exit. The current motion revision addresses those failures, including the bag facing the rear camera.
 
 [![Play the first animated cut](first-cut-v1/deliverables/first-cut-poster.jpg)](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-girl-episode-2/marketing/assets/goji-girl/episode-02/first-cut-v1/deliverables/episode-02-first-cut-v1.mp4)
 

@@ -1,0 +1,36 @@
+{
+  "commit": "c1952c6",
+  "checked_at": 1795679471.575307,
+  "assets": [
+    {
+      "asset": "README.md",
+      "status": 200,
+      "sha256": "8292f686a1e82ceb1264f2f29bbeaafe08c7f88a7331744080846e919ddb5f9d",
+      "matches_local": true
+    },
+    {
+      "asset": "inputs/03-grip-side-on.png",
+      "status": 200,
+      "sha256": "8b4819797edc74dffd8e6a7067f1111a617878e0f8acf0a28a38c101cd37d046",
+      "matches_local": true
+    },
+    {
+      "asset": "inputs/04-grip-side-on.png",
+      "status": 200,
+      "sha256": "42190f3c8d833bc642f61a88c4415e05c40f88ddbdcb3c3cedd4af48a22dd9ed",
+      "matches_local": true
+    },
+    {
+      "asset": "inputs/09-grip-side-on.png",
+      "status": 200,
+      "sha256": "b7bf12b98fca7e8cf2cc59720a8cbe3aa2071e9bb9def7454e45e67c45a25f69",
+      "matches_local": true
+    },
+    {
+      "asset": "inputs/10-grip-side-on.png",
+      "status": 200,
+      "sha256": "01aa951d52cb67b487793ccb995c2bbb36723cc0469d09ac807fc05c8c6300a5",
+      "matches_local": true
+    }
+  ]
+}

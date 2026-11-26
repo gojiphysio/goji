@@ -40,5 +40,12 @@
     "duration": 5,
     "status": "provisional motion revision; sampled-frame review",
     "review": "Full 4fps review supports more aggressive weaving and faster road travel; no visible exterior character or bus-mounted police emitters. Normal-speed playback still pending."
+  },
+  "07": {
+    "path": "takes/07-01/raw_00001_.mp4",
+    "start": 0,
+    "duration": 5,
+    "status": "provisional revised rough-cut selection; livery drift needs polish",
+    "review": "Full 6fps review shows rapid approach, abrupt steering, a quick roll, ground strike, continued slide and canopy impact. The body remains double-decked and the wreck heading is consistent. White/purple side livery changes around final impact; retain as a rough motion test only. No visible pedestrian contact. Normal-speed playback blocked by locked Mac."
   }
 }
