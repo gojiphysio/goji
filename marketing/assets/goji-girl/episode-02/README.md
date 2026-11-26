@@ -4,7 +4,7 @@
 
 [**Watch the updated 47-second review video**](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-girl-episode-2/marketing/assets/goji-girl/episode-02/first-cut-v1/deliverables/review-checkpoint-02.mp4)
 
-**35 seconds are animated; 12 seconds are labelled “STORYBOARD — MOTION PENDING.”** This checkpoint adds the revised GTA SA-style running scenes, the driver takeover and the crash. The recovery and interior shots are still rendering.
+**35 seconds are animated; 12 seconds are labelled “STORYBOARD — MOTION PENDING.”** This checkpoint adds the revised GTA SA-style running scenes, the driver takeover and the crash. The final reformer shot is still rendering; newer recovery and arrival clips are on the individual-clips page.
 
 [![Play review checkpoint 02](first-cut-v1/deliverables/review-checkpoint-02-poster.jpg)](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-girl-episode-2/marketing/assets/goji-girl/episode-02/first-cut-v1/deliverables/review-checkpoint-02.mp4)
 
@@ -18,9 +18,10 @@ Use timestamps from this video for comments:
 | 00:15–00:20 | 06 · Bus chase | Animated |
 | 00:20–00:25 | 07 · Crash | Animated; turn and shelter impact need polish |
 | 00:25–00:31 | 08 · Tap and exit | Animated; small body dip and handbag shape need polish |
-| 00:31–00:33 | 09 · Dust off | Storyboard; render pending |
+| 00:31–00:33 | 09 · Dust off | Storyboard here; newer animated take available |
 | 00:33–00:37 | 10 · Sprint to Goji | Revised running animation |
-| 00:37–00:47 | 11–12 · Clinic and Pilates | Storyboards; renders pending |
+| 00:37–00:39 | 11 · Clinic arrival | Storyboard here; newer animated take available |
+| 00:39–00:47 | 12 · Pilates | Storyboard; render pending |
 
 [Individual clips, review notes and editable overlays](first-cut-v1/README.md) · [Draft PR #265](https://github.com/gojiphysio/goji/pull/265) · [Earlier checkpoint 01](https://raw.githubusercontent.com/gojiphysio/goji/009a4a7/marketing/assets/goji-girl/episode-02/first-cut-v1/deliverables/review-checkpoint-01.mp4)
 
