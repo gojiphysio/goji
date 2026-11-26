@@ -43,6 +43,7 @@ const jdHtml = [
   `<h2>What we offer</h2><h3>Compensation and benefits</h3>${list(v.benefits)}`,
   `<h3>Clinical and career development</h3>${list(v.development)}`,
   `<h2>Working arrangements</h2>${list(v.workingArrangements)}`,
+  v.workingArrangementsNote ? `<p>${esc(v.workingArrangementsNote)}</p>` : "",
 ].join("");
 
 const jobPosting = {
@@ -205,6 +206,7 @@ const facts = [
 
         <h2>Working arrangements</h2>
         <ul>{v.workingArrangements.map((i) => <li>{i}</li>)}</ul>
+        {v.workingArrangementsNote && <p>{v.workingArrangementsNote}</p>}
 
         {
           open && (
