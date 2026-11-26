@@ -430,7 +430,7 @@ def test_whatsapp_booking_links_or_creates_the_patients_own_record(monkeypatch):
     monkeypatch.setattr(bk, "_create_appointments",
                         lambda *a, **k: (appts.append(k.get("patient_id")) or (["A1"], "VISIT000001")))
     assert bk._create_patient(P(), "Mei Tan", "+6582823628") == "NEWPATIENT1"
-    assert posted == [("patient", {"name": "Mei Tan", "handphone": "+6582823628"})]
+    assert posted == [("patient", {"name": "Mei Tan", "telephone": "+6582823628"})]
 
 
 def test_create_patient_failure_is_a_booking_error():

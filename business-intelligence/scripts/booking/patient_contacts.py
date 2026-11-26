@@ -12,9 +12,15 @@ table as it happens:
     (/plato/webhook/<token>); we read the patient back from Plato.
   - goji-booking itself: /internal/book when it creates a patient. Plato
     sends no webhook for API writes, so this one is ours to write.
+  - everything else: every snapshot refresh (5 min) reads the patients Plato
+    changed since the last pass (`modified_since`) and writes them
+    (catch_up). The webhook alone missed all 6 new or edited patients on
+    25 Nov 2026: it fires only for staff who logged in to Plato after it was
+    activated, never for patients filling in Plato's registration form
+    ("terminal") or for API writes, and Plato drops it after failed deliveries.
 The nightly rebuild stays the repair (Plato doesn't store or replay webhook
-events, and drops a webhook after 5 failed deliveries in a day) and reports
-any patient these writers missed (plato_patients/main.py, contact drift).
+events) and reports any patient these writers missed (plato_patients/main.py,
+contact drift).
 """
 from __future__ import annotations
 
@@ -198,3 +204,58 @@ def refresh(plato, bq, table: str, ids: list[str]) -> int:
         log.info("plato webhook: %d patient(s) over the read cap, left to the nightly rebuild",
                  skipped)
     return written
+
+
+# The catch-up pass (see the module docstring). The first pass after a start
+# looks back past the last nightly rebuild; later passes overlap the previous
+# one so an edit saved while it ran isn't skipped.
+CATCH_UP_FIRST_LOOKBACK_S = 26 * 3600
+CATCH_UP_OVERLAP_S = 120
+# Plato pages 20 patients. Three pages covers any day this clinic has had; a
+# longer list leaves the cursor where it was and the rest to the nightly rebuild.
+CATCH_UP_MAX_PAGES = 3
+PAGE_SIZE = 20
+
+_caught_up_to: float | None = None
+# patient id -> the last_edited we wrote, so the overlap doesn't rewrite a row.
+_written_edit: dict[str, str] = {}
+
+
+def catch_up(plato, bq, table: str, now: float | None = None) -> dict:
+    """Write every patient Plato changed since the last pass. One bulk Plato
+    read per page, no retries; a Plato error propagates and the next pass
+    starts from the same point. The cursor moves only once every patient in
+    the window was read and written."""
+    global _caught_up_to
+    now = time.time() if now is None else now
+    since = (now - CATCH_UP_FIRST_LOOKBACK_S if _caught_up_to is None
+             else _caught_up_to - CATCH_UP_OVERLAP_S)
+    written = unchanged = failed = 0
+    complete = False
+    for page in range(1, CATCH_UP_MAX_PAGES + 1):
+        rows = plato.get("patient", {"modified_since": int(since), "current_page": page},
+                         bulk=True, max_wait_s=READ_MAX_WAIT_S, _retries=0)
+        rows = rows if isinstance(rows, list) else []
+        for p in rows:
+            pid = str(p.get("_id") or "").strip() if isinstance(p, dict) else ""
+            if not pid:
+                continue
+            edit = str(p.get("last_edited") or "")
+            if edit and _written_edit.get(pid) == edit:
+                unchanged += 1
+                continue
+            if upsert(bq, table, from_plato(pid, p)):
+                written += 1
+                if edit:
+                    _written_edit[pid] = edit
+            else:
+                failed += 1
+        if len(rows) < PAGE_SIZE:
+            complete = True
+            break
+    if complete and not failed:
+        _caught_up_to = now
+    elif not complete:
+        log.warning("patient catch-up: more than %d pages changed; the nightly "
+                    "rebuild covers the rest", CATCH_UP_MAX_PAGES)
+    return {"written": written, "unchanged": unchanged, "failed": failed}
