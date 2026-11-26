@@ -275,6 +275,10 @@ def registration_form(token: str):
     log.info("registration form link opened (%s)", state)
     if state == "form":
         return redirect(url, 302)
+    if state == "no_email":
+        return _FORM_PAGE.format(message="We need an email address on your record to send "
+                                         "you the registration form. Please WhatsApp us and "
+                                         "we'll sort it out.")
     if state == "done":
         return _FORM_PAGE.format(message="You're all set: we already have your registration "
                                          "form. See you soon!")

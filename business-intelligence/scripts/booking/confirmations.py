@@ -315,9 +315,21 @@ def registration_link(plato, bq, appt: Appointment) -> str | None:
     return formlink.url(appt.appointment_id, INTERNAL_TOKEN) or None
 
 
+def _email_of(patient: dict) -> str:
+    v = patient.get("email")
+    if isinstance(v, str) and "@" in v:
+        return v.strip()
+    if isinstance(v, list):
+        for x in v:
+            if isinstance(x, str) and "@" in x:
+                return x.strip()
+    return ""
+
+
 def form_destination(plato, appointment_id: str) -> tuple[str, str | None]:
     """Where a tap on the form link goes: ('form', Plato URL), ('done', None)
-    when the patient has already signed, or ('gone', None) when the
+    when the patient has already signed, ('no_email', None) when their
+    profile has no email for Plato's update form, or ('gone', None) when the
     appointment no longer exists. Raises on a Plato failure."""
     appt = one_record(plato.get(f"/appointment/{appointment_id}", max_wait_s=READ_MAX_WAIT_S,
                                 _retries=1))
@@ -340,7 +352,15 @@ def form_destination(plato, appointment_id: str) -> tuple[str, str | None]:
                                    _retries=1))
     if patient is not None and consent_signed(patient):
         return "done", None
-    r = plato.get(f"/patient/{pid}/updatelink", max_wait_s=READ_MAX_WAIT_S, _retries=1)
+    # Plato's update form shows the patient's saved details, so it's "shared
+    # with" one email and opens after a one-time code sent there. Without
+    # `email` it's shared with nobody and no one can open it (first live test,
+    # 26 Nov 2026). The profile's email, else the appointment's.
+    email = (_email_of(patient or {}) or str(appt.get("email") or "").strip())
+    if not email:
+        return "no_email", None
+    r = plato.get(f"/patient/{pid}/updatelink", params={"email": email},
+                  max_wait_s=READ_MAX_WAIT_S, _retries=1)
     url = r.get("url") if isinstance(r, dict) else None
     if not (isinstance(url, str) and url.startswith("https://")):
         raise RuntimeError("no profile update link")
