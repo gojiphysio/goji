@@ -8,6 +8,8 @@ The exit gets eight seconds, bringing the planned cut to 49 seconds. The safehou
 
 [Watch the new chase and crash motion test with SFX](deliverables/chase-crash-motion-test.mp4). This ten-second test is provisional and has been reviewed in frame samples. The impact still has some livery drift; the full revision is rendering. The [earlier chase-only test](deliverables/chase-motion-test.mp4) remains unchanged.
 
+[Watch the supported bus-exit test with SFX](deliverables/exit-motion-test.mp4). She climbs across the sill, lowers herself down and lands on the pavement. The card tap is still small in this wide view.
+
 ## Bag orientation correction
 
 The revised references turn the bag alongside her body, with its narrow end visible from behind. The grip transform has the same correction in the running and exit guides. The new animation test is queued; this correction is not yet verified in finished motion.

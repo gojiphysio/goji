@@ -538,13 +538,13 @@
     },
     {
       "stem": "ui",
-      "start": 28.0,
+      "start": 27.5,
       "duration": 0.115,
       "label": "isolated EZ-Link BEEP"
     },
     {
       "stem": "foley",
-      "start": 31.58,
+      "start": 32.0,
       "duration": 0.22,
       "label": "two feet land after supported descent"
     },

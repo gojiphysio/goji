@@ -47,5 +47,12 @@
     "duration": 5,
     "status": "provisional revised rough-cut selection; livery drift needs polish",
     "review": "Full 6fps review shows rapid approach, abrupt steering, a quick roll, ground strike, continued slide and canopy impact. The body remains double-decked and the wreck heading is consistent. White/purple side livery changes around final impact; retain as a rough motion test only. No visible pedestrian contact. Normal-speed playback blocked by locked Mac."
+  },
+  "08": {
+    "path": "takes/08-02/raw_00001_.mp4",
+    "start": 0,
+    "duration": 8,
+    "status": "provisional revised rough-cut selection; tap legibility needs polish",
+    "review": "Full 4fps samples plus 8fps tap/landing details show braced torso/knee crossing, crouched sill support, a supported descent facing the chassis, release and bent-knee landing near 7.0s. No elevator rise. Bag stays with the left wrist/hand through the descent; its broad face is naturally visible from this side angle. Tap reach near 2.5s is small/partly occluded; card-reader contact needs a clearer polish pass. Normal-speed playback and listening review pending locked Mac."
   }
 }

@@ -1,7 +1,7 @@
 {
   "shot": "03",
   "take": "01",
-  "status": "generated_unreviewed",
+  "status": "rejected",
   "started": 1795675344.351118,
   "recipe": "H3 Ref2VA GGUF Q4 + native Turbo 4-step; 576x1024 24fps",
   "native_frames": 73,
