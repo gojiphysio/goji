@@ -8,7 +8,7 @@ import pytest
 
 from careers import app as app_module
 from careers import config, mailer, vacancies
-from careers.fakes import DOCX, PDF, VACANCIES, FakeWorkspace
+from careers.fakes import DOCX, JPG, PDF, PNG, VACANCIES, FakeWorkspace
 from careers.validation import FileRejected, check_cv, normalise_phone
 
 ORIGIN = "https://www.gojiphysio.com"
@@ -42,10 +42,27 @@ def form(**over):
     return {k: v for k, v in f.items() if v is not None}
 
 
-def post(client, data, cv=(PDF, "cv.pdf"), headers=None):
+def pilates_form(**over):
+    """A complete Freelance Pilates Instructor application. Lists are sent as
+    repeated fields, as the browser does."""
+    f = {"role": "pilates-instructor", "full_name": "Test Instructor",
+         "email": "pilates@example.com", "phone": "9123 4567",
+         "work_eligibility": "Singapore Citizen or Permanent Resident",
+         "certification": "Comprehensive certification, Example Pilates Academy",
+         "apparatus": ["Mat", "Reformer", "Others"], "apparatus_other": "Spine corrector",
+         "teaching_years": "3 to 5 years", "teaching_experience": ["Private 1:1", "Prenatal"],
+         "available_days": ["Saturday", "Sunday"], "time_windows": ["Morning"],
+         "start_date": "2027-01-04", "privacy_ack": "yes", "elapsed_ms": "20000"}
+    f.update(over)
+    return {k: v for k, v in f.items() if v is not None}
+
+
+def post(client, data, cv=(PDF, "cv.pdf"), headers=None, certs=()):
     data = dict(data)
     if cv:
         data["cv"] = (io.BytesIO(cv[0]), cv[1])
+    if certs:
+        data["certificates"] = [(io.BytesIO(b), n) for b, n in certs]
     h = {"Origin": ORIGIN, "X-Goji-Careers": "1"} if headers is None else headers
     return client.post("/api/applications", data=data, headers=h,
                        content_type="multipart/form-data")
@@ -189,3 +206,87 @@ def test_local_number_is_stored_with_plus_65(env):
     assert post(env["client"], form(phone="9123 4567")).status_code == 200
     assert col(env["ws"].rows[-1], "Mobile number") == "+65 9123 4567"
 
+
+
+# ---- Freelance Pilates Instructor ------------------------------------------------
+
+def test_pilates_application_is_stored_with_its_own_answers(env):
+    r = post(env["client"], pilates_form(), certs=[(PDF, "stott.pdf"), (JPG, "reformer.jpg")])
+    assert r.status_code == 200, r.json
+    ref = r.json["reference"]
+    [row] = env["ws"].rows
+    assert len(row) == len(config.TRACKER_COLUMNS)
+    assert col(row, "Role applied for") == "Freelance Pilates Instructor"
+    assert col(row, "Employment preference") == "Freelance"
+    assert col(row, "Apparatus qualifications") == "Mat, Reformer, Others: Spine corrector"
+    assert col(row, "Relevant teaching experience") == "Private 1:1, Prenatal"
+    assert col(row, "Preferred working days") == "Saturday, Sunday"
+    assert col(row, "Preferred time windows") == "Morning"
+    assert col(row, "Earliest available start date") == "2027-01-04"
+    assert col(row, "Mobile number") == "+65 9123 4567"
+    # No physiotherapist-only answers on a Pilates row.
+    for c in ("AHPC registration status", "Actual years of clinical experience",
+              "Days available per week", "Clinical experience"):
+        assert col(row, c) == ""
+    names = sorted(f["name"] for f in env["ws"].files.values())
+    assert names == [f"{ref} - Test Instructor - CV.pdf",
+                     f"{ref} - Test Instructor - Certificate 1.pdf",
+                     f"{ref} - Test Instructor - Certificate 2.jpg"]
+    assert col(row, "Pilates certificate links").count("https://drive.google.com/file/d/") == 2
+    internal, confirm = env["sent"]
+    assert internal["Subject"] == ("[Goji Careers] New application — Freelance Pilates "
+                                   "Instructor — Test Instructor")
+    body = internal.get_content()
+    assert "Engagement: Freelance" in body and "AHPC" not in body
+    assert body.count("Certificate: https://") == 2
+    assert confirm["To"] == "pilates@example.com"
+    assert "Freelance Pilates Instructor position" in confirm.get_content()
+
+
+def test_pilates_needs_no_physio_answers_and_intro_is_optional(env):
+    r = post(env["client"], pilates_form(intro=None))
+    assert r.status_code == 200, r.json
+    assert col(env["ws"].rows[0], "Pilates certificate links") == ""
+
+
+def test_pilates_required_fields(env):
+    r = post(env["client"], pilates_form(work_eligibility=None, certification="", apparatus=None,
+                                         teaching_years="", teaching_experience=None,
+                                         available_days=None, start_date="next week"))
+    assert r.status_code == 400
+    assert {"work_eligibility", "certification", "apparatus", "teaching_years",
+            "teaching_experience", "available_days", "start_date"} <= set(r.json["fields"])
+    assert "employment" not in r.json["fields"] and "intro" not in r.json["fields"]
+
+
+def test_pilates_drops_values_not_on_the_lists(env):
+    post(env["client"], pilates_form(apparatus=["Mat", "Trampoline"], time_windows=["Midnight"]))
+    row = env["ws"].rows[0]
+    assert col(row, "Apparatus qualifications") == "Mat"
+    assert col(row, "Preferred time windows") == ""
+
+
+@pytest.mark.parametrize("certs", [
+    [(PDF, "cert.exe")],                        # wrong type
+    [(b"not an image", "cert.png")],            # bad signature
+    [(PNG, "a.png")] * 4,                       # too many
+])
+def test_bad_certificates_are_refused(env, certs):
+    r = post(env["client"], pilates_form(), certs=certs)
+    assert r.status_code == 400 and "certificates" in r.json["fields"]
+    assert env["ws"].files == {}
+
+
+def test_physio_roles_ignore_certificates_and_pilates_fields(env):
+    r = post(env["client"], form(certification="Sneaky", work_eligibility="x"),
+             certs=[(PDF, "c.pdf")])
+    assert r.status_code == 200
+    row = env["ws"].rows[0]
+    assert col(row, "Pilates certification and training provider") == ""
+    assert len(env["ws"].files) == 1
+
+
+def test_physio_still_requires_its_questions(env):
+    r = post(env["client"], form(ahpc_status=None, employment=None, start_availability=""))
+    assert r.status_code == 400
+    assert {"ahpc_status", "employment", "start_availability"} <= set(r.json["fields"])

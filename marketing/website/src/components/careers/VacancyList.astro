@@ -26,7 +26,7 @@ const roles = openVacancies();
                 <dd>{v.location}</dd>
               </div>
               <div>
-                <dt>Employment</dt>
+                <dt>{v.employmentTypes.includes("CONTRACTOR") ? "Engagement" : "Employment"}</dt>
                 <dd>{employmentLabel(v.employmentTypes)}</dd>
               </div>
               <div>
@@ -38,7 +38,7 @@ const roles = openVacancies();
                 <dd>{v.experience}</dd>
               </div>
               <div>
-                <dt>Clinical focus</dt>
+                <dt>{(v.focusLabel ?? "clinical focus").replace(/^./, (c) => c.toUpperCase())}</dt>
                 <dd>
                   {v.clinicalFocus.primary}
                   {v.clinicalFocus.secondary && ` and ${v.clinicalFocus.secondary.toLowerCase()}`}

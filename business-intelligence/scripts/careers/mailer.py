@@ -33,11 +33,14 @@ def _one_line(v) -> str:
     return " ".join(str(v or "").split())
 
 
-def internal_message(ref: str, role: dict, app: dict, cv_id: str) -> EmailMessage:
+def internal_message(ref: str, role: dict, app: dict, cv_id: str,
+                     cert_ids: list[str] | None = None) -> EmailMessage:
     general = role["id"] == config.GENERAL_ID
+    pilates = role.get("form") == "pilates"
     msg = EmailMessage()
-    msg["Subject"] = ("[Goji Careers] New expression of interest" if general
-                      else f"[Goji Careers] New application — {role['title']}")
+    name = _one_line(app.get("full_name"))
+    msg["Subject"] = (f"[Goji Careers] New expression of interest — {name}" if general
+                      else f"[Goji Careers] New application — {role['title']} — {name}")
     msg["From"] = formataddr(("Goji Careers", config.SMTP_USER))
     msg["To"] = config.ADMIN_TO
     lines = [
@@ -47,19 +50,30 @@ def internal_message(ref: str, role: dict, app: dict, cv_id: str) -> EmailMessag
     ]
     if general and app.get("interest_area"):
         lines.append(f"Interested in: {app['interest_area']}")
+    if pilates:
+        lines += [
+            "Engagement: Freelance",
+            f"Singapore work eligibility: {app.get('work_eligibility')}",
+            f"Certification: {_one_line(app.get('certification'))}",
+            f"Apparatus: {', '.join(app.get('apparatus') or [])}",
+            f"Teaching experience: {app.get('teaching_years')}",
+            f"Available days: {', '.join(app.get('preferred_days') or [])}",
+            f"Earliest start date: {app.get('start_availability')}",
+        ]
+    else:
+        lines += [
+            f"Employment preference: {app.get('employment')}",
+            f"Years of experience: {app.get('years_experience')}",
+        ]
+        if app.get("ahpc_status"):
+            lines.append(f"AHPC registration status: {app['ahpc_status']}")
+        lines.append(f"Earliest availability: {_one_line(app.get('start_availability'))}")
+    lines += ["", f"CV: {file_url(cv_id)}"]
+    lines += [f"Certificate: {file_url(i)}" for i in cert_ids or []]
     lines += [
-        f"Employment preference: {app.get('employment')}",
-        f"Years of experience: {app.get('years_experience')}",
-    ]
-    if app.get("ahpc_status"):
-        lines.append(f"AHPC registration status: {app['ahpc_status']}")
-    lines += [
-        f"Earliest availability: {_one_line(app.get('start_availability'))}",
-        "",
-        f"CV: {file_url(cv_id)}",
         f"Applicant tracker: {sheet_url()}",
         "",
-        "Both links need a Goji Google account with access to the Goji Recruitment drive.",
+        "These links need a Goji Google account with access to the Goji Recruitment drive.",
     ]
     if config.TEST_MODE:
         lines += ["", "[TEST MODE] Stored in the test folder and tracker."]

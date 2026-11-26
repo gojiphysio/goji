@@ -8,6 +8,7 @@ from __future__ import annotations
 import re
 import unicodedata
 from dataclasses import dataclass, field
+from datetime import date
 
 from . import config
 
@@ -20,6 +21,11 @@ CONTENT_TYPES = {
     "doc": "application/msword",
     "docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
 }
+
+
+# Pilates certificates may also be photos or scans.
+CERT_TYPES = {"pdf": "application/pdf", "jpg": "image/jpeg", "jpeg": "image/jpeg",
+              "png": "image/png"}
 
 
 class FileRejected(ValueError):
@@ -98,6 +104,25 @@ def check_cv(filename: str, data: bytes) -> str:
     return ext
 
 
+_IMG_MAGIC = {"jpg": b"\xff\xd8\xff", "jpeg": b"\xff\xd8\xff", "png": b"\x89PNG\r\n\x1a\n"}
+
+
+def check_certificate(filename: str, data: bytes) -> str:
+    """Validate one Pilates certificate (PDF, JPG or PNG). Returns the
+    extension, or raises FileRejected with a message safe to show. The
+    combined size limit is checked by the caller."""
+    ext = file_ext(filename)
+    if ext not in CERT_TYPES:
+        raise FileRejected("Upload certificates as PDF, JPG or PNG files.")
+    if not data:
+        raise FileRejected("One of the certificate files is empty. Please choose another.")
+    ok = (_MAGIC["pdf"] in data[:1024]) if ext == "pdf" else data.startswith(_IMG_MAGIC[ext])
+    if not ok:
+        raise FileRejected("One of the certificate files doesn't look like a valid "
+                           f"{ext.upper()}. Please export it again or upload a PDF.")
+    return ext
+
+
 # ---- form ----------------------------------------------------------------------------
 
 def _one_of(value: str, options: list[str]) -> str:
@@ -126,6 +151,49 @@ def validate_form(form, vacancy: dict | None, general: bool) -> Result:
         r.fail("phone", "Enter a valid mobile number, for example 9123 4567.")
     d["phone"] = phone or ""
 
+    if (form.get("privacy_ack") or "") != "yes":
+        r.fail("privacy_ack", "Please confirm you have read the recruitment privacy notice.")
+    d["talent_pool"] = (form.get("talent_pool") or "") == "yes"
+
+    kind = "general" if general else (vacancy or {}).get("form") or "physio"
+    for k in PILATES_KEYS:
+        d[k] = [] if k in PILATES_LISTS else ""
+    if kind == "pilates":
+        _pilates(form, r)
+    else:
+        _standard(form, r)
+
+    physio = kind == "physio"
+    if physio:
+        d["ahpc_status"] = _one_of(g("ahpc_status", 40), config.AHPC_OPTIONS)
+        if not d["ahpc_status"]:
+            r.fail("ahpc_status", "Choose your AHPC registration status.")
+        d["clinical_experience"] = clean_text(form.get("clinical_experience"), 600)
+        if not d["clinical_experience"]:
+            r.fail("clinical_experience", "Tell us your main areas of clinical experience.")
+        d["womens_health"] = clean_text(form.get("womens_health"), 600)
+    else:
+        d["ahpc_status"] = d["clinical_experience"] = d["womens_health"] = ""
+
+    if general:
+        d["interest_area"] = _one_of(g("interest_area", 60), config.INTEREST_AREAS)
+        if not d["interest_area"]:
+            r.fail("interest_area", "Choose the kind of role you're interested in.")
+        d["interest_detail"] = g("interest_detail", 200)
+    else:
+        d["interest_area"] = d["interest_detail"] = ""
+
+    # Non-identifying campaign attribution, for the tracker's source column.
+    d["utm"] = {k: g(k, 100) for k in ("utm_source", "utm_medium", "utm_campaign", "utm_content")
+                if g(k, 100)}
+    d["source_page"] = g("source_page", 120)
+    return r
+
+
+def _standard(form, r: Result) -> None:
+    """The physiotherapist and expression-of-interest questions."""
+    g = lambda k, n=200: clean_line(form.get(k), n)  # noqa: E731
+    d = r.data
     emp = g("employment", 20)
     if emp not in config.EMPLOYMENT:
         r.fail("employment", "Choose full-time, part-time or open to both.")
@@ -170,32 +238,80 @@ def validate_form(form, vacancy: dict | None, general: bool) -> Result:
 
     d["heard_about"] = _one_of(g("heard_about", 40), config.HEARD_ABOUT_OPTIONS)
 
-    if (form.get("privacy_ack") or "") != "yes":
-        r.fail("privacy_ack", "Please confirm you have read the recruitment privacy notice.")
-    d["talent_pool"] = (form.get("talent_pool") or "") == "yes"
 
-    physio = bool(vacancy) and vacancy.get("form") == "physio"
-    if physio:
-        d["ahpc_status"] = _one_of(g("ahpc_status", 40), config.AHPC_OPTIONS)
-        if not d["ahpc_status"]:
-            r.fail("ahpc_status", "Choose your AHPC registration status.")
-        d["clinical_experience"] = clean_text(form.get("clinical_experience"), 600)
-        if not d["clinical_experience"]:
-            r.fail("clinical_experience", "Tell us your main areas of clinical experience.")
-        d["womens_health"] = clean_text(form.get("womens_health"), 600)
-    else:
-        d["ahpc_status"] = d["clinical_experience"] = d["womens_health"] = ""
+# Keys only the Pilates form fills; blank on every other application.
+PILATES_LISTS = ("apparatus", "teaching_experience", "time_windows")
+PILATES_KEYS = ("work_eligibility", "certification", "apparatus", "apparatus_other",
+                "teaching_years", "teaching_experience", "teaching_other", "time_windows",
+                "weekly_availability", "current_commitments", "portfolio")
 
-    if general:
-        d["interest_area"] = _one_of(g("interest_area", 60), config.INTEREST_AREAS)
-        if not d["interest_area"]:
-            r.fail("interest_area", "Choose the kind of role you're interested in.")
-        d["interest_detail"] = g("interest_detail", 200)
-    else:
-        d["interest_area"] = d["interest_detail"] = ""
 
-    # Non-identifying campaign attribution, for the tracker's source column.
-    d["utm"] = {k: g(k, 100) for k in ("utm_source", "utm_medium", "utm_campaign", "utm_content")
-                if g(k, 100)}
-    d["source_page"] = g("source_page", 120)
-    return r
+def _pilates(form, r: Result) -> None:
+    """The freelance Pilates instructor questions. No employment arrangement,
+    notice period, salary or AHPC questions (and none are stored)."""
+    g = lambda k, n=200: clean_line(form.get(k), n)  # noqa: E731
+    d = r.data
+    pick = lambda k, opts: [x for x in opts if x in form.getlist(k)]  # noqa: E731
+
+    d["employment"] = "Freelance"
+    d["days_per_week"] = ""
+    d["years_experience"] = ""
+    d["start_availability"] = ""
+    d["heard_about"] = ""
+    d["linkedin"] = ""
+    d["training"], d["training_other"] = [], ""
+
+    d["work_eligibility"] = _one_of(g("work_eligibility", 80), config.WORK_ELIGIBILITY_OPTIONS)
+    if not d["work_eligibility"]:
+        r.fail("work_eligibility", "Choose your Singapore work eligibility.")
+
+    d["certification"] = g("certification", 200)
+    if not d["certification"]:
+        r.fail("certification", "Tell us your Pilates certification and who trained you.")
+
+    d["apparatus"] = pick("apparatus", config.APPARATUS_OPTIONS)
+    if not d["apparatus"]:
+        r.fail("apparatus", "Choose at least one apparatus.")
+    d["apparatus_other"] = g("apparatus_other", 200) if "Others" in d["apparatus"] else ""
+
+    d["teaching_years"] = _one_of(g("teaching_years", 40), config.TEACHING_YEARS_OPTIONS)
+    if not d["teaching_years"]:
+        r.fail("teaching_years", "Choose your years of teaching experience.")
+
+    d["teaching_experience"] = pick("teaching_experience", config.TEACHING_EXPERIENCE_OPTIONS)
+    if not d["teaching_experience"]:
+        r.fail("teaching_experience", "Choose at least one kind of teaching experience.")
+    d["teaching_other"] = (g("teaching_other", 200)
+                           if "Others" in d["teaching_experience"] else "")
+
+    # Reuses the tracker's existing "Additional certifications" column.
+    extra = g("additional_qualifications", 300)
+    d["training"] = [extra] if extra else []
+
+    d["preferred_days"] = pick("available_days", config.ALL_DAYS)
+    if not d["preferred_days"]:
+        r.fail("available_days", "Choose at least one day you're available.")
+    d["time_windows"] = pick("time_windows", config.TIME_WINDOWS)
+    d["weekly_availability"] = g("weekly_availability", 200)
+
+    start = g("start_date", 10)
+    try:
+        date.fromisoformat(start)
+        if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", start):
+            raise ValueError
+        d["start_availability"] = start
+    except ValueError:
+        r.fail("start_date", "Choose your earliest available start date.")
+
+    d["current_commitments"] = g("current_commitments", 300)
+
+    portfolio = g("portfolio", 300)
+    if portfolio and not re.match(r"^https?://[^\s<>\"']+$", portfolio, re.I):
+        r.fail("portfolio", "Enter a full web address starting with https://.")
+        portfolio = ""
+    d["portfolio"] = portfolio
+
+    # Optional for this role.
+    d["intro"] = clean_text(form.get("intro"), 2000)
+    if len(clean_text(form.get("intro"), 5000)) > 2000:
+        r.fail("intro", "Keep the introduction to 2,000 characters or fewer.")

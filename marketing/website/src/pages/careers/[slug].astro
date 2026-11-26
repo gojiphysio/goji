@@ -29,6 +29,22 @@ const list = (items: string[]) => `<ul>${items.map((i) => `<li>${esc(i)}</li>`).
 
 // JobPosting `description` must be the same text a visitor sees: built from the
 // same fields, in the same order, as the body below.
+// Section headings: the physiotherapist wording unless the role overrides it.
+const h = {
+  requirements: "What we're looking for",
+  preferred: "Preferred skills and experience",
+  offer: "What we offer",
+  benefits: "Compensation and benefits",
+  development: "Clinical and career development",
+  working: "Working arrangements",
+  ...v.headings,
+};
+const howToApply =
+  v.howToApply ??
+  "If you are passionate about delivering excellent clinical care and excited to be part of a growing, collaborative practice, we would love to hear from you.";
+const focusLabel = v.focusLabel ?? "clinical focus";
+const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
 const jdHtml = [
   `<p>${esc(v.shortDescription)}</p>`,
   `<h2>About the role</h2>`,
@@ -38,11 +54,11 @@ const jdHtml = [
     ? `<h3>${esc(v.additionalResponsibilities.heading)}</h3>${list(v.additionalResponsibilities.items)}` +
       (v.additionalResponsibilities.note ? `<p>${esc(v.additionalResponsibilities.note)}</p>` : "")
     : "",
-  `<h2>What we're looking for</h2>${list(v.requirements)}`,
-  `<h3>Preferred skills and experience</h3><p>${esc(v.preferred.intro)}</p>${list(v.preferred.items)}`,
-  `<h2>What we offer</h2><h3>Compensation and benefits</h3>${list(v.benefits)}`,
-  `<h3>Clinical and career development</h3>${list(v.development)}`,
-  `<h2>Working arrangements</h2>${list(v.workingArrangements)}`,
+  `<h2>${esc(h.requirements)}</h2>${list(v.requirements)}`,
+  `<h3>${esc(h.preferred)}</h3>${v.preferred.intro ? `<p>${esc(v.preferred.intro)}</p>` : ""}${list(v.preferred.items)}`,
+  `<h2>${esc(h.offer)}</h2>${h.benefits ? `<h3>${esc(h.benefits)}</h3>` : ""}${list(v.benefits)}`,
+  v.development.length ? `<h3>${esc(h.development)}</h3>${list(v.development)}` : "",
+  `<h2>${esc(h.working)}</h2>${list(v.workingArrangements)}`,
   v.workingArrangementsNote ? `<p>${esc(v.workingArrangementsNote)}</p>` : "",
 ].join("");
 
@@ -72,16 +88,20 @@ const jobPosting = {
     },
   },
   directApply: true,
-  occupationalCategory: "Physiotherapist",
+  occupationalCategory: v.schema?.occupationalCategory ?? "Physiotherapist",
   industry: "Healthcare",
   educationRequirements: {
     "@type": "EducationalOccupationalCredential",
-    credentialCategory: "bachelor degree",
+    credentialCategory: v.schema?.credentialCategory ?? "bachelor degree",
   },
-  experienceRequirements: {
-    "@type": "OccupationalExperienceRequirements",
-    monthsOfExperience: v.minYearsExperience * 12,
-  },
+  ...(v.minYearsExperience > 0
+    ? {
+        experienceRequirements: {
+          "@type": "OccupationalExperienceRequirements",
+          monthsOfExperience: v.minYearsExperience * 12,
+        },
+      }
+    : {}),
   url: pageUrl,
 };
 
@@ -107,11 +127,11 @@ const schema = open ? [jobPosting, breadcrumb] : [webPage, breadcrumb];
 const facts = [
   ["Department", v.department],
   ["Location", v.location],
-  ["Employment type", employmentLabel(v.employmentTypes)],
-  ["Minimum commitment", v.minCommitment],
+  [v.employmentTypes.includes("CONTRACTOR") ? "Engagement type" : "Employment type", employmentLabel(v.employmentTypes)],
+  [v.minDaysPerWeek ? "Minimum commitment" : "Commitment", v.minCommitment],
   ["Experience", v.experience],
-  ["Primary clinical focus", v.clinicalFocus.primary],
-  ...(v.clinicalFocus.secondary ? [["Secondary clinical focus", v.clinicalFocus.secondary]] : []),
+  [v.clinicalFocus.secondary ? `Primary ${focusLabel}` : cap(focusLabel), v.clinicalFocus.primary],
+  ...(v.clinicalFocus.secondary ? [[`Secondary ${focusLabel}`, v.clinicalFocus.secondary]] : []),
   ...(v.closingDate ? [["Applications close", new Date(`${v.closingDate}T00:00:00+08:00`).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Singapore" })]] : []),
 ];
 ---
@@ -192,19 +212,25 @@ const facts = [
           )
         }
 
-        <h2>What we're looking for</h2>
+        <h2>{h.requirements}</h2>
         <ul>{v.requirements.map((i) => <li>{i}</li>)}</ul>
-        <h3>Preferred skills and experience</h3>
-        <p>{v.preferred.intro}</p>
+        <h3>{h.preferred}</h3>
+        {v.preferred.intro && <p>{v.preferred.intro}</p>}
         <ul>{v.preferred.items.map((i) => <li>{i}</li>)}</ul>
 
-        <h2>What we offer</h2>
-        <h3>Compensation and benefits</h3>
+        <h2>{h.offer}</h2>
+        {h.benefits && <h3>{h.benefits}</h3>}
         <ul>{v.benefits.map((i) => <li>{i}</li>)}</ul>
-        <h3>Clinical and career development</h3>
-        <ul>{v.development.map((i) => <li>{i}</li>)}</ul>
+        {
+          v.development.length > 0 && (
+            <Fragment>
+              <h3>{h.development}</h3>
+              <ul>{v.development.map((i) => <li>{i}</li>)}</ul>
+            </Fragment>
+          )
+        }
 
-        <h2>Working arrangements</h2>
+        <h2>{h.working}</h2>
         <ul>{v.workingArrangements.map((i) => <li>{i}</li>)}</ul>
         {v.workingArrangementsNote && <p>{v.workingArrangementsNote}</p>}
 
@@ -212,13 +238,13 @@ const facts = [
           open && (
             <Fragment>
               <h2>How to apply</h2>
+              <p>{howToApply}</p>
               <p>
-                If you are passionate about delivering excellent clinical care and excited to be part of a growing,
-                collaborative practice, we would love to hear from you.
-              </p>
-              <p>
-                Apply online below with your CV and a short introduction. There's no account to create. If you
-                have any trouble with the form, email your CV to <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.
+                {v.form === "pilates"
+                  ? "Apply online below with your CV and, if you have them to hand, your Pilates certificates."
+                  : "Apply online below with your CV and a short introduction."}{" "}
+                There's no account to create. If you have any trouble with the form, email your CV to{" "}
+                <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.
               </p>
             </Fragment>
           )

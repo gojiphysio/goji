@@ -11,7 +11,8 @@
  *
  * Content rules (from the recruitment brief, 2026-11):
  * - The approved job description is the Google Doc "Senior Physiotherapist -
- *   Job Posting". Keep its wording; only format it for the web.
+ *   Job Posting". Keep its wording; only format it for the web. The Freelance
+ *   Pilates Instructor copy is the owner's brief of 2026-11-26, kept verbatim.
  * - Never publish salary figures, commission percentages or thresholds,
  *   projected earnings, sign-on incentives, salary reviews, differences in pay
  *   between seniority levels, or unapproved benefits. Never call Goji
@@ -23,10 +24,23 @@
  * - British English, regular dashes, no emojis.
  */
 
-export type EmploymentType = "FULL_TIME" | "PART_TIME";
+/** schema.org JobPosting employmentType values. CONTRACTOR = freelance. */
+export type EmploymentType = "FULL_TIME" | "PART_TIME" | "CONTRACTOR";
 
-/** Which extra questions the application form asks for this role. */
-export type FormKind = "physio" | "general";
+/** Which question set the application form asks for this role. */
+export type FormKind = "physio" | "pilates" | "general";
+
+/** Section headings on the role page (and in the JobPosting description).
+ *  Anything left out uses the physiotherapist wording. `benefits: ""` drops
+ *  the sub-heading, for a role whose offer is one list. */
+export interface VacancyHeadings {
+  requirements?: string;
+  preferred?: string;
+  offer?: string;
+  benefits?: string;
+  development?: string;
+  working?: string;
+}
 
 export interface Vacancy {
   /** Stable job ID. Written to the tracker and the backend allowlist; never
@@ -42,10 +56,14 @@ export interface Vacancy {
   minCommitment: string;
   /** Minimum part-time days per week, used by the form's notice. */
   minDaysPerWeek?: number;
-  /** Minimum years of post-qualification experience (for JSON-LD). */
+  /** Minimum years of post-qualification experience (for JSON-LD; 0 = none
+   *  stated, and the JobPosting leaves experienceRequirements out). */
   minYearsExperience: number;
   experience: string;
   clinicalFocus: { primary: string; secondary?: string };
+  /** Label for clinicalFocus on the card and page; default "clinical focus".
+   *  A non-clinical role must set it (Private Pilates is not clinical care). */
+  focusLabel?: string;
   shortDescription: string;
   /** "About the role" paragraphs. */
   about: string[];
@@ -57,8 +75,13 @@ export interface Vacancy {
   preferred: { intro: string; items: string[] };
   /** "Compensation & Benefits" in the doc. */
   benefits: string[];
-  /** "Clinical & Career Development" in the doc. */
+  /** "Clinical & Career Development" in the doc (empty = no such section). */
   development: string[];
+  headings?: VacancyHeadings;
+  /** The first "How to apply" paragraph; default is the physiotherapist one. */
+  howToApply?: string;
+  /** JobPosting fields that differ by profession. */
+  schema?: { occupationalCategory: string; credentialCategory: string };
   workingArrangements: string[];
   /** Paragraph shown after the working-arrangements list. */
   workingArrangementsNote?: string;
@@ -243,6 +266,90 @@ export const VACANCIES: Vacancy[] = [
     form: "physio",
     driveFolder: "Senior Physiotherapist",
   },
+  {
+    id: "pilates-instructor",
+    slug: "pilates-instructor",
+    title: "Freelance Pilates Instructor",
+    department: "Pilates",
+    location: LOCATION,
+    employmentTypes: ["CONTRACTOR"],
+    minCommitment: "Flexible, by mutual agreement",
+    minYearsExperience: 0,
+    experience: "Experience teaching personalised Pilates",
+    clinicalFocus: { primary: "Private Pilates (1:1 and 2:1)" },
+    focusLabel: "focus",
+    // Copy supplied by the owner, 2026-11-26. Freelance: no employee benefits,
+    // no fees, earnings, booking minimums or contract terms (CAREERS.md).
+    shortDescription:
+      "Deliver personalised Pilates sessions in a supportive, physiotherapy-led environment. Help clients build strength, improve movement and develop confidence in their bodies.",
+    about: [
+      "We're looking for a passionate and personable Pilates Instructor who enjoys delivering thoughtful, individualised movement experiences.",
+      "Our Private Pilates offering focuses on 1:1 and 2:1 sessions, allowing instructors to develop meaningful client relationships and tailor each session to individual needs, abilities and goals.",
+      "Work alongside our team of physiotherapists in a collaborative environment, supporting clients across different life stages, from pregnancy and postpartum recovery to healthy ageing and active lifestyles.",
+      "This is an instructor-led Private Pilates role, offered as a freelance engagement. Clinical Pilates at Goji is a separate service led by our AHPC-registered physiotherapists, and is not part of this role.",
+    ],
+    responsibilities: [
+      "Deliver safe, engaging and personalised 1:1 and 2:1 Pilates sessions.",
+      "Adapt exercises to individual client needs, abilities and goals.",
+      "Support client progression and continuity of care.",
+      "Collaborate with Goji's physiotherapists while maintaining appropriate professional boundaries.",
+      "Maintain accurate and timely session documentation.",
+      "Uphold high standards of professionalism, client care, confidentiality, safety and studio hygiene.",
+      "Opportunities to participate in workshops, community activations and marketing initiatives.",
+    ],
+    requirements: [
+      "Recognised Pilates instructor certification, with training in Mat and Reformer Pilates.",
+      "Experience delivering personalised Pilates instruction.",
+      "Strong understanding of movement principles, exercise programming and safe exercise progression.",
+      "Excellent interpersonal and communication skills.",
+      "Ability to work independently and collaboratively within a multidisciplinary environment.",
+    ],
+    preferred: {
+      intro: "The following would be advantageous but are not mandatory:",
+      items: [
+        "Comprehensive Pilates certification or training across additional apparatus.",
+        "Prenatal and postnatal Pilates experience.",
+        "Experience adapting exercises for clients with specific movement needs.",
+        "Additional qualifications in fitness, movement or strength and conditioning.",
+        "Interest in women's health.",
+      ],
+    },
+    benefits: [
+      "Competitive remuneration.",
+      "Flexible availability and mutually agreed booking arrangements.",
+      "Access to a well-equipped Pilates studio within a physiotherapy-led practice.",
+      "Opportunities for professional collaboration and knowledge sharing.",
+      "Opportunities for additional paid workshops, corporate engagements and community events.",
+    ],
+    development: [],
+    workingArrangements: [
+      "Regular weekly availability is preferred.",
+      "Weekend availability would be advantageous.",
+      "Currently based at our Lentor Modern clinic, conveniently connected to Lentor MRT.",
+    ],
+    workingArrangementsNote:
+      "As Goji continues to grow, there may be opportunities to provide services across future clinic locations, subject to mutually agreed engagement arrangements.",
+    headings: {
+      requirements: "Qualifications and requirements",
+      offer: "Remuneration and engagement arrangements",
+      benefits: "",
+      working: "Availability and location",
+    },
+    howToApply:
+      "If you enjoy teaching Pilates one-to-one and would like to work alongside a team of physiotherapists, we would love to hear from you.",
+    schema: { occupationalCategory: "Pilates Instructor", credentialCategory: "professional certificate" },
+    datePosted: "2026-11-26",
+    active: true,
+    featured: true,
+    order: 3,
+    seo: {
+      title: "Freelance Pilates Instructor Jobs Singapore | Goji",
+      description:
+        "Freelance Pilates instructor role at Goji, Singapore (currently Lentor Modern). Private 1:1 and 2:1 mat and reformer sessions in a physiotherapy-led practice.",
+    },
+    form: "pilates",
+    driveFolder: "Pilates Instructor",
+  },
 ];
 
 /** The pseudo-role for general expressions of interest. Not a vacancy: it
@@ -296,6 +403,40 @@ export const HEARD_ABOUT_OPTIONS = [
 
 export const WORKING_DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"] as const;
 
+// ---- Pilates instructor form options ------------------------------------
+// Kept in sync with the PILATES_* lists in
+// business-intelligence/scripts/careers/config.py (the backend drops any
+// value not on its list).
+
+export const WORK_ELIGIBILITY_OPTIONS = [
+  "Singapore Citizen or Permanent Resident",
+  "I hold a pass that allows me to work in Singapore",
+  "I would need a pass to work in Singapore",
+] as const;
+
+export const APPARATUS_OPTIONS = ["Mat", "Reformer", "Cadillac / Trapeze Table", "Chair", "Barrels", "Others"] as const;
+
+export const TEACHING_YEARS_OPTIONS = [
+  "Less than 1 year",
+  "1 to 2 years",
+  "3 to 5 years",
+  "6 to 10 years",
+  "More than 10 years",
+] as const;
+
+export const TEACHING_EXPERIENCE_OPTIONS = [
+  "Private 1:1",
+  "Duet 2:1",
+  "Group Pilates",
+  "Prenatal",
+  "Postnatal",
+  "Others",
+] as const;
+
+export const ALL_DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"] as const;
+
+export const TIME_WINDOWS = ["Morning", "Afternoon", "Evening"] as const;
+
 /** A role is open when it is active and its closing date (if any) has not
  *  passed in Singapore time. Evaluated at build time; a closing date also
  *  needs a rebuild (any deploy) to take the page down, and the backend checks
@@ -316,6 +457,6 @@ export function vacancyById(id: string): Vacancy | undefined {
 }
 
 export function employmentLabel(types: EmploymentType[]): string {
-  const map: Record<EmploymentType, string> = { FULL_TIME: "Full-time", PART_TIME: "Part-time" };
+  const map: Record<EmploymentType, string> = { FULL_TIME: "Full-time", PART_TIME: "Part-time", CONTRACTOR: "Freelance" };
   return types.map((t) => map[t]).join(" / ");
 }
