@@ -49,22 +49,18 @@ be inside a Shared Drive, not a My Drive folder shared with it.
 
 The workflow's `env:` block is the switch, so going live is a reviewed PR.
 
-- **Now (test):** it points at the "Goji Recruitment (TEST)" folder and tracker,
-  with `CAREERS_TEST_MODE: "1"`. Applicant confirmations go to
-  `CAREERS_TEST_EMAIL` instead of the applicant; with no test address, no
-  confirmation is sent at all.
-- **Go live:**
-  1. In the Shared Drive, make a copy of the TEST tracker (it has the header row
-     and dropdowns), name it "Goji Recruitment — Applicant Tracker", clear its
-     rows, and create an `Applications` folder beside it.
-  2. In a PR, put their IDs in the workflow and set `CAREERS_TEST_MODE: "0"`.
-  3. Set `PUBLIC_CAREERS_API=https://careers-api.gojiphysio.com` on the
-     Cloudflare Pages production environment and rebuild the site. Until then
-     the site shows "apply by email" instead of the form.
+- **Live (since 26 Nov 2026):** it points at the production "Goji Recruitment"
+  folder and tracker with `CAREERS_TEST_MODE: "0"`, so the applicant gets the
+  confirmation. The TEST IDs are kept in a comment in the workflow.
+- **Back to test:** swap in the TEST IDs and set `CAREERS_TEST_MODE: "1"`.
+  Applicant confirmations then go to `CAREERS_TEST_EMAIL` instead of the
+  applicant; with no test address, no confirmation is sent at all.
+- **The form** appears only when `PUBLIC_CAREERS_API=https://careers-api.gojiphysio.com`
+  is set on the Cloudflare Pages production environment (and the site is
+  rebuilt). Without it the site shows "apply by email".
 
-Before going live: a test submission per role and one expression of interest;
-check the tracker row, the CV and both emails; management approves the
-privacy notice and the retention periods (`RETENTION.md`).
+A test submission in production goes in the live tracker: delete its row,
+its CV (and empty the drive's trash) and its two emails afterwards.
 
 ## Website side
 
