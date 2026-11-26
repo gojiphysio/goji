@@ -54,5 +54,12 @@
     "duration": 8,
     "status": "provisional revised rough-cut selection; tap legibility needs polish",
     "review": "Full 4fps samples plus 8fps tap/landing details show braced torso/knee crossing, crouched sill support, a supported descent facing the chassis, release and bent-knee landing near 7.0s. No elevator rise. Bag stays with the left wrist/hand through the descent; its broad face is naturally visible from this side angle. Tap reach near 2.5s is small/partly occluded; card-reader contact needs a clearer polish pass. Normal-speed playback and listening review pending locked Mac."
+  },
+  "03": {
+    "path": "takes/03-03/raw_00001_.mp4",
+    "start": 0,
+    "duration": 3,
+    "status": "provisional revised selection; full-stride sampled review",
+    "review": "8fps across the entire three seconds shows alternating full left/right arm pumps, including the bag arm. Bag remains rigid and mostly narrow-end toward the rear camera, with no broad gold-clasp face locked to camera. Indexed anchors preserve the range beyond the opening. Normal-speed playback remains blocked by locked Mac."
   }
 }

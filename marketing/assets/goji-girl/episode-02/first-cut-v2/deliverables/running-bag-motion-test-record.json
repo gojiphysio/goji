@@ -1,0 +1,15 @@
+{
+  "source": "takes/03-03/raw_00001_.mp4",
+  "source_frames": [
+    0,
+    72
+  ],
+  "duration": 3,
+  "audio_range_seconds": [
+    5,
+    8
+  ],
+  "full_decode_verified": true,
+  "review": "8fps across the entire three seconds shows alternating full left/right arm pumps, including the bag arm. Bag remains rigid and mostly narrow-end toward the rear camera, with no broad gold-clasp face locked to camera. Indexed anchors preserve the range beyond the opening. Normal-speed playback remains blocked by locked Mac.",
+  "sha256": "7be4741188768cac2bb08187450fb8fae9164271857a21ba0b5097b60358d672"
+}

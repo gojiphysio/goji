@@ -38,3 +38,5 @@ Run test 03-02 also fails: the first raised-arm pose decays into the old low car
 The clinic chase camera moves closer and rotates through the turn. The officers follow continuous flanking arcs, keeping the player visible. The left runner stays clear of the tree. These changes still need generated-footage review.
 
 The latest scene 10 guide has been inspected across the full route at 3fps. Both officers remain beside the camera edges and the player stays visible through the turn. The scene 07 render establishes the fast roll and slide but changes some side livery as it reaches the final anchor; it is a provisional rough-cut selection with that defect retained in the review record.
+
+Run test 03-03 holds both arm extremes throughout the 8fps full-shot review and keeps the narrow bag end toward the rear camera. It is selected provisionally, pending normal-speed playback. Scenes 04 and 10 add this finished clip as Video 2 for locomotion only, retaining their own Video 1 route/camera and appearance frame.

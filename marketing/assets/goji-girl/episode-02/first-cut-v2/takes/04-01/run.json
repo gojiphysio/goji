@@ -1,0 +1,296 @@
+{
+  "shot": "04",
+  "take": "01",
+  "status": "queued",
+  "started": 1795681918.220402,
+  "recipe": "H3 Ref2VA GGUF Q4 + native Turbo 4-step; 576x1024 24fps",
+  "native_frames": 73,
+  "edit_seconds": 3,
+  "guidance": "video",
+  "prompt": "One uninterrupted three-second third-person gameplay run AROUND the FRONT NOSE of the parked double-decker, from passenger side to driver side. Start with the girl on the sidewalk. She runs PAST the open passenger entrance without entering it, continues in front of the windscreen, then rounds the other front corner onto the road and stops beside the compact DRIVER WINDOW. The bus stays parked, completely stationary. The girl never boards during this shot. The corrected <Video 1> gives the full route and collision-free camera, and the supplied final frame anchors her arrival at the driver window. Preserve the full continuous turn; no cut or teleport. Use <Picture 1> for the exact finished bus and woman appearance: formed rounded sheet-metal corners, inset dark glazing, detailed wheel arches/rims/lamps, orange-red/purple/white SOS Transit livery, maroon clothing and black bag in LEFT hand. <Video 1> contains crude planning blocks ONLY: use their positions, timing and camera, NEVER their boxy silhouettes, flat toy surfaces or primitive faces as the finished geometry. Original PS2 GTA San Andreas painted textures and economical but properly formed vehicle mesh. Camera follows the whole run around the nose without entering the bus. Pedestrians remain clear on pavement; nobody is touched. No extra characters, HUD, captions or stars. Blender primitives govern ONLY world positions, motion, contacts and camera. Reconstruct the FINISHED MESH SHAPES from the approved appearance image: formed rounded bus corners, inset glazing, detailed wheel arches, rims, lamps and bumpers, and the approved human anatomy. Never merely paint textures onto the guide boxes or reproduce their blocky silhouettes or primitive faces. Match the original PS2 running cycle in the guide: forward-pitched torso, squared flared bent elbows, pronounced heel recovery and brisk repeated footfalls. BOTH arms pump firmly through the same full range, including the left arm holding the handbag. Keep a regular game-animation cadence along the full continuous route, slowing only to stop at the driver window. The handbag is a STIFF rigid game prop attached to the moving LEFT hand. Its body and handle keep their exact shape and rotate/translate WITH that hand through the FULL arm pump. Never hold the bag arm still, pin it beside the hip, reduce its swing, stretch the bag or animate it like soft cloth. Match both-arm motion in the video guide. The handbag is oriented ALONGSIDE HER BODY: its long side runs fore-aft, broad face points outward to her left, and the rear camera mostly sees its narrow gusset/end. Keep this orientation FIXED TO HER GRIP and rotate it with her wrist/arm, never swivel the broad front or gold clasp to face camera. No independent dangling, bag flattening or camera-facing billboard. <Video 2> is the selected FINISHED LOCOMOTION reference only: reproduce its repeated full two-arm pumping and rigid narrow-end handbag orientation throughout every stride. Do not copy its house, road, people, framing or route. <Video 1> remains the authoritative route, contacts and camera for THIS shot; <Picture 1> remains its finished appearance. Keep the full arm range of Video2 after the first stride and through the turn.",
+  "workflow": {
+    "1": {
+      "class_type": "UnetLoaderGGUF",
+      "inputs": {
+        "unet_name": "minimax_h3_ref2va_pruned-Q4_K_M.gguf"
+      }
+    },
+    "2": {
+      "class_type": "CLIPLoaderGGUF",
+      "inputs": {
+        "clip_name": "qwen3vl_32b_minimax_h3-Q4_K_M.gguf",
+        "type": "minimax"
+      }
+    },
+    "3": {
+      "class_type": "VAELoader",
+      "inputs": {
+        "vae_name": "minimax_h3_video_vae_fp16.safetensors"
+      }
+    },
+    "4": {
+      "class_type": "LoraLoaderModelOnly",
+      "inputs": {
+        "model": [
+          "1",
+          0
+        ],
+        "lora_name": "minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors",
+        "strength_model": 1.0
+      }
+    },
+    "5": {
+      "class_type": "MiniMaxH3SigmaShift",
+      "inputs": {
+        "model": [
+          "4",
+          0
+        ],
+        "shift_video": 12.0,
+        "shift_audio": 3.0
+      }
+    },
+    "6": {
+      "class_type": "MiniMaxH3ReferenceToVideo",
+      "inputs": {
+        "clip": [
+          "2",
+          0
+        ],
+        "vae": [
+          "3",
+          0
+        ],
+        "prompt": "One uninterrupted three-second third-person gameplay run AROUND the FRONT NOSE of the parked double-decker, from passenger side to driver side. Start with the girl on the sidewalk. She runs PAST the open passenger entrance without entering it, continues in front of the windscreen, then rounds the other front corner onto the road and stops beside the compact DRIVER WINDOW. The bus stays parked, completely stationary. The girl never boards during this shot. The corrected <Video 1> gives the full route and collision-free camera, and the supplied final frame anchors her arrival at the driver window. Preserve the full continuous turn; no cut or teleport. Use <Picture 1> for the exact finished bus and woman appearance: formed rounded sheet-metal corners, inset dark glazing, detailed wheel arches/rims/lamps, orange-red/purple/white SOS Transit livery, maroon clothing and black bag in LEFT hand. <Video 1> contains crude planning blocks ONLY: use their positions, timing and camera, NEVER their boxy silhouettes, flat toy surfaces or primitive faces as the finished geometry. Original PS2 GTA San Andreas painted textures and economical but properly formed vehicle mesh. Camera follows the whole run around the nose without entering the bus. Pedestrians remain clear on pavement; nobody is touched. No extra characters, HUD, captions or stars. Blender primitives govern ONLY world positions, motion, contacts and camera. Reconstruct the FINISHED MESH SHAPES from the approved appearance image: formed rounded bus corners, inset glazing, detailed wheel arches, rims, lamps and bumpers, and the approved human anatomy. Never merely paint textures onto the guide boxes or reproduce their blocky silhouettes or primitive faces. Match the original PS2 running cycle in the guide: forward-pitched torso, squared flared bent elbows, pronounced heel recovery and brisk repeated footfalls. BOTH arms pump firmly through the same full range, including the left arm holding the handbag. Keep a regular game-animation cadence along the full continuous route, slowing only to stop at the driver window. The handbag is a STIFF rigid game prop attached to the moving LEFT hand. Its body and handle keep their exact shape and rotate/translate WITH that hand through the FULL arm pump. Never hold the bag arm still, pin it beside the hip, reduce its swing, stretch the bag or animate it like soft cloth. Match both-arm motion in the video guide. The handbag is oriented ALONGSIDE HER BODY: its long side runs fore-aft, broad face points outward to her left, and the rear camera mostly sees its narrow gusset/end. Keep this orientation FIXED TO HER GRIP and rotate it with her wrist/arm, never swivel the broad front or gold clasp to face camera. No independent dangling, bag flattening or camera-facing billboard. <Video 2> is the selected FINISHED LOCOMOTION reference only: reproduce its repeated full two-arm pumping and rigid narrow-end handbag orientation throughout every stride. Do not copy its house, road, people, framing or route. <Video 1> remains the authoritative route, contacts and camera for THIS shot; <Picture 1> remains its finished appearance. Keep the full arm range of Video2 after the first stride and through the turn.",
+        "width": 576,
+        "height": 1024,
+        "length": 73,
+        "ref_image_size": "match",
+        "ref_images.ref_image_0": [
+          "20",
+          0
+        ],
+        "ref_videos.ref_video_0": [
+          "22",
+          0
+        ],
+        "ref_videos.ref_video_1": [
+          "103",
+          0
+        ]
+      }
+    },
+    "7": {
+      "class_type": "BasicGuider",
+      "inputs": {
+        "model": [
+          "5",
+          0
+        ],
+        "conditioning": [
+          "32",
+          0
+        ]
+      }
+    },
+    "8": {
+      "class_type": "RandomNoise",
+      "inputs": {
+        "noise_seed": 2026113004
+      }
+    },
+    "9": {
+      "class_type": "KSamplerSelect",
+      "inputs": {
+        "sampler_name": "euler"
+      }
+    },
+    "10": {
+      "class_type": "BasicScheduler",
+      "inputs": {
+        "model": [
+          "5",
+          0
+        ],
+        "scheduler": "simple",
+        "steps": 4,
+        "denoise": 1.0
+      }
+    },
+    "11": {
+      "class_type": "SamplerCustomAdvanced",
+      "inputs": {
+        "noise": [
+          "8",
+          0
+        ],
+        "guider": [
+          "7",
+          0
+        ],
+        "sampler": [
+          "9",
+          0
+        ],
+        "sigmas": [
+          "10",
+          0
+        ],
+        "latent_image": [
+          "6",
+          1
+        ]
+      }
+    },
+    "12": {
+      "class_type": "VAEDecodeTiled",
+      "inputs": {
+        "samples": [
+          "11",
+          0
+        ],
+        "vae": [
+          "3",
+          0
+        ],
+        "tile_size": 256,
+        "overlap": 64,
+        "temporal_size": 64,
+        "temporal_overlap": 8
+      }
+    },
+    "13": {
+      "class_type": "CreateVideo",
+      "inputs": {
+        "images": [
+          "12",
+          0
+        ],
+        "fps": 24.0
+      }
+    },
+    "14": {
+      "class_type": "SaveVideo",
+      "inputs": {
+        "video": [
+          "13",
+          0
+        ],
+        "filename_prefix": "04-01/raw",
+        "format": "mp4",
+        "format.codec": "h264"
+      }
+    },
+    "20": {
+      "class_type": "LoadImage",
+      "inputs": {
+        "image": "04-grip-side-on.png"
+      }
+    },
+    "21": {
+      "class_type": "LoadVideo",
+      "inputs": {
+        "file": "04-guide-grip-v3.mp4"
+      }
+    },
+    "22": {
+      "class_type": "GetVideoComponents",
+      "inputs": {
+        "video": [
+          "21",
+          0
+        ]
+      }
+    },
+    "102": {
+      "class_type": "LoadVideo",
+      "inputs": {
+        "file": "03-selected-locomotion-reference.mp4"
+      }
+    },
+    "103": {
+      "class_type": "GetVideoComponents",
+      "inputs": {
+        "video": [
+          "102",
+          0
+        ]
+      }
+    },
+    "30": {
+      "class_type": "MiniMaxH3AddGuide",
+      "inputs": {
+        "positive": [
+          "6",
+          0
+        ],
+        "latent": [
+          "6",
+          1
+        ],
+        "vae": [
+          "3",
+          0
+        ],
+        "image": [
+          "20",
+          0
+        ],
+        "frame_idx": 0
+      }
+    },
+    "31": {
+      "class_type": "LoadImage",
+      "inputs": {
+        "image": "04-end-v2.png"
+      }
+    },
+    "32": {
+      "class_type": "MiniMaxH3AddGuide",
+      "inputs": {
+        "positive": [
+          "30",
+          0
+        ],
+        "latent": [
+          "6",
+          1
+        ],
+        "vae": [
+          "3",
+          0
+        ],
+        "image": [
+          "31",
+          0
+        ],
+        "frame_idx": 72
+      }
+    }
+  },
+  "inputs": [
+    {
+      "path": "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/first-cut-v2/inputs/04-grip-side-on.png",
+      "sha256": "42190f3c8d833bc642f61a88c4415e05c40f88ddbdcb3c3cedd4af48a22dd9ed"
+    },
+    {
+      "path": "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/first-cut-v2/inputs/04-guide-grip-v3.mp4",
+      "sha256": "e0a2733494339aaf413eb62ff6b41fc74dbedcd41121c6646123e342c552ee87"
+    },
+    {
+      "path": "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/first-cut-v2/inputs/03-selected-locomotion-reference.mp4",
+      "sha256": "b8386bca7420bf3524de82bc04533e9fb700c5c9fdfb0839e1abf3eaf99d4c8c"
+    },
+    {
+      "path": "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/first-cut-v2/inputs/04-end-v2.png",
+      "sha256": "9b20a646c31e8850cb1cc620b25ae1c649789dba133e015408e9118fc036e0c3"
+    }
+  ],
+  "audio": "Separate original procedural SFX in edit; video VAE only",
+  "runtime_commit": "da8bd08e48deee74d9f6c3bc00aed365b00ec209",
+  "receipt": {
+    "prompt_id": "86c61b23-ade6-4382-9409-c1539138bd40",
+    "number": 4.0,
+    "node_errors": {}
+  }
+}

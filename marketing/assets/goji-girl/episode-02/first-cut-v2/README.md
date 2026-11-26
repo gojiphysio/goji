@@ -12,7 +12,9 @@ The exit gets eight seconds, bringing the planned cut to 49 seconds. The safehou
 
 ## Bag orientation correction
 
-The revised references turn the bag alongside her body, with its narrow end visible from behind. The grip transform has the same correction in the running and exit guides. The new animation test is queued; this correction is not yet verified in finished motion.
+The revised references turn the bag alongside her body, with its narrow end visible from behind. The grip transform has the same correction in the running and exit guides. The rendered departure test now keeps both arms pumping across the full shot and shows the narrow bag end from behind in 8fps review. Normal-speed playback remains pending. The bus-approach and clinic-sprint renders are using this selected movement as an additional reference.
+
+[Watch the revised running and bag motion with SFX](deliverables/running-bag-motion-test.mp4).
 
 | Previous reference | Revised reference |
 | --- | --- |
