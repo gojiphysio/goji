@@ -199,6 +199,11 @@ The WhatsApp assistant. What it is and how to run it: [`README.md`](README.md).
   The one-line run-on read as word salad on a phone (owner, 26 Nov 2026).
   Outside her 24h window the template takes one line, so the kind goes in
   front of the reason (`template_params`).
+  The morning summary follows the same rule (`summary.build`): what needs
+  her first, one chat per line, intents in words (`summary.TOPIC`; add a new
+  intent there), the count in the subject. Every outcome belongs to a
+  section: cancellations and getting-worse chats were in none, so they never
+  appeared.
 - **Staff numbers are never customers.** `WA_AGENT_STAFF` messages go to
   `handle_staff` before any lookup, model call or metric; the numbers live in
   a private env file, never the repo. Pings name customers by first name or
