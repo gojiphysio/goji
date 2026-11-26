@@ -1,0 +1,283 @@
+{
+  "shot": "07",
+  "take": "01",
+  "status": "queued",
+  "started": 1795676936.719501,
+  "recipe": "H3 Ref2VA GGUF Q4 + native Turbo 4-step; 576x1024 24fps",
+  "native_frames": 124,
+  "edit_seconds": 5,
+  "guidance": "video",
+  "prompt": "One unbroken FIVE-second original GTA San Andreas PS2 high-speed bus crash. At first frame SAME SOS Transit double-decker is upright, racing forward at 80 km/h. First 1.1 seconds sustained fast approach toward Lentor Modern. At 1.1 seconds the driver jerks sharply LEFT at speed: nose snaps left, tyres scrub, body loads onto outside/right tyres. From1.45 to1.95 seconds top-heavy bus rapidly TOPPLES on its RIGHT side, pivoting around outside tyre contact, roof swinging toward road. Heavy side SLAMS pavement at1.95 seconds. Momentum carries it forward rapidly on its side, sparks and scraped metal, sliding about25 metres. Around3.15 seconds it CRASHES into the EMPTY mall-side canopy supports: posts buckle, canopy bay crumples upward, bus jolts and finally stops on its side by3.6 seconds. Hold wreck still to5 seconds. Every stage has a cause: steering snap, weight shift, accelerating fall, ground hit, fast frictional slide, hard structural impact. No slow motion, hovering, gentle eased rotation, magical self-righting or teleporting. Follow <Video 1> world path and contacts, but give action sharp dynamic timing and heavy rigid vehicle inertia. Keep rear player chase camera, horizon level, no cinematic cut/orbit. The bus is the rounded formed PS2 vehicle in <Picture 1> and anchors: orange-red white purple SOS Transit DOUBLE DECKER, two rows of windows, three axles, fitted lamps/bumper, wheel arches, inset glazing and textured sheetmetal. Blender blocks ONLY establish space and motion, NEVER final mesh forms or surfaces. Two distant pedestrians recoil safely beyond wreck at far storefront; nobody hit or falls, no one on road, no driver outsidebus. End in supplied wreck position, passenger side facing UP, front pointing away, wheels toward mall and roof towardroad. No blood, explosion, HUD, stars, captions or blue undercarriage.",
+  "workflow": {
+    "1": {
+      "class_type": "UnetLoaderGGUF",
+      "inputs": {
+        "unet_name": "minimax_h3_ref2va_pruned-Q4_K_M.gguf"
+      }
+    },
+    "2": {
+      "class_type": "CLIPLoaderGGUF",
+      "inputs": {
+        "clip_name": "qwen3vl_32b_minimax_h3-Q4_K_M.gguf",
+        "type": "minimax"
+      }
+    },
+    "3": {
+      "class_type": "VAELoader",
+      "inputs": {
+        "vae_name": "minimax_h3_video_vae_fp16.safetensors"
+      }
+    },
+    "4": {
+      "class_type": "LoraLoaderModelOnly",
+      "inputs": {
+        "model": [
+          "1",
+          0
+        ],
+        "lora_name": "minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors",
+        "strength_model": 1.0
+      }
+    },
+    "5": {
+      "class_type": "MiniMaxH3SigmaShift",
+      "inputs": {
+        "model": [
+          "4",
+          0
+        ],
+        "shift_video": 12.0,
+        "shift_audio": 3.0
+      }
+    },
+    "6": {
+      "class_type": "MiniMaxH3ReferenceToVideo",
+      "inputs": {
+        "clip": [
+          "2",
+          0
+        ],
+        "vae": [
+          "3",
+          0
+        ],
+        "prompt": "One unbroken FIVE-second original GTA San Andreas PS2 high-speed bus crash. At first frame SAME SOS Transit double-decker is upright, racing forward at 80 km/h. First 1.1 seconds sustained fast approach toward Lentor Modern. At 1.1 seconds the driver jerks sharply LEFT at speed: nose snaps left, tyres scrub, body loads onto outside/right tyres. From1.45 to1.95 seconds top-heavy bus rapidly TOPPLES on its RIGHT side, pivoting around outside tyre contact, roof swinging toward road. Heavy side SLAMS pavement at1.95 seconds. Momentum carries it forward rapidly on its side, sparks and scraped metal, sliding about25 metres. Around3.15 seconds it CRASHES into the EMPTY mall-side canopy supports: posts buckle, canopy bay crumples upward, bus jolts and finally stops on its side by3.6 seconds. Hold wreck still to5 seconds. Every stage has a cause: steering snap, weight shift, accelerating fall, ground hit, fast frictional slide, hard structural impact. No slow motion, hovering, gentle eased rotation, magical self-righting or teleporting. Follow <Video 1> world path and contacts, but give action sharp dynamic timing and heavy rigid vehicle inertia. Keep rear player chase camera, horizon level, no cinematic cut/orbit. The bus is the rounded formed PS2 vehicle in <Picture 1> and anchors: orange-red white purple SOS Transit DOUBLE DECKER, two rows of windows, three axles, fitted lamps/bumper, wheel arches, inset glazing and textured sheetmetal. Blender blocks ONLY establish space and motion, NEVER final mesh forms or surfaces. Two distant pedestrians recoil safely beyond wreck at far storefront; nobody hit or falls, no one on road, no driver outsidebus. End in supplied wreck position, passenger side facing UP, front pointing away, wheels toward mall and roof towardroad. No blood, explosion, HUD, stars, captions or blue undercarriage.",
+        "width": 576,
+        "height": 1024,
+        "length": 124,
+        "ref_image_size": "match",
+        "ref_images.ref_image_0": [
+          "20",
+          0
+        ],
+        "ref_videos.ref_video_0": [
+          "22",
+          0
+        ]
+      }
+    },
+    "7": {
+      "class_type": "BasicGuider",
+      "inputs": {
+        "model": [
+          "5",
+          0
+        ],
+        "conditioning": [
+          "43",
+          0
+        ]
+      }
+    },
+    "8": {
+      "class_type": "RandomNoise",
+      "inputs": {
+        "noise_seed": 2026112807
+      }
+    },
+    "9": {
+      "class_type": "KSamplerSelect",
+      "inputs": {
+        "sampler_name": "euler"
+      }
+    },
+    "10": {
+      "class_type": "BasicScheduler",
+      "inputs": {
+        "model": [
+          "5",
+          0
+        ],
+        "scheduler": "simple",
+        "steps": 4,
+        "denoise": 1.0
+      }
+    },
+    "11": {
+      "class_type": "SamplerCustomAdvanced",
+      "inputs": {
+        "noise": [
+          "8",
+          0
+        ],
+        "guider": [
+          "7",
+          0
+        ],
+        "sampler": [
+          "9",
+          0
+        ],
+        "sigmas": [
+          "10",
+          0
+        ],
+        "latent_image": [
+          "6",
+          1
+        ]
+      }
+    },
+    "12": {
+      "class_type": "VAEDecodeTiled",
+      "inputs": {
+        "samples": [
+          "11",
+          0
+        ],
+        "vae": [
+          "3",
+          0
+        ],
+        "tile_size": 256,
+        "overlap": 64,
+        "temporal_size": 64,
+        "temporal_overlap": 8
+      }
+    },
+    "13": {
+      "class_type": "CreateVideo",
+      "inputs": {
+        "images": [
+          "12",
+          0
+        ],
+        "fps": 24.0
+      }
+    },
+    "14": {
+      "class_type": "SaveVideo",
+      "inputs": {
+        "video": [
+          "13",
+          0
+        ],
+        "filename_prefix": "07-01/raw",
+        "format": "mp4",
+        "format.codec": "h264"
+      }
+    },
+    "20": {
+      "class_type": "LoadImage",
+      "inputs": {
+        "image": "07-impact-end.png"
+      }
+    },
+    "21": {
+      "class_type": "LoadVideo",
+      "inputs": {
+        "file": "07-guide-v2.mp4"
+      }
+    },
+    "22": {
+      "class_type": "GetVideoComponents",
+      "inputs": {
+        "video": [
+          "21",
+          0
+        ]
+      }
+    },
+    "40": {
+      "class_type": "LoadImage",
+      "inputs": {
+        "image": "06-appearance.png"
+      }
+    },
+    "41": {
+      "class_type": "MiniMaxH3AddGuide",
+      "inputs": {
+        "positive": [
+          "6",
+          0
+        ],
+        "latent": [
+          "6",
+          1
+        ],
+        "vae": [
+          "3",
+          0
+        ],
+        "image": [
+          "40",
+          0
+        ],
+        "frame_idx": 0
+      }
+    },
+    "42": {
+      "class_type": "LoadImage",
+      "inputs": {
+        "image": "07-impact-end.png"
+      }
+    },
+    "43": {
+      "class_type": "MiniMaxH3AddGuide",
+      "inputs": {
+        "positive": [
+          "41",
+          0
+        ],
+        "latent": [
+          "6",
+          1
+        ],
+        "vae": [
+          "3",
+          0
+        ],
+        "image": [
+          "42",
+          0
+        ],
+        "frame_idx": 119
+      }
+    }
+  },
+  "inputs": [
+    {
+      "path": "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/first-cut-v2/inputs/07-impact-end.png",
+      "sha256": "53aa86e33048d3f911d2ae8fc2c80864932248eb7f30d15c1eec404e87df586b"
+    },
+    {
+      "path": "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/first-cut-v2/inputs/07-guide-v2.mp4",
+      "sha256": "2db41ba5e15c5d00ad9f6118cf83a7715bc0306c1b2af02ca4c735fe7f6fbb41"
+    },
+    {
+      "path": "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/first-cut-v2/inputs/06-appearance.png",
+      "sha256": "220c15a6bdea1cf0db8f6ad10792cc3be2b75d3a77eb3c9a3c90ce3d5f34090d"
+    },
+    {
+      "path": "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/first-cut-v2/inputs/07-impact-end.png",
+      "sha256": "53aa86e33048d3f911d2ae8fc2c80864932248eb7f30d15c1eec404e87df586b"
+    }
+  ],
+  "audio": "Separate original procedural SFX in edit; video VAE only",
+  "runtime_commit": "da8bd08e48deee74d9f6c3bc00aed365b00ec209",
+  "receipt": {
+    "prompt_id": "68244dc7-fadf-430d-91e1-77f457d5714c",
+    "number": 3.0,
+    "node_errors": {}
+  }
+}

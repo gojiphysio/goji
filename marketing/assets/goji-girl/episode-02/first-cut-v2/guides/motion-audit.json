@@ -1,0 +1,27 @@
+{
+  "basis": "Original proposed kinematic staging; no extracted game data or validated real-vehicle simulation",
+  "chase_forward_travel_metres": 110,
+  "chase_duration_seconds": 5,
+  "chase_forward_speed_mps": 22,
+  "chase_forward_speed_kph": 79.2,
+  "crash_peak_speed_mps": 22.06782678999523,
+  "wall_minimum_x": -9.464060718013549,
+  "wall_limit_x": -9.7,
+  "minimum_projected_bus_to_npc_body_clearance_m": 2.4077914655814165,
+  "exit_limb_reach_violations": 0,
+  "scene08_end_root": [
+    -7.35,
+    4.4,
+    0.13
+  ],
+  "scene09_start_root": [
+    -7.35,
+    4.4,
+    0.13
+  ],
+  "limitations": [
+    "Projected conservative bus body bounds, fixed NPC marks; generated motion must be reviewed separately.",
+    "Reach audit checks limb lengths; it does not prove skin-level collision or model output contacts.",
+    "Canopy supports intentionally break; this is exaggerated game choreography."
+  ]
+}

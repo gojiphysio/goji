@@ -1,0 +1,47 @@
+[
+  {
+    "path": "inputs/03-full-left-pump.png",
+    "generated_source": "exec-282a5f18-d947-4ae7-bb23-cdbd9f6dd6e1.png",
+    "role": "Revised high left fist / rigid bag running pose",
+    "status": "assistant-reviewed conditioning reference, not user-approved animation",
+    "sha256": "81237b6715a7479140886b3134a396796a3b94bbaeb64e9a0c89c0b37661c38d",
+    "tool": "built-in image_gen",
+    "reference_policy": "Use approved cast/SOS-BUS-01 for finished forms; Blender for geometry only"
+  },
+  {
+    "path": "inputs/04-full-left-pump.png",
+    "generated_source": "exec-b54ce04c-9c2b-4e31-b21f-a9c8a0b7a857.png",
+    "role": "Same full left-arm pump in bus approach",
+    "status": "assistant-reviewed conditioning reference, not user-approved animation",
+    "sha256": "527b1fa130712f6f4934c88859a2b171476727294a0a8c62b7d432d441a8d9d6",
+    "tool": "built-in image_gen",
+    "reference_policy": "Use approved cast/SOS-BUS-01 for finished forms; Blender for geometry only"
+  },
+  {
+    "path": "inputs/10-full-left-pump.png",
+    "generated_source": "exec-c75bd277-ed09-4e5b-86b8-47397ee34239.png",
+    "role": "Same full left-arm pump in police chase",
+    "status": "assistant-reviewed conditioning reference, not user-approved animation",
+    "sha256": "2c098c5518f8224358f6bafa386959404007069cee83c74289b104715f16ac13",
+    "tool": "built-in image_gen",
+    "reference_policy": "Use approved cast/SOS-BUS-01 for finished forms; Blender for geometry only"
+  },
+  {
+    "path": "inputs/07-impact-end.png",
+    "generated_source": "exec-801cee14-adc3-47e7-9b8b-1217aaa5f1b7.png",
+    "role": "Detailed SOS-BUS-01 at new mall-side impact pose",
+    "status": "assistant-reviewed conditioning reference, not user-approved animation",
+    "sha256": "53aa86e33048d3f911d2ae8fc2c80864932248eb7f30d15c1eec404e87df586b",
+    "tool": "built-in image_gen",
+    "reference_policy": "Use approved cast/SOS-BUS-01 for finished forms; Blender for geometry only"
+  },
+  {
+    "path": "inputs/08-contact-look.png",
+    "generated_source": "exec-172b7a9b-d1ad-461f-998a-2d360f946bed.png",
+    "role": "Crouched, braced doorway pose; maroon leggings correction",
+    "status": "assistant-reviewed conditioning reference, not user-approved animation",
+    "sha256": "14b3570075e46d88407035e76e3e3cd4ea488f4e425af0e7dcafdb8f89b3af0b",
+    "tool": "built-in image_gen",
+    "reference_policy": "Use approved cast/SOS-BUS-01 for finished forms; Blender for geometry only"
+  }
+]

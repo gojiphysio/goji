@@ -1,0 +1,37 @@
+{
+  "01": {
+    "path": "../first-cut-v1/takes/01-01/raw_00001_.mp4",
+    "start": 0,
+    "duration": 3,
+    "status": "draft selection; sampled-frame review",
+    "review": "Headset removal and laptop close complete; room/props remain coherent in sampled frames."
+  },
+  "02": {
+    "path": "../first-cut-v1/takes/02-01/raw_00001_.mp4",
+    "start": 0,
+    "duration": 2,
+    "status": "draft selection; sampled-frame review",
+    "review": "Surprised reaction, closed laptop/headset and left-hand bag pickup retained."
+  },
+  "05": {
+    "path": "../first-cut-v1/takes/05-02/raw_00001_.mp4",
+    "start": 0.125,
+    "duration": 4,
+    "status": "provisional rough-cut selection; contact animation needs polish",
+    "review": "Small driver window and solid lower panel remain fixed; distinct driver clears bus and girl enters cab. Pull-out and entry look floaty, with imperfect hand/body contact. Not a finished motion pass."
+  },
+  "11": {
+    "path": "../first-cut-v1/takes/11-01/raw_00001_.mp4",
+    "start": 0,
+    "duration": 2,
+    "status": "draft selection; sampled-frame and close arrival review",
+    "review": "Girl settles at reception and therapist gives engaged welcoming gesture. Two officers remain outside glass at left edge. Fixed room/brand and shoes retained. Bag appears in near/right hand after the turn, a prop continuity detail to polish against left-hand exterior carry. Normal-speed playback pending Mac unlock."
+  },
+  "12": {
+    "path": "../first-cut-v1/takes/12-02/raw_00001_.mp4",
+    "start": 0,
+    "duration": 8,
+    "status": "draft selection; full-take 2fps and dense 8fps detail review",
+    "review": "One extension/return repetition; therapist actively follows and cues knees. Two officers pump arms/knees in place outside glass, burning wreck stays on its side, shoes/bag remain on bench and girl wears socks. Slight foot/bar contact drift remains for polish. Fixed camera and required gag preserved in samples. Normal-speed playback pending Mac unlock."
+  }
+}

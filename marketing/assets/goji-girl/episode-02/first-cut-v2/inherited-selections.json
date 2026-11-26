@@ -1,0 +1,87 @@
+{
+  "01": {
+    "path": "../first-cut-v1/takes/01-01/raw_00001_.mp4",
+    "start": 0,
+    "duration": 3,
+    "status": "draft selection; sampled-frame review",
+    "review": "Headset removal and laptop close complete; room/props remain coherent in sampled frames."
+  },
+  "02": {
+    "path": "../first-cut-v1/takes/02-01/raw_00001_.mp4",
+    "start": 0,
+    "duration": 2,
+    "status": "draft selection; sampled-frame review",
+    "review": "Surprised reaction, closed laptop/headset and left-hand bag pickup retained."
+  },
+  "03": {
+    "path": "../first-cut-v1/takes/03-02/raw_00001_.mp4",
+    "start": 0,
+    "duration": 3,
+    "status": "previous take; rejected or superseded for v2 revision",
+    "review": "Compared with 03-01 and sampled original PS2 gait reference. Firmer bent-elbow pump and regular half-second stride, left bag retained, forward rear camera and safe bystanders. H3 still softens the original rig poses; closer approximation, not exact game animation. Normal-speed playback pending Mac unlock."
+  },
+  "04": {
+    "path": "../first-cut-v1/takes/04-04/raw_00001_.mp4",
+    "start": 0,
+    "duration": 3,
+    "status": "previous take; rejected or superseded for v2 revision",
+    "review": "Stronger running stride through the turn, passes passenger entrance without boarding and arrives at small driver window. Sampled route clears fixed bin, front corner and bystanders; brief natural shelter-post occlusion. Finished bus mesh stays formed, not proxy boxes. Normal-speed playback pending Mac unlock."
+  },
+  "05": {
+    "path": "../first-cut-v1/takes/05-02/raw_00001_.mp4",
+    "start": 0.125,
+    "duration": 4,
+    "status": "provisional rough-cut selection; contact animation needs polish",
+    "review": "Small driver window and solid lower panel remain fixed; distinct driver clears bus and girl enters cab. Pull-out and entry look floaty, with imperfect hand/body contact. Not a finished motion pass."
+  },
+  "06": {
+    "path": "../first-cut-v1/takes/06-02/raw_00001_.mp4",
+    "start": 0,
+    "duration": 5,
+    "video_filter": "crop=486:864:0:80",
+    "status": "previous take; rejected or superseded for v2 revision",
+    "review": "No outside runner. Bus shape/livery and rear vehicle camera retained. Diffuse staggered police spill, no emitters on bus. Fixed crop excludes brief pursuit-car edge; inspected 8fps around intrusion. Vehicle swerves near centreline; no collision or person in roadway. Normal-speed QuickTime playback completed with start/end observations after unlock."
+  },
+  "07": {
+    "path": "../first-cut-v1/takes/07-02/raw_00001_.mp4",
+    "start": 0,
+    "duration": 5,
+    "status": "previous take; rejected or superseded for v2 revision",
+    "review": "2fps full-take samples preserve same rigid double-decker, right-side-down roll and slide, level rear camera and pedestrians clear. Steering before roll and contact with shelter are weakly expressed; not a finished crash-performance pass. Normal-speed playback pending Mac unlock."
+  },
+  "08": {
+    "path": "../first-cut-v1/takes/08-02/raw_00001_.mp4",
+    "start": 0,
+    "duration": 6,
+    "status": "previous take; rejected or superseded for v2 revision",
+    "review": "QuickTime normal-speed playback completed with start/end observations, plus 2fps contact sheet and tap/end close inspection. Frozen bus/intact front corner preserved; reader reach then climb complete. Small early body dip and rounder handbag silhouette need polish; do not claim a frame-perfect motion pass."
+  },
+  "09": {
+    "path": "../first-cut-v1/takes/09-02/raw_00001_.mp4",
+    "start": 0,
+    "duration": 2,
+    "status": "previous take; rejected or superseded for v2 revision",
+    "review": "Shoulder dust-off then forward steps toward Goji; fixed black underside fragment remains at right edge instead of becoming an upright bus. Damaged post and pavement stay fixed, pedestrians recoil clear. Normal-speed playback pending Mac unlock."
+  },
+  "10": {
+    "path": "../first-cut-v1/takes/10-02/raw_00001_.mp4",
+    "start": 0,
+    "duration": 4,
+    "status": "previous take; rejected or superseded for v2 revision",
+    "review": "Regular high-heel-recovery run and bent arm pump for girl and two officers. Wreck stays absent, storefront left/road right, forward route turns into Goji. White-shirt pedestrian remains clear with no visible impact. Brief foreground-officer occlusion around 3.0\u20133.25s needs framing polish. H3 gait is an approximation, not exact game animation. Normal-speed playback pending Mac unlock."
+  },
+  "11": {
+    "path": "../first-cut-v1/takes/11-01/raw_00001_.mp4",
+    "start": 0,
+    "duration": 2,
+    "status": "draft selection; sampled-frame and close arrival review",
+    "review": "Girl settles at reception and therapist gives engaged welcoming gesture. Two officers remain outside glass at left edge. Fixed room/brand and shoes retained. Bag appears in near/right hand after the turn, a prop continuity detail to polish against left-hand exterior carry. Normal-speed playback pending Mac unlock."
+  },
+  "12": {
+    "path": "../first-cut-v1/takes/12-02/raw_00001_.mp4",
+    "start": 0,
+    "duration": 8,
+    "status": "draft selection; full-take 2fps and dense 8fps detail review",
+    "review": "One extension/return repetition; therapist actively follows and cues knees. Two officers pump arms/knees in place outside glass, burning wreck stays on its side, shoes/bag remain on bench and girl wears socks. Slight foot/bar contact drift remains for polish. Fixed camera and required gag preserved in samples. Normal-speed playback pending Mac unlock."
+  }
+}

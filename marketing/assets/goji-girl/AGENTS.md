@@ -55,7 +55,15 @@
 - Retarget running from original PS2 footage, with the source and approximate
   gait settings recorded. Inspect several phases per stride, plus clearance
   around bins, posts and vehicle corners; half-second samples can hide a
-  half-second gait cycle. Keep the bag-carrying arm constrained.
+  half-second gait cycle. Both arms use the full running pump, including the
+  bag-carrying arm. The handbag is a rigid hand-attached game prop; never dampen
+  the shoulder cycle, hold the bag steady, or give it soft-body deformation.
+- Chase guides must establish actual travel speed and visible cause/effect:
+  hard steering, lateral load, roll, ground strike, sliding friction and impact.
+  Do not ease a slowly moving bus into a sideways pose and call it a crash.
+- A rolled-bus exit must show load-bearing hand/foot contacts, a knee over the
+  real passenger-door sill, weight transfer and a descent to pavement. Root
+  translation by itself is not a climb; reject elevator-like vertical motion.
 - Scope appearance instructions to what is visible in each shot. An unseen
   driver needs no on-foot outfit/bag block; a cropped wreck edge needs no full
   bus reconstruction. On the reformer, her shoes and bag stay on the bench.
