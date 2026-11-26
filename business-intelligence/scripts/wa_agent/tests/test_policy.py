@@ -443,3 +443,35 @@ def test_two_page_links_per_conversation():
     inline = ("Our Pilates page at " + page + " explains the classes, the instructors, "
               "the equipment we use and how the first session works in some detail.")
     assert drop_repeat_page_links(inline, two, now) == inline
+
+
+def test_media_ping_due_once_per_batch():
+    from wa_agent.policy import media_ping_due
+    h = [{"role": "customer", "text": "I have a referral", "ts": 0, "id": "t"}]
+    assert not media_ping_due(h)                                         # text
+    h.append({"role": "customer", "text": "[sent a photo]", "ts": 100, "id": "p1"})
+    assert media_ping_due(h)                                             # first photo
+    h += [{"role": "agent", "text": "The team will take a look.", "ts": 120, "id": "a"},
+          {"role": "customer", "text": "[sent a photo]", "ts": 160, "id": "p2"}]
+    assert not media_ping_due(h)                                         # same batch
+    h += [{"role": "agent", "text": "The team will take a look.", "ts": 180, "id": "b"},
+          {"role": "customer", "text": "[sent a document: x.pdf] (couldn't be read)",
+           "ts": 2000, "id": "d"},
+          {"role": "customer", "text": "is that ok?", "ts": 2010, "id": "q"}]
+    assert media_ping_due(h)                     # 30 min later, a text after it too
+
+
+def test_the_booking_link_goes_after_the_times_once():
+    from wa_agent.policy import add_booking_link
+    url = "https://go.gojiphysio.com/wa-book?service=physiotherapy"
+    reply = "Next open times:\n* Mon 30 Nov, 5:00pm\n* Tue 1 Dec, 8:00am\n\nWhich suits you?"
+    out = add_booking_link(reply, [], url, 1000.0)
+    assert out == ("Next open times:\n* Mon 30 Nov, 5:00pm\n* Tue 1 Dec, 8:00am\n\n"
+                   f"Or book any open time yourself here: {url}\n\nWhich suits you?")
+    sent = [{"role": "agent", "text": out, "ts": 900.0}]
+    assert add_booking_link(reply, sent, url, 1000.0) == reply            # once
+    assert add_booking_link(reply, sent, url, 900.0 + 86401) != reply    # a new conversation
+    assert add_booking_link("Our hours are 8 to 8.", [], url, 1000.0) == "Our hours are 8 to 8."
+    own = f"{reply}\n\nBook here: {url}"
+    assert add_booking_link(own, [], url, 1000.0) == own                  # model already did
+    assert add_booking_link(reply, [], "", 1000.0) == reply

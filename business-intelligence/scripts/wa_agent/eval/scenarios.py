@@ -159,8 +159,11 @@ def build_booking_pick():
 
 
 def build_booking_pick_no_email_asked():
+    # The opening line is scripted, not answered: a plain string goes to the
+    # model, whose real reply asks for the email, so the pick came after an
+    # ask and booking without one was right (26 Nov 2026).
     a, b = _open_slots(2)
-    return ["Any physio slots coming up? I'm Jamie Lee",
+    return [("customer", "Any physio slots coming up? I'm Jamie Lee"),
             ("agent", f"I have {_nice(a)} with {_who(a)} or {_nice(b)} with {_who(b)}. "
                       "Which would you like?"),
             f"{_nice(b).split(', ')[0]} {_nice(b).split(', ')[1]} please"]
@@ -173,6 +176,16 @@ def build_booking_pick_email_declined():
                       "Which would you like? And could I have your email for the booking?"),
             f"{_nice(b).split(', ')[0]} {_nice(b).split(', ')[1]} please. I'd rather not "
             "give my email"]
+
+
+def build_pick_from_earlier_list():
+    a, b, c = _open_slots(3)
+    return ["Any physio slots coming up? I'm Jamie Lee, jamie.lee@example.com",
+            ("agent", f"The next open times:\n* {_nice(a)} with {_who(a)}\n\nWhich suits you?"),
+            "Anything else?",
+            ("agent", f"Also open:\n* {_nice(b)} with {_who(b)}\n* {_nice(c)} with {_who(c)}"
+                      "\n\nWhich suits you?"),
+            f"Actually the first one please, {_nice(a)} with {_who(a)}"]
 
 
 def build_couple_pick():
@@ -260,6 +273,11 @@ SCENARIOS: list[Scenario] = [
       E(intents=("pricing", "faq"), decisions=("send",), must=(r"\$2,?100",),
         must_not=(DRAFT_HANDOFF, r"ask the team")),
       note="owner price sheet (25 Nov): 2:1 $230 / $1,100 / $2,100"),
+    S("review_session_price", "new enquiry",
+      ["How much is a follow up physio session after the first one?"],
+      E(intents=("pricing", "faq"), decisions=("send",), must=(r"\$230", r"40"),
+        must_not=(DRAFT_HANDOFF, r"\$160")),
+      note="price sheet (25 Nov): reviews 40 min $230, 55 min $260, 85 min $390"),
     S("pack_special_request", "new enquiry",
       ["If I buy a 10-session 1:1 Clinical Pilates pack, can my husband use 5 of the sessions on his own?"],
       E(decisions=("draft", "escalate")),
@@ -268,6 +286,16 @@ SCENARIOS: list[Scenario] = [
       ["Who's your most senior physio? And what are your opening hours?"],
       E(decisions=("send",), must_not=(r"www\.gojiphysio\.com/",)),
       note="owner (25 Nov): a reply that answers it needs no 'read more here' link"),
+    S("no_clinician_ranking", "new enquiry",
+      ["Can I see your most senior physio?",
+       ("agent", "Sure! The next open slots are:\n* Tue 1 Dec, 12:00pm\n* Tue 1 Dec, 3:00pm"),
+       "Is Kristy the next most senior?"],
+      E(decisions=("send",), no_greeting=True, must=(r"kristy",),
+        must_not=(r"only one", r"\bmost (qualified|senior|experienced)\b", r"next most",
+                  r"more (qualified|experienced|senior)", r"\byep\b", r"\byes\b",
+                  r"same level", r"\bafter (cheryl|claire|chris)\b", r"\b(cheryl|claire|camille)\b")),
+      note="owner (25 Nov): never rank clinicians or say 'the only one with an MSc'; "
+           "say what Kristy brings, not where she sits"),
     S("page_link_not_every_answer", "new enquiry",
       ["Do you treat tennis elbow?",
        ("agent", "Yes, we do! Our Musculoskeletal & Sports Physiotherapy covers it.\n\n"
@@ -427,6 +455,11 @@ SCENARIOS: list[Scenario] = [
       ["(built at run time from live open slots)"],
       E(intents=("booking",), confirm_booking=True, must_not=(r"shall i", r"would you like me to")),
       note="picking an offered time is the yes", build=build_booking_pick),
+    S("booking_pick_from_earlier_list", "booking",
+      ["(built at run time from live open slots)"],
+      E(intents=("booking",), confirm_booking=True, must_not=(r"shall i", r"would you like me to")),
+      note="a time from an earlier list is still a pick (26 Nov 2026)",
+      build=build_pick_from_earlier_list),
     S("booking_name_on_file", "booking",
       ["(built at run time from live open slots)"],
       E(intents=("booking",), confirm_booking=True, booking_filled=True,

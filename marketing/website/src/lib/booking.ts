@@ -19,7 +19,7 @@ export interface BookingDraft {
   /** Physiotherapy sub-type (null for non-physio services). Narrows clinicians
    *  and tells the clinic what the physio session is for. */
   physioFocus: PhysioFocusId | null;
-  /** Duration variant (e.g., "30min" or "55min"), when the sub-type offers
+  /** Duration variant (e.g., "40min" or "55min"), when the sub-type offers
    *  multiple durations. Null for services/sub-types without variants. */
   variant: string | null;
   format: BookingFormat;
@@ -40,7 +40,7 @@ export interface AvailabilityQuery {
   /** Physio sub-type, when the service is physiotherapy. Lets the backend
    *  restrict availability to the mapped clinicians. */
   focus?: PhysioFocusId;
-  /** Duration variant (e.g., "30min"), when the sub-type offers variants. */
+  /** Duration variant (e.g., "40min"), when the sub-type offers variants. */
   variant?: string;
   clinicianId: string;
   date: string;
@@ -50,7 +50,7 @@ export interface AvailabilityQuery {
 export interface AvailableDaysQuery {
   service: ServiceId;
   focus?: PhysioFocusId;
-  /** Duration variant (e.g., "30min"), when the sub-type offers variants. */
+  /** Duration variant (e.g., "40min"), when the sub-type offers variants. */
   variant?: string;
   clinicianId: string;
   /** Calendar month, YYYY-MM. */
@@ -338,7 +338,7 @@ const mockApi: BookingApi = {
  *  mock build on localhost/previews would only show a failing widget. Override
  *  with PUBLIC_TURNSTILE_SITE_KEY (Cloudflare's always-pass test key
  *  1x00000000000000000000AA works on localhost). */
-const GOJI_TURNSTILE_SITE_KEY = "0x4AAAAAAF-VF-HZnvawjuXM";
+export const GOJI_TURNSTILE_SITE_KEY = "0x4AAAAAAF-VF-HZnvawjuXM";
 export const TURNSTILE_SITE_KEY =
   (import.meta.env.PUBLIC_TURNSTILE_SITE_KEY as string | undefined) ||
   (API ? GOJI_TURNSTILE_SITE_KEY : "");

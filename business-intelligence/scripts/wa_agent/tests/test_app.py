@@ -1,9 +1,11 @@
 """The whole flow through the webhook, with fakes for Claude and WhatsApp.
 Handlers run inline (no thread pool) and the pre-send hold is instant, so a
 'person replies during the hold' is simulated by an echo inside _sleep."""
+import base64
 import hashlib
 import hmac
 import json
+import time
 
 import pytest
 
@@ -527,16 +529,65 @@ def test_a_document_is_read_into_the_chat_without_an_email(env):
     post(client, body)
     stored = app_mod.store.load(CUSTOMER).history[0]["text"]
     assert "[sent a document: referral.txt]" in stored and "scoliosis" in stored
-    assert notes == []                    # Chris sees the file in the app; no email
+    assert notes == []                    # read and used: nothing for the team to do
 
 
-def test_a_photo_is_left_for_the_team(env):
+def _photo(msg_id="wamid.in1", ts=1763431200):
+    body = inbound(kind="image", msg_id=msg_id, ts=ts)
+    body["entry"][0]["changes"][0]["value"]["messages"][0]["image"]["mime_type"] = "image/jpeg"
+    return body
+
+
+def test_the_model_sees_the_photo(env):
     client, _, notes = env
+    app_mod.wa.media = (b"\xff\xd8jpeg", "image/jpeg")
+    app_mod.claude.queue.append(final(reply="Thanks for sending Dr Lim's referral!",
+                                      intent="service_fit"))
+    post(client, _photo())
+    [req] = app_mod.claude.requests
+    [img] = [b for m in req["messages"] for b in m["content"] if b["type"] == "image"]
+    assert img["source"] == {"type": "base64", "media_type": "image/jpeg",
+                             "data": base64.b64encode(b"\xff\xd8jpeg").decode()}
+    line = app_mod.store.load(CUSTOMER).history[0]
+    assert line["text"] == "[sent a photo]" and line["media"] == {"id": "media1",
+                                                                  "mime": "image/jpeg"}
+    assert notes == []                    # used it: no ping
+
+
+def test_a_photo_it_cant_use_pings_staff(env, monkeypatch):
+    # 25 Nov 2026: the agent told a customer "the team will take a look" at her
+    # referral photos and nobody was told.
+    client, rec, notes = env
+    monkeypatch.setattr(config, "STAFF", frozenset({"6591110000"}))
+    app_mod.store.note_staff_inbound("6591110000", time.time() - 60)  # her 24h window
+    app_mod.wa.download_media = lambda media_id: (_ for _ in ()).throw(OSError("expired"))
     app_mod.claude.queue.append(final(reply="Thanks! The team will take a look.",
                                       intent="media_received"))
-    post(client, inbound(kind="image"))
-    assert app_mod.store.load(CUSTOMER).history[0]["text"] == "[sent a photo]"
-    assert app_mod.wa.sent[-1][1] == "Thanks! The team will take a look."
+    post(client, _photo())
+    req = app_mod.claude.requests[0]
+    assert not [b for m in req["messages"] for b in m["content"] if b["type"] == "image"]
+    [to_customer] = [s for s in app_mod.wa.sent if s[0] == CUSTOMER]
+    assert to_customer[1] == "Thanks! The team will take a look."
+    [ping] = [s for s in app_mod.wa.sent if s[0] == "6591110000"]
+    assert "sent something I couldn't use*" in ping[1]
+    assert notes == []                    # the WhatsApp ping, no email
+    assert app_mod.store.load(CUSTOMER).mode == AGENT   # the agent keeps the chat
+
+
+def test_photos_sent_together_get_one_ping(env):
+    client, _, notes = env
+    for i in range(2):
+        app_mod.claude.queue.append(final(reply="Thanks! The team will take a look.",
+                                          intent="media_received"))
+        post(client, _photo(msg_id=f"wamid.img{i}", ts=1763431200 + 60 * i))
+    assert len([s for s in app_mod.wa.sent if s[0] == CUSTOMER]) == 2
+    assert [k for k, _ in notes] == ["media"]
+
+
+def test_a_text_message_pings_nobody(env):
+    client, _, notes = env
+    app_mod.claude.queue.append(final(reply="We open at 8am."))
+    post(client, inbound())
     assert notes == []
 
 
@@ -579,6 +630,48 @@ def test_booking_needs_a_yes_in_a_later_message(env, monkeypatch):
     assert state.booked["reference"] == "GOJI-AB12CD" and state.pending_booking == {}
     assert state.patient_at == 0.0          # look the number up again: it may be a patient now
     assert ("booked", {"intent": "booking", "reason": "dry_run"}) in rec
+
+
+def _age_pending_booking(seconds):
+    state = app_mod.store.load(CUSTOMER)
+    state.pending_booking = {**state.pending_booking,
+                             "at": state.pending_booking["at"] - seconds}
+    app_mod.store.save(state)
+
+
+def test_a_pick_hours_after_the_offer_still_books(env, monkeypatch):
+    """25 Nov 2026: a customer picked a time 32 minutes after it was offered
+    (waiting on the team's answer) and the 30-minute window had closed. The
+    offer now stays open for a day; goji-booking checks the slot live."""
+    client, rec, _ = env
+    calls = []
+    monkeypatch.setattr(app_mod.booking_client, "book", lambda b, wa_id, patient_id="": calls.append(b) or
+                        {"ok": True, "reference": "GOJI-AB12CD", "clinician_name": "Kristy Ng",
+                         "service": "Physiotherapy", "date": b["date"], "time": b["time"],
+                         "dry_run": True})
+    app_mod.claude.queue.append(_final_with(
+        "Shall I book Thu 26 Nov, 10:00am with Kristy for Charles Tan?", booking=BOOK))
+    post(client, inbound(text="book me Thursday 10am with Kristy, I'm Charles Tan"))
+    _age_pending_booking(2 * 3600)
+    app_mod.claude.queue.append(_final_with("Booking that now!", booking=BOOK,
+                                            confirm_booking=True))
+    post(client, inbound(msg_id="wamid.in2", text="yes please"))
+    assert len(calls) == 1
+    assert app_mod.store.load(CUSTOMER).booked["reference"] == "GOJI-AB12CD"
+
+
+def test_a_yes_more_than_a_day_after_the_offer_does_not_book(env, monkeypatch):
+    client, rec, _ = env
+    monkeypatch.setattr(app_mod.booking_client, "book",
+                        lambda b, wa_id, patient_id="": pytest.fail("booked a day-old offer"))
+    app_mod.claude.queue.append(_final_with(
+        "Shall I book Thu 26 Nov, 10:00am with Kristy for Charles Tan?", booking=BOOK))
+    post(client, inbound(text="book me Thursday 10am with Kristy, I'm Charles Tan"))
+    _age_pending_booking(25 * 3600)
+    app_mod.claude.queue.append(_final_with("Booking that now!", booking=BOOK,
+                                            confirm_booking=True))
+    post(client, inbound(msg_id="wamid.in2", text="yes please"))
+    assert ("book_skipped", {"reason": "no_pending_booking"}) in rec
 
 
 def test_the_model_cannot_book_in_the_same_turn_it_states_the_details(env, monkeypatch):
@@ -873,9 +966,11 @@ def test_a_confirmed_booking_that_cant_be_made_holds_and_tells_chris(env, monkey
     picked = {**BOOK, "full_name": "", "options": "2026-11-26 10:00"}
     app_mod.claude.queue.append(_final_with("Could I have your full name?", booking=picked))
     post(client, inbound(text="10am tomorrow"))
-    app_mod.claude.queue.append(_final_with("Booking you in now.", confirm_booking=True,
-                                            booking=picked))
-    post(client, inbound(msg_id="wamid.in2", text="ok"))
+    for i in (2, 3):     # asked for the name once, then it's the team's
+        app_mod.claude.queue.append(_final_with("Booking you in now.", confirm_booking=True,
+                                                booking=picked))
+        post(client, inbound(msg_id=f"wamid.in{i}", text="just book it please"))
+    assert ("book_skipped", {"reason": "details_asked"}) in rec
     assert ("book_skipped", {"reason": "details_missing"}) in rec
     assert app_mod.wa.sent[-1][1] == app_mod.BOOK_HELD_REPLY      # never "booking you in now"
     assert notes[-1][0] == "escalated"
@@ -1260,3 +1355,127 @@ def test_send_template_url_button_payload():
     comps = posted[0]["template"]["components"]
     assert comps[1] == {"type": "button", "sub_type": "url", "index": "0",
                         "parameters": [{"type": "text", "text": FORM_TOKEN}]}
+def _offer(clinician, options, text):
+    return _final_with(text, booking={**BOOK, "date": "", "time": "", "clinician": clinician,
+                                      "options": options})
+
+
+def test_a_time_from_an_earlier_offer_books_with_its_clinician(env, monkeypatch):
+    """26 Nov 2026: Claire's times were offered, then Kristy's; the customer
+    picked 'Monday 5:00 with Claire' from the first list and wasn't booked
+    (time_not_offered): only the latest list counted."""
+    client, rec, notes = env
+    calls = []
+    monkeypatch.setattr(app_mod.booking_client, "book", _booker(calls))
+    app_mod.claude.queue.append(_offer(
+        "Claire", "2026-11-30 17:00 Claire, 2026-11-30 18:00 Claire",
+        "After Saturday noon:\n* Mon 30 Nov, 5:00pm with Claire\n"
+        "* Mon 30 Nov, 6:00pm with Claire\n\nWhich suits you?"))
+    post(client, inbound(text="after sat noon please, I'm Charles Tan"))
+    app_mod.claude.queue.append(_offer(
+        "Kristy", "2026-12-01 08:00 Kristy, 2026-12-01 08:30 Kristy",
+        "Kristy's next open times:\n* Tue 1 Dec, 8:00am\n* Tue 1 Dec, 8:30am\n\n"
+        "Which suits you?"))
+    post(client, inbound(msg_id="wamid.in2", text="and Kristy?"))
+    app_mod.claude.queue.append(_final_with("Booking!", confirm_booking=True, booking={
+        **BOOK, "date": "2026-11-30", "time": "17:00", "clinician": "Claire",
+        "options": ""}))
+    post(client, inbound(msg_id="wamid.in3", text="Please book Monday 5:00 with Claire."))
+    assert len(calls) == 1
+    assert (calls[0]["date"], calls[0]["time"], calls[0]["clinician"]) == \
+        ("2026-11-30", "17:00", "Claire")
+    assert ("book_skipped", {"reason": "time_not_offered"}) not in rec
+    assert notes == []
+
+
+def test_offers_for_another_service_dont_carry_over(env, monkeypatch):
+    client, rec, _ = env
+    monkeypatch.setattr(app_mod.booking_client, "book",
+                        lambda b, wa_id, patient_id="": pytest.fail("booked a pilates time"))
+    app_mod.claude.queue.append(_final_with("Pilates?\n* Mon 30 Nov, 5:00pm", booking={
+        **BOOK, "service": "clinical-pilates", "date": "", "time": "",
+        "options": "2026-11-30 17:00 Claire"}))
+    post(client, inbound(text="pilates times?"))
+    app_mod.claude.queue.append(_offer("Kristy", "2026-12-01 08:00 Kristy",
+                                       "Physio:\n* Tue 1 Dec, 8:00am"))
+    post(client, inbound(msg_id="wamid.in2", text="actually physio"))
+    app_mod.claude.queue.append(_final_with("Booking!", confirm_booking=True, booking={
+        **BOOK, "date": "2026-11-30", "time": "17:00", "clinician": "Claire"}))
+    post(client, inbound(msg_id="wamid.in3", text="mon 5pm"))
+    assert ("book_skipped", {"reason": "time_not_offered"}) in rec
+
+
+def test_a_pick_without_a_name_asks_for_it_and_the_answer_books(env, monkeypatch):
+    client, rec, notes = env
+    calls = []
+    monkeypatch.setattr(app_mod.booking_client, "book", _booker(calls))
+    nameless = {**BOOK, "full_name": ""}
+    app_mod.claude.queue.append(_final_with("Times:\n* Mon 30 Nov, 5:00pm with Claire", booking={
+        **nameless, "date": "", "time": "", "clinician": "Claire",
+        "options": "2026-11-30 17:00 Claire"}))
+    post(client, inbound(text="times?"))
+    app_mod.claude.queue.append(_final_with("Booking you in now.", confirm_booking=True,
+                                            booking={**nameless, "date": "2026-11-30",
+                                                     "time": "17:00", "clinician": "Claire"}))
+    post(client, inbound(msg_id="wamid.in2", text="Monday 5 with Claire"))
+    assert calls == [] and notes == []
+    assert app_mod.wa.sent[-1][1] == ("Lovely! Could I have your full name? Then I'll book "
+                                      "Mon 30 Nov, 5:00pm with Claire for you.")
+    app_mod.claude.queue.append(_final_with("Booking you in now.", confirm_booking=True,
+                                            booking={**nameless, "date": "2026-11-30",
+                                                     "time": "17:00", "clinician": "Claire",
+                                                     "full_name": "Ami Tan"}))
+    post(client, inbound(msg_id="wamid.in3", text="Ami Tan"))
+    assert len(calls) == 1 and calls[0]["full_name"] == "Ami Tan"
+    assert calls[0]["clinician"] == "Claire" and calls[0]["time"] == "17:00"
+
+
+def _book_with_terms(client, team: bool):
+    if team:
+        state = app_mod.store.load(CUSTOMER)
+        app_mod.append_history(state, "team", "Can do, bill to FM, $190 for 40 min",
+                               time.time())
+        app_mod.store.save(state)
+    terms = {**BOOK, "variant": "40min", "arranged": "Bill to FM, $190 for 40 min"}
+    app_mod.claude.queue.append(_final_with("Shall I book Thu 26 Nov, 10:00am with Kristy?",
+                                            booking=terms))
+    post(client, inbound(text="thursday 10am with kristy please"))
+    app_mod.claude.queue.append(_final_with("Booking!", confirm_booking=True, booking=terms))
+    post(client, inbound(msg_id="wamid.in2", text="yes"))
+
+
+def test_terms_the_team_agreed_go_on_the_booking(env, monkeypatch):
+    client, rec, _ = env
+    calls = []
+    monkeypatch.setattr(app_mod.booking_client, "book", _booker(calls))
+    _book_with_terms(client, team=True)
+    assert calls[0]["arranged"] == "Bill to FM, $190 for 40 min"
+    assert calls[0]["variant"] == "40min"
+
+
+def test_terms_with_no_one_from_the_clinic_in_the_chat_are_dropped(env, monkeypatch):
+    client, rec, _ = env
+    calls = []
+    monkeypatch.setattr(app_mod.booking_client, "book", _booker(calls))
+    _book_with_terms(client, team=False)
+    assert calls and calls[0]["arranged"] == ""
+
+
+def test_the_first_times_offered_come_with_the_booking_link(env, monkeypatch):
+    client, rec, _ = env
+    first = ("Here are the next open times:\n* Today, 2:00pm with Kristy\n"
+             "* Fri 27 Nov, 2:00pm with Kristy\n\nWhich suits you? And could I have your "
+             "full name and email for the booking?")
+    app_mod.claude.queue.append(_offer("", "2026-11-26 14:00 Kristy, 2026-11-27 14:00 Kristy",
+                                       first))
+    post(client, inbound(text="yes please, a time"))
+    sent = "\n".join(t for _, t in app_mod.wa.sent)
+    assert "Or book any open time yourself here: https://go.gojiphysio.com/wa-book?" \
+           "service=physiotherapy" in sent
+    assert sent.rstrip().endswith("full name and email for the booking?")   # question last
+    count = len(app_mod.wa.sent)
+    app_mod.claude.queue.append(_offer("", "2026-11-28 16:00 Claire",
+                                       "After Saturday noon:\n* Sat 28 Nov, 4:00pm\n\n"
+                                       "Which suits you?"))
+    post(client, inbound(msg_id="wamid.in2", text="after sat noon?"))
+    assert not any("go.gojiphysio.com" in t for _, t in app_mod.wa.sent[count:])

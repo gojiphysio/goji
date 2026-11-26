@@ -207,8 +207,10 @@ def parse_webhook(payload: dict) -> list[Inbound | Echo | Status | HistoryChunk]
                                          wa_id=s.get("recipient_id", "")))
             elif field_name == "smb_message_echoes":
                 for m in value.get("message_echoes") or []:
-                    if m.get("type") == "reaction":
-                        continue  # a 👍 from the Business app isn't taking the chat over
+                    if m.get("type") in ("reaction", "revoke"):
+                        # A 👍 or a deleted message from the Business app isn't
+                        # taking the chat over (a revoke paused chat #027, 25 Nov 2026).
+                        continue
                     text, _ = _message_text(m)
                     events.append(Echo(wa_id=m.get("to", ""), msg_id=m.get("id", ""),
                                        ts=float(m.get("timestamp") or 0), text=text))

@@ -46,3 +46,5 @@ tab, honour these:
   `references/san-andreas-reference.md`: retain source-platform provenance and
   distinguish inspected footage, documented mechanics and proposed Goji values.
   Do not present an unrendered motion preset as measured PS2 physics.
+
+- **Approved recurring vehicles.** For future Goji GTA episodes, reuse SOS-BUS-01 v1, CONFRONT v3 and GRIP v2 from `assets/goji-girl/vehicle-references/README.md`; preserve their fictional branding, unbadged bodies and S-prefixed plates. The series bible links the exact approved images.

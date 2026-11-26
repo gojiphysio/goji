@@ -1,0 +1,60 @@
+{
+  "approved_on": "2026-11-25",
+  "approval_quote": "kpkb is a bit too far, the rest are good",
+  "assets": [
+    {
+      "name": "Lion City Airlines",
+      "slug": "lion-city-airlines",
+      "file": "lion-city-airlines.png",
+      "sha256": "4c9cf75f256b48eeec394efa4c10b56634ca5e871bf6dafbcf2f12e4a3247a06",
+      "width": 1536,
+      "height": 1024,
+      "format": "white-background PNG"
+    },
+    {
+      "name": "DIBS",
+      "slug": "dibs",
+      "file": "dibs.png",
+      "sha256": "30abfebba797ba4cb6d40449e93883edea9af601ded1bfcd432a117851beffbb",
+      "width": 1448,
+      "height": 1086,
+      "format": "white-background PNG"
+    },
+    {
+      "name": "OOPS",
+      "slug": "oops",
+      "file": "oops.png",
+      "sha256": "aa346ccfb7f16d399d9a8d9931cdfebeb69a26a73fa3afee00f6790164f13a93",
+      "width": 1774,
+      "height": 887,
+      "format": "white-background PNG"
+    },
+    {
+      "name": "Single",
+      "slug": "single",
+      "file": "single.png",
+      "sha256": "2c9a1cfcfef855d85fc65d01abca08b21a155664bb85d2946bb61eaf18766c3f",
+      "width": 1672,
+      "height": 941,
+      "format": "white-background PNG"
+    },
+    {
+      "name": "Bartab",
+      "slug": "bartab",
+      "file": "bartab.png",
+      "sha256": "5158822ae64cab61870e417e923a3fb8ab0ccbc1b1ab8bca4e4f1dd8594e17fc",
+      "width": 1673,
+      "height": 940,
+      "format": "white-background PNG"
+    },
+    {
+      "name": "doughchat",
+      "slug": "doughchat",
+      "file": "doughchat.png",
+      "sha256": "3e559dfc80f5f5c3bbd9d3d3eb48aaf07049de682948f6a37040ec78cdd53706",
+      "width": 1774,
+      "height": 887,
+      "format": "white-background PNG"
+    }
+  ]
+}

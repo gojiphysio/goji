@@ -1,0 +1,115 @@
+---
+/**
+ * /careers/expression-of-interest/ — the general form, for people interested
+ * in Goji without a specific open role. Same ApplicationForm, "general" mode:
+ * no role select, an interest-area question instead, and no physiotherapy-only
+ * questions. Stored apart from vacancy applications (own Drive folder, role
+ * "general" in the tracker).
+ */
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import ApplicationForm from "../../components/careers/ApplicationForm.astro";
+
+const title = "Express Your Interest | Careers at Goji";
+const description =
+  "Don't see a role that fits right now? Tell Goji Physiotherapy about yourself, your experience and what you're looking for.";
+
+const origin = Astro.site ?? new URL(Astro.url.origin);
+const pageUrl = new URL("/careers/expression-of-interest/", origin).href;
+const breadcrumb = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Home", item: new URL("/", origin).href },
+    { "@type": "ListItem", position: 2, name: "Careers", item: new URL("/careers/", origin).href },
+    { "@type": "ListItem", position: 3, name: "Express your interest", item: pageUrl },
+  ],
+};
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  schema={breadcrumb}
+  searchable={false}
+  ogImage="/og/careers/careers.jpg"
+  ogImageAlt="The reception and waiting area at Goji Physiotherapy, Lentor Modern"
+>
+  <section class="eoi-hero">
+    <div class="container eoi-inner">
+      <nav class="eoi-crumbs" aria-label="Breadcrumb">
+        <ol>
+          <li><a href="/">Home</a></li>
+          <li><a href="/careers/">Careers</a></li>
+          <li aria-current="page">Express your interest</li>
+        </ol>
+      </nav>
+      <h1>We're always open for a chat!</h1>
+      <p class="eoi-lead">
+        Don't see a role that fits you right now? We're always interested in connecting with people who share our
+        approach to care and want to be part of Goji's journey.
+      </p>
+      <p class="eoi-lead">Tell us a little about yourself, your experience and what you're looking for.</p>
+      <p class="eoi-note">
+        Applying for one of our <a href="/careers/#vacancies">open roles</a>? Please use the form on that role's page
+        instead, so your application reaches the right place.
+      </p>
+    </div>
+  </section>
+  <section class="eoi-form">
+    <div class="container eoi-inner">
+      <ApplicationForm />
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .eoi-hero {
+    background: var(--bg-page);
+    padding-block: var(--space-6) var(--space-8);
+    border-bottom: 1px solid var(--rule);
+  }
+  .eoi-inner {
+    max-width: calc(var(--container-narrow) + 2 * var(--gutter));
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+  .eoi-hero h1 {
+    font-size: var(--fs-h1);
+    margin: 0;
+  }
+  .eoi-lead {
+    font-size: var(--fs-lead);
+    margin: 0;
+  }
+  .eoi-note {
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+    margin: 0;
+  }
+  .eoi-note a,
+  .eoi-crumbs a {
+    color: var(--text-muted);
+  }
+  .eoi-note a {
+    color: var(--color-primary);
+  }
+  .eoi-crumbs ol {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin: 0;
+    padding: 0;
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+  }
+  .eoi-crumbs li + li::before {
+    content: "›";
+    margin-right: var(--space-2);
+  }
+  .eoi-form {
+    background: var(--bg-content);
+    padding-block: var(--space-8) var(--section-y);
+  }
+</style>

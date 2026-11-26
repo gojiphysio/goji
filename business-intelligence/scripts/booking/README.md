@@ -138,11 +138,18 @@ everywhere a patient is created or changed now updates that one table at once
   key: `bulk` (the booking form keeps priority), no retries, at most
   `PLATO_WEBHOOK_READS_PER_MIN` (4) a minute so the availability snapshot,
   which pages Plato from the same share, is never starved.
+- **Everything the webhook misses:** each snapshot refresh (5 min) reads
+  `/patient?modified_since=<last pass>` (one bulk request, no retries) and
+  writes what changed (`patient_contacts.catch_up`). The webhook fires only
+  for staff who logged in to Plato after it was activated, and never for
+  patients filling in Plato's registration form (`created_by: terminal`):
+  on 25 Nov 2026 it missed all 6 new or edited patients.
 - **goji-booking itself:** Plato sends no webhook for API writes, so
   `/internal/book` writes the patient it creates before it answers. The wait
   is capped at 5s (the assistant gives up on a booking after 30s) and never
   fails the booking. Website bookings create no patient (staff register them
-  in Plato, which fires the webhook).
+  in Plato, which fires the webhook). The new patient's number goes in
+  `telephone`: Plato drops `handphone` (an appointment field) from a patient.
 - **The nightly rebuild is the repair and the check.** Plato doesn't store or
   replay webhook events and drops a webhook after 5 failed deliveries in a
   day, so the rebuild stays, and first logs `PATIENT_CONTACT_DRIFT` for any
@@ -329,6 +336,9 @@ Rules layered on top (`config.py`):
   service before their start date — for a new starter whose Plato calendar is
   live early (Camille: 2026-11-01). Delete the entry once the date has passed.
 - Home visits: **Cheryl only**, ±30-min travel padding.
+- One-off extra days (`CLINICIAN_EXTRA_DAYS`): open a clinician on a date their
+  Plato rule keeps closed, with set hours; the all-day "Working from …" note block
+  on that date is ignored, real bookings still block. Remove entries once past.
 - **One shared reformer** (Camille's Private Pilates, Claire's Clinical Pilates).
   Plato has no resource model, so while any appointment, on any calendar, carries
   Space Requirement `code_Left` = `REFORMER_CODE` (`YS06`, "Reformer needed";

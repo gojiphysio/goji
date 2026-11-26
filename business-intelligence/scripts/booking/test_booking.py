@@ -274,15 +274,26 @@ def test_first_available_respects_service_clinician_eligibility():
     assert res["clinician_id"] == "claire-ng"
 
 
-def test_30min_paediatric_variant_duration():
-    # Paediatric physiotherapy with 30-min variant should create a 30-min slot.
+def test_40min_paediatric_review_duration():
+    # Paediatric review with the 40-min variant (price sheet 25 Nov 2026) books 40 minutes.
     p = StubPlato()
     res = create_booking(p, {**BASE, "clinician_id": "cheryl-long",
-                             "physio_focus": "paediatrics", "variant": "30min"}, now=NOW)
+                             "physio_focus": "paediatrics", "variant": "40min"}, now=NOW)
     assert res["ok"]
     payload = p.created[0][0]
     assert payload["starttime"] == "2026-07-15 10:00:00"
-    assert payload["endtime"] == "2026-07-15 10:30:00"  # 30 mins later
+    assert payload["endtime"] == "2026-07-15 10:40:00"  # 40 mins later
+
+
+def test_85min_paediatric_review_duration():
+    # The 85-min extended review (price sheet 25 Nov 2026) books 85 minutes.
+    p = StubPlato()
+    res = create_booking(p, {**BASE, "clinician_id": "cheryl-long",
+                             "physio_focus": "paediatrics", "variant": "85min"}, now=NOW)
+    assert res["ok"]
+    payload = p.created[0][0]
+    assert payload["endtime"] == "2026-07-15 11:25:00"  # 85 mins after 10:00
+    assert payload["description"].startswith("Physiotherapy.")
 
 
 def test_55min_paediatric_variant_duration():

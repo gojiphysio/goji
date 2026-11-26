@@ -20,8 +20,9 @@ Pick-up notes for continuing this work in a local session.
   Remaining: design polish, per-page OG images, and **publishing the blog** —
   the first three drafts are awaiting Cheryl's clinical review in the Drive
   folder "Articles" (`1_7lYb2OiP3x3qORovG6Wg6TxLVClE7Nb`).
-- **Live ops notes:** the apex→www 301 is a Cloudflare zone rule (not in
-  `public/_redirects`) — verify it exists when touching DNS. Google Search
+- **Live ops notes:** the apex→www 301 is issued by Squarespace (the apex A
+  records still point there), not by Cloudflare or `public/_redirects`. DNS is
+  at Squarespace Domains, not Cloudflare (root `AGENTS.md`). Google Search
   Console ownership + sitemap submission is an operator task tracked in
   `../seo/seo-geo-review.md` §1 (P0: inner pages were not indexed at the
   2026-07-13 audit).

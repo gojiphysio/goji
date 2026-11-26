@@ -331,6 +331,36 @@ def drop_repeat_page_links(reply: str, history: list[dict], now: float) -> str:
     return out or reply
 
 
+_BOOKING_LINK = re.compile(r"go\.gojiphysio\.com/", re.I)
+
+
+def add_booking_link(reply: str, history: list[dict], url: str, now: float) -> str:
+    """The first times offered in a conversation come with the booking link,
+    so a customer can pick any time themselves instead of going back and
+    forth (owner, 26 Nov 2026: a chat went through three lists of times and
+    no link; the email question added on 25 Nov had taken the link's place
+    at the end). It goes in its own paragraph straight after the list of
+    times, so the question stays last. Once per conversation: not when we,
+    or Chris, sent it in the last day."""
+    if not url or not reply or _BOOKING_LINK.search(reply):
+        return reply
+    since = now - PAGE_LINK_WINDOW_S
+    if any(_BOOKING_LINK.search(h.get("text", "")) for h in history
+           if h["role"] in ("agent", "staff") and h.get("ts", 0) >= since):
+        return reply
+    lines = reply.split("\n")
+    bullets = [i for i, line in enumerate(lines) if line.lstrip().startswith(("* ", "- ", "• "))]
+    if not bullets:
+        return reply     # no list of times: nothing to pair it with
+    last = bullets[-1]
+    link = f"Or book any open time yourself here: {url}"
+    rest = lines[last + 1:]
+    while rest and not rest[0].strip():
+        rest = rest[1:]
+    out = lines[:last + 1] + ["", link] + (["", *rest] if rest else [])
+    return "\n".join(out)
+
+
 _ACK_WORD = (r"(ok+(ay)?|k+|thanks?( you)?( so much)?|thank u|thx|ty|tq|noted|alright|sure|"
              r"great|cool|got it|will do|see you( then| soon)?|perfect|nice|awesome)")
 # One or more acknowledgement words ("ok thanks!", "noted, thank you"), then
@@ -431,6 +461,33 @@ def note_off_topic(state: ChatState, intent: str, now: float,
         return False
     state.off_topic_strikes += 1
     return state.off_topic_strikes >= limit and set_mode(state, PAUSED, WATCHLIST, now)
+
+
+# Customer messages that carry something for the team to look at. When the
+# agent can't use one it says the team will take a look (media_received) and
+# staff are pinged (owner, 25 Nov 2026: the agent told a customer "the team
+# will take a look" at her referral photos and no one was told).
+TEAM_LOOKS_AT = ("[sent a photo", "[sent a video", "[sent a voice note", "[sent a document")
+MEDIA_PING_WINDOW_S = 10 * 60
+
+
+def media_ping_due(history: list[dict], window_s: float = MEDIA_PING_WINDOW_S) -> bool:
+    """Whether the customer's latest messages (since the last reply) hold a
+    photo, video, voice note or document staff haven't heard about. Several
+    sent together get one ping: none if another came in the `window_s`
+    before the first of these."""
+    def is_media(h: dict) -> bool:
+        return h["role"] == "customer" and (h.get("text") or "").startswith(TEAM_LOOKS_AT)
+
+    start = len(history)
+    while start and history[start - 1]["role"] == "customer":
+        start -= 1
+    batch = [h for h in history[start:] if is_media(h)]
+    if not batch:
+        return False
+    first = batch[0].get("ts") or 0
+    return not any(is_media(h) and 0 <= first - (h.get("ts") or 0) <= window_s
+                   for h in history[:start])
 
 
 def hours_until(appointment: dict | None, now: float) -> float:

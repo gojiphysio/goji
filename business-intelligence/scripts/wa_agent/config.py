@@ -269,7 +269,12 @@ BOOKING_DRY_RUN = _env_bool("WA_AGENT_BOOKING_DRY_RUN", True)
 BOOKING_SIMULATE = _env_bool("WA_AGENT_BOOKING_SIMULATE", False)  # local, no private route
 # Shared with goji-booking for /internal/book and /internal/booking-confirmed.
 INTERNAL_TOKEN = os.environ.get("WA_AGENT_INTERNAL_TOKEN", "")
-BOOKING_CONFIRM_WINDOW_S = 30 * 60  # a pending booking expires if not confirmed
+# Times offered (or a booking stated back) stay open to a yes for a day. It was
+# 30 minutes: a customer who waited on the team's answer to a clinical question
+# picked a time 32 minutes after the offer and wasn't booked (25 Nov 2026).
+# goji-booking checks the slot live when booking, so a stale pick is
+# `slot_taken` ("that time was just taken"), never a double booking.
+BOOKING_CONFIRM_WINDOW_S = 24 * 3600
 # Local tone testing only (needs WA_AGENT_STATE=memory): made-up patient
 # context for test numbers, JSON {"6591234567": {"returning": true,
 # "first_name": "Sarah", "next_appointment": null, "last_visit": "2026-10-02"}}.

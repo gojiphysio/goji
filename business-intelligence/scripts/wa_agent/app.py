@@ -63,9 +63,10 @@ from .policy import (AGENT, DRAFT, ESCALATE, HUMAN, LATE_CHANGE_H, OFF_TOPIC, PA
                      note_off_topic,
                      out_of_scope,
                      pre_golive_chat,
-                     decide, drop_repeat_page_links, gate, human_replied_since,
+                     add_booking_link, decide, drop_repeat_page_links, gate,
+                     human_replied_since,
                      is_acknowledgement, is_positive_reaction, mask_customer_emails,
-                     on_human_message,
+                     media_ping_due, on_human_message,
                      reply_problems, set_mode)
 from .state import ChatLocks, append_history, make_store, mark_seen, note_outcome, parse_code
 from .whatsapp import (Echo, HistoryChunk, Inbound, Status, WhatsAppClient, parse_webhook,
@@ -302,12 +303,13 @@ def _note_rescue(st, intent: str, wa_id: str) -> None:
                     suggested_reply="", reason=reason, last_message="")
 
 
-def _ping_staff(who: str, note: str, wa_id: str = "") -> bool:
+def _ping_staff(kind: str, who: str, note: str, wa_id: str = "", **quotes) -> bool:
     """A short WhatsApp to each staff number (WA_AGENT_STAFF): free-form inside
     their 24h window, else the approved template. True if any ping went out.
     Never a customer's full number (staff.label / staff.redact). With the
     chat's `wa_id`, each ping's message id is kept so a swipe-reply to it
-    finds the chat (_staff_answer)."""
+    finds the chat (_staff_answer). `quotes` (last_message, sent_reply,
+    draft) go in the free-form ping only: the template has one line."""
     if not config.STAFF:
         return False
     st, client, _ = _deps()
@@ -315,11 +317,11 @@ def _ping_staff(who: str, note: str, wa_id: str = "") -> bool:
     for number in sorted(config.STAFF):
         try:
             if staff.window_open(windows.get(number, 0.0), now):
-                ping_id = client.send_text(number, staff.ping_text(who, note))
+                ping_id = client.send_text(number, staff.ping_text(kind, who, note, **quotes))
                 how = "text"
             else:
                 ping_id = client.send_template(number, config.STAFF_TEMPLATE,
-                                               staff.template_params(who, note))
+                                               staff.template_params(who, note, kind))
                 how = "template"
             ok = True
             if wa_id:
@@ -343,8 +345,10 @@ def _alert(kind: str, *, customer: str, wa_id: str, who: str | None = None, **kw
         who = staff.label(customer, wa_id, st.load(wa_id).code if wa_id else "")
     # A ping about a chat (named) can be answered by swipe-reply; one that
     # isn't (a demotion notice, who="") must never route an answer to a customer.
-    pinged = _ping_staff(who, kw.get("staff_note") or kw.get("reason") or "",
-                         wa_id if who else "")
+    pinged = _ping_staff(kind, who, kw.get("staff_note") or kw.get("reason") or "",
+                         wa_id if who else "", last_message=kw.get("last_message") or "",
+                         sent_reply=kw.get("sent_reply") or "",
+                         draft=kw.get("suggested_reply") or "")
     if kind in ("urgent", "sensitive", "priority") or not pinged:
         notify.send(kind, customer=customer, wa_id=wa_id, **kw)
 
@@ -399,11 +403,13 @@ def handle_staff(ev: Inbound) -> None:
         chats = [c for c in st.recent_chats(day) if c.wa_id not in config.STAFF]
         paused = [c for c in st.paused_chats() if c.wa_id not in config.STAFF
                   and c.mode_reason != WATCHLIST]  # the watch list is in the summary
+        groups = summary.status_groups(paused, now)
         reply = staff.status_text(kill=config.KILL_SWITCH or st.get_kill(),
                                   rollout=config.resolve_rollout(st.get_rollout()),
                                   waiting=summary.waiting_for_chris(chats, day),
-                                  paused=summary.paused_labels(paused),
-                                  live=not _not_live(st))
+                                  unanswered=groups["unanswered"],
+                                  hand_back=groups["hand_back"], others=groups["rest"],
+                                  show_all=code == "all", live=not _not_live(st))
     else:
         reply = staff.HELP
     try:
@@ -525,6 +531,11 @@ def _staff_answer(st, client, model, wa_id: str, answer: str) -> str:
             state.owner = "agent"
             state.off_topic_strikes = 0
             state.pending_draft, state.last_auto = {}, {}
+            # Times offered before the handover are still on the table: the
+            # write-up usually asks which one suits, so the clock restarts.
+            for kind in ("pending_booking", "pending_move"):
+                if getattr(state, kind):
+                    setattr(state, kind, {**getattr(state, kind), "at": sent_at})
             note_outcome(state, "staff_answer",
                          summary.TEAM_PARTIAL if still_open else summary.TEAM_ANSWER, sent_at)
             st.save(state)
@@ -603,9 +614,18 @@ def _book_pending(state, ev: Inbound, received: float, fallback: str,
     # the times offered in that earlier message. Nothing else gets booked.
     pick = (chosen.get("date", ""), chosen.get("time", ""))
     if pick != (pending.get("date"), pending.get("time")):
-        if pick not in booking_client.offered(pending.get("options", "")):
+        # Any time offered in the chat in the last day, with the clinician it
+        # was offered with (the latest offer may have been someone else's).
+        who = booking_client.offered_with(pending.get("options", ""), *pick,
+                                          wanted=chosen.get("clinician", ""))
+        if who is None:
             return _book_skipped(state, ev, "time_not_offered", pending)
-        pending = {**pending, "date": pick[0], "time": pick[1]}
+        pending = {**pending, "date": pick[0], "time": pick[1], "clinician": who.capitalize()}
+    # Terms the team agreed (billing, a custom price or length) are only
+    # taken when a person from the clinic has written in this chat: a
+    # customer's own say-so never reaches the Plato note as agreed.
+    arranged = (chosen.get("arranged") or pending.get("arranged") or "").strip()
+    pending = {**pending, "arranged": arranged if _team_spoke(state) else ""}
     # Details given in the confirming message itself fill what's missing: the
     # usual case is a customer who picked a time, was asked their name, and
     # sent it. The time stays the one confirmed above.
@@ -617,6 +637,9 @@ def _book_pending(state, ev: Inbound, received: float, fallback: str,
     if (chosen.get("email") or "").strip():
         pending = {**pending, "email": chosen["email"].strip()}
     if not booking_client.complete(pending):
+        missing = booking_client.missing_details(pending)
+        if missing and not pending.get("details_asked"):
+            return _ask_details(state, ev, pending, missing)
         return _book_skipped(state, ev, "details_missing", pending)
     patient_id = tools.record_for_booking(state.patient or {}, pending.get("full_name", ""),
                                           pending.get("for_whom", ""))
@@ -672,6 +695,37 @@ def _ask_email_again(state, ev: Inbound, pending: dict, question: str):
     events.record("book_skipped", ev.wa_id, reason="email_check")
     return question, None, False
 
+
+
+def _offer_link(ev: Inbound, p) -> str:
+    """The booking link for the service a reply offers times for, or "" when
+    the reply offers none."""
+    b = p.booking or {}
+    if not booking_client.offered(b.get("options", "")):
+        return ""
+    focus = b.get("physio_focus") if b.get("service") == "physiotherapy" else ""
+    try:
+        return tools.booking_link({"service": b.get("service"),
+                                   **({"focus": focus} if focus else {})},
+                                  wa_id=ev.wa_id)["url"]
+    except tools.ToolError:
+        return ""
+
+
+def _team_spoke(state) -> bool:
+    """Has someone from the clinic written in this chat (in the Business app,
+    or an answer the assistant passed on)?"""
+    return any(h.get("role") in ("staff", "team") for h in state.history)
+
+
+def _ask_details(state, ev: Inbound, pending: dict, missing: list[str]):
+    """They picked a time but we don't have their name (or a home visit's
+    address): ask, and keep the time so their answer books it. 26 Nov 2026:
+    a pick with no name was handed to the team instead. Asked once: a second
+    confirmation still without it goes to the team."""
+    state.pending_booking = {**pending, "details_asked": True, "at": time.time()}
+    events.record("book_skipped", ev.wa_id, reason="details_asked")
+    return booking_client.details_question(pending, missing), None, False
 
 
 BOOK_HELD_REPLY = ("Thanks! I'm just getting the team to confirm this booking, and "
@@ -785,6 +839,34 @@ def _cancel_now(state, ev: Inbound, cancel: dict, follow_up: str) -> tuple[str, 
         state.booked = {}
     state.patient_at = 0.0  # the record's next appointment has changed: look it up again
     return booking_client.cancel_text(res, follow_up), True, False
+
+
+IMAGE_TYPES = frozenset({"image/jpeg", "image/png", "image/webp", "image/gif"})
+IMAGE_MAX_BYTES = 5 * 1024 * 1024  # the Messages API's per-image limit
+IMAGES_PER_TURN = 3
+
+
+def _batch_images(client, history: list[dict]) -> dict:
+    """The photos in the customer's latest messages (since the last reply),
+    {history line id: (bytes, mime)}, for the model to look at this turn
+    only; never stored. One that can't be fetched stays a "[sent a photo]"
+    line, and the model hands it to the team."""
+    out: dict = {}
+    for h in reversed(history):
+        if h["role"] != "customer" or len(out) >= IMAGES_PER_TURN:
+            break
+        media = h.get("media") or {}
+        if not media.get("id") or media.get("mime") not in IMAGE_TYPES:
+            continue
+        try:
+            data, mime = client.download_media(media["id"])
+        except Exception as e:
+            log.warning("photo download failed: %s", e)
+            continue
+        mime = mime if mime in IMAGE_TYPES else media["mime"]
+        if data and len(data) <= IMAGE_MAX_BYTES:
+            out[h["id"]] = (data, mime)
+    return out
 
 
 def _read_document(client, ev: Inbound) -> str:
@@ -1038,6 +1120,8 @@ def handle_inbound(ev: Inbound, received: float) -> None:
         state.name = ev.name or state.name
         state.code = state.code or st.next_code()
         append_history(state, "customer", ev.text, ev.ts, ev.msg_id)
+        if ev.kind == "image" and ev.media_id:  # the id only: the photo is never stored
+            state.history[-1]["media"] = {"id": ev.media_id, "mime": ev.mime}
         blocked = _gate_now(st, state, now, rollout, prior_last_at=prior_last_at,
                             had_record=had_record, patient=scope_patient)
         _hold_pre_golive(state, blocked, now)
@@ -1090,7 +1174,7 @@ def handle_inbound(ev: Inbound, received: float) -> None:
     earlier_late = st.get_late_changes(key)
     waiver_used = bool(earlier_late) or bool(patient.get("waiver_used"))
     res = agent.propose(history, wa_id=ev.wa_id, now=now, customer_name=ev.name,
-                        client=model,
+                        client=model, images=_batch_images(client, history),
                         pending_for_chris=state.pending_for_chris if state.mode == WAITING else "",
                         patient="; ".join(filter(None, [
                             tools.describe_patient(patient),
@@ -1172,6 +1256,8 @@ def handle_inbound(ev: Inbound, received: float) -> None:
         # A handover sends the holding reply; p.reply is Chris's draft (notice).
         reply = drop_repeat_page_links(customer_message(d, p, time.time()), state.history,
                                        time.time())
+        if d.action == SEND and not p.confirm_booking and not p.confirm_move:
+            reply = add_booking_link(reply, state.history, _offer_link(ev, p), time.time())
         booked, failed, cancelled = None, False, False
         if d.action == SEND and p.intent == "cancel" and booking_client.cancel_complete(p.cancel):
             reply, cancelled, failed = _cancel_now(state, ev, p.cancel, reply)
@@ -1215,14 +1301,28 @@ def handle_inbound(ev: Inbound, received: float) -> None:
             state.patient_at = 0.0  # look again: the booking may have made a patient
         elif d.action == SEND and not p.confirm_move and p.move.get("old_date") and (
                 booking_client.move_complete(p.move) or booking_client.offered(p.move.get("options", ""))):
+            prev = state.pending_move or {}
+            same = (sent_at - prev.get("at", 0) <= config.BOOKING_CONFIRM_WINDOW_S and all(
+                prev.get(k, "") == p.move.get(k, "") for k in ("old_date", "old_time")))
             state.pending_move = {**{k: p.move.get(k, "") for k in booking_client.MOVE_FIELDS},
-                                  "options": p.move.get("options", ""), "at": sent_at}
+                                  "options": booking_client.merge_options(
+                                      p.move.get("options", ""),
+                                      prev.get("options", "") if same else ""),
+                                  "at": sent_at}
         elif d.action == SEND and not p.confirm_booking and (
                 booking_client.complete(p.booking)
                 or (p.booking.get("service") and booking_client.offered(p.booking.get("options", "")))):
             # Stated back, or times offered; only their next message can confirm.
+            # Times offered earlier for the same service stay pickable.
+            prev = state.pending_booking or {}
+            same = (sent_at - prev.get("at", 0) <= config.BOOKING_CONFIRM_WINDOW_S and all(
+                prev.get(k, "") == p.booking.get(k, "")
+                for k in ("service", "format", "for_whom")))
             state.pending_booking = {**{k: p.booking.get(k, "") for k in booking_client.FIELDS},
-                                     "options": p.booking.get("options", ""), "at": sent_at}
+                                     "options": booking_client.merge_options(
+                                         p.booking.get("options", ""),
+                                         prev.get("options", "") if same else ""),
+                                     "at": sent_at}
         st.save(state)
     if d.action == SEND:
         with _autonomy_lock:
@@ -1237,8 +1337,15 @@ def handle_inbound(ev: Inbound, received: float) -> None:
     if d.action == SEND and p.intent == "priority":
         # Sent and flagged at once: Chris hears as the customer gets the reply.
         _alert("priority", **{**notice, "sent_reply": as_one_message(reply),
-                              "staff_note": f"Priority, getting worse: {p.staff_note}"})
+                              "staff_note": p.staff_note})
         _test_show(client, ev.wa_id, f"Chris is pinged now (priority): {p.staff_note}")
+    if d.action == SEND and p.intent == "media_received" and media_ping_due(history):
+        # The reply says the team will look at it, so someone is told (a
+        # handover pings below anyway). WhatsApp ping only; email just if
+        # the ping fails (_alert).
+        _alert("media", **{**notice, "sent_reply": as_one_message(reply),
+                           "staff_note": p.staff_note or "for the team to look at"})
+        _test_show(client, ev.wa_id, f"Chris is pinged now (media): {p.staff_note}")
     if d.action == SEND and config.INTENT_POLICY.get(p.intent) == "auto_notify":
         notify.send("fyi", **notice)
         _test_show(client, ev.wa_id, f"Chris would get an FYI email: {p.staff_note}")

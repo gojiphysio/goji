@@ -323,6 +323,14 @@ def _refresh_snapshot():
             _avail_cache.clear()
             _summary_cache.clear()
         log.info("snapshot refreshed: %s", stats)
+        # Same tick: patients Plato changed that the webhook didn't bring
+        # (patient_contacts.catch_up). Never fails the refresh.
+        try:
+            contacts = patient_contacts.catch_up(plato(), bq(), CONTACT_TABLE)
+            if contacts["written"] or contacts["failed"]:
+                log.info("patient catch-up: %s", contacts)
+        except Exception as e:
+            log.warning("patient catch-up skipped: %s", e)
         return jsonify({"ok": True, **stats})
     finally:
         _snapshot_lock.release()
