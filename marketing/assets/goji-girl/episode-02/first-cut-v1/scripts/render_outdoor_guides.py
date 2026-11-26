@@ -1,9 +1,9 @@
 """Continuous original blocking guides, using the frozen bus/street and crowd."""
 import bpy,math,json,sys
 from pathlib import Path
-from mathutils import Vector
+from mathutils import Vector,Matrix
 R=Path(__file__).resolve().parents[1];E=R.parent
-sid=sys.argv[-1];dur={'04':3,'05':4,'06':5,'07':5,'09':2,'10':4}[sid];N=dur*12+1
+sid=sys.argv[-1];variant='-v2' if sid in ['04','05'] else '';dur={'04':3,'05':4,'06':5,'07':5,'09':2,'10':4}[sid];N=dur*12+1
 bpy.ops.wm.open_mainfile(filepath=str(E/'revision-08/blender/route-with-pedestrians.blend'))
 s=bpy.context.scene;s.timeline_markers.clear();s.frame_set(1)
 source=(E/'revision-07/scripts/build_continuity.py').read_text();exec(source[source.index('M={}'):source.index('# +Y is vehicle forward')])
@@ -29,25 +29,45 @@ for ob in bpy.data.objects:
  if ob.name.startswith(('fixed crash debris','damaged canopy post')):ob.hide_render=sid in ['04','05','06']
 bpy.ops.object.camera_add();cam=bpy.context.object;cam.name='CUT'+sid+' follow';cam.data.sensor_fit='HORIZONTAL';cam.data.sensor_width=36;cam.data.lens=36/(2*math.tan(math.radians(52)/2));s.camera=cam
 s.render.resolution_x=288;s.render.resolution_y=512;s.cycles.samples=8;s.render.fps=12;s.frame_start=1;s.frame_end=N
-out=R/'guides'/f'{sid}-frames';out.mkdir(exist_ok=True)
+out=R/'guides'/f'{sid}{variant}-frames';out.mkdir(exist_ok=True)
 def lerp(a,b,u):return Vector(a).lerp(Vector(b),u)
 def ease(u):return u*u*(3-2*u)
 def path(points,u):
  v=min(len(points)-1.00001,max(0,u)*(len(points)-1));i=int(v);return lerp(points[i],points[i+1],v-i)
 def face(v):return math.atan2(-v.x,v.y)
+def window_pose(actor,f,centre,tilt,facing,seated=0,reach=None):
+ rot=Matrix.Rotation(tilt,3,'Y')@Matrix.Rotation(facing,3,'Z')
+ root=Vector(centre)-rot@Vector((0,0,.9))
+ actor.pose(f,root,facing,seated=seated,reach=reach)
+ actor.root.rotation_euler=rot.to_euler();actor.root.keyframe_insert('rotation_euler',frame=f)
+ return root
 marks=[]
 for f in range(1,N+1):
  t=(f-1)/12;u=t/dur
  if sid=='04':
   pts=[(-6.55,-27.5,.13),(-6.55,-23.0,.13),(-5.6,-21.0,.13),(-3.7,-20.9,.13),(-1.85,-22.85,.13)];p=path(pts,u);d=path(pts,min(1,u+.02))-path(pts,max(0,u-.02));angle=face(d);hero.pose(f,p,angle,walk=t*12)
-  direction=Vector((-math.sin(angle),math.cos(angle),0));cp=p-direction*3.6+Vector((0,0,2.1));target=p+direction+Vector((0,0,1.2))
+  # A naive rear offset enters the bus during the tight turn. Stage the chase
+  # camera outside the rigid vehicle footprint throughout the nose crossing.
+  cp=path([(-7.8,-31,2.8),(-8.5,-24,2.8),(-6,-17,2.8),(-1.2,-17.5,2.8),(1.9,-20.4,2.8)],u)
+  target=p+Vector((0,0,1.15))
  elif sid=='05':
-  if t<.8:hp=Vector((-1.85,-22.85,0));dp=Vector((-2.72,-22.85,.63));re=(.1,.4,1.77)
-  elif t<2.2:
-   v=ease((t-.8)/1.4);hp=lerp((-1.85,-22.85,0),(-1.0,-22.8,0),v);dp=lerp((-2.72,-22.85,.63),(-.30,-23.4,0),v);re=(.1,.4,1.4)
+  # Cross the small opening at sill height. The previous upright proxy moved
+  # through the lower body panel and encouraged H3 to invent a full-height door.
+  if t<.45:dc=Vector((-2.72,-22.85,1.53));dt=0
+  elif t<.95:
+   v=ease((t-.45)/.5);dc=lerp((-2.72,-22.85,1.53),(-2.6,-22.85,2.18),v);dt=math.pi/2*v
+  elif t<1.55:dc=lerp((-2.6,-22.85,2.18),(-.9,-22.85,2.18),ease((t-.95)/.6));dt=math.pi/2
+  elif t<2:
+   v=ease((t-1.55)/.45);dc=lerp((-.9,-22.85,2.18),(-.3,-23.4,.9),v);dt=math.pi/2*(1-v)
+  else:dc=lerp((-.3,-23.4,.9),(.5,-24.3,.9),min(1,(t-2)/1.2));dt=0
+  window_pose(driver,f,dc,dt,-math.pi/2,seated=max(0,1-t/.7))
+  if t<2:hc=Vector((-1.85,-22.85,.9));ht=0;seat=0
+  elif t<2.65:
+   v=ease((t-2)/.65);hc=lerp((-1.85,-22.85,.9),(-1.7,-22.85,2.18),v);ht=-math.pi/2*v;seat=0
+  elif t<3.35:hc=lerp((-1.7,-22.85,2.18),(-3.35,-22.85,2.18),ease((t-2.65)/.7));ht=-math.pi/2;seat=0
   else:
-   v=ease(min(1,(t-2.2)/1.5));hp=lerp((-1.0,-22.8,0),(-2.72,-22.85,.63),v);dp=lerp((-.30,-23.4,0),(.5,-24.3,0),v);re=(.1,.3,1.3)
-  hero.pose(f,hp,math.pi/2,walk=t*8 if t>2.2 else 0,seated=max(0,min(1,(t-3.2)/.5)),reach=re);driver.pose(f,dp,-math.pi/2,walk=t*8 if t>1 else 0,seated=max(0,1-t/1.2));p=hp
+   v=ease(min(1,(t-3.35)/.65));hc=lerp((-3.35,-22.85,2.18),(-2.72,-22.85,1.53),v);ht=-math.pi/2*(1-v);seat=v
+  p=window_pose(hero,f,hc,ht,math.pi/2,seated=seat,reach=(.1,.4,1.77) if t<2 else (.1,.3,1.3))
   pane=bpy.data.objects.get('intact driver side glass');pane.hide_render=t>.5;pane.keyframe_insert('hide_render',frame=f)
   cp=Vector((1,-20,2.8));target=Vector((-2.0,-23,1.4))
  elif sid=='06':
@@ -73,6 +93,6 @@ for f in range(1,N+1):
  for prop in ['location','rotation_euler']:cam.keyframe_insert(prop,frame=f)
  s.frame_set(f);s.render.filepath=str(out/f'{f:04}.png');bpy.ops.render.render(write_still=True)
  marks.append({'frame':f,'time':t,'player_or_bus':list(p),'camera':list(cp)})
-(R/'guides'/f'{sid}-motion.json').write_text(json.dumps({'fps':12,'frames':N,'duration':dur,'role':'original procedural motion control, not finished appearance','marks':marks},indent=2))
-bpy.ops.wm.save_as_mainfile(filepath=str(R/'guides'/f'{sid}-motion.blend'))
+(R/'guides'/f'{sid}{variant}-motion.json').write_text(json.dumps({'fps':12,'frames':N,'duration':dur,'role':'original procedural motion control, not finished appearance','marks':marks},indent=2))
+bpy.ops.wm.save_as_mainfile(filepath=str(R/'guides'/f'{sid}{variant}-motion.blend'))
 print('Finished guide',sid)

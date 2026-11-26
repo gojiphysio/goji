@@ -1,0 +1,24 @@
+{
+  "role": "motion and contact positions only; never final mesh shapes",
+  "repair": "Bodies cross at window/sill height instead of translating upright through lower body panel.",
+  "guide_sha256": "84b078854edd41e7ff78dedf698ba0d2407804b20dbc6db867c0b35232d2b5ad",
+  "anchors": [
+    {
+      "frame": 0,
+      "image": "04-end-v2.png"
+    },
+    {
+      "frame": 12,
+      "image": "05-appearance.png"
+    },
+    {
+      "frame": 48,
+      "image": "05-mid-v2.png"
+    },
+    {
+      "frame": 96,
+      "image": "05-end-v2.png"
+    }
+  ],
+  "anchor_review": "Both generated states retain the compact window and white panel below; driver and girl distinct; formed bus shape preserved."
+}

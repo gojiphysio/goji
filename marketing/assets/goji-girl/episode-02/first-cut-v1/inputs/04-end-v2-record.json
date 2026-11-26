@@ -1,0 +1,8 @@
+{
+  "role": "approved-look end anchor for corrected approach, not a new vehicle design",
+  "source": "05-appearance.png",
+  "method": "built-in imagegen pose/state edit",
+  "changes": "Restore intact driver glass; driver seated inside; girl stands outside with right arm lowered and bag in left. Preserve bus, camera, scene, character and PS2 style.",
+  "visual_review": "Inspected generated image: compact window and formed body preserved, no passenger doorway substituted.",
+  "sha256": "9b20a646c31e8850cb1cc620b25ae1c649789dba133e015408e9118fc036e0c3"
+}

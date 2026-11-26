@@ -216,7 +216,7 @@
     "number": 0,
     "node_errors": {}
   },
-  "completed_at": 1795657753.556339,
+  "completed_at": 1795657717.841,
   "outputs": {
     "21": {
       "images": [
@@ -238,5 +238,8 @@
         true
       ]
     }
-  }
+  },
+  "collected_at": 1795657753.556339,
+  "execution_started_at": 1795657707.101,
+  "render_wall_seconds": 10.740000009536743
 }

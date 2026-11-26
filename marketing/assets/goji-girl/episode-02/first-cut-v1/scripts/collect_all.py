@@ -8,7 +8,10 @@ for p in sorted((R/'takes').glob('*/run.json')):
  pid=r['receipt']['prompt_id']
  with urllib.request.urlopen('http://127.0.0.1:8195/history/'+pid,timeout=30) as f:h=json.load(f)
  if pid not in h:continue
- h=h[pid];(p.parent/'history.json').write_text(json.dumps(h,indent=2));r['status']='generated_unreviewed' if h.get('status',{}).get('status_str')=='success' else 'failed';r['completed_at']=time.time();r['outputs']=h.get('outputs',{});r['videos']=[]
+ h=h[pid];(p.parent/'history.json').write_text(json.dumps(h,indent=2));r['status']='generated_unreviewed' if h.get('status',{}).get('status_str')=='success' else 'failed';r['collected_at']=time.time();r['outputs']=h.get('outputs',{});r['videos']=[]
+ stamps={event:data.get('timestamp',0)/1000 for event,data in h.get('status',{}).get('messages',[]) if event in ['execution_start','execution_success','execution_error']}
+ r['execution_started_at']=stamps.get('execution_start');r['completed_at']=stamps.get('execution_success',stamps.get('execution_error'))
+ r['render_wall_seconds']=r['completed_at']-r['execution_started_at'] if r['completed_at'] and r['execution_started_at'] else None
  if r['status']=='generated_unreviewed':
   for entries in h.get('outputs',{}).get('14',{}).values():
    if not isinstance(entries,list):continue

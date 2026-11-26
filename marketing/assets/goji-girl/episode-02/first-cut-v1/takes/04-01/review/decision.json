@@ -1,0 +1,5 @@
+{
+  "decision": "rejected",
+  "reason": "Girl boards passenger entrance instead of rounding bus nose; guide camera entered bus footprint and hid endpoint.",
+  "repair": "Corrected camera path plus approved-look start/end anchors. Proxy geometry remains motion/layout reference only."
+}

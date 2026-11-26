@@ -49,6 +49,9 @@
   lead character. Blender controls spatial pose and contacts; primitive boxes
   are not the vehicle appearance target. Preserve formed corners, inset glazing,
   arches, rims and fitted lamps/bumpers, not just paint over blockout shapes.
+- Inspect the full Blender camera path around rigid props. A rear follow offset
+  can enter a bus on a tight turn; keep the camera outside its footprint and
+  the complete player action visible before using the guide in H3.
 - On the rolled bus, preserve a solid front corner between the side entrance
   and front facade. Use the colour-coded side-door guide when generation merges
   them; reject front-face cutouts, additional axles and upright wreck fragments.

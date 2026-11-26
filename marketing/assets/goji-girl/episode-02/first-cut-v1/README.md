@@ -1,6 +1,6 @@
 # Episode 2 — first cut v1
 
-**Render in progress · 26 November 2026 · 4 of 12 shots rendered.**
+**Render in progress · 26 November 2026 · 4 shots held for the edit; 2 interaction takes being revised.**
 
 [Play the animated opening with SFX — scenes 01–03](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-girl-episode-2/marketing/assets/goji-girl/episode-02/first-cut-v1/deliverables/opening-pass.mp4)
 
@@ -8,7 +8,11 @@
 
 These are first-pass motion previews. The exit preserves the doorway and climb,
 with a small initial body dip and a rounder handbag shape noted for polish.
-The rest of the animated cut is still rendering.
+The rest of the animated cut is still rendering. The first approach take incorrectly
+boarded the passenger door; the first driver take enlarged the window into a door.
+Both are rejected. Replacement takes use repaired Blender camera/contact paths
+and finished-look anchors that preserve the small window and solid body panel.
+Blender proxies supply motion and layout only; they do not define final mesh shapes.
 
 [Play the timing animatic with SFX](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-girl-episode-2/marketing/assets/goji-girl/episode-02/first-cut-v1/deliverables/timing-animatic.mp4)
 

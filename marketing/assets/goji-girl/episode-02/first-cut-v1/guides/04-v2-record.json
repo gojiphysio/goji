@@ -1,0 +1,6 @@
+{
+  "role": "motion, camera and spatial relationships only; proxy meshes are not final shapes",
+  "input": "marketing/assets/goji-girl/episode-02/first-cut-v1/inputs/04-guide-v2.mp4",
+  "sha256": "fc52c200c0198950611b325205fe6f890aebd6f7fb8b9b97b17fd5f44c6522f6",
+  "repair": "Camera stays outside bus footprint and keeps girl visible around nose."
+}

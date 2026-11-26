@@ -1,0 +1,33 @@
+{
+  "04": {
+    "duration": 3,
+    "mode": "video",
+    "prompt": "One uninterrupted three-second third-person gameplay run AROUND the FRONT NOSE of the parked double-decker, from passenger side to driver side. Start with the girl on the sidewalk. She runs PAST the open passenger entrance without entering it, continues in front of the windscreen, then rounds the other front corner onto the road and stops beside the compact DRIVER WINDOW. The bus stays parked, completely stationary. The girl never boards during this shot. The corrected Video1 gives the full route and collision-free camera, and the supplied final frame anchors her arrival at the driver window. Preserve the full continuous turn; no cut or teleport. Use Picture1 for the exact finished bus and woman appearance: formed rounded sheet-metal corners, inset dark glazing, detailed wheel arches/rims/lamps, orange-red/purple/white SOS Transit livery, maroon clothing and black bag in LEFT hand. Video1 contains crude planning blocks ONLY: use their positions, timing and camera, NEVER their boxy silhouettes, flat toy surfaces or primitive faces as the finished geometry. Original PS2 GTA San Andreas painted textures and economical but properly formed vehicle mesh. Camera follows the whole run around the nose without entering the bus. Pedestrians remain clear on pavement; nobody is touched. No extra characters, HUD, captions or stars.",
+    "guide_filename": "04-guide-v2.mp4",
+    "end_guide": "04-end-v2.png"
+  },
+  "05": {
+    "duration": 4,
+    "mode": "video",
+    "prompt": "One continuous four-second fixed rear interaction camera in original GTA San Andreas PS2 graphics. The girl smashes the SMALL DRIVER WINDOW with her right hand, pulls the purple-shirt driver through that same SMALL WINDOW, he lands on his feet unharmed and steps left, then she lifts herself head-first and climbs through the SAME SMALL WINDOW into the driver seat. Follow the supplied guide and timed still anchors, completing the action. THE SOLID WHITE BODY PANEL BELOW THE WINDOW NEVER CHANGES. This is a high small driver window, NEVER a passenger door. Both bodies cross the side of the bus at WINDOW HEIGHT above the sill; no one walks through the body panel. Driver and girl remain distinct. Bus remains rigid and stationary, no panel movement or resizing. Use Picture1 and the anchors for all FINISHED SHAPES AND TEXTURES: formed rounded bus body, inset dark glazing, detailed lamps, wheel arches and rims, exact orange-red/purple/white SOS Transit livery, maroon-clad woman with ponytail and white shoes. Video1 is primitive choreography ONLY, never copy its boxy mesh, faceted primitive faces or toy surfaces. Girl keeps handbag on LEFT forearm while climbing, then places it inside cab. Keep small black structured handbag, no extra bags. Driver walks away upright with no injury, blood or impact. No other people, doors, HUD, stars, cuts or captions. Camera does not move.",
+    "guide_filename": "05-guide-v2.mp4",
+    "anchors": [
+      {
+        "frame": 0,
+        "image": "04-end-v2.png"
+      },
+      {
+        "frame": 12,
+        "image": "05-appearance.png"
+      },
+      {
+        "frame": 48,
+        "image": "05-mid-v2.png"
+      },
+      {
+        "frame": 96,
+        "image": "05-end-v2.png"
+      }
+    ]
+  }
+}

@@ -1,0 +1,295 @@
+{
+  "prompt": [
+    6,
+    "4d8e55ec-5d9b-4a80-8126-4c5026f18388",
+    {
+      "1": {
+        "class_type": "UnetLoaderGGUF",
+        "inputs": {
+          "unet_name": "minimax_h3_ref2va_pruned-Q4_K_M.gguf"
+        }
+      },
+      "2": {
+        "class_type": "CLIPLoaderGGUF",
+        "inputs": {
+          "clip_name": "qwen3vl_32b_minimax_h3-Q4_K_M.gguf",
+          "type": "minimax"
+        }
+      },
+      "3": {
+        "class_type": "VAELoader",
+        "inputs": {
+          "vae_name": "minimax_h3_video_vae_fp16.safetensors"
+        }
+      },
+      "4": {
+        "class_type": "LoraLoaderModelOnly",
+        "inputs": {
+          "model": [
+            "1",
+            0
+          ],
+          "lora_name": "minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors",
+          "strength_model": 1.0
+        }
+      },
+      "5": {
+        "class_type": "MiniMaxH3SigmaShift",
+        "inputs": {
+          "model": [
+            "4",
+            0
+          ],
+          "shift_video": 12.0,
+          "shift_audio": 3.0
+        }
+      },
+      "6": {
+        "class_type": "MiniMaxH3ReferenceToVideo",
+        "inputs": {
+          "clip": [
+            "2",
+            0
+          ],
+          "vae": [
+            "3",
+            0
+          ],
+          "prompt": "A continuous four-second third-person interaction take.  Use <Picture 1> ONLY as the approved appearance reference. Use <Video 1> as the continuous spatial, action and camera guide; replace its primitive surfaces and proxy humans with the detailed painted PS2 look of Picture1. Follow the video motion, not the static pose of Picture1. At the compact right-side DRIVER WINDOW beside the front windscreen, she strikes and breaks the glass, pulls the male purple-shirt driver out, steps back to let him clear, then climbs into the driver seat. Complete all stages in order. Driver lands upright and hurries clear, alive and unharmed; no blood, body impact or ragdoll. Girl and driver remain TWO distinct people. Bus stays exactly parked in the same LEFT lane, rigid body, identical double-decker livery and small driver opening. One handbag remains on left forearm until she places it in cab footwell. Do not duplicate people or turn window into an enormous doorway. Keep same rear interaction camera. Original GTA San Andreas PlayStation 2 graphics throughout: angular economical character meshes, painted low-resolution skin/clothing/vehicle textures, restrained broad diffuse shading and period game animation. Preserve the same adult woman, maroon sleeveless top and leggings, one black ponytail, white shoes and ONE small black handbag carried LEFT. Every NPC matches the same PS2 rendering. Preserve the architecture, lighting and palette of <Picture 1>. No photoreal faces, no modern glossy rendering, no cartoon toy figures, no body morphing, no new logos, HUD, wanted stars, captions or baked text overlays. No shot changes. No speech or music.",
+          "width": 576,
+          "height": 1024,
+          "length": 107,
+          "ref_image_size": "match",
+          "ref_images.ref_image_0": [
+            "20",
+            0
+          ],
+          "ref_videos.ref_video_0": [
+            "22",
+            0
+          ]
+        }
+      },
+      "7": {
+        "class_type": "BasicGuider",
+        "inputs": {
+          "model": [
+            "5",
+            0
+          ],
+          "conditioning": [
+            "6",
+            0
+          ]
+        }
+      },
+      "8": {
+        "class_type": "RandomNoise",
+        "inputs": {
+          "noise_seed": 2026112705
+        }
+      },
+      "9": {
+        "class_type": "KSamplerSelect",
+        "inputs": {
+          "sampler_name": "euler"
+        }
+      },
+      "10": {
+        "class_type": "BasicScheduler",
+        "inputs": {
+          "model": [
+            "5",
+            0
+          ],
+          "scheduler": "simple",
+          "steps": 4,
+          "denoise": 1.0
+        }
+      },
+      "11": {
+        "class_type": "SamplerCustomAdvanced",
+        "inputs": {
+          "noise": [
+            "8",
+            0
+          ],
+          "guider": [
+            "7",
+            0
+          ],
+          "sampler": [
+            "9",
+            0
+          ],
+          "sigmas": [
+            "10",
+            0
+          ],
+          "latent_image": [
+            "6",
+            1
+          ]
+        }
+      },
+      "12": {
+        "class_type": "VAEDecodeTiled",
+        "inputs": {
+          "samples": [
+            "11",
+            0
+          ],
+          "vae": [
+            "3",
+            0
+          ],
+          "tile_size": 256,
+          "overlap": 64,
+          "temporal_size": 64,
+          "temporal_overlap": 8
+        }
+      },
+      "13": {
+        "class_type": "CreateVideo",
+        "inputs": {
+          "images": [
+            "12",
+            0
+          ],
+          "fps": 24.0
+        }
+      },
+      "14": {
+        "class_type": "SaveVideo",
+        "inputs": {
+          "video": [
+            "13",
+            0
+          ],
+          "filename_prefix": "05-01/raw",
+          "format": "mp4",
+          "format.codec": "h264"
+        }
+      },
+      "20": {
+        "class_type": "LoadImage",
+        "inputs": {
+          "image": "05-appearance.png"
+        }
+      },
+      "21": {
+        "class_type": "LoadVideo",
+        "inputs": {
+          "file": "05-guide.mp4"
+        }
+      },
+      "22": {
+        "class_type": "GetVideoComponents",
+        "inputs": {
+          "video": [
+            "21",
+            0
+          ]
+        }
+      }
+    },
+    {
+      "create_time": 1795658188095
+    },
+    [
+      "14"
+    ]
+  ],
+  "outputs": {
+    "21": {
+      "images": [
+        {
+          "filename": "05-guide.mp4",
+          "subfolder": "",
+          "type": "input",
+          "metadata": {
+            "kind": "video",
+            "width": 288,
+            "height": 512,
+            "duration": 4.458333333333333,
+            "fps": 24.0,
+            "frame_count": 107
+          }
+        }
+      ],
+      "animated": [
+        true
+      ]
+    },
+    "14": {
+      "images": [
+        {
+          "filename": "raw_00001_.mp4",
+          "subfolder": "05-01",
+          "type": "output",
+          "metadata": {
+            "kind": "video",
+            "width": 576,
+            "height": 1024,
+            "duration": 4.458333333333333,
+            "fps": 24.0,
+            "frame_count": 107
+          }
+        }
+      ],
+      "animated": [
+        true
+      ]
+    }
+  },
+  "status": {
+    "status_str": "success",
+    "completed": true,
+    "messages": [
+      [
+        "execution_start",
+        {
+          "prompt_id": "4d8e55ec-5d9b-4a80-8126-4c5026f18388",
+          "timestamp": 1795661055732
+        }
+      ],
+      [
+        "execution_cached",
+        {
+          "nodes": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "9",
+            "10"
+          ],
+          "prompt_id": "4d8e55ec-5d9b-4a80-8126-4c5026f18388",
+          "timestamp": 1795661055736
+        }
+      ],
+      [
+        "execution_success",
+        {
+          "prompt_id": "4d8e55ec-5d9b-4a80-8126-4c5026f18388",
+          "timestamp": 1795661909407
+        }
+      ]
+    ]
+  },
+  "meta": {
+    "21": {
+      "node_id": "21",
+      "display_node": "21",
+      "parent_node": null,
+      "real_node_id": "21"
+    },
+    "14": {
+      "node_id": "14",
+      "display_node": "14",
+      "parent_node": null,
+      "real_node_id": "14"
+    }
+  }
+}
