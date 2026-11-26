@@ -2,7 +2,8 @@
 start dates (CLINICIAN_AVAILABLE_FROM) unless a test sets its own."""
 import pytest
 
-from booking import availability
+from booking import app as app_mod
+from booking import availability, confirmations
 
 
 @pytest.fixture(autouse=True)
@@ -18,3 +19,7 @@ def _confirmations_off_unless_a_test_says(monkeypatch):
     starts from "off"; tests that need a mode set it themselves."""
     for name in ("CONFIRMATIONS_MODE", "CONFIRMATIONS_SINCE", "CONFIRMATIONS_TEST_TO"):
         monkeypatch.delenv(name, raising=False)
+    # WA_AGENT_URL is exported too and read at import: no test may call the
+    # live assistant. Tests that need a callback set their own URL.
+    monkeypatch.setattr(confirmations, "WA_AGENT_URL", "")
+    monkeypatch.setattr(app_mod, "WA_AGENT_URL", "")
