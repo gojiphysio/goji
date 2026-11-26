@@ -37,10 +37,12 @@ env:
   DOMAIN: careers-api.gojiphysio.com
   RUNTIME_SA: careers-sa@${{ vars.GCP_PROJECT }}.iam.gserviceaccount.com
   # ---- test / production switch (Goji Recruitment Shared Drive) ----
-  # TEST: "Goji Recruitment (TEST)" > Applications, and its Applicant Tracker.
-  APPLICATIONS_FOLDER_ID: 13JNhXXqT_qLRaj7Tw9h-Gyr1wzv8Eaiq
-  TRACKER_SHEET_ID: 1Lx6vPpgMV29-0GBovwjmkoUWfGXvhQaZFtIAa5ZHlnQ
-  CAREERS_TEST_MODE: "1"
+  # PRODUCTION: "Goji Recruitment" > Applications, and its Applicant Tracker.
+  # TEST (to switch back): folder 13JNhXXqT_qLRaj7Tw9h-Gyr1wzv8Eaiq,
+  # tracker 1Lx6vPpgMV29-0GBovwjmkoUWfGXvhQaZFtIAa5ZHlnQ, CAREERS_TEST_MODE "1".
+  APPLICATIONS_FOLDER_ID: 1wGtr9jvUMldzfH6ZFfv2Mf5ErFDArHdk
+  TRACKER_SHEET_ID: 1t_0zY-6M2Gt2iG2Q5Q5GHI2MAhk7zFWusejgGgjJ7wE
+  CAREERS_TEST_MODE: "0"
   CAREERS_TEST_EMAIL: hello@gojiphysio.com
   CORS_ORIGIN: https://www.gojiphysio.com
 
