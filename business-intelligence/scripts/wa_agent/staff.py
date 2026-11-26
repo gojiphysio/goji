@@ -45,9 +45,9 @@ WELCOME = (
     "Hi! I'm Goji's WhatsApp assistant. Here's how we'll work together:\n\n"
     "1. I answer customers on the Goji number: questions, prices, availability, bookings "
     "and moving appointments.\n"
-    "2. When a chat needs you, I message you here, e.g. \"Mei (#004) needs you: ...\". "
-    "I've already told them the team will get back to them. The email has my suggested "
-    "reply: fill in anything in [brackets], then send it from the WhatsApp Business app.\n"
+    "2. When a chat needs you, I message you here: who it is (e.g. Mei #004), what they "
+    "want, what they said, what I told them and a draft reply with anything only you "
+    "know in [brackets].\n"
     "3. Once you have the answer, swipe-reply to my ping with it (or text ANSWER 004 and "
     "the answer). I'll write it up, send it to the customer, show you what I sent and "
     "look after the chat again.\n"
@@ -87,21 +87,84 @@ def redact(text: str) -> str:
     return _SPACE.sub(" ", out).strip()
 
 
-def ping_text(who: str, note: str) -> str:
-    """The free-form ping, inside the staff member's 24h window."""
-    note = redact(note).rstrip(" .") or "a chat needs a reply"
-    head = f"Goji assistant: {who} needs you" if who else "Goji assistant needs you"
-    return f"{head}: {note}. Open the chat in the Business app."
+# The header of each kind of ping: what happened, at a glance on a lock screen.
+_PING_HEAD = {
+    "urgent": "🚨 *URGENT: {who}, possible red flag*",
+    "sensitive": "🔔 *{who} needs you (sensitive)*",
+    "priority": "⚠️ *{who}: symptoms getting worse*",
+    "media": "📎 *{who} sent something I couldn't use*",
+    "reaction": "💬 *{who}: a reaction to check*",
+    "fyi": "ℹ️ *{who}: for you to do*",
+    "demoted": "⚙️ *Assistant setting changed*",
+}
+# What to do with it, one line. The default is a handover waiting on her.
+_PING_FOOT = {
+    "urgent": "I've already sent them the reply above. Swipe-reply with anything to add, "
+              "or call or reply in the Business app.",
+    "priority": "I'm still in the chat and will book the time they pick. Reply in the "
+                "Business app to step in.",
+    "media": "Open the chat in the Business app to see it. I'm still answering them.",
+    "reaction": "Open the chat in the Business app if it needs a word.",
+    "fyi": "Nothing to send them.",
+    "demoted": "",
+}
+_HANDOVER_FOOT = ("Swipe-reply with the answer and I'll send it, or reply yourself in the "
+                  "Business app.")
+QUOTE_MAX = 220   # a customer message or a reply, in a ping
+DRAFT_MAX = 450   # the draft is the part she may send, so it gets more room
+
+
+def _quote(text: str, limit: int) -> str:
+    text = redact(text)
+    return text if len(text) <= limit else text[:limit - 1].rstrip() + "…"
+
+
+def ping_text(kind: str, who: str, note: str, *, last_message: str = "",
+              sent_reply: str = "", draft: str = "") -> str:
+    """The free-form ping, inside the staff member's 24h window: a bold header
+    that says what happened, the one-line summary, then what the customer
+    said, what they were told and the draft for her, each on its own line,
+    and what to do. It was one run-on sentence with all of that missing, and
+    read as word salad on a phone (owner, 26 Nov 2026). WhatsApp renders
+    *bold*; quotes are redacted and clipped."""
+    who = redact(who) or "a customer"
+    who = who[0].upper() + who[1:]  # it starts the header: "The customer ending 4567"
+    head = _PING_HEAD.get(kind, "🔔 *{who} needs you*").format(who=who)
+    note = redact(note).rstrip(" .")
+    lines = [head] + ([note[0].upper() + note[1:] + "."] if note else [])
+    quoted = []
+    if last_message.strip() and kind != "reaction":  # a reaction's text is the emoji
+        quoted.append(f"*They said:* “{_quote(last_message, QUOTE_MAX)}”")
+    if sent_reply.strip():
+        quoted.append(f"*I told them:* “{_quote(sent_reply, QUOTE_MAX)}”")
+    if draft.strip() and draft.strip() != sent_reply.strip():
+        quoted.append(f"*Draft for you:* “{_quote(draft, DRAFT_MAX)}”")
+    if quoted:
+        lines += [""] + quoted
+    foot = _PING_FOOT.get(kind, _HANDOVER_FOOT)
+    if foot:
+        lines += ["", foot]
+    return "\n".join(lines)
 
 
 def _clip(text: str) -> str:
     return text if len(text) <= PARAM_MAX else text[:PARAM_MAX - 1].rstrip() + "…"
 
 
-def template_params(who: str, note: str) -> list[str]:
+# The template's reason is one line, so the kind goes in front of the note.
+_TEMPLATE_KIND = {"urgent": "Possible red flag", "sensitive": "Sensitive",
+                  "priority": "Symptoms getting worse",
+                  "media": "Sent something the assistant couldn't use",
+                  "reaction": "Reacted", "demoted": "Assistant setting changed"}
+
+
+def template_params(who: str, note: str, kind: str = "") -> list[str]:
     """goji_staff_alert_v2: "Staff alert: chat {{1}} on Goji's WhatsApp needs a
     reply from the team. Reason: {{2}}. ..." One line each, no phone numbers."""
-    reason = redact(note).rstrip(" .") or "a customer is waiting for a reply"
+    reason = redact(note).rstrip(" .")
+    if kind in _TEMPLATE_KIND:
+        reason = f"{_TEMPLATE_KIND[kind]}: {reason}" if reason else _TEMPLATE_KIND[kind]
+    reason = reason or "a customer is waiting for a reply"
     return [_clip(redact(who) or "with a customer"), _clip(reason)]
 
 

@@ -422,6 +422,37 @@ def test_staff_helpers():
     assert staff.parse_command("Resume chat #12") == ("resume", "012")
     assert staff.parse_command("resume") == ("help", "")
     assert staff.label("Mei", CUSTOMER, "004") == "Mei (#004)"
+    assert staff.template_params("Mei", "knee worse", "priority")[1] == \
+        "Symptoms getting worse: knee worse"
+
+
+def test_ping_text_layout():
+    """One line per part, bold header, no run-on sentence (owner, 26 Nov 2026)."""
+    ping = staff.ping_text("escalated", "Mei (#004)", "wants to move Thu 10am, 18h notice",
+                           last_message="can I move tmr's appt? call 9123 4567",
+                           sent_reply="I've passed this to the team.",
+                           draft="Hi Mei, we can move it to [time].")
+    assert ping.split("\n") == [
+        "🔔 *Mei (#004) needs you*",
+        "Wants to move Thu 10am, 18h notice.",
+        "",
+        "*They said:* “can I move tmr's appt? call [number]”",
+        "*I told them:* “I've passed this to the team.”",
+        "*Draft for you:* “Hi Mei, we can move it to [time].”",
+        "",
+        staff._HANDOVER_FOOT,
+    ]
+    # the same reply sent and drafted shows once; a long quote is clipped
+    p = staff.ping_text("priority", "Mei (#004)", "", last_message="x" * 999,
+                        sent_reply="same", draft="same")
+    assert p.count("same") == 1 and "Draft for you" not in p and "…" in p
+    # nothing about a chat: no swipe-reply footer, nothing quoted
+    d = staff.ping_text("demoted", "", "'price' messages now come to you as drafts")
+    assert d == "⚙️ *Assistant setting changed*\n'price' messages now come to you as drafts."
+    r = staff.ping_text("reaction", "the customer ending 4567 (#009)", 'reacted 👎 to "hi"',
+                        last_message="👎")
+    assert r.startswith("💬 *The customer ending 4567 (#009): a reaction to check*\n"
+                        "Reacted 👎 to \"hi\".") and "They said" not in r
 
 
 def test_staff_message_is_never_a_customer(env, with_staff):
@@ -468,7 +499,9 @@ def test_ping_is_free_text_inside_window_and_urgent_still_emails(env, with_staff
     app_mod.claude.queue.append(final(reply="Please call 995", intent="urgent", escalate=True,
                                       reason="red flag", note="chest pain"))
     post(client, inbound(text="chest pain", ts=int(time.time())))
-    assert (CHRIS, staff.ping_text("Mei (#001)", "chest pain")) in app_mod.wa.sent
+    ping = next(t for to, t in app_mod.wa.sent if to == CHRIS)
+    assert ping.startswith("🚨 *URGENT: Mei (#001), possible red flag*\nChest pain.")
+    assert "*They said:* “chest pain”" in ping and "*I told them:* “Please call 995”" in ping
     assert app_mod.wa.templates == []
     assert [k for k, _ in notes] == ["urgent"]
 
@@ -541,7 +574,7 @@ def test_morning_summary_route(env, with_staff):
     assert r.json["answered"] == 1 and r.json["staff_pinged"] == 1
     (subj, body), = plain
     assert "morning summary" in subj and "Mei" in body
-    assert app_mod.wa.sent[-1][0] == CHRIS and "1 chat(s) answered" in app_mod.wa.sent[-1][1]
+    assert app_mod.wa.sent[-1][0] == CHRIS and "1 handled by the assistant" in app_mod.wa.sent[-1][1]
 
 
 # --- kill-switch gaps -------------------------------------------------------------
@@ -640,14 +673,52 @@ def test_summary_groups_paused_chats_like_status():
     assert s["paused"] == 4 and s["unanswered"] == 1 and s["hand_back"] == 1
     body = s["body"]
     assert "Waiting on a reply (1)" in body and "Cy (#009) 5h ago" in body
-    assert "Ready to hand back (1)" in body and "RESUME 004" in body and "Bo (#027)" in body
+    assert "READY TO HAND BACK (1)" in body and "RESUME 004" in body and "- Bo (#027)" in body
     assert "You're handling 2 more yourself" in body
-    assert body.index("Ann (#004)") < body.index("ending 0012 (#007)")    # latest first
+    assert body.index("Ann (#004)") < body.index("Customer ending 0012 (#007)")  # latest first
+    assert s["subject"].endswith(", 1 chat needs you")
     line = s["line"]
-    assert "Waiting on a reply: Cy (#009) 5h ago." in line
-    assert "Ready to hand back, text RESUME and the number: Bo (#027)." in line
+    assert "*Waiting on a reply (1)*\n• Cy (#009) 5h ago" in line
+    assert "*Ready to hand back (1)*, text RESUME and the number:\n• Bo (#027)" in line
     assert "You're handling 2 more yourself (STATUS ALL lists them)." in line
     assert "#004" not in line and "and more" not in line
+
+
+def test_summary_says_what_happened_in_words():
+    """26 Nov 2026: the email named intents ("location_hours (link sent)") and
+    the WhatsApp version was one run-on sentence. Plain words, one chat a line,
+    what needs Chris first. Cancelled and getting-worse chats used to drop out."""
+    now = 1_800_000_000.0
+    a = ChatState(wa_id="6500000001", name="Amy", code="031")
+    note_outcome(a, "pricing", "answered", now - 5 * 3600)
+    note_outcome(a, "booking", "booked", now - 4 * 3600)
+    note_outcome(a, "pricing", "answered", now - 3 * 3600)
+    b = ChatState(wa_id="6500000002", name="Bo", code="032")
+    note_outcome(b, "location_hours", "link sent", now - 3600)
+    c = ChatState(wa_id="6500000003", name="Cy", code="033")
+    note_outcome(c, "cancel", "cancelled", now - 3600)
+    d = ChatState(wa_id="6500000004", name="Di", code="034")
+    note_outcome(d, "priority", "flagged, times offered", now - 3600)
+    w = ChatState(wa_id="6500000005", name="", code="035", mode=WAITING, mode_since=now - 600,
+                  pending_for_chris="call me on 91234567 about the fee")
+    note_outcome(w, "billing", "handed over", now - 600)
+    s = summary.build([a, b, c, d, w], now)
+    body = s["body"]
+    assert "- Amy (#031): prices, booked\n" in body               # each said once
+    assert "- Bo (#032): hours and location, booking link sent" in body
+    assert "- Cy (#033): appointment cancelled" in body
+    assert "- Di (#034): flagged to you, times offered" in body
+    assert s["answered"] == 4 and "_" not in body
+    assert body.index("NEEDS YOU (1)") < body.index("HANDLED BY THE ASSISTANT (4)")
+    assert "- Customer ending 0005 (#035): billing. Waiting on: call me on [number]" in body
+    line = s["line"]
+    assert line.startswith("☀️ *Goji assistant, last 24h*\n4 handled by the assistant\n")
+    assert "*Left for you (1)*\n• Customer ending 0005 (#035): call me on [number]" in line
+    many = [ChatState(wa_id=f"65000001{i:02d}", name=f"P{i}", code=f"1{i:02d}", mode=WAITING,
+                      mode_since=now - 60) for i in range(12)]
+    line = summary.build(many, now)["line"]
+    assert line.count("• ") == summary.WA_LIST_MAX + 1 and "and 4 more (see your email)" in line
+    assert summary.build([a], now)["line"].count("Nothing needs you.") == 1
 
 
 def test_status_groups_paused_chats_by_what_chris_can_do():
@@ -773,7 +844,7 @@ def test_priority_sends_concern_and_slots_and_pings_staff_at_once(env, with_staf
     to_customer = [m for m in app_mod.wa.sent if m[0] == CUSTOMER]
     assert to_customer and "let our team know" in to_customer[-1][1]
     pings = [m for m in app_mod.wa.sent if m[0] == CHRIS]
-    assert pings and "Priority, getting worse" in pings[-1][1]
+    assert pings and "*Mei (#001): symptoms getting worse*" in pings[-1][1]
     assert [k for k, _ in notes] == ["priority"]  # email backup too
     assert "let our team know" in notes[0][1]["sent_reply"]
     assert app_mod.store.load(CUSTOMER).mode == AGENT
