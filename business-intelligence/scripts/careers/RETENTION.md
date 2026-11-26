@@ -24,8 +24,8 @@ when the process concludes (concluded date + 6 or + 12 months).
    and there is no reason to keep it (for example a dispute, or a pending
    offer).
 3. Delete, in this order:
-   - the application folder in Drive (`Applications/<year>/<role>/<reference>`),
-     then empty it from the Shared Drive's trash;
+   - the CV in Drive (`Applications/<reference> - <name> - CV.<ext>`), then
+     empty it from the Shared Drive's trash;
    - email: the "[Goji Careers]" internal notification and any correspondence
      with the applicant in hello@ (search by the reference and the name), then
      empty Gmail's trash;
@@ -40,7 +40,7 @@ when the process concludes (concluded date + 6 or + 12 months).
 
 Requests come to hello@gojiphysio.com. Find the applicant by reference or
 email in the tracker. An access request is answered with the stored
-application JSON and CV. A withdrawal or deletion request follows step 3
+tracker row and CV. A withdrawal or deletion request follows step 3
 straight away.
 
 ## What the system already limits

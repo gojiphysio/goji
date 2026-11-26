@@ -12,7 +12,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Served as the `careers` package so its relative imports work. Tests are not
 # shipped in the image.
 COPY *.py /app/careers/
-RUN rm -f /app/careers/test_*.py /app/careers/conftest.py /app/careers/dev_server.py
+RUN rm -f /app/careers/test_*.py /app/careers/fakes.py /app/careers/dev_server.py
 
 # ONE worker: reference numbers are allocated under an in-process lock (paired
 # with Cloud Run --max-instances=1). Uploads are I/O-bound, so threads cover

@@ -13,8 +13,8 @@
  *
  * Privacy rules (recruitment brief §6, §10, §14): nothing the applicant enters
  * is written to localStorage/sessionStorage or sent to analytics; the form
- * state lives in memory only. The idempotency key is per page load, so a
- * retry after a failed or lost response can't create a second application.
+ * state lives in memory only. The submit button stays disabled while a
+ * submission is in flight, so a double click sends one application.
  */
 import {
   AHPC_OPTIONS,
@@ -27,7 +27,7 @@ import {
   type Vacancy,
 } from "../../lib/vacancies.ts";
 import { CAREERS_API } from "../../lib/careers.ts";
-import { TURNSTILE_SITE_KEY } from "../../lib/booking.ts";
+import { GOJI_TURNSTILE_SITE_KEY, TURNSTILE_SITE_KEY } from "../../lib/booking.ts";
 import { SITE } from "../../lib/site.ts";
 
 interface Props {
@@ -54,7 +54,9 @@ const roleMeta = Object.fromEntries(
 );
 const physio = !general && vacancy!.form === "physio";
 const minDays = vacancy?.minDaysPerWeek ?? 0;
-const turnstileKey = CAREERS_API ? TURNSTILE_SITE_KEY : "";
+// The backend requires Turnstile, so a live form always carries the widget
+// (not only when the booking API is also configured).
+const turnstileKey = CAREERS_API ? TURNSTILE_SITE_KEY || GOJI_TURNSTILE_SITE_KEY : "";
 const formId = general ? "interest-form" : "application-form";
 ---
 
@@ -762,11 +764,6 @@ const formId = general ? "interest-form" : "application-form";
     const general = root.dataset.general === "1";
     const roles: RoleMeta = JSON.parse(root.dataset.roles || "{}");
     const loadedAt = Date.now();
-    // One key per page load: a retry (or a double click) re-sends the same key,
-    // and the backend returns the existing application instead of a new one.
-    const idemKey = crypto.randomUUID
-      ? crypto.randomUUID()
-      : Array.from(crypto.getRandomValues(new Uint8Array(16)), (b) => b.toString(16).padStart(2, "0")).join("");
     let submitting = false;
     let submitted = false;
     let started = false;
@@ -1098,7 +1095,6 @@ const formId = general ? "interest-form" : "application-form";
         fd.delete("clinical_experience");
         fd.delete("womens_health");
       }
-      fd.set("idempotency_key", idemKey);
       fd.set("elapsed_ms", String(Date.now() - loadedAt));
       fd.set("source_page", location.pathname);
       if (tsToken) fd.set("turnstile_token", tsToken);

@@ -31,14 +31,12 @@ they can't disagree.
 
 Copy an entry and give it a new `id` (this is the URL slug and the value
 stored in the tracker; never change it after launch). Set `order`,
-`driveFolder` (the folder name under `Applications/<year>/`; the backend
-creates it on first use), `minYearsExperience`, `form: "physio"` for a clinical role, and
+`driveFolder`, `minYearsExperience`, `form: "physio"` for a clinical role, and
 `alsoConsiderFor` if there is a sibling level. Then:
 
 - add the page to `public/llms.txt` (`check_dist.py` fails otherwise);
-- add the role folder to `ROLE_FOLDERS` in `careers/setup_workspace.py` if you
-  want it pre-created, and the id to the tests' `VACANCIES` fixture if it has
-  new behaviour;
+- add the id to `VACANCIES` in `business-intelligence/scripts/careers/fakes.py`
+  if it has new behaviour worth testing;
 - a non-physio role needs its own question set: today the form knows
   `physio` and the general expression of interest only.
 
