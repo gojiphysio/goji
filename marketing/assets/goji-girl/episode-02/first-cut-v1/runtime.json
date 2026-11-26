@@ -1,0 +1,23 @@
+{
+  "engine": "local ComfyUI H3 Ref2VA",
+  "comfy_commit": "da8bd08e48deee74d9f6c3bc00aed365b00ec209",
+  "gguf_commit": "ff8d48666758866bcc9e93b22e1e07cb636e084f",
+  "code_hashes": {
+    "/Users/tidepool/Projects/goji-comfy-control/comfy_extras/nodes_minimax_h3.py": "32da0ea654f884b6c9dac74caaf81f1354dfd27686109b1b81952a24689f6492",
+    "/Users/tidepool/Projects/goji-comfy-control/custom_nodes/ComfyUI-GGUF/nodes.py": "a0fa252885cb80ea4727dbfa3a361f377add910002db333e6bd4dea7d33261db",
+    "/Users/tidepool/Projects/goji-comfy-control/custom_nodes/ComfyUI-GGUF/loader.py": "ab9ea7ce189b348f5421bb959b26af4e26219d1e1c883815eec095cde8cc0922"
+  },
+  "video_vae_compute": "float32",
+  "text_encoder": "MPS BF16 via GOJI_TEXT_ENCODER_MPS=1",
+  "attention": "PyTorch SDPA on MPS",
+  "output_canvas": [
+    576,
+    1024
+  ],
+  "output_fps": 24,
+  "sampling_steps": 4,
+  "model": "H3 Ref2VA Q4_K_M with native Ref2VA Turbo v0.1",
+  "concurrency": "one local GPU job at a time",
+  "audio": "separately synthesized SFX; no audio VAE",
+  "spend": "no paid API or rental"
+}

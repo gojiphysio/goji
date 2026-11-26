@@ -1,0 +1,30 @@
+{
+  "01": {
+    "path": "takes/01-01/raw_00001_.mp4",
+    "start": 0,
+    "duration": 3,
+    "status": "draft selection; sampled-frame review",
+    "review": "Headset removal and laptop close complete; room/props remain coherent in sampled frames."
+  },
+  "02": {
+    "path": "takes/02-01/raw_00001_.mp4",
+    "start": 0,
+    "duration": 2,
+    "status": "draft selection; sampled-frame review",
+    "review": "Surprised reaction, closed laptop/headset and left-hand bag pickup retained."
+  },
+  "03": {
+    "path": "takes/03-01/raw_00001_.mp4",
+    "start": 0,
+    "duration": 3,
+    "status": "draft selection; sampled-frame review",
+    "review": "Forward rear-camera run; bystanders step clear with no observed contact."
+  },
+  "08": {
+    "path": "takes/08-02/raw_00001_.mp4",
+    "start": 0,
+    "duration": 6,
+    "status": "draft selection; sampled-frame review",
+    "review": "QuickTime normal-speed playback completed with start/end observations, plus 2fps contact sheet and tap/end close inspection. Frozen bus/intact front corner preserved; reader reach then climb complete. Small early body dip and rounder handbag silhouette need polish; do not claim a frame-perfect motion pass."
+  }
+}

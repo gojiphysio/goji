@@ -1,6 +1,14 @@
 # Episode 2 — first cut v1
 
-**Render in progress · 26 November 2026.**
+**Render in progress · 26 November 2026 · 4 of 12 shots rendered.**
+
+[Play the animated opening with SFX — scenes 01–03](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-girl-episode-2/marketing/assets/goji-girl/episode-02/first-cut-v1/deliverables/opening-pass.mp4)
+
+[Exit motion take — scene 08, silent](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-girl-episode-2/marketing/assets/goji-girl/episode-02/first-cut-v1/takes/08-02/raw_00001_.mp4)
+
+These are first-pass motion previews. The exit preserves the doorway and climb,
+with a small initial body dip and a rounder handbag shape noted for polish.
+The rest of the animated cut is still rendering.
 
 [Play the timing animatic with SFX](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-girl-episode-2/marketing/assets/goji-girl/episode-02/first-cut-v1/deliverables/timing-animatic.mp4)
 
