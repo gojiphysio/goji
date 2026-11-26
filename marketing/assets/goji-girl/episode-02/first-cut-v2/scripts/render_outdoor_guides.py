@@ -3,7 +3,7 @@ import bpy,math,json,sys
 from pathlib import Path
 from mathutils import Vector,Matrix
 R=Path(__file__).resolve().parents[1];E=R.parent
-sid=sys.argv[-1];variant='-full-motion-v1';dur={'03':3,'04':3,'05':4,'06':5,'07':5,'09':2,'10':4}[sid];N=dur*12+1
+sid=sys.argv[-1];variant='-grip-motion-v2' if sid in ['03','04','09','10'] else '-full-motion-v1';dur={'03':3,'04':3,'05':4,'06':5,'07':5,'09':2,'10':4}[sid];N=dur*12+1
 exec((R/'scripts/sa_gait.py').read_text())
 exec((R/'scripts/stunt_motion.py').read_text())
 bpy.ops.wm.open_mainfile(filepath=str(E/'revision-08/blender/route-with-pedestrians.blend'))
@@ -182,20 +182,16 @@ for f in range(1,N+1):
  elif sid=='09':
   ground_bus(WRECK_X,WRECK_Y,0,WRECK_ROLL);p=Vector((-7.35,4.4+max(0,t-1.3)*2,.13));hero.pose(f,p,0,walk=0 if t<1.3 else t*12,reach=(.05,-.07,1.45) if t<1.3 else None);cp=p+Vector((-.4,-4.1,1.87));target=p+Vector((.2,0,1.12))
  else:
-  ground_bus(WRECK_X,WRECK_Y,0,WRECK_ROLL);pts=[(-6.55,14,.13),(-7.15,22.1,.13),(-9.58,25.3,.13)];p=path(pts,u);d=path(pts,min(1,u+.02))-path(pts,max(0,u-.02));speed=d.length/((min(1,u+.02)-max(0,u-.02))*dur)
+  ground_bus(WRECK_X,WRECK_Y,0,WRECK_ROLL);pts=[(-6.55,14,.13),(-6.55,22.1,.13),(-9.58,25.3,.13)];p=path(pts,u);d=path(pts,min(1,u+.02))-path(pts,max(0,u-.02));speed=d.length/((min(1,u+.02)-max(0,u-.02))*dur)
   sa_run_pose(hero,f,p,face(d),t,move_segment,speed=speed)
-  lengths=[(Vector(pts[i+1])-Vector(pts[i])).length for i in range(2)]
-  hero_distance=lengths[0]*u*2 if u<.5 else lengths[0]+lengths[1]*(u*2-1)
+  a0=face(Vector(pts[1])-Vector(pts[0]));a1=face(Vector(pts[2])-Vector(pts[1]));ca=a0+(a1-a0)*ease(max(0,min(1,(t-1.8)/.5)));cr=Matrix.Rotation(ca,3,'Z')
   for k,c in enumerate(cops):
-   follow=hero_distance-3.2-k*.3
-   if follow<0:chase=Vector(pts[0])+(Vector(pts[1])-Vector(pts[0])).normalized()*follow
-   elif follow<lengths[0]:chase=lerp(pts[0],pts[1],follow/lengths[0])
-   else:chase=lerp(pts[1],pts[2],(follow-lengths[0])/lengths[1])
-   tangent=(p-chase).normalized();sideways=Vector((tangent.y,-tangent.x,0))
-   chase+=sideways*(-.55 if k==0 else .55)
-   chase_direction=p-chase
-   sa_run_pose(c,f,chase,face(chase_direction),t,move_segment,speed=speed,phase_offset=k*.3)
-  cp=p+Vector((.65,-4.8,1.97));target=p+Vector((-1.1,2.5,1.27))
+   # Continuous flanking chase arcs keep the player visible during the turn.
+   chase=p+cr@Vector((-.55 if k==0 else .95,-2.0-k*.3,0))
+   sa_run_pose(c,f,chase,ca,t,move_segment,speed=speed,phase_offset=k*.3)
+  cp=p+cr@Vector((.15,-3.6,1.97));target=p+cr@Vector((0,.8,1.2))
+ if sid=='09':
+  hero.bag.rotation_euler=(0,0,math.pi/2);hero.bag.keyframe_insert('rotation_euler',frame=f)
  if sid in ['04','05','06','07']:
   for prop in ['location','rotation_euler']:bus.keyframe_insert(prop,frame=f)
  cam.location=cp;cam.rotation_euler=(target-cp).to_track_quat('-Z','Y').to_euler()

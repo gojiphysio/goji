@@ -51,7 +51,7 @@ def limb(a,b,length,bend,label,t):
  return (a+b)*.5+pole*math.sqrt(max(0,length*length-min(dist,length*2)**2/4))
 bpy.ops.object.camera_add();cam=bpy.context.object;s.camera=cam;cam.data.sensor_fit='HORIZONTAL';cam.data.sensor_width=36;cam.data.lens=36/(2*math.tan(math.radians(62)/2))
 s.render.resolution_x=288;s.render.resolution_y=512;s.render.fps=12;s.cycles.samples=8;s.frame_start=1;s.frame_end=97
-out=R/'guides/08-full-motion-v1-frames';out.mkdir(exist_ok=True)
+out=R/'guides/08-grip-motion-v2-frames';out.mkdir(exist_ok=True)
 for f in range(1,98):
  t=(f-1)/12;_,pel,lean,heading,lh,rh,lf,rf=interp(t)
  rot=Matrix.Rotation(math.radians(heading),3,'Z')@Matrix.Rotation(math.radians(-lean),3,'X')
@@ -75,7 +75,7 @@ for f in range(1,98):
   for prop in ['location','rotation_euler']:shoe.keyframe_insert(prop,frame=f)
   h=p.parts[(side,'hand')];h.location=inv@(wrist-root);h.keyframe_insert('location',frame=f)
   if side==-1:
-   p.bag.location=inv@(wrist-root);p.bag.rotation_euler=inv.to_euler()
+   p.bag.location=inv@(wrist-root);p.bag.rotation_euler=(inv@Matrix.Rotation(math.radians(heading)+math.pi/2,3,'Z')).to_euler()
    for prop in ['location','rotation_euler']:p.bag.keyframe_insert(prop,frame=f)
   else:
    card.location=wrist;card.hide_render=not (2.35<t<3.3)
@@ -86,4 +86,4 @@ for f in range(1,98):
  if '--audit' not in sys.argv and ('--preview' not in sys.argv or f in [1,14,23,34,46,61,72,80,88,97]):bpy.ops.render.render(write_still=True)
  records.append({'time':t,'pelvis':list(pelvis),'hands':[list(vec(lh,4.18)),list(vec(rh,4.62))],'phase':'braced climb' if t<2.35 else 'supported card tap' if t<3.3 else 'climb down' if t<6.15 else 'drop and landing' if t<7.25 else 'recover'})
 (R/'guides/08-contact-audit.json').write_text(json.dumps({'sill':list(sill),'reader':list(reader),'bus_pose':list(bus.location),'violations':violations,'marks':records},indent=2))
-bpy.ops.wm.save_as_mainfile(filepath=str(R/'guides/08-contact-exit.blend'));print('CONTACT VIOLATIONS',len(violations))
+bpy.ops.wm.save_as_mainfile(filepath=str(R/'guides/08-grip-exit.blend'));print('CONTACT VIOLATIONS',len(violations))

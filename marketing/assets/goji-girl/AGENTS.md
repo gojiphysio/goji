@@ -58,6 +58,8 @@
   half-second gait cycle. Both arms use the full running pump, including the
   bag-carrying arm. The handbag is a rigid hand-attached game prop; never dampen
   the shoulder cycle, hold the bag steady, or give it soft-body deformation.
+  Its long side runs alongside her body, with the broad face pointing outward.
+  Fix its orientation to the grip; never billboard the broad face at camera.
 - Chase guides must establish actual travel speed and visible cause/effect:
   hard steering, lateral load, roll, ground strike, sliding friction and impact.
   Do not ease a slowly moving bus into a sideways pose and call it a crash.

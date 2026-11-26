@@ -2,27 +2,75 @@
   "03": {
     "duration": 3,
     "mode": "video",
-    "prompt": "One continuous three-second original GTA San Andreas PS2 rear-player sprint. Start exactly in the first-frame anchor as Goji Girl bursts through her open front doorway; then run FORWARD along this Singapore pavement away from camera. Match the repeated locomotion cycle in <Video 1>: a slight forward body lean, squared and flared BENT elbows, strong forward/back arm pumping, pronounced heel recovery, long push-off and a firm regular quick rhythm. Follow the guide timing rather than inventing a smooth fashion jog. Keep ONE structured black handbag attached to LEFT hand; BOTH arms pump through the SAME full shoulder swing with bent elbows. The left hand travels fully forward and backward, just like the right. Camera follows behind at ordinary player height with the same heading, no cut, orbit or reversal. Background passersby step clear without contact. <Picture 1> and the first anchor define the finished woman, maroon top/leggings, ponytail, white shoes, bag and neighbourhood appearance. <Video 1> is ONLY original rig motion, path and camera reference: never reproduce its blocks, primitive face or building silhouettes as final shapes. Painted low-resolution PS2 textures and economical but properly formed anatomy for every person. No photographic humans, extra limbs, bag swaps, HUD, stars, captions or new vehicles. The handbag is a STIFF rigid game prop attached to the moving LEFT hand. Its body and handle keep their exact shape and rotate/translate WITH that hand through the FULL arm pump. Never hold the bag arm still, pin it beside the hip, reduce its swing, stretch the bag or animate it like soft cloth. Match both-arm motion in the video guide.",
-    "guide_filename": "03-guide-v2.mp4",
-    "queue_number": 2,
+    "prompt": "One continuous three-second original GTA San Andreas PS2 rear-player sprint. Start exactly in the first-frame anchor as Goji Girl bursts through her open front doorway; then run FORWARD along this Singapore pavement away from camera. Match the repeated locomotion cycle in <Video 1>: a slight forward body lean, squared and flared BENT elbows, strong forward/back arm pumping, pronounced heel recovery, long push-off and a firm regular quick rhythm. Follow the guide timing rather than inventing a smooth fashion jog. Keep ONE structured black handbag attached to LEFT hand; BOTH arms pump through the SAME full shoulder swing with bent elbows. The left hand travels fully forward and backward, just like the right. Camera follows behind at ordinary player height with the same heading, no cut, orbit or reversal. Background passersby step clear without contact. <Picture 1> and the first anchor define the finished woman, maroon top/leggings, ponytail, white shoes, bag and neighbourhood appearance. <Video 1> is ONLY original rig motion, path and camera reference: never reproduce its blocks, primitive face or building silhouettes as final shapes. Painted low-resolution PS2 textures and economical but properly formed anatomy for every person. No photographic humans, extra limbs, bag swaps, HUD, stars, captions or new vehicles. The handbag is a STIFF rigid game prop attached to the moving LEFT hand. Its body and handle keep their exact shape and rotate/translate WITH that hand through the FULL arm pump. Never hold the bag arm still, pin it beside the hip, reduce its swing, stretch the bag or animate it like soft cloth. Match both-arm motion in the video guide. The handbag is oriented ALONGSIDE HER BODY: its long side runs fore-aft, broad face points outward to her left, and the rear camera mostly sees its narrow gusset/end. Keep this orientation FIXED TO HER GRIP and rotate it with her wrist/arm, never swivel the broad front or gold clasp to face camera. No independent dangling, bag flattening or camera-facing billboard. The indexed images prescribe the full alternating running cycle throughout the shot: left fist fully forward at frames 0,12,24,36,48,60,72 and fully backward at frames 6,18,30,42,54,66. Interpolate a continuous vigorous arm swing between every anchor, a complete stride every half second. Maintain this full range to the very end. Keep the rigid narrow-side bag attached to the left fist.",
+    "guide_filename": "03-guide-grip-v3.mp4",
+    "queue_number": 1,
     "anchors": [
       {
         "frame": 0,
-        "image": "03-full-left-pump.png"
+        "image": "03-grip-side-on.png"
+      },
+      {
+        "frame": 6,
+        "image": "grip-phase-anchors/03-frame-006.png"
+      },
+      {
+        "frame": 12,
+        "image": "grip-phase-anchors/03-frame-012.png"
+      },
+      {
+        "frame": 18,
+        "image": "grip-phase-anchors/03-frame-018.png"
+      },
+      {
+        "frame": 24,
+        "image": "grip-phase-anchors/03-frame-024.png"
+      },
+      {
+        "frame": 30,
+        "image": "grip-phase-anchors/03-frame-030-legs.png"
+      },
+      {
+        "frame": 36,
+        "image": "grip-phase-anchors/03-frame-036.png"
+      },
+      {
+        "frame": 42,
+        "image": "grip-phase-anchors/03-frame-042-legs.png"
+      },
+      {
+        "frame": 48,
+        "image": "grip-phase-anchors/03-frame-048.png"
+      },
+      {
+        "frame": 54,
+        "image": "grip-phase-anchors/03-frame-054-legs.png"
+      },
+      {
+        "frame": 60,
+        "image": "grip-phase-anchors/03-frame-060-legs.png"
+      },
+      {
+        "frame": 66,
+        "image": "grip-phase-anchors/03-frame-066-legs.png"
+      },
+      {
+        "frame": 72,
+        "image": "grip-phase-anchors/03-frame-072.png"
       }
     ],
     "seed": 2026112803,
-    "appearance": "03-full-left-pump.png"
+    "appearance": "03-grip-side-on.png"
   },
   "04": {
     "duration": 3,
     "mode": "video",
-    "prompt": "One uninterrupted three-second third-person gameplay run AROUND the FRONT NOSE of the parked double-decker, from passenger side to driver side. Start with the girl on the sidewalk. She runs PAST the open passenger entrance without entering it, continues in front of the windscreen, then rounds the other front corner onto the road and stops beside the compact DRIVER WINDOW. The bus stays parked, completely stationary. The girl never boards during this shot. The corrected <Video 1> gives the full route and collision-free camera, and the supplied final frame anchors her arrival at the driver window. Preserve the full continuous turn; no cut or teleport. Use <Picture 1> for the exact finished bus and woman appearance: formed rounded sheet-metal corners, inset dark glazing, detailed wheel arches/rims/lamps, orange-red/purple/white SOS Transit livery, maroon clothing and black bag in LEFT hand. <Video 1> contains crude planning blocks ONLY: use their positions, timing and camera, NEVER their boxy silhouettes, flat toy surfaces or primitive faces as the finished geometry. Original PS2 GTA San Andreas painted textures and economical but properly formed vehicle mesh. Camera follows the whole run around the nose without entering the bus. Pedestrians remain clear on pavement; nobody is touched. No extra characters, HUD, captions or stars. Blender primitives govern ONLY world positions, motion, contacts and camera. Reconstruct the FINISHED MESH SHAPES from the approved appearance image: formed rounded bus corners, inset glazing, detailed wheel arches, rims, lamps and bumpers, and the approved human anatomy. Never merely paint textures onto the guide boxes or reproduce their blocky silhouettes or primitive faces. Match the original PS2 running cycle in the guide: forward-pitched torso, squared flared bent elbows, pronounced heel recovery and brisk repeated footfalls. BOTH arms pump firmly through the same full range, including the left arm holding the handbag. Keep a regular game-animation cadence along the full continuous route, slowing only to stop at the driver window. The handbag is a STIFF rigid game prop attached to the moving LEFT hand. Its body and handle keep their exact shape and rotate/translate WITH that hand through the FULL arm pump. Never hold the bag arm still, pin it beside the hip, reduce its swing, stretch the bag or animate it like soft cloth. Match both-arm motion in the video guide.",
-    "guide_filename": "04-guide-v2.mp4",
+    "prompt": "One uninterrupted three-second third-person gameplay run AROUND the FRONT NOSE of the parked double-decker, from passenger side to driver side. Start with the girl on the sidewalk. She runs PAST the open passenger entrance without entering it, continues in front of the windscreen, then rounds the other front corner onto the road and stops beside the compact DRIVER WINDOW. The bus stays parked, completely stationary. The girl never boards during this shot. The corrected <Video 1> gives the full route and collision-free camera, and the supplied final frame anchors her arrival at the driver window. Preserve the full continuous turn; no cut or teleport. Use <Picture 1> for the exact finished bus and woman appearance: formed rounded sheet-metal corners, inset dark glazing, detailed wheel arches/rims/lamps, orange-red/purple/white SOS Transit livery, maroon clothing and black bag in LEFT hand. <Video 1> contains crude planning blocks ONLY: use their positions, timing and camera, NEVER their boxy silhouettes, flat toy surfaces or primitive faces as the finished geometry. Original PS2 GTA San Andreas painted textures and economical but properly formed vehicle mesh. Camera follows the whole run around the nose without entering the bus. Pedestrians remain clear on pavement; nobody is touched. No extra characters, HUD, captions or stars. Blender primitives govern ONLY world positions, motion, contacts and camera. Reconstruct the FINISHED MESH SHAPES from the approved appearance image: formed rounded bus corners, inset glazing, detailed wheel arches, rims, lamps and bumpers, and the approved human anatomy. Never merely paint textures onto the guide boxes or reproduce their blocky silhouettes or primitive faces. Match the original PS2 running cycle in the guide: forward-pitched torso, squared flared bent elbows, pronounced heel recovery and brisk repeated footfalls. BOTH arms pump firmly through the same full range, including the left arm holding the handbag. Keep a regular game-animation cadence along the full continuous route, slowing only to stop at the driver window. The handbag is a STIFF rigid game prop attached to the moving LEFT hand. Its body and handle keep their exact shape and rotate/translate WITH that hand through the FULL arm pump. Never hold the bag arm still, pin it beside the hip, reduce its swing, stretch the bag or animate it like soft cloth. Match both-arm motion in the video guide. The handbag is oriented ALONGSIDE HER BODY: its long side runs fore-aft, broad face points outward to her left, and the rear camera mostly sees its narrow gusset/end. Keep this orientation FIXED TO HER GRIP and rotate it with her wrist/arm, never swivel the broad front or gold clasp to face camera. No independent dangling, bag flattening or camera-facing billboard.",
+    "guide_filename": "04-guide-grip-v3.mp4",
     "end_guide": "04-end-v2.png",
     "queue_number": 4,
     "seed": 2026113004,
-    "appearance": "04-full-left-pump.png"
+    "appearance": "04-grip-side-on.png"
   },
   "06": {
     "duration": 5,
@@ -60,33 +108,34 @@
   "08": {
     "duration": 8,
     "mode": "video",
-    "prompt": "One continuous EIGHT-second original GTA San Andreas PS2 bus-exit interaction. Same stationary SOS Transit double decker rests on RIGHT side, passenger side UP, undercarriage facing camera, real front passenger door behind intact white front corner. Follow the complete contact-driven action in <Video 1>. At start only head/shoulders peek through real passenger doorway, hips and legs still INSIDE. Brief deadpan pause. BOTH palms grip actual frame, elbows flex as she leans torso over sill; lift ONE KNEE and hook it over the sill, transfer weight onto that knee and planted palm, pull hips across, bring other foot out. She remains CROUCHED LOW with bent knees, never floats vertically upright. Around2.8seconds, LEFT palm and feet brace on solid doorway frame while RIGHT hand reaches back INSIDE to tap a small transit card once on fixed green reader. Black rigid handbag hangs from left wrist. Then both hands take outer chassis edge, she turns to FACE the bus, lowers one foot to a chassis crossmember, lowers hips with arms supporting her weight, hangs briefly, then releases and DROPS a short final distance to pavement at6.6seconds. Both white shoes land, knees COMPRESS, then recover upright and turn forward along sidewalk away from wreck. Finish with her fully OUTSIDE on pavement, bus beside/behind her, ready to dust off. Show entire climb, supported tap and actual downward descent; do not end on top of bus, raise her like elevator, slide legs through body panels, teleport, hover, invent roof hatch or new doorway. All contacts grounded in video. <Picture 1> defines FINISHED character, detailed bus and PS2 look, not start pose: maroon sleeveless top AND full-length maroon leggings, ponytail, white sneakers, single black handbag. Rebuild proper rounded sheet-metal bus shape, detailed chassis/suspension, wheel arches, fitted lamps/bumpers, two decks/three axles; NEVER copy the blockout flat black rectangle or primitive anatomy. Low-resolution painted textures, original PS2 graphics, same sunlight. Reader fixed inside original opening; logos on painted front below windscreen, no logos on glass. No yellow door outline, no stars/HUD/captions, no cuts, no bus motion. Keep the player-visible interaction camera in the video; frame hands, legs and landing throughout.",
+    "prompt": "One continuous EIGHT-second original GTA San Andreas PS2 bus-exit interaction. Same stationary SOS Transit double decker rests on RIGHT side, passenger side UP, undercarriage facing camera, real front passenger door behind intact white front corner. Follow the complete contact-driven action in <Video 1>. At start only head/shoulders peek through real passenger doorway, hips and legs still INSIDE. Brief deadpan pause. BOTH palms grip actual frame, elbows flex as she leans torso over sill; lift ONE KNEE and hook it over the sill, transfer weight onto that knee and planted palm, pull hips across, bring other foot out. She remains CROUCHED LOW with bent knees, never floats vertically upright. Around2.8seconds, LEFT palm and feet brace on solid doorway frame while RIGHT hand reaches back INSIDE to tap a small transit card once on fixed green reader. Black rigid handbag hangs from left wrist. Then both hands take outer chassis edge, she turns to FACE the bus, lowers one foot to a chassis crossmember, lowers hips with arms supporting her weight, hangs briefly, then releases and DROPS a short final distance to pavement at6.6seconds. Both white shoes land, knees COMPRESS, then recover upright and turn forward along sidewalk away from wreck. Finish with her fully OUTSIDE on pavement, bus beside/behind her, ready to dust off. Show entire climb, supported tap and actual downward descent; do not end on top of bus, raise her like elevator, slide legs through body panels, teleport, hover, invent roof hatch or new doorway. All contacts grounded in video. <Picture 1> defines FINISHED character, detailed bus and PS2 look, not start pose: maroon sleeveless top AND full-length maroon leggings, ponytail, white sneakers, single black handbag. Rebuild proper rounded sheet-metal bus shape, detailed chassis/suspension, wheel arches, fitted lamps/bumpers, two decks/three axles; NEVER copy the blockout flat black rectangle or primitive anatomy. Low-resolution painted textures, original PS2 graphics, same sunlight. Reader fixed inside original opening; logos on painted front below windscreen, no logos on glass. No yellow door outline, no stars/HUD/captions, no cuts, no bus motion. Keep the player-visible interaction camera in the video; frame hands, legs and landing throughout. The handbag is oriented ALONGSIDE HER BODY: its long side runs fore-aft, broad face points outward to her left, and the rear camera mostly sees its narrow gusset/end. Keep this orientation FIXED TO HER GRIP and rotate it with her wrist/arm, never swivel the broad front or gold clasp to face camera. No independent dangling, bag flattening or camera-facing billboard.",
     "seed": 2026112808,
     "queue_number": 3.5,
-    "guide_filename": "08-guide-v2.mp4",
+    "guide_filename": "08-guide-grip-v3.mp4",
     "appearance": "08-contact-look.png"
   },
   "09": {
     "duration": 2,
     "mode": "video",
-    "prompt": "One continuous two-second rear player shot. Follow the guide starting and ending positions exactly. Maroon-clad Goji Girl brushes dust off her right shoulder with her right hand during first second, then lowers that hand and takes one brisk step FORWARD away from camera along the same pavement toward the red Goji sign. Black structured bag stays in LEFT hand. Same ponytail, white shoes, maroon top and leggings, same PS2 painted textures and economical human mesh. The two nearest startled pedestrians recoil at the LEFT storefront, safely clear of her path. Preserve the fixed canopy, damaged diagonal support, road on RIGHT and shops on LEFT. At the extreme RIGHT is ONLY a cropped black riveted metal underside panel from the overturned wreck. Keep that edge frozen and identical to anchors; the rest of the wreck is OFFSCREEN. No upright bus, front facade, windshield, headlights, livery or new vehicle enters the image. Nothing rolls, rotates or stands upright. <Video 1> gives motion/layout only; <Picture 1> and anchors define all finished shapes, textures and framing. No proxy block shapes, no camera reversal, no cut, HUD or text. No contact between people or with debris. The struck canopy bay BEHIND her is buckled upward; its open gap exposes sky above the landing area. Keep intact canopy ahead of her as in video. The cropped black bus UNDERCARRIAGE at extreme right stays rigid, behind her direction of travel. Never reconstruct an upright bus, bus facade or new wheels in this crop.",
+    "prompt": "One continuous two-second rear player shot. Follow the guide starting and ending positions exactly. Maroon-clad Goji Girl brushes dust off her right shoulder with her right hand during first second, then lowers that hand and takes one brisk step FORWARD away from camera along the same pavement toward the red Goji sign. Black structured bag stays in LEFT hand. Same ponytail, white shoes, maroon top and leggings, same PS2 painted textures and economical human mesh. The two nearest startled pedestrians recoil at the LEFT storefront, safely clear of her path. Preserve the fixed canopy, damaged diagonal support, road on RIGHT and shops on LEFT. At the extreme RIGHT is ONLY a cropped black riveted metal underside panel from the overturned wreck. Keep that edge frozen and identical to anchors; the rest of the wreck is OFFSCREEN. No upright bus, front facade, windshield, headlights, livery or new vehicle enters the image. Nothing rolls, rotates or stands upright. <Video 1> gives motion/layout only; <Picture 1> and anchors define all finished shapes, textures and framing. No proxy block shapes, no camera reversal, no cut, HUD or text. No contact between people or with debris. The struck canopy bay BEHIND her is buckled upward; its open gap exposes sky above the landing area. Keep intact canopy ahead of her as in video. The cropped black bus UNDERCARRIAGE at extreme right stays rigid, behind her direction of travel. Never reconstruct an upright bus, bus facade or new wheels in this crop. The handbag is oriented ALONGSIDE HER BODY: its long side runs fore-aft, broad face points outward to her left, and the rear camera mostly sees its narrow gusset/end. Keep this orientation FIXED TO HER GRIP and rotate it with her wrist/arm, never swivel the broad front or gold clasp to face camera. No independent dangling, bag flattening or camera-facing billboard.",
     "queue_number": 9,
     "seed": 2026112809,
-    "guide_filename": "09-guide-v2.mp4"
+    "guide_filename": "09-guide-grip-v3.mp4",
+    "appearance": "09-grip-side-on.png"
   },
   "10": {
     "duration": 4,
     "mode": "video",
-    "prompt": "A continuous four-second third-person rear player SPRINT, beginning exactly at the supplied first-frame anchor. Match the original-PS2 sprint cycle staged in <Video 1>: slight forward lean, flared bent elbows, a firm repetitive arm pump, pronounced heel recovery and long push-off. Keep the regular quick game-animation rhythm throughout, including both officers, with staggered phases. Goji Girl runs FORWARD down this SAME pavement and veers left to the Goji entrance as shown in <Video 1>. Camera follows from behind without reversing or orbiting. Storefronts stay LEFT, road RIGHT. Two navy-uniform police pursue from BEHIND, partly visible at lower frame edges. Teal-shirt passerby beyond entrance recoils against shopfront; white-shirt passerby hurries clear near tree. Keep central route and doorway empty of bystanders. Girl and police never touch anyone. End as she reaches the clinic doorway. The wreck remains BEHIND CAMERA and completely invisible for the whole shot. No bus or vehicle appears anywhere in frame. Preserve the exact girl, maroon athleisure, ponytail, white shoes and ONE structured black handbag carried in her LEFT hand. All people have original GTA San Andreas PS2 economical anatomy, painted textures and diffuse shading. <Picture 1> supplies finished characters, architecture and colours; <Video 1> supplies only trajectory, timing and camera, never literal proxy block shapes or primitive faces. No extra cops, cuts, teleports, captions, HUD or stars. The handbag is a STIFF rigid game prop attached to the moving LEFT hand. Its body and handle keep their exact shape and rotate/translate WITH that hand through the FULL arm pump. Never hold the bag arm still, pin it beside the hip, reduce its swing, stretch the bag or animate it like soft cloth. Match both-arm motion in the video guide.",
+    "prompt": "A continuous four-second third-person rear player SPRINT, beginning exactly at the supplied first-frame anchor. Match the original-PS2 sprint cycle staged in <Video 1>: slight forward lean, flared bent elbows, a firm repetitive arm pump, pronounced heel recovery and long push-off. Keep the regular quick game-animation rhythm throughout, including both officers, with staggered phases. Goji Girl runs FORWARD down this SAME pavement and veers left to the Goji entrance as shown in <Video 1>. Camera follows from behind without reversing or orbiting. Storefronts stay LEFT, road RIGHT. Two navy-uniform police pursue from BEHIND, partly visible at lower frame edges. Teal-shirt passerby beyond entrance recoils against shopfront; white-shirt passerby hurries clear near tree. Keep central route and doorway empty of bystanders. Girl and police never touch anyone. End as she reaches the clinic doorway. The wreck remains BEHIND CAMERA and completely invisible for the whole shot. No bus or vehicle appears anywhere in frame. Preserve the exact girl, maroon athleisure, ponytail, white shoes and ONE structured black handbag carried in her LEFT hand. All people have original GTA San Andreas PS2 economical anatomy, painted textures and diffuse shading. <Picture 1> supplies finished characters, architecture and colours; <Video 1> supplies only trajectory, timing and camera, never literal proxy block shapes or primitive faces. No extra cops, cuts, teleports, captions, HUD or stars. The handbag is a STIFF rigid game prop attached to the moving LEFT hand. Its body and handle keep their exact shape and rotate/translate WITH that hand through the FULL arm pump. Never hold the bag arm still, pin it beside the hip, reduce its swing, stretch the bag or animate it like soft cloth. Match both-arm motion in the video guide. The handbag is oriented ALONGSIDE HER BODY: its long side runs fore-aft, broad face points outward to her left, and the rear camera mostly sees its narrow gusset/end. Keep this orientation FIXED TO HER GRIP and rotate it with her wrist/arm, never swivel the broad front or gold clasp to face camera. No independent dangling, bag flattening or camera-facing billboard.",
     "anchors": [
       {
         "frame": 0,
-        "image": "10-full-left-pump.png"
+        "image": "10-grip-side-on.png"
       }
     ],
-    "guide_filename": "10-guide-v2.mp4",
+    "guide_filename": "10-guide-grip-v3.mp4",
     "queue_number": 10,
     "seed": 2026112810,
-    "appearance": "10-full-left-pump.png"
+    "appearance": "10-grip-side-on.png"
   }
 }

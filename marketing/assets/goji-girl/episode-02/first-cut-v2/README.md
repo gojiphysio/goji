@@ -2,11 +2,19 @@
 
 This pass is in production. The previous cut remains available in [first-cut-v1](../first-cut-v1/README.md).
 
-The revision covers the running scenes, bus chase, rollover, exit and the dust-off transition. Both arms pump through the full running cycle, with the handbag attached as a rigid prop. The bus carries speed through a sharp turn, a roll onto its side and a slide into the mall-side canopy. Goji Girl climbs through the passenger doorway with visible hand and foot support, taps the reader while braced, then climbs down and lands on the pavement.
+The revision covers the running scenes, bus chase, rollover, exit and the dust-off transition. Both arms pump through the full running cycle, with the handbag attached as a rigid prop. Its long side runs alongside her body; it follows her grip instead of presenting its broad face to the camera. The bus carries speed through a sharp turn, a roll onto its side and a slide into the mall-side canopy. Goji Girl climbs through the passenger doorway with visible hand and foot support, taps the reader while braced, then climbs down and lands on the pavement.
 
 The exit gets eight seconds, bringing the planned cut to 49 seconds. The safehouse message stays exactly as approved: “You can save your game, improve your stats, and lose the police at a safehouse.”
 
 [Watch the new five-second chase test with SFX](deliverables/chase-motion-test.mp4). This is a provisional take reviewed in frame samples; the full revision is still rendering.
+
+## Bag orientation correction
+
+The revised references turn the bag alongside her body, with its narrow end visible from behind. The grip transform has the same correction in the running and exit guides. The new animation test is queued; this correction is not yet verified in finished motion.
+
+| Previous reference | Revised reference |
+| --- | --- |
+| ![Previous broad bag face](inputs/03-full-left-pump.png) | ![Revised narrow bag end](inputs/03-grip-side-on.png) |
 
 ## New appearance references
 
@@ -14,7 +22,7 @@ These are still references for rendering, not proof that the animation passes re
 
 | Full arm pump | Braced exit |
 | --- | --- |
-| ![Running pose](inputs/03-full-left-pump.png) | ![Braced passenger-door exit](inputs/08-contact-look.png) |
+| ![Running pose](inputs/03-grip-side-on.png) | ![Braced passenger-door exit](inputs/08-contact-look.png) |
 
 ![Mall-side impact](inputs/07-impact-end.png)
 

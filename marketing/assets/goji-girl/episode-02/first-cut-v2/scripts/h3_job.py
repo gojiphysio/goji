@@ -20,6 +20,10 @@ if job['mode']=='video':
  g['21']=node('LoadVideo',file=v.name);g['22']=node('GetVideoComponents',video=['21',0]);g['6']['inputs']['ref_videos.ref_video_0']=['22',0]
 else:
  g['30']=node('MiniMaxH3AddGuide',positive=['6',0],latent=['6',1],vae=['3',0],image=['20',0],frame_idx=0);g['7']['inputs']['conditioning']=['30',0]
+for i,filename in enumerate(job.get('additional_ref_videos',[]),start=1):
+ v=R/'inputs'/filename;assert v.exists();refs.append(v)
+ loader=str(100+i*2);components=str(101+i*2)
+ g[loader]=node('LoadVideo',file=v.name);g[components]=node('GetVideoComponents',video=[loader,0]);g['6']['inputs'][f'ref_videos.ref_video_{i}']=[components,0]
 if job.get('end_guide'):
  end=R/'inputs'/job['end_guide'];assert end.exists();refs.append(end)
  g['30']=node('MiniMaxH3AddGuide',positive=['6',0],latent=['6',1],vae=['3',0],image=['20',0],frame_idx=0)
@@ -31,7 +35,7 @@ if job.get('anchors'):
  for i,anchor in enumerate(job['anchors']):
   im=R/'inputs'/anchor['image'];assert im.exists();refs.append(im)
   loader=str(40+i*2);guide=str(41+i*2)
-  g[loader]=node('LoadImage',image=im.name)
+  g[loader]=node('LoadImage',image=str(im.relative_to(R/'inputs')))
   g[guide]=node('MiniMaxH3AddGuide',positive=previous,latent=['6',1],vae=['3',0],image=[loader,0],frame_idx=anchor['frame'])
   previous=[guide,0]
  g['7']['inputs']['conditioning']=previous

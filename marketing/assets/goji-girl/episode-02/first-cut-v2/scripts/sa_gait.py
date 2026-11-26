@@ -47,5 +47,5 @@ def sa_run_pose(actor,frame,position,heading,time,move_segment,speed=3.75,phase_
         move_segment(actor.parts[(side,'forearm')],elbow,wrist,frame)
         hand=actor.parts[(side,'hand')];hand.location=wrist+Vector((0,0,-.035));hand.keyframe_insert('location',frame=frame);hand.rotation_euler.x=arm_angle;hand.keyframe_insert('rotation_euler',frame=frame)
         if side==-1 and actor.bag:
-            actor.bag.location=wrist;actor.bag.rotation_euler=(arm_angle,0,0);actor.bag.scale=(1,1,1)
+            actor.bag.location=wrist;actor.bag.rotation_euler=(Matrix.Rotation(arm_angle,3,'X')@Matrix.Rotation(math.pi/2,3,'Z')).to_euler();actor.bag.scale=(1,1,1)
             for channel in ['location','rotation_euler','scale']:actor.bag.keyframe_insert(channel,frame=frame)

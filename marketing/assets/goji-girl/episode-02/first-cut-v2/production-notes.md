@@ -28,3 +28,11 @@ Scene 08 opens the saved end state of 07. Passenger frame and reader contacts ar
 - Keep all raw attempts and record decisions in each take's run.json. A completed render is not an accepted take.
 
 The first v2 run test, 03-01, is rejected because the bag arm still has reduced range. The next test changes the finished first-frame pose while retaining the same seed and full two-arm guide.
+
+## Bag orientation and running follow-up
+
+The user rejected the broad bag face pointing at the rear camera. The grip transform now turns the bag 90 degrees around its local vertical axis before applying the arm rotation. Its long side runs fore-aft beside her body. Updated look references carry the same direction. The exit uses the body/hand orientation rather than a world-fixed, camera-facing bag.
+
+Run test 03-02 also fails: the first raised-arm pose decays into the old low carry. The next attempt adds alternating indexed pose anchors through the whole three-second stride sequence, alongside the continuous Blender guide. It stays on the same H3 model and seed.
+
+The clinic chase camera moves closer and rotates through the turn. The officers follow continuous flanking arcs, keeping the player visible. The left runner stays clear of the tree. These changes still need generated-footage review.

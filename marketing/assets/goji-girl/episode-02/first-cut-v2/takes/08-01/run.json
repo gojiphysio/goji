@@ -1,7 +1,7 @@
 {
   "shot": "08",
   "take": "01",
-  "status": "queued",
+  "status": "cancelled_before_render",
   "started": 1795677056.176693,
   "recipe": "H3 Ref2VA GGUF Q4 + native Turbo 4-step; 576x1024 24fps",
   "native_frames": 192,
@@ -215,5 +215,6 @@
     "prompt_id": "7251001d-d4a9-4ad0-811c-52f6109b2891",
     "number": 3.5,
     "node_errors": {}
-  }
+  },
+  "reason": "Latest user correction: handbag broad face must not billboard toward camera. Correct grip-local orientation in guide and appearance before rendering."
 }
