@@ -1,35 +1,24 @@
 # Goji Girl · Episode 02 — TAP OUT
 
-**Review checkpoint 02 · 26 November 2026 · 47 seconds · vertical 9:16 · with SFX**
+**First animated cut · 26 November 2026 · 47 seconds · vertical 9:16 · with SFX**
 
-[**Watch the updated 47-second review video**](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-girl-episode-2/marketing/assets/goji-girl/episode-02/first-cut-v1/deliverables/review-checkpoint-02.mp4)
+[**Watch the full animated first cut**](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-girl-episode-2/marketing/assets/goji-girl/episode-02/first-cut-v1/deliverables/episode-02-first-cut-v1.mp4)
 
-**35 seconds are animated; 12 seconds are labelled “STORYBOARD — MOTION PENDING.”** This checkpoint adds the revised GTA SA-style running scenes, the driver takeover and the crash. The final reformer shot is still rendering; newer recovery and arrival clips are on the individual-clips page.
+All twelve scenes are animated. The departure run at **00:05–00:08** and clinic sprint at **00:33–00:37** use the revised GTA SA-informed gait; the bus approach at **00:08–00:11** uses it too. The running is a closer approximation, not an exact copy of the game animation.
 
-[![Play review checkpoint 02](first-cut-v1/deliverables/review-checkpoint-02-poster.jpg)](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-girl-episode-2/marketing/assets/goji-girl/episode-02/first-cut-v1/deliverables/review-checkpoint-02.mp4)
+[![Play the first animated cut](first-cut-v1/deliverables/first-cut-poster.jpg)](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-girl-episode-2/marketing/assets/goji-girl/episode-02/first-cut-v1/deliverables/episode-02-first-cut-v1.mp4)
 
-Use timestamps from this video for comments:
+This is a rough first cut for creative comments. The driver pull/climb, crash contact, bag continuity and brief officer occlusion still need polish. [Timestamps, selected takes and full review notes](first-cut-v1/README.md) · [Draft PR #265](https://github.com/gojiphysio/goji/pull/265)
 
-| Time | Scene | Current state |
-| --- | --- | --- |
-| 00:00–00:05 | 01–02 · Call and reminder | Animated |
-| 00:05–00:11 | 03–04 · Departure and run around bus | Revised running animation |
-| 00:11–00:15 | 05 · Driver takeover | Animated; pull/climb contact needs polish |
-| 00:15–00:20 | 06 · Bus chase | Animated |
-| 00:20–00:25 | 07 · Crash | Animated; turn and shelter impact need polish |
-| 00:25–00:31 | 08 · Tap and exit | Animated; small body dip and handbag shape need polish |
-| 00:31–00:33 | 09 · Dust off | Storyboard here; newer animated take available |
-| 00:33–00:37 | 10 · Sprint to Goji | Revised running animation |
-| 00:37–00:39 | 11 · Clinic arrival | Storyboard here; newer animated take available |
-| 00:39–00:47 | 12 · Pilates | Storyboard; render pending |
-
-[Individual clips, review notes and editable overlays](first-cut-v1/README.md) · [Draft PR #265](https://github.com/gojiphysio/goji/pull/265) · [Earlier checkpoint 01](https://raw.githubusercontent.com/gojiphysio/goji/009a4a7/marketing/assets/goji-girl/episode-02/first-cut-v1/deliverables/review-checkpoint-01.mp4)
+Reviewed with sampled frames and a strict full-decode check. Full normal-speed playback remains pending because the Mac relocked.
 
 The current safehouse text is:
 
 > You can save your game, improve your stats, and lose the police at a safehouse.
 
-The storyboard images below retain their earlier popup artwork; the review video uses the updated sentence.
+The storyboard images below retain their earlier popup artwork; the video uses the updated sentence. Wanted stars and other gameplay HUD remain for post-production.
+
+[Checkpoint01](https://raw.githubusercontent.com/gojiphysio/goji/009a4a7/marketing/assets/goji-girl/episode-02/first-cut-v1/deliverables/review-checkpoint-01.mp4) and [checkpoint02](https://raw.githubusercontent.com/gojiphysio/goji/ff72286/marketing/assets/goji-girl/episode-02/first-cut-v1/deliverables/review-checkpoint-02.mp4) remain unchanged for earlier comments.
 
 ## Storyboard from the top
 
