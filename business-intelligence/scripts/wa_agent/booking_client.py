@@ -183,7 +183,13 @@ def book(b: dict, *, wa_id: str, patient_id: str = "", http=requests) -> dict:
             "source": "whatsapp", "dry_run": config.BOOKING_DRY_RUN,
             # The patient's own record (matched by name and number), or a new
             # one: the texter may be booking for someone on the same number.
-            "patient_id": patient_id, "create_patient": not patient_id}
+            # No record on the number in the patient's name: book without one,
+            # like the website, so the new patient gets Plato's
+            # pre-registration form (which creates their profile) in the
+            # confirmation and the 48-hour reminder. A record made here was
+            # a bare profile that the form could never reach (clinic, 26 Nov
+            # 2026: existing profiles are never sent the form).
+            "patient_id": patient_id, "create_patient": False}
     try:
         r = http.post(f"{config.BOOKING_API_BASE}/internal/book", json=body, timeout=30,
                       headers={"X-Internal-Token": config.INTERNAL_TOKEN})
