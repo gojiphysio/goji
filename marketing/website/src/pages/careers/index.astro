@@ -64,37 +64,6 @@ const reasons = [
     body: "We believe in recognising individual contributions, supporting professional development and building sustainable careers in healthcare.",
   },
 ];
-
-const life = [
-  {
-    src: "/photos/services/clinical-pilates",
-    w: 1440,
-    h: 950,
-    alt: "A Goji clinician guiding two clients through a Pilates exercise on reformers in the studio",
-    caption: "The reformer studio",
-  },
-  {
-    src: "/photos/space/strength-conditioning",
-    w: 1440,
-    h: 960,
-    alt: "A Goji physiotherapist supporting a client's leg during a strength exercise beside the squat rack",
-    caption: "Strength and conditioning space",
-  },
-  {
-    src: "/photos/space/community-class-warm",
-    w: 1600,
-    h: 1067,
-    alt: "Participants stretching side by side on mats during a community class at Goji",
-    caption: "Community classes",
-  },
-  {
-    src: "/photos/directions/exterior-frontage",
-    w: 1600,
-    h: 1173,
-    alt: "The Goji clinic frontage at Lentor Modern with congratulatory flower stands on opening day",
-    caption: "Opening day at Lentor Modern",
-  },
-];
 ---
 
 <BaseLayout
@@ -158,35 +127,26 @@ const life = [
 
   {/* ---- D. Life at Goji ---- */}
   <Section tone="surface">
-    <div class="cr-life-head">
-      <h2 class="cr-section-title">Life at Goji</h2>
-      <p class="cr-insta">
-        See more of the team on Instagram:
-        <a href={LIFE_TAG_URL} target="_blank" rel="noopener noreferrer">#lifeatgoji</a>
-        <a href={SITE.instagram} target="_blank" rel="noopener noreferrer">Follow @gojiphysio</a>
-      </p>
-    </div>
-    <ul class="cr-life" role="list">
-      {
-        life.map((p) => (
-          <li>
-            <figure class="cr-photo">
-              <img
-                src={`${p.src}-800.webp`}
-                srcset={`${p.src}-800.webp 800w, ${p.src}.webp ${p.w}w`}
-                sizes="(min-width: 900px) 25vw, (min-width: 600px) 50vw, 100vw"
-                alt={p.alt}
-                width={p.w}
-                height={p.h}
-                loading="lazy"
-                decoding="async"
-              />
-              <figcaption>{p.caption}</figcaption>
-            </figure>
-          </li>
-        ))
-      }
-    </ul>
+    {/* The collage carries its own "Life at Goji" title, so the heading is for
+        screen readers and the outline only. */}
+    <h2 class="visually-hidden">Life at Goji</h2>
+    <figure class="cr-collage">
+      <img
+        src="/photos/space/life-at-goji-1280.webp"
+        srcset="/photos/space/life-at-goji-800.webp 800w, /photos/space/life-at-goji-1280.webp 1280w, /photos/space/life-at-goji.webp 2000w"
+        sizes="(min-width: 1280px) 1200px, 100vw"
+        alt="A scrapbook collage of life at Goji: a team member dressed as a ghost in the Pilates studio, the team out for ice cream and desserts, birthday celebrations at the clinic, homemade chiffon cakes, a dog, and opening-day flowers at Lentor Modern"
+        width="2000"
+        height="1242"
+        loading="lazy"
+        decoding="async"
+      />
+    </figure>
+    <p class="cr-insta">
+      See more of the team on Instagram:
+      <a href={LIFE_TAG_URL} target="_blank" rel="noopener noreferrer">#lifeatgoji</a>
+      <a href={SITE.instagram} target="_blank" rel="noopener noreferrer">Follow @gojiphysio</a>
+    </p>
   </Section>
 
   {/* ---- E. Current vacancies ---- */}
@@ -338,38 +298,17 @@ const life = [
     max-width: 52ch;
   }
 
-  .cr-life {
-    list-style: none;
+  .cr-collage {
     margin: 0;
-    padding: 0;
-    display: grid;
-    gap: var(--space-5);
   }
-  @media (min-width: 600px) {
-    .cr-life {
-      grid-template-columns: 1fr 1fr;
-    }
-  }
-  @media (min-width: 1024px) {
-    .cr-life {
-      grid-template-columns: repeat(4, 1fr);
-    }
-  }
-  .cr-life img {
-    aspect-ratio: 4 / 5;
-  }
-
-  .cr-life-head {
-    margin-bottom: var(--space-7);
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-3);
-  }
-  .cr-life-head .cr-section-title {
-    margin: 0;
+  .cr-collage img {
+    display: block;
+    width: 100%;
+    height: auto;
   }
   .cr-insta {
-    margin: 0;
+    margin: var(--space-5) 0 0;
+    justify-content: center;
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-1) var(--space-5);
