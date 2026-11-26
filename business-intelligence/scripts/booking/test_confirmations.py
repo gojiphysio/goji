@@ -283,14 +283,16 @@ def test_no_profile_gets_the_form_link_without_a_plato_read(sent, monkeypatch):
     assert result["form_token"].startswith("abcdef123456.")
 
 
-def test_unsigned_profile_gets_the_form_link(sent, monkeypatch):
+@pytest.mark.parametrize("profile", [("p123", False), ("p9", True)])
+def test_existing_profile_never_gets_the_form(sent, monkeypatch, profile):
+    """Clinic decision (26 Nov 2026): gaps in an existing profile are fixed in
+    person, signed consent or not. No Plato read either."""
     live(monkeypatch)
-    plato = FakePlato(patient={"name": "Sarah Tan", "created_by": "api"})
-    c.on_booking(plato, FakeBQ(profile=("p123", False)),
-                 {**RESULT, "patient_id": "p123", "patient_created": True}, DRAFT,
-                 source="whatsapp")
-    assert plato.gets == ["/patient/p123"]
-    assert FORM in _body(sent[0])
+    plato = FakePlato()
+    result = {**RESULT, "patient_id": profile[0]}
+    c.on_booking(plato, FakeBQ(profile=profile), result, DRAFT, source="whatsapp")
+    assert plato.gets == [] and "registration form" not in _body(sent[0])
+    assert "form_token" not in result
 
 
 def test_signed_patient_gets_no_form_and_no_plato_read(sent, monkeypatch):
@@ -300,13 +302,6 @@ def test_signed_patient_gets_no_form_and_no_plato_read(sent, monkeypatch):
     c.on_booking(plato, FakeBQ(profile=("p9", True)), result, DRAFT, source="web")
     assert plato.gets == [] and "registration form" not in _body(sent[0])
     assert "form_token" not in result
-
-
-def test_signed_since_last_night_is_caught_live(sent, monkeypatch):
-    live(monkeypatch)
-    plato = FakePlato(patient=SIGNED)
-    c.on_booking(plato, FakeBQ(profile=("p9", False)), RESULT, DRAFT, source="web")
-    assert plato.gets == ["/patient/p9"] and "registration form" not in _body(sent[0])
 
 
 def test_no_secret_means_no_form(sent, monkeypatch):
@@ -587,28 +582,21 @@ def test_destination_no_profile_is_prereg():
         "form", "https://clinic.platomedical.com/prereg/a/b")
 
 
-def test_destination_profile_is_its_update_form_or_done():
-    assert c.form_destination(DestPlato({"_id": "a1", "patient_id": "p1"}), "a1")[1] \
-        .endswith("/regupdate/a/b")
-    assert c.form_destination(DestPlato({"_id": "a1", "patient_id": "p1"}, SIGNED), "a1") == (
+def test_destination_with_a_profile_is_done():
+    assert c.form_destination(DestPlato({"_id": "a1", "patient_id": "p1"}), "a1") == (
         "done", None)
 
 
-def test_update_form_is_shared_with_the_patients_email():
-    p = DestPlato({"_id": "a1", "patient_id": "p1"})
-    c.form_destination(p, "a1")
-    assert {"email": "sarah@example.com"} in p.params
+def test_destination_linked_since_the_link_was_sent_is_done():
+    class Linked(DestPlato):
+        reads = 0
 
-
-def test_update_form_falls_back_to_the_appointment_email():
-    p = DestPlato({"_id": "a1", "patient_id": "p1", "email": "appt@example.com"}, patient={})
-    c.form_destination(p, "a1")
-    assert {"email": "appt@example.com"} in p.params
-
-
-def test_no_email_anywhere_says_so():
-    assert c.form_destination(DestPlato({"_id": "a1", "patient_id": "p1"}, patient={}),
-                              "a1") == ("no_email", None)
+        def get(self, path, **kw):
+            if path == "/appointment/a1":
+                Linked.reads += 1
+                return [{"_id": "a1", "patient_id": "" if Linked.reads == 1 else "p1"}]
+            return super().get(path, **kw)
+    assert c.form_destination(Linked({"_id": "a1"}, prereg=False), "a1") == ("done", None)
 
 
 def test_destination_gone():

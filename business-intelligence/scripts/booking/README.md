@@ -204,19 +204,18 @@ registration form on a **first visit only**, and a calendar invite.
 - **Calendar invite.** `METHOD:REQUEST` inline plus an `.ics` attachment, clinic
   wall clock with `TZID=Asia/Singapore`, no alarm, `RSVP=FALSE` (the clinic
   wants the entry in the patient's calendar and no calendar notifications).
-- **Registration form.** Asked for until the patient has signed Plato's
-  "Clinic Consent Form", the last step of Plato's registration form, stored on
-  the profile (`others.consents`): the nightly import writes it to
-  `dim_patient.consent_signed_at`, and a live Plato read confirms before
-  asking. No profile at all (none on the appointment, none matching the phone
-  or email) = owed. Every message carries one stable link,
-  `booking.gojiphysio.com/form/<appointment id>.<signature>` (`formlink.py`,
-  signed with the internal token so ids can't be walked). Tapping it runs
-  `form_destination`: no profile -> Plato's pre-registration form, a profile
-  -> its update form, already signed -> a "you're all set" page. WhatsApp's
-  URL buttons take one variable at the end of a fixed URL, which is why the
-  link is ours and not Plato's. The 48-hour reminder asks again on the same
-  rule.
+- **Registration form: new patients only.** A patient with no Plato profile
+  (none on the appointment, none matching the phone or email) gets Plato's
+  pre-registration form, which needs no login and creates the profile. A
+  patient with a profile is never asked: the clinic fixes gaps in an
+  existing profile in person (26 Nov 2026; Plato's update form for existing
+  profiles needs a login with a one-time code). Every message carries one
+  stable link, `booking.gojiphysio.com/form/<appointment id>.<signature>`
+  (`formlink.py`, signed with the internal token). Tapping it runs
+  `form_destination`: the pre-registration form while the appointment has
+  no profile, a "you're all set" page once it has one. WhatsApp's URL
+  buttons take one variable at the end of a fixed URL, which is why the link
+  is ours and not Plato's. The 48-hour reminder asks on the same rule.
 - **WhatsApp.** A patient who owes the form gets
   `goji_appointment_confirmed_form` (adds a "Registration form" button) once
   Meta approves it and the agent's `WA_AGENT_CONFIRM_FORM_TEMPLATE` is set;

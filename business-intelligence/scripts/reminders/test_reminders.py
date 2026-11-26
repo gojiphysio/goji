@@ -1115,26 +1115,6 @@ def test_no_profile_owes_the_form_without_a_plato_read():
     assert url.startswith(LINK + "a1b2c3d4e5f6a7b8.") and p.http.paths == []
 
 
-def test_unsigned_profile_owes_the_form():
-    p = _plato(patient={"name": "Jo", "created_by": "api"})
-    assert registration.form_link(p, {"appointment_id": "a1", "profile_id": "p1",
-                                      "consent_signed": False}, secret="s")
-    assert p.http.paths == ["patient/p1"]
-
-
-def test_signed_last_night_means_no_read_and_no_form():
-    p = _plato()
-    assert registration.form_link(p, {"appointment_id": "a1", "profile_id": "p1",
-                                      "consent_signed": True}, secret="s") is None
-    assert p.http.paths == []
-
-
-def test_signed_since_last_night_is_caught_live():
-    p = _plato(patient=SIGNED)
-    assert registration.form_link(p, {"appointment_id": "a1", "profile_id": "p1",
-                                      "consent_signed": False}, secret="s") is None
-
-
 @pytest.mark.parametrize("patient", [
     {}, {"others": {}}, {"others": {"consents": []}},
     {"others": {"consents": [{"title": "Another Form", "created_on": 1793000000}]}},
@@ -1144,10 +1124,17 @@ def test_anything_but_a_signed_clinic_consent_is_unsigned(patient):
     assert not registration.consent_signed(patient)
 
 
-def test_plato_failure_or_no_secret_means_no_form():
-    row = {"appointment_id": "a1", "profile_id": "p1", "consent_signed": False}
-    assert registration.form_link(_plato(fail=True), row, secret="s") is None
-    assert registration.form_link(_plato(), {**row, "profile_id": None}, secret="") is None
+@pytest.mark.parametrize("signed", [False, True])
+def test_existing_profile_never_owes_the_form(signed):
+    p = _plato()
+    assert registration.form_link(p, {"appointment_id": "a1", "profile_id": "p1",
+                                      "consent_signed": signed}, secret="s") is None
+    assert p.http.paths == []
+
+
+def test_no_secret_means_no_form():
+    assert registration.form_link(_plato(), {"appointment_id": "a1", "profile_id": None},
+                                  secret="") is None
 
 
 def test_attach_sets_link_and_token(monkeypatch):

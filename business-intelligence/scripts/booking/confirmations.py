@@ -290,81 +290,47 @@ def consent_signed(patient: dict) -> bool:
 
 
 def registration_link(plato, bq, appt: Appointment) -> str | None:
-    """Our form link (formlink.py) if this patient hasn't signed Plato's
-    registration form, else None. No profile at all: owed. A profile: owed
-    unless its consent is signed, by last night's flag or, failing that, a
-    live Plato read so someone who signed today isn't asked. Which Plato form
-    they get is decided when they tap it (form_destination). Never raises;
-    any doubt = no form."""
+    """Our form link (formlink.py) for a NEW patient: one with no Plato profile
+    yet, none on the appointment and none matching the phone or email. They
+    get Plato's pre-registration form, which creates the profile. A patient
+    with a profile is never asked (clinic decision, 26 Nov 2026: gaps in an
+    existing profile are fixed in person; Plato's update form for existing
+    profiles needs a login with a one-time code). Never raises; any doubt =
+    no form."""
     if not INTERNAL_TOKEN:
         return None
     try:
-        profile, signed = profile_and_consent(bq, appt)
-        if signed:
-            return None
-        if profile:
-            # Priority share, not bulk: one read per booking, and the 5-minute
-            # availability refresh can hold the whole bulk share (26 Nov 2026).
-            patient = one_record(plato.get(f"/patient/{profile}",
-                                           max_wait_s=READ_MAX_WAIT_S, _retries=0))
-            if patient is None or consent_signed(patient):
-                return None
+        profile, _signed = profile_and_consent(bq, appt)
     except Exception as e:
         log.warning("registration check skipped (%s): %s", appt.appointment_id, e)
+        return None
+    if profile:
         return None
     return formlink.url(appt.appointment_id, INTERNAL_TOKEN) or None
 
 
-def _email_of(patient: dict) -> str:
-    v = patient.get("email")
-    if isinstance(v, str) and "@" in v:
-        return v.strip()
-    if isinstance(v, list):
-        for x in v:
-            if isinstance(x, str) and "@" in x:
-                return x.strip()
-    return ""
-
-
 def form_destination(plato, appointment_id: str) -> tuple[str, str | None]:
-    """Where a tap on the form link goes: ('form', Plato URL), ('done', None)
-    when the patient has already signed, ('no_email', None) when their
-    profile has no email for Plato's update form, or ('gone', None) when the
-    appointment no longer exists. Raises on a Plato failure."""
+    """Where a tap on the form link goes: ('form', Plato's pre-registration
+    URL) while the appointment has no profile, ('done', None) once it has one
+    (the patient submitted the form, or staff linked them), or ('gone', None)
+    when the appointment no longer exists. Raises on a Plato failure."""
     appt = one_record(plato.get(f"/appointment/{appointment_id}", max_wait_s=READ_MAX_WAIT_S,
                                 _retries=1))
     if not appt:
         return "gone", None
-    pid = str(appt.get("patient_id") or "").strip()
-    if not pid:
-        r = plato.get(f"/appointment/{appointment_id}/prereg", max_wait_s=READ_MAX_WAIT_S,
-                      _retries=1)
-        url = r.get("url") if isinstance(r, dict) else None
-        if isinstance(url, str) and url.startswith("https://"):
-            return "form", url
-        # Plato refuses prereg once the appointment is linked: read it again.
-        appt = one_record(plato.get(f"/appointment/{appointment_id}",
-                                    max_wait_s=READ_MAX_WAIT_S, _retries=1)) or {}
-        pid = str(appt.get("patient_id") or "").strip()
-        if not pid:
-            raise RuntimeError("no pre-registration link")
-    patient = one_record(plato.get(f"/patient/{pid}", max_wait_s=READ_MAX_WAIT_S,
-                                   _retries=1))
-    if patient is not None and consent_signed(patient):
+    if str(appt.get("patient_id") or "").strip():
         return "done", None
-    # Plato's update form shows the patient's saved details, so it's "shared
-    # with" one email and opens after a one-time code sent there. Without
-    # `email` it's shared with nobody and no one can open it (first live test,
-    # 26 Nov 2026). The profile's email, else the appointment's.
-    email = (_email_of(patient or {}) or str(appt.get("email") or "").strip())
-    if not email:
-        return "no_email", None
-    r = plato.get(f"/patient/{pid}/updatelink", params={"email": email},
-                  max_wait_s=READ_MAX_WAIT_S, _retries=1)
+    r = plato.get(f"/appointment/{appointment_id}/prereg", max_wait_s=READ_MAX_WAIT_S,
+                  _retries=1)
     url = r.get("url") if isinstance(r, dict) else None
-    if not (isinstance(url, str) and url.startswith("https://")):
-        raise RuntimeError("no profile update link")
-    return "form", url
+    if isinstance(url, str) and url.startswith("https://"):
+        return "form", url
+    # Plato refuses prereg once the appointment is linked: read it again.
+    appt = one_record(plato.get(f"/appointment/{appointment_id}",
+                                max_wait_s=READ_MAX_WAIT_S, _retries=1)) or {}
+    if str(appt.get("patient_id") or "").strip():
+        return "done", None
+    raise RuntimeError("no pre-registration link")
 
 
 # --- rendering -----------------------------------------------------------------

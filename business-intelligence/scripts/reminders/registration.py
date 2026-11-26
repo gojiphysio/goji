@@ -1,24 +1,21 @@
-"""Has the patient filled in Plato's registration form? If not, the 48-hour
-reminder asks again, by email and on WhatsApp (clinic decision, 25 Nov 2026).
+"""Does this patient still owe Plato's registration form? If so, the 48-hour
+reminder asks again, by email and on WhatsApp (clinic decisions, 25 and
+26 Nov 2026).
 
-THE FLAG: the form's last step is the patient signing the "Clinic Consent
-Form", which Plato stores on the profile (others.consents, with the time).
-Signed = registration done. The nightly import puts it in
-dim_patient.consent_signed_at; this module rechecks a profile live in Plato
-before asking, so someone who signed today isn't asked. No profile at all
-(none on the appointment, none matching the phone or email) = owed.
+Only NEW patients are asked: no Plato profile on the appointment and none
+matching the phone or email (the reminder query works that out). They get
+Plato's pre-registration form, which needs no login and creates the profile;
+submitting it links the appointment, so the next reminder won't ask. A
+patient with a profile is never asked: the clinic fixes gaps in an existing
+profile in person.
 
 THE LINK: goji-booking's stable form link,
-https://booking.gojiphysio.com/form/<appointment id>.<signature>, which works
-out the right Plato form when tapped (pre-registration without a profile, the
-profile's update form with one). The same link goes in the email and in the
+https://booking.gojiphysio.com/form/<appointment id>.<signature>, which opens
+Plato's pre-registration form, or a "you're all set" page once the
+appointment has a profile. The same link goes in the email and in the
 WhatsApp template's URL button, signed with the internal token
 (INTERNAL_TOKEN, mounted from wa-agent-internal-token). form_token is a copy
 of booking/formlink.py; a test keeps them equal.
-
-Plato reads use the job's Plato key, no retries, and at most MAX_READS a run:
-the clinic shares 20 requests a minute. Any failure means "don't ask": a
-missing reminder line is better than a wrong one.
 """
 from __future__ import annotations
 
@@ -88,23 +85,11 @@ def consent_signed(patient: dict) -> bool:
 
 
 def owes_form(plato: Plato | None, row: dict) -> bool:
-    """Whether this patient still owes the registration form. `row` carries
-    profile_id and consent_signed (last night's flag). Never raises; any
-    doubt = not owed."""
-    if row.get("consent_signed"):
-        return False
-    pid = row.get("profile_id") or ""
-    if not pid:
-        return True
-    if plato is None:
-        return False
-    try:
-        patient = _one(plato.get(f"patient/{pid}"))
-    except Exception as e:
-        log.warning("registration check for appointment %s skipped: %s",
-                    row.get("appointment_id"), type(e).__name__)
-        return False
-    return patient is not None and not consent_signed(patient)
+    """A NEW patient owes the form: no Plato profile on the appointment and
+    none matching the phone or email (row['profile_id'] empty). A patient with
+    a profile is never asked (clinic decision, 26 Nov 2026: gaps in an
+    existing profile are fixed in person). No Plato read."""
+    return not row.get("profile_id")
 
 
 def form_link(plato: Plato | None, row: dict, secret: str | None = None) -> str | None:
