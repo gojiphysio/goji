@@ -192,7 +192,7 @@ export const VACANCIES: Vacancy[] = [
     seo: {
       title: "Physiotherapist Jobs Singapore | Goji",
       description:
-        "Join Goji Physiotherapy in Singapore, currently at Lentor Modern. Full-time and part-time physiotherapist role for MSK clinicians with an interest in women's health.",
+        "Physiotherapist role at Goji, Singapore (currently at Lentor Modern). Full-time or part-time, for MSK clinicians with an interest in women's health.",
     },
     form: "physio",
     alsoConsiderFor: ["senior-physiotherapist"],
@@ -242,7 +242,7 @@ export const VACANCIES: Vacancy[] = [
     seo: {
       title: "Senior Physiotherapist Jobs Singapore | Goji",
       description:
-        "Senior physiotherapist role at Goji Physiotherapy in Singapore, currently at Lentor Modern. Full-time or part-time, for experienced MSK clinicians with an interest in women's health.",
+        "Senior physiotherapist at Goji, Singapore (currently Lentor Modern). Full-time or part-time, for experienced MSK clinicians with an interest in women's health.",
     },
     form: "physio",
     alsoConsiderFor: ["physiotherapist"],
