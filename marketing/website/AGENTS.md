@@ -331,6 +331,27 @@ of `npm run build`. Config in `pagefind.yml`; Cloudflare Pages needs no change.
   doesn't reach into child components" rule, but easier to miss because the class
   *is* on the element you can see in devtools.
 
+## Careers (/careers)
+Runbook: `CAREERS.md`. Backend: `../../business-intelligence/scripts/careers/`.
+- **Roles live only in `src/lib/vacancies.ts`.** Pages, JobPosting schema, the
+  sitemap filter and `/careers/vacancies.json` (which the backend reads to
+  accept or refuse applications) all derive from it. Close a role with
+  `active: false` or `closingDate`; never delete the entry while the URL has
+  traffic.
+- **JobPosting only on open roles**, built from the same fields the page shows,
+  never with `baseSalary`. No pay, commission or earnings anywhere on careers
+  pages, schema or emails.
+- **The form renders only when `PUBLIC_CAREERS_API` is set**; otherwise each
+  page offers "Apply by email". Keep that fallback.
+- **Careers analytics carry no personal data**: role id, error code, UTM only.
+- **Owner exception (2026-11-24):** the `/careers/` hero keeps its "Careers at
+  Goji" label and "Explore open positions" button despite the no-eyebrow and
+  no-"Explore" rules. Don't "fix" them in a cleanup pass.
+- **Initialise every `const` a form script's handlers read before the first
+  call that triggers them.** A TDZ error kills the whole script, the form then
+  submits natively, and a `<form>` without `method="post"` puts the fields in
+  the URL. Keep `method="post"` on script-driven forms as a backstop.
+
 ## Roadmap (remaining)
 Active focus: design polish (via `tokens.css`), more blog posts on the clusters in `../seo/seo-geo-review.md` §3, and an
 enquiry-form handler (free/DIY, a Pages Function feeding the front-desk Leads

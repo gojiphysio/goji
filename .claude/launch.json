@@ -36,6 +36,32 @@
       ],
       "cwd": "business-intelligence/scripts/dashboard",
       "port": 8080
+    },
+    {
+      "name": "careers-api-dev",
+      "runtimeExecutable": "uv",
+      "runtimeArgs": [
+        "run",
+        "--with-requirements",
+        "careers/requirements.txt",
+        "--with",
+        "pytest",
+        "python",
+        "-m",
+        "careers.dev_server"
+      ],
+      "cwd": "business-intelligence/scripts",
+      "port": 8090
+    },
+    {
+      "name": "website-careers-dev",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": [
+        "-c",
+        "PUBLIC_CAREERS_API=http://localhost:8090 npm run dev -- --port 4234"
+      ],
+      "cwd": "marketing/website",
+      "port": 4234
     }
   ]
 }

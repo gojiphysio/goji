@@ -5,6 +5,7 @@ import { defineConfig } from "astro/config";
 import icon from "astro-icon";
 import sitemap from "@astrojs/sitemap";
 import rehypeFaqAccordion from "./src/lib/rehype-faq-accordion.mjs";
+import { VACANCIES, isOpen } from "./src/lib/vacancies.ts";
 
 // While the blog has no published posts, /blog renders a `noindex` "Coming
 // soon" placeholder (see src/pages/blog/index.astro). Listing a noindexed URL
@@ -69,6 +70,10 @@ function lastmodFor(url) {
   }
 }
 
+// A closed role keeps its page (shared links still work) but is noindexed,
+// so it must leave the sitemap too (check_dist.py: sitemap_noindex).
+const closedJobPaths = VACANCIES.filter((v) => !isOpen(v)).map((v) => `/careers/${v.slug}/`);
+
 // Static output (the default). Cloudflare Pages serves the contents of `dist/`.
 // When SSR / Pages Functions are needed later (e.g. the enquiry-form handler),
 // add `@astrojs/cloudflare` as an adapter here.
@@ -90,6 +95,7 @@ export default defineConfig({
         !page.includes("/styleguide") &&
         !page.includes("/search") &&
         !page.includes("/links") &&
+        !closedJobPaths.some((p) => page.endsWith(p)) &&
         (blogHasPosts || !page.includes("/blog")),
       serialize: (item) => {
         const lastmod = lastmodFor(item.url);
