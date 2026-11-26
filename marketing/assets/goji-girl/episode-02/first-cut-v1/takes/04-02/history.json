@@ -1,0 +1,345 @@
+{
+  "prompt": [
+    7.1,
+    "2bc6cbb9-2b20-44bc-a06c-62cda8e94308",
+    {
+      "1": {
+        "class_type": "UnetLoaderGGUF",
+        "inputs": {
+          "unet_name": "minimax_h3_ref2va_pruned-Q4_K_M.gguf"
+        }
+      },
+      "2": {
+        "class_type": "CLIPLoaderGGUF",
+        "inputs": {
+          "clip_name": "qwen3vl_32b_minimax_h3-Q4_K_M.gguf",
+          "type": "minimax"
+        }
+      },
+      "3": {
+        "class_type": "VAELoader",
+        "inputs": {
+          "vae_name": "minimax_h3_video_vae_fp16.safetensors"
+        }
+      },
+      "4": {
+        "class_type": "LoraLoaderModelOnly",
+        "inputs": {
+          "model": [
+            "1",
+            0
+          ],
+          "lora_name": "minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors",
+          "strength_model": 1.0
+        }
+      },
+      "5": {
+        "class_type": "MiniMaxH3SigmaShift",
+        "inputs": {
+          "model": [
+            "4",
+            0
+          ],
+          "shift_video": 12.0,
+          "shift_audio": 3.0
+        }
+      },
+      "6": {
+        "class_type": "MiniMaxH3ReferenceToVideo",
+        "inputs": {
+          "clip": [
+            "2",
+            0
+          ],
+          "vae": [
+            "3",
+            0
+          ],
+          "prompt": "One uninterrupted three-second third-person gameplay run AROUND the FRONT NOSE of the parked double-decker, from passenger side to driver side. Start with the girl on the sidewalk. She runs PAST the open passenger entrance without entering it, continues in front of the windscreen, then rounds the other front corner onto the road and stops beside the compact DRIVER WINDOW. The bus stays parked, completely stationary. The girl never boards during this shot. The corrected <Video 1> gives the full route and collision-free camera, and the supplied final frame anchors her arrival at the driver window. Preserve the full continuous turn; no cut or teleport. Use <Picture 1> for the exact finished bus and woman appearance: formed rounded sheet-metal corners, inset dark glazing, detailed wheel arches/rims/lamps, orange-red/purple/white SOS Transit livery, maroon clothing and black bag in LEFT hand. <Video 1> contains crude planning blocks ONLY: use their positions, timing and camera, NEVER their boxy silhouettes, flat toy surfaces or primitive faces as the finished geometry. Original PS2 GTA San Andreas painted textures and economical but properly formed vehicle mesh. Camera follows the whole run around the nose without entering the bus. Pedestrians remain clear on pavement; nobody is touched. No extra characters, HUD, captions or stars. Blender primitives govern ONLY world positions, motion, contacts and camera. Reconstruct the FINISHED MESH SHAPES from the approved appearance image: formed rounded bus corners, inset glazing, detailed wheel arches, rims, lamps and bumpers, and the approved human anatomy. Never merely paint textures onto the guide boxes or reproduce their blocky silhouettes or primitive faces.",
+          "width": 576,
+          "height": 1024,
+          "length": 73,
+          "ref_image_size": "match",
+          "ref_images.ref_image_0": [
+            "20",
+            0
+          ],
+          "ref_videos.ref_video_0": [
+            "22",
+            0
+          ]
+        }
+      },
+      "7": {
+        "class_type": "BasicGuider",
+        "inputs": {
+          "model": [
+            "5",
+            0
+          ],
+          "conditioning": [
+            "32",
+            0
+          ]
+        }
+      },
+      "8": {
+        "class_type": "RandomNoise",
+        "inputs": {
+          "noise_seed": 2026112804
+        }
+      },
+      "9": {
+        "class_type": "KSamplerSelect",
+        "inputs": {
+          "sampler_name": "euler"
+        }
+      },
+      "10": {
+        "class_type": "BasicScheduler",
+        "inputs": {
+          "model": [
+            "5",
+            0
+          ],
+          "scheduler": "simple",
+          "steps": 4,
+          "denoise": 1.0
+        }
+      },
+      "11": {
+        "class_type": "SamplerCustomAdvanced",
+        "inputs": {
+          "noise": [
+            "8",
+            0
+          ],
+          "guider": [
+            "7",
+            0
+          ],
+          "sampler": [
+            "9",
+            0
+          ],
+          "sigmas": [
+            "10",
+            0
+          ],
+          "latent_image": [
+            "6",
+            1
+          ]
+        }
+      },
+      "12": {
+        "class_type": "VAEDecodeTiled",
+        "inputs": {
+          "samples": [
+            "11",
+            0
+          ],
+          "vae": [
+            "3",
+            0
+          ],
+          "tile_size": 256,
+          "overlap": 64,
+          "temporal_size": 64,
+          "temporal_overlap": 8
+        }
+      },
+      "13": {
+        "class_type": "CreateVideo",
+        "inputs": {
+          "images": [
+            "12",
+            0
+          ],
+          "fps": 24.0
+        }
+      },
+      "14": {
+        "class_type": "SaveVideo",
+        "inputs": {
+          "video": [
+            "13",
+            0
+          ],
+          "filename_prefix": "04-02/raw",
+          "format": "mp4",
+          "format.codec": "h264"
+        }
+      },
+      "20": {
+        "class_type": "LoadImage",
+        "inputs": {
+          "image": "04-appearance.png"
+        }
+      },
+      "21": {
+        "class_type": "LoadVideo",
+        "inputs": {
+          "file": "04-guide-v2.mp4"
+        }
+      },
+      "22": {
+        "class_type": "GetVideoComponents",
+        "inputs": {
+          "video": [
+            "21",
+            0
+          ]
+        }
+      },
+      "30": {
+        "class_type": "MiniMaxH3AddGuide",
+        "inputs": {
+          "positive": [
+            "6",
+            0
+          ],
+          "latent": [
+            "6",
+            1
+          ],
+          "vae": [
+            "3",
+            0
+          ],
+          "image": [
+            "20",
+            0
+          ],
+          "frame_idx": 0
+        }
+      },
+      "31": {
+        "class_type": "LoadImage",
+        "inputs": {
+          "image": "04-end-v2.png"
+        }
+      },
+      "32": {
+        "class_type": "MiniMaxH3AddGuide",
+        "inputs": {
+          "positive": [
+            "30",
+            0
+          ],
+          "latent": [
+            "6",
+            1
+          ],
+          "vae": [
+            "3",
+            0
+          ],
+          "image": [
+            "31",
+            0
+          ],
+          "frame_idx": 72
+        }
+      }
+    },
+    {
+      "create_time": 1795663785708
+    },
+    [
+      "14"
+    ]
+  ],
+  "outputs": {
+    "21": {
+      "images": [
+        {
+          "filename": "04-guide-v2.mp4",
+          "subfolder": "",
+          "type": "input",
+          "metadata": {
+            "kind": "video",
+            "width": 288,
+            "height": 512,
+            "duration": 3.0416666666666665,
+            "fps": 24.0,
+            "frame_count": 73
+          }
+        }
+      ],
+      "animated": [
+        true
+      ]
+    },
+    "14": {
+      "images": [
+        {
+          "filename": "raw_00001_.mp4",
+          "subfolder": "04-02",
+          "type": "output",
+          "metadata": {
+            "kind": "video",
+            "width": 576,
+            "height": 1024,
+            "duration": 3.0416666666666665,
+            "fps": 24.0,
+            "frame_count": 73
+          }
+        }
+      ],
+      "animated": [
+        true
+      ]
+    }
+  },
+  "status": {
+    "status_str": "success",
+    "completed": true,
+    "messages": [
+      [
+        "execution_start",
+        {
+          "prompt_id": "2bc6cbb9-2b20-44bc-a06c-62cda8e94308",
+          "timestamp": 1795664540652
+        }
+      ],
+      [
+        "execution_cached",
+        {
+          "nodes": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "9",
+            "10"
+          ],
+          "prompt_id": "2bc6cbb9-2b20-44bc-a06c-62cda8e94308",
+          "timestamp": 1795664540657
+        }
+      ],
+      [
+        "execution_success",
+        {
+          "prompt_id": "2bc6cbb9-2b20-44bc-a06c-62cda8e94308",
+          "timestamp": 1795665169257
+        }
+      ]
+    ]
+  },
+  "meta": {
+    "21": {
+      "node_id": "21",
+      "display_node": "21",
+      "parent_node": null,
+      "real_node_id": "21"
+    },
+    "14": {
+      "node_id": "14",
+      "display_node": "14",
+      "parent_node": null,
+      "real_node_id": "14"
+    }
+  }
+}

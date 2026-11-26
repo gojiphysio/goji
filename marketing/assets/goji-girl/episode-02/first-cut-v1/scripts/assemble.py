@@ -1,25 +1,30 @@
 import argparse,json,subprocess,hashlib
 from pathlib import Path
-R=Path(__file__).resolve().parents[1];p=argparse.ArgumentParser();p.add_argument('--animatic',action='store_true');a=p.parse_args();shots=json.loads((R/'shots.json').read_text())
-name='timing-animatic' if a.animatic else 'episode-02-first-cut-v1';tmp=R/'deliverables'/('edit-'+name);tmp.mkdir(exist_ok=True)
+R=Path(__file__).resolve().parents[1];p=argparse.ArgumentParser();p.add_argument('--animatic',action='store_true');p.add_argument('--review',action='store_true');a=p.parse_args();shots=json.loads((R/'shots.json').read_text())
+name='timing-animatic' if a.animatic else ('review-checkpoint-01' if a.review else 'episode-02-first-cut-v1');tmp=R/'deliverables'/('edit-'+name);tmp.mkdir(exist_ok=True)
 selected={} if a.animatic else json.loads((R/'selected.json').read_text());records=[]
 for sid,job in shots.items():
  out=tmp/(sid+'.mp4');duration=job['duration']
- if a.animatic:
+ board=a.animatic or (a.review and sid not in selected)
+ if board:
   src=R/'inputs'/f'{sid}-appearance.png';args=['-loop','1','-i',str(src)]
  else:
   item=selected[sid];src=R/item['path'];args=['-ss',str(item.get('start',0)),'-i',str(src)]
- extra='' if a.animatic else item.get('video_filter','')
+ extra='' if board else item.get('video_filter','')
  vf=(extra+',' if extra else '')+'scale=576:1024:force_original_aspect_ratio=decrease,pad=576:1024:(ow-iw)/2:(oh-ih)/2,setsar=1,fps=24'
- if not out.exists():subprocess.run(['ffmpeg','-v','error',*args,'-t',str(duration),'-vf',vf,'-an','-c:v','libx264','-preset','fast','-crf','20','-pix_fmt','yuv420p',str(out)],check=True)
- records.append({'shot':sid,'source':str(src.relative_to(R)),'start_seconds':sum(x['duration'] for x in records),'duration':duration,'video_filter':extra,'sha256':hashlib.sha256(src.read_bytes()).hexdigest()})
+ if board and a.review:
+  args+=['-i',str(R/'overlays/review-pending.png')]
+  filtering=['-filter_complex',f'[0:v]{vf}[base];[1:v]scale=576:1024[badge];[base][badge]overlay=0:0[v]','-map','[v]']
+ else:filtering=['-vf',vf]
+ if not out.exists():subprocess.run(['ffmpeg','-v','error',*args,'-t',str(duration),*filtering,'-an','-c:v','libx264','-preset','fast','-crf','20','-pix_fmt','yuv420p',str(out)],check=True)
+ records.append({'shot':sid,'source':str(src.relative_to(R)),'kind':'storyboard hold' if board else 'animated take','start_seconds':sum(x['duration'] for x in records),'duration':duration,'video_filter':extra,'sha256':hashlib.sha256(src.read_bytes()).hexdigest()})
 listing=tmp/'concat.txt';listing.write_text(''.join("file '"+str((tmp/(sid+'.mp4')).resolve())+"'\n" for sid in shots))
 base=tmp/'picture.mp4'
 subprocess.run(['ffmpeg','-y','-v','error','-f','concat','-safe','0','-i',str(listing),'-c','copy',str(base)],check=True)
 out=R/'deliverables'/(name+'.mp4')
 filters="[1:v]scale=576:1024[cal];[2:v]scale=576:1024[safe];[0:v][cal]overlay=0:0:enable='between(t,3,5)'[v1];[v1][safe]overlay=0:0:enable='between(t,41.5,46)'[v]"
-subprocess.run(['ffmpeg','-y','-v','error','-i',str(base),'-i',str(R/'overlays/calendar-reminder.png'),'-i',str(R/'overlays/safehouse-popup.png'),'-i',str(R/'audio/sfx-mix.wav'),'-filter_complex',filters,'-map','[v]','-map','3:a','-t','47','-c:v','libx264','-preset','fast','-crf','20','-pix_fmt','yuv420p','-c:a','aac','-b:a','192k','-movflags','+faststart',str(out)],check=True)
+subprocess.run(['ffmpeg','-y','-v','error','-i',str(base),'-loop','1','-framerate','24','-t','47','-i',str(R/'overlays/calendar-reminder.png'),'-loop','1','-framerate','24','-t','47','-i',str(R/'overlays/safehouse-popup.png'),'-i',str(R/'audio/sfx-mix.wav'),'-filter_complex_threads','1','-filter_complex',filters,'-map','[v]','-map','3:a','-t','47','-c:v','libx264','-preset','fast','-crf','20','-pix_fmt','yuv420p','-c:a','aac','-b:a','192k','-movflags','+faststart',str(out)],check=True)
 probe=json.loads(subprocess.check_output(['ffprobe','-v','error','-show_format','-show_streams','-of','json',str(out)],text=True))
-subprocess.run(['ffmpeg','-v','error','-i',str(out),'-f','null','-'],check=True)
-(R/'deliverables'/(name+'-record.json')).write_text(json.dumps({'kind':'static storyboard timing animatic' if a.animatic else 'first animated cut','shot_ranges':records,'overlays':{'calendar':[3,5],'safehouse':[41.5,46]},'audio':'SFX only, original procedural synthesis','probe':probe,'sha256':hashlib.sha256(out.read_bytes()).hexdigest(),'full_decode_verified':True},indent=2)+'\n')
+subprocess.run(['ffmpeg','-v','error','-xerror','-err_detect','explode','-i',str(out),'-f','null','-'],check=True)
+(R/'deliverables'/(name+'-record.json')).write_text(json.dumps({'kind':'static storyboard timing animatic' if a.animatic else ('mixed animated/storyboard review checkpoint' if a.review else 'first animated cut'),'shot_ranges':records,'overlays':{'calendar':[3,5],'safehouse':[41.5,46]},'audio':'SFX only, original procedural synthesis','probe':probe,'sha256':hashlib.sha256(out.read_bytes()).hexdigest(),'full_decode_verified':True},indent=2)+'\n')
 print(out)

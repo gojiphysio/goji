@@ -18,7 +18,7 @@ for p in sorted((R/'takes').glob('*/run.json')):
    for e in entries:
     if not isinstance(e,dict) or not e.get('filename','').endswith('.mp4'):continue
     video=R/'takes'/e.get('subfolder','')/e['filename'];assert video.exists(),video
-    probe=json.loads(subprocess.check_output(['ffprobe','-v','error','-show_streams','-show_format','-of','json',str(video)],text=True));subprocess.run(['ffmpeg','-v','error','-i',str(video),'-f','null','-'],check=True)
+    probe=json.loads(subprocess.check_output(['ffprobe','-v','error','-show_streams','-show_format','-of','json',str(video)],text=True));subprocess.run(['ffmpeg','-v','error','-xerror','-err_detect','explode','-i',str(video),'-f','null','-'],check=True)
     r['videos'].append({'path':str(video.relative_to(R)),'sha256':hashlib.sha256(video.read_bytes()).hexdigest(),'probe':probe,'full_decode_verified':True})
     q=p.parent/'review';q.mkdir(exist_ok=True)
     count=max(1,round(float(probe['format']['duration'])*2));cols=min(6,count);rows=math.ceil(count/cols)

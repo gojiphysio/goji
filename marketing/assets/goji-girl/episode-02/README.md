@@ -1,13 +1,33 @@
 # Goji Girl · Episode 02 — TAP OUT
 
-**Creative draft v8 · 25 November 2026 · proposed 47 seconds · vertical 9:16**
+**Review checkpoint 01 · 26 November 2026 · 47 seconds · vertical 9:16 · with SFX**
 
-Goji Girl ends a frustrating call, sees that her Goji appointment is in only five
-minutes, reacts in surprise and rushes out. The stolen-bus commute ends in a crash,
-a conscientious EZ-Link tap, and a sprint forward to the calm of Pilates.
+**Next revision:** bring the running beats closer to the GTA San Andreas run cycle; the current checkpoint preserves the version being reviewed.
 
-**First cut:** [render status, revised popup and audio plan](first-cut-v1/README.md).
-The boards below retain the previous popup artwork; the render uses the revised sentence above.
+[**Watch the current 47-second review video**](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-girl-episode-2/marketing/assets/goji-girl/episode-02/first-cut-v1/deliverables/review-checkpoint-01.mp4)
+
+**22 seconds are animated; the other 25 seconds are labelled “STORYBOARD — MOTION PENDING.”** This is a work-in-progress review, not the finished animated cut. The remaining renders continue locally.
+
+[![Play the current review video](first-cut-v1/deliverables/review-poster.jpg)](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-girl-episode-2/marketing/assets/goji-girl/episode-02/first-cut-v1/deliverables/review-checkpoint-01.mp4)
+
+Use timestamps from this video for comments:
+
+| Time | Scene | Current state |
+| --- | --- | --- |
+| 00:00–00:11 | 01–04 · Call, reminder, run around bus | Animated |
+| 00:11–00:15 | 05 · Driver takeover | Storyboard; geometry repair rendering |
+| 00:15–00:20 | 06 · Bus chase | Animated |
+| 00:20–00:25 | 07 · Crash | Storyboard; render pending |
+| 00:25–00:31 | 08 · Tap and exit | Animated; climb hesitation and handbag shape need polish |
+| 00:31–00:47 | 09–12 · Dust off, sprint, clinic, Pilates | Storyboards; renders pending |
+
+[Individual clips, render notes and editable overlays](first-cut-v1/README.md) · [Draft PR #265](https://github.com/gojiphysio/goji/pull/265)
+
+The current safehouse text is:
+
+> You can save your game, improve your stats, and lose the police at a safehouse.
+
+The storyboard images below retain their earlier popup artwork; the review video uses the updated sentence.
 
 ## Storyboard from the top
 

@@ -1,6 +1,14 @@
 # Episode 2 — first cut v1
 
-**Render in progress · 26 November 2026 · 5 shots held for the edit; bus-action takes being revised.**
+**Render in progress · 26 November 2026 · 6 shots held for the edit; bus-action takes being revised.**
+
+**Next revision:** bring the running beats closer to the GTA San Andreas run cycle; the current checkpoint preserves the version being reviewed.
+
+[**Watch review checkpoint 01 — full 47-second timeline with SFX**](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-girl-episode-2/marketing/assets/goji-girl/episode-02/first-cut-v1/deliverables/review-checkpoint-01.mp4)
+
+This checkpoint combines **22 seconds of selected animation** (01–04, 06, 08) with **25 seconds of clearly labelled storyboard holds** (05, 07, 09–12). It is ready for initial comments while rendering continues. Use the video timestamps when reviewing.
+
+The run around the bus now reaches the driver side. The chase has no outside runner; a fixed crop keeps the pursuit car offscreen. The exit still has a small initial body dip and a rounder handbag silhouette to polish.
 
 [Play the animated opening with SFX — scenes 01–03](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-girl-episode-2/marketing/assets/goji-girl/episode-02/first-cut-v1/deliverables/opening-pass.mp4)
 

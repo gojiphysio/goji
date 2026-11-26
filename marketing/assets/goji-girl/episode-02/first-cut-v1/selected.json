@@ -20,13 +20,20 @@
     "status": "draft selection; sampled-frame review",
     "review": "Forward rear-camera run; bystanders step clear with no observed contact."
   },
+  "04": {
+    "path": "takes/04-02/raw_00001_.mp4",
+    "start": 0,
+    "duration": 3,
+    "status": "draft selection; sampled-frame review",
+    "review": "Corrected take runs past passenger door around front nose to driver side. Approved formed bus and compact driver opening retained. Six sampled frames inspected; full continuous motion not claimed."
+  },
   "06": {
     "path": "takes/06-02/raw_00001_.mp4",
     "start": 0,
     "duration": 5,
     "video_filter": "crop=486:864:0:80",
     "status": "draft selection; sampled-frame review",
-    "review": "No outside runner. Bus shape/livery and rear vehicle camera retained. Diffuse staggered police spill, no emitters on bus. Fixed crop excludes brief pursuit-car edge; inspected 8fps around intrusion. Vehicle swerves near centreline; no collision or person in roadway."
+    "review": "No outside runner. Bus shape/livery and rear vehicle camera retained. Diffuse staggered police spill, no emitters on bus. Fixed crop excludes brief pursuit-car edge; inspected 8fps around intrusion. Vehicle swerves near centreline; no collision or person in roadway. Normal-speed QuickTime playback completed with start/end observations after unlock."
   },
   "08": {
     "path": "takes/08-02/raw_00001_.mp4",

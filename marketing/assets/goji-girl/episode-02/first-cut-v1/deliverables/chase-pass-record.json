@@ -7,7 +7,7 @@
     20
   ],
   "full_decode_verified": true,
-  "visual_review": "2fps whole take; 8fps intrusion region; cropped frame at2.65s. QuickTime playback blocked by locked Mac; not claimed.",
+  "visual_review": "Normal-speed QuickTime playback completed with start/end observations after Mac unlock; 2fps whole-take contact sheet, 8fps intrusion region and cropped2.65s frame inspected. Do not claim frame-perfect motion or listening QA.",
   "sha256": "a0c7ec5aaa0b6d9eca561ba555ce6824ce382e87c87038041dd318609e5d826e",
   "probe": {
     "streams": [
