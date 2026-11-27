@@ -1,5 +1,7 @@
 # Episode 2: revised first cut
 
+**Production paused · 27 November 2026.** [Pause handoff and lessons](../PAUSE-HANDOFF.md).
+
 **49 seconds · vertical 9:16 · original SFX · creative review draft**
 
 [**Watch the revised cut with sound**](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-girl-episode-2/marketing/assets/goji-girl/episode-02/first-cut-v2/deliverables/episode-02-first-cut-v2.mp4)

@@ -1,5 +1,7 @@
 # Goji Girl · Episode 02 — TAP OUT
 
+**Production paused · 27 November 2026.** [Saved state, lessons and resume notes](PAUSE-HANDOFF.md).
+
 **Revised first cut · 49 seconds · vertical 9:16 · with SFX**
 
 [**Watch the revised animated cut**](https://raw.githubusercontent.com/gojiphysio/goji/codex/goji-girl-episode-2/marketing/assets/goji-girl/episode-02/first-cut-v2/deliverables/episode-02-first-cut-v2.mp4)

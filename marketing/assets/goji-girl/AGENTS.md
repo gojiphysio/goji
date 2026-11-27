@@ -3,6 +3,9 @@
 - Episode creative lives in the numbered episode folders. Keep the timed script,
   storyboard and creative decisions together; tooling and generation workflow
   belong to the separate workflow workstream.
+- Episode 2 is paused. Read `episode-02/PAUSE-HANDOFF.md` before resuming; it
+  records the current cut, tested controls and unresolved review items. A merge
+  preserves the draft and does not turn provisional footage into user approval.
 - Carry forward the established adult protagonist: black ponytail, maroon
   athleisure, white sneakers and small black handbag. Goji staff wear black;
   the back of the top is plain, without lettering or logos.
@@ -60,6 +63,11 @@
   the shoulder cycle, hold the bag steady, or give it soft-body deformation.
   Its long side runs alongside her body, with the broad face pointing outward.
   Fix its orientation to the grip; never billboard the broad face at camera.
+- If a corrected opening pose decays during a repeated action, test guidance
+  across the full cycle before generating related shots. Keep each reference's
+  role explicit: appearance, locomotion, or the shot's own route and camera.
+- Inspect edit boundaries by exact frame index. Use half-open overlay intervals
+  to keep a popup from leaking onto the first frame of the next scene.
 - Chase guides must establish actual travel speed and visible cause/effect:
   hard steering, lateral load, roll, ground strike, sliding friction and impact.
   Do not ease a slowly moving bus into a sideways pose and call it a crash.
