@@ -142,5 +142,17 @@
   "size": "288x512",
   "sha256": "1616cba3bed8ec7882b33663cdc7bf70b3553640288234a2baf95149b2b5da98",
   "stage_json_sha256": "43d63e057f39452e8bafe2f710218bae2b75813ad932cbab979d9d0e5329f61d"
+ },
+ "t03/layout-cont79": {
+  "path": "staging/t03/guides/t03-layout-cont79-192.mp4",
+  "source_frames": [
+   79,
+   271
+  ],
+  "frames": 192,
+  "fps": 24,
+  "size": "288x512",
+  "sha256": "dcf823843081279d342c901344fc7fa6edd8e40fd3c534fd704369e177687173",
+  "stage_json_sha256": "43d63e057f39452e8bafe2f710218bae2b75813ad932cbab979d9d0e5329f61d"
  }
 }

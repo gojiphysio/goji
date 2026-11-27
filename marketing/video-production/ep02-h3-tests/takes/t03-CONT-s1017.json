@@ -1,6 +1,6 @@
 {
  "take": "t03-CONT-s1017",
- "status": "queued",
+ "status": "generated",
  "settings": {
   "scene": "t03",
   "variant": "CONT",
@@ -338,5 +338,65 @@
  },
  "private_dir": "/Users/tidepool/Projects/goji-ep02-runtime/takes/t03-CONT-s1017",
  "prompt_id": "63e25b45-8c9c-4e87-a9c2-16b69f8a95b3",
- "submitted": 1795777165.5861042
+ "submitted": 1795777165.5861042,
+ "wall_seconds": 2705.6,
+ "messages": [
+  [
+   "execution_start",
+   {
+    "prompt_id": "63e25b45-8c9c-4e87-a9c2-16b69f8a95b3",
+    "timestamp": 1795777165600
+   }
+  ],
+  [
+   "execution_cached",
+   {
+    "nodes": [
+     "1",
+     "2",
+     "3",
+     "4",
+     "5",
+     "9",
+     "10",
+     "20",
+     "21",
+     "22"
+    ],
+    "prompt_id": "63e25b45-8c9c-4e87-a9c2-16b69f8a95b3",
+    "timestamp": 1795777165606
+   }
+  ],
+  [
+   "execution_success",
+   {
+    "prompt_id": "63e25b45-8c9c-4e87-a9c2-16b69f8a95b3",
+    "timestamp": 1795779871215
+   }
+  ]
+ ],
+ "output": {
+  "path": "/Users/tidepool/Projects/goji-ep02-runtime/takes/t03-CONT-s1017/t03-CONT-s1017.mp4",
+  "sha256": "04632642cb2e8c7007d4993681456f21fcb3dc2f704a8f0fceb3742b98433851",
+  "probe": {
+   "width": 576,
+   "height": 1024,
+   "r_frame_rate": "24/1",
+   "nb_read_frames": "192"
+  }
+ },
+ "contact_frames": [
+  0,
+  17,
+  35,
+  52,
+  69,
+  87,
+  104,
+  122,
+  139,
+  156,
+  174,
+  191
+ ]
 }

@@ -54,10 +54,10 @@ def build(take):
     scene, variant, seed = take.split('-')
     seed = int(seed[1:])
     smoke = variant == 'P'
-    cont = variant == 'CONT'
+    cont = variant.startswith('CONT')
     w, h = (768, 1344) if variant == 'C' else (288, 512) if smoke else (576, 1024)
     n = 124 if smoke else FRAMES['CONT' if cont else scene]
-    pkey = f'{scene[:3]}/{"B" if smoke else "D" if variant == "D2" else variant}'  # t02v2 reuses the T02 prompts; only the guide changes
+    pkey = f'{scene[:3]}/{"B" if smoke else "D" if variant == "D2" else "CONT" if cont else variant}'  # t02v2 reuses the T02 prompts; only the guide changes
     prompt = PROMPTS[pkey]
     lora, steps = ('minimax_h3_ref2v_turbo_8step_v1.1_768p_comfyui_bf16.safetensors', 8) if variant == 'C' else \
                   ('minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors', 2 if smoke else 4)
@@ -106,7 +106,7 @@ def build(take):
         g['7']['inputs']['model'] = ['41', 0]
         g['10']['inputs']['model'] = ['41', 0]
     if cont:
-        cs = json.loads(CONT_SOURCE.read_text())
+        cs = json.loads(CONT_SOURCE.read_text())[take]
         src, end = cs['take'], cs['tail_end']  # end = first rejected source frame
         src_mp4 = PRIVATE / src / f'{src}.mp4'
         tail = PRIVATE / take / 'source-tail-56.mp4'
