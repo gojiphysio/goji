@@ -236,6 +236,11 @@ The WhatsApp assistant. What it is and how to run it: [`README.md`](README.md).
   intent there), the count in the subject. Every outcome belongs to a
   section: cancellations and getting-worse chats were in none, so they never
   appeared.
+- **A home visit never gets the clinic's address.** Every customer message
+  about a home visit leaves out Lentor Modern and directions: the
+  confirmation template is picked on goji-booking's `home` flag, and with no
+  home template set the WhatsApp confirmation is skipped, not sent as the
+  clinic one (owner, 27 Nov 2026).
 - **Staff numbers are never customers.** `WA_AGENT_STAFF` messages go to
   `handle_staff` before any lookup, model call or metric; the numbers live in
   a private env file, never the repo. Pings name customers by first name or

@@ -676,7 +676,7 @@ def notify_whatsapp(appt: Appointment) -> bool:
     import requests
     body = {"phone": appt.phone, "reference": appt.reference, "service": appt.service,
             "date": appt.start.date().isoformat(), "time": appt.start.strftime("%H:%M"),
-            "clinician_name": appt.clinician, "source": "staff",
+            "clinician_name": appt.clinician, "source": "staff", "home": appt.home,
             "first_name": appt.first_name if appt.name else "", "send_template": True,
             # The registration-form button, when the form is still owed.
             "form_token": formlink.token(appt.appointment_id, INTERNAL_TOKEN)

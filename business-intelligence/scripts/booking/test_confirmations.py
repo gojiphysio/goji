@@ -496,6 +496,7 @@ def test_front_desk_booking_is_confirmed_on_whatsapp_too(sent, monkeypatch):
     url, body = posts[0]
     assert url == "https://wa.example/internal/booking-confirmed"
     assert body["send_template"] is True and body["source"] == "staff"
+    assert body["home"] is False
     assert (body["date"], body["time"], body["first_name"]) == ("2026-12-03", "10:00", "Sarah")
     assert bq.inserts[0]["channel"] == "both"
 

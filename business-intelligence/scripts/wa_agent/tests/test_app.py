@@ -1345,6 +1345,45 @@ def test_plain_template_otherwise(env, monkeypatch, form_template, token):
     assert sent == [("goji_appointment_confirmed", None)]
 
 
+@pytest.mark.parametrize("home_form, token, expected", [
+    ("goji_home_visit_confirmed_form", FORM_TOKEN,
+     ("goji_home_visit_confirmed_form", {0: FORM_TOKEN})),
+    ("goji_home_visit_confirmed_form", "", ("goji_home_visit_confirmed", None)),
+    ("", FORM_TOKEN, ("goji_home_visit_confirmed", None)),
+])
+def test_home_visit_gets_the_home_template(env, monkeypatch, home_form, token, expected):
+    """The clinic confirmation ends with Lentor Modern and a directions
+    button: wrong for a home visit (owner, 27 Nov 2026)."""
+    client, rec, _ = env
+    monkeypatch.setattr(config, "INTERNAL_TOKEN", "t")
+    monkeypatch.setattr(config, "CONFIRMATIONS", True)
+    monkeypatch.setattr(config, "CONFIRM_FORM_TEMPLATE", "goji_appointment_confirmed_form")
+    monkeypatch.setattr(config, "CONFIRM_HOME_TEMPLATE", "goji_home_visit_confirmed")
+    monkeypatch.setattr(config, "CONFIRM_HOME_FORM_TEMPLATE", home_form)
+    sent = []
+    app_mod.wa.send_template = lambda wa_id, name, params, language="en", url_buttons=None: \
+        sent.append((name, url_buttons, params)) or "wamid.h1"
+    client.post("/internal/booking-confirmed", headers={"X-Internal-Token": "t"},
+                json=_confirm_body(home=True, form_token=token))
+    (name, buttons, params), = sent
+    assert (name, buttons) == expected
+    assert params[0] == "Mei" and params[2] == "Kristy" and len(params) == 3
+
+
+def test_home_visit_never_gets_the_clinic_template(env, monkeypatch):
+    """Home templates not approved yet: no WhatsApp confirmation at all
+    (the email still goes), never the clinic one with its directions."""
+    client, rec, _ = env
+    monkeypatch.setattr(config, "INTERNAL_TOKEN", "t")
+    monkeypatch.setattr(config, "CONFIRMATIONS", True)
+    monkeypatch.setattr(config, "CONFIRM_HOME_TEMPLATE", "")
+    monkeypatch.setattr(config, "CONFIRM_HOME_FORM_TEMPLATE", "")
+    app_mod.wa.send_template = lambda *a, **k: pytest.fail("clinic template on a home visit")
+    r = client.post("/internal/booking-confirmed", headers={"X-Internal-Token": "t"},
+                    json=_confirm_body(home=True, form_token=FORM_TOKEN))
+    assert r.get_json()["template_sent"] is False
+
+
 def test_send_template_url_button_payload():
     from wa_agent.whatsapp import WhatsAppClient
     posted = []

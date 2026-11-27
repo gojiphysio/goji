@@ -1580,14 +1580,26 @@ def _send_confirmation_template(client, wa_id: str, b: dict) -> str:
             and b.get("date") and b.get("time")):
         return ""
     when = booking_client._when(b["date"], b["time"])
-    params = [b.get("first_name") or "there", (b.get("service") or "physiotherapy").lower(),
-              when, (b.get("clinician_name") or "our team").split(" ")[0]]
+    first = b.get("first_name") or "there"
+    who = (b.get("clinician_name") or "our team").split(" ")[0]
     # Still owes the registration form: the version with a form button, once
     # approved. The token is goji-booking's signed form link (booking/formlink.py).
     form = str(b.get("form_token") or "")
-    name, buttons = config.CONFIRM_TEMPLATE, None
-    if config.CONFIRM_FORM_TEMPLATE and _FORM_TOKEN.match(form):
-        name, buttons = config.CONFIRM_FORM_TEMPLATE, {0: form}
+    owes_form = bool(_FORM_TOKEN.match(form))
+    if b.get("home") is True:
+        # No clinic address or directions on a home visit (owner, 27 Nov 2026).
+        params = [first, when, who]
+        name, buttons = config.CONFIRM_HOME_TEMPLATE, None
+        if config.CONFIRM_HOME_FORM_TEMPLATE and owes_form:
+            name, buttons = config.CONFIRM_HOME_FORM_TEMPLATE, {0: form}
+        if not name:
+            events.record("confirmation_skipped", wa_id, reason="home_template_off")
+            return ""
+    else:
+        params = [first, (b.get("service") or "physiotherapy").lower(), when, who]
+        name, buttons = config.CONFIRM_TEMPLATE, None
+        if config.CONFIRM_FORM_TEMPLATE and owes_form:
+            name, buttons = config.CONFIRM_FORM_TEMPLATE, {0: form}
     try:
         msg_id = client.send_template(wa_id, name, params, url_buttons=buttons) if buttons \
             else client.send_template(wa_id, name, params)
