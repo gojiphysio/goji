@@ -184,6 +184,8 @@ CLINICIAN_EXTRA_DAYS: dict[str, list[dict]] = {
 }
 
 # Home visits: Cheryl only, typed "Home Visit" in Plato regardless of service.
+# Overrides PHYSIO_FOCUS_CLINICIANS and SERVICE_CLINICIANS: every home visit,
+# for every physio sub-type (incl. Women's Health), goes to this clinician.
 HOME_VISIT_CLINICIAN = "cheryl-long"
 HOME_VISIT_TYPE_CODE = "sCla"
 

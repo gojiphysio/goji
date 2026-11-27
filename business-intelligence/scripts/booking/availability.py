@@ -269,6 +269,14 @@ def _derive_day(
     # provide this service (e.g. Cheryl removed from Clinical Pilates).
     service_clinicians = SERVICE_CLINICIANS.get(service_id)
 
+    # Home visits sit ABOVE the sub-type and service rosters: the home-visit
+    # clinician (Cheryl) takes every home visit, for every physio sub-type —
+    # including ones she's off in-clinic (e.g. Women's Health). Without this the
+    # two rules intersect to nobody and the calendar shows no dates.
+    if home:
+        focus_allowed = None
+        service_clinicians = None
+
     # Duration: use variant duration if provided and available, else base service duration.
     duration_min = svc["duration_min"]
     if variant and svc.get("variants", {}).get(variant):
@@ -394,9 +402,14 @@ def _derive_day(
         t = win_start
         while t + dur <= win_end:
             occ_start, occ_end = t - pad, t + dur + pad
-            free = occ_start >= win_start  # travel-before must fit the working day
+            # A home visit's travel blocks must fit the working day at BOTH ends:
+            # travel-before starts no earlier than the window opens, and
+            # travel-after ends no later than it closes. (pad = 0 in-clinic.)
+            free = occ_start >= win_start and occ_end <= win_end
             exclusion = None
-            if free and day == today and t <= earliest:
+            # Same-day lead time is measured from when the clinician has to set
+            # off (travel-before), not from the visit itself.
+            if free and day == today and occ_start <= earliest:
                 free = False  # no past slots (same-day is also gated by min_days)
                 exclusion = "past"
             if free and any(_overlaps(occ_start, occ_end, bs, be) for bs, be in blocks):
