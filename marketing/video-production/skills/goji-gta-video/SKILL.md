@@ -25,6 +25,10 @@ is not proof of a coherent scene; a seed or repeated description is not an ident
 - Read [blender-staging.md](references/blender-staging.md) when building or reusing
   3D assets, cameras, animatics or control exports. Copy its shot template when
   an existing job format does not already record those details.
+- Read [h3-practice.md](references/h3-practice.md) before building or prompting
+  any H3 job. It covers routes, canvas, frame grid, draft and final settings,
+  the prompt format and audio, and tags each rule as official, ours or untested.
+  Start prompts from [the Ref2VA template](assets/h3-ref2va-prompt-template.md).
 - Read [research-2026-11-24.md](references/research-2026-11-24.md) when comparing
   models or changing the workflow. Recheck dated capabilities on the exact runtime.
 - Read [local-pilot-2026-11-24.md](references/local-pilot-2026-11-24.md) for the
@@ -76,6 +80,16 @@ choose it when sparse anchors are sufficient and review motion between them.
 See [production.md](references/production.md#choose-h3-guidance-per-shot) for routing.
 This preference supersedes treating LTX as the default starting renderer.
 
+Within H3, separate draft and final renders. Drafts use the measured route
+(Ref2V Turbo 4-step v0.1, 576×1024). Finals should move toward the native
+768×1344 canvas with a newer 768p Ref2V adapter or a full-step run; those
+recipes are untested here, so the first one is an experiment. Fun ControlNet Union
+with a Blender depth or pose pass is the candidate replacement for the style
+conversion pass. Test it on one shot before routing an episode through it.
+Author H3 guides on its 17k+5 frame grid (124, 192 … 362 frames at 24 fps).
+H3's native range is about 5–15 seconds, so an 8–15 second continuous action can
+be one take rather than an extension chain.
+
 Use LTX or Wan for a specific draft, fallback or requested comparison when useful;
 do not rerun a model comparison automatically for every episode.
 For visual-quality comparisons, use a reviewed episode image or look frame and
@@ -102,11 +116,30 @@ frames and multiple references can be combined. Do not transfer LTX, Wan or H3
 conditioning syntax between pipelines. Keep one renderer within a continuous
 shot where practical; compare look matching before mixing renderers across cuts.
 
+## Write H3 prompts in H3's format
+
+H3 reads a structured prompt, not free prose. Ref2VA takes six sections in order:
+`subject_definitions`, `summary`, `retention_analysis`, `detailed_description`,
+`overall_soundscape`, `non_diegetic_music`. The base modes take
+`integrated_multimodal_description`, `overall_soundscape`, `non_diegetic_music`.
+
+- Make each cast member, vehicle, location and the PS2 look a `<Subject N>`.
+  Reuse those lines word for word across every shot of the episode.
+- Give the Blender clip one job: `<Video 1>` for motion, layout and camera path,
+  marked `attribute_transfer`. Say its placeholder surfaces are replaced by the
+  look Subject.
+- Never write ban lists. H3 runs at CFG 1 with no negative branch, so "no extra
+  cars" adds cars. Describe what exists instead.
+- Describe the low-poly look concretely and avoid photographic vocabulary.
+- Fill both audio fields, even when the edit replaces the audio.
+
 ## Generate, inspect, decide
 
 Start with the hardest continuity test, not a batch of the whole episode.
 Log all attempts, controls, source hashes, runtime, cost, retained ranges and
-failure reasons. Change one major variable per retry. After three attempts with
+failure reasons. Change one major variable per retry. Choose between two recipes
+on at least two seeds each; one attractive take is not evidence that a recipe
+works. After three attempts with
 the same structural failure, change the guide/control/model or staging instead
 of adding more adjectives. This is a default experiment budget, adjustable to
 the user's task and compute allowance.
