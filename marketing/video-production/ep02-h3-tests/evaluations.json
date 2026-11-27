@@ -311,5 +311,47 @@
   "style_note": "Smooth 3D people, as in the source take",
   "usable_seconds": 0.0,
   "usable_note": "Confounded: the anchored tail f93-114 ended on f114, the first frame carrying the native take's defect trace, so the continuation inherited it. The mechanics work (anchor + seam); clean-tail retry is t03-CONT2-s1017 (tail f45-100, anchor f79-100)."
+ },
+ "t02v2-L-s1017": {
+  "reviewed": "guide/take pairs at 10 times; face crop at f156 side by side with t02v2-B-s1017; normal-speed playback not watched by a human",
+  "scores": {
+   "cast_identity": "not assessed (no reviewed turnarounds); relative to Ep1 refs both leads recognisable",
+   "all_human_ps2_style": 1,
+   "spatial_structure": 2,
+   "motion_contacts": 2,
+   "camera": 2,
+   "temporal_continuity": 2
+  },
+  "failure_timecodes": [
+   "0.00-8.00 s: garbled microtext under the GOJI logo (absent in B)"
+  ],
+  "passes": [
+   "hand stays on the handle from carry (f30) through the chest lift (f50-65) and the set-down (f70-88); released ~f90; bag fixed after",
+   "follows the guide from frame 0; one logo; fixed camera",
+   "therapist turn and open-palm gesture follow the guide"
+  ],
+  "style_note": "Indistinguishable from t02v2-B-s1017 (same seed): anchoring the look Subject text to <Picture 3> does not change the smooth 3D rendering; the reference images drive the look.",
+  "usable_seconds": 8.0,
+  "usable_note": "Complete 8 s action, same as B on this seed. The prompt-only look change has no visible effect."
+ },
+ "t02v2-L-s2026": {
+  "reviewed": "guide/take pairs at 10 times, bag/hand region every 5th frame 30-99; normal-speed playback not watched by a human",
+  "scores": {
+   "cast_identity": "not assessed (no reviewed turnarounds); relative to Ep1 refs both leads recognisable",
+   "all_human_ps2_style": 1,
+   "spatial_structure": 2,
+   "motion_contacts": 2,
+   "camera": 2,
+   "temporal_continuity": 2
+  },
+  "failure_timecodes": [],
+  "passes": [
+   "hand on the handle through carry, chest lift and set-down; released ~f90; bag fixed after",
+   "follows the guide from frame 0; one logo; fixed camera",
+   "therapist turn and gesture follow the guide"
+  ],
+  "style_note": "Indistinguishable from t02v2-B-s2026 (same seed): smooth 3D people. Look-anchor text has no visible effect on either seed.",
+  "usable_seconds": 8.0,
+  "usable_note": "Complete 8 s action, same as B on this seed."
  }
 }
