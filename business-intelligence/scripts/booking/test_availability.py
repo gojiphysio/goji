@@ -74,6 +74,29 @@ def test_paediatrics_focus_excludes_claire():
     assert set(out) == {"cheryl-long", "kristy-ng"}
 
 
+def test_home_visit_is_cheryl_for_every_physio_focus():
+    # Home visits sit above the sub-type roster: Cheryl takes them all, even
+    # Women's Health, which she doesn't do in-clinic (was an empty calendar).
+    for focus in (None, "general", "womens-health", "paediatrics", "scoliosis", "others"):
+        out = derive_availability(StubPlato([], CFG_ALL), "physiotherapy", WED,
+                                  focus=focus, home=True, now=NOW)
+        assert set(out) == {"cheryl-long"}, focus
+        assert out["cheryl-long"], focus
+
+
+def test_womens_health_in_clinic_still_excludes_cheryl():
+    out = derive_availability(StubPlato([], CFG_ALL), "physiotherapy", WED,
+                              focus="womens-health", now=NOW)
+    assert set(out) == {"claire-ng", "kristy-ng"}
+
+
+def test_month_shading_has_womens_health_home_days():
+    days = derive_available_days(StubPlato([], CFG_ALL), "physiotherapy",
+                                 date(2026, 7, 15), date(2026, 7, 17),
+                                 focus="womens-health", home=True, now=NOW)
+    assert days
+
+
 def test_free_day_gives_all_30min_starts():
     out = derive_availability(StubPlato([], CFG), "physiotherapy", WED, now=NOW)
     # 60-min appts, 30-min steps, window 09:00-12:00 -> last start 11:00.

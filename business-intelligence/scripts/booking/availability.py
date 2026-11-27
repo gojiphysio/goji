@@ -269,6 +269,14 @@ def _derive_day(
     # provide this service (e.g. Cheryl removed from Clinical Pilates).
     service_clinicians = SERVICE_CLINICIANS.get(service_id)
 
+    # Home visits sit ABOVE the sub-type and service rosters: the home-visit
+    # clinician (Cheryl) takes every home visit, for every physio sub-type —
+    # including ones she's off in-clinic (e.g. Women's Health). Without this the
+    # two rules intersect to nobody and the calendar shows no dates.
+    if home:
+        focus_allowed = None
+        service_clinicians = None
+
     # Duration: use variant duration if provided and available, else base service duration.
     duration_min = svc["duration_min"]
     if variant and svc.get("variants", {}).get(variant):

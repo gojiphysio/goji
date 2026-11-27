@@ -1456,8 +1456,10 @@ const steps = [
       let serviceEligible = cliniciansForService(svc.id).map((c) => c.id);
       // Within Physiotherapy, the chosen sub-type narrows the clinician set
       // (e.g. Scoliosis -> Cheryl only). No sub-type yet -> leave the full set.
+      // Home visits skip this: Cheryl takes every home visit, whatever the
+      // sub-type (incl. Women's Health) — mirrors availability.py on the backend.
       const focus = getChecked("physioFocus");
-      if (svc.id === "physiotherapy" && focus) {
+      if (svc.id === "physiotherapy" && focus && !home) {
         const focusIds = new Set(cliniciansForPhysioFocus(focus));
         serviceEligible = serviceEligible.filter((id) => focusIds.has(id));
       }

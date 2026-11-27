@@ -97,6 +97,15 @@ def test_home_visit_creates_three_blocks():
     assert p.created[2][0]["endtime"] == "2026-07-15 11:30:00"    # travel-after
 
 
+def test_womens_health_home_visit_books_cheryl():
+    # Cheryl is off Women's Health in-clinic, but home visits override that.
+    p = StubPlato()
+    res = create_booking(p, {**BASE, "format": "home", "clinician_id": "cheryl-long",
+                             "physio_focus": "womens-health",
+                             "address": "123B Lentor, S788887"}, now=NOW)
+    assert res["clinician_id"] == "cheryl-long" and len(p.created) == 3
+
+
 def test_home_visit_rolls_back_on_failure():
     p = StubPlato(fail_on_create=3)  # travel-after fails
     try:
