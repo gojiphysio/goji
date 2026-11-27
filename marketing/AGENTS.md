@@ -42,6 +42,8 @@ tab, honour these:
   choices from proposed camera/style defaults. Keep its installed copy in sync.
   The user's selected renderer is H3 with video reference; H3 indexed still
   guides can suit simpler scenes. Apply the skill's per-shot guidance routing.
+  Write H3 prompts in its structured format (six Ref2VA sections) with no ban
+  lists; `references/h3-practice.md` holds settings and which are untested.
   For San Andreas-specific appearance or behaviour, use the skill's
   `references/san-andreas-reference.md`: retain source-platform provenance and
   distinguish inspected footage, documented mechanics and proposed Goji values.

@@ -54,6 +54,15 @@ to future Goji GTA episodes; it is a production choice, not a universal leaderbo
 - If a still-guided take loses trajectory, timing, contacts or camera continuity
   between anchors, move to the continuous guide. Do not rescue the required
   action through cuts solely to keep the cheaper control route.
+- Stills connected only to `MiniMaxH3AddGuide` are invisible to the text
+  encoder. Also connect any still the prompt names to a `ref_images` slot.
+- **Candidate, untested here:** Fun ControlNet Union with a Blender depth or pose
+  pass, plus cast and look references. It takes structure without the guide's
+  appearance, so it may remove the style-conversion pass. Run it as a paired
+  test against the video-reference route on one shot before adopting it.
+
+Settings, frame grid, draft and final recipes, and the prompt format are in
+[h3-practice.md](h3-practice.md).
 
 Record the chosen route and reason in the shot record. Use the tested Ref2VA
 runtime route from the local pilot; the old FL2VA installation is not equivalent.
@@ -103,7 +112,12 @@ generation:
   frames: null
   seed: null
   prompt: null
-  negative_prompt: null  # only if supported
+  prompt_format: null    # H3: ref2va-six-section / base-three-field
+  negative_prompt: null  # only if supported; H3 has none (CFG 1)
+  adapter_and_strength: null  # e.g. Ref2V Turbo 4-step v0.1 @ 1.0, or none
+  steps: null
+  shifts_video_audio: null
+  ref_image_size: null   # H3: match / max
   controls_and_strengths: {}
   prompt_enhancement: null
   reference_order: []
@@ -131,7 +145,13 @@ Do not make a pose/reference sheet the literal opening composition. Start from
 the staged keyframe and describe the change through time. Keep the invariant
 style and character blocks stable, and keep action/camera instructions specific.
 
-Example for a supported image-to-video mode, after staging the matching frame:
+**For H3, use its own format.** Write the six Ref2VA sections (or three base-mode
+fields) from [the Ref2VA template](../assets/h3-ref2va-prompt-template.md), with
+roles set by `<Subject N>` lines and retention markers. Do not reuse the prose
+example below or any ban list for H3.
+
+Example of the content to cover, written as prose for a non-H3 image-to-video
+mode, after staging the matching frame:
 
 > One continuous eight-second PS2-era game shot. The maroon-clad woman follows
 > the pavement away from the rear-follow camera, carrying one black handbag in
@@ -162,6 +182,13 @@ models. Disable or inspect prompt enhancement when it adds modern realism.
 - Preserve latents only within a compatible model/VAE/workflow. Do not claim
   they can be carried between LTX, Wan and a closed API. Native continuation may
   alter earlier frames; keep the approved originals for the final edit.
+- With H3, first try to fit the action in one native take (up to about 15 s).
+  To continue a take, anchor its last 22 frames as a clip with
+  `MiniMaxH3AddGuide` at `frame_idx` 0 and keep the same Subject lines. A guide
+  clip is invisible to the text encoder; to name it as `<Video N>` with a
+  `[video continuation]` summary, also connect at least 2 s of the source take
+  as a reference video. This route is untested here; review the seam
+  as above.
 - Stop extending when identity, texture or geometry drifts. Repair from a clean
   canonical reference at an intentional scene boundary or change the control.
   Repeatedly sharpening or recolouring the last frame is not a reliable cure.
