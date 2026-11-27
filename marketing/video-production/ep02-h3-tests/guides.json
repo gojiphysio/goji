@@ -1,0 +1,98 @@
+{
+ "t01/layout": {
+  "path": "staging/t01/guides/t01-layout-192.mp4",
+  "source_frames": [
+   0,
+   192
+  ],
+  "frames": 192,
+  "fps": 24,
+  "size": "288x512",
+  "sha256": "345f8f9d0abe8a8c2bc52627834df8d4f16a6a2fd13fa63bc7a5fc90f2412a7d",
+  "stage_json_sha256": "5a0bfb2088f2dc4e8b1eb8b947a324f7e38106d425105475b24fd4a1325b37a8"
+ },
+ "t01/depth": {
+  "path": "staging/t01/guides/t01-depth-192.mp4",
+  "source_frames": [
+   0,
+   192
+  ],
+  "frames": 192,
+  "fps": 24,
+  "size": "576x1024",
+  "sha256": "50e4955897d8973fc73f8014fc6328959ba553feaf78bb02346fadd07ac9cd30",
+  "stage_json_sha256": "5a0bfb2088f2dc4e8b1eb8b947a324f7e38106d425105475b24fd4a1325b37a8"
+ },
+ "t02/layout": {
+  "path": "staging/t02/guides/t02-layout-192.mp4",
+  "source_frames": [
+   0,
+   192
+  ],
+  "frames": 192,
+  "fps": 24,
+  "size": "288x512",
+  "sha256": "8dfa4116780bf5936e11b29bf460bf7f893d96ed5a523f6ef9b04990a7364895",
+  "stage_json_sha256": "e92e4585f2e953d5b9e15625a8c739df8b412eb4573451ff1c1431f3a4387ce7"
+ },
+ "t02/depth": {
+  "path": "staging/t02/guides/t02-depth-192.mp4",
+  "source_frames": [
+   0,
+   192
+  ],
+  "frames": 192,
+  "fps": 24,
+  "size": "576x1024",
+  "sha256": "494ebcbb6d0eb466b48c365d7fe0446c308fa93995a6216151712a7c718d1fad",
+  "stage_json_sha256": "e92e4585f2e953d5b9e15625a8c739df8b412eb4573451ff1c1431f3a4387ce7"
+ },
+ "t03/layout": {
+  "path": "staging/t03/guides/t03-layout-362.mp4",
+  "source_frames": [
+   0,
+   362
+  ],
+  "frames": 362,
+  "fps": 24,
+  "size": "288x512",
+  "sha256": "725314e9c8ea6a8576fde185e0608ceb4db6ac1ab87713f808361b4729b3bf71",
+  "stage_json_sha256": "43d63e057f39452e8bafe2f710218bae2b75813ad932cbab979d9d0e5329f61d"
+ },
+ "t03/depth": {
+  "path": "staging/t03/guides/t03-depth-362.mp4",
+  "source_frames": [
+   0,
+   362
+  ],
+  "frames": 362,
+  "fps": 24,
+  "size": "576x1024",
+  "sha256": "cb9e9fd981be8be9c09844af70387204320f247d0ce6e26ba67d9212f005381c",
+  "stage_json_sha256": "43d63e057f39452e8bafe2f710218bae2b75813ad932cbab979d9d0e5329f61d"
+ },
+ "t03/layout-cont": {
+  "path": "staging/t03/guides/t03-layout-cont-192.mp4",
+  "source_frames": [
+   340,
+   532
+  ],
+  "frames": 192,
+  "fps": 24,
+  "size": "288x512",
+  "sha256": "cc2dd421b5e2b9fd6e54f5088cbd1be48e6aa1e1c0597140e170ba1b66d6ccff",
+  "stage_json_sha256": "43d63e057f39452e8bafe2f710218bae2b75813ad932cbab979d9d0e5329f61d"
+ },
+ "t03/depth-cont": {
+  "path": "staging/t03/guides/t03-depth-cont-192.mp4",
+  "source_frames": [
+   340,
+   532
+  ],
+  "frames": 192,
+  "fps": 24,
+  "size": "576x1024",
+  "sha256": "9ee657be6907fc835c7dafbae9202477cbbb90e5e70e2fc1379841bb1cdd2831",
+  "stage_json_sha256": "43d63e057f39452e8bafe2f710218bae2b75813ad932cbab979d9d0e5329f61d"
+ }
+}
