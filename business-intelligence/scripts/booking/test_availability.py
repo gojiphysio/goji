@@ -97,6 +97,42 @@ def test_month_shading_has_womens_health_home_days():
     assert days
 
 
+def _home(appts, **kw):
+    # CFG: Cheryl 09:00-12:00; a 60-min visit needs 30 min travel either side.
+    return derive_availability(StubPlato(appts, CFG), "physiotherapy", WED,
+                               home=True, now=NOW, **kw)["cheryl-long"]
+
+
+def test_home_visit_travel_fits_the_working_day_at_both_ends():
+    # 09:00 has no room for travel-before; 11:00 would travel back until 12:30.
+    assert _home([]) == ["09:30", "10:00", "10:30"]
+
+
+def test_home_visit_needs_travel_before_clear():
+    # A booking ending 09:30 blocks a 09:30 visit (travel 09:00-09:30 overlaps)
+    # but a 10:00 visit fits exactly (travel 09:30-10:00).
+    appts = [{"color": "blue", "starttime": "2026-07-15 09:00:00",
+              "endtime": "2026-07-15 09:30:00"}]
+    assert _home(appts) == ["10:00", "10:30"]
+
+
+def test_home_visit_needs_travel_after_clear():
+    # A booking from 11:30 blocks a 10:30 visit (travel back 11:30-12:00) but a
+    # 10:00 visit fits exactly (visit to 11:00, travel back 11:00-11:30).
+    appts = [{"color": "blue", "starttime": "2026-07-15 11:30:00",
+              "endtime": "2026-07-15 12:00:00"}]
+    assert _home(appts) == ["09:30", "10:00"]
+
+
+def test_same_day_home_visit_lead_counts_from_travel():
+    # now 08:30 + 60 min lead = 09:30. In-clinic 10:00 is fine, but a 10:00 home
+    # visit means leaving at 09:30, which isn't after the lead time.
+    now = datetime(2026, 7, 15, 8, 30)
+    out = derive_availability(StubPlato([], CFG), "physiotherapy", WED,
+                              home=True, now=now, same_day_lead=60)
+    assert out["cheryl-long"] == ["10:30"]
+
+
 def test_free_day_gives_all_30min_starts():
     out = derive_availability(StubPlato([], CFG), "physiotherapy", WED, now=NOW)
     # 60-min appts, 30-min steps, window 09:00-12:00 -> last start 11:00.

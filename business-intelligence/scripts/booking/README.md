@@ -334,7 +334,10 @@ Rules layered on top (`config.py`):
 - `CLINICIAN_AVAILABLE_FROM` (`config.py`): a clinician is not offered for any
   service before their start date — for a new starter whose Plato calendar is
   live early (Camille: 2026-11-01). Delete the entry once the date has passed.
-- Home visits: **Cheryl only**, ±30-min travel padding. This sits **above** the
+- Home visits: **Cheryl only**, ±30-min travel padding. A home-visit slot is
+  offered only if both 30-min travel blocks are free and fit inside Cheryl's
+  working hours (so her first home visit is 09:30 and the travel back ends by
+  17:00). A same-day lead time counts from the travel-before start. This sits **above** the
   physio sub-type and service rosters: Cheryl takes home visits for every
   sub-type, including Women's Health, which she doesn't do in-clinic. (Before
   this, the two rules intersected to nobody and Women's Health home visits
