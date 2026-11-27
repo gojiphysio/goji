@@ -82,13 +82,14 @@ This preference supersedes treating LTX as the default starting renderer.
 
 Within H3, separate draft and final renders. Drafts use the measured route
 (Ref2V Turbo 4-step v0.1, 576×1024). Finals should move toward the native
-768×1344 canvas with a newer 768p Ref2V adapter or a full-step run; those
-recipes are untested here, so the first one is an experiment. Fun ControlNet Union
-with a Blender depth or pose pass is the candidate replacement for the style
-conversion pass. Test it on one shot before routing an episode through it.
+768×1344 canvas with a newer 768p Ref2V adapter or a full-step run; see
+[h3-practice.md](references/h3-practice.md) for the measured 768p result.
+Fun ControlNet Union with a Blender depth pass was tested on 27 November and
+not adopted: it either lost to the cast and set references or overrode them.
 Author H3 guides on its 17k+5 frame grid (124, 192 … 362 frames at 24 fps).
-H3's native range is about 5–15 seconds, so an 8–15 second continuous action can
-be one take rather than an extension chain.
+H3 is trained up to about 15 seconds, but at the draft recipe 8-second takes
+held and the one native 15-second take broke at 4.75 s. Plan 8-second takes or
+deliberate cuts until a longer take passes on this runtime.
 
 Use LTX or Wan for a specific draft, fallback or requested comparison when useful;
 do not rerun a model comparison automatically for every episode.
@@ -127,7 +128,8 @@ H3 reads a structured prompt, not free prose. Ref2VA takes six sections in order
   Reuse those lines word for word across every shot of the episode.
 - Give the Blender clip one job: `<Video 1>` for motion, layout and camera path,
   marked `attribute_transfer`. Say its placeholder surfaces are replaced by the
-  look Subject.
+  look Subject. This only works for subjects that also have a reference image;
+  render text-only subjects (NPCs) as neutral grey clay in the guide.
 - Never write ban lists. H3 runs at CFG 1 with no negative branch, so "no extra
   cars" adds cars. Describe what exists instead.
 - Describe the low-poly look concretely and avoid photographic vocabulary.

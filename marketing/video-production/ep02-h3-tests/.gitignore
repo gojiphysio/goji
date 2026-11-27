@@ -1,0 +1,7 @@
+results/
+staging/*/frames/
+staging/*/depth/
+staging/*/*.blend*
+staging/*/*.mp4
+private/
+staging/*/guides/

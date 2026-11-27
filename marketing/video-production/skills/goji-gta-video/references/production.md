@@ -56,10 +56,10 @@ to future Goji GTA episodes; it is a production choice, not a universal leaderbo
   action through cuts solely to keep the cheaper control route.
 - Stills connected only to `MiniMaxH3AddGuide` are invisible to the text
   encoder. Also connect any still the prompt names to a `ref_images` slot.
-- **Candidate, untested here:** Fun ControlNet Union with a Blender depth or pose
-  pass, plus cast and look references. It takes structure without the guide's
-  appearance, so it may remove the style-conversion pass. Run it as a paired
-  test against the video-reference route on one shot before adopting it.
+- **Tested, not adopted (27 Nov):** Fun ControlNet Union with a Blender depth
+  pass plus cast and look references. At strength 1.0 the references won and the
+  layout came from a reference picture; at 2.0 the layout held but identity, set
+  look and prop shape were lost. Keep the raw Blender clip as `<Video 1>`.
 
 Settings, frame grid, draft and final recipes, and the prompt format are in
 [h3-practice.md](h3-practice.md).

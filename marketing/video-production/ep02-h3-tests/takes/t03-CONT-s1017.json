@@ -1,0 +1,402 @@
+{
+ "take": "t03-CONT-s1017",
+ "status": "generated",
+ "settings": {
+  "scene": "t03",
+  "variant": "CONT",
+  "seed": 1017,
+  "width": 576,
+  "height": 1024,
+  "frames": 192,
+  "steps": 4,
+  "lora": "minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors",
+  "shifts_video_audio": [
+   12.0,
+   3.0
+  ],
+  "ref_image_size": "match",
+  "sampler": "euler/simple",
+  "cfg": 1.0,
+  "prompt_key": "t03/CONT",
+  "prompt_sha256": "303511a2d5b97619420c648573cd616c30522be68b96b638253326ad22647b30",
+  "prompt_format": "ref2va-six-section"
+ },
+ "inputs": [
+  {
+   "role": "<Picture 1>",
+   "path": "marketing/video-production/skills/goji-gta-video/assets/ep01-reception.png",
+   "sha256": "fc4c68ddc41bb6f73092de7e5e743271b78d757433b10a885a423708caaa83f5",
+   "note": "Episode 1 recovered reference; cast turnarounds not reviewed"
+  },
+  {
+   "role": "<Picture 2>",
+   "path": "marketing/video-production/skills/goji-gta-video/assets/ep01-therapist-back.png",
+   "sha256": "b69e2e40d1f86b6f00c0e0ff490377d83da82f2a216b6cf5184eef954e0dd6a2",
+   "note": "Episode 1 recovered reference; cast turnarounds not reviewed"
+  },
+  {
+   "role": "<Picture 3>",
+   "path": "marketing/video-production/skills/goji-gta-video/assets/ep01-street.png",
+   "sha256": "396698cd2396bf7897d95fae1bb572b5ca67b41d17cfcae2a06c1496dd8d53e9",
+   "note": "Episode 1 recovered reference; cast turnarounds not reviewed"
+  },
+  {
+   "role": "<Video 1> source take frames 59-114",
+   "path": "/Users/tidepool/Projects/goji-ep02-runtime/takes/t03-CONT-s1017/source-tail-56.mp4",
+   "sha256": "9fd274561ff6a84d07799b7ba22f1b651226ca576275202a40acdf1339f65735",
+   "parent_take": "t03-B-s1017"
+  },
+  {
+   "role": "AddGuide clip: source frames 93-114 at frame_idx 0",
+   "path": "/Users/tidepool/Projects/goji-ep02-runtime/takes/t03-CONT-s1017/source-tail-22.mp4",
+   "sha256": "f0e663e5e1bb9a2ae64175c26be19ca40db1a4fa535c4fa6e760a9bc1a900eb0",
+   "parent_take": "t03-B-s1017"
+  },
+  {
+   "role": "<Video 2> Blender layout t03/layout-cont93",
+   "path": "staging/t03/guides/t03-layout-cont93-192.mp4",
+   "sha256": "1616cba3bed8ec7882b33663cdc7bf70b3553640288234a2baf95149b2b5da98",
+   "source_frames": [
+    93,
+    285
+   ]
+  }
+ ],
+ "runtime": {
+  "comfy_commit": "da8bd08e48deee74d9f6c3bc00aed365b00ec209",
+  "gguf_commit": "ff8d48666758866bcc9e93b22e1e07cb636e084f",
+  "launch": "GOJI_TEXT_ENCODER_MPS=1 .venv/bin/python main.py --port 8195 --use-pytorch-cross-attention --fp32-vae",
+  "hardware": "Mac M5 Pro, 64 GB unified memory",
+  "audio": "not decoded (no audio VAE connected)"
+ },
+ "workflow": {
+  "1": {
+   "class_type": "UnetLoaderGGUF",
+   "inputs": {
+    "unet_name": "minimax_h3_ref2va_pruned-Q4_K_M.gguf"
+   }
+  },
+  "2": {
+   "class_type": "CLIPLoaderGGUF",
+   "inputs": {
+    "clip_name": "qwen3vl_32b_minimax_h3-Q4_K_M.gguf",
+    "type": "minimax"
+   }
+  },
+  "3": {
+   "class_type": "VAELoader",
+   "inputs": {
+    "vae_name": "minimax_h3_video_vae_fp16.safetensors"
+   }
+  },
+  "4": {
+   "class_type": "LoraLoaderModelOnly",
+   "inputs": {
+    "model": [
+     "1",
+     0
+    ],
+    "lora_name": "minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors",
+    "strength_model": 1.0
+   }
+  },
+  "5": {
+   "class_type": "MiniMaxH3SigmaShift",
+   "inputs": {
+    "model": [
+     "4",
+     0
+    ],
+    "shift_video": 12.0,
+    "shift_audio": 3.0
+   }
+  },
+  "6": {
+   "class_type": "MiniMaxH3ReferenceToVideo",
+   "inputs": {
+    "clip": [
+     "2",
+     0
+    ],
+    "vae": [
+     "3",
+     0
+    ],
+    "prompt": "subject_definitions:\n<Subject 1> is the original 2004 PlayStation 2 game look shared by <Picture 1>, <Picture 2> and <Picture 3>: angular low-poly character meshes with simple joint deformation, flat painted textures with visible texel detail, simple diffuse shading, warm hazy light and a short draw distance.\n<Subject 2> is the Goji girl from <Picture 1> and <Picture 3>: an adult woman with a long black ponytail, a maroon sleeveless athletic top, matching maroon fitted leggings and white trainers, built as an angular PS2 character mesh with painted skin.\n<Subject 4> is the Goji physiotherapist from <Picture 1> and <Picture 2>: an adult woman with a short chin-length black bob tucked behind her ears, a fitted black short-sleeve crew-neck top with a small red Goji mark on her left chest and a plain black back, black full-length leggings and white shoes, built as an angular PS2 character mesh with painted skin.\n<Subject 7> is the Goji treatment room: cream walls, a warm wooden floor, a yellow exercise mat, a dark treatment plinth, wooden wall bars and a red exercise ball, rendered in the same painted style as <Picture 1>.\n<Video 1> is the end of the previous take, which this video continues directly from its last frame. <Video 2> is the Blender layout clip that defines every character's position, body movement, hand and foot contacts, timing and the camera for the continuation; its plain untextured placeholder figures and surfaces carry no appearance.\n\nsummary:\n[video continuation] Continue <Video 1> as one unbroken shot in the look of <Subject 1> inside <Subject 7>: <Subject 2> keeps doing slow bodyweight squats on the yellow mat while <Subject 4> watches, nods twice and claps twice, following the motion and camera arc of <Video 2>.\n\nretention_analysis:\n<Subject 1> (appears in [Shot 1]): fully_preserved - every surface and every person is rendered in the painted PS2 style.\n<Subject 2> (appears in [Shot 1]): fully_preserved - ponytail, maroon top, maroon leggings and white trainers stay unchanged.\n<Subject 4> (appears in [Shot 1]): fully_preserved - short bob, black top with the small chest mark, plain back and black leggings stay unchanged.\n<Subject 7> (appears in [Shot 1]): fully_preserved - mat, plinth, wall bars, ball and walls stay fixed in place.\n<Video 1> (the previous take): fully_preserved - the opening frames continue its last frame exactly, with the same people, lighting, colours and camera position.\n<Video 2> (positions, body movement, contacts, timing and camera): attribute_transfer - motion, contacts and camera are transferred to the styled characters while its placeholder figures and surfaces are fully replaced by <Subject 1>.\n\ndetailed_description:\nThe target video is original 2004 PlayStation 2 open-world gameplay footage with angular low-poly characters, flat painted textures, simple diffuse shading and warm hazy light, framed as vertical 9:16. Every person shares the same painted PS2 character style.\n[Shot 1] The shot continues from the last frame of <Video 1> without any change in lighting, colour, framing or camera speed. <Subject 2>, the woman with the long black ponytail in the maroon sleeveless top, maroon leggings and white trainers, is partway down a squat on the yellow mat; she finishes it and keeps squatting at the same steady rhythm, hips back, knees over her toes, arms rising straight out in front as she lowers and returning to her sides as she stands, heels flat on the mat. <Subject 4>, the woman with the short black bob in the black short-sleeve top with the small red mark on her left chest and black leggings, stands beside her on the right, watching. She nods twice, then claps her hands together twice in encouragement and lowers her hands to her sides. Both women keep their hands, fingers and feet clearly visible, and each keeps her own face, hair and clothes. The camera keeps arcing slowly to the right around them with small amplitude at slow speed, as it was moving at the end of <Video 1>, with the horizon level. These two women are the only people in the room, and every surface keeps the painted PS2 look of <Subject 1>.\n\noverall_soundscape:\nSoft breathing with each squat, the gentle squeak of trainers on a rubber mat, two light hand claps and a quiet room tone.\n\nnon_diegetic_music:\nN/A",
+    "width": 576,
+    "height": 1024,
+    "length": 192,
+    "ref_image_size": "match",
+    "ref_images.ref_image_0": [
+     "20",
+     0
+    ],
+    "ref_images.ref_image_1": [
+     "21",
+     0
+    ],
+    "ref_images.ref_image_2": [
+     "22",
+     0
+    ],
+    "ref_videos.ref_video_0": [
+     "33",
+     0
+    ],
+    "ref_videos.ref_video_1": [
+     "31",
+     0
+    ]
+   }
+  },
+  "7": {
+   "class_type": "BasicGuider",
+   "inputs": {
+    "model": [
+     "5",
+     0
+    ],
+    "conditioning": [
+     "42",
+     0
+    ]
+   }
+  },
+  "8": {
+   "class_type": "RandomNoise",
+   "inputs": {
+    "noise_seed": 1017
+   }
+  },
+  "9": {
+   "class_type": "KSamplerSelect",
+   "inputs": {
+    "sampler_name": "euler"
+   }
+  },
+  "10": {
+   "class_type": "BasicScheduler",
+   "inputs": {
+    "model": [
+     "5",
+     0
+    ],
+    "scheduler": "simple",
+    "steps": 4,
+    "denoise": 1.0
+   }
+  },
+  "11": {
+   "class_type": "SamplerCustomAdvanced",
+   "inputs": {
+    "noise": [
+     "8",
+     0
+    ],
+    "guider": [
+     "7",
+     0
+    ],
+    "sampler": [
+     "9",
+     0
+    ],
+    "sigmas": [
+     "10",
+     0
+    ],
+    "latent_image": [
+     "6",
+     1
+    ]
+   }
+  },
+  "12": {
+   "class_type": "VAEDecodeTiled",
+   "inputs": {
+    "samples": [
+     "11",
+     0
+    ],
+    "vae": [
+     "3",
+     0
+    ],
+    "tile_size": 256,
+    "overlap": 64,
+    "temporal_size": 64,
+    "temporal_overlap": 8
+   }
+  },
+  "13": {
+   "class_type": "CreateVideo",
+   "inputs": {
+    "images": [
+     "12",
+     0
+    ],
+    "fps": 24.0
+   }
+  },
+  "14": {
+   "class_type": "SaveVideo",
+   "inputs": {
+    "video": [
+     "13",
+     0
+    ],
+    "filename_prefix": "goji-ep02/t03-CONT-s1017",
+    "format": "mp4",
+    "format.codec": "h264"
+   }
+  },
+  "20": {
+   "class_type": "LoadImage",
+   "inputs": {
+    "image": "ep02-ep01-reception.png"
+   }
+  },
+  "21": {
+   "class_type": "LoadImage",
+   "inputs": {
+    "image": "ep02-ep01-therapist-back.png"
+   }
+  },
+  "22": {
+   "class_type": "LoadImage",
+   "inputs": {
+    "image": "ep02-ep01-street.png"
+   }
+  },
+  "32": {
+   "class_type": "LoadVideo",
+   "inputs": {
+    "file": "ep02-t03-CONT-s1017-source-tail-56.mp4"
+   }
+  },
+  "33": {
+   "class_type": "GetVideoComponents",
+   "inputs": {
+    "video": [
+     "32",
+     0
+    ]
+   }
+  },
+  "34": {
+   "class_type": "LoadVideo",
+   "inputs": {
+    "file": "ep02-t03-CONT-s1017-source-tail-22.mp4"
+   }
+  },
+  "35": {
+   "class_type": "GetVideoComponents",
+   "inputs": {
+    "video": [
+     "34",
+     0
+    ]
+   }
+  },
+  "30": {
+   "class_type": "LoadVideo",
+   "inputs": {
+    "file": "ep02-t03-layout-cont93-192.mp4"
+   }
+  },
+  "31": {
+   "class_type": "GetVideoComponents",
+   "inputs": {
+    "video": [
+     "30",
+     0
+    ]
+   }
+  },
+  "42": {
+   "class_type": "MiniMaxH3AddGuide",
+   "inputs": {
+    "positive": [
+     "6",
+     0
+    ],
+    "vae": [
+     "3",
+     0
+    ],
+    "latent": [
+     "6",
+     1
+    ],
+    "image": [
+     "35",
+     0
+    ],
+    "frame_idx": 0
+   }
+  }
+ },
+ "private_dir": "/Users/tidepool/Projects/goji-ep02-runtime/takes/t03-CONT-s1017",
+ "prompt_id": "63e25b45-8c9c-4e87-a9c2-16b69f8a95b3",
+ "submitted": 1795777165.5861042,
+ "wall_seconds": 2705.6,
+ "messages": [
+  [
+   "execution_start",
+   {
+    "prompt_id": "63e25b45-8c9c-4e87-a9c2-16b69f8a95b3",
+    "timestamp": 1795777165600
+   }
+  ],
+  [
+   "execution_cached",
+   {
+    "nodes": [
+     "1",
+     "2",
+     "3",
+     "4",
+     "5",
+     "9",
+     "10",
+     "20",
+     "21",
+     "22"
+    ],
+    "prompt_id": "63e25b45-8c9c-4e87-a9c2-16b69f8a95b3",
+    "timestamp": 1795777165606
+   }
+  ],
+  [
+   "execution_success",
+   {
+    "prompt_id": "63e25b45-8c9c-4e87-a9c2-16b69f8a95b3",
+    "timestamp": 1795779871215
+   }
+  ]
+ ],
+ "output": {
+  "path": "/Users/tidepool/Projects/goji-ep02-runtime/takes/t03-CONT-s1017/t03-CONT-s1017.mp4",
+  "sha256": "04632642cb2e8c7007d4993681456f21fcb3dc2f704a8f0fceb3742b98433851",
+  "probe": {
+   "width": 576,
+   "height": 1024,
+   "r_frame_rate": "24/1",
+   "nb_read_frames": "192"
+  }
+ },
+ "contact_frames": [
+  0,
+  17,
+  35,
+  52,
+  69,
+  87,
+  104,
+  122,
+  139,
+  156,
+  174,
+  191
+ ]
+}

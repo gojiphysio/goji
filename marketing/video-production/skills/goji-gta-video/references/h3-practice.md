@@ -1,7 +1,8 @@
 # MiniMax-H3 operating guide
 
 How to drive H3 for this series, written 27 November 2026 from the official
-guides, the installed ComfyUI nodes and our own takes. Each rule is tagged:
+guides, the installed ComfyUI nodes and our own takes, then corrected the same
+day from the Episode 2 hard-scene tests. Each rule is tagged:
 
 - **[official]** stated by MiniMax, Comfy-Org or the adapter authors
 - **[ours]** measured or verified in Goji's runtime
@@ -32,15 +33,18 @@ reuse. Sources are listed at the end.
 |---|---|---|
 | Path, timing, contacts or camera move matter | Ref2VA with the Blender clip as `<Video 1>` | Default. **[ours]** |
 | Simple action, fixed or easy camera | Ref2VA with chained `MiniMaxH3AddGuide` stills | Valid for simpler shots. **[ours]** |
-| Exact geometry or body pose from Blender | Fun ControlNet Union with a Blender depth or pose pass, plus cast/look references | Works with `ref2va` weights. **[untested]** |
-| Continue an accepted take | `MiniMaxH3AddGuide` with the last 22 frames of the take at `frame_idx` 0; also connect ≥2 s of the take as a reference video if the prompt names it | **[untested]** |
+| Exact geometry or body pose from Blender | Fun ControlNet Union with a Blender depth pass, plus cast/look references | Loads and runs with the Ref2VA Q4_K_M GGUF on MPS. With three reference images and Turbo 4-step: strength 1.0 ignored the depth layout; 2.0 held the layout but lost the girl's ponytail, the set's look and the bag's shape. Not a replacement for the video reference while cast and set references must hold. **[ours]**, one seed each |
+| Continue an accepted take | `MiniMaxH3AddGuide` with the last 22 frames of the take at `frame_idx` 0; also connect ≥2 s of the take as a reference video if the prompt names it, and the next Blender range as a second reference video | The anchored frames reproduce the source and the seam showed no pose, light or camera jump. The anchor also carries forward any defect already in the tail. End the tail before the first defect frame, checked frame by frame. A clean-tail retry joined to its source gave 9.13 s of continuous action; the squat scene still drifted to a different gym ~5.8 s into the continuation. **[ours]**, one source take |
 | Longer than 15 s | `MiniMaxH3ContextWindows` (windows on the 17-frame grid) or planned cuts | **[untested]** |
 
 The video-reference route carries the guide's appearance as well as its motion.
 That is why the chase needed a 31-minute style conversion before the guided
-takes. Fun ControlNet takes structure only (depth, pose, canny, HED, MLSD), so
-it may let a Blender pass replace that conversion. Test it on one shot before
-adopting it.
+takes. Fun ControlNet takes structure only (depth, pose, canny, HED, MLSD), but
+on Tidepool it either lost to the references or overrode them (above), so it has
+not replaced the conversion. The 27 November tests used the raw Blender clip as
+`<Video 1>` with cast and set reference images instead: subjects that have a
+reference image lost their proxy look; text-only subjects did not (see Labels).
+Results: [Episode 2 hard-scene tests](../../../ep02-h3-tests/README.md).
 
 ## Canvas, duration and frame grid
 
@@ -53,6 +57,11 @@ adopting it.
 - Author Blender guides at a grid length (124, 192, 362 and so on) instead of 121
   plus padding. A clip that is not on the grid is silently cropped (121 became
   107 in the chase). **[ours]**
+- At the draft recipe, 192-frame (8 s) takes held structure whenever the guide
+  was valid. The one native 362-frame (15 s) take broke at 4.75 s: a duplicate
+  person faded in, then the scene dissolved into a different gym. Treat 8 s as
+  the measured draft length and test any longer take before planning around it.
+  **[ours]**, one seed at 15 s
 - Reference videos are read as 24 fps with no metadata, 2–15 s each, up to three.
   Up to nine reference images. **[official]**
 - Crop guides and keyframes to 9:16 before loading. Off-aspect frames are
@@ -64,8 +73,8 @@ All H3 checkpoints are CFG-distilled: keep CFG 1, with no negative branch. **[of
 
 | Use | Recipe | Status |
 |---|---|---|
-| Draft (current) | Ref2V Turbo 4-step **v0.1** (544p-trained), 4 steps, euler, simple, shifts video 12 / audio 3, `ref_image_size: match`, 576×1024 | 13–17 min per 5 s take. **[ours]** |
-| Final candidate A | Ref2V Turbo **8-step v1.1 768p**, 8 steps, 768×1344 | Files exist since 20 Oct. The README does not state their shift; the FL2VA 768p adapters use 6 / 3. Confirm against lightx2v's Ref2VA example workflow before use. **[untested]** |
+| Draft (current) | Ref2V Turbo 4-step **v0.1** (544p-trained), 4 steps, euler, simple, shifts video 12 / audio 3, `ref_image_size: match`, 576×1024 | 13–17 min per 5 s take with one reference image. 25–31 min per 8 s take with three reference images and a 288×512, 192-frame guide (19 takes); 75 min for a 362-frame take (859 s per step); 45 min for a 192-frame continuation with two reference videos and a 22-frame anchor. **[ours]** |
+| Final candidate A | Ref2V Turbo **8-step v1.1 768p**, 8 steps, euler, simple, shifts 12 / 3, 768×1344 | The shift is inferred, not published: lightx2v's Ref2VA example workflow covers only 4-step v0.1 (12 / 3); their 8-step 768p Ref2V v1.0 post gives 12 / 3; their v1.1 post says the new shift 6 is for FL2V, not Ref2V. About 692 s per step, ~100 min per 8 s take. On T02 (two seeds) the action and contacts held and detail was sharper, but both takes rebuilt the set from the reference picture (added furniture, a glass entrance, the logo wall gone), which the 576 draft held on the same seeds. People kept the same smooth look. Not adopted yet. **[ours]** |
 | Final candidate B | No adapter, 20–25 steps, shifts 12 / 3, 768×1344 | Comfy's advice when references must hold; Turbo weakens reference and audio adherence. Expect roughly an hour or more per take here. **[untested]** |
 
 - Use `ref_image_size: match` with Turbo adapters, which were trained that way.
@@ -115,7 +124,11 @@ Keyframe modes open with the alignment line, for example
 - For a Blender motion guide, mark it `<Video 1> (motion, layout and camera path):
   attribute_transfer` and state plainly that its surfaces are placeholders and
   the look comes from the look Subject. This targets proxy appearance leaking
-  into the output. **[official]** guidance, **[untested]** for our proxies.
+  into the output. **[official]** guidance. **[ours]**: it worked for every
+  subject that also has a reference image (leads, sets, props). Subjects
+  described only in text kept their proxy colours and box heads (NPCs, 2 of 2
+  takes). Rendering those proxies as neutral grey clay in the guide fixed it
+  (2 of 2). Give a text-only subject clay in the guide or its own reference image.
 - Pictures connected only to `MiniMaxH3AddGuide` are invisible to the text
   encoder. Also connect them to `ref_images` if the prompt names them. **[official]**
 - Multi-panel character sheets are allowed as their own `<Picture N>` when each
@@ -131,6 +144,16 @@ Keyframe modes open with the alignment line, for example
   draw distance. Avoid photographic phrases (shallow depth of field, volumetric
   god rays), which pull toward realism. **[official]** for the photographic-term
   risk, **[untested]** for low-poly specifically.
+- Text does not override the reference images' rendering. Anchoring the look
+  Subject to the street reference instead of all three pictures left the
+  interior takes unchanged (same seed, near-identical frames, two seeds). The
+  Episode 1 interior references produce smooth modern 3D people; interiors need
+  a reviewed PS2 interior look frame before final renders. **[ours]**
+- Name a picture by its role inside a Subject line. A prose prompt that called
+  `<Picture 1>` "the appearance reference for the whole shot" reproduced its
+  composition for the first second, then dissolved into the guide (1 of 2
+  takes), and duplicated a wall logo (1 of 2). Six-section prompts did neither
+  in 17 takes. **[ours]**
 - Camera moves are natural sentences with type, amplitude and speed: "The camera
   follows behind the taxi at constant distance and pans left with small amplitude
   at slow speed." Leave out medium amplitude and normal speed. **[official]**
@@ -160,6 +183,9 @@ Keyframe modes open with the alignment line, for example
   softening along chains, colour drift on continuations. Composite exact signs
   and HUD separately. Community reports, so treat them as things to check, not
   facts. **[untested]**
+- Generated extras can fade in from a faint trace over several frames. Check a
+  contrast-boosted crop of empty floor or foreground before accepting a tail,
+  and do not rely on `ffmpeg scdet` alone: it does not flag dissolves. **[ours]**
 
 ## Sources (checked 27 November 2026)
 
