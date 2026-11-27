@@ -21,7 +21,6 @@ import {
   GENERAL_INTEREST,
   HEARD_ABOUT_OPTIONS,
   INTEREST_AREAS,
-  TRAINING_OPTIONS,
   WORKING_DAYS,
   openVacancies,
   type Vacancy,
@@ -185,21 +184,10 @@ const formId = general ? "interest-form" : "application-form";
               </div>
             </div>
 
-            <fieldset class="fld" data-field="training">
-              <legend class="fld__label">Relevant additional training or certifications (optional)</legend>
-              <div class="apply__options apply__options--cols">
-                {TRAINING_OPTIONS.map((o, i) => (
-                  <div class="chk">
-                    <input id={`f-training-${i}`} type="checkbox" name="training" value={o} data-other={o === "Other" ? "1" : undefined} />
-                    <label for={`f-training-${i}`}>{o}</label>
-                  </div>
-                ))}
-              </div>
-              <div class="fld" data-training-other hidden>
-                <label class="fld__label" for="f-training_other">Other training</label>
-                <input id="f-training_other" name="training_other" type="text" maxlength="200" />
-              </div>
-            </fieldset>
+            <div class="fld" data-field="training">
+              <label class="fld__label" for="f-training">Relevant additional training or certifications (optional)</label>
+              <textarea id="f-training" name="training" rows="2" maxlength="600" />
+            </div>
 
             <div class="fld" data-field="linkedin">
               <label class="fld__label" for="f-linkedin">LinkedIn profile URL (optional)</label>
@@ -811,13 +799,6 @@ const formId = general ? "interest-form" : "application-form";
     );
     daysSel?.addEventListener("change", checkDays);
     applyRole();
-
-    // ---- "Other" training ----
-    const otherBox = $<HTMLInputElement>('input[name="training"][data-other]');
-    const otherWrap = $("[data-training-other]");
-    otherBox?.addEventListener("change", () => {
-      if (otherWrap) otherWrap.hidden = !otherBox.checked;
-    });
 
     // ---- CV picker ----
     const cvInput = $<HTMLInputElement>("[data-cv-input]")!;

@@ -47,11 +47,7 @@ GENERAL_ID = "general"
 GENERAL_TITLE = "General expression of interest"
 
 # ---- form option lists (must match marketing/website/src/lib/vacancies.ts) ----
-AHPC_OPTIONS = ["Fully registered", "Conditionally registered",
-                "Registration pending", "Not currently registered"]
-TRAINING_OPTIONS = ["Clinical Pilates", "Mat or reformer Pilates", "Dry needling",
-                    "Women's health / Pelvic health", "Pre- and post-natal rehabilitation",
-                    "Strength and conditioning", "Sports rehabilitation", "Other"]
+AHPC_OPTIONS = ["Full registration", "Conditional registration"]
 INTEREST_AREAS = ["Physiotherapy", "Women's health physiotherapy", "Clinical leadership",
                   "Pilates instruction", "Clinic operations",
                   "Administration and patient care", "Something else"]
