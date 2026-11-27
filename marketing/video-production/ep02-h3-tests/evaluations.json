@@ -1,0 +1,92 @@
+{
+ "t02-A-s1017": {
+  "reviewed": "contact sheet, guide/take pairs at 10 times, every frame 24-48, bag region every 3rd frame 70-103; normal-speed playback not watched by a human",
+  "scores": {
+   "cast_identity": "not assessed (no reviewed turnarounds); relative to Ep1 refs both leads recognisable",
+   "all_human_ps2_style": 1,
+   "spatial_structure": 0,
+   "motion_contacts": 0,
+   "camera": 0,
+   "temporal_continuity": 0
+  },
+  "failure_timecodes": [
+   "0.00-1.00 s (f0-23): reproduces <Picture 1> composition (glass door, round table, chairs, different camera) instead of the guide",
+   "1.00-1.08 s (f23-26): dissolve into the guide layout (unplanned transition)",
+   "3.04-3.67 s (f73-88): handbag rises out of the tabletop and floats above it while her hand hangs at her side; no hand-handle contact or release"
+  ],
+  "passes": [
+   "walk path, stop position and lean follow the guide from 1.1 s",
+   "therapist turn 4.0-5.1 s and open-palm right-hand gesture 5.5-8 s follow the guide",
+   "proxy surfaces fully replaced; single bag; vase and table fixed"
+  ],
+  "style_note": "Smooth modern 3D characters like the Ep1 interior reference, not angular painted PS2 meshes",
+  "usable_seconds": 0.0,
+  "usable_note": "8 s required action fails (opening composition + bag teleport). Longest clean fragment 1.1-3.0 s (1.9 s) of walking only."
+ },
+ "t02-B-s1017": {
+  "reviewed": "guide/take pairs at 10 times, every frame 14-38, bag region every 3rd frame 64-103; normal-speed playback not watched by a human",
+  "scores": {
+   "cast_identity": "not assessed (no reviewed turnarounds); relative to Ep1 refs both leads recognisable",
+   "all_human_ps2_style": 1,
+   "spatial_structure": 2,
+   "motion_contacts": 0,
+   "camera": 2,
+   "temporal_continuity": 2
+  },
+  "failure_timecodes": [
+   "2.92-3.54 s (f70-85): handbag rises out of the tabletop and floats above it beside, not in, her left hand; settles at f85. Same failure as A-s1017."
+  ],
+  "passes": [
+   "follows the guide from frame 0: no <Picture 1> composition copy, no dissolve",
+   "walk, stop, therapist turn and open-palm gesture follow the guide",
+   "fixed camera, single bag, fixed vase and table"
+  ],
+  "style_note": "Smooth modern 3D people (interior-reference look), not angular painted PS2 meshes",
+  "usable_seconds": 0.0,
+  "usable_note": "Required 8 s action fails on the bag contact. Clean fragments 0-2.9 s and 3.6-8.0 s."
+ },
+ "t02-A-s2026": {
+  "reviewed": "guide/take pairs at 10 times, every frame 0-38, bag region every 3rd frame 64-103; normal-speed playback not watched by a human",
+  "scores": {
+   "cast_identity": "not assessed (no reviewed turnarounds); relative to Ep1 refs both leads recognisable",
+   "all_human_ps2_style": 1,
+   "spatial_structure": 1,
+   "motion_contacts": 0,
+   "camera": 2,
+   "temporal_continuity": 2
+  },
+  "failure_timecodes": [
+   "0.00-8.00 s: two GOJI logos side by side on the back wall (set duplication)",
+   "3.04-3.54 s (f73-85): handbag rises out of the tabletop and floats beside her left hand; settles at f85 (third take with this failure)"
+  ],
+  "passes": [
+   "follows the guide from frame 0 on this seed (no <Picture 1> copy)",
+   "walk, stop, therapist turn and gesture follow the guide"
+  ],
+  "style_note": "Smooth modern 3D people, not angular painted PS2 meshes",
+  "usable_seconds": 0.0,
+  "usable_note": "Required action fails on the bag contact; set duplication throughout."
+ },
+ "t02-B-s2026": {
+  "reviewed": "guide/take pairs at 10 times, every frame 0-38, bag region every 3rd frame 64-103; normal-speed playback not watched by a human",
+  "scores": {
+   "cast_identity": "not assessed (no reviewed turnarounds); relative to Ep1 refs both leads recognisable",
+   "all_human_ps2_style": 1,
+   "spatial_structure": 2,
+   "motion_contacts": 1,
+   "camera": 2,
+   "temporal_continuity": 2
+  },
+  "failure_timecodes": [
+   "2.92-3.04 s (f70-73): bag body emerges from behind the table front edge before the hand-handle link reads clearly; check at normal speed"
+  ],
+  "passes": [
+   "left hand stays on the handle from f73 to f82; bag set down at f85 and released; stays fixed after",
+   "follows the guide from frame 0",
+   "therapist turn and open-palm gesture follow the guide"
+  ],
+  "style_note": "Smooth modern 3D people, not angular painted PS2 meshes (fails the style gate)",
+  "usable_seconds": 8.0,
+  "usable_note": "Structurally complete 8 s action with a minor contact defect; fails the production style gate (style 1/2). Diagnostic 9/10 on the five scored categories, cast not assessed."
+ }
+}

@@ -24,7 +24,7 @@ PRIVATE = Path('/Users/tidepool/Projects/goji-ep02-runtime/takes')
 URL = 'http://127.0.0.1:8195'
 REFS = ROOT.parents[0] / 'skills/goji-gta-video/assets'
 REF_IMAGES = ['ep01-reception.png', 'ep01-therapist-back.png', 'ep01-street.png']
-FRAMES = {'t01': 192, 't02': 192, 't03': 362, 'CONT': 192}
+FRAMES = {'t01': 192, 't02': 192, 't02v2': 192, 't03': 362, 'CONT': 192}
 PROMPTS = json.loads((ROOT / 'prompts/ep02-prompts.json').read_text())
 GUIDES = json.loads((ROOT / 'guides.json').read_text())
 CONT_SOURCE = ROOT / 'takes' / 'cont-source.json'  # {"take": "t03-B-s1017"} chosen after review
@@ -55,7 +55,7 @@ def build(take):
     cont = variant == 'CONT'
     w, h = (768, 1344) if variant == 'C' else (288, 512) if smoke else (576, 1024)
     n = 124 if smoke else FRAMES['CONT' if cont else scene]
-    pkey = f'{scene}/{"B" if smoke else variant}'
+    pkey = f'{scene[:3]}/{"B" if smoke else variant}'  # t02v2 reuses the T02 prompts; only the guide changes
     prompt = PROMPTS[pkey]
     lora, steps = ('minimax_h3_ref2v_turbo_8step_v1.1_768p_comfyui_bf16.safetensors', 8) if variant == 'C' else \
                   ('minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors', 2 if smoke else 4)

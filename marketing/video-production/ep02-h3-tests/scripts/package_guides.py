@@ -12,6 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 JOBS = {
     't01': [('layout', 0, 192), ('depth', 0, 192)],
     't02': [('layout', 0, 192), ('depth', 0, 192)],
+    't02v2': [('layout', 0, 192), ('depth', 0, 192)],
     't03': [('layout', 0, 362), ('depth', 0, 362), ('layout-cont', 340, 192), ('depth-cont', 340, 192)],
 }
 

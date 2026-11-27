@@ -397,7 +397,7 @@ def walk_steps(t0, t1, first='R', period=.5):
 
 
 # ---------------------------------------------------------------- scenes
-def scene_t02():
+def scene_t02(v2=False):
     """Interior reception. GG-01 walks toward camera, places bag on the table,
     GP-01 turns from the shelf and gestures. 192 frames, fixed camera."""
     n = 192
@@ -436,6 +436,23 @@ def scene_t02():
     swing_off = lambda t: None
 
     def g_left(t):
+        if v2:
+            # v2: lift the bag to chest height while still walking, so it stays above
+            # the table edge in camera, then reach forward and lower it onto the top.
+            if t < 1.4:
+                return None
+            carry = gm.world(Vector((-.25, .02, .80)) * girl.scale, 1.4)
+            chest = lambda tt: gm.world(Vector((-.14, .32, 1.2)) * girl.scale, tt)
+            if t < 2.4:
+                u = smooth((t - 1.4) / .6)
+                c0 = gm.world(Vector((-.25, .02, .80)) * girl.scale, t)
+                return c0.lerp(chest(t), u)
+            keys = [(2.4, tuple(chest(2.4))), (3.0, tuple(hand_over + Vector((0, 0, .15)))),
+                    (3.5, tuple(hand_over)), (3.9, tuple(hand_over)),
+                    (4.6, tuple(gm.world(Vector((-.25, .02, .80)) * girl.scale, 4.6)))]
+            if t >= 4.6:
+                return None
+            return Vector(interp(keys, t))
         if t < 2.3:
             return None
         carry = gm.world(Vector((-.25, .02, .80)) * girl.scale, t)
@@ -464,7 +481,7 @@ def scene_t02():
     tm.hand['R'] = t_right
     tm.head_turn = lambda t: interp([(0, 0), (3.6, 0), (4.0, -.5), (5.1, -.35), (8, -.35)], t)
     tm.nod = lambda t: interp([(0, 0), (6.2, 0), (6.5, .18), (6.8, 0)], t)
-    cam = camera((.4, -.15, 1.38), (.4, 2.6, 1.0), hfov=48)
+    cam = camera((.4, -.15, 1.62), (.4, 2.6, .95), hfov=48) if v2 else camera((.4, -.15, 1.38), (.4, 2.6, 1.0), hfov=48)
     light((math.radians(55), 0, math.radians(-35)), 1.8, (.55, .47, .36))
     pt = bpy.data.lights.new('ceiling', 'AREA')
     pt.energy, pt.size = 150, 3
@@ -610,7 +627,7 @@ def scene_t03():
     return n, [gm, tm], dict(girl=girl), cam
 
 
-n, motions, extra, cam = {'t01': scene_t01, 't02': scene_t02, 't03': scene_t03}[SCENE]()
+n, motions, extra, cam = {'t01': scene_t01, 't02': scene_t02, 't02v2': lambda: scene_t02(True), 't03': scene_t03}[SCENE]()
 sc = bpy.context.scene
 sc.render.fps = FPS
 sc.frame_start, sc.frame_end = 0, n - 1
@@ -673,7 +690,7 @@ if RENDER != 'none':
         bpy.ops.render.render(write_still=True)
     if DEPTH:
         # Fixed-range depth (near = white), identical mapping for every frame.
-        near, far = {'t01': (1.0, 30.0), 't02': (1.5, 7.0), 't03': (2.0, 7.5)}[SCENE]
+        near, far = {'t01': (1.0, 30.0), 't02': (1.5, 7.0), 't02v2': (1.5, 7.0), 't03': (2.0, 7.5)}[SCENE]
         dm = bpy.data.materials.new('depth override')
         dm.use_nodes = True
         nt = dm.node_tree
