@@ -44,6 +44,8 @@ tab, honour these:
   guides can suit simpler scenes. Apply the skill's per-shot guidance routing.
   Write H3 prompts in its structured format (six Ref2VA sections) with no ban
   lists; `references/h3-practice.md` holds settings and which are untested.
+  In H3 Blender guides, render any person with no reference image as grey clay
+  and keep handled props above occluding edges in camera (Episode 2 tests).
   For San Andreas-specific appearance or behaviour, use the skill's
   `references/san-andreas-reference.md`: retain source-platform provenance and
   distinguish inspected footage, documented mechanics and proposed Goji values.

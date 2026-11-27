@@ -397,5 +397,28 @@
   "style_note": "Same smooth modern 3D people as the 576 draft; resolution improves, style does not.",
   "usable_seconds": 8.0,
   "usable_note": "Complete 8 s action with a set-fidelity defect on both C seeds. 101 min versus ~30 min for the draft."
+ },
+ "t03-CONT2-s1017": {
+  "reviewed": "every 8th frame, source f95-100 vs continuation f16-27 across the seam, upper-frame crop every 2nd frame 128-160; normal-speed playback not watched by a human",
+  "label": "continuation (192 frames) of t03-B-s1017 from a clean tail: source f45-100 as <Video 1>, f79-100 anchored at frame_idx 0, Blender 79-270 as <Video 2>",
+  "scores": {
+   "cast_identity": "not assessed",
+   "all_human_ps2_style": 1,
+   "spatial_structure": 1,
+   "motion_contacts": 2,
+   "camera": 2,
+   "temporal_continuity": 1
+  },
+  "failure_timecodes": [
+   "5.83 s (f140): the power-rack gym from the native take starts to dissolve in from the top of frame; full by ~f165"
+  ],
+  "passes": [
+   "no inherited ghost: the clean tail removed it",
+   "seam (source f100 / continuation f22) has no pose, light or camera jump; squat rhythm and arc continue",
+   "f22-139 clean: squats, therapist nods and claps follow the guide"
+  ],
+  "style_note": "Smooth 3D people, as in the source take",
+  "usable_seconds": 4.92,
+  "usable_note": "New clean footage f22-139 (4.92 s). Joined with source f0-100 gives 9.13 s of continuous clean action from two generations. The gym drift recurs ~5-6 s into each generation of this squat scene independently of the tail, so it is a prompt/scene prior, not a continuation artefact."
  }
 }
