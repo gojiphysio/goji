@@ -850,3 +850,64 @@ def test_priority_sends_concern_and_slots_and_pings_staff_at_once(env, with_staf
     assert [k for k, _ in notes] == ["priority"]  # email backup too
     assert "let our team know" in notes[0][1]["sent_reply"]
     assert app_mod.store.load(CUSTOMER).mode == AGENT
+
+
+# --- resume answers a message left waiting (owner, 27 Nov 2026) ---------------
+
+def test_resume_answers_the_message_waiting_in_a_pre_golive_chat(env, with_staff):
+    # A patient Chris spoke to before go-live asks to move Tuesday's session.
+    # The chat is Chris's, so it pauses silently; RESUME must answer it now,
+    # not wait for a next message that may never come.
+    client, rec, _, _ = env
+    now = time.time()
+    app_mod.store.set_go_live(now - 3 * DAY)
+    app_mod.store.save(ChatState(wa_id=CUSTOMER, last_customer_at=now - 10 * DAY,
+                                 last_staff_at=now - 10 * DAY))
+    post(client, inbound(ts=int(now - 1800), text="Down with flu, can I postpone Tuesday?"))
+    assert silent_reasons(rec)[-1] == "pre_golive_chat" and app_mod.wa.sent == []
+    code = app_mod.store.load(CUSTOMER).code
+    app_mod.claude.queue.append(final(reply="Sorry to hear that! Let me find you a new time."))
+    post(client, inbound(wa_id=CHRIS, text=f"resume {code}", ts=int(now), msg_id="s1"))
+    assert [to for to, _ in app_mod.wa.sent] == [CUSTOMER, CHRIS]
+    assert app_mod.wa.sent[0][1].startswith("Sorry to hear that")
+    assert "replying to it now" in app_mod.wa.sent[1][1]
+    st = app_mod.store.load(CUSTOMER)
+    assert st.mode == AGENT and [h["role"] for h in st.history][-2:] == ["customer", "agent"]
+    assert "resume_answer" in names(rec)
+
+
+def test_resume_leaves_a_message_past_the_24h_window(env, with_staff):
+    client, rec, _, _ = env
+    now = int(time.time())
+    post(client, echo(ts=now - 3 * DAY))                       # Chris wrote: paused
+    post(client, inbound(ts=now - 2 * DAY, msg_id="wamid.a"))  # waiting, but 2 days old
+    code = app_mod.store.load(CUSTOMER).code
+    post(client, inbound(wa_id=CHRIS, text=f"resume {code}", ts=now, msg_id="s1"))
+    assert [to for to, _ in app_mod.wa.sent] == [CHRIS]
+    assert "next message" in app_mod.wa.sent[-1][1]
+
+
+def test_resume_with_the_kill_switch_on_sends_nothing(env, with_staff):
+    client, rec, _, _ = env
+    now = int(time.time())
+    post(client, echo(ts=now - 900))                       # Chris wrote: paused
+    post(client, inbound(ts=now - 600, msg_id="wamid.a"))  # they wrote back: waiting
+    code = app_mod.store.load(CUSTOMER).code
+    app_mod.store.set_kill(True)
+    post(client, inbound(wa_id=CHRIS, text=f"resume {code}", ts=now, msg_id="s1"))
+    assert [to for to, _ in app_mod.wa.sent] == [CHRIS]
+    assert "next message" in app_mod.wa.sent[-1][1]
+
+
+def test_admin_handback_answers_a_waiting_message(env):
+    client, rec, _, _ = env
+    now = int(time.time())
+    post(client, echo(ts=now - 900))
+    post(client, inbound(ts=now - 600, msg_id="wamid.a"))
+    assert app_mod.wa.sent == []
+    app_mod.claude.queue.append(final(reply="Happy to help with that."))
+    r = client.post(f"/admin/chats/{CUSTOMER}/handback", headers=ADMIN)
+    assert r.get_json()["answering"] is True
+    assert app_mod.wa.sent == [(CUSTOMER, "Happy to help with that.")]
+    r = client.post(f"/admin/chats/{CUSTOMER}/handback", headers=ADMIN)
+    assert r.get_json()["answering"] is False                # answered: nothing more

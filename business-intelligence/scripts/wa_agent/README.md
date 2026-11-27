@@ -161,8 +161,12 @@ provider forwards Meta's signature (if not: `USE_URL_TOKEN=1`, below), and the
 - *Resume over WhatsApp.* Every chat has a short code (`#004`) shown in pings,
   the STATUS reply and the morning summary, which lists every paused chat.
   Chris texts `RESUME 004` (or `PAUSE 004`) to the Goji number from her phone.
-  Resuming sends the customer nothing: the assistant just answers their next
-  message. The admin hand-back route does the same.
+  If the customer's last message is still unanswered and under 23 hours old
+  (`policy.unanswered_message`), the assistant answers it straight away, through
+  the usual gate and checks: a patient who wrote into a paused chat was
+  otherwise left waiting (owner, 27 Nov 2026). If anyone already replied,
+  resuming sends nothing and the assistant answers their next message. The
+  admin hand-back route does the same.
 - *Answer through the assistant* (owner, 24 Nov 2026). Once the team has the
   answer, Chris swipe-replies to the ping with it (or texts `ANSWER 004 ...`).
   The assistant writes it up, sends it, looks after the chat again and shows
