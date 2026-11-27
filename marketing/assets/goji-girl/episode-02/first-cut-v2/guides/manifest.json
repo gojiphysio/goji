@@ -1,0 +1,37 @@
+[
+  {
+    "file": "03-guide-v2.mp4",
+    "sha256": "2cfa4674ff8ddd266848b79c4e0f2ec8fbd4bb8a34e03e3779a96b2bfd2620f0",
+    "role": "original Blender motion, camera and contacts only; appearance supplied separately"
+  },
+  {
+    "file": "04-guide-v2.mp4",
+    "sha256": "112205d695974f9a1881fff91e48993c030f260c7d015eb1e2cab6da52500c45",
+    "role": "original Blender motion, camera and contacts only; appearance supplied separately"
+  },
+  {
+    "file": "06-guide-v2.mp4",
+    "sha256": "9f04087c18f89c1c65721cf7af1b667caa235ab19caf66a0b24bc1d81350547e",
+    "role": "original Blender motion, camera and contacts only; appearance supplied separately"
+  },
+  {
+    "file": "07-guide-v2.mp4",
+    "sha256": "2db41ba5e15c5d00ad9f6118cf83a7715bc0306c1b2af02ca4c735fe7f6fbb41",
+    "role": "original Blender motion, camera and contacts only; appearance supplied separately"
+  },
+  {
+    "file": "08-guide-v2.mp4",
+    "sha256": "1be843474dd54d7344862de98748c478fc63290e617263b9afc1f25a119b26c5",
+    "role": "original Blender motion, camera and contacts only; appearance supplied separately"
+  },
+  {
+    "file": "09-guide-v2.mp4",
+    "sha256": "f51eeab838c4ef43cf7e5f616c0a77ac6df70aae7c51517d7b7ba24883df191a",
+    "role": "original Blender motion, camera and contacts only; appearance supplied separately"
+  },
+  {
+    "file": "10-guide-v2.mp4",
+    "sha256": "1cbf5ccbe2d29e3e6d8bb65d87e1e33773bc60a3c30017b5b99dd390e107c2de",
+    "role": "original Blender motion, camera and contacts only; appearance supplied separately"
+  }
+]

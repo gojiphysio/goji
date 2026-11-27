@@ -1,0 +1,266 @@
+{
+  "kind": "mixed animated/storyboard review checkpoint",
+  "shot_ranges": [
+    {
+      "shot": "01",
+      "source": "takes/01-01/raw_00001_.mp4",
+      "kind": "animated take",
+      "start_seconds": 0,
+      "duration": 3,
+      "video_filter": "",
+      "sha256": "449d814633a66a26c69e9c67dbca9b36fffc161b1c1e391ae4be77dd9811a7f1"
+    },
+    {
+      "shot": "02",
+      "source": "takes/02-01/raw_00001_.mp4",
+      "kind": "animated take",
+      "start_seconds": 3,
+      "duration": 2,
+      "video_filter": "",
+      "sha256": "72532bcba8a60ddfb764205220c485ea5c0dbb6e0497d751908868c055094045"
+    },
+    {
+      "shot": "03",
+      "source": "takes/03-01/raw_00001_.mp4",
+      "kind": "animated take",
+      "start_seconds": 5,
+      "duration": 3,
+      "video_filter": "",
+      "sha256": "f29679a688a4aa088eb54d5b073aa36530aa654f8c5402f046ad2f5813885fa9"
+    },
+    {
+      "shot": "04",
+      "source": "takes/04-02/raw_00001_.mp4",
+      "kind": "animated take",
+      "start_seconds": 8,
+      "duration": 3,
+      "video_filter": "",
+      "sha256": "0838f46b157e914d1bd51baf02de9d5c08d3486c5aa82c92ee9dac54a9fa5e73"
+    },
+    {
+      "shot": "05",
+      "source": "inputs/05-appearance.png",
+      "kind": "storyboard hold",
+      "start_seconds": 11,
+      "duration": 4,
+      "video_filter": "",
+      "sha256": "3e4e11001cfb0a23c68ff0f98de8d50c143a8eed61a9d890645d700bb3f3632e"
+    },
+    {
+      "shot": "06",
+      "source": "takes/06-02/raw_00001_.mp4",
+      "kind": "animated take",
+      "start_seconds": 15,
+      "duration": 5,
+      "video_filter": "crop=486:864:0:80",
+      "sha256": "246827831719b7aafadf0da9a478e11e75206e10bd7a86fb2642e33543a01e84"
+    },
+    {
+      "shot": "07",
+      "source": "inputs/07-appearance.png",
+      "kind": "storyboard hold",
+      "start_seconds": 20,
+      "duration": 5,
+      "video_filter": "",
+      "sha256": "13aa6ab2256b81ad2794dab3a31c170288236c3cd173d53908c4b017e7198869"
+    },
+    {
+      "shot": "08",
+      "source": "takes/08-02/raw_00001_.mp4",
+      "kind": "animated take",
+      "start_seconds": 25,
+      "duration": 6,
+      "video_filter": "",
+      "sha256": "1d8d88e5ad4d2e1c9b826d57435b54a201ff02b869829e74c628a1e4230f264b"
+    },
+    {
+      "shot": "09",
+      "source": "inputs/09-appearance.png",
+      "kind": "storyboard hold",
+      "start_seconds": 31,
+      "duration": 2,
+      "video_filter": "",
+      "sha256": "15d56b6df76125acee73cf37ae1f4b69bbf11874504fceaa6d7ff5fc07a33577"
+    },
+    {
+      "shot": "10",
+      "source": "inputs/10-appearance.png",
+      "kind": "storyboard hold",
+      "start_seconds": 33,
+      "duration": 4,
+      "video_filter": "",
+      "sha256": "b0032023cd18a67a32d7db13d350247483ec0333fb263bdf5af809c7a54b8714"
+    },
+    {
+      "shot": "11",
+      "source": "inputs/11-appearance.png",
+      "kind": "storyboard hold",
+      "start_seconds": 37,
+      "duration": 2,
+      "video_filter": "",
+      "sha256": "566079d405cc1efdac878c708b5fee14771d879cdf4b65c49f9e647b698bd720"
+    },
+    {
+      "shot": "12",
+      "source": "inputs/12-appearance.png",
+      "kind": "storyboard hold",
+      "start_seconds": 39,
+      "duration": 8,
+      "video_filter": "",
+      "sha256": "1641ae9f0196af4df78fd6c3774db371b68ba497c49c5e487b56bee0e92e2ca7"
+    }
+  ],
+  "overlays": {
+    "calendar": [
+      3,
+      5
+    ],
+    "safehouse": [
+      41.5,
+      46
+    ]
+  },
+  "audio": "SFX only, original procedural synthesis",
+  "probe": {
+    "streams": [
+      {
+        "index": 0,
+        "codec_name": "h264",
+        "codec_long_name": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+        "profile": "High",
+        "codec_type": "video",
+        "codec_tag_string": "avc1",
+        "codec_tag": "0x31637661",
+        "mime_codec_string": "avc1.64001f",
+        "width": 576,
+        "height": 1024,
+        "coded_width": 576,
+        "coded_height": 1024,
+        "has_b_frames": 2,
+        "sample_aspect_ratio": "1:1",
+        "display_aspect_ratio": "9:16",
+        "pix_fmt": "yuv420p",
+        "level": 31,
+        "color_range": "tv",
+        "color_space": "bt709",
+        "color_transfer": "iec61966-2-1",
+        "color_primaries": "bt709",
+        "chroma_location": "left",
+        "field_order": "progressive",
+        "is_avc": "true",
+        "nal_length_size": "4",
+        "id": "0x1",
+        "r_frame_rate": "24/1",
+        "avg_frame_rate": "1126/47",
+        "time_base": "1/12288",
+        "start_pts": 0,
+        "start_time": "0.000000",
+        "duration_ts": 577536,
+        "duration": "47.000000",
+        "bit_rate": "1148304",
+        "bits_per_raw_sample": "8",
+        "nb_frames": "1126",
+        "extradata_size": 49,
+        "disposition": {
+          "default": 1,
+          "dub": 0,
+          "original": 0,
+          "comment": 0,
+          "lyrics": 0,
+          "karaoke": 0,
+          "forced": 0,
+          "hearing_impaired": 0,
+          "visual_impaired": 0,
+          "clean_effects": 0,
+          "attached_pic": 0,
+          "timed_thumbnails": 0,
+          "non_diegetic": 0,
+          "captions": 0,
+          "descriptions": 0,
+          "metadata": 0,
+          "dependent": 0,
+          "still_image": 0,
+          "multilayer": 0
+        },
+        "tags": {
+          "language": "und",
+          "handler_name": "VideoHandler",
+          "encoder": "Lavc63.1.102 libx264"
+        }
+      },
+      {
+        "index": 1,
+        "codec_name": "aac",
+        "codec_long_name": "AAC (Advanced Audio Coding)",
+        "profile": "LC",
+        "codec_type": "audio",
+        "codec_tag_string": "mp4a",
+        "codec_tag": "0x6134706d",
+        "mime_codec_string": "mp4a.40.2",
+        "sample_fmt": "fltp",
+        "sample_rate": "48000",
+        "channels": 2,
+        "channel_layout": "stereo",
+        "bits_per_sample": 0,
+        "initial_padding": 1024,
+        "id": "0x2",
+        "r_frame_rate": "0/0",
+        "avg_frame_rate": "0/0",
+        "time_base": "1/48000",
+        "start_pts": 0,
+        "start_time": "0.000000",
+        "duration_ts": 2256000,
+        "duration": "47.000000",
+        "bit_rate": "150134",
+        "nb_frames": "2205",
+        "extradata_size": 5,
+        "disposition": {
+          "default": 1,
+          "dub": 0,
+          "original": 0,
+          "comment": 0,
+          "lyrics": 0,
+          "karaoke": 0,
+          "forced": 0,
+          "hearing_impaired": 0,
+          "visual_impaired": 0,
+          "clean_effects": 0,
+          "attached_pic": 0,
+          "timed_thumbnails": 0,
+          "non_diegetic": 0,
+          "captions": 0,
+          "descriptions": 0,
+          "metadata": 0,
+          "dependent": 0,
+          "still_image": 0,
+          "multilayer": 0
+        },
+        "tags": {
+          "language": "und",
+          "handler_name": "SoundHandler"
+        }
+      }
+    ],
+    "format": {
+      "filename": "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/first-cut-v1/deliverables/review-checkpoint-01.mp4",
+      "nb_streams": 2,
+      "nb_programs": 0,
+      "nb_stream_groups": 0,
+      "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+      "format_long_name": "QuickTime / MOV",
+      "start_time": "0.000000",
+      "duration": "47.000000",
+      "size": "7662806",
+      "bit_rate": "1304307",
+      "probe_score": 100,
+      "tags": {
+        "major_brand": "isom",
+        "minor_version": "512",
+        "compatible_brands": "isomiso2avc1mp41",
+        "encoder": "Lavf63.1.102"
+      }
+    }
+  },
+  "sha256": "95dddc2258665edc938e69ae8746cb087cd69b8bb1686ff13333bdc2607e96a5",
+  "full_decode_verified": true
+}

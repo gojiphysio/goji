@@ -1,0 +1,20 @@
+{
+  "commit": "f3139ee",
+  "checked_at": 1795679985.1245718,
+  "assets": [
+    {
+      "url": "https://raw.githubusercontent.com/gojiphysio/goji/f3139ee/marketing/assets/goji-girl/episode-02/first-cut-v2/README.md",
+      "http_status": 200,
+      "bytes": 2793,
+      "sha256": "dc7ce93ee4d1301379ffd0e52ed72bb6870af59cfffe014d91455a0693a9a709",
+      "matches_local": true
+    },
+    {
+      "url": "https://raw.githubusercontent.com/gojiphysio/goji/f3139ee/marketing/assets/goji-girl/episode-02/first-cut-v2/deliverables/chase-crash-motion-test.mp4",
+      "http_status": 200,
+      "bytes": 5281372,
+      "sha256": "dbcc772b80a718caa02f6ccf759aed1fc3029cce98b63b395f413eac7b21f2f8",
+      "matches_local": true
+    }
+  ]
+}

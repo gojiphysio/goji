@@ -1,0 +1,264 @@
+{
+  "prompt": [
+    0,
+    "30a17479-1517-45f2-a19d-9b58304592fd",
+    {
+      "1": {
+        "class_type": "UnetLoaderGGUF",
+        "inputs": {
+          "unet_name": "minimax_h3_ref2va_pruned-Q4_K_M.gguf"
+        }
+      },
+      "2": {
+        "class_type": "CLIPLoaderGGUF",
+        "inputs": {
+          "clip_name": "qwen3vl_32b_minimax_h3-Q4_K_M.gguf",
+          "type": "minimax"
+        }
+      },
+      "3": {
+        "class_type": "VAELoader",
+        "inputs": {
+          "vae_name": "minimax_h3_video_vae_fp16.safetensors"
+        }
+      },
+      "4": {
+        "class_type": "LoraLoaderModelOnly",
+        "inputs": {
+          "model": [
+            "1",
+            0
+          ],
+          "lora_name": "minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors",
+          "strength_model": 1.0
+        }
+      },
+      "5": {
+        "class_type": "MiniMaxH3SigmaShift",
+        "inputs": {
+          "model": [
+            "4",
+            0
+          ],
+          "shift_video": 12.0,
+          "shift_audio": 3.0
+        }
+      },
+      "6": {
+        "class_type": "MiniMaxH3ReferenceToVideo",
+        "inputs": {
+          "clip": [
+            "2",
+            0
+          ],
+          "vae": [
+            "3",
+            0
+          ],
+          "prompt": "A continuous eight-second FIXED clinic cutscene, exact medium-wide composition of <Picture 1>. Goji Girl lies on the reformer in maroon outfit and grip socks and performs ONE slow controlled footwork repetition: extend knees smoothly as carriage moves away from footbar, then bend to return. Feet stay planted on footbar. Therapist in fitted BLACK crew-neck shirt and leggings, short black bob and white shoes, leans forward and actively watches knee alignment; one open hand cues the near knee while the other demonstrates extension direction. She follows the movement, not a passive pose. One pair white shoes and ONE black handbag remain on bench. Behind glass TWO police face inward and RUN IN PLACE against glass with alternating knees and pumping arms, no forward progress, slightly out of phase. Farther outside the same overturned double-decker burns; no pedestrians near flames, no explosion. Everyone inside remains utterly calm. Keep people separate, reformer rigid and feet attached; no new equipment. No text box in generated pixels; safehouse tutorial will be composited separately. Original GTA San Andreas PlayStation 2 graphics throughout: angular economical character meshes, painted low-resolution skin/clothing/vehicle textures, restrained broad diffuse shading and period game animation. Preserve the same adult woman, maroon sleeveless top and leggings, one black ponytail and grip socks. Her white shoes and ONE black handbag stay on the bench throughout, never in her hands or on the reformer. Every NPC matches the same PS2 rendering. Preserve the architecture, lighting and palette of <Picture 1>. No photoreal faces, no modern glossy rendering, no cartoon toy figures, no body morphing, no new logos, HUD, wanted stars, captions or baked text overlays. No shot changes. No speech or music.",
+          "width": 576,
+          "height": 1024,
+          "length": 192,
+          "ref_image_size": "match",
+          "ref_images.ref_image_0": [
+            "20",
+            0
+          ]
+        }
+      },
+      "7": {
+        "class_type": "BasicGuider",
+        "inputs": {
+          "model": [
+            "5",
+            0
+          ],
+          "conditioning": [
+            "30",
+            0
+          ]
+        }
+      },
+      "8": {
+        "class_type": "RandomNoise",
+        "inputs": {
+          "noise_seed": 2026112712
+        }
+      },
+      "9": {
+        "class_type": "KSamplerSelect",
+        "inputs": {
+          "sampler_name": "euler"
+        }
+      },
+      "10": {
+        "class_type": "BasicScheduler",
+        "inputs": {
+          "model": [
+            "5",
+            0
+          ],
+          "scheduler": "simple",
+          "steps": 4,
+          "denoise": 1.0
+        }
+      },
+      "11": {
+        "class_type": "SamplerCustomAdvanced",
+        "inputs": {
+          "noise": [
+            "8",
+            0
+          ],
+          "guider": [
+            "7",
+            0
+          ],
+          "sampler": [
+            "9",
+            0
+          ],
+          "sigmas": [
+            "10",
+            0
+          ],
+          "latent_image": [
+            "6",
+            1
+          ]
+        }
+      },
+      "12": {
+        "class_type": "VAEDecodeTiled",
+        "inputs": {
+          "samples": [
+            "11",
+            0
+          ],
+          "vae": [
+            "3",
+            0
+          ],
+          "tile_size": 256,
+          "overlap": 64,
+          "temporal_size": 64,
+          "temporal_overlap": 8
+        }
+      },
+      "13": {
+        "class_type": "CreateVideo",
+        "inputs": {
+          "images": [
+            "12",
+            0
+          ],
+          "fps": 24.0
+        }
+      },
+      "14": {
+        "class_type": "SaveVideo",
+        "inputs": {
+          "video": [
+            "13",
+            0
+          ],
+          "filename_prefix": "12-02/raw",
+          "format": "mp4",
+          "format.codec": "h264"
+        }
+      },
+      "20": {
+        "class_type": "LoadImage",
+        "inputs": {
+          "image": "12-appearance.png"
+        }
+      },
+      "30": {
+        "class_type": "MiniMaxH3AddGuide",
+        "inputs": {
+          "positive": [
+            "6",
+            0
+          ],
+          "latent": [
+            "6",
+            1
+          ],
+          "vae": [
+            "3",
+            0
+          ],
+          "image": [
+            "20",
+            0
+          ],
+          "frame_idx": 0
+        }
+      }
+    },
+    {
+      "create_time": 1795671233585
+    },
+    [
+      "14"
+    ]
+  ],
+  "outputs": {
+    "14": {
+      "images": [
+        {
+          "filename": "raw_00001_.mp4",
+          "subfolder": "12-02",
+          "type": "output",
+          "metadata": {
+            "kind": "video",
+            "width": 576,
+            "height": 1024,
+            "duration": 8.0,
+            "fps": 24.0,
+            "frame_count": 192
+          }
+        }
+      ],
+      "animated": [
+        true
+      ]
+    }
+  },
+  "status": {
+    "status_str": "success",
+    "completed": true,
+    "messages": [
+      [
+        "execution_start",
+        {
+          "prompt_id": "30a17479-1517-45f2-a19d-9b58304592fd",
+          "timestamp": 1795671233585
+        }
+      ],
+      [
+        "execution_cached",
+        {
+          "nodes": [],
+          "prompt_id": "30a17479-1517-45f2-a19d-9b58304592fd",
+          "timestamp": 1795671233588
+        }
+      ],
+      [
+        "execution_success",
+        {
+          "prompt_id": "30a17479-1517-45f2-a19d-9b58304592fd",
+          "timestamp": 1795672357752
+        }
+      ]
+    ]
+  },
+  "meta": {
+    "14": {
+      "node_id": "14",
+      "display_node": "14",
+      "parent_node": null,
+      "real_node_id": "14"
+    }
+  }
+}

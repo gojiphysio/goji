@@ -1,0 +1,390 @@
+{
+  "prompt": [
+    4.0,
+    "86c61b23-ade6-4382-9409-c1539138bd40",
+    {
+      "1": {
+        "class_type": "UnetLoaderGGUF",
+        "inputs": {
+          "unet_name": "minimax_h3_ref2va_pruned-Q4_K_M.gguf"
+        }
+      },
+      "2": {
+        "class_type": "CLIPLoaderGGUF",
+        "inputs": {
+          "clip_name": "qwen3vl_32b_minimax_h3-Q4_K_M.gguf",
+          "type": "minimax"
+        }
+      },
+      "3": {
+        "class_type": "VAELoader",
+        "inputs": {
+          "vae_name": "minimax_h3_video_vae_fp16.safetensors"
+        }
+      },
+      "4": {
+        "class_type": "LoraLoaderModelOnly",
+        "inputs": {
+          "model": [
+            "1",
+            0
+          ],
+          "lora_name": "minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors",
+          "strength_model": 1.0
+        }
+      },
+      "5": {
+        "class_type": "MiniMaxH3SigmaShift",
+        "inputs": {
+          "model": [
+            "4",
+            0
+          ],
+          "shift_video": 12.0,
+          "shift_audio": 3.0
+        }
+      },
+      "6": {
+        "class_type": "MiniMaxH3ReferenceToVideo",
+        "inputs": {
+          "clip": [
+            "2",
+            0
+          ],
+          "vae": [
+            "3",
+            0
+          ],
+          "prompt": "One uninterrupted three-second third-person gameplay run AROUND the FRONT NOSE of the parked double-decker, from passenger side to driver side. Start with the girl on the sidewalk. She runs PAST the open passenger entrance without entering it, continues in front of the windscreen, then rounds the other front corner onto the road and stops beside the compact DRIVER WINDOW. The bus stays parked, completely stationary. The girl never boards during this shot. The corrected <Video 1> gives the full route and collision-free camera, and the supplied final frame anchors her arrival at the driver window. Preserve the full continuous turn; no cut or teleport. Use <Picture 1> for the exact finished bus and woman appearance: formed rounded sheet-metal corners, inset dark glazing, detailed wheel arches/rims/lamps, orange-red/purple/white SOS Transit livery, maroon clothing and black bag in LEFT hand. <Video 1> contains crude planning blocks ONLY: use their positions, timing and camera, NEVER their boxy silhouettes, flat toy surfaces or primitive faces as the finished geometry. Original PS2 GTA San Andreas painted textures and economical but properly formed vehicle mesh. Camera follows the whole run around the nose without entering the bus. Pedestrians remain clear on pavement; nobody is touched. No extra characters, HUD, captions or stars. Blender primitives govern ONLY world positions, motion, contacts and camera. Reconstruct the FINISHED MESH SHAPES from the approved appearance image: formed rounded bus corners, inset glazing, detailed wheel arches, rims, lamps and bumpers, and the approved human anatomy. Never merely paint textures onto the guide boxes or reproduce their blocky silhouettes or primitive faces. Match the original PS2 running cycle in the guide: forward-pitched torso, squared flared bent elbows, pronounced heel recovery and brisk repeated footfalls. BOTH arms pump firmly through the same full range, including the left arm holding the handbag. Keep a regular game-animation cadence along the full continuous route, slowing only to stop at the driver window. The handbag is a STIFF rigid game prop attached to the moving LEFT hand. Its body and handle keep their exact shape and rotate/translate WITH that hand through the FULL arm pump. Never hold the bag arm still, pin it beside the hip, reduce its swing, stretch the bag or animate it like soft cloth. Match both-arm motion in the video guide. The handbag is oriented ALONGSIDE HER BODY: its long side runs fore-aft, broad face points outward to her left, and the rear camera mostly sees its narrow gusset/end. Keep this orientation FIXED TO HER GRIP and rotate it with her wrist/arm, never swivel the broad front or gold clasp to face camera. No independent dangling, bag flattening or camera-facing billboard. <Video 2> is the selected FINISHED LOCOMOTION reference only: reproduce its repeated full two-arm pumping and rigid narrow-end handbag orientation throughout every stride. Do not copy its house, road, people, framing or route. <Video 1> remains the authoritative route, contacts and camera for THIS shot; <Picture 1> remains its finished appearance. Keep the full arm range of Video2 after the first stride and through the turn.",
+          "width": 576,
+          "height": 1024,
+          "length": 73,
+          "ref_image_size": "match",
+          "ref_images.ref_image_0": [
+            "20",
+            0
+          ],
+          "ref_videos.ref_video_0": [
+            "22",
+            0
+          ],
+          "ref_videos.ref_video_1": [
+            "103",
+            0
+          ]
+        }
+      },
+      "7": {
+        "class_type": "BasicGuider",
+        "inputs": {
+          "model": [
+            "5",
+            0
+          ],
+          "conditioning": [
+            "32",
+            0
+          ]
+        }
+      },
+      "8": {
+        "class_type": "RandomNoise",
+        "inputs": {
+          "noise_seed": 2026113004
+        }
+      },
+      "9": {
+        "class_type": "KSamplerSelect",
+        "inputs": {
+          "sampler_name": "euler"
+        }
+      },
+      "10": {
+        "class_type": "BasicScheduler",
+        "inputs": {
+          "model": [
+            "5",
+            0
+          ],
+          "scheduler": "simple",
+          "steps": 4,
+          "denoise": 1.0
+        }
+      },
+      "11": {
+        "class_type": "SamplerCustomAdvanced",
+        "inputs": {
+          "noise": [
+            "8",
+            0
+          ],
+          "guider": [
+            "7",
+            0
+          ],
+          "sampler": [
+            "9",
+            0
+          ],
+          "sigmas": [
+            "10",
+            0
+          ],
+          "latent_image": [
+            "6",
+            1
+          ]
+        }
+      },
+      "12": {
+        "class_type": "VAEDecodeTiled",
+        "inputs": {
+          "samples": [
+            "11",
+            0
+          ],
+          "vae": [
+            "3",
+            0
+          ],
+          "tile_size": 256,
+          "overlap": 64,
+          "temporal_size": 64,
+          "temporal_overlap": 8
+        }
+      },
+      "13": {
+        "class_type": "CreateVideo",
+        "inputs": {
+          "images": [
+            "12",
+            0
+          ],
+          "fps": 24.0
+        }
+      },
+      "14": {
+        "class_type": "SaveVideo",
+        "inputs": {
+          "video": [
+            "13",
+            0
+          ],
+          "filename_prefix": "04-01/raw",
+          "format": "mp4",
+          "format.codec": "h264"
+        }
+      },
+      "20": {
+        "class_type": "LoadImage",
+        "inputs": {
+          "image": "04-grip-side-on.png"
+        }
+      },
+      "21": {
+        "class_type": "LoadVideo",
+        "inputs": {
+          "file": "04-guide-grip-v3.mp4"
+        }
+      },
+      "22": {
+        "class_type": "GetVideoComponents",
+        "inputs": {
+          "video": [
+            "21",
+            0
+          ]
+        }
+      },
+      "102": {
+        "class_type": "LoadVideo",
+        "inputs": {
+          "file": "03-selected-locomotion-reference.mp4"
+        }
+      },
+      "103": {
+        "class_type": "GetVideoComponents",
+        "inputs": {
+          "video": [
+            "102",
+            0
+          ]
+        }
+      },
+      "30": {
+        "class_type": "MiniMaxH3AddGuide",
+        "inputs": {
+          "positive": [
+            "6",
+            0
+          ],
+          "latent": [
+            "6",
+            1
+          ],
+          "vae": [
+            "3",
+            0
+          ],
+          "image": [
+            "20",
+            0
+          ],
+          "frame_idx": 0
+        }
+      },
+      "31": {
+        "class_type": "LoadImage",
+        "inputs": {
+          "image": "04-end-v2.png"
+        }
+      },
+      "32": {
+        "class_type": "MiniMaxH3AddGuide",
+        "inputs": {
+          "positive": [
+            "30",
+            0
+          ],
+          "latent": [
+            "6",
+            1
+          ],
+          "vae": [
+            "3",
+            0
+          ],
+          "image": [
+            "31",
+            0
+          ],
+          "frame_idx": 72
+        }
+      }
+    },
+    {
+      "create_time": 1795681918246
+    },
+    [
+      "14"
+    ]
+  ],
+  "outputs": {
+    "102": {
+      "images": [
+        {
+          "filename": "03-selected-locomotion-reference.mp4",
+          "subfolder": "",
+          "type": "input",
+          "metadata": {
+            "kind": "video",
+            "width": 576,
+            "height": 1024,
+            "duration": 3.0416666666666665,
+            "fps": 24.0,
+            "frame_count": 73
+          }
+        }
+      ],
+      "animated": [
+        true
+      ]
+    },
+    "21": {
+      "images": [
+        {
+          "filename": "04-guide-grip-v3.mp4",
+          "subfolder": "",
+          "type": "input",
+          "metadata": {
+            "kind": "video",
+            "width": 288,
+            "height": 512,
+            "duration": 3.0416666666666665,
+            "fps": 24.0,
+            "frame_count": 73
+          }
+        }
+      ],
+      "animated": [
+        true
+      ]
+    },
+    "14": {
+      "images": [
+        {
+          "filename": "raw_00001_.mp4",
+          "subfolder": "04-01",
+          "type": "output",
+          "metadata": {
+            "kind": "video",
+            "width": 576,
+            "height": 1024,
+            "duration": 3.0416666666666665,
+            "fps": 24.0,
+            "frame_count": 73
+          }
+        }
+      ],
+      "animated": [
+        true
+      ]
+    }
+  },
+  "status": {
+    "status_str": "success",
+    "completed": true,
+    "messages": [
+      [
+        "execution_start",
+        {
+          "prompt_id": "86c61b23-ade6-4382-9409-c1539138bd40",
+          "timestamp": 1795682310423
+        }
+      ],
+      [
+        "execution_cached",
+        {
+          "nodes": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "9",
+            "10"
+          ],
+          "prompt_id": "86c61b23-ade6-4382-9409-c1539138bd40",
+          "timestamp": 1795682310429
+        }
+      ],
+      [
+        "execution_success",
+        {
+          "prompt_id": "86c61b23-ade6-4382-9409-c1539138bd40",
+          "timestamp": 1795683541839
+        }
+      ]
+    ]
+  },
+  "meta": {
+    "102": {
+      "node_id": "102",
+      "display_node": "102",
+      "parent_node": null,
+      "real_node_id": "102"
+    },
+    "21": {
+      "node_id": "21",
+      "display_node": "21",
+      "parent_node": null,
+      "real_node_id": "21"
+    },
+    "14": {
+      "node_id": "14",
+      "display_node": "14",
+      "parent_node": null,
+      "real_node_id": "14"
+    }
+  }
+}

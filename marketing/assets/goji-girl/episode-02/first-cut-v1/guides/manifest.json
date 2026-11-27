@@ -1,0 +1,72 @@
+[
+  {
+    "shot": "04",
+    "fps": 24,
+    "source_fps": 12,
+    "source_frames": 37,
+    "encoded_frames": 73,
+    "padded_seconds": 0.04166666666666652,
+    "sha256": "8199d5314eea43a8aa8cba39b865977265eabb93ac57939f663b57e7b77c8488",
+    "role": "continuous Blender motion/layout guidance, not final appearance"
+  },
+  {
+    "shot": "05",
+    "fps": 24,
+    "source_fps": 12,
+    "source_frames": 49,
+    "encoded_frames": 107,
+    "padded_seconds": 0.45833333333333304,
+    "sha256": "a3ed8605890c0fc05103d39df0fe4c7103c589732ed13820252437a36e87b60e",
+    "role": "continuous Blender motion/layout guidance, not final appearance"
+  },
+  {
+    "shot": "06",
+    "fps": 24,
+    "source_fps": 12,
+    "source_frames": 61,
+    "encoded_frames": 124,
+    "padded_seconds": 0.16666666666666696,
+    "sha256": "919fefff1ac4384564654dc42ff0b2673b9a9311b4da77740823d52541237e13",
+    "role": "continuous Blender motion/layout guidance, not final appearance"
+  },
+  {
+    "shot": "07",
+    "fps": 24,
+    "source_fps": 12,
+    "source_frames": 61,
+    "encoded_frames": 124,
+    "padded_seconds": 0.16666666666666696,
+    "sha256": "5f283f41e81403a5d7fda0ccac5892589c91a0ecce3ac2240577eaffd76f4ae7",
+    "role": "continuous Blender motion/layout guidance, not final appearance"
+  },
+  {
+    "shot": "08",
+    "fps": 24,
+    "source_fps": 12,
+    "source_frames": 73,
+    "encoded_frames": 158,
+    "padded_seconds": 0.583333333333333,
+    "sha256": "c596b9c384efa83df39b877c1ea3851511fd9511e94c1570e42378a0f540ac55",
+    "role": "continuous Blender motion/layout guidance, not final appearance"
+  },
+  {
+    "shot": "09",
+    "fps": 24,
+    "source_fps": 12,
+    "source_frames": 25,
+    "encoded_frames": 56,
+    "padded_seconds": 0.3333333333333335,
+    "sha256": "8da84f99c8f582f90685a470fe3d4c6ed52e4e82966ff7e83d373da3dc79983c",
+    "role": "continuous Blender motion/layout guidance, not final appearance"
+  },
+  {
+    "shot": "10",
+    "fps": 24,
+    "source_fps": 12,
+    "source_frames": 49,
+    "encoded_frames": 107,
+    "padded_seconds": 0.45833333333333304,
+    "sha256": "f4cf48db41d760a3b041abf55e273bff4f243d8b04136501367fc1151e500b12",
+    "role": "continuous Blender motion/layout guidance, not final appearance"
+  }
+]

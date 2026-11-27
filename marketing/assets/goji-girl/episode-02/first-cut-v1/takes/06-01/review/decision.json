@@ -1,0 +1,5 @@
+{
+  "decision": "rejected",
+  "reason": "H3 adds maroon-clad woman running behind moving bus, contradicting her driving. Bus appearance and ambient lighting otherwise remain coherent.",
+  "repair": "Remove generic on-foot character block; add vehicle-only first frame and explicit empty-road condition."
+}

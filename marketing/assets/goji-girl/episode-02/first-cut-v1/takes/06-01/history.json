@@ -1,0 +1,295 @@
+{
+  "prompt": [
+    7,
+    "126168e4-994c-477a-b1aa-a6a393acbffb",
+    {
+      "1": {
+        "class_type": "UnetLoaderGGUF",
+        "inputs": {
+          "unet_name": "minimax_h3_ref2va_pruned-Q4_K_M.gguf"
+        }
+      },
+      "2": {
+        "class_type": "CLIPLoaderGGUF",
+        "inputs": {
+          "clip_name": "qwen3vl_32b_minimax_h3-Q4_K_M.gguf",
+          "type": "minimax"
+        }
+      },
+      "3": {
+        "class_type": "VAELoader",
+        "inputs": {
+          "vae_name": "minimax_h3_video_vae_fp16.safetensors"
+        }
+      },
+      "4": {
+        "class_type": "LoraLoaderModelOnly",
+        "inputs": {
+          "model": [
+            "1",
+            0
+          ],
+          "lora_name": "minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors",
+          "strength_model": 1.0
+        }
+      },
+      "5": {
+        "class_type": "MiniMaxH3SigmaShift",
+        "inputs": {
+          "model": [
+            "4",
+            0
+          ],
+          "shift_video": 12.0,
+          "shift_audio": 3.0
+        }
+      },
+      "6": {
+        "class_type": "MiniMaxH3ReferenceToVideo",
+        "inputs": {
+          "clip": [
+            "2",
+            0
+          ],
+          "vae": [
+            "3",
+            0
+          ],
+          "prompt": "A continuous five-second rear vehicle chase shot.  Use <Picture 1> ONLY as the approved appearance reference. Use <Video 1> as the continuous spatial, action and camera guide; replace its primitive surfaces and proxy humans with the detailed painted PS2 look of Picture1. Follow the video motion, not the static pose of Picture1. The same SOS Transit double-decker accelerates northbound and swerves within the LEFT road side. Chase camera stays behind the bus, rear grille and taillights face camera; no front view or orbit. Rigid chassis, turning road wheels, suspension lean. Red and blue police flashes are uneven AMBIENT SPILL from unseen chase cars BEHIND the camera, staggered and offset; no paired lights or emitters on bus. No pedestrians in road; no collision. Bus is empty except seated woman driver. Original GTA San Andreas PlayStation 2 graphics throughout: angular economical character meshes, painted low-resolution skin/clothing/vehicle textures, restrained broad diffuse shading and period game animation. Preserve the same adult woman, maroon sleeveless top and leggings, one black ponytail, white shoes and ONE small black handbag carried LEFT. Every NPC matches the same PS2 rendering. Preserve the architecture, lighting and palette of <Picture 1>. No photoreal faces, no modern glossy rendering, no cartoon toy figures, no body morphing, no new logos, HUD, wanted stars, captions or baked text overlays. No shot changes. No speech or music.",
+          "width": 576,
+          "height": 1024,
+          "length": 124,
+          "ref_image_size": "match",
+          "ref_images.ref_image_0": [
+            "20",
+            0
+          ],
+          "ref_videos.ref_video_0": [
+            "22",
+            0
+          ]
+        }
+      },
+      "7": {
+        "class_type": "BasicGuider",
+        "inputs": {
+          "model": [
+            "5",
+            0
+          ],
+          "conditioning": [
+            "6",
+            0
+          ]
+        }
+      },
+      "8": {
+        "class_type": "RandomNoise",
+        "inputs": {
+          "noise_seed": 2026112706
+        }
+      },
+      "9": {
+        "class_type": "KSamplerSelect",
+        "inputs": {
+          "sampler_name": "euler"
+        }
+      },
+      "10": {
+        "class_type": "BasicScheduler",
+        "inputs": {
+          "model": [
+            "5",
+            0
+          ],
+          "scheduler": "simple",
+          "steps": 4,
+          "denoise": 1.0
+        }
+      },
+      "11": {
+        "class_type": "SamplerCustomAdvanced",
+        "inputs": {
+          "noise": [
+            "8",
+            0
+          ],
+          "guider": [
+            "7",
+            0
+          ],
+          "sampler": [
+            "9",
+            0
+          ],
+          "sigmas": [
+            "10",
+            0
+          ],
+          "latent_image": [
+            "6",
+            1
+          ]
+        }
+      },
+      "12": {
+        "class_type": "VAEDecodeTiled",
+        "inputs": {
+          "samples": [
+            "11",
+            0
+          ],
+          "vae": [
+            "3",
+            0
+          ],
+          "tile_size": 256,
+          "overlap": 64,
+          "temporal_size": 64,
+          "temporal_overlap": 8
+        }
+      },
+      "13": {
+        "class_type": "CreateVideo",
+        "inputs": {
+          "images": [
+            "12",
+            0
+          ],
+          "fps": 24.0
+        }
+      },
+      "14": {
+        "class_type": "SaveVideo",
+        "inputs": {
+          "video": [
+            "13",
+            0
+          ],
+          "filename_prefix": "06-01/raw",
+          "format": "mp4",
+          "format.codec": "h264"
+        }
+      },
+      "20": {
+        "class_type": "LoadImage",
+        "inputs": {
+          "image": "06-appearance.png"
+        }
+      },
+      "21": {
+        "class_type": "LoadVideo",
+        "inputs": {
+          "file": "06-guide.mp4"
+        }
+      },
+      "22": {
+        "class_type": "GetVideoComponents",
+        "inputs": {
+          "video": [
+            "21",
+            0
+          ]
+        }
+      }
+    },
+    {
+      "create_time": 1795658188157
+    },
+    [
+      "14"
+    ]
+  ],
+  "outputs": {
+    "21": {
+      "images": [
+        {
+          "filename": "06-guide.mp4",
+          "subfolder": "",
+          "type": "input",
+          "metadata": {
+            "kind": "video",
+            "width": 288,
+            "height": 512,
+            "duration": 5.166666666666667,
+            "fps": 24.0,
+            "frame_count": 124
+          }
+        }
+      ],
+      "animated": [
+        true
+      ]
+    },
+    "14": {
+      "images": [
+        {
+          "filename": "raw_00001_.mp4",
+          "subfolder": "06-01",
+          "type": "output",
+          "metadata": {
+            "kind": "video",
+            "width": 576,
+            "height": 1024,
+            "duration": 5.166666666666667,
+            "fps": 24.0,
+            "frame_count": 124
+          }
+        }
+      ],
+      "animated": [
+        true
+      ]
+    }
+  },
+  "status": {
+    "status_str": "success",
+    "completed": true,
+    "messages": [
+      [
+        "execution_start",
+        {
+          "prompt_id": "126168e4-994c-477a-b1aa-a6a393acbffb",
+          "timestamp": 1795661910082
+        }
+      ],
+      [
+        "execution_cached",
+        {
+          "nodes": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "9",
+            "10"
+          ],
+          "prompt_id": "126168e4-994c-477a-b1aa-a6a393acbffb",
+          "timestamp": 1795661910085
+        }
+      ],
+      [
+        "execution_success",
+        {
+          "prompt_id": "126168e4-994c-477a-b1aa-a6a393acbffb",
+          "timestamp": 1795662951893
+        }
+      ]
+    ]
+  },
+  "meta": {
+    "21": {
+      "node_id": "21",
+      "display_node": "21",
+      "parent_node": null,
+      "real_node_id": "21"
+    },
+    "14": {
+      "node_id": "14",
+      "display_node": "14",
+      "parent_node": null,
+      "real_node_id": "14"
+    }
+  }
+}

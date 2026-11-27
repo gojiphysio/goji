@@ -1,0 +1,363 @@
+{
+  "shot": "08",
+  "take": "02",
+  "status": "provisional_selection",
+  "started": 1795679025.44078,
+  "recipe": "H3 Ref2VA GGUF Q4 + native Turbo 4-step; 576x1024 24fps",
+  "native_frames": 192,
+  "edit_seconds": 8,
+  "guidance": "video",
+  "prompt": "One continuous EIGHT-second original GTA San Andreas PS2 bus-exit interaction. Same stationary SOS Transit double decker rests on RIGHT side, passenger side UP, undercarriage facing camera, real front passenger door behind intact white front corner. Follow the complete contact-driven action in <Video 1>. At start only head/shoulders peek through real passenger doorway, hips and legs still INSIDE. Brief deadpan pause. BOTH palms grip actual frame, elbows flex as she leans torso over sill; lift ONE KNEE and hook it over the sill, transfer weight onto that knee and planted palm, pull hips across, bring other foot out. She remains CROUCHED LOW with bent knees, never floats vertically upright. Around2.8seconds, LEFT palm and feet brace on solid doorway frame while RIGHT hand reaches back INSIDE to tap a small transit card once on fixed green reader. Black rigid handbag hangs from left wrist. Then both hands take outer chassis edge, she turns to FACE the bus, lowers one foot to a chassis crossmember, lowers hips with arms supporting her weight, hangs briefly, then releases and DROPS a short final distance to pavement at6.6seconds. Both white shoes land, knees COMPRESS, then recover upright and turn forward along sidewalk away from wreck. Finish with her fully OUTSIDE on pavement, bus beside/behind her, ready to dust off. Show entire climb, supported tap and actual downward descent; do not end on top of bus, raise her like elevator, slide legs through body panels, teleport, hover, invent roof hatch or new doorway. All contacts grounded in video. <Picture 1> defines FINISHED character, detailed bus and PS2 look, not start pose: maroon sleeveless top AND full-length maroon leggings, ponytail, white sneakers, single black handbag. Rebuild proper rounded sheet-metal bus shape, detailed chassis/suspension, wheel arches, fitted lamps/bumpers, two decks/three axles; NEVER copy the blockout flat black rectangle or primitive anatomy. Low-resolution painted textures, original PS2 graphics, same sunlight. Reader fixed inside original opening; logos on painted front below windscreen, no logos on glass. No yellow door outline, no stars/HUD/captions, no cuts, no bus motion. Keep the player-visible interaction camera in the video; frame hands, legs and landing throughout. The handbag is oriented ALONGSIDE HER BODY: its long side runs fore-aft, broad face points outward to her left, and the rear camera mostly sees its narrow gusset/end. Keep this orientation FIXED TO HER GRIP and rotate it with her wrist/arm, never swivel the broad front or gold clasp to face camera. No independent dangling, bag flattening or camera-facing billboard.",
+  "workflow": {
+    "1": {
+      "class_type": "UnetLoaderGGUF",
+      "inputs": {
+        "unet_name": "minimax_h3_ref2va_pruned-Q4_K_M.gguf"
+      }
+    },
+    "2": {
+      "class_type": "CLIPLoaderGGUF",
+      "inputs": {
+        "clip_name": "qwen3vl_32b_minimax_h3-Q4_K_M.gguf",
+        "type": "minimax"
+      }
+    },
+    "3": {
+      "class_type": "VAELoader",
+      "inputs": {
+        "vae_name": "minimax_h3_video_vae_fp16.safetensors"
+      }
+    },
+    "4": {
+      "class_type": "LoraLoaderModelOnly",
+      "inputs": {
+        "model": [
+          "1",
+          0
+        ],
+        "lora_name": "minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors",
+        "strength_model": 1.0
+      }
+    },
+    "5": {
+      "class_type": "MiniMaxH3SigmaShift",
+      "inputs": {
+        "model": [
+          "4",
+          0
+        ],
+        "shift_video": 12.0,
+        "shift_audio": 3.0
+      }
+    },
+    "6": {
+      "class_type": "MiniMaxH3ReferenceToVideo",
+      "inputs": {
+        "clip": [
+          "2",
+          0
+        ],
+        "vae": [
+          "3",
+          0
+        ],
+        "prompt": "One continuous EIGHT-second original GTA San Andreas PS2 bus-exit interaction. Same stationary SOS Transit double decker rests on RIGHT side, passenger side UP, undercarriage facing camera, real front passenger door behind intact white front corner. Follow the complete contact-driven action in <Video 1>. At start only head/shoulders peek through real passenger doorway, hips and legs still INSIDE. Brief deadpan pause. BOTH palms grip actual frame, elbows flex as she leans torso over sill; lift ONE KNEE and hook it over the sill, transfer weight onto that knee and planted palm, pull hips across, bring other foot out. She remains CROUCHED LOW with bent knees, never floats vertically upright. Around2.8seconds, LEFT palm and feet brace on solid doorway frame while RIGHT hand reaches back INSIDE to tap a small transit card once on fixed green reader. Black rigid handbag hangs from left wrist. Then both hands take outer chassis edge, she turns to FACE the bus, lowers one foot to a chassis crossmember, lowers hips with arms supporting her weight, hangs briefly, then releases and DROPS a short final distance to pavement at6.6seconds. Both white shoes land, knees COMPRESS, then recover upright and turn forward along sidewalk away from wreck. Finish with her fully OUTSIDE on pavement, bus beside/behind her, ready to dust off. Show entire climb, supported tap and actual downward descent; do not end on top of bus, raise her like elevator, slide legs through body panels, teleport, hover, invent roof hatch or new doorway. All contacts grounded in video. <Picture 1> defines FINISHED character, detailed bus and PS2 look, not start pose: maroon sleeveless top AND full-length maroon leggings, ponytail, white sneakers, single black handbag. Rebuild proper rounded sheet-metal bus shape, detailed chassis/suspension, wheel arches, fitted lamps/bumpers, two decks/three axles; NEVER copy the blockout flat black rectangle or primitive anatomy. Low-resolution painted textures, original PS2 graphics, same sunlight. Reader fixed inside original opening; logos on painted front below windscreen, no logos on glass. No yellow door outline, no stars/HUD/captions, no cuts, no bus motion. Keep the player-visible interaction camera in the video; frame hands, legs and landing throughout. The handbag is oriented ALONGSIDE HER BODY: its long side runs fore-aft, broad face points outward to her left, and the rear camera mostly sees its narrow gusset/end. Keep this orientation FIXED TO HER GRIP and rotate it with her wrist/arm, never swivel the broad front or gold clasp to face camera. No independent dangling, bag flattening or camera-facing billboard.",
+        "width": 576,
+        "height": 1024,
+        "length": 192,
+        "ref_image_size": "match",
+        "ref_images.ref_image_0": [
+          "20",
+          0
+        ],
+        "ref_videos.ref_video_0": [
+          "22",
+          0
+        ]
+      }
+    },
+    "7": {
+      "class_type": "BasicGuider",
+      "inputs": {
+        "model": [
+          "5",
+          0
+        ],
+        "conditioning": [
+          "6",
+          0
+        ]
+      }
+    },
+    "8": {
+      "class_type": "RandomNoise",
+      "inputs": {
+        "noise_seed": 2026112808
+      }
+    },
+    "9": {
+      "class_type": "KSamplerSelect",
+      "inputs": {
+        "sampler_name": "euler"
+      }
+    },
+    "10": {
+      "class_type": "BasicScheduler",
+      "inputs": {
+        "model": [
+          "5",
+          0
+        ],
+        "scheduler": "simple",
+        "steps": 4,
+        "denoise": 1.0
+      }
+    },
+    "11": {
+      "class_type": "SamplerCustomAdvanced",
+      "inputs": {
+        "noise": [
+          "8",
+          0
+        ],
+        "guider": [
+          "7",
+          0
+        ],
+        "sampler": [
+          "9",
+          0
+        ],
+        "sigmas": [
+          "10",
+          0
+        ],
+        "latent_image": [
+          "6",
+          1
+        ]
+      }
+    },
+    "12": {
+      "class_type": "VAEDecodeTiled",
+      "inputs": {
+        "samples": [
+          "11",
+          0
+        ],
+        "vae": [
+          "3",
+          0
+        ],
+        "tile_size": 256,
+        "overlap": 64,
+        "temporal_size": 64,
+        "temporal_overlap": 8
+      }
+    },
+    "13": {
+      "class_type": "CreateVideo",
+      "inputs": {
+        "images": [
+          "12",
+          0
+        ],
+        "fps": 24.0
+      }
+    },
+    "14": {
+      "class_type": "SaveVideo",
+      "inputs": {
+        "video": [
+          "13",
+          0
+        ],
+        "filename_prefix": "08-02/raw",
+        "format": "mp4",
+        "format.codec": "h264"
+      }
+    },
+    "20": {
+      "class_type": "LoadImage",
+      "inputs": {
+        "image": "08-contact-look.png"
+      }
+    },
+    "21": {
+      "class_type": "LoadVideo",
+      "inputs": {
+        "file": "08-guide-grip-v3.mp4"
+      }
+    },
+    "22": {
+      "class_type": "GetVideoComponents",
+      "inputs": {
+        "video": [
+          "21",
+          0
+        ]
+      }
+    }
+  },
+  "inputs": [
+    {
+      "path": "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/first-cut-v2/inputs/08-contact-look.png",
+      "sha256": "14b3570075e46d88407035e76e3e3cd4ea488f4e425af0e7dcafdb8f89b3af0b"
+    },
+    {
+      "path": "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/first-cut-v2/inputs/08-guide-grip-v3.mp4",
+      "sha256": "6cd2b2c17952f9a8d9385bb6f23701364cce468297e8b66481d3c954457acd78"
+    }
+  ],
+  "audio": "Separate original procedural SFX in edit; video VAE only",
+  "runtime_commit": "da8bd08e48deee74d9f6c3bc00aed365b00ec209",
+  "receipt": {
+    "prompt_id": "11229b50-e26c-4e7f-b8e9-f1e2ecda608b",
+    "number": 3.5,
+    "node_errors": {}
+  },
+  "collected_at": 1795681099.309085,
+  "outputs": {
+    "21": {
+      "images": [
+        {
+          "filename": "08-guide-grip-v3.mp4",
+          "subfolder": "",
+          "type": "input",
+          "metadata": {
+            "kind": "video",
+            "width": 288,
+            "height": 512,
+            "duration": 8.0,
+            "fps": 24.0,
+            "frame_count": 192
+          }
+        }
+      ],
+      "animated": [
+        true
+      ]
+    },
+    "14": {
+      "images": [
+        {
+          "filename": "raw_00001_.mp4",
+          "subfolder": "08-02",
+          "type": "output",
+          "metadata": {
+            "kind": "video",
+            "width": 576,
+            "height": 1024,
+            "duration": 8.0,
+            "fps": 24.0,
+            "frame_count": 192
+          }
+        }
+      ],
+      "animated": [
+        true
+      ]
+    }
+  },
+  "videos": [
+    {
+      "path": "takes/08-02/raw_00001_.mp4",
+      "sha256": "2038ecef7a72f37410e0c21cb1dd437459300e9a482dc2f7d530add2bd2bfd99",
+      "probe": {
+        "streams": [
+          {
+            "index": 0,
+            "codec_name": "h264",
+            "codec_long_name": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+            "profile": "High",
+            "codec_type": "video",
+            "codec_tag_string": "avc1",
+            "codec_tag": "0x31637661",
+            "mime_codec_string": "avc1.64001f",
+            "width": 576,
+            "height": 1024,
+            "coded_width": 576,
+            "coded_height": 1024,
+            "has_b_frames": 2,
+            "pix_fmt": "yuv420p",
+            "level": 31,
+            "color_range": "tv",
+            "color_space": "bt709",
+            "color_transfer": "iec61966-2-1",
+            "color_primaries": "bt709",
+            "chroma_location": "left",
+            "field_order": "progressive",
+            "is_avc": "true",
+            "nal_length_size": "4",
+            "id": "0x1",
+            "r_frame_rate": "24/1",
+            "avg_frame_rate": "24/1",
+            "time_base": "1/12288",
+            "start_pts": 0,
+            "start_time": "0.000000",
+            "duration_ts": 98304,
+            "duration": "8.000000",
+            "bit_rate": "2358895",
+            "bits_per_raw_sample": "8",
+            "nb_frames": "192",
+            "extradata_size": 48,
+            "disposition": {
+              "default": 1,
+              "dub": 0,
+              "original": 0,
+              "comment": 0,
+              "lyrics": 0,
+              "karaoke": 0,
+              "forced": 0,
+              "hearing_impaired": 0,
+              "visual_impaired": 0,
+              "clean_effects": 0,
+              "attached_pic": 0,
+              "timed_thumbnails": 0,
+              "non_diegetic": 0,
+              "captions": 0,
+              "descriptions": 0,
+              "metadata": 0,
+              "dependent": 0,
+              "still_image": 0,
+              "multilayer": 0
+            },
+            "tags": {
+              "language": "und",
+              "handler_name": "VideoHandler"
+            }
+          }
+        ],
+        "format": {
+          "filename": "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/first-cut-v2/takes/08-02/raw_00001_.mp4",
+          "nb_streams": 1,
+          "nb_programs": 0,
+          "nb_stream_groups": 0,
+          "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+          "format_long_name": "QuickTime / MOV",
+          "start_time": "0.000000",
+          "duration": "8.000000",
+          "size": "2366975",
+          "bit_rate": "2366975",
+          "probe_score": 100,
+          "tags": {
+            "major_brand": "isom",
+            "minor_version": "512",
+            "compatible_brands": "isomiso2avc1mp41",
+            "prompt": "{\"1\": {\"class_type\": \"UnetLoaderGGUF\", \"inputs\": {\"unet_name\": \"minimax_h3_ref2va_pruned-Q4_K_M.gguf\"}}, \"2\": {\"class_type\": \"CLIPLoaderGGUF\", \"inputs\": {\"clip_name\": \"qwen3vl_32b_minimax_h3-Q4_K_M.gguf\", \"type\": \"minimax\"}}, \"3\": {\"class_type\": \"VAELoader\", \"inputs\": {\"vae_name\": \"minimax_h3_video_vae_fp16.safetensors\"}}, \"4\": {\"class_type\": \"LoraLoaderModelOnly\", \"inputs\": {\"model\": [\"1\", 0], \"lora_name\": \"minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors\", \"strength_model\": 1.0}}, \"5\": {\"class_type\": \"MiniMaxH3SigmaShift\", \"inputs\": {\"model\": [\"4\", 0], \"shift_video\": 12.0, \"shift_audio\": 3.0}}, \"6\": {\"class_type\": \"MiniMaxH3ReferenceToVideo\", \"inputs\": {\"clip\": [\"2\", 0], \"vae\": [\"3\", 0], \"prompt\": \"One continuous EIGHT-second original GTA San Andreas PS2 bus-exit interaction. Same stationary SOS Transit double decker rests on RIGHT side, passenger side UP, undercarriage facing camera, real front passenger door behind intact white front corner. Follow the complete contact-driven action in <Video 1>. At start only head/shoulders peek through real passenger doorway, hips and legs still INSIDE. Brief deadpan pause. BOTH palms grip actual frame, elbows flex as she leans torso over sill; lift ONE KNEE and hook it over the sill, transfer weight onto that knee and planted palm, pull hips across, bring other foot out. She remains CROUCHED LOW with bent knees, never floats vertically upright. Around2.8seconds, LEFT palm and feet brace on solid doorway frame while RIGHT hand reaches back INSIDE to tap a small transit card once on fixed green reader. Black rigid handbag hangs from left wrist. Then both hands take outer chassis edge, she turns to FACE the bus, lowers one foot to a chassis crossmember, lowers hips with arms supporting her weight, hangs briefly, then releases and DROPS a short final distance to pavement at6.6seconds. Both white shoes land, knees COMPRESS, then recover upright and turn forward along sidewalk away from wreck. Finish with her fully OUTSIDE on pavement, bus beside/behind her, ready to dust off. Show entire climb, supported tap and actual downward descent; do not end on top of bus, raise her like elevator, slide legs through body panels, teleport, hover, invent roof hatch or new doorway. All contacts grounded in video. <Picture 1> defines FINISHED character, detailed bus and PS2 look, not start pose: maroon sleeveless top AND full-length maroon leggings, ponytail, white sneakers, single black handbag. Rebuild proper rounded sheet-metal bus shape, detailed chassis/suspension, wheel arches, fitted lamps/bumpers, two decks/three axles; NEVER copy the blockout flat black rectangle or primitive anatomy. Low-resolution painted textures, original PS2 graphics, same sunlight. Reader fixed inside original opening; logos on painted front below windscreen, no logos on glass. No yellow door outline, no stars/HUD/captions, no cuts, no bus motion. Keep the player-visible interaction camera in the video; frame hands, legs and landing throughout. The handbag is oriented ALONGSIDE HER BODY: its long side runs fore-aft, broad face points outward to her left, and the rear camera mostly sees its narrow gusset/end. Keep this orientation FIXED TO HER GRIP and rotate it with her wrist/arm, never swivel the broad front or gold clasp to face camera. No independent dangling, bag flattening or camera-facing billboard.\", \"width\": 576, \"height\": 1024, \"length\": 192, \"ref_image_size\": \"match\", \"ref_images.ref_image_0\": [\"20\", 0], \"ref_videos.ref_video_0\": [\"22\", 0]}}, \"7\": {\"class_type\": \"BasicGuider\", \"inputs\": {\"model\": [\"5\", 0], \"conditioning\": [\"6\", 0]}}, \"8\": {\"class_type\": \"RandomNoise\", \"inputs\": {\"noise_seed\": 2026112808}}, \"9\": {\"class_type\": \"KSamplerSelect\", \"inputs\": {\"sampler_name\": \"euler\"}}, \"10\": {\"class_type\": \"BasicScheduler\", \"inputs\": {\"model\": [\"5\", 0], \"scheduler\": \"simple\", \"steps\": 4, \"denoise\": 1.0}}, \"11\": {\"class_type\": \"SamplerCustomAdvanced\", \"inputs\": {\"noise\": [\"8\", 0], \"guider\": [\"7\", 0], \"sampler\": [\"9\", 0], \"sigmas\": [\"10\", 0], \"latent_image\": [\"6\", 1]}}, \"12\": {\"class_type\": \"VAEDecodeTiled\", \"inputs\": {\"samples\": [\"11\", 0], \"vae\": [\"3\", 0], \"tile_size\": 256, \"overlap\": 64, \"temporal_size\": 64, \"temporal_overlap\": 8}}, \"13\": {\"class_type\": \"CreateVideo\", \"inputs\": {\"images\": [\"12\", 0], \"fps\": 24.0}}, \"14\": {\"class_type\": \"SaveVideo\", \"inputs\": {\"video\": [\"13\", 0], \"filename_prefix\": \"08-02/raw\", \"format\": \"mp4\", \"format.codec\": \"h264\"}}, \"20\": {\"class_type\": \"LoadImage\", \"inputs\": {\"image\": \"08-contact-look.png\"}, \"is_changed\": [\"14b3570075e46d88407035e76e3e3cd4ea488f4e425af0e7dcafdb8f89b3af0b\"]}, \"21\": {\"class_type\": \"LoadVideo\", \"inputs\": {\"file\": \"08-guide-grip-v3.mp4\"}, \"is_changed\": [1795678898.8025727]}, \"22\": {\"class_type\": \"GetVideoComponents\", \"inputs\": {\"video\": [\"21\", 0]}}}",
+            "encoder": "Lavf63.1.102"
+          }
+        }
+      },
+      "full_decode_verified": true
+    }
+  ],
+  "execution_started_at": 1795679241.584,
+  "completed_at": 1795681025.616,
+  "render_wall_seconds": 1784.0319998264313,
+  "review": {
+    "decision": "provisional revised rough-cut selection",
+    "method": "4fps full shot; 8fps cropped tap and landing details",
+    "notes": "Full 4fps samples plus 8fps tap/landing details show braced torso/knee crossing, crouched sill support, a supported descent facing the chassis, release and bent-knee landing near 7.0s. No elevator rise. Bag stays with the left wrist/hand through the descent; its broad face is naturally visible from this side angle. Tap reach near 2.5s is small/partly occluded; card-reader contact needs a clearer polish pass. Normal-speed playback and listening review pending locked Mac."
+  }
+}

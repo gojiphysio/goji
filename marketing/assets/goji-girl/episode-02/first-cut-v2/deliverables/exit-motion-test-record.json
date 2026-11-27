@@ -1,0 +1,17 @@
+{
+  "source": "takes/08-02/raw_00001_.mp4",
+  "source_frames": [
+    0,
+    192
+  ],
+  "duration": 8,
+  "audio_range_seconds": [
+    25,
+    33
+  ],
+  "beep_source_time": 2.5,
+  "landing_source_time": 7.0,
+  "full_decode_verified": true,
+  "review": "Full 4fps and dense 8fps contact review. Supported climb and landing; tap gesture remains small/partly occluded. Playback and listening review blocked by locked Mac.",
+  "sha256": "bf7c95e5afb3b79c18b80474d8af83c561d3b0e174c74f6e33f4079b5a918476"
+}

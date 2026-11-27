@@ -1,0 +1,18 @@
+{
+  "commit": "e01009a",
+  "checked_at": 1795681476.581881,
+  "assets": [
+    {
+      "url": "https://raw.githubusercontent.com/gojiphysio/goji/e01009a/marketing/assets/goji-girl/episode-02/first-cut-v2/README.md",
+      "http_status": 200,
+      "sha256": "99e8be7affbcad5a63daf374332263c2a5cec02f257dbafec47b0633e1053f6b",
+      "matches_local": true
+    },
+    {
+      "url": "https://raw.githubusercontent.com/gojiphysio/goji/e01009a/marketing/assets/goji-girl/episode-02/first-cut-v2/deliverables/exit-motion-test.mp4",
+      "http_status": 200,
+      "sha256": "bf7c95e5afb3b79c18b80474d8af83c561d3b0e174c74f6e33f4079b5a918476",
+      "matches_local": true
+    }
+  ]
+}

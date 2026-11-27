@@ -1,0 +1,121 @@
+{
+  "frame_index_seam_samples": [
+    71,
+    72,
+    119,
+    120,
+    191,
+    192,
+    263,
+    264,
+    359,
+    360,
+    479,
+    480,
+    599,
+    600,
+    791,
+    792,
+    839,
+    840,
+    935,
+    936,
+    983,
+    984,
+    1046,
+    1171
+  ],
+  "frozen_generation_inputs_match": true,
+  "full_decode_verified": true,
+  "normal_speed_playback": false,
+  "audio_audition": false,
+  "playback_blocker": "Mac locked",
+  "final_sha256": "8dca522644b67bb215ce6b06410b7d84df527e61a6c461b32425bcfe972c7fc2",
+  "source_ranges": [
+    {
+      "shot": "01",
+      "source": "../first-cut-v1/takes/01-01/raw_00001_.mp4",
+      "start_frame": 0,
+      "frames": 72,
+      "source_duration": "3.041667"
+    },
+    {
+      "shot": "02",
+      "source": "../first-cut-v1/takes/02-01/raw_00001_.mp4",
+      "start_frame": 0,
+      "frames": 48,
+      "source_duration": "2.333333"
+    },
+    {
+      "shot": "03",
+      "source": "takes/03-03/raw_00001_.mp4",
+      "start_frame": 0,
+      "frames": 72,
+      "source_duration": "3.041667"
+    },
+    {
+      "shot": "04",
+      "source": "takes/04-01/raw_00001_.mp4",
+      "start_frame": 0,
+      "frames": 72,
+      "source_duration": "3.041667"
+    },
+    {
+      "shot": "05",
+      "source": "../first-cut-v1/takes/05-02/raw_00001_.mp4",
+      "start_frame": 3,
+      "frames": 96,
+      "source_duration": "4.458333"
+    },
+    {
+      "shot": "06",
+      "source": "takes/06-01/raw_00001_.mp4",
+      "start_frame": 0,
+      "frames": 120,
+      "source_duration": "5.166667"
+    },
+    {
+      "shot": "07",
+      "source": "takes/07-01/raw_00001_.mp4",
+      "start_frame": 0,
+      "frames": 120,
+      "source_duration": "5.166667"
+    },
+    {
+      "shot": "08",
+      "source": "takes/08-02/raw_00001_.mp4",
+      "start_frame": 0,
+      "frames": 192,
+      "source_duration": "8.000000"
+    },
+    {
+      "shot": "09",
+      "source": "takes/09-02/framing-v2.mp4",
+      "start_frame": 0,
+      "frames": 48,
+      "source_duration": "2.000000"
+    },
+    {
+      "shot": "10",
+      "source": "takes/10-01/raw_00001_.mp4",
+      "start_frame": 0,
+      "frames": 96,
+      "source_duration": "4.458333"
+    },
+    {
+      "shot": "11",
+      "source": "../first-cut-v1/takes/11-01/raw_00001_.mp4",
+      "start_frame": 0,
+      "frames": 48,
+      "source_duration": "2.333333"
+    },
+    {
+      "shot": "12",
+      "source": "../first-cut-v1/takes/12-02/raw_00001_.mp4",
+      "start_frame": 0,
+      "frames": 192,
+      "source_duration": "8.000000"
+    }
+  ],
+  "seam_review": "Exact previous/next frame inspected at all eleven cuts; direction remains coherent. Calendar cleared at frame120; safehouse text verified at lowered position."
+}

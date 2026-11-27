@@ -1,0 +1,1822 @@
+{
+  "updated": 1795672427.3685749,
+  "takes": [
+    {
+      "shot": "01",
+      "take": "01",
+      "status": "generated_unreviewed",
+      "started": 1795658187.641192,
+      "videos": [
+        {
+          "path": "takes/01-01/raw_00001_.mp4",
+          "sha256": "449d814633a66a26c69e9c67dbca9b36fffc161b1c1e391ae4be77dd9811a7f1",
+          "probe": {
+            "streams": [
+              {
+                "index": 0,
+                "codec_name": "h264",
+                "codec_long_name": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+                "profile": "High",
+                "codec_type": "video",
+                "codec_tag_string": "avc1",
+                "codec_tag": "0x31637661",
+                "mime_codec_string": "avc1.64001f",
+                "width": 576,
+                "height": 1024,
+                "coded_width": 576,
+                "coded_height": 1024,
+                "has_b_frames": 2,
+                "pix_fmt": "yuv420p",
+                "level": 31,
+                "color_range": "tv",
+                "color_space": "bt709",
+                "color_transfer": "iec61966-2-1",
+                "color_primaries": "bt709",
+                "chroma_location": "left",
+                "field_order": "progressive",
+                "is_avc": "true",
+                "nal_length_size": "4",
+                "id": "0x1",
+                "r_frame_rate": "24/1",
+                "avg_frame_rate": "24/1",
+                "time_base": "1/12288",
+                "start_pts": 0,
+                "start_time": "0.000000",
+                "duration_ts": 37376,
+                "duration": "3.041667",
+                "bit_rate": "1434226",
+                "bits_per_raw_sample": "8",
+                "nb_frames": "73",
+                "extradata_size": 48,
+                "disposition": {
+                  "default": 1,
+                  "dub": 0,
+                  "original": 0,
+                  "comment": 0,
+                  "lyrics": 0,
+                  "karaoke": 0,
+                  "forced": 0,
+                  "hearing_impaired": 0,
+                  "visual_impaired": 0,
+                  "clean_effects": 0,
+                  "attached_pic": 0,
+                  "timed_thumbnails": 0,
+                  "non_diegetic": 0,
+                  "captions": 0,
+                  "descriptions": 0,
+                  "metadata": 0,
+                  "dependent": 0,
+                  "still_image": 0,
+                  "multilayer": 0
+                },
+                "tags": {
+                  "language": "und",
+                  "handler_name": "VideoHandler"
+                }
+              }
+            ],
+            "format": {
+              "filename": "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/first-cut-v1/takes/01-01/raw_00001_.mp4",
+              "nb_streams": 1,
+              "nb_programs": 0,
+              "nb_stream_groups": 0,
+              "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+              "format_long_name": "QuickTime / MOV",
+              "start_time": "0.000000",
+              "duration": "3.041667",
+              "size": "550395",
+              "bit_rate": "1447614",
+              "probe_score": 100,
+              "tags": {
+                "major_brand": "isom",
+                "minor_version": "512",
+                "compatible_brands": "isomiso2avc1mp41",
+                "prompt": "{\"1\": {\"class_type\": \"UnetLoaderGGUF\", \"inputs\": {\"unet_name\": \"minimax_h3_ref2va_pruned-Q4_K_M.gguf\"}}, \"2\": {\"class_type\": \"CLIPLoaderGGUF\", \"inputs\": {\"clip_name\": \"qwen3vl_32b_minimax_h3-Q4_K_M.gguf\", \"type\": \"minimax\"}}, \"3\": {\"class_type\": \"VAELoader\", \"inputs\": {\"vae_name\": \"minimax_h3_video_vae_fp16.safetensors\"}}, \"4\": {\"class_type\": \"LoraLoaderModelOnly\", \"inputs\": {\"model\": [\"1\", 0], \"lora_name\": \"minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors\", \"strength_model\": 1.0}}, \"5\": {\"class_type\": \"MiniMaxH3SigmaShift\", \"inputs\": {\"model\": [\"4\", 0], \"shift_video\": 12.0, \"shift_audio\": 3.0}}, \"6\": {\"class_type\": \"MiniMaxH3ReferenceToVideo\", \"inputs\": {\"clip\": [\"2\", 0], \"vae\": [\"3\", 0], \"prompt\": \"A continuous three-second fixed indoor over-shoulder cutscene. Start exactly from <Picture 1>. The woman is on a frustrating video call wearing a headset with boom microphone. During the first second she taps her finger impatiently. She angrily pulls the headset off and drops it onto the desk, then firmly SLAMS THE LAPTOP SHUT before the end. Her phone and one black handbag remain on the desk. End with closed laptop and headset on desk. Keep the exact desk and room; no camera movement. Do not keep the laptop open or leave headset on her head. Original GTA San Andreas PlayStation 2 graphics throughout: angular economical character meshes, painted low-resolution skin/clothing/vehicle textures, restrained broad diffuse shading and period game animation. Preserve the same adult woman, maroon sleeveless top and leggings, one black ponytail, white shoes and ONE small black handbag carried LEFT. Every NPC matches the same PS2 rendering. Preserve the architecture, lighting and palette of <Picture 1>. No photoreal faces, no modern glossy rendering, no cartoon toy figures, no body morphing, no new logos, HUD, wanted stars, captions or baked text overlays. No shot changes. No speech or music.\", \"width\": 576, \"height\": 1024, \"length\": 73, \"ref_image_size\": \"match\", \"ref_images.ref_image_0\": [\"20\", 0]}}, \"7\": {\"class_type\": \"BasicGuider\", \"inputs\": {\"model\": [\"5\", 0], \"conditioning\": [\"30\", 0]}}, \"8\": {\"class_type\": \"RandomNoise\", \"inputs\": {\"noise_seed\": 2026112701}}, \"9\": {\"class_type\": \"KSamplerSelect\", \"inputs\": {\"sampler_name\": \"euler\"}}, \"10\": {\"class_type\": \"BasicScheduler\", \"inputs\": {\"model\": [\"5\", 0], \"scheduler\": \"simple\", \"steps\": 4, \"denoise\": 1.0}}, \"11\": {\"class_type\": \"SamplerCustomAdvanced\", \"inputs\": {\"noise\": [\"8\", 0], \"guider\": [\"7\", 0], \"sampler\": [\"9\", 0], \"sigmas\": [\"10\", 0], \"latent_image\": [\"6\", 1]}}, \"12\": {\"class_type\": \"VAEDecodeTiled\", \"inputs\": {\"samples\": [\"11\", 0], \"vae\": [\"3\", 0], \"tile_size\": 256, \"overlap\": 64, \"temporal_size\": 64, \"temporal_overlap\": 8}}, \"13\": {\"class_type\": \"CreateVideo\", \"inputs\": {\"images\": [\"12\", 0], \"fps\": 24.0}}, \"14\": {\"class_type\": \"SaveVideo\", \"inputs\": {\"video\": [\"13\", 0], \"filename_prefix\": \"01-01/raw\", \"format\": \"mp4\", \"format.codec\": \"h264\"}}, \"20\": {\"class_type\": \"LoadImage\", \"inputs\": {\"image\": \"01-appearance.png\"}, \"is_changed\": [\"e72c35b7210fe7437c6e8b92147d3cb2b82183b3b58fd35cf35eabebc52bf41d\"]}, \"30\": {\"class_type\": \"MiniMaxH3AddGuide\", \"inputs\": {\"positive\": [\"6\", 0], \"latent\": [\"6\", 1], \"vae\": [\"3\", 0], \"image\": [\"20\", 0], \"frame_idx\": 0}}}",
+                "encoder": "Lavf63.1.102"
+              }
+            }
+          },
+          "full_decode_verified": true
+        }
+      ]
+    },
+    {
+      "shot": "02",
+      "take": "01",
+      "status": "generated_unreviewed",
+      "started": 1795658187.7654479,
+      "videos": [
+        {
+          "path": "takes/02-01/raw_00001_.mp4",
+          "sha256": "72532bcba8a60ddfb764205220c485ea5c0dbb6e0497d751908868c055094045",
+          "probe": {
+            "streams": [
+              {
+                "index": 0,
+                "codec_name": "h264",
+                "codec_long_name": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+                "profile": "High",
+                "codec_type": "video",
+                "codec_tag_string": "avc1",
+                "codec_tag": "0x31637661",
+                "mime_codec_string": "avc1.64001f",
+                "width": 576,
+                "height": 1024,
+                "coded_width": 576,
+                "coded_height": 1024,
+                "has_b_frames": 2,
+                "pix_fmt": "yuv420p",
+                "level": 31,
+                "color_range": "tv",
+                "color_space": "bt709",
+                "color_transfer": "iec61966-2-1",
+                "color_primaries": "bt709",
+                "chroma_location": "left",
+                "field_order": "progressive",
+                "is_avc": "true",
+                "nal_length_size": "4",
+                "id": "0x1",
+                "r_frame_rate": "24/1",
+                "avg_frame_rate": "24/1",
+                "time_base": "1/12288",
+                "start_pts": 0,
+                "start_time": "0.000000",
+                "duration_ts": 28672,
+                "duration": "2.333333",
+                "bit_rate": "1349670",
+                "bits_per_raw_sample": "8",
+                "nb_frames": "56",
+                "extradata_size": 48,
+                "disposition": {
+                  "default": 1,
+                  "dub": 0,
+                  "original": 0,
+                  "comment": 0,
+                  "lyrics": 0,
+                  "karaoke": 0,
+                  "forced": 0,
+                  "hearing_impaired": 0,
+                  "visual_impaired": 0,
+                  "clean_effects": 0,
+                  "attached_pic": 0,
+                  "timed_thumbnails": 0,
+                  "non_diegetic": 0,
+                  "captions": 0,
+                  "descriptions": 0,
+                  "metadata": 0,
+                  "dependent": 0,
+                  "still_image": 0,
+                  "multilayer": 0
+                },
+                "tags": {
+                  "language": "und",
+                  "handler_name": "VideoHandler"
+                }
+              }
+            ],
+            "format": {
+              "filename": "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/first-cut-v1/takes/02-01/raw_00001_.mp4",
+              "nb_streams": 1,
+              "nb_programs": 0,
+              "nb_stream_groups": 0,
+              "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+              "format_long_name": "QuickTime / MOV",
+              "start_time": "0.000000",
+              "duration": "2.333333",
+              "size": "398485",
+              "bit_rate": "1366234",
+              "probe_score": 100,
+              "tags": {
+                "major_brand": "isom",
+                "minor_version": "512",
+                "compatible_brands": "isomiso2avc1mp41",
+                "prompt": "{\"1\": {\"class_type\": \"UnetLoaderGGUF\", \"inputs\": {\"unet_name\": \"minimax_h3_ref2va_pruned-Q4_K_M.gguf\"}}, \"2\": {\"class_type\": \"CLIPLoaderGGUF\", \"inputs\": {\"clip_name\": \"qwen3vl_32b_minimax_h3-Q4_K_M.gguf\", \"type\": \"minimax\"}}, \"3\": {\"class_type\": \"VAELoader\", \"inputs\": {\"vae_name\": \"minimax_h3_video_vae_fp16.safetensors\"}}, \"4\": {\"class_type\": \"LoraLoaderModelOnly\", \"inputs\": {\"model\": [\"1\", 0], \"lora_name\": \"minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors\", \"strength_model\": 1.0}}, \"5\": {\"class_type\": \"MiniMaxH3SigmaShift\", \"inputs\": {\"model\": [\"4\", 0], \"shift_video\": 12.0, \"shift_audio\": 3.0}}, \"6\": {\"class_type\": \"MiniMaxH3ReferenceToVideo\", \"inputs\": {\"clip\": [\"2\", 0], \"vae\": [\"3\", 0], \"prompt\": \"A continuous two-second fixed indoor cutscene. Start from <Picture 1>: closed laptop, headset removed and lying on desk, woman holding phone and looking SURPRISED. Her eyebrows rise, eyes widen, lips part as she realizes the appointment is only FIVE MINUTES away; she leans forward urgently and starts reaching for the black handbag with her left hand. No smile. The phone stays in her right hand. Do not draw calendar text; it will be overlaid in post. Preserve the closed laptop and headset exactly. Original GTA San Andreas PlayStation 2 graphics throughout: angular economical character meshes, painted low-resolution skin/clothing/vehicle textures, restrained broad diffuse shading and period game animation. Preserve the same adult woman, maroon sleeveless top and leggings, one black ponytail, white shoes and ONE small black handbag carried LEFT. Every NPC matches the same PS2 rendering. Preserve the architecture, lighting and palette of <Picture 1>. No photoreal faces, no modern glossy rendering, no cartoon toy figures, no body morphing, no new logos, HUD, wanted stars, captions or baked text overlays. No shot changes. No speech or music.\", \"width\": 576, \"height\": 1024, \"length\": 56, \"ref_image_size\": \"match\", \"ref_images.ref_image_0\": [\"20\", 0]}}, \"7\": {\"class_type\": \"BasicGuider\", \"inputs\": {\"model\": [\"5\", 0], \"conditioning\": [\"30\", 0]}}, \"8\": {\"class_type\": \"RandomNoise\", \"inputs\": {\"noise_seed\": 2026112702}}, \"9\": {\"class_type\": \"KSamplerSelect\", \"inputs\": {\"sampler_name\": \"euler\"}}, \"10\": {\"class_type\": \"BasicScheduler\", \"inputs\": {\"model\": [\"5\", 0], \"scheduler\": \"simple\", \"steps\": 4, \"denoise\": 1.0}}, \"11\": {\"class_type\": \"SamplerCustomAdvanced\", \"inputs\": {\"noise\": [\"8\", 0], \"guider\": [\"7\", 0], \"sampler\": [\"9\", 0], \"sigmas\": [\"10\", 0], \"latent_image\": [\"6\", 1]}}, \"12\": {\"class_type\": \"VAEDecodeTiled\", \"inputs\": {\"samples\": [\"11\", 0], \"vae\": [\"3\", 0], \"tile_size\": 256, \"overlap\": 64, \"temporal_size\": 64, \"temporal_overlap\": 8}}, \"13\": {\"class_type\": \"CreateVideo\", \"inputs\": {\"images\": [\"12\", 0], \"fps\": 24.0}}, \"14\": {\"class_type\": \"SaveVideo\", \"inputs\": {\"video\": [\"13\", 0], \"filename_prefix\": \"02-01/raw\", \"format\": \"mp4\", \"format.codec\": \"h264\"}}, \"20\": {\"class_type\": \"LoadImage\", \"inputs\": {\"image\": \"02-appearance.png\"}, \"is_changed\": [\"fa4f34c84fae3a8669544afc31a2801475d8d024febdf7abc5ef1b3283d25a08\"]}, \"30\": {\"class_type\": \"MiniMaxH3AddGuide\", \"inputs\": {\"positive\": [\"6\", 0], \"latent\": [\"6\", 1], \"vae\": [\"3\", 0], \"image\": [\"20\", 0], \"frame_idx\": 0}}}",
+                "encoder": "Lavf63.1.102"
+              }
+            }
+          },
+          "full_decode_verified": true
+        }
+      ]
+    },
+    {
+      "shot": "03",
+      "take": "01",
+      "status": "generated_unreviewed",
+      "started": 1795658187.829665,
+      "videos": [
+        {
+          "path": "takes/03-01/raw_00001_.mp4",
+          "sha256": "f29679a688a4aa088eb54d5b073aa36530aa654f8c5402f046ad2f5813885fa9",
+          "probe": {
+            "streams": [
+              {
+                "index": 0,
+                "codec_name": "h264",
+                "codec_long_name": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+                "profile": "High",
+                "codec_type": "video",
+                "codec_tag_string": "avc1",
+                "codec_tag": "0x31637661",
+                "mime_codec_string": "avc1.64001f",
+                "width": 576,
+                "height": 1024,
+                "coded_width": 576,
+                "coded_height": 1024,
+                "has_b_frames": 2,
+                "pix_fmt": "yuv420p",
+                "level": 31,
+                "color_range": "tv",
+                "color_space": "bt709",
+                "color_transfer": "iec61966-2-1",
+                "color_primaries": "bt709",
+                "chroma_location": "left",
+                "field_order": "progressive",
+                "is_avc": "true",
+                "nal_length_size": "4",
+                "id": "0x1",
+                "r_frame_rate": "24/1",
+                "avg_frame_rate": "24/1",
+                "time_base": "1/12288",
+                "start_pts": 0,
+                "start_time": "0.000000",
+                "duration_ts": 37376,
+                "duration": "3.041667",
+                "bit_rate": "5879195",
+                "bits_per_raw_sample": "8",
+                "nb_frames": "73",
+                "extradata_size": 48,
+                "disposition": {
+                  "default": 1,
+                  "dub": 0,
+                  "original": 0,
+                  "comment": 0,
+                  "lyrics": 0,
+                  "karaoke": 0,
+                  "forced": 0,
+                  "hearing_impaired": 0,
+                  "visual_impaired": 0,
+                  "clean_effects": 0,
+                  "attached_pic": 0,
+                  "timed_thumbnails": 0,
+                  "non_diegetic": 0,
+                  "captions": 0,
+                  "descriptions": 0,
+                  "metadata": 0,
+                  "dependent": 0,
+                  "still_image": 0,
+                  "multilayer": 0
+                },
+                "tags": {
+                  "language": "und",
+                  "handler_name": "VideoHandler"
+                }
+              }
+            ],
+            "format": {
+              "filename": "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/first-cut-v1/takes/03-01/raw_00001_.mp4",
+              "nb_streams": 1,
+              "nb_programs": 0,
+              "nb_stream_groups": 0,
+              "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+              "format_long_name": "QuickTime / MOV",
+              "start_time": "0.000000",
+              "duration": "3.041667",
+              "size": "2240401",
+              "bit_rate": "5892560",
+              "probe_score": 100,
+              "tags": {
+                "major_brand": "isom",
+                "minor_version": "512",
+                "compatible_brands": "isomiso2avc1mp41",
+                "prompt": "{\"1\": {\"class_type\": \"UnetLoaderGGUF\", \"inputs\": {\"unet_name\": \"minimax_h3_ref2va_pruned-Q4_K_M.gguf\"}}, \"2\": {\"class_type\": \"CLIPLoaderGGUF\", \"inputs\": {\"clip_name\": \"qwen3vl_32b_minimax_h3-Q4_K_M.gguf\", \"type\": \"minimax\"}}, \"3\": {\"class_type\": \"VAELoader\", \"inputs\": {\"vae_name\": \"minimax_h3_video_vae_fp16.safetensors\"}}, \"4\": {\"class_type\": \"LoraLoaderModelOnly\", \"inputs\": {\"model\": [\"1\", 0], \"lora_name\": \"minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors\", \"strength_model\": 1.0}}, \"5\": {\"class_type\": \"MiniMaxH3SigmaShift\", \"inputs\": {\"model\": [\"4\", 0], \"shift_video\": 12.0, \"shift_audio\": 3.0}}, \"6\": {\"class_type\": \"MiniMaxH3ReferenceToVideo\", \"inputs\": {\"clip\": [\"2\", 0], \"vae\": [\"3\", 0], \"prompt\": \"A continuous three-second outdoor third-person rear player camera. Start from <Picture 1>. Goji Girl bursts out of the front doorway then RUNS forward along the Singapore pavement away from camera. Her right arm pumps, bag swings from left hand, clearly running with bent knees and lifted heels. Camera follows behind at fixed ordinary gameplay height, no orbit or cut. Background pedestrians look up and step aside without contact. No one is struck or knocked down. Keep her identity and proportions stable. Original GTA San Andreas PlayStation 2 graphics throughout: angular economical character meshes, painted low-resolution skin/clothing/vehicle textures, restrained broad diffuse shading and period game animation. Preserve the same adult woman, maroon sleeveless top and leggings, one black ponytail, white shoes and ONE small black handbag carried LEFT. Every NPC matches the same PS2 rendering. Preserve the architecture, lighting and palette of <Picture 1>. No photoreal faces, no modern glossy rendering, no cartoon toy figures, no body morphing, no new logos, HUD, wanted stars, captions or baked text overlays. No shot changes. No speech or music.\", \"width\": 576, \"height\": 1024, \"length\": 73, \"ref_image_size\": \"match\", \"ref_images.ref_image_0\": [\"20\", 0]}}, \"7\": {\"class_type\": \"BasicGuider\", \"inputs\": {\"model\": [\"5\", 0], \"conditioning\": [\"30\", 0]}}, \"8\": {\"class_type\": \"RandomNoise\", \"inputs\": {\"noise_seed\": 2026112703}}, \"9\": {\"class_type\": \"KSamplerSelect\", \"inputs\": {\"sampler_name\": \"euler\"}}, \"10\": {\"class_type\": \"BasicScheduler\", \"inputs\": {\"model\": [\"5\", 0], \"scheduler\": \"simple\", \"steps\": 4, \"denoise\": 1.0}}, \"11\": {\"class_type\": \"SamplerCustomAdvanced\", \"inputs\": {\"noise\": [\"8\", 0], \"guider\": [\"7\", 0], \"sampler\": [\"9\", 0], \"sigmas\": [\"10\", 0], \"latent_image\": [\"6\", 1]}}, \"12\": {\"class_type\": \"VAEDecodeTiled\", \"inputs\": {\"samples\": [\"11\", 0], \"vae\": [\"3\", 0], \"tile_size\": 256, \"overlap\": 64, \"temporal_size\": 64, \"temporal_overlap\": 8}}, \"13\": {\"class_type\": \"CreateVideo\", \"inputs\": {\"images\": [\"12\", 0], \"fps\": 24.0}}, \"14\": {\"class_type\": \"SaveVideo\", \"inputs\": {\"video\": [\"13\", 0], \"filename_prefix\": \"03-01/raw\", \"format\": \"mp4\", \"format.codec\": \"h264\"}}, \"20\": {\"class_type\": \"LoadImage\", \"inputs\": {\"image\": \"03-appearance.png\"}, \"is_changed\": [\"fdfe68451bf012f439df5b067e7a336c2292f36755806937445a3e78978d0fb7\"]}, \"30\": {\"class_type\": \"MiniMaxH3AddGuide\", \"inputs\": {\"positive\": [\"6\", 0], \"latent\": [\"6\", 1], \"vae\": [\"3\", 0], \"image\": [\"20\", 0], \"frame_idx\": 0}}}",
+                "encoder": "Lavf63.1.102"
+              }
+            }
+          },
+          "full_decode_verified": true
+        }
+      ]
+    },
+    {
+      "shot": "03",
+      "take": "02",
+      "status": "generated_unreviewed",
+      "started": 1795666406.560811,
+      "videos": [
+        {
+          "path": "takes/03-02/raw_00001_.mp4",
+          "sha256": "870512f3081826071bab2b07d0288ac742ac0e8e0d3ed4e24710bcc8ac4488e1",
+          "probe": {
+            "streams": [
+              {
+                "index": 0,
+                "codec_name": "h264",
+                "codec_long_name": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+                "profile": "High",
+                "codec_type": "video",
+                "codec_tag_string": "avc1",
+                "codec_tag": "0x31637661",
+                "mime_codec_string": "avc1.64001f",
+                "width": 576,
+                "height": 1024,
+                "coded_width": 576,
+                "coded_height": 1024,
+                "has_b_frames": 2,
+                "pix_fmt": "yuv420p",
+                "level": 31,
+                "color_range": "tv",
+                "color_space": "bt709",
+                "color_transfer": "iec61966-2-1",
+                "color_primaries": "bt709",
+                "chroma_location": "left",
+                "field_order": "progressive",
+                "is_avc": "true",
+                "nal_length_size": "4",
+                "id": "0x1",
+                "r_frame_rate": "24/1",
+                "avg_frame_rate": "24/1",
+                "time_base": "1/12288",
+                "start_pts": 0,
+                "start_time": "0.000000",
+                "duration_ts": 37376,
+                "duration": "3.041667",
+                "bit_rate": "5280870",
+                "bits_per_raw_sample": "8",
+                "nb_frames": "73",
+                "extradata_size": 48,
+                "disposition": {
+                  "default": 1,
+                  "dub": 0,
+                  "original": 0,
+                  "comment": 0,
+                  "lyrics": 0,
+                  "karaoke": 0,
+                  "forced": 0,
+                  "hearing_impaired": 0,
+                  "visual_impaired": 0,
+                  "clean_effects": 0,
+                  "attached_pic": 0,
+                  "timed_thumbnails": 0,
+                  "non_diegetic": 0,
+                  "captions": 0,
+                  "descriptions": 0,
+                  "metadata": 0,
+                  "dependent": 0,
+                  "still_image": 0,
+                  "multilayer": 0
+                },
+                "tags": {
+                  "language": "und",
+                  "handler_name": "VideoHandler"
+                }
+              }
+            ],
+            "format": {
+              "filename": "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/first-cut-v1/takes/03-02/raw_00001_.mp4",
+              "nb_streams": 1,
+              "nb_programs": 0,
+              "nb_stream_groups": 0,
+              "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+              "format_long_name": "QuickTime / MOV",
+              "start_time": "0.000000",
+              "duration": "3.041667",
+              "size": "2013390",
+              "bit_rate": "5295490",
+              "probe_score": 100,
+              "tags": {
+                "major_brand": "isom",
+                "minor_version": "512",
+                "compatible_brands": "isomiso2avc1mp41",
+                "prompt": "{\"1\": {\"class_type\": \"UnetLoaderGGUF\", \"inputs\": {\"unet_name\": \"minimax_h3_ref2va_pruned-Q4_K_M.gguf\"}}, \"2\": {\"class_type\": \"CLIPLoaderGGUF\", \"inputs\": {\"clip_name\": \"qwen3vl_32b_minimax_h3-Q4_K_M.gguf\", \"type\": \"minimax\"}}, \"3\": {\"class_type\": \"VAELoader\", \"inputs\": {\"vae_name\": \"minimax_h3_video_vae_fp16.safetensors\"}}, \"4\": {\"class_type\": \"LoraLoaderModelOnly\", \"inputs\": {\"model\": [\"1\", 0], \"lora_name\": \"minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors\", \"strength_model\": 1.0}}, \"5\": {\"class_type\": \"MiniMaxH3SigmaShift\", \"inputs\": {\"model\": [\"4\", 0], \"shift_video\": 12.0, \"shift_audio\": 3.0}}, \"6\": {\"class_type\": \"MiniMaxH3ReferenceToVideo\", \"inputs\": {\"clip\": [\"2\", 0], \"vae\": [\"3\", 0], \"prompt\": \"One continuous three-second original GTA San Andreas PS2 rear-player sprint. Start exactly in the first-frame anchor as Goji Girl bursts through her open front doorway; then run FORWARD along this Singapore pavement away from camera. Match the repeated locomotion cycle in <Video 1>: a slight forward body lean, squared and flared BENT elbows, strong forward/back arm pumping, pronounced heel recovery, long push-off and a firm regular quick rhythm. Follow the guide timing rather than inventing a smooth fashion jog. Keep ONE structured black handbag attached to LEFT hand; the left arm has a smaller swing to carry it, the right arm pumps freely. Camera follows behind at ordinary player height with the same heading, no cut, orbit or reversal. Background passersby step clear without contact. <Picture 1> and the first anchor define the finished woman, maroon top/leggings, ponytail, white shoes, bag and neighbourhood appearance. <Video 1> is ONLY original rig motion, path and camera reference: never reproduce its blocks, primitive face or building silhouettes as final shapes. Painted low-resolution PS2 textures and economical but properly formed anatomy for every person. No photographic humans, extra limbs, bag swaps, HUD, stars, captions or new vehicles.\", \"width\": 576, \"height\": 1024, \"length\": 73, \"ref_image_size\": \"match\", \"ref_images.ref_image_0\": [\"20\", 0], \"ref_videos.ref_video_0\": [\"22\", 0]}}, \"7\": {\"class_type\": \"BasicGuider\", \"inputs\": {\"model\": [\"5\", 0], \"conditioning\": [\"41\", 0]}}, \"8\": {\"class_type\": \"RandomNoise\", \"inputs\": {\"noise_seed\": 2026112803}}, \"9\": {\"class_type\": \"KSamplerSelect\", \"inputs\": {\"sampler_name\": \"euler\"}}, \"10\": {\"class_type\": \"BasicScheduler\", \"inputs\": {\"model\": [\"5\", 0], \"scheduler\": \"simple\", \"steps\": 4, \"denoise\": 1.0}}, \"11\": {\"class_type\": \"SamplerCustomAdvanced\", \"inputs\": {\"noise\": [\"8\", 0], \"guider\": [\"7\", 0], \"sampler\": [\"9\", 0], \"sigmas\": [\"10\", 0], \"latent_image\": [\"6\", 1]}}, \"12\": {\"class_type\": \"VAEDecodeTiled\", \"inputs\": {\"samples\": [\"11\", 0], \"vae\": [\"3\", 0], \"tile_size\": 256, \"overlap\": 64, \"temporal_size\": 64, \"temporal_overlap\": 8}}, \"13\": {\"class_type\": \"CreateVideo\", \"inputs\": {\"images\": [\"12\", 0], \"fps\": 24.0}}, \"14\": {\"class_type\": \"SaveVideo\", \"inputs\": {\"video\": [\"13\", 0], \"filename_prefix\": \"03-02/raw\", \"format\": \"mp4\", \"format.codec\": \"h264\"}}, \"20\": {\"class_type\": \"LoadImage\", \"inputs\": {\"image\": \"03-appearance.png\"}, \"is_changed\": [\"fdfe68451bf012f439df5b067e7a336c2292f36755806937445a3e78978d0fb7\"]}, \"21\": {\"class_type\": \"LoadVideo\", \"inputs\": {\"file\": \"03-guide-sa-v3.mp4\"}, \"is_changed\": [1795666328.3516812]}, \"22\": {\"class_type\": \"GetVideoComponents\", \"inputs\": {\"video\": [\"21\", 0]}}, \"40\": {\"class_type\": \"LoadImage\", \"inputs\": {\"image\": \"03-appearance.png\"}, \"is_changed\": [\"fdfe68451bf012f439df5b067e7a336c2292f36755806937445a3e78978d0fb7\"]}, \"41\": {\"class_type\": \"MiniMaxH3AddGuide\", \"inputs\": {\"positive\": [\"6\", 0], \"latent\": [\"6\", 1], \"vae\": [\"3\", 0], \"image\": [\"40\", 0], \"frame_idx\": 0}}}",
+                "encoder": "Lavf63.1.102"
+              }
+            }
+          },
+          "full_decode_verified": true
+        }
+      ]
+    },
+    {
+      "shot": "04",
+      "take": "01",
+      "status": "generated_unreviewed",
+      "started": 1795658187.9621959,
+      "videos": [
+        {
+          "path": "takes/04-01/raw_00001_.mp4",
+          "sha256": "3df138c07a8424d42be7f2d067b1c99b944f4ddef1712940c8ee6d3f0e63ceb0",
+          "probe": {
+            "streams": [
+              {
+                "index": 0,
+                "codec_name": "h264",
+                "codec_long_name": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+                "profile": "High",
+                "codec_type": "video",
+                "codec_tag_string": "avc1",
+                "codec_tag": "0x31637661",
+                "mime_codec_string": "avc1.64001f",
+                "width": 576,
+                "height": 1024,
+                "coded_width": 576,
+                "coded_height": 1024,
+                "has_b_frames": 2,
+                "pix_fmt": "yuv420p",
+                "level": 31,
+                "color_range": "tv",
+                "color_space": "bt709",
+                "color_transfer": "iec61966-2-1",
+                "color_primaries": "bt709",
+                "chroma_location": "left",
+                "field_order": "progressive",
+                "is_avc": "true",
+                "nal_length_size": "4",
+                "id": "0x1",
+                "r_frame_rate": "24/1",
+                "avg_frame_rate": "24/1",
+                "time_base": "1/12288",
+                "start_pts": 0,
+                "start_time": "0.000000",
+                "duration_ts": 37376,
+                "duration": "3.041667",
+                "bit_rate": "4659692",
+                "bits_per_raw_sample": "8",
+                "nb_frames": "73",
+                "extradata_size": 48,
+                "disposition": {
+                  "default": 1,
+                  "dub": 0,
+                  "original": 0,
+                  "comment": 0,
+                  "lyrics": 0,
+                  "karaoke": 0,
+                  "forced": 0,
+                  "hearing_impaired": 0,
+                  "visual_impaired": 0,
+                  "clean_effects": 0,
+                  "attached_pic": 0,
+                  "timed_thumbnails": 0,
+                  "non_diegetic": 0,
+                  "captions": 0,
+                  "descriptions": 0,
+                  "metadata": 0,
+                  "dependent": 0,
+                  "still_image": 0,
+                  "multilayer": 0
+                },
+                "tags": {
+                  "language": "und",
+                  "handler_name": "VideoHandler"
+                }
+              }
+            ],
+            "format": {
+              "filename": "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/first-cut-v1/takes/04-01/raw_00001_.mp4",
+              "nb_streams": 1,
+              "nb_programs": 0,
+              "nb_stream_groups": 0,
+              "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+              "format_long_name": "QuickTime / MOV",
+              "start_time": "0.000000",
+              "duration": "3.041667",
+              "size": "1777190",
+              "bit_rate": "4674252",
+              "probe_score": 100,
+              "tags": {
+                "major_brand": "isom",
+                "minor_version": "512",
+                "compatible_brands": "isomiso2avc1mp41",
+                "prompt": "{\"1\": {\"class_type\": \"UnetLoaderGGUF\", \"inputs\": {\"unet_name\": \"minimax_h3_ref2va_pruned-Q4_K_M.gguf\"}}, \"2\": {\"class_type\": \"CLIPLoaderGGUF\", \"inputs\": {\"clip_name\": \"qwen3vl_32b_minimax_h3-Q4_K_M.gguf\", \"type\": \"minimax\"}}, \"3\": {\"class_type\": \"VAELoader\", \"inputs\": {\"vae_name\": \"minimax_h3_video_vae_fp16.safetensors\"}}, \"4\": {\"class_type\": \"LoraLoaderModelOnly\", \"inputs\": {\"model\": [\"1\", 0], \"lora_name\": \"minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors\", \"strength_model\": 1.0}}, \"5\": {\"class_type\": \"MiniMaxH3SigmaShift\", \"inputs\": {\"model\": [\"4\", 0], \"shift_video\": 12.0, \"shift_audio\": 3.0}}, \"6\": {\"class_type\": \"MiniMaxH3ReferenceToVideo\", \"inputs\": {\"clip\": [\"2\", 0], \"vae\": [\"3\", 0], \"prompt\": \"A continuous three-second third-person player approach to the same parked SOS Transit DOUBLE-DECKER bus.  Use <Picture 1> ONLY as the approved appearance reference. Use <Video 1> as the continuous spatial, action and camera guide; replace its primitive surfaces and proxy humans with the detailed painted PS2 look of Picture1. Follow the video motion, not the static pose of Picture1. The girl RUNS up the left/passenger-side pavement, around the front nose, and toward the right-side driver window as shown in Video1. The bus remains parked in the LEFT traffic lane, three axles, orange-red/purple/white livery, two glazing rows, rounded body, charcoal door trim without yellow outline. The last commuters have stepped clear on the storefront side; nobody is touched. Camera follows behind her around the nose, preserving rigid bus position and correct right-hand driver seat. No boarding through passenger door in this shot. Original GTA San Andreas PlayStation 2 graphics throughout: angular economical character meshes, painted low-resolution skin/clothing/vehicle textures, restrained broad diffuse shading and period game animation. Preserve the same adult woman, maroon sleeveless top and leggings, one black ponytail, white shoes and ONE small black handbag carried LEFT. Every NPC matches the same PS2 rendering. Preserve the architecture, lighting and palette of <Picture 1>. No photoreal faces, no modern glossy rendering, no cartoon toy figures, no body morphing, no new logos, HUD, wanted stars, captions or baked text overlays. No shot changes. No speech or music.\", \"width\": 576, \"height\": 1024, \"length\": 73, \"ref_image_size\": \"match\", \"ref_images.ref_image_0\": [\"20\", 0], \"ref_videos.ref_video_0\": [\"22\", 0]}}, \"7\": {\"class_type\": \"BasicGuider\", \"inputs\": {\"model\": [\"5\", 0], \"conditioning\": [\"6\", 0]}}, \"8\": {\"class_type\": \"RandomNoise\", \"inputs\": {\"noise_seed\": 2026112704}}, \"9\": {\"class_type\": \"KSamplerSelect\", \"inputs\": {\"sampler_name\": \"euler\"}}, \"10\": {\"class_type\": \"BasicScheduler\", \"inputs\": {\"model\": [\"5\", 0], \"scheduler\": \"simple\", \"steps\": 4, \"denoise\": 1.0}}, \"11\": {\"class_type\": \"SamplerCustomAdvanced\", \"inputs\": {\"noise\": [\"8\", 0], \"guider\": [\"7\", 0], \"sampler\": [\"9\", 0], \"sigmas\": [\"10\", 0], \"latent_image\": [\"6\", 1]}}, \"12\": {\"class_type\": \"VAEDecodeTiled\", \"inputs\": {\"samples\": [\"11\", 0], \"vae\": [\"3\", 0], \"tile_size\": 256, \"overlap\": 64, \"temporal_size\": 64, \"temporal_overlap\": 8}}, \"13\": {\"class_type\": \"CreateVideo\", \"inputs\": {\"images\": [\"12\", 0], \"fps\": 24.0}}, \"14\": {\"class_type\": \"SaveVideo\", \"inputs\": {\"video\": [\"13\", 0], \"filename_prefix\": \"04-01/raw\", \"format\": \"mp4\", \"format.codec\": \"h264\"}}, \"20\": {\"class_type\": \"LoadImage\", \"inputs\": {\"image\": \"04-appearance.png\"}, \"is_changed\": [\"abd225d42b0adab8f1985ac7e35285a6088cab72d8be16484df2dcb269953b8c\"]}, \"21\": {\"class_type\": \"LoadVideo\", \"inputs\": {\"file\": \"04-guide.mp4\"}, \"is_changed\": [1795658085.505602]}, \"22\": {\"class_type\": \"GetVideoComponents\", \"inputs\": {\"video\": [\"21\", 0]}}}",
+                "encoder": "Lavf63.1.102"
+              }
+            }
+          },
+          "full_decode_verified": true
+        }
+      ]
+    },
+    {
+      "shot": "04",
+      "take": "02",
+      "status": "generated_unreviewed",
+      "started": 1795661344.702722,
+      "videos": [
+        {
+          "path": "takes/04-02/raw_00001_.mp4",
+          "sha256": "0838f46b157e914d1bd51baf02de9d5c08d3486c5aa82c92ee9dac54a9fa5e73",
+          "probe": {
+            "streams": [
+              {
+                "index": 0,
+                "codec_name": "h264",
+                "codec_long_name": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+                "profile": "High",
+                "codec_type": "video",
+                "codec_tag_string": "avc1",
+                "codec_tag": "0x31637661",
+                "mime_codec_string": "avc1.64001f",
+                "width": 576,
+                "height": 1024,
+                "coded_width": 576,
+                "coded_height": 1024,
+                "has_b_frames": 2,
+                "pix_fmt": "yuv420p",
+                "level": 31,
+                "color_range": "tv",
+                "color_space": "bt709",
+                "color_transfer": "iec61966-2-1",
+                "color_primaries": "bt709",
+                "chroma_location": "left",
+                "field_order": "progressive",
+                "is_avc": "true",
+                "nal_length_size": "4",
+                "id": "0x1",
+                "r_frame_rate": "24/1",
+                "avg_frame_rate": "24/1",
+                "time_base": "1/12288",
+                "start_pts": 0,
+                "start_time": "0.000000",
+                "duration_ts": 37376,
+                "duration": "3.041667",
+                "bit_rate": "5328857",
+                "bits_per_raw_sample": "8",
+                "nb_frames": "73",
+                "extradata_size": 48,
+                "disposition": {
+                  "default": 1,
+                  "dub": 0,
+                  "original": 0,
+                  "comment": 0,
+                  "lyrics": 0,
+                  "karaoke": 0,
+                  "forced": 0,
+                  "hearing_impaired": 0,
+                  "visual_impaired": 0,
+                  "clean_effects": 0,
+                  "attached_pic": 0,
+                  "timed_thumbnails": 0,
+                  "non_diegetic": 0,
+                  "captions": 0,
+                  "descriptions": 0,
+                  "metadata": 0,
+                  "dependent": 0,
+                  "still_image": 0,
+                  "multilayer": 0
+                },
+                "tags": {
+                  "language": "und",
+                  "handler_name": "VideoHandler"
+                }
+              }
+            ],
+            "format": {
+              "filename": "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/first-cut-v1/takes/04-02/raw_00001_.mp4",
+              "nb_streams": 1,
+              "nb_programs": 0,
+              "nb_stream_groups": 0,
+              "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+              "format_long_name": "QuickTime / MOV",
+              "start_time": "0.000000",
+              "duration": "3.041667",
+              "size": "2032234",
+              "bit_rate": "5345053",
+              "probe_score": 100,
+              "tags": {
+                "major_brand": "isom",
+                "minor_version": "512",
+                "compatible_brands": "isomiso2avc1mp41",
+                "prompt": "{\"1\": {\"class_type\": \"UnetLoaderGGUF\", \"inputs\": {\"unet_name\": \"minimax_h3_ref2va_pruned-Q4_K_M.gguf\"}}, \"2\": {\"class_type\": \"CLIPLoaderGGUF\", \"inputs\": {\"clip_name\": \"qwen3vl_32b_minimax_h3-Q4_K_M.gguf\", \"type\": \"minimax\"}}, \"3\": {\"class_type\": \"VAELoader\", \"inputs\": {\"vae_name\": \"minimax_h3_video_vae_fp16.safetensors\"}}, \"4\": {\"class_type\": \"LoraLoaderModelOnly\", \"inputs\": {\"model\": [\"1\", 0], \"lora_name\": \"minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors\", \"strength_model\": 1.0}}, \"5\": {\"class_type\": \"MiniMaxH3SigmaShift\", \"inputs\": {\"model\": [\"4\", 0], \"shift_video\": 12.0, \"shift_audio\": 3.0}}, \"6\": {\"class_type\": \"MiniMaxH3ReferenceToVideo\", \"inputs\": {\"clip\": [\"2\", 0], \"vae\": [\"3\", 0], \"prompt\": \"One uninterrupted three-second third-person gameplay run AROUND the FRONT NOSE of the parked double-decker, from passenger side to driver side. Start with the girl on the sidewalk. She runs PAST the open passenger entrance without entering it, continues in front of the windscreen, then rounds the other front corner onto the road and stops beside the compact DRIVER WINDOW. The bus stays parked, completely stationary. The girl never boards during this shot. The corrected <Video 1> gives the full route and collision-free camera, and the supplied final frame anchors her arrival at the driver window. Preserve the full continuous turn; no cut or teleport. Use <Picture 1> for the exact finished bus and woman appearance: formed rounded sheet-metal corners, inset dark glazing, detailed wheel arches/rims/lamps, orange-red/purple/white SOS Transit livery, maroon clothing and black bag in LEFT hand. <Video 1> contains crude planning blocks ONLY: use their positions, timing and camera, NEVER their boxy silhouettes, flat toy surfaces or primitive faces as the finished geometry. Original PS2 GTA San Andreas painted textures and economical but properly formed vehicle mesh. Camera follows the whole run around the nose without entering the bus. Pedestrians remain clear on pavement; nobody is touched. No extra characters, HUD, captions or stars. Blender primitives govern ONLY world positions, motion, contacts and camera. Reconstruct the FINISHED MESH SHAPES from the approved appearance image: formed rounded bus corners, inset glazing, detailed wheel arches, rims, lamps and bumpers, and the approved human anatomy. Never merely paint textures onto the guide boxes or reproduce their blocky silhouettes or primitive faces.\", \"width\": 576, \"height\": 1024, \"length\": 73, \"ref_image_size\": \"match\", \"ref_images.ref_image_0\": [\"20\", 0], \"ref_videos.ref_video_0\": [\"22\", 0]}}, \"7\": {\"class_type\": \"BasicGuider\", \"inputs\": {\"model\": [\"5\", 0], \"conditioning\": [\"32\", 0]}}, \"8\": {\"class_type\": \"RandomNoise\", \"inputs\": {\"noise_seed\": 2026112804}}, \"9\": {\"class_type\": \"KSamplerSelect\", \"inputs\": {\"sampler_name\": \"euler\"}}, \"10\": {\"class_type\": \"BasicScheduler\", \"inputs\": {\"model\": [\"5\", 0], \"scheduler\": \"simple\", \"steps\": 4, \"denoise\": 1.0}}, \"11\": {\"class_type\": \"SamplerCustomAdvanced\", \"inputs\": {\"noise\": [\"8\", 0], \"guider\": [\"7\", 0], \"sampler\": [\"9\", 0], \"sigmas\": [\"10\", 0], \"latent_image\": [\"6\", 1]}}, \"12\": {\"class_type\": \"VAEDecodeTiled\", \"inputs\": {\"samples\": [\"11\", 0], \"vae\": [\"3\", 0], \"tile_size\": 256, \"overlap\": 64, \"temporal_size\": 64, \"temporal_overlap\": 8}}, \"13\": {\"class_type\": \"CreateVideo\", \"inputs\": {\"images\": [\"12\", 0], \"fps\": 24.0}}, \"14\": {\"class_type\": \"SaveVideo\", \"inputs\": {\"video\": [\"13\", 0], \"filename_prefix\": \"04-02/raw\", \"format\": \"mp4\", \"format.codec\": \"h264\"}}, \"20\": {\"class_type\": \"LoadImage\", \"inputs\": {\"image\": \"04-appearance.png\"}, \"is_changed\": [\"abd225d42b0adab8f1985ac7e35285a6088cab72d8be16484df2dcb269953b8c\"]}, \"21\": {\"class_type\": \"LoadVideo\", \"inputs\": {\"file\": \"04-guide-v2.mp4\"}, \"is_changed\": [1795661291.5500891]}, \"22\": {\"class_type\": \"GetVideoComponents\", \"inputs\": {\"video\": [\"21\", 0]}}, \"30\": {\"class_type\": \"MiniMaxH3AddGuide\", \"inputs\": {\"positive\": [\"6\", 0], \"latent\": [\"6\", 1], \"vae\": [\"3\", 0], \"image\": [\"20\", 0], \"frame_idx\": 0}}, \"31\": {\"class_type\": \"LoadImage\", \"inputs\": {\"image\": \"04-end-v2.png\"}, \"is_changed\": [\"9b20a646c31e8850cb1cc620b25ae1c649789dba133e015408e9118fc036e0c3\"]}, \"32\": {\"class_type\": \"MiniMaxH3AddGuide\", \"inputs\": {\"positive\": [\"30\", 0], \"latent\": [\"6\", 1], \"vae\": [\"3\", 0], \"image\": [\"31\", 0], \"frame_idx\": 72}}}",
+                "encoder": "Lavf63.1.102"
+              }
+            }
+          },
+          "full_decode_verified": true
+        }
+      ]
+    },
+    {
+      "shot": "04",
+      "take": "03",
+      "status": "superseded_before_render",
+      "started": 1795667042.647688,
+      "videos": []
+    },
+    {
+      "shot": "04",
+      "take": "04",
+      "status": "generated_unreviewed",
+      "started": 1795667236.156632,
+      "videos": [
+        {
+          "path": "takes/04-04/raw_00001_.mp4",
+          "sha256": "cbc0f3c89ea6c9002a157121096168861c74e59ad572aa23ff80870864837b79",
+          "probe": {
+            "streams": [
+              {
+                "index": 0,
+                "codec_name": "h264",
+                "codec_long_name": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+                "profile": "High",
+                "codec_type": "video",
+                "codec_tag_string": "avc1",
+                "codec_tag": "0x31637661",
+                "mime_codec_string": "avc1.64001f",
+                "width": 576,
+                "height": 1024,
+                "coded_width": 576,
+                "coded_height": 1024,
+                "has_b_frames": 2,
+                "pix_fmt": "yuv420p",
+                "level": 31,
+                "color_range": "tv",
+                "color_space": "bt709",
+                "color_transfer": "iec61966-2-1",
+                "color_primaries": "bt709",
+                "chroma_location": "left",
+                "field_order": "progressive",
+                "is_avc": "true",
+                "nal_length_size": "4",
+                "id": "0x1",
+                "r_frame_rate": "24/1",
+                "avg_frame_rate": "24/1",
+                "time_base": "1/12288",
+                "start_pts": 0,
+                "start_time": "0.000000",
+                "duration_ts": 37376,
+                "duration": "3.041667",
+                "bit_rate": "5658858",
+                "bits_per_raw_sample": "8",
+                "nb_frames": "73",
+                "extradata_size": 48,
+                "disposition": {
+                  "default": 1,
+                  "dub": 0,
+                  "original": 0,
+                  "comment": 0,
+                  "lyrics": 0,
+                  "karaoke": 0,
+                  "forced": 0,
+                  "hearing_impaired": 0,
+                  "visual_impaired": 0,
+                  "clean_effects": 0,
+                  "attached_pic": 0,
+                  "timed_thumbnails": 0,
+                  "non_diegetic": 0,
+                  "captions": 0,
+                  "descriptions": 0,
+                  "metadata": 0,
+                  "dependent": 0,
+                  "still_image": 0,
+                  "multilayer": 0
+                },
+                "tags": {
+                  "language": "und",
+                  "handler_name": "VideoHandler"
+                }
+              }
+            ],
+            "format": {
+              "filename": "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/first-cut-v1/takes/04-04/raw_00001_.mp4",
+              "nb_streams": 1,
+              "nb_programs": 0,
+              "nb_stream_groups": 0,
+              "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+              "format_long_name": "QuickTime / MOV",
+              "start_time": "0.000000",
+              "duration": "3.041667",
+              "size": "2158081",
+              "bit_rate": "5676048",
+              "probe_score": 100,
+              "tags": {
+                "major_brand": "isom",
+                "minor_version": "512",
+                "compatible_brands": "isomiso2avc1mp41",
+                "prompt": "{\"1\": {\"class_type\": \"UnetLoaderGGUF\", \"inputs\": {\"unet_name\": \"minimax_h3_ref2va_pruned-Q4_K_M.gguf\"}}, \"2\": {\"class_type\": \"CLIPLoaderGGUF\", \"inputs\": {\"clip_name\": \"qwen3vl_32b_minimax_h3-Q4_K_M.gguf\", \"type\": \"minimax\"}}, \"3\": {\"class_type\": \"VAELoader\", \"inputs\": {\"vae_name\": \"minimax_h3_video_vae_fp16.safetensors\"}}, \"4\": {\"class_type\": \"LoraLoaderModelOnly\", \"inputs\": {\"model\": [\"1\", 0], \"lora_name\": \"minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors\", \"strength_model\": 1.0}}, \"5\": {\"class_type\": \"MiniMaxH3SigmaShift\", \"inputs\": {\"model\": [\"4\", 0], \"shift_video\": 12.0, \"shift_audio\": 3.0}}, \"6\": {\"class_type\": \"MiniMaxH3ReferenceToVideo\", \"inputs\": {\"clip\": [\"2\", 0], \"vae\": [\"3\", 0], \"prompt\": \"One uninterrupted three-second third-person gameplay run AROUND the FRONT NOSE of the parked double-decker, from passenger side to driver side. Start with the girl on the sidewalk. She runs PAST the open passenger entrance without entering it, continues in front of the windscreen, then rounds the other front corner onto the road and stops beside the compact DRIVER WINDOW. The bus stays parked, completely stationary. The girl never boards during this shot. The corrected <Video 1> gives the full route and collision-free camera, and the supplied final frame anchors her arrival at the driver window. Preserve the full continuous turn; no cut or teleport. Use <Picture 1> for the exact finished bus and woman appearance: formed rounded sheet-metal corners, inset dark glazing, detailed wheel arches/rims/lamps, orange-red/purple/white SOS Transit livery, maroon clothing and black bag in LEFT hand. <Video 1> contains crude planning blocks ONLY: use their positions, timing and camera, NEVER their boxy silhouettes, flat toy surfaces or primitive faces as the finished geometry. Original PS2 GTA San Andreas painted textures and economical but properly formed vehicle mesh. Camera follows the whole run around the nose without entering the bus. Pedestrians remain clear on pavement; nobody is touched. No extra characters, HUD, captions or stars. Blender primitives govern ONLY world positions, motion, contacts and camera. Reconstruct the FINISHED MESH SHAPES from the approved appearance image: formed rounded bus corners, inset glazing, detailed wheel arches, rims, lamps and bumpers, and the approved human anatomy. Never merely paint textures onto the guide boxes or reproduce their blocky silhouettes or primitive faces. Match the original PS2 running cycle in the guide: forward-pitched torso, squared flared bent elbows, pronounced heel recovery and brisk repeated footfalls. Right arm pumps firmly; left arm uses a smaller swing to keep the single black handbag. Keep a regular game-animation cadence along the full continuous route, slowing only to stop at the driver window.\", \"width\": 576, \"height\": 1024, \"length\": 73, \"ref_image_size\": \"match\", \"ref_images.ref_image_0\": [\"20\", 0], \"ref_videos.ref_video_0\": [\"22\", 0]}}, \"7\": {\"class_type\": \"BasicGuider\", \"inputs\": {\"model\": [\"5\", 0], \"conditioning\": [\"32\", 0]}}, \"8\": {\"class_type\": \"RandomNoise\", \"inputs\": {\"noise_seed\": 2026113004}}, \"9\": {\"class_type\": \"KSamplerSelect\", \"inputs\": {\"sampler_name\": \"euler\"}}, \"10\": {\"class_type\": \"BasicScheduler\", \"inputs\": {\"model\": [\"5\", 0], \"scheduler\": \"simple\", \"steps\": 4, \"denoise\": 1.0}}, \"11\": {\"class_type\": \"SamplerCustomAdvanced\", \"inputs\": {\"noise\": [\"8\", 0], \"guider\": [\"7\", 0], \"sampler\": [\"9\", 0], \"sigmas\": [\"10\", 0], \"latent_image\": [\"6\", 1]}}, \"12\": {\"class_type\": \"VAEDecodeTiled\", \"inputs\": {\"samples\": [\"11\", 0], \"vae\": [\"3\", 0], \"tile_size\": 256, \"overlap\": 64, \"temporal_size\": 64, \"temporal_overlap\": 8}}, \"13\": {\"class_type\": \"CreateVideo\", \"inputs\": {\"images\": [\"12\", 0], \"fps\": 24.0}}, \"14\": {\"class_type\": \"SaveVideo\", \"inputs\": {\"video\": [\"13\", 0], \"filename_prefix\": \"04-04/raw\", \"format\": \"mp4\", \"format.codec\": \"h264\"}}, \"20\": {\"class_type\": \"LoadImage\", \"inputs\": {\"image\": \"04-appearance.png\"}, \"is_changed\": [\"abd225d42b0adab8f1985ac7e35285a6088cab72d8be16484df2dcb269953b8c\"]}, \"21\": {\"class_type\": \"LoadVideo\", \"inputs\": {\"file\": \"04-guide-sa-v4.mp4\"}, \"is_changed\": [1795667221.1248498]}, \"22\": {\"class_type\": \"GetVideoComponents\", \"inputs\": {\"video\": [\"21\", 0]}}, \"30\": {\"class_type\": \"MiniMaxH3AddGuide\", \"inputs\": {\"positive\": [\"6\", 0], \"latent\": [\"6\", 1], \"vae\": [\"3\", 0], \"image\": [\"20\", 0], \"frame_idx\": 0}}, \"31\": {\"class_type\": \"LoadImage\", \"inputs\": {\"image\": \"04-end-v2.png\"}, \"is_changed\": [\"9b20a646c31e8850cb1cc620b25ae1c649789dba133e015408e9118fc036e0c3\"]}, \"32\": {\"class_type\": \"MiniMaxH3AddGuide\", \"inputs\": {\"positive\": [\"30\", 0], \"latent\": [\"6\", 1], \"vae\": [\"3\", 0], \"image\": [\"31\", 0], \"frame_idx\": 72}}}",
+                "encoder": "Lavf63.1.102"
+              }
+            }
+          },
+          "full_decode_verified": true
+        }
+      ]
+    },
+    {
+      "shot": "05",
+      "take": "01",
+      "status": "generated_unreviewed",
+      "started": 1795658188.0770361,
+      "videos": [
+        {
+          "path": "takes/05-01/raw_00001_.mp4",
+          "sha256": "3a73db641359b771c3bd4fe34bcd968b1b7cf93f14b0979904890212792cb444",
+          "probe": {
+            "streams": [
+              {
+                "index": 0,
+                "codec_name": "h264",
+                "codec_long_name": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+                "profile": "High",
+                "codec_type": "video",
+                "codec_tag_string": "avc1",
+                "codec_tag": "0x31637661",
+                "mime_codec_string": "avc1.64001f",
+                "width": 576,
+                "height": 1024,
+                "coded_width": 576,
+                "coded_height": 1024,
+                "has_b_frames": 2,
+                "pix_fmt": "yuv420p",
+                "level": 31,
+                "color_range": "tv",
+                "color_space": "bt709",
+                "color_transfer": "iec61966-2-1",
+                "color_primaries": "bt709",
+                "chroma_location": "left",
+                "field_order": "progressive",
+                "is_avc": "true",
+                "nal_length_size": "4",
+                "id": "0x1",
+                "r_frame_rate": "24/1",
+                "avg_frame_rate": "24/1",
+                "time_base": "1/12288",
+                "start_pts": 0,
+                "start_time": "0.000000",
+                "duration_ts": 54784,
+                "duration": "4.458333",
+                "bit_rate": "2004424",
+                "bits_per_raw_sample": "8",
+                "nb_frames": "107",
+                "extradata_size": 48,
+                "disposition": {
+                  "default": 1,
+                  "dub": 0,
+                  "original": 0,
+                  "comment": 0,
+                  "lyrics": 0,
+                  "karaoke": 0,
+                  "forced": 0,
+                  "hearing_impaired": 0,
+                  "visual_impaired": 0,
+                  "clean_effects": 0,
+                  "attached_pic": 0,
+                  "timed_thumbnails": 0,
+                  "non_diegetic": 0,
+                  "captions": 0,
+                  "descriptions": 0,
+                  "metadata": 0,
+                  "dependent": 0,
+                  "still_image": 0,
+                  "multilayer": 0
+                },
+                "tags": {
+                  "language": "und",
+                  "handler_name": "VideoHandler"
+                }
+              }
+            ],
+            "format": {
+              "filename": "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/first-cut-v1/takes/05-01/raw_00001_.mp4",
+              "nb_streams": 1,
+              "nb_programs": 0,
+              "nb_stream_groups": 0,
+              "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+              "format_long_name": "QuickTime / MOV",
+              "start_time": "0.000000",
+              "duration": "4.458333",
+              "size": "1123084",
+              "bit_rate": "2015253",
+              "probe_score": 100,
+              "tags": {
+                "major_brand": "isom",
+                "minor_version": "512",
+                "compatible_brands": "isomiso2avc1mp41",
+                "prompt": "{\"1\": {\"class_type\": \"UnetLoaderGGUF\", \"inputs\": {\"unet_name\": \"minimax_h3_ref2va_pruned-Q4_K_M.gguf\"}}, \"2\": {\"class_type\": \"CLIPLoaderGGUF\", \"inputs\": {\"clip_name\": \"qwen3vl_32b_minimax_h3-Q4_K_M.gguf\", \"type\": \"minimax\"}}, \"3\": {\"class_type\": \"VAELoader\", \"inputs\": {\"vae_name\": \"minimax_h3_video_vae_fp16.safetensors\"}}, \"4\": {\"class_type\": \"LoraLoaderModelOnly\", \"inputs\": {\"model\": [\"1\", 0], \"lora_name\": \"minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors\", \"strength_model\": 1.0}}, \"5\": {\"class_type\": \"MiniMaxH3SigmaShift\", \"inputs\": {\"model\": [\"4\", 0], \"shift_video\": 12.0, \"shift_audio\": 3.0}}, \"6\": {\"class_type\": \"MiniMaxH3ReferenceToVideo\", \"inputs\": {\"clip\": [\"2\", 0], \"vae\": [\"3\", 0], \"prompt\": \"A continuous four-second third-person interaction take.  Use <Picture 1> ONLY as the approved appearance reference. Use <Video 1> as the continuous spatial, action and camera guide; replace its primitive surfaces and proxy humans with the detailed painted PS2 look of Picture1. Follow the video motion, not the static pose of Picture1. At the compact right-side DRIVER WINDOW beside the front windscreen, she strikes and breaks the glass, pulls the male purple-shirt driver out, steps back to let him clear, then climbs into the driver seat. Complete all stages in order. Driver lands upright and hurries clear, alive and unharmed; no blood, body impact or ragdoll. Girl and driver remain TWO distinct people. Bus stays exactly parked in the same LEFT lane, rigid body, identical double-decker livery and small driver opening. One handbag remains on left forearm until she places it in cab footwell. Do not duplicate people or turn window into an enormous doorway. Keep same rear interaction camera. Original GTA San Andreas PlayStation 2 graphics throughout: angular economical character meshes, painted low-resolution skin/clothing/vehicle textures, restrained broad diffuse shading and period game animation. Preserve the same adult woman, maroon sleeveless top and leggings, one black ponytail, white shoes and ONE small black handbag carried LEFT. Every NPC matches the same PS2 rendering. Preserve the architecture, lighting and palette of <Picture 1>. No photoreal faces, no modern glossy rendering, no cartoon toy figures, no body morphing, no new logos, HUD, wanted stars, captions or baked text overlays. No shot changes. No speech or music.\", \"width\": 576, \"height\": 1024, \"length\": 107, \"ref_image_size\": \"match\", \"ref_images.ref_image_0\": [\"20\", 0], \"ref_videos.ref_video_0\": [\"22\", 0]}}, \"7\": {\"class_type\": \"BasicGuider\", \"inputs\": {\"model\": [\"5\", 0], \"conditioning\": [\"6\", 0]}}, \"8\": {\"class_type\": \"RandomNoise\", \"inputs\": {\"noise_seed\": 2026112705}}, \"9\": {\"class_type\": \"KSamplerSelect\", \"inputs\": {\"sampler_name\": \"euler\"}}, \"10\": {\"class_type\": \"BasicScheduler\", \"inputs\": {\"model\": [\"5\", 0], \"scheduler\": \"simple\", \"steps\": 4, \"denoise\": 1.0}}, \"11\": {\"class_type\": \"SamplerCustomAdvanced\", \"inputs\": {\"noise\": [\"8\", 0], \"guider\": [\"7\", 0], \"sampler\": [\"9\", 0], \"sigmas\": [\"10\", 0], \"latent_image\": [\"6\", 1]}}, \"12\": {\"class_type\": \"VAEDecodeTiled\", \"inputs\": {\"samples\": [\"11\", 0], \"vae\": [\"3\", 0], \"tile_size\": 256, \"overlap\": 64, \"temporal_size\": 64, \"temporal_overlap\": 8}}, \"13\": {\"class_type\": \"CreateVideo\", \"inputs\": {\"images\": [\"12\", 0], \"fps\": 24.0}}, \"14\": {\"class_type\": \"SaveVideo\", \"inputs\": {\"video\": [\"13\", 0], \"filename_prefix\": \"05-01/raw\", \"format\": \"mp4\", \"format.codec\": \"h264\"}}, \"20\": {\"class_type\": \"LoadImage\", \"inputs\": {\"image\": \"05-appearance.png\"}, \"is_changed\": [\"3e4e11001cfb0a23c68ff0f98de8d50c143a8eed61a9d890645d700bb3f3632e\"]}, \"21\": {\"class_type\": \"LoadVideo\", \"inputs\": {\"file\": \"05-guide.mp4\"}, \"is_changed\": [1795658085.5894992]}, \"22\": {\"class_type\": \"GetVideoComponents\", \"inputs\": {\"video\": [\"21\", 0]}}}",
+                "encoder": "Lavf63.1.102"
+              }
+            }
+          },
+          "full_decode_verified": true
+        }
+      ]
+    },
+    {
+      "shot": "05",
+      "take": "02",
+      "status": "generated_unreviewed",
+      "started": 1795662163.5933871,
+      "videos": [
+        {
+          "path": "takes/05-02/raw_00001_.mp4",
+          "sha256": "809e390c25978ede28f2f60c1a785debf4d92fa172d0b3bd0a33f9fb4f665833",
+          "probe": {
+            "streams": [
+              {
+                "index": 0,
+                "codec_name": "h264",
+                "codec_long_name": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+                "profile": "High",
+                "codec_type": "video",
+                "codec_tag_string": "avc1",
+                "codec_tag": "0x31637661",
+                "mime_codec_string": "avc1.64001f",
+                "width": 576,
+                "height": 1024,
+                "coded_width": 576,
+                "coded_height": 1024,
+                "has_b_frames": 2,
+                "pix_fmt": "yuv420p",
+                "level": 31,
+                "color_range": "tv",
+                "color_space": "bt709",
+                "color_transfer": "iec61966-2-1",
+                "color_primaries": "bt709",
+                "chroma_location": "left",
+                "field_order": "progressive",
+                "is_avc": "true",
+                "nal_length_size": "4",
+                "id": "0x1",
+                "r_frame_rate": "24/1",
+                "avg_frame_rate": "24/1",
+                "time_base": "1/12288",
+                "start_pts": 0,
+                "start_time": "0.000000",
+                "duration_ts": 54784,
+                "duration": "4.458333",
+                "bit_rate": "1675819",
+                "bits_per_raw_sample": "8",
+                "nb_frames": "107",
+                "extradata_size": 48,
+                "disposition": {
+                  "default": 1,
+                  "dub": 0,
+                  "original": 0,
+                  "comment": 0,
+                  "lyrics": 0,
+                  "karaoke": 0,
+                  "forced": 0,
+                  "hearing_impaired": 0,
+                  "visual_impaired": 0,
+                  "clean_effects": 0,
+                  "attached_pic": 0,
+                  "timed_thumbnails": 0,
+                  "non_diegetic": 0,
+                  "captions": 0,
+                  "descriptions": 0,
+                  "metadata": 0,
+                  "dependent": 0,
+                  "still_image": 0,
+                  "multilayer": 0
+                },
+                "tags": {
+                  "language": "und",
+                  "handler_name": "VideoHandler"
+                }
+              }
+            ],
+            "format": {
+              "filename": "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/first-cut-v1/takes/05-02/raw_00001_.mp4",
+              "nb_streams": 1,
+              "nb_programs": 0,
+              "nb_stream_groups": 0,
+              "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+              "format_long_name": "QuickTime / MOV",
+              "start_time": "0.000000",
+              "duration": "4.458333",
+              "size": "941300",
+              "bit_rate": "1689061",
+              "probe_score": 100,
+              "tags": {
+                "major_brand": "isom",
+                "minor_version": "512",
+                "compatible_brands": "isomiso2avc1mp41",
+                "prompt": "{\"1\": {\"class_type\": \"UnetLoaderGGUF\", \"inputs\": {\"unet_name\": \"minimax_h3_ref2va_pruned-Q4_K_M.gguf\"}}, \"2\": {\"class_type\": \"CLIPLoaderGGUF\", \"inputs\": {\"clip_name\": \"qwen3vl_32b_minimax_h3-Q4_K_M.gguf\", \"type\": \"minimax\"}}, \"3\": {\"class_type\": \"VAELoader\", \"inputs\": {\"vae_name\": \"minimax_h3_video_vae_fp16.safetensors\"}}, \"4\": {\"class_type\": \"LoraLoaderModelOnly\", \"inputs\": {\"model\": [\"1\", 0], \"lora_name\": \"minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors\", \"strength_model\": 1.0}}, \"5\": {\"class_type\": \"MiniMaxH3SigmaShift\", \"inputs\": {\"model\": [\"4\", 0], \"shift_video\": 12.0, \"shift_audio\": 3.0}}, \"6\": {\"class_type\": \"MiniMaxH3ReferenceToVideo\", \"inputs\": {\"clip\": [\"2\", 0], \"vae\": [\"3\", 0], \"prompt\": \"One continuous four-second fixed rear interaction camera in original GTA San Andreas PS2 graphics. The girl smashes the SMALL DRIVER WINDOW with her right hand, pulls the purple-shirt driver through that same SMALL WINDOW, he lands on his feet unharmed and steps left, then she lifts herself head-first and climbs through the SAME SMALL WINDOW into the driver seat. Follow the supplied guide and timed still anchors, completing the action. THE SOLID WHITE BODY PANEL BELOW THE WINDOW NEVER CHANGES. This is a high small driver window, NEVER a passenger door. Both bodies cross the side of the bus at WINDOW HEIGHT above the sill; no one walks through the body panel. Driver and girl remain distinct. Bus remains rigid and stationary, no panel movement or resizing. Use <Picture 1> and the anchors for all FINISHED SHAPES AND TEXTURES: formed rounded bus body, inset dark glazing, detailed lamps, wheel arches and rims, exact orange-red/purple/white SOS Transit livery, maroon-clad woman with ponytail and white shoes. <Video 1> is primitive choreography ONLY, never copy its boxy mesh, faceted primitive faces or toy surfaces. Girl keeps handbag on LEFT forearm while climbing, then places it inside cab. Keep small black structured handbag, no extra bags. Driver walks away upright with no injury, blood or impact. No other people, doors, HUD, stars, cuts or captions. Camera does not move. Blender primitives govern ONLY world positions, motion, contacts and camera. Reconstruct the FINISHED MESH SHAPES from the approved appearance image: formed rounded bus corners, inset glazing, detailed wheel arches, rims, lamps and bumpers, and the approved human anatomy. Never merely paint textures onto the guide boxes or reproduce their blocky silhouettes or primitive faces.\", \"width\": 576, \"height\": 1024, \"length\": 107, \"ref_image_size\": \"match\", \"ref_images.ref_image_0\": [\"20\", 0], \"ref_videos.ref_video_0\": [\"22\", 0]}}, \"7\": {\"class_type\": \"BasicGuider\", \"inputs\": {\"model\": [\"5\", 0], \"conditioning\": [\"47\", 0]}}, \"8\": {\"class_type\": \"RandomNoise\", \"inputs\": {\"noise_seed\": 2026112805}}, \"9\": {\"class_type\": \"KSamplerSelect\", \"inputs\": {\"sampler_name\": \"euler\"}}, \"10\": {\"class_type\": \"BasicScheduler\", \"inputs\": {\"model\": [\"5\", 0], \"scheduler\": \"simple\", \"steps\": 4, \"denoise\": 1.0}}, \"11\": {\"class_type\": \"SamplerCustomAdvanced\", \"inputs\": {\"noise\": [\"8\", 0], \"guider\": [\"7\", 0], \"sampler\": [\"9\", 0], \"sigmas\": [\"10\", 0], \"latent_image\": [\"6\", 1]}}, \"12\": {\"class_type\": \"VAEDecodeTiled\", \"inputs\": {\"samples\": [\"11\", 0], \"vae\": [\"3\", 0], \"tile_size\": 256, \"overlap\": 64, \"temporal_size\": 64, \"temporal_overlap\": 8}}, \"13\": {\"class_type\": \"CreateVideo\", \"inputs\": {\"images\": [\"12\", 0], \"fps\": 24.0}}, \"14\": {\"class_type\": \"SaveVideo\", \"inputs\": {\"video\": [\"13\", 0], \"filename_prefix\": \"05-02/raw\", \"format\": \"mp4\", \"format.codec\": \"h264\"}}, \"20\": {\"class_type\": \"LoadImage\", \"inputs\": {\"image\": \"05-appearance.png\"}, \"is_changed\": [\"3e4e11001cfb0a23c68ff0f98de8d50c143a8eed61a9d890645d700bb3f3632e\"]}, \"21\": {\"class_type\": \"LoadVideo\", \"inputs\": {\"file\": \"05-guide-v2.mp4\"}, \"is_changed\": [1795662120.622348]}, \"22\": {\"class_type\": \"GetVideoComponents\", \"inputs\": {\"video\": [\"21\", 0]}}, \"40\": {\"class_type\": \"LoadImage\", \"inputs\": {\"image\": \"04-end-v2.png\"}, \"is_changed\": [\"9b20a646c31e8850cb1cc620b25ae1c649789dba133e015408e9118fc036e0c3\"]}, \"41\": {\"class_type\": \"MiniMaxH3AddGuide\", \"inputs\": {\"positive\": [\"6\", 0], \"latent\": [\"6\", 1], \"vae\": [\"3\", 0], \"image\": [\"40\", 0], \"frame_idx\": 0}}, \"42\": {\"class_type\": \"LoadImage\", \"inputs\": {\"image\": \"05-appearance.png\"}, \"is_changed\": [\"3e4e11001cfb0a23c68ff0f98de8d50c143a8eed61a9d890645d700bb3f3632e\"]}, \"43\": {\"class_type\": \"MiniMaxH3AddGuide\", \"inputs\": {\"positive\": [\"41\", 0], \"latent\": [\"6\", 1], \"vae\": [\"3\", 0], \"image\": [\"42\", 0], \"frame_idx\": 12}}, \"44\": {\"class_type\": \"LoadImage\", \"inputs\": {\"image\": \"05-mid-v2.png\"}, \"is_changed\": [\"0e871d59c4cc17eee91da5a5ecd39c778e49439561f96e44cd297d2f8f291d6f\"]}, \"45\": {\"class_type\": \"MiniMaxH3AddGuide\", \"inputs\": {\"positive\": [\"43\", 0], \"latent\": [\"6\", 1], \"vae\": [\"3\", 0], \"image\": [\"44\", 0], \"frame_idx\": 48}}, \"46\": {\"class_type\": \"LoadImage\", \"inputs\": {\"image\": \"05-end-v2.png\"}, \"is_changed\": [\"4469f5c54146ff3ae1b47a9d587742ebbe6f5c8f7b5a29565968a184f4876df5\"]}, \"47\": {\"class_type\": \"MiniMaxH3AddGuide\", \"inputs\": {\"positive\": [\"45\", 0], \"latent\": [\"6\", 1], \"vae\": [\"3\", 0], \"image\": [\"46\", 0], \"frame_idx\": 96}}}",
+                "encoder": "Lavf63.1.102"
+              }
+            }
+          },
+          "full_decode_verified": true
+        }
+      ]
+    },
+    {
+      "shot": "06",
+      "take": "01",
+      "status": "generated_unreviewed",
+      "started": 1795658188.138711,
+      "videos": [
+        {
+          "path": "takes/06-01/raw_00001_.mp4",
+          "sha256": "b6a24e7f303b2404e2f2521505c25e3dbef342ea4d2c94a592d3a5d47d9a77b0",
+          "probe": {
+            "streams": [
+              {
+                "index": 0,
+                "codec_name": "h264",
+                "codec_long_name": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+                "profile": "High",
+                "codec_type": "video",
+                "codec_tag_string": "avc1",
+                "codec_tag": "0x31637661",
+                "mime_codec_string": "avc1.64001f",
+                "width": 576,
+                "height": 1024,
+                "coded_width": 576,
+                "coded_height": 1024,
+                "has_b_frames": 2,
+                "pix_fmt": "yuv420p",
+                "level": 31,
+                "color_range": "tv",
+                "color_space": "bt709",
+                "color_transfer": "iec61966-2-1",
+                "color_primaries": "bt709",
+                "chroma_location": "left",
+                "field_order": "progressive",
+                "is_avc": "true",
+                "nal_length_size": "4",
+                "id": "0x1",
+                "r_frame_rate": "24/1",
+                "avg_frame_rate": "24/1",
+                "time_base": "1/12288",
+                "start_pts": 0,
+                "start_time": "0.000000",
+                "duration_ts": 63488,
+                "duration": "5.166667",
+                "bit_rate": "5126296",
+                "bits_per_raw_sample": "8",
+                "nb_frames": "124",
+                "extradata_size": 48,
+                "disposition": {
+                  "default": 1,
+                  "dub": 0,
+                  "original": 0,
+                  "comment": 0,
+                  "lyrics": 0,
+                  "karaoke": 0,
+                  "forced": 0,
+                  "hearing_impaired": 0,
+                  "visual_impaired": 0,
+                  "clean_effects": 0,
+                  "attached_pic": 0,
+                  "timed_thumbnails": 0,
+                  "non_diegetic": 0,
+                  "captions": 0,
+                  "descriptions": 0,
+                  "metadata": 0,
+                  "dependent": 0,
+                  "still_image": 0,
+                  "multilayer": 0
+                },
+                "tags": {
+                  "language": "und",
+                  "handler_name": "VideoHandler"
+                }
+              }
+            ],
+            "format": {
+              "filename": "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/first-cut-v1/takes/06-01/raw_00001_.mp4",
+              "nb_streams": 1,
+              "nb_programs": 0,
+              "nb_stream_groups": 0,
+              "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+              "format_long_name": "QuickTime / MOV",
+              "start_time": "0.000000",
+              "duration": "5.166667",
+              "size": "3316807",
+              "bit_rate": "5135700",
+              "probe_score": 100,
+              "tags": {
+                "major_brand": "isom",
+                "minor_version": "512",
+                "compatible_brands": "isomiso2avc1mp41",
+                "prompt": "{\"1\": {\"class_type\": \"UnetLoaderGGUF\", \"inputs\": {\"unet_name\": \"minimax_h3_ref2va_pruned-Q4_K_M.gguf\"}}, \"2\": {\"class_type\": \"CLIPLoaderGGUF\", \"inputs\": {\"clip_name\": \"qwen3vl_32b_minimax_h3-Q4_K_M.gguf\", \"type\": \"minimax\"}}, \"3\": {\"class_type\": \"VAELoader\", \"inputs\": {\"vae_name\": \"minimax_h3_video_vae_fp16.safetensors\"}}, \"4\": {\"class_type\": \"LoraLoaderModelOnly\", \"inputs\": {\"model\": [\"1\", 0], \"lora_name\": \"minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors\", \"strength_model\": 1.0}}, \"5\": {\"class_type\": \"MiniMaxH3SigmaShift\", \"inputs\": {\"model\": [\"4\", 0], \"shift_video\": 12.0, \"shift_audio\": 3.0}}, \"6\": {\"class_type\": \"MiniMaxH3ReferenceToVideo\", \"inputs\": {\"clip\": [\"2\", 0], \"vae\": [\"3\", 0], \"prompt\": \"A continuous five-second rear vehicle chase shot.  Use <Picture 1> ONLY as the approved appearance reference. Use <Video 1> as the continuous spatial, action and camera guide; replace its primitive surfaces and proxy humans with the detailed painted PS2 look of Picture1. Follow the video motion, not the static pose of Picture1. The same SOS Transit double-decker accelerates northbound and swerves within the LEFT road side. Chase camera stays behind the bus, rear grille and taillights face camera; no front view or orbit. Rigid chassis, turning road wheels, suspension lean. Red and blue police flashes are uneven AMBIENT SPILL from unseen chase cars BEHIND the camera, staggered and offset; no paired lights or emitters on bus. No pedestrians in road; no collision. Bus is empty except seated woman driver. Original GTA San Andreas PlayStation 2 graphics throughout: angular economical character meshes, painted low-resolution skin/clothing/vehicle textures, restrained broad diffuse shading and period game animation. Preserve the same adult woman, maroon sleeveless top and leggings, one black ponytail, white shoes and ONE small black handbag carried LEFT. Every NPC matches the same PS2 rendering. Preserve the architecture, lighting and palette of <Picture 1>. No photoreal faces, no modern glossy rendering, no cartoon toy figures, no body morphing, no new logos, HUD, wanted stars, captions or baked text overlays. No shot changes. No speech or music.\", \"width\": 576, \"height\": 1024, \"length\": 124, \"ref_image_size\": \"match\", \"ref_images.ref_image_0\": [\"20\", 0], \"ref_videos.ref_video_0\": [\"22\", 0]}}, \"7\": {\"class_type\": \"BasicGuider\", \"inputs\": {\"model\": [\"5\", 0], \"conditioning\": [\"6\", 0]}}, \"8\": {\"class_type\": \"RandomNoise\", \"inputs\": {\"noise_seed\": 2026112706}}, \"9\": {\"class_type\": \"KSamplerSelect\", \"inputs\": {\"sampler_name\": \"euler\"}}, \"10\": {\"class_type\": \"BasicScheduler\", \"inputs\": {\"model\": [\"5\", 0], \"scheduler\": \"simple\", \"steps\": 4, \"denoise\": 1.0}}, \"11\": {\"class_type\": \"SamplerCustomAdvanced\", \"inputs\": {\"noise\": [\"8\", 0], \"guider\": [\"7\", 0], \"sampler\": [\"9\", 0], \"sigmas\": [\"10\", 0], \"latent_image\": [\"6\", 1]}}, \"12\": {\"class_type\": \"VAEDecodeTiled\", \"inputs\": {\"samples\": [\"11\", 0], \"vae\": [\"3\", 0], \"tile_size\": 256, \"overlap\": 64, \"temporal_size\": 64, \"temporal_overlap\": 8}}, \"13\": {\"class_type\": \"CreateVideo\", \"inputs\": {\"images\": [\"12\", 0], \"fps\": 24.0}}, \"14\": {\"class_type\": \"SaveVideo\", \"inputs\": {\"video\": [\"13\", 0], \"filename_prefix\": \"06-01/raw\", \"format\": \"mp4\", \"format.codec\": \"h264\"}}, \"20\": {\"class_type\": \"LoadImage\", \"inputs\": {\"image\": \"06-appearance.png\"}, \"is_changed\": [\"220c15a6bdea1cf0db8f6ad10792cc3be2b75d3a77eb3c9a3c90ce3d5f34090d\"]}, \"21\": {\"class_type\": \"LoadVideo\", \"inputs\": {\"file\": \"06-guide.mp4\"}, \"is_changed\": [1795658085.719911]}, \"22\": {\"class_type\": \"GetVideoComponents\", \"inputs\": {\"video\": [\"21\", 0]}}}",
+                "encoder": "Lavf63.1.102"
+              }
+            }
+          },
+          "full_decode_verified": true
+        }
+      ]
+    },
+    {
+      "shot": "06",
+      "take": "02",
+      "status": "generated_unreviewed",
+      "started": 1795663169.521506,
+      "videos": [
+        {
+          "path": "takes/06-02/raw_00001_.mp4",
+          "sha256": "246827831719b7aafadf0da9a478e11e75206e10bd7a86fb2642e33543a01e84",
+          "probe": {
+            "streams": [
+              {
+                "index": 0,
+                "codec_name": "h264",
+                "codec_long_name": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+                "profile": "High",
+                "codec_type": "video",
+                "codec_tag_string": "avc1",
+                "codec_tag": "0x31637661",
+                "mime_codec_string": "avc1.64001f",
+                "width": 576,
+                "height": 1024,
+                "coded_width": 576,
+                "coded_height": 1024,
+                "has_b_frames": 2,
+                "pix_fmt": "yuv420p",
+                "level": 31,
+                "color_range": "tv",
+                "color_space": "bt709",
+                "color_transfer": "iec61966-2-1",
+                "color_primaries": "bt709",
+                "chroma_location": "left",
+                "field_order": "progressive",
+                "is_avc": "true",
+                "nal_length_size": "4",
+                "id": "0x1",
+                "r_frame_rate": "24/1",
+                "avg_frame_rate": "24/1",
+                "time_base": "1/12288",
+                "start_pts": 0,
+                "start_time": "0.000000",
+                "duration_ts": 63488,
+                "duration": "5.166667",
+                "bit_rate": "4900827",
+                "bits_per_raw_sample": "8",
+                "nb_frames": "124",
+                "extradata_size": 48,
+                "disposition": {
+                  "default": 1,
+                  "dub": 0,
+                  "original": 0,
+                  "comment": 0,
+                  "lyrics": 0,
+                  "karaoke": 0,
+                  "forced": 0,
+                  "hearing_impaired": 0,
+                  "visual_impaired": 0,
+                  "clean_effects": 0,
+                  "attached_pic": 0,
+                  "timed_thumbnails": 0,
+                  "non_diegetic": 0,
+                  "captions": 0,
+                  "descriptions": 0,
+                  "metadata": 0,
+                  "dependent": 0,
+                  "still_image": 0,
+                  "multilayer": 0
+                },
+                "tags": {
+                  "language": "und",
+                  "handler_name": "VideoHandler"
+                }
+              }
+            ],
+            "format": {
+              "filename": "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/first-cut-v1/takes/06-02/raw_00001_.mp4",
+              "nb_streams": 1,
+              "nb_programs": 0,
+              "nb_stream_groups": 0,
+              "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+              "format_long_name": "QuickTime / MOV",
+              "start_time": "0.000000",
+              "duration": "5.166667",
+              "size": "3171372",
+              "bit_rate": "4910511",
+              "probe_score": 100,
+              "tags": {
+                "major_brand": "isom",
+                "minor_version": "512",
+                "compatible_brands": "isomiso2avc1mp41",
+                "prompt": "{\"1\": {\"class_type\": \"UnetLoaderGGUF\", \"inputs\": {\"unet_name\": \"minimax_h3_ref2va_pruned-Q4_K_M.gguf\"}}, \"2\": {\"class_type\": \"CLIPLoaderGGUF\", \"inputs\": {\"clip_name\": \"qwen3vl_32b_minimax_h3-Q4_K_M.gguf\", \"type\": \"minimax\"}}, \"3\": {\"class_type\": \"VAELoader\", \"inputs\": {\"vae_name\": \"minimax_h3_video_vae_fp16.safetensors\"}}, \"4\": {\"class_type\": \"LoraLoaderModelOnly\", \"inputs\": {\"model\": [\"1\", 0], \"lora_name\": \"minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors\", \"strength_model\": 1.0}}, \"5\": {\"class_type\": \"MiniMaxH3SigmaShift\", \"inputs\": {\"model\": [\"4\", 0], \"shift_video\": 12.0, \"shift_audio\": 3.0}}, \"6\": {\"class_type\": \"MiniMaxH3ReferenceToVideo\", \"inputs\": {\"clip\": [\"2\", 0], \"vae\": [\"3\", 0], \"prompt\": \"A continuous five-second rear VEHICLE chase camera, starting exactly at the still anchor. Follow the rear of the SAME SOS Transit double-decker speeding along the LEFT lane and weaving as in <Video 1>. Three axles, two decks, orange-red upper rear and purple lower rear with white SOS Transit logo, no change to vehicle design. Road wheels turn and chassis leans slightly. Red and blue flashes come as UNEVEN diffuse ambient spill from unseen chase vehicles behind camera, independently timed and spatially offset. No police-light emitters on the bus. Camera stays behind the moving bus; never cuts or orbits. The visible road is EMPTY of people throughout. No pedestrians, runners, cyclists or characters between camera and bus or alongside it. No collision. Use <Picture 1> and still anchors for the finished vehicle mesh and paint: rounded formed sheet metal, inset glazing, fitted lamps and bumper, detailed arches and rims. <Video 1> gives ONLY trajectory, timing and camera; never copy its primitive box shapes, toy surfaces or flat block faces. Original GTA San Andreas PS2 graphics, low-resolution painted textures and restrained diffuse shading. No modern glossy rendering, no HUD, captions, stars or cuts. The sole driver is hidden INSIDE the bus and NEVER visible outside it. No on-foot player character or person following the bus.\", \"width\": 576, \"height\": 1024, \"length\": 124, \"ref_image_size\": \"match\", \"ref_images.ref_image_0\": [\"20\", 0], \"ref_videos.ref_video_0\": [\"22\", 0]}}, \"7\": {\"class_type\": \"BasicGuider\", \"inputs\": {\"model\": [\"5\", 0], \"conditioning\": [\"41\", 0]}}, \"8\": {\"class_type\": \"RandomNoise\", \"inputs\": {\"noise_seed\": 2026112806}}, \"9\": {\"class_type\": \"KSamplerSelect\", \"inputs\": {\"sampler_name\": \"euler\"}}, \"10\": {\"class_type\": \"BasicScheduler\", \"inputs\": {\"model\": [\"5\", 0], \"scheduler\": \"simple\", \"steps\": 4, \"denoise\": 1.0}}, \"11\": {\"class_type\": \"SamplerCustomAdvanced\", \"inputs\": {\"noise\": [\"8\", 0], \"guider\": [\"7\", 0], \"sampler\": [\"9\", 0], \"sigmas\": [\"10\", 0], \"latent_image\": [\"6\", 1]}}, \"12\": {\"class_type\": \"VAEDecodeTiled\", \"inputs\": {\"samples\": [\"11\", 0], \"vae\": [\"3\", 0], \"tile_size\": 256, \"overlap\": 64, \"temporal_size\": 64, \"temporal_overlap\": 8}}, \"13\": {\"class_type\": \"CreateVideo\", \"inputs\": {\"images\": [\"12\", 0], \"fps\": 24.0}}, \"14\": {\"class_type\": \"SaveVideo\", \"inputs\": {\"video\": [\"13\", 0], \"filename_prefix\": \"06-02/raw\", \"format\": \"mp4\", \"format.codec\": \"h264\"}}, \"20\": {\"class_type\": \"LoadImage\", \"inputs\": {\"image\": \"06-appearance.png\"}, \"is_changed\": [\"220c15a6bdea1cf0db8f6ad10792cc3be2b75d3a77eb3c9a3c90ce3d5f34090d\"]}, \"21\": {\"class_type\": \"LoadVideo\", \"inputs\": {\"file\": \"06-guide.mp4\"}, \"is_changed\": [1795658085.719911]}, \"22\": {\"class_type\": \"GetVideoComponents\", \"inputs\": {\"video\": [\"21\", 0]}}, \"40\": {\"class_type\": \"LoadImage\", \"inputs\": {\"image\": \"06-appearance.png\"}, \"is_changed\": [\"220c15a6bdea1cf0db8f6ad10792cc3be2b75d3a77eb3c9a3c90ce3d5f34090d\"]}, \"41\": {\"class_type\": \"MiniMaxH3AddGuide\", \"inputs\": {\"positive\": [\"6\", 0], \"latent\": [\"6\", 1], \"vae\": [\"3\", 0], \"image\": [\"40\", 0], \"frame_idx\": 0}}}",
+                "encoder": "Lavf63.1.102"
+              }
+            }
+          },
+          "full_decode_verified": true
+        }
+      ]
+    },
+    {
+      "shot": "07",
+      "take": "01",
+      "status": "failed",
+      "started": 1795658188.1989162,
+      "videos": []
+    },
+    {
+      "shot": "07",
+      "take": "02",
+      "status": "generated_unreviewed",
+      "started": 1795663169.6977978,
+      "videos": [
+        {
+          "path": "takes/07-02/raw_00001_.mp4",
+          "sha256": "ae0db8b7324f5bc6598dfd359614a982a44505b58c74733e534fa160518be385",
+          "probe": {
+            "streams": [
+              {
+                "index": 0,
+                "codec_name": "h264",
+                "codec_long_name": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+                "profile": "High",
+                "codec_type": "video",
+                "codec_tag_string": "avc1",
+                "codec_tag": "0x31637661",
+                "mime_codec_string": "avc1.64001f",
+                "width": 576,
+                "height": 1024,
+                "coded_width": 576,
+                "coded_height": 1024,
+                "has_b_frames": 2,
+                "pix_fmt": "yuv420p",
+                "level": 31,
+                "color_range": "tv",
+                "color_space": "bt709",
+                "color_transfer": "iec61966-2-1",
+                "color_primaries": "bt709",
+                "chroma_location": "left",
+                "field_order": "progressive",
+                "is_avc": "true",
+                "nal_length_size": "4",
+                "id": "0x1",
+                "r_frame_rate": "24/1",
+                "avg_frame_rate": "24/1",
+                "time_base": "1/12288",
+                "start_pts": 0,
+                "start_time": "0.000000",
+                "duration_ts": 63488,
+                "duration": "5.166667",
+                "bit_rate": "3187966",
+                "bits_per_raw_sample": "8",
+                "nb_frames": "124",
+                "extradata_size": 48,
+                "disposition": {
+                  "default": 1,
+                  "dub": 0,
+                  "original": 0,
+                  "comment": 0,
+                  "lyrics": 0,
+                  "karaoke": 0,
+                  "forced": 0,
+                  "hearing_impaired": 0,
+                  "visual_impaired": 0,
+                  "clean_effects": 0,
+                  "attached_pic": 0,
+                  "timed_thumbnails": 0,
+                  "non_diegetic": 0,
+                  "captions": 0,
+                  "descriptions": 0,
+                  "metadata": 0,
+                  "dependent": 0,
+                  "still_image": 0,
+                  "multilayer": 0
+                },
+                "tags": {
+                  "language": "und",
+                  "handler_name": "VideoHandler"
+                }
+              }
+            ],
+            "format": {
+              "filename": "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/first-cut-v1/takes/07-02/raw_00001_.mp4",
+              "nb_streams": 1,
+              "nb_programs": 0,
+              "nb_stream_groups": 0,
+              "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+              "format_long_name": "QuickTime / MOV",
+              "start_time": "0.000000",
+              "duration": "5.166667",
+              "size": "2065612",
+              "bit_rate": "3198366",
+              "probe_score": 100,
+              "tags": {
+                "major_brand": "isom",
+                "minor_version": "512",
+                "compatible_brands": "isomiso2avc1mp41",
+                "prompt": "{\"1\": {\"class_type\": \"UnetLoaderGGUF\", \"inputs\": {\"unet_name\": \"minimax_h3_ref2va_pruned-Q4_K_M.gguf\"}}, \"2\": {\"class_type\": \"CLIPLoaderGGUF\", \"inputs\": {\"clip_name\": \"qwen3vl_32b_minimax_h3-Q4_K_M.gguf\", \"type\": \"minimax\"}}, \"3\": {\"class_type\": \"VAELoader\", \"inputs\": {\"vae_name\": \"minimax_h3_video_vae_fp16.safetensors\"}}, \"4\": {\"class_type\": \"LoraLoaderModelOnly\", \"inputs\": {\"model\": [\"1\", 0], \"lora_name\": \"minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors\", \"strength_model\": 1.0}}, \"5\": {\"class_type\": \"MiniMaxH3SigmaShift\", \"inputs\": {\"model\": [\"4\", 0], \"shift_video\": 12.0, \"shift_audio\": 3.0}}, \"6\": {\"class_type\": \"MiniMaxH3ReferenceToVideo\", \"inputs\": {\"clip\": [\"2\", 0], \"vae\": [\"3\", 0], \"prompt\": \"One continuous five-second rear VEHICLE crash shot. Start with the SAME SOS Transit double-decker UPRIGHT on wheels at Lentor Modern, as first anchor. Follow <Video 1>: sharp steering, rigid bus rolls onto RIGHT/driver side, then slides forward and stops against an EMPTY canopy support. End exactly in the last anchor: passenger side faces UP, wheels toward left mall curb, front pointing forward away from camera, unchanged orange-red/purple/white livery. Camera remains BEHIND the vehicle and horizon stays level throughout the roll. No person is on the road or immediately beside the bus. Only two small pedestrians, blue-shirt man and cream-shirt woman, recoil along the far LEFT storefront, always metres clear of bus and debris; nobody is hit, falls or crosses the road. Metal sparks/dust at road contact, bent shelter post, no explosion. Bus is empty except hidden driver. Final wreck stops rigidly and stays on its side. Use <Picture 1> and still anchors for the finished vehicle mesh and paint: rounded formed sheet metal, inset glazing, fitted lamps and bumper, detailed arches and rims. <Video 1> gives ONLY trajectory, timing and camera; never copy its primitive box shapes, toy surfaces or flat block faces. Original GTA San Andreas PS2 graphics, low-resolution painted textures and restrained diffuse shading. No modern glossy rendering, no HUD, captions, stars or cuts. The sole driver is hidden INSIDE the bus and NEVER visible outside it. No on-foot player character or person following the bus.\", \"width\": 576, \"height\": 1024, \"length\": 124, \"ref_image_size\": \"match\", \"ref_images.ref_image_0\": [\"20\", 0], \"ref_videos.ref_video_0\": [\"22\", 0]}}, \"7\": {\"class_type\": \"BasicGuider\", \"inputs\": {\"model\": [\"5\", 0], \"conditioning\": [\"43\", 0]}}, \"8\": {\"class_type\": \"RandomNoise\", \"inputs\": {\"noise_seed\": 2026112807}}, \"9\": {\"class_type\": \"KSamplerSelect\", \"inputs\": {\"sampler_name\": \"euler\"}}, \"10\": {\"class_type\": \"BasicScheduler\", \"inputs\": {\"model\": [\"5\", 0], \"scheduler\": \"simple\", \"steps\": 4, \"denoise\": 1.0}}, \"11\": {\"class_type\": \"SamplerCustomAdvanced\", \"inputs\": {\"noise\": [\"8\", 0], \"guider\": [\"7\", 0], \"sampler\": [\"9\", 0], \"sigmas\": [\"10\", 0], \"latent_image\": [\"6\", 1]}}, \"12\": {\"class_type\": \"VAEDecodeTiled\", \"inputs\": {\"samples\": [\"11\", 0], \"vae\": [\"3\", 0], \"tile_size\": 256, \"overlap\": 64, \"temporal_size\": 64, \"temporal_overlap\": 8}}, \"13\": {\"class_type\": \"CreateVideo\", \"inputs\": {\"images\": [\"12\", 0], \"fps\": 24.0}}, \"14\": {\"class_type\": \"SaveVideo\", \"inputs\": {\"video\": [\"13\", 0], \"filename_prefix\": \"07-02/raw\", \"format\": \"mp4\", \"format.codec\": \"h264\"}}, \"20\": {\"class_type\": \"LoadImage\", \"inputs\": {\"image\": \"07-appearance.png\"}, \"is_changed\": [\"13aa6ab2256b81ad2794dab3a31c170288236c3cd173d53908c4b017e7198869\"]}, \"21\": {\"class_type\": \"LoadVideo\", \"inputs\": {\"file\": \"07-guide.mp4\"}, \"is_changed\": [1795658085.8349426]}, \"22\": {\"class_type\": \"GetVideoComponents\", \"inputs\": {\"video\": [\"21\", 0]}}, \"40\": {\"class_type\": \"LoadImage\", \"inputs\": {\"image\": \"07-start-v2.png\"}, \"is_changed\": [\"560b57b81811f74a73abfa269f17df76313920c35d59eb128e34177f33d3593a\"]}, \"41\": {\"class_type\": \"MiniMaxH3AddGuide\", \"inputs\": {\"positive\": [\"6\", 0], \"latent\": [\"6\", 1], \"vae\": [\"3\", 0], \"image\": [\"40\", 0], \"frame_idx\": 0}}, \"42\": {\"class_type\": \"LoadImage\", \"inputs\": {\"image\": \"07-appearance.png\"}, \"is_changed\": [\"13aa6ab2256b81ad2794dab3a31c170288236c3cd173d53908c4b017e7198869\"]}, \"43\": {\"class_type\": \"MiniMaxH3AddGuide\", \"inputs\": {\"positive\": [\"41\", 0], \"latent\": [\"6\", 1], \"vae\": [\"3\", 0], \"image\": [\"42\", 0], \"frame_idx\": 119}}}",
+                "encoder": "Lavf63.1.102"
+              }
+            }
+          },
+          "full_decode_verified": true
+        }
+      ]
+    },
+    {
+      "shot": "08",
+      "take": "01",
+      "status": "failed",
+      "started": 1795657707.0797188,
+      "videos": []
+    },
+    {
+      "shot": "08",
+      "take": "02",
+      "status": "generated_unreviewed",
+      "started": 1795658067.471802,
+      "videos": [
+        {
+          "path": "takes/08-02/raw_00001_.mp4",
+          "sha256": "1d8d88e5ad4d2e1c9b826d57435b54a201ff02b869829e74c628a1e4230f264b",
+          "probe": {
+            "streams": [
+              {
+                "index": 0,
+                "codec_name": "h264",
+                "codec_long_name": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+                "profile": "High",
+                "codec_type": "video",
+                "codec_tag_string": "avc1",
+                "codec_tag": "0x31637661",
+                "mime_codec_string": "avc1.64001f",
+                "width": 576,
+                "height": 1024,
+                "coded_width": 576,
+                "coded_height": 1024,
+                "has_b_frames": 2,
+                "pix_fmt": "yuv420p",
+                "level": 31,
+                "color_range": "tv",
+                "color_space": "bt709",
+                "color_transfer": "iec61966-2-1",
+                "color_primaries": "bt709",
+                "chroma_location": "left",
+                "field_order": "progressive",
+                "is_avc": "true",
+                "nal_length_size": "4",
+                "id": "0x1",
+                "r_frame_rate": "24/1",
+                "avg_frame_rate": "24/1",
+                "time_base": "1/12288",
+                "start_pts": 0,
+                "start_time": "0.000000",
+                "duration_ts": 80896,
+                "duration": "6.583333",
+                "bit_rate": "2009038",
+                "bits_per_raw_sample": "8",
+                "nb_frames": "158",
+                "extradata_size": 48,
+                "disposition": {
+                  "default": 1,
+                  "dub": 0,
+                  "original": 0,
+                  "comment": 0,
+                  "lyrics": 0,
+                  "karaoke": 0,
+                  "forced": 0,
+                  "hearing_impaired": 0,
+                  "visual_impaired": 0,
+                  "clean_effects": 0,
+                  "attached_pic": 0,
+                  "timed_thumbnails": 0,
+                  "non_diegetic": 0,
+                  "captions": 0,
+                  "descriptions": 0,
+                  "metadata": 0,
+                  "dependent": 0,
+                  "still_image": 0,
+                  "multilayer": 0
+                },
+                "tags": {
+                  "language": "und",
+                  "handler_name": "VideoHandler"
+                }
+              }
+            ],
+            "format": {
+              "filename": "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/first-cut-v1/takes/08-02/raw_00001_.mp4",
+              "nb_streams": 1,
+              "nb_programs": 0,
+              "nb_stream_groups": 0,
+              "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+              "format_long_name": "QuickTime / MOV",
+              "start_time": "0.000000",
+              "duration": "6.583333",
+              "size": "1659650",
+              "bit_rate": "2016789",
+              "probe_score": 100,
+              "tags": {
+                "major_brand": "isom",
+                "minor_version": "512",
+                "compatible_brands": "isomiso2avc1mp41",
+                "prompt": "{\"1\": {\"class_type\": \"UnetLoaderGGUF\", \"inputs\": {\"unet_name\": \"minimax_h3_ref2va_pruned-Q4_K_M.gguf\"}}, \"2\": {\"class_type\": \"CLIPLoaderGGUF\", \"inputs\": {\"clip_name\": \"qwen3vl_32b_minimax_h3-Q4_K_M.gguf\", \"type\": \"minimax\"}}, \"3\": {\"class_type\": \"VAELoader\", \"inputs\": {\"vae_name\": \"minimax_h3_video_vae_fp16.safetensors\"}}, \"4\": {\"class_type\": \"LoraLoaderModelOnly\", \"inputs\": {\"model\": [\"1\", 0], \"lora_name\": \"minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors\", \"strength_model\": 1.0}}, \"5\": {\"class_type\": \"MiniMaxH3SigmaShift\", \"inputs\": {\"model\": [\"4\", 0], \"shift_video\": 12.0, \"shift_audio\": 3.0}}, \"6\": {\"class_type\": \"MiniMaxH3ReferenceToVideo\", \"inputs\": {\"clip\": [\"2\", 0], \"vae\": [\"3\", 0], \"prompt\": \"One continuous six-second original GTA San Andreas PS2 gameplay interaction shot. Use <Picture 1> as the exact APPEARANCE of Goji Girl, SOS Transit double-decker, passenger doorway, reader and Singapore street. Use <Video 1> as the continuous motion and camera guide, from start to finish; its primitive rendering is NOT the target appearance. The bus rests rigidly on its right side throughout, with the left front passenger doorway facing UP. Hold briefly, then the maroon-clad woman rises out of that same opening, braces her left hand on its edge, reaches her right hand back to tap a small transit card on the green reader just INSIDE the opening, then climbs onto the upward-facing bodywork and brings her black handbag with her. Preserve the complete guided action and timing. The white solid corner between doorway and front windscreen remains intact; the entrance never cuts into the bus front. Logos attach to bodywork, not glass. No bus motion, door resizing, teleport, new door, hatch, extra wheels, camera orbit or cut. Original PS2 angular human meshes, economical faces, painted low-resolution textures, restrained highlights, same daylight and colour as Picture1; no plastic or photographic people. No HUD, captions, stars or extra people. Single handbag, maroon top and leggings, ponytail, white shoes. The camera remains in the guide's position. No speech or music.\", \"width\": 576, \"height\": 1024, \"length\": 158, \"ref_image_size\": \"match\", \"ref_images.ref_image_0\": [\"20\", 0], \"ref_videos.ref_video_0\": [\"22\", 0]}}, \"7\": {\"class_type\": \"BasicGuider\", \"inputs\": {\"model\": [\"5\", 0], \"conditioning\": [\"6\", 0]}}, \"8\": {\"class_type\": \"RandomNoise\", \"inputs\": {\"noise_seed\": 2026112808}}, \"9\": {\"class_type\": \"KSamplerSelect\", \"inputs\": {\"sampler_name\": \"euler\"}}, \"10\": {\"class_type\": \"BasicScheduler\", \"inputs\": {\"model\": [\"5\", 0], \"scheduler\": \"simple\", \"steps\": 4, \"denoise\": 1.0}}, \"11\": {\"class_type\": \"SamplerCustomAdvanced\", \"inputs\": {\"noise\": [\"8\", 0], \"guider\": [\"7\", 0], \"sampler\": [\"9\", 0], \"sigmas\": [\"10\", 0], \"latent_image\": [\"6\", 1]}}, \"12\": {\"class_type\": \"VAEDecodeTiled\", \"inputs\": {\"samples\": [\"11\", 0], \"vae\": [\"3\", 0], \"tile_size\": 256, \"overlap\": 64, \"temporal_size\": 64, \"temporal_overlap\": 8}}, \"13\": {\"class_type\": \"CreateVideo\", \"inputs\": {\"images\": [\"12\", 0], \"fps\": 24.0}}, \"14\": {\"class_type\": \"SaveVideo\", \"inputs\": {\"video\": [\"13\", 0], \"filename_prefix\": \"08-02/raw\", \"format\": \"mp4\", \"format.codec\": \"h264\"}}, \"20\": {\"class_type\": \"LoadImage\", \"inputs\": {\"image\": \"08-appearance.png\"}, \"is_changed\": [\"0dfb724fdaa55d626c96ad4f28d05ede22d4191b8ba93d680b70fdeef0f5c780\"]}, \"21\": {\"class_type\": \"LoadVideo\", \"inputs\": {\"file\": \"08-guide.mp4\"}, \"is_changed\": [1795657707.0283833]}, \"22\": {\"class_type\": \"GetVideoComponents\", \"inputs\": {\"video\": [\"21\", 0]}}}",
+                "encoder": "Lavf63.1.102"
+              }
+            }
+          },
+          "full_decode_verified": true
+        }
+      ]
+    },
+    {
+      "shot": "09",
+      "take": "01",
+      "status": "generated_unreviewed",
+      "started": 1795658188.2594528,
+      "videos": [
+        {
+          "path": "takes/09-01/raw_00001_.mp4",
+          "sha256": "fbbdc305f517b6eb26dfbde9ab911e5fdcee81a1886c4bc294cef9f41c1a6753",
+          "probe": {
+            "streams": [
+              {
+                "index": 0,
+                "codec_name": "h264",
+                "codec_long_name": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+                "profile": "High",
+                "codec_type": "video",
+                "codec_tag_string": "avc1",
+                "codec_tag": "0x31637661",
+                "mime_codec_string": "avc1.64001f",
+                "width": 576,
+                "height": 1024,
+                "coded_width": 576,
+                "coded_height": 1024,
+                "has_b_frames": 2,
+                "pix_fmt": "yuv420p",
+                "level": 31,
+                "color_range": "tv",
+                "color_space": "bt709",
+                "color_transfer": "iec61966-2-1",
+                "color_primaries": "bt709",
+                "chroma_location": "left",
+                "field_order": "progressive",
+                "is_avc": "true",
+                "nal_length_size": "4",
+                "id": "0x1",
+                "r_frame_rate": "24/1",
+                "avg_frame_rate": "24/1",
+                "time_base": "1/12288",
+                "start_pts": 0,
+                "start_time": "0.000000",
+                "duration_ts": 28672,
+                "duration": "2.333333",
+                "bit_rate": "3348452",
+                "bits_per_raw_sample": "8",
+                "nb_frames": "56",
+                "extradata_size": 48,
+                "disposition": {
+                  "default": 1,
+                  "dub": 0,
+                  "original": 0,
+                  "comment": 0,
+                  "lyrics": 0,
+                  "karaoke": 0,
+                  "forced": 0,
+                  "hearing_impaired": 0,
+                  "visual_impaired": 0,
+                  "clean_effects": 0,
+                  "attached_pic": 0,
+                  "timed_thumbnails": 0,
+                  "non_diegetic": 0,
+                  "captions": 0,
+                  "descriptions": 0,
+                  "metadata": 0,
+                  "dependent": 0,
+                  "still_image": 0,
+                  "multilayer": 0
+                },
+                "tags": {
+                  "language": "und",
+                  "handler_name": "VideoHandler"
+                }
+              }
+            ],
+            "format": {
+              "filename": "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/first-cut-v1/takes/09-01/raw_00001_.mp4",
+              "nb_streams": 1,
+              "nb_programs": 0,
+              "nb_stream_groups": 0,
+              "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+              "format_long_name": "QuickTime / MOV",
+              "start_time": "0.000000",
+              "duration": "2.333333",
+              "size": "982214",
+              "bit_rate": "3367591",
+              "probe_score": 100,
+              "tags": {
+                "major_brand": "isom",
+                "minor_version": "512",
+                "compatible_brands": "isomiso2avc1mp41",
+                "prompt": "{\"1\": {\"class_type\": \"UnetLoaderGGUF\", \"inputs\": {\"unet_name\": \"minimax_h3_ref2va_pruned-Q4_K_M.gguf\"}}, \"2\": {\"class_type\": \"CLIPLoaderGGUF\", \"inputs\": {\"clip_name\": \"qwen3vl_32b_minimax_h3-Q4_K_M.gguf\", \"type\": \"minimax\"}}, \"3\": {\"class_type\": \"VAELoader\", \"inputs\": {\"vae_name\": \"minimax_h3_video_vae_fp16.safetensors\"}}, \"4\": {\"class_type\": \"LoraLoaderModelOnly\", \"inputs\": {\"model\": [\"1\", 0], \"lora_name\": \"minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors\", \"strength_model\": 1.0}}, \"5\": {\"class_type\": \"MiniMaxH3SigmaShift\", \"inputs\": {\"model\": [\"4\", 0], \"shift_video\": 12.0, \"shift_audio\": 3.0}}, \"6\": {\"class_type\": \"MiniMaxH3ReferenceToVideo\", \"inputs\": {\"clip\": [\"2\", 0], \"vae\": [\"3\", 0], \"prompt\": \"A continuous two-second rear player recovery shot.  Use <Picture 1> ONLY as the approved appearance reference. Use <Video 1> as the continuous spatial, action and camera guide; replace its primitive surfaces and proxy humans with the detailed painted PS2 look of <Picture 1>. Follow the video motion, not the static pose of <Picture 1>. The woman has just cleared the upward-facing bus door and reached the pavement. She dusts her shoulders with her right hand, settles the black handbag in her LEFT, and starts forward away from the wreck. Same wreck edge remains beside camera at RIGHT; shops LEFT and the small red Goji sign ahead. Blue-shirt man and cream-shirt woman recoil along storefront, never crossing her corridor or making contact. Preserve direction, no reversal, no moving wreck, no falls. Original GTA San Andreas PlayStation 2 graphics throughout: angular economical character meshes, painted low-resolution skin/clothing/vehicle textures, restrained broad diffuse shading and period game animation. Preserve the same adult woman, maroon sleeveless top and leggings, one black ponytail, white shoes and ONE small black handbag carried LEFT. Every NPC matches the same PS2 rendering. Preserve the architecture, lighting and palette of <Picture 1>. No photoreal faces, no modern glossy rendering, no cartoon toy figures, no body morphing, no new logos, HUD, wanted stars, captions or baked text overlays. No shot changes. No speech or music. Blender primitives govern ONLY world positions, motion, contacts and camera. Reconstruct the FINISHED MESH SHAPES from the approved appearance image: formed rounded bus corners, inset glazing, detailed wheel arches, rims, lamps and bumpers, and the approved human anatomy. Never merely paint textures onto the guide boxes or reproduce their blocky silhouettes or primitive faces.\", \"width\": 576, \"height\": 1024, \"length\": 56, \"ref_image_size\": \"match\", \"ref_images.ref_image_0\": [\"20\", 0], \"ref_videos.ref_video_0\": [\"22\", 0]}}, \"7\": {\"class_type\": \"BasicGuider\", \"inputs\": {\"model\": [\"5\", 0], \"conditioning\": [\"6\", 0]}}, \"8\": {\"class_type\": \"RandomNoise\", \"inputs\": {\"noise_seed\": 2026112709}}, \"9\": {\"class_type\": \"KSamplerSelect\", \"inputs\": {\"sampler_name\": \"euler\"}}, \"10\": {\"class_type\": \"BasicScheduler\", \"inputs\": {\"model\": [\"5\", 0], \"scheduler\": \"simple\", \"steps\": 4, \"denoise\": 1.0}}, \"11\": {\"class_type\": \"SamplerCustomAdvanced\", \"inputs\": {\"noise\": [\"8\", 0], \"guider\": [\"7\", 0], \"sampler\": [\"9\", 0], \"sigmas\": [\"10\", 0], \"latent_image\": [\"6\", 1]}}, \"12\": {\"class_type\": \"VAEDecodeTiled\", \"inputs\": {\"samples\": [\"11\", 0], \"vae\": [\"3\", 0], \"tile_size\": 256, \"overlap\": 64, \"temporal_size\": 64, \"temporal_overlap\": 8}}, \"13\": {\"class_type\": \"CreateVideo\", \"inputs\": {\"images\": [\"12\", 0], \"fps\": 24.0}}, \"14\": {\"class_type\": \"SaveVideo\", \"inputs\": {\"video\": [\"13\", 0], \"filename_prefix\": \"09-01/raw\", \"format\": \"mp4\", \"format.codec\": \"h264\"}}, \"20\": {\"class_type\": \"LoadImage\", \"inputs\": {\"image\": \"09-appearance.png\"}, \"is_changed\": [\"15d56b6df76125acee73cf37ae1f4b69bbf11874504fceaa6d7ff5fc07a33577\"]}, \"21\": {\"class_type\": \"LoadVideo\", \"inputs\": {\"file\": \"09-guide.mp4\"}, \"is_changed\": [1795658085.9128509]}, \"22\": {\"class_type\": \"GetVideoComponents\", \"inputs\": {\"video\": [\"21\", 0]}}}",
+                "encoder": "Lavf63.1.102"
+              }
+            }
+          },
+          "full_decode_verified": true
+        }
+      ]
+    },
+    {
+      "shot": "09",
+      "take": "02",
+      "status": "generated_unreviewed",
+      "started": 1795663705.768269,
+      "videos": [
+        {
+          "path": "takes/09-02/raw_00001_.mp4",
+          "sha256": "1fb1d1ce6ef497a3b8bec8540c710cf03927ae864a90950e74429f63e0eba85b",
+          "probe": {
+            "streams": [
+              {
+                "index": 0,
+                "codec_name": "h264",
+                "codec_long_name": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+                "profile": "High",
+                "codec_type": "video",
+                "codec_tag_string": "avc1",
+                "codec_tag": "0x31637661",
+                "mime_codec_string": "avc1.64001f",
+                "width": 576,
+                "height": 1024,
+                "coded_width": 576,
+                "coded_height": 1024,
+                "has_b_frames": 2,
+                "pix_fmt": "yuv420p",
+                "level": 31,
+                "color_range": "tv",
+                "color_space": "bt709",
+                "color_transfer": "iec61966-2-1",
+                "color_primaries": "bt709",
+                "chroma_location": "left",
+                "field_order": "progressive",
+                "is_avc": "true",
+                "nal_length_size": "4",
+                "id": "0x1",
+                "r_frame_rate": "24/1",
+                "avg_frame_rate": "24/1",
+                "time_base": "1/12288",
+                "start_pts": 0,
+                "start_time": "0.000000",
+                "duration_ts": 28672,
+                "duration": "2.333333",
+                "bit_rate": "1636697",
+                "bits_per_raw_sample": "8",
+                "nb_frames": "56",
+                "extradata_size": 48,
+                "disposition": {
+                  "default": 1,
+                  "dub": 0,
+                  "original": 0,
+                  "comment": 0,
+                  "lyrics": 0,
+                  "karaoke": 0,
+                  "forced": 0,
+                  "hearing_impaired": 0,
+                  "visual_impaired": 0,
+                  "clean_effects": 0,
+                  "attached_pic": 0,
+                  "timed_thumbnails": 0,
+                  "non_diegetic": 0,
+                  "captions": 0,
+                  "descriptions": 0,
+                  "metadata": 0,
+                  "dependent": 0,
+                  "still_image": 0,
+                  "multilayer": 0
+                },
+                "tags": {
+                  "language": "und",
+                  "handler_name": "VideoHandler"
+                }
+              }
+            ],
+            "format": {
+              "filename": "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/first-cut-v1/takes/09-02/raw_00001_.mp4",
+              "nb_streams": 1,
+              "nb_programs": 0,
+              "nb_stream_groups": 0,
+              "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+              "format_long_name": "QuickTime / MOV",
+              "start_time": "0.000000",
+              "duration": "2.333333",
+              "size": "482921",
+              "bit_rate": "1655729",
+              "probe_score": 100,
+              "tags": {
+                "major_brand": "isom",
+                "minor_version": "512",
+                "compatible_brands": "isomiso2avc1mp41",
+                "prompt": "{\"1\": {\"class_type\": \"UnetLoaderGGUF\", \"inputs\": {\"unet_name\": \"minimax_h3_ref2va_pruned-Q4_K_M.gguf\"}}, \"2\": {\"class_type\": \"CLIPLoaderGGUF\", \"inputs\": {\"clip_name\": \"qwen3vl_32b_minimax_h3-Q4_K_M.gguf\", \"type\": \"minimax\"}}, \"3\": {\"class_type\": \"VAELoader\", \"inputs\": {\"vae_name\": \"minimax_h3_video_vae_fp16.safetensors\"}}, \"4\": {\"class_type\": \"LoraLoaderModelOnly\", \"inputs\": {\"model\": [\"1\", 0], \"lora_name\": \"minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors\", \"strength_model\": 1.0}}, \"5\": {\"class_type\": \"MiniMaxH3SigmaShift\", \"inputs\": {\"model\": [\"4\", 0], \"shift_video\": 12.0, \"shift_audio\": 3.0}}, \"6\": {\"class_type\": \"MiniMaxH3ReferenceToVideo\", \"inputs\": {\"clip\": [\"2\", 0], \"vae\": [\"3\", 0], \"prompt\": \"One continuous two-second rear player shot. Start exactly in first anchor, finish in last anchor. Maroon-clad Goji Girl brushes dust off her right shoulder with her right hand during first second, then lowers that hand and takes one brisk step FORWARD away from camera along the same pavement toward the red Goji sign. Black structured bag stays in LEFT hand. Same ponytail, white shoes, maroon top and leggings, same PS2 painted textures and economical human mesh. The two nearest startled pedestrians recoil at the LEFT storefront, safely clear of her path. Preserve the fixed canopy, damaged diagonal support, road on RIGHT and shops on LEFT. At the extreme RIGHT is ONLY a cropped black riveted metal underside panel from the overturned wreck. Keep that edge frozen and identical to anchors; the rest of the wreck is OFFSCREEN. No upright bus, front facade, windshield, headlights, livery or new vehicle enters the image. Nothing rolls, rotates or stands upright. <Video 1> gives motion/layout only; <Picture 1> and anchors define all finished shapes, textures and framing. No proxy block shapes, no camera reversal, no cut, HUD or text. No contact between people or with debris.\", \"width\": 576, \"height\": 1024, \"length\": 56, \"ref_image_size\": \"match\", \"ref_images.ref_image_0\": [\"20\", 0], \"ref_videos.ref_video_0\": [\"22\", 0]}}, \"7\": {\"class_type\": \"BasicGuider\", \"inputs\": {\"model\": [\"5\", 0], \"conditioning\": [\"43\", 0]}}, \"8\": {\"class_type\": \"RandomNoise\", \"inputs\": {\"noise_seed\": 2026112809}}, \"9\": {\"class_type\": \"KSamplerSelect\", \"inputs\": {\"sampler_name\": \"euler\"}}, \"10\": {\"class_type\": \"BasicScheduler\", \"inputs\": {\"model\": [\"5\", 0], \"scheduler\": \"simple\", \"steps\": 4, \"denoise\": 1.0}}, \"11\": {\"class_type\": \"SamplerCustomAdvanced\", \"inputs\": {\"noise\": [\"8\", 0], \"guider\": [\"7\", 0], \"sampler\": [\"9\", 0], \"sigmas\": [\"10\", 0], \"latent_image\": [\"6\", 1]}}, \"12\": {\"class_type\": \"VAEDecodeTiled\", \"inputs\": {\"samples\": [\"11\", 0], \"vae\": [\"3\", 0], \"tile_size\": 256, \"overlap\": 64, \"temporal_size\": 64, \"temporal_overlap\": 8}}, \"13\": {\"class_type\": \"CreateVideo\", \"inputs\": {\"images\": [\"12\", 0], \"fps\": 24.0}}, \"14\": {\"class_type\": \"SaveVideo\", \"inputs\": {\"video\": [\"13\", 0], \"filename_prefix\": \"09-02/raw\", \"format\": \"mp4\", \"format.codec\": \"h264\"}}, \"20\": {\"class_type\": \"LoadImage\", \"inputs\": {\"image\": \"09-appearance.png\"}, \"is_changed\": [\"15d56b6df76125acee73cf37ae1f4b69bbf11874504fceaa6d7ff5fc07a33577\"]}, \"21\": {\"class_type\": \"LoadVideo\", \"inputs\": {\"file\": \"09-guide.mp4\"}, \"is_changed\": [1795658085.9128509]}, \"22\": {\"class_type\": \"GetVideoComponents\", \"inputs\": {\"video\": [\"21\", 0]}}, \"40\": {\"class_type\": \"LoadImage\", \"inputs\": {\"image\": \"09-appearance.png\"}, \"is_changed\": [\"15d56b6df76125acee73cf37ae1f4b69bbf11874504fceaa6d7ff5fc07a33577\"]}, \"41\": {\"class_type\": \"MiniMaxH3AddGuide\", \"inputs\": {\"positive\": [\"6\", 0], \"latent\": [\"6\", 1], \"vae\": [\"3\", 0], \"image\": [\"40\", 0], \"frame_idx\": 0}}, \"42\": {\"class_type\": \"LoadImage\", \"inputs\": {\"image\": \"09-end-v2.png\"}, \"is_changed\": [\"85fa94bd1a943c502b95e448bc3401c0894ebe07005885ff3126049e6b429521\"]}, \"43\": {\"class_type\": \"MiniMaxH3AddGuide\", \"inputs\": {\"positive\": [\"41\", 0], \"latent\": [\"6\", 1], \"vae\": [\"3\", 0], \"image\": [\"42\", 0], \"frame_idx\": 47}}}",
+                "encoder": "Lavf63.1.102"
+              }
+            }
+          },
+          "full_decode_verified": true
+        }
+      ]
+    },
+    {
+      "shot": "10",
+      "take": "01",
+      "status": "superseded_before_render",
+      "started": 1795658188.319367,
+      "videos": []
+    },
+    {
+      "shot": "10",
+      "take": "02",
+      "status": "generated_unreviewed",
+      "started": 1795666483.637814,
+      "videos": [
+        {
+          "path": "takes/10-02/raw_00001_.mp4",
+          "sha256": "6dd038f1ec92070a84f71a215aed8023c8d9509d1c4919662fdf1d60c2435a3d",
+          "probe": {
+            "streams": [
+              {
+                "index": 0,
+                "codec_name": "h264",
+                "codec_long_name": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+                "profile": "High",
+                "codec_type": "video",
+                "codec_tag_string": "avc1",
+                "codec_tag": "0x31637661",
+                "mime_codec_string": "avc1.64001f",
+                "width": 576,
+                "height": 1024,
+                "coded_width": 576,
+                "coded_height": 1024,
+                "has_b_frames": 2,
+                "pix_fmt": "yuv420p",
+                "level": 31,
+                "color_range": "tv",
+                "color_space": "bt709",
+                "color_transfer": "iec61966-2-1",
+                "color_primaries": "bt709",
+                "chroma_location": "left",
+                "field_order": "progressive",
+                "is_avc": "true",
+                "nal_length_size": "4",
+                "id": "0x1",
+                "r_frame_rate": "24/1",
+                "avg_frame_rate": "24/1",
+                "time_base": "1/12288",
+                "start_pts": 0,
+                "start_time": "0.000000",
+                "duration_ts": 54784,
+                "duration": "4.458333",
+                "bit_rate": "5768808",
+                "bits_per_raw_sample": "8",
+                "nb_frames": "107",
+                "extradata_size": 48,
+                "disposition": {
+                  "default": 1,
+                  "dub": 0,
+                  "original": 0,
+                  "comment": 0,
+                  "lyrics": 0,
+                  "karaoke": 0,
+                  "forced": 0,
+                  "hearing_impaired": 0,
+                  "visual_impaired": 0,
+                  "clean_effects": 0,
+                  "attached_pic": 0,
+                  "timed_thumbnails": 0,
+                  "non_diegetic": 0,
+                  "captions": 0,
+                  "descriptions": 0,
+                  "metadata": 0,
+                  "dependent": 0,
+                  "still_image": 0,
+                  "multilayer": 0
+                },
+                "tags": {
+                  "language": "und",
+                  "handler_name": "VideoHandler"
+                }
+              }
+            ],
+            "format": {
+              "filename": "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/first-cut-v1/takes/10-02/raw_00001_.mp4",
+              "nb_streams": 1,
+              "nb_programs": 0,
+              "nb_stream_groups": 0,
+              "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+              "format_long_name": "QuickTime / MOV",
+              "start_time": "0.000000",
+              "duration": "4.458333",
+              "size": "3221127",
+              "bit_rate": "5779966",
+              "probe_score": 100,
+              "tags": {
+                "major_brand": "isom",
+                "minor_version": "512",
+                "compatible_brands": "isomiso2avc1mp41",
+                "prompt": "{\"1\": {\"class_type\": \"UnetLoaderGGUF\", \"inputs\": {\"unet_name\": \"minimax_h3_ref2va_pruned-Q4_K_M.gguf\"}}, \"2\": {\"class_type\": \"CLIPLoaderGGUF\", \"inputs\": {\"clip_name\": \"qwen3vl_32b_minimax_h3-Q4_K_M.gguf\", \"type\": \"minimax\"}}, \"3\": {\"class_type\": \"VAELoader\", \"inputs\": {\"vae_name\": \"minimax_h3_video_vae_fp16.safetensors\"}}, \"4\": {\"class_type\": \"LoraLoaderModelOnly\", \"inputs\": {\"model\": [\"1\", 0], \"lora_name\": \"minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors\", \"strength_model\": 1.0}}, \"5\": {\"class_type\": \"MiniMaxH3SigmaShift\", \"inputs\": {\"model\": [\"4\", 0], \"shift_video\": 12.0, \"shift_audio\": 3.0}}, \"6\": {\"class_type\": \"MiniMaxH3ReferenceToVideo\", \"inputs\": {\"clip\": [\"2\", 0], \"vae\": [\"3\", 0], \"prompt\": \"A continuous four-second third-person rear player SPRINT, beginning exactly at the supplied first-frame anchor. Match the original-PS2 sprint cycle staged in <Video 1>: slight forward lean, flared bent elbows, a firm repetitive arm pump, pronounced heel recovery and long push-off. Keep the regular quick game-animation rhythm throughout, including both officers, with staggered phases. Goji Girl runs FORWARD down this SAME pavement and veers left to the Goji entrance as shown in <Video 1>. Camera follows from behind without reversing or orbiting. Storefronts stay LEFT, road RIGHT. Two navy-uniform police pursue from BEHIND, partly visible at lower frame edges. Teal-shirt passerby beyond entrance recoils against shopfront; white-shirt passerby hurries clear near tree. Keep central route and doorway empty of bystanders. Girl and police never touch anyone. End as she reaches the clinic doorway. The wreck remains BEHIND CAMERA and completely invisible for the whole shot. No bus or vehicle appears anywhere in frame. Preserve the exact girl, maroon athleisure, ponytail, white shoes and ONE structured black handbag carried in her LEFT hand. All people have original GTA San Andreas PS2 economical anatomy, painted textures and diffuse shading. <Picture 1> supplies finished characters, architecture and colours; <Video 1> supplies only trajectory, timing and camera, never literal proxy block shapes or primitive faces. No extra cops, cuts, teleports, captions, HUD or stars.\", \"width\": 576, \"height\": 1024, \"length\": 107, \"ref_image_size\": \"match\", \"ref_images.ref_image_0\": [\"20\", 0], \"ref_videos.ref_video_0\": [\"22\", 0]}}, \"7\": {\"class_type\": \"BasicGuider\", \"inputs\": {\"model\": [\"5\", 0], \"conditioning\": [\"41\", 0]}}, \"8\": {\"class_type\": \"RandomNoise\", \"inputs\": {\"noise_seed\": 2026112810}}, \"9\": {\"class_type\": \"KSamplerSelect\", \"inputs\": {\"sampler_name\": \"euler\"}}, \"10\": {\"class_type\": \"BasicScheduler\", \"inputs\": {\"model\": [\"5\", 0], \"scheduler\": \"simple\", \"steps\": 4, \"denoise\": 1.0}}, \"11\": {\"class_type\": \"SamplerCustomAdvanced\", \"inputs\": {\"noise\": [\"8\", 0], \"guider\": [\"7\", 0], \"sampler\": [\"9\", 0], \"sigmas\": [\"10\", 0], \"latent_image\": [\"6\", 1]}}, \"12\": {\"class_type\": \"VAEDecodeTiled\", \"inputs\": {\"samples\": [\"11\", 0], \"vae\": [\"3\", 0], \"tile_size\": 256, \"overlap\": 64, \"temporal_size\": 64, \"temporal_overlap\": 8}}, \"13\": {\"class_type\": \"CreateVideo\", \"inputs\": {\"images\": [\"12\", 0], \"fps\": 24.0}}, \"14\": {\"class_type\": \"SaveVideo\", \"inputs\": {\"video\": [\"13\", 0], \"filename_prefix\": \"10-02/raw\", \"format\": \"mp4\", \"format.codec\": \"h264\"}}, \"20\": {\"class_type\": \"LoadImage\", \"inputs\": {\"image\": \"10-appearance.png\"}, \"is_changed\": [\"b0032023cd18a67a32d7db13d350247483ec0333fb263bdf5af809c7a54b8714\"]}, \"21\": {\"class_type\": \"LoadVideo\", \"inputs\": {\"file\": \"10-guide-sa-v3.mp4\"}, \"is_changed\": [1795666454.1478114]}, \"22\": {\"class_type\": \"GetVideoComponents\", \"inputs\": {\"video\": [\"21\", 0]}}, \"40\": {\"class_type\": \"LoadImage\", \"inputs\": {\"image\": \"10-appearance.png\"}, \"is_changed\": [\"b0032023cd18a67a32d7db13d350247483ec0333fb263bdf5af809c7a54b8714\"]}, \"41\": {\"class_type\": \"MiniMaxH3AddGuide\", \"inputs\": {\"positive\": [\"6\", 0], \"latent\": [\"6\", 1], \"vae\": [\"3\", 0], \"image\": [\"40\", 0], \"frame_idx\": 0}}}",
+                "encoder": "Lavf63.1.102"
+              }
+            }
+          },
+          "full_decode_verified": true
+        }
+      ]
+    },
+    {
+      "shot": "11",
+      "take": "01",
+      "status": "generated_unreviewed",
+      "started": 1795658188.379203,
+      "videos": [
+        {
+          "path": "takes/11-01/raw_00001_.mp4",
+          "sha256": "d34de14c6711ffc64fdd896b71b5fd46b9d142e43cfe8228483e2e54a32193b4",
+          "probe": {
+            "streams": [
+              {
+                "index": 0,
+                "codec_name": "h264",
+                "codec_long_name": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+                "profile": "High",
+                "codec_type": "video",
+                "codec_tag_string": "avc1",
+                "codec_tag": "0x31637661",
+                "mime_codec_string": "avc1.64001f",
+                "width": 576,
+                "height": 1024,
+                "coded_width": 576,
+                "coded_height": 1024,
+                "has_b_frames": 2,
+                "pix_fmt": "yuv420p",
+                "level": 31,
+                "color_range": "tv",
+                "color_space": "bt709",
+                "color_transfer": "iec61966-2-1",
+                "color_primaries": "bt709",
+                "chroma_location": "left",
+                "field_order": "progressive",
+                "is_avc": "true",
+                "nal_length_size": "4",
+                "id": "0x1",
+                "r_frame_rate": "24/1",
+                "avg_frame_rate": "24/1",
+                "time_base": "1/12288",
+                "start_pts": 0,
+                "start_time": "0.000000",
+                "duration_ts": 28672,
+                "duration": "2.333333",
+                "bit_rate": "1131411",
+                "bits_per_raw_sample": "8",
+                "nb_frames": "56",
+                "extradata_size": 48,
+                "disposition": {
+                  "default": 1,
+                  "dub": 0,
+                  "original": 0,
+                  "comment": 0,
+                  "lyrics": 0,
+                  "karaoke": 0,
+                  "forced": 0,
+                  "hearing_impaired": 0,
+                  "visual_impaired": 0,
+                  "clean_effects": 0,
+                  "attached_pic": 0,
+                  "timed_thumbnails": 0,
+                  "non_diegetic": 0,
+                  "captions": 0,
+                  "descriptions": 0,
+                  "metadata": 0,
+                  "dependent": 0,
+                  "still_image": 0,
+                  "multilayer": 0
+                },
+                "tags": {
+                  "language": "und",
+                  "handler_name": "VideoHandler"
+                }
+              }
+            ],
+            "format": {
+              "filename": "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/first-cut-v1/takes/11-01/raw_00001_.mp4",
+              "nb_streams": 1,
+              "nb_programs": 0,
+              "nb_stream_groups": 0,
+              "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+              "format_long_name": "QuickTime / MOV",
+              "start_time": "0.000000",
+              "duration": "2.333333",
+              "size": "334832",
+              "bit_rate": "1147995",
+              "probe_score": 100,
+              "tags": {
+                "major_brand": "isom",
+                "minor_version": "512",
+                "compatible_brands": "isomiso2avc1mp41",
+                "prompt": "{\"1\": {\"class_type\": \"UnetLoaderGGUF\", \"inputs\": {\"unet_name\": \"minimax_h3_ref2va_pruned-Q4_K_M.gguf\"}}, \"2\": {\"class_type\": \"CLIPLoaderGGUF\", \"inputs\": {\"clip_name\": \"qwen3vl_32b_minimax_h3-Q4_K_M.gguf\", \"type\": \"minimax\"}}, \"3\": {\"class_type\": \"VAELoader\", \"inputs\": {\"vae_name\": \"minimax_h3_video_vae_fp16.safetensors\"}}, \"4\": {\"class_type\": \"LoraLoaderModelOnly\", \"inputs\": {\"model\": [\"1\", 0], \"lora_name\": \"minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors\", \"strength_model\": 1.0}}, \"5\": {\"class_type\": \"MiniMaxH3SigmaShift\", \"inputs\": {\"model\": [\"4\", 0], \"shift_video\": 12.0, \"shift_audio\": 3.0}}, \"6\": {\"class_type\": \"MiniMaxH3ReferenceToVideo\", \"inputs\": {\"clip\": [\"2\", 0], \"vae\": [\"3\", 0], \"prompt\": \"A continuous two-second fixed clinic interior cutscene. Start from <Picture 1>. Goji Girl crosses the threshold and immediately relaxes her shoulders, stopping at reception. The short-bobbed female therapist in plain black outfit turns attentively toward her and gives a small welcoming hand gesture. Two police remain outside glass, cannot enter. Warm timber, cream/red floor and red table unchanged; no camera movement. One bag remains in girl left hand. All excitement stops at doorway, calm serene room. Original GTA San Andreas PlayStation 2 graphics throughout: angular economical character meshes, painted low-resolution skin/clothing/vehicle textures, restrained broad diffuse shading and period game animation. Preserve the same adult woman, maroon sleeveless top and leggings, one black ponytail, white shoes and ONE small black handbag carried LEFT. Every NPC matches the same PS2 rendering. Preserve the architecture, lighting and palette of <Picture 1>. No photoreal faces, no modern glossy rendering, no cartoon toy figures, no body morphing, no new logos, HUD, wanted stars, captions or baked text overlays. No shot changes. No speech or music.\", \"width\": 576, \"height\": 1024, \"length\": 56, \"ref_image_size\": \"match\", \"ref_images.ref_image_0\": [\"20\", 0]}}, \"7\": {\"class_type\": \"BasicGuider\", \"inputs\": {\"model\": [\"5\", 0], \"conditioning\": [\"30\", 0]}}, \"8\": {\"class_type\": \"RandomNoise\", \"inputs\": {\"noise_seed\": 2026112711}}, \"9\": {\"class_type\": \"KSamplerSelect\", \"inputs\": {\"sampler_name\": \"euler\"}}, \"10\": {\"class_type\": \"BasicScheduler\", \"inputs\": {\"model\": [\"5\", 0], \"scheduler\": \"simple\", \"steps\": 4, \"denoise\": 1.0}}, \"11\": {\"class_type\": \"SamplerCustomAdvanced\", \"inputs\": {\"noise\": [\"8\", 0], \"guider\": [\"7\", 0], \"sampler\": [\"9\", 0], \"sigmas\": [\"10\", 0], \"latent_image\": [\"6\", 1]}}, \"12\": {\"class_type\": \"VAEDecodeTiled\", \"inputs\": {\"samples\": [\"11\", 0], \"vae\": [\"3\", 0], \"tile_size\": 256, \"overlap\": 64, \"temporal_size\": 64, \"temporal_overlap\": 8}}, \"13\": {\"class_type\": \"CreateVideo\", \"inputs\": {\"images\": [\"12\", 0], \"fps\": 24.0}}, \"14\": {\"class_type\": \"SaveVideo\", \"inputs\": {\"video\": [\"13\", 0], \"filename_prefix\": \"11-01/raw\", \"format\": \"mp4\", \"format.codec\": \"h264\"}}, \"20\": {\"class_type\": \"LoadImage\", \"inputs\": {\"image\": \"11-appearance.png\"}, \"is_changed\": [\"566079d405cc1efdac878c708b5fee14771d879cdf4b65c49f9e647b698bd720\"]}, \"30\": {\"class_type\": \"MiniMaxH3AddGuide\", \"inputs\": {\"positive\": [\"6\", 0], \"latent\": [\"6\", 1], \"vae\": [\"3\", 0], \"image\": [\"20\", 0], \"frame_idx\": 0}}}",
+                "encoder": "Lavf63.1.102"
+              }
+            }
+          },
+          "full_decode_verified": true
+        }
+      ]
+    },
+    {
+      "shot": "12",
+      "take": "01",
+      "status": "interrupted_no_output",
+      "started": 1795658188.4376361,
+      "videos": []
+    },
+    {
+      "shot": "12",
+      "take": "02",
+      "status": "generated_unreviewed",
+      "started": 1795671233.581433,
+      "videos": [
+        {
+          "path": "takes/12-02/raw_00001_.mp4",
+          "sha256": "42f375ebeaef6890606ac111ee231819ee5ca90152d6c68735177e02575a5390",
+          "probe": {
+            "streams": [
+              {
+                "index": 0,
+                "codec_name": "h264",
+                "codec_long_name": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+                "profile": "High",
+                "codec_type": "video",
+                "codec_tag_string": "avc1",
+                "codec_tag": "0x31637661",
+                "mime_codec_string": "avc1.64001f",
+                "width": 576,
+                "height": 1024,
+                "coded_width": 576,
+                "coded_height": 1024,
+                "has_b_frames": 2,
+                "pix_fmt": "yuv420p",
+                "level": 31,
+                "color_range": "tv",
+                "color_space": "bt709",
+                "color_transfer": "iec61966-2-1",
+                "color_primaries": "bt709",
+                "chroma_location": "left",
+                "field_order": "progressive",
+                "is_avc": "true",
+                "nal_length_size": "4",
+                "id": "0x1",
+                "r_frame_rate": "24/1",
+                "avg_frame_rate": "24/1",
+                "time_base": "1/12288",
+                "start_pts": 0,
+                "start_time": "0.000000",
+                "duration_ts": 98304,
+                "duration": "8.000000",
+                "bit_rate": "1828642",
+                "bits_per_raw_sample": "8",
+                "nb_frames": "192",
+                "extradata_size": 48,
+                "disposition": {
+                  "default": 1,
+                  "dub": 0,
+                  "original": 0,
+                  "comment": 0,
+                  "lyrics": 0,
+                  "karaoke": 0,
+                  "forced": 0,
+                  "hearing_impaired": 0,
+                  "visual_impaired": 0,
+                  "clean_effects": 0,
+                  "attached_pic": 0,
+                  "timed_thumbnails": 0,
+                  "non_diegetic": 0,
+                  "captions": 0,
+                  "descriptions": 0,
+                  "metadata": 0,
+                  "dependent": 0,
+                  "still_image": 0,
+                  "multilayer": 0
+                },
+                "tags": {
+                  "language": "und",
+                  "handler_name": "VideoHandler"
+                }
+              }
+            ],
+            "format": {
+              "filename": "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/first-cut-v1/takes/12-02/raw_00001_.mp4",
+              "nb_streams": 1,
+              "nb_programs": 0,
+              "nb_stream_groups": 0,
+              "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+              "format_long_name": "QuickTime / MOV",
+              "start_time": "0.000000",
+              "duration": "8.000000",
+              "size": "1835785",
+              "bit_rate": "1835785",
+              "probe_score": 100,
+              "tags": {
+                "major_brand": "isom",
+                "minor_version": "512",
+                "compatible_brands": "isomiso2avc1mp41",
+                "prompt": "{\"1\": {\"class_type\": \"UnetLoaderGGUF\", \"inputs\": {\"unet_name\": \"minimax_h3_ref2va_pruned-Q4_K_M.gguf\"}}, \"2\": {\"class_type\": \"CLIPLoaderGGUF\", \"inputs\": {\"clip_name\": \"qwen3vl_32b_minimax_h3-Q4_K_M.gguf\", \"type\": \"minimax\"}}, \"3\": {\"class_type\": \"VAELoader\", \"inputs\": {\"vae_name\": \"minimax_h3_video_vae_fp16.safetensors\"}}, \"4\": {\"class_type\": \"LoraLoaderModelOnly\", \"inputs\": {\"model\": [\"1\", 0], \"lora_name\": \"minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors\", \"strength_model\": 1.0}}, \"5\": {\"class_type\": \"MiniMaxH3SigmaShift\", \"inputs\": {\"model\": [\"4\", 0], \"shift_video\": 12.0, \"shift_audio\": 3.0}}, \"6\": {\"class_type\": \"MiniMaxH3ReferenceToVideo\", \"inputs\": {\"clip\": [\"2\", 0], \"vae\": [\"3\", 0], \"prompt\": \"A continuous eight-second FIXED clinic cutscene, exact medium-wide composition of <Picture 1>. Goji Girl lies on the reformer in maroon outfit and grip socks and performs ONE slow controlled footwork repetition: extend knees smoothly as carriage moves away from footbar, then bend to return. Feet stay planted on footbar. Therapist in fitted BLACK crew-neck shirt and leggings, short black bob and white shoes, leans forward and actively watches knee alignment; one open hand cues the near knee while the other demonstrates extension direction. She follows the movement, not a passive pose. One pair white shoes and ONE black handbag remain on bench. Behind glass TWO police face inward and RUN IN PLACE against glass with alternating knees and pumping arms, no forward progress, slightly out of phase. Farther outside the same overturned double-decker burns; no pedestrians near flames, no explosion. Everyone inside remains utterly calm. Keep people separate, reformer rigid and feet attached; no new equipment. No text box in generated pixels; safehouse tutorial will be composited separately. Original GTA San Andreas PlayStation 2 graphics throughout: angular economical character meshes, painted low-resolution skin/clothing/vehicle textures, restrained broad diffuse shading and period game animation. Preserve the same adult woman, maroon sleeveless top and leggings, one black ponytail and grip socks. Her white shoes and ONE black handbag stay on the bench throughout, never in her hands or on the reformer. Every NPC matches the same PS2 rendering. Preserve the architecture, lighting and palette of <Picture 1>. No photoreal faces, no modern glossy rendering, no cartoon toy figures, no body morphing, no new logos, HUD, wanted stars, captions or baked text overlays. No shot changes. No speech or music.\", \"width\": 576, \"height\": 1024, \"length\": 192, \"ref_image_size\": \"match\", \"ref_images.ref_image_0\": [\"20\", 0]}}, \"7\": {\"class_type\": \"BasicGuider\", \"inputs\": {\"model\": [\"5\", 0], \"conditioning\": [\"30\", 0]}}, \"8\": {\"class_type\": \"RandomNoise\", \"inputs\": {\"noise_seed\": 2026112712}}, \"9\": {\"class_type\": \"KSamplerSelect\", \"inputs\": {\"sampler_name\": \"euler\"}}, \"10\": {\"class_type\": \"BasicScheduler\", \"inputs\": {\"model\": [\"5\", 0], \"scheduler\": \"simple\", \"steps\": 4, \"denoise\": 1.0}}, \"11\": {\"class_type\": \"SamplerCustomAdvanced\", \"inputs\": {\"noise\": [\"8\", 0], \"guider\": [\"7\", 0], \"sampler\": [\"9\", 0], \"sigmas\": [\"10\", 0], \"latent_image\": [\"6\", 1]}}, \"12\": {\"class_type\": \"VAEDecodeTiled\", \"inputs\": {\"samples\": [\"11\", 0], \"vae\": [\"3\", 0], \"tile_size\": 256, \"overlap\": 64, \"temporal_size\": 64, \"temporal_overlap\": 8}}, \"13\": {\"class_type\": \"CreateVideo\", \"inputs\": {\"images\": [\"12\", 0], \"fps\": 24.0}}, \"14\": {\"class_type\": \"SaveVideo\", \"inputs\": {\"video\": [\"13\", 0], \"filename_prefix\": \"12-02/raw\", \"format\": \"mp4\", \"format.codec\": \"h264\"}}, \"20\": {\"class_type\": \"LoadImage\", \"inputs\": {\"image\": \"12-appearance.png\"}, \"is_changed\": [\"1641ae9f0196af4df78fd6c3774db371b68ba497c49c5e487b56bee0e92e2ca7\"]}, \"30\": {\"class_type\": \"MiniMaxH3AddGuide\", \"inputs\": {\"positive\": [\"6\", 0], \"latent\": [\"6\", 1], \"vae\": [\"3\", 0], \"image\": [\"20\", 0], \"frame_idx\": 0}}}",
+                "encoder": "Lavf63.1.102"
+              }
+            }
+          },
+          "full_decode_verified": true
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,272 @@
+{
+  "prompt": [
+    4,
+    "48ba51a3-e56e-44eb-9ec5-c4fb4de9d0a3",
+    {
+      "1": {
+        "class_type": "UnetLoaderGGUF",
+        "inputs": {
+          "unet_name": "minimax_h3_ref2va_pruned-Q4_K_M.gguf"
+        }
+      },
+      "2": {
+        "class_type": "CLIPLoaderGGUF",
+        "inputs": {
+          "clip_name": "qwen3vl_32b_minimax_h3-Q4_K_M.gguf",
+          "type": "minimax"
+        }
+      },
+      "3": {
+        "class_type": "VAELoader",
+        "inputs": {
+          "vae_name": "minimax_h3_video_vae_fp16.safetensors"
+        }
+      },
+      "4": {
+        "class_type": "LoraLoaderModelOnly",
+        "inputs": {
+          "model": [
+            "1",
+            0
+          ],
+          "lora_name": "minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors",
+          "strength_model": 1.0
+        }
+      },
+      "5": {
+        "class_type": "MiniMaxH3SigmaShift",
+        "inputs": {
+          "model": [
+            "4",
+            0
+          ],
+          "shift_video": 12.0,
+          "shift_audio": 3.0
+        }
+      },
+      "6": {
+        "class_type": "MiniMaxH3ReferenceToVideo",
+        "inputs": {
+          "clip": [
+            "2",
+            0
+          ],
+          "vae": [
+            "3",
+            0
+          ],
+          "prompt": "A continuous three-second outdoor third-person rear player camera. Start from <Picture 1>. Goji Girl bursts out of the front doorway then RUNS forward along the Singapore pavement away from camera. Her right arm pumps, bag swings from left hand, clearly running with bent knees and lifted heels. Camera follows behind at fixed ordinary gameplay height, no orbit or cut. Background pedestrians look up and step aside without contact. No one is struck or knocked down. Keep her identity and proportions stable. Original GTA San Andreas PlayStation 2 graphics throughout: angular economical character meshes, painted low-resolution skin/clothing/vehicle textures, restrained broad diffuse shading and period game animation. Preserve the same adult woman, maroon sleeveless top and leggings, one black ponytail, white shoes and ONE small black handbag carried LEFT. Every NPC matches the same PS2 rendering. Preserve the architecture, lighting and palette of <Picture 1>. No photoreal faces, no modern glossy rendering, no cartoon toy figures, no body morphing, no new logos, HUD, wanted stars, captions or baked text overlays. No shot changes. No speech or music.",
+          "width": 576,
+          "height": 1024,
+          "length": 73,
+          "ref_image_size": "match",
+          "ref_images.ref_image_0": [
+            "20",
+            0
+          ]
+        }
+      },
+      "7": {
+        "class_type": "BasicGuider",
+        "inputs": {
+          "model": [
+            "5",
+            0
+          ],
+          "conditioning": [
+            "30",
+            0
+          ]
+        }
+      },
+      "8": {
+        "class_type": "RandomNoise",
+        "inputs": {
+          "noise_seed": 2026112703
+        }
+      },
+      "9": {
+        "class_type": "KSamplerSelect",
+        "inputs": {
+          "sampler_name": "euler"
+        }
+      },
+      "10": {
+        "class_type": "BasicScheduler",
+        "inputs": {
+          "model": [
+            "5",
+            0
+          ],
+          "scheduler": "simple",
+          "steps": 4,
+          "denoise": 1.0
+        }
+      },
+      "11": {
+        "class_type": "SamplerCustomAdvanced",
+        "inputs": {
+          "noise": [
+            "8",
+            0
+          ],
+          "guider": [
+            "7",
+            0
+          ],
+          "sampler": [
+            "9",
+            0
+          ],
+          "sigmas": [
+            "10",
+            0
+          ],
+          "latent_image": [
+            "6",
+            1
+          ]
+        }
+      },
+      "12": {
+        "class_type": "VAEDecodeTiled",
+        "inputs": {
+          "samples": [
+            "11",
+            0
+          ],
+          "vae": [
+            "3",
+            0
+          ],
+          "tile_size": 256,
+          "overlap": 64,
+          "temporal_size": 64,
+          "temporal_overlap": 8
+        }
+      },
+      "13": {
+        "class_type": "CreateVideo",
+        "inputs": {
+          "images": [
+            "12",
+            0
+          ],
+          "fps": 24.0
+        }
+      },
+      "14": {
+        "class_type": "SaveVideo",
+        "inputs": {
+          "video": [
+            "13",
+            0
+          ],
+          "filename_prefix": "03-01/raw",
+          "format": "mp4",
+          "format.codec": "h264"
+        }
+      },
+      "20": {
+        "class_type": "LoadImage",
+        "inputs": {
+          "image": "03-appearance.png"
+        }
+      },
+      "30": {
+        "class_type": "MiniMaxH3AddGuide",
+        "inputs": {
+          "positive": [
+            "6",
+            0
+          ],
+          "latent": [
+            "6",
+            1
+          ],
+          "vae": [
+            "3",
+            0
+          ],
+          "image": [
+            "20",
+            0
+          ],
+          "frame_idx": 0
+        }
+      }
+    },
+    {
+      "create_time": 1795658187857
+    },
+    [
+      "14"
+    ]
+  ],
+  "outputs": {
+    "14": {
+      "images": [
+        {
+          "filename": "raw_00001_.mp4",
+          "subfolder": "03-01",
+          "type": "output",
+          "metadata": {
+            "kind": "video",
+            "width": 576,
+            "height": 1024,
+            "duration": 3.0416666666666665,
+            "fps": 24.0,
+            "frame_count": 73
+          }
+        }
+      ],
+      "animated": [
+        true
+      ]
+    }
+  },
+  "status": {
+    "status_str": "success",
+    "completed": true,
+    "messages": [
+      [
+        "execution_start",
+        {
+          "prompt_id": "48ba51a3-e56e-44eb-9ec5-c4fb4de9d0a3",
+          "timestamp": 1795660008252
+        }
+      ],
+      [
+        "execution_cached",
+        {
+          "nodes": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "9",
+            "10"
+          ],
+          "prompt_id": "48ba51a3-e56e-44eb-9ec5-c4fb4de9d0a3",
+          "timestamp": 1795660008256
+        }
+      ],
+      [
+        "execution_success",
+        {
+          "prompt_id": "48ba51a3-e56e-44eb-9ec5-c4fb4de9d0a3",
+          "timestamp": 1795660425190
+        }
+      ]
+    ]
+  },
+  "meta": {
+    "14": {
+      "node_id": "14",
+      "display_node": "14",
+      "parent_node": null,
+      "real_node_id": "14"
+    }
+  }
+}

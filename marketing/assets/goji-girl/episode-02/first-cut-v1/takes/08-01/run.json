@@ -1,0 +1,245 @@
+{
+  "shot": "08",
+  "take": "01",
+  "status": "failed",
+  "started": 1795657707.0797188,
+  "recipe": "H3 Ref2VA GGUF Q4 + native Turbo 4-step; 576x1024 24fps",
+  "native_frames": 158,
+  "edit_seconds": 6,
+  "guidance": "video",
+  "prompt": "One continuous six-second original GTA San Andreas PS2 gameplay interaction shot. Use <Picture 1> as the exact APPEARANCE of Goji Girl, SOS Transit double-decker, passenger doorway, reader and Singapore street. Use <Video 1> as the continuous motion and camera guide, from start to finish; its primitive rendering is NOT the target appearance. The bus rests rigidly on its right side throughout, with the left front passenger doorway facing UP. Hold briefly, then the maroon-clad woman rises out of that same opening, braces her left hand on its edge, reaches her right hand back to tap a small transit card on the green reader just INSIDE the opening, then climbs onto the upward-facing bodywork and brings her black handbag with her. Preserve the complete guided action and timing. The white solid corner between doorway and front windscreen remains intact; the entrance never cuts into the bus front. Logos attach to bodywork, not glass. No bus motion, door resizing, teleport, new door, hatch, extra wheels, camera orbit or cut. Original PS2 angular human meshes, economical faces, painted low-resolution textures, restrained highlights, same daylight and colour as Picture1; no plastic or photographic people. No HUD, captions, stars or extra people. Single handbag, maroon top and leggings, ponytail, white shoes. The camera remains in the guide's position. No speech or music.",
+  "workflow": {
+    "1": {
+      "class_type": "UnetLoaderGGUF",
+      "inputs": {
+        "unet_name": "minimax_h3_ref2va_pruned-Q4_K_M.gguf"
+      }
+    },
+    "2": {
+      "class_type": "CLIPLoaderGGUF",
+      "inputs": {
+        "clip_name": "qwen3vl_32b_minimax_h3-Q4_K_M.gguf",
+        "type": "minimax"
+      }
+    },
+    "3": {
+      "class_type": "VAELoader",
+      "inputs": {
+        "vae_name": "minimax_h3_video_vae_fp16.safetensors"
+      }
+    },
+    "4": {
+      "class_type": "LoraLoaderModelOnly",
+      "inputs": {
+        "model": [
+          "1",
+          0
+        ],
+        "lora_name": "minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors",
+        "strength_model": 1.0
+      }
+    },
+    "5": {
+      "class_type": "MiniMaxH3SigmaShift",
+      "inputs": {
+        "model": [
+          "4",
+          0
+        ],
+        "shift_video": 12.0,
+        "shift_audio": 3.0
+      }
+    },
+    "6": {
+      "class_type": "MiniMaxH3ReferenceToVideo",
+      "inputs": {
+        "clip": [
+          "2",
+          0
+        ],
+        "vae": [
+          "3",
+          0
+        ],
+        "prompt": "One continuous six-second original GTA San Andreas PS2 gameplay interaction shot. Use <Picture 1> as the exact APPEARANCE of Goji Girl, SOS Transit double-decker, passenger doorway, reader and Singapore street. Use <Video 1> as the continuous motion and camera guide, from start to finish; its primitive rendering is NOT the target appearance. The bus rests rigidly on its right side throughout, with the left front passenger doorway facing UP. Hold briefly, then the maroon-clad woman rises out of that same opening, braces her left hand on its edge, reaches her right hand back to tap a small transit card on the green reader just INSIDE the opening, then climbs onto the upward-facing bodywork and brings her black handbag with her. Preserve the complete guided action and timing. The white solid corner between doorway and front windscreen remains intact; the entrance never cuts into the bus front. Logos attach to bodywork, not glass. No bus motion, door resizing, teleport, new door, hatch, extra wheels, camera orbit or cut. Original PS2 angular human meshes, economical faces, painted low-resolution textures, restrained highlights, same daylight and colour as Picture1; no plastic or photographic people. No HUD, captions, stars or extra people. Single handbag, maroon top and leggings, ponytail, white shoes. The camera remains in the guide's position. No speech or music.",
+        "width": 576,
+        "height": 1024,
+        "length": 158,
+        "ref_image_size": "match",
+        "ref_images.ref_image_0": [
+          "20",
+          0
+        ],
+        "ref_videos.ref_video_0": [
+          "22",
+          0
+        ]
+      }
+    },
+    "7": {
+      "class_type": "BasicGuider",
+      "inputs": {
+        "model": [
+          "5",
+          0
+        ],
+        "conditioning": [
+          "6",
+          0
+        ]
+      }
+    },
+    "8": {
+      "class_type": "RandomNoise",
+      "inputs": {
+        "noise_seed": 2026112708
+      }
+    },
+    "9": {
+      "class_type": "KSamplerSelect",
+      "inputs": {
+        "sampler_name": "euler"
+      }
+    },
+    "10": {
+      "class_type": "BasicScheduler",
+      "inputs": {
+        "model": [
+          "5",
+          0
+        ],
+        "scheduler": "simple",
+        "steps": 4,
+        "denoise": 1.0
+      }
+    },
+    "11": {
+      "class_type": "SamplerCustomAdvanced",
+      "inputs": {
+        "noise": [
+          "8",
+          0
+        ],
+        "guider": [
+          "7",
+          0
+        ],
+        "sampler": [
+          "9",
+          0
+        ],
+        "sigmas": [
+          "10",
+          0
+        ],
+        "latent_image": [
+          "6",
+          1
+        ]
+      }
+    },
+    "12": {
+      "class_type": "VAEDecodeTiled",
+      "inputs": {
+        "samples": [
+          "11",
+          0
+        ],
+        "vae": [
+          "3",
+          0
+        ],
+        "tile_size": 256,
+        "overlap": 64,
+        "temporal_size": 64,
+        "temporal_overlap": 8
+      }
+    },
+    "13": {
+      "class_type": "CreateVideo",
+      "inputs": {
+        "images": [
+          "12",
+          0
+        ],
+        "fps": 24.0
+      }
+    },
+    "14": {
+      "class_type": "SaveVideo",
+      "inputs": {
+        "video": [
+          "13",
+          0
+        ],
+        "filename_prefix": "08-01/raw",
+        "format": "mp4",
+        "format.codec": "h264"
+      }
+    },
+    "20": {
+      "class_type": "LoadImage",
+      "inputs": {
+        "image": "08-appearance.png"
+      }
+    },
+    "21": {
+      "class_type": "LoadVideo",
+      "inputs": {
+        "file": "08-guide.mp4"
+      }
+    },
+    "22": {
+      "class_type": "GetVideoComponents",
+      "inputs": {
+        "video": [
+          "21",
+          0
+        ]
+      }
+    }
+  },
+  "inputs": [
+    {
+      "path": "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/first-cut-v1/inputs/08-appearance.png",
+      "sha256": "0dfb724fdaa55d626c96ad4f28d05ede22d4191b8ba93d680b70fdeef0f5c780"
+    },
+    {
+      "path": "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/first-cut-v1/inputs/08-guide.mp4",
+      "sha256": "c596b9c384efa83df39b877c1ea3851511fd9511e94c1570e42378a0f540ac55"
+    }
+  ],
+  "audio": "Separate original/reused SFX in edit; video VAE only",
+  "runtime_commit": "da8bd08e48deee74d9f6c3bc00aed365b00ec209",
+  "receipt": {
+    "prompt_id": "f409e843-f48f-4396-a58d-b2083c92c7bd",
+    "number": 0,
+    "node_errors": {}
+  },
+  "completed_at": 1795657717.841,
+  "outputs": {
+    "21": {
+      "images": [
+        {
+          "filename": "08-guide.mp4",
+          "subfolder": "",
+          "type": "input",
+          "metadata": {
+            "kind": "video",
+            "width": 288,
+            "height": 512,
+            "duration": 6.583333333333333,
+            "fps": 24.0,
+            "frame_count": 158
+          }
+        }
+      ],
+      "animated": [
+        true
+      ]
+    }
+  },
+  "collected_at": 1795657753.556339,
+  "execution_started_at": 1795657707.101,
+  "render_wall_seconds": 10.740000009536743
+}

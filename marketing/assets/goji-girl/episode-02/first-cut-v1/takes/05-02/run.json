@@ -1,0 +1,503 @@
+{
+  "shot": "05",
+  "take": "02",
+  "status": "generated_unreviewed",
+  "started": 1795662163.5933871,
+  "recipe": "H3 Ref2VA GGUF Q4 + native Turbo 4-step; 576x1024 24fps",
+  "native_frames": 107,
+  "edit_seconds": 4,
+  "guidance": "video",
+  "prompt": "One continuous four-second fixed rear interaction camera in original GTA San Andreas PS2 graphics. The girl smashes the SMALL DRIVER WINDOW with her right hand, pulls the purple-shirt driver through that same SMALL WINDOW, he lands on his feet unharmed and steps left, then she lifts herself head-first and climbs through the SAME SMALL WINDOW into the driver seat. Follow the supplied guide and timed still anchors, completing the action. THE SOLID WHITE BODY PANEL BELOW THE WINDOW NEVER CHANGES. This is a high small driver window, NEVER a passenger door. Both bodies cross the side of the bus at WINDOW HEIGHT above the sill; no one walks through the body panel. Driver and girl remain distinct. Bus remains rigid and stationary, no panel movement or resizing. Use <Picture 1> and the anchors for all FINISHED SHAPES AND TEXTURES: formed rounded bus body, inset dark glazing, detailed lamps, wheel arches and rims, exact orange-red/purple/white SOS Transit livery, maroon-clad woman with ponytail and white shoes. <Video 1> is primitive choreography ONLY, never copy its boxy mesh, faceted primitive faces or toy surfaces. Girl keeps handbag on LEFT forearm while climbing, then places it inside cab. Keep small black structured handbag, no extra bags. Driver walks away upright with no injury, blood or impact. No other people, doors, HUD, stars, cuts or captions. Camera does not move. Blender primitives govern ONLY world positions, motion, contacts and camera. Reconstruct the FINISHED MESH SHAPES from the approved appearance image: formed rounded bus corners, inset glazing, detailed wheel arches, rims, lamps and bumpers, and the approved human anatomy. Never merely paint textures onto the guide boxes or reproduce their blocky silhouettes or primitive faces.",
+  "workflow": {
+    "1": {
+      "class_type": "UnetLoaderGGUF",
+      "inputs": {
+        "unet_name": "minimax_h3_ref2va_pruned-Q4_K_M.gguf"
+      }
+    },
+    "2": {
+      "class_type": "CLIPLoaderGGUF",
+      "inputs": {
+        "clip_name": "qwen3vl_32b_minimax_h3-Q4_K_M.gguf",
+        "type": "minimax"
+      }
+    },
+    "3": {
+      "class_type": "VAELoader",
+      "inputs": {
+        "vae_name": "minimax_h3_video_vae_fp16.safetensors"
+      }
+    },
+    "4": {
+      "class_type": "LoraLoaderModelOnly",
+      "inputs": {
+        "model": [
+          "1",
+          0
+        ],
+        "lora_name": "minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors",
+        "strength_model": 1.0
+      }
+    },
+    "5": {
+      "class_type": "MiniMaxH3SigmaShift",
+      "inputs": {
+        "model": [
+          "4",
+          0
+        ],
+        "shift_video": 12.0,
+        "shift_audio": 3.0
+      }
+    },
+    "6": {
+      "class_type": "MiniMaxH3ReferenceToVideo",
+      "inputs": {
+        "clip": [
+          "2",
+          0
+        ],
+        "vae": [
+          "3",
+          0
+        ],
+        "prompt": "One continuous four-second fixed rear interaction camera in original GTA San Andreas PS2 graphics. The girl smashes the SMALL DRIVER WINDOW with her right hand, pulls the purple-shirt driver through that same SMALL WINDOW, he lands on his feet unharmed and steps left, then she lifts herself head-first and climbs through the SAME SMALL WINDOW into the driver seat. Follow the supplied guide and timed still anchors, completing the action. THE SOLID WHITE BODY PANEL BELOW THE WINDOW NEVER CHANGES. This is a high small driver window, NEVER a passenger door. Both bodies cross the side of the bus at WINDOW HEIGHT above the sill; no one walks through the body panel. Driver and girl remain distinct. Bus remains rigid and stationary, no panel movement or resizing. Use <Picture 1> and the anchors for all FINISHED SHAPES AND TEXTURES: formed rounded bus body, inset dark glazing, detailed lamps, wheel arches and rims, exact orange-red/purple/white SOS Transit livery, maroon-clad woman with ponytail and white shoes. <Video 1> is primitive choreography ONLY, never copy its boxy mesh, faceted primitive faces or toy surfaces. Girl keeps handbag on LEFT forearm while climbing, then places it inside cab. Keep small black structured handbag, no extra bags. Driver walks away upright with no injury, blood or impact. No other people, doors, HUD, stars, cuts or captions. Camera does not move. Blender primitives govern ONLY world positions, motion, contacts and camera. Reconstruct the FINISHED MESH SHAPES from the approved appearance image: formed rounded bus corners, inset glazing, detailed wheel arches, rims, lamps and bumpers, and the approved human anatomy. Never merely paint textures onto the guide boxes or reproduce their blocky silhouettes or primitive faces.",
+        "width": 576,
+        "height": 1024,
+        "length": 107,
+        "ref_image_size": "match",
+        "ref_images.ref_image_0": [
+          "20",
+          0
+        ],
+        "ref_videos.ref_video_0": [
+          "22",
+          0
+        ]
+      }
+    },
+    "7": {
+      "class_type": "BasicGuider",
+      "inputs": {
+        "model": [
+          "5",
+          0
+        ],
+        "conditioning": [
+          "47",
+          0
+        ]
+      }
+    },
+    "8": {
+      "class_type": "RandomNoise",
+      "inputs": {
+        "noise_seed": 2026112805
+      }
+    },
+    "9": {
+      "class_type": "KSamplerSelect",
+      "inputs": {
+        "sampler_name": "euler"
+      }
+    },
+    "10": {
+      "class_type": "BasicScheduler",
+      "inputs": {
+        "model": [
+          "5",
+          0
+        ],
+        "scheduler": "simple",
+        "steps": 4,
+        "denoise": 1.0
+      }
+    },
+    "11": {
+      "class_type": "SamplerCustomAdvanced",
+      "inputs": {
+        "noise": [
+          "8",
+          0
+        ],
+        "guider": [
+          "7",
+          0
+        ],
+        "sampler": [
+          "9",
+          0
+        ],
+        "sigmas": [
+          "10",
+          0
+        ],
+        "latent_image": [
+          "6",
+          1
+        ]
+      }
+    },
+    "12": {
+      "class_type": "VAEDecodeTiled",
+      "inputs": {
+        "samples": [
+          "11",
+          0
+        ],
+        "vae": [
+          "3",
+          0
+        ],
+        "tile_size": 256,
+        "overlap": 64,
+        "temporal_size": 64,
+        "temporal_overlap": 8
+      }
+    },
+    "13": {
+      "class_type": "CreateVideo",
+      "inputs": {
+        "images": [
+          "12",
+          0
+        ],
+        "fps": 24.0
+      }
+    },
+    "14": {
+      "class_type": "SaveVideo",
+      "inputs": {
+        "video": [
+          "13",
+          0
+        ],
+        "filename_prefix": "05-02/raw",
+        "format": "mp4",
+        "format.codec": "h264"
+      }
+    },
+    "20": {
+      "class_type": "LoadImage",
+      "inputs": {
+        "image": "05-appearance.png"
+      }
+    },
+    "21": {
+      "class_type": "LoadVideo",
+      "inputs": {
+        "file": "05-guide-v2.mp4"
+      }
+    },
+    "22": {
+      "class_type": "GetVideoComponents",
+      "inputs": {
+        "video": [
+          "21",
+          0
+        ]
+      }
+    },
+    "40": {
+      "class_type": "LoadImage",
+      "inputs": {
+        "image": "04-end-v2.png"
+      }
+    },
+    "41": {
+      "class_type": "MiniMaxH3AddGuide",
+      "inputs": {
+        "positive": [
+          "6",
+          0
+        ],
+        "latent": [
+          "6",
+          1
+        ],
+        "vae": [
+          "3",
+          0
+        ],
+        "image": [
+          "40",
+          0
+        ],
+        "frame_idx": 0
+      }
+    },
+    "42": {
+      "class_type": "LoadImage",
+      "inputs": {
+        "image": "05-appearance.png"
+      }
+    },
+    "43": {
+      "class_type": "MiniMaxH3AddGuide",
+      "inputs": {
+        "positive": [
+          "41",
+          0
+        ],
+        "latent": [
+          "6",
+          1
+        ],
+        "vae": [
+          "3",
+          0
+        ],
+        "image": [
+          "42",
+          0
+        ],
+        "frame_idx": 12
+      }
+    },
+    "44": {
+      "class_type": "LoadImage",
+      "inputs": {
+        "image": "05-mid-v2.png"
+      }
+    },
+    "45": {
+      "class_type": "MiniMaxH3AddGuide",
+      "inputs": {
+        "positive": [
+          "43",
+          0
+        ],
+        "latent": [
+          "6",
+          1
+        ],
+        "vae": [
+          "3",
+          0
+        ],
+        "image": [
+          "44",
+          0
+        ],
+        "frame_idx": 48
+      }
+    },
+    "46": {
+      "class_type": "LoadImage",
+      "inputs": {
+        "image": "05-end-v2.png"
+      }
+    },
+    "47": {
+      "class_type": "MiniMaxH3AddGuide",
+      "inputs": {
+        "positive": [
+          "45",
+          0
+        ],
+        "latent": [
+          "6",
+          1
+        ],
+        "vae": [
+          "3",
+          0
+        ],
+        "image": [
+          "46",
+          0
+        ],
+        "frame_idx": 96
+      }
+    }
+  },
+  "inputs": [
+    {
+      "path": "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/first-cut-v1/inputs/05-appearance.png",
+      "sha256": "3e4e11001cfb0a23c68ff0f98de8d50c143a8eed61a9d890645d700bb3f3632e"
+    },
+    {
+      "path": "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/first-cut-v1/inputs/05-guide-v2.mp4",
+      "sha256": "84b078854edd41e7ff78dedf698ba0d2407804b20dbc6db867c0b35232d2b5ad"
+    },
+    {
+      "path": "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/first-cut-v1/inputs/04-end-v2.png",
+      "sha256": "9b20a646c31e8850cb1cc620b25ae1c649789dba133e015408e9118fc036e0c3"
+    },
+    {
+      "path": "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/first-cut-v1/inputs/05-appearance.png",
+      "sha256": "3e4e11001cfb0a23c68ff0f98de8d50c143a8eed61a9d890645d700bb3f3632e"
+    },
+    {
+      "path": "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/first-cut-v1/inputs/05-mid-v2.png",
+      "sha256": "0e871d59c4cc17eee91da5a5ecd39c778e49439561f96e44cd297d2f8f291d6f"
+    },
+    {
+      "path": "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/first-cut-v1/inputs/05-end-v2.png",
+      "sha256": "4469f5c54146ff3ae1b47a9d587742ebbe6f5c8f7b5a29565968a184f4876df5"
+    }
+  ],
+  "audio": "Separate original procedural SFX in edit; video VAE only",
+  "runtime_commit": "da8bd08e48deee74d9f6c3bc00aed365b00ec209",
+  "receipt": {
+    "prompt_id": "cbf1a003-5b1a-4550-9167-d76d7379845b",
+    "number": 7.2,
+    "node_errors": {}
+  },
+  "superseded_receipt": {
+    "prompt_id": "42d2b065-f55e-47c3-8103-071dce4f953b",
+    "number": 14,
+    "node_errors": {}
+  },
+  "steering_applied_at": 1795662516.604853,
+  "queue_changes": [
+    {
+      "previous_receipt": {
+        "prompt_id": "7cccd1e3-dedf-4662-add9-a3bfd4f2f530",
+        "number": 14.0,
+        "node_errors": {}
+      },
+      "reason": "Review known interaction repairs before the remaining long renders.",
+      "time": 1795663785.713085
+    }
+  ],
+  "collected_at": 1795666263.114055,
+  "outputs": {
+    "21": {
+      "images": [
+        {
+          "filename": "05-guide-v2.mp4",
+          "subfolder": "",
+          "type": "input",
+          "metadata": {
+            "kind": "video",
+            "width": 288,
+            "height": 512,
+            "duration": 4.458333333333333,
+            "fps": 24.0,
+            "frame_count": 107
+          }
+        }
+      ],
+      "animated": [
+        true
+      ]
+    },
+    "14": {
+      "images": [
+        {
+          "filename": "raw_00001_.mp4",
+          "subfolder": "05-02",
+          "type": "output",
+          "metadata": {
+            "kind": "video",
+            "width": 576,
+            "height": 1024,
+            "duration": 4.458333333333333,
+            "fps": 24.0,
+            "frame_count": 107
+          }
+        }
+      ],
+      "animated": [
+        true
+      ]
+    }
+  },
+  "videos": [
+    {
+      "path": "takes/05-02/raw_00001_.mp4",
+      "sha256": "809e390c25978ede28f2f60c1a785debf4d92fa172d0b3bd0a33f9fb4f665833",
+      "probe": {
+        "streams": [
+          {
+            "index": 0,
+            "codec_name": "h264",
+            "codec_long_name": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+            "profile": "High",
+            "codec_type": "video",
+            "codec_tag_string": "avc1",
+            "codec_tag": "0x31637661",
+            "mime_codec_string": "avc1.64001f",
+            "width": 576,
+            "height": 1024,
+            "coded_width": 576,
+            "coded_height": 1024,
+            "has_b_frames": 2,
+            "pix_fmt": "yuv420p",
+            "level": 31,
+            "color_range": "tv",
+            "color_space": "bt709",
+            "color_transfer": "iec61966-2-1",
+            "color_primaries": "bt709",
+            "chroma_location": "left",
+            "field_order": "progressive",
+            "is_avc": "true",
+            "nal_length_size": "4",
+            "id": "0x1",
+            "r_frame_rate": "24/1",
+            "avg_frame_rate": "24/1",
+            "time_base": "1/12288",
+            "start_pts": 0,
+            "start_time": "0.000000",
+            "duration_ts": 54784,
+            "duration": "4.458333",
+            "bit_rate": "1675819",
+            "bits_per_raw_sample": "8",
+            "nb_frames": "107",
+            "extradata_size": 48,
+            "disposition": {
+              "default": 1,
+              "dub": 0,
+              "original": 0,
+              "comment": 0,
+              "lyrics": 0,
+              "karaoke": 0,
+              "forced": 0,
+              "hearing_impaired": 0,
+              "visual_impaired": 0,
+              "clean_effects": 0,
+              "attached_pic": 0,
+              "timed_thumbnails": 0,
+              "non_diegetic": 0,
+              "captions": 0,
+              "descriptions": 0,
+              "metadata": 0,
+              "dependent": 0,
+              "still_image": 0,
+              "multilayer": 0
+            },
+            "tags": {
+              "language": "und",
+              "handler_name": "VideoHandler"
+            }
+          }
+        ],
+        "format": {
+          "filename": "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/first-cut-v1/takes/05-02/raw_00001_.mp4",
+          "nb_streams": 1,
+          "nb_programs": 0,
+          "nb_stream_groups": 0,
+          "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+          "format_long_name": "QuickTime / MOV",
+          "start_time": "0.000000",
+          "duration": "4.458333",
+          "size": "941300",
+          "bit_rate": "1689061",
+          "probe_score": 100,
+          "tags": {
+            "major_brand": "isom",
+            "minor_version": "512",
+            "compatible_brands": "isomiso2avc1mp41",
+            "prompt": "{\"1\": {\"class_type\": \"UnetLoaderGGUF\", \"inputs\": {\"unet_name\": \"minimax_h3_ref2va_pruned-Q4_K_M.gguf\"}}, \"2\": {\"class_type\": \"CLIPLoaderGGUF\", \"inputs\": {\"clip_name\": \"qwen3vl_32b_minimax_h3-Q4_K_M.gguf\", \"type\": \"minimax\"}}, \"3\": {\"class_type\": \"VAELoader\", \"inputs\": {\"vae_name\": \"minimax_h3_video_vae_fp16.safetensors\"}}, \"4\": {\"class_type\": \"LoraLoaderModelOnly\", \"inputs\": {\"model\": [\"1\", 0], \"lora_name\": \"minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors\", \"strength_model\": 1.0}}, \"5\": {\"class_type\": \"MiniMaxH3SigmaShift\", \"inputs\": {\"model\": [\"4\", 0], \"shift_video\": 12.0, \"shift_audio\": 3.0}}, \"6\": {\"class_type\": \"MiniMaxH3ReferenceToVideo\", \"inputs\": {\"clip\": [\"2\", 0], \"vae\": [\"3\", 0], \"prompt\": \"One continuous four-second fixed rear interaction camera in original GTA San Andreas PS2 graphics. The girl smashes the SMALL DRIVER WINDOW with her right hand, pulls the purple-shirt driver through that same SMALL WINDOW, he lands on his feet unharmed and steps left, then she lifts herself head-first and climbs through the SAME SMALL WINDOW into the driver seat. Follow the supplied guide and timed still anchors, completing the action. THE SOLID WHITE BODY PANEL BELOW THE WINDOW NEVER CHANGES. This is a high small driver window, NEVER a passenger door. Both bodies cross the side of the bus at WINDOW HEIGHT above the sill; no one walks through the body panel. Driver and girl remain distinct. Bus remains rigid and stationary, no panel movement or resizing. Use <Picture 1> and the anchors for all FINISHED SHAPES AND TEXTURES: formed rounded bus body, inset dark glazing, detailed lamps, wheel arches and rims, exact orange-red/purple/white SOS Transit livery, maroon-clad woman with ponytail and white shoes. <Video 1> is primitive choreography ONLY, never copy its boxy mesh, faceted primitive faces or toy surfaces. Girl keeps handbag on LEFT forearm while climbing, then places it inside cab. Keep small black structured handbag, no extra bags. Driver walks away upright with no injury, blood or impact. No other people, doors, HUD, stars, cuts or captions. Camera does not move. Blender primitives govern ONLY world positions, motion, contacts and camera. Reconstruct the FINISHED MESH SHAPES from the approved appearance image: formed rounded bus corners, inset glazing, detailed wheel arches, rims, lamps and bumpers, and the approved human anatomy. Never merely paint textures onto the guide boxes or reproduce their blocky silhouettes or primitive faces.\", \"width\": 576, \"height\": 1024, \"length\": 107, \"ref_image_size\": \"match\", \"ref_images.ref_image_0\": [\"20\", 0], \"ref_videos.ref_video_0\": [\"22\", 0]}}, \"7\": {\"class_type\": \"BasicGuider\", \"inputs\": {\"model\": [\"5\", 0], \"conditioning\": [\"47\", 0]}}, \"8\": {\"class_type\": \"RandomNoise\", \"inputs\": {\"noise_seed\": 2026112805}}, \"9\": {\"class_type\": \"KSamplerSelect\", \"inputs\": {\"sampler_name\": \"euler\"}}, \"10\": {\"class_type\": \"BasicScheduler\", \"inputs\": {\"model\": [\"5\", 0], \"scheduler\": \"simple\", \"steps\": 4, \"denoise\": 1.0}}, \"11\": {\"class_type\": \"SamplerCustomAdvanced\", \"inputs\": {\"noise\": [\"8\", 0], \"guider\": [\"7\", 0], \"sampler\": [\"9\", 0], \"sigmas\": [\"10\", 0], \"latent_image\": [\"6\", 1]}}, \"12\": {\"class_type\": \"VAEDecodeTiled\", \"inputs\": {\"samples\": [\"11\", 0], \"vae\": [\"3\", 0], \"tile_size\": 256, \"overlap\": 64, \"temporal_size\": 64, \"temporal_overlap\": 8}}, \"13\": {\"class_type\": \"CreateVideo\", \"inputs\": {\"images\": [\"12\", 0], \"fps\": 24.0}}, \"14\": {\"class_type\": \"SaveVideo\", \"inputs\": {\"video\": [\"13\", 0], \"filename_prefix\": \"05-02/raw\", \"format\": \"mp4\", \"format.codec\": \"h264\"}}, \"20\": {\"class_type\": \"LoadImage\", \"inputs\": {\"image\": \"05-appearance.png\"}, \"is_changed\": [\"3e4e11001cfb0a23c68ff0f98de8d50c143a8eed61a9d890645d700bb3f3632e\"]}, \"21\": {\"class_type\": \"LoadVideo\", \"inputs\": {\"file\": \"05-guide-v2.mp4\"}, \"is_changed\": [1795662120.622348]}, \"22\": {\"class_type\": \"GetVideoComponents\", \"inputs\": {\"video\": [\"21\", 0]}}, \"40\": {\"class_type\": \"LoadImage\", \"inputs\": {\"image\": \"04-end-v2.png\"}, \"is_changed\": [\"9b20a646c31e8850cb1cc620b25ae1c649789dba133e015408e9118fc036e0c3\"]}, \"41\": {\"class_type\": \"MiniMaxH3AddGuide\", \"inputs\": {\"positive\": [\"6\", 0], \"latent\": [\"6\", 1], \"vae\": [\"3\", 0], \"image\": [\"40\", 0], \"frame_idx\": 0}}, \"42\": {\"class_type\": \"LoadImage\", \"inputs\": {\"image\": \"05-appearance.png\"}, \"is_changed\": [\"3e4e11001cfb0a23c68ff0f98de8d50c143a8eed61a9d890645d700bb3f3632e\"]}, \"43\": {\"class_type\": \"MiniMaxH3AddGuide\", \"inputs\": {\"positive\": [\"41\", 0], \"latent\": [\"6\", 1], \"vae\": [\"3\", 0], \"image\": [\"42\", 0], \"frame_idx\": 12}}, \"44\": {\"class_type\": \"LoadImage\", \"inputs\": {\"image\": \"05-mid-v2.png\"}, \"is_changed\": [\"0e871d59c4cc17eee91da5a5ecd39c778e49439561f96e44cd297d2f8f291d6f\"]}, \"45\": {\"class_type\": \"MiniMaxH3AddGuide\", \"inputs\": {\"positive\": [\"43\", 0], \"latent\": [\"6\", 1], \"vae\": [\"3\", 0], \"image\": [\"44\", 0], \"frame_idx\": 48}}, \"46\": {\"class_type\": \"LoadImage\", \"inputs\": {\"image\": \"05-end-v2.png\"}, \"is_changed\": [\"4469f5c54146ff3ae1b47a9d587742ebbe6f5c8f7b5a29565968a184f4876df5\"]}, \"47\": {\"class_type\": \"MiniMaxH3AddGuide\", \"inputs\": {\"positive\": [\"45\", 0], \"latent\": [\"6\", 1], \"vae\": [\"3\", 0], \"image\": [\"46\", 0], \"frame_idx\": 96}}}",
+            "encoder": "Lavf63.1.102"
+          }
+        }
+      },
+      "full_decode_verified": true
+    }
+  ],
+  "execution_started_at": 1795665170.036,
+  "completed_at": 1795666214.093,
+  "render_wall_seconds": 1044.0569999217987
+}

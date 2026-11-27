@@ -1,0 +1,15 @@
+{
+  "id": "r7f_08",
+  "prompt": "SURGICAL LOGO PLACEMENT FIX ONLY. The user has APPROVED this exact doorway, body shape, player pose, reader placement, camera and all other content. Preserve all of them unchanged.\nOn the near FRONT FACE of the rolled bus, the red/purple 'SOS Transit' wordmark and swoosh currently overlap/float inside the lower front WINDSCREEN. REMOVE ALL of that existing front wordmark/swoosh from the dark glass and restore clean uninterrupted dark glazing with the same reflections. Do not change the windscreen shape or its black rubber frame.\nRepaint that same SOS Transit wordmark with small swoosh ONLY on the SOLID WHITE FRONT BODY FASCIA to the RIGHT of that windscreen in this rotated image \u2014 the narrow white nose panel BETWEEN the windscreen's right black edge and the headlights/bumper. Reduce the logo enough that every letter and swoosh fits entirely within white metal, clear of glass, rubber gasket, lights and doorway. It follows the surface perspective, rotated90degrees WITH the bus, like paint/decal physically attached to the nose, never floating. Leave visible white margin around it. In upright bus coordinates this is the white panel BELOW the lower windscreen and ABOVE the bumper; bus is rolled90degrees so that panel is on the right here.\nAbsolutely no other edits: do not move/resize the door or the approved solid white corner bridge, girl or bag, reader/pole, lamps, windows, wheels, livery, post or street. Same PS2 GTA SA rendering.",
+  "inputs": [
+    "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-07/frames/08-look-clean.png"
+  ],
+  "tool": "built-in image_gen",
+  "model_version": "not exposed",
+  "output_hint": "Generated images are saved to /Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b as /Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b/exec-88bf9234-bc85-4760-b559-45fbaf712865.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+  "status": "selected: logo moved to solid front fascia; user-approved doorway retained",
+  "input_hashes": {
+    "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/revision-07/frames/08-look-clean.png": "9d434d02891b630b45b9883a251535c34b2a617aa988823c10612dabdce6d599"
+  },
+  "input_original_source": "/Users/tidepool/.codex/generated_images/01a20c52-105c-7e60-b224-234555254f1b/exec-b50cc225-0c2c-4650-a6f5-86c850dc4b1b.png"
+}

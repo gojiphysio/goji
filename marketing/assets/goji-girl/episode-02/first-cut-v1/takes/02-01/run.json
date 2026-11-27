@@ -1,0 +1,337 @@
+{
+  "shot": "02",
+  "take": "01",
+  "status": "generated_unreviewed",
+  "started": 1795658187.7654479,
+  "recipe": "H3 Ref2VA GGUF Q4 + native Turbo 4-step; 576x1024 24fps",
+  "native_frames": 56,
+  "edit_seconds": 2,
+  "guidance": "stills",
+  "prompt": "A continuous two-second fixed indoor cutscene. Start from <Picture 1>: closed laptop, headset removed and lying on desk, woman holding phone and looking SURPRISED. Her eyebrows rise, eyes widen, lips part as she realizes the appointment is only FIVE MINUTES away; she leans forward urgently and starts reaching for the black handbag with her left hand. No smile. The phone stays in her right hand. Do not draw calendar text; it will be overlaid in post. Preserve the closed laptop and headset exactly. Original GTA San Andreas PlayStation 2 graphics throughout: angular economical character meshes, painted low-resolution skin/clothing/vehicle textures, restrained broad diffuse shading and period game animation. Preserve the same adult woman, maroon sleeveless top and leggings, one black ponytail, white shoes and ONE small black handbag carried LEFT. Every NPC matches the same PS2 rendering. Preserve the architecture, lighting and palette of <Picture 1>. No photoreal faces, no modern glossy rendering, no cartoon toy figures, no body morphing, no new logos, HUD, wanted stars, captions or baked text overlays. No shot changes. No speech or music.",
+  "workflow": {
+    "1": {
+      "class_type": "UnetLoaderGGUF",
+      "inputs": {
+        "unet_name": "minimax_h3_ref2va_pruned-Q4_K_M.gguf"
+      }
+    },
+    "2": {
+      "class_type": "CLIPLoaderGGUF",
+      "inputs": {
+        "clip_name": "qwen3vl_32b_minimax_h3-Q4_K_M.gguf",
+        "type": "minimax"
+      }
+    },
+    "3": {
+      "class_type": "VAELoader",
+      "inputs": {
+        "vae_name": "minimax_h3_video_vae_fp16.safetensors"
+      }
+    },
+    "4": {
+      "class_type": "LoraLoaderModelOnly",
+      "inputs": {
+        "model": [
+          "1",
+          0
+        ],
+        "lora_name": "minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors",
+        "strength_model": 1.0
+      }
+    },
+    "5": {
+      "class_type": "MiniMaxH3SigmaShift",
+      "inputs": {
+        "model": [
+          "4",
+          0
+        ],
+        "shift_video": 12.0,
+        "shift_audio": 3.0
+      }
+    },
+    "6": {
+      "class_type": "MiniMaxH3ReferenceToVideo",
+      "inputs": {
+        "clip": [
+          "2",
+          0
+        ],
+        "vae": [
+          "3",
+          0
+        ],
+        "prompt": "A continuous two-second fixed indoor cutscene. Start from <Picture 1>: closed laptop, headset removed and lying on desk, woman holding phone and looking SURPRISED. Her eyebrows rise, eyes widen, lips part as she realizes the appointment is only FIVE MINUTES away; she leans forward urgently and starts reaching for the black handbag with her left hand. No smile. The phone stays in her right hand. Do not draw calendar text; it will be overlaid in post. Preserve the closed laptop and headset exactly. Original GTA San Andreas PlayStation 2 graphics throughout: angular economical character meshes, painted low-resolution skin/clothing/vehicle textures, restrained broad diffuse shading and period game animation. Preserve the same adult woman, maroon sleeveless top and leggings, one black ponytail, white shoes and ONE small black handbag carried LEFT. Every NPC matches the same PS2 rendering. Preserve the architecture, lighting and palette of <Picture 1>. No photoreal faces, no modern glossy rendering, no cartoon toy figures, no body morphing, no new logos, HUD, wanted stars, captions or baked text overlays. No shot changes. No speech or music.",
+        "width": 576,
+        "height": 1024,
+        "length": 56,
+        "ref_image_size": "match",
+        "ref_images.ref_image_0": [
+          "20",
+          0
+        ]
+      }
+    },
+    "7": {
+      "class_type": "BasicGuider",
+      "inputs": {
+        "model": [
+          "5",
+          0
+        ],
+        "conditioning": [
+          "30",
+          0
+        ]
+      }
+    },
+    "8": {
+      "class_type": "RandomNoise",
+      "inputs": {
+        "noise_seed": 2026112702
+      }
+    },
+    "9": {
+      "class_type": "KSamplerSelect",
+      "inputs": {
+        "sampler_name": "euler"
+      }
+    },
+    "10": {
+      "class_type": "BasicScheduler",
+      "inputs": {
+        "model": [
+          "5",
+          0
+        ],
+        "scheduler": "simple",
+        "steps": 4,
+        "denoise": 1.0
+      }
+    },
+    "11": {
+      "class_type": "SamplerCustomAdvanced",
+      "inputs": {
+        "noise": [
+          "8",
+          0
+        ],
+        "guider": [
+          "7",
+          0
+        ],
+        "sampler": [
+          "9",
+          0
+        ],
+        "sigmas": [
+          "10",
+          0
+        ],
+        "latent_image": [
+          "6",
+          1
+        ]
+      }
+    },
+    "12": {
+      "class_type": "VAEDecodeTiled",
+      "inputs": {
+        "samples": [
+          "11",
+          0
+        ],
+        "vae": [
+          "3",
+          0
+        ],
+        "tile_size": 256,
+        "overlap": 64,
+        "temporal_size": 64,
+        "temporal_overlap": 8
+      }
+    },
+    "13": {
+      "class_type": "CreateVideo",
+      "inputs": {
+        "images": [
+          "12",
+          0
+        ],
+        "fps": 24.0
+      }
+    },
+    "14": {
+      "class_type": "SaveVideo",
+      "inputs": {
+        "video": [
+          "13",
+          0
+        ],
+        "filename_prefix": "02-01/raw",
+        "format": "mp4",
+        "format.codec": "h264"
+      }
+    },
+    "20": {
+      "class_type": "LoadImage",
+      "inputs": {
+        "image": "02-appearance.png"
+      }
+    },
+    "30": {
+      "class_type": "MiniMaxH3AddGuide",
+      "inputs": {
+        "positive": [
+          "6",
+          0
+        ],
+        "latent": [
+          "6",
+          1
+        ],
+        "vae": [
+          "3",
+          0
+        ],
+        "image": [
+          "20",
+          0
+        ],
+        "frame_idx": 0
+      }
+    }
+  },
+  "inputs": [
+    {
+      "path": "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/first-cut-v1/inputs/02-appearance.png",
+      "sha256": "fa4f34c84fae3a8669544afc31a2801475d8d024febdf7abc5ef1b3283d25a08"
+    }
+  ],
+  "audio": "Separate original/reused SFX in edit; video VAE only",
+  "runtime_commit": "da8bd08e48deee74d9f6c3bc00aed365b00ec209",
+  "receipt": {
+    "prompt_id": "49bdb4d7-fd97-4fbe-a7ec-63cb0a661285",
+    "number": 3,
+    "node_errors": {}
+  },
+  "completed_at": 1795660008.097,
+  "outputs": {
+    "14": {
+      "images": [
+        {
+          "filename": "raw_00001_.mp4",
+          "subfolder": "02-01",
+          "type": "output",
+          "metadata": {
+            "kind": "video",
+            "width": 576,
+            "height": 1024,
+            "duration": 2.3333333333333335,
+            "fps": 24.0,
+            "frame_count": 56
+          }
+        }
+      ],
+      "animated": [
+        true
+      ]
+    }
+  },
+  "videos": [
+    {
+      "path": "takes/02-01/raw_00001_.mp4",
+      "sha256": "72532bcba8a60ddfb764205220c485ea5c0dbb6e0497d751908868c055094045",
+      "probe": {
+        "streams": [
+          {
+            "index": 0,
+            "codec_name": "h264",
+            "codec_long_name": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+            "profile": "High",
+            "codec_type": "video",
+            "codec_tag_string": "avc1",
+            "codec_tag": "0x31637661",
+            "mime_codec_string": "avc1.64001f",
+            "width": 576,
+            "height": 1024,
+            "coded_width": 576,
+            "coded_height": 1024,
+            "has_b_frames": 2,
+            "pix_fmt": "yuv420p",
+            "level": 31,
+            "color_range": "tv",
+            "color_space": "bt709",
+            "color_transfer": "iec61966-2-1",
+            "color_primaries": "bt709",
+            "chroma_location": "left",
+            "field_order": "progressive",
+            "is_avc": "true",
+            "nal_length_size": "4",
+            "id": "0x1",
+            "r_frame_rate": "24/1",
+            "avg_frame_rate": "24/1",
+            "time_base": "1/12288",
+            "start_pts": 0,
+            "start_time": "0.000000",
+            "duration_ts": 28672,
+            "duration": "2.333333",
+            "bit_rate": "1349670",
+            "bits_per_raw_sample": "8",
+            "nb_frames": "56",
+            "extradata_size": 48,
+            "disposition": {
+              "default": 1,
+              "dub": 0,
+              "original": 0,
+              "comment": 0,
+              "lyrics": 0,
+              "karaoke": 0,
+              "forced": 0,
+              "hearing_impaired": 0,
+              "visual_impaired": 0,
+              "clean_effects": 0,
+              "attached_pic": 0,
+              "timed_thumbnails": 0,
+              "non_diegetic": 0,
+              "captions": 0,
+              "descriptions": 0,
+              "metadata": 0,
+              "dependent": 0,
+              "still_image": 0,
+              "multilayer": 0
+            },
+            "tags": {
+              "language": "und",
+              "handler_name": "VideoHandler"
+            }
+          }
+        ],
+        "format": {
+          "filename": "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/first-cut-v1/takes/02-01/raw_00001_.mp4",
+          "nb_streams": 1,
+          "nb_programs": 0,
+          "nb_stream_groups": 0,
+          "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+          "format_long_name": "QuickTime / MOV",
+          "start_time": "0.000000",
+          "duration": "2.333333",
+          "size": "398485",
+          "bit_rate": "1366234",
+          "probe_score": 100,
+          "tags": {
+            "major_brand": "isom",
+            "minor_version": "512",
+            "compatible_brands": "isomiso2avc1mp41",
+            "prompt": "{\"1\": {\"class_type\": \"UnetLoaderGGUF\", \"inputs\": {\"unet_name\": \"minimax_h3_ref2va_pruned-Q4_K_M.gguf\"}}, \"2\": {\"class_type\": \"CLIPLoaderGGUF\", \"inputs\": {\"clip_name\": \"qwen3vl_32b_minimax_h3-Q4_K_M.gguf\", \"type\": \"minimax\"}}, \"3\": {\"class_type\": \"VAELoader\", \"inputs\": {\"vae_name\": \"minimax_h3_video_vae_fp16.safetensors\"}}, \"4\": {\"class_type\": \"LoraLoaderModelOnly\", \"inputs\": {\"model\": [\"1\", 0], \"lora_name\": \"minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors\", \"strength_model\": 1.0}}, \"5\": {\"class_type\": \"MiniMaxH3SigmaShift\", \"inputs\": {\"model\": [\"4\", 0], \"shift_video\": 12.0, \"shift_audio\": 3.0}}, \"6\": {\"class_type\": \"MiniMaxH3ReferenceToVideo\", \"inputs\": {\"clip\": [\"2\", 0], \"vae\": [\"3\", 0], \"prompt\": \"A continuous two-second fixed indoor cutscene. Start from <Picture 1>: closed laptop, headset removed and lying on desk, woman holding phone and looking SURPRISED. Her eyebrows rise, eyes widen, lips part as she realizes the appointment is only FIVE MINUTES away; she leans forward urgently and starts reaching for the black handbag with her left hand. No smile. The phone stays in her right hand. Do not draw calendar text; it will be overlaid in post. Preserve the closed laptop and headset exactly. Original GTA San Andreas PlayStation 2 graphics throughout: angular economical character meshes, painted low-resolution skin/clothing/vehicle textures, restrained broad diffuse shading and period game animation. Preserve the same adult woman, maroon sleeveless top and leggings, one black ponytail, white shoes and ONE small black handbag carried LEFT. Every NPC matches the same PS2 rendering. Preserve the architecture, lighting and palette of <Picture 1>. No photoreal faces, no modern glossy rendering, no cartoon toy figures, no body morphing, no new logos, HUD, wanted stars, captions or baked text overlays. No shot changes. No speech or music.\", \"width\": 576, \"height\": 1024, \"length\": 56, \"ref_image_size\": \"match\", \"ref_images.ref_image_0\": [\"20\", 0]}}, \"7\": {\"class_type\": \"BasicGuider\", \"inputs\": {\"model\": [\"5\", 0], \"conditioning\": [\"30\", 0]}}, \"8\": {\"class_type\": \"RandomNoise\", \"inputs\": {\"noise_seed\": 2026112702}}, \"9\": {\"class_type\": \"KSamplerSelect\", \"inputs\": {\"sampler_name\": \"euler\"}}, \"10\": {\"class_type\": \"BasicScheduler\", \"inputs\": {\"model\": [\"5\", 0], \"scheduler\": \"simple\", \"steps\": 4, \"denoise\": 1.0}}, \"11\": {\"class_type\": \"SamplerCustomAdvanced\", \"inputs\": {\"noise\": [\"8\", 0], \"guider\": [\"7\", 0], \"sampler\": [\"9\", 0], \"sigmas\": [\"10\", 0], \"latent_image\": [\"6\", 1]}}, \"12\": {\"class_type\": \"VAEDecodeTiled\", \"inputs\": {\"samples\": [\"11\", 0], \"vae\": [\"3\", 0], \"tile_size\": 256, \"overlap\": 64, \"temporal_size\": 64, \"temporal_overlap\": 8}}, \"13\": {\"class_type\": \"CreateVideo\", \"inputs\": {\"images\": [\"12\", 0], \"fps\": 24.0}}, \"14\": {\"class_type\": \"SaveVideo\", \"inputs\": {\"video\": [\"13\", 0], \"filename_prefix\": \"02-01/raw\", \"format\": \"mp4\", \"format.codec\": \"h264\"}}, \"20\": {\"class_type\": \"LoadImage\", \"inputs\": {\"image\": \"02-appearance.png\"}, \"is_changed\": [\"fa4f34c84fae3a8669544afc31a2801475d8d024febdf7abc5ef1b3283d25a08\"]}, \"30\": {\"class_type\": \"MiniMaxH3AddGuide\", \"inputs\": {\"positive\": [\"6\", 0], \"latent\": [\"6\", 1], \"vae\": [\"3\", 0], \"image\": [\"20\", 0], \"frame_idx\": 0}}}",
+            "encoder": "Lavf63.1.102"
+          }
+        }
+      },
+      "full_decode_verified": true
+    }
+  ],
+  "collected_at": 1795660500.672086,
+  "execution_started_at": 1795659691.885,
+  "render_wall_seconds": 316.2119998931885
+}

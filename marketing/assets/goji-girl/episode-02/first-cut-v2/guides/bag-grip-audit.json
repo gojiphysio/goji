@@ -1,0 +1,38 @@
+{
+  "scope": "Saved Blender running guides only; not a generated-footage pass",
+  "checks": [
+    {
+      "shot": "03",
+      "frames_checked": 37,
+      "max_grip_rotation_error_radians": 0.0,
+      "grip_offset_metres": [
+        0.034999505438939975,
+        0.03500023324530285
+      ],
+      "minimum_outward_face_dot": 1.0,
+      "scale_constant": true
+    },
+    {
+      "shot": "04",
+      "frames_checked": 37,
+      "max_grip_rotation_error_radians": 0.0,
+      "grip_offset_metres": [
+        0.0349997154858309,
+        0.03500031038284729
+      ],
+      "minimum_outward_face_dot": 0.9999999366700649,
+      "scale_constant": true
+    },
+    {
+      "shot": "10",
+      "frames_checked": 49,
+      "max_grip_rotation_error_radians": 0.0,
+      "grip_offset_metres": [
+        0.034999849309063684,
+        0.035000176129369606
+      ],
+      "minimum_outward_face_dot": 0.9999999403953552,
+      "scale_constant": true
+    }
+  ]
+}

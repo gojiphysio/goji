@@ -1,0 +1,57 @@
+[
+  {
+    "path": "inputs/03-full-left-pump.png",
+    "generated_source": "exec-282a5f18-d947-4ae7-bb23-cdbd9f6dd6e1.png",
+    "role": "Revised high left fist / rigid bag running pose",
+    "status": "assistant-reviewed conditioning reference, not user-approved animation",
+    "sha256": "81237b6715a7479140886b3134a396796a3b94bbaeb64e9a0c89c0b37661c38d",
+    "tool": "built-in image_gen",
+    "reference_policy": "Use approved cast/SOS-BUS-01 for finished forms; Blender for geometry only",
+    "final_prompt": "Edit ONLY the central maroon woman\u2019s running arm pose. Preserve the exact scene, camera, bus/shopfront/sign/NPC/officer positions, identity, maroon clothing, ponytail and white shoes. Seen from behind, anatomical LEFT is SCREEN LEFT. The left fist pumps high forward to chest/shoulder height with elbow bent about 90 degrees; the single rigid black structured handbag moves with that fist, hanging beside the upper torso. The right elbow pumps back, bent 90 degrees, and the right hand holds nothing. Both elbows are bent and flared like GTA San Andreas. Do not mirror the scene, swap hands, hold the bag beside the hip or deform it. Preserve original PS2 painted textures and 9:16 framing, with no HUD.",
+    "prompt_record": "Consolidated final instructions; image generation included targeted corrections, recorded in the chat."
+  },
+  {
+    "path": "inputs/04-full-left-pump.png",
+    "generated_source": "exec-b54ce04c-9c2b-4e31-b21f-a9c8a0b7a857.png",
+    "role": "Same full left-arm pump in bus approach",
+    "status": "assistant-reviewed conditioning reference, not user-approved animation",
+    "sha256": "527b1fa130712f6f4934c88859a2b171476727294a0a8c62b7d432d441a8d9d6",
+    "tool": "built-in image_gen",
+    "reference_policy": "Use approved cast/SOS-BUS-01 for finished forms; Blender for geometry only",
+    "final_prompt": "Edit ONLY the central maroon woman\u2019s running arm pose. Preserve the exact scene, camera, bus/shopfront/sign/NPC/officer positions, identity, maroon clothing, ponytail and white shoes. Seen from behind, anatomical LEFT is SCREEN LEFT. The left fist pumps high forward to chest/shoulder height with elbow bent about 90 degrees; the single rigid black structured handbag moves with that fist, hanging beside the upper torso. The right elbow pumps back, bent 90 degrees, and the right hand holds nothing. Both elbows are bent and flared like GTA San Andreas. Do not mirror the scene, swap hands, hold the bag beside the hip or deform it. Preserve original PS2 painted textures and 9:16 framing, with no HUD.",
+    "prompt_record": "Consolidated final instructions; image generation included targeted corrections, recorded in the chat."
+  },
+  {
+    "path": "inputs/10-full-left-pump.png",
+    "generated_source": "exec-c75bd277-ed09-4e5b-86b8-47397ee34239.png",
+    "role": "Same full left-arm pump in police chase",
+    "status": "assistant-reviewed conditioning reference, not user-approved animation",
+    "sha256": "2c098c5518f8224358f6bafa386959404007069cee83c74289b104715f16ac13",
+    "tool": "built-in image_gen",
+    "reference_policy": "Use approved cast/SOS-BUS-01 for finished forms; Blender for geometry only",
+    "final_prompt": "Edit ONLY the central maroon woman\u2019s running arm pose. Preserve the exact scene, camera, bus/shopfront/sign/NPC/officer positions, identity, maroon clothing, ponytail and white shoes. Seen from behind, anatomical LEFT is SCREEN LEFT. The left fist pumps high forward to chest/shoulder height with elbow bent about 90 degrees; the single rigid black structured handbag moves with that fist, hanging beside the upper torso. The right elbow pumps back, bent 90 degrees, and the right hand holds nothing. Both elbows are bent and flared like GTA San Andreas. Do not mirror the scene, swap hands, hold the bag beside the hip or deform it. Preserve original PS2 painted textures and 9:16 framing, with no HUD.",
+    "prompt_record": "Consolidated final instructions; image generation included targeted corrections, recorded in the chat."
+  },
+  {
+    "path": "inputs/07-impact-end.png",
+    "generated_source": "exec-801cee14-adc3-47e7-9b8b-1217aaa5f1b7.png",
+    "role": "Detailed SOS-BUS-01 at new mall-side impact pose",
+    "status": "assistant-reviewed conditioning reference, not user-approved animation",
+    "sha256": "53aa86e33048d3f911d2ae8fc2c80864932248eb7f30d15c1eec404e87df586b",
+    "tool": "built-in image_gen",
+    "reference_policy": "Use approved cast/SOS-BUS-01 for finished forms; Blender for geometry only",
+    "final_prompt": "Create a finished PS2 GTA San Andreas gameplay frame. Use the Blender frame only for layout, bus wreck pose and rear chase camera. Bus rests on its right side partially on the left curb, front forward away, wheels toward mall, roof toward road. The struck canopy bay buckles upward and supports break. Reconstruct the properly formed SOS-BUS-01 mesh and orange-red/white/purple livery from the approved appearance references, with inset glazing, three axles, fitted lamps, bumper, arches and painted sheet-metal detail. Preserve Lentor cladding, shop glazing and balconies. Distant pedestrians remain safely clear. Dust and local debris only; no girl outside, fire, explosion, HUD or stars.",
+    "prompt_record": "Consolidated final instructions; image generation included targeted corrections, recorded in the chat."
+  },
+  {
+    "path": "inputs/08-contact-look.png",
+    "generated_source": "exec-172b7a9b-d1ad-461f-998a-2d360f946bed.png",
+    "role": "Crouched, braced doorway pose; maroon leggings correction",
+    "status": "assistant-reviewed conditioning reference, not user-approved animation",
+    "sha256": "14b3570075e46d88407035e76e3e3cd4ea488f4e425af0e7dcafdb8f89b3af0b",
+    "tool": "built-in image_gen",
+    "reference_policy": "Use approved cast/SOS-BUS-01 for finished forms; Blender for geometry only",
+    "final_prompt": "Use the Blender frame only for camera, right-side-down bus pose, real upward-facing passenger door, and braced crouching pose. Use approved character and SOS-BUS-01 references for finished PS2 mesh shapes and painted textures. Show detailed dark chassis crossmembers, suspension and six wheels rather than a flat rectangle. Goji Girl supports her weight with the left palm and feet on the door frame, with one rigid black handbag at her left wrist. Her right hand reaches inside to the fixed green reader. Keep the solid white corner between door and front facade, logos below glazing, charcoal door frame, daylight, stone wall and tropical trees. No new hatch, bus movement, HUD or stars. Final targeted edit: change only the black leggings to deep maroon matching her top; preserve everything else.",
+    "prompt_record": "Consolidated final instructions; image generation included targeted corrections, recorded in the chat."
+  }
+]

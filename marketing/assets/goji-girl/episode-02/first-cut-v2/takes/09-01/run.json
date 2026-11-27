@@ -1,0 +1,220 @@
+{
+  "shot": "09",
+  "take": "01",
+  "status": "cancelled_before_render",
+  "started": 1795677163.6848052,
+  "recipe": "H3 Ref2VA GGUF Q4 + native Turbo 4-step; 576x1024 24fps",
+  "native_frames": 56,
+  "edit_seconds": 2,
+  "guidance": "video",
+  "prompt": "One continuous two-second rear player shot. Follow the guide starting and ending positions exactly. Maroon-clad Goji Girl brushes dust off her right shoulder with her right hand during first second, then lowers that hand and takes one brisk step FORWARD away from camera along the same pavement toward the red Goji sign. Black structured bag stays in LEFT hand. Same ponytail, white shoes, maroon top and leggings, same PS2 painted textures and economical human mesh. The two nearest startled pedestrians recoil at the LEFT storefront, safely clear of her path. Preserve the fixed canopy, damaged diagonal support, road on RIGHT and shops on LEFT. At the extreme RIGHT is ONLY a cropped black riveted metal underside panel from the overturned wreck. Keep that edge frozen and identical to anchors; the rest of the wreck is OFFSCREEN. No upright bus, front facade, windshield, headlights, livery or new vehicle enters the image. Nothing rolls, rotates or stands upright. <Video 1> gives motion/layout only; <Picture 1> and anchors define all finished shapes, textures and framing. No proxy block shapes, no camera reversal, no cut, HUD or text. No contact between people or with debris. The struck canopy bay BEHIND her is buckled upward; its open gap exposes sky above the landing area. Keep intact canopy ahead of her as in video. The cropped black bus UNDERCARRIAGE at extreme right stays rigid, behind her direction of travel. Never reconstruct an upright bus, bus facade or new wheels in this crop.",
+  "workflow": {
+    "1": {
+      "class_type": "UnetLoaderGGUF",
+      "inputs": {
+        "unet_name": "minimax_h3_ref2va_pruned-Q4_K_M.gguf"
+      }
+    },
+    "2": {
+      "class_type": "CLIPLoaderGGUF",
+      "inputs": {
+        "clip_name": "qwen3vl_32b_minimax_h3-Q4_K_M.gguf",
+        "type": "minimax"
+      }
+    },
+    "3": {
+      "class_type": "VAELoader",
+      "inputs": {
+        "vae_name": "minimax_h3_video_vae_fp16.safetensors"
+      }
+    },
+    "4": {
+      "class_type": "LoraLoaderModelOnly",
+      "inputs": {
+        "model": [
+          "1",
+          0
+        ],
+        "lora_name": "minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors",
+        "strength_model": 1.0
+      }
+    },
+    "5": {
+      "class_type": "MiniMaxH3SigmaShift",
+      "inputs": {
+        "model": [
+          "4",
+          0
+        ],
+        "shift_video": 12.0,
+        "shift_audio": 3.0
+      }
+    },
+    "6": {
+      "class_type": "MiniMaxH3ReferenceToVideo",
+      "inputs": {
+        "clip": [
+          "2",
+          0
+        ],
+        "vae": [
+          "3",
+          0
+        ],
+        "prompt": "One continuous two-second rear player shot. Follow the guide starting and ending positions exactly. Maroon-clad Goji Girl brushes dust off her right shoulder with her right hand during first second, then lowers that hand and takes one brisk step FORWARD away from camera along the same pavement toward the red Goji sign. Black structured bag stays in LEFT hand. Same ponytail, white shoes, maroon top and leggings, same PS2 painted textures and economical human mesh. The two nearest startled pedestrians recoil at the LEFT storefront, safely clear of her path. Preserve the fixed canopy, damaged diagonal support, road on RIGHT and shops on LEFT. At the extreme RIGHT is ONLY a cropped black riveted metal underside panel from the overturned wreck. Keep that edge frozen and identical to anchors; the rest of the wreck is OFFSCREEN. No upright bus, front facade, windshield, headlights, livery or new vehicle enters the image. Nothing rolls, rotates or stands upright. <Video 1> gives motion/layout only; <Picture 1> and anchors define all finished shapes, textures and framing. No proxy block shapes, no camera reversal, no cut, HUD or text. No contact between people or with debris. The struck canopy bay BEHIND her is buckled upward; its open gap exposes sky above the landing area. Keep intact canopy ahead of her as in video. The cropped black bus UNDERCARRIAGE at extreme right stays rigid, behind her direction of travel. Never reconstruct an upright bus, bus facade or new wheels in this crop.",
+        "width": 576,
+        "height": 1024,
+        "length": 56,
+        "ref_image_size": "match",
+        "ref_images.ref_image_0": [
+          "20",
+          0
+        ],
+        "ref_videos.ref_video_0": [
+          "22",
+          0
+        ]
+      }
+    },
+    "7": {
+      "class_type": "BasicGuider",
+      "inputs": {
+        "model": [
+          "5",
+          0
+        ],
+        "conditioning": [
+          "6",
+          0
+        ]
+      }
+    },
+    "8": {
+      "class_type": "RandomNoise",
+      "inputs": {
+        "noise_seed": 2026112809
+      }
+    },
+    "9": {
+      "class_type": "KSamplerSelect",
+      "inputs": {
+        "sampler_name": "euler"
+      }
+    },
+    "10": {
+      "class_type": "BasicScheduler",
+      "inputs": {
+        "model": [
+          "5",
+          0
+        ],
+        "scheduler": "simple",
+        "steps": 4,
+        "denoise": 1.0
+      }
+    },
+    "11": {
+      "class_type": "SamplerCustomAdvanced",
+      "inputs": {
+        "noise": [
+          "8",
+          0
+        ],
+        "guider": [
+          "7",
+          0
+        ],
+        "sampler": [
+          "9",
+          0
+        ],
+        "sigmas": [
+          "10",
+          0
+        ],
+        "latent_image": [
+          "6",
+          1
+        ]
+      }
+    },
+    "12": {
+      "class_type": "VAEDecodeTiled",
+      "inputs": {
+        "samples": [
+          "11",
+          0
+        ],
+        "vae": [
+          "3",
+          0
+        ],
+        "tile_size": 256,
+        "overlap": 64,
+        "temporal_size": 64,
+        "temporal_overlap": 8
+      }
+    },
+    "13": {
+      "class_type": "CreateVideo",
+      "inputs": {
+        "images": [
+          "12",
+          0
+        ],
+        "fps": 24.0
+      }
+    },
+    "14": {
+      "class_type": "SaveVideo",
+      "inputs": {
+        "video": [
+          "13",
+          0
+        ],
+        "filename_prefix": "09-01/raw",
+        "format": "mp4",
+        "format.codec": "h264"
+      }
+    },
+    "20": {
+      "class_type": "LoadImage",
+      "inputs": {
+        "image": "09-appearance.png"
+      }
+    },
+    "21": {
+      "class_type": "LoadVideo",
+      "inputs": {
+        "file": "09-guide-v2.mp4"
+      }
+    },
+    "22": {
+      "class_type": "GetVideoComponents",
+      "inputs": {
+        "video": [
+          "21",
+          0
+        ]
+      }
+    }
+  },
+  "inputs": [
+    {
+      "path": "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/first-cut-v2/inputs/09-appearance.png",
+      "sha256": "15d56b6df76125acee73cf37ae1f4b69bbf11874504fceaa6d7ff5fc07a33577"
+    },
+    {
+      "path": "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/first-cut-v2/inputs/09-guide-v2.mp4",
+      "sha256": "f51eeab838c4ef43cf7e5f616c0a77ac6df70aae7c51517d7b7ba24883df191a"
+    }
+  ],
+  "audio": "Separate original procedural SFX in edit; video VAE only",
+  "runtime_commit": "da8bd08e48deee74d9f6c3bc00aed365b00ec209",
+  "receipt": {
+    "prompt_id": "7326d53c-e7dd-40d5-be60-0a8dc3aa35a1",
+    "number": 9.0,
+    "node_errors": {}
+  },
+  "reason": "Latest user correction: handbag broad face must not billboard toward camera. Correct grip-local orientation in guide and appearance before rendering."
+}

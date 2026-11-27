@@ -1,0 +1,51 @@
+{
+  "role": "static crowd marks; NOT validated finished movement",
+  "crowd": [
+    {
+      "id": "NPC01 blue-shirt man",
+      "position": [
+        -8.6,
+        8,
+        0.13
+      ],
+      "reaction": "hands raised, recoiling toward storefront",
+      "player_route_envelope_clearance_m": 1.0716052226498343,
+      "impact_exclusion_clearance_m": 2.049999999999999
+    },
+    {
+      "id": "NPC02 cream-shirt woman",
+      "position": [
+        -8.7,
+        12,
+        0.13
+      ],
+      "reaction": "turning back in alarm, stepping toward storefront",
+      "player_route_envelope_clearance_m": 1.0647015066537497,
+      "impact_exclusion_clearance_m": 2.1499999999999986
+    },
+    {
+      "id": "NPC03 teal-shirt man",
+      "position": [
+        -8.8,
+        28.4,
+        0.13
+      ],
+      "reaction": "startled backward step beyond clinic doorway",
+      "player_route_envelope_clearance_m": 1.996623544881137,
+      "impact_exclusion_clearance_m": 7.849999999999999
+    },
+    {
+      "id": "NPC04 white-shirt woman",
+      "position": [
+        -6.0,
+        30.5,
+        0.13
+      ],
+      "reaction": "turning away along pavement, looking back",
+      "player_route_envelope_clearance_m": 5.113193179303296,
+      "impact_exclusion_clearance_m": 9.95
+    }
+  ],
+  "invariant": "No pedestrian contact with bus, debris, player or pursuing officers. Retreat toward storefront or farther along sidewalk; never cross sprint corridor.",
+  "animation_review": "Keep these protected pockets through motion; inspect continuous H3 result. No ragdolls, falls, injured people or bodies in road."
+}

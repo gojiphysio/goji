@@ -1,0 +1,498 @@
+{
+  "revision": 7,
+  "proposed_duration_seconds": 47,
+  "user_direction": "outdoor third-person player POV, indoor cutscenes, original GTA San Andreas PS2 look",
+  "approved": "User approved SOS-BUS-01 appearance reference. User confirmed calendar reminder/smile at04\u201305s after ending frustrating call, then rush out.",
+  "video_rendered": "No new double-decker motion rendered; earlier single-decker exit video is a historical contact study only.",
+  "reference_manifest": "revision-07/blender/continuity-record.json",
+  "known_board_limitation": "Generated PS2 look frames conditioned on shared Blender staging and approved vehicle reference. Reviewed for structural continuity, not exact pixel projection or continuous motion proof.",
+  "shots": [
+    {
+      "shot_id": "EP02-01",
+      "status": "planned",
+      "start_seconds": 0,
+      "end_seconds": 3,
+      "required_action_seconds": 3,
+      "cast": "GG01 and video-call NPCs",
+      "location_id": "desk",
+      "character_reference_version": "goji-gta-video recovered episode-one references",
+      "location_reference_version": "concept staging; surveyed set master pending",
+      "style_version": "original PS2 SA target + recovered Goji identity",
+      "camera": {
+        "preset": "HOME-CUTSCENE",
+        "aspect_ratio": "9:16",
+        "horizontal_fov_degrees": null,
+        "movement": "static over-shoulder; possible eye insert",
+        "numeric_calibration": "pending Blender framing; no measured game constants"
+      },
+      "blocking": {
+        "start": "meeting active",
+        "end": "frustrated on the overrunning call; no appointment notification yet",
+        "props": "bag beside desk; headset worn",
+        "contacts": "home scene proposed; phone/laptop readable",
+        "screen_direction": "staged interior axis"
+      },
+      "guide_status": "no timed animatic or motion control generated",
+      "generation": {
+        "model_id": null,
+        "mode": null
+      },
+      "evaluation": {
+        "status": "not motion tested"
+      },
+      "frame_image": "revision-07/frames/01-look.png"
+    },
+    {
+      "shot_id": "EP02-02",
+      "status": "planned",
+      "start_seconds": 3,
+      "end_seconds": 5,
+      "required_action_seconds": 2,
+      "cast": "GG01",
+      "location_id": "desk",
+      "character_reference_version": "goji-gta-video recovered episode-one references",
+      "location_reference_version": "concept staging; surveyed set master pending",
+      "style_version": "original PS2 SA target + recovered Goji identity",
+      "camera": {
+        "preset": "HOME-CUTSCENE",
+        "aspect_ratio": "9:16",
+        "horizontal_fov_degrees": null,
+        "movement": "static medium",
+        "numeric_calibration": "pending Blender framing; no measured game constants"
+      },
+      "blocking": {
+        "start": "frustrated; headset on; laptop open",
+        "end": "call ended, calendar reminder seen, smiles, picks up bag",
+        "props": "bag desk to left hand",
+        "contacts": "03\u201304s headset removal then laptop slam;04\u201305s calendar ping, phone glance and smile",
+        "screen_direction": "staged interior axis"
+      },
+      "guide_status": "no timed animatic or motion control generated",
+      "generation": {
+        "model_id": null,
+        "mode": null
+      },
+      "evaluation": {
+        "status": "not motion tested"
+      },
+      "frame_image": "revision-07/frames/02-look.png",
+      "calendar_reminder": {
+        "in_seconds": 4,
+        "out_seconds": 5,
+        "title": "Goji Pilates",
+        "body": "Appointment in 5 minutes",
+        "source": "revision-07/overlays/calendar-reminder.svg"
+      }
+    },
+    {
+      "shot_id": "EP02-03",
+      "status": "planned",
+      "start_seconds": 5,
+      "end_seconds": 8,
+      "required_action_seconds": 3,
+      "cast": "GG01",
+      "location_id": "home exit",
+      "character_reference_version": "goji-gta-video recovered episode-one references",
+      "location_reference_version": "concept staging; surveyed set master pending",
+      "style_version": "original PS2 SA target + recovered Goji identity",
+      "camera": {
+        "preset": "PLAYER",
+        "aspect_ratio": "9:16",
+        "horizontal_fov_degrees": null,
+        "movement": "rear follow; normal gameplay height",
+        "numeric_calibration": "pending Blender framing; no measured game constants"
+      },
+      "blocking": {
+        "start": "smiles at reminder, rises with bag",
+        "end": "pushes door open and immediately runs out eagerly",
+        "props": "bag left hand",
+        "contacts": "right hand door; feet grounded",
+        "screen_direction": "forward into depth, rear subject anchor"
+      },
+      "guide_status": "no timed animatic or motion control generated",
+      "generation": {
+        "model_id": null,
+        "mode": null
+      },
+      "evaluation": {
+        "status": "not motion tested"
+      },
+      "frame_image": "revision-07/frames/03-look.png"
+    },
+    {
+      "shot_id": "EP02-04",
+      "status": "PS2 appearance concept from refined shared Blender staging",
+      "start_seconds": 8,
+      "end_seconds": 11,
+      "required_action_seconds": 3,
+      "cast": "GG01 and commuter NPCs",
+      "location_id": "bus stop",
+      "character_reference_version": "goji-gta-video recovered episode-one references",
+      "location_reference_version": "concept staging; surveyed set master pending",
+      "style_version": "original PS2 SA target + recovered Goji identity",
+      "camera": {
+        "preset": "PLAYER",
+        "aspect_ratio": "9:16",
+        "horizontal_fov_degrees": null,
+        "movement": "rear follow, modest heading lag around bus nose",
+        "numeric_calibration": "pending Blender framing; no measured game constants"
+      },
+      "blocking": {
+        "start": "bus alighting",
+        "end": "player reaches right cab; passengers clear",
+        "props": "bag left hand",
+        "contacts": "left passenger doors; right driver cab; left-hand traffic",
+        "screen_direction": "forward into depth, rear subject anchor"
+      },
+      "guide_status": "no timed animatic or motion control generated",
+      "generation": {
+        "model_id": null,
+        "mode": null
+      },
+      "evaluation": {
+        "status": "not motion tested"
+      },
+      "continuity": "Identical parked bus transform at (-3.65,-28,0), heading+Y, left lane x<0. Passenger curb west; driver faces centreline. Camera follows player around nose.",
+      "source_scene": "revision-07/blender/double-decker-master.blend",
+      "source_frame": 1,
+      "frame_image": "revision-07/frames/04-look.png",
+      "geometry_guide": "revision-07/frames/04-direct.png",
+      "appearance_reference": "../references/sos-bus-01/canonical.png"
+    },
+    {
+      "shot_id": "EP02-05",
+      "status": "PS2 appearance concept from refined shared Blender staging",
+      "start_seconds": 11,
+      "end_seconds": 15,
+      "required_action_seconds": 4,
+      "cast": "GG01 and driver NPC",
+      "location_id": "bus right cab",
+      "character_reference_version": "goji-gta-video recovered episode-one references",
+      "location_reference_version": "concept staging; surveyed set master pending",
+      "style_version": "original PS2 SA target + recovered Goji identity",
+      "camera": {
+        "preset": "PLAYER-INTERACTION",
+        "aspect_ratio": "9:16",
+        "horizontal_fov_degrees": null,
+        "movement": "rear-right offset at fullbody distance, no closeup",
+        "numeric_calibration": "pending Blender framing; no measured game constants"
+      },
+      "blocking": {
+        "start": "driver seated",
+        "end": "driver clear; player seated",
+        "props": "bag left forearm then cab footwell",
+        "contacts": "break window -> pull driver -> driver clear -> player entry",
+        "screen_direction": "forward into depth, rear subject anchor"
+      },
+      "guide_status": "no timed animatic or motion control generated",
+      "generation": {
+        "model_id": null,
+        "mode": null
+      },
+      "evaluation": {
+        "status": "not motion tested"
+      },
+      "continuity": "Identical parked bus transform at (-3.65,-28,0), heading+Y, left lane x<0. Passenger curb west; driver faces centreline. Camera follows player around nose.",
+      "source_scene": "revision-07/blender/double-decker-master.blend",
+      "source_frame": 10,
+      "frame_image": "revision-07/frames/05-look.png",
+      "geometry_guide": "revision-07/frames/05-direct.png",
+      "appearance_reference": "../references/sos-bus-01/canonical.png"
+    },
+    {
+      "shot_id": "EP02-06",
+      "status": "PS2 appearance concept from refined shared Blender staging",
+      "start_seconds": 15,
+      "end_seconds": 20,
+      "required_action_seconds": 5,
+      "cast": "GG01 driving offscreen; traffic NPCs",
+      "location_id": "Singapore road",
+      "character_reference_version": "goji-gta-video recovered episode-one references",
+      "location_reference_version": "concept staging; surveyed set master pending",
+      "style_version": "original PS2 SA target + recovered Goji identity",
+      "camera": {
+        "preset": "BUS-FOLLOW",
+        "aspect_ratio": "9:16",
+        "horizontal_fov_degrees": null,
+        "movement": "rear follow; horizon level; scaled to bus",
+        "numeric_calibration": "pending Blender framing; no measured game constants"
+      },
+      "blocking": {
+        "start": "bus accelerates",
+        "end": "bus approaches turn",
+        "props": "bag footwell",
+        "contacts": "single continuous view; no oncoming camera or cabin insert",
+        "screen_direction": "forward into depth, rear subject anchor"
+      },
+      "guide_status": "no timed animatic or motion control generated",
+      "generation": {
+        "model_id": null,
+        "mode": null
+      },
+      "evaluation": {
+        "status": "not motion tested"
+      },
+      "lighting": "Offscreen pursuing-car sources behind and offset from follow camera; staggered red/blue diffuse spill over road, rail and bus. No bus-mounted emergency emitters or symmetric point glows.",
+      "source_scene": "revision-07/blender/double-decker-master.blend",
+      "source_frame": 20,
+      "frame_image": "revision-07/frames/06-look.png",
+      "geometry_guide": "revision-07/frames/06-direct.png",
+      "appearance_reference": "../references/sos-bus-01/canonical.png"
+    },
+    {
+      "shot_id": "EP02-07",
+      "status": "PS2 appearance concept from refined shared Blender staging",
+      "start_seconds": 20,
+      "end_seconds": 25,
+      "required_action_seconds": 5,
+      "cast": "GG01 driving offscreen",
+      "location_id": "Lentor approach",
+      "character_reference_version": "goji-gta-video recovered episode-one references",
+      "location_reference_version": "revision-03/references actual Goji frontage/Lentor Drive canopy; fictional stunt spacing",
+      "style_version": "original PS2 SA target + recovered Goji identity",
+      "camera": {
+        "preset": "BUS-FOLLOW",
+        "aspect_ratio": "9:16",
+        "horizontal_fov_degrees": null,
+        "movement": "continue rear rig, translation/heading lag; no roll coupling",
+        "numeric_calibration": "pending Blender framing; no measured game constants"
+      },
+      "blocking": {
+        "start": "bus turns left",
+        "end": "bus right side on ground; shelter hit",
+        "props": "bag remains cab",
+        "contacts": "tyre grip -> roll -> ground contact -> slide -> empty shelter contact",
+        "screen_direction": "forward into depth, rear subject anchor"
+      },
+      "guide_status": "no timed animatic or motion control generated",
+      "generation": {
+        "model_id": null,
+        "mode": null
+      },
+      "evaluation": {
+        "status": "not motion tested"
+      },
+      "continuity": "Identical bus transform (-5.1,0,1.45), roll+90deg aboutY, forward+Y. Roof road-centre/east, wheels and underbody curb/mall/west. No mirrors. End07/start08/09 same shared bus.",
+      "source_scene": "revision-07/blender/double-decker-master.blend",
+      "source_frame": 30,
+      "frame_image": "revision-07/frames/07-look.png",
+      "geometry_guide": "revision-07/frames/07-direct.png",
+      "appearance_reference": "../references/sos-bus-01/canonical.png"
+    },
+    {
+      "shot_id": "EP02-08",
+      "status": "PS2 appearance concept from refined shared Blender staging",
+      "start_seconds": 25,
+      "end_seconds": 31,
+      "required_action_seconds": 6,
+      "cast": "GG01",
+      "location_id": "overturned bus",
+      "character_reference_version": "goji-gta-video recovered episode-one references",
+      "location_reference_version": "concept staging; surveyed set master pending",
+      "style_version": "original PS2 SA target + recovered Goji identity",
+      "camera": {
+        "preset": "PLAYER-RECOVERY",
+        "aspect_ratio": "9:16",
+        "horizontal_fov_degrees": null,
+        "movement": "hold 1 second then reattach behind emerging player, modest obstruction offset",
+        "numeric_calibration": "pending Blender framing; no measured game constants"
+      },
+      "blocking": {
+        "start": "wreck settled",
+        "end": "tap complete; player fully out on upward-facing bus side",
+        "props": "bag recovered from cab to left forearm",
+        "contacts": "front left passenger doorway ahead of front axle; rotated reader/pole; card touches display; left hand brace; legs climb clear",
+        "screen_direction": "staged interior axis"
+      },
+      "guide_status": "Current double-decker still and inherited contact keys; no new continuous double-decker animation reviewed.",
+      "generation": {
+        "model_id": null,
+        "mode": null
+      },
+      "evaluation": {
+        "status": "not motion tested"
+      },
+      "continuity": "Identical bus transform (-5.1,0,1.45), roll+90deg aboutY, forward+Y. Roof road-centre/east, wheels and underbody curb/mall/west. No mirrors. End07/start08/09 same shared bus.",
+      "source_scene": "revision-07/blender/double-decker-master.blend",
+      "source_frame": 35,
+      "frame_image": "revision-07/frames/08-look.png",
+      "geometry_guide": "revision-07/frames/08-direct.png",
+      "appearance_reference": "../references/sos-bus-01/canonical.png",
+      "door_front_corner_clearance_metres": 0.7,
+      "door_control": "revision-07/frames/08-door-control.png"
+    },
+    {
+      "shot_id": "EP02-09",
+      "status": "PS2 appearance concept from refined shared Blender staging",
+      "start_seconds": 31,
+      "end_seconds": 33,
+      "required_action_seconds": 2,
+      "cast": "GG01",
+      "location_id": "wreck roadside",
+      "character_reference_version": "goji-gta-video recovered episode-one references",
+      "location_reference_version": "revision-03/references actual Goji frontage/Lentor Drive canopy; fictional stunt spacing",
+      "style_version": "original PS2 SA target + recovered Goji identity",
+      "camera": {
+        "preset": "PLAYER",
+        "aspect_ratio": "9:16",
+        "horizontal_fov_degrees": null,
+        "movement": "rear follow, no front reaction coverage",
+        "numeric_calibration": "pending Blender framing; no measured game constants"
+      },
+      "blocking": {
+        "start": "player on pavement",
+        "end": "dust off then run",
+        "props": "bag left forearm to left hand",
+        "contacts": "feet land before dust-off",
+        "screen_direction": "forward into depth, rear subject anchor"
+      },
+      "guide_status": "no timed animatic or motion control generated",
+      "generation": {
+        "model_id": null,
+        "mode": null
+      },
+      "evaluation": {
+        "status": "not motion tested"
+      },
+      "source_scene": "revision-07/blender/double-decker-master.blend",
+      "source_frame": 80,
+      "frame_image": "revision-07/frames/09-look.png",
+      "continuity": "Identical bus transform (-5.1,0,1.45), roll+90deg aboutY, forward+Y. Roof road-centre/east, wheels and underbody curb/mall/west. No mirrors. End07/start08/09 same shared bus.",
+      "geometry_guide": "revision-07/frames/09-direct.png",
+      "appearance_reference": "../references/sos-bus-01/canonical.png"
+    },
+    {
+      "shot_id": "EP02-10",
+      "status": "planned",
+      "start_seconds": 33,
+      "end_seconds": 37,
+      "required_action_seconds": 4,
+      "cast": "GG01 and two police",
+      "location_id": "mall approach",
+      "character_reference_version": "goji-gta-video recovered episode-one references",
+      "location_reference_version": "revision-03/references actual Goji frontage/Lentor Drive canopy; fictional stunt spacing",
+      "style_version": "original PS2 SA target + recovered Goji identity",
+      "camera": {
+        "preset": "PLAYER",
+        "aspect_ratio": "9:16",
+        "horizontal_fov_degrees": null,
+        "movement": "rear player-centred follow; officers clipped at lower edges",
+        "numeric_calibration": "pending Blender framing; no measured game constants"
+      },
+      "blocking": {
+        "start": "player starts sprint",
+        "end": "player reaches shop threshold",
+        "props": "bag left hand",
+        "contacts": "exactly two pursuers; camera follows girl; optional matched route-compression cut",
+        "screen_direction": "forward into depth, rear subject anchor"
+      },
+      "guide_status": "no timed animatic or motion control generated",
+      "generation": {
+        "model_id": null,
+        "mode": null
+      },
+      "evaluation": {
+        "status": "not motion tested"
+      },
+      "frame_image": "revision-07/frames/10-look.png"
+    },
+    {
+      "shot_id": "EP02-11",
+      "status": "planned",
+      "start_seconds": 37,
+      "end_seconds": 39,
+      "required_action_seconds": 2,
+      "cast": "GG01 GP01 and two police outside",
+      "location_id": "Goji reception",
+      "character_reference_version": "goji-gta-video recovered episode-one references",
+      "location_reference_version": "concept staging; surveyed set master pending",
+      "style_version": "original PS2 SA target + recovered Goji identity",
+      "camera": {
+        "preset": "CLINIC-CUTSCENE",
+        "aspect_ratio": "9:16",
+        "horizontal_fov_degrees": null,
+        "movement": "fixed interior medium",
+        "numeric_calibration": "pending Blender framing; no measured game constants"
+      },
+      "blocking": {
+        "start": "girl crosses threshold",
+        "end": "girl calm; officers outside",
+        "props": "bag left hand",
+        "contacts": "audio/HUD cut at boundary; police feet on exterior pavement",
+        "screen_direction": "staged interior axis"
+      },
+      "guide_status": "no timed animatic or motion control generated",
+      "generation": {
+        "model_id": null,
+        "mode": null
+      },
+      "evaluation": {
+        "status": "not motion tested"
+      },
+      "frame_image": "revision-07/frames/11-look.png"
+    },
+    {
+      "shot_id": "EP02-12",
+      "status": "planned",
+      "start_seconds": 39,
+      "end_seconds": 47,
+      "required_action_seconds": 8,
+      "cast": "GG01 GP01 and two police outside",
+      "location_id": "Goji reformer",
+      "character_reference_version": "goji-gta-video recovered episode-one references",
+      "location_reference_version": "concept staging; surveyed set master pending",
+      "style_version": "original PS2 SA target + recovered Goji identity",
+      "camera": {
+        "preset": "CLINIC-CUTSCENE",
+        "aspect_ratio": "9:16",
+        "horizontal_fov_degrees": null,
+        "movement": "fixed medium-wide entire eight seconds",
+        "numeric_calibration": "pending Blender framing; no measured game constants"
+      },
+      "blocking": {
+        "start": "girl already exercising",
+        "end": "slow rep ends; cops loop remains",
+        "props": "bag and white shoes bench; grip socks on player",
+        "contacts": "feet footbar; carriage movement; two police face into glass with no translation; therapist leans in, follows knee alignment and cues extension",
+        "screen_direction": "staged interior axis"
+      },
+      "guide_status": "no timed animatic or motion control generated",
+      "generation": {
+        "model_id": null,
+        "mode": null
+      },
+      "evaluation": {
+        "status": "not motion tested"
+      },
+      "popup": {
+        "text": "You can save your game and lose the police at a safehouse.",
+        "source": "revision-07/overlays/safehouse-popup.svg",
+        "box": [
+          56,
+          360,
+          658,
+          250
+        ],
+        "in_seconds": 41.5,
+        "out_seconds": 46,
+        "provenance": "Exact user-provided sentence; line breaks are typesetting only."
+      },
+      "frame_image": "revision-07/frames/12-safehouse-preview.png"
+    }
+  ],
+  "bus_brand": "SOS Transit; orange-red upper body, deep-purple lower/rear, diagonal white panels; double-decker with three axles",
+  "popup_copy_source": "user-provided",
+  "livery_reference": "User-supplied double-decker photograph; subsequent explicit request sets two decks.",
+  "vehicle": {
+    "deck_count": 2,
+    "axles_y": [
+      -4.2,
+      -2.8,
+      3.15
+    ],
+    "height_metres": 4.65,
+    "upper_floor_z": 2.7,
+    "dimensions_status": "original staging proportions inspired by supplied photo, not a manufacturer specification"
+  },
+  "canonical_bus_reference": "../references/sos-bus-01/reference.json"
+}

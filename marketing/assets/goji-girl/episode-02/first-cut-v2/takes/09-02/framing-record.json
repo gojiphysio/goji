@@ -1,0 +1,13 @@
+{
+  "source": "raw_00001_.mp4",
+  "source_frames": [
+    0,
+    48
+  ],
+  "output": "framing-v2.mp4",
+  "intent": "Counter generated camera pullback; preserve the player scale while walking away from the wreck.",
+  "filter": "zoompan=z='1+0.42*pow(min(1,max(0,(on-12)/35)),2)':x='252-2*pow(min(1,max(0,(on-12)/35)),2)-252/zoom':y='510-16*pow(min(1,max(0,(on-12)/35)),2)-510/zoom':d=1:s=576x1024:fps=24",
+  "inspection": "6fps full reframed shot; no scene reversal or cropped player feet",
+  "full_decode_verified": true,
+  "sha256": "0bf6d8bafc30379720cadd028d0d822936d19b2d75d6d939358aff21619b4ed7"
+}

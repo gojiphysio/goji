@@ -1,0 +1,9 @@
+*.blend1
+*.blend2
+sequence/*
+!sequence/0001.png
+!sequence/0025.png
+!sequence/0035.png
+!sequence/0049.png
+!sequence/0059.png
+!sequence/0073.png

@@ -1,0 +1,41 @@
+{
+  "auditioned": false,
+  "reason": "Mac locked; waveform and file checks only",
+  "files": {
+    "clinic.wav": {
+      "seconds": 49.0,
+      "channels": 2,
+      "sample_rate": 48000,
+      "peak": 0.017486572265625,
+      "clipped_samples": 0
+    },
+    "vehicles.wav": {
+      "seconds": 49.0,
+      "channels": 2,
+      "sample_rate": 48000,
+      "peak": 0.226226806640625,
+      "clipped_samples": 0
+    },
+    "ui.wav": {
+      "seconds": 49.0,
+      "channels": 2,
+      "sample_rate": 48000,
+      "peak": 0.197967529296875,
+      "clipped_samples": 0
+    },
+    "foley.wav": {
+      "seconds": 49.0,
+      "channels": 2,
+      "sample_rate": 48000,
+      "peak": 0.49676513671875,
+      "clipped_samples": 0
+    },
+    "sfx-mix.wav": {
+      "seconds": 49.0,
+      "channels": 2,
+      "sample_rate": 48000,
+      "peak": 0.584625244140625,
+      "clipped_samples": 0
+    }
+  }
+}

@@ -1,0 +1,438 @@
+{
+  "shot": "10",
+  "take": "01",
+  "status": "provisional_selection",
+  "started": 1795681918.294972,
+  "recipe": "H3 Ref2VA GGUF Q4 + native Turbo 4-step; 576x1024 24fps",
+  "native_frames": 107,
+  "edit_seconds": 4,
+  "guidance": "video",
+  "prompt": "A continuous four-second third-person rear player SPRINT, beginning exactly at the supplied first-frame anchor. Match the original-PS2 sprint cycle staged in <Video 1>: slight forward lean, flared bent elbows, a firm repetitive arm pump, pronounced heel recovery and long push-off. Keep the regular quick game-animation rhythm throughout, including both officers, with staggered phases. Goji Girl runs FORWARD down this SAME pavement and veers left to the Goji entrance as shown in <Video 1>. Camera follows from behind without reversing or orbiting. Storefronts stay LEFT, road RIGHT. Two navy-uniform police pursue from BEHIND, partly visible at lower frame edges. Teal-shirt passerby beyond entrance recoils against shopfront; white-shirt passerby hurries clear near tree. Keep central route and doorway empty of bystanders. Girl and police never touch anyone. End as she reaches the clinic doorway. The wreck remains BEHIND CAMERA and completely invisible for the whole shot. No bus or vehicle appears anywhere in frame. Preserve the exact girl, maroon athleisure, ponytail, white shoes and ONE structured black handbag carried in her LEFT hand. All people have original GTA San Andreas PS2 economical anatomy, painted textures and diffuse shading. <Picture 1> supplies finished characters, architecture and colours; <Video 1> supplies only trajectory, timing and camera, never literal proxy block shapes or primitive faces. No extra cops, cuts, teleports, captions, HUD or stars. The handbag is a STIFF rigid game prop attached to the moving LEFT hand. Its body and handle keep their exact shape and rotate/translate WITH that hand through the FULL arm pump. Never hold the bag arm still, pin it beside the hip, reduce its swing, stretch the bag or animate it like soft cloth. Match both-arm motion in the video guide. The handbag is oriented ALONGSIDE HER BODY: its long side runs fore-aft, broad face points outward to her left, and the rear camera mostly sees its narrow gusset/end. Keep this orientation FIXED TO HER GRIP and rotate it with her wrist/arm, never swivel the broad front or gold clasp to face camera. No independent dangling, bag flattening or camera-facing billboard. <Video 2> is the selected FINISHED LOCOMOTION reference only: reproduce its repeated full two-arm pumping and rigid narrow-end handbag orientation throughout every stride. Do not copy its house, road, people, framing or route. <Video 1> remains the authoritative route, contacts and camera for THIS shot; <Picture 1> remains its finished appearance. Keep the full arm range of Video2 after the first stride and through the turn.",
+  "workflow": {
+    "1": {
+      "class_type": "UnetLoaderGGUF",
+      "inputs": {
+        "unet_name": "minimax_h3_ref2va_pruned-Q4_K_M.gguf"
+      }
+    },
+    "2": {
+      "class_type": "CLIPLoaderGGUF",
+      "inputs": {
+        "clip_name": "qwen3vl_32b_minimax_h3-Q4_K_M.gguf",
+        "type": "minimax"
+      }
+    },
+    "3": {
+      "class_type": "VAELoader",
+      "inputs": {
+        "vae_name": "minimax_h3_video_vae_fp16.safetensors"
+      }
+    },
+    "4": {
+      "class_type": "LoraLoaderModelOnly",
+      "inputs": {
+        "model": [
+          "1",
+          0
+        ],
+        "lora_name": "minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors",
+        "strength_model": 1.0
+      }
+    },
+    "5": {
+      "class_type": "MiniMaxH3SigmaShift",
+      "inputs": {
+        "model": [
+          "4",
+          0
+        ],
+        "shift_video": 12.0,
+        "shift_audio": 3.0
+      }
+    },
+    "6": {
+      "class_type": "MiniMaxH3ReferenceToVideo",
+      "inputs": {
+        "clip": [
+          "2",
+          0
+        ],
+        "vae": [
+          "3",
+          0
+        ],
+        "prompt": "A continuous four-second third-person rear player SPRINT, beginning exactly at the supplied first-frame anchor. Match the original-PS2 sprint cycle staged in <Video 1>: slight forward lean, flared bent elbows, a firm repetitive arm pump, pronounced heel recovery and long push-off. Keep the regular quick game-animation rhythm throughout, including both officers, with staggered phases. Goji Girl runs FORWARD down this SAME pavement and veers left to the Goji entrance as shown in <Video 1>. Camera follows from behind without reversing or orbiting. Storefronts stay LEFT, road RIGHT. Two navy-uniform police pursue from BEHIND, partly visible at lower frame edges. Teal-shirt passerby beyond entrance recoils against shopfront; white-shirt passerby hurries clear near tree. Keep central route and doorway empty of bystanders. Girl and police never touch anyone. End as she reaches the clinic doorway. The wreck remains BEHIND CAMERA and completely invisible for the whole shot. No bus or vehicle appears anywhere in frame. Preserve the exact girl, maroon athleisure, ponytail, white shoes and ONE structured black handbag carried in her LEFT hand. All people have original GTA San Andreas PS2 economical anatomy, painted textures and diffuse shading. <Picture 1> supplies finished characters, architecture and colours; <Video 1> supplies only trajectory, timing and camera, never literal proxy block shapes or primitive faces. No extra cops, cuts, teleports, captions, HUD or stars. The handbag is a STIFF rigid game prop attached to the moving LEFT hand. Its body and handle keep their exact shape and rotate/translate WITH that hand through the FULL arm pump. Never hold the bag arm still, pin it beside the hip, reduce its swing, stretch the bag or animate it like soft cloth. Match both-arm motion in the video guide. The handbag is oriented ALONGSIDE HER BODY: its long side runs fore-aft, broad face points outward to her left, and the rear camera mostly sees its narrow gusset/end. Keep this orientation FIXED TO HER GRIP and rotate it with her wrist/arm, never swivel the broad front or gold clasp to face camera. No independent dangling, bag flattening or camera-facing billboard. <Video 2> is the selected FINISHED LOCOMOTION reference only: reproduce its repeated full two-arm pumping and rigid narrow-end handbag orientation throughout every stride. Do not copy its house, road, people, framing or route. <Video 1> remains the authoritative route, contacts and camera for THIS shot; <Picture 1> remains its finished appearance. Keep the full arm range of Video2 after the first stride and through the turn.",
+        "width": 576,
+        "height": 1024,
+        "length": 107,
+        "ref_image_size": "match",
+        "ref_images.ref_image_0": [
+          "20",
+          0
+        ],
+        "ref_videos.ref_video_0": [
+          "22",
+          0
+        ],
+        "ref_videos.ref_video_1": [
+          "103",
+          0
+        ]
+      }
+    },
+    "7": {
+      "class_type": "BasicGuider",
+      "inputs": {
+        "model": [
+          "5",
+          0
+        ],
+        "conditioning": [
+          "41",
+          0
+        ]
+      }
+    },
+    "8": {
+      "class_type": "RandomNoise",
+      "inputs": {
+        "noise_seed": 2026112810
+      }
+    },
+    "9": {
+      "class_type": "KSamplerSelect",
+      "inputs": {
+        "sampler_name": "euler"
+      }
+    },
+    "10": {
+      "class_type": "BasicScheduler",
+      "inputs": {
+        "model": [
+          "5",
+          0
+        ],
+        "scheduler": "simple",
+        "steps": 4,
+        "denoise": 1.0
+      }
+    },
+    "11": {
+      "class_type": "SamplerCustomAdvanced",
+      "inputs": {
+        "noise": [
+          "8",
+          0
+        ],
+        "guider": [
+          "7",
+          0
+        ],
+        "sampler": [
+          "9",
+          0
+        ],
+        "sigmas": [
+          "10",
+          0
+        ],
+        "latent_image": [
+          "6",
+          1
+        ]
+      }
+    },
+    "12": {
+      "class_type": "VAEDecodeTiled",
+      "inputs": {
+        "samples": [
+          "11",
+          0
+        ],
+        "vae": [
+          "3",
+          0
+        ],
+        "tile_size": 256,
+        "overlap": 64,
+        "temporal_size": 64,
+        "temporal_overlap": 8
+      }
+    },
+    "13": {
+      "class_type": "CreateVideo",
+      "inputs": {
+        "images": [
+          "12",
+          0
+        ],
+        "fps": 24.0
+      }
+    },
+    "14": {
+      "class_type": "SaveVideo",
+      "inputs": {
+        "video": [
+          "13",
+          0
+        ],
+        "filename_prefix": "10-01/raw",
+        "format": "mp4",
+        "format.codec": "h264"
+      }
+    },
+    "20": {
+      "class_type": "LoadImage",
+      "inputs": {
+        "image": "10-grip-side-on.png"
+      }
+    },
+    "21": {
+      "class_type": "LoadVideo",
+      "inputs": {
+        "file": "10-guide-grip-v3.mp4"
+      }
+    },
+    "22": {
+      "class_type": "GetVideoComponents",
+      "inputs": {
+        "video": [
+          "21",
+          0
+        ]
+      }
+    },
+    "102": {
+      "class_type": "LoadVideo",
+      "inputs": {
+        "file": "03-selected-locomotion-reference.mp4"
+      }
+    },
+    "103": {
+      "class_type": "GetVideoComponents",
+      "inputs": {
+        "video": [
+          "102",
+          0
+        ]
+      }
+    },
+    "40": {
+      "class_type": "LoadImage",
+      "inputs": {
+        "image": "10-grip-side-on.png"
+      }
+    },
+    "41": {
+      "class_type": "MiniMaxH3AddGuide",
+      "inputs": {
+        "positive": [
+          "6",
+          0
+        ],
+        "latent": [
+          "6",
+          1
+        ],
+        "vae": [
+          "3",
+          0
+        ],
+        "image": [
+          "40",
+          0
+        ],
+        "frame_idx": 0
+      }
+    }
+  },
+  "inputs": [
+    {
+      "path": "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/first-cut-v2/inputs/10-grip-side-on.png",
+      "sha256": "01aa951d52cb67b487793ccb995c2bbb36723cc0469d09ac807fc05c8c6300a5"
+    },
+    {
+      "path": "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/first-cut-v2/inputs/10-guide-grip-v3.mp4",
+      "sha256": "0aa445d23eb9fa0f0bb33d017842fbd02b5ec8b04377deb79e3f4e26ab5e2aeb"
+    },
+    {
+      "path": "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/first-cut-v2/inputs/03-selected-locomotion-reference.mp4",
+      "sha256": "b8386bca7420bf3524de82bc04533e9fb700c5c9fdfb0839e1abf3eaf99d4c8c"
+    },
+    {
+      "path": "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/first-cut-v2/inputs/10-grip-side-on.png",
+      "sha256": "01aa951d52cb67b487793ccb995c2bbb36723cc0469d09ac807fc05c8c6300a5"
+    }
+  ],
+  "audio": "Separate original procedural SFX in edit; video VAE only",
+  "runtime_commit": "da8bd08e48deee74d9f6c3bc00aed365b00ec209",
+  "receipt": {
+    "prompt_id": "332c1637-760f-48e9-805e-5f052cb09e6c",
+    "number": 10.0,
+    "node_errors": {}
+  },
+  "collected_at": 1795685166.2990458,
+  "outputs": {
+    "21": {
+      "images": [
+        {
+          "filename": "10-guide-grip-v3.mp4",
+          "subfolder": "",
+          "type": "input",
+          "metadata": {
+            "kind": "video",
+            "width": 288,
+            "height": 512,
+            "duration": 4.458333333333333,
+            "fps": 24.0,
+            "frame_count": 107
+          }
+        }
+      ],
+      "animated": [
+        true
+      ]
+    },
+    "14": {
+      "images": [
+        {
+          "filename": "raw_00001_.mp4",
+          "subfolder": "10-01",
+          "type": "output",
+          "metadata": {
+            "kind": "video",
+            "width": 576,
+            "height": 1024,
+            "duration": 4.458333333333333,
+            "fps": 24.0,
+            "frame_count": 107
+          }
+        }
+      ],
+      "animated": [
+        true
+      ]
+    },
+    "102": {
+      "images": [
+        {
+          "filename": "03-selected-locomotion-reference.mp4",
+          "subfolder": "",
+          "type": "input",
+          "metadata": {
+            "kind": "video",
+            "width": 576,
+            "height": 1024,
+            "duration": 3.0416666666666665,
+            "fps": 24.0,
+            "frame_count": 73
+          }
+        }
+      ],
+      "animated": [
+        true
+      ]
+    }
+  },
+  "videos": [
+    {
+      "path": "takes/10-01/raw_00001_.mp4",
+      "sha256": "b74af4b5293286da25d63dca5f787471c5faa4a6284850b183dc5b3b9f0a12da",
+      "probe": {
+        "streams": [
+          {
+            "index": 0,
+            "codec_name": "h264",
+            "codec_long_name": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+            "profile": "High",
+            "codec_type": "video",
+            "codec_tag_string": "avc1",
+            "codec_tag": "0x31637661",
+            "mime_codec_string": "avc1.64001f",
+            "width": 576,
+            "height": 1024,
+            "coded_width": 576,
+            "coded_height": 1024,
+            "has_b_frames": 2,
+            "pix_fmt": "yuv420p",
+            "level": 31,
+            "color_range": "tv",
+            "color_space": "bt709",
+            "color_transfer": "iec61966-2-1",
+            "color_primaries": "bt709",
+            "chroma_location": "left",
+            "field_order": "progressive",
+            "is_avc": "true",
+            "nal_length_size": "4",
+            "id": "0x1",
+            "r_frame_rate": "24/1",
+            "avg_frame_rate": "24/1",
+            "time_base": "1/12288",
+            "start_pts": 0,
+            "start_time": "0.000000",
+            "duration_ts": 54784,
+            "duration": "4.458333",
+            "bit_rate": "4350700",
+            "bits_per_raw_sample": "8",
+            "nb_frames": "107",
+            "extradata_size": 48,
+            "disposition": {
+              "default": 1,
+              "dub": 0,
+              "original": 0,
+              "comment": 0,
+              "lyrics": 0,
+              "karaoke": 0,
+              "forced": 0,
+              "hearing_impaired": 0,
+              "visual_impaired": 0,
+              "clean_effects": 0,
+              "attached_pic": 0,
+              "timed_thumbnails": 0,
+              "non_diegetic": 0,
+              "captions": 0,
+              "descriptions": 0,
+              "metadata": 0,
+              "dependent": 0,
+              "still_image": 0,
+              "multilayer": 0
+            },
+            "tags": {
+              "language": "und",
+              "handler_name": "VideoHandler"
+            }
+          }
+        ],
+        "format": {
+          "filename": "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/first-cut-v2/takes/10-01/raw_00001_.mp4",
+          "nb_streams": 1,
+          "nb_programs": 0,
+          "nb_stream_groups": 0,
+          "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+          "format_long_name": "QuickTime / MOV",
+          "start_time": "0.000000",
+          "duration": "4.458333",
+          "size": "2432184",
+          "bit_rate": "4364293",
+          "probe_score": 100,
+          "tags": {
+            "major_brand": "isom",
+            "minor_version": "512",
+            "compatible_brands": "isomiso2avc1mp41",
+            "prompt": "{\"1\": {\"class_type\": \"UnetLoaderGGUF\", \"inputs\": {\"unet_name\": \"minimax_h3_ref2va_pruned-Q4_K_M.gguf\"}}, \"2\": {\"class_type\": \"CLIPLoaderGGUF\", \"inputs\": {\"clip_name\": \"qwen3vl_32b_minimax_h3-Q4_K_M.gguf\", \"type\": \"minimax\"}}, \"3\": {\"class_type\": \"VAELoader\", \"inputs\": {\"vae_name\": \"minimax_h3_video_vae_fp16.safetensors\"}}, \"4\": {\"class_type\": \"LoraLoaderModelOnly\", \"inputs\": {\"model\": [\"1\", 0], \"lora_name\": \"minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors\", \"strength_model\": 1.0}}, \"5\": {\"class_type\": \"MiniMaxH3SigmaShift\", \"inputs\": {\"model\": [\"4\", 0], \"shift_video\": 12.0, \"shift_audio\": 3.0}}, \"6\": {\"class_type\": \"MiniMaxH3ReferenceToVideo\", \"inputs\": {\"clip\": [\"2\", 0], \"vae\": [\"3\", 0], \"prompt\": \"A continuous four-second third-person rear player SPRINT, beginning exactly at the supplied first-frame anchor. Match the original-PS2 sprint cycle staged in <Video 1>: slight forward lean, flared bent elbows, a firm repetitive arm pump, pronounced heel recovery and long push-off. Keep the regular quick game-animation rhythm throughout, including both officers, with staggered phases. Goji Girl runs FORWARD down this SAME pavement and veers left to the Goji entrance as shown in <Video 1>. Camera follows from behind without reversing or orbiting. Storefronts stay LEFT, road RIGHT. Two navy-uniform police pursue from BEHIND, partly visible at lower frame edges. Teal-shirt passerby beyond entrance recoils against shopfront; white-shirt passerby hurries clear near tree. Keep central route and doorway empty of bystanders. Girl and police never touch anyone. End as she reaches the clinic doorway. The wreck remains BEHIND CAMERA and completely invisible for the whole shot. No bus or vehicle appears anywhere in frame. Preserve the exact girl, maroon athleisure, ponytail, white shoes and ONE structured black handbag carried in her LEFT hand. All people have original GTA San Andreas PS2 economical anatomy, painted textures and diffuse shading. <Picture 1> supplies finished characters, architecture and colours; <Video 1> supplies only trajectory, timing and camera, never literal proxy block shapes or primitive faces. No extra cops, cuts, teleports, captions, HUD or stars. The handbag is a STIFF rigid game prop attached to the moving LEFT hand. Its body and handle keep their exact shape and rotate/translate WITH that hand through the FULL arm pump. Never hold the bag arm still, pin it beside the hip, reduce its swing, stretch the bag or animate it like soft cloth. Match both-arm motion in the video guide. The handbag is oriented ALONGSIDE HER BODY: its long side runs fore-aft, broad face points outward to her left, and the rear camera mostly sees its narrow gusset/end. Keep this orientation FIXED TO HER GRIP and rotate it with her wrist/arm, never swivel the broad front or gold clasp to face camera. No independent dangling, bag flattening or camera-facing billboard. <Video 2> is the selected FINISHED LOCOMOTION reference only: reproduce its repeated full two-arm pumping and rigid narrow-end handbag orientation throughout every stride. Do not copy its house, road, people, framing or route. <Video 1> remains the authoritative route, contacts and camera for THIS shot; <Picture 1> remains its finished appearance. Keep the full arm range of Video2 after the first stride and through the turn.\", \"width\": 576, \"height\": 1024, \"length\": 107, \"ref_image_size\": \"match\", \"ref_images.ref_image_0\": [\"20\", 0], \"ref_videos.ref_video_0\": [\"22\", 0], \"ref_videos.ref_video_1\": [\"103\", 0]}}, \"7\": {\"class_type\": \"BasicGuider\", \"inputs\": {\"model\": [\"5\", 0], \"conditioning\": [\"41\", 0]}}, \"8\": {\"class_type\": \"RandomNoise\", \"inputs\": {\"noise_seed\": 2026112810}}, \"9\": {\"class_type\": \"KSamplerSelect\", \"inputs\": {\"sampler_name\": \"euler\"}}, \"10\": {\"class_type\": \"BasicScheduler\", \"inputs\": {\"model\": [\"5\", 0], \"scheduler\": \"simple\", \"steps\": 4, \"denoise\": 1.0}}, \"11\": {\"class_type\": \"SamplerCustomAdvanced\", \"inputs\": {\"noise\": [\"8\", 0], \"guider\": [\"7\", 0], \"sampler\": [\"9\", 0], \"sigmas\": [\"10\", 0], \"latent_image\": [\"6\", 1]}}, \"12\": {\"class_type\": \"VAEDecodeTiled\", \"inputs\": {\"samples\": [\"11\", 0], \"vae\": [\"3\", 0], \"tile_size\": 256, \"overlap\": 64, \"temporal_size\": 64, \"temporal_overlap\": 8}}, \"13\": {\"class_type\": \"CreateVideo\", \"inputs\": {\"images\": [\"12\", 0], \"fps\": 24.0}}, \"14\": {\"class_type\": \"SaveVideo\", \"inputs\": {\"video\": [\"13\", 0], \"filename_prefix\": \"10-01/raw\", \"format\": \"mp4\", \"format.codec\": \"h264\"}}, \"20\": {\"class_type\": \"LoadImage\", \"inputs\": {\"image\": \"10-grip-side-on.png\"}, \"is_changed\": [\"01aa951d52cb67b487793ccb995c2bbb36723cc0469d09ac807fc05c8c6300a5\"]}, \"21\": {\"class_type\": \"LoadVideo\", \"inputs\": {\"file\": \"10-guide-grip-v3.mp4\"}, \"is_changed\": [1795678898.9816418]}, \"22\": {\"class_type\": \"GetVideoComponents\", \"inputs\": {\"video\": [\"21\", 0]}}, \"102\": {\"class_type\": \"LoadVideo\", \"inputs\": {\"file\": \"03-selected-locomotion-reference.mp4\"}, \"is_changed\": [1795681816.696789]}, \"103\": {\"class_type\": \"GetVideoComponents\", \"inputs\": {\"video\": [\"102\", 0]}}, \"40\": {\"class_type\": \"LoadImage\", \"inputs\": {\"image\": \"10-grip-side-on.png\"}, \"is_changed\": [\"01aa951d52cb67b487793ccb995c2bbb36723cc0469d09ac807fc05c8c6300a5\"]}, \"41\": {\"class_type\": \"MiniMaxH3AddGuide\", \"inputs\": {\"positive\": [\"6\", 0], \"latent\": [\"6\", 1], \"vae\": [\"3\", 0], \"image\": [\"40\", 0], \"frame_idx\": 0}}}",
+            "encoder": "Lavf63.1.102"
+          }
+        }
+      },
+      "full_decode_verified": true
+    }
+  ],
+  "execution_started_at": 1795683542.203,
+  "completed_at": 1795685057.517,
+  "render_wall_seconds": 1515.3139998912811,
+  "review": {
+    "decision": "provisional_selection",
+    "method": "8fps retained full four-second route",
+    "notes": "8fps over the retained four seconds shows repeated full arm pumps including the bag arm. The rigid bag mostly shows its narrow end from behind and changes view with the turn. Two officers stay behind at the sides, keeping the player visible; passersby remain clear. No wreck appears ahead. She reaches the Goji doorway at the end. The follow camera turns quickly toward the entrance. Normal-speed playback pending locked Mac."
+  }
+}

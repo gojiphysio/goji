@@ -1,0 +1,82 @@
+{
+  "revision": 3,
+  "date": "2026-11-25",
+  "tool": "built-in image_gen.imagegen",
+  "scope": "storyboard revisions + requested local Blender geometry blockout; no H3 generation",
+  "inputs": [
+    {
+      "path": "../storyboards/v2/01-call-and-player.png",
+      "role": "accepted first board, edit branding only",
+      "sha256": "07f70dfeaf08582e3405294d541813fea5fe83046b9ae6946ad0580d76ba757e"
+    },
+    {
+      "path": "../storyboards/v2/02-takeover-and-bus.png",
+      "role": "accepted bus board, revise facade/branding/exit",
+      "sha256": "e63a0c73bc277f6f6d2dc996cbc15ee14ab5f62ceb751e778cd0d14b3d1d8fe6"
+    },
+    {
+      "path": "../storyboards/v2/03-player-and-clinic.png",
+      "role": "accepted interior/camera/cast; revise facades/therapist",
+      "sha256": "8c991fec7e955edaea794eef9aee7f52a73475889a3606ad5359cfcf224d2c28"
+    },
+    {
+      "path": "references/goji-frontage.webp",
+      "role": "real shop facade, project-owned source copy",
+      "sha256": "0933ceb34ccd964030baba3dd9cf017ef9e0ebb06d40b096bbf96e14e336f138"
+    },
+    {
+      "path": "references/lentor-drive-canopy.webp",
+      "role": "real mall canopy and cladding, ignore editorial text",
+      "sha256": "9f6e6d4430ce2556fb6a34e707b6de994a5ebbc16081fb9045d56e5e66c66f93"
+    },
+    {
+      "path": "blender/sequence/0035.png",
+      "role": "front-door tap geometry and camera; authoritative over style output",
+      "sha256": "56c665cfbbfd002f3194be2d95f324d653400b672b5fb8e29877b99f662c1c17"
+    }
+  ],
+  "generations": [
+    {
+      "id": "C",
+      "prompt": "Edit this exact 4-panel Goji Girl PS2 San Andreas storyboard (first image). Preserve panel layout 09,10,11,12, character identities, maroon outfit and handbag, rear player cameras outdoors, and the approved Goji interior. Second image is REAL GOJI FACADE authority. Third image is REAL LENTOR MODERN canopy/facade authority; ignore its foreground finger and overlaid social-video lettering.\n09: Replace generic large building with huge Goji lettering with actual Lentor Modern street facade language: charcoal-grey vertical cladding, apartment towers with staggered balconies above, silver shallow pitched metal/glass taxi stand canopy on square posts. Woman dusting off viewed from behind remains. Wreck bears fictional wordmark 'SOS Transit' in SAME red/purple italic logo styling as earlier SBS logo. No 'SBS' text anywhere.\n10: Goji Girl runs toward the REAL GOJI SHOP FRONT as in photo: modest individual shop bay beneath plain grey soffit, thin black aluminium rectangular glass mullions, glazed hinged entrance on LEFT, larger right glass window with GOJI logo, burgundy ROUND PROJECTING SIGN at left. Stainless waist-high handrail along walkway and grey pavement. Do not turn shop into huge standalone Goji-branded mall. No opening flower bouquets (temporary decorations), no giant roof-mounted GOJI letters. Retain third-person player behind woman with police partly clipped at lower edges; no front-facing shot. Frame close enough to recognise black-framed shop and circular sign.\n11: KEEP APPROVED INTERIOR and camera unchanged: warm timber, red/cream checkered floor, burgundy table, therapist in black; cops outside. Keep same people.\n12: KEEP the exact interior, reformer, girl's supine exercise, outside police running against glass and distant burning overturned bus. Change therapist from passive hands clasped to actively coaching: she takes a half-step toward woman's footbar side and bends gently at hips/knees to eye level with moving knee, eyes focused on girl's knee alignment. One hand open hovering just beside the near knee as a clear alignment cue (not grabbing), other hand demonstrating slow extension direction above footbar. Stable anatomy with only two arms; calm attentive face, short bob, plain black crewneck/leggings and white shoes. Girl remains in grip socks. Wreck label is SOS Transit. Leave upper-left interior/window area clear for a separately composited Mobility game popup; do not generate popup or other captions.\nAll humans and backgrounds match original PS2 painted textures and economical geometry, NOT photoreal or modern PBR. Reference photos supply architectural proportions and details ONLY, translated into same game rendering. Only one wanted star in09,10; no stars indoors.",
+      "output": "frames/09-12-facade-and-coaching.png",
+      "decision": "selected",
+      "sha256": "d97e35b461a03a1d96d44d8a31b7d834388f3d50a0d2f8e6e31d5ff1b32871f2"
+    },
+    {
+      "id": "EXIT-1",
+      "prompt": "Use case: style-transfer. Restyle the FIRST image, a Blender geometry guide, into an original PS2 GTA San Andreas gameplay frame for Goji Girl. Second image is canonical Goji Girl identity and painted PS2 street look. First image controls ALL geometry, camera, pose and proportions of the bus entrance. Maintain same 9:16 view, player seen from behind, exact door opening and exact reach/card contact.\nThe bus is on its RIGHT driver's side. Closest end at lower-left is FRONT WINDSCREEN and NOSE, NOT rear engine. The rectangular opening above/front-left is the FRONT LEFT PASSENGER DOOR, immediately behind the front windscreen and ahead of front wheel. Passenger side is upward. It is NOT a roof hatch or rear door. Keep the opening's yellow rectangular surround and folded glass door leaves parked by FRONT jamb inside. Keep wheels visible on the underside/right side exactly as guide. Keep reader mounted just inside the REAR jamb of this front passenger opening, on the rotated interior pole, at girl's RIGHT HAND. The green reader face is visible and her transit card touches it. Do NOT move reader to external body, bus nose or road; do NOT turn reader upright in world. Both reader and pole rotate with bus.\nWoman halfway up from bus: long black ponytail, maroon sleeveless outfit and leggings, left hand bracing on far sill, right hand tapping green reader; one black bag hangs from left forearm. Preserve guide's body arrangement, hand contact and height. Improve proxy anatomy to canonical woman while staying within original silhouette. No extra limbs.\nBus white body, purple lower stripe, red roof strip. Fictional lettering EXACT 'SOS Transit', same red/purple italic swept logo style/placement as existing bus, never SBS. Proper side windows and simple painted texture instead of blank flat panels, but do not add windows across doorway. Add grey Singapore road and modest empty bent shelter in distance; do not add people, front grille at closest end, fake glass door on rear, huge buildings, or camera angle changes.\nLOOK original 2004 PS2 GTA San Andreas: painted low-resolution clothing/road/vehicle textures, economical meshes, broad diffuse light, muted green/ochre, cyan sky haze. No photorealism, modern PBR, origami skin or glossy toy look. The still should read as a paused rear-player interaction. No HUD or captions; source dimensions and lens projection preserved.",
+      "decision": "rejected: turned rolled bus upright and entrance into roof hatch; not delivered as selected"
+    },
+    {
+      "id": "B",
+      "prompt": "Edit this exact four-panel Goji Girl storyboard (image1), keeping four panels labelled05,06,07,08 and all PS2 game art/camera style. Image2 is the REAL Lentor Modern facade reference; ignore photo's finger, added text overlays. Image3 is the corrected BLENDER geometry authority for panel08.\nALL BUS WORDMARKS: replace 'SBS Transit' with EXACT 'SOS Transit'. Keep the existing italic red/purple wordmark styling, swoosh and placement; change text only. Maintain same bus livery.\n05 and06 preserve pose/camera/actions, just fictional SOS branding.\n07 preserve rear bus chase camera and tipping onto driver's side, horizon level. Replace generic cream apartment/mall facade with real Lentor Modern dark grey vertical-finned cladding, staggered balcony towers and silver/light-grey shallow pitched taxi canopy on square posts, yellow/black chevron bollards. Put readable 'LENTOR MODERN' lettering on dark facade (not a freestanding invented sign). Empty broken bus stop remains fictional crash prop, keep distinct from actual taxi canopy. No HDB facade where mall should be.\n08 REPLACE camera/composition with image3 precisely. This image is a 3D bus lying ON ITS SIDE. Preserve this toppled orientation; FRONT WINDSCREEN at closest end is rotated NINETY DEGREES, tall side-on with one headlamp ABOVE the other. Wheels are at the TOP far-right ridge with axes pointing UP, not normal upright wheels below side panels. Near side is SOLID RED ROOF now vertical; top horizontal surface is passenger side with windows and open front door, NOT a roof with a hatch. Preserve ALL structural outlines and image3's rectangular doorway at FRONT just behind front windshield. Woman seen from BACK rising through this upward-facing doorway, right hand touching green reader on pole at aft jamb; left hand braces other edge. Restyle materials only to painted PS2 textures and same canonical woman, NEVER rearrange front/roof/wheels/window geometry. Keep TOP wheels and SIDEWAYS windscreen. Front door reader on interior rotated pole, never rear engine or rooftop hatch. No HUD on08 except one small star. If detailed textures would contradict geometry, retain the guide's simple surfaces instead. The roof is red and vertical nearest left; front windscreen vertical sideways at lower-left; wheels on upper-right.",
+      "output": "frames/05-08-bus-and-geometry.png",
+      "decision": "selected as concept; Blender/direct render is geometry authority",
+      "sha256": "e2e58293de9bfd5520a075e977f5c19763d7f41d20a968a7736d9c591df7ae1c"
+    },
+    {
+      "id": "FINAL",
+      "prompt": "Edit/extend this accepted Goji Pilates ending composition into ONE tall 9:16 frame at 1080x1920 intended for Instagram. Preserve the woman's face/outfit and pose on reformer, the actively engaged short-bob therapist in black leaning toward the knee and demonstrating alignment/extension, red/cream floor, timber room and clear shop glass. Preserve TWO police facing into glass running in place behind therapist, burning overturned bus outside branded 'SOS Transit' in red/purple italic logo. Woman wears grip socks and white trainers plus single black handbag remain on bench.\nReframe to vertical with more clear room/window space ABOVE the people. Composition should keep therapist and woman predominantly in LOWER HALF; police heads around middle-height, bus flame upper-middle right. Reserve upper-left rectangle approximately x56..714, y360..610 in a 1080x1920 frame for a popup to be composited separately: it should cover only plain upper window/ceiling, not faces, police or bus flames. No popup or any generated caption.\nRetain exact calm/game contrast, whole reformer readable, body positions and simple PS2 GTA San Andreas painted texture style. No new characters, no photoreal faces, no modern gloss, no camera angle change, no foot/shoe duplication. This is one cutscene still, not a storyboard sheet; no panel number or gutters.",
+      "output": "frames/12-coaching-clean.png",
+      "decision": "selected; separately composited original popup",
+      "sha256": "f1e36734badaf8efb76f3edccc5f070f6b26a2a53680aa180315c8871b531184"
+    },
+    {
+      "id": "A",
+      "prompt": "Edit the supplied four-panel storyboard with labels01,02,03,04. Make ONLY one change in panel04: change the bus wordmark text from 'SBS Transit' to 'SOS Transit', retaining its exact red/purple italic logo styling, size, swoosh and position. Preserve all pixels/composition/characters/poses/camera/look in panels01,02,03; preserve everything else in04 including alighting passengers and third-person girl with handbag in left hand. No other edits.",
+      "output": "frames/01-04-sos-brand.png",
+      "decision": "selected",
+      "sha256": "09d05188023aa4ad9289fc7d32792806095d5b124807d38812b4e09b43903e52"
+    }
+  ],
+  "overlay": {
+    "source": "Episode 1 animation-v8/overlays/mobility-popup.svg and scripts/draw_overlays.swift",
+    "change": "vertical position +180px only; no wording/style changes"
+  },
+  "review": {
+    "normal_speed_motion_review": false,
+    "method": "Blender assertions, contact sheet and representative start/tap/climb/end stills; full decode check",
+    "limits": "procedural proxy; no final H3 performance or crash physics"
+  }
+}

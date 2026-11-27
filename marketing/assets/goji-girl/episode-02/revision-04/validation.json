@@ -1,0 +1,14 @@
+{
+  "episode_seconds": 47,
+  "sequences": 12,
+  "popup_copy": "passed",
+  "popup_previous_style_and_y360": "passed",
+  "concept_visual_review": [
+    "05 nose/driver-side reverse angle; bag left forearm",
+    "06 diffuse road/body spill; no blue bus emitter",
+    "07/08 roof toward mall, wheels toward road; correct reverse-angle landmarks",
+    "12 popup legible and clear of faces"
+  ],
+  "normal_speed_playback_reviewed": false,
+  "new_motion_rendered": false
+}

@@ -1,0 +1,253 @@
+{
+  "shot": "07",
+  "take": "01",
+  "status": "failed",
+  "started": 1795658188.1989162,
+  "recipe": "H3 Ref2VA GGUF Q4 + native Turbo 4-step; 576x1024 24fps",
+  "native_frames": 124,
+  "edit_seconds": 5,
+  "guidance": "video",
+  "prompt": "A continuous five-second vehicle chase crash.  Use <Picture 1> ONLY as the approved appearance reference. Use <Video 1> as the continuous spatial, action and camera guide; replace its primitive surfaces and proxy humans with the detailed painted PS2 look of <Picture 1>. Follow the video motion, not the static pose of <Picture 1>. At Lentor Modern the empty SOS Transit double-decker makes a sharp left steering move, rolls onto its RIGHT/driver side and slides forward to hit the EMPTY shelter post. Follow the rigid bus rotation and final position in <Video 1>. Wheels end toward mall curb, passenger side faces UP. Camera horizon stays LEVEL while bus rolls, rear following position with modest lag, no cinematic cut. Metal sparks at road contact, dust and a bent shelter support; no explosion yet. Nearby blue-shirt and cream-shirt pedestrians beyond the impact zone recoil and run toward storefront, clearly several metres clear. Nobody is hit by bus, debris or another person, no people on road or under vehicle. Freeze bus in the final wreck position. Original GTA San Andreas PlayStation 2 graphics throughout: angular economical character meshes, painted low-resolution skin/clothing/vehicle textures, restrained broad diffuse shading and period game animation. Preserve the same adult woman, maroon sleeveless top and leggings, one black ponytail, white shoes and ONE small black handbag carried LEFT. Every NPC matches the same PS2 rendering. Preserve the architecture, lighting and palette of <Picture 1>. No photoreal faces, no modern glossy rendering, no cartoon toy figures, no body morphing, no new logos, HUD, wanted stars, captions or baked text overlays. No shot changes. No speech or music. Blender primitives govern ONLY world positions, motion, contacts and camera. Reconstruct the FINISHED MESH SHAPES from the approved appearance image: formed rounded bus corners, inset glazing, detailed wheel arches, rims, lamps and bumpers, and the approved human anatomy. Never merely paint textures onto the guide boxes or reproduce their blocky silhouettes or primitive faces.",
+  "workflow": {
+    "1": {
+      "class_type": "UnetLoaderGGUF",
+      "inputs": {
+        "unet_name": "minimax_h3_ref2va_pruned-Q4_K_M.gguf"
+      }
+    },
+    "2": {
+      "class_type": "CLIPLoaderGGUF",
+      "inputs": {
+        "clip_name": "qwen3vl_32b_minimax_h3-Q4_K_M.gguf",
+        "type": "minimax"
+      }
+    },
+    "3": {
+      "class_type": "VAELoader",
+      "inputs": {
+        "vae_name": "minimax_h3_video_vae_fp16.safetensors"
+      }
+    },
+    "4": {
+      "class_type": "LoraLoaderModelOnly",
+      "inputs": {
+        "model": [
+          "1",
+          0
+        ],
+        "lora_name": "minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors",
+        "strength_model": 1.0
+      }
+    },
+    "5": {
+      "class_type": "MiniMaxH3SigmaShift",
+      "inputs": {
+        "model": [
+          "4",
+          0
+        ],
+        "shift_video": 12.0,
+        "shift_audio": 3.0
+      }
+    },
+    "6": {
+      "class_type": "MiniMaxH3ReferenceToVideo",
+      "inputs": {
+        "clip": [
+          "2",
+          0
+        ],
+        "vae": [
+          "3",
+          0
+        ],
+        "prompt": "A continuous five-second vehicle chase crash.  Use <Picture 1> ONLY as the approved appearance reference. Use <Video 1> as the continuous spatial, action and camera guide; replace its primitive surfaces and proxy humans with the detailed painted PS2 look of <Picture 1>. Follow the video motion, not the static pose of <Picture 1>. At Lentor Modern the empty SOS Transit double-decker makes a sharp left steering move, rolls onto its RIGHT/driver side and slides forward to hit the EMPTY shelter post. Follow the rigid bus rotation and final position in <Video 1>. Wheels end toward mall curb, passenger side faces UP. Camera horizon stays LEVEL while bus rolls, rear following position with modest lag, no cinematic cut. Metal sparks at road contact, dust and a bent shelter support; no explosion yet. Nearby blue-shirt and cream-shirt pedestrians beyond the impact zone recoil and run toward storefront, clearly several metres clear. Nobody is hit by bus, debris or another person, no people on road or under vehicle. Freeze bus in the final wreck position. Original GTA San Andreas PlayStation 2 graphics throughout: angular economical character meshes, painted low-resolution skin/clothing/vehicle textures, restrained broad diffuse shading and period game animation. Preserve the same adult woman, maroon sleeveless top and leggings, one black ponytail, white shoes and ONE small black handbag carried LEFT. Every NPC matches the same PS2 rendering. Preserve the architecture, lighting and palette of <Picture 1>. No photoreal faces, no modern glossy rendering, no cartoon toy figures, no body morphing, no new logos, HUD, wanted stars, captions or baked text overlays. No shot changes. No speech or music. Blender primitives govern ONLY world positions, motion, contacts and camera. Reconstruct the FINISHED MESH SHAPES from the approved appearance image: formed rounded bus corners, inset glazing, detailed wheel arches, rims, lamps and bumpers, and the approved human anatomy. Never merely paint textures onto the guide boxes or reproduce their blocky silhouettes or primitive faces.",
+        "width": 576,
+        "height": 1024,
+        "length": 124,
+        "ref_image_size": "match",
+        "ref_images.ref_image_0": [
+          "20",
+          0
+        ],
+        "ref_videos.ref_video_0": [
+          "22",
+          0
+        ]
+      }
+    },
+    "7": {
+      "class_type": "BasicGuider",
+      "inputs": {
+        "model": [
+          "5",
+          0
+        ],
+        "conditioning": [
+          "6",
+          0
+        ]
+      }
+    },
+    "8": {
+      "class_type": "RandomNoise",
+      "inputs": {
+        "noise_seed": 2026112707
+      }
+    },
+    "9": {
+      "class_type": "KSamplerSelect",
+      "inputs": {
+        "sampler_name": "euler"
+      }
+    },
+    "10": {
+      "class_type": "BasicScheduler",
+      "inputs": {
+        "model": [
+          "5",
+          0
+        ],
+        "scheduler": "simple",
+        "steps": 4,
+        "denoise": 1.0
+      }
+    },
+    "11": {
+      "class_type": "SamplerCustomAdvanced",
+      "inputs": {
+        "noise": [
+          "8",
+          0
+        ],
+        "guider": [
+          "7",
+          0
+        ],
+        "sampler": [
+          "9",
+          0
+        ],
+        "sigmas": [
+          "10",
+          0
+        ],
+        "latent_image": [
+          "6",
+          1
+        ]
+      }
+    },
+    "12": {
+      "class_type": "VAEDecodeTiled",
+      "inputs": {
+        "samples": [
+          "11",
+          0
+        ],
+        "vae": [
+          "3",
+          0
+        ],
+        "tile_size": 256,
+        "overlap": 64,
+        "temporal_size": 64,
+        "temporal_overlap": 8
+      }
+    },
+    "13": {
+      "class_type": "CreateVideo",
+      "inputs": {
+        "images": [
+          "12",
+          0
+        ],
+        "fps": 24.0
+      }
+    },
+    "14": {
+      "class_type": "SaveVideo",
+      "inputs": {
+        "video": [
+          "13",
+          0
+        ],
+        "filename_prefix": "07-01/raw",
+        "format": "mp4",
+        "format.codec": "h264"
+      }
+    },
+    "20": {
+      "class_type": "LoadImage",
+      "inputs": {
+        "image": "07-appearance.png"
+      }
+    },
+    "21": {
+      "class_type": "LoadVideo",
+      "inputs": {
+        "file": "07-guide.mp4"
+      }
+    },
+    "22": {
+      "class_type": "GetVideoComponents",
+      "inputs": {
+        "video": [
+          "21",
+          0
+        ]
+      }
+    }
+  },
+  "inputs": [
+    {
+      "path": "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/first-cut-v1/inputs/07-appearance.png",
+      "sha256": "13aa6ab2256b81ad2794dab3a31c170288236c3cd173d53908c4b017e7198869"
+    },
+    {
+      "path": "/Users/tidepool/.codex/worktrees/goji-girl-episode-2/goji/marketing/assets/goji-girl/episode-02/first-cut-v1/inputs/07-guide.mp4",
+      "sha256": "5f283f41e81403a5d7fda0ccac5892589c91a0ecce3ac2240577eaffd76f4ae7"
+    }
+  ],
+  "audio": "Separate original/reused SFX in edit; video VAE only",
+  "runtime_commit": "da8bd08e48deee74d9f6c3bc00aed365b00ec209",
+  "receipt": {
+    "prompt_id": "55847e14-10a8-4277-a908-4f6d009103a1",
+    "number": 8.0,
+    "node_errors": {}
+  },
+  "superseded_receipt": {
+    "prompt_id": "0f206b1a-f4c0-437f-bc1d-6d233fc0036e",
+    "number": 8,
+    "node_errors": {}
+  },
+  "steering_applied_at": 1795662516.589194,
+  "cancel_reason": "Conflicting generic on-foot character description removed after shot06 hallucinated an outside runner. Replace vehicle-only shot before spending another full render.",
+  "collected_at": 1795663190.7809181,
+  "outputs": {
+    "21": {
+      "images": [
+        {
+          "filename": "07-guide.mp4",
+          "subfolder": "",
+          "type": "input",
+          "metadata": {
+            "kind": "video",
+            "width": 288,
+            "height": 512,
+            "duration": 5.166666666666667,
+            "fps": 24.0,
+            "frame_count": 124
+          }
+        }
+      ],
+      "animated": [
+        true
+      ]
+    }
+  },
+  "videos": [],
+  "execution_started_at": 1795662952.516,
+  "completed_at": null,
+  "render_wall_seconds": null
+}
