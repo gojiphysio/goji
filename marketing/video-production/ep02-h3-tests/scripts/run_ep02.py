@@ -7,7 +7,8 @@ Variants (one change per step):
   A  prose prompt with exclusion list, Blender <Video 1>, Ref2V Turbo 4-step v0.1, 576x1024
   B  A with the six-section Ref2VA prompt
   C  B at 768x1344 with Ref2V Turbo 8-step v1.1 768p, 8 steps (shift 12/3, inferred; see weights record)
-  D  B with the Blender depth pass through Fun ControlNet Union instead of <Video 1>
+  D  B with the Blender depth pass through Fun ControlNet Union instead of <Video 1> (strength 1.0)
+  D2 D at ControlNet strength 2.0 (after D at 1.0 ignored the depth layout)
   CONT  continuation of the selected native T03 take (anchors its last 22 frames at frame_idx 0)
   P  smoke: 2 steps, 124 frames, 288x512, B graph (validates loading only; never scored)
 
@@ -55,7 +56,7 @@ def build(take):
     cont = variant == 'CONT'
     w, h = (768, 1344) if variant == 'C' else (288, 512) if smoke else (576, 1024)
     n = 124 if smoke else FRAMES['CONT' if cont else scene]
-    pkey = f'{scene[:3]}/{"B" if smoke else variant}'  # t02v2 reuses the T02 prompts; only the guide changes
+    pkey = f'{scene[:3]}/{"B" if smoke else "D" if variant == "D2" else variant}'  # t02v2 reuses the T02 prompts; only the guide changes
     prompt = PROMPTS[pkey]
     lora, steps = ('minimax_h3_ref2v_turbo_8step_v1.1_768p_comfyui_bf16.safetensors', 8) if variant == 'C' else \
                   ('minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors', 2 if smoke else 4)
@@ -96,10 +97,10 @@ def build(take):
 
     if variant in ('A', 'B', 'C', 'P'):
         g['6']['inputs']['ref_videos.ref_video_0'] = video_input(f'{scene}/layout', '<Video 1> Blender layout', '30', '31')
-    if variant == 'D':
+    if variant in ('D', 'D2'):
         ctrl = video_input(f'{scene}/depth', 'Fun ControlNet depth control_video', '30', '31')
         g['40'] = node('ModelPatchLoader', name='minimax_h3_fun_controlnet_union_pruned_bf16.safetensors')
-        g['41'] = node('MiniMaxH3FunControlNetApply', model=['5', 0], model_patch=['40', 0], vae=['3', 0], strength=1.0,
+        g['41'] = node('MiniMaxH3FunControlNetApply', model=['5', 0], model_patch=['40', 0], vae=['3', 0], strength=2.0 if variant == 'D2' else 1.0,
                        start_percent=0.0, end_percent=1.0, control_video=ctrl)
         g['7']['inputs']['model'] = ['41', 0]
         g['10']['inputs']['model'] = ['41', 0]

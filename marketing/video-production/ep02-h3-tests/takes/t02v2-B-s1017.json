@@ -1,6 +1,6 @@
 {
  "take": "t02v2-B-s1017",
- "status": "queued",
+ "status": "generated",
  "settings": {
   "scene": "t02v2",
   "variant": "B",
@@ -270,5 +270,65 @@
  },
  "private_dir": "/Users/tidepool/Projects/goji-ep02-runtime/takes/t02v2-B-s1017",
  "prompt_id": "d8e239ce-03e5-453f-b191-84512155ff13",
- "submitted": 1795758766.247661
+ "submitted": 1795758766.247661,
+ "wall_seconds": 1815.0,
+ "messages": [
+  [
+   "execution_start",
+   {
+    "prompt_id": "d8e239ce-03e5-453f-b191-84512155ff13",
+    "timestamp": 1795758766269
+   }
+  ],
+  [
+   "execution_cached",
+   {
+    "nodes": [
+     "1",
+     "2",
+     "3",
+     "4",
+     "5",
+     "9",
+     "10",
+     "20",
+     "21",
+     "22"
+    ],
+    "prompt_id": "d8e239ce-03e5-453f-b191-84512155ff13",
+    "timestamp": 1795758766275
+   }
+  ],
+  [
+   "execution_success",
+   {
+    "prompt_id": "d8e239ce-03e5-453f-b191-84512155ff13",
+    "timestamp": 1795760581267
+   }
+  ]
+ ],
+ "output": {
+  "path": "/Users/tidepool/Projects/goji-ep02-runtime/takes/t02v2-B-s1017/t02v2-B-s1017.mp4",
+  "sha256": "bb11cce385e9a3e9c96d001b85f01e0d5199d321cd72087e3bbe9d17e116c52c",
+  "probe": {
+   "width": 576,
+   "height": 1024,
+   "r_frame_rate": "24/1",
+   "nb_read_frames": "192"
+  }
+ },
+ "contact_frames": [
+  0,
+  17,
+  35,
+  52,
+  69,
+  87,
+  104,
+  122,
+  139,
+  156,
+  174,
+  191
+ ]
 }
