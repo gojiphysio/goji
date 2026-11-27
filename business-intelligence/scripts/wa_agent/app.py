@@ -67,7 +67,7 @@ from .policy import (AGENT, DRAFT, ESCALATE, HUMAN, LATE_CHANGE_H, OFF_TOPIC, PA
                      human_replied_since,
                      is_acknowledgement, is_positive_reaction, mask_customer_emails,
                      media_ping_due, on_human_message,
-                     reply_problems, set_mode)
+                     reply_problems, set_mode, unanswered_message)
 from .state import ChatLocks, append_history, make_store, mark_seen, note_outcome, parse_code
 from .whatsapp import (Echo, HistoryChunk, Inbound, Status, WhatsAppClient, parse_webhook,
                        verify_signature)
@@ -176,12 +176,16 @@ def webhook_with_url_token(token: str):
     return _dispatch()
 
 
-_HANDLERS = {"inbound": Inbound, "echo": Echo, "history": HistoryChunk}
+# "resumed" is never parsed from a webhook (_dispatch takes the first match,
+# "inbound"); it's queued by a resume to answer a message already recorded.
+_HANDLERS = {"inbound": Inbound, "echo": Echo, "history": HistoryChunk, "resumed": Inbound}
 
 
 def _run_event(kind: str, ev, received: float) -> None:
     if kind == "inbound":
         handle_inbound(ev, received)
+    elif kind == "resumed":
+        handle_inbound(ev, received, resumed=True)
     elif kind == "echo":
         handle_echo(ev)
     elif kind == "history":
@@ -439,10 +443,30 @@ def _staff_resume_pause(st, cmd: str, code: str, now: float, wa_id: str = "") ->
         st.save(state)
     _mode_event(state, old, now)
     who = staff.label(state.name, wa_id, state.code)
+    if cmd == "resume" and _answer_unanswered(st, state, now):
+        return (f"OK, I'm looking after {who} again. Their last message hasn't been "
+                f"answered, so I'm replying to it now.")
     if cmd == "resume":
         return (f"OK, I'm looking after {who} again. I won't message them now; I'll answer "
                 f"their next message.")
     return f"OK, I'll stay out of {who} until you text RESUME {state.code}."
+
+
+def _answer_unanswered(st, state, now: float) -> bool:
+    """After a resume or hand-back: if the customer's last message is still
+    unanswered and their 24h window is open (policy.unanswered_message), it's
+    answered now, through the normal pipeline and its gate, instead of on
+    their next message. A chat someone already replied in gets nothing.
+    Returns whether a reply was queued. Call it outside the chat's lock."""
+    h = unanswered_message(state, now)
+    if (not h or config.KILL_SWITCH or st.get_kill() or _not_live(st)
+            or state.wa_id in config.ALWAYS_HUMAN):
+        return False
+    ev = Inbound(wa_id=state.wa_id, msg_id=h["id"], ts=h["ts"], text=h["text"],
+                 name=state.name)
+    events.record("resume_answer", state.wa_id)
+    _queue_or_submit("resumed", ev, now)
+    return True
 
 
 def _staff_answer(st, client, model, wa_id: str, answer: str) -> str:
@@ -1052,23 +1076,27 @@ def _confirm_in_plato(ev) -> None:
         events.record("reminder_confirm_failed", ev.wa_id, reason=e.code)
 
 
-def handle_inbound(ev: Inbound, received: float) -> None:
-    if ev.kind == "reaction":  # staff reacting to a ping: nothing to do
+def handle_inbound(ev: Inbound, received: float, resumed: bool = False) -> None:
+    """`resumed`: staff just resumed the chat and `ev` is the customer's last
+    message, already recorded but never answered (_answer_unanswered). It
+    skips the recording steps and goes through the same gate and pipeline."""
+    if ev.kind == "reaction" and not resumed:  # staff reacting to a ping: nothing to do
         if ev.wa_id not in config.STAFF:
             _customer_reaction(ev)
         return
     if ev.wa_id in config.STAFF:
-        handle_staff(ev)
+        if not resumed:
+            handle_staff(ev)
         return
     st, client, model = _deps()
     now = time.time()
     rollout = config.resolve_rollout(st.get_rollout())
-    if _is_reset(ev):
+    if not resumed and _is_reset(ev):
         _reset_chat(st, client, ev)
         return
-    if _turbo_command(st, client, ev):
+    if not resumed and _turbo_command(st, client, ev):
         return
-    if ev.kind == "button" and (ev.text or "").strip().lower() == "confirm":
+    if not resumed and ev.kind == "button" and (ev.text or "").strip().lower() == "confirm":
         # The reminder template's Confirm tap: thank them, no model call.
         # (Reschedule goes to the agent like any message.)
         with locks(ev.wa_id):
@@ -1099,7 +1127,7 @@ def handle_inbound(ev: Inbound, received: float) -> None:
         events.record("reminder_confirmed", ev.wa_id, reason="button")
         _confirm_in_plato(ev)
         return
-    if ev.kind == "document" and ev.media_id:
+    if not resumed and ev.kind == "document" and ev.media_id:
         ev.text = documents.as_message(_read_document(client, ev), ev.filename, ev.caption)
     scope_patient = {}
     if rollout["contact_scope"] == "new_only":
@@ -1108,20 +1136,25 @@ def handle_inbound(ev: Inbound, received: float) -> None:
             scope_patient = _patient_for(st, ev.wa_id, peek)
     with locks(ev.wa_id):
         state = st.load(ev.wa_id)
-        if not mark_seen(state, ev.msg_id):
+        if resumed:  # still their last message, still unanswered?
+            if unanswered_message(state, now).get("id") != ev.msg_id:
+                events.record("superseded", ev.wa_id, reason="resume_already_answered")
+                return
+        elif not mark_seen(state, ev.msg_id):
             return
         old = state.mode
         # The go-live cut-off reads the latest message BEFORE this one.
         prior_last_at = max(state.last_customer_at, state.last_staff_at)
         had_record = has_record(state)
-        apply_idle_handback(state, now)
-        apply_pause_expiry(state, now)
-        state.last_customer_at = max(state.last_customer_at, ev.ts or now)
-        state.name = ev.name or state.name
-        state.code = state.code or st.next_code()
-        append_history(state, "customer", ev.text, ev.ts, ev.msg_id)
-        if ev.kind == "image" and ev.media_id:  # the id only: the photo is never stored
-            state.history[-1]["media"] = {"id": ev.media_id, "mime": ev.mime}
+        if not resumed:  # a resumed message was recorded when it came in
+            apply_idle_handback(state, now)
+            apply_pause_expiry(state, now)
+            state.last_customer_at = max(state.last_customer_at, ev.ts or now)
+            state.name = ev.name or state.name
+            state.code = state.code or st.next_code()
+            append_history(state, "customer", ev.text, ev.ts, ev.msg_id)
+            if ev.kind == "image" and ev.media_id:  # the id only: the photo is never stored
+                state.history[-1]["media"] = {"id": ev.media_id, "mime": ev.mime}
         blocked = _gate_now(st, state, now, rollout, prior_last_at=prior_last_at,
                             had_record=had_record, patient=scope_patient)
         _hold_pre_golive(state, blocked, now)
@@ -1130,7 +1163,9 @@ def handle_inbound(ev: Inbound, received: float) -> None:
         st.save(state)
         history = list(state.history)
     _mode_event(state, old, now)
-    events.record("inbound", ev.wa_id, kind=ev.kind, webhook_lag_s=round(received - ev.ts, 1))
+    if not resumed:
+        events.record("inbound", ev.wa_id, kind=ev.kind,
+                      webhook_lag_s=round(received - ev.ts, 1))
     if blocked:
         events.record("silent", ev.wa_id, reason=blocked.reason)
         return
@@ -1410,7 +1445,13 @@ def takeover(wa_id: str):
 
 @app.post("/admin/chats/<wa_id>/handback")
 def handback(wa_id: str):
-    return _set_chat_mode(wa_id, AGENT, "admin_handback")
+    """Like RESUME: an unanswered last message (24h window open) is answered now."""
+    resp = _set_chat_mode(wa_id, AGENT, "admin_handback")
+    if isinstance(resp, tuple):  # forbidden
+        return resp
+    st, _, _ = _deps()
+    answering = _answer_unanswered(st, st.load(wa_id), time.time())
+    return jsonify({"wa_id": wa_id, "mode": AGENT, "answering": answering})
 
 
 @app.post("/admin/chats/<wa_id>/pause")

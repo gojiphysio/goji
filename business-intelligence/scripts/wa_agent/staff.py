@@ -10,8 +10,9 @@ voice, sends it, hands the chat back to itself and shows her what it sent
 
 Every chat has a short code ("004") shown in pings, the status reply and the
 morning summary. Chris writing in a chat pauses the agent there; "resume 004"
-hands it back. Resuming sends the customer nothing: the agent just starts
-paying attention again from their next message.
+hands it back. If the customer's last message is unanswered (and under a day
+old), the agent answers it then; otherwise resuming sends the customer nothing
+and the agent answers their next message.
 
 Staff numbers (WA_AGENT_STAFF: Chris, optionally Charles) are never customers:
 app.handle_staff takes their messages before any patient lookup, model call
@@ -31,8 +32,9 @@ PARAM_MAX = 150             # the template's one parameter
 
 HELP = ("Goji assistant: swipe-reply to one of my pings with the team's answer (or text "
         "ANSWER 004 and the answer) and I'll pass it on and look after the chat again. "
-        "RESUME 004 hands chat #004 back to the assistant (it won't "
-        "message them, it just answers their next message; a chat you wrote in comes back "
+        "RESUME 004 hands chat #004 back to the assistant (if their last message hasn't "
+        "been answered it replies now, otherwise it answers their next one; a chat you "
+        "wrote in comes back "
         "by itself if they write 2 weeks after your last message), PAUSE 004 silences it in "
         "that chat for good, STOP pauses it in every chat, START turns it back on, STATUS "
         "for a summary, STATUS ALL to list every chat you're handling yourself.")
@@ -54,7 +56,8 @@ WELCOME = (
     "4. As soon as you write in a chat yourself, I go quiet there until you hand it back. "
     "If the customer writes again 2 weeks or more after your last message, I pick it up.\n"
     "5. To hand a chat back without a message, text RESUME and its number, e.g. RESUME "
-    "004. I won't message the customer; I'll just answer their next message.\n"
+    "004. If their last message hasn't been answered, I reply to it now; if it has, I "
+    "won't message them and I'll answer their next one.\n"
     "6. PAUSE 004 keeps me out of one chat for good. STOP pauses me in every chat, START "
     "turns me back on.\n"
     "7. Every morning at 7:30 there's an email summary, including the chats waiting for "

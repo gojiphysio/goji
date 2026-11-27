@@ -681,6 +681,18 @@ def customer_window_open(state: ChatState, now: float) -> bool:
     return bool(state.last_customer_at) and now - state.last_customer_at < CUSTOMER_WINDOW_S
 
 
+def unanswered_message(state: ChatState, now: float) -> dict:
+    """The customer's last message if nothing followed it (no reply from the
+    agent, a person or the team) and the 24h window is still open; else {}.
+    A resume answers it at once: a patient who wrote into a paused chat was
+    otherwise left waiting for their next message (owner, 27 Nov 2026). When
+    someone already replied, resuming still sends nothing."""
+    last = state.history[-1] if state.history else {}
+    if last.get("role") != "customer" or not last.get("id"):
+        return {}
+    return last if customer_window_open(state, now) else {}
+
+
 def human_replied_since(state: ChatState, since: float) -> bool:
     """The pre-send re-check: did a human write in this chat after `since`?
     (`waiting` doesn't count: Chris hasn't written yet.)"""

@@ -475,3 +475,18 @@ def test_the_booking_link_goes_after_the_times_once():
     own = f"{reply}\n\nBook here: {url}"
     assert add_booking_link(own, [], url, 1000.0) == own                  # model already did
     assert add_booking_link(reply, [], "", 1000.0) == reply
+
+
+def test_unanswered_message_only_when_nothing_followed_and_window_open():
+    from wa_agent.policy import unanswered_message
+    now = 1_000_000.0
+    st = ChatState(wa_id="x", last_customer_at=now - 600)
+    assert unanswered_message(st, now) == {}                          # no history
+    st.history = [{"role": "customer", "text": "hi", "ts": now - 600, "id": "m1"}]
+    assert unanswered_message(st, now)["id"] == "m1"
+    for role in ("agent", "staff", "team"):                           # someone replied
+        st.history.append({"role": role, "text": "ok", "ts": now - 500, "id": "m2"})
+        assert unanswered_message(st, now) == {}
+        st.history.pop()
+    st.last_customer_at = now - 2 * 86400                             # window closed
+    assert unanswered_message(st, now) == {}
