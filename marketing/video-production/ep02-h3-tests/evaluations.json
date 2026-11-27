@@ -353,5 +353,49 @@
   "style_note": "Indistinguishable from t02v2-B-s2026 (same seed): smooth 3D people. Look-anchor text has no visible effect on either seed.",
   "usable_seconds": 8.0,
   "usable_note": "Complete 8 s action, same as B on this seed."
+ },
+ "t02v2-C-s1017": {
+  "reviewed": "guide/take pairs at 10 times, bag/hand region every 5th frame 30-99, crop at f156 against t02v2-B-s1017 upscaled to 768x1344; normal-speed playback not watched by a human",
+  "scores": {
+   "cast_identity": "not assessed (no reviewed turnarounds); relative to Ep1 refs both leads recognisable",
+   "all_human_ps2_style": 1,
+   "spatial_structure": 1,
+   "motion_contacts": 2,
+   "camera": 2,
+   "temporal_continuity": 2
+  },
+  "failure_timecodes": [
+   "0.00-8.00 s: set rebuilt from <Picture 1> rather than the guide: wooden stools added in the near foreground, the GOJI logo wall replaced by plain shelving, floor becomes orange tiles"
+  ],
+  "passes": [
+   "hand on the handle through carry, chest lift and set-down; released ~f90",
+   "walk, stop, therapist turn and open-palm gesture follow the guide; fixed camera",
+   "sharper edges and prop detail than the 576x1024 take"
+  ],
+  "style_note": "Same smooth modern 3D people as the 576 draft; resolution improves, style does not.",
+  "usable_seconds": 8.0,
+  "usable_note": "Complete 8 s action with a set-fidelity defect (added foreground stools). 104 min versus ~30 min for the draft."
+ },
+ "t02v2-C-s2026": {
+  "reviewed": "guide/take pairs at 10 times, bag/hand region every 5th frame 30-99; normal-speed playback not watched by a human",
+  "scores": {
+   "cast_identity": "not assessed (no reviewed turnarounds); relative to Ep1 refs both leads recognisable",
+   "all_human_ps2_style": 1,
+   "spatial_structure": 1,
+   "motion_contacts": 2,
+   "camera": 2,
+   "temporal_continuity": 2
+  },
+  "failure_timecodes": [
+   "0.00-8.00 s: set rebuilt from <Picture 1> rather than the guide: glass entrance wall with the street outside on the left, extra chairs, the GOJI logo wall gone"
+  ],
+  "passes": [
+   "hand on the handle through carry, chest lift and set-down; released ~f90",
+   "walk, stop, therapist turn and open-palm gesture follow the guide; fixed camera",
+   "sharper detail than the 576 draft"
+  ],
+  "style_note": "Same smooth modern 3D people as the 576 draft; resolution improves, style does not.",
+  "usable_seconds": 8.0,
+  "usable_note": "Complete 8 s action with a set-fidelity defect on both C seeds. 101 min versus ~30 min for the draft."
  }
 }

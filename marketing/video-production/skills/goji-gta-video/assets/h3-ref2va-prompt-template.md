@@ -11,7 +11,9 @@ What changed from the original prompt:
 - The "No realistic humans, no new vehicles, no spawning…" list is gone. Each
   ban is restated as what does exist.
 - The Blender clip is limited to motion, layout and camera through
-  `attribute_transfer`. Its placeholder surfaces are stated as replaced.
+  `attribute_transfer`. Its placeholder surfaces are stated as replaced. In the
+  Episode 2 tests this held for subjects with a reference image, not for
+  text-only NPCs; render those as grey clay in the guide.
 - Cast, vehicles, street and look are separate Subjects, so later shots and
   episodes can reuse the same lines word for word.
 - The audio fields are filled in explicitly.

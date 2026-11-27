@@ -84,7 +84,12 @@ objects and required end state. Keep secondary NPC movement simple enough that
 the primary action remains readable. Test foreground occlusions deliberately.
 
 For a bag placement, track the hand–handle attachment, then the bag–surface
-contact and release. For a door, use its real hinge and rigid motion; check the
+contact and release. Keep a handled prop visible above any occluding edge in
+the camera view for the whole move. A bag lifted from behind a table edge read
+as rising out of the tabletop and floated free of the hand in three of four H3
+takes; lifting it to chest height before the table fixed it in all four.
+In a guide used as an H3 `<Video 1>`, give any person without a reference image
+neutral grey clay materials; coloured proxies are copied into the output. For a door, use its real hinge and rigid motion; check the
 door sweep against the person and vehicle. For a vehicle exit, check seat height,
 foot clearance, standing room and the character's route. A well-shaped still
 does not prove these transitions. Use IK/constraints or keyed animation as useful;
