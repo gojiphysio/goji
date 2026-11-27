@@ -1,0 +1,21 @@
+{
+  "review_method": "Exact frames at 0,1,2,3,4,5 seconds; full MP4 decoded. Human normal-speed acceptance pending.",
+  "decision": "reject_required_action",
+  "accepted_complete_actions": 0,
+  "positive": "Camera and broad low-poly rendering remain relatively stable in inspected frames.",
+  "failures": [
+    {
+      "time_seconds": 3,
+      "finding": "Woman rises onto/alongside the car instead of stepping back and holding the door."
+    },
+    {
+      "time_seconds": 4,
+      "finding": "Near-side panels/door change shape and opening; no separate driver exit is visible."
+    },
+    {
+      "time_seconds": 5,
+      "finding": "Required driver emergence and departure never complete."
+    }
+  ],
+  "limits": "Actual 448x800 canvas is below the runtime guide\u2019s recommended 480x832 quality target. Treat as a lower-resolution feasibility take, not a model quality ceiling or overall ranking. Proxy cast and one seed."
+}

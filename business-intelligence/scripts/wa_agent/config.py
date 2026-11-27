@@ -58,6 +58,10 @@ WA_WEBHOOK_URL_TOKEN = os.environ.get("WA_WEBHOOK_URL_TOKEN", "")
 KILL_SWITCH = _env_bool("WA_AGENT_KILL_SWITCH", False)
 # After a human (Chris) writes in a chat, the agent stays silent this long.
 HUMAN_IDLE_HANDBACK_S = int(os.environ.get("WA_AGENT_HUMAN_IDLE_S", str(24 * 3600)))
+# A chat paused because a person wrote in it goes back to the agent on the
+# customer's first message this long after that person's last message
+# (owner, 24 Nov 2026: 2 weeks). Deliberate pauses never lapse.
+HUMAN_PAUSE_S = int(os.environ.get("WA_AGENT_HUMAN_PAUSE_S", str(14 * 86400)))
 # Wait this long before sending, then re-check whether a human replied meanwhile.
 PRE_SEND_HOLD_S = float(os.environ.get("WA_AGENT_PRE_SEND_HOLD_S", "20"))
 # Wait this long after a customer message before calling the model, so a burst
@@ -91,7 +95,10 @@ INTENT_POLICY: dict[str, str] = {
     # The agent moves the appointment itself (goji-booking /internal/reschedule)
     # after the customer confirms; Chris only hears about failures.
     "reschedule": "auto",
-    "cancel": "draft",
+    # Same for cancelling with 24 hours' notice or more (goji-booking
+    # /internal/cancel); inside 24 hours the fee is Chris's call, so
+    # policy.decide drafts it (owner, 24 Nov 2026).
+    "cancel": "auto",
     "billing": "draft",
     "clinical": "draft",
     "complaint": "draft",
@@ -135,7 +142,7 @@ RED_FLAG_INTENTS = frozenset({"urgent", "priority"})
 SAFE_INTENTS = frozenset({"greeting", "faq", "pricing", "location_hours", "availability",
                           "service_fit", "person_check", "media_received", "off_topic",
                           "booking"})  # direct booking on from day one (owner's call)
-STAGE2_EXTRA = frozenset({"existing_appointment", "reschedule"})
+STAGE2_EXTRA = frozenset({"existing_appointment", "reschedule", "cancel"})
 STAGES = (0, 1, 2, 3)
 
 
@@ -222,11 +229,20 @@ FEEDBACK_SECRET = os.environ.get("WA_AGENT_FEEDBACK_SECRET", "")
 TEST_SHOW_DRAFTS = os.environ.get("WA_AGENT_TEST_SHOW_DRAFTS", "") == "1"
 # Numbers allowed to send /reset from WhatsApp (E.164 digits, comma-separated).
 # Any number may on a local run (WA_AGENT_STATE=memory); never anyone else.
-# Appointment confirmations for website bookings, as an approved template
-# (goji_appointment_confirmed). Off until the template is approved on the
-# clinic's real number.
-CONFIRMATIONS = _env_bool("WA_AGENT_CONFIRMATIONS", False)
+# Appointment confirmations as an approved template (goji_appointment_confirmed,
+# approved on the clinic's number by 25 Nov 2026). On by default; what turns a
+# send on is goji-booking's `send_template: true` on the booking-confirmed
+# callback, which it sets only once its confirmation email is live
+# (CONFIRMATIONS_MODE=live), so the WhatsApp and email confirmations go live
+# together. This flag stays as the agent-side off switch.
+CONFIRMATIONS = _env_bool("WA_AGENT_CONFIRMATIONS", True)
 CONFIRM_TEMPLATE = os.environ.get("WA_AGENT_CONFIRM_TEMPLATE", "goji_appointment_confirmed")
+# The same confirmation with a "Registration form" button (button 0, its URL
+# ends in goji-booking's form token), for a patient who still owes Plato's
+# registration form. Empty = off: set it to goji_appointment_confirmed_form
+# once Meta approves it (submitted 25 Nov 2026). Until then those patients get
+# CONFIRM_TEMPLATE, and the form link in their email.
+CONFIRM_FORM_TEMPLATE = os.environ.get("WA_AGENT_CONFIRM_FORM_TEMPLATE", "")
 # A long reply may go out as 2 WhatsApp messages, the way Chris writes (owner,
 # 24 Nov 2026). Capped because Meta bills each delivered service message past
 # 1,000 a month per number (since 1 Oct 2026); a reply under SPLIT_MIN_WORDS is
@@ -253,7 +269,12 @@ BOOKING_DRY_RUN = _env_bool("WA_AGENT_BOOKING_DRY_RUN", True)
 BOOKING_SIMULATE = _env_bool("WA_AGENT_BOOKING_SIMULATE", False)  # local, no private route
 # Shared with goji-booking for /internal/book and /internal/booking-confirmed.
 INTERNAL_TOKEN = os.environ.get("WA_AGENT_INTERNAL_TOKEN", "")
-BOOKING_CONFIRM_WINDOW_S = 30 * 60  # a pending booking expires if not confirmed
+# Times offered (or a booking stated back) stay open to a yes for a day. It was
+# 30 minutes: a customer who waited on the team's answer to a clinical question
+# picked a time 32 minutes after the offer and wasn't booked (25 Nov 2026).
+# goji-booking checks the slot live when booking, so a stale pick is
+# `slot_taken` ("that time was just taken"), never a double booking.
+BOOKING_CONFIRM_WINDOW_S = 24 * 3600
 # Local tone testing only (needs WA_AGENT_STATE=memory): made-up patient
 # context for test numbers, JSON {"6591234567": {"returning": true,
 # "first_name": "Sarah", "next_appointment": null, "last_visit": "2026-10-02"}}.

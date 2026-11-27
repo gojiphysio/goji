@@ -56,6 +56,9 @@ class Inbound:
     mime: str = ""
     filename: str = ""
     caption: str = ""
+    reply_to: str = ""     # the message id they swipe-replied to (context.id), or reacted to
+    emoji: str = ""        # a reaction's emoji; "" when they removed one
+    payload: str = ""      # a template quick-reply's payload, e.g. reminder_confirm:<appointment id>
 
 
 @dataclass
@@ -106,6 +109,9 @@ def _message_text(m: dict) -> tuple[str, str]:
         return reply.get("title", "[tapped a button]"), kind
     if kind == "button":
         return (m.get("button") or {}).get("text", "[tapped a button]"), kind
+    if kind == "reaction":
+        emoji = (m.get("reaction") or {}).get("emoji", "")
+        return (f"[reacted {emoji}]" if emoji else "[removed a reaction]"), kind
     caption = (m.get(kind) or {}).get("caption") if isinstance(m.get(kind), dict) else None
     text = NON_TEXT_PLACEHOLDERS.get(kind, f"[sent a {kind} message]")
     return (f"{text} {caption}" if caption else text), kind
@@ -182,19 +188,29 @@ def parse_webhook(payload: dict) -> list[Inbound | Echo | Status | HistoryChunk]
                 for m in value.get("messages") or []:
                     text, kind = _message_text(m)
                     media = m.get(kind) if isinstance(m.get(kind), dict) else {}
+                    react = (m.get("reaction") or {}) if kind == "reaction" else {}
                     events.append(Inbound(wa_id=m.get("from", ""), msg_id=m.get("id", ""),
                                           ts=float(m.get("timestamp") or 0), text=text,
                                           name=names.get(m.get("from"), ""), kind=kind,
                                           media_id=media.get("id", "") if kind != "text" else "",
                                           mime=media.get("mime_type", ""),
                                           filename=media.get("filename", ""),
-                                          caption=media.get("caption", "")))
+                                          caption=media.get("caption", ""),
+                                          reply_to=react.get("message_id") or
+                                          (m.get("context") or {}).get("id", ""),
+                                          emoji=react.get("emoji", ""),
+                                          payload=(m.get("button") or {}).get("payload", "")
+                                          if kind == "button" else ""))
                 for s in value.get("statuses") or []:
                     events.append(Status(msg_id=s.get("id", ""), status=s.get("status", ""),
                                          ts=float(s.get("timestamp") or 0),
                                          wa_id=s.get("recipient_id", "")))
             elif field_name == "smb_message_echoes":
                 for m in value.get("message_echoes") or []:
+                    if m.get("type") in ("reaction", "revoke"):
+                        # A 👍 or a deleted message from the Business app isn't
+                        # taking the chat over (a revoke paused chat #027, 25 Nov 2026).
+                        continue
                     text, _ = _message_text(m)
                     events.append(Echo(wa_id=m.get("to", ""), msg_id=m.get("id", ""),
                                        ts=float(m.get("timestamp") or 0), text=text))
@@ -232,13 +248,18 @@ class WhatsAppClient:
         return ((resp.get("messages") or [{}])[0]).get("id", "")
 
     def send_template(self, wa_id: str, name: str, params: list[str],
-                      language: str = "en") -> str:
+                      language: str = "en", url_buttons: dict[int, str] | None = None) -> str:
         """Send an approved template (the only way to message someone outside
-        the 24-hour window). Body parameters in order. Returns the message id."""
+        the 24-hour window). Body parameters in order; `url_buttons` maps a URL
+        button's index to the text filling its {{1}}. Returns the message id."""
+        components = [{"type": "body", "parameters": [
+            {"type": "text", "text": p} for p in params]}]
+        for index, text in sorted((url_buttons or {}).items()):
+            components.append({"type": "button", "sub_type": "url", "index": str(index),
+                               "parameters": [{"type": "text", "text": text}]})
         resp = self._post({"messaging_product": "whatsapp", "to": wa_id, "type": "template",
                            "template": {"name": name, "language": {"code": language},
-                                        "components": [{"type": "body", "parameters": [
-                                            {"type": "text", "text": p} for p in params]}]}})
+                                        "components": components}})
         return ((resp.get("messages") or [{}])[0]).get("id", "")
 
     def download_media(self, media_id: str) -> tuple[bytes, str]:

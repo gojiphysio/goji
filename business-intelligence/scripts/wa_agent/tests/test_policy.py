@@ -1,8 +1,11 @@
+import pytest
 from datetime import datetime
 
 from wa_agent.policy import (AGENT, DRAFT, ESCALATE, HUMAN, PAUSED, SEND, SGT, SILENT,
-                             ChatState, Proposal, apply_idle_handback, decide, gate,
-                             human_replied_since, in_clinic_hours, is_acknowledgement, on_human_message)
+                             ChatState, Decision, Proposal, apply_idle_handback,
+                             claims_cancelled, decide, gate,
+                             human_replied_since, in_clinic_hours, is_acknowledgement,
+                             mask_customer_emails, on_human_message, reply_problems)
 
 NOW = datetime(2026, 11, 18, 10, 0, tzinfo=SGT).timestamp()  # Wednesday 10am
 
@@ -31,12 +34,12 @@ def test_escalate_intents_escalate_even_if_model_did_not():
 
 
 def test_draft_and_unknown_intents_draft():
-    for intent in ("cancel", "billing", "clinical", "complaint", "something_new"):
+    for intent in ("billing", "clinical", "complaint", "something_new"):
         assert decide(prop(intent=intent)).action == DRAFT, intent
 
 
 def test_draft_intents_stay_drafts_even_if_the_model_escalates():
-    # Chris asked for complaints, billing, clinical and cancelling as drafts she checks.
+    # Chris asked for complaints, billing and clinical as drafts she checks.
     assert decide(prop(intent="complaint", escalate=True)).action == DRAFT
     assert decide(prop(intent="urgent", escalate=True)).action == ESCALATE
     assert decide(prop(intent="faq", escalate=True)).action == ESCALATE   # unsure on an auto intent
@@ -88,6 +91,36 @@ def test_human_message_pauses_until_resumed():
     assert s.mode == PAUSED and s.owner == ""
     assert not apply_idle_handback(s, NOW + 90 * 24 * 3600, idle_s=24 * 3600)
     assert s.mode == PAUSED
+
+
+def test_human_pause_lapses_two_weeks_after_the_last_human_message():
+    """Owner, 24 Nov 2026: a chat Chris stepped into goes back to the agent on
+    the customer's first message 2 weeks after her last message."""
+    from wa_agent.policy import AGENT, apply_pause_expiry
+    two_weeks = 14 * 24 * 3600
+    s = ChatState(wa_id="x", owner="agent", off_topic_strikes=2)
+    on_human_message(s, NOW)
+    on_human_message(s, NOW + 10 * 24 * 3600)            # she wrote again on day 10
+    assert not apply_pause_expiry(s, NOW + two_weeks + 60, pause_s=two_weeks)
+    assert s.mode == PAUSED                               # clock runs from her last message
+    assert apply_pause_expiry(s, NOW + 24 * 24 * 3600, pause_s=two_weeks)
+    assert s.mode == AGENT and s.mode_reason == "pause_expired"
+    assert s.owner == "agent" and s.off_topic_strikes == 0
+
+
+@pytest.mark.parametrize("reason", ["staff_paused", "admin_pause", "watchlist", "pre_golive_chat"])
+def test_deliberate_pauses_never_lapse(reason):
+    from wa_agent.policy import apply_pause_expiry
+    s = ChatState(wa_id="x", mode=PAUSED, mode_reason=reason, mode_since=NOW)
+    assert not apply_pause_expiry(s, NOW + 365 * 24 * 3600, pause_s=14 * 24 * 3600)
+
+
+def test_chris_writing_in_a_pre_golive_chat_starts_the_clock():
+    from wa_agent.policy import apply_pause_expiry
+    s = ChatState(wa_id="x", mode=PAUSED, mode_reason="pre_golive_chat", mode_since=NOW)
+    on_human_message(s, NOW + 3600)
+    assert s.mode_reason == "human_replied"
+    assert apply_pause_expiry(s, NOW + 15 * 24 * 3600, pause_s=14 * 24 * 3600)
 
 
 def test_unanswered_escalation_also_hands_back():
@@ -170,8 +203,8 @@ def test_a_short_clarifying_question_sends_even_below_the_confidence_bar():
     assert decide(two).action == DRAFT               # more than one question
     unsure = Proposal(reply="Is it today?", intent="reschedule", confidence=0.3, escalate=False)
     assert decide(unsure).action == DRAFT            # very unsure: still drafted
-    cancel = Proposal(reply="Which appointment?", intent="cancel", confidence=0.6, escalate=False)
-    assert decide(cancel).action == DRAFT            # draft-for-Chris intents stay drafts
+    billing = Proposal(reply="Which invoice?", intent="billing", confidence=0.6, escalate=False)
+    assert decide(billing).action == DRAFT           # draft-for-Chris intents stay drafts
 
 
 def test_bubbles_split_and_cap_at_three():
@@ -339,3 +372,106 @@ def test_a_long_unmarked_reply_splits_after_its_opening():
     times = "The earliest times are:\n* Today, 2:30pm\n* Wed 25 Nov, 9:00am"
     out = split_bubbles("Sorry to hear that, Sam.\n\n" + times + "\n\n" + body)
     assert out[0] == "Sorry to hear that, Sam." and out[1].startswith(times)
+
+
+def test_cancel_with_notice_is_the_agents_and_a_late_one_is_chris():
+    now = Proposal(reply="Hope all's well! Whenever you're ready, I'm happy to find you "
+                         "another time.", intent="cancel", confidence=0.9, escalate=False,
+                   hours_to_appointment=72, cancel={"date": "2026-11-27", "time": "15:00"})
+    assert decide(now).action == SEND
+    late = Proposal(reply="No worries! As it's your first late change, we'll waive the fee.",
+                    intent="cancel", confidence=0.9, escalate=False, hours_to_appointment=5)
+    assert decide(late) == Decision(DRAFT, "late_change")
+
+
+def test_a_cancel_reply_that_says_its_done_is_never_sent():
+    # Only the code's confirmation, from goji-booking's answer, says it's cancelled:
+    # with no appointment for the code to cancel, a reply saying so is held.
+    for reply in ("Done, I've cancelled it!", "Your appointment has been cancelled.",
+                  "All cancelled 😊"):
+        p = Proposal(reply=reply, intent="cancel", confidence=0.95, escalate=False,
+                     hours_to_appointment=72)
+        assert decide(p) == Decision(DRAFT, "claims_cancelled"), reply
+    assert not claims_cancelled("Shall I cancel it for you?")
+
+
+def test_the_customers_own_email_written_back_is_not_a_foreign_contact():
+    history = [{"role": "customer", "text": "Jamie Lee, Jamie.Lee@example.com"}]
+    reply = mask_customer_emails("Thanks! Sending it to jamie.lee@example.com", history)
+    assert reply == "Thanks! Sending it to your email" and not reply_problems(reply)
+    # Anyone else's address still fails the check.
+    other = mask_customer_emails("Email bob@example.com", history)
+    assert reply_problems(other) == ["email"]
+
+
+def test_two_page_links_per_conversation():
+    from wa_agent.policy import BREAK, drop_repeat_page_links
+    now = 1_800_000_000.0
+    page = "https://www.gojiphysio.com/getting-here/"
+    reply = ("Yes, that's right! We're just above Lentor MRT.\n\n"
+             f"Here's how to get here by MRT, car or taxi:\n{page}")
+    one = [{"role": "customer", "text": "Do you treat X?", "ts": now - 600},
+           {"role": "agent", "text": "Yes!\n\nRead more here:\n"
+                                     "https://www.gojiphysio.com/services/x/", "ts": now - 500}]
+    # Chris's page links count too.
+    two = one + [{"role": "staff", "text": "About Cheryl: https://www.gojiphysio.com/team/c/",
+                  "ts": now - 300}]
+    # The first and second page links of a conversation go out as written.
+    assert drop_repeat_page_links(reply, one[:1], now) == reply
+    assert drop_repeat_page_links(reply, one, now) == reply
+    # A third: the link and its intro line come out; the answer stays.
+    assert drop_repeat_page_links(reply, two, now) == \
+        "Yes, that's right! We're just above Lentor MRT."
+    # Booking links don't count towards the two.
+    booked = one + [{"role": "agent", "text": "Book here: https://go.gojiphysio.com/wa-book?x=1",
+                     "ts": now - 60}] * 3
+    assert drop_repeat_page_links(reply, booked, now) == reply
+    # A link sent over a day ago is a past conversation.
+    old = [dict(m, ts=now - 90_000) for m in two]
+    assert drop_repeat_page_links(reply, old, now) == reply
+    # Two page links in one reply with one slot left: the first stays.
+    both = f"Pilates:\nhttps://www.gojiphysio.com/services/p/\n\nGetting here:\n{page}"
+    assert drop_repeat_page_links(both, one, now) == \
+        "Pilates:\nhttps://www.gojiphysio.com/services/p/"
+    # Intro and link on one line, and a bubble break left dangling.
+    same_line = f"We're open 8am to 8pm.\n{BREAK}\nMore about Cheryl here: {page}"
+    assert drop_repeat_page_links(same_line, two, now) == "We're open 8am to 8pm."
+    # The booking go-link is never dropped here (when to send it is the prompt's rule).
+    book = "Here are the times.\n\nYou can also book here:\nhttps://go.gojiphysio.com/wa-book?s=1"
+    assert drop_repeat_page_links(book, two, now) == book
+    # A link in the middle of a long sentence is left rather than cut mid-thought.
+    inline = ("Our Pilates page at " + page + " explains the classes, the instructors, "
+              "the equipment we use and how the first session works in some detail.")
+    assert drop_repeat_page_links(inline, two, now) == inline
+
+
+def test_media_ping_due_once_per_batch():
+    from wa_agent.policy import media_ping_due
+    h = [{"role": "customer", "text": "I have a referral", "ts": 0, "id": "t"}]
+    assert not media_ping_due(h)                                         # text
+    h.append({"role": "customer", "text": "[sent a photo]", "ts": 100, "id": "p1"})
+    assert media_ping_due(h)                                             # first photo
+    h += [{"role": "agent", "text": "The team will take a look.", "ts": 120, "id": "a"},
+          {"role": "customer", "text": "[sent a photo]", "ts": 160, "id": "p2"}]
+    assert not media_ping_due(h)                                         # same batch
+    h += [{"role": "agent", "text": "The team will take a look.", "ts": 180, "id": "b"},
+          {"role": "customer", "text": "[sent a document: x.pdf] (couldn't be read)",
+           "ts": 2000, "id": "d"},
+          {"role": "customer", "text": "is that ok?", "ts": 2010, "id": "q"}]
+    assert media_ping_due(h)                     # 30 min later, a text after it too
+
+
+def test_the_booking_link_goes_after_the_times_once():
+    from wa_agent.policy import add_booking_link
+    url = "https://go.gojiphysio.com/wa-book?service=physiotherapy"
+    reply = "Next open times:\n* Mon 30 Nov, 5:00pm\n* Tue 1 Dec, 8:00am\n\nWhich suits you?"
+    out = add_booking_link(reply, [], url, 1000.0)
+    assert out == ("Next open times:\n* Mon 30 Nov, 5:00pm\n* Tue 1 Dec, 8:00am\n\n"
+                   f"Or book any open time yourself here: {url}\n\nWhich suits you?")
+    sent = [{"role": "agent", "text": out, "ts": 900.0}]
+    assert add_booking_link(reply, sent, url, 1000.0) == reply            # once
+    assert add_booking_link(reply, sent, url, 900.0 + 86401) != reply    # a new conversation
+    assert add_booking_link("Our hours are 8 to 8.", [], url, 1000.0) == "Our hours are 8 to 8."
+    own = f"{reply}\n\nBook here: {url}"
+    assert add_booking_link(own, [], url, 1000.0) == own                  # model already did
+    assert add_booking_link(reply, [], "", 1000.0) == reply

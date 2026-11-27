@@ -1,0 +1,8 @@
+{
+  "source_asset": "/Users/tidepool/Projects/goji-reel-github/marketing/assets/goji-reel-prototype/animation-v8/assets/02-four-door-seated.png",
+  "source_sha256": "f328b66bea7aa10691b43213bf038b8f4b78eb9bb98b40b759fa2c12b9706152",
+  "operation": "Lanczos resize to 576x1024, no generative image edit",
+  "prepared_sha256": "77f05c4247f1cbf45d99390f6c63a9f24d0ae1f91ace0c367ffad6600054dfaf",
+  "reference_clip": "/Users/tidepool/Projects/goji-reel-github/marketing/assets/goji-reel-prototype/animation-v8/clips/02-takeover.mp4",
+  "reference_note": "Episode 1 two-keyframe selected take, context only; not entered as a one-frame benchmark result."
+}

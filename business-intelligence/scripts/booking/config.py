@@ -60,7 +60,7 @@ CLINICIANS: dict[str, dict] = {
 # duration_min: appointment length used for slot occupancy (clinic books hourly;
 #   confirm 55 vs 60 with the clinic — using 60 to match observed real bookings).
 # variants: optional duration variants (e.g., paediatric physio offers 30-min and
-#   55-min options with different pricing). Keyed by variant id (e.g., "30min").
+#   55-min options with different pricing). Keyed by variant id (e.g., "40min").
 SERVICES: dict[str, dict] = {
     "physiotherapy": {
         "title": "Physiotherapy",
@@ -69,9 +69,11 @@ SERVICES: dict[str, dict] = {
         "duration_min": 60,
         "supports_home": True,
         "variants": {
-            "30min": {"duration_min": 30, "price": 160, "description": "Only if prescribed by physio"},
-            "45min": {"duration_min": 45, "price": 230, "description": "Review session"},
-            "55min": {"duration_min": 55, "price": 260, "description": "Initial consultation"},
+            # Price sheet 25 Nov 2026. 85 min on this type is also Mummy & Baby:
+            # _service_for tells them apart by the appointment's description.
+            "40min": {"duration_min": 40, "price": 230, "description": "Review session"},
+            "55min": {"duration_min": 55, "price": 260, "description": "Initial consultation or review"},
+            "85min": {"duration_min": 85, "price": 390, "description": "Extended review"},
         },
         "variant_focus": "paediatrics",  # variants only apply to this physio sub-type
     },
@@ -167,6 +169,18 @@ CLINICIAN_RESTRICTED_BLOCKS: dict[str, list[dict]] = {
 # live but who has not begun work yet; remove the entry once the date has passed.
 CLINICIAN_AVAILABLE_FROM: dict[str, date] = {
     "camille-tan": date(2026, 11, 1),  # first week of work is in November
+}
+
+# One-off extra working days: open a clinician online on a date their Plato rule
+# keeps closed (a day off in `restricted_days`). On that date the given hours
+# replace the rule hours, and any all-day patient-less block on their calendar is
+# ignored (the clinic notes these days as an all-day "Working from 1-6pm" block).
+# Real bookings, restricted blocks and the min/max lead time still apply.
+# Remove an entry once its date has passed.
+CLINICIAN_EXTRA_DAYS: dict[str, list[dict]] = {
+    "claire-ng": [
+        {"date": date(2026, 12, 17), "starttime": "13:00", "endtime": "18:00"},  # Thu
+    ],
 }
 
 # Home visits: Cheryl only, typed "Home Visit" in Plato regardless of service.

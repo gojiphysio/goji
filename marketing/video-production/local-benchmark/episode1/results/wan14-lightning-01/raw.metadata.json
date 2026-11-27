@@ -1,0 +1,103 @@
+{
+    "metadata_schema_version": 2,
+    "mflux_version": "0.40.1",
+    "model": "/Users/tidepool/Models/goji-benchmark/wan2.2-i2v-a14b-diffusers-8bit",
+    "base_model": "Wan-AI/Wan2.2-I2V-A14B-Diffusers",
+    "task": "image-to-video",
+    "seed": 1017,
+    "steps": 4,
+    "guidance": 1.0,
+    "guidance_2": 1.0,
+    "flow_shift": 5.0,
+    "solver": "unipc",
+    "height": 1024,
+    "width": 576,
+    "requested_height": 1024,
+    "requested_width": 576,
+    "canvas_policy": "exact-resize",
+    "resize_mode": "resize",
+    "source_image_height": 1024,
+    "source_image_width": 576,
+    "frames": 81,
+    "fps": 16,
+    "duration_seconds": 5.062,
+    "precision": "mlx.core.bfloat16",
+    "quantize": 8,
+    "generation_time_seconds": 1294.21,
+    "created_at": "2026-11-24T17:54:24.740327",
+    "image_path": "/Users/tidepool/.codex/worktrees/goji-video-workflow/goji/marketing/video-production/local-benchmark/episode1/inputs/start.png",
+    "video_path": null,
+    "prompt": "One continuous shot in the same textured GTA San Andreas PS2 game style as the supplied image. Preserve the character faces, clothing, adult proportions, painted surface textures, Singapore street, warm daylight and colour treatment. A fixed rear three-quarter GTA San Andreas gameplay camera. The maroon woman grabs the CLOSED taxi door handle, plants her feet and aggressively YANKS the front driver door wide open with a forceful backward step. Her left elbow and shoulder sweep backwards with the door, and her torso twists sharply from the effort. The door rotates around its FRONT hinge, remaining attached to the taxi. As it opens, the startled grey-shirt driver tips sideways out of the seat, falls through the open doorway and rolls onto his hip on the road. She releases the handle and stays upright beside the wide-open door. The driver ends seated on the ground, unharmed. Clear large arm and body motion by the woman; same solid car and fixed camera. The taxi is a four-door sedan: the rear passenger door stays CLOSED with its separate window and handle, the fixed B-pillar stays still. Only the front driver door opens, carrying its single wing mirror. Rear seat stays empty. No cuts, no camera movement, no new people, no photorealistic skin, no modern glossy rendering. Complete the door opening and driver fall within five seconds.",
+    "negative_prompt": null,
+    "lora_paths": [
+        "/Users/tidepool/Models/goji-benchmark/wan-lightning/Wan2.2-I2V-A14B-4steps-lora-rank64-Seko-V1/high_noise_model.safetensors",
+        "/Users/tidepool/Models/goji-benchmark/wan-lightning/Wan2.2-I2V-A14B-4steps-lora-rank64-Seko-V1/low_noise_model.safetensors"
+    ],
+    "lora_scales": [
+        1.0,
+        1.0
+    ],
+    "runtime_memory": {
+        "phase": "video-save-complete",
+        "timestamp": 1795514173.3429918,
+        "pid": 21436,
+        "platform": "macOS-27.0-arm64-arm-64bit",
+        "synchronized": true,
+        "mlx_active_memory_bytes": 279912074,
+        "mlx_peak_memory_bytes": 42694717160,
+        "mlx_cache_memory_bytes": 1371340800,
+        "process_rss_bytes": 662847488,
+        "process_peak_rss_bytes": 10351017984,
+        "darwin_physical_footprint_bytes": 2851867096,
+        "errors": {},
+        "darwin_peak_physical_footprint_bytes": 44297343152
+    },
+    "lora_application_reports": [
+        {
+            "requested_path": "/Users/tidepool/Models/goji-benchmark/wan-lightning/Wan2.2-I2V-A14B-4steps-lora-rank64-Seko-V1/high_noise_model.safetensors",
+            "resolved_path": "/Users/tidepool/Models/goji-benchmark/wan-lightning/Wan2.2-I2V-A14B-4steps-lora-rank64-Seko-V1/high_noise_model.safetensors",
+            "scale": 1.0,
+            "role": "high_noise_transformer",
+            "total_key_count": 1200,
+            "matched_key_count": 1200,
+            "unmatched_key_count": 0,
+            "applied_target_count": 400
+        },
+        {
+            "requested_path": "/Users/tidepool/Models/goji-benchmark/wan-lightning/Wan2.2-I2V-A14B-4steps-lora-rank64-Seko-V1/low_noise_model.safetensors",
+            "resolved_path": "/Users/tidepool/Models/goji-benchmark/wan-lightning/Wan2.2-I2V-A14B-4steps-lora-rank64-Seko-V1/low_noise_model.safetensors",
+            "scale": 1.0,
+            "role": "low_noise_transformer",
+            "total_key_count": 1200,
+            "matched_key_count": 1200,
+            "unmatched_key_count": 0,
+            "applied_target_count": 400
+        }
+    ],
+    "lora_applied_file_count": 2,
+    "lora_applied_target_count": 800,
+    "lora_target_roles": [
+        "high_noise_transformer",
+        "low_noise_transformer"
+    ],
+    "released_inactive_denoiser": true,
+    "prompt_tokens": 309,
+    "prompt_truncated": false,
+    "wan_decode_mode": "streamed_vae_slices",
+    "generation_time_scope": "pre-save",
+    "video_health": {
+        "file": {
+            "source": "/Users/tidepool/.codex/worktrees/goji-video-workflow/goji/marketing/video-production/local-benchmark/episode1/results/wan14-lightning-01/raw.mp4",
+            "frame_count": 81,
+            "width": 576,
+            "height": 1024,
+            "fps": 16.0,
+            "luma_min": 0.0,
+            "luma_max": 255.0,
+            "luma_mean": 101.49025076406973,
+            "mean_temporal_delta": 1.9623094260692597
+        }
+    },
+    "save_time_seconds": 108.54,
+    "total_generation_time_seconds": 1402.75
+}

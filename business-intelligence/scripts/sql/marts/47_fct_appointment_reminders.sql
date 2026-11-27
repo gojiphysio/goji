@@ -3,10 +3,9 @@
 -- Appointments due a 48-hour reminder email — the recipient list for the daily
 -- `appointment-reminders` Cloud Run Job (12:00 SGT, Asia/Singapore).
 --
--- Replaces a manual chore: Plato's reminder template can only be fired by hand
--- from its UI (its API exposes no notification/template endpoint), so someone
--- had to log in every day and click it for the sessions ~48h out. This view is
--- the "who gets one today" half of automating that away.
+-- Replaces Plato's own 48-hour reminder email (which the clinic turns off the
+-- day this job goes live; the two never run together). This view is the "who
+-- gets one today" half.
 --
 -- WINDOW — D+2 CALENDAR DATE, not a rolling 48 hours:
 --   appt_date = CURRENT_DATE('Asia/Singapore') + 2. Run at noon, Monday sends to

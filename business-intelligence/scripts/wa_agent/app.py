@@ -47,6 +47,7 @@ import hmac
 import json
 from datetime import datetime
 import logging
+import re
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
@@ -57,11 +58,15 @@ from . import (agent, booking_client, config, documents, events, learning, notif
                summary, tasks, tools)
 from .policy import (AGENT, DRAFT, ESCALATE, HUMAN, LATE_CHANGE_H, OFF_TOPIC, PAUSED, SEND,
                      SGT, SILENT, WAITING, WATCHLIST, as_one_message, split_bubbles,
-                     apply_idle_handback, apply_stage, handover_mode,
-                     check_late_change, customer_message, has_record, note_off_topic,
+                     apply_idle_handback, apply_pause_expiry, apply_stage, handover_mode,
+                     check_late_change, customer_message, customer_window_open, has_record,
+                     note_off_topic,
                      out_of_scope,
                      pre_golive_chat,
-                     decide, gate, human_replied_since, is_acknowledgement, on_human_message,
+                     add_booking_link, decide, drop_repeat_page_links, gate,
+                     human_replied_since,
+                     is_acknowledgement, is_positive_reaction, mask_customer_emails,
+                     media_ping_due, on_human_message,
                      reply_problems, set_mode)
 from .state import ChatLocks, append_history, make_store, mark_seen, note_outcome, parse_code
 from .whatsapp import (Echo, HistoryChunk, Inbound, Status, WhatsAppClient, parse_webhook,
@@ -250,7 +255,8 @@ def _warm_task() -> None:
 
 def handle_echo(ev: Echo) -> None:
     """A person wrote from the WhatsApp Business app: the chat pauses, and the
-    agent stays out of it until they resume it ("resume 004")."""
+    agent stays out of it until they resume it ("resume 004"), or until the
+    customer writes 14 days after the person's last message."""
     if ev.wa_id in config.STAFF:
         return  # the business number writing to a staff phone: not a customer chat
     st, _, _ = _deps()
@@ -297,10 +303,13 @@ def _note_rescue(st, intent: str, wa_id: str) -> None:
                     suggested_reply="", reason=reason, last_message="")
 
 
-def _ping_staff(who: str, note: str) -> bool:
+def _ping_staff(kind: str, who: str, note: str, wa_id: str = "", **quotes) -> bool:
     """A short WhatsApp to each staff number (WA_AGENT_STAFF): free-form inside
     their 24h window, else the approved template. True if any ping went out.
-    Never a customer's full number (staff.label / staff.redact)."""
+    Never a customer's full number (staff.label / staff.redact). With the
+    chat's `wa_id`, each ping's message id is kept so a swipe-reply to it
+    finds the chat (_staff_answer). `quotes` (last_message, sent_reply,
+    draft) go in the free-form ping only: the template has one line."""
     if not config.STAFF:
         return False
     st, client, _ = _deps()
@@ -308,13 +317,18 @@ def _ping_staff(who: str, note: str) -> bool:
     for number in sorted(config.STAFF):
         try:
             if staff.window_open(windows.get(number, 0.0), now):
-                client.send_text(number, staff.ping_text(who, note))
+                ping_id = client.send_text(number, staff.ping_text(kind, who, note, **quotes))
                 how = "text"
             else:
-                client.send_template(number, config.STAFF_TEMPLATE,
-                                     staff.template_params(who, note))
+                ping_id = client.send_template(number, config.STAFF_TEMPLATE,
+                                               staff.template_params(who, note, kind))
                 how = "template"
             ok = True
+            if wa_id:
+                try:
+                    st.note_ping(ping_id, wa_id)
+                except Exception as e:  # the ping went out; only swipe-reply is lost
+                    log.warning("ping id not kept: %s", e)
             events.record("staff_ping", "", reason=how)
         except Exception as e:
             log.warning("staff ping failed: %s", e)
@@ -329,7 +343,12 @@ def _alert(kind: str, *, customer: str, wa_id: str, who: str | None = None, **kw
     if who is None:
         st, _, _ = _deps()
         who = staff.label(customer, wa_id, st.load(wa_id).code if wa_id else "")
-    pinged = _ping_staff(who, kw.get("staff_note") or kw.get("reason") or "")
+    # A ping about a chat (named) can be answered by swipe-reply; one that
+    # isn't (a demotion notice, who="") must never route an answer to a customer.
+    pinged = _ping_staff(kind, who, kw.get("staff_note") or kw.get("reason") or "",
+                         wa_id if who else "", last_message=kw.get("last_message") or "",
+                         sent_reply=kw.get("sent_reply") or "",
+                         draft=kw.get("suggested_reply") or "")
     if kind in ("urgent", "sensitive", "priority") or not pinged:
         notify.send(kind, customer=customer, wa_id=wa_id, **kw)
 
@@ -342,9 +361,10 @@ def _sgt_day_start(now: float) -> float:
 
 def handle_staff(ev: Inbound) -> None:
     """A staff number wrote to the business number: never a customer (no
-    lookup, no model, no metrics). Opens their 24h window; stop / start /
-    status work even with the kill switch on."""
-    st, client, _ = _deps()
+    lookup or metrics for them). Opens their 24h window; stop / start /
+    status work even with the kill switch on. The model runs only for the
+    team's answer, on the chat it's for (_staff_answer)."""
+    st, client, model = _deps()
     now = time.time()
     with locks(ev.wa_id):
         state = st.load(ev.wa_id)  # only for webhook de-dupe
@@ -353,7 +373,19 @@ def handle_staff(ev: Inbound) -> None:
         st.save(state)
     st.note_staff_inbound(ev.wa_id, ev.ts or now)
     cmd, code = staff.parse_command(ev.text)
-    if not st.staff_welcomed(ev.wa_id) and cmd == "help":
+    answer = staff.parse_answer(ev.text)
+    pinged_chat = st.ping_chat(ev.reply_to) if ev.reply_to else ""
+    if answer is not None:  # "answer 004 ...": the code wins over a quoted ping
+        wa_id = st.find_by_code(answer[0])
+        reply = (_staff_answer(st, client, model, wa_id, answer[1]) if wa_id else
+                 f"I can't find chat #{answer[0]}. The number is in the ping or the morning summary.")
+    elif pinged_chat and staff.bare_command(ev.text) in ("resume", "pause"):
+        reply = _staff_resume_pause(st, staff.bare_command(ev.text), "", now,
+                                    wa_id=pinged_chat)
+    elif pinged_chat and not staff.bare_command(ev.text):
+        # A swipe-reply to a ping: whatever she wrote is the team's answer.
+        reply = _staff_answer(st, client, model, pinged_chat, ev.text or "")
+    elif not st.staff_welcomed(ev.wa_id) and cmd == "help":
         # Their first message: the walkthrough is the first thing they get from us.
         st.mark_staff_welcomed(ev.wa_id)
         reply = staff.WELCOME
@@ -371,11 +403,13 @@ def handle_staff(ev: Inbound) -> None:
         chats = [c for c in st.recent_chats(day) if c.wa_id not in config.STAFF]
         paused = [c for c in st.paused_chats() if c.wa_id not in config.STAFF
                   and c.mode_reason != WATCHLIST]  # the watch list is in the summary
+        groups = summary.status_groups(paused, now)
         reply = staff.status_text(kill=config.KILL_SWITCH or st.get_kill(),
                                   rollout=config.resolve_rollout(st.get_rollout()),
                                   waiting=summary.waiting_for_chris(chats, day),
-                                  paused=summary.paused_labels(paused),
-                                  live=not _not_live(st))
+                                  unanswered=groups["unanswered"],
+                                  hand_back=groups["hand_back"], others=groups["rest"],
+                                  show_all=code == "all", live=not _not_live(st))
     else:
         reply = staff.HELP
     try:
@@ -384,10 +418,11 @@ def handle_staff(ev: Inbound) -> None:
         log.warning("staff reply failed: %s", e)
 
 
-def _staff_resume_pause(st, cmd: str, code: str, now: float) -> str:
+def _staff_resume_pause(st, cmd: str, code: str, now: float, wa_id: str = "") -> str:
     """"resume 004": the agent watches chat #004 again from the customer's next
-    message (nothing is sent to them). "pause 004": it stays out of it."""
-    wa_id = st.find_by_code(code) if code else ""
+    message (nothing is sent to them). "pause 004": it stays out of it. A
+    bare "resume" swipe-replied to a ping passes that ping's chat as `wa_id`."""
+    wa_id = wa_id or (st.find_by_code(code) if code else "")
     if not wa_id:
         return f"I can't find chat #{code}. The number is in the ping or the morning summary."
     with locks(wa_id):
@@ -408,6 +443,107 @@ def _staff_resume_pause(st, cmd: str, code: str, now: float) -> str:
         return (f"OK, I'm looking after {who} again. I won't message them now; I'll answer "
                 f"their next message.")
     return f"OK, I'll stay out of {who} until you text RESUME {state.code}."
+
+
+def _staff_answer(st, client, model, wa_id: str, answer: str) -> str:
+    """The team's answer for chat `wa_id` (Chris's swipe-reply to a ping, or
+    "answer 004 ..."): the agent writes it up in its own voice, sends it, and
+    takes the chat back, so Chris doesn't type it out and then RESUME (owner,
+    24 Nov 2026). Any mode, red flags included: it's her explicit instruction.
+    Never past the kill switch, before go-live, or outside the customer's 24h
+    window (only the Business app can write then). If the model says it isn't
+    an answer for this chat, or its write-up fails the reply check, nothing is
+    sent and Chris is told why. Returns the message for Chris."""
+    state = st.load(wa_id)
+    who = staff.label(state.name, wa_id, state.code)
+
+    def refuse(why: str, reason: str) -> str:
+        events.record("staff_answer", wa_id, reason=f"refused:{reason}")
+        return staff.answer_refused_text(who, why)
+
+    if not answer.strip():
+        return (f"What should I tell {who}? Swipe-reply to the ping with the answer, or text "
+                f"ANSWER {state.code} and the answer.")
+    if config.KILL_SWITCH or st.get_kill():
+        return refuse("the assistant is stopped (text START first)", "kill_switch")
+    if _not_live(st):
+        return refuse("the assistant isn't live yet", "not_live")
+    if wa_id in config.ALWAYS_HUMAN:
+        return refuse("this number is set to always go to you", "always_human")
+    if not any(h["role"] == "customer" for h in state.history):
+        return refuse("I no longer have this chat's messages", "no_history")
+    if not customer_window_open(state, time.time()):
+        return refuse("their last message was over a day ago, so WhatsApp only lets the "
+                      "Business app message them now", "window_closed")
+    for _attempt in range(2):
+        started = time.time()
+        history = list(state.history)
+        latest = next((h["id"] for h in reversed(history) if h["role"] == "customer"), "")
+        patient = _patient_for(st, wa_id, state)
+        res = agent.propose(history, wa_id=wa_id, now=started, customer_name=state.name,
+                            client=model, patient=tools.describe_patient(patient),
+                            team_answer=answer)
+        p = res.proposal
+        events.record("proposal", wa_id, intent=p.intent, confidence=p.confidence,
+                      escalate=p.escalate, decision="staff_answer", reason="staff_answer",
+                      agent_ms=res.total_ms, steps=[s.__dict__ for s in res.steps],
+                      tools=",".join(res.tools_used), model=res.model_served, stop=res.stop,
+                      input_tokens=res.input_tokens, output_tokens=res.output_tokens,
+                      cache_read_tokens=res.cache_read_tokens,
+                      cache_write_tokens=res.cache_write_tokens, cost_usd=round(res.cost_usd, 5))
+        reply = drop_repeat_page_links((p.reply or "").strip(), history, time.time())
+        if p.failed:
+            return refuse("I couldn't write it up just now", "model_failed")
+        if p.escalate:
+            return refuse(p.escalation_reason or "it doesn't look like an answer for this chat",
+                          "not_an_answer")
+        problems = reply_problems(reply) if reply else ["empty"]
+        if problems:
+            return refuse("my write-up didn't pass the checks (" + ", ".join(problems) + ")",
+                          "reply_check")
+        with locks(wa_id):
+            state = st.load(wa_id)
+            if state.last_human_at > started:
+                return refuse("you've written in the chat yourself since", "human_replied")
+            if config.KILL_SWITCH or st.get_kill():
+                return refuse("the assistant was stopped", "kill_switch")
+            newest = next((h["id"] for h in reversed(state.history)
+                           if h["role"] == "customer"), "")
+            if newest != latest:
+                continue  # they wrote again while it was thinking: write it up again
+            try:
+                mid = _send_bubbles(client, Inbound(wa_id=wa_id, msg_id=newest,
+                                                    ts=time.time(), text=""), reply)
+            except Exception as e:
+                log.warning("staff answer send failed: %s", e)
+                events.record("send_failed", wa_id, reason=type(e).__name__)
+                return refuse("WhatsApp wouldn't send it", "send_failed")
+            sent_at = time.time()
+            append_history(state, "team", answer.strip(), sent_at)
+            append_history(state, "agent", as_one_message(reply), sent_at, mid)
+            old = state.mode
+            # Part still open: the agent keeps the chat but not that topic.
+            still_open = (p.staff_note or "").strip()
+            mode = WAITING if still_open else AGENT
+            if not set_mode(state, mode, "staff_answered", sent_at):
+                state.mode_reason, state.mode_since = "staff_answered", sent_at
+            state.pending_for_chris = still_open[:600]
+            state.owner = "agent"
+            state.off_topic_strikes = 0
+            state.pending_draft, state.last_auto = {}, {}
+            # Times offered before the handover are still on the table: the
+            # write-up usually asks which one suits, so the clock restarts.
+            for kind in ("pending_booking", "pending_move"):
+                if getattr(state, kind):
+                    setattr(state, kind, {**getattr(state, kind), "at": sent_at})
+            note_outcome(state, "staff_answer",
+                         summary.TEAM_PARTIAL if still_open else summary.TEAM_ANSWER, sent_at)
+            st.save(state)
+        _mode_event(state, old, sent_at)
+        events.record("staff_answer", wa_id, wa_msg_id=mid,
+                      reason="sent_partial" if still_open else "sent")
+        return staff.answer_sent_text(who, as_one_message(reply), still_open)
+    return refuse("they kept writing while I was writing it up", "superseded")
 
 
 def handle_history(chunk: HistoryChunk) -> None:
@@ -473,24 +609,63 @@ def _book_pending(state, ev: Inbound, received: float, fallback: str,
     pending = state.pending_booking or {}
     if not pending or pending.get("at", 0) >= received \
             or received - pending.get("at", 0) > config.BOOKING_CONFIRM_WINDOW_S:
-        events.record("book_skipped", ev.wa_id, reason="no_pending_booking")
-        return fallback, None, False
+        return _book_skipped(state, ev, "no_pending_booking", pending)
     # The customer either said yes to the booking stated back, or picked one of
     # the times offered in that earlier message. Nothing else gets booked.
     pick = (chosen.get("date", ""), chosen.get("time", ""))
     if pick != (pending.get("date"), pending.get("time")):
-        if pick not in booking_client.offered(pending.get("options", "")):
-            events.record("book_skipped", ev.wa_id, reason="time_not_offered")
-            return fallback, None, False
-        pending = {**pending, "date": pick[0], "time": pick[1],
-                   "full_name": pending.get("full_name") or chosen.get("full_name", "")}
+        # Any time offered in the chat in the last day, with the clinician it
+        # was offered with (the latest offer may have been someone else's).
+        who = booking_client.offered_with(pending.get("options", ""), *pick,
+                                          wanted=chosen.get("clinician", ""))
+        if who is None:
+            return _book_skipped(state, ev, "time_not_offered", pending)
+        pending = {**pending, "date": pick[0], "time": pick[1], "clinician": who.capitalize()}
+    # Terms the team agreed (billing, a custom price or length) are only
+    # taken when a person from the clinic has written in this chat: a
+    # customer's own say-so never reaches the Plato note as agreed.
+    arranged = (chosen.get("arranged") or pending.get("arranged") or "").strip()
+    pending = {**pending, "arranged": arranged if _team_spoke(state) else ""}
+    # Details given in the confirming message itself fill what's missing: the
+    # usual case is a customer who picked a time, was asked their name, and
+    # sent it. The time stays the one confirmed above.
+    pending = {**pending, **{k: chosen[k].strip() for k in ("full_name", "email", "address")
+                             if not (pending.get(k) or "").strip()
+                             and (chosen.get(k) or "").strip()}}
+    # A different email in the confirming message wins: it's their word (or
+    # the corrected one after _ask_email_again).
+    if (chosen.get("email") or "").strip():
+        pending = {**pending, "email": chosen["email"].strip()}
     if not booking_client.complete(pending):
-        events.record("book_skipped", ev.wa_id, reason="details_missing")
-        return fallback, None, False
+        missing = booking_client.missing_details(pending)
+        if missing and not pending.get("details_asked"):
+            return _ask_details(state, ev, pending, missing)
+        return _book_skipped(state, ev, "details_missing", pending)
     patient_id = tools.record_for_booking(state.patient or {}, pending.get("full_name", ""),
                                           pending.get("for_whom", ""))
+    check = booking_client.email_check(pending.get("email", ""))
+    if check:
+        # A mistyped email would bounce the confirmation: ask, and keep the
+        # time so their answer books it.
+        return _ask_email_again(state, ev, pending, check)
+    on_file = "" if (pending.get("email") or "").strip() else \
+        tools.contact_email(state.patient or {}, patient_id,
+                            pending.get("booked_by") or ev.name)
+    # The email on file (the patient's, else the texter's), so Plato's
+    # confirmation (and the registration form) still goes out.
+    sent = {**pending, "email": on_file} if on_file else pending
     try:
-        res = booking_client.book(pending, wa_id=ev.wa_id, patient_id=patient_id)
+        try:
+            res = booking_client.book(sent, wa_id=ev.wa_id, patient_id=patient_id)
+        except booking_client.BookingFailed as e:
+            if e.code != "bad_email":
+                raise
+            if on_file:   # Plato's own copy is off: book without it, ask nobody
+                sent = pending
+                res = booking_client.book(sent, wa_id=ev.wa_id, patient_id=patient_id)
+            else:
+                return _ask_email_again(state, ev, pending, booking_client.email_check(
+                    pending.get("email", ""), str(e)))
     except booking_client.BookingFailed as e:
         state.pending_booking = {}
         events.record("book_failed", ev.wa_id, reason=e.code)
@@ -505,15 +680,72 @@ def _book_pending(state, ev: Inbound, received: float, fallback: str,
                 "know and they'll sort it out with you shortly."), None, True
     events.record("booked", ev.wa_id, intent="booking",
                   reason="dry_run" if res.get("dry_run") else "agent")
-    first = (pending.get("full_name") or "").split(" ")[0]
-    for_other = (pending.get("for_whom") or "self").strip().lower() not in ("", "self")
-    return (booking_client.confirmation_text(res, first_name="" if for_other else first,
-                                             patient=first if for_other else ""),
+    return (booking_client.confirmation_text(
+                res, emailed=bool((sent.get("email") or "").strip())),
             {"reference": res["reference"], "date": res["date"], "time": res["time"],
              "with": res.get("clinician_name", ""), "service": res.get("service", ""),
              "dry_run": bool(res.get("dry_run")), "at": time.time(), "source": "whatsapp"},
             False)
 
+
+def _ask_email_again(state, ev: Inbound, pending: dict, question: str):
+    """The email given wouldn't reach them: ask again and keep the time, so the
+    answer books it (the pick is already their yes). Not a failure: no alert."""
+    state.pending_booking = {**pending, "email": "", "options": "", "at": time.time()}
+    events.record("book_skipped", ev.wa_id, reason="email_check")
+    return question, None, False
+
+
+
+def _offer_link(ev: Inbound, p) -> str:
+    """The booking link for the service a reply offers times for, or "" when
+    the reply offers none."""
+    b = p.booking or {}
+    if not booking_client.offered(b.get("options", "")):
+        return ""
+    focus = b.get("physio_focus") if b.get("service") == "physiotherapy" else ""
+    try:
+        return tools.booking_link({"service": b.get("service"),
+                                   **({"focus": focus} if focus else {})},
+                                  wa_id=ev.wa_id)["url"]
+    except tools.ToolError:
+        return ""
+
+
+def _team_spoke(state) -> bool:
+    """Has someone from the clinic written in this chat (in the Business app,
+    or an answer the assistant passed on)?"""
+    return any(h.get("role") in ("staff", "team") for h in state.history)
+
+
+def _ask_details(state, ev: Inbound, pending: dict, missing: list[str]):
+    """They picked a time but we don't have their name (or a home visit's
+    address): ask, and keep the time so their answer books it. 26 Nov 2026:
+    a pick with no name was handed to the team instead. Asked once: a second
+    confirmation still without it goes to the team."""
+    state.pending_booking = {**pending, "details_asked": True, "at": time.time()}
+    events.record("book_skipped", ev.wa_id, reason="details_asked")
+    return booking_client.details_question(pending, missing), None, False
+
+
+BOOK_HELD_REPLY = ("Thanks! I'm just getting the team to confirm this booking, and "
+                   "they'll message you shortly.")
+
+
+def _book_skipped(state, ev: Inbound, reason: str, pending: dict
+                  ) -> tuple[str, dict | None, bool]:
+    """The model said the customer confirmed a booking, but the code can't
+    make it. The customer must not be left thinking it's booked (the model's
+    own reply may say so), so they get a holding line and Chris is told."""
+    events.record("book_skipped", ev.wa_id, reason=reason)
+    what = " ".join(x for x in (pending.get("service", ""), pending.get("date", ""),
+                                pending.get("time", ""), pending.get("clinician", ""))
+                    if x)
+    _alert("escalated", customer=ev.name, wa_id=ev.wa_id,
+           staff_note=f"They confirmed a booking but it didn't go through ({reason}). "
+                      f"Please book and confirm with them: {what or 'see the chat'}",
+           suggested_reply="", reason=f"booking skipped: {reason}", last_message=ev.text)
+    return BOOK_HELD_REPLY, None, True
 
 BUBBLE_PAUSE_S = 1.2
 
@@ -578,6 +810,65 @@ def _move_pending(state, ev: Inbound, received: float, fallback: str,
             False)
 
 
+def _cancel_now(state, ev: Inbound, cancel: dict, follow_up: str) -> tuple[str, bool, bool]:
+    """Cancel the appointment the customer asked to cancel, in the same turn
+    (owner, 24 Nov 2026: no "shall I?" first). goji-booking checks it is
+    theirs and 24h+ away. The reply is the confirmation built from its answer
+    plus the model's follow-up line. Chris is only told if it fails.
+    Returns (reply, cancelled, failed)."""
+    ids = (state.patient or {}).get("patient_ids") or []
+    try:
+        res = booking_client.cancel(cancel, wa_id=ev.wa_id,
+                                    patient_id=ids[0] if len(ids) == 1 else "")
+    except booking_client.BookingFailed as e:
+        events.record("cancel_failed", ev.wa_id, reason=e.code)
+        _alert("escalated", customer=ev.name, wa_id=ev.wa_id,
+               staff_note=f"Couldn't cancel their appointment ({e.code}): "
+                          f"{cancel.get('date')} {cancel.get('time')}",
+               suggested_reply="", reason=f"cancel failed: {e}", last_message=ev.text)
+        if e.code == "late_change":
+            return ("Thanks for letting us know. As it's within 24 hours of your "
+                    "appointment, I've passed this to the team and they'll sort it out "
+                    "with you shortly."), False, True
+        return ("Sorry, I couldn't cancel it just now. I've let the team know and they'll "
+                "sort it out with you shortly."), False, True
+    events.record("cancelled", ev.wa_id, intent="cancel",
+                  reason="dry_run" if res.get("dry_run") else "agent")
+    if (state.booked or {}).get("date") == res.get("date") \
+            and (state.booked or {}).get("time") == res.get("time"):
+        state.booked = {}
+    state.patient_at = 0.0  # the record's next appointment has changed: look it up again
+    return booking_client.cancel_text(res, follow_up), True, False
+
+
+IMAGE_TYPES = frozenset({"image/jpeg", "image/png", "image/webp", "image/gif"})
+IMAGE_MAX_BYTES = 5 * 1024 * 1024  # the Messages API's per-image limit
+IMAGES_PER_TURN = 3
+
+
+def _batch_images(client, history: list[dict]) -> dict:
+    """The photos in the customer's latest messages (since the last reply),
+    {history line id: (bytes, mime)}, for the model to look at this turn
+    only; never stored. One that can't be fetched stays a "[sent a photo]"
+    line, and the model hands it to the team."""
+    out: dict = {}
+    for h in reversed(history):
+        if h["role"] != "customer" or len(out) >= IMAGES_PER_TURN:
+            break
+        media = h.get("media") or {}
+        if not media.get("id") or media.get("mime") not in IMAGE_TYPES:
+            continue
+        try:
+            data, mime = client.download_media(media["id"])
+        except Exception as e:
+            log.warning("photo download failed: %s", e)
+            continue
+        mime = mime if mime in IMAGE_TYPES else media["mime"]
+        if data and len(data) <= IMAGE_MAX_BYTES:
+            out[h["id"]] = (data, mime)
+    return out
+
+
 def _read_document(client, ev: Inbound) -> str:
     try:
         data, mime = client.download_media(ev.media_id)
@@ -588,6 +879,10 @@ def _read_document(client, ev: Inbound) -> str:
 
 
 PATIENT_CACHE_S = 6 * 3600
+# "No record" is kept only briefly: the number may become a patient minutes
+# later (booked here, on the website or at the desk), and a 6-hour "no record"
+# made the agent hand over a booking it had made itself (24 Nov 2026).
+NO_RECORD_CACHE_S = 10 * 60
 
 
 def _booked_note(state) -> str:
@@ -614,7 +909,8 @@ def _late_change_note(changes: list[dict], tagged: bool = False) -> str:
 def _patient_for(st, wa_id: str, state) -> dict:
     """Who this number is (returning-patient recognition), looked up in code by
     the chat's own number and cached on the chat for a few hours."""
-    if state.patient_at and time.time() - state.patient_at < PATIENT_CACHE_S:
+    ttl = PATIENT_CACHE_S if (state.patient or {}).get("returning") else NO_RECORD_CACHE_S
+    if state.patient_at and time.time() - state.patient_at < ttl:
         return state.patient
     patient = tools.patient_context(wa_id)
     if patient:
@@ -705,7 +1001,62 @@ def _hold_pre_golive(state, blocked, now: float) -> None:
         set_mode(state, PAUSED, "pre_golive_chat", now)
 
 
+def _customer_reaction(ev: Inbound) -> None:
+    """An emoji reaction is never a question: no model call, no reply, no
+    history line (one landing after a text would supersede that text's run).
+    A positive one (👍 😊 🙏) needs nobody; a negative or neutral one pings
+    staff, when the chat is the agent's (in Chris's own chats she sees it in
+    the Business app). Owner, 25 Nov 2026, after a 👍 pinged her."""
+    if not ev.emoji or is_positive_reaction(ev.emoji):
+        events.record("silent", ev.wa_id, reason="reaction")
+        return
+    st, _, _ = _deps()
+    with locks(ev.wa_id):
+        state = st.load(ev.wa_id)
+        if not mark_seen(state, ev.msg_id):
+            return
+        st.save(state)
+    blocked = gate(state, time.time(), kill_switch=config.KILL_SWITCH or st.get_kill(),
+                   agent_hours=config.resolve_rollout(st.get_rollout())["hours"],
+                   not_live=_not_live(st))
+    if state.owner != "agent" or blocked:
+        events.record("silent", ev.wa_id, reason="reaction")
+        return
+    target = next((h for h in state.history if ev.reply_to and h.get("id") == ev.reply_to), None)
+    on = ""
+    if target:
+        words = target["text"].split()
+        quote = " ".join(words[:12]).rstrip(".!?") + ("…" if len(words) > 12 else "")
+        on = f' to "{quote}"'
+    events.record("escalated", ev.wa_id, reason="reaction")
+    _alert("reaction", customer=state.name, wa_id=ev.wa_id, suggested_reply="",
+           staff_note=f"reacted {ev.emoji}{on}", reason="a negative or neutral reaction",
+           last_message=ev.text)
+
+
+def _confirm_in_plato(ev) -> None:
+    """Record a reminder's Confirm tap in Plato (code_Right "Confirmed"), the same
+    status Plato's own Confirm link sets, so the reminder and confirmation
+    emails stop asking. The appointment id rides the button payload
+    (reminder_confirm:<id>, set by scripts/reminders). Best effort: the patient
+    already has their thank-you, and staff see an unconfirmed slot at worst."""
+    prefix = "reminder_confirm:"
+    if not (ev.payload or "").startswith(prefix):
+        return
+    try:
+        res = booking_client.confirm(ev.payload[len(prefix):], wa_id=ev.wa_id)
+        events.record("reminder_confirmed_in_plato", ev.wa_id,
+                      already=bool(res.get("already")), dry_run=bool(res.get("dry_run")))
+    except booking_client.BookingFailed as e:
+        log.warning("plato confirm failed (%s)", e.code)
+        events.record("reminder_confirm_failed", ev.wa_id, reason=e.code)
+
+
 def handle_inbound(ev: Inbound, received: float) -> None:
+    if ev.kind == "reaction":  # staff reacting to a ping: nothing to do
+        if ev.wa_id not in config.STAFF:
+            _customer_reaction(ev)
+        return
     if ev.wa_id in config.STAFF:
         handle_staff(ev)
         return
@@ -725,6 +1076,8 @@ def handle_inbound(ev: Inbound, received: float) -> None:
             if not mark_seen(state, ev.msg_id):
                 return
             prior = max(state.last_customer_at, state.last_staff_at)
+            old = state.mode
+            apply_pause_expiry(state, now)
             state.last_customer_at = max(state.last_customer_at, ev.ts or now)
             append_history(state, "customer", "Confirm", ev.ts, ev.msg_id)
             state.code = state.code or st.next_code()
@@ -732,6 +1085,7 @@ def handle_inbound(ev: Inbound, received: float) -> None:
             if blocked:  # kill switch, Chris's chat, paused...: she sees the tap
                 _hold_pre_golive(state, blocked, now)
                 st.save(state)
+                _mode_event(state, old, now)
                 events.record("silent", ev.wa_id, reason=blocked.reason)
                 return
             try:
@@ -741,7 +1095,9 @@ def handle_inbound(ev: Inbound, received: float) -> None:
             except Exception as e:
                 log.warning("confirm reply failed: %s", e)
             st.save(state)
+        _mode_event(state, old, now)
         events.record("reminder_confirmed", ev.wa_id, reason="button")
+        _confirm_in_plato(ev)
         return
     if ev.kind == "document" and ev.media_id:
         ev.text = documents.as_message(_read_document(client, ev), ev.filename, ev.caption)
@@ -759,10 +1115,13 @@ def handle_inbound(ev: Inbound, received: float) -> None:
         prior_last_at = max(state.last_customer_at, state.last_staff_at)
         had_record = has_record(state)
         apply_idle_handback(state, now)
+        apply_pause_expiry(state, now)
         state.last_customer_at = max(state.last_customer_at, ev.ts or now)
         state.name = ev.name or state.name
         state.code = state.code or st.next_code()
         append_history(state, "customer", ev.text, ev.ts, ev.msg_id)
+        if ev.kind == "image" and ev.media_id:  # the id only: the photo is never stored
+            state.history[-1]["media"] = {"id": ev.media_id, "mime": ev.mime}
         blocked = _gate_now(st, state, now, rollout, prior_last_at=prior_last_at,
                             had_record=had_record, patient=scope_patient)
         _hold_pre_golive(state, blocked, now)
@@ -815,7 +1174,7 @@ def handle_inbound(ev: Inbound, received: float) -> None:
     earlier_late = st.get_late_changes(key)
     waiver_used = bool(earlier_late) or bool(patient.get("waiver_used"))
     res = agent.propose(history, wa_id=ev.wa_id, now=now, customer_name=ev.name,
-                        client=model,
+                        client=model, images=_batch_images(client, history),
                         pending_for_chris=state.pending_for_chris if state.mode == WAITING else "",
                         patient="; ".join(filter(None, [
                             tools.describe_patient(patient),
@@ -823,6 +1182,7 @@ def handle_inbound(ev: Inbound, received: float) -> None:
                             _booked_note(state)])))
     _schedule_warm()
     p = res.proposal
+    p.reply = mask_customer_emails(p.reply, history)
     check_late_change(p, patient.get("next_appointment"), time.time())
     d = decide(p, intent_policy=learning.effective_policy(config.stage_policy(rollout["stage"]),
                                                           st.get_autonomy()))
@@ -894,9 +1254,14 @@ def handle_inbound(ev: Inbound, received: float) -> None:
             events.record("silent", ev.wa_id, reason="kill_switch")
             return
         # A handover sends the holding reply; p.reply is Chris's draft (notice).
-        reply = customer_message(d, p, time.time())
-        booked, failed = None, False
-        if d.action == SEND and p.confirm_booking:
+        reply = drop_repeat_page_links(customer_message(d, p, time.time()), state.history,
+                                       time.time())
+        if d.action == SEND and not p.confirm_booking and not p.confirm_move:
+            reply = add_booking_link(reply, state.history, _offer_link(ev, p), time.time())
+        booked, failed, cancelled = None, False, False
+        if d.action == SEND and p.intent == "cancel" and booking_client.cancel_complete(p.cancel):
+            reply, cancelled, failed = _cancel_now(state, ev, p.cancel, reply)
+        elif d.action == SEND and p.confirm_booking:
             reply, booked, failed = _book_pending(state, ev, received, reply, p.booking)
         elif d.action == SEND and p.confirm_move:
             reply, booked, failed = _move_pending(state, ev, received, reply, p.move)
@@ -929,19 +1294,35 @@ def handle_inbound(ev: Inbound, received: float) -> None:
         state.pending_draft = {}
         watched = _watch(st, state, ev.wa_id, p.intent, sent_at)
         note_outcome(state, p.intent, "watch-listed" if watched
+                     else "cancelled" if cancelled
                      else _outcome(d, p, reply, booked, failed), sent_at)
         if booked:
             state.booked, state.pending_booking, state.pending_move = booked, {}, {}
+            state.patient_at = 0.0  # look again: the booking may have made a patient
         elif d.action == SEND and not p.confirm_move and p.move.get("old_date") and (
                 booking_client.move_complete(p.move) or booking_client.offered(p.move.get("options", ""))):
+            prev = state.pending_move or {}
+            same = (sent_at - prev.get("at", 0) <= config.BOOKING_CONFIRM_WINDOW_S and all(
+                prev.get(k, "") == p.move.get(k, "") for k in ("old_date", "old_time")))
             state.pending_move = {**{k: p.move.get(k, "") for k in booking_client.MOVE_FIELDS},
-                                  "options": p.move.get("options", ""), "at": sent_at}
+                                  "options": booking_client.merge_options(
+                                      p.move.get("options", ""),
+                                      prev.get("options", "") if same else ""),
+                                  "at": sent_at}
         elif d.action == SEND and not p.confirm_booking and (
                 booking_client.complete(p.booking)
                 or (p.booking.get("service") and booking_client.offered(p.booking.get("options", "")))):
             # Stated back, or times offered; only their next message can confirm.
+            # Times offered earlier for the same service stay pickable.
+            prev = state.pending_booking or {}
+            same = (sent_at - prev.get("at", 0) <= config.BOOKING_CONFIRM_WINDOW_S and all(
+                prev.get(k, "") == p.booking.get(k, "")
+                for k in ("service", "format", "for_whom")))
             state.pending_booking = {**{k: p.booking.get(k, "") for k in booking_client.FIELDS},
-                                     "options": p.booking.get("options", ""), "at": sent_at}
+                                     "options": booking_client.merge_options(
+                                         p.booking.get("options", ""),
+                                         prev.get("options", "") if same else ""),
+                                     "at": sent_at}
         st.save(state)
     if d.action == SEND:
         with _autonomy_lock:
@@ -956,8 +1337,15 @@ def handle_inbound(ev: Inbound, received: float) -> None:
     if d.action == SEND and p.intent == "priority":
         # Sent and flagged at once: Chris hears as the customer gets the reply.
         _alert("priority", **{**notice, "sent_reply": as_one_message(reply),
-                              "staff_note": f"Priority, getting worse: {p.staff_note}"})
+                              "staff_note": p.staff_note})
         _test_show(client, ev.wa_id, f"Chris is pinged now (priority): {p.staff_note}")
+    if d.action == SEND and p.intent == "media_received" and media_ping_due(history):
+        # The reply says the team will look at it, so someone is told (a
+        # handover pings below anyway). WhatsApp ping only; email just if
+        # the ping fails (_alert).
+        _alert("media", **{**notice, "sent_reply": as_one_message(reply),
+                           "staff_note": p.staff_note or "for the team to look at"})
+        _test_show(client, ev.wa_id, f"Chris is pinged now (media): {p.staff_note}")
     if d.action == SEND and config.INTENT_POLICY.get(p.intent) == "auto_notify":
         notify.send("fyi", **notice)
         _test_show(client, ev.wa_id, f"Chris would get an FYI email: {p.staff_note}")
@@ -1178,17 +1566,31 @@ def morning_summary():
                    | {"staff_pinged": pinged})
 
 
+_FORM_TOKEN = re.compile(r"^[0-9a-f]{16,64}\.[0-9a-f]{20}$")
+
+
 def _send_confirmation_template(client, wa_id: str, b: dict) -> str:
-    """A website booking from someone outside the 24-hour window: the
-    approved confirmation template (the booking form carries the opt-in).
-    Returns the message id, or "" when off or it failed."""
-    if not (config.CONFIRMATIONS and b.get("date") and b.get("time")):
+    """A booking made outside this chat (website or front desk) for someone
+    outside the 24-hour window: the approved confirmation template (the
+    booking form carries the opt-in; front-desk bookings are existing
+    patients). Only when goji-booking asks for it (`send_template: true`,
+    set once its confirmation email is live) and the agent's own switch is
+    on. Returns the message id, or "" when off or it failed."""
+    if not (config.CONFIRMATIONS and b.get("send_template") is True
+            and b.get("date") and b.get("time")):
         return ""
     when = booking_client._when(b["date"], b["time"])
     params = [b.get("first_name") or "there", (b.get("service") or "physiotherapy").lower(),
               when, (b.get("clinician_name") or "our team").split(" ")[0]]
+    # Still owes the registration form: the version with a form button, once
+    # approved. The token is goji-booking's signed form link (booking/formlink.py).
+    form = str(b.get("form_token") or "")
+    name, buttons = config.CONFIRM_TEMPLATE, None
+    if config.CONFIRM_FORM_TEMPLATE and _FORM_TOKEN.match(form):
+        name, buttons = config.CONFIRM_FORM_TEMPLATE, {0: form}
     try:
-        msg_id = client.send_template(wa_id, config.CONFIRM_TEMPLATE, params)
+        msg_id = client.send_template(wa_id, name, params, url_buttons=buttons) if buttons \
+            else client.send_template(wa_id, name, params)
     except Exception as e:
         log.warning("confirmation template failed: %s", e)
         events.record("confirmation_failed", wa_id, reason=type(e).__name__)
@@ -1243,13 +1645,13 @@ def booking_confirmed():
             pass
         elif b.get("source") != "whatsapp" and not in_window:
             # An old chat, outside the 24-hour window: free-form isn't allowed.
+            # (source "web" or "staff": a booking made outside this chat.)
             acked = bool(_send_confirmation_template(client, wa_id, b))
         if (not quiet and not chris_has_it and b.get("source") != "whatsapp"
                 and state.mode in (AGENT, WAITING) and in_window
                 and b.get("date") and b.get("time")):
-            text = booking_client.confirmation_text(
-                {**b, "dry_run": False}, first_name="").replace(
-                "You're booked!", "Thanks for booking! You're all set for", 1)
+            text = booking_client.confirmation_text({**b, "dry_run": False}).replace(
+                "All booked!", "Thanks for booking! You're all set for", 1)
             try:
                 msg_id = client.send_text(wa_id, text)
                 append_history(state, "agent", text, time.time(), msg_id)

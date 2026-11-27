@@ -13,12 +13,16 @@ A chat is in one of four modes:
 
 Ways into `human`: Chris writes in the chat (echo), the agent escalates, an
 admin takes over. Ways back to `agent`: HUMAN_IDLE_HANDBACK_S with no human
-message, or an admin hands back. `paused` only leaves by admin hand-back.
+message, or an admin hands back. `paused` leaves by hand-back, or, for a pause
+that came from a person writing in the chat, by `apply_pause_expiry`.
 
 Chris writing in a chat (an echo) pauses it: the agent is fully silent there
-until she resumes it ("resume 004" on WhatsApp, or the admin hand-back). The
-24h idle hand-back only applies to handovers the agent made that no person
-answered (Chris, 19 Nov 2026).
+until she resumes it ("resume 004" on WhatsApp, or the admin hand-back), or
+until HUMAN_PAUSE_S (14 days) pass after the last person's message, when the
+customer's next message goes to the agent (owner, 24 Nov 2026). The 24h idle
+hand-back only applies to handovers the agent made that no person answered
+(Chris, 19 Nov 2026). A deliberate pause (PAUSE 004, the admin pause, the
+watch list) never lapses.
 
 The go-live cut-off: at go-live, a chat with a message either way in the
 GOLIVE_LOOKBACK_DAYS (30) before go-live is Chris's (`pre_golive_chat`); its
@@ -39,6 +43,7 @@ SGT = timezone(timedelta(hours=8))
 AGENT, HUMAN, PAUSED, WAITING = "agent", "human", "paused", "waiting"
 LATE_CHANGE_H = 24  # the cancellation policy's notice period (gojiphysio.com/services/#faq)
 SEND, DRAFT, ESCALATE, SILENT = "send", "draft", "escalate", "silent"
+HUMAN_REPLIED = "human_replied"  # mode_reason: a person wrote in the chat (on_human_message)
 
 
 @dataclass
@@ -90,6 +95,7 @@ class Proposal:
     confirm_booking: bool = False                # the customer just confirmed the pending one
     move: dict = field(default_factory=dict)     # old/new date+time for moving an appointment
     confirm_move: bool = False
+    cancel: dict = field(default_factory=dict)   # date+time to cancel now; empty: not yet
     failed: bool = False  # agent._escalation: the model or a tool failed, nothing to judge
     holding_reply: str = ""  # the model's own handover message, sent when the code hands over
 
@@ -134,8 +140,30 @@ def on_human_message(state: ChatState, now: float) -> bool:
     state.last_human_at = now
     state.pending_for_chris = ""
     state.owner = ""
-    # Fully silent until she resumes it: no idle hand-back (Chris, 19 Nov 2026).
-    return set_mode(state, PAUSED, "human_replied", now)
+    if state.mode == PAUSED and state.mode_reason == "pre_golive_chat":
+        state.mode_reason = HUMAN_REPLIED  # she has stepped in: the 14-day clock applies
+    # Fully silent until she resumes it, or HUMAN_PAUSE_S after her last
+    # message (apply_pause_expiry); no 24h idle hand-back (Chris, 19 Nov 2026).
+    return set_mode(state, PAUSED, HUMAN_REPLIED, now)
+
+
+def apply_pause_expiry(state: ChatState, now: float,
+                       pause_s: int = config.HUMAN_PAUSE_S) -> bool:
+    """A chat paused because a person wrote in it goes back to the agent
+    `pause_s` after that person's last message (owner, 24 Nov 2026: 2 weeks).
+    Called on the customer's next message, so the customer is sent nothing
+    until they write. The clock runs from the latest person's message, so a
+    conversation Chris is still having never lapses mid-way. Deliberate pauses
+    (PAUSE 004, admin pause, watch list) and pre-go-live chats she hasn't
+    written in don't lapse. Returns True if the chat was handed back."""
+    if state.mode != PAUSED or state.mode_reason != HUMAN_REPLIED:
+        return False
+    if now - max(state.last_human_at, state.mode_since) < pause_s:
+        return False
+    state.owner = "agent"
+    state.off_topic_strikes = 0
+    state.pending_for_chris, state.pending_draft, state.last_auto = "", {}, {}
+    return set_mode(state, AGENT, "pause_expired", now)
 
 
 # Handovers after which the agent goes fully quiet rather than waiting: a red
@@ -217,6 +245,17 @@ _PHONE = re.compile(r"(?<![\w$.])(?:\+?65[\s-]?)?(\d{4}[\s-]?\d{4})(?![\w])")
 _PLACEHOLDER = re.compile(r"\[[^\[\]\n]{1,80}\]")
 
 
+def mask_customer_emails(reply: str, history: list[dict]) -> str:
+    """The customer's own email, written back to them, reads as "your email":
+    the contact check would otherwise hand the chat over for it."""
+    theirs = {e.lower() for h in history if h.get("role") == "customer"
+              for e in _EMAIL.findall(h.get("text") or "")} - ALLOWED_EMAILS
+    if not theirs:
+        return reply
+    return _EMAIL.sub(lambda m: "your email" if m.group(0).lower() in theirs else m.group(0),
+                      reply)
+
+
 def reply_problems(reply: str) -> list[str]:
     """Links, emails or phone numbers in a reply that aren't Goji's own, and
     [placeholders] left for Chris."""
@@ -248,6 +287,80 @@ def reply_problems(reply: str) -> list[str]:
     return problems
 
 
+PAGE_LINK_WINDOW_S = 86400  # one conversation, as for the greeting
+MAX_PAGE_LINKS = 2  # per conversation; the booking link doesn't count (owner)
+# www.gojiphysio.com pages, not the go.gojiphysio.com booking link.
+_PAGE_URL = re.compile(
+    r"(?:https?://(?:www\.)?|(?<![\w./-])(?:www\.)?)gojiphysio\.com/[^\s)>\]]*", re.I)
+_LINK_INTRO_MAX_WORDS = 15
+
+
+def drop_repeat_page_links(reply: str, history: list[dict], now: float) -> str:
+    """At most two website page links per conversation. Every answer ending
+    "You can read more here: <link>" reads as a bot (owner, 25 Nov 2026: a
+    link after every message in a live chat). Once we, or Chris, have sent
+    MAX_PAGE_LINKS page links in the last day, a further page link (with its
+    "read more here:" line) comes out of the reply. The booking go-link
+    neither counts nor is touched: when to send it is the prompt's rule. A
+    link inside a longer sentence is left alone rather than cut mid-thought."""
+    if not _PAGE_URL.search(reply or ""):
+        return reply
+    since = now - PAGE_LINK_WINDOW_S
+    left = MAX_PAGE_LINKS - sum(
+        len(_PAGE_URL.findall(h.get("text", ""))) for h in history
+        if h["role"] in ("agent", "staff") and h.get("ts", 0) >= since)
+    lines = reply.split("\n")
+    keep = [True] * len(lines)
+    for i, line in enumerate(lines):
+        if not _PAGE_URL.search(line):
+            continue
+        if left > 0:
+            left -= len(_PAGE_URL.findall(line))
+            continue
+        rest = _PAGE_URL.sub("", line).strip()
+        if len(rest.split()) > _LINK_INTRO_MAX_WORDS:
+            continue
+        keep[i] = False
+        j = i - 1  # the "You can read more here:" line above it
+        if not rest and j >= 0 and lines[j].rstrip().endswith(":") \
+                and len(lines[j].split()) <= _LINK_INTRO_MAX_WORDS:
+            keep[j] = False
+    out = "\n".join(line for line, k in zip(lines, keep) if k)
+    out = re.sub(r"\n{3,}", "\n\n", out).strip()
+    out = re.sub(rf"(\s*{re.escape(BREAK)}\s*)+$", "", out).strip()
+    return out or reply
+
+
+_BOOKING_LINK = re.compile(r"go\.gojiphysio\.com/", re.I)
+
+
+def add_booking_link(reply: str, history: list[dict], url: str, now: float) -> str:
+    """The first times offered in a conversation come with the booking link,
+    so a customer can pick any time themselves instead of going back and
+    forth (owner, 26 Nov 2026: a chat went through three lists of times and
+    no link; the email question added on 25 Nov had taken the link's place
+    at the end). It goes in its own paragraph straight after the list of
+    times, so the question stays last. Once per conversation: not when we,
+    or Chris, sent it in the last day."""
+    if not url or not reply or _BOOKING_LINK.search(reply):
+        return reply
+    since = now - PAGE_LINK_WINDOW_S
+    if any(_BOOKING_LINK.search(h.get("text", "")) for h in history
+           if h["role"] in ("agent", "staff") and h.get("ts", 0) >= since):
+        return reply
+    lines = reply.split("\n")
+    bullets = [i for i, line in enumerate(lines) if line.lstrip().startswith(("* ", "- ", "• "))]
+    if not bullets:
+        return reply     # no list of times: nothing to pair it with
+    last = bullets[-1]
+    link = f"Or book any open time yourself here: {url}"
+    rest = lines[last + 1:]
+    while rest and not rest[0].strip():
+        rest = rest[1:]
+    out = lines[:last + 1] + ["", link] + (["", *rest] if rest else [])
+    return "\n".join(out)
+
+
 _ACK_WORD = (r"(ok+(ay)?|k+|thanks?( you)?( so much)?|thank u|thx|ty|tq|noted|alright|sure|"
              r"great|cool|got it|will do|see you( then| soon)?|perfect|nice|awesome)")
 # One or more acknowledgement words ("ok thanks!", "noted, thank you"), then
@@ -264,6 +377,19 @@ def is_acknowledgement(text: str, history: list[dict]) -> bool:
     t = text.strip()
     prior_role = history[-2]["role"] if len(history) >= 2 else ""
     return bool(t) and bool(_ACK.fullmatch(t)) and prior_role in ("agent", "staff")
+
+
+# Reactions that need nobody (owner, 25 Nov 2026). Anything else, negative
+# or neutral (👎 😡 😢 😮 🤔 😅), pings staff. Skin tones and the emoji
+# variation selector are ignored, so 👍🏽 and ❤️ count.
+POSITIVE_REACTIONS = frozenset(
+    "👍 👌 🙏 🙌 👏 💪 🤝 🫶 ❤ ♥ 🧡 💛 💚 💙 💜 🤍 🤎 🩷 🩵 💕 💖 💗 💓 💞 💝 "
+    "😊 🙂 ☺ 😀 😃 😄 😁 😆 😂 🤣 🥰 😍 😘 🤗 😇 🤩 🥳 😻 🎉 ✨ ⭐ 🌟 💯 ✅ ✔ 🔥".split())
+_EMOJI_MODIFIERS = re.compile("[\U0001F3FB-\U0001F3FF\uFE0F]")
+
+
+def is_positive_reaction(emoji: str) -> bool:
+    return _EMOJI_MODIFIERS.sub("", emoji or "") in POSITIVE_REACTIONS
 
 
 BREAK = "<break>"
@@ -337,6 +463,33 @@ def note_off_topic(state: ChatState, intent: str, now: float,
     return state.off_topic_strikes >= limit and set_mode(state, PAUSED, WATCHLIST, now)
 
 
+# Customer messages that carry something for the team to look at. When the
+# agent can't use one it says the team will take a look (media_received) and
+# staff are pinged (owner, 25 Nov 2026: the agent told a customer "the team
+# will take a look" at her referral photos and no one was told).
+TEAM_LOOKS_AT = ("[sent a photo", "[sent a video", "[sent a voice note", "[sent a document")
+MEDIA_PING_WINDOW_S = 10 * 60
+
+
+def media_ping_due(history: list[dict], window_s: float = MEDIA_PING_WINDOW_S) -> bool:
+    """Whether the customer's latest messages (since the last reply) hold a
+    photo, video, voice note or document staff haven't heard about. Several
+    sent together get one ping: none if another came in the `window_s`
+    before the first of these."""
+    def is_media(h: dict) -> bool:
+        return h["role"] == "customer" and (h.get("text") or "").startswith(TEAM_LOOKS_AT)
+
+    start = len(history)
+    while start and history[start - 1]["role"] == "customer":
+        start -= 1
+    batch = [h for h in history[start:] if is_media(h)]
+    if not batch:
+        return False
+    first = batch[0].get("ts") or 0
+    return not any(is_media(h) and 0 <= first - (h.get("ts") or 0) <= window_s
+                   for h in history[:start])
+
+
 def hours_until(appointment: dict | None, now: float) -> float:
     """Hours from `now` to a {date: YYYY-MM-DD, time: HH:MM} SGT appointment;
     -1 if there isn't one or it can't be read."""
@@ -400,10 +553,16 @@ def decide(proposal: Proposal, *, intent_policy: dict[str, str] = config.INTENT_
         # "I've cancelled it"), so the code's holding reply goes out instead.
         return Decision(ESCALATE, f"intent:{proposal.intent}",
                         holding=proposal.intent not in MODEL_HANDOVER_INTENTS)
-    if proposal.intent == "reschedule" and 0 <= proposal.hours_to_appointment < LATE_CHANGE_H:
+    if proposal.intent in ("reschedule", "cancel") \
+            and 0 <= proposal.hours_to_appointment < LATE_CHANGE_H:
         # Inside the 24-hour policy: whether the $50 fee applies or is waived
         # is Chris's call, so she checks the reply first.
         return Decision(DRAFT, "late_change")
+    if proposal.intent == "cancel" and not _names_appointment(proposal.cancel) \
+            and claims_cancelled(proposal.reply):
+        # Only the code's confirmation, built from goji-booking's answer, may
+        # say it's cancelled; with no appointment to cancel, nothing was.
+        return Decision(DRAFT, "claims_cancelled")
     if not proposal.reply.strip():
         return Decision(DRAFT, "empty_reply")
     problems = reply_problems(proposal.reply)
@@ -419,6 +578,22 @@ def decide(proposal: Proposal, *, intent_policy: dict[str, str] = config.INTENT_
     if rule in ("auto", "auto_notify"):
         return Decision(SEND, f"intent:{proposal.intent}")
     return Decision(DRAFT, f"intent:{proposal.intent}")
+
+
+_CLAIMS_CANCELLED = re.compile(
+    r"\b(i'?ve|we'?ve|i have|we have|has been|have been|is now|it's|it is|all)\s+cancell?ed\b", re.I)
+
+
+def _names_appointment(c: dict | None) -> bool:
+    """A cancel the code will act on (booking_client.cancel_complete's shape)."""
+    c = c or {}
+    return bool(re.fullmatch(r"\d{4}-\d{2}-\d{2}", c.get("date", ""))
+                and re.fullmatch(r"\d{2}:\d{2}", c.get("time", "")))
+
+
+def claims_cancelled(reply: str) -> bool:
+    """The reply says an appointment is cancelled ("I've cancelled it")."""
+    return bool(_CLAIMS_CANCELLED.search(reply or ""))
 
 
 # Intents the model is instructed to answer with a handover message (red flag
@@ -495,6 +670,15 @@ def with_team_line(reply: str) -> str:
     if m:
         first, rest = m.group(1), m.group(2) + (sep + rest if sep else "")
     return f"{first}\n\n{TEAM_LINE}" + (f"\n\n{rest}" if rest else "")
+
+
+CUSTOMER_WINDOW_S = 23 * 3600  # Meta's free-form window is 24h; keep a margin
+
+
+def customer_window_open(state: ChatState, now: float) -> bool:
+    """May the API send this customer free-form text? Only within 24h of their
+    last message; after that only a template, or Chris in the Business app."""
+    return bool(state.last_customer_at) and now - state.last_customer_at < CUSTOMER_WINDOW_S
 
 
 def human_replied_since(state: ChatState, since: float) -> bool:

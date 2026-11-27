@@ -197,6 +197,14 @@ def create_booking(plato, draft: dict, *, now: datetime | None = None,
     notes = (draft.get("notes") or "").strip()[:1000]
     _require(not _TAG_RE.search(notes) and not _TAG_RE.search(address),
              "Please remove the < and > characters from your note.")
+    # Terms the clinic agreed in a WhatsApp chat (billing to a company or
+    # insurer, a custom price or length): the assistant passes on what the
+    # team said, so it's written apart from the patient's own note. Only the
+    # internal route sends it; the website form can't set it.
+    arranged = ((draft.get("arranged") or "").strip()[:300]
+                if source == "whatsapp" else "")
+    _require(not _TAG_RE.search(arranged),
+             "Please remove the < and > characters from your note.")
 
     # Physiotherapy sub-type the patient chose (website's "What type of
     # physiotherapy?" step). Only meaningful for physiotherapy. `focus_label` is
@@ -206,7 +214,7 @@ def create_booking(plato, draft: dict, *, now: datetime | None = None,
     focus_label = PHYSIO_FOCUS_LABELS.get(focus_id, "")
     focus_clinicians = PHYSIO_FOCUS_CLINICIANS.get(focus_id)
 
-    # Duration variant (e.g., "30min" or "55min" for paediatric physiotherapy).
+    # Duration variant (e.g., "40min" or "55min" for paediatric physiotherapy).
     # Only meaningful for services that define variants. Extracted from draft for
     # availability calculations and used when creating the Plato appointment.
     variant = (draft.get("variant") or "").strip() if svc.get("variants") else ""
@@ -271,7 +279,8 @@ def create_booking(plato, draft: dict, *, now: datetime | None = None,
                 continue
             if dry_run:
                 # Everything above ran for real; stop before the only write.
-                ids, reference = [], "DRYRUN-" + uuid.uuid4().hex[:6].upper()
+                ids, visit_id = [], ""
+                reference = "DRYRUN-" + uuid.uuid4().hex[:6].upper()
             else:
                 # WhatsApp bookings are linked to the patient's own record: the
                 # one the assistant matched by name AND number, or a new record
@@ -286,7 +295,8 @@ def create_booking(plato, draft: dict, *, now: datetime | None = None,
                 ids, visit_id = _create_appointments(
                     plato, svc, cid, day, time_, home, name, phone, email, address,
                     notes, clinician_requested, focus_label, variant,
-                    booked_via=BOOKED_VIA.get(source, "website"), patient_id=patient_id)
+                    booked_via=BOOKED_VIA.get(source, "website"), patient_id=patient_id,
+                    arranged=arranged)
                 reference = "GOJI-" + visit_id[-6:].upper()
             return {
                 "ok": True,
@@ -294,6 +304,10 @@ def create_booking(plato, draft: dict, *, now: datetime | None = None,
                 "dry_run": dry_run,
                 "source": source,
                 "appointment_ids": ids,
+                # The patient's own appointment (not a home visit's travel
+                # legs): what the confirmation email and its invite key on.
+                "visit_id": visit_id,
+                "duration_min": _duration_min(svc, variant),
                 "clinician_id": cid,
                 "clinician_name": CLINICIANS[cid]["name"],
                 # Matched clinician's inbox, so the admin email can CC them.
@@ -312,10 +326,22 @@ def create_booking(plato, draft: dict, *, now: datetime | None = None,
     raise last_err or BookingError("That time is no longer available.", "slot_taken")
 
 
+def _duration_min(svc: dict, variant: str = "") -> int:
+    """Session length: the variant's when it has one, else the service's."""
+    if variant and svc.get("variants", {}).get(variant):
+        return svc["variants"][variant]["duration_min"]
+    return svc["duration_min"]
+
+
 def _create_patient(plato, name: str, phone: str, email: str = "") -> str:
     """A new Plato patient for a WhatsApp booking (the patient may not be the
-    person texting; the texter's number is the contact). Returns its id."""
-    payload = {"name": name, "handphone": phone, **({"email": email} if email else {})}
+    person texting; the texter's number is the contact). Returns its id.
+
+    The patient's number is `telephone`. `handphone` is the appointment's
+    field: Plato drops it from a patient without an error, so until 26 Nov
+    2026 every patient made here had no number in Plato, and the nightly
+    rebuild then blanked the one we had written to dim_patient_contact."""
+    payload = {"name": name, "telephone": phone, **({"email": email} if email else {})}
     try:
         r = plato.post("patient", payload) or {}
     except Exception as e:
@@ -338,21 +364,22 @@ def _post(plato, payload: dict) -> str:
 def _create_appointments(plato, svc, cid, day, time_, home, name, phone, email,
                          address, notes="", clinician_requested=False,
                          focus_label="", variant="",
-                         booked_via="website", patient_id: str = "") -> tuple[list[str], str]:
+                         booked_via="website", patient_id: str = "",
+                         arranged: str = "") -> tuple[list[str], str]:
     """Create the appointment(s). Returns (all_ids, visit_id). Rolls back on any
     failure so a partial home visit never lingers."""
     clin = CLINICIANS[cid]
     color, doctor = clin["calendar"], clin["doctor"]
     # Duration: use variant duration if provided and available, else base service duration.
-    duration_min = svc["duration_min"]
-    if variant and svc.get("variants", {}).get(variant):
-        duration_min = svc["variants"][variant]["duration_min"]
-    dur = duration_min
+    dur = _duration_min(svc, variant)
     # Physiotherapy sub-type, so the clinic sees what the session is for (the
     # Plato type is the same for every physio booking).
     focus_line = f"\nType: {focus_label}" if focus_label else ""
     # Patient's condition note, appended to the visit description when present.
     note_line = f"\nCondition: {notes}" if notes else ""
+    # What the clinic agreed with them in the chat (WhatsApp only).
+    if arranged:
+        note_line += f"\nAgreed with the clinic: {arranged}"
     # Flag how the clinician was assigned so the clinic can reallocate. Home
     # visits are Cheryl-only, so the basis line only applies in-clinic.
     clin_line = ""
@@ -461,18 +488,30 @@ def _parse_plato_dt(value) -> datetime | None:
         return None
 
 
-def _service_for(type_code: str, minutes: int) -> tuple[str, str] | None:
+def _service_for(type_code: str, minutes: int,
+                 description: str | None = "") -> tuple[str, str] | None:
     """(service_id, variant) for an appointment's Plato type + length, or None.
-    Physiotherapy and Mummy & Baby share a type, so the length decides."""
+    Physiotherapy and Mummy & Baby share a type, so the length decides. An
+    85-minute paediatric review and Mummy & Baby share a length too: an online
+    booking's description starts with its service title ("Physiotherapy.
+    Booked via ..."), which settles it; anything else reads as the service
+    whose own length it is (Mummy & Baby), as before."""
+    found = []
     for sid, svc in SERVICES.items():
         if svc["type_code"] != type_code:
             continue
         if svc["duration_min"] == minutes:
-            return sid, ""
+            found.append((sid, ""))
         for vid, v in (svc.get("variants") or {}).items():
             if v["duration_min"] == minutes:
-                return sid, vid
-    return None
+                found.append((sid, vid))
+    if not found:
+        return None
+    desc = description.lstrip() if isinstance(description, str) else ""
+    for sid, vid in found:
+        if desc.startswith(SERVICES[sid]["title"] + "."):
+            return sid, vid
+    return next((f for f in found if not f[1]), found[0])
 
 
 class _WithoutAppointment:
@@ -577,7 +616,7 @@ def reschedule_appointment(plato, req: dict, *, now: datetime | None = None,
              "Home visits are moved by our team.", "unsupported")
     cid = clinician_by_calendar(_calendar_color_for_appointment(appt))
     minutes = int((end - start).total_seconds() // 60)
-    found = _service_for(type_code, minutes)
+    found = _service_for(type_code, minutes, appt.get("description"))
     _require(cid and found, "That appointment can't be moved automatically.",
              "unsupported")
     service_id, variant = found
@@ -622,3 +661,131 @@ def reschedule_appointment(plato, req: dict, *, now: datetime | None = None,
         "date": new_day.isoformat(),
         "time": new_time,
     }
+
+
+# --- Cancel (the WhatsApp assistant cancels an existing appointment) ----------
+
+def cancel_appointment(plato, req: dict, *, now: datetime | None = None,
+                       dry_run: bool = False) -> dict:
+    """Cancel one existing appointment with at least 24 hours' notice. Raises
+    BookingError (codes: invalid, not_found, ambiguous, late_change,
+    unsupported, plato_error).
+
+    req keys: phone, patient_id (optional, preferred), date, time (YYYY-MM-DD /
+    HH:MM, SGT wall clock).
+
+    Goji's Plato has no cancelled flag (no appointment carries `cancelled`,
+    `void` or `status`; checked 24 Nov 2026): staff cancel by deleting the
+    appointment, so this deletes it too. The clinic email is the record.
+    dry_run=True does everything but the DELETE.
+    """
+    phone = str(req.get("phone") or "").strip()
+    patient_id = str(req.get("patient_id") or "").strip()
+    _require(_PHONE_RE.match(phone), "Please give a valid phone number.")
+    _require(not patient_id or (patient_id.replace("-", "").isalnum()
+                                and len(patient_id) <= 64), "Invalid patient_id.")
+    try:
+        day = date.fromisoformat(str(req.get("date") or "").strip())
+    except ValueError:
+        raise BookingError("Dates must be YYYY-MM-DD.")
+    time_ = str(req.get("time") or "").strip()
+    _require(_TIME_RE.match(time_), "Times must be HH:MM.")
+
+    now = now or datetime.now(_SGT).replace(tzinfo=None)
+    appt = _find_appointment(plato, day, time_, patient_id, phone)
+    appt_id = str(appt.get("_id") or "")
+    start = _parse_plato_dt(appt.get("starttime"))
+    end = _parse_plato_dt(appt.get("endtime"))
+    _require(appt_id and start and end and end > start,
+             "That appointment can't be cancelled automatically.", "unsupported")
+    _require(start - now >= timedelta(hours=RESCHEDULE_MIN_NOTICE_HOURS),
+             f"Changes within {RESCHEDULE_MIN_NOTICE_HOURS} hours go to our team.",
+             "late_change")
+    # Home visits are three appointments (travel / visit / travel): deleting
+    # the visit alone would strand the travel blocks, so they stay with staff.
+    type_code = str(appt.get("code_Bottom") or "")
+    _require(type_code != HOME_VISIT_TYPE_CODE,
+             "Home visits are cancelled by our team.", "unsupported")
+    cid = clinician_by_calendar(_calendar_color_for_appointment(appt))
+    _require(cid, "That appointment can't be cancelled automatically.", "unsupported")
+    found = _service_for(type_code, int((end - start).total_seconds() // 60),
+                         appt.get("description"))
+    service = SERVICES[found[0]]["title"] if found else "Appointment"
+
+    if not dry_run:
+        with _lock_for(cid):
+            try:
+                r = plato.delete_appointment(appt_id, days=(day.isoformat(),))
+            except Exception:
+                raise BookingError("Could not cancel the appointment.", "plato_error")
+            if isinstance(r, dict) and r.get("success") is False:
+                raise BookingError("Plato did not accept the cancellation.", "plato_error")
+
+    return {
+        "ok": True,
+        "dry_run": dry_run,
+        "source": "whatsapp",
+        "reference": "GOJI-" + appt_id[-6:].upper(),
+        "appointment_id": appt_id,
+        "clinician_id": cid,
+        "clinician_name": CLINICIANS[cid]["name"],
+        "clinician_email": CLINICIANS[cid].get("email"),
+        "service": service,
+        "date": day.isoformat(),
+        "time": time_,
+    }
+
+
+# --- Confirm (a WhatsApp reminder's Confirm tap) -------------------------------
+
+# Plato's "Confirmed" appointment code (code_Right, from GET appointment/codes).
+# Plato's own Confirm link sets it too, so every channel shares one status.
+CONFIRMED_CODE = "qK8x"
+
+
+def confirm_appointment(plato, req: dict, *, now: datetime | None = None,
+                        dry_run: bool = False) -> dict:
+    """Mark an appointment Confirmed in Plato for the patient who tapped Confirm
+    on their WhatsApp reminder. req keys: appointment_id (from the template's
+    button payload, which we wrote), phone (the WhatsApp number that tapped).
+
+    The number must be the appointment's own (inline handphone, else the linked
+    patient's profile), so a tap can only ever confirm the tapper's appointment.
+    Already confirmed -> ok, nothing written. Raises BookingError."""
+    from .plato import one_record
+    from .patient_contacts import from_plato as contact_from_plato
+
+    aid = str(req.get("appointment_id") or "").strip()
+    _require(aid and aid.isalnum() and len(aid) <= 64, "Invalid appointment_id.")
+    phone = _last8(req.get("phone"))
+    _require(len(phone) == 8, "Invalid phone.")
+    try:
+        appt = one_record(plato.get(f"/appointment/{aid}", _retries=1))
+    except Exception as e:
+        raise BookingError("Could not read the appointment.", "plato_error") from e
+    if not appt or not _is_live_booking(appt):
+        raise BookingError("No such appointment.", "not_found")
+    owner = _last8(appt.get("handphone"))
+    if not owner and appt.get("patient_id"):
+        try:
+            patient = one_record(plato.get(f"/patient/{appt['patient_id']}", _retries=1))
+        except Exception as e:
+            raise BookingError("Could not read the patient.", "plato_error") from e
+        owner = _last8((contact_from_plato(appt["patient_id"], patient or {}) or {}).get("phone"))
+    if owner != phone:
+        # Same answer as a missing appointment: don't confirm that it exists.
+        raise BookingError("No such appointment.", "not_found")
+    start = _parse_plato_dt(appt.get("starttime"))
+    clinic_now = now or datetime.now(_SGT).replace(tzinfo=None)
+    _require(start is not None and start > clinic_now,
+             "That appointment has already started.", "past")
+    already = str(appt.get("code_Right") or "").strip() == CONFIRMED_CODE
+    if not already and not dry_run:
+        try:
+            r = plato.update_appointment(aid, {"code_Right": CONFIRMED_CODE})
+        except Exception as e:
+            raise BookingError("Could not confirm the appointment.", "plato_error") from e
+        if isinstance(r, dict) and r.get("success") is False:
+            raise BookingError("Plato did not accept the change.", "plato_error")
+    return {"ok": True, "already": already, "dry_run": dry_run,
+            "appointment_id": aid, "reference": "GOJI-" + aid[-6:].upper()}

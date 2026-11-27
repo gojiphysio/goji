@@ -9,8 +9,65 @@ The WhatsApp assistant. What it is and how to run it: [`README.md`](README.md).
 - **The model never writes.** Its tools are read-only. Direct booking happens
   in code (`app._book_pending` → goji-booking `/internal/book`) only after the
   customer confirms, in a later message, the details stated back to them; the
-  confirmation text is built from goji-booking's answer. Dry run until go-live
-  (`WA_AGENT_BOOKING_DRY_RUN`). Changing or cancelling bookings stays with staff.
+  confirmation text is built from goji-booking's answer and names no one (a
+  couple sharing one session is booked under one of them, so a name greeted
+  the wrong person: owner, 25 Nov 2026). Dry run until go-live
+  (`WA_AGENT_BOOKING_DRY_RUN`). Moves with 24h+ notice go the same way
+  (`_move_pending` → `/internal/reschedule`); cancellations with 24h+ notice
+  go out in the same turn (`_cancel_now` → `/internal/cancel`). Inside 24
+  hours both are drafts for Chris (fee policy).
+- **Offered times stay open for a day** (`BOOKING_CONFIRM_WINDOW_S`), and
+  the team's answer restarts the clock on any offer or move still pending
+  (`_staff_answer`). It was 30 minutes: a customer waiting on a clinical
+  answer picked their time 32 minutes later and wasn't booked (25 Nov 2026).
+  goji-booking checks the slot live, so a stale pick is `slot_taken`.
+  Every list offered in that day stays pickable, not only the latest
+  (`booking_client.merge_options`, same service, format and patient),
+  and each time carries the clinician it was offered with ("2026-11-30
+  17:00 Claire"), which the booking takes (`offered_with`): a customer
+  picked Claire's Monday from the first list after asking for Kristy's
+  times and wasn't booked (26 Nov 2026).
+- **New patients are booked without a Plato record** (owner, 26 Nov
+  2026), like the website: goji-booking's confirmation and 48-hour reminder
+  send them Plato's pre-registration form, which creates the profile.
+  Existing records are never sent a form (gaps are fixed in person), so a
+  bare record made by the agent would have left a new patient unregistered.
+  `my_appointments` also finds unlinked bookings by the number on them.
+- **A pick with no name is asked for, once** (`_ask_details`), with the
+  time held; a second confirmation still without it goes to Chris.
+- **The first times offered come with the booking link** (owner, 26 Nov
+  2026; `policy.add_booking_link`), in its own paragraph after the list so
+  the question stays last, once per conversation. The email question had
+  pushed it out of the prompt's layout and a chat went three rounds of
+  times without it.
+- **Terms the team agreed go on the booking as `arranged`** (billing to a
+  company or insurer, a custom price or length), written to Plato as
+  "Agreed with the clinic: ...", apart from the patient's condition note.
+  Taken only when someone from the clinic has written in the chat
+  (`_team_spoke`); goji-booking accepts it from `/internal/book` only.
+  `variant` is only goji-booking's codes (`booking_client.VARIANTS`).
+- **Bookings ask for an email** (owner, 25 Nov 2026): with one on the
+  booking, Plato sends its own confirmation (with the clinic's registration
+  form) and goji-booking sends Goji's. The agent asks once, with the times,
+  or before booking if a time was picked first; a no books without it. Only
+  numbers with no email on file are asked: otherwise the booking takes the
+  patient's own email, else the texter's (the person chatting is the
+  contact, as with the phone), unless they give another
+  (`tools.contact_email`, from `dim_patient_contact`, never shown to the
+  model). A malformed or mistyped email
+  (goji-booking's `bad_email`) is asked again with the time kept, not handed
+  to Chris; a bad one on file books without it.
+- **Cancelling is the agent's with 24h+ notice** (owner, 24 Nov 2026: a test
+  cancel more than 24 hours out was handed to Chris). No "shall I?" first:
+  when it knows which appointment, it fills `cancel` and the code cancels in
+  that turn (several booked: it asks which). The reply is the code's
+  confirmation plus the model's follow-up: a gentle "what came up?" if no
+  reason was given, since "away" or "unwell" shapes the follow-up, or a word
+  on the reason if one was, and an offer to rebook. A follow-up that claims
+  the cancellation itself or fails the check gives way to the default
+  (`booking_client.cancel_text`); a model reply that says it's cancelled
+  with nothing for the code to cancel is never sent
+  (`policy.claims_cancelled`).
 - **Never call Plato from here.** Availability comes from goji-booking's API,
   which serves its 5-minute snapshot. Plato allows 20 requests/min for the
   whole clinic (`booking/README.md`).
@@ -19,11 +76,21 @@ The WhatsApp assistant. What it is and how to run it: [`README.md`](README.md).
   fixed on the site, not in the prompt. A practice Chris confirms that doesn't
   belong on the site (physio isn't sold as packages) goes in `house_rules.md`,
   one dated line each. Service ids mirror `booking/config.py` (`test_tools.py` checks).
+- **The full names on the chat's own number reach the model**
+  (`tools.describe_patient`), so it books a returning patient under the name
+  on file instead of asking (owner, 25 Nov 2026). It uses one only for
+  someone the customer named or who is writing, and never mentions the others.
 - **Patient lookup is keyed on the chat's own number.** The one exception,
   `find_booking` (no record for this number), needs the full name AND the
   booking's number to match the same patient, returns only the next
   appointment, and is capped at 3 tries per chat. A number alone or a name
   alone never reveals anything.
+- **`dim_patient_contact` is current within seconds.** goji-booking updates
+  it when staff change a patient in Plato (webhook) and when it creates one
+  (`booking/patient_contacts.py`); the nightly rebuild repairs and reports
+  drift. Read only that table. "No record" is cached 10 minutes, a match 6
+  hours, and a booking clears the cache (a 6-hour "no record" handed over a
+  booking the agent had made itself, 24 Nov 2026).
 - **No message text or phone numbers in BigQuery.** `marts.wa_agent_events`
   uses a salted hash per chat. Transcripts live only in Firestore with a 30-day
   TTL. Don't add text columns.
@@ -58,6 +125,17 @@ The WhatsApp assistant. What it is and how to run it: [`README.md`](README.md).
   is a handover, never a draft.
 - **Booking links use the `wa-book` go-link** (`dashboard/app.py` LINK_SLUGS),
   which forwards `service`/`focus` to `/book`.
+- **At most two website page links per conversation.** A link at the end
+  of every answer read as a bot (owner, 25 Nov 2026). Once two page links
+  have gone out in the last day, `policy.drop_repeat_page_links` takes any
+  further page link and its "read more here:" line out of the reply before
+  it's sent. Booking links don't count and aren't touched: the prompt's
+  once-per-conversation rule covers them.
+- **Never rank clinicians.** Asked who's most senior or whether someone is
+  "next most senior", the agent says what that clinician brings and never
+  confirms a ranking or contrasts the team ("she's the only one with an MSc"
+  read as discrediting the others: owner, 25 Nov 2026). Recommend by fit and
+  availability, not by who's "better". Eval: `no_clinician_ranking`.
 - **Disclosure: don't lead with it, never hide it.** The agent introduces
   itself as Goji's front desk; asked whether it's a person, a bot or Chris, it
   says it's Goji's WhatsApp assistant. It never claims to be a named person.
@@ -73,6 +151,25 @@ The WhatsApp assistant. What it is and how to run it: [`README.md`](README.md).
   answered and goes to the morning summary, never a ping; it persists past
   `OFF_TOPIC_LIMIT` and the number is watch-listed (`policy.note_off_topic`).
   Don't route something to Chris just because it's unusual.
+- **The agent looks at photos.** A photo in the customer's latest messages
+  (since the last reply, up to 3) is downloaded and sent to the model with
+  that turn only (`app._batch_images`); history keeps "[sent a photo]" and the
+  media id, never the image. Like documents, it's used only to see what they
+  need: named by what it is, no clinical details read back, no comment on
+  how an injury looks. Before this the agent asked what a referral was for
+  after the customer had sent a photo of it (25 Nov 2026).
+- **"The team will take a look" means staff are pinged.** When the agent
+  can't use what was sent (a photo it couldn't fetch, an unreadable
+  document, a video or voice note) it says so with `media_received`, and
+  staff get a WhatsApp ping (email only if the ping fails); several within
+  10 minutes get one ping (`policy.media_ping_due`). The chat stays with the
+  agent. Before this the promise told nobody (25 Nov 2026).
+- **An emoji reaction is never a message.** A customer's reaction gets no
+  model call or reply and isn't added to history. A positive one (👍 😊 🙏,
+  `policy.POSITIVE_REACTIONS`) pings nobody; a negative or neutral one
+  pings staff when the chat is the agent's (owner, 25 Nov 2026, after a 👍
+  pinged Chris). A staff reaction to a ping gets no reply; Chris reacting in
+  the Business app isn't an echo, so it doesn't pause the chat.
 - **A handover splits two messages.** The customer gets the model's
   `holding_reply` (acknowledges the ask, apologises if they're unhappy,
   promises nothing a person must decide); Chris's ping carries `reply`, the
@@ -84,6 +181,13 @@ The WhatsApp assistant. What it is and how to run it: [`README.md`](README.md).
   any reply; the generic line is only the fallback. (Before 23 Nov 2026 a model
   handover sent its holding message to the customer AND to Chris as her
   "suggestion", so she got nothing usable.)
+- **A scripted turn must be the whole history.** In a scenario, each plain
+  string is a customer message the model answers, and its real reply joins
+  the history before the next scripted line. A scenario that needs the agent
+  NOT to have said something (no email ask yet) scripts the earlier customer
+  lines as `("customer", ...)` tuples: the model's own first reply asked for
+  the email, so `booking_pick_asks_email_first` "failed" every run for a
+  correct booking (26 Nov 2026).
 - **Evals judge at the deployed stage.** `eval/scenarios.py` decides with
   `stage_policy` + `apply_stage` as `app.py` does, so a "draft" in a scenario
   is a handover from stage 1. Judging with the bare `INTENT_POLICY` hid that
@@ -101,10 +205,37 @@ The WhatsApp assistant. What it is and how to run it: [`README.md`](README.md).
   this repo's one exception to "free / DIY first". Code speaks Cloud API
   payloads only, so the provider is a config change (`WA_API_BASE`, ...).
 - **Chris stays primary.** Her writing in a chat pauses it until she resumes
-  it (`RESUME <code>`); chats she had in the 30 days before go-live pause on
+  it (`RESUME <code>`), or for 14 days after her last message: the customer's
+  next message after that goes to the agent (`policy.apply_pause_expiry`;
+  owner, 24 Nov 2026). Deliberate pauses (`PAUSE <code>`, admin, watch list)
+  never lapse; chats she had in the 30 days before go-live pause on
   their next message (`policy.pre_golive_chat`). Any new path that messages a
   customer (confirmations, reminders, pings) checks the kill switch, go-live
   and the chat's mode first.
+- **The team's answer goes through the agent.** Chris swipe-replies to a
+  ping with the answer (the ping's message id maps to the chat for 7 days,
+  `<collection>_pings`), or texts `ANSWER 004 ...`. The agent passes it on in
+  its own voice (`agent.relay_note`), sends it and takes the chat back, then
+  shows her what it sent (`app._staff_answer`; owner, 24 Nov 2026). Any mode,
+  red flags included: it's her explicit call. Never past the kill switch,
+  before go-live, or outside the customer's 24h window. Nothing is sent if
+  the model says it isn't an answer for that chat or the write-up fails
+  `reply_problems`; a partial answer leaves the rest `waiting`. Only pings
+  about a named chat are mapped, so a swipe-reply can't reach the wrong
+  customer. The answer is kept as a `team` history line for follow-ups.
+  Check prompt changes with `python -m wa_agent.eval.relay` on the CLI.
+- **A ping is laid out, not one sentence.** `staff.ping_text`: a bold header
+  by kind (🚨 red flag, ⚠️ getting worse, 🔔 needs you, ...), the one-line
+  summary, then "They said" / "I told them" / "Draft for you" on their own
+  lines, then what to do. Put the kind in the header, not in `staff_note`.
+  The one-line run-on read as word salad on a phone (owner, 26 Nov 2026).
+  Outside her 24h window the template takes one line, so the kind goes in
+  front of the reason (`template_params`).
+  The morning summary follows the same rule (`summary.build`): what needs
+  her first, one chat per line, intents in words (`summary.TOPIC`; add a new
+  intent there), the count in the subject. Every outcome belongs to a
+  section: cancellations and getting-worse chats were in none, so they never
+  appeared.
 - **Staff numbers are never customers.** `WA_AGENT_STAFF` messages go to
   `handle_staff` before any lookup, model call or metric; the numbers live in
   a private env file, never the repo. Pings name customers by first name or

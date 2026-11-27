@@ -73,4 +73,3 @@ for ob in bpy.data.objects:
  if 'roof' in ob.name and ('canopy' in ob.name or 'shelter' in ob.name):ob.hide_render=True
 bpy.ops.object.camera_add(location=(-4.7,12.0,45));cam=bpy.context.object;cam.rotation_euler=(0,0,0);cam.data.type='ORTHO';cam.data.ortho_scale=39;s.camera=cam
 s.render.resolution_x=900;s.render.resolution_y=1200;s.render.filepath=str(R/'frames/route-plan.png');bpy.ops.render.render(write_still=True)
-

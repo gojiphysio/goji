@@ -23,6 +23,16 @@ the only place PII lands in the warehouse; it is read solely by the staff
 worklist path and never appears on the financial dashboard. dim_patient itself
 stays PII-free. Keep these two concerns in separate tables.
 
+Between runs, goji-booking keeps dim_patient_contact current
+(booking/patient_contacts.py: Plato's patient webhook for staff actions, a
+5-minute modified_since catch-up for anything it misses, and the patients
+/internal/book creates), so the WhatsApp assistant recognises a
+patient the same day. This nightly rebuild stays the repair, and before it
+replaces the table it reports CONTACT DRIFT: patients Plato has that the table
+was missing, or held with a different name or number. Drift means one of
+those writers missed something (the catch-up couldn't reach Plato or
+BigQuery for a while, or a write sent a field Plato ignores). Counts and patient ids only, never names or numbers.
+
 Env vars:
   PLATO_DB          Plato database name             default: gojihealth
   PLATO_API_KEY     Plato bearer token              (required, from Secret Manager)
@@ -169,6 +179,53 @@ def _looks_like_email(raw: str) -> bool:
         and not domain.endswith(".")
 
 
+DRIFT_MARKER = "PATIENT_CONTACT_DRIFT"
+
+
+def _last8(phone: str | None) -> str:
+    return "".join(c for c in (phone or "") if c.isdigit())[-8:]
+
+
+def _name_key(name: str | None) -> str:
+    return " ".join((name or "").lower().split())
+
+
+def contact_drift(current: dict[str, tuple[str | None, str | None]],
+                  fresh: list[dict]) -> tuple[list[str], list[str]]:
+    """(missing, changed) patient ids: in Plato but not in the table, or in
+    both with a different name or number (last 8 digits, case-insensitive
+    name). Patients only in the table are ignored: Plato has no delete event,
+    so a deleted patient is expected to linger until this rebuild."""
+    missing, changed = [], []
+    for r in fresh:
+        pid = r["patient_id"]
+        if pid not in current:
+            missing.append(pid)
+            continue
+        name, phone = current[pid]
+        if (_name_key(name), _last8(phone)) != (_name_key(r["full_name"]), _last8(r["phone"])):
+            changed.append(pid)
+    return missing, changed
+
+
+def report_drift(bq: "bigquery.Client", contact_ref: str, fresh: list[dict]) -> None:
+    """Log CONTACT DRIFT (see the module docstring) before the rebuild. Never
+    fails the job: the rebuild is the repair either way."""
+    try:
+        current = {r["patient_id"]: (r["full_name"], r["phone"]) for r in bq.query(
+            f"SELECT patient_id, full_name, phone FROM `{contact_ref}`").result()}
+    except Exception as e:
+        log.warning(f"contact drift check skipped: {e}")
+        return
+    missing, changed = contact_drift(current, fresh)
+    if missing or changed:
+        log.warning(f"{DRIFT_MARKER} missing={len(missing)} changed={len(changed)} "
+                    f"e.g. {(missing + changed)[:5]}: the nightly rebuild repairs it; "
+                    "check goji-booking's patient catch-up and webhook (booking/README.md)")
+    else:
+        log.info("contact drift: none")
+
+
 def age_band(dob_str: str | None, today: date | None = None) -> str | None:
     """Bucket a Plato DOB string into a coarse age band.
 
@@ -251,6 +308,25 @@ def tag_list(tag_field: object) -> list[str]:
             if s:
                 out.append(s)
     return out
+
+
+# The last step of Plato's registration form: the patient signs this consent,
+# and Plato stores it on the profile as others.consents[] {title, created_on}.
+# Its presence is the "registration form done" flag the booking emails use
+# (scripts/reminders/registration.py, booking/confirmations.py).
+CONSENT_TITLE = "Clinic Consent Form"
+
+
+def consent_signed_at(others: object) -> str | None:
+    """When the patient signed the Clinic Consent Form, as an ISO UTC
+    timestamp, or None if they never did. The latest signing wins."""
+    consents = others.get("consents") if isinstance(others, dict) else None
+    stamps = [c.get("created_on") for c in consents or []
+              if isinstance(c, dict) and c.get("title") == CONSENT_TITLE
+              and isinstance(c.get("created_on"), (int, float)) and c["created_on"] > 0]
+    if not stamps:
+        return None
+    return datetime.fromtimestamp(max(stamps), tz=timezone.utc).isoformat()
 
 
 def created_on_date(created_on_str: object) -> str | None:
@@ -375,6 +451,7 @@ def main() -> None:
             row_primary_doc   = primary_doctor(p.get("doctor"))
             row_created_on    = created_on_date(p.get("created_on"))
             row_referred_by   = referred_by_id(p.get("referred_by"))
+            row_consent       = consent_signed_at(p.get("others"))
 
             rows.append({
                 "patient_id":       patient_id,
@@ -386,6 +463,7 @@ def main() -> None:
                 "primary_doctor":   row_primary_doc,
                 "created_on":       row_created_on,
                 "referred_by":      row_referred_by,
+                "consent_signed_at": row_consent,
                 "_updated_at":      updated_at_iso,
             })
 
@@ -431,6 +509,7 @@ def main() -> None:
             bigquery.SchemaField("primary_doctor",   "STRING"),
             bigquery.SchemaField("created_on",       "DATE"),
             bigquery.SchemaField("referred_by",      "STRING"),
+            bigquery.SchemaField("consent_signed_at", "TIMESTAMP"),
             bigquery.SchemaField("_updated_at",      "TIMESTAMP", mode="REQUIRED"),
         ],
     )
@@ -447,6 +526,7 @@ def main() -> None:
     # staff Front Desk dashboard and the appointment-reminder job. Same
     # WRITE_TRUNCATE snapshot pattern, separate table. WRITE_TRUNCATE replaces
     # the schema too, so adding a column here needs no migration.
+    report_drift(bq, contact_ref, contact_rows)
     log.info(f"loading {len(contact_rows)} contact rows into {contact_ref}")
     contact_job_config = bigquery.LoadJobConfig(
         source_format=bigquery.SourceFormat.NEWLINE_DELIMITED_JSON,

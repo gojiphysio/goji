@@ -1,0 +1,31 @@
+{
+  "review_basis": "Exact-frame inspection at 0.25-second intervals; full-file decode. Not human normal-speed sign-off.",
+  "appearance": "Episode 1 textures, clothing, faces and Singapore setting retained in sampled frames. No primitive proxy conditioning.",
+  "camera": "Approximately fixed in sampled frames.",
+  "action_verdict": "reject",
+  "findings": [
+    {
+      "time_seconds": [
+        0.5,
+        2.25
+      ],
+      "finding": "Driver door opens, closes again and reopens; repeated yanking breaks the requested single continuous hinge motion."
+    },
+    {
+      "time_seconds": [
+        1.75,
+        2.5
+      ],
+      "finding": "Doorway/vehicle side shape changes around the driver emergence."
+    },
+    {
+      "time_seconds": [
+        3.5,
+        5.0
+      ],
+      "finding": "Driver finishes lying on the road instead of seated."
+    }
+  ],
+  "retained_production_range": null,
+  "limitations": "One seed; this is a practical distilled recipe, not a quality-ceiling measurement."
+}

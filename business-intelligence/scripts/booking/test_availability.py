@@ -607,3 +607,54 @@ def test_same_day_lead_in_the_month_summary():
     assert days == []
     days = derive_available_days(plato, "physiotherapy", WED, WED, now=now, same_day_lead=60)
     assert days == [WED.isoformat()]
+
+
+# --- one-off extra working days (CLINICIAN_EXTRA_DAYS) ----------------------
+
+THU = date(2026, 7, 16)  # a Thursday
+
+
+def _claire_thu_off_cfg():
+    return {"calendars": [{"id": "dDIjWJp", "rules": [{
+        "name": "Claire Ng", "book_calendar": "6hpO",
+        "starttime": "08:00", "endtime": "20:00", "min_days": 1, "max_days": 365,
+        "restricted_days": ["Sun", "Thu"], "restricted_blocks": [],
+    }]}]}
+
+
+_CLAIRE_THU_1_TO_6 = {"claire-ng": [{"date": THU, "starttime": "13:00", "endtime": "18:00"}]}
+# The clinic marks the extra day with an all-day, patient-less block in Plato.
+_ALL_DAY_NOTE = {"color": "6hpO", "title": "Working from 1-6pm",
+                 "starttime": "2026-07-16 00:00:00", "endtime": "2026-07-17 00:00:00"}
+
+
+def test_extra_day_opens_a_day_off_with_its_own_hours(monkeypatch):
+    monkeypatch.setattr(availability, "CLINICIAN_EXTRA_DAYS", _CLAIRE_THU_1_TO_6)
+    out = derive_availability(StubPlato([_ALL_DAY_NOTE], _claire_thu_off_cfg()),
+                              "physiotherapy", THU, now=NOW)
+    assert out["claire-ng"] == ["13:00", "13:30", "14:00", "14:30", "15:00",
+                                "15:30", "16:00", "16:30", "17:00"]
+
+
+def test_extra_day_still_respects_real_bookings(monkeypatch):
+    monkeypatch.setattr(availability, "CLINICIAN_EXTRA_DAYS", _CLAIRE_THU_1_TO_6)
+    appt = {"color": "6hpO", "title": "Patient",
+            "starttime": "2026-07-16 14:00:00", "endtime": "2026-07-16 15:00:00"}
+    out = derive_availability(StubPlato([_ALL_DAY_NOTE, appt], _claire_thu_off_cfg()),
+                              "physiotherapy", THU, now=NOW)
+    assert "13:30" not in out["claire-ng"] and "14:30" not in out["claire-ng"]
+    assert "13:00" in out["claire-ng"] and "15:00" in out["claire-ng"]
+
+
+def test_extra_day_does_not_open_other_thursdays(monkeypatch):
+    monkeypatch.setattr(availability, "CLINICIAN_EXTRA_DAYS", _CLAIRE_THU_1_TO_6)
+    out = derive_availability(StubPlato([], _claire_thu_off_cfg()),
+                              "physiotherapy", date(2026, 7, 23), now=NOW)
+    assert out == {}
+
+
+def test_month_shading_includes_extra_day(monkeypatch):
+    monkeypatch.setattr(availability, "CLINICIAN_EXTRA_DAYS", _CLAIRE_THU_1_TO_6)
+    days = derive_available_days(StubPlato([_ALL_DAY_NOTE], _claire_thu_off_cfg()),
+                                 "physiotherapy", date(2026, 7, 15), date(2026, 7, 17), now=NOW)
+    assert "2026-07-16" in days

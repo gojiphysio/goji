@@ -114,7 +114,12 @@ class _SnapPlato:
 def snap(monkeypatch, client):
     monkeypatch.setattr(app_mod, "_snapshot_last_try", float("-inf"))
     p = _SnapPlato()
+    p.catch_ups = []
     monkeypatch.setattr(app_mod, "plato", lambda: p)
+    monkeypatch.setattr(app_mod, "bq", lambda: None)
+    monkeypatch.setattr(app_mod.patient_contacts, "catch_up",
+                        lambda plato, bq, table: p.catch_ups.append(table)
+                        or {"written": 0, "unchanged": 0, "failed": 0})
     return p
 
 
@@ -143,11 +148,25 @@ def test_refresh_drops_answers_derived_from_the_old_snapshot(client, snap):
     assert app_mod._avail_cache == {} and app_mod._summary_cache == {}
 
 
+def test_each_refresh_also_catches_up_patient_contacts(client, snap):
+    client.post("/internal/refresh-snapshot")
+    assert snap.catch_ups == [app_mod.CONTACT_TABLE]
+
+
+def test_a_failed_catch_up_never_fails_the_refresh(client, snap, monkeypatch):
+    def boom(*a):
+        raise RuntimeError("plato busy")
+    monkeypatch.setattr(app_mod.patient_contacts, "catch_up", boom)
+    r = client.post("/internal/refresh-snapshot")
+    assert r.status_code == 200 and r.get_json()["ok"]
+
+
 def test_a_refresh_plato_cannot_serve_is_a_503(client, snap):
     snap.fail = PlatoBusy("window still loading")
     r = client.post("/internal/refresh-snapshot")
     assert r.status_code == 503
     assert r.get_json()["ok"] is False
+    assert snap.catch_ups == []
 
 
 # --- same-day slots: the WhatsApp assistant only --------------------------------

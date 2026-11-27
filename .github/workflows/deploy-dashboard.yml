@@ -166,7 +166,7 @@ jobs:
           # click-to-WhatsApp link clicks, and provider-attribution alert
           # dismissals. The same SA runs the appointment-reminders job, which
           # writes its own send ledger. Everything else stays read-only.
-          for t in patient_followup_events new_patient_welcome_events lead_events link_click_events booking_funnel_events web_session_events mismatch_dismissal_events appointment_reminder_events; do
+          for t in patient_followup_events new_patient_welcome_events lead_events link_click_events booking_funnel_events web_session_events mismatch_dismissal_events appointment_reminder_events appointment_confirmation_events dim_patient_contact; do
             bq add-iam-policy-binding \
               --member="serviceAccount:${DASHBOARD_SA}" \
               --role="roles/bigquery.dataEditor" \
@@ -191,9 +191,9 @@ jobs:
           # 12:00 SGT; we deliberately do NOT `gcloud run jobs execute` here —
           # a deploy must never mail patients.
           #
-          # DRY_RUN ships as 'true' and is flipped by hand once the front desk
-          # has stopped clicking the reminder button in Plato (otherwise every
-          # patient gets two reminders). To go live:
+          # DRY_RUN ships as 'true' and is flipped by hand on go-live day, the
+          # same day Plato's own automatic 48-hour reminder is turned off
+          # (otherwise every patient gets two reminders). To go live:
           #   gcloud run jobs update appointment-reminders --region asia-southeast1 \
           #     --update-env-vars DRY_RUN=false
           # Use --update-env-vars, never --set-env-vars, which replaces the whole
@@ -212,21 +212,23 @@ jobs:
                    --format='value(template.template.containers[0].env.filter("name:DRY_RUN").extract(value))' \
                    2>/dev/null || true)"
           dry="${dry:-true}"
-          # WhatsApp reminders: preserved the same way (default off). The
-          # wa-token mount is added only when they're on, because Cloud Run
-          # fails a deploy that mounts a secret that doesn't exist yet.
-          wa="$(gcloud run jobs describe appointment-reminders \
-                   --region "${REGION}" --project "${PROJECT}" \
-                   --format='value(template.template.containers[0].env.filter("name:WA_REMINDERS_ENABLED").extract(value))' \
-                   2>/dev/null || true)"
-          wa="${wa:-0}"
-          secrets="GMAIL_APP_PASSWORD=gmail-app-password:latest"
+          # WhatsApp reminders: ON (clinic decision, 25 Nov 2026: email and
+          # WhatsApp in parallel; Meta approved goji_appointment_reminder). They
+          # still send nothing until DRY_RUN is false and the scheduler is
+          # resumed on go-live day. Repo variable WA_REMINDERS_ENABLED=0 turns
+          # them off. Sends go through Dualhook: repo variables
+          # WA_PHONE_NUMBER_ID and WA_API_BASE must be set (the job falls back
+          # to email-only, and says so in the digest, if they aren't).
+          wa="${{ vars.WA_REMINDERS_ENABLED || '1' }}"
+          # PLATO_API_KEY: the registration-form check (reminders/registration.py).
+          # INTERNAL_TOKEN: signs the registration-form link, as goji-booking does.
+          secrets="GMAIL_APP_PASSWORD=gmail-app-password:latest,PLATO_API_KEY=plato-api-key:latest,INTERNAL_TOKEN=wa-agent-internal-token:latest"
           if [ "${wa}" = "1" ]; then secrets="${secrets},WA_TOKEN=wa-token:latest"; fi
           echo "Deploying appointment-reminders with DRY_RUN=${dry} WA_REMINDERS_ENABLED=${wa}"
           gcloud run jobs deploy appointment-reminders \
             --source . --region "${REGION}" --project "${PROJECT}" \
             --service-account "${DASHBOARD_SA}" \
-            --set-env-vars="BQ_PROJECT=${PROJECT},BQ_DATASET=marts,DRY_RUN=${dry},WA_REMINDERS_ENABLED=${wa},WA_PHONE_NUMBER_ID=${{ vars.WA_PHONE_NUMBER_ID }}" \
+            --set-env-vars="BQ_PROJECT=${PROJECT},BQ_DATASET=marts,DRY_RUN=${dry},WA_REMINDERS_ENABLED=${wa},WA_PHONE_NUMBER_ID=${{ vars.WA_PHONE_NUMBER_ID }},WA_API_BASE=${{ vars.WA_API_BASE }},WA_REMINDER_FORM_TEMPLATE=${{ vars.WA_REMINDER_FORM_TEMPLATE }}" \
             --set-secrets="${secrets}" \
             --max-retries=0 \
             --quiet

@@ -13,4 +13,3 @@ for (s,size,y) in lines {
 }
 NSGraphicsContext.restoreGraphicsState()
 try rep.representation(using:.png,properties:[:])!.write(to:r.appendingPathComponent("frames/02-look.png"))
-

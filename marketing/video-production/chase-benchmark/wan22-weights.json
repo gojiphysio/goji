@@ -1,0 +1,52 @@
+{
+  "files": [
+    {
+      "repo": "QuantStack/Wan2.2-VACE-Fun-A14B-GGUF",
+      "path": "HighNoise/Wan2.2-VACE-Fun-A14B-high-noise-Q4_K_M.gguf",
+      "size": 11639453600,
+      "sha256": "46584a1be3a01d50cfdb7b4e326d01f9a4ef9ddeb2a85b6df8bcd5f5f874916c",
+      "local_name": "Wan2.2-VACE-Fun-A14B-high-noise-Q4_K_M.gguf",
+      "comfy_kind": "unet"
+    },
+    {
+      "repo": "QuantStack/Wan2.2-VACE-Fun-A14B-GGUF",
+      "path": "LowNoise/Wan2.2-VACE-Fun-A14B-low-noise-Q4_K_M.gguf",
+      "size": 11639453600,
+      "sha256": "efa88568f8a8fec0b7e3867db40b8c940b95bcfcf5543cf9fb8db8c5aca1dac2",
+      "local_name": "Wan2.2-VACE-Fun-A14B-low-noise-Q4_K_M.gguf",
+      "comfy_kind": "unet"
+    },
+    {
+      "repo": "city96/umt5-xxl-encoder-gguf",
+      "path": "umt5-xxl-encoder-Q4_K_M.gguf",
+      "size": 3655145312,
+      "sha256": "17cf97a5bbbc60a646d6105b832b6f657ce904a8a1ad970e4b59df0c67584a40",
+      "local_name": "umt5-xxl-encoder-Q4_K_M.gguf",
+      "comfy_kind": "clip"
+    },
+    {
+      "repo": "Comfy-Org/Wan_2.1_ComfyUI_repackaged",
+      "path": "split_files/vae/wan_2.1_vae.safetensors",
+      "size": 253815318,
+      "sha256": "2fc39d31359a4b0a64f55876d8ff7fa8d780956ae2cb13463b0223e15148976b",
+      "local_name": "wan_2.1_vae.safetensors",
+      "comfy_kind": "vae"
+    },
+    {
+      "repo": "lightx2v/Wan2.2-Lightning",
+      "path": "Wan2.2-T2V-A14B-4steps-lora-rank64-Seko-V1.1/high_noise_model.safetensors",
+      "size": 1226977424,
+      "sha256": "698321cb86bd30c4af06c9b84e656a1048c8cb54e06d50694536fb5de37fde41",
+      "local_name": "goji-wan22-seko-high.safetensors",
+      "comfy_kind": "loras"
+    },
+    {
+      "repo": "lightx2v/Wan2.2-Lightning",
+      "path": "Wan2.2-T2V-A14B-4steps-lora-rank64-Seko-V1.1/low_noise_model.safetensors",
+      "size": 1226977424,
+      "sha256": "ec95216e614b3c132c11bfb387b11feedf62163150ccc9068bca8a189771e75a",
+      "local_name": "goji-wan22-seko-low.safetensors",
+      "comfy_kind": "loras"
+    }
+  ]
+}

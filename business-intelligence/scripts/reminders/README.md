@@ -2,14 +2,19 @@
 
 Cloud Run Job `appointment-reminders`. Reminds every patient whose appointment
 is **two calendar days out**, once a day at **12:00 SGT**. Monday's run covers
-Wednesday. **WhatsApp first** for anyone with a usable mobile, **email** as the
-fallback. The WhatsApp channel is **off until `WA_REMINDERS_ENABLED=1`**; off,
-the job is the email-only job, unchanged.
+Wednesday. **Email** to everyone with an address and, in parallel, **WhatsApp**
+for anyone with a usable mobile (skipped once they've confirmed and have an email).
+The WhatsApp channel is **off until `WA_REMINDERS_ENABLED=1`**; off, the job is
+the email-only job.
 
-Replaces a daily manual chore: Plato's reminder template can only be fired by
-hand from its UI — the Plato API exposes appointments, webhooks, PlatoPay and
-invoices, but **no notification or template endpoint** — so someone had to log in
-every day and click it for the sessions ~48h out.
+Plato also sends a 48-hour reminder email on its own (confirmed by the clinic,
+25 Nov 2026; earlier notes here said it could only be fired by hand). This job
+replaces it: same copy, plus the parts Plato's can't do (one email per patient
+per day, only the directions that apply, a tracked WhatsApp link, WhatsApp
+first). **Never run both:** the clinic turns Plato's reminder off the same day
+this job is unpaused with `DRY_RUN=false`. Every email carries Plato's own
+Confirm Appointment link for each session (`reminder_mailer.confirm_url`, the
+same link booking/confirmations.py puts in the booking confirmation).
 
 Not an ingestion job (it ingests nothing), hence `scripts/reminders/` rather than
 `scripts/ingestion/`. It reads marts, sends WhatsApp templates via the Cloud API
@@ -22,7 +27,8 @@ and email via Gmail SMTP, and writes only its own send ledger.
 | Who gets one | `marts.fct_appointment_reminders` — `appt_date = CURRENT_DATE('Asia/Singapore') + 2`, PII-free |
 | Contact | Hydrated at query time: appointment payload first (the front desk typed it for *this* booking), then `marts.dim_patient_contact` (the Plato profile). The profile fallback is what makes this viable — only ~4% of upcoming appointments carry an inline address |
 | Never twice | `marts.appointment_reminder_events` / `_latest`. Anything already `sent` is suppressed in SQL, **whichever channel sent it** |
-| Channel | WhatsApp if `WA_REMINDERS_ENABLED` and the phone normalises to a WhatsApp number; else email. A failed WhatsApp send (non-2xx, error body, network) falls back to email for that appointment. Never both unless WhatsApp failed |
+| Channel | **In parallel** (clinic decision, 25 Nov 2026): email to everyone with an address, always; WhatsApp too when `WA_REMINDERS_ENABLED` and the phone normalises to a WhatsApp number, except an appointment already **Confirmed** in Plato (`code_Right` `qK8x`) whose patient has an email, since the template asks them to confirm. The email drops the Confirm button for confirmed sessions and thanks them instead. A WhatsApp Confirm tap marks the appointment Confirmed in Plato (goji-booking `/internal/confirm`) |
+| Registration form | New patients only: no Plato profile on the appointment and none matching the phone or email. Both channels ask again (`registration.py`) with goji-booking's stable `booking.gojiphysio.com/form/<token>`, which opens Plato's pre-registration form (no login). A patient with a profile is never asked: the clinic fixes gaps in person (26 Nov 2026). WhatsApp: `goji_appointment_reminder_form` when owed |
 | Grouping | WhatsApp: **one message per appointment** (a template holds one date/time), in time order. Email: one per patient per day, listing every session that day |
 | Transport | WhatsApp Cloud API template (`reminder_whatsapp.py`). Gmail SMTP as `hello@gojiphysio.com`, app password from Secret Manager — same path as `scripts/booking/mailer.py` |
 | Unreachable | No WhatsApp and no email (or WhatsApp failed and no email) → listed in a digest to `hello@` for the front desk to contact by hand |

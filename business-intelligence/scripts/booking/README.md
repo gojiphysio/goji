@@ -32,6 +32,8 @@ the clinic's real rules — see the plan/validation notes in the repo.
   (`X-Internal-Token`; see **WhatsApp assistant** below).
 - `POST /internal/reschedule` → the WhatsApp assistant moves a patient's
   existing appointment (same token; see **WhatsApp assistant** below).
+- `POST /internal/cancel` → the WhatsApp assistant cancels a patient's
+  existing appointment with 24h+ notice (same token; see below).
 - `GET /healthcheck` → liveness only ("is the container up"). Never touches Plato.
 - `GET /healthcheck/deep` → **readiness**: derives real availability for the next
   14 days. `200 {"ok":true,...}` = a visitor can book; `503` = they can't, with
@@ -110,6 +112,9 @@ books through `POST /internal/book`, the same `create_booking` as `/api/book`.
 - **Moving a booking:** `POST /internal/reschedule` (same token) moves an
   existing appointment, same clinician and service; a real move also fires the
   callback above. Full contract under **`POST /internal/reschedule`** below.
+- **Cancelling a booking:** `POST /internal/cancel` (same token). Contract
+  under **`POST /internal/cancel`** below; `test_cancel.py` checks a dry run
+  never deletes.
 
 **Setup (once, before this deploys):** the deploy mounts the secret
 unconditionally, so a missing secret fails the deploy.
@@ -120,6 +125,134 @@ gcloud secrets add-iam-policy-binding wa-agent-internal-token --project goji-bi 
   --role roles/secretmanager.secretAccessor
 ```
 Then set the repo variable `WA_AGENT_URL` to the assistant's Cloud Run URL.
+
+## Patient contacts kept current (`/plato/webhook/<token>`)
+The WhatsApp assistant recognises a chat by its number in
+`marts.dim_patient_contact`. The nightly `plato-patients-ingest` rebuild alone
+left a patient created today a stranger until tomorrow (24 Nov 2026), so
+everywhere a patient is created or changed now updates that one table at once
+(`patient_contacts.py`, a `MERGE` per patient):
+
+- **Staff in Plato:** Plato's webhook (`patient:upsert`, `patient:merge`). A
+  delivery only names patient ids; we read each one back from Plato with our
+  key: `bulk` (the booking form keeps priority), no retries, at most
+  `PLATO_WEBHOOK_READS_PER_MIN` (4) a minute so the availability snapshot,
+  which pages Plato from the same share, is never starved.
+- **Everything the webhook misses:** each snapshot refresh (5 min) reads
+  `/patient?modified_since=<last pass>` (one bulk request, no retries) and
+  writes what changed (`patient_contacts.catch_up`). The webhook fires only
+  for staff who logged in to Plato after it was activated, and never for
+  patients filling in Plato's registration form (`created_by: terminal`):
+  on 25 Nov 2026 it missed all 6 new or edited patients.
+- **goji-booking itself:** Plato sends no webhook for API writes, so
+  `/internal/book` writes the patient it creates before it answers. The wait
+  is capped at 5s (the assistant gives up on a booking after 30s) and never
+  fails the booking. Website bookings create no patient (staff register them
+  in Plato, which fires the webhook). The new patient's number goes in
+  `telephone`: Plato drops `handphone` (an appointment field) from a patient.
+- **The nightly rebuild is the repair and the check.** Plato doesn't store or
+  replay webhook events and drops a webhook after 5 failed deliveries in a
+  day, so the rebuild stays, and first logs `PATIENT_CONTACT_DRIFT` for any
+  patient the writers above missed. `setup_monitoring.sh` emails on it.
+- **Answer fast, always 200.** Plato waits 3s. The route answers 200 to
+  anything with the right token and waits at most `PLATO_WEBHOOK_WAIT` (2s)
+  for its work; Cloud Run only gives us CPU during a request, so slower work
+  finishes on the next request (the 5-minute snapshot refresh).
+- **The URL token** is derived from `INTERNAL_TOKEN`
+  (`patient_contacts.webhook_token`), so there is no second secret. Rotating
+  `wa-agent-internal-token` changes the URL: register again.
+- **Activation is automatic:** Plato posts a `webhook:token` event on
+  registration and the route calls `POST webhook/activate` with it. People
+  logged in to Plato must log out and in again before their actions fire it.
+- **Field rules match the nightly job** (`test_patient_contacts.py` checks):
+  change name/phone/email extraction in both places.
+
+**Register (once, and after a token rotation or if Plato drops it):**
+```bash
+KEY=$(gcloud secrets versions access latest --secret=plato-api-key --project goji-bi)
+TOK=$(gcloud secrets versions access latest --secret=wa-agent-internal-token --project goji-bi)
+URL_TOKEN=$(printf 'plato-webhook' | openssl dgst -sha256 -hmac "$TOK" | awk '{print $NF}' | cut -c1-32)
+curl -sS -X POST https://clinic.platomedical.com/api/gojihealth/webhook \
+  -H "Authorization: Bearer $KEY" -H 'Content-Type: application/json' \
+  -d "{\"url\": \"https://booking.gojiphysio.com/plato/webhook/$URL_TOKEN\",
+       \"events\": [\"patient:upsert\", \"patient:merge\"],
+       \"notification_email\": \"hello@gojiphysio.com\"}"
+# Check: the logs show "plato webhook activated", and
+curl -sS https://clinic.platomedical.com/api/gojihealth/webhook -H "Authorization: Bearer $KEY"
+```
+Plato allows 5 webhooks per database: add events to this one rather than
+registering another URL.
+
+## Confirmation email (`confirmations.py`)
+One email per appointment, however it was booked (website, WhatsApp assistant,
+staff in Plato), decided with the clinic on 25 Nov 2026. It carries the
+details, Plato's Confirm Appointment link (built from the appointment id:
+`appointment_confirm/<base64 db>/<id>`), the clinic address or the home-visit
+note, the $50 policy, the tracked `confirm-wa` WhatsApp link, Plato's
+registration form on a **first visit only**, and a calendar invite.
+
+- **Triggers.** `/api/book` and `/internal/book` call it after the Plato write;
+  `/internal/reschedule` sends the "moved" email (Plato sends no webhook for
+  our own API writes). Staff bookings and moves arrive on the Plato webhook
+  (`appointment:upsert`, read back from Plato, at most
+  `CONFIRMATIONS_READS_PER_MIN` a minute) and, as the safety net, the sweep
+  that rides the 5-minute snapshot tick and reads `stg.appointments` (15-minute
+  ingestion). Deletes send nothing (clinic decision).
+- **Once only.** `marts.appointment_confirmation_events` is the ledger: same
+  start time = nothing, new start time = "moved" with the invite's SEQUENCE + 1
+  (same UID `<appointment id>@gojiphysio.com`, so the calendar entry moves).
+- **Calendar invite.** `METHOD:REQUEST` inline plus an `.ics` attachment, clinic
+  wall clock with `TZID=Asia/Singapore`, no alarm, `RSVP=FALSE` (the clinic
+  wants the entry in the patient's calendar and no calendar notifications).
+- **Registration form: new patients only.** A patient with no Plato profile
+  (none on the appointment, none matching the phone or email) gets Plato's
+  pre-registration form, which needs no login and creates the profile. A
+  patient with a profile is never asked: the clinic fixes gaps in an
+  existing profile in person (26 Nov 2026; Plato's update form for existing
+  profiles needs a login with a one-time code). Every message carries one
+  stable link, `booking.gojiphysio.com/form/<appointment id>.<signature>`
+  (`formlink.py`, signed with the internal token). Tapping it runs
+  `form_destination`: the pre-registration form while the appointment has
+  no profile, a "you're all set" page once it has one. WhatsApp's URL
+  buttons take one variable at the end of a fixed URL, which is why the link
+  is ours and not Plato's. The 48-hour reminder asks on the same rule.
+- **WhatsApp.** A patient who owes the form gets
+  `goji_appointment_confirmed_form` (adds a "Registration form" button) once
+  Meta approves it and the agent's `WA_AGENT_CONFIRM_FORM_TEMPLATE` is set;
+  the callback carries `form_token`. The same switch starts the WhatsApp confirmation: the
+  booking-confirmed callback to the assistant carries `send_template: true`
+  only in live mode. Front-desk bookings, which no other path tells the
+  assistant about, are handed to it from here (`notify_whatsapp`), so a
+  patient with no email still gets a confirmation. Moves by staff are email
+  only. The ledger's `channel` says what went out.
+- **Modes** (`CONFIRMATIONS_MODE`, repo variables read by deploy-booking.yml):
+  `off` (default) = the old `mailer.send_customer_booking_email` only; `test` =
+  the new email for every appointment goes to `CONFIRMATIONS_TEST_TO`, patients
+  keep the old one; `live` = patients get the new one, the old one stops.
+  `CONFIRMATIONS_SINCE` (`YYYY-MM-DDTHH:MM`, clinic time) is the creation
+  cutoff for the webhook and sweep: unset, they send nothing, so switching on
+  never mails the existing diary. The `ZZ` test patient only ever mails the test
+  inbox.
+
+**Go-live checklist**
+0. After the merge, run `plato-patients-ingest` once (it adds
+   `dim_patient.consent_signed_at`). Until it has, the registration-form
+   lookup fails safe: no form is offered.
+1. Repo variables `CONFIRMATIONS_MODE=test`, `CONFIRMATIONS_TEST_TO=<inbox>`,
+   `CONFIRMATIONS_SINCE=<now>`; redeploy.
+2. Add `appointment:upsert` to the Plato webhook. Plato has no update call:
+   `GET webhook` for its id, `DELETE webhook/{id}`, then register the same URL
+   with `["patient:upsert", "patient:merge", "appointment:upsert"]` (the
+   register command above). Activation is automatic; staff log out and in.
+3. Gmail filter on hello@: invitation replies (`Accepted:` / `Declined:` /
+   `Tentative:` with an invite) skip the inbox.
+4. On the ZZ test patient: a staff booking, a move, a website booking. Check the
+   test inbox (invite added, Confirm link works, form on a first visit) and
+   what a Confirm click shows in Plato.
+5. Go-live, all on one day: `CONFIRMATIONS_MODE=live`,
+   `CONFIRMATIONS_SINCE=<go-live time>`; staff stop sending Plato's
+   confirmation by hand; Plato's automatic 48-hour reminder off and the
+   `appointment-reminders` job unpaused with `DRY_RUN=false` (never both).
 
 ## Monitoring
 `setup_monitoring.sh` (re-runnable) provisions a Cloud Monitoring uptime check on
@@ -202,6 +335,9 @@ Rules layered on top (`config.py`):
   service before their start date — for a new starter whose Plato calendar is
   live early (Camille: 2026-11-01). Delete the entry once the date has passed.
 - Home visits: **Cheryl only**, ±30-min travel padding.
+- One-off extra days (`CLINICIAN_EXTRA_DAYS`): open a clinician on a date their
+  Plato rule keeps closed, with set hours; the all-day "Working from …" note block
+  on that date is ignored, real bookings still block. Remove entries once past.
 - **One shared reformer** (Camille's Private Pilates, Claire's Clinical Pilates).
   Plato has no resource model, so while any appointment, on any calendar, carries
   Space Requirement `code_Left` = `REFORMER_CODE` (`YS06`, "Reformer needed";
@@ -291,6 +427,29 @@ service and the length (no clinician change in this version).
   and notes; that the `YYYY-MM-DD HH:MM:SS` format is accepted on PUT; whether
   `endtime` is required (we always send it); and that writing `description`
   back doesn't mangle it (HTML/escaping).
+
+### `POST /internal/cancel` (WhatsApp assistant)
+Cancels one existing appointment. `cancel_appointment` in `booking.py`; same
+token rules as `/internal/book`.
+- **Body:** `{phone, patient_id?, date: "YYYY-MM-DD", time: "HH:MM", dry_run:
+  bool}` (SGT wall clock). Non-boolean `dry_run` or bad values → `400 invalid`.
+- **Finding it:** same as `/internal/reschedule` (`_find_appointment`): `404
+  not_found`, `409 ambiguous`.
+- **Policy:** less than 24 hours ahead → `409 late_change` (staff apply the
+  fee policy). Home visits (three appointments) and anything not on a known
+  clinician's calendar → `409 unsupported`.
+- **Write:** `DELETE /appointment/{id}`. Goji's Plato has no cancelled flag
+  (no appointment carries `cancelled`, `void` or `status`; checked 24 Nov
+  2026): staff cancel by deleting, so this does too. The day reads live until
+  the next snapshot so the freed slot shows at once. `dry_run: true` does
+  everything but the DELETE and sends nothing.
+- **Response:** `200 {ok, dry_run, reference, clinician_name, service, date,
+  time}`. Errors `{ok:false, error, code}` with the reschedule status codes.
+- **After a real cancel:** a clinic email "Cancelled via WhatsApp assistant"
+  (`send_admin_cancel_email`, CCs the clinician). Plato keeps nothing once the
+  appointment is deleted, so this email is the record.
+- **Verify once on the test patient before relying on it** that DELETE frees
+  the slot in Plato's calendar.
 
 ## Config to keep in sync
 `config.py` mirrors the website's `src/lib/services.ts` + `clinicians.ts`

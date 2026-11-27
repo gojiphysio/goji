@@ -139,14 +139,28 @@ def test_describe_patient_keeps_it_to_name_and_dates():
     one = tools.describe_patient({"returning": True, "first_name": "Sarah",
                                   "patients_on_number": 1, "next_appointment": None,
                                   "last_visit": "2026-10-02"})
-    assert one == ("a patient record is linked to this number; record first name Sarah (the "
-                   "texter may be this patient or someone booking for them); no upcoming "
+    assert one == ("a patient record is linked to this number (the texter may be this "
+                   "patient or someone booking for them); record first name Sarah; no upcoming "
                    "appointment; last visit 2026-10-02")
     shared = tools.describe_patient({"returning": True, "first_name": "Ghazal",
                                      "patients_on_number": 2,
                                      "next_appointment": {"date": "2026-11-21", "time": "16:30",
                                                           "with": "Cheryl"}})
     assert "2 patients share this number" in shared and "with Cheryl" in shared
+
+
+def test_describe_patient_gives_the_full_names_on_the_number():
+    # A returning couple was asked for both full names the record already had
+    # (owner, 25 Nov 2026).
+    two = tools.describe_patient({"returning": True, "first_name": "Ben",
+                                  "patients_on_number": 2,
+                                  "records": [{"id": "a", "name": "Ben Lim"},
+                                              {"id": "b", "name": " Ana Koh "}]})
+    assert "full names on file: Ben Lim, Ana Koh (use one only for someone" in two
+    assert "record first name" not in two
+    many = tools.describe_patient({"returning": True, "patients_on_number": 6, "records": [
+        {"id": str(i), "name": f"Kid{i} Tan"} for i in range(6)]})
+    assert "Kid3 Tan" in many and "Kid4 Tan" not in many
 
 
 class _Rows:
@@ -212,3 +226,49 @@ def test_next_slots_labels_todays_times_today():
                         "2026-11-25": _day({"kristy-ng": ["09:00"]})})
     out = tools.next_slots({"service": "physiotherapy"}, http=http, today=date(2026, 11, 24))
     assert [s["weekday"] for s in out["slots"]] == ["Today", "Wed"]
+
+
+def test_an_email_on_file_goes_to_the_booking_never_to_the_model():
+    p = {"returning": True, "first_name": "Sarah", "patients_on_number": 1,
+         "records": [{"id": "S1", "name": "Sarah Lim", "email": "sarah@example.com"}]}
+    assert tools.contact_email(p, "S1") == "sarah@example.com"
+    line = tools.describe_patient(p)
+    assert "an email is on file" in line and "sarah@example.com" not in line
+    assert "no email on file" in tools.describe_patient({**p, "records": [
+        {"id": "S1", "name": "Sarah Lim", "email": ""}]})
+
+
+def test_a_family_member_without_an_email_gets_the_texters():
+    # Owner, 25 Nov 2026: the person chatting is the contact, unless they say otherwise.
+    family = {"returning": True, "first_name": "Mei Ling", "patients_on_number": 3, "records": [
+        {"id": "MUM", "name": "Lim Mei Ling", "email": "mum@example.com"},
+        {"id": "DAD", "name": "Tan Wei Ming", "email": "dad@example.com"},
+        {"id": "KID", "name": "Lim Ethan", "email": ""}]}
+    assert tools.contact_email(family, "KID", "Wei Ming") == "dad@example.com"   # the texter's
+    assert tools.contact_email(family, "KID", "") == "mum@example.com"           # first on file
+    assert tools.contact_email(family, "MUM", "Wei Ming") == "mum@example.com"   # the patient's own
+    assert tools.contact_email(family, "", "Wei Ming") == "dad@example.com"      # a new patient
+    assert tools.contact_email({}, "", "Jamie") == ""
+    assert "don't ask" in tools.describe_patient(family)
+
+
+def test_new_patient_is_booked_without_a_plato_record(monkeypatch):
+    """Owner, 26 Nov 2026: new patients get Plato's pre-registration form, which
+    only works on a booking with no record; existing records are never sent it."""
+    from wa_agent import booking_client, config
+    monkeypatch.setattr(config, "BOOKING_SIMULATE", False)
+    monkeypatch.setattr(config, "INTERNAL_TOKEN", "t")
+    sent = {}
+
+    class R:
+        def json(self):
+            return {"ok": True, "reference": "GOJI-1", "clinician_name": "Kristy Ng",
+                    "service": "Physiotherapy", "date": "2026-12-01", "time": "10:00"}
+
+    class Http:
+        def post(self, url, json=None, timeout=None, headers=None):
+            sent.update(json)
+            return R()
+    booking_client.book({"service": "physiotherapy", "date": "2026-12-01", "time": "10:00",
+                         "full_name": "Mei Lim"}, wa_id="6591234567", http=Http())
+    assert sent["create_patient"] is False and sent["patient_id"] == ""

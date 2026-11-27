@@ -1,7 +1,7 @@
 /**
  * DurationVariant represents an alternative duration and price for a service
- * or physiotherapy sub-type (e.g., paediatric physio offers both 30-min/$160 and
- * 55-min/$260 options).
+ * or physiotherapy sub-type (e.g., paediatric physio offers 40-min review and
+ * 55-min initial or review options).
  */
 export interface DurationVariant {
   durationMin: number;
@@ -84,11 +84,11 @@ export const services: Service[] = [
     icon: "tabler:stretching",
     title: "Paediatric Physiotherapy",
     lead: "Care for babies, children and teens, from early developmental milestones to scoliosis and sports injuries.",
-    meta: ["From 30 min", "In-clinic & home visits"],
-    price: "160",
-    priceNote: "From 30 min. Home visits available on request with parent supervision",
+    meta: ["55 min", "In-clinic & home visits"],
+    price: "260",
+    priceNote: "Home visits available on request with parent supervision",
     supportsHome: true,
-    durationMin: 30,
+    durationMin: 55,
     platoCalendarId: "z1xE8rP",
     platoTypeCode: "hDWW",
     bookingHidden: true,

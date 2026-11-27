@@ -37,4 +37,3 @@ for p in [E/'README.md',R/'README.md']:
 report={'route':route['checks'],'wanted_stars':'05,06,08 match clean sources byte-for-byte;07 crowd edit visually reviewed; all12 panels visually inspected without wanted stars','calendar_font':'33px all lines in native composition and editable SVG','scene02':'surprise visually reviewed','scene04':'running stride visually reviewed','timing_seconds':47,'motion_status':'staged stills and route checks; no continuous episode video','hashes':{str(p.relative_to(R)):hashlib.sha256(p.read_bytes()).hexdigest() for p in R.rglob('*') if p.is_file() and p.suffix in ['.png','.blend','.svg','.swift','.py']}}
 (R/'validation.json').write_text(json.dumps(report,indent=2)+'\n')
 print('Passed: frozen wreck, forward route, wreck behind camera10, uniform font, clean sources,47second timing, input hashes and links.')
-

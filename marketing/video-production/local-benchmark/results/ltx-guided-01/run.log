@@ -1,0 +1,30 @@
+Mode: Distilled Two-Stage (half-res + upscale + distilled refine)
+  Model: /Users/tidepool/Models/ltx-2.5-mlx-q8
+[Loading text encoder (Gemma)] ...
+PyTorch was not found. Models won't be available and only tokenizers, configuration and file/data utilities can be used.
+You are using a model of type `gemma4_unified` to instantiate a model of type ``. This may be expected if you are loading a checkpoint that shares a subset of the architecture (e.g., loading a `sam2_video` checkpoint into `Sam2Model`), but is otherwise not supported and can yield errors. Please verify that the checkpoint is compatible with the model you are instantiating.
+Using pack Gemma 4 at /Users/tidepool/Models/ltx-2.5-mlx-q8/gemma4-12b-ltx-v1 (666 tensors)
+Skipping missing text_encoder.safetensors (projections live in connector.safetensors)
+[Loading text encoder (Gemma)] done in 1.6s
+[Encoding prompt] ...
+[Encoding prompt] done in 5.2s
+[Loading transformer (transformer-distilled.safetensors)] ...
+Mixed-precision quantization: 1632 layers — {8: 1632}
+[Loading transformer (transformer-distilled.safetensors)] done in 3.5s
+[estimate] denoising (ancestral): 8 steps x 1 passes over 3024 video + 126 audio tokens = 8 forwards (cost follows total clip length, not the regenerated window)
+Denoising (ancestral):   0%|          | 0/8 [00:00<?, ?it/s]                                                            [estimate] denoising (ancestral): ~39 s remaining (5.6 s/forward) (first step includes warm-up)
+Denoising (ancestral):   0%|          | 0/8 [00:05<?, ?it/s]Denoising (ancestral):  12%|█▎        | 1/8 [00:05<00:39,  5.59s/it]                                                                    [estimate] denoising (ancestral): ~33 s remaining (5.5 s/forward) (refined)
+Denoising (ancestral):  12%|█▎        | 1/8 [00:11<00:39,  5.59s/it]Denoising (ancestral):  25%|██▌       | 2/8 [00:11<00:33,  5.51s/it]Denoising (ancestral):  38%|███▊      | 3/8 [00:16<00:27,  5.55s/it]Denoising (ancestral):  50%|█████     | 4/8 [00:22<00:22,  5.62s/it]Denoising (ancestral):  62%|██████▎   | 5/8 [00:28<00:17,  5.68s/it]Denoising (ancestral):  75%|███████▌  | 6/8 [00:33<00:11,  5.66s/it]Denoising (ancestral):  88%|████████▊ | 7/8 [00:39<00:05,  5.71s/it]Denoising (ancestral):  88%|████████▊ | 7/8 [00:45<00:06,  6.51s/it]
+[estimate] denoising (ancestral): 3 steps x 1 passes over 12096 video + 126 audio tokens = 3 forwards (cost follows total clip length, not the regenerated window)
+Denoising (ancestral):   0%|          | 0/3 [00:00<?, ?it/s]                                                            [estimate] denoising (ancestral): ~54 s remaining (27.1 s/forward) (first step includes warm-up)
+Denoising (ancestral):   0%|          | 0/3 [00:27<?, ?it/s]Denoising (ancestral):  33%|███▎      | 1/3 [00:27<00:54, 27.10s/it]                                                                    [estimate] denoising (ancestral): ~27 s remaining (26.6 s/forward) (refined)
+Denoising (ancestral):  33%|███▎      | 1/3 [00:53<00:54, 27.10s/it]Denoising (ancestral):  67%|██████▋   | 2/3 [00:53<00:26, 26.80s/it]Denoising (ancestral):  67%|██████▋   | 2/3 [01:20<00:40, 40.11s/it]
+[Loading decoders (VAE only, --no-audio)] ...
+[Loading decoders (VAE only, --no-audio)] done in 0.0s
+[Decoding video (--no-audio)] ...
+[vae-decode tiling] frames=72/16 est. 31.6 GB budget=32.0 GB
+[vae-decode tiling] peak Metal memory 28.47 GB
+[Decoding video (--no-audio)] done in 15.9s
+
+Saved to: /Users/tidepool/.codex/worktrees/goji-video-workflow/goji/marketing/video-production/local-benchmark/results/ltx-guided-01/raw.mp4
+Time: 158.0s

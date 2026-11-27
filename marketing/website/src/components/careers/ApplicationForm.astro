@@ -1,0 +1,1173 @@
+---
+/**
+ * ApplicationForm — one form for both job applications and general
+ * expressions of interest.
+ *
+ *   <ApplicationForm vacancy={v} />   a specific role (preselected)
+ *   <ApplicationForm />               a general expression of interest
+ *
+ * Posts multipart/form-data to the goji-careers backend
+ * (business-intelligence/scripts/careers). Only renders a live form when
+ * PUBLIC_CAREERS_API is set; otherwise it shows the email fallback, so no
+ * build can show a form that doesn't store applications.
+ *
+ * Privacy rules (recruitment brief §6, §10, §14): nothing the applicant enters
+ * is written to localStorage/sessionStorage or sent to analytics; the form
+ * state lives in memory only. The submit button stays disabled while a
+ * submission is in flight, so a double click sends one application.
+ */
+import {
+  AHPC_OPTIONS,
+  GENERAL_INTEREST,
+  HEARD_ABOUT_OPTIONS,
+  INTEREST_AREAS,
+  TRAINING_OPTIONS,
+  WORKING_DAYS,
+  openVacancies,
+  type Vacancy,
+} from "../../lib/vacancies.ts";
+import { CAREERS_API } from "../../lib/careers.ts";
+import { GOJI_TURNSTILE_SITE_KEY, TURNSTILE_SITE_KEY } from "../../lib/booking.ts";
+import { SITE } from "../../lib/site.ts";
+
+interface Props {
+  vacancy?: Vacancy;
+}
+const { vacancy } = Astro.props;
+const general = !vacancy;
+const roles = general ? [] : openVacancies().filter((v) => v.form === vacancy!.form);
+// Role data the script needs to relabel the "also consider me" option and the
+// part-time minimum when the candidate switches role.
+const roleMeta = Object.fromEntries(
+  roles.map((r) => [
+    r.id,
+    {
+      title: r.title,
+      form: r.form,
+      minDays: r.minDaysPerWeek ?? 0,
+    },
+  ]),
+);
+const physio = !general && vacancy!.form === "physio";
+const minDays = vacancy?.minDaysPerWeek ?? 0;
+// The backend requires Turnstile, so a live form always carries the widget
+// (not only when the booking API is also configured).
+const turnstileKey = CAREERS_API ? TURNSTILE_SITE_KEY || GOJI_TURNSTILE_SITE_KEY : "";
+const formId = general ? "interest-form" : "application-form";
+---
+
+<div
+  class="apply"
+  data-careers-apply
+  data-api={CAREERS_API}
+  data-general={general ? "1" : "0"}
+  data-job-id={general ? GENERAL_INTEREST.id : vacancy!.id}
+  data-roles={JSON.stringify(roleMeta)}
+  data-turnstile-key={turnstileKey}
+>
+  {
+    CAREERS_API ? (
+      <Fragment>
+        {/* method="post" with no action: if the script ever fails to load, a native
+            submit must never put answers into a URL (GET would). */}
+        <form id={formId} class="apply__form" method="post" novalidate data-form>
+          <p class="apply__required-note">
+            Fields marked <span class="apply__req" aria-hidden="true">*</span>
+            <span class="visually-hidden">with an asterisk</span> are required.
+          </p>
+
+          <div class="apply__summary" role="alert" tabindex="-1" hidden data-error-summary>
+            <h3 class="apply__summary-title">Please check the following</h3>
+            <ul data-error-list />
+          </div>
+
+          {/* ---- Role ---- */}
+          <fieldset class="apply__group">
+            <legend class="apply__legend">{general ? "Your interest" : "The role"}</legend>
+            {general ? (
+              <Fragment>
+                <input type="hidden" name="role" value={GENERAL_INTEREST.id} />
+                <div class="fld" data-field="interest_area">
+                  <label class="fld__label" for="f-interest_area">
+                    What kind of role are you interested in? <span class="apply__req" aria-hidden="true">*</span>
+                  </label>
+                  <select id="f-interest_area" name="interest_area" required aria-describedby="e-interest_area">
+                    <option value="">Choose one</option>
+                    {INTEREST_AREAS.map((a) => <option value={a}>{a}</option>)}
+                  </select>
+                  <p class="fld__error" id="e-interest_area" hidden />
+                </div>
+                <div class="fld" data-field="interest_detail">
+                  <label class="fld__label" for="f-interest_detail">Tell us more about the role you have in mind (optional)</label>
+                  <input id="f-interest_detail" name="interest_detail" type="text" maxlength="200" aria-describedby="e-interest_detail" />
+                  <p class="fld__error" id="e-interest_detail" hidden />
+                </div>
+              </Fragment>
+            ) : (
+              <Fragment>
+                <div class="fld" data-field="role">
+                  <label class="fld__label" for="f-role">
+                    Role applied for <span class="apply__req" aria-hidden="true">*</span>
+                  </label>
+                  <select id="f-role" name="role" required aria-describedby="e-role">
+                    {roles.map((r) => (
+                      <option value={r.id} selected={r.id === vacancy!.id}>
+                        {r.title}
+                      </option>
+                    ))}
+                  </select>
+                  <p class="fld__error" id="e-role" hidden />
+                </div>
+              </Fragment>
+            )}
+          </fieldset>
+
+          {/* ---- About you ---- */}
+          <fieldset class="apply__group">
+            <legend class="apply__legend">About you</legend>
+            <div class="fld" data-field="full_name">
+              <label class="fld__label" for="f-full_name">Full name <span class="apply__req" aria-hidden="true">*</span></label>
+              <input id="f-full_name" name="full_name" type="text" autocomplete="name" required maxlength="120" aria-describedby="e-full_name" />
+              <p class="fld__error" id="e-full_name" hidden />
+            </div>
+            <div class="apply__row">
+              <div class="fld" data-field="email">
+                <label class="fld__label" for="f-email">Email address <span class="apply__req" aria-hidden="true">*</span></label>
+                <input id="f-email" name="email" type="email" autocomplete="email" required maxlength="254" aria-describedby="e-email" />
+                <p class="fld__error" id="e-email" hidden />
+              </div>
+              <div class="fld" data-field="phone">
+                <label class="fld__label" for="f-phone">Mobile number <span class="apply__req" aria-hidden="true">*</span></label>
+                <input id="f-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" required maxlength="25" placeholder="9123 4567" aria-describedby="h-phone e-phone" />
+                <p class="fld__hint" id="h-phone">Outside Singapore? Start with your country code, like +44.</p>
+                <p class="fld__error" id="e-phone" hidden />
+              </div>
+            </div>
+          </fieldset>
+
+          {/* ---- Experience ---- */}
+          <fieldset class="apply__group">
+            <legend class="apply__legend">Your experience</legend>
+            <div class="fld fld--short" data-field="years_experience">
+              <label class="fld__label" for="f-years_experience">
+                {physio ? "Years of post-qualification clinical experience" : "Years of relevant professional experience"}
+                <span class="apply__req" aria-hidden="true">*</span>
+              </label>
+              <input id="f-years_experience" name="years_experience" type="number" min="0" max="50" step="0.5" inputmode="decimal" required aria-describedby="e-years_experience" />
+              <p class="fld__error" id="e-years_experience" hidden />
+            </div>
+
+            <div data-physio-only hidden={!physio}>
+              <fieldset class="fld" data-field="ahpc_status" aria-describedby="e-ahpc_status">
+                <legend class="fld__label">AHPC registration status <span class="apply__req" aria-hidden="true">*</span></legend>
+                <div class="apply__options">
+                  {AHPC_OPTIONS.map((o, i) => (
+                    <div class="chk">
+                      <input id={`f-ahpc-${i}`} type="radio" name="ahpc_status" value={o} />
+                      <label for={`f-ahpc-${i}`}>{o}</label>
+                    </div>
+                  ))}
+                </div>
+                <p class="fld__error" id="e-ahpc_status" hidden />
+              </fieldset>
+              <div class="fld" data-field="clinical_experience">
+                <label class="fld__label" for="f-clinical_experience">
+                  Your main areas of clinical experience <span class="apply__req" aria-hidden="true">*</span>
+                </label>
+                <textarea id="f-clinical_experience" name="clinical_experience" rows="2" maxlength="600" aria-describedby="h-clinical_experience e-clinical_experience" />
+                <p class="fld__hint" id="h-clinical_experience">For example: outpatient MSK, sports injuries, post-operative rehabilitation.</p>
+                <p class="fld__error" id="e-clinical_experience" hidden />
+              </div>
+              <div class="fld" data-field="womens_health">
+                <label class="fld__label" for="f-womens_health">Women's health experience or areas of interest (optional)</label>
+                <textarea id="f-womens_health" name="womens_health" rows="2" maxlength="600" aria-describedby="e-womens_health" />
+                <p class="fld__error" id="e-womens_health" hidden />
+              </div>
+            </div>
+
+            <fieldset class="fld" data-field="training">
+              <legend class="fld__label">Relevant additional training or certifications (optional)</legend>
+              <div class="apply__options apply__options--cols">
+                {TRAINING_OPTIONS.map((o, i) => (
+                  <div class="chk">
+                    <input id={`f-training-${i}`} type="checkbox" name="training" value={o} data-other={o === "Other" ? "1" : undefined} />
+                    <label for={`f-training-${i}`}>{o}</label>
+                  </div>
+                ))}
+              </div>
+              <div class="fld" data-training-other hidden>
+                <label class="fld__label" for="f-training_other">Other training</label>
+                <input id="f-training_other" name="training_other" type="text" maxlength="200" />
+              </div>
+            </fieldset>
+
+            <div class="fld" data-field="linkedin">
+              <label class="fld__label" for="f-linkedin">LinkedIn profile URL (optional)</label>
+              <input id="f-linkedin" name="linkedin" type="url" inputmode="url" maxlength="300" placeholder="https://www.linkedin.com/in/…" aria-describedby="e-linkedin" />
+              <p class="fld__error" id="e-linkedin" hidden />
+            </div>
+          </fieldset>
+
+          {/* ---- Availability ---- */}
+          <fieldset class="apply__group">
+            <legend class="apply__legend">Availability</legend>
+            <fieldset class="fld" data-field="employment" aria-describedby="e-employment">
+              <legend class="fld__label">Preferred employment arrangement <span class="apply__req" aria-hidden="true">*</span></legend>
+              <div class="apply__options apply__options--inline">
+                {[
+                  ["full-time", "Full-time"],
+                  ["part-time", "Part-time"],
+                  ["either", "Open to both"],
+                ].map(([v, l]) => (
+                  <div class="chk">
+                    <input id={`f-employment-${v}`} type="radio" name="employment" value={v} />
+                    <label for={`f-employment-${v}`}>{l}</label>
+                  </div>
+                ))}
+              </div>
+              <p class="fld__error" id="e-employment" hidden />
+            </fieldset>
+
+            <div data-part-time hidden>
+              <p class="apply__notice" data-min-days-note hidden={!minDays}>
+                Part-time roles at Goji are a minimum of <span data-min-days>{minDays || 3}</span> days per week.
+              </p>
+              <div class="fld fld--short" data-field="days_per_week">
+                <label class="fld__label" for="f-days_per_week">
+                  How many days per week are you available? <span class="apply__req" aria-hidden="true">*</span>
+                </label>
+                <select id="f-days_per_week" name="days_per_week" aria-describedby="n-days_per_week e-days_per_week">
+                  <option value="">Choose</option>
+                  {[1, 2, 3, 4, 5, 6].map((n) => <option value={String(n)}>{n}</option>)}
+                </select>
+                <p class="fld__hint" id="n-days_per_week" data-below-min hidden aria-live="polite">
+                  That's fewer days than this role's minimum. You can still apply; we review every application.
+                </p>
+                <p class="fld__error" id="e-days_per_week" hidden />
+              </div>
+            </div>
+
+            <fieldset class="fld" data-field="preferred_days">
+              <legend class="fld__label">Days you could work (optional)</legend>
+              <div class="apply__options apply__options--inline">
+                {WORKING_DAYS.map((d) => (
+                  <div class="chk">
+                    <input id={`f-day-${d}`} type="checkbox" name="preferred_days" value={d} />
+                    <label for={`f-day-${d}`}>{d}</label>
+                  </div>
+                ))}
+              </div>
+            </fieldset>
+
+            <div class="fld" data-field="start_availability">
+              <label class="fld__label" for="f-start_availability">
+                Earliest start date or notice period <span class="apply__req" aria-hidden="true">*</span>
+              </label>
+              <input id="f-start_availability" name="start_availability" type="text" required maxlength="120" placeholder="e.g. 1 March 2027, or 1 month's notice" aria-describedby="e-start_availability" />
+              <p class="fld__error" id="e-start_availability" hidden />
+            </div>
+          </fieldset>
+
+          {/* ---- CV and introduction ---- */}
+          <fieldset class="apply__group">
+            <legend class="apply__legend">Your CV and introduction</legend>
+            <div class="fld" data-field="cv">
+              <label class="fld__label" for="f-cv">CV <span class="apply__req" aria-hidden="true">*</span></label>
+              <input
+                id="f-cv"
+                name="cv"
+                type="file"
+                class="visually-hidden"
+                accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                aria-describedby="h-cv e-cv"
+                data-cv-input
+              />
+              <div class="cv">
+                <label for="f-cv" class="cv__pick" data-cv-pick>Choose a file</label>
+                <p class="cv__name" data-cv-name aria-live="polite">No file chosen</p>
+                <button type="button" class="cv__remove" data-cv-remove hidden>Remove</button>
+              </div>
+              <p class="fld__hint" id="h-cv">PDF, DOC or DOCX, up to 10MB. Please leave out your NRIC, date of birth and photo.</p>
+              <p class="fld__error" id="e-cv" hidden />
+            </div>
+            <div class="fld" data-field="intro">
+              <label class="fld__label" for="f-intro">
+                {general ? "Tell us a little about yourself, your experience and what you're looking for" : "A brief introduction"}
+                <span class="apply__req" aria-hidden="true">*</span>
+              </label>
+              <textarea id="f-intro" name="intro" rows="5" required maxlength="2000" aria-describedby="h-intro e-intro" />
+              <p class="fld__hint" id="h-intro">A few sentences is plenty (up to 2,000 characters).</p>
+              <p class="fld__error" id="e-intro" hidden />
+            </div>
+            <div class="fld fld--short" data-field="heard_about">
+              <label class="fld__label" for="f-heard_about">How did you hear about Goji? (optional)</label>
+              <select id="f-heard_about" name="heard_about">
+                <option value="">Choose one</option>
+                {HEARD_ABOUT_OPTIONS.map((o) => <option value={o}>{o}</option>)}
+              </select>
+            </div>
+          </fieldset>
+
+          {/* ---- Privacy ---- */}
+          <fieldset class="apply__group apply__group--privacy">
+            <legend class="apply__legend">Your personal data</legend>
+            <div class="apply__privacy" id="recruitment-privacy">
+              <p>
+                By submitting this application, you acknowledge that Goji Health Pte. Ltd. will collect, use and
+                retain the personal information you provide for recruitment purposes, including assessing your
+                suitability for employment, communicating with you and administering the recruitment process.
+              </p>
+              <p>
+                Your information may be stored using secure third-party service providers and will only be
+                accessible to authorised personnel for relevant recruitment purposes.
+              </p>
+              <p>
+                For questions about your personal data or to request its withdrawal or correction, please contact
+                <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.
+              </p>
+              <p>Please refer to our <a href="/privacy/">Privacy Policy</a> for further information.</p>
+            </div>
+            <div class="fld" data-field="privacy_ack">
+              <div class="chk">
+                <input id="f-privacy_ack" name="privacy_ack" type="checkbox" value="yes" aria-describedby="e-privacy_ack" />
+                <label for="f-privacy_ack">
+                  I have read the recruitment privacy notice above <span class="apply__req" aria-hidden="true">*</span>
+                </label>
+              </div>
+              <p class="fld__error" id="e-privacy_ack" hidden />
+            </div>
+            <div class="chk">
+              <input id="f-talent_pool" name="talent_pool" type="checkbox" value="yes" />
+              <label for="f-talent_pool">
+                I would like Goji to retain my application and contact me about suitable future opportunities.
+              </label>
+            </div>
+          </fieldset>
+
+          {/* Bot trap: hidden from people and screen readers; the backend refuses
+              any application where it has a value. */}
+          <div class="apply__trap" aria-hidden="true">
+            <label for="f-company_url">Leave this empty</label>
+            <input type="text" id="f-company_url" name="company_url" tabindex="-1" autocomplete="off" />
+          </div>
+          <div class="apply__turnstile" data-turnstile />
+
+          <div class="apply__submit">
+            <button type="submit" class="apply__button" data-submit>
+              {general ? "Send my expression of interest" : "Submit application"}
+            </button>
+            <div class="apply__progress" data-progress hidden>
+              <progress max="100" value="0" aria-labelledby="apply-progress-label" data-progress-bar />
+              <span id="apply-progress-label" data-progress-label>Uploading your application…</span>
+            </div>
+            <p class="apply__status" role="status" aria-live="polite" data-status />
+          </div>
+          <p class="apply__fallback">
+            Having trouble with the form? Email your CV to <a href={`mailto:${SITE.email}`}>{SITE.email}</a> and we'll
+            take it from there.
+          </p>
+        </form>
+
+        <div class="apply__done" data-done hidden>
+          <h2 class="apply__done-title" tabindex="-1" data-done-title>Thank you for your interest in Goji!</h2>
+          <p>We've received your application and look forward to learning more about you.</p>
+          <p>Our team will be in touch should there be a suitable next step.</p>
+          <p class="apply__ref">
+            Your application reference: <strong data-done-ref />
+          </p>
+          <p>You should also receive an acknowledgement email from us.</p>
+          <a class="apply__button apply__button--link" href="/careers/">Back to Careers</a>
+        </div>
+      </Fragment>
+    ) : (
+      <div class="apply__offline">
+        <h3 class="apply__offline-title">Apply by email</h3>
+        <p>
+          Online applications are opening shortly. In the meantime, please email your CV and a short introduction
+          to <a href={`mailto:${SITE.email}?subject=${encodeURIComponent(general ? "Expression of interest" : `Application: ${vacancy!.title}`)}`}>{SITE.email}</a>
+          {general ? "." : `, with "${vacancy!.title}" in the subject line.`}
+        </p>
+      </div>
+    )
+  }
+</div>
+
+<style>
+  .apply {
+    --apply-gap: var(--space-5);
+  }
+  .apply__form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+  }
+  .apply__required-note,
+  .apply__fallback {
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+  }
+  .apply__req {
+    color: var(--color-primary);
+    margin-left: 0.1em;
+  }
+  .apply__group {
+    border: 0;
+    margin: 0;
+    padding: 0;
+    padding-top: var(--space-5);
+    border-top: 1px solid var(--rule);
+    display: flex;
+    flex-direction: column;
+    gap: var(--apply-gap);
+    min-width: 0;
+  }
+  .apply__legend {
+    font-family: var(--font-display);
+    font-variation-settings: var(--font-display-axes);
+    font-weight: var(--weight-display);
+    font-size: var(--fs-h3);
+    color: var(--text-default);
+    padding: 0;
+    margin-bottom: var(--space-4);
+    float: left;
+    width: 100%;
+  }
+  .apply__legend + * {
+    clear: both;
+  }
+  .apply__row {
+    display: grid;
+    gap: var(--apply-gap);
+  }
+  @media (min-width: 720px) {
+    .apply__row {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .fld {
+    border: 0;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    min-width: 0;
+  }
+  /* Every element in the form sets its own display, which beats the browser's
+     [hidden] rule; this puts it back for all of them (the form itself after
+     success, the CV Remove button with no file, the progress bar...). */
+  .apply [hidden] {
+    display: none !important;
+  }
+  [data-physio-only],
+  [data-part-time] {
+    display: flex;
+    flex-direction: column;
+    gap: var(--apply-gap);
+  }
+  .fld--short {
+    max-width: 22rem;
+  }
+  .fld__label {
+    font-family: var(--font-body);
+    font-size: var(--fs-small);
+    font-weight: var(--weight-semibold);
+    color: var(--text-default);
+    padding: 0;
+  }
+  .fld__hint {
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+    margin: 0;
+  }
+  .fld__error {
+    font-size: var(--fs-small);
+    color: var(--color-primary);
+    font-weight: var(--weight-medium);
+    margin: 0;
+  }
+  .fld[data-invalid] :is(input:not([type="checkbox"]):not([type="radio"]), select, textarea),
+  .fld[data-invalid] .cv {
+    border-color: var(--color-primary);
+  }
+  .apply input[type="number"] {
+    max-width: 10rem;
+  }
+
+  .apply__options {
+    display: grid;
+    gap: var(--space-1) var(--space-5);
+  }
+  /* Short options (days, employment) sit two to a row on a phone. */
+  .apply__options--inline {
+    grid-template-columns: 1fr 1fr;
+  }
+  @media (min-width: 640px) {
+    .apply__options--cols {
+      grid-template-columns: 1fr 1fr;
+    }
+    .apply__options--inline {
+      display: flex;
+      flex-wrap: wrap;
+    }
+  }
+  .chk {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    min-height: 44px;
+    padding-block: var(--space-2);
+  }
+  .chk input {
+    flex: none;
+    width: 1.25rem;
+    height: 1.25rem;
+    margin: 0.1rem 0 0;
+    accent-color: var(--color-primary);
+  }
+  .chk label {
+    font-size: var(--fs-body);
+    line-height: var(--lh-snug);
+    cursor: pointer;
+  }
+  .chk input:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
+
+  .apply__notice {
+    margin: 0;
+    padding: var(--space-3) var(--space-4);
+    background: var(--bg-raised);
+    border-left: 3px solid var(--color-primary);
+    font-size: var(--fs-small);
+  }
+
+  /* CV picker: the native input is visually hidden but stays focusable; the
+     label is the visible, keyboard- and touch-friendly control. */
+  .cv {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3) var(--space-4);
+    padding: var(--space-3);
+    border: 1px dashed var(--color-border-strong);
+    border-radius: var(--radius-sm);
+    background: var(--bg-content);
+  }
+  .cv__pick,
+  .cv__remove {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 var(--space-4);
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--color-primary);
+    color: var(--color-primary);
+    background: var(--bg-content);
+    font: inherit;
+    font-weight: var(--weight-semibold);
+    font-size: var(--fs-small);
+    cursor: pointer;
+  }
+  .cv__remove {
+    border-color: var(--color-border-strong);
+    color: var(--text-default);
+  }
+  .cv__pick:hover {
+    background: var(--color-linen);
+  }
+  input[data-cv-input]:focus-visible + .cv .cv__pick {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
+  .cv__name {
+    margin: 0;
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+    overflow-wrap: anywhere;
+    flex: 1 1 12rem;
+  }
+
+  .apply__privacy {
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+    background: var(--bg-raised);
+    border-radius: var(--radius-sm);
+    padding: var(--space-4) var(--space-5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  .apply__privacy p {
+    margin: 0;
+  }
+
+  .apply__trap {
+    position: absolute;
+    left: -10000px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
+  .apply__summary {
+    border: 2px solid var(--color-primary);
+    border-radius: var(--radius-sm);
+    padding: var(--space-4) var(--space-5);
+    background: var(--bg-content);
+  }
+  .apply__summary:focus {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
+  .apply__summary-title {
+    font-family: var(--font-body);
+    font-size: var(--fs-body);
+    font-weight: var(--weight-semibold);
+    margin: 0 0 var(--space-2);
+  }
+  .apply__summary ul {
+    margin: 0;
+    padding-left: 1.2em;
+  }
+  .apply__summary a {
+    color: var(--color-primary);
+  }
+
+  .apply__submit {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-3);
+  }
+  .apply__button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+    padding: 0 var(--space-6);
+    border: 0;
+    border-radius: var(--radius-pill);
+    background: var(--cta-bg);
+    color: var(--cta-text);
+    font: inherit;
+    font-weight: var(--weight-semibold);
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color var(--dur) var(--ease);
+  }
+  .apply__button:hover {
+    background: var(--cta-bg-hover);
+  }
+  .apply__button:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 3px;
+  }
+  .apply__button[disabled] {
+    opacity: 0.6;
+    cursor: progress;
+  }
+  .apply__progress {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    width: 100%;
+    max-width: 24rem;
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+  }
+  .apply__progress progress {
+    width: 100%;
+    height: 6px;
+    accent-color: var(--color-primary);
+  }
+  .apply__status {
+    margin: 0;
+    font-size: var(--fs-small);
+  }
+  .apply__status[data-tone="error"] {
+    color: var(--color-primary);
+    font-weight: var(--weight-medium);
+  }
+
+  .apply__done {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    align-items: flex-start;
+    /* Clear the sticky header when the success message scrolls into view. */
+    scroll-margin-top: 7rem;
+  }
+  .apply__done p {
+    margin: 0;
+  }
+  .apply__done-title {
+    font-size: var(--fs-h2);
+    margin: 0 0 var(--space-2);
+  }
+  .apply__done-title:focus {
+    outline: none;
+  }
+  .apply__ref strong {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+  }
+  .apply__button--link {
+    margin-top: var(--space-3);
+  }
+
+  .apply__offline {
+    padding: var(--space-5);
+    background: var(--bg-raised);
+    border-radius: var(--radius-md);
+  }
+  .apply__offline-title {
+    font-family: var(--font-body);
+    font-weight: var(--weight-semibold);
+    font-size: var(--fs-lead);
+    margin: 0 0 var(--space-2);
+  }
+  .apply__offline p {
+    margin: 0;
+  }
+</style>
+
+<script>
+  import { careersEvent, campaignAttribution } from "../../lib/careers";
+
+  const MAX_BYTES = 10 * 1024 * 1024;
+  const ALLOWED_EXT = ["pdf", "doc", "docx"];
+  const EMAIL_RE = /^[^\s@<>(),;:"]+@[^\s@<>(),;:"]+\.[A-Za-z]{2,}$/;
+
+  type RoleMeta = Record<string, { title: string; form: string; minDays: number; also: { id: string; title: string }[] }>;
+
+  document.querySelectorAll<HTMLElement>("[data-careers-apply]").forEach((root) => {
+    const form = root.querySelector<HTMLFormElement>("[data-form]");
+    if (form) init(root, form);
+  });
+
+  function init(root: HTMLElement, form: HTMLFormElement) {
+    const api = root.dataset.api || "";
+    const general = root.dataset.general === "1";
+    const roles: RoleMeta = JSON.parse(root.dataset.roles || "{}");
+    const loadedAt = Date.now();
+    let submitting = false;
+    let submitted = false;
+    let started = false;
+
+    const $ = <T extends Element = HTMLElement>(sel: string) => form.querySelector<T>(sel);
+    const roleSelect = $<HTMLSelectElement>("#f-role");
+    const jobId = () => (roleSelect ? roleSelect.value : root.dataset.jobId || "general");
+
+    // ---- application_started: first interaction, once ----
+    form.addEventListener(
+      "focusin",
+      () => {
+        if (started) return;
+        started = true;
+        careersEvent("application_started", { job_id: jobId() });
+      },
+      { once: false },
+    );
+
+    // ---- Role-dependent bits ----
+    const physioOnly = $("[data-physio-only]");
+    const minDaysEl = $("[data-min-days]");
+    const minNote = $("[data-min-days-note]");
+    function applyRole() {
+      if (general) return;
+      const r = roles[jobId()];
+      if (!r) return;
+      if (physioOnly) physioOnly.hidden = r.form !== "physio";
+      if (minDaysEl) minDaysEl.textContent = String(r.minDays || 3);
+      if (minNote) minNote.hidden = !r.minDays;
+      checkDays();
+    }
+    roleSelect?.addEventListener("change", applyRole);
+
+    // ---- Part-time questions ----
+    const ptBlock = $("[data-part-time]");
+    const daysSel = $<HTMLSelectElement>("#f-days_per_week");
+    const belowMin = $("[data-below-min]");
+    function employment() {
+      return ($<HTMLInputElement>('input[name="employment"]:checked')?.value || "") as string;
+    }
+    function checkDays() {
+      const r = general ? null : roles[jobId()];
+      const min = r?.minDays || 0;
+      const n = Number(daysSel?.value || 0);
+      if (belowMin) belowMin.hidden = !(min && n && n < min);
+    }
+    form.querySelectorAll<HTMLInputElement>('input[name="employment"]').forEach((el) =>
+      el.addEventListener("change", () => {
+        const pt = employment() === "part-time" || employment() === "either";
+        if (ptBlock) ptBlock.hidden = !pt;
+        if (!pt && daysSel) daysSel.value = "";
+        checkDays();
+      }),
+    );
+    daysSel?.addEventListener("change", checkDays);
+    applyRole();
+
+    // ---- "Other" training ----
+    const otherBox = $<HTMLInputElement>('input[name="training"][data-other]');
+    const otherWrap = $("[data-training-other]");
+    otherBox?.addEventListener("change", () => {
+      if (otherWrap) otherWrap.hidden = !otherBox.checked;
+    });
+
+    // ---- CV picker ----
+    const cvInput = $<HTMLInputElement>("[data-cv-input]")!;
+    const cvName = $("[data-cv-name]")!;
+    const cvPick = $("[data-cv-pick]")!;
+    const cvRemove = $<HTMLButtonElement>("[data-cv-remove]")!;
+    function fmtSize(b: number) {
+      return b >= 1024 * 1024 ? `${(b / 1024 / 1024).toFixed(1)}MB` : `${Math.max(1, Math.round(b / 1024))}KB`;
+    }
+    function showFile() {
+      const f = cvInput.files?.[0];
+      cvName.textContent = f ? `${f.name} (${fmtSize(f.size)})` : "No file chosen";
+      cvPick.textContent = f ? "Replace file" : "Choose a file";
+      cvRemove.hidden = !f;
+      if (f) validateField("cv");
+    }
+    cvInput.addEventListener("change", showFile);
+    cvRemove.addEventListener("click", () => {
+      cvInput.value = "";
+      showFile();
+      cvInput.focus();
+    });
+
+    // ---- Validation ----
+    const LABELS: Record<string, string> = {
+      role: "Role applied for",
+      interest_area: "Kind of role",
+      full_name: "Full name",
+      email: "Email address",
+      phone: "Mobile number",
+      years_experience: "Years of experience",
+      ahpc_status: "AHPC registration status",
+      clinical_experience: "Areas of clinical experience",
+      employment: "Employment arrangement",
+      days_per_week: "Days per week",
+      start_availability: "Earliest start date or notice period",
+      cv: "CV",
+      intro: "Introduction",
+      privacy_ack: "Privacy acknowledgement",
+      linkedin: "LinkedIn profile URL",
+    };
+    const val = (name: string) => {
+      const el = form.elements.namedItem(name) as HTMLInputElement | RadioNodeList | null;
+      if (!el) return "";
+      if (el instanceof RadioNodeList) return el.value;
+      if ((el as HTMLInputElement).type === "checkbox") return (el as HTMLInputElement).checked ? "yes" : "";
+      return ((el as HTMLInputElement).value || "").trim();
+    };
+    const physioActive = () => !general && roles[jobId()]?.form === "physio";
+
+    function check(name: string): string {
+      const v = val(name);
+      switch (name) {
+        case "role":
+          return general || v ? "" : "Choose the role you're applying for.";
+        case "interest_area":
+          return !general || v ? "" : "Choose the kind of role you're interested in.";
+        case "full_name":
+          return v.length >= 2 ? "" : "Enter your full name.";
+        case "email":
+          if (!v) return "Enter your email address.";
+          return EMAIL_RE.test(v) ? "" : "Enter a valid email address, like name@example.com.";
+        case "phone": {
+          // Singapore numbers can skip +65; anyone else types their country code.
+          if (!v) return "Enter your mobile number.";
+          const digits = v.replace(/\D/g, "");
+          return digits.length >= 8 && digits.length <= 15 && /^\+?[\d\s().-]+$/.test(v)
+            ? ""
+            : "Enter a valid mobile number, for example 9123 4567.";
+        }
+        case "years_experience": {
+          if (v === "") return "Enter your years of experience (0 is fine).";
+          const n = Number(v);
+          return Number.isFinite(n) && n >= 0 && n <= 50 ? "" : "Enter a number of years between 0 and 50.";
+        }
+        case "ahpc_status":
+          return !physioActive() || v ? "" : "Choose your AHPC registration status.";
+        case "clinical_experience":
+          return !physioActive() || v ? "" : "Tell us your main areas of clinical experience.";
+        case "employment":
+          return v ? "" : "Choose full-time, part-time or open to both.";
+        case "days_per_week": {
+          const pt = employment() === "part-time" || employment() === "either";
+          return !pt || v ? "" : "Choose how many days per week you're available.";
+        }
+        case "start_availability":
+          return v ? "" : "Tell us your earliest start date or notice period.";
+        case "intro":
+          if (!v) return "Write a brief introduction.";
+          return v.length <= 2000 ? "" : "Keep the introduction to 2,000 characters or fewer.";
+        case "privacy_ack":
+          return v ? "" : "Please confirm you have read the recruitment privacy notice.";
+        case "linkedin":
+          if (!v) return "";
+          try {
+            const u = new URL(v);
+            return u.protocol === "https:" || u.protocol === "http:" ? "" : "Enter a full web address starting with https://.";
+          } catch {
+            return "Enter a full web address starting with https://.";
+          }
+        case "cv": {
+          const f = cvInput.files?.[0];
+          if (!f) return "Choose your CV to upload.";
+          const ext = (f.name.split(".").pop() || "").toLowerCase();
+          if (!ALLOWED_EXT.includes(ext)) return "Upload your CV as a PDF, DOC or DOCX file.";
+          if (f.size > MAX_BYTES) return `This file is ${fmtSize(f.size)}. Please upload a CV of 10MB or less.`;
+          if (f.size === 0) return "This file is empty. Please choose another.";
+          return "";
+        }
+      }
+      return "";
+    }
+
+    function setError(name: string, msg: string) {
+      const wrap = form.querySelector<HTMLElement>(`[data-field="${name}"]`);
+      const err = form.querySelector<HTMLElement>(`#e-${name}`);
+      if (wrap) wrap.toggleAttribute("data-invalid", !!msg);
+      if (err) {
+        err.textContent = msg;
+        err.hidden = !msg;
+      }
+      form
+        .querySelectorAll<HTMLElement>(`[name="${name}"]`)
+        .forEach((el) => (msg ? el.setAttribute("aria-invalid", "true") : el.removeAttribute("aria-invalid")));
+    }
+    function validateField(name: string) {
+      const msg = check(name);
+      setError(name, msg);
+      return msg;
+    }
+
+    // Re-check a field once it has been flagged, so the error clears as the
+    // candidate fixes it (but don't nag before they've tried to submit).
+    form.addEventListener("change", (e) => {
+      const n = (e.target as HTMLInputElement).name;
+      if (n && form.querySelector(`[data-field="${n}"][data-invalid]`)) validateField(n);
+    });
+    form.addEventListener("focusout", (e) => {
+      const n = (e.target as HTMLInputElement).name;
+      if (n && form.querySelector(`[data-field="${n}"][data-invalid]`)) validateField(n);
+    });
+
+    const summary = $("[data-error-summary]")!;
+    const summaryList = $("[data-error-list]")!;
+    function showSummary(errors: [string, string][]) {
+      summaryList.innerHTML = "";
+      for (const [name, msg] of errors) {
+        const li = document.createElement("li");
+        const a = document.createElement("a");
+        a.href = `#${firstControlId(name)}`;
+        a.textContent = `${LABELS[name] || name}: ${msg}`;
+        a.addEventListener("click", (ev) => {
+          ev.preventDefault();
+          document.getElementById(firstControlId(name))?.focus();
+        });
+        li.appendChild(a);
+        summaryList.appendChild(li);
+      }
+      summary.hidden = errors.length === 0;
+      if (errors.length) summary.focus();
+    }
+    function firstControlId(name: string) {
+      const el = form.querySelector<HTMLElement>(`[name="${name}"]`);
+      return el?.id || `f-${name}`;
+    }
+
+    function validateAll(): [string, string][] {
+      const fields = [
+        "role",
+        "interest_area",
+        "full_name",
+        "email",
+        "phone",
+        "years_experience",
+        "ahpc_status",
+        "clinical_experience",
+        "linkedin",
+        "employment",
+        "days_per_week",
+        "start_availability",
+        "cv",
+        "intro",
+        "privacy_ack",
+      ];
+      const errors: [string, string][] = [];
+      for (const f of fields) {
+        const msg = validateField(f);
+        if (msg) errors.push([f, msg]);
+      }
+      return errors;
+    }
+
+    // ---- Turnstile (only when the site has a key) ----
+    type Turnstile = { render(el: HTMLElement, o: Record<string, unknown>): string; reset(id: string): void };
+    let tsToken = "";
+    let tsId: string | undefined;
+    const tsKey = root.dataset.turnstileKey || "";
+    if (tsKey) {
+      const host = $("[data-turnstile]");
+      const mount = () => {
+        if (!host || tsId !== undefined) return;
+        const s = document.createElement("script");
+        s.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+        s.async = true;
+        s.onload = () => {
+          const ts = (window as unknown as { turnstile?: Turnstile }).turnstile;
+          if (!ts) return;
+          tsId = ts.render(host, {
+            sitekey: tsKey,
+            action: "careers",
+            callback: (t: string) => (tsToken = t),
+            "expired-callback": () => (tsToken = ""),
+            "error-callback": () => (tsToken = ""),
+          });
+        };
+        document.head.appendChild(s);
+      };
+      // Loaded on first interaction so it costs nothing for readers.
+      form.addEventListener("focusin", mount, { once: true });
+    }
+    const resetTurnstile = () => {
+      tsToken = "";
+      const ts = (window as unknown as { turnstile?: Turnstile }).turnstile;
+      if (ts && tsId) ts.reset(tsId);
+    };
+
+    // ---- Submit ----
+    const submitBtn = $<HTMLButtonElement>("[data-submit]")!;
+    const progress = $("[data-progress]")!;
+    const bar = $<HTMLProgressElement>("[data-progress-bar]")!;
+    const progressLabel = $("[data-progress-label]")!;
+    const status = $("[data-status]")!;
+    const done = root.querySelector<HTMLElement>("[data-done]")!;
+
+    function setStatus(msg: string, tone: "info" | "error" = "info") {
+      status.textContent = msg;
+      status.dataset.tone = tone;
+    }
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      if (submitting || submitted) return;
+      setStatus("");
+      const errors = validateAll();
+      showSummary(errors);
+      if (errors.length) {
+        careersEvent("application_error", { job_id: jobId(), error_code: "validation" });
+        return;
+      }
+
+      const fd = new FormData(form);
+      // Normalise what the form can't express on its own.
+      fd.set("privacy_ack", val("privacy_ack") ? "yes" : "no");
+      fd.set("talent_pool", val("talent_pool") ? "yes" : "no");
+      if (!physioActive()) {
+        fd.delete("ahpc_status");
+        fd.delete("clinical_experience");
+        fd.delete("womens_health");
+      }
+      fd.set("elapsed_ms", String(Date.now() - loadedAt));
+      fd.set("source_page", location.pathname);
+      if (tsToken) fd.set("turnstile_token", tsToken);
+      for (const [k, v] of Object.entries(campaignAttribution())) fd.set(k, v);
+
+      send(fd);
+    });
+
+    function send(fd: FormData) {
+      submitting = true;
+      submitBtn.disabled = true;
+      progress.hidden = false;
+      bar.value = 0;
+      progressLabel.textContent = "Uploading your application…";
+      setStatus("Sending your application. Please keep this page open.");
+
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", `${api}/api/applications`);
+      // A custom header forces a CORS preflight, so another site can't submit
+      // applications through a visitor's browser.
+      xhr.setRequestHeader("X-Goji-Careers", "1");
+      xhr.timeout = 120_000;
+      xhr.upload.onprogress = (ev) => {
+        if (!ev.lengthComputable) return;
+        const pct = Math.round((ev.loaded / ev.total) * 100);
+        bar.value = pct;
+        if (pct >= 100) progressLabel.textContent = "Saving your application securely…";
+      };
+      const fail = (code: string, msg: string, fields?: Record<string, string>) => {
+        submitting = false;
+        submitBtn.disabled = false;
+        progress.hidden = true;
+        setStatus(msg, "error");
+        resetTurnstile();
+        careersEvent("application_error", { job_id: jobId(), error_code: code });
+        if (fields && Object.keys(fields).length) {
+          const errs: [string, string][] = [];
+          for (const [k, m] of Object.entries(fields)) {
+            setError(k, m);
+            errs.push([k, m]);
+          }
+          showSummary(errs);
+        }
+      };
+      xhr.onload = () => {
+        let body: { ok?: boolean; reference?: string; error?: string; code?: string; fields?: Record<string, string> } = {};
+        try {
+          body = JSON.parse(xhr.responseText || "{}");
+        } catch {
+          /* non-JSON error page */
+        }
+        if (xhr.status >= 200 && xhr.status < 300 && body.ok && body.reference) {
+          succeed(body.reference);
+          return;
+        }
+        const retryMsg = `We couldn't save your application just now. Please try again in a minute, or email your CV to hello@gojiphysio.com.`;
+        if (xhr.status === 400 || xhr.status === 413 || xhr.status === 415 || xhr.status === 422) {
+          fail(body.code || "invalid", body.error || "Please check the highlighted fields.", body.fields);
+        } else if (xhr.status === 409) {
+          fail(body.code || "closed", body.error || retryMsg);
+        } else if (xhr.status === 429) {
+          fail("rate_limited", body.error || "We've had several applications from this connection. Please try again later, or email your CV to hello@gojiphysio.com.");
+        } else {
+          fail(body.code || `http_${xhr.status}`, body.error || retryMsg);
+        }
+      };
+      xhr.onerror = () =>
+        fail("network", "We couldn't reach our server. Check your connection and try again; you won't be submitted twice.");
+      xhr.ontimeout = () =>
+        fail("timeout", "This is taking longer than expected. Please try again; you won't be submitted twice.");
+      xhr.send(fd);
+    }
+
+    function succeed(reference: string) {
+      submitted = true;
+      submitting = false;
+      careersEvent(general ? "expression_of_interest_submitted" : "application_submitted", { job_id: jobId() });
+      // Drop the file and answers from the page; only the reference remains.
+      form.reset();
+      form.hidden = true;
+      root.querySelector<HTMLElement>("[data-done-ref]")!.textContent = reference;
+      done.hidden = false;
+      done.querySelector<HTMLElement>("[data-done-title]")?.focus();
+      done.scrollIntoView({ behavior: "smooth", block: "start" });
+      // A refresh shows a fresh, empty form; nothing is re-sent (the submit was
+      // an XHR, not a page POST), and the key above dies with this page.
+    }
+
+    // Warn before leaving mid-upload.
+    window.addEventListener("beforeunload", (e) => {
+      if (submitting) e.preventDefault();
+    });
+  }
+</script>

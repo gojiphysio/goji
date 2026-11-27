@@ -24,6 +24,8 @@
 --                patient's Confirm/Reschedule tap.
 --   'email'    — the reminder email (one per patient per day, listing all of
 --                that day's appointments).
+--   'both'     — WhatsApp and email both went out (they run in parallel since
+--                25 Nov 2026: the email goes to everyone with an address).
 --   'none'     — nothing was attempted (no usable mobile and no email).
 --   NULL       — rows written before the channel column existed (all email).
 -- A 2xx from the Cloud API means Meta accepted the message, not that it was
@@ -71,7 +73,7 @@ CREATE TABLE IF NOT EXISTS `goji-bi.marts.appointment_reminder_events` (
   status         STRING    NOT NULL OPTIONS(description="sent | test | skipped_no_email | skipped_no_contact | failed | dry_run"),
   note           STRING    OPTIONS(description="Operational note / SMTP or WhatsApp error text. Never PII"),
   sent_at        TIMESTAMP NOT NULL OPTIONS(description="When the job attempted the send"),
-  channel        STRING    OPTIONS(description="whatsapp | email | none. NULL on rows from before the WhatsApp channel (all email)"),
+  channel        STRING    OPTIONS(description="whatsapp | email | both | none. NULL on rows from before the WhatsApp channel (all email)"),
   wa_message_id  STRING    OPTIONS(description="WhatsApp message id (wamid) when channel = whatsapp and Meta accepted it")
 );
 
@@ -82,7 +84,7 @@ CREATE TABLE IF NOT EXISTS `goji-bi.marts.appointment_reminder_events` (
 -- deploy.
 ALTER TABLE `goji-bi.marts.appointment_reminder_events`
   ADD COLUMN IF NOT EXISTS channel STRING
-    OPTIONS(description="whatsapp | email | none. NULL on rows from before the WhatsApp channel (all email)"),
+    OPTIONS(description="whatsapp | email | both | none. NULL on rows from before the WhatsApp channel (all email)"),
   ADD COLUMN IF NOT EXISTS wa_message_id STRING
     OPTIONS(description="WhatsApp message id (wamid) when channel = whatsapp and Meta accepted it");
 

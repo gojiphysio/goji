@@ -58,20 +58,12 @@ const grouped = categories.reduce(
 const fromPrice = (clinic: number, home?: number) =>
   `$${Math.min(clinic, home ?? clinic)}`;
 
-/** For paediatric physio only (not Schroth), show the lowest variant price ("From $160"). */
 const displayPrice = (service: any) => {
-  if (service.slug === "paediatric-physiotherapy") {
-    return "From $160";  // lowest paediatric variant
-  }
   const price = fromPrice(service.data.priceClinic, service.data.priceHome);
   return service.data.priceUsual ? `${price} introductory (usual $${service.data.priceUsual})` : price;
 };
 
-/** For paediatric physio only (not Schroth), show the shortest variant duration ("From 30 min"). */
 const displayDuration = (service: any) => {
-  if (service.slug === "paediatric-physiotherapy") {
-    return "From 30 min";  // shortest paediatric variant
-  }
   return `${service.data.durationMin} min`;
 };
 
@@ -90,7 +82,7 @@ const faqs = [
   },
   {
     q: "How much does physiotherapy cost in Singapore?",
-    a: `Physiotherapy fees in Singapore vary with the provider, the setting (a private clinic, a polyclinic or public hospital, or a home visit) and the length of the appointment, so check the per-session price before you book. At Goji, a 55-minute physiotherapy session is $260 at the clinic or $380 as a home visit. The 85-minute Mummy and Baby assessment is $330 at the clinic or $450 as a home visit. Prices are as of ${SITE.pricesAsOf}. We do not do direct billing: most patients pay first and claim from their insurer afterwards, depending on their policy's physiotherapy coverage.`,
+    a: `Physiotherapy fees in Singapore vary with the provider, the setting (a private clinic, a polyclinic or public hospital, or a home visit) and the length of the appointment, so check the per-session price before you book. At Goji, a 55-minute initial physiotherapy consultation is $260 at the clinic or $380 as a home visit, and review sessions are $230 for 40 minutes, $260 for 55 minutes or $390 for 85 minutes (a home visit adds $120). The 85-minute Mummy and Baby assessment is $330 at the clinic or $450 as a home visit. Prices are as of ${SITE.pricesAsOf}. We do not do direct billing: most patients pay first and claim from their insurer afterwards, depending on their policy's physiotherapy coverage.`,
   },
   {
     q: "Do I need a doctor's referral to see a physiotherapist in Singapore?",

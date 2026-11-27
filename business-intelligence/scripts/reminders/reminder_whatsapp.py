@@ -45,7 +45,8 @@ log = logging.getLogger("reminders.whatsapp")
 # header; the payload stays Cloud API shaped. E.g. 360dialog:
 #   WA_API_BASE=https://waba-v2.360dialog.io WA_SEND_PATH=/messages
 #   WA_AUTH_HEADER=D360-API-KEY WA_AUTH_PREFIX=   (set, but empty)
-WA_API_BASE = os.environ.get("WA_API_BASE", "https://graph.facebook.com/v23.0")
+# `or`: the deploy passes an empty value when the repo variable is unset.
+WA_API_BASE = os.environ.get("WA_API_BASE") or "https://graph.facebook.com/v23.0"
 WA_PHONE_NUMBER_ID = os.environ.get("WA_PHONE_NUMBER_ID", "")
 # Meta: /{phone_number_id}/messages. 360dialog-style providers: /messages.
 WA_SEND_PATH = os.environ.get("WA_SEND_PATH", "/{phone_number_id}/messages")
@@ -54,6 +55,11 @@ WA_AUTH_HEADER = os.environ.get("WA_AUTH_HEADER", "Authorization")
 WA_AUTH_PREFIX = os.environ.get("WA_AUTH_PREFIX", "Bearer ")
 WA_TOKEN = os.environ.get("WA_TOKEN", "")  # Secret Manager wa-token
 TEMPLATE = os.environ.get("WA_REMINDER_TEMPLATE", "goji_appointment_reminder")
+# The same reminder with a "Registration form" URL button (index 2, after
+# Confirm and Reschedule), for a patient who still owes Plato's registration
+# form. Empty = off: set the repo variable WA_REMINDER_FORM_TEMPLATE to
+# goji_appointment_reminder_form once Meta approves it (submitted 25 Nov 2026).
+FORM_TEMPLATE = os.environ.get("WA_REMINDER_FORM_TEMPLATE", "")
 LANGUAGE = os.environ.get("WA_REMINDER_LANGUAGE", "en")
 
 TEMPLATE_BODY = (
@@ -178,7 +184,8 @@ def render_preview(params: list[str]) -> str:
     return text
 
 
-def build_payload(to: str, params: list[str], appointment_id: str) -> dict:
+def build_payload(to: str, params: list[str], appointment_id: str,
+                  form_token: str = "") -> dict:
     """The Cloud API request body for one reminder.
 
     Quick-reply buttons need no parameters to send, but each one may carry a
@@ -196,12 +203,19 @@ def build_payload(to: str, params: list[str], appointment_id: str) -> dict:
             "index": str(i),
             "parameters": [{"type": "payload", "payload": f"{prefix}:{appointment_id}"}],
         })
+    name = TEMPLATE
+    if form_token and FORM_TEMPLATE:
+        # The form version: its third button's URL ends in the signed token
+        # (registration.form_token), which goji-booking's /form route opens.
+        name = FORM_TEMPLATE
+        components.append({"type": "button", "sub_type": "url", "index": "2",
+                           "parameters": [{"type": "text", "text": form_token}]})
     return {
         "messaging_product": "whatsapp",
         "to": to,
         "type": "template",
         "template": {
-            "name": TEMPLATE,
+            "name": name,
             "language": {"code": LANGUAGE},
             "components": components,
         },
@@ -247,7 +261,7 @@ def _error_text(resp) -> str:
 
 
 def send_template(to: str, params: list[str], appointment_id: str, *,
-                  session=None) -> str:
+                  form_token: str = "", session=None) -> str:
     """Send one reminder template. Returns the WhatsApp message id (wamid).
 
     Raises WhatsAppSendError on a network error, a non-2xx status, an error body,
@@ -264,7 +278,7 @@ def send_template(to: str, params: list[str], appointment_id: str, *,
                "Content-Type": "application/json"}
     http = session or requests
     try:
-        resp = http.post(url, json=build_payload(to, params, appointment_id),
+        resp = http.post(url, json=build_payload(to, params, appointment_id, form_token),
                          headers=headers, timeout=15)
     except requests.RequestException as e:
         raise WhatsAppSendError(f"network error: {e.__class__.__name__}") from e

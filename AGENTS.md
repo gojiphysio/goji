@@ -40,7 +40,19 @@ you're working in (`scripts/dashboard/`, `scripts/ingestion/`, `scripts/wa_agent
 - **SQL is idempotent.** Every `.sql` is `CREATE OR REPLACE` (views) or
   `CREATE TABLE IF NOT EXISTS` (tables); `deploy_all.sh` re-runs them safely.
 - **Least privilege.** The dashboard service account is read-only on BigQuery
-  except table-level `dataEditor` grants on the append-only event tables.
+  except table-level `dataEditor` grants on the append-only event tables, plus
+  `dim_patient_contact`, which goji-booking (same account) keeps current
+  between nightly rebuilds (`booking/patient_contacts.py`).
+- **Where the domain lives.** `gojiphysio.com` DNS is hosted at **Squarespace
+  Domains** (nameservers `ns-cloud-a*.googledomains.com`, left over from
+  Google Domains). It is **not** in Cloudflare and not in any GCP project, so
+  neither the Cloudflare API nor `gcloud dns` can change it; the owner adds
+  records in Squarespace (Domains > gojiphysio.com > DNS). A new Cloud Run
+  subdomain is `<name> CNAME ghs.googlehosted.com.` there. Cloudflare hosts
+  only the Pages site (project `goji-bgb`: `www` CNAMEs to
+  `goji-bgb.pages.dev`, previews are `<branch>.goji-bgb.pages.dev`; the bare
+  `goji.pages.dev` is someone else's) and Turnstile. Check with
+  `dig +short NS gojiphysio.com` before writing a DNS step into a PR or a prompt.
 - **Capture rules as you learn them.** When a build surfaces a new rule of
   thumb, add it to the nearest `AGENTS.md` in the same PR.
 

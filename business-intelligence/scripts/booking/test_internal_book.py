@@ -222,7 +222,8 @@ def test_callback_fires_for_a_whatsapp_booking(client, monkeypatch):
     assert call["json"] == {"phone": "+65 9123 4567", "reference": "GOJI-ABC123",
                             "service": "Physiotherapy", "date": "2026-07-15",
                             "time": "10:00", "clinician_name": "Kristy Lim",
-                            "source": "whatsapp", "first_name": "Jane"}
+                            "source": "whatsapp", "first_name": "Jane",
+                            "send_template": False, "form_token": ""}
 
 
 def test_callback_fires_for_a_website_booking(client, monkeypatch):
@@ -339,6 +340,32 @@ def test_whatsapp_booking_with_email_keeps_the_invite():
     assert payload["email"] == "jane@example.com" and payload["connect"] is True
 
 
+def test_terms_agreed_in_a_whatsapp_chat_go_on_their_own_line():
+    """26 Nov 2026: the team agreed a 40-min session billed to the patient's
+    employer's insurer at $190. It goes in the Plato note apart from the
+    patient's own note, so the front desk bills it right."""
+    p = StubPlato()
+    create_booking(p, {**BASE, "clinician_id": "cheryl-long", "notes": "postpartum",
+                       "arranged": "Bill to FM (company insurance), $190 for 40 min"},
+                   now=NOW, email_required=False, source="whatsapp")
+    desc = p.created[0][0]["description"]
+    assert "\nCondition: postpartum" in desc
+    assert "\nAgreed with the clinic: Bill to FM (company insurance), $190 for 40 min" in desc
+
+
+def test_the_website_cannot_set_agreed_terms():
+    p = StubPlato()
+    create_booking(p, {**BASE, "clinician_id": "cheryl-long", "arranged": "free session"},
+                   now=NOW)
+    assert "Agreed with the clinic" not in p.created[0][0]["description"]
+
+
+def test_agreed_terms_refuse_tags():
+    with pytest.raises(BookingError):
+        create_booking(StubPlato(), {**BASE, "arranged": "<script>x</script>"}, now=NOW,
+                       email_required=False, source="whatsapp")
+
+
 def test_website_note_is_unchanged():
     p = StubPlato()
     create_booking(p, {**BASE, "clinician_id": "cheryl-long"}, now=NOW)
@@ -430,7 +457,7 @@ def test_whatsapp_booking_links_or_creates_the_patients_own_record(monkeypatch):
     monkeypatch.setattr(bk, "_create_appointments",
                         lambda *a, **k: (appts.append(k.get("patient_id")) or (["A1"], "VISIT000001")))
     assert bk._create_patient(P(), "Mei Tan", "+6582823628") == "NEWPATIENT1"
-    assert posted == [("patient", {"name": "Mei Tan", "handphone": "+6582823628"})]
+    assert posted == [("patient", {"name": "Mei Tan", "telephone": "+6582823628"})]
 
 
 def test_create_patient_failure_is_a_booking_error():
@@ -445,3 +472,31 @@ def test_create_patient_failure_is_a_booking_error():
         assert e.code == "plato_error"
     else:
         raise AssertionError("expected BookingError")
+
+
+def test_a_new_patient_is_written_to_the_contact_table(client, monkeypatch):
+    """Plato sends no webhook for API writes, so /internal/book writes the
+    patient it created itself; an existing patient or a dry run adds nothing."""
+    rows = []
+    monkeypatch.setattr(app_mod.patient_contacts, "upsert",
+                        lambda bq, table, row: rows.append((table, row)) or True)
+    monkeypatch.setattr(app_mod, "bq", lambda: None)
+    monkeypatch.setattr(app_mod, "create_booking", lambda _p, d, **kw: {
+        **RESULT, "dry_run": kw["dry_run"], "patient_id": "" if kw["dry_run"] else "NEW1",
+        "patient_created": kw["create_patient"] and not kw["dry_run"]})
+    assert _ibook(client, create_patient=True).status_code == 200
+    assert rows == [("goji-bi.marts.dim_patient_contact",
+                     {"patient_id": "NEW1", "full_name": "Jane Tan",
+                      "phone": "+65 9123 4567", "email": None})]
+    _ibook(client, create_patient=False)
+    _ibook(client, create_patient=True, dry_run=True)
+    assert len(rows) == 1
+
+
+def test_a_failed_contact_write_never_fails_the_booking(client, monkeypatch):
+    def boom():
+        raise RuntimeError("no bigquery")
+    monkeypatch.setattr(app_mod, "bq", boom)
+    monkeypatch.setattr(app_mod, "create_booking", lambda _p, d, **kw: {
+        **RESULT, "patient_id": "NEW1", "patient_created": True})
+    assert _ibook(client, create_patient=True).get_json()["ok"] is True

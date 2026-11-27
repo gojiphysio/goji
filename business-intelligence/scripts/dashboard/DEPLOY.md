@@ -93,7 +93,7 @@ can append "contacted/snoozed/dismissed" follow-up events, appointment
 confirmations, click-to-WhatsApp link clicks, and provider-attribution alert
 dismissals; everything else stays read-only):
 
-    for t in patient_followup_events new_patient_welcome_events lead_events link_click_events booking_funnel_events web_session_events mismatch_dismissal_events appointment_reminder_events; do
+    for t in patient_followup_events new_patient_welcome_events lead_events link_click_events booking_funnel_events web_session_events mismatch_dismissal_events appointment_reminder_events appointment_confirmation_events; do
       bq add-iam-policy-binding \
         --member="serviceAccount:dashboard-sa@goji-bi.iam.gserviceaccount.com" \
         --role="roles/bigquery.dataEditor" \
@@ -156,7 +156,7 @@ The dashboard SA must have **write** access to the relevant append-only table:
 `deploy_admin.sh` grants and verifies them all, but if you ever see a save
 error, grant them directly:
 
-    for t in patient_followup_events new_patient_welcome_events lead_events link_click_events booking_funnel_events web_session_events mismatch_dismissal_events appointment_reminder_events; do
+    for t in patient_followup_events new_patient_welcome_events lead_events link_click_events booking_funnel_events web_session_events mismatch_dismissal_events appointment_reminder_events appointment_confirmation_events; do
       bq add-iam-policy-binding \
         --member="serviceAccount:dashboard-sa@goji-bi.iam.gserviceaccount.com" \
         --role="roles/bigquery.dataEditor" \

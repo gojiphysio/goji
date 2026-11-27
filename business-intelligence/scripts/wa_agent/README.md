@@ -39,15 +39,18 @@ Each chat is in one mode: `agent`, `waiting`, `human` or `paused` (`policy.py`).
 | | `POST /admin/chats/<id>/takeover` | `POST /admin/chats/<id>/handback` |
 
 Chris writing in a chat from the app (`smb_message_echoes`) pauses it: `paused`
-never times out and only leaves when she texts `RESUME <code>` or an admin
-hands it back (see Go-live controls).
+leaves when she texts `RESUME <code>`, an admin hands it back (see Go-live
+controls), or the customer writes 14 days or more after the last person's
+message (`WA_AGENT_HUMAN_PAUSE_S`, `policy.apply_pause_expiry`; owner, 24 Nov
+2026). That message goes to the agent like any other; nothing is sent before it.
+`PAUSE <code>`, the admin pause and the watch list never lapse.
 
 While `waiting`, the model is told what's with Chris (`pending_for_chris`, the
 staff note), so it answers everything else but not that, says once that Chris
 has it if asked, and adds any new topic for Chris to the list without a second
 standby message (19 Nov 2026, Charles: a handover shouldn't stop the front desk).
 
-`paused` only leaves by hand-back. Across all chats: `POST /admin/kill` and the
+`paused` leaves by hand-back, or by the 14-day lapse above. Across all chats: `POST /admin/kill` and the
 `WA_AGENT_KILL_SWITCH` env var. Contacts in `WA_AGENT_ALWAYS_HUMAN` are never
 answered. `WA_AGENT_HOURS=after_hours` limits the agent to outside Mon-Sat
 8am-8pm.
@@ -55,12 +58,14 @@ answered. `WA_AGENT_HOURS=after_hours` limits the agent to outside Mon-Sat
 What happens to a proposal: `config.INTENT_POLICY` maps each intent to
 auto / auto_notify / draft / escalate; below `WA_AGENT_MIN_CONFIDENCE` (0.7) it's a
 draft. Chris's routing (18-19 Nov): booking requests, appointment checks and
-routine moves (24h+ notice) are handled by the agent end to end, with no email
-to Chris; "is this Chris?" answers as the front desk and asks for a message;
-cancelling, billing, clinical and complaints are drafts she checks, even if
-the model wanted to hand over; a reschedule less than 24 hours before the
-appointment (the site's cancellation policy) is a draft, with the first-time
-fee waiver; asking for a person about something the agent can't handle,
+routine moves and cancellations (24h+ notice) are handled by the agent end to
+end, with no email to Chris (a cancellation is done in the same turn, no
+"shall I?"; the confirmation asks gently what came up, or answers the reason
+they gave, and offers another time: owner, 24 Nov 2026); "is this Chris?" answers as the front desk
+and asks for a message; billing, clinical and complaints are drafts she
+checks, even if the model wanted to hand over; a reschedule or cancellation
+less than 24 hours before the appointment (the site's cancellation policy) is
+a draft, with the first-time fee waiver; asking for a person about something the agent can't handle,
 sensitive topics and urgent red flags escalate with a holding reply.
 
 **Long replies go out as 2 messages** (owner, 24 Nov 2026), the way Chris
@@ -150,13 +155,22 @@ provider forwards Meta's signature (if not: `USE_URL_TOKEN=1`, below), and the
 **Chris stays primary** (Chris, 19 Nov 2026).
 
 - *Chris writes in a chat → the assistant is fully silent there* (mode
-  `paused`, no 24h idle hand-back) until she resumes it. The idle hand-back
-  is only for handovers the assistant made that nobody answered.
+  `paused`, no 24h idle hand-back) until she resumes it, or until the
+  customer writes 14+ days after her last message (owner, 24 Nov 2026). The
+  idle hand-back is only for handovers the assistant made that nobody answered.
 - *Resume over WhatsApp.* Every chat has a short code (`#004`) shown in pings,
   the STATUS reply and the morning summary, which lists every paused chat.
   Chris texts `RESUME 004` (or `PAUSE 004`) to the Goji number from her phone.
   Resuming sends the customer nothing: the assistant just answers their next
   message. The admin hand-back route does the same.
+- *Answer through the assistant* (owner, 24 Nov 2026). Once the team has the
+  answer, Chris swipe-replies to the ping with it (or texts `ANSWER 004 ...`).
+  The assistant writes it up, sends it, looks after the chat again and shows
+  her what it sent. If the answer only covers part of what the customer
+  asked, the chat stays waiting on the rest. Nothing is sent if it isn't an
+  answer for that chat, the write-up fails the reply check, the assistant is
+  stopped, or the customer's last message was over a day ago (only the
+  Business app can message them then).
 - *Off-topic never reaches Chris* (owner, 23 Nov 2026). Wrong numbers,
   unrelated questions, attempts to misuse the chat and cold sales pitches
   (intent `off_topic`) get a short front-desk reply whatever the confidence,
@@ -421,13 +435,12 @@ The agent books new appointments in the chat. The model never books:
 **Booking for someone else** (a husband for his wife, a parent for a child):
 the agent asks the patient's own full name (and a child's age) and books under
 it, with the texter's number as the contact; the Plato note says who booked.
-The appointment is linked to the patient's own record: an existing one on the
-number only if the name matches (`tools.record_for_booking`), otherwise a new
-record in the patient's name (goji-booking `create_patient`). Never the
-texter's record by phone. Website bookings are unchanged (unlinked until staff
-register the patient). The live Plato test must confirm the patient-create
-payload (`name`, `handphone`, `email`) and that `patient_id` on the appointment
-links it.
+The appointment is linked to the patient's own record when one exists on the
+number in their name (`tools.record_for_booking`), never the texter's record by
+phone. A new patient gets no record (since 26 Nov 2026, like a website
+booking): the confirmation and the 48-hour reminder send them Plato's
+pre-registration form, which creates the profile and links the appointment.
+`my_appointments` finds these unlinked bookings by the number on them.
 
 **Dry run by default** (`WA_AGENT_BOOKING_DRY_RUN`, deploy sets 1): goji-booking
 validates and checks the slot but writes nothing to Plato, and the
@@ -470,26 +483,48 @@ Plato deletes cancellations, so late-change history is built from go-live:
 - Dry run while bookings are (`WA_AGENT_BOOKING_DRY_RUN`): goji-booking reads
   the patient but doesn't write the tag.
 
-## Appointment confirmations and reminders on WhatsApp (19 Nov 2026)
+## Appointment confirmations and reminders on WhatsApp
 
-Templates submitted to Meta on the test account (UTILITY, pending review):
+All four templates are approved on Goji's number (checked 25 Nov 2026):
 `goji_appointment_confirmed` (name, service, date and time, clinician, plus a
-directions button) and `goji_appointment_reminder` (same fields, Confirm and
-Reschedule quick replies). `goji_referral_received` for referrals. All need
-resubmitting on Goji's real number once it's connected.
+"Get directions" button), `goji_appointment_reminder` (same fields, Confirm
+and Reschedule quick replies), `goji_referral_received`, `goji_staff_alert_v2`.
 
-- **Confirmations:** a website booking from a number with no chat in the last
-  24 hours gets `goji_appointment_confirmed` (`WA_AGENT_CONFIRMATIONS=1`, off
-  until the template is approved on the real number). Inside the window the
-  agent's free-form acknowledgement covers it; chat bookings are confirmed in
-  the chat. goji-booking's callback now carries the patient's first name.
-- **Reminders:** the reminders job (see `reminders/README.md`) sends
-  `goji_appointment_reminder` first and email as the fallback. A Confirm tap
-  gets a thank-you with no model call; Reschedule goes to the agent's move flow.
+- **New Maps link pending:** `goji_appointment_confirmed_v2` (same wording,
+  "Get directions" to the clinic's chosen Maps link,
+  https://maps.app.goo.gl/Mm3eYLNMUwwx8USv8) was submitted to Meta on
+  25 Nov 2026. Once approved, switch with
+  `gcloud run services update goji-wa-agent --update-env-vars
+  WA_AGENT_CONFIRM_TEMPLATE=goji_appointment_confirmed_v2` (the deploy carries
+  env vars forward). Same four parameters, so no code change.
+- **Registration-form versions pending:** `goji_appointment_confirmed_form`
+  and `goji_appointment_reminder_form` (submitted 25 Nov 2026) add a
+  "Registration form" URL button for patients who haven't filled in Plato's
+  form; its URL ends in goji-booking's signed form token. Once approved: set
+  `WA_AGENT_CONFIRM_FORM_TEMPLATE=goji_appointment_confirmed_form` on the
+  agent (`gcloud run services update ... --update-env-vars`) and the repo
+  variable `WA_REMINDER_FORM_TEMPLATE=goji_appointment_reminder_form` (read at
+  the reminder job's deploy).
+- **Confirmations** go live with goji-booking's confirmation email: goji-booking
+  puts `send_template: true` on the booking-confirmed callback only when
+  `CONFIRMATIONS_MODE=live`, and the agent sends the template only then
+  (`WA_AGENT_CONFIRMATIONS`, default on, is the agent-side off switch). It
+  covers website bookings and, since 25 Nov 2026, front-desk bookings
+  (`source: "staff"`, from goji-booking's Plato webhook and sweep), for a
+  number with no chat in the last 24 hours. Inside the window a website or
+  front-desk booking gets the free-form acknowledgement; chat bookings are
+  confirmed in the chat. Kill switch, go-live and Chris's paused chats stop
+  all of it.
+- **Reminders:** the reminders job (`reminders/README.md`) sends
+  `goji_appointment_reminder` alongside the reminder email, except to a
+  patient who has already confirmed and has an email. A Confirm tap gets a
+  thank-you with no model call and marks the appointment Confirmed in Plato
+  (goji-booking `/internal/confirm`); Reschedule goes to the agent's move flow.
 - **Opt-in:** the website booking form says, by default, that Goji may send
   the confirmation and reminders on WhatsApp (Meta needs opt-in naming the
   business). Chat bookings: the customer messaged us, and the confirmation
-  says a reminder will follow.
+  says a reminder will follow. Front-desk bookings: existing patients who
+  gave the clinic their number.
 
 ## Returning-patient recognition (built 19 Nov 2026)
 

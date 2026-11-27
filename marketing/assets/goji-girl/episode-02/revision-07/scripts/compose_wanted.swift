@@ -11,4 +11,3 @@ for n in ["05","06","07","08","09"] {
  path.close();NSColor(calibratedRed:0.94,green:0.70,blue:0.10,alpha:1).setFill();path.fill();NSColor.black.setStroke();path.lineWidth=5;path.stroke()
  NSGraphicsContext.restoreGraphicsState();try rep.representation(using:.png,properties:[:])!.write(to:r.appendingPathComponent("frames/"+n+"-look.png"))
 }
-

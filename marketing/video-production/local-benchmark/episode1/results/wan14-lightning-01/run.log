@@ -1,0 +1,14 @@
+⚠️  Normalizing Wan q8 runtime-sensitive paths to BF16 at load: blocks.0.ffn.net.0, blocks.0.ffn.net.1, blocks.0.attn2.to_k, ...
+⚠️  Normalizing Wan q8 runtime-sensitive paths to BF16 at load: blocks.0.ffn.net.0, blocks.0.ffn.net.1, blocks.0.attn2.to_k, ...
+📦 Loading 1 LoRA file(s)...
+🔧 Applying LoRA: high_noise_model.safetensors (scale=1.0)
+   ✅ Applied to 400 layers (1200/1200 keys matched)
+✅ All LoRA weights applied successfully
+📦 Loading 1 LoRA file(s)...
+🔧 Applying LoRA: low_noise_model.safetensors (scale=1.0)
+   ✅ Applied to 400 layers (1200/1200 keys matched)
+✅ All LoRA weights applied successfully
+Wan image-guided video generation honoring the requested canvas (canvas_policy=exact-resize): (1024, 576) with source image (1024, 576).
+Denoising video:   0%|          | 0/4 [00:00<?, ?step/s]Denoising video:   0%|          | 0/4 [00:00<?, ?step/s, start; 81 frames]Denoising video:  25%|██▌       | 1/4 [06:34<19:42, 394.12s/step, start; 81 frames]Denoising video:  25%|██▌       | 1/4 [06:34<19:42, 394.12s/step, denoise; 81 frames]Denoising video:  50%|█████     | 2/4 [11:36<11:20, 340.13s/step, denoise; 81 frames]Denoising video:  50%|█████     | 2/4 [11:36<11:20, 340.13s/step, denoise; 81 frames]Denoising video:  75%|███████▌  | 3/4 [16:35<05:21, 321.31s/step, denoise; 81 frames]Denoising video:  75%|███████▌  | 3/4 [16:35<05:21, 321.31s/step, denoise; 81 frames]Denoising video: 100%|██████████| 4/4 [21:33<00:00, 312.25s/step, denoise; 81 frames]Denoising video: 100%|██████████| 4/4 [21:33<00:00, 312.25s/step, denoise; 81 frames]Denoising video: 100%|██████████| 4/4 [21:34<00:00, 312.25s/step, decode; 81 frames] Denoising video: 100%|██████████| 4/4 [21:34<00:00, 312.25s/step, convert; 81 frames]Denoising video: 100%|██████████| 4/4 [21:34<00:00, 312.25s/step, generated; 81 frames]Saving video to: /Users/tidepool/.codex/worktrees/goji-video-workflow/goji/marketing/video-production/local-benchmark/episode1/results/wan14-lightning-01/raw.mp4
+Denoising video: 100%|██████████| 4/4 [21:34<00:00, 312.25s/step, save; 81 frames]     Denoising video: 100%|██████████| 4/4 [23:22<00:00, 312.25s/step, complete; 81 frames]Denoising video: 100%|██████████| 4/4 [23:22<00:00, 350.70s/step, complete; 81 frames]
+Saved video to: /Users/tidepool/.codex/worktrees/goji-video-workflow/goji/marketing/video-production/local-benchmark/episode1/results/wan14-lightning-01/raw.mp4

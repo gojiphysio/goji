@@ -221,6 +221,13 @@ def test_service_is_read_from_type_and_length():
     assert _service_for("hDWW", 60) == ("physiotherapy", "")
     assert _service_for("hDWW", 55) == ("physiotherapy", "55min")
     assert _service_for("hDWW", 85) == ("mummy-baby", "")
+    # An 85-minute paediatric review booked online names its service first.
+    assert _service_for("hDWW", 85, "Physiotherapy. Booked via website.\nPaediatrics") \
+        == ("physiotherapy", "85min")
+    assert _service_for("hDWW", 85, "Mummy & Baby Assessment. Booked via website.") \
+        == ("mummy-baby", "")
+    assert _service_for("hDWW", 85, None) == ("mummy-baby", "")
+    assert _service_for("hDWW", 40) == ("physiotherapy", "40min")
     assert _service_for("qLbH", 60) == ("strength-conditioning", "")
     assert _service_for("hDWW", 90) is None
 
@@ -321,7 +328,8 @@ def test_real_move_emails_the_clinic_and_calls_the_assistant(client):
     assert posted["json"] == {"phone": PHONE, "reference": "GOJI-123456",
                               "service": "Physiotherapy", "date": "2026-07-17",
                               "time": "14:00", "clinician_name": "Cheryl Long",
-                              "source": "whatsapp", "first_name": ""}
+                              "source": "whatsapp", "first_name": "",
+                              "send_template": False, "form_token": ""}
 
 
 def test_plato_write_failure_is_502_and_notifies_nobody(client, monkeypatch):

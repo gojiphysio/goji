@@ -15,7 +15,7 @@ import type { DurationVariant } from "./services";
  * a category beyond who actually offers it in the roster.
  *
  * Some sub-types (e.g., paediatrics) offer multiple duration variants.
- * `variants` maps variant ids to their duration and pricing (e.g., "30min", "55min").
+ * `variants` maps variant ids to their duration and pricing (e.g., "40min", "55min").
  */
 
 export type PhysioFocusId =
@@ -32,7 +32,7 @@ export interface PhysioCategory {
   hint: string;
   /** Clinician ids (from clinicians.ts) this sub-type opens. */
   clinicianIds: string[];
-  /** Optional: variant durations/prices (e.g., { "30min": {...}, "55min": {...} }). */
+  /** Optional: variant durations/prices (e.g., { "40min": {...}, "55min": {...} }). */
   variants?: Record<string, DurationVariant>;
 }
 
@@ -55,9 +55,9 @@ export const physioCategories: PhysioCategory[] = [
     hint: "Neurodevelopmental concerns, congenital conditions, chest physio, pelvic health (bed wetting / constipation) and other injuries.",
     clinicianIds: ["kristy-ng", "cheryl-long"],
     variants: {
-      "30min": { durationMin: 30, price: "160", description: "Only if prescribed by physio" },
-      "45min": { durationMin: 45, price: "230", description: "Review session" },
-      "55min": { durationMin: 55, price: "260", description: "Initial consultation" },
+      "40min": { durationMin: 40, price: "230", description: "Review session" },
+      "55min": { durationMin: 55, price: "260", description: "Initial consultation or review" },
+      "85min": { durationMin: 85, price: "390", description: "Extended review" },
     },
   },
   {
