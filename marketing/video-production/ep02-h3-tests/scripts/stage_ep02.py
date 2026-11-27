@@ -681,6 +681,21 @@ sc.render.engine = 'BLENDER_EEVEE'
 sc.view_settings.view_transform = 'Standard'
 sc.render.image_settings.file_format = 'PNG'
 sc.render.film_transparent = False
+CLAY = '--clay' in argv
+if CLAY:
+    # NPC clay: same geometry and light, no colour cues on the NPC proxies for the
+    # generator to copy (tests proxy-appearance leakage on subjects with no reference image).
+    cm = bpy.data.materials.new('clay')
+    cm.use_nodes = True
+    cm.node_tree.nodes['Principled BSDF'].inputs['Base Color'].default_value = (.62, .62, .62, 1)
+    cm.node_tree.nodes['Principled BSDF'].inputs['Roughness'].default_value = .9
+    # Only the NPC proxies (no reference image) become clay; leads, bag and set keep their colours.
+    for o in bpy.data.objects:
+        if o.type == 'MESH' and o.name.startswith('NPC0'):
+            o.data.materials.clear()
+            o.data.materials.append(cm)
+    OUT = OUT.parent / f'{SCENE}clay'
+    OUT.mkdir(exist_ok=True)
 if RENDER != 'none':
     frames = range(n) if RENDER == 'all' else [int(x * (n - 1) / 7) for x in range(8)]
     (OUT / 'frames').mkdir(exist_ok=True)

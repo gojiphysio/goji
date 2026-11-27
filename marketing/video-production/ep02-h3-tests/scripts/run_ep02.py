@@ -25,7 +25,7 @@ PRIVATE = Path('/Users/tidepool/Projects/goji-ep02-runtime/takes')
 URL = 'http://127.0.0.1:8195'
 REFS = ROOT.parents[0] / 'skills/goji-gta-video/assets'
 REF_IMAGES = ['ep01-reception.png', 'ep01-therapist-back.png', 'ep01-street.png']
-FRAMES = {'t01': 192, 't02': 192, 't02v2': 192, 't03': 362, 'CONT': 192}
+FRAMES = {'t01': 192, 't01clay': 192, 't02': 192, 't02v2': 192, 't03': 362, 'CONT': 192}
 PROMPTS = json.loads((ROOT / 'prompts/ep02-prompts.json').read_text())
 GUIDES = json.loads((ROOT / 'guides.json').read_text())
 CONT_SOURCE = ROOT / 'takes' / 'cont-source.json'  # {"take": "t03-B-s1017"} chosen after review
@@ -105,23 +105,28 @@ def build(take):
         g['7']['inputs']['model'] = ['41', 0]
         g['10']['inputs']['model'] = ['41', 0]
     if cont:
-        src = json.loads(CONT_SOURCE.read_text())['take']
+        cs = json.loads(CONT_SOURCE.read_text())
+        src, end = cs['take'], cs['tail_end']  # end = first rejected source frame
         src_mp4 = PRIVATE / src / f'{src}.mp4'
         tail = PRIVATE / take / 'source-tail-56.mp4'
         tail.parent.mkdir(parents=True, exist_ok=True)
-        # Last 56 frames (306-361) as <Video 1>; last 22 (340-361) anchored at frame_idx 0.
-        subprocess.run(['ffmpeg', '-loglevel', 'error', '-y', '-i', str(src_mp4), '-vf', 'select=gte(n\\,306)', '-fps_mode', 'passthrough',
-                        '-frames:v', '56', '-c:v', 'libx264', '-crf', '10', '-pix_fmt', 'yuv420p', '-r', '24', str(tail)], check=True)
+        # Last 56 retained frames as <Video 1>; last 22 anchored with AddGuide at frame_idx 0.
+        def cut(first, count, dst):
+            subprocess.run(['ffmpeg', '-loglevel', 'error', '-y', '-i', str(src_mp4), '-vf',
+                            f'select=between(n\\,{first}\\,{first + count - 1}),setpts=N/24/TB', '-frames:v', str(count),
+                            '-c:v', 'libx264', '-crf', '10', '-pix_fmt', 'yuv420p', '-r', '24', str(dst)], check=True)
         tail22 = PRIVATE / take / 'source-tail-22.mp4'
-        subprocess.run(['ffmpeg', '-loglevel', 'error', '-y', '-i', str(src_mp4), '-vf', 'select=gte(n\\,340)', '-fps_mode', 'passthrough',
-                        '-frames:v', '22', '-c:v', 'libx264', '-crf', '10', '-pix_fmt', 'yuv420p', '-r', '24', str(tail22)], check=True)
-        for p, k, label in [(tail, '32', '<Video 1> source take frames 306-361'), (tail22, '34', 'AddGuide clip: source frames 340-361 at frame_idx 0')]:
+        cut(end - 56, 56, tail)
+        cut(end - 22, 22, tail22)
+        for p, k, label in [(tail, '32', f'<Video 1> source take frames {end - 56}-{end - 1}'),
+                            (tail22, '34', f'AddGuide clip: source frames {end - 22}-{end - 1} at frame_idx 0')]:
             name = stage_input(p, f'ep02-{take}-{p.name}')
             g[k] = node('LoadVideo', file=name)
             g[str(int(k) + 1)] = node('GetVideoComponents', video=[k, 0])
             inputs.append({'role': label, 'path': str(p), 'sha256': sha(p), 'parent_take': src})
         g['6']['inputs']['ref_videos.ref_video_0'] = ['33', 0]
-        g['6']['inputs']['ref_videos.ref_video_1'] = video_input('t03/layout-cont', '<Video 2> Blender layout 340-531', '30', '31')
+        gk = cs['guide']
+        g['6']['inputs']['ref_videos.ref_video_1'] = video_input(gk, f'<Video 2> Blender layout {gk}', '30', '31')
         g['42'] = node('MiniMaxH3AddGuide', positive=['6', 0], vae=['3', 0], latent=['6', 1], image=['35', 0], frame_idx=0)
         g['7']['inputs']['conditioning'] = ['42', 0]
     return g, dict(scene=scene, variant=variant, seed=seed, width=w, height=h, frames=n, steps=steps, lora=lora,

@@ -173,5 +173,76 @@
   "style_note": "Smooth 3D people; set textures degrade",
   "usable_seconds": 0.0,
   "usable_note": "Strength 2.0 trades reference fidelity (identity, set look, prop shape) for geometry. Not adopted."
+ },
+ "t01-B-s1017": {
+  "reviewed": "guide/take pairs at 10 times, every frame 4.0-5.2 s (occlusion); normal-speed playback not watched by a human",
+  "scores": {
+   "cast_identity": "not assessed (no reviewed turnarounds); GG-01 rear view matches the Ep1 street reference, same outfit and bag after the occlusion",
+   "all_human_ps2_style": 0,
+   "spatial_structure": 2,
+   "motion_contacts": 2,
+   "camera": 2,
+   "temporal_continuity": 2
+  },
+  "failure_timecodes": [
+   "2.8-6.0 s: NPC-02 (yellow cap) keeps the Blender proxy appearance almost literally: box head, flat yellow and grey blocks",
+   "0.8-3.8 s: NPC-01 only partly converted (blocky head and limbs)"
+  ],
+  "passes": [
+   "rear-follow camera, distance and heading held",
+   "NPC-01 passes on her right; NPC-02 crosses the foreground and hides her ~4.3-4.9 s; she reappears with the same ponytail, outfit and bag in her left hand",
+   "stops on the yellow marker at ~7 s and stands still",
+   "street, covered walkway, trees and HDB blocks match <Picture 3>"
+  ],
+  "style_note": "GG-01 and the street pick up the Ep1 street look (closer to PS2 than the interior takes). NPCs with no reference image keep proxy surfaces: <Video 1> attribute_transfer + placeholder sentence did not replace them.",
+  "usable_seconds": 0.0,
+  "usable_note": "Structurally complete 8 s walk/occlusion/stop (10/10 on the four structural categories), fails the all-human style gate on both NPCs."
+ },
+ "t01-B-s2026": {
+  "reviewed": "guide/take pairs at 10 times; normal-speed playback not watched by a human",
+  "scores": {
+   "cast_identity": "not assessed (no reviewed turnarounds); GG-01 rear view matches the Ep1 street reference, same outfit and bag after the occlusion",
+   "all_human_ps2_style": 0,
+   "spatial_structure": 2,
+   "motion_contacts": 2,
+   "camera": 2,
+   "temporal_continuity": 2
+  },
+  "failure_timecodes": [
+   "2.8-6.0 s: NPC-02 keeps the Blender proxy appearance (box head, flat yellow and grey blocks) - same as s1017",
+   "0.8-3.8 s: NPC-01 only partly converted"
+  ],
+  "passes": [
+   "rear-follow camera, distance and heading held",
+   "NPC-01 passes on her right; NPC-02 crosses the foreground and hides her ~4.3-4.9 s; she reappears with the same ponytail, outfit and bag in her left hand",
+   "stops on the yellow marker at ~7 s and stands still",
+   "street, covered walkway, trees and HDB blocks match <Picture 3>"
+  ],
+  "style_note": "GG-01 and the street pick up the Ep1 street look (closer to PS2 than the interior takes). NPCs with no reference image keep proxy surfaces: <Video 1> attribute_transfer + placeholder sentence did not replace them.",
+  "usable_seconds": 0.0,
+  "usable_note": "Structurally complete 8 s walk/occlusion/stop (10/10 on the four structural categories), fails the all-human style gate on both NPCs."
+ },
+ "t03-B-s1017": {
+  "reviewed": "every 15th frame across 362, guide/take pairs at 10 times, every 3rd frame 88-160 and 236-272; normal-speed playback not watched by a human",
+  "label": "native 15.08 s generation (362 frames)",
+  "scores": {
+   "cast_identity": "not assessed (no reviewed turnarounds); both leads recognisable to 4.75 s",
+   "all_human_ps2_style": 1,
+   "spatial_structure": 0,
+   "motion_contacts": 1,
+   "camera": 1,
+   "temporal_continuity": 0
+  },
+  "failure_timecodes": [
+   "4.79 s (f115): a third person, a kneeling duplicate of the therapist, fades in in the foreground and stays",
+   "9.5-10.5 s: the duplicate walks across the frame in front of the girl",
+   "9.83-11.33 s (f236-272): the whole scene dissolves into a different gym (power rack, barbell back squats, mirrors); remains there to 15 s"
+  ],
+  "passes": [
+   "0-4.75 s: squat rhythm, arm raise, both characters' positions and the slow camera arc follow the guide"
+  ],
+  "style_note": "Smooth modern 3D people, as in T02",
+  "usable_seconds": 4.75,
+  "usable_note": "Longest clean span f0-114 (4.75 s) of 15.08 s generated. Native 15 s single take fails at this draft recipe on one seed."
  }
 }

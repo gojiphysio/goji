@@ -163,8 +163,8 @@ SCENES = {
 }
 
 CONT_SUMMARY = ("[video continuation] Continue <Video 1> as one unbroken shot in the look of <Subject 1> inside <Subject 7>: "
-                "<Subject 2> keeps doing slow bodyweight squats on the yellow mat while <Subject 4> watches, then raises her left "
-                "hand in a thumbs-up, following the motion and camera arc of <Video 2>.")
+                "<Subject 2> keeps doing slow bodyweight squats on the yellow mat while <Subject 4> watches, nods twice and claps "
+                "twice, following the motion and camera arc of <Video 2>.")
 CONT_VIDEO = ("<Video 1> is the end of the previous take, which this video continues directly from its last frame. "
               "<Video 2> is the Blender layout clip that defines every character's position, body movement, hand and foot contacts, "
               "timing and the camera for the continuation; its plain untextured placeholder figures and surfaces carry no appearance.")
@@ -177,11 +177,12 @@ CONT_SHOT = ("[Shot 1] The shot continues from the last frame of <Video 1> witho
              "white trainers, is partway down a squat on the yellow mat; she finishes it and keeps squatting at the same steady "
              "rhythm, hips back, knees over her toes, arms rising straight out in front as she lowers and returning to her sides as "
              "she stands, heels flat on the mat. <Subject 4>, the woman with the short black bob in the black short-sleeve top "
-             "with the small red mark on her left chest and black leggings, stands beside her on the right, watching. She raises "
-             "her left hand to shoulder height in a thumbs-up, holds it for two seconds and lowers it. Both women keep their hands, "
-             "fingers and feet clearly visible, and each keeps her own face, hair and clothes. The camera keeps arcing slowly to "
-             "the right around them with small amplitude at slow speed, as it was moving at the end of <Video 1>, with the horizon "
-             "level. These two women are the only people in the room, and every surface keeps the painted PS2 look of <Subject 1>.")
+             "with the small red mark on her left chest and black leggings, stands beside her on the right, watching. She nods "
+             "twice, then claps her hands together twice in encouragement and lowers her hands to her sides. Both women keep their "
+             "hands, fingers and feet clearly visible, and each keeps her own face, hair and clothes. The camera keeps arcing "
+             "slowly to the right around them with small amplitude at slow speed, as it was moving at the end of <Video 1>, with "
+             "the horizon level. These two women are the only people in the room, and every surface keeps the painted PS2 look of "
+             "<Subject 1>.")
 
 
 def six(scene, video=True, cont=False):

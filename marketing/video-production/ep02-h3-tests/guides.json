@@ -71,6 +71,18 @@
   "sha256": "41dcf2a67e671f39058ab84701fa391327c1f862eae07d3d27240c9d18e3600e",
   "stage_json_sha256": "4ccf702e0ed2699d7a45480da18dae9218a720aa2679cbd4db0ddb0f0264ce6c"
  },
+ "t01clay/layout": {
+  "path": "staging/t01clay/guides/t01clay-layout-192.mp4",
+  "source_frames": [
+   0,
+   192
+  ],
+  "frames": 192,
+  "fps": 24,
+  "size": "288x512",
+  "sha256": "94e6639e9a123e0559be597785fdb2c76e3c3d95644b0fb34c6a5f13db4f661b",
+  "stage_json_sha256": "5a0bfb2088f2dc4e8b1eb8b947a324f7e38106d425105475b24fd4a1325b37a8"
+ },
  "t03/layout": {
   "path": "staging/t03/guides/t03-layout-362.mp4",
   "source_frames": [
@@ -117,6 +129,18 @@
   "fps": 24,
   "size": "576x1024",
   "sha256": "9ee657be6907fc835c7dafbae9202477cbbb90e5e70e2fc1379841bb1cdd2831",
+  "stage_json_sha256": "43d63e057f39452e8bafe2f710218bae2b75813ad932cbab979d9d0e5329f61d"
+ },
+ "t03/layout-cont93": {
+  "path": "staging/t03/guides/t03-layout-cont93-192.mp4",
+  "source_frames": [
+   93,
+   285
+  ],
+  "frames": 192,
+  "fps": 24,
+  "size": "288x512",
+  "sha256": "1616cba3bed8ec7882b33663cdc7bf70b3553640288234a2baf95149b2b5da98",
   "stage_json_sha256": "43d63e057f39452e8bafe2f710218bae2b75813ad932cbab979d9d0e5329f61d"
  }
 }
