@@ -265,24 +265,11 @@ export const INTEREST_AREAS = [
   "Something else",
 ] as const;
 
-/** Training options on the form (multi-select). Kept in sync with
- *  TRAINING_OPTIONS in business-intelligence/scripts/careers/config.py. */
-export const TRAINING_OPTIONS = [
-  "Clinical Pilates",
-  "Mat or reformer Pilates",
-  "Dry needling",
-  "Women's health / Pelvic health",
-  "Pre- and post-natal rehabilitation",
-  "Strength and conditioning",
-  "Sports rehabilitation",
-  "Other",
-] as const;
-
+/** AHPC registration options on the form. Kept in sync with
+ *  AHPC_OPTIONS in business-intelligence/scripts/careers/config.py. */
 export const AHPC_OPTIONS = [
-  "Fully registered",
-  "Conditionally registered",
-  "Registration pending",
-  "Not currently registered",
+  "Full registration",
+  "Conditional registration",
 ] as const;
 
 export const HEARD_ABOUT_OPTIONS = [

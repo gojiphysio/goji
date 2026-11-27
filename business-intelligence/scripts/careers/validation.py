@@ -160,8 +160,7 @@ def validate_form(form, vacancy: dict | None, general: bool) -> Result:
     elif len(clean_text(form.get("intro"), 5000)) > 2000:
         r.fail("intro", "Keep the introduction to 2,000 characters or fewer.")
 
-    d["training"] = [x for x in config.TRAINING_OPTIONS if x in form.getlist("training")]
-    d["training_other"] = g("training_other", 200) if "Other" in d["training"] else ""
+    d["training"] = clean_text(form.get("training"), 600)
 
     linkedin = g("linkedin", 300)
     if linkedin and not re.match(r"^https?://[^\s<>\"']+$", linkedin, re.I):

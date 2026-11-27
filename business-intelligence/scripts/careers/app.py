@@ -134,11 +134,6 @@ def tracker_row(ref: str, received: datetime, role: dict, d: dict, cv_id: str) -
     source = "Website" + (f" ({d['source_page']})" if d.get("source_page") else "")
     if d.get("utm"):
         source += "; " + " ".join(f"{k}={v}" for k, v in d["utm"].items())
-    training = [t for t in d.get("training") or [] if t != "Other"]
-    if d.get("training_other"):
-        training.append(f"Other: {d['training_other']}")
-    elif "Other" in (d.get("training") or []):
-        training.append("Other")
     interest = ""
     if general:
         interest = d.get("interest_area", "") + (
@@ -161,7 +156,7 @@ def tracker_row(ref: str, received: datetime, role: dict, d: dict, cv_id: str) -
         "AHPC registration status": d.get("ahpc_status", ""),
         "Clinical experience": d.get("clinical_experience", ""),
         "Women's health experience or interest": d.get("womens_health", ""),
-        "Additional certifications": ", ".join(training),
+        "Additional certifications": d.get("training", ""),
         "Earliest available start date": d.get("start_availability", ""),
         "Personal introduction": d.get("intro", ""),
         "LinkedIn profile": d.get("linkedin", ""),

@@ -36,7 +36,7 @@ def form(**over):
     f = {"role": "physiotherapist", "full_name": "Test Applicant", "email": "test@example.com",
          "phone": "+65 9123 4567", "employment": "full-time", "years_experience": "3",
          "start_availability": "One month's notice", "intro": "Hello, I'm a physio.",
-         "privacy_ack": "yes", "ahpc_status": "Fully registered",
+         "privacy_ack": "yes", "ahpc_status": "Full registration",
          "clinical_experience": "MSK and sports", "elapsed_ms": "20000"}
     f.update(over)
     return {k: v for k, v in f.items() if v is not None}
