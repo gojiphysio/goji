@@ -12,12 +12,16 @@ VACANCIES = {
                         "form": "physio", "closing_date": None},
     "senior-physiotherapist": {"id": "senior-physiotherapist", "title": "Senior Physiotherapist",
                                "open": True, "form": "physio", "closing_date": None},
+    "pilates-instructor": {"id": "pilates-instructor", "title": "Freelance Pilates Instructor",
+                           "open": True, "form": "pilates", "closing_date": None},
     "old-role": {"id": "old-role", "title": "Old role", "open": False, "form": "physio",
                  "closing_date": None},
 }
 
 PDF = b"%PDF-1.4\n1 0 obj<<>>endobj\ntrailer<<>>\n%%EOF\n"
 DOCX = b"PK\x03\x04" + b"\x00" * 64
+JPG = b"\xff\xd8\xff\xe0" + b"\x00" * 64
+PNG = b"\x89PNG\r\n\x1a\n" + b"\x00" * 64
 
 
 class FakeWorkspace:

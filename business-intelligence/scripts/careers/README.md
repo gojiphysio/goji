@@ -10,13 +10,18 @@ What one submission does:
    header), then runs the bot checks: a hidden honeypot field, a minimum fill
    time, and Cloudflare Turnstile.
 2. Checks the role is still open, against the site's `/careers/vacancies.json`.
-3. Validates the fields and the CV (PDF, DOC or DOCX, 10 MB max, real file
-   signature). Google Drive virus-scans the upload itself.
+3. Validates the fields for the role's form kind (`physio`, `pilates` or the
+   general expression of interest) and the CV (PDF, DOC or DOCX, 10 MB max,
+   real file signature). Freelance Pilates Instructor applicants may add up to
+   3 certificates (PDF, JPG or PNG, 10 MB together). Google Drive virus-scans
+   the uploads itself.
 4. Uploads the CV to the `Applications` folder in the **Goji Recruitment**
-   Shared Drive as `<reference> - <name> - CV.<ext>`, then appends a row to the
-   applicant tracker sheet. The reference is `GOJI-APP-<year>-NNNN`.
-5. Emails hello@ (with links, never the CV), then sends the applicant a
-   confirmation.
+   Shared Drive as `<reference> - <name> - CV.<ext>` (certificates as
+   `... - Certificate N.<ext>`), then appends a row to the applicant tracker
+   sheet. The reference is `GOJI-APP-<year>-NNNN`. Every role shares the one
+   folder; the tracker's "Role applied for" column is the role identifier.
+5. Emails hello@ (subject names the role and applicant; links, never the
+   files), then sends the applicant a confirmation.
 
 There is no endpoint that reads or lists applications. Reviewers use Drive and
 Sheets with their own Goji accounts.

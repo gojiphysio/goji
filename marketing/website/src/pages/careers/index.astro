@@ -14,14 +14,18 @@ import Button from "../../components/Button.astro";
 import VacancyList from "../../components/careers/VacancyList.astro";
 import { clinicRef } from "../../lib/schema.ts";
 import { SITE } from "../../lib/site.ts";
+import { openVacancies } from "../../lib/vacancies.ts";
+
+/** Freelance roles get no employee benefits; say so whenever one is listed. */
+const hasFreelance = openVacancies().some((v) => v.employmentTypes.includes("CONTRACTOR"));
 
 /** Instagram's page for the team hashtag. A plain outbound link: no embed,
  *  so the page makes no third-party request. */
 const LIFE_TAG_URL = "https://www.instagram.com/explore/tags/lifeatgoji/";
 
-const title = "Careers at Goji | Physiotherapy Jobs in Singapore";
+const title = "Careers at Goji | Physiotherapy and Pilates Jobs Singapore";
 const description =
-  "Join Goji Women's & Family Physiotherapy, a growing private practice in Singapore. Clinical careers, including full-time and part-time physiotherapist roles.";
+  "Join Goji Women's & Family Physiotherapy in Singapore: full-time and part-time physiotherapist roles, and a freelance Pilates instructor role.";
 
 const origin = Astro.site ?? new URL(Astro.url.origin);
 const pageUrl = new URL("/careers/", origin).href;
@@ -154,6 +158,14 @@ const reasons = [
       <p class="cr-lead">
         We're looking for people who share our approach to care and are excited to grow alongside us.
       </p>
+      {
+        hasFreelance && (
+          <p class="cr-vac-note">
+            Freelance roles are independent engagements: the employee benefits listed on our employed roles don't
+            apply, and terms are agreed individually.
+          </p>
+        )
+      }
     </div>
     <VacancyList />
   </Section>
@@ -322,6 +334,11 @@ const reasons = [
     display: flex;
     flex-direction: column;
     gap: var(--space-3);
+  }
+  .cr-vac-note {
+    margin: 0;
+    max-width: 58ch;
+    color: var(--text-muted);
   }
   .cr-vac-head .cr-section-title {
     margin: 0;

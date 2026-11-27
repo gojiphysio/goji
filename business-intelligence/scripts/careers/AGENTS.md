@@ -16,6 +16,11 @@ are in `README.md`; data retention in `RETENTION.md`. Rules:
   written by position, so removing or reordering a column means changing the
   live production and TEST trackers right after that deploy lands, or rows
   shift into the wrong columns.
+- **One question set per form kind.** `validate_form` branches on the
+  vacancy's `form` (`physio`, `pilates`, general); a kind's answers are blank
+  on every other kind's row, and a role never stores answers it didn't ask
+  (Pilates: no salary, notice period or AHPC). Option lists in `config.py`
+  mirror `vacancies.ts`; values not on the list are dropped.
 - **No auto-rejection or scoring.** Below-minimum days or years are recorded,
   never refused.
 - **Test mode fails closed.** Never email the address on the form while

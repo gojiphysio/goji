@@ -37,8 +37,23 @@ Then:
 - add the page to `public/llms.txt` (`check_dist.py` fails otherwise);
 - add the id to `VACANCIES` in `business-intelligence/scripts/careers/fakes.py`
   if it has new behaviour worth testing;
-- a non-physio role needs its own question set: today the form knows
-  `physio` and the general expression of interest only.
+- a role with new questions needs its own question set: the form knows
+  `physio`, `pilates` (freelance instructor) and the general expression of
+  interest. A set is markup blocks tagged `data-kinds="<kind>"` in
+  `ApplicationForm.astro` (hidden blocks are disabled, so never sent), a
+  `check()` case per required field, and a branch in the backend's
+  `validation.py`. New answers go in new tracker columns at the END
+  (`TRACKER_COLUMNS`), and the live trackers get the same header cells.
+
+## Freelance roles
+
+`employmentTypes: ["CONTRACTOR"]` shows "Freelance" and emits JobPosting
+`employmentType: CONTRACTOR`. A freelance role lists no employee benefits
+(no leave, insurance or "employment package"), and never session fees,
+earnings, guaranteed or minimum bookings, contract length or restrictive
+terms. `/careers/` says employee benefits don't apply while one is open.
+Keep instructor-led Private Pilates distinct from physiotherapist-led
+Clinical Pilates in the copy.
 
 ## Rules
 

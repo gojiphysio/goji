@@ -6,6 +6,14 @@
  *   <ApplicationForm vacancy={v} />   a specific role (preselected)
  *   <ApplicationForm />               a general expression of interest
  *
+ * Each role's `form` kind picks a question set: "physio" (AHPC, clinical
+ * experience, employment and notice), "pilates" (freelance instructor:
+ * certification, apparatus, teaching experience, availability, certificates)
+ * or "general" (the expression of interest). Blocks carry
+ * data-kinds="<kinds>"; the script shows the block for the chosen role and
+ * disables the controls of hidden blocks, so they are neither validated nor
+ * sent. Switching role in the select swaps the questions in place.
+ *
  * Posts multipart/form-data to the goji-careers backend
  * (business-intelligence/scripts/careers). Only renders a live form when
  * PUBLIC_CAREERS_API is set; otherwise it shows the email fallback, so no
@@ -18,6 +26,12 @@
  */
 import {
   AHPC_OPTIONS,
+  ALL_DAYS,
+  APPARATUS_OPTIONS,
+  TEACHING_EXPERIENCE_OPTIONS,
+  TEACHING_YEARS_OPTIONS,
+  TIME_WINDOWS,
+  WORK_ELIGIBILITY_OPTIONS,
   GENERAL_INTEREST,
   HEARD_ABOUT_OPTIONS,
   INTEREST_AREAS,
@@ -35,7 +49,9 @@ interface Props {
 }
 const { vacancy } = Astro.props;
 const general = !vacancy;
-const roles = general ? [] : openVacancies().filter((v) => v.form === vacancy!.form);
+// Every open role is offered, so a candidate who lands on the wrong page can
+// switch; the questions follow the chosen role's form kind.
+const roles = general ? [] : openVacancies();
 // Role data the script needs to relabel the "also consider me" option and the
 // part-time minimum when the candidate switches role.
 const roleMeta = Object.fromEntries(
@@ -48,7 +64,11 @@ const roleMeta = Object.fromEntries(
     },
   ]),
 );
-const physio = !general && vacancy!.form === "physio";
+const kind = general ? "general" : vacancy!.form;
+const physio = kind === "physio";
+/** Server-side initial visibility of a data-kinds block (the script keeps it
+ *  in step when the role changes). */
+const hide = (kinds: string) => !kinds.split(" ").includes(kind);
 const minDays = vacancy?.minDaysPerWeek ?? 0;
 // The backend requires Turnstile, so a live form always carries the widget
 // (not only when the booking API is also configured).
@@ -137,18 +157,30 @@ const formId = general ? "interest-form" : "application-form";
                 <p class="fld__error" id="e-email" hidden />
               </div>
               <div class="fld" data-field="phone">
-                <label class="fld__label" for="f-phone">Mobile number <span class="apply__req" aria-hidden="true">*</span></label>
+                <label class="fld__label" for="f-phone"><span data-kinds="physio general" hidden={hide("physio general")}>Mobile number</span><span data-kinds="pilates" hidden={hide("pilates")}>Contact number</span> <span class="apply__req" aria-hidden="true">*</span></label>
                 <input id="f-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" required maxlength="25" placeholder="9123 4567" aria-describedby="h-phone e-phone" />
                 <p class="fld__hint" id="h-phone">Outside Singapore? Start with your country code, like +44.</p>
                 <p class="fld__error" id="e-phone" hidden />
               </div>
             </div>
+            <fieldset class="fld" data-field="work_eligibility" data-kinds="pilates" hidden={hide("pilates")} aria-describedby="e-work_eligibility">
+              <legend class="fld__label">Singapore work eligibility <span class="apply__req" aria-hidden="true">*</span></legend>
+              <div class="apply__options">
+                {WORK_ELIGIBILITY_OPTIONS.map((o, i) => (
+                  <div class="chk">
+                    <input id={`f-work_eligibility-${i}`} type="radio" name="work_eligibility" value={o} />
+                    <label for={`f-work_eligibility-${i}`}>{o}</label>
+                  </div>
+                ))}
+              </div>
+              <p class="fld__error" id="e-work_eligibility" hidden />
+            </fieldset>
           </fieldset>
 
           {/* ---- Experience ---- */}
           <fieldset class="apply__group">
             <legend class="apply__legend">Your experience</legend>
-            <div class="fld fld--short" data-field="years_experience">
+            <div class="fld fld--short" data-field="years_experience" data-kinds="physio general" hidden={hide("physio general")}>
               <label class="fld__label" for="f-years_experience">
                 {physio ? "Years of post-qualification clinical experience" : "Years of relevant professional experience"}
                 <span class="apply__req" aria-hidden="true">*</span>
@@ -157,7 +189,7 @@ const formId = general ? "interest-form" : "application-form";
               <p class="fld__error" id="e-years_experience" hidden />
             </div>
 
-            <div data-physio-only hidden={!physio}>
+            <div class="apply__block" data-kinds="physio" hidden={hide("physio")}>
               <fieldset class="fld" data-field="ahpc_status" aria-describedby="e-ahpc_status">
                 <legend class="fld__label">AHPC registration status <span class="apply__req" aria-hidden="true">*</span></legend>
                 <div class="apply__options">
@@ -185,7 +217,7 @@ const formId = general ? "interest-form" : "application-form";
               </div>
             </div>
 
-            <fieldset class="fld" data-field="training">
+            <fieldset class="fld" data-field="training" data-kinds="physio general" hidden={hide("physio general")}>
               <legend class="fld__label">Relevant additional training or certifications (optional)</legend>
               <div class="apply__options apply__options--cols">
                 {TRAINING_OPTIONS.map((o, i) => (
@@ -201,16 +233,80 @@ const formId = general ? "interest-form" : "application-form";
               </div>
             </fieldset>
 
-            <div class="fld" data-field="linkedin">
+            <div class="fld" data-field="linkedin" data-kinds="physio general" hidden={hide("physio general")}>
               <label class="fld__label" for="f-linkedin">LinkedIn profile URL (optional)</label>
               <input id="f-linkedin" name="linkedin" type="url" inputmode="url" maxlength="300" placeholder="https://www.linkedin.com/in/…" aria-describedby="e-linkedin" />
               <p class="fld__error" id="e-linkedin" hidden />
+            </div>
+
+            <div class="apply__block" data-kinds="pilates" hidden={hide("pilates")}>
+              <div class="fld" data-field="certification">
+                <label class="fld__label" for="f-certification">
+                  Pilates certification and training provider <span class="apply__req" aria-hidden="true">*</span>
+                </label>
+                <input id="f-certification" name="certification" type="text" maxlength="200" aria-describedby="h-certification e-certification" />
+                <p class="fld__hint" id="h-certification">For example: Comprehensive certification, STOTT PILATES®, 2021.</p>
+                <p class="fld__error" id="e-certification" hidden />
+              </div>
+              <fieldset class="fld" data-field="apparatus" aria-describedby="e-apparatus">
+                <legend class="fld__label">Apparatus you're qualified to teach <span class="apply__req" aria-hidden="true">*</span></legend>
+                <div class="apply__options apply__options--cols">
+                  {APPARATUS_OPTIONS.map((o, i) => (
+                    <div class="chk">
+                      <input id={`f-apparatus-${i}`} type="checkbox" name="apparatus" value={o} data-other-for={o === "Others" ? "apparatus_other" : undefined} />
+                      <label for={`f-apparatus-${i}`}>{o}</label>
+                    </div>
+                  ))}
+                </div>
+                <div class="fld" data-other="apparatus_other" hidden>
+                  <label class="fld__label" for="f-apparatus_other">Other apparatus</label>
+                  <input id="f-apparatus_other" name="apparatus_other" type="text" maxlength="200" />
+                </div>
+                <p class="fld__error" id="e-apparatus" hidden />
+              </fieldset>
+              <div class="fld fld--short" data-field="teaching_years">
+                <label class="fld__label" for="f-teaching_years">
+                  Years of teaching experience <span class="apply__req" aria-hidden="true">*</span>
+                </label>
+                <select id="f-teaching_years" name="teaching_years" aria-describedby="e-teaching_years">
+                  <option value="">Choose one</option>
+                  {TEACHING_YEARS_OPTIONS.map((o) => <option value={o}>{o}</option>)}
+                </select>
+                <p class="fld__error" id="e-teaching_years" hidden />
+              </div>
+              <fieldset class="fld" data-field="teaching_experience" aria-describedby="e-teaching_experience">
+                <legend class="fld__label">Relevant teaching experience <span class="apply__req" aria-hidden="true">*</span></legend>
+                <div class="apply__options apply__options--cols">
+                  {TEACHING_EXPERIENCE_OPTIONS.map((o, i) => (
+                    <div class="chk">
+                      <input id={`f-teaching_experience-${i}`} type="checkbox" name="teaching_experience" value={o} data-other-for={o === "Others" ? "teaching_other" : undefined} />
+                      <label for={`f-teaching_experience-${i}`}>{o}</label>
+                    </div>
+                  ))}
+                </div>
+                <div class="fld" data-other="teaching_other" hidden>
+                  <label class="fld__label" for="f-teaching_other">Other teaching experience</label>
+                  <input id="f-teaching_other" name="teaching_other" type="text" maxlength="200" />
+                </div>
+                <p class="fld__error" id="e-teaching_experience" hidden />
+              </fieldset>
+              <div class="fld" data-field="additional_qualifications">
+                <label class="fld__label" for="f-additional_qualifications">Additional qualifications (optional)</label>
+                <input id="f-additional_qualifications" name="additional_qualifications" type="text" maxlength="300" aria-describedby="h-additional_qualifications" />
+                <p class="fld__hint" id="h-additional_qualifications">For example: prenatal and postnatal Pilates, strength and conditioning, personal training.</p>
+              </div>
+              <div class="fld" data-field="portfolio">
+                <label class="fld__label" for="f-portfolio">Portfolio or social media profile (optional)</label>
+                <input id="f-portfolio" name="portfolio" type="url" inputmode="url" maxlength="300" placeholder="https://" aria-describedby="e-portfolio" />
+                <p class="fld__error" id="e-portfolio" hidden />
+              </div>
             </div>
           </fieldset>
 
           {/* ---- Availability ---- */}
           <fieldset class="apply__group">
             <legend class="apply__legend">Availability</legend>
+            <div class="apply__block" data-kinds="physio general" hidden={hide("physio general")}>
             <fieldset class="fld" data-field="employment" aria-describedby="e-employment">
               <legend class="fld__label">Preferred employment arrangement <span class="apply__req" aria-hidden="true">*</span></legend>
               <div class="apply__options apply__options--inline">
@@ -266,6 +362,49 @@ const formId = general ? "interest-form" : "application-form";
               <input id="f-start_availability" name="start_availability" type="text" required maxlength="120" placeholder="e.g. 1 March 2027, or 1 month's notice" aria-describedby="e-start_availability" />
               <p class="fld__error" id="e-start_availability" hidden />
             </div>
+            </div>
+
+            <div class="apply__block" data-kinds="pilates" hidden={hide("pilates")}>
+              <fieldset class="fld" data-field="available_days" aria-describedby="e-available_days">
+                <legend class="fld__label">Preferred days of availability <span class="apply__req" aria-hidden="true">*</span></legend>
+                <div class="apply__options apply__options--inline">
+                  {ALL_DAYS.map((d) => (
+                    <div class="chk">
+                      <input id={`f-avail-${d}`} type="checkbox" name="available_days" value={d} />
+                      <label for={`f-avail-${d}`}>{d}</label>
+                    </div>
+                  ))}
+                </div>
+                <p class="fld__error" id="e-available_days" hidden />
+              </fieldset>
+              <fieldset class="fld" data-field="time_windows">
+                <legend class="fld__label">Preferred time windows (optional)</legend>
+                <div class="apply__options apply__options--inline">
+                  {TIME_WINDOWS.map((t) => (
+                    <div class="chk">
+                      <input id={`f-time-${t}`} type="checkbox" name="time_windows" value={t} />
+                      <label for={`f-time-${t}`}>{t}</label>
+                    </div>
+                  ))}
+                </div>
+              </fieldset>
+              <div class="fld" data-field="weekly_availability">
+                <label class="fld__label" for="f-weekly_availability">Approximate weekly availability (optional)</label>
+                <input id="f-weekly_availability" name="weekly_availability" type="text" maxlength="200" placeholder="e.g. 6 to 8 sessions a week" />
+              </div>
+              <div class="fld fld--short" data-field="start_date">
+                <label class="fld__label" for="f-start_date">
+                  Earliest available start date <span class="apply__req" aria-hidden="true">*</span>
+                </label>
+                <input id="f-start_date" name="start_date" type="date" aria-describedby="e-start_date" />
+                <p class="fld__error" id="e-start_date" hidden />
+              </div>
+              <div class="fld" data-field="current_commitments">
+                <label class="fld__label" for="f-current_commitments">Current teaching commitments (optional)</label>
+                <input id="f-current_commitments" name="current_commitments" type="text" maxlength="300" aria-describedby="h-current_commitments" />
+                <p class="fld__hint" id="h-current_commitments">Other studios or classes you teach at the moment, if any.</p>
+              </div>
+            </div>
           </fieldset>
 
           {/* ---- CV and introduction ---- */}
@@ -290,16 +429,43 @@ const formId = general ? "interest-form" : "application-form";
               <p class="fld__hint" id="h-cv">PDF, DOC or DOCX, up to 10MB. Please leave out your NRIC, date of birth and photo.</p>
               <p class="fld__error" id="e-cv" hidden />
             </div>
+            <div class="fld" data-field="certificates" data-kinds="pilates" hidden={hide("pilates")}>
+              <label class="fld__label" for="f-certificates">Pilates certificates (optional)</label>
+              <input
+                id="f-certificates"
+                name="certificates"
+                type="file"
+                multiple
+                class="visually-hidden"
+                accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+                aria-describedby="h-certificates e-certificates"
+                data-file-input
+              />
+              <div class="cv">
+                <label for="f-certificates" class="cv__pick" data-file-pick>Choose files</label>
+                <p class="cv__name" data-file-name aria-live="polite">No files chosen</p>
+                <button type="button" class="cv__remove" data-file-remove hidden>Remove</button>
+              </div>
+              <p class="fld__hint" id="h-certificates">Up to 3 files: PDF, JPG or PNG, 10MB in total.</p>
+              <p class="fld__error" id="e-certificates" hidden />
+            </div>
             <div class="fld" data-field="intro">
               <label class="fld__label" for="f-intro">
-                {general ? "Tell us a little about yourself, your experience and what you're looking for" : "A brief introduction"}
-                <span class="apply__req" aria-hidden="true">*</span>
+                {general
+                  ? "Tell us a little about yourself, your experience and what you're looking for"
+                  : (
+                      <Fragment>
+                        <span data-kinds="physio" hidden={hide("physio")}>A brief introduction</span>
+                        <span data-kinds="pilates" hidden={hide("pilates")}>Tell us a little about yourself (optional)</span>
+                      </Fragment>
+                    )}
+                <span class="apply__req" aria-hidden="true" data-kinds="physio general" hidden={hide("physio general")}>*</span>
               </label>
-              <textarea id="f-intro" name="intro" rows="5" required maxlength="2000" aria-describedby="h-intro e-intro" />
+              <textarea id="f-intro" name="intro" rows="5" maxlength="2000" aria-describedby="h-intro e-intro" />
               <p class="fld__hint" id="h-intro">A few sentences is plenty (up to 2,000 characters).</p>
               <p class="fld__error" id="e-intro" hidden />
             </div>
-            <div class="fld fld--short" data-field="heard_about">
+            <div class="fld fld--short" data-field="heard_about" data-kinds="physio general" hidden={hide("physio general")}>
               <label class="fld__label" for="f-heard_about">How did you hear about Goji? (optional)</label>
               <select id="f-heard_about" name="heard_about">
                 <option value="">Choose one</option>
@@ -315,7 +481,7 @@ const formId = general ? "interest-form" : "application-form";
               <p>
                 By submitting this application, you acknowledge that Goji Health Pte. Ltd. will collect, use and
                 retain the personal information you provide for recruitment purposes, including assessing your
-                suitability for employment, communicating with you and administering the recruitment process.
+                suitability for <span data-kinds="physio general" hidden={hide("physio general")}>employment</span><span data-kinds="pilates" hidden={hide("pilates")}>engagement</span>, communicating with you and administering the recruitment process.
               </p>
               <p>
                 Your information may be stored using secure third-party service providers and will only be
@@ -460,7 +626,7 @@ const formId = general ? "interest-form" : "application-form";
   .apply [hidden] {
     display: none !important;
   }
-  [data-physio-only],
+  .apply__block,
   [data-part-time] {
     display: flex;
     flex-direction: column;
@@ -740,9 +906,11 @@ const formId = general ? "interest-form" : "application-form";
 
   const MAX_BYTES = 10 * 1024 * 1024;
   const ALLOWED_EXT = ["pdf", "doc", "docx"];
+  const CERT_EXT = ["pdf", "jpg", "jpeg", "png"];
+  const MAX_CERTS = 3;
   const EMAIL_RE = /^[^\s@<>(),;:"]+@[^\s@<>(),;:"]+\.[A-Za-z]{2,}$/;
 
-  type RoleMeta = Record<string, { title: string; form: string; minDays: number; also: { id: string; title: string }[] }>;
+  type RoleMeta = Record<string, { title: string; form: string; minDays: number }>;
 
   document.querySelectorAll<HTMLElement>("[data-careers-apply]").forEach((root) => {
     const form = root.querySelector<HTMLFormElement>("[data-form]");
@@ -773,17 +941,31 @@ const formId = general ? "interest-form" : "application-form";
       { once: false },
     );
 
-    // ---- Role-dependent bits ----
-    const physioOnly = $("[data-physio-only]");
+    // ---- Role-dependent question sets ----
+    // The chosen role's form kind decides which data-kinds blocks show. Hidden
+    // blocks have their controls disabled, so FormData leaves them out and a
+    // half-filled answer from the other role's questions is never sent.
+    const kind = () => (general ? "general" : roles[jobId()]?.form || "physio");
     const minDaysEl = $("[data-min-days]");
     const minNote = $("[data-min-days-note]");
     function applyRole() {
-      if (general) return;
-      const r = roles[jobId()];
-      if (!r) return;
-      if (physioOnly) physioOnly.hidden = r.form !== "physio";
-      if (minDaysEl) minDaysEl.textContent = String(r.minDays || 3);
-      if (minNote) minNote.hidden = !r.minDays;
+      const k = kind();
+      form.querySelectorAll<HTMLElement>("[data-kinds]").forEach((block) => {
+        const show = (block.dataset.kinds || "").split(" ").includes(k);
+        block.hidden = !show;
+        block
+          .querySelectorAll<HTMLInputElement>("input, select, textarea")
+          .forEach((c) => (c.disabled = !show));
+      });
+      if (!general) {
+        const r = roles[jobId()];
+        if (minDaysEl) minDaysEl.textContent = String(r?.minDays || 3);
+        if (minNote) minNote.hidden = !r?.minDays;
+      }
+      // Errors from the other question set no longer apply.
+      form.querySelectorAll<HTMLElement>("[data-field][data-invalid]").forEach((f) => {
+        if (f.closest("[hidden]")) setError(f.dataset.field || "", "");
+      });
       checkDays();
     }
     roleSelect?.addEventListener("change", applyRole);
@@ -810,7 +992,6 @@ const formId = general ? "interest-form" : "application-form";
       }),
     );
     daysSel?.addEventListener("change", checkDays);
-    applyRole();
 
     // ---- "Other" training ----
     const otherBox = $<HTMLInputElement>('input[name="training"][data-other]');
@@ -818,6 +999,17 @@ const formId = general ? "interest-form" : "application-form";
     otherBox?.addEventListener("change", () => {
       if (otherWrap) otherWrap.hidden = !otherBox.checked;
     });
+    // "Others" on the Pilates multi-selects reveals its free-text box.
+    form.querySelectorAll<HTMLInputElement>("input[data-other-for]").forEach((box) =>
+      box.addEventListener("change", () => {
+        const wrap = form.querySelector<HTMLElement>(`[data-other="${box.dataset.otherFor}"]`);
+        if (wrap) wrap.hidden = !box.checked;
+      }),
+    );
+
+    // The start date can't usefully be in the past.
+    const startDate = $<HTMLInputElement>("#f-start_date");
+    if (startDate) startDate.min = new Date(Date.now() + 8 * 3600_000).toISOString().slice(0, 10);
 
     // ---- CV picker ----
     const cvInput = $<HTMLInputElement>("[data-cv-input]")!;
@@ -841,6 +1033,29 @@ const formId = general ? "interest-form" : "application-form";
       cvInput.focus();
     });
 
+    // ---- Certificates picker (Pilates; optional, several files) ----
+    const certInput = $<HTMLInputElement>("[data-file-input]");
+    const certName = $("[data-file-name]");
+    const certPick = $("[data-file-pick]");
+    const certRemove = $<HTMLButtonElement>("[data-file-remove]");
+    function showCerts() {
+      if (!certInput || !certName || !certPick || !certRemove) return;
+      const files = Array.from(certInput.files || []);
+      certName.textContent = files.length
+        ? files.map((f) => `${f.name} (${fmtSize(f.size)})`).join(", ")
+        : "No files chosen";
+      certPick.textContent = files.length ? "Replace files" : "Choose files";
+      certRemove.hidden = !files.length;
+      validateField("certificates");
+    }
+    certInput?.addEventListener("change", showCerts);
+    certRemove?.addEventListener("click", () => {
+      if (!certInput) return;
+      certInput.value = "";
+      showCerts();
+      certInput.focus();
+    });
+
     // ---- Validation ----
     const LABELS: Record<string, string> = {
       role: "Role applied for",
@@ -858,6 +1073,15 @@ const formId = general ? "interest-form" : "application-form";
       intro: "Introduction",
       privacy_ack: "Privacy acknowledgement",
       linkedin: "LinkedIn profile URL",
+      work_eligibility: "Singapore work eligibility",
+      certification: "Pilates certification",
+      apparatus: "Apparatus",
+      teaching_years: "Years of teaching experience",
+      teaching_experience: "Teaching experience",
+      available_days: "Days of availability",
+      start_date: "Earliest available start date",
+      certificates: "Pilates certificates",
+      portfolio: "Portfolio or social media profile",
     };
     const val = (name: string) => {
       const el = form.elements.namedItem(name) as HTMLInputElement | RadioNodeList | null;
@@ -866,7 +1090,19 @@ const formId = general ? "interest-form" : "application-form";
       if ((el as HTMLInputElement).type === "checkbox") return (el as HTMLInputElement).checked ? "yes" : "";
       return ((el as HTMLInputElement).value || "").trim();
     };
-    const physioActive = () => !general && roles[jobId()]?.form === "physio";
+    const physioActive = () => kind() === "physio";
+    const pilatesActive = () => kind() === "pilates";
+    const checked = (name: string) =>
+      form.querySelectorAll<HTMLInputElement>(`input[name="${name}"]:checked`).length;
+    const urlError = (v: string) => {
+      if (!v) return "";
+      try {
+        const u = new URL(v);
+        return u.protocol === "https:" || u.protocol === "http:" ? "" : "Enter a full web address starting with https://.";
+      } catch {
+        return "Enter a full web address starting with https://.";
+      }
+    };
 
     function check(name: string): string {
       const v = val(name);
@@ -889,6 +1125,7 @@ const formId = general ? "interest-form" : "application-form";
             : "Enter a valid mobile number, for example 9123 4567.";
         }
         case "years_experience": {
+          if (pilatesActive()) return "";
           if (v === "") return "Enter your years of experience (0 is fine).";
           const n = Number(v);
           return Number.isFinite(n) && n >= 0 && n <= 50 ? "" : "Enter a number of years between 0 and 50.";
@@ -898,26 +1135,49 @@ const formId = general ? "interest-form" : "application-form";
         case "clinical_experience":
           return !physioActive() || v ? "" : "Tell us your main areas of clinical experience.";
         case "employment":
-          return v ? "" : "Choose full-time, part-time or open to both.";
+          return pilatesActive() || v ? "" : "Choose full-time, part-time or open to both.";
         case "days_per_week": {
           const pt = employment() === "part-time" || employment() === "either";
-          return !pt || v ? "" : "Choose how many days per week you're available.";
+          return pilatesActive() || !pt || v ? "" : "Choose how many days per week you're available.";
         }
         case "start_availability":
-          return v ? "" : "Tell us your earliest start date or notice period.";
+          return pilatesActive() || v ? "" : "Tell us your earliest start date or notice period.";
         case "intro":
-          if (!v) return "Write a brief introduction.";
+          if (!v) return pilatesActive() ? "" : "Write a brief introduction.";
           return v.length <= 2000 ? "" : "Keep the introduction to 2,000 characters or fewer.";
+        case "work_eligibility":
+          return !pilatesActive() || v ? "" : "Choose your Singapore work eligibility.";
+        case "certification":
+          return !pilatesActive() || v ? "" : "Tell us your Pilates certification and who trained you.";
+        case "apparatus":
+          return !pilatesActive() || checked("apparatus") ? "" : "Choose at least one apparatus.";
+        case "teaching_years":
+          return !pilatesActive() || v ? "" : "Choose your years of teaching experience.";
+        case "teaching_experience":
+          return !pilatesActive() || checked("teaching_experience") ? "" : "Choose at least one kind of teaching experience.";
+        case "available_days":
+          return !pilatesActive() || checked("available_days") ? "" : "Choose at least one day you're available.";
+        case "start_date":
+          if (!pilatesActive()) return "";
+          return /^\d{4}-\d{2}-\d{2}$/.test(v) ? "" : "Choose your earliest available start date.";
+        case "portfolio":
+          return pilatesActive() ? urlError(v) : "";
+        case "certificates": {
+          if (!pilatesActive() || !certInput) return "";
+          const files = Array.from(certInput.files || []);
+          if (files.length > MAX_CERTS) return `Choose up to ${MAX_CERTS} certificate files.`;
+          for (const f of files) {
+            const ext = (f.name.split(".").pop() || "").toLowerCase();
+            if (!CERT_EXT.includes(ext)) return "Upload certificates as PDF, JPG or PNG files.";
+            if (f.size === 0) return `${f.name} is empty. Please choose another.`;
+          }
+          const total = files.reduce((n, f) => n + f.size, 0);
+          return total > MAX_BYTES ? `These files add up to ${fmtSize(total)}. Please keep certificates to 10MB in total.` : "";
+        }
         case "privacy_ack":
           return v ? "" : "Please confirm you have read the recruitment privacy notice.";
         case "linkedin":
-          if (!v) return "";
-          try {
-            const u = new URL(v);
-            return u.protocol === "https:" || u.protocol === "http:" ? "" : "Enter a full web address starting with https://.";
-          } catch {
-            return "Enter a full web address starting with https://.";
-          }
+          return pilatesActive() ? "" : urlError(v);
         case "cv": {
           const f = cvInput.files?.[0];
           if (!f) return "Choose your CV to upload.";
@@ -968,7 +1228,8 @@ const formId = general ? "interest-form" : "application-form";
         const li = document.createElement("li");
         const a = document.createElement("a");
         a.href = `#${firstControlId(name)}`;
-        a.textContent = `${LABELS[name] || name}: ${msg}`;
+        const label = name === "phone" && pilatesActive() ? "Contact number" : LABELS[name] || name;
+        a.textContent = `${label}: ${msg}`;
         a.addEventListener("click", (ev) => {
           ev.preventDefault();
           document.getElementById(firstControlId(name))?.focus();
@@ -991,14 +1252,23 @@ const formId = general ? "interest-form" : "application-form";
         "full_name",
         "email",
         "phone",
+        "work_eligibility",
         "years_experience",
         "ahpc_status",
         "clinical_experience",
         "linkedin",
+        "certification",
+        "apparatus",
+        "teaching_years",
+        "teaching_experience",
+        "portfolio",
         "employment",
         "days_per_week",
         "start_availability",
+        "available_days",
+        "start_date",
         "cv",
+        "certificates",
         "intro",
         "privacy_ack",
       ];
@@ -1009,6 +1279,10 @@ const formId = general ? "interest-form" : "application-form";
       }
       return errors;
     }
+
+    // After setError and the pickers exist: applyRole calls them (a TDZ error
+    // here would kill the script and let the form submit natively).
+    applyRole();
 
     // ---- Turnstile (only when the site has a key) ----
     type Turnstile = { render(el: HTMLElement, o: Record<string, unknown>): string; reset(id: string): void };
