@@ -209,6 +209,13 @@ for s, sc in SCENES.items():
     out[f'{s}/C'] = six(s)
     out[f'{s}/D'] = six(s, video=False)
 out['t03/CONT'] = six('t03', cont=True)
+# L: B with the look Subject anchored to the street reference only (<Picture 3>, the
+# bible's stronger PS2 anchor); cast lines unchanged.
+LOOK_L = ("<Subject 1> is the original 2004 PlayStation 2 game look of <Picture 3>: angular low-poly character meshes with "
+          "simple joint deformation, flat painted textures with visible texel detail, simple diffuse shading, warm hazy light "
+          "and a short draw distance; the people of <Picture 1> and <Picture 2> are rebuilt in this look.")
+out['t02/L'] = out['t02/B'].replace(LOOK, LOOK_L)
+assert out['t02/L'] != out['t02/B']
 (ROOT / 'prompts').mkdir(exist_ok=True)
 (ROOT / 'prompts' / 'ep02-prompts.json').write_text(json.dumps(out, indent=1))
 for k, v in out.items():

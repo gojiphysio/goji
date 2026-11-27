@@ -244,5 +244,49 @@
   "style_note": "Smooth modern 3D people, as in T02",
   "usable_seconds": 4.75,
   "usable_note": "Longest clean span f0-114 (4.75 s) of 15.08 s generated. Native 15 s single take fails at this draft recipe on one seed."
+ },
+ "t01clay-B-s1017": {
+  "reviewed": "guide/take pairs at 10 times, every 3rd frame 96-147 (occlusion); normal-speed playback not watched by a human",
+  "scores": {
+   "cast_identity": "not assessed (no reviewed turnarounds); GG-01 rear view matches the Ep1 street reference, unchanged after the occlusion",
+   "all_human_ps2_style": 2,
+   "spatial_structure": 2,
+   "motion_contacts": 2,
+   "camera": 2,
+   "temporal_continuity": 2
+  },
+  "failure_timecodes": [
+   "~4.3-4.9 s guide occlusion lands at ~5.1-5.4 s (f123-129) and is partial; timing lag ~0.5 s, not a defect in the action"
+  ],
+  "passes": [
+   "both NPCs rendered from their text Subject lines in the same painted style as GG-01 and the Ep1 street (blue shirt/khaki; yellow cap/polo/grey trousers)",
+   "NPC-02 crosses in front and hides her; she reappears with the same ponytail, outfit and bag in her left hand",
+   "rear-follow camera held; stops on the yellow marker"
+  ],
+  "style_note": "All humans share the Ep1 street look. Style 2/2 is relative to that inherited reference; it is not a reviewed PS2 lineup.",
+  "usable_seconds": 8.0,
+  "usable_note": "Complete 8 s walk/occlusion/stop. Only change from t01-B: NPC proxies rendered as neutral grey clay in the guide."
+ },
+ "t01clay-B-s2026": {
+  "reviewed": "guide/take pairs at 10 times, every 3rd frame 96-147 (occlusion); normal-speed playback not watched by a human",
+  "scores": {
+   "cast_identity": "not assessed (no reviewed turnarounds); GG-01 rear view matches the Ep1 street reference, unchanged after the occlusion",
+   "all_human_ps2_style": 2,
+   "spatial_structure": 2,
+   "motion_contacts": 2,
+   "camera": 2,
+   "temporal_continuity": 2
+  },
+  "failure_timecodes": [
+   "guide occlusion ~4.3-4.9 s lands at ~4.9-5.1 s (f117-123), full occlusion; small timing lag only"
+  ],
+  "passes": [
+   "both NPCs rendered from text in the shared Ep1 street look",
+   "NPC-02 fully hides her for ~0.25 s; she reappears with the same ponytail, outfit and bag in her left hand",
+   "rear-follow camera held; stops on the yellow marker"
+  ],
+  "style_note": "All humans share the Ep1 street look. Style 2/2 is relative to that inherited reference; it is not a reviewed PS2 lineup.",
+  "usable_seconds": 8.0,
+  "usable_note": "Complete 8 s walk/occlusion/stop. Only change from t01-B: NPC proxies rendered as neutral grey clay in the guide."
  }
 }

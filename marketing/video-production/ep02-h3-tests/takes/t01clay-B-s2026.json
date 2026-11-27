@@ -1,0 +1,338 @@
+{
+ "take": "t01clay-B-s2026",
+ "status": "generated",
+ "settings": {
+  "scene": "t01clay",
+  "variant": "B",
+  "seed": 2026,
+  "width": 576,
+  "height": 1024,
+  "frames": 192,
+  "steps": 4,
+  "lora": "minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors",
+  "shifts_video_audio": [
+   12.0,
+   3.0
+  ],
+  "ref_image_size": "match",
+  "sampler": "euler/simple",
+  "cfg": 1.0,
+  "prompt_key": "t01/B",
+  "prompt_sha256": "a44131a2da2199f3b08dd4f985bf2a9a64ec4fcd630e4b8817f1f98648371e34",
+  "prompt_format": "ref2va-six-section"
+ },
+ "inputs": [
+  {
+   "role": "<Picture 1>",
+   "path": "marketing/video-production/skills/goji-gta-video/assets/ep01-reception.png",
+   "sha256": "fc4c68ddc41bb6f73092de7e5e743271b78d757433b10a885a423708caaa83f5",
+   "note": "Episode 1 recovered reference; cast turnarounds not reviewed"
+  },
+  {
+   "role": "<Picture 2>",
+   "path": "marketing/video-production/skills/goji-gta-video/assets/ep01-therapist-back.png",
+   "sha256": "b69e2e40d1f86b6f00c0e0ff490377d83da82f2a216b6cf5184eef954e0dd6a2",
+   "note": "Episode 1 recovered reference; cast turnarounds not reviewed"
+  },
+  {
+   "role": "<Picture 3>",
+   "path": "marketing/video-production/skills/goji-gta-video/assets/ep01-street.png",
+   "sha256": "396698cd2396bf7897d95fae1bb572b5ca67b41d17cfcae2a06c1496dd8d53e9",
+   "note": "Episode 1 recovered reference; cast turnarounds not reviewed"
+  },
+  {
+   "role": "<Video 1> Blender layout",
+   "path": "staging/t01clay/guides/t01clay-layout-192.mp4",
+   "sha256": "94e6639e9a123e0559be597785fdb2c76e3c3d95644b0fb34c6a5f13db4f661b",
+   "source_frames": [
+    0,
+    192
+   ]
+  }
+ ],
+ "runtime": {
+  "comfy_commit": "da8bd08e48deee74d9f6c3bc00aed365b00ec209",
+  "gguf_commit": "ff8d48666758866bcc9e93b22e1e07cb636e084f",
+  "launch": "GOJI_TEXT_ENCODER_MPS=1 .venv/bin/python main.py --port 8195 --use-pytorch-cross-attention --fp32-vae",
+  "hardware": "Mac M5 Pro, 64 GB unified memory",
+  "audio": "not decoded (no audio VAE connected)"
+ },
+ "workflow": {
+  "1": {
+   "class_type": "UnetLoaderGGUF",
+   "inputs": {
+    "unet_name": "minimax_h3_ref2va_pruned-Q4_K_M.gguf"
+   }
+  },
+  "2": {
+   "class_type": "CLIPLoaderGGUF",
+   "inputs": {
+    "clip_name": "qwen3vl_32b_minimax_h3-Q4_K_M.gguf",
+    "type": "minimax"
+   }
+  },
+  "3": {
+   "class_type": "VAELoader",
+   "inputs": {
+    "vae_name": "minimax_h3_video_vae_fp16.safetensors"
+   }
+  },
+  "4": {
+   "class_type": "LoraLoaderModelOnly",
+   "inputs": {
+    "model": [
+     "1",
+     0
+    ],
+    "lora_name": "minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors",
+    "strength_model": 1.0
+   }
+  },
+  "5": {
+   "class_type": "MiniMaxH3SigmaShift",
+   "inputs": {
+    "model": [
+     "4",
+     0
+    ],
+    "shift_video": 12.0,
+    "shift_audio": 3.0
+   }
+  },
+  "6": {
+   "class_type": "MiniMaxH3ReferenceToVideo",
+   "inputs": {
+    "clip": [
+     "2",
+     0
+    ],
+    "vae": [
+     "3",
+     0
+    ],
+    "prompt": "subject_definitions:\n<Subject 1> is the original 2004 PlayStation 2 game look shared by <Picture 1>, <Picture 2> and <Picture 3>: angular low-poly character meshes with simple joint deformation, flat painted textures with visible texel detail, simple diffuse shading, warm hazy light and a short draw distance.\n<Subject 2> is the Goji girl from <Picture 1> and <Picture 3>: an adult woman with a long black ponytail, a maroon sleeveless athletic top, matching maroon fitted leggings and white trainers, built as an angular PS2 character mesh with painted skin.\n<Subject 3> is her single structured black handbag with a short top handle and a small gold clasp, as carried in <Picture 3>.\n<Subject 6> is the Singapore HDB walkway from <Picture 3>: a wide warm-grey pavement beside a road with double yellow lines, a covered walkway on the left, leafy rain trees, cream and red HDB blocks and a pale blue sky.\n<Subject 8> is a male commuter NPC with short black hair, a light-blue short-sleeve shirt, khaki trousers and brown shoes, built as an angular PS2 character mesh with painted skin.\n<Subject 9> is a male passer-by NPC with a yellow cap, a yellow polo shirt, grey trousers and black shoes, built as an angular PS2 character mesh with painted skin.\n<Video 1> is the Blender layout clip that defines every character's position, body movement, hand and foot contacts, timing and the camera; its plain untextured placeholder figures and surfaces carry no appearance.\n\nsummary:\n[reference generation] One continuous eight-second rear-follow walking shot in the look of <Subject 1> on <Subject 6>. <Subject 2>, carrying <Subject 3>, walks away from the camera past <Subject 8>, is briefly hidden as <Subject 9> crosses in front of the camera, reappears unchanged and stops on a yellow floor marker, following the motion and camera structure of <Video 1>.\n\nretention_analysis:\n<Subject 1> (appears in [Shot 1]): fully_preserved - every surface and every person is rendered in the painted PS2 style.\n<Subject 2> (appears in [Shot 1]): fully_preserved - ponytail, maroon top, maroon leggings and white trainers stay unchanged.\n<Subject 3> (appears in [Shot 1]): fully_preserved - one black handbag with a gold clasp, the same size and shape throughout.\n<Subject 6> (appears in [Shot 1]): fully_preserved - pavement, road, covered walkway, trees and blocks stay fixed in place.\n<Subject 8> (appears in [Shot 1]): fully_preserved - light-blue shirt and khaki trousers stay unchanged.\n<Subject 9> (appears in [Shot 1]): fully_preserved - yellow cap, yellow polo and grey trousers stay unchanged.\n<Video 1> (positions, body movement, contacts, timing and camera): attribute_transfer - motion, contacts and camera are transferred to the styled characters while its placeholder figures and surfaces are fully replaced by <Subject 1>.\n\ndetailed_description:\nThe target video is original 2004 PlayStation 2 open-world gameplay footage with angular low-poly characters, flat painted textures, simple diffuse shading and warm hazy light, framed as vertical 9:16. Every person shares the same painted PS2 character style.\n[Shot 1] A third-person camera follows behind and slightly above <Subject 2>, the woman with the long black ponytail, maroon sleeveless top, maroon leggings and white trainers, as she walks straight along the warm-grey pavement of <Subject 6>, away from the camera, at an easy steady pace. She carries <Subject 3>, the black handbag with the gold clasp, by its top handle in her left hand, and it swings slightly with each step. The covered walkway with grey pillars runs along the left, the road with double yellow lines runs along the right, and rain trees and HDB blocks line the distance. <Subject 8>, the commuter in the light-blue shirt and khaki trousers, walks toward the camera on the right side of the pavement, passes the girl on her right and leaves the frame past the camera on the right. Next, <Subject 9>, the passer-by in the yellow cap and yellow polo, steps out from under the covered walkway on the left and crosses the pavement from left to right between the camera and the girl, hiding her for a moment. He reaches the kerb on the right and stands there facing down the road. The girl reappears with the same ponytail, maroon outfit, white trainers and the same black handbag in her left hand, keeps walking, slows and stops with both feet on the round yellow marker painted on the pavement, and stands still. The camera keeps the same distance, height and heading behind her throughout, moving forward with her and coming to rest as she stops, with the horizon level. Each person's feet stay on the pavement and each casts a soft shadow from the high afternoon sun. These three people are the only people in view, and every surface keeps the painted PS2 look of <Subject 1>.\n\noverall_soundscape:\nTrainers scuffing on concrete, distant traffic passing on the road and faint tropical birdsong in the trees.\n\nnon_diegetic_music:\nN/A",
+    "width": 576,
+    "height": 1024,
+    "length": 192,
+    "ref_image_size": "match",
+    "ref_images.ref_image_0": [
+     "20",
+     0
+    ],
+    "ref_images.ref_image_1": [
+     "21",
+     0
+    ],
+    "ref_images.ref_image_2": [
+     "22",
+     0
+    ],
+    "ref_videos.ref_video_0": [
+     "31",
+     0
+    ]
+   }
+  },
+  "7": {
+   "class_type": "BasicGuider",
+   "inputs": {
+    "model": [
+     "5",
+     0
+    ],
+    "conditioning": [
+     "6",
+     0
+    ]
+   }
+  },
+  "8": {
+   "class_type": "RandomNoise",
+   "inputs": {
+    "noise_seed": 2026
+   }
+  },
+  "9": {
+   "class_type": "KSamplerSelect",
+   "inputs": {
+    "sampler_name": "euler"
+   }
+  },
+  "10": {
+   "class_type": "BasicScheduler",
+   "inputs": {
+    "model": [
+     "5",
+     0
+    ],
+    "scheduler": "simple",
+    "steps": 4,
+    "denoise": 1.0
+   }
+  },
+  "11": {
+   "class_type": "SamplerCustomAdvanced",
+   "inputs": {
+    "noise": [
+     "8",
+     0
+    ],
+    "guider": [
+     "7",
+     0
+    ],
+    "sampler": [
+     "9",
+     0
+    ],
+    "sigmas": [
+     "10",
+     0
+    ],
+    "latent_image": [
+     "6",
+     1
+    ]
+   }
+  },
+  "12": {
+   "class_type": "VAEDecodeTiled",
+   "inputs": {
+    "samples": [
+     "11",
+     0
+    ],
+    "vae": [
+     "3",
+     0
+    ],
+    "tile_size": 256,
+    "overlap": 64,
+    "temporal_size": 64,
+    "temporal_overlap": 8
+   }
+  },
+  "13": {
+   "class_type": "CreateVideo",
+   "inputs": {
+    "images": [
+     "12",
+     0
+    ],
+    "fps": 24.0
+   }
+  },
+  "14": {
+   "class_type": "SaveVideo",
+   "inputs": {
+    "video": [
+     "13",
+     0
+    ],
+    "filename_prefix": "goji-ep02/t01clay-B-s2026",
+    "format": "mp4",
+    "format.codec": "h264"
+   }
+  },
+  "20": {
+   "class_type": "LoadImage",
+   "inputs": {
+    "image": "ep02-ep01-reception.png"
+   }
+  },
+  "21": {
+   "class_type": "LoadImage",
+   "inputs": {
+    "image": "ep02-ep01-therapist-back.png"
+   }
+  },
+  "22": {
+   "class_type": "LoadImage",
+   "inputs": {
+    "image": "ep02-ep01-street.png"
+   }
+  },
+  "30": {
+   "class_type": "LoadVideo",
+   "inputs": {
+    "file": "ep02-t01clay-layout-192.mp4"
+   }
+  },
+  "31": {
+   "class_type": "GetVideoComponents",
+   "inputs": {
+    "video": [
+     "30",
+     0
+    ]
+   }
+  }
+ },
+ "private_dir": "/Users/tidepool/Projects/goji-ep02-runtime/takes/t01clay-B-s2026",
+ "prompt_id": "d17de071-a053-4574-852f-750ba059622d",
+ "submitted": 1795775640.861326,
+ "wall_seconds": 1500.2,
+ "messages": [
+  [
+   "execution_start",
+   {
+    "prompt_id": "d17de071-a053-4574-852f-750ba059622d",
+    "timestamp": 1795775640864
+   }
+  ],
+  [
+   "execution_cached",
+   {
+    "nodes": [
+     "1",
+     "2",
+     "3",
+     "4",
+     "5",
+     "6",
+     "7",
+     "9",
+     "10",
+     "20",
+     "21",
+     "22",
+     "30",
+     "31"
+    ],
+    "prompt_id": "d17de071-a053-4574-852f-750ba059622d",
+    "timestamp": 1795775640868
+   }
+  ],
+  [
+   "execution_success",
+   {
+    "prompt_id": "d17de071-a053-4574-852f-750ba059622d",
+    "timestamp": 1795777141051
+   }
+  ]
+ ],
+ "output": {
+  "path": "/Users/tidepool/Projects/goji-ep02-runtime/takes/t01clay-B-s2026/t01clay-B-s2026.mp4",
+  "sha256": "86ec72bba47ef128dc42e8651b86233b3484b271ed18a5cdf3eea27ab36a43f9",
+  "probe": {
+   "width": 576,
+   "height": 1024,
+   "r_frame_rate": "24/1",
+   "nb_read_frames": "192"
+  }
+ },
+ "contact_frames": [
+  0,
+  17,
+  35,
+  52,
+  69,
+  87,
+  104,
+  122,
+  139,
+  156,
+  174,
+  191
+ ]
+}

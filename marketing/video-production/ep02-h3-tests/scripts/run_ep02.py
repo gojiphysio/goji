@@ -9,6 +9,7 @@ Variants (one change per step):
   C  B at 768x1344 with Ref2V Turbo 8-step v1.1 768p, 8 steps (shift 12/3, inferred; see weights record)
   D  B with the Blender depth pass through Fun ControlNet Union instead of <Video 1> (strength 1.0)
   D2 D at ControlNet strength 2.0 (after D at 1.0 ignored the depth layout)
+  L  B with the look Subject anchored to <Picture 3> (street) only
   CONT  continuation of the selected native T03 take (anchors its last 22 frames at frame_idx 0)
   P  smoke: 2 steps, 124 frames, 288x512, B graph (validates loading only; never scored)
 
@@ -95,7 +96,7 @@ def build(take):
         inputs.append({'role': label, 'path': gd['path'], 'sha256': gd['sha256'], 'source_frames': gd['source_frames']})
         return [comp_node, 0]
 
-    if variant in ('A', 'B', 'C', 'P'):
+    if variant in ('A', 'B', 'C', 'L', 'P'):
         g['6']['inputs']['ref_videos.ref_video_0'] = video_input(f'{scene}/layout', '<Video 1> Blender layout', '30', '31')
     if variant in ('D', 'D2'):
         ctrl = video_input(f'{scene}/depth', 'Fun ControlNet depth control_video', '30', '31')
