@@ -509,6 +509,13 @@ and Reschedule quick replies), `goji_referral_received`, `goji_staff_alert_v2`.
   agent (`gcloud run services update ... --update-env-vars`) and the repo
   variable `WA_REMINDER_FORM_TEMPLATE=goji_appointment_reminder_form` (read at
   the reminder job's deploy).
+- **Home visits** get their own confirmation, with no "📍 Lentor Modern" or
+  Get directions button (owner, 27 Nov 2026): `goji_home_visit_confirmed`
+  and `goji_home_visit_confirmed_form` (name, date and time, clinician; no
+  service), submitted 27 Nov 2026. goji-booking puts `home` on the
+  booking-confirmed callback. Until they're approved and set
+  (`WA_AGENT_CONFIRM_HOME_TEMPLATE`, `WA_AGENT_CONFIRM_HOME_FORM_TEMPLATE`), a
+  home visit gets no WhatsApp template, only the email.
 - **Confirmations** go live with goji-booking's confirmation email: goji-booking
   puts `send_template: true` on the booking-confirmed callback only when
   `CONFIRMATIONS_MODE=live`, and the agent sends the template only then

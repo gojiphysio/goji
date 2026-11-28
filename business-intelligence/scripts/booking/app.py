@@ -674,6 +674,8 @@ def _notify_wa_agent(result: dict, draft: dict, source: str) -> None:
         "time": result.get("time"),
         "clinician_name": result.get("clinician_name"),
         "source": source,
+        # A home visit's WhatsApp confirmation has no clinic address or directions.
+        "home": bool(result.get("home")),
         # First name only: the assistant greets with it in the confirmation.
         "first_name": (str(draft.get("name") or "").strip().split() or [""])[0],
         # The go-ahead for the WhatsApp confirmation template: only once the

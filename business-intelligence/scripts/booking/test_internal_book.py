@@ -223,7 +223,7 @@ def test_callback_fires_for_a_whatsapp_booking(client, monkeypatch):
                             "service": "Physiotherapy", "date": "2026-07-15",
                             "time": "10:00", "clinician_name": "Kristy Lim",
                             "source": "whatsapp", "first_name": "Jane",
-                            "send_template": False, "form_token": ""}
+                            "send_template": False, "form_token": "", "home": False}
 
 
 def test_callback_fires_for_a_website_booking(client, monkeypatch):

@@ -243,6 +243,13 @@ CONFIRM_TEMPLATE = os.environ.get("WA_AGENT_CONFIRM_TEMPLATE", "goji_appointment
 # once Meta approves it (submitted 25 Nov 2026). Until then those patients get
 # CONFIRM_TEMPLATE, and the form link in their email.
 CONFIRM_FORM_TEMPLATE = os.environ.get("WA_AGENT_CONFIRM_FORM_TEMPLATE", "")
+# Home visits get their own confirmation: the clinic ones end with
+# "📍 Lentor Modern" and a Get directions button (owner, 27 Nov 2026). Three
+# parameters (name, date and time, clinician), no service. Both submitted to
+# Meta 27 Nov 2026. Empty = not approved yet: a home visit then gets no
+# WhatsApp template (the confirmation email still goes), never the clinic one.
+CONFIRM_HOME_TEMPLATE = os.environ.get("WA_AGENT_CONFIRM_HOME_TEMPLATE", "")
+CONFIRM_HOME_FORM_TEMPLATE = os.environ.get("WA_AGENT_CONFIRM_HOME_FORM_TEMPLATE", "")
 # A long reply may go out as 2 WhatsApp messages, the way Chris writes (owner,
 # 24 Nov 2026). Capped because Meta bills each delivered service message past
 # 1,000 a month per number (since 1 Oct 2026); a reply under SPLIT_MIN_WORDS is
